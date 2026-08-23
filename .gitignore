@@ -19,7 +19,7 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# virtual machine crash logs
 hs_err_pid*
 replay_pid*
 
@@ -47,6 +47,25 @@ runs/
 *.db
 certs/
 keys/
+
+# TLA+/TLC/Apalache generated artifacts
+.tla-toolbox/
+.toolbox/
+states/
+MC.out
+MC_*.out
+*.trace
+*.trace.json
+.apalache/
+formal/build/
+formal/reports/local/
+
+# Lean generated artifacts
+formal/proofs/.lake/
+formal/proofs/build/
+formal/proofs/lake-packages/
+
+# Editors / OS
 .idea/
 .vscode/
 .DS_Store

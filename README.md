@@ -2,7 +2,7 @@
 
 DeltaTorrent — исследовательская система для обучения и дообучения языковых моделей на географически распределённой сети GPU с ограниченной памятью и нестабильными WAN-соединениями. **DeltaReduce v1** является authoritative архитектурой её reduce/apply plane.
 
-Репозиторий находится на стадии **specification-first**. Реализационный стек разбит на последовательные Spec Kit feature-ветки; каждая следующая ветка основана на предыдущей и добавляет одну независимо проверяемую возможность.
+Репозиторий находится на стадии **formal-first, specification-first**. До реализации Python/PyTorch-веток протокол обязан пройти нулевой этап: executable TLA+ model checking для BFT lifecycle/failure/recovery и параметрические theorem-prover proofs для quorum/fixed-point/hierarchical/apply утверждений.
 
 ## Архитектурный мандат DeltaReduce v1
 
@@ -13,24 +13,38 @@ DeltaTorrent — исследовательская система для обу
 5. **Input freeze предшествует randomness.** Exact set `{T_j, C_j, AC_j}` фиксируется до генерации seed `ρ_t`; seed не может влиять на включение commitments задним числом.
 6. **Каждый переход сертифицирован.** Certificate chain развивается от input set через eligibility/aggregation plan и parameter QCs к `AggregateRootQC` и `ApplyQC`.
 7. **Reduce и distribution разделены.** P2P swarm распространяет только одинаковые immutable datasets, checkpoints, certified global aggregates и applied checkpoints. Worker commitments, local shards и regional partials не являются distributable objects.
+8. **Формальная модель предшествует коду.** Safety/failure/recovery semantics и parametric proof obligations фиксируются в `000-formal-tla-spec`; изменение протокольной семантики без обновления модели и повторного formal gate запрещено.
 
 ## Порядок реализации
 
 | Шаг | Feature-ветка | Результат |
 | ---: | --- | --- |
-| 1 | `001-reproducible-training-baseline` | Воспроизводимый single-node baseline и WAN-эмулятор |
+| 0 | `000-formal-tla-spec` | TLA+ BFT/failure/recovery model, theorem-prover proofs и обязательный Formal GO |
+| 1 | `001-reproducible-training-baseline` | Воспроизводимый single-node baseline и WAN-эмулятор, заблокированные до Formal GO |
 | 2 | `002-local-round-engine` | Локальный optimizer engine и canonical pseudo-gradient |
-| 3 | `003-bft-round-state-machine` | Реплицированная BFT lifecycle, fixed tickets и bit-exact integer reduce |
-| 4 | `004-compressed-delta-protocol` | Canonical fixed-point quantization, shard envelopes и overflow proofs |
+| 3 | `003-bft-round-state-machine` | Реализация, refinement и bit-exact conformance BFT lifecycle |
+| 4 | `004-compressed-delta-protocol` | Canonical fixed-point quantization, shard envelopes и machine-checked overflow proofs |
 | 5 | `005-content-addressed-p2p-distribution` | Проверяемая P2P-раздача только certified global objects |
-| 6 | `006-regional-hierarchical-reduce` | Региональные/parameter-shard BFT committees без FP arithmetic |
+| 6 | `006-regional-hierarchical-reduce` | Региональные/parameter-shard BFT committees и formal flat-equivalence obligation |
 | 7 | `007-domain-pure-ticket-scheduling` | Детерминированное планирование fixed `B/H` tickets по domains |
-| 8 | `008-certificates-and-consensus` | ISC/EC/APC, shard QCs, AggregateRootQC и ApplyQC |
+| 8 | `008-certificates-and-consensus` | ISC/EC/APC, shard QCs, AggregateRootQC, ApplyQC и refinement gate |
 | 9 | `009-qlora-8gb-mode` | Adapter-only fixed-ticket QLoRA для квалифицированных 8 GB GPU |
 | 10 | `010-wan-benchmark-and-quality` | Token/domain-matched WAN, BFT, safety и quality gates |
 | 11 | `011-multiregion-pilot` | Permissioned pilot на 20–50 workers и 3–5 регионах |
 
-Полный authoritative набор спецификаций находится в последней стековой ветке `011-multiregion-pilot`. Карта зависимостей и exit gates находится в `specs/ROADMAP.md`.
+Полный authoritative набор спецификаций находится в последней стековой ветке `011-multiregion-pilot`. Карта зависимостей, formal obligations и exit gates находится в `specs/ROADMAP.md`.
+
+## Formal gate
+
+Ветка `000-formal-tla-spec` должна завершиться content-addressed `FormalVerificationReport(decision=GO)`. Минимальный gate включает:
+
+- TLC safety checking для `f=1`, четырёх validators, message reorder/duplicate/drop, crash/restart, partition, equivocation и storage loss;
+- liveness checking только под явно заданными fairness/eventual-synchrony/quorum/availability assumptions;
+- machine-checked parametric proofs для quorum intersection, accumulator safety, hierarchical-flat equality и Apply uniqueness;
+- зафиксированные counterexample traces для намеренно сломанных вариантов;
+- refinement/trace contract, обязательный для реализационных веток `003`, `004`, `006` и `008`.
+
+`001` и все последующие code-bearing branches не могут начинать implementation tasks при отсутствии exact compatible Formal GO.
 
 ## Superseded legacy refs
 
@@ -44,11 +58,12 @@ DeltaTorrent — исследовательская система для обу
 
 ## Как выполнять очередной шаг
 
-1. Переключиться на нужную authoritative feature-ветку из таблицы.
-2. Прочитать `.specify/memory/constitution.md`, `specs/ROADMAP.md`, затем `spec.md`, `plan.md` и `tasks.md` текущей функции.
-3. Запустить cross-artifact analysis; любые упоминания central coordinator, adaptive local steps или FP32 consensus accumulation считаются blocking defects.
-4. Реализовывать задачи по порядку, связывая commits с task IDs.
-5. Пройти exit gate функции и final Constitution Check до перехода к следующей ветке.
+1. Начать с `000-formal-tla-spec` и получить Formal GO.
+2. Переключиться на очередную authoritative feature-ветку из таблицы.
+3. Прочитать `.specify/memory/constitution.md`, `docs/adr/0000-formal-verification-gate.md`, `specs/ROADMAP.md`, formal failure/proof artifacts, затем `spec.md`, `plan.md` и `tasks.md` текущей функции.
+4. Запустить cross-artifact и formal-impact analysis; central coordinator, adaptive local steps, FP consensus accumulation и несогласованная с TLA+ transition semantics считаются blocking defects.
+5. Реализовывать задачи по порядку, связывая commits с task IDs и formal trace obligations.
+6. Пройти feature exit gate, regression formal gate и final Constitution Check до перехода к следующей ветке.
 
 ## Целевой MVP
 
@@ -56,4 +71,4 @@ DeltaTorrent — исследовательская система для обу
 
 ## Источники и supersession
 
-Исходная концепция DeltaTorrent сохранена в `docs/source/deltatorrent-concept.ru.md`. Архитектурная поправка DeltaReduce v1 сохранена в `docs/source/deltareduce-v1-amendment.md` и имеет приоритет в вопросах central coordination, local-step adaptivity, reduce arithmetic и consensus certification.
+Исходная концепция DeltaTorrent сохранена в `docs/source/deltatorrent-concept.ru.md`. Архитектурная поправка DeltaReduce v1 сохранена в `docs/source/deltareduce-v1-amendment.md` и имеет приоритет в вопросах central coordination, local-step adaptivity, reduce arithmetic и consensus certification. ADR-0000 и Constitution 2.1.0 дополнительно требуют formal verification до production implementation.
