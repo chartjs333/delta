@@ -1,52 +1,65 @@
-# DeltaTorrent Constitution
+# DeltaTorrent / DeltaReduce Constitution
 
-**Version**: 1.0.0  
+**Version**: 2.0.0  
 **Ratified**: 2026-08-21  
-**Last amended**: 2026-08-21
+**Last amended**: 2026-08-23
+
+Version 2.0.0 is a breaking architectural amendment. It replaces the central coordinator, adaptive local-step scheduling and FP32 global accumulation contracts with DeltaReduce v1.
 
 ## I. Scientific correctness before throughput
 
-Every distributed result MUST be comparable with a token-matched reference baseline. Token accounting, data assignment, model version, optimizer configuration, random seeds and evaluation inputs MUST be persisted in an immutable run manifest. Throughput optimizations MUST NOT be accepted solely because training loss appears normal; validation loss, downstream quality and post-training behavior are required at the applicable milestone.
+Every distributed result MUST be comparable with a token- and domain-matched reference baseline. Data assignment, domain mixture, ticket budget, model version, optimizer configuration, arithmetic profile, random seeds and evaluation inputs MUST be persisted in immutable manifests. Training loss alone is insufficient; validation loss, downstream quality and post-training behavior are required at the applicable milestone.
 
-## II. Reduce plane and distribution plane are separate
+## II. Replicated deterministic state, never central authority
 
-Different worker updates MUST first be mathematically reduced into one canonical global update. Only identical immutable objects MAY enter the P2P distribution plane. Worker-local deltas MUST NOT be broadcast to the whole swarm. Tests MUST enforce this boundary at module and protocol level.
+Round lifecycle and global application MUST execute as a deterministic BFT replicated state machine over a configured validator set of `3f+1`. A finalized transition or quorum certificate MUST contain at least `2f+1` valid votes. No service, operator or arrival-order winner MAY unilaterally decide membership, aggregate bytes or the current checkpoint.
 
-## III. Deterministic, versioned and content-addressed state
+## III. Domain-pure fixed work
 
-Every dataset shard, base model, checkpoint, parameter schema, compressed delta shard and round manifest MUST have a stable identifier and cryptographic content hash. Every update MUST name its parent model version. Duplicate, replayed, corrupted or wrong-parent artifacts MUST be rejected idempotently.
+Every `WorkTicket` MUST bind exactly one data domain, one immutable data range, fixed batch/token budget `B`, fixed optimizer-step count `H`, parent checkpoint, parameter schema and arithmetic profile. Adaptive `H_i`, stale update acceptance, device-speed weighting and mutation after ticket issuance are forbidden. Heterogeneous capacity MAY influence admission and the number of tickets assigned before input freeze, but MUST NOT alter the declared domain mixture `π_d`.
 
-## IV. WAN realism is a test requirement
+## IV. Integer fixed-point consensus arithmetic
 
-Networking behavior MUST be validated under controlled RTT, bandwidth, loss, jitter, reordering and disconnect profiles before a real WAN pilot. Tests MUST avoid public network dependencies and MUST provide an unprivileged deterministic simulation path when Linux traffic control is unavailable. Timeouts, retries and cancellation are part of the contract.
+Workers MUST normalize their local accumulation by effective optimizer-step count `A_j` before quantization. All certified clipping, scalar weighting and parameter summation MUST use a canonical integer/fixed-point representation with exact rounding and ordering rules. Floating-point addition is forbidden in the BFT reduce phase. Every round MUST prove that the worst-case integer sum fits the selected INT64/INT128 accumulator; saturation and wraparound are protocol failures.
 
-## V. Heterogeneity and asynchrony are bounded
+## V. Input freeze, unbiased randomness and certificate lineage
 
-No algorithm MAY wait indefinitely for the slowest node or accept updates with unbounded staleness. Work allocation MUST use measured capability, verified processed tokens and explicit deadlines. Adaptive local-step counts MUST be clamped by communication-efficiency and optimization-drift guards. Experimental staleness weighting MUST be feature-flagged against a strict synchronous default.
+The exact ordered input set `{T_j, C_j, AC_j}` MUST be finalized before seed `ρ_t` is generated or revealed. Every later decision MUST reference its explicit parent certificate. A valid model lineage proceeds through input-set, eligibility/aggregation-plan, parameter-shard, aggregate-root and apply certificates. Mixed views, missing parents and context-reused signatures MUST fail closed.
 
-## VI. Permissioned security by default
+## VI. Atomic certified model application
 
-The MVP MUST use enrolled node identities, authenticated transport, signed metadata and safe tensor formats. Untrusted network input MUST never be deserialized through pickle or executed. Norm limits, finite-value checks, replay protection, audit records and manifest verification are mandatory before the multi-region pilot. Permissionless participation requires a separate approved specification.
+Domain mixture, outer momentum, weight decay and Nesterov application MUST execute under a deterministic `ApplyArithmeticProfile` inside the consensus layer. A checkpoint becomes current only after `2f+1` apply validators sign one tuple containing the new model hash, new optimizer-state hash and parent `AggregateRootQC`. For one aggregate root, at most one `ApplyQC` may finalize.
 
-## VII. Observable, reversible increments
+## VII. Reduce plane and distribution plane are separate
 
-Each feature branch MUST expose structured metrics, deterministic tests, an independent exit gate and a rollback path. New protocol behavior MUST be versioned. A feature MAY be merged only when its tasks, tests, documentation and evidence are complete; later features MUST NOT excuse a failing earlier gate.
+Different worker updates MUST be reduced and certified before distribution. Only identical immutable datasets, base models, certified global aggregates, checkpoints and certificate bundles MAY enter the P2P distribution plane. Worker-local vectors, commitments, availability fragments and regional partials MUST NOT be swarm objects.
 
-## VIII. Reproducible interfaces, replaceable implementations
+## VIII. Permissioned identity and safe boundaries
 
-Domain contracts MUST be separated from transport, storage, accelerator and orchestration adapters. Tests MUST target stable interfaces so implementations can be replaced without changing the mathematical contract.
+The MVP MUST use enrolled workers, storage peers and validators, authenticated transport, role-bound signing keys, replay protection and safe tensor/manifest formats. Untrusted bytes MUST never be deserialized through pickle or executed. Permissionless participation, Sybil resistance and economic incentives require a separate constitutional amendment.
+
+## IX. WAN realism, observability and reversibility
+
+Networking behavior MUST be validated under controlled RTT, bandwidth, loss, jitter, reordering, partition and Byzantine-message profiles before a real WAN pilot. Every feature branch MUST expose structured metrics, deterministic tests, an independent exit gate, immutable evidence and a rollback/abort path. Later features MUST NOT excuse a failing earlier gate.
+
+## X. Reproducible interfaces, replaceable implementations
+
+Domain, arithmetic and certificate contracts MUST be independent of transport, storage, accelerator and BFT-engine adapters. Implementations may be replaced only when they pass the same canonical bytes, state roots, accumulator proofs and quorum fixtures.
 
 ## Engineering quality gates
 
-- Typed Python code passes formatting, linting, static checks and the configured test suites.
-- Numerical tests define dtype-aware tolerances and compare with a direct reference implementation.
-- Protocol changes include compatibility and canonical serialization fixtures.
-- GPU-specific behavior has a CPU or mocked smoke path.
+- Typed Python code passes formatting, linting, static checks and configured test suites.
+- Protocol changes include golden canonical-serialization and backward-read fixtures.
+- Integer arithmetic tests include maximum/minimum, overflow, sign, rounding and accumulator-headroom boundaries.
+- At least four independent aggregator instances (`f=1`) produce byte-identical state and aggregate hashes on the feature-003 gate.
+- Randomness-order tests prove that no seed exists before the input-set certificate.
+- Certificate tests cover quorum intersection, duplicate votes, equivocation, wrong validator set, replay and mixed-view rejection.
+- GPU-specific local training has a CPU or mocked smoke path; consensus arithmetic has a portable reference implementation.
 - Secrets, private data and licensed model weights are never committed.
-- Performance targets remain labelled as targets until benchmark evidence exists.
+- Performance targets remain labelled as targets until measured evidence exists.
 
 ## Governance
 
-This constitution governs all specifications, plans, tasks and implementation changes. Amendments require a dedicated commit explaining reason, migration impact and affected features. A breaking invariant increments the major version; a new mandatory principle increments the minor version; clarification increments the patch version.
+This constitution governs all specifications, plans, tasks and implementation changes. Breaking invariants increment the major version; new mandatory principles increment the minor version; clarifications increment the patch version. Amendments require a dedicated commit explaining the reason, migration impact, superseded branches and affected artifacts.
 
-Every feature plan MUST record a Constitution Check before implementation and repeat it against the final diff before merge.
+Every feature plan MUST record a pre-implementation Constitution Check and repeat it against the final diff before merge.
