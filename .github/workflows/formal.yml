@@ -155,7 +155,8 @@ jobs:
             python formal/scripts/run_clean_offline_reproduction.py \
             2>&1 | tee formal/reports/local/clean-offline-reproduction.log
       - name: Publish machine-readable result annotation
-        run: python3 -c 'import base64,pathlib; print("::notice title=clean-offline-reproduction::" + base64.b64encode(pathlib.Path("formal/reports/clean-offline-reproduction.json").read_bytes()).decode("ascii"))'
+        if: always()
+        run: python3 -c 'import base64,pathlib; p=pathlib.Path("formal/reports/clean-offline-reproduction.json"); print("::notice title=clean-offline-reproduction::" + (base64.b64encode(p.read_bytes()).decode("ascii") if p.is_file() else "RESULT_FILE_MISSING"))'
       - name: Retain clean offline evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
