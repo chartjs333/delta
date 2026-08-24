@@ -34,7 +34,10 @@ from formal_artifacts import (  # noqa: E402
     write_canonical_json,
 )
 from run_formal_gate import verify_action_coverage, verify_sany_output  # noqa: E402
-from run_clean_offline_reproduction import verify_source_manifest  # noqa: E402
+from run_clean_offline_reproduction import (  # noqa: E402
+    git_safe_directory_environment,
+    verify_source_manifest,
+)
 from generate_formal_report import (  # noqa: E402
     REPRODUCTION_CHECK_IDS,
     is_report_output,
@@ -84,6 +87,37 @@ def trace_document() -> dict[str, object]:
 
 
 class ReportSourceBoundaryTests(unittest.TestCase):
+    def test_offline_git_safe_directories_are_exact_and_non_wildcard(self) -> None:
+        environment = git_safe_directory_environment({"PRESERVED": "yes"})
+        count = int(environment["GIT_CONFIG_COUNT"])
+        values = {
+            environment[f"GIT_CONFIG_VALUE_{index}"] for index in range(count)
+        }
+        self.assertEqual(environment["PRESERVED"], "yes")
+        self.assertEqual(count, 10)
+        self.assertNotIn("*", values)
+        self.assertEqual(
+            values,
+            {
+                str((REPOSITORY / "formal" / "proofs").resolve()),
+                *(
+                    str(
+                        (
+                            REPOSITORY
+                            / "formal"
+                            / "proofs"
+                            / ".lake"
+                            / "packages"
+                            / package["name"]
+                        ).resolve()
+                    )
+                    for package in load_json_strict(
+                        REPOSITORY / "formal" / "proofs" / "dependencies.lock.json"
+                    )["packages"]
+                ),
+            },
+        )
+
     def test_ci_tee_pipelines_cannot_mask_gate_failures(self) -> None:
         lines = (REPOSITORY / ".github" / "workflows" / "formal.yml").read_text(
             encoding="utf-8"

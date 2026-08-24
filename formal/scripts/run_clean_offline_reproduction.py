@@ -115,6 +115,36 @@ def observed_source_files(root: Path) -> set[str]:
     return observed
 
 
+def git_safe_directory_environment(
+    environment: dict[str, str], root: Path = ROOT
+) -> dict[str, str]:
+    """Allow Git to inspect only the exact bind-mounted proof checkouts.
+
+    Git rejects repositories owned by the host runner when the container runs as
+    root. Lake interprets that rejection as a changed dependency URL and tries to
+    clone again. Command-scope config keeps the network-none build deterministic
+    without granting the wildcard safe.directory exception.
+    """
+
+    dependencies = load_json_strict(
+        root / "formal" / "proofs" / "dependencies.lock.json"
+    )
+    package_names = [package["name"] for package in dependencies["packages"]]
+    safe_directories = [
+        root / "formal" / "proofs",
+        *(
+            root / "formal" / "proofs" / ".lake" / "packages" / name
+            for name in package_names
+        ),
+    ]
+    configured = dict(environment)
+    configured["GIT_CONFIG_COUNT"] = str(len(safe_directories))
+    for index, directory in enumerate(safe_directories):
+        configured[f"GIT_CONFIG_KEY_{index}"] = "safe.directory"
+        configured[f"GIT_CONFIG_VALUE_{index}"] = str(directory.resolve())
+    return configured
+
+
 def verify_source_manifest(path: Path, root: Path = ROOT) -> dict[str, Any]:
     manifest = load_json_strict(path)
     if set(manifest) != {
@@ -203,6 +233,7 @@ def main() -> int:
             "NO_PROXY": "",
         }
     )
+    environment = git_safe_directory_environment(environment)
     checks: list[dict[str, Any]] = []
     if not errors:
         for name, command, timeout in COMMANDS:
