@@ -79,17 +79,23 @@ RUNTIME_PREFIXES = (
     ".apalache/",
     ".git/",
     "formal/build/",
+    "formal/mutants/states/",
     "formal/proofs/.lake/",
     "formal/proofs/build/",
     "formal/proofs/lake-packages/",
     "formal/reports/local/",
     "formal/toolchain/cache/",
     "formal/toolchain/windows/",
+    "formal/tla/states/",
 )
 
 
 def is_runtime_path(relative: str) -> bool:
-    return "__pycache__/" in relative or relative.startswith(RUNTIME_PREFIXES)
+    return (
+        "__pycache__/" in relative
+        or relative.startswith(RUNTIME_PREFIXES)
+        or relative.endswith((".class", ".log", ".pyc", ".pyo"))
+    )
 
 
 def observed_source_files(root: Path) -> set[str]:
@@ -154,7 +160,11 @@ def verify_source_manifest(path: Path, root: Path = ROOT) -> dict[str, Any]:
 
     observed = observed_source_files(root)
     extras = sorted(observed - declared)
-    missing = sorted(declared - observed)
+    missing = sorted(
+        relative
+        for relative in declared - observed
+        if not is_runtime_path(relative)
+    )
     if extras or missing:
         raise ValueError(f"source file set mismatch: extras={extras}, missing={missing}")
     return manifest
