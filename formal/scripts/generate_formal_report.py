@@ -12,6 +12,10 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "formal" / "reports"
+REPORT_OUTPUTS = {
+    "formal/reports/formal-verification-report.json",
+    "formal/reports/source-tree-manifest.json",
+}
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import (  # noqa: E402
@@ -39,6 +43,36 @@ def git(*arguments: str) -> str:
     return result.stdout.strip()
 
 
+def source_tree_status() -> tuple[str, bool]:
+    """Return the latest non-report commit and whether that source tree is clean.
+
+    The report and its manifest are committed one layer after the tree they
+    attest, so their own generated-byte changes are not source-tree changes.
+    Every other tracked or untracked path remains fail-closed.
+    """
+
+    status_lines = git(
+        "status", "--porcelain=v1", "--untracked-files=all"
+    ).splitlines()
+    source_changes = []
+    for line in status_lines:
+        path = line[3:].split(" -> ")[-1].replace("\\", "/")
+        if path not in REPORT_OUTPUTS:
+            source_changes.append(line)
+    commit = git(
+        "log",
+        "-1",
+        "--format=%H",
+        "--",
+        ".",
+        ":(exclude)formal/reports/formal-verification-report.json",
+        ":(exclude)formal/reports/source-tree-manifest.json",
+    )
+    if len(commit) != 40:
+        raise RuntimeError("unable to identify the attested non-report source commit")
+    return commit, not source_changes
+
+
 def evidence_node(identifier: str, relative: str, media_type: str) -> dict[str, str]:
     path = ROOT / relative
     if not path.is_file():
@@ -62,8 +96,7 @@ def check(identifier: str, status: str, evidence_id: str) -> dict[str, Any]:
 
 
 def main() -> int:
-    source_status = git("status", "--porcelain=v1", "--untracked-files=all")
-    commit = git("rev-parse", "HEAD")
+    commit, source_clean = source_tree_status()
     registry = load_json_strict(REPORTS / "formal-id-registry.json")
     baseline = load_json_strict(REPORTS / "baseline-inputs.json")
     toolchains = load_json_strict(REPORTS / "toolchain-evidence.json")
@@ -237,7 +270,7 @@ def main() -> int:
             "commit": commit,
             "manifest_path": "formal/reports/source-tree-manifest.json",
             "tree_sha256": sha256_file(manifest_path),
-            "clean": source_status == "",
+            "clean": source_clean,
             "semantic_artifacts": semantic_artifacts,
         },
         "baseline_inputs": {
