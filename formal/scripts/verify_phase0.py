@@ -14,12 +14,11 @@ ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "formal" / "reports"
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+def semantic_text_sha256(path: Path) -> str:
+    """Hash text inputs after Git-compatible newline canonicalization."""
+
+    canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(canonical).hexdigest()
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -88,7 +87,7 @@ def main() -> int:
             source_path = ROOT / relative_path
             require(source_path.is_file(), f"missing input: {relative_path}", errors)
             if source_path.is_file():
-                actual_hash = sha256_file(source_path)
+                actual_hash = semantic_text_sha256(source_path)
                 require(
                     actual_hash == expected_hash,
                     f"hash mismatch for {relative_path}: {actual_hash} != {expected_hash}",

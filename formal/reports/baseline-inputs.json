@@ -7,63 +7,63 @@
   "branch_head_at_freeze": "050ceb1eca6f55ff665a37b9f907003aa0833c59",
   "declared_base_commit": "e40e697cb67d94a6bc6bc0be9b395e58252c3d19",
   "hash_algorithm": "sha256",
-  "input_bundle_canonicalization": "Sort paths by ordinal repository-relative path; for each input encode path, one TAB, lowercase SHA-256, one LF as UTF-8; concatenate records and SHA-256 the result.",
-  "input_bundle_sha256": "1a53d506aa794ddb20aeda276001a75800af2588cc11806356a8a9497793b667",
+  "input_bundle_canonicalization": "Normalize each UTF-8 text input CRLF/CR to LF before SHA-256; sort paths by ordinal repository-relative path; for each input encode path, one TAB, lowercase SHA-256, one LF as UTF-8; concatenate records and SHA-256 the result.",
+  "input_bundle_sha256": "4272e7636fdfcb8ec8988562e41e30b485c45a0c7e718cd39a7e79267b247765",
   "inputs": [
     {
       "role": "execution_contract",
       "path": "AGENTS.md",
-      "sha256": "4a7ad3f557400c2bec019ca7fcc36e89c7cfe17cf3a5893002e5302206614d9b"
+      "sha256": "ca70fcbdc7b7b9a0b344fee4b6ccc8185ba05961975d4a254f0d2bf643b04619"
     },
     {
       "role": "constitution",
       "path": ".specify/memory/constitution.md",
-      "sha256": "3d28685ed9e6db53783632b44dbaf0a71cc7f3f2dbe352013f9a88929f2ed0de"
+      "sha256": "4b9da704f3c37ac4f8ce9756832e92c2ad732d0116c6dccebeee67ee722042fd"
     },
     {
       "role": "formal_gate_decision",
       "path": "docs/adr/0000-formal-verification-gate.md",
-      "sha256": "10db04f40f4e1c8900fb805c8c2635ad40c304aa7caa0f0f073a8abeb3d8c500"
+      "sha256": "59523ef963cfceaa741499e3d375ceedcd451ac0fb8574ab70b8ad9e480a8bd0"
     },
     {
       "role": "deltareduce_architecture_decision",
       "path": "docs/adr/0001-deltareduce-v1.md",
-      "sha256": "29635b0dbbb8d6dc75bcba45b9998f25e01dbe1958bc306a0f8914aac0649406"
+      "sha256": "bbfe6e23ca0658d23b41350fb3eb70df62fdfae124c2b460890fac16b77d30e9"
     },
     {
       "role": "authoritative_branch_topology",
       "path": "specs/ROADMAP.md",
-      "sha256": "47be5b7675d512559f97e9207fc7acb8148269900e9ae561e08642a54792fa5a"
+      "sha256": "33bcd78026537b0ae6483ee4d1deb3133063681c2dfa8c8ea890706cae80d491"
     },
     {
       "role": "normative_failure_recovery_contract",
       "path": "specs/000-formal-tla-spec/failure-semantics.md",
-      "sha256": "bc7c9bfbe5a783f110849fd0f17b5cc51eea042fd878f7cf9871611cf827d133"
+      "sha256": "36123243475c9a17a6a6e3884f5cf8d4adce9c644c33be1785e115d60cb42459"
     },
     {
       "role": "normative_parametric_proof_contract",
       "path": "specs/000-formal-tla-spec/proof-obligations.md",
-      "sha256": "6f0fe9a89c6038ccf9b1ec5a724b5ed2fffc12fe4bbc5ee87e0120e6a2c74be3"
+      "sha256": "0c4c23f0ceb1ef5f78eed54e56f8707cfba6d20dfd1c5d698fee02d5ceed3385"
     },
     {
       "role": "normative_refinement_contract",
       "path": "specs/000-formal-tla-spec/refinement-contract.md",
-      "sha256": "56dd25d7a828e081e97ad1ccd8c591af0beea4de6e498d1e2c9c4af560498fe3"
+      "sha256": "d85fa6d564dc4a647f63750270c3806958d4815eabce7ff34daaf65b1788d94c"
     },
     {
       "role": "feature_specification",
       "path": "specs/000-formal-tla-spec/spec.md",
-      "sha256": "53596970d692db42f050a338e160339bd94063eeff6b5b28d57d650ee79e8348"
+      "sha256": "d21a6136c7fb420850f983c64bdf5099699a03a52baae3e0fd11225ef4ac3c7f"
     },
     {
       "role": "feature_plan",
       "path": "specs/000-formal-tla-spec/plan.md",
-      "sha256": "fff49d9c3edb6a8b835feea8fe45e104494fe43dfa2070ee82a9a51b856aca9f"
+      "sha256": "556b571267d90456b14f67d99f0d77b0b74f8fbe9360f8b933e83bf815970f65"
     },
     {
       "role": "feature_tasks",
       "path": "specs/000-formal-tla-spec/tasks.md",
-      "sha256": "cb9ae0c8fc540d6c2e7e04147915463b10a047bd671f20ea9ccae95ab2fcca2d"
+      "sha256": "1f8caff2f8f9ff28ccb98f11234567ea66e4aa7542a885b41c4c2a2fd315ff3a"
     },
     {
       "role": "stable_formal_id_registry",

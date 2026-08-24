@@ -34,6 +34,7 @@ from formal_artifacts import (  # noqa: E402
     write_canonical_json,
 )
 from run_formal_gate import verify_action_coverage, verify_sany_output  # noqa: E402
+from verify_phase0 import semantic_text_sha256  # noqa: E402
 
 
 HASH_A = "sha256:" + "a" * 64
@@ -131,6 +132,14 @@ class ContractTest(unittest.TestCase):
             path.write_text('{"a":1,"a":2}', encoding="utf-8")
             with self.assertRaises(CanonicalJsonError):
                 load_json_strict(path)
+
+    def test_phase0_text_hash_is_newline_independent(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            lf = Path(directory) / "lf.txt"
+            crlf = Path(directory) / "crlf.txt"
+            lf.write_bytes(b"alpha\nbeta\n")
+            crlf.write_bytes(b"alpha\r\nbeta\r\n")
+            self.assertEqual(semantic_text_sha256(lf), semantic_text_sha256(crlf))
 
     def test_semantics_id_is_input_order_independent(self) -> None:
         entries = [
