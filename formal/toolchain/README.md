@@ -22,6 +22,20 @@ For a fully offline build, the pinned base image from `container.lock` must alre
 
 Lean package sources/oleans are a separate dependency cache governed by `formal/proofs/dependencies.lock.json`. The proof invocation must use an already materialized `.lake/packages`/cache matching that lock when public network is disabled. T062 archives and verifies that materialized cache as clean-reproduction evidence; its absence must fail closed rather than trigger an implicit download.
 
+From a clean checkout mounted at `/workspace`, run the retained reproduction in
+the prebuilt local image with networking disabled:
+
+```text
+docker run --rm --network none -v "$PWD:/workspace" -w /workspace \
+  deltareduce-formal:local python formal/scripts/run_clean_offline_reproduction.py
+```
+
+The script refuses to pass unless it starts from a clean Git tree inside Linux,
+detects `/.dockerenv`, observes only the loopback network interface, verifies the
+complete local cache and passes every machine gate. It writes
+`formal/reports/clean-offline-reproduction.json`; the report generator consumes
+that exact evidence for FR-042.
+
 ## Update policy
 
 1. Open an explicit toolchain update change.

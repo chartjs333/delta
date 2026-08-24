@@ -2,7 +2,7 @@ PYTHON ?= python3
 FORMAL_RUNNER := $(PYTHON) formal/scripts/run_formal_gate.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
-	formal-proofs formal-mutants formal-refinement formal-report formal-check
+	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -30,6 +30,9 @@ formal-mutants:
 
 formal-refinement:
 	$(FORMAL_RUNNER) refinement
+
+formal-clean-reproduction:
+	$(PYTHON) formal/scripts/run_clean_offline_reproduction.py
 
 formal-report:
 	$(FORMAL_RUNNER) report
