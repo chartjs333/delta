@@ -218,15 +218,16 @@ def main() -> int:
                 timeout=timeout,
             )
             combined = f"{result.stdout}\n{result.stderr}"
-            checks.append(
-                {
-                    "id": name,
-                    "command": command,
-                    "exit_code": result.returncode,
-                    "output_sha256": digest(combined),
-                    "status": "PASS" if result.returncode == 0 else "FAIL",
-                }
-            )
+            record: dict[str, Any] = {
+                "id": name,
+                "command": command,
+                "exit_code": result.returncode,
+                "output_sha256": digest(combined),
+                "status": "PASS" if result.returncode == 0 else "FAIL",
+            }
+            if result.returncode != 0:
+                record["failure_output_tail"] = combined[-8000:]
+            checks.append(record)
             if result.returncode != 0:
                 errors.append(f"{name} exited {result.returncode}")
                 break
