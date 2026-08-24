@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0.0",
+  "formal_semantics_version": "1.0.0",
+  "formal_semantics_id": "sha256:76e1ccb9e658b7819ef3dee1e732d189d7ed7fd9bc6e0d138634edb914bff18d",
+  "formal_semantics_id_status": "published_T057",
+  "feature_branch": "000-formal-tla-spec",
+  "branch_head_at_freeze": "050ceb1eca6f55ff665a37b9f907003aa0833c59",
+  "declared_base_commit": "e40e697cb67d94a6bc6bc0be9b395e58252c3d19",
+  "hash_algorithm": "sha256",
+  "input_bundle_canonicalization": "Sort paths by ordinal repository-relative path; for each input encode path, one TAB, lowercase SHA-256, one LF as UTF-8; concatenate records and SHA-256 the result.",
+  "input_bundle_sha256": "1a53d506aa794ddb20aeda276001a75800af2588cc11806356a8a9497793b667",
+  "inputs": [
+    {
+      "role": "execution_contract",
+      "path": "AGENTS.md",
+      "sha256": "4a7ad3f557400c2bec019ca7fcc36e89c7cfe17cf3a5893002e5302206614d9b"
+    },
+    {
+      "role": "constitution",
+      "path": ".specify/memory/constitution.md",
+      "sha256": "3d28685ed9e6db53783632b44dbaf0a71cc7f3f2dbe352013f9a88929f2ed0de"
+    },
+    {
+      "role": "formal_gate_decision",
+      "path": "docs/adr/0000-formal-verification-gate.md",
+      "sha256": "10db04f40f4e1c8900fb805c8c2635ad40c304aa7caa0f0f073a8abeb3d8c500"
+    },
+    {
+      "role": "deltareduce_architecture_decision",
+      "path": "docs/adr/0001-deltareduce-v1.md",
+      "sha256": "29635b0dbbb8d6dc75bcba45b9998f25e01dbe1958bc306a0f8914aac0649406"
+    },
+    {
+      "role": "authoritative_branch_topology",
+      "path": "specs/ROADMAP.md",
+      "sha256": "47be5b7675d512559f97e9207fc7acb8148269900e9ae561e08642a54792fa5a"
+    },
+    {
+      "role": "normative_failure_recovery_contract",
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "sha256": "bc7c9bfbe5a783f110849fd0f17b5cc51eea042fd878f7cf9871611cf827d133"
+    },
+    {
+      "role": "normative_parametric_proof_contract",
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "sha256": "6f0fe9a89c6038ccf9b1ec5a724b5ed2fffc12fe4bbc5ee87e0120e6a2c74be3"
+    },
+    {
+      "role": "normative_refinement_contract",
+      "path": "specs/000-formal-tla-spec/refinement-contract.md",
+      "sha256": "56dd25d7a828e081e97ad1ccd8c591af0beea4de6e498d1e2c9c4af560498fe3"
+    },
+    {
+      "role": "feature_specification",
+      "path": "specs/000-formal-tla-spec/spec.md",
+      "sha256": "53596970d692db42f050a338e160339bd94063eeff6b5b28d57d650ee79e8348"
+    },
+    {
+      "role": "feature_plan",
+      "path": "specs/000-formal-tla-spec/plan.md",
+      "sha256": "fff49d9c3edb6a8b835feea8fe45e104494fe43dfa2070ee82a9a51b856aca9f"
+    },
+    {
+      "role": "feature_tasks",
+      "path": "specs/000-formal-tla-spec/tasks.md",
+      "sha256": "cb9ae0c8fc540d6c2e7e04147915463b10a047bd671f20ea9ccae95ab2fcca2d"
+    },
+    {
+      "role": "stable_formal_id_registry",
+      "path": "formal/reports/formal-id-registry.json",
+      "sha256": "07eb370592e880c5e53bab12f6fe62db8e19820be187744e072dc044ab8dc329"
+    }
+  ],
+  "cross_branch_contract_validation": {
+    "evidence": "formal/reports/failure-semantics-validation.md",
+    "authoritative_refs": [
+      {
+        "feature": "003-bft-round-state-machine",
+        "commit": "1032dd3a339d9014d7187ef2d0df8d99a23aefad",
+        "spec_blob": "0a5ebbc066e903278969c461a36e8db7b7738835"
+      },
+      {
+        "feature": "004-compressed-delta-protocol",
+        "commit": "0ba1503abe0d280558d1818ddaa1551fea5bcf8f",
+        "spec_blob": "e7e8c849958f158c93fc7e106a640f6b489b47ea"
+      },
+      {
+        "feature": "005-content-addressed-p2p-distribution",
+        "commit": "cc764f3c220efc55a952796024002c0e01cb365c",
+        "spec_blob": "e805fc2259ca5182b11f40a5ce2487a7bebac11e"
+      },
+      {
+        "feature": "006-regional-hierarchical-reduce",
+        "commit": "5ee3961389022c464183c44956f294698c042501",
+        "spec_blob": "c327c6891ce17a25fbc4baf3b6fcc97603322f5f"
+      },
+      {
+        "feature": "007-domain-pure-ticket-scheduling",
+        "commit": "aed0e6cbd251162648a49cc40820ef5ee60c1d12",
+        "spec_blob": "dd04ae8cc14ea8ea52a9ae81c4c4389f3096474d"
+      },
+      {
+        "feature": "008-certificates-and-consensus",
+        "commit": "1d8109df660cb11b143f8f5ef92a29559fb5bb1f",
+        "spec_blob": "1d896a3d1d71e6cb9859d7aaeee21c62271570db"
+      }
+    ],
+    "superseded_refs_used": []
+  },
+  "modeled_claims": [
+    {
+      "id": "MODEL-CLAIM-001",
+      "claim": "Finite asynchronous replicated round and certificate state transitions preserve safety for the declared TLC scopes, including the mandatory f=1 configuration."
+    },
+    {
+      "id": "MODEL-CLAIM-002",
+      "claim": "Durable context-bound votes, quorum formation, view change and certified abort do not permit conflicting finalized bodies within the declared Byzantine bound."
+    },
+    {
+      "id": "MODEL-CLAIM-003",
+      "claim": "Ticket, lease, commitment, availability, input-close, ISC and seed ordering obey immutable parent and close-policy rules."
+    },
+    {
+      "id": "MODEL-CLAIM-004",
+      "claim": "EC/APC, parameter shard, aggregate root, ApplyQC and current-pointer transitions preserve exact certificate parentage and complete coverage."
+    },
+    {
+      "id": "MODEL-CLAIM-005",
+      "claim": "Crash, restart, journal recovery, replay, partition, logical deadlines, artifact loss, exact repair, blocking and certified abort preserve the parent current checkpoint unless a valid ApplyQC advances it."
+    },
+    {
+      "id": "MODEL-CLAIM-006",
+      "claim": "Consensus-visible arithmetic is bounded integer or exact rational arithmetic; finite boundary behavior is model checked and parametric quorum, accumulator, hierarchy, coverage and apply claims are theorem obligations."
+    },
+    {
+      "id": "MODEL-CLAIM-007",
+      "claim": "Only allowlisted certified global immutable objects can enter the abstract distribution publication set."
+    },
+    {
+      "id": "MODEL-CLAIM-008",
+      "claim": "Later implementations can project protocol-visible executions onto the stable formal action and trace vocabulary, with documented internal stuttering only."
+    }
+  ],
+  "non_modeled_claims": [
+    {
+      "id": "NONCLAIM-001",
+      "claim": "No proof of hash, signature, canonical-serialization or CAS implementations; only their named abstractions and correct context binding are modeled."
+    },
+    {
+      "id": "NONCLAIM-002",
+      "claim": "No permissionless identity, Sybil-resistance, economic-incentive or key-management security proof."
+    },
+    {
+      "id": "NONCLAIM-003",
+      "claim": "No proof that workers execute ML training honestly and no universal poisoning or backdoor resistance guarantee."
+    },
+    {
+      "id": "NONCLAIM-004",
+      "claim": "No convergence, model-quality, compression-quality, WAN-performance, memory-footprint or scalability achievement claim."
+    },
+    {
+      "id": "NONCLAIM-005",
+      "claim": "TLC does not prove unbounded nodes, messages or values; theorem results cover only their exact stated parametric abstractions and preconditions."
+    },
+    {
+      "id": "NONCLAIM-006",
+      "claim": "Optional worker-local quantization residuals, peer scheduling/backpressure/filesystem defenses and capability benchmarking are concrete later-feature obligations outside the core consensus state model."
+    },
+    {
+      "id": "NONCLAIM-007",
+      "claim": "No safety claim applies after more than f validators are Byzantine or the unforgeable identity/signature abstraction fails."
+    },
+    {
+      "id": "NONCLAIM-008",
+      "claim": "Trace refinement and conformance fixtures do not constitute a full general proof of arbitrary implementation code, cryptography or platform behavior."
+    }
+  ],
+  "mandatory_assumptions": [
+    "For safety, each validator epoch has exactly 3f+1 unique validators and at most f are Byzantine.",
+    "Honest validators persist vote intent before transmitting a signature and never sign conflicting bodies in one vote context.",
+    "Hashes, signatures, identities and canonical encodings satisfy the named abstractions.",
+    "Liveness is claimed only per config under explicit eventual synchrony, honest responsive quorum, artifact availability or repairability, bounded computation and declared fairness.",
+    "Every theorem-backed runtime transition separately validates and content-addresses the concrete theorem preconditions."
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "selected_profile": "tlaplus-1.7.4-temurin-17-linux-amd64",
+  "tla_tools": {
+    "project": "tlaplus/tlaplus",
+    "release": "v1.7.4",
+    "release_commit": "5a47802b5c391f59ecdd44117981f4ff8c0656ba",
+    "artifact": "tla2tools.jar",
+    "url": "https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar",
+    "bytes": 2274532,
+    "sha1": "bee4a54f3ee3d4afc347c3240ec2d9e93b075104",
+    "sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88",
+    "reported_tlc_version": "2.19 of 08 August 2024",
+    "minimum_java_major": 11,
+    "selection_reason": "Latest stable TLA+ release; includes the v1.7.4 fix for unsound multi-worker liveness checking. The v1.8.0 Clarke channel is a pre-release and is not used by the mandatory gate."
+  },
+  "jvm": {
+    "project": "adoptium/temurin17-binaries",
+    "distribution": "Eclipse Temurin",
+    "version": "17.0.20.1+1",
+    "release": "jdk-17.0.20.1+1",
+    "platform": "linux-amd64-hotspot-jre",
+    "artifact": "OpenJDK17U-jre_x64_linux_hotspot_17.0.20.1_1.tar.gz",
+    "url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jre_x64_linux_hotspot_17.0.20.1_1.tar.gz",
+    "signature_url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jre_x64_linux_hotspot_17.0.20.1_1.tar.gz.sig",
+    "bytes": 46640574,
+    "sha256": "0b2b640e3046b64c8ec504de0ab9d91bb5610182bda21fad454681ce54d45a62"
+  },
+  "jvm_windows": {
+    "project": "adoptium/temurin17-binaries",
+    "distribution": "Eclipse Temurin",
+    "version": "17.0.20.1+1",
+    "release": "jdk-17.0.20.1+1",
+    "platform": "windows-amd64-hotspot-jre",
+    "artifact": "OpenJDK17U-jre_x64_windows_hotspot_17.0.20.1_1.zip",
+    "url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jre_x64_windows_hotspot_17.0.20.1_1.zip",
+    "signature_url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jre_x64_windows_hotspot_17.0.20.1_1.zip.sig",
+    "bytes": 43780109,
+    "sha256": "bc21a93923103cdaac93ee337b0ae4365e739fde36df823dd456bc67c8a9d352"
+  },
+  "runtime": {
+    "locale": "C.UTF-8",
+    "timezone": "UTC",
+    "java_options": [
+      "-XX:+UseParallelGC",
+      "-Dfile.encoding=UTF-8",
+      "-Duser.language=en",
+      "-Duser.country=US",
+      "-Duser.timezone=UTC"
+    ],
+    "sany_main_class": "tla2sany.SANY",
+    "tlc_main_class": "tlc2.TLC"
+  },
+  "update_policy": "A version or artifact update requires an explicit task/commit, renewed upstream release review, fresh size and SHA-256 capture, parser/safety/liveness/mutant regression, evidence-hash invalidation and reviewer approval. Floating or nightly URLs are forbidden in mandatory evidence."
+}

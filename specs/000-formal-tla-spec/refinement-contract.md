@@ -76,6 +76,9 @@ The checker MUST reject traces containing:
 - current pointer transition without ApplyQC;
 - local/partial artifact publication;
 - restart voting before journal recovery.
+- finalized view change without a valid `ViewChangeQC` quorum;
+- terminal `ABORTED` state without a valid `AbortQC` quorum;
+- non-abort progress after the immutable hard deadline.
 
 ## 7. Feature ownership matrix
 
@@ -95,4 +98,4 @@ The checker MUST reject traces containing:
 
 ## 8. Compatibility
 
-`FormalVerificationReport` publishes a `formal_semantics_id` derived from module/proof/trace-schema hashes. Every later feature report/run/pilot definition MUST bind a compatible ID. Any semantic change invalidates compatibility until a new formal report obtains GO.
+`FormalVerificationReport` publishes a `formal_semantics_id` derived from the complete sorted set of non-mutant TLA module hashes, mandatory Lean source hashes and the public trace-schema hash. The domain-separated canonical derivation is frozen in `formal/schemas/README.md` and independently implemented by `formal/scripts/formal_artifacts.py`. Every later feature report/run/pilot definition MUST bind a compatible ID. Any semantic change invalidates compatibility until a new formal report obtains GO. T057 publishes the first concrete ID only after the complete model, proof and trace artifact set exists.

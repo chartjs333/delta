@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.invalid/schemas/formal-verification-report.schema.json",
+  "title": "DeltaReduce v1 FormalVerificationReport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_schema_version",
+    "formal_semantics_version",
+    "formal_semantics_id",
+    "source_tree",
+    "baseline_inputs",
+    "toolchains",
+    "model_checks",
+    "theorem_checks",
+    "mutant_checks",
+    "refinement_checks",
+    "coverage",
+    "assumptions",
+    "abstractions",
+    "limitations",
+    "review_attestations",
+    "evidence_graph",
+    "decision",
+    "decision_reasons"
+  ],
+  "properties": {
+    "report_schema_version": {"const": "1.0.0"},
+    "formal_semantics_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "source_tree": {"$ref": "#/$defs/sourceTree"},
+    "baseline_inputs": {"$ref": "#/$defs/baselineInputs"},
+    "toolchains": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/check"}
+    },
+    "model_checks": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/modelCheck"}
+    },
+    "theorem_checks": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/theoremCheck"}
+    },
+    "mutant_checks": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/mutantCheck"}
+    },
+    "refinement_checks": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/refinementCheck"}
+    },
+    "coverage": {"$ref": "#/$defs/coverage"},
+    "assumptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "abstractions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "limitations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "review_attestations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/review"}
+    },
+    "evidence_graph": {"$ref": "#/$defs/evidenceGraph"},
+    "decision": {"type": "string", "enum": ["GO", "NO_GO"]},
+    "decision_reasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9_.:-]{0,255}$"}
+    }
+  },
+  "$defs": {
+    "contentId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)[ -~]+$"
+    },
+    "semanticArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["tla_module", "lean_theorem", "trace_schema"]},
+        "path": {"$ref": "#/$defs/relativePath"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "sourceTree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "manifest_path", "tree_sha256", "clean", "semantic_artifacts"],
+      "properties": {
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "manifest_path": {"$ref": "#/$defs/relativePath"},
+        "tree_sha256": {"$ref": "#/$defs/sha256"},
+        "clean": {"type": "boolean"},
+        "semantic_artifacts": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/semanticArtifact"}
+        }
+      }
+    },
+    "baselineInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "input_bundle_sha256", "verified"],
+      "properties": {
+        "path": {"$ref": "#/$defs/relativePath"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "input_bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "verified": {"type": "boolean"}
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mandatory", "status", "verified", "evidence_id"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "mandatory": {"type": "boolean"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "MISSING"]},
+        "verified": {"type": "boolean"},
+        "evidence_id": {
+          "type": ["string", "null"],
+          "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"
+        }
+      }
+    },
+    "propertyResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "NOT_RUN"]}
+      }
+    },
+    "modelCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "kind", "mandatory", "status", "verified", "evidence_id",
+        "states", "distinct_states", "diameter", "terminal_states", "properties"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^CFG-[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "kind": {"type": "string", "enum": ["safety", "liveness"]},
+        "mandatory": {"type": "boolean"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "MISSING"]},
+        "verified": {"type": "boolean"},
+        "evidence_id": {
+          "type": ["string", "null"],
+          "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"
+        },
+        "states": {"type": ["integer", "null"], "minimum": 0},
+        "distinct_states": {"type": ["integer", "null"], "minimum": 0},
+        "diameter": {"type": ["integer", "null"], "minimum": 0},
+        "terminal_states": {"type": ["integer", "null"], "minimum": 0},
+        "properties": {"type": "array", "items": {"$ref": "#/$defs/propertyResult"}}
+      }
+    },
+    "theoremCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mandatory", "status", "verified", "evidence_id", "source", "axioms"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^PO-[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "mandatory": {"type": "boolean"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "MISSING"]},
+        "verified": {"type": "boolean"},
+        "evidence_id": {
+          "type": ["string", "null"],
+          "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"
+        },
+        "source": {"$ref": "#/$defs/relativePath"},
+        "axioms": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "mutantCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mandatory", "status", "verified", "evidence_id", "expected_property_id"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^MUT-[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "mandatory": {"type": "boolean"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "MISSING"]},
+        "verified": {"type": "boolean"},
+        "evidence_id": {
+          "type": ["string", "null"],
+          "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"
+        },
+        "expected_property_id": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9._-]{0,127}$"}
+      }
+    },
+    "refinementCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "mandatory", "status", "verified", "evidence_id",
+        "legal_fixture_count", "illegal_fixture_count"
+      ],
+      "properties": {
+        "id": {"const": "REFINEMENT-SUITE"},
+        "mandatory": {"type": "boolean"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "MISSING"]},
+        "verified": {"type": "boolean"},
+        "evidence_id": {
+          "type": ["string", "null"],
+          "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"
+        },
+        "legal_fixture_count": {"type": "integer", "minimum": 0},
+        "illegal_fixture_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "coverageItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "evidence_id"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^FR-[0-9]{3}$"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "MISSING"]},
+        "evidence_id": {
+          "type": ["string", "null"],
+          "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirements", "unresolved"],
+      "properties": {
+        "requirements": {"type": "array", "items": {"$ref": "#/$defs/coverageItem"}},
+        "unresolved": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer_id", "independent", "status", "scope", "evidence_id"],
+      "properties": {
+        "reviewer_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "independent": {"type": "boolean"},
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "MISSING"]},
+        "scope": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "enum": ["MODEL", "LIVENESS", "PROOFS", "COVERAGE"]}
+        },
+        "evidence_id": {
+          "type": ["string", "null"],
+          "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"
+        }
+      }
+    },
+    "evidenceNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "sha256", "media_type"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "path": {"$ref": "#/$defs/relativePath"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "media_type": {"type": "string", "pattern": "^[a-z0-9.+-]+/[a-zA-Z0-9.+-]+$"}
+      }
+    },
+    "evidenceEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "relation"],
+      "properties": {
+        "from": {"type": "string", "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "to": {"type": "string", "pattern": "^EVIDENCE-[A-Z0-9][A-Z0-9._-]{0,127}$"},
+        "relation": {"type": "string", "enum": ["DERIVES_FROM", "VERIFIES", "COVERS", "COUNTEREXAMPLE_FOR"]}
+      }
+    },
+    "evidenceGraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {"type": "array", "items": {"$ref": "#/$defs/evidenceNode"}},
+        "edges": {"type": "array", "items": {"$ref": "#/$defs/evidenceEdge"}}
+      }
+    }
+  }
+}

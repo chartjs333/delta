@@ -17,7 +17,7 @@ Let `V` be a finite validator set with `|V| = 3f + 1`. If `Q1,Q2 ⊆ V`, `|Q1| �
 
 If at most `f` validators are Byzantine, `Q1 ∩ Q2` contains at least one honest validator.
 
-**Used by**: config/ISC/EC/APC/shard/AggregateRoot/Apply QC uniqueness.
+**Used by**: config/ISC/EC/APC/shard/AggregateRoot/Apply/ViewChange/Abort QC uniqueness.
 
 **Lean artifact target**: `formal/proofs/DeltaReduce/Quorum.lean`.
 

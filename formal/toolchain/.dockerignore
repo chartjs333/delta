@@ -1,0 +1,8 @@
+*
+!Dockerfile
+!tla.lock
+!lean.lock
+!prepare_cache.py
+!install_cached_toolchain.py
+!cache/
+!cache/*

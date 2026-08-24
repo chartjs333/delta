@@ -84,6 +84,7 @@ The authoritative TLA+ model MUST expose at least the following state variables,
 - `parameterResult`, `parameterQC`, `aggregateRootQC`;
 - `applyCandidate`, `applyQC`;
 - `volatileVotes`, `durableVotes`, `finalizedCertificates`;
+- `timeoutVotes`, `viewChangeQC`, `abortQC`;
 - `messages`, `alive`, `byzantine`, `partition`, `logicalTime`;
 - `repairAttempts`, `abortReason`, `publishedObjects`.
 
@@ -97,7 +98,7 @@ The action vocabulary MUST include:
 - `ProposeParameterResult`, `VoteParameter`, `FinalizeParameterQC`;
 - `AssembleAggregateRoot`, `VoteAggregateRoot`, `FinalizeAggregateRootQC`;
 - `ComputeApplyCandidate`, `VoteApply`, `FinalizeApplyQC`, `AdvanceCurrentCheckpoint`;
-- `SoftTimeout`, `ViewChange`, `HardAbort`;
+- `SoftTimeout`, `VoteViewChange`, `ViewChange`, `VoteHardAbort`, `HardAbort`;
 - `Crash`, `Restart`, `RecoverJournal`;
 - `CorruptArtifact`, `LoseArtifact`, `RepairArtifact`;
 - `PublishCertifiedObject`, `ReplayMessage`.
@@ -128,6 +129,8 @@ The model and proofs MUST establish or explicitly discharge:
 - **CurrentCertified**: current checkpoint changes only to the exact checkpoint named by valid ApplyQC.
 - **AbortPreservesParent**: an aborted/non-applied round cannot change current checkpoint.
 - **RecoveryIdempotence**: crash/restart/replay cannot create a new vote, certificate, commitment, residual advance or pointer transition beyond the original legal action.
+- **ViewChangeCertified**: finalized view metadata changes only with one valid `ViewChangeQC` containing `2f+1` unique context-bound votes from the exact epoch.
+- **AbortCertified**: `ABORTED` exists only with one valid `AbortQC`; reaching a hard deadline without quorum blocks non-abort progress but cannot fabricate terminal certification.
 - **PlaneSeparation**: worker vectors, commitments, AC fragments and regional/parameter partials never appear in `publishedObjects`.
 - **CertifiedPublishOnly**: every distributed current checkpoint has the required certificate policy and lineage.
 
@@ -227,7 +230,7 @@ The model loses proposers, validators and connectivity across soft/hard deadline
 **Acceptance Scenarios**:
 
 1. **Given** proposer crash and honest quorum, **When** soft timeout occurs, **Then** view changes and progress can resume.
-2. **Given** fewer than `2f+1` responsive validators through hard deadline, **When** timeout resolves, **Then** no QC is fabricated and the round aborts.
+2. **Given** fewer than `2f+1` responsive validators through hard deadline, **When** timeout resolves, **Then** no QC is fabricated, ordinary progress is disabled and the round remains blocked until an abort quorum can certify the canonical abort body.
 3. **Given** finalized ApplyQC and crash before pointer commit, **When** recovery replays it, **Then** pointer advances exactly once.
 4. **Given** permanent partition without quorum, **When** liveness is evaluated, **Then** no unconditional progress claim is asserted.
 
@@ -273,8 +276,8 @@ Later implementations export canonical traces projected onto the formal vocabula
 - **FR-012**: Safety configs MUST NOT assume synchrony or honest delivery beyond the cryptographic/Byzantine threshold abstraction.
 - **FR-013**: Durable vote persistence MUST be modeled separately from volatile send/receipt state.
 - **FR-014**: Crash/restart actions MUST clear only volatile state and recover durable journal/state before new voting.
-- **FR-015**: View change MUST preserve finalized state and durable votes and MUST not alter frozen config/ticket/ISC data.
-- **FR-016**: Hard abort MUST be deterministic, content-addressed by reason/context, terminal for the round and preserve parent current checkpoint.
+- **FR-015**: View change MUST require `2f+1` unique durable timeout/view-change votes from the exact validator epoch and MUST preserve finalized state, durable votes and frozen config/ticket/ISC data.
+- **FR-016**: Hard abort MUST require `2f+1` unique durable votes over one deterministic content-addressed reason/context body, be terminal for the round and preserve parent current checkpoint. Reaching the hard deadline without this quorum MUST disable non-abort transitions and remain safely BLOCKED.
 - **FR-017**: Commitment/lease/availability actions MUST encode exact preconditions for uniqueness, current lease epoch and complete shard coverage.
 - **FR-018**: ISC action MUST accept exactly the canonical AC-covered tuple set allowed by the close policy and become immutable.
 - **FR-019**: Seed action MUST require finalized ISC and bind its hash/epoch/transcript profile.

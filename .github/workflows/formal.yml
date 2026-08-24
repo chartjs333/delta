@@ -1,0 +1,140 @@
+name: Formal verification gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 000-formal-tla-spec
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONHASHSEED: "0"
+  TZ: UTC
+
+jobs:
+  phase0-and-locks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Verify authority, scope and toolchain locks
+        run: |
+          python3 formal/scripts/verify_phase0.py
+          make formal-contracts
+          python3 formal/toolchain/verify_locks.py
+
+  tla:
+    needs: phase0-and-locks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Fetch and verify pinned TLA and JVM artifacts
+        run: python3 formal/toolchain/prepare_cache.py --download --component tla
+      - name: Install pinned JVM without package manager
+        run: |
+          python3 formal/toolchain/install_cached_toolchain.py \
+            --cache-dir formal/toolchain/cache \
+            --destination .formal-tools \
+            --component tla
+          echo "JAVA=$GITHUB_WORKSPACE/.formal-tools/java/bin/java" >> "$GITHUB_ENV"
+          echo "TLA2TOOLS_JAR=$GITHUB_WORKSPACE/.formal-tools/tla/tla2tools.jar" >> "$GITHUB_ENV"
+      - name: Run parser, safety and liveness gates
+        run: |
+          mkdir -p formal/reports/local
+          make formal-parse formal-safety formal-liveness 2>&1 | tee formal/reports/local/tla.log
+      - name: Retain TLA evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: formal-tla-${{ github.run_id }}
+          path: |
+            formal/reports/local/
+            formal/build/
+          if-no-files-found: warn
+          retention-days: 14
+
+  proofs:
+    needs: phase0-and-locks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Fetch and verify pinned Lean artifact
+        run: python3 formal/toolchain/prepare_cache.py --download --component lean
+      - name: Install pinned Lean without elan
+        run: |
+          python3 formal/toolchain/install_cached_toolchain.py \
+            --cache-dir formal/toolchain/cache \
+            --destination .formal-tools \
+            --component lean
+          echo "LAKE=$GITHUB_WORKSPACE/.formal-tools/lean/bin/lake" >> "$GITHUB_ENV"
+      - name: Materialize exact dependency commits and mathlib cache
+        working-directory: formal/proofs
+        run: |
+          "$LAKE" exe cache get
+          git diff --exit-code -- lake-manifest.json lean-toolchain lakefile.toml dependencies.lock.json
+      - name: Build mandatory theorem target
+        run: |
+          mkdir -p formal/reports/local
+          make formal-proofs 2>&1 | tee formal/reports/local/proofs.log
+      - name: Retain theorem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: formal-proofs-${{ github.run_id }}
+          path: formal/reports/local/
+          if-no-files-found: warn
+          retention-days: 14
+
+  mutants-refinement-report:
+    needs:
+      - tla
+      - proofs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Fetch and install pinned TLA runtime for mutant checks
+        run: |
+          python3 formal/toolchain/prepare_cache.py --download --component tla
+          python3 formal/toolchain/install_cached_toolchain.py \
+            --cache-dir formal/toolchain/cache \
+            --destination .formal-tools \
+            --component tla
+          echo "JAVA=$GITHUB_WORKSPACE/.formal-tools/java/bin/java" >> "$GITHUB_ENV"
+          echo "TLA2TOOLS_JAR=$GITHUB_WORKSPACE/.formal-tools/tla/tla2tools.jar" >> "$GITHUB_ENV"
+      - name: Run mutant, refinement and report gates
+        run: |
+          mkdir -p formal/reports/local
+          make formal-mutants formal-refinement formal-report 2>&1 | tee formal/reports/local/evidence.log
+      - name: Retain normalized counterexamples and reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: formal-evidence-${{ github.run_id }}
+          path: |
+            formal/reports/
+            formal/fixtures/counterexamples/
+          if-no-files-found: warn
+          retention-days: 30
