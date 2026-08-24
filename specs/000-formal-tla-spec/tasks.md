@@ -99,7 +99,7 @@
 - [x] T059 Run liveness models and record exact assumptions/fairness plus counterchecks without assumptions where appropriate.
 - [x] T060 Build theorem project and archive source/tool/dependency/axiom results.
 - [x] T061 Run all mutants/refinement/schema/report verifiers.
-- [ ] T062 Reproduce the full gate from a clean offline-capable environment.
+- [x] T062 Reproduce the full gate from a clean offline-capable environment.
 - [x] T063 Generate content-addressed `formal/reports/formal-verification-report.json` and evidence graph.
 - [ ] T064 Obtain two independent technical reviews of model scope, liveness assumptions, proof statements and coverage.
 - [x] T065 Run Spec Kit cross-artifact analysis and final Constitution Check.

@@ -3,9 +3,9 @@
 **Task**: T001  
 **Formal semantics version**: `1.0.0`  
 **Registry**: `formal/reports/formal-id-registry.json`  
-**Coverage status**: executable evidence PASS; clean offline reproduction and independent review gates pending
+**Coverage status**: executable and clean offline reproduction evidence PASS; independent review gate pending
 
-This matrix began as the pre-model traceability contract. All referenced executable configs, theorems, mutants and refinement fixtures now have passing machine evidence in `formal/reports/`. Any future `UNRESOLVED` cell remains an unconditional STOP. There are no unresolved semantic cells in this revision; clean offline reproduction and the separate independent-review requirement remain fail-closed.
+This matrix began as the pre-model traceability contract. All referenced executable configs, theorems, mutants, refinement fixtures and the clean network-none Linux reproduction now have passing machine evidence in `formal/reports/`. Any future `UNRESOLVED` cell remains an unconditional STOP. There are no unresolved semantic cells in this revision; the separate independent-review requirement remains fail-closed.
 
 ## Functional requirement mapping
 

@@ -8,7 +8,7 @@
   "declared_base_commit": "e40e697cb67d94a6bc6bc0be9b395e58252c3d19",
   "hash_algorithm": "sha256",
   "input_bundle_canonicalization": "Normalize each UTF-8 text input CRLF/CR to LF before SHA-256; sort paths by ordinal repository-relative path; for each input encode path, one TAB, lowercase SHA-256, one LF as UTF-8; concatenate records and SHA-256 the result.",
-  "input_bundle_sha256": "4272e7636fdfcb8ec8988562e41e30b485c45a0c7e718cd39a7e79267b247765",
+  "input_bundle_sha256": "d2ff2119d547c48a2e6e0404c8de22cf87599b799ce6cde2234237bd2832413c",
   "inputs": [
     {
       "role": "execution_contract",
@@ -63,7 +63,7 @@
     {
       "role": "feature_tasks",
       "path": "specs/000-formal-tla-spec/tasks.md",
-      "sha256": "1f8caff2f8f9ff28ccb98f11234567ea66e4aa7542a885b41c4c2a2fd315ff3a"
+      "sha256": "fb36e8317d3f10caae9a373964f74034f887ba91384580c4da6e7b4b1941bd69"
     },
     {
       "role": "stable_formal_id_registry",
