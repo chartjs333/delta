@@ -10,6 +10,11 @@ coverage evidence; a generated or self-attested approval is not acceptable.
 Until two such records exist and verify, the report generator intentionally
 produces `NO_GO` with `INSUFFICIENT_INDEPENDENT_REVIEWS`.
 
+`reviewed_commit` names the latest non-evidence source commit. Generated machine
+evidence and `formal/reports/reviews/*.json` are an evidence overlay and do not
+change that commit, so review records can be added without creating a circular
+self-reference.
+
 Example shape (serialize canonically before use):
 
 ```json

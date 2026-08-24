@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -17,7 +18,13 @@ ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "formal" / "reports" / "clean-offline-reproduction.json"
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
-from formal_artifacts import write_canonical_json  # noqa: E402
+from formal_artifacts import (  # noqa: E402
+    derive_formal_semantics_id,
+    discover_semantic_artifacts,
+    load_json_strict,
+    sha256_file,
+    write_canonical_json,
+)
 
 
 COMMANDS = (
@@ -68,17 +75,89 @@ def digest(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def git(*arguments: str) -> str:
-    return subprocess.run(
-        ["git", *arguments],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        timeout=30,
-    ).stdout.strip()
+RUNTIME_PREFIXES = (
+    ".apalache/",
+    ".git/",
+    "formal/build/",
+    "formal/proofs/.lake/",
+    "formal/proofs/build/",
+    "formal/proofs/lake-packages/",
+    "formal/reports/local/",
+    "formal/toolchain/cache/",
+    "formal/toolchain/windows/",
+)
+
+
+def is_runtime_path(relative: str) -> bool:
+    return "__pycache__/" in relative or relative.startswith(RUNTIME_PREFIXES)
+
+
+def observed_source_files(root: Path) -> set[str]:
+    observed: set[str] = set()
+    for directory, directory_names, file_names in os.walk(root):
+        relative_directory = Path(directory).relative_to(root).as_posix()
+        prefix = "" if relative_directory == "." else f"{relative_directory}/"
+        directory_names[:] = [
+            name
+            for name in directory_names
+            if name != "__pycache__" and not is_runtime_path(f"{prefix}{name}/")
+        ]
+        for name in file_names:
+            relative = f"{prefix}{name}"
+            if not is_runtime_path(relative):
+                observed.add(relative)
+    return observed
+
+
+def verify_source_manifest(path: Path, root: Path = ROOT) -> dict[str, Any]:
+    manifest = load_json_strict(path)
+    if set(manifest) != {
+        "schema_version",
+        "source_commit",
+        "source_tree",
+        "source_clean",
+        "files",
+    }:
+        raise ValueError("source manifest shape mismatch")
+    if manifest["schema_version"] != "1.0.0" or manifest["source_clean"] is not True:
+        raise ValueError("source manifest is not a clean v1 snapshot")
+    for field in ("source_commit", "source_tree"):
+        if not isinstance(manifest[field], str) or not re.fullmatch(
+            r"[0-9a-f]{40}", manifest[field]
+        ):
+            raise ValueError(f"invalid {field}")
+
+    files = manifest["files"]
+    if not isinstance(files, list):
+        raise ValueError("source manifest files must be an array")
+    declared: set[str] = set()
+    previous = ""
+    root_resolved = root.resolve()
+    for item in files:
+        if not isinstance(item, dict) or set(item) != {"path", "sha256"}:
+            raise ValueError("invalid source manifest entry")
+        relative = item["path"]
+        if (
+            not isinstance(relative, str)
+            or not relative
+            or relative <= previous
+            or relative.startswith(("/", "\\"))
+        ):
+            raise ValueError("source manifest paths must be sorted relative paths")
+        previous = relative
+        candidate = (root / relative).resolve()
+        if root_resolved not in candidate.parents or not candidate.is_file():
+            raise ValueError(f"unsafe or missing source path: {relative}")
+        if sha256_file(candidate) != item["sha256"]:
+            raise ValueError(f"source hash mismatch: {relative}")
+        declared.add(relative.replace("\\", "/"))
+
+    observed = observed_source_files(root)
+    extras = sorted(observed - declared)
+    missing = sorted(declared - observed)
+    if extras or missing:
+        raise ValueError(f"source file set mismatch: extras={extras}, missing={missing}")
+    return manifest
 
 
 def main() -> int:
@@ -90,9 +169,18 @@ def main() -> int:
     interfaces = sorted(path.name for path in Path("/sys/class/net").glob("*"))
     if interfaces != ["lo"]:
         errors.append(f"network-none expected only lo, observed {interfaces}")
-    source_status = git("status", "--porcelain=v1", "--untracked-files=all")
-    if source_status:
-        errors.append("source tree was not clean before reproduction")
+    manifest_path = Path(os.environ.get("FORMAL_SOURCE_MANIFEST", ""))
+    source_manifest: dict[str, Any] | None = None
+    if not manifest_path.is_file():
+        errors.append("FORMAL_SOURCE_MANIFEST must name a mounted manifest file")
+    else:
+        try:
+            source_manifest = verify_source_manifest(manifest_path)
+        except (OSError, ValueError) as error:
+            errors.append(f"source manifest verification failed: {error}")
+
+    semantic_artifacts = discover_semantic_artifacts(ROOT)
+    formal_semantics_id = derive_formal_semantics_id("1.0.0", semantic_artifacts)
 
     environment = dict(os.environ)
     environment.update(
@@ -137,8 +225,13 @@ def main() -> int:
         "schema_version": "1.0.0",
         "status": "PASS" if not errors else "FAIL",
         "environment": "linux/amd64 clean container with --network none",
-        "source_commit": git("rev-parse", "HEAD"),
-        "source_clean_at_start": source_status == "",
+        "source_commit": source_manifest["source_commit"] if source_manifest else "0" * 40,
+        "source_tree": source_manifest["source_tree"] if source_manifest else "0" * 40,
+        "source_clean_at_start": source_manifest is not None,
+        "source_manifest_sha256": sha256_file(manifest_path)
+        if manifest_path.is_file()
+        else "0" * 64,
+        "formal_semantics_id": formal_semantics_id,
         "platform": platform.platform(),
         "machine": platform.machine(),
         "network_interfaces": interfaces,

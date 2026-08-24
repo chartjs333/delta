@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -13,9 +14,33 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "formal" / "reports"
 REPORT_OUTPUTS = {
+    "formal/reports/clean-offline-reproduction.json",
+    "formal/reports/cross-artifact-analysis.json",
     "formal/reports/formal-verification-report.json",
+    "formal/reports/formal-semantics.json",
+    "formal/reports/lean-proof-report.json",
+    "formal/reports/mutant-evidence.json",
+    "formal/reports/refinement-evidence.json",
+    "formal/reports/reproducibility-evidence.json",
     "formal/reports/source-tree-manifest.json",
+    "formal/reports/tlc-evidence.json",
+    "formal/reports/toolchain-evidence.json",
 }
+REPORT_OUTPUT_GLOBS = ("formal/reports/reviews/*.json",)
+REPRODUCTION_CHECK_IDS = (
+    "phase0",
+    "contracts",
+    "toolchain",
+    "report-verifier",
+    "parse",
+    "safety",
+    "liveness",
+    "proofs",
+    "mutants",
+    "refinement",
+    "tlc-evidence",
+    "cross-artifact",
+)
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import (  # noqa: E402
@@ -43,12 +68,65 @@ def git(*arguments: str) -> str:
     return result.stdout.rstrip()
 
 
-def source_tree_status() -> tuple[str, bool]:
-    """Return the latest non-report commit and whether that source tree is clean.
+def is_report_output(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return normalized in REPORT_OUTPUTS or (
+        normalized.startswith("formal/reports/reviews/")
+        and normalized.endswith(".json")
+    )
 
-    The report and its manifest are committed one layer after the tree they
-    attest, so their own generated-byte changes are not source-tree changes.
-    Every other tracked or untracked path remains fail-closed.
+
+def reproduction_matches_source(
+    reproduction: dict[str, Any], commit: str, formal_semantics_id: str
+) -> bool:
+    checks = reproduction.get("checks")
+    if not isinstance(checks, list):
+        return False
+    if [item.get("id") for item in checks if isinstance(item, dict)] != list(
+        REPRODUCTION_CHECK_IDS
+    ):
+        return False
+    checks_pass = all(
+        isinstance(item, dict)
+        and item.get("status") == "PASS"
+        and item.get("exit_code") == 0
+        and isinstance(item.get("command"), list)
+        and bool(item["command"])
+        and isinstance(item.get("output_sha256"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", item["output_sha256"]) is not None
+        for item in checks
+    )
+    return (
+        reproduction.get("schema_version") == "1.0.0"
+        and reproduction.get("status") == "PASS"
+        and reproduction.get("environment")
+        == "linux/amd64 clean container with --network none"
+        and reproduction.get("source_commit") == commit
+        and reproduction.get("source_clean_at_start") is True
+        and reproduction.get("formal_semantics_id") == formal_semantics_id
+        and reproduction.get("network_interfaces") == ["lo"]
+        and reproduction.get("network_proxies_forced_to_loopback") is True
+        and reproduction.get("errors") == []
+        and isinstance(reproduction.get("source_tree"), str)
+        and re.fullmatch(r"[0-9a-f]{40}", reproduction["source_tree"]) is not None
+        and isinstance(reproduction.get("source_manifest_sha256"), str)
+        and re.fullmatch(
+            r"[0-9a-f]{64}", reproduction["source_manifest_sha256"]
+        )
+        is not None
+        and str(reproduction.get("machine", "")).lower() in {"amd64", "x86_64"}
+        and str(reproduction.get("platform", "")).startswith("Linux-")
+        and checks_pass
+    )
+
+
+def source_tree_status() -> tuple[str, bool]:
+    """Return the latest source commit and whether that source tree is clean.
+
+    Generated machine evidence and independent review attestations are committed
+    as an evidence overlay after the source tree they attest. Ignoring only those
+    known outputs avoids a circular reviewed_commit while every other tracked or
+    untracked path remains fail-closed.
     """
 
     status_lines = git(
@@ -57,16 +135,17 @@ def source_tree_status() -> tuple[str, bool]:
     source_changes = []
     for line in status_lines:
         path = line[3:].split(" -> ")[-1].replace("\\", "/")
-        if path not in REPORT_OUTPUTS:
+        if not is_report_output(path):
             source_changes.append(line)
+    exclusions = [f":(exclude){path}" for path in sorted(REPORT_OUTPUTS)]
+    exclusions.extend(f":(exclude,glob){pattern}" for pattern in REPORT_OUTPUT_GLOBS)
     commit = git(
         "log",
         "-1",
         "--format=%H",
         "--",
         ".",
-        ":(exclude)formal/reports/formal-verification-report.json",
-        ":(exclude)formal/reports/source-tree-manifest.json",
+        *exclusions,
     )
     if len(commit) != 40:
         raise RuntimeError("unable to identify the attested non-report source commit")
@@ -249,7 +328,9 @@ def main() -> int:
         check(item["id"], item["status"], "EVIDENCE-TOOLCHAINS")
         for item in toolchains["checks"]
     ]
-    reproduction_pass = reproduction.get("status") == "PASS"
+    reproduction_pass = reproduction_matches_source(
+        reproduction, commit, formal_semantics_id
+    )
     coverage = []
     for identifier in sorted(REQUIREMENT_IDS):
         status = "FAIL" if identifier == "FR-042" and not reproduction_pass else "PASS"

@@ -34,6 +34,12 @@ from formal_artifacts import (  # noqa: E402
     write_canonical_json,
 )
 from run_formal_gate import verify_action_coverage, verify_sany_output  # noqa: E402
+from run_clean_offline_reproduction import verify_source_manifest  # noqa: E402
+from generate_formal_report import (  # noqa: E402
+    REPRODUCTION_CHECK_IDS,
+    is_report_output,
+    reproduction_matches_source,
+)
 from verify_phase0 import semantic_text_sha256  # noqa: E402
 
 
@@ -75,6 +81,89 @@ def trace_document() -> dict[str, object]:
             }
         ],
     }
+
+
+class ReportSourceBoundaryTests(unittest.TestCase):
+    def test_ci_tee_pipelines_cannot_mask_gate_failures(self) -> None:
+        lines = (REPOSITORY / ".github" / "workflows" / "formal.yml").read_text(
+            encoding="utf-8"
+        ).splitlines()
+        pipeline_count = 0
+        for index, line in enumerate(lines):
+            if "| tee " not in line:
+                continue
+            pipeline_count += 1
+            run_index = max(
+                position
+                for position in range(index)
+                if lines[position].strip() == "run: |"
+            )
+            self.assertIn("set -o pipefail", [item.strip() for item in lines[run_index:index]])
+        self.assertGreaterEqual(pipeline_count, 5)
+
+    def test_generated_evidence_overlay_does_not_change_source_commit(self) -> None:
+        self.assertTrue(is_report_output("formal/reports/tlc-evidence.json"))
+        self.assertTrue(is_report_output("formal\\reports\\reviews\\review-a.json"))
+        self.assertFalse(is_report_output("formal/reports/reviews/README.md"))
+        self.assertFalse(is_report_output("formal/reports/baseline-inputs.json"))
+
+    def test_reproduction_must_bind_exact_source_and_semantics(self) -> None:
+        reproduction = {
+            "schema_version": "1.0.0",
+            "status": "PASS",
+            "environment": "linux/amd64 clean container with --network none",
+            "source_commit": "1" * 40,
+            "source_tree": "2" * 40,
+            "source_clean_at_start": True,
+            "source_manifest_sha256": "3" * 64,
+            "formal_semantics_id": HASH_A,
+            "platform": "Linux-6.8.0-x86_64-with-glibc2.36",
+            "machine": "x86_64",
+            "network_interfaces": ["lo"],
+            "network_proxies_forced_to_loopback": True,
+            "checks": [
+                {
+                    "id": identifier,
+                    "command": ["python", identifier],
+                    "exit_code": 0,
+                    "output_sha256": "5" * 64,
+                    "status": "PASS",
+                }
+                for identifier in REPRODUCTION_CHECK_IDS
+            ],
+            "errors": [],
+        }
+        self.assertTrue(reproduction_matches_source(reproduction, "1" * 40, HASH_A))
+        reproduction["source_commit"] = "4" * 40
+        self.assertFalse(reproduction_matches_source(reproduction, "1" * 40, HASH_A))
+
+    def test_offline_source_manifest_rejects_untracked_source_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_name:
+            temporary = Path(temporary_name)
+            root = temporary / "source"
+            root.mkdir()
+            source = root / "tracked.txt"
+            source.write_text("tracked\n", encoding="utf-8")
+            cache = root / "formal" / "toolchain" / "cache"
+            cache.mkdir(parents=True)
+            (cache / "ignored.bin").write_bytes(b"cache")
+            manifest_path = temporary / "source-manifest.json"
+            write_canonical_json(
+                manifest_path,
+                {
+                    "schema_version": "1.0.0",
+                    "source_commit": "1" * 40,
+                    "source_tree": "2" * 40,
+                    "source_clean": True,
+                    "files": [
+                        {"path": "tracked.txt", "sha256": sha256_file(source)}
+                    ],
+                },
+            )
+            verify_source_manifest(manifest_path, root)
+            (root / "untracked.txt").write_text("unexpected\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                verify_source_manifest(manifest_path, root)
 
 
 class ContractTest(unittest.TestCase):

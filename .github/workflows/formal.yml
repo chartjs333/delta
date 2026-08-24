@@ -55,6 +55,7 @@ jobs:
           echo "TLA2TOOLS_JAR=$GITHUB_WORKSPACE/.formal-tools/tla/tla2tools.jar" >> "$GITHUB_ENV"
       - name: Run parser, safety and liveness gates
         run: |
+          set -o pipefail
           mkdir -p formal/reports/local
           make formal-parse formal-safety formal-liveness 2>&1 | tee formal/reports/local/tla.log
       - name: Retain TLA evidence
@@ -89,6 +90,7 @@ jobs:
       - name: Materialize exact dependency commits and prime mathlib cache
         working-directory: formal/proofs
         run: |
+          set -o pipefail
           mkdir -p ../reports/local
           if ! "$LAKE" exe cache get 2>&1 | tee ../reports/local/cache-get.log; then
             echo "::warning::mathlib binary cache was unavailable; the mandatory pinned-source build will continue"
@@ -96,6 +98,7 @@ jobs:
           git diff --exit-code -- lake-manifest.json lean-toolchain lakefile.toml dependencies.lock.json
       - name: Build mandatory theorem target
         run: |
+          set -o pipefail
           mkdir -p formal/reports/local
           make formal-proofs 2>&1 | tee formal/reports/local/proofs.log
       - name: Retain theorem evidence
@@ -107,10 +110,68 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  clean-offline-reproduction:
+    needs: phase0-and-locks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Fetch complete pinned binary cache
+        run: |
+          python3 formal/toolchain/prepare_cache.py --download
+          python3 formal/toolchain/install_cached_toolchain.py \
+            --cache-dir formal/toolchain/cache \
+            --destination "$RUNNER_TEMP/formal-tools" \
+            --component lean
+          echo "LAKE=$RUNNER_TEMP/formal-tools/lean/bin/lake" >> "$GITHUB_ENV"
+      - name: Materialize exact proof cache
+        working-directory: formal/proofs
+        run: |
+          set -o pipefail
+          mkdir -p ../reports/local
+          if ! "$LAKE" exe cache get 2>&1 | tee ../reports/local/offline-cache-get.log; then
+            echo "::warning::mathlib binary cache was incomplete; building the exact pinned source before network cutoff"
+          fi
+          "$LAKE" build DeltaReduce 2>&1 | tee ../reports/local/offline-prime-build.log
+          git diff --exit-code -- lake-manifest.json lean-toolchain lakefile.toml dependencies.lock.json
+          rm -rf "$RUNNER_TEMP/formal-tools"
+      - name: Snapshot exact clean source
+        run: python3 formal/scripts/create_reproduction_source_manifest.py --output "$RUNNER_TEMP/formal-source-manifest.json"
+      - name: Materialize pinned base image before network cutoff
+        run: docker pull docker.io/library/python:3.12.11-slim-bookworm@sha256:c00fc7b44d844b6da22861ec24af43968a5200eac4ec607b4725d585165d6b49
+      - name: Build formal image without network
+        run: docker build --network none -t deltareduce-formal:ci formal/toolchain
+      - name: Run the complete gate without network
+        run: |
+          set -o pipefail
+          docker run --rm --network none \
+            -e FORMAL_SOURCE_MANIFEST=/source-manifest.json \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -v "$RUNNER_TEMP/formal-source-manifest.json:/source-manifest.json:ro" \
+            -w /workspace deltareduce-formal:ci \
+            python formal/scripts/run_clean_offline_reproduction.py \
+            2>&1 | tee formal/reports/local/clean-offline-reproduction.log
+      - name: Publish machine-readable result annotation
+        run: python3 -c 'import base64,pathlib; print("::notice title=clean-offline-reproduction::" + base64.b64encode(pathlib.Path("formal/reports/clean-offline-reproduction.json").read_bytes()).decode("ascii"))'
+      - name: Retain clean offline evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: formal-clean-offline-${{ github.run_id }}
+          path: |
+            formal/reports/clean-offline-reproduction.json
+            formal/reports/local/
+          if-no-files-found: warn
+          retention-days: 30
+
   mutants-refinement-report:
     needs:
       - tla
       - proofs
+      - clean-offline-reproduction
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -129,6 +190,7 @@ jobs:
           echo "TLA2TOOLS_JAR=$GITHUB_WORKSPACE/.formal-tools/tla/tla2tools.jar" >> "$GITHUB_ENV"
       - name: Run mutant, refinement and report gates
         run: |
+          set -o pipefail
           mkdir -p formal/reports/local
           make formal-mutants formal-refinement formal-report 2>&1 | tee formal/reports/local/evidence.log
       - name: Retain normalized counterexamples and reports
