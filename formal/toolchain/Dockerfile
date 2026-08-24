@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.12.11-slim-bookworm@sha256:c00fc7b44d844b6da22861ec24af43968a5200eac4ec607b4725d585165d6b49
+FROM docker.io/library/python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
 
 COPY tla.lock lean.lock prepare_cache.py install_cached_toolchain.py /opt/formal-bootstrap/
 COPY cache/ /opt/formal-cache/
