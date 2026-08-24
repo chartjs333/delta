@@ -86,10 +86,13 @@ jobs:
             --destination .formal-tools \
             --component lean
           echo "LAKE=$GITHUB_WORKSPACE/.formal-tools/lean/bin/lake" >> "$GITHUB_ENV"
-      - name: Materialize exact dependency commits and mathlib cache
+      - name: Materialize exact dependency commits and prime mathlib cache
         working-directory: formal/proofs
         run: |
-          "$LAKE" exe cache get
+          mkdir -p ../reports/local
+          if ! "$LAKE" exe cache get 2>&1 | tee ../reports/local/cache-get.log; then
+            echo "::warning::mathlib binary cache was unavailable; the mandatory pinned-source build will continue"
+          fi
           git diff --exit-code -- lake-manifest.json lean-toolchain lakefile.toml dependencies.lock.json
       - name: Build mandatory theorem target
         run: |
