@@ -40,7 +40,7 @@ def git(*arguments: str) -> str:
         errors="replace",
         timeout=30,
     )
-    return result.stdout.strip()
+    return result.stdout.rstrip()
 
 
 def source_tree_status() -> tuple[str, bool]:
