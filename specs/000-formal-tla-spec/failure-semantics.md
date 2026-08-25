@@ -14,6 +14,13 @@ Every protocol operation resolves into one of four abstract outcomes:
 
 No failure rule permits an unsigned, partial, floating, arrival-order or single-validator fallback.
 
+Every vote that can contribute to RoundConfigQC, ISC, EC, APC, ParameterShardQC,
+AggregateRootQC, ApplyQC, ViewChangeQC or AbortQC follows the same explicit
+durability/transport lifecycle: persist the exact envelope, send, optionally
+duplicate/drop/delay, deliver, crash, restart and recover. Domain-specific vote
+sets are durable-journal projections only; a persisted but undelivered vote does
+not count toward a certificate quorum.
+
 ## 2. Deadline model
 
 - `softDeadline(view, phase)` enables a validator to durably vote for the next view when required QC/progress is absent. `ViewChange` finalizes only from `2f+1` matching, context-bound timeout/view-change votes from the exact validator epoch.
@@ -125,5 +132,9 @@ Any durable-state corruption or ambiguity fails closed and may remove the role f
 
 - **Safety scope**: asynchronous network, arbitrary reorder/duplicate/drop, up to `f` Byzantine validators, crash/restart and modeled artifact faults, subject to cryptographic and durable-journal abstractions.
 - **Liveness scope**: eventual synchrony, at least `2f+1` honest/responsive validators in required committees, required artifact availability/repair, bounded computation and declared fairness.
+- **Positive evidence rule**: phase-specific positive liveness models start from
+  the real empty `Init` before their target milestone and exclude hard-abort as a
+  progress shortcut. At least one mandatory positive behavior must traverse the
+  complete production lifecycle and reach `APPLIED`.
 - **Outside liveness scope**: the protocol may remain BLOCKED even after the hard deadline when an abort quorum cannot form. The hard deadline forbids ordinary progress; it does not weaken certificate thresholds or permit conflicting/uncertified state.
 - **Compromise boundary**: safety claims assume at most `f` Byzantine validators and unforgeable identities/signatures for the remaining validators. Evidence that this assumption is exceeded triggers operational emergency stop, but no formal safety claim is made beyond that boundary.

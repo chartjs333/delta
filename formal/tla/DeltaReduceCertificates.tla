@@ -68,6 +68,12 @@ BaseVariablesUnchanged ==
                 AvailabilityVariables, ReduceApplyVariables,
                 FailureControlVariables>>
 
+PersistedCertificateVoteBaseUnchanged ==
+    UNCHANGED <<proposals, byzantine, messages, messageMultiplicity,
+                receivedVotes, finalizedCertificates, alive, recoveryState,
+                crashCoverage, TicketVariables, AvailabilityVariables,
+                ReduceApplyVariables, FailureControlVariables>>
+
 RoundContext(height, epoch) == [height |-> height, epoch |-> epoch]
 
 FinalizedRoundConfig(round, config) ==
@@ -109,7 +115,7 @@ ISCVoteRecord(validator, body) ==
 
 ISCSigners(body) ==
     {validator \in Validators :
-        ISCVoteRecord(validator, body) \in iscVotes}
+        HasDeliveredVote(validator, "ISC", body)}
 
 HasConflictingISCVote(validator, body) ==
     \E vote \in iscVotes :
@@ -160,21 +166,23 @@ RequestIncompleteInputAbort(round, config) ==
 
 VoteISC(validator, body) ==
     LET vote == ISCVoteRecord(validator, body)
+        envelope == VoteEnvelope(validator, "ISC", body.round, body)
     IN  /\ EnableCertificateActions
         /\ validator \in Validators
         /\ body \in closedInputBodies
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ ~RoundAbortRequired(body.round)
         /\ vote \notin iscVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingISCVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ iscVotes' = iscVotes \cup {vote}
         /\ UNCHANGED <<closedInputBodies, inputSetCertificates,
                         seedTranscripts, ecVotes, eligibilityCertificates,
                         apcVotes, aggregationPlanCertificates,
                         certificateRejections, certificateReplayReceipts,
                         abortRequests>>
-        /\ BaseVariablesUnchanged
+        /\ PersistedCertificateVoteBaseUnchanged
 
 FinalizeISC(body) ==
     LET signers == ISCSigners(body)
@@ -318,7 +326,7 @@ ECVoteRecord(validator, body) ==
 
 ECSigners(body) ==
     {validator \in Validators :
-        ECVoteRecord(validator, body) \in ecVotes}
+        HasDeliveredVote(validator, "EC", body)}
 
 HasConflictingECVote(validator, body) ==
     \E vote \in ecVotes :
@@ -328,15 +336,17 @@ HasConflictingECVote(validator, body) ==
 
 VoteEC(validator, body) ==
     LET vote == ECVoteRecord(validator, body)
+        envelope == VoteEnvelope(validator, "EC", body.isc, body)
     IN  /\ EnableCertificateActions
         /\ EnablePlanningActions
         /\ validator \in Validators
         /\ IsEligibilityBody(body)
         /\ ValidEligibilityBody(body)
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin ecVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingECVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ ecVotes' = ecVotes \cup {vote}
         /\ UNCHANGED <<closedInputBodies, iscVotes,
                         inputSetCertificates, seedTranscripts,
@@ -344,7 +354,7 @@ VoteEC(validator, body) ==
                         aggregationPlanCertificates,
                         certificateRejections, certificateReplayReceipts,
                         abortRequests>>
-        /\ BaseVariablesUnchanged
+        /\ PersistedCertificateVoteBaseUnchanged
 
 FinalizeEC(body) ==
     LET signers == ECSigners(body)
@@ -468,7 +478,7 @@ APCVoteRecord(validator, body) ==
 
 APCSigners(body) ==
     {validator \in Validators :
-        APCVoteRecord(validator, body) \in apcVotes}
+        HasDeliveredVote(validator, "APC", body)}
 
 HasConflictingAPCVote(validator, body) ==
     \E vote \in apcVotes :
@@ -478,15 +488,17 @@ HasConflictingAPCVote(validator, body) ==
 
 VoteAPC(validator, body) ==
     LET vote == APCVoteRecord(validator, body)
+        envelope == VoteEnvelope(validator, "APC", body.ec, body)
     IN  /\ EnableCertificateActions
         /\ EnablePlanningActions
         /\ validator \in Validators
         /\ IsAggregationPlanBody(body)
         /\ ValidAggregationPlanBody(body)
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin apcVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingAPCVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ apcVotes' = apcVotes \cup {vote}
         /\ UNCHANGED <<closedInputBodies, iscVotes,
                         inputSetCertificates, seedTranscripts, ecVotes,
@@ -494,7 +506,7 @@ VoteAPC(validator, body) ==
                         aggregationPlanCertificates,
                         certificateRejections, certificateReplayReceipts,
                         abortRequests>>
-        /\ BaseVariablesUnchanged
+        /\ PersistedCertificateVoteBaseUnchanged
 
 FinalizeAPC(body) ==
     LET signers == APCSigners(body)

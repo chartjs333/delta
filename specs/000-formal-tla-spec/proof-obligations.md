@@ -55,7 +55,17 @@ The implementation profile MUST additionally prove/check that each intermediate 
 
 ## PO-A3 — Rational/common-denominator safety
 
-For coefficients represented as reduced rationals `n_j / D` with common positive denominator `D`, prove that integer numerator accumulation is safe under the configured bound and that final canonical reduction/rounding is deterministic. Denominator zero and noncanonical fractions are excluded by preconditions.
+For each rational input, prove separately that its denominator is positive and
+that `gcd(|n_j|, d_j)=1`. Prove that the constructed common denominator is
+positive and divisible by every `d_j`, and that integer numerator accumulation
+is safe under the configured bound.
+
+Final integer conversion follows ADR-0002: Euclidean quotient/remainder,
+strictly-below-half rounds to the quotient, at-or-above-half rounds to quotient
+plus one, and an exact half tie resolves toward positive infinity. Each branch,
+the tie rule and determinism MUST be represented by a named checked theorem;
+denominator zero or a noncanonical input fraction is not an admissible runtime
+precondition.
 
 **Used by**: APC weights, domain mixture and ApplyArithmeticProfile.
 
@@ -97,6 +107,10 @@ Assume:
 
 Prove at most one next current checkpoint exists per height and replay cannot apply twice.
 
+The checked theorem set MUST separately cover ApplyQC uniqueness from quorum
+intersection, uniqueness of the resulting current state, accepted compare-and-set
+advance and exact replay idempotence.
+
 TLA+ checks crash/interleaving behavior; Lean proves the abstract transition relation result.
 
 ## PO-D1 — Domain mixture preservation
@@ -113,7 +127,12 @@ For the abstract state transition relation, prove every `HardAbort` transition l
 
 ## PO-R2 — Recovery idempotence
 
-For idempotent replay keys and durable vote/current transition records, prove applying the same recovery command zero, one or multiple times yields observationally equivalent certified state. Finite crash placements are explored by TLC; algebraic/idempotent state-update lemmas are proved where practical.
+For idempotent replay keys and durable vote/current transition records, prove
+applying the same recovery command zero, one or multiple times yields
+observationally equivalent certified state. The checked theorem set MUST
+separately prove restoration of the durable vote journal, certificates and
+current checkpoint, full recovered-state observational equivalence and
+restart/recovery idempotence. Finite crash placements remain a TLC obligation.
 
 ## Proof dependency graph
 
@@ -137,6 +156,11 @@ Each theorem artifact MUST record:
 - build result;
 - owning feature(s);
 - concrete runtime/config checks required to establish theorem preconditions.
+
+The evidence generator MUST maintain an explicit proof-obligation-to-normative-
+conjunct table. A parent proof obligation passes only when every listed conjunct
+has a named theorem, a successful kernel/axiom audit entry and no admitted
+placeholder. Counting one weak theorem per parent ID is insufficient.
 
 ## Runtime precondition rule
 

@@ -45,7 +45,7 @@ def main() -> int:
     prefix = config_text.split(property_marker, 1)[0]
     countercheck_text = (
         prefix
-        + "\nPROPERTY AggregateEventuallyAppliesOrAborts\n"
+        + "\nPROPERTY AppliedReached\n"
         + "CHECK_DEADLOCK FALSE\n"
     )
     config = TLA / "cfg" / ".generated-liveness-no-fairness.cfg"
@@ -92,7 +92,7 @@ def main() -> int:
         "status": "PASS",
         "countercheck_id": "COUNTERCHECK-NO-FAIRNESS",
         "removed_assumptions": ["weak fairness for protocol progress actions"],
-        "expected_property_id": "LIVE-AGGREGATE-APPLY-OR-ABORT",
+        "expected_property_id": "LIVE-APPLIED-REACHED",
         "outcome": "EXPECTED_TEMPORAL_COUNTEREXAMPLE",
         "module": {
             "path": "formal/tla/DeltaReduceLivenessHarness.tla",

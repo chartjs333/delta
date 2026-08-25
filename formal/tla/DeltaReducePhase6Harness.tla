@@ -77,19 +77,36 @@ HarnessAPC ==
         HarnessInputBody, HarnessSeed, HarnessEC, RequiredTickets,
         ConfiguredCoefficientProfile)
 
+HarnessISCVoteEnvelopes ==
+    {VoteEnvelope(validator, "ISC", HarnessInputBody.round,
+        HarnessInputBody) : validator \in Validators}
+
+HarnessECVoteEnvelopes ==
+    {VoteEnvelope(validator, "EC", HarnessEC.isc, HarnessEC) :
+        validator \in Validators}
+
+HarnessAPCVoteEnvelopes ==
+    {VoteEnvelope(validator, "APC", HarnessAPC.ec, HarnessAPC) :
+        validator \in Validators}
+
+HarnessDurableVotes ==
+    HarnessConfigVotes \cup HarnessISCVoteEnvelopes
+        \cup HarnessECVoteEnvelopes \cup HarnessAPCVoteEnvelopes
+
 Phase6Init ==
     /\ ModelConstantsOK
+    /\ MaxDurableSequence >= 4
     /\ FailureInit
     /\ proposals =
         {[context |-> HarnessConfigContext, body |-> HarnessConfig]}
     /\ byzantine = InitialByzantine
-    /\ durableVotes = HarnessConfigVotes
-    /\ volatileVotes = HarnessConfigVotes
+    /\ durableVotes = HarnessDurableVotes
+    /\ volatileVotes = HarnessDurableVotes
     /\ messages = {}
-    /\ messageMultiplicity = [vote \in VoteRecords |-> 0]
-    /\ receivedVotes = HarnessConfigVotes
+    /\ messageMultiplicity = {}
+    /\ receivedVotes = HarnessDurableVotes
     /\ finalizedCertificates = {HarnessConfigCertificate}
-    /\ durableSequence = [validator \in Validators |-> 1]
+    /\ durableSequence = [validator \in Validators |-> 4]
     /\ alive = Validators
     /\ recoveryState = [validator \in Validators |-> "READY"]
     /\ crashCoverage = {}
@@ -130,7 +147,7 @@ Phase6Init ==
     /\ abortRequests = {}
     /\ ReduceApplyInit
 
-Phase6Next == ReduceApplyNext
+Phase6Next == ReduceApplyNext \/ VoteTransportNext
 
 Spec == Phase6Init /\ [][Phase6Next]_ProtocolVariables
 

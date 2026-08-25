@@ -115,6 +115,9 @@ The model and proofs MUST establish or explicitly discharge:
 - **LeaseCommitSafety**: only the current lease epoch may commit; an accepted commitment prevents reassignment.
 - **CommitUniqueness**: one `ticket_id` maps to at most one distinct commitment root.
 - **VoteUniqueness**: an honest validator never durably signs two bodies for one vote context.
+- **AllQCVotesPersisted**: every domain vote visible to any QC-building action is
+  backed by the exact durable vote envelope; delivery, not direct set insertion,
+  determines signer power.
 - **QCUniqueness**: two conflicting QCs of the same type/context cannot both finalize.
 - **AvailabilityBeforeISC**: every ISC tuple has a valid AC covering every committed shard.
 - **ISCImmutability**: finalized ISC membership/order/root cannot change.
@@ -139,6 +142,14 @@ The model and proofs MUST establish or explicitly discharge:
 Liveness MUST be stated conditionally. The model MUST NOT claim progress during permanent partition, absence of `2f+1` responsive validators, irrecoverable post-ISC artifact loss or unfair perpetual message suppression.
 
 Under explicit assumptions of eventual synchrony, honest responsive quorum, required artifact availability/repairability, finite worker/committee computation and weak/strong fairness as declared, verify:
+
+- **ConfigQCReached**, **ISCReached** and **PlanQCReached** from real empty `Init`
+  in separate pre-milestone models;
+- **AppliedReached** across the complete lifecycle without HardAbort;
+- **ViewQCReached** from real `Init` through soft timeout and delivered durable
+  view-change votes, and **AbortQCReached** through the hard deadline and
+  delivered durable abort votes;
+- **NeverUsesAbortAsProgress** in every positive milestone model;
 
 - **ConfigEventuallyFinalizesOrAborts**;
 - **CommittedEventuallyAvailableOrRejectedBeforeISC**;
@@ -274,7 +285,9 @@ Later implementations export canonical traces projected onto the formal vocabula
 - **FR-010**: TLC deadlock detection MUST distinguish legal terminal states (`APPLIED`, `ABORTED`) from accidental deadlocks.
 - **FR-011**: Liveness configs MUST declare exact fairness, eventual-synchrony, quorum and artifact-availability assumptions in both TLA+ and prose.
 - **FR-012**: Safety configs MUST NOT assume synchrony or honest delivery beyond the cryptographic/Byzantine threshold abstraction.
-- **FR-013**: Durable vote persistence MUST be modeled separately from volatile send/receipt state.
+- **FR-013**: Durable vote persistence MUST be modeled separately from volatile
+  send/receipt state for every QC-producing vote class: RoundConfig, ISC, EC,
+  APC, Parameter, AggregateRoot, Apply, ViewChange and Abort.
 - **FR-014**: Crash/restart actions MUST clear only volatile state and recover durable journal/state before new voting.
 - **FR-015**: View change MUST require `2f+1` unique durable timeout/view-change votes from the exact validator epoch and MUST preserve finalized state, durable votes and frozen config/ticket/ISC data.
 - **FR-016**: Hard abort MUST require `2f+1` unique durable votes over one deterministic content-addressed reason/context body, be terminal for the round and preserve parent current checkpoint. Reaching the hard deadline without this quorum MUST disable non-abort transitions and remain safely BLOCKED.
@@ -291,14 +304,22 @@ Later implementations export canonical traces projected onto the formal vocabula
 - **FR-027**: Every liveness property listed in section 5 MUST appear as a temporal property in a config with explicit assumptions.
 - **FR-028**: The theorem project MUST contain no admitted placeholder for mandatory theorems and MUST produce a dependency/axiom report.
 - **FR-029**: Quorum theorem MUST be parametric in natural `f` and derive intersection lower bound.
-- **FR-030**: Fixed-point theorem MUST cover signed values, intermediate multiply width, sum width, common denominator and hierarchical composition assumptions.
+- **FR-030**: Fixed-point theorem MUST cover signed values, intermediate multiply
+  width, sum width, positive/canonical rational denominators, common-denominator
+  divisibility, the ADR-0002 half-tie rule and hierarchical composition assumptions.
 - **FR-031**: Hierarchy theorem MUST require exact disjoint partition and prove per-domain/per-shard sum/metadata equality.
 - **FR-032**: Apply uniqueness theorem MUST use explicit vote-context uniqueness and quorum intersection assumptions.
 - **FR-033**: Hash/Merkle/canonical-serialization properties MAY be axiomatized only behind named abstractions and MUST not be presented as cryptographic implementation proofs.
-- **FR-034**: At least one intentionally weakened mutant MUST exist for each critical class: no durable vote, seed before ISC, mutable ISC, missing shard parent, incomplete aggregate, unchecked overflow and current advance without ApplyQC.
+- **FR-034**: At least one intentionally weakened production-action source
+  mutation MUST exist for each critical class: no durable vote, seed before ISC,
+  mutable ISC, missing shard parent, incomplete aggregate, unchecked overflow and
+  current advance without ApplyQC. A detached toy transition system does not count.
 - **FR-035**: Each mutant MUST produce the expected invariant/counterexample; an unexpected pass is a test failure.
 - **FR-036**: Counterexample traces MUST be minimized when practical, normalized to canonical JSON and stored with model/config/tool hashes.
-- **FR-037**: Formal trace schema MUST include action ID, round/height/view/epoch, actor/role, parent/body/result hashes, durability sequence, logical time and state root.
+- **FR-037**: Formal trace schema MUST include action ID,
+  round/height/view/epoch, actor/role, parent/body/result hashes, durability
+  sequence, logical time, state root and the self-authenticating immutable
+  RoundConfig/parameter-schema/shard-plan requirement matrix.
 - **FR-038**: Refinement checker MUST allow documented stuttering/internal events but reject externally visible transitions outside the formal action relation.
 - **FR-039**: Later protocol branches MUST map requirements/tasks/tests to formal action/invariant/proof IDs and rerun affected configs/theorems.
 - **FR-040**: `FormalVerificationReport` MUST bind source tree, Constitution/ADR/spec hashes, toolchain hashes, modules/configs, explored states/diameter, properties, theorem build, mutants/counterexamples, coverage, limitations, reviewer attestations and `GO|NO_GO`.
@@ -306,7 +327,10 @@ Later implementations export canonical traces projected onto the formal vocabula
 - **FR-042**: Report and evidence bundle MUST be content-addressed, reproducible from a clean environment and independently verifiable offline.
 - **FR-043**: CI MUST fail on parser/type errors, invariant/liveness violation, deadlock outside legal terminals, theorem/admission placeholder, mutant unexpectedly passing, trace-schema drift or report mismatch.
 - **FR-044**: Formal verification MUST run without access to private keys, model weights, datasets or public network.
-- **FR-045**: Documentation MUST clearly distinguish proved properties, finite checked scopes, assumptions, abstractions, limitations and unproved claims.
+- **FR-045**: Documentation MUST clearly distinguish proved properties, finite
+  checked scopes, assumptions, abstractions, limitations and unproved claims. A
+  syntactic cross-artifact analyzer MUST NOT be reported as evidence of semantic
+  completeness, temporal non-vacuity or theorem strength.
 - **FR-046**: A formal semantic change MUST invalidate prior Formal GO through compatibility/hash rules until the new report passes.
 
 ## 10. Non-Functional Requirements

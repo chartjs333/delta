@@ -202,18 +202,24 @@ InputClosed == closedInputBodies # {}
 
 CertificateProgressOpen == ~InputClosed /\ abortRequests = {}
 
-VoteKinds == {"ROUND_CONFIG"}
+\* Every signature that can contribute to a QC uses the same durable
+\* persist -> send -> deliver lifecycle.  The domain-specific vote sets below
+\* are durable projections; only delivered envelopes count as QC signers.
+VoteKinds ==
+    {"ROUND_CONFIG", "ISC", "EC", "APC", "PARAMETER",
+     "AGGREGATE_ROOT", "APPLY", "VIEW_CHANGE", "ABORT"}
 RecoveryStates == {"READY", "CRASHED", "RECOVERING"}
 CrashPoints == {"BEFORE_PERSIST", "AFTER_PERSIST", "AFTER_SEND"}
 
 VoteContexts ==
-    [kind : VoteKinds, height : Heights, epoch : ValidatorEpochs]
+    [kind : {"ROUND_CONFIG"}, height : Heights, epoch : ValidatorEpochs]
 
 ProposalRecords ==
     [context : VoteContexts, body : ConfigBodies]
 
-VoteRecords ==
-    [validator : Validators, context : VoteContexts, body : ConfigBodies]
+ConfigVoteRecords ==
+    [validator : Validators, kind : {"ROUND_CONFIG"},
+     context : VoteContexts, body : ConfigBodies]
 
 CertificateRecords ==
     [context : VoteContexts, body : ConfigBodies, signers : SUBSET Validators]
@@ -451,8 +457,12 @@ ModelConstantsOK ==
 ConfigContext(height, epoch) ==
     [kind |-> "ROUND_CONFIG", height |-> height, epoch |-> epoch]
 
+VoteEnvelope(validator, kind, context, body) ==
+    [validator |-> validator, kind |-> kind,
+     context |-> context, body |-> body]
+
 VoteRecord(validator, context, body) ==
-    [validator |-> validator, context |-> context, body |-> body]
+    VoteEnvelope(validator, "ROUND_CONFIG", context, body)
 
 CertificateRecord(context, body, signers) ==
     [context |-> context, body |-> body, signers |-> signers]

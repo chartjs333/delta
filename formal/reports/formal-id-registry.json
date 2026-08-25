@@ -79,8 +79,16 @@
     {"id": "INV-ABORT-CERTIFIED", "name": "AbortCertified"},
     {"id": "INV-PLANE-SEPARATION", "name": "PlaneSeparation"},
     {"id": "INV-CERTIFIED-PUBLISH-ONLY", "name": "CertifiedPublishOnly"}
+    ,{"id": "INV-ALL-QC-VOTES-PERSISTED", "name": "AllQCVotesPersisted"}
   ],
   "temporal_properties": [
+    {"id": "LIVE-CONFIG-QC-REACHED", "name": "ConfigQCReached"},
+    {"id": "LIVE-ISC-REACHED", "name": "ISCReached"},
+    {"id": "LIVE-PLAN-QC-REACHED", "name": "PlanQCReached"},
+    {"id": "LIVE-APPLIED-REACHED", "name": "AppliedReached"},
+    {"id": "LIVE-VIEW-QC-REACHED", "name": "ViewQCReached"},
+    {"id": "LIVE-ABORT-QC-REACHED", "name": "AbortQCReached"},
+    {"id": "LIVE-ABORT-EXCLUDED-FROM-POSITIVE", "name": "NeverUsesAbortAsProgress"},
     {"id": "LIVE-CONFIG-FINALIZE-OR-ABORT", "name": "ConfigEventuallyFinalizesOrAborts"},
     {"id": "LIVE-COMMIT-AVAILABLE-OR-REJECT", "name": "CommittedEventuallyAvailableOrRejectedBeforeISC"},
     {"id": "LIVE-FROZEN-PLAN-OR-ABORT", "name": "FrozenRoundEventuallyGetsPlanOrAborts"},
@@ -153,6 +161,15 @@
     {"id": "CFG-CONFIG-QC", "path": "formal/tla/cfg/config-qc-uniqueness.cfg"},
     {"id": "CFG-SAFETY-F1", "path": "formal/tla/cfg/safety-f1.cfg"},
     {"id": "CFG-VOTE-CRASH-RECOVERY", "path": "formal/tla/cfg/vote-crash-recovery.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-CONFIG", "path": "formal/tla/cfg/vote-lifecycle-config.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-ISC", "path": "formal/tla/cfg/vote-lifecycle-isc.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-EC", "path": "formal/tla/cfg/vote-lifecycle-ec.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-APC", "path": "formal/tla/cfg/vote-lifecycle-apc.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-PARAMETER", "path": "formal/tla/cfg/vote-lifecycle-parameter.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-AGGREGATE", "path": "formal/tla/cfg/vote-lifecycle-aggregate.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-APPLY", "path": "formal/tla/cfg/vote-lifecycle-apply.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-VIEW", "path": "formal/tla/cfg/vote-lifecycle-view.cfg"},
+    {"id": "CFG-VOTE-LIFECYCLE-ABORT", "path": "formal/tla/cfg/vote-lifecycle-abort.cfg"},
     {"id": "CFG-TICKET-LEASE-AVAILABILITY", "path": "formal/tla/cfg/ticket-lease-availability.cfg"},
     {"id": "CFG-INPUT-FREEZE-SEED", "path": "formal/tla/cfg/input-freeze-seed.cfg"},
     {"id": "CFG-AVAILABILITY-LOSS-REPAIR", "path": "formal/tla/cfg/availability-loss-repair.cfg"},
@@ -160,7 +177,12 @@
     {"id": "CFG-CERTIFICATE-FRANKENSTEIN", "path": "formal/tla/cfg/certificate-frankenstein.cfg"},
     {"id": "CFG-ARITHMETIC-BOUNDARY", "path": "formal/tla/cfg/arithmetic-boundary.cfg"},
     {"id": "CFG-APPLY-RECOVERY", "path": "formal/tla/cfg/apply-recovery.cfg"},
-    {"id": "CFG-LIVENESS-EVENTUAL-SYNCHRONY", "path": "formal/tla/cfg/liveness-eventual-synchrony.cfg"}
+    {"id": "CFG-LIVENESS-CONFIG-QC", "path": "formal/tla/cfg/liveness-config.cfg"},
+    {"id": "CFG-LIVENESS-ISC", "path": "formal/tla/cfg/liveness-isc.cfg"},
+    {"id": "CFG-LIVENESS-PLAN", "path": "formal/tla/cfg/liveness-plan.cfg"},
+    {"id": "CFG-LIVENESS-EVENTUAL-SYNCHRONY", "path": "formal/tla/cfg/liveness-eventual-synchrony.cfg"},
+    {"id": "CFG-LIVENESS-VIEW-CHANGE", "path": "formal/tla/cfg/liveness-view.cfg"},
+    {"id": "CFG-LIVENESS-ABORT-QC", "path": "formal/tla/cfg/liveness-abort.cfg"}
   ],
   "report_fields": [
     "report_schema_version",
@@ -184,7 +206,7 @@
   ],
   "compatibility": {
     "id_derivation_status": "published_by_T057_artifact_manifest",
-    "formal_semantics_id": "sha256:76e1ccb9e658b7819ef3dee1e732d189d7ed7fd9bc6e0d138634edb914bff18d",
+    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
     "hash_algorithm": "sha256",
     "domain": "deltareduce.formal-semantics.v1",
     "canonicalization": "formal/scripts/formal_artifacts.py:canonical_json_bytes",

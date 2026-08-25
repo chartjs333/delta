@@ -331,14 +331,55 @@ def main() -> int:
     reproduction_pass = reproduction_matches_source(
         reproduction, commit, formal_semantics_id
     )
+    evidence_pass = {
+        "EVIDENCE-TOOLCHAINS": all(
+            item.get("status") == "PASS" for item in toolchains["checks"]
+        ),
+        "EVIDENCE-TLC": all(
+            item.get("status") == "PASS" for item in tlc["models"]
+        ),
+        "EVIDENCE-LEAN": (
+            lean.get("status") == "PASS"
+            and lean.get("conjunct_completeness", {}).get("status") == "PASS"
+        ),
+        "EVIDENCE-MUTANTS": (
+            mutants.get("status") == "PASS"
+            and mutants.get("mutation_scope") == "PRODUCTION_ACTION_SOURCE"
+        ),
+        "EVIDENCE-REFINEMENT": refinement.get("status") == "PASS",
+        "EVIDENCE-CROSS-ARTIFACT": (
+            cross_artifact.get("status") == "PASS"
+            and cross_artifact.get("gate_kind") == "SYNTACTIC_TRACEABILITY"
+            and cross_artifact.get("semantic_completeness_claimed") is False
+        ),
+        "EVIDENCE-REPRODUCIBILITY": reproduction_pass,
+        "EVIDENCE-SEMANTICS": True,
+    }
+
+    def requirement_evidence(identifier: str) -> str:
+        number = int(identifier.removeprefix("FR-"))
+        if number == 1:
+            return "EVIDENCE-TOOLCHAINS"
+        if number == 3 or number in {40, 41, 45}:
+            return "EVIDENCE-CROSS-ARTIFACT"
+        if 2 <= number <= 27:
+            return "EVIDENCE-TLC"
+        if 28 <= number <= 33:
+            return "EVIDENCE-LEAN"
+        if 34 <= number <= 36:
+            return "EVIDENCE-MUTANTS"
+        if 37 <= number <= 39:
+            return "EVIDENCE-REFINEMENT"
+        if 42 <= number <= 44:
+            return "EVIDENCE-REPRODUCIBILITY"
+        if number == 46:
+            return "EVIDENCE-SEMANTICS"
+        raise ValueError(f"unmapped formal requirement: {identifier}")
+
     coverage = []
     for identifier in sorted(REQUIREMENT_IDS):
-        status = "FAIL" if identifier == "FR-042" and not reproduction_pass else "PASS"
-        evidence_id = (
-            "EVIDENCE-REPRODUCIBILITY"
-            if identifier == "FR-042"
-            else "EVIDENCE-CROSS-ARTIFACT"
-        )
+        evidence_id = requirement_evidence(identifier)
+        status = "PASS" if evidence_pass[evidence_id] else "FAIL"
         coverage.append(
             {"id": identifier, "status": status, "evidence_id": evidence_id}
         )
@@ -379,6 +420,7 @@ def main() -> int:
         "limitations": [
             "Finite TLC scopes do not prove unbounded state-space safety.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, worker honesty, convergence or model quality.",
+            "The cross-artifact analyzer is a syntactic traceability gate and does not establish semantic completeness, liveness non-vacuity or theorem strength.",
             "A clean offline Linux reproduction and two independent technical reviews are required before Formal GO.",
         ],
         "review_attestations": reviews,
@@ -386,7 +428,7 @@ def main() -> int:
         "decision": "NO_GO",
         "decision_reasons": ["DRAFT"],
     }
-    if cross_artifact.get("status") != "PASS":
+    if not evidence_pass["EVIDENCE-CROSS-ARTIFACT"]:
         report["coverage"]["unresolved"].append("CROSS_ARTIFACT_ANALYSIS_FAILED")
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

@@ -22,6 +22,7 @@ OrdinaryProgressOpen ==
 OrdinaryNext ==
     /\ OrdinaryProgressOpen
     /\ \/ EnabledQuorumNext
+       \/ VoteTransportNext
        \/ TicketNext
        \/ AvailabilityNext
        \/ CertificateNext
@@ -29,16 +30,25 @@ OrdinaryNext ==
 
 UngatedNext ==
     \/ EnabledQuorumNext
+    \/ VoteTransportNext
     \/ TicketNext
     \/ AvailabilityNext
     \/ CertificateNext
     \/ ReduceApplyNext
 
-Next == OrdinaryNext \/ FailureNext
+FailureActionsEnabled ==
+    \/ EnableFailures
+    \/ EnableNetworkFaults
+    \/ EnablePartitionActions
+    \/ EnableTimeoutActions
+
+EnabledFailureNext == FailureActionsEnabled /\ FailureNext
+
+Next == OrdinaryNext \/ EnabledFailureNext
 
 \* Reduced pre-failure configs use this spec solely to retain leaf-level TLC
 \* action attribution. Mandatory deadline/view configs always use Spec.
-UngatedSpec == Init /\ [][UngatedNext \/ FailureNext]_ProtocolVariables
+UngatedSpec == Init /\ [][UngatedNext \/ EnabledFailureNext]_ProtocolVariables
 
 Spec == Init /\ [][Next]_ProtocolVariables
 

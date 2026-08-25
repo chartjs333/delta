@@ -7,24 +7,37 @@ QuorumInit ==
     /\ durableVotes = {}
     /\ volatileVotes = {}
     /\ messages = {}
-    /\ messageMultiplicity = [vote \in VoteRecords |-> 0]
+    /\ messageMultiplicity = {}
     /\ receivedVotes = {}
     /\ finalizedCertificates = {}
     /\ durableSequence = [validator \in Validators |-> 0]
     /\ alive = Validators
     /\ recoveryState = [validator \in Validators |-> "READY"]
 
+IsVoteEnvelope(vote) ==
+    /\ vote.validator \in Validators
+    /\ vote.kind \in VoteKinds
+
+MessageCopy(vote, copy) == [vote |-> vote, copy |-> copy]
+
+IsMessageCopy(messageCopy) ==
+    /\ IsVoteEnvelope(messageCopy.vote)
+    /\ messageCopy.copy \in 1..MaxMessageCopies
+
+MessageCopiesFor(vote) ==
+    {copy \in 1..MaxMessageCopies :
+        MessageCopy(vote, copy) \in messageMultiplicity}
+
 QuorumTypeOK ==
     /\ proposals \subseteq ProposalRecords
     /\ byzantine \subseteq Validators
     /\ Cardinality(byzantine) <= F
-    /\ durableVotes \subseteq VoteRecords
-    /\ volatileVotes \subseteq VoteRecords
-    /\ messages \subseteq VoteRecords
-    /\ messageMultiplicity \in [VoteRecords -> 0..MaxMessageCopies]
-    /\ messages =
-        {vote \in VoteRecords : messageMultiplicity[vote] > 0}
-    /\ receivedVotes \subseteq VoteRecords
+    /\ \A vote \in durableVotes : IsVoteEnvelope(vote)
+    /\ \A vote \in volatileVotes : IsVoteEnvelope(vote)
+    /\ \A vote \in messages : IsVoteEnvelope(vote)
+    /\ \A copy \in messageMultiplicity : IsMessageCopy(copy)
+    /\ messages = {copy.vote : copy \in messageMultiplicity}
+    /\ \A vote \in receivedVotes : IsVoteEnvelope(vote)
     /\ finalizedCertificates \subseteq CertificateRecords
     /\ durableSequence \in [Validators -> 0..MaxDurableSequence]
     /\ alive \subseteq Validators
@@ -33,6 +46,24 @@ QuorumTypeOK ==
 CanVote(validator) ==
     /\ validator \in alive
     /\ recoveryState[validator] = "READY"
+
+CanPersistVoteEnvelope(vote) ==
+    /\ IsVoteEnvelope(vote)
+    /\ CanVote(vote.validator)
+    /\ vote \notin durableVotes
+    /\ durableSequence[vote.validator] < MaxDurableSequence
+
+PersistVoteEnvelopeChanges(vote) ==
+    /\ durableVotes' = durableVotes \cup {vote}
+    /\ volatileVotes' = volatileVotes \cup {vote}
+    /\ durableSequence' =
+        [durableSequence EXCEPT ![vote.validator] = @ + 1]
+
+HasDeliveredVote(validator, kind, body) ==
+    \E vote \in receivedVotes :
+        /\ vote.validator = validator
+        /\ vote.kind = kind
+        /\ vote.body = body
 
 HasDurableVote(validator, context) ==
     \E vote \in durableVotes :
@@ -65,15 +96,10 @@ PersistConfigVote(validator, context, body) ==
         /\ context \in VoteContexts
         /\ body \in ConfigBodies
         /\ proposal \in proposals
-        /\ CanVote(validator)
-        /\ vote \notin durableVotes
-        /\ durableSequence[validator] < MaxDurableSequence
+        /\ CanPersistVoteEnvelope(vote)
         /\ (validator \in byzantine
             \/ ~HasConflictingDurableVote(validator, context, body))
-        /\ durableVotes' = durableVotes \cup {vote}
-        /\ volatileVotes' = volatileVotes \cup {vote}
-        /\ durableSequence' =
-            [durableSequence EXCEPT ![validator] = @ + 1]
+        /\ PersistVoteEnvelopeChanges(vote)
         /\ UNCHANGED <<proposals, byzantine, messages, receivedVotes,
                         messageMultiplicity,
                         finalizedCertificates, alive, recoveryState,
@@ -81,29 +107,34 @@ PersistConfigVote(validator, context, body) ==
                         AvailabilityVariables, CertificateVariables,
                         ReduceApplyVariables, FailureControlVariables>>
 
+SendVoteEnvelope(vote) ==
+    /\ vote \in volatileVotes
+    /\ CanVote(vote.validator)
+    /\ vote \notin receivedVotes
+    /\ vote \notin messages
+    /\ MessageCopiesFor(vote) = {}
+    /\ messages' = messages \cup {vote}
+    /\ messageMultiplicity' =
+        messageMultiplicity \cup {MessageCopy(vote, 1)}
+    /\ UNCHANGED <<proposals, byzantine, durableVotes, volatileVotes,
+                    receivedVotes, finalizedCertificates, durableSequence,
+                    alive, recoveryState, crashCoverage, TicketVariables,
+                    AvailabilityVariables, CertificateVariables,
+                    ReduceApplyVariables, FailureControlVariables>>
+
 SendConfigVote(validator, context, body) ==
     LET vote == VoteRecord(validator, context, body)
-    IN  /\ vote \in volatileVotes
-        /\ CanVote(validator)
-        /\ vote \notin messages
-        /\ messageMultiplicity[vote] = 0
-        /\ messages' = messages \cup {vote}
-        /\ messageMultiplicity' =
-            [messageMultiplicity EXCEPT ![vote] = 1]
-        /\ UNCHANGED <<proposals, byzantine, durableVotes, volatileVotes,
-                        receivedVotes, finalizedCertificates, durableSequence,
-                        alive, recoveryState, crashCoverage, TicketVariables,
-                        AvailabilityVariables, CertificateVariables,
-                        ReduceApplyVariables, FailureControlVariables>>
+    IN  /\ vote.kind = "ROUND_CONFIG"
+        /\ SendVoteEnvelope(vote)
 
-DeliverConfigVote(vote) ==
+DeliverVoteEnvelope(vote, copy) ==
     /\ vote \in messages
     /\ vote.validator \notin partition
-    /\ messageMultiplicity[vote] > 0
+    /\ copy \in MessageCopiesFor(vote)
     /\ messageMultiplicity' =
-        [messageMultiplicity EXCEPT ![vote] = @ - 1]
+        messageMultiplicity \ {MessageCopy(vote, copy)}
     /\ messages' =
-        IF messageMultiplicity[vote] = 1
+        IF Cardinality(MessageCopiesFor(vote)) = 1
         THEN messages \ {vote}
         ELSE messages
     /\ receivedVotes' = receivedVotes \cup {vote}
@@ -113,14 +144,18 @@ DeliverConfigVote(vote) ==
                     AvailabilityVariables, CertificateVariables,
                     ReduceApplyVariables, FailureControlVariables>>
 
-DropConfigVote(vote) ==
+DeliverConfigVote(vote, copy) ==
+    /\ vote.kind = "ROUND_CONFIG"
+    /\ DeliverVoteEnvelope(vote, copy)
+
+DropVoteEnvelope(vote, copy) ==
     /\ EnableMessageDrop
     /\ vote \in messages
-    /\ messageMultiplicity[vote] > 0
+    /\ copy \in MessageCopiesFor(vote)
     /\ messageMultiplicity' =
-        [messageMultiplicity EXCEPT ![vote] = @ - 1]
+        messageMultiplicity \ {MessageCopy(vote, copy)}
     /\ messages' =
-        IF messageMultiplicity[vote] = 1
+        IF Cardinality(MessageCopiesFor(vote)) = 1
         THEN messages \ {vote}
         ELSE messages
     /\ UNCHANGED <<proposals, byzantine, durableVotes, volatileVotes,
@@ -128,6 +163,10 @@ DropConfigVote(vote) ==
                     alive, recoveryState, crashCoverage, TicketVariables,
                     AvailabilityVariables, CertificateVariables,
                     ReduceApplyVariables, FailureControlVariables>>
+
+DropConfigVote(vote, copy) ==
+    /\ vote.kind = "ROUND_CONFIG"
+    /\ DropVoteEnvelope(vote, copy)
 
 ReceivedSigners(context, body) ==
     {validator \in Validators :
@@ -168,11 +207,20 @@ SendConfigVoteAction ==
        body \in ConfigBodies :
         SendConfigVote(validator, context, body)
 
+SendVoteEnvelopeAction ==
+    \E vote \in volatileVotes : SendVoteEnvelope(vote)
+
+DeliverVoteEnvelopeAction ==
+    \E vote \in messages, copy \in 1..MaxMessageCopies :
+        DeliverVoteEnvelope(vote, copy)
+
 DeliverConfigVoteAction ==
-    \E vote \in VoteRecords : DeliverConfigVote(vote)
+    \E vote \in messages, copy \in 1..MaxMessageCopies :
+        DeliverConfigVote(vote, copy)
 
 DropConfigVoteAction ==
-    \E vote \in VoteRecords : DropConfigVote(vote)
+    \E vote \in messages, copy \in 1..MaxMessageCopies :
+        DropConfigVote(vote, copy)
 
 FinalizeRoundConfigAction ==
     \E context \in VoteContexts, body \in ConfigBodies :
@@ -181,10 +229,12 @@ FinalizeRoundConfigAction ==
 QuorumNext ==
     \/ ProposeRoundConfigAction
     \/ PersistConfigVoteAction
-    \/ SendConfigVoteAction
-    \/ DeliverConfigVoteAction
     \/ DropConfigVoteAction
     \/ FinalizeRoundConfigAction
+
+VoteTransportNext ==
+    \/ SendVoteEnvelopeAction
+    \/ DeliverVoteEnvelopeAction
 
 VoteUniqueness ==
     \A validator \in Validators \ byzantine, context \in VoteContexts :

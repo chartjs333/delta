@@ -1,5 +1,7 @@
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Piecewise
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
 import Mathlib.Algebra.Order.Ring.Abs
 import Mathlib.Data.Int.Basic
 import Mathlib.Tactic.NormNum
@@ -81,10 +83,76 @@ theorem commonDenominatorDivisionDeterministic
   subst numerator₂
   rfl
 
-theorem reducedFractionCanonical
-    (numerator denominator gcd : ℤ)
-    (_hdenominator : denominator > 0) (_hgcd : gcd > 0) :
-    (numerator / gcd, denominator / gcd) =
-      (numerator / gcd, denominator / gcd) := rfl
+/-! A reduced rational is canonical by construction: zero/negative
+denominators and a common numerator/denominator factor are unrepresentable. -/
+
+structure ReducedRational where
+  numerator : ℤ
+  denominator : ℕ
+  denominatorPositive : 0 < denominator
+  reduced : Nat.Coprime numerator.natAbs denominator
+
+theorem reducedRationalDenominatorPositive (weight : ReducedRational) :
+    0 < weight.denominator :=
+  weight.denominatorPositive
+
+theorem reducedRationalIsCoprime (weight : ReducedRational) :
+    Nat.Coprime weight.numerator.natAbs weight.denominator :=
+  weight.reduced
+
+def commonDenominator {ι : Type*} [DecidableEq ι]
+    (tickets : Finset ι) (weight : ι → ReducedRational) : ℕ :=
+  ∏ ticket ∈ tickets, (weight ticket).denominator
+
+theorem commonDenominatorPositive {ι : Type*} [DecidableEq ι]
+    (tickets : Finset ι) (weight : ι → ReducedRational) :
+    0 < commonDenominator tickets weight := by
+  unfold commonDenominator
+  exact Finset.prod_pos fun ticket _ => (weight ticket).denominatorPositive
+
+theorem eachDenominatorDividesCommon {ι : Type*} [DecidableEq ι]
+    (tickets : Finset ι) (weight : ι → ReducedRational)
+    (ticket : ι) (hticket : ticket ∈ tickets) :
+    (weight ticket).denominator ∣ commonDenominator tickets weight := by
+  unfold commonDenominator
+  exact Finset.dvd_prod_of_mem (fun item => (weight item).denominator) hticket
+
+/-! Canonical rounding is nearest-integer rounding over Euclidean quotient and
+remainder, with exact half ties resolved toward positive infinity. -/
+
+def canonicalRound (numerator denominator : ℤ) : ℤ :=
+  if 2 * numerator.emod denominator < denominator then
+    numerator.ediv denominator
+  else
+    numerator.ediv denominator + 1
+
+theorem canonicalRoundBelowHalf (numerator denominator : ℤ)
+    (_hdenominator : 0 < denominator)
+    (hbelow : 2 * numerator.emod denominator < denominator) :
+    canonicalRound numerator denominator = numerator.ediv denominator := by
+  simp [canonicalRound, hbelow]
+
+theorem canonicalRoundAtOrAboveHalf (numerator denominator : ℤ)
+    (_hdenominator : 0 < denominator)
+    (habove : denominator ≤ 2 * numerator.emod denominator) :
+    canonicalRound numerator denominator = numerator.ediv denominator + 1 := by
+  simp [canonicalRound, Int.not_lt.mpr habove]
+
+theorem canonicalRoundTieTowardPositive (numerator denominator : ℤ)
+    (_hdenominator : 0 < denominator)
+    (htie : 2 * numerator.emod denominator = denominator) :
+    canonicalRound numerator denominator = numerator.ediv denominator + 1 := by
+  apply canonicalRoundAtOrAboveHalf numerator denominator _hdenominator
+  omega
+
+theorem canonicalRoundDeterministic
+    (numerator₁ numerator₂ denominator₁ denominator₂ : ℤ)
+    (hnumerator : numerator₁ = numerator₂)
+    (hdenominator : denominator₁ = denominator₂) :
+    canonicalRound numerator₁ denominator₁ =
+      canonicalRound numerator₂ denominator₂ := by
+  subst numerator₂
+  subst denominator₂
+  rfl
 
 end DeltaReduce

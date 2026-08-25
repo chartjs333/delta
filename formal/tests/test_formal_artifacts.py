@@ -56,6 +56,31 @@ def trace_document() -> dict[str, object]:
         "formal_semantics_id": HASH_A,
         "trace_id": "TRACE-UNIT",
         "abstraction_version": "1.0.0",
+        "round_contract": {
+            "contract_id": HASH_A,
+            "round_id": "round-1",
+            "round_config": {
+                "body_hash": HASH_A,
+                "domain_ids": ["domain-1"],
+                "parameter_schema_hash": HASH_A,
+                "shard_plan_hash": HASH_B,
+            },
+            "parameter_schema": {
+                "schema_hash": HASH_A,
+                "parameter_ids": ["parameter-1"],
+            },
+            "shard_plan": {
+                "plan_hash": HASH_B,
+                "assignments": [
+                    {
+                        "parameter_id": "parameter-1",
+                        "domain_id": "domain-1",
+                        "shard_id": "shard-1",
+                        "vote_context_id": "PARAM:domain-1:shard-1",
+                    }
+                ],
+            },
+        },
         "initial_state_root": HASH_A,
         "terminal_state_root": HASH_B,
         "terminal_outcome": "IN_PROGRESS",
@@ -310,6 +335,17 @@ class ContractTest(unittest.TestCase):
             )
             self.assertEqual(trace["formal_semantics_id"], semantics_id, fixture)
             validate_trace_document(trace, REPOSITORY)
+
+    def test_full_liveness_evidence_reaches_applied(self) -> None:
+        evidence = load_json_strict(REPOSITORY / "formal/reports/tlc-evidence.json")
+        model = next(
+            item
+            for item in evidence["models"]
+            if item["id"] == "CFG-LIVENESS-EVENTUAL-SYNCHRONY"
+        )
+        self.assertIn("LIVE-APPLIED-REACHED", model["properties"])
+        self.assertIn("APPLIED", model["terminal_outcomes_observed"])
+        self.assertGreater(model["terminal_outcome_class_count"], 0)
 
 
 class ReportVerifierTest(unittest.TestCase):

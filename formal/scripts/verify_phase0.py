@@ -194,6 +194,7 @@ def main() -> int:
         "AbortCertified",
         "PlaneSeparation",
         "CertifiedPublishOnly",
+        "AllQCVotesPersisted",
     }
     registered_invariants = {
         entry.get("name")
@@ -207,6 +208,13 @@ def main() -> int:
     )
 
     required_temporal = {
+        "ConfigQCReached",
+        "ISCReached",
+        "PlanQCReached",
+        "AppliedReached",
+        "ViewQCReached",
+        "AbortQCReached",
+        "NeverUsesAbortAsProgress",
         "ConfigEventuallyFinalizesOrAborts",
         "CommittedEventuallyAvailableOrRejectedBeforeISC",
         "FrozenRoundEventuallyGetsPlanOrAborts",

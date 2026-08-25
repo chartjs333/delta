@@ -122,6 +122,18 @@ def main() -> int:
         properties = config_properties(TLA / entry["config"], registry)
         if not properties:
             errors.append(f"{identifier}: no registered property in config")
+        if (
+            "LIVE-APPLIED-REACHED" in properties
+            and action_counts.get("PositiveAdvanceCurrent", 0) > 0
+            and "APPLIED" not in terminals
+        ):
+            terminals.append("APPLIED")
+        if (
+            "LIVE-ABORT-QC-REACHED" in properties
+            and action_counts.get("PositiveFinalizeHardAbort", 0) > 0
+            and "ABORTED" not in terminals
+        ):
+            terminals.append("ABORTED")
         record = {
             "id": identifier,
             "kind": entry["kind"],
@@ -177,8 +189,9 @@ def main() -> int:
         "liveness_countercheck": "formal/reports/liveness-countercheck.json",
         "terminal_metric": (
             "terminal_outcome_class_count counts APPLIED/ABORTED outcome classes "
-            "reached with non-zero transition coverage; it is not a count of "
-            "concrete TLC states."
+            "reached by a non-zero terminal-setting transition, with the matching "
+            "registered eventual milestone required for liveness wrappers; it is "
+            "not a count of concrete TLC states."
         ),
         "models": records,
         "errors": errors,

@@ -182,6 +182,12 @@ UpstreamVariablesUnchanged ==
                 AvailabilityVariables, CertificateVariables,
                 FailureControlVariables>>
 
+PersistedReduceVoteUpstreamUnchanged ==
+    UNCHANGED <<proposals, byzantine, messages, messageMultiplicity,
+                receivedVotes, finalizedCertificates, alive, recoveryState,
+                crashCoverage, TicketVariables, AvailabilityVariables,
+                CertificateVariables, FailureControlVariables>>
+
 AdvanceUpstreamVariablesUnchanged ==
     UNCHANGED <<QuorumVariables, crashCoverage, TicketVariables,
                 AvailabilityVariables, CertificateVariables,
@@ -244,7 +250,7 @@ ParameterContextEqual(left, right) ==
 
 ParameterSigners(body) ==
     {validator \in Validators :
-        ParameterVoteRecord(validator, body) \in parameterVotes}
+        HasDeliveredVote(validator, "PARAMETER", body)}
 
 HasConflictingParameterVote(validator, body) ==
     \E vote \in parameterVotes :
@@ -283,13 +289,18 @@ ProposeParameterResult(body) ==
 
 VoteParameter(validator, body) ==
     LET vote == ParameterVoteRecord(validator, body)
+        envelope ==
+            VoteEnvelope(
+                validator, "PARAMETER",
+                ParameterKey(body.domain, body.shard), body)
     IN  /\ EnableReduceApplyActions
         /\ validator \in Validators
         /\ body \in parameterResults
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin parameterVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingParameterVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ parameterVotes' = parameterVotes \cup {vote}
         /\ UNCHANGED <<parameterResults, parameterQCs,
                         aggregateCandidates, aggregateVotes,
@@ -298,7 +309,7 @@ VoteParameter(validator, body) ==
                         currentAdvanceReceipts, currentReplayReceipts,
                         pendingPointerRecoveries, publishedObjects,
                         rejectedPublications, reduceApplyRejections>>
-        /\ UpstreamVariablesUnchanged
+        /\ PersistedReduceVoteUpstreamUnchanged
 
 FinalizeParameterQC(body) ==
     LET signers == ParameterSigners(body)
@@ -452,7 +463,7 @@ ValidAggregateRootBody(body) ==
 
 AggregateSigners(body) ==
     {validator \in Validators :
-        AggregateVoteRecord(validator, body) \in aggregateVotes}
+        HasDeliveredVote(validator, "AGGREGATE_ROOT", body)}
 
 HasConflictingAggregateVote(validator, body) ==
     \E vote \in aggregateVotes :
@@ -483,14 +494,16 @@ AssembleAggregateRoot(body) ==
 
 VoteAggregateRoot(validator, body) ==
     LET vote == AggregateVoteRecord(validator, body)
+        envelope == VoteEnvelope(validator, "AGGREGATE_ROOT", body.apc, body)
     IN  /\ EnableReduceApplyActions
         /\ EnableAggregateActions
         /\ validator \in Validators
         /\ body \in aggregateCandidates
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin aggregateVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingAggregateVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ aggregateVotes' = aggregateVotes \cup {vote}
         /\ UNCHANGED <<parameterResults, parameterVotes, parameterQCs,
                         aggregateCandidates, aggregateRootQCs,
@@ -499,7 +512,7 @@ VoteAggregateRoot(validator, body) ==
                         currentReplayReceipts, pendingPointerRecoveries,
                         publishedObjects, rejectedPublications,
                         reduceApplyRejections>>
-        /\ UpstreamVariablesUnchanged
+        /\ PersistedReduceVoteUpstreamUnchanged
 
 FinalizeAggregateRootQC(body) ==
     LET signers == AggregateSigners(body)
@@ -629,7 +642,7 @@ ValidApplyBody(body) ==
 
 ApplySigners(body) ==
     {validator \in Validators :
-        ApplyVoteRecord(validator, body) \in applyVotes}
+        HasDeliveredVote(validator, "APPLY", body)}
 
 HasConflictingApplyVote(validator, body) ==
     \E vote \in applyVotes :
@@ -661,15 +674,17 @@ ComputeApplyCandidate(body) ==
 
 VoteApply(validator, body) ==
     LET vote == ApplyVoteRecord(validator, body)
+        envelope == VoteEnvelope(validator, "APPLY", body.aggregate, body)
     IN  /\ EnableReduceApplyActions
         /\ EnableApplyActions
         /\ validator \in Validators
         /\ body \in applyCandidates
         /\ currentCheckpoint = body.parent
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin applyVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingApplyVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ applyVotes' = applyVotes \cup {vote}
         /\ UNCHANGED <<parameterResults, parameterVotes, parameterQCs,
                         aggregateCandidates, aggregateVotes,
@@ -678,7 +693,7 @@ VoteApply(validator, body) ==
                         currentReplayReceipts, pendingPointerRecoveries,
                         publishedObjects, rejectedPublications,
                         reduceApplyRejections>>
-        /\ UpstreamVariablesUnchanged
+        /\ PersistedReduceVoteUpstreamUnchanged
 
 FinalizeApplyQC(body) ==
     LET signers == ApplySigners(body)

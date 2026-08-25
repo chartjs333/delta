@@ -50,6 +50,46 @@ theorem currentStateUnique {Checkpoint : Type*} [DecidableEq Checkpoint]
   subst certificate₂
   rfl
 
+theorem applyQCUniqueness
+    {Validator Checkpoint : Type*}
+    [DecidableEq Validator] [DecidableEq Checkpoint]
+    (validators signers₁ signers₂ byzantine : Finset Validator) (f : ℕ)
+    (certificate₁ certificate₂ : ApplyCertificate Checkpoint)
+    (hV : validators.card = 3 * f + 1)
+    (hsigners₁ : signers₁ ⊆ validators)
+    (hsigners₂ : signers₂ ⊆ validators)
+    (hcard₁ : 2 * f + 1 ≤ signers₁.card)
+    (hcard₂ : 2 * f + 1 ≤ signers₂.card)
+    (hbyzantine : byzantine.card ≤ f)
+    (honestApplyVoteUnique : ∀ validator,
+      validator ∈ signers₁ ∩ signers₂ → validator ∉ byzantine →
+        certificate₁ = certificate₂) :
+    certificate₁ = certificate₂ :=
+  conflictingQCImpossible validators signers₁ signers₂ byzantine f
+    certificate₁ certificate₂ hV hsigners₁ hsigners₂ hcard₁ hcard₂
+    hbyzantine honestApplyVoteUnique
+
+theorem currentStateUniqueFromQCIntersection
+    {Validator Checkpoint : Type*}
+    [DecidableEq Validator] [DecidableEq Checkpoint]
+    (validators signers₁ signers₂ byzantine : Finset Validator) (f : ℕ)
+    (certificate₁ certificate₂ : ApplyCertificate Checkpoint)
+    (hV : validators.card = 3 * f + 1)
+    (hsigners₁ : signers₁ ⊆ validators)
+    (hsigners₂ : signers₂ ⊆ validators)
+    (hcard₁ : 2 * f + 1 ≤ signers₁.card)
+    (hcard₂ : 2 * f + 1 ≤ signers₂.card)
+    (hbyzantine : byzantine.card ≤ f)
+    (honestApplyVoteUnique : ∀ validator,
+      validator ∈ signers₁ ∩ signers₂ → validator ∉ byzantine →
+        certificate₁ = certificate₂) :
+    advanceCurrent certificate₁.parent certificate₁ =
+      advanceCurrent certificate₂.parent certificate₂ := by
+  have hcertificate := applyQCUniqueness validators signers₁ signers₂
+    byzantine f certificate₁ certificate₂ hV hsigners₁ hsigners₂
+    hcard₁ hcard₂ hbyzantine honestApplyVoteUnique
+  exact currentStateUnique certificate₁ certificate₂ hcertificate
+
 def hardAbort {Checkpoint : Type*} (current : Checkpoint) : Checkpoint := current
 
 theorem abortPreservesCurrent {Checkpoint : Type*} (current : Checkpoint) :
@@ -83,5 +123,59 @@ theorem domainMixtureCongruent
 theorem replayRecordIdempotent {Key : Type*} [DecidableEq Key]
     (key : Key) (records : Finset Key) :
     insert key (insert key records) = insert key records := by simp
+
+structure DurableRecoveryState (Vote Certificate Checkpoint : Type*) where
+  voteJournal : Finset Vote
+  certificates : Finset Certificate
+  currentCheckpoint : Checkpoint
+
+structure RuntimeRecoveryState (Vote Certificate Checkpoint : Type*) where
+  durable : DurableRecoveryState Vote Certificate Checkpoint
+  volatileVotes : Finset Vote
+  recoveredCertificates : Finset Certificate
+  currentCheckpoint : Checkpoint
+
+def recoverFullState {Vote Certificate Checkpoint : Type*}
+    (durable : DurableRecoveryState Vote Certificate Checkpoint) :
+    RuntimeRecoveryState Vote Certificate Checkpoint :=
+  { durable := durable
+    volatileVotes := durable.voteJournal
+    recoveredCertificates := durable.certificates
+    currentCheckpoint := durable.currentCheckpoint }
+
+def restartAndRecover {Vote Certificate Checkpoint : Type*}
+    (runtime : RuntimeRecoveryState Vote Certificate Checkpoint) :
+    RuntimeRecoveryState Vote Certificate Checkpoint :=
+  recoverFullState runtime.durable
+
+theorem recoveryRestoresDurableVoteJournal
+    {Vote Certificate Checkpoint : Type*}
+    (durable : DurableRecoveryState Vote Certificate Checkpoint) :
+    (recoverFullState durable).volatileVotes = durable.voteJournal := rfl
+
+theorem recoveryRestoresCertificates
+    {Vote Certificate Checkpoint : Type*}
+    (durable : DurableRecoveryState Vote Certificate Checkpoint) :
+    (recoverFullState durable).recoveredCertificates = durable.certificates := rfl
+
+theorem recoveryRestoresCurrentCheckpoint
+    {Vote Certificate Checkpoint : Type*}
+    (durable : DurableRecoveryState Vote Certificate Checkpoint) :
+    (recoverFullState durable).currentCheckpoint = durable.currentCheckpoint := rfl
+
+theorem fullRecoveryObservationalEquivalence
+    {Vote Certificate Checkpoint : Type*}
+    (runtime : RuntimeRecoveryState Vote Certificate Checkpoint) :
+    let recovered := restartAndRecover runtime
+    recovered.volatileVotes = runtime.durable.voteJournal ∧
+      recovered.recoveredCertificates = runtime.durable.certificates ∧
+      recovered.currentCheckpoint = runtime.durable.currentCheckpoint := by
+  simp [restartAndRecover, recoverFullState]
+
+theorem restartRecoveryIdempotent
+    {Vote Certificate Checkpoint : Type*}
+    (runtime : RuntimeRecoveryState Vote Certificate Checkpoint) :
+    restartAndRecover (restartAndRecover runtime) = restartAndRecover runtime := by
+  rfl
 
 end DeltaReduce

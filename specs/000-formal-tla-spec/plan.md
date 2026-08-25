@@ -191,9 +191,13 @@ The formal semantics ID is immutable. A failed new model/proof does not replace 
 ## Risks and Mitigations
 
 - **State explosion**: modular configs, symmetry and explicit coverage review.
-- **Vacuous invariants**: mutant counterexamples and reachability/action-coverage checks.
+- **Vacuous invariants/liveness**: production-action counterexamples,
+  nonzero action coverage and phase-specific positive models from real `Init`;
+  the full positive chain must reach `APPLIED` without abort.
 - **Overstated proof scope**: report finite bounds, assumptions and abstractions explicitly.
-- **Mismatch between TLA+ and prose**: traceability IDs and cross-artifact review.
+- **Mismatch between TLA+ and prose**: traceability IDs plus semantic TLC/Lean/
+  mutation/refinement evidence and independent human review. The cross-artifact
+  analyzer is explicitly syntactic and cannot establish semantic completeness.
 - **Theorem preconditions not enforced at runtime**: later feature tasks must materialize and verify exact precondition evidence.
 - **Liveness under impossible faults**: never claim it outside eventual synchrony/quorum/availability assumptions.
 - **Toolchain drift**: pinned versions/checksums and clean reproducibility.
@@ -203,7 +207,7 @@ The formal semantics ID is immutable. A failed new model/proof does not replace 
 - All mandatory TLA+ modules/configs parse and complete.
 - Every required safety invariant passes relevant configs; no illegal deadlock.
 - Every declared liveness property passes only under its documented assumptions.
-- Every mutant produces the expected counterexample.
+- Every source-level mutation of a production action produces the expected counterexample.
 - Mandatory Lean theorems build without admitted placeholders and publish dependencies/axioms.
 - Trace/refinement legal/illegal fixtures behave as expected.
 - Clean offline-capable environment reproduces evidence hashes.

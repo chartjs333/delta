@@ -1,6 +1,8 @@
-# Final Constitution Check
+# Syntactic Traceability and Constitution Vocabulary Check
 
-Machine consistency result: **PASS**.
+Syntactic traceability result: **PASS**.
+
+This tool checks identifier presence, registry/set equality, source anchors, fixture cardinality and Constitution vocabulary. It does **not** claim semantic completeness, liveness non-vacuity or proof-statement strength.
 
 | Principle | Result | Evidence boundary |
 | --- | --- | --- |
@@ -13,4 +15,4 @@ Machine consistency result: **PASS**.
 | atomic-apply | PASS | current, applyqc, atomic |
 | plane-separation | PASS | distribution, worker-local, certified |
 
-This check establishes cross-artifact consistency only. The final Formal GO additionally requires the executed TLC, Lean, mutant, refinement, offline reproduction and two independent review records.
+Semantic evidence is established separately by executed TLC, Lean, production-mutation and refinement gates. Final Formal GO additionally requires clean offline reproduction and two independent human review records.

@@ -3,9 +3,15 @@
 **Task**: T001  
 **Formal semantics version**: `1.0.0`  
 **Registry**: `formal/reports/formal-id-registry.json`  
-**Coverage status**: executable and clean offline reproduction evidence PASS; independent review gate pending
+**Coverage status**: machine gates must be regenerated for the current semantic
+source; independent human review gate pending
 
-This matrix began as the pre-model traceability contract. All referenced executable configs, theorems, mutants, refinement fixtures and the clean network-none Linux reproduction now have passing machine evidence in `formal/reports/`. Any future `UNRESOLVED` cell remains an unconditional STOP. There are no unresolved semantic cells in this revision; the separate independent-review requirement remains fail-closed.
+This matrix is a traceability contract, not a proof of its own completeness. The
+cross-artifact analyzer checks IDs, set equality, source anchors and fixture
+counts only. Semantic status comes from separately executed TLC, Lean,
+production-mutation and refinement evidence; clean offline reproduction and two
+independent human reviews remain fail-closed requirements. Any `UNRESOLVED` cell
+is an unconditional STOP.
 
 ## Functional requirement mapping
 
@@ -21,7 +27,7 @@ This matrix began as the pre-model traceability contract. All referenced executa
 | FR-008 | Config boundary | property-specific | all `CFG-*` in registry | coverage review; T042 |
 | FR-009 | Config boundary | property-specific | every config using symmetry/constraints | soundness rationale and reachability evidence |
 | FR-010 | Terminal predicate | `INV-ABORT-CERTIFIED`, `INV-CURRENT-CERTIFIED` | all safety configs | legal-terminal/deadlock classification |
-| FR-011 | Fairness/assumption actions | all `LIVE-*` | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | assumption manifest; T041/T059 |
+| FR-011 | Fairness/assumption actions | all `LIVE-*` | all six `CFG-LIVENESS-*` models | assumption manifest; T041/T059 |
 | FR-012 | asynchronous message/partition actions | all safety invariants | `CFG-SAFETY-F1`, `CFG-SPLIT-BRAIN-PARTITION` | no synchrony assumption in safety configs |
 | FR-013 | all `*-VOTE` actions | `INV-VOTE-UNIQUENESS`, `INV-QC-UNIQUENESS` | `CFG-CONFIG-QC`, `CFG-VOTE-CRASH-RECOVERY` | `PO-Q1`, `PO-Q2` |
 | FR-014 | `ACT-CRASH`, `ACT-RESTART`, `ACT-JOURNAL-RECOVER` | `INV-VOTE-UNIQUENESS`, `INV-RECOVERY-IDEMPOTENCE` | `CFG-VOTE-CRASH-RECOVERY` | `PO-Q2`, `PO-R2` |
@@ -37,7 +43,7 @@ This matrix began as the pre-model traceability contract. All referenced executa
 | FR-024 | artifact corrupt/lose/repair actions | `INV-ISC-IMMUTABILITY`, `INV-RECOVERY-IDEMPOTENCE`, `INV-ABORT-PRESERVES-PARENT` | `CFG-AVAILABILITY-LOSS-REPAIR` | `PO-R1`, `PO-R2` |
 | FR-025 | `ACT-PUBLISH` | `INV-PLANE-SEPARATION`, `INV-CERTIFIED-PUBLISH-ONLY` | `CFG-SAFETY-F1`, publication mutant | forbidden-media fixtures |
 | FR-026 | all public actions | all `INV-*` | safety config matrix below | safety result manifest |
-| FR-027 | fairness-enabled actions | all `LIVE-*` | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | temporal result manifest |
+| FR-027 | fairness-enabled actions | all `LIVE-*` | phase-specific `CFG-LIVENESS-*` models | temporal result manifest |
 | FR-028 | theorem tooling boundary | N/A | `formal-proofs`, no-`sorry`/axiom gate | `PO-Q1`–`PO-R2` |
 | FR-029 | N/A | `INV-QC-UNIQUENESS` theorem link | theorem gate | `PO-Q1`, `PO-Q2` |
 | FR-030 | parameter/apply arithmetic actions | `INV-CONSENSUS-INTEGER-ONLY`, `INV-NO-OVERFLOW` | `CFG-ARITHMETIC-BOUNDARY` | `PO-A1`, `PO-A2`, `PO-A3`, `PO-H2` |
@@ -67,7 +73,8 @@ This matrix began as the pre-model traceability contract. All referenced executa
 | `INV-TICKET-IMMUTABILITY` | ticket/lease/commit | `CFG-TICKET-LEASE-AVAILABILITY` | none | post-open ticket mutation trace | EXECUTED PASS |
 | `INV-LEASE-COMMIT-SAFETY` | lease expire/reassign/commit | `CFG-TICKET-LEASE-AVAILABILITY` | none | old/new holder race | EXECUTED PASS |
 | `INV-COMMIT-UNIQUENESS` | commit | `CFG-TICKET-LEASE-AVAILABILITY`, `CFG-SAFETY-F1` | none | duplicate-commit mutant | EXECUTED PASS |
-| `INV-VOTE-UNIQUENESS` | every vote; crash/recover | `CFG-CONFIG-QC`, `CFG-VOTE-CRASH-RECOVERY` | `PO-Q2` assumption correspondence | missing-durable-vote mutant | EXECUTED PASS |
+| `INV-VOTE-UNIQUENESS` | every vote; crash/recover | all `CFG-VOTE-LIFECYCLE-*`, `CFG-VOTE-CRASH-RECOVERY` | `PO-Q2` assumption correspondence | production missing-durable-vote mutation | EXECUTED PASS |
+| `INV-ALL-QC-VOTES-PERSISTED` | every QC-producing vote | all nine `CFG-VOTE-LIFECYCLE-*` configs | durable-envelope correspondence | production `VoteISC` without persistence mutation | EXECUTED PASS |
 | `INV-QC-UNIQUENESS` | every finalize-QC action | `CFG-CONFIG-QC`, `CFG-SPLIT-BRAIN-PARTITION`, `CFG-SAFETY-F1` | `PO-Q1`, `PO-Q2` | conflicting-QC traces | EXECUTED PASS |
 | `INV-AVAILABILITY-BEFORE-ISC` | availability, close, ISC | `CFG-TICKET-LEASE-AVAILABILITY`, `CFG-AVAILABILITY-LOSS-REPAIR` | none | AC-shortfall trace | EXECUTED PASS |
 | `INV-ISC-IMMUTABILITY` | close/ISC; loss/repair | `CFG-INPUT-FREEZE-SEED`, `CFG-AVAILABILITY-LOSS-REPAIR` | none | mutable-ISC mutant | EXECUTED PASS |
@@ -89,18 +96,30 @@ This matrix began as the pre-model traceability contract. All referenced executa
 
 ## Liveness coverage and claim boundaries
 
-All positive liveness rows require eventual synchrony, fair delivery/actions, bounded computation and an honest responsive quorum in every required committee. Artifact-dependent rows additionally require exact required bytes to remain available or repairable. These assumptions are absent from safety configs.
+All positive liveness rows start from real empty `Init` before the named
+milestone and exclude timeout/HardAbort as progress. They require eventual
+synchrony, fair delivery/actions, bounded computation and an honest responsive
+quorum in every required committee. Artifact-dependent rows additionally require
+exact required bytes to remain available or repairable. These assumptions are
+absent from safety configs.
 
 | Temporal property | Progress actions | Positive config | Additional assumption | Required negative countercheck | Status |
 | --- | --- | --- | --- | --- | --- |
-| `LIVE-CONFIG-FINALIZE-OR-ABORT` | config votes/finalize; view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | config proposal eventually enabled | permanent quorum loss reaches BLOCKED, never fake QC | EXECUTED PASS |
-| `LIVE-COMMIT-AVAILABLE-OR-REJECT` | availability/close/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | required pre-ISC storage quorum or fixed close decision | unfair delivery is not claimed live | EXECUTED PASS |
-| `LIVE-FROZEN-PLAN-OR-ABORT` | seed/EC/APC/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | seed source/fallback and exact ISC bytes available | unavailable seed permits only abort/block | EXECUTED PASS |
+| `LIVE-CONFIG-QC-REACHED` | config propose/persist/send/deliver/finalize | `CFG-LIVENESS-CONFIG-QC` | responsive quorum and fair transport | no-fairness model need not reach QC | EXECUTED PASS |
+| `LIVE-ISC-REACHED` | config through close/ISC transport/finalize | `CFG-LIVENESS-ISC` | complete required input and fair transport | abort is disabled as a witness | EXECUTED PASS |
+| `LIVE-PLAN-QC-REACHED` | config/ISC/seed/EC/APC full chain | `CFG-LIVENESS-PLAN` | valid norm/plan data and fair transport | abort is disabled as a witness | EXECUTED PASS |
+| `LIVE-APPLIED-REACHED` | complete config→ISC→EC/APC→parameter→root→ApplyQC→current chain | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | all required quorums/artifacts and weak fairness | `NoFairnessSpec` violates `AppliedReached` | EXECUTED PASS |
+| `LIVE-VIEW-QC-REACHED` | logical time→soft timeout→durable view votes→ViewChangeQC | `CFG-LIVENESS-VIEW-CHANGE` | view quorum and fair transport | no abort action is available | EXECUTED PASS |
+| `LIVE-ABORT-QC-REACHED` | logical time→hard deadline→durable abort votes→AbortQC | `CFG-LIVENESS-ABORT-QC` | abort quorum and fair transport | ordinary progress is absent after deadline | EXECUTED PASS |
+| `LIVE-ABORT-EXCLUDED-FROM-POSITIVE` | all positive milestone models | all four positive liveness configs | timeout/abort actions excluded | any ABORTED witness fails the property | EXECUTED PASS |
+| `LIVE-CONFIG-FINALIZE-OR-ABORT` | config votes/finalize; view/abort | `CFG-LIVENESS-CONFIG-QC` | config proposal eventually enabled | permanent quorum loss reaches BLOCKED, never fake QC | EXECUTED PASS |
+| `LIVE-COMMIT-AVAILABLE-OR-REJECT` | availability/close/abort | `CFG-LIVENESS-ISC` | required pre-ISC storage quorum or fixed close decision | unfair delivery is not claimed live | EXECUTED PASS |
+| `LIVE-FROZEN-PLAN-OR-ABORT` | seed/EC/APC/abort | `CFG-LIVENESS-PLAN` | seed source/fallback and exact ISC bytes available | unavailable seed permits only abort/block | EXECUTED PASS |
 | `LIVE-SHARD-QC-OR-ABORT` | parameter/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | parameter committee quorum and shard bytes | permanent shard loss never rewrites membership | EXECUTED PASS |
 | `LIVE-AGGREGATE-APPLY-OR-ABORT` | root/apply/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | root/apply quorums and parent artifacts | apply quorum loss preserves parent | EXECUTED PASS |
 | `LIVE-APPLY-QC-REPAIRS-CURRENT` | journal recover/current advance | `CFG-LIVENESS-EVENTUAL-SYNCHRONY`, `CFG-APPLY-RECOVERY` | durable ApplyQC and exact artifact available | artifact loss may remain BLOCKED | EXECUTED PASS |
-| `LIVE-SOFT-TIMEOUT-CHANGES-VIEW` | soft timeout/view vote/finalize | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | `2f+1` timeout votes and fairness | one timeout observer cannot change view | EXECUTED PASS |
-| `LIVE-HARD-DEADLINE-TERMINATES` | logical time/abort vote/finalize | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | `2f+1` abort votes remain obtainable | without abort quorum hard deadline yields BLOCKED | EXECUTED PASS |
+| `LIVE-SOFT-TIMEOUT-CHANGES-VIEW` | soft timeout/view vote/finalize | `CFG-LIVENESS-VIEW-CHANGE` | `2f+1` timeout votes and fairness | one timeout observer cannot change view | EXECUTED PASS |
+| `LIVE-HARD-DEADLINE-TERMINATES` | logical time/abort vote/finalize | `CFG-LIVENESS-ABORT-QC` | `2f+1` abort votes remain obtainable | without abort quorum hard deadline yields BLOCKED | EXECUTED PASS |
 
 ## Fault-to-config coverage
 
@@ -108,6 +127,7 @@ All positive liveness rows require eventual synchrony, fair delivery/actions, bo
 | --- | --- | --- |
 | `CFG-CONFIG-QC` | `FAULT-PROPOSER-CRASH`, `FAULT-PROPOSER-EQUIVOCATION`, `FAULT-SIGNER-SCOPE` | config/vote/QC uniqueness |
 | `CFG-VOTE-CRASH-RECOVERY` | validator crash-before/after-persist/send, journal loss, message replay | vote uniqueness and recovery idempotence |
+| `CFG-VOTE-LIFECYCLE-CONFIG`, `CFG-VOTE-LIFECYCLE-ISC`, `CFG-VOTE-LIFECYCLE-EC`, `CFG-VOTE-LIFECYCLE-APC`, `CFG-VOTE-LIFECYCLE-PARAMETER`, `CFG-VOTE-LIFECYCLE-AGGREGATE`, `CFG-VOTE-LIFECYCLE-APPLY`, `CFG-VOTE-LIFECYCLE-VIEW`, `CFG-VOTE-LIFECYCLE-ABORT` | persist/send/deliver/drop/duplicate and crash-before/after-persist/send for RoundConfig, ISC, EC, APC, Parameter, AggregateRoot, Apply, ViewChange and Abort votes | durable envelope backing, delivery-based signer power and recovery ordering |
 | `CFG-TICKET-LEASE-AVAILABILITY` | lease expiry/race, commit replay/equivocation, AC shortfall, wrong-content attestation rejection | ticket/lease/commit/availability safety |
 | `CFG-INPUT-FREEZE-SEED` | late input, early/wrong/conflicting seed, certificate replay/conflict | ISC immutability, seed ordering and EC/APC normal chain |
 | `CFG-AVAILABILITY-LOSS-REPAIR` | pre/post real close/ISC loss, corruption, bounded exact-ID repair | identity-preserving availability repair and certified abort integration |
@@ -116,7 +136,9 @@ All positive liveness rows require eventual synchrony, fair delivery/actions, bo
 | `CFG-ARITHMETIC-BOUNDARY` | EC/APC/parameter/apply overflow | integer-only and no-overflow |
 | `CFG-APPLY-RECOVERY` | apply disagreement/quorum, post-ApplyQC crashes, pointer replay/conflict | Apply/current uniqueness and idempotence |
 | `CFG-SAFETY-F1` | all fault families in bounded representative combinations, including P2P seed loss and forbidden publication | full mandatory safety regression |
-| `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | transient proposer/quorum/partition/storage/apply faults followed by assumption recovery | all registered liveness properties |
+| `CFG-LIVENESS-CONFIG-QC`, `CFG-LIVENESS-ISC`, `CFG-LIVENESS-PLAN`, `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | phase-specific progress from real `Init`, through config/ISC/plan and the full path to `APPLIED` | positive milestone and conditional progress properties without abort as progress |
+| `CFG-LIVENESS-VIEW-CHANGE` | soft-deadline observation followed by durable view-change vote transport and QC | `ViewQCReached`, `SoftTimeoutEventuallyChangesView` |
+| `CFG-LIVENESS-ABORT-QC` | hard-deadline transition followed by durable abort vote transport and AbortQC | `AbortQCReached`, `HardDeadlineEventuallyTerminatesNonfinalizedRound` |
 
 `FAULT-EPOCH-KEY-COMPROMISE` is modeled only within the declared `f`-Byzantine bound. Exceeding that bound is recorded as a limitation, not covered by a safety theorem.
 
@@ -128,16 +150,21 @@ All positive liveness rows require eventual synchrony, fair delivery/actions, bo
 | `PO-Q2` | conflicting QC impossibility | vote/QC/view/abort/apply uniqueness | `DeltaReduce/Quorum.lean` plus durable-vote trace correspondence |
 | `PO-A1` | signed product bound | parameter/apply multiply guards | `DeltaReduce/FixedPoint.lean` |
 | `PO-A2` | flat accumulator bound | parameter/APC/apply sum guards | `DeltaReduce/FixedPoint.lean` |
-| `PO-A3` | common-denominator safety and deterministic reduction | APC/domain mixture/apply | `DeltaReduce/FixedPoint.lean` |
+| `PO-A3` | canonical reduced inputs, positive/divisible common denominator, numerator safety and all ADR-0002 rounding branches | APC/domain mixture/apply | nine named conjunct theorems in `DeltaReduce/FixedPoint.lean` |
 | `PO-H1` | exact regional partition | topology and aggregate coverage preconditions | `DeltaReduce/Hierarchy.lean` |
 | `PO-H2` | hierarchical result equals flat | regional/global parameter results | `DeltaReduce/Hierarchy.lean` |
 | `PO-C1` | canonical complete coverage table | AggregateRootQC body/root | `DeltaReduce/Coverage.lean` |
 | `PO-AP1` | ApplyQC vote uniqueness | apply finalization | `DeltaReduce/Apply.lean` |
-| `PO-AP2` | current state uniqueness/idempotence | pointer CAS/replay | `DeltaReduce/Apply.lean` |
+| `PO-AP2` | ApplyQC/current uniqueness, accepted CAS and replay idempotence | pointer CAS/replay | four named conjunct theorems in `DeltaReduce/Apply.lean` |
 | `PO-D1` | domain mixture independent of worker speed/order | deterministic apply candidate | `DeltaReduce/Apply.lean` |
 | `PO-R1` | abort and non-apply transitions preserve current | hard abort/failure paths | `DeltaReduce/Apply.lean` plus TLA invariant |
-| `PO-R2` | replay observational idempotence | journals, messages, repair and pointer recovery | `DeltaReduce/Apply.lean` where algebraic; TLC for interleavings |
+| `PO-R2` | restoration of durable votes, certificates/current plus full observational and replay idempotence | journals, messages, repair and pointer recovery | five named conjunct theorems in `DeltaReduce/Apply.lean`; TLC for interleavings |
 
 ## Gate rule
 
-The matrix and generated evidence complete the executable coverage portion of the formal gate. Missing config coverage, an unreachable required action, a contradictory assumption or any mismatch between a proof statement and runtime/model preconditions changes the affected row to `UNRESOLVED` and stops implementation until corrected. Formal GO additionally requires both independent review attestations.
+The matrix records intended executable coverage; it does not certify semantic
+completeness. Missing config coverage, an unreachable required action, a
+contradictory assumption or any mismatch between a proof statement and
+runtime/model preconditions changes the affected row to `UNRESOLVED` and stops
+implementation until corrected. Formal GO requires passing semantic gates,
+clean offline reproduction and both independent human review attestations.

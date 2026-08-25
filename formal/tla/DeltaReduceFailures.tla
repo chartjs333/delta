@@ -82,18 +82,33 @@ CrashAt(validator, point) ==
                     FailureControlVariables>>
     /\ DownstreamVariablesUnchanged
 
-CrashBeforePersist(validator) ==
-    /\ VotesBy(validator, durableVotes) = {}
+CrashBeforePersistKind(validator, kind) ==
+    /\ kind \in VoteKinds
+    /\ ~\E vote \in VotesBy(validator, durableVotes) :
+        vote.kind = kind
     /\ CrashAt(validator, "BEFORE_PERSIST")
 
-CrashAfterPersist(validator) ==
-    /\ VotesBy(validator, durableVotes) # {}
-    /\ VotesBy(validator, messages \cup receivedVotes) = {}
+CrashBeforePersist(validator) ==
+    \E kind \in VoteKinds : CrashBeforePersistKind(validator, kind)
+
+CrashAfterPersistKind(validator, kind) ==
+    /\ kind \in VoteKinds
+    /\ \E vote \in VotesBy(validator, durableVotes) :
+        /\ vote.kind = kind
+        /\ vote \notin messages \cup receivedVotes
     /\ CrashAt(validator, "AFTER_PERSIST")
 
-CrashAfterSend(validator) ==
-    /\ VotesBy(validator, messages \cup receivedVotes) # {}
+CrashAfterPersist(validator) ==
+    \E kind \in VoteKinds : CrashAfterPersistKind(validator, kind)
+
+CrashAfterSendKind(validator, kind) ==
+    /\ kind \in VoteKinds
+    /\ \E vote \in VotesBy(validator, messages \cup receivedVotes) :
+        vote.kind = kind
     /\ CrashAt(validator, "AFTER_SEND")
+
+CrashAfterSend(validator) ==
+    \E kind \in VoteKinds : CrashAfterSendKind(validator, kind)
 
 Crash(validator) ==
     \/ CrashBeforePersist(validator)
@@ -129,22 +144,24 @@ RecoverJournal(validator) ==
 
 EnqueueMessage(vote) ==
     /\ EnableNetworkFaults
-    /\ SendConfigVote(vote.validator, vote.context, vote.body)
+    /\ SendVoteEnvelope(vote)
 
-DeliverMessage(vote) ==
+DeliverMessage(vote, copy) ==
     /\ EnableNetworkFaults
-    /\ DeliverConfigVote(vote)
+    /\ DeliverVoteEnvelope(vote, copy)
 
-DropMessage(vote) ==
+DropMessage(vote, copy) ==
     /\ EnableNetworkFaults
-    /\ DropConfigVote(vote)
+    /\ DropVoteEnvelope(vote, copy)
 
 DuplicateMessage(vote) ==
     /\ EnableNetworkFaults
     /\ vote \in messages
-    /\ messageMultiplicity[vote] < MaxMessageCopies
-    /\ messageMultiplicity' =
-        [messageMultiplicity EXCEPT ![vote] = @ + 1]
+    /\ Cardinality(MessageCopiesFor(vote)) < MaxMessageCopies
+    /\ \E copy \in 1..MaxMessageCopies :
+        /\ copy \notin MessageCopiesFor(vote)
+        /\ messageMultiplicity' =
+            messageMultiplicity \cup {MessageCopy(vote, copy)}
     /\ UNCHANGED <<proposals, byzantine, durableVotes, volatileVotes,
                     messages, receivedVotes, finalizedCertificates,
                     durableSequence, alive, recoveryState, crashCoverage,
@@ -206,7 +223,7 @@ ViewChangeVoteRecord(validator, body) ==
 
 ViewChangeSigners(body) ==
     {validator \in Validators :
-        ViewChangeVoteRecord(validator, body) \in timeoutVotes}
+        HasDeliveredVote(validator, "VIEW_CHANGE", body)}
 
 HasConflictingViewChangeVote(validator, body) ==
     \E vote \in timeoutVotes :
@@ -217,6 +234,9 @@ HasConflictingViewChangeVote(validator, body) ==
 
 VoteViewChange(validator, body) ==
     LET vote == ViewChangeVoteRecord(validator, body)
+        envelope ==
+            VoteEnvelope(validator, "VIEW_CHANGE",
+                [round |-> body.round, fromView |-> body.fromView], body)
         observation ==
             [round |-> body.round, view |-> body.fromView]
     IN  /\ EnableTimeoutActions
@@ -229,12 +249,16 @@ VoteViewChange(validator, body) ==
         /\ body.toView = view + 1
         /\ body.softDeadline = SoftDeadline
         /\ observation \in timeoutObservations
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin timeoutVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingViewChangeVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ timeoutVotes' = timeoutVotes \cup {vote}
-        /\ UNCHANGED <<QuorumVariables, crashCoverage, partition, view,
+        /\ UNCHANGED <<proposals, byzantine, messages,
+                        messageMultiplicity, receivedVotes,
+                        finalizedCertificates, alive, recoveryState,
+                        crashCoverage, partition, view,
                         logicalTime, timeoutObservations, viewChangeQCs,
                         abortVotes, abortQCs, phase, abortReason>>
         /\ DownstreamVariablesUnchanged
@@ -296,7 +320,7 @@ AbortVoteRecord(validator, body) ==
 
 AbortSigners(body) ==
     {validator \in Validators :
-        AbortVoteRecord(validator, body) \in abortVotes}
+        HasDeliveredVote(validator, "ABORT", body)}
 
 HasConflictingAbortVote(validator, body) ==
     \E vote \in abortVotes :
@@ -306,18 +330,23 @@ HasConflictingAbortVote(validator, body) ==
 
 VoteHardAbort(validator, body) ==
     LET vote == AbortVoteRecord(validator, body)
+        envelope == VoteEnvelope(validator, "ABORT", body.round, body)
     IN  /\ EnableTimeoutActions
         /\ validator \in Validators
         /\ IsAbortBody(body)
         /\ phase \in {"ACTIVE", "ABORTING"}
         /\ body = AbortBody(body.round)
         /\ AbortEnabled(body.round)
-        /\ CanVote(validator)
+        /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin abortVotes
         /\ \/ validator \in byzantine
            \/ ~HasConflictingAbortVote(validator, body)
+        /\ PersistVoteEnvelopeChanges(envelope)
         /\ abortVotes' = abortVotes \cup {vote}
-        /\ UNCHANGED <<QuorumVariables, crashCoverage, partition, view,
+        /\ UNCHANGED <<proposals, byzantine, messages,
+                        messageMultiplicity, receivedVotes,
+                        finalizedCertificates, alive, recoveryState,
+                        crashCoverage, partition, view,
                         logicalTime, timeoutObservations, timeoutVotes,
                         viewChangeQCs, abortQCs, phase, abortReason>>
         /\ DownstreamVariablesUnchanged
@@ -356,16 +385,18 @@ RecoverJournalAction ==
     \E validator \in Validators : RecoverJournal(validator)
 
 EnqueueMessageAction ==
-    \E vote \in VoteRecords : EnqueueMessage(vote)
+    \E vote \in volatileVotes : EnqueueMessage(vote)
 
 DeliverMessageAction ==
-    \E vote \in VoteRecords : DeliverMessage(vote)
+    \E vote \in messages, copy \in 1..MaxMessageCopies :
+        DeliverMessage(vote, copy)
 
 DropMessageAction ==
-    \E vote \in VoteRecords : DropMessage(vote)
+    \E vote \in messages, copy \in 1..MaxMessageCopies :
+        DropMessage(vote, copy)
 
 DuplicateMessageAction ==
-    \E vote \in VoteRecords : DuplicateMessage(vote)
+    \E vote \in messages : DuplicateMessage(vote)
 
 EnablePartitionAction ==
     \E validator \in Validators : EnablePartition(validator)
@@ -429,7 +460,43 @@ DurableSequenceExact ==
             = Cardinality(VotesBy(validator, durableVotes))
 
 MessageMultisetConsistent ==
-    messages = {vote \in VoteRecords : messageMultiplicity[vote] > 0}
+    messages = {copy.vote : copy \in messageMultiplicity}
+
+\* Domain vote sets are durable journal projections.  A certificate signer
+\* is computed separately from receivedVotes, so persistence alone never
+\* creates quorum power.
+AllQCVotesPersisted ==
+    /\ \A vote \in iscVotes :
+        VoteEnvelope(vote.validator, "ISC", vote.body.round, vote.body)
+            \in durableVotes
+    /\ \A vote \in ecVotes :
+        VoteEnvelope(vote.validator, "EC", vote.body.isc, vote.body)
+            \in durableVotes
+    /\ \A vote \in apcVotes :
+        VoteEnvelope(vote.validator, "APC", vote.body.ec, vote.body)
+            \in durableVotes
+    /\ \A vote \in parameterVotes :
+        VoteEnvelope(
+            vote.validator, "PARAMETER",
+            ParameterKey(vote.body.domain, vote.body.shard), vote.body)
+            \in durableVotes
+    /\ \A vote \in aggregateVotes :
+        VoteEnvelope(
+            vote.validator, "AGGREGATE_ROOT", vote.body.apc, vote.body)
+            \in durableVotes
+    /\ \A vote \in applyVotes :
+        VoteEnvelope(
+            vote.validator, "APPLY", vote.body.aggregate, vote.body)
+            \in durableVotes
+    /\ \A vote \in timeoutVotes :
+        VoteEnvelope(
+            vote.validator, "VIEW_CHANGE",
+            [round |-> vote.body.round,
+             fromView |-> vote.body.fromView], vote.body)
+            \in durableVotes
+    /\ \A vote \in abortVotes :
+        VoteEnvelope(vote.validator, "ABORT", vote.body.round, vote.body)
+            \in durableVotes
 
 ViewChangeVoteUniqueness ==
     \A validator \in Validators \ byzantine,

@@ -66,28 +66,28 @@
 - [x] T038 Compose `Init`, `Next`, invariants and terminal/deadlock predicates in `DeltaReduce.tla`.
 - [x] T039 Add mandatory `f=1` safety config with four validators, ≥3 tickets, two domains and two shards.
 - [x] T040 Add split-brain/partition, storage repair/loss, vote crash recovery, Frankenstein and ApplyQC recovery configs.
-- [x] T041 Add liveness specs/config under exact eventual-synchrony, honest-quorum, artifact-availability and fairness assumptions.
+- [x] T041 Add phase-specific liveness specs/config from real `Init` under exact eventual-synchrony, honest-quorum, artifact-availability and fairness assumptions, including a full path to `APPLIED`.
 - [x] T042 Generate action reachability/coverage evidence and justify symmetry/state constraints.
 
 ## Phase 8: Parametric theorem proofs
 
 - [x] T043 Prove PO-Q1/PO-Q2 in `formal/proofs/DeltaReduce/Quorum.lean`.
-- [x] T044 Prove PO-A1/PO-A2/PO-A3, intermediate width and common-denominator results in `FixedPoint.lean`.
+- [x] T044 Prove PO-A1/PO-A2/PO-A3, intermediate width, canonical reduced-rational, common-denominator and ADR-0002 rounding results in `FixedPoint.lean`.
 - [x] T045 Prove PO-H1/PO-H2 including domain/shard metadata equality in `Hierarchy.lean`.
 - [x] T046 Prove PO-C1 canonical key/coverage ordering under named hash abstraction in `Coverage.lean`.
-- [x] T047 Prove PO-AP1/PO-AP2/PO-D1/PO-R1 and idempotent pointer transition lemmas in `Apply.lean`.
+- [x] T047 Prove PO-AP1/PO-AP2/PO-D1/PO-R1/PO-R2, including ApplyQC/current uniqueness, CAS/replay and full durable recovery, in `Apply.lean`.
 - [x] T048 Add concrete theorem instantiation examples for INT64, INT128, f=1 and representative topology bounds.
 - [x] T049 Add no-`sorry` and axiom/dependency report gate.
 
 ## Phase 9: Mutants and expected counterexamples
 
-- [x] T050 Add mutants for missing durable vote, duplicate commitment, mutable ISC, early seed, missing APC parent, incomplete aggregate, unchecked overflow, current-without-ApplyQC and partial publication.
+- [x] T050 Add source-level mutants of production actions for missing durable vote, duplicate commitment, mutable ISC, early seed, missing APC/shard parent, incomplete aggregate, unchecked overflow, current-without-ApplyQC and partial publication.
 - [x] T051 Run each mutant, normalize/minimize the expected counterexample and store property/config/tool hashes under `formal/fixtures/counterexamples/`.
 - [x] T052 Fail CI if a mutant unexpectedly passes or fails for an unrelated property before reaching its intended fault.
 
 ## Phase 10: Trace/refinement baseline
 
-- [x] T053 Implement formal action-labelled trace export/normalization.
+- [x] T053 Implement formal action-labelled trace export/normalization with a hash-bound immutable RoundConfig/schema/shard-plan requirement matrix.
 - [x] T054 Implement standalone trace/refinement checker in `formal/scripts/check-refinement.py`.
 - [x] T055 Add legal fixtures for normal, view-change, repair, abort and ApplyQC pointer-recovery behaviors.
 - [x] T056 Add every mandatory illegal fixture listed in `refinement-contract.md`.
@@ -99,11 +99,11 @@
 - [x] T059 Run liveness models and record exact assumptions/fairness plus counterchecks without assumptions where appropriate.
 - [x] T060 Build theorem project and archive source/tool/dependency/axiom results.
 - [x] T061 Run all mutants/refinement/schema/report verifiers.
-- [x] T062 Reproduce the full gate from a clean offline-capable environment.
-- [x] T063 Generate content-addressed `formal/reports/formal-verification-report.json` and evidence graph.
+- [ ] T062 Reproduce the full gate from a clean offline-capable environment.
+- [ ] T063 Generate content-addressed `formal/reports/formal-verification-report.json` and evidence graph.
 - [ ] T064 Obtain two independent technical reviews of model scope, liveness assumptions, proof statements and coverage.
 - [x] T065 Run Spec Kit cross-artifact analysis and final Constitution Check.
-- [x] T066 Finalize `FormalVerificationReport(decision=GO)` only if every mandatory item verifies; otherwise record `NO_GO` and keep 001 blocked.
+- [ ] T066 Finalize `FormalVerificationReport(decision=GO)` only if every mandatory item verifies; otherwise record `NO_GO` and keep 001 blocked.
 
 ## Dependencies
 

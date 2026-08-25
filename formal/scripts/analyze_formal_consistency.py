@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Spec Kit style cross-artifact and final Constitution consistency audit."""
+"""Syntactic traceability audit across the checked-in formal artifacts."""
 
 from __future__ import annotations
 
@@ -119,7 +119,21 @@ def main() -> int:
 
     result = {
         "schema_version": "1.0.0",
+        "gate_kind": "SYNTACTIC_TRACEABILITY",
         "status": "PASS" if not errors else "FAIL",
+        "semantic_completeness_claimed": False,
+        "semantic_evidence_evaluated": False,
+        "semantic_gates": [
+            "TLC_SAFETY_AND_LIVENESS",
+            "LEAN_NORMATIVE_CONJUNCTS",
+            "PRODUCTION_MUTATION_COUNTEREXAMPLES",
+            "REFINEMENT_BEHAVIOR_FIXTURES",
+            "INDEPENDENT_HUMAN_REVIEWS",
+        ],
+        "limitations": [
+            "Identifier presence, set equality, source anchors and fixture counts are syntactic signals only.",
+            "This analyzer does not establish temporal non-vacuity, theorem strength or end-to-end semantic completeness.",
+        ],
         "requirements": len(spec_requirements),
         "tasks": len(task_ids),
         "actions": len(registry_actions),
@@ -132,9 +146,13 @@ def main() -> int:
     }
     write_canonical_json(REPORTS / "cross-artifact-analysis.json", result)
     lines = [
-        "# Final Constitution Check",
+        "# Syntactic Traceability and Constitution Vocabulary Check",
         "",
-        f"Machine consistency result: **{result['status']}**.",
+        f"Syntactic traceability result: **{result['status']}**.",
+        "",
+        "This tool checks identifier presence, registry/set equality, source anchors, "
+        "fixture cardinality and Constitution vocabulary. It does **not** claim "
+        "semantic completeness, liveness non-vacuity or proof-statement strength.",
         "",
         "| Principle | Result | Evidence boundary |",
         "| --- | --- | --- |",
@@ -147,9 +165,9 @@ def main() -> int:
     lines.extend(
         [
             "",
-            "This check establishes cross-artifact consistency only. The final "
-            "Formal GO additionally requires the executed TLC, Lean, mutant, "
-            "refinement, offline reproduction and two independent review records.",
+            "Semantic evidence is established separately by executed TLC, Lean, "
+            "production-mutation and refinement gates. Final Formal GO additionally "
+            "requires clean offline reproduction and two independent human review records.",
             "",
         ]
     )

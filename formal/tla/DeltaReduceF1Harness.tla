@@ -24,7 +24,7 @@ ASSUME QuorumSize = 3
 
 F1Init == Init /\ F1HarnessConstantsOK
 
-F1Next == FailureNext
+F1Next == FailureNext \/ VoteTransportNext
 
 F1Spec == F1Init /\ [][F1Next]_ProtocolVariables
 

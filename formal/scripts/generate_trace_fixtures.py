@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import (  # noqa: E402
+    canonical_json_bytes,
     derive_formal_semantics_id,
     discover_semantic_artifacts,
     load_json_strict,
@@ -29,6 +30,70 @@ SEMANTICS_ID = derive_formal_semantics_id(
 
 def cid(label: str) -> str:
     return "sha256:" + hashlib.sha256(label.encode("utf-8")).hexdigest()
+
+
+def content_id(value: Any) -> str:
+    return "sha256:" + hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+
+DEFAULT_ASSIGNMENTS = [
+    {
+        "parameter_id": "parameter-1",
+        "domain_id": "d1",
+        "shard_id": "s1",
+        "vote_context_id": "NORMAL-PARAM-D1-S1:round-1",
+    },
+    {
+        "parameter_id": "parameter-2",
+        "domain_id": "d1",
+        "shard_id": "s2",
+        "vote_context_id": "NORMAL-PARAM-D1-S2:round-1",
+    },
+]
+
+
+def build_round_contract(
+    assignments: list[dict[str, str]] | None = None,
+) -> dict[str, Any]:
+    exact_assignments = assignments or DEFAULT_ASSIGNMENTS
+    exact_assignments = sorted(
+        exact_assignments,
+        key=lambda item: (
+            item["parameter_id"],
+            item["domain_id"],
+            item["shard_id"],
+            item["vote_context_id"],
+        ),
+    )
+    parameter_ids = sorted(item["parameter_id"] for item in exact_assignments)
+    domain_ids = sorted({item["domain_id"] for item in exact_assignments})
+    schema_payload = {"parameter_ids": parameter_ids}
+    plan_payload = {"assignments": exact_assignments}
+    parameter_schema = {
+        "schema_hash": content_id(schema_payload),
+        "parameter_ids": parameter_ids,
+    }
+    shard_plan = {
+        "plan_hash": content_id(plan_payload),
+        "assignments": exact_assignments,
+    }
+    config_payload = {
+        "domain_ids": domain_ids,
+        "parameter_schema_hash": parameter_schema["schema_hash"],
+        "shard_plan_hash": shard_plan["plan_hash"],
+    }
+    round_config = {"body_hash": content_id(config_payload), **config_payload}
+    contract_payload = {
+        "round_id": "round-1",
+        "round_config": round_config,
+        "parameter_schema": parameter_schema,
+        "shard_plan": shard_plan,
+    }
+    return {"contract_id": content_id(contract_payload), **contract_payload}
+
+
+DEFAULT_ROUND_CONTRACT = build_round_contract()
+ROUND_CONFIG_HASH = DEFAULT_ROUND_CONTRACT["round_config"]["body_hash"]
 
 
 def make_event(
@@ -92,11 +157,13 @@ def qc_events(
     *,
     parents: list[str] | None = None,
     artifacts: list[str] | None = None,
+    body_hash: str | None = None,
+    vote_context: str | None = None,
     view: int = 0,
 ) -> tuple[list[dict[str, Any]], str, str]:
-    body = cid(label + "-body")
+    body = body_hash or cid(label + "-body")
     result = cid(label + "-qc")
-    context = label.upper() + ":round-1"
+    context = vote_context or label.upper() + ":round-1"
     events = vote_events(vote_action, body, context, view=view)
     events.append(
         make_event(
@@ -113,7 +180,12 @@ def qc_events(
     return events, body, result
 
 
-def trace(trace_id: str, events: list[dict[str, Any]], terminal: str = "IN_PROGRESS") -> dict[str, Any]:
+def trace(
+    trace_id: str,
+    events: list[dict[str, Any]],
+    terminal: str = "IN_PROGRESS",
+    round_contract: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     initial = cid(trace_id + ":state:0")
     prior = initial
     for index, event in enumerate(events, start=1):
@@ -127,6 +199,7 @@ def trace(trace_id: str, events: list[dict[str, Any]], terminal: str = "IN_PROGR
         "formal_semantics_id": SEMANTICS_ID,
         "trace_id": trace_id,
         "abstraction_version": "1.0.0",
+        "round_contract": round_contract or DEFAULT_ROUND_CONTRACT,
         "initial_state_root": initial,
         "terminal_state_root": prior,
         "terminal_outcome": terminal,
@@ -160,10 +233,13 @@ def write_fixture(directory: Path, name: str, document: dict[str, Any]) -> None:
 
 def generate_legal() -> None:
     events: list[dict[str, Any]] = [
-        make_event("ACT-CONFIG-PROPOSE", body=cid("normal-config"), request="config-1")
+        make_event("ACT-CONFIG-PROPOSE", body=ROUND_CONFIG_HASH, request="config-1")
     ]
     config_events, _config_body, _config_qc = qc_events(
-        "ACT-CONFIG-VOTE", "ACT-CONFIG-FINALIZE", "normal-config"
+        "ACT-CONFIG-VOTE",
+        "ACT-CONFIG-FINALIZE",
+        "normal-config",
+        body_hash=ROUND_CONFIG_HASH,
     )
     events.extend(config_events)
     isc_events, isc_result, members = valid_isc("normal-isc")
@@ -333,6 +409,10 @@ def generate_legal() -> None:
     for existing in LEGAL.glob("config-*.json"):
         document = load_json_strict(existing)
         document["formal_semantics_id"] = SEMANTICS_ID
+        document["round_contract"] = DEFAULT_ROUND_CONTRACT
+        for event in document["events"]:
+            if event["action_id"].startswith("ACT-CONFIG-"):
+                event["body_hash"] = ROUND_CONFIG_HASH
         write_canonical_json(existing, document)
 
 
@@ -429,12 +509,27 @@ def generate_illegal() -> None:
         trace("TRACE-ILLEGAL-PARAMETER-WRONG-PARENT", wrong_parent_votes),
     )
 
+    incomplete_preamble, incomplete_apc = valid_apc("incomplete-root")
+    incomplete_parameter, _body, incomplete_result = qc_events(
+        "ACT-PARAM-VOTE",
+        "ACT-PARAM-FINALIZE",
+        "normal-param-d1-s1",
+        parents=[incomplete_apc],
+    )
     write_fixture(
         ILLEGAL,
         "incomplete-aggregate",
         trace(
             "TRACE-ILLEGAL-INCOMPLETE-AGGREGATE",
-            [make_event("ACT-ROOT-ASSEMBLE", body=cid("incomplete-root"))],
+            [
+                *incomplete_preamble,
+                *incomplete_parameter,
+                make_event(
+                    "ACT-ROOT-ASSEMBLE",
+                    body=cid("incomplete-root"),
+                    artifacts=[incomplete_result],
+                ),
+            ],
         ),
     )
 
@@ -463,7 +558,26 @@ def generate_illegal() -> None:
     write_fixture(
         ILLEGAL,
         "duplicate-aggregate",
-        trace("TRACE-ILLEGAL-DUPLICATE-AGGREGATE", duplicate_events),
+        trace(
+            "TRACE-ILLEGAL-DUPLICATE-AGGREGATE",
+            duplicate_events,
+            round_contract=build_round_contract(
+                [
+                    {
+                        "parameter_id": "parameter-1",
+                        "domain_id": "d1",
+                        "shard_id": "s1",
+                        "vote_context_id": "DUPLICATE-KEY:round-1",
+                    },
+                    {
+                        "parameter_id": "parameter-2",
+                        "domain_id": "d1",
+                        "shard_id": "s2",
+                        "vote_context_id": "DUPLICATE-MISSING:round-1",
+                    },
+                ]
+            ),
+        ),
     )
 
     write_fixture(

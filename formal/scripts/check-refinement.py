@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections import defaultdict
@@ -76,6 +77,83 @@ def event_identity(event: dict[str, Any]) -> str:
     return event["result_hash"] or event["body_hash"] or event["next_state_root"]
 
 
+def content_id(value: Any) -> str:
+    return "sha256:" + hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+
+def verify_round_contract(trace: dict[str, Any]) -> tuple[set[str], str]:
+    contract = trace["round_contract"]
+    round_config = contract["round_config"]
+    parameter_schema = contract["parameter_schema"]
+    shard_plan = contract["shard_plan"]
+
+    event_round = (
+        trace["events"][0]["round_id"]
+        if trace["events"]
+        else contract["round_id"]
+    )
+    if contract["round_id"] != event_round:
+        fail("ROUND_CONTRACT_ID_MISMATCH", trace["trace_id"])
+
+    parameter_ids = parameter_schema["parameter_ids"]
+    domain_ids = round_config["domain_ids"]
+    assignments = shard_plan["assignments"]
+    if parameter_ids != sorted(parameter_ids) or domain_ids != sorted(domain_ids):
+        fail("NONCANONICAL_ROUND_CONTRACT", "identifier arrays must be sorted")
+    assignment_order = sorted(
+        assignments,
+        key=lambda item: (
+            item["parameter_id"],
+            item["domain_id"],
+            item["shard_id"],
+            item["vote_context_id"],
+        ),
+    )
+    if assignments != assignment_order:
+        fail("NONCANONICAL_ROUND_CONTRACT", "shard assignments must be sorted")
+
+    schema_payload = {"parameter_ids": parameter_ids}
+    if parameter_schema["schema_hash"] != content_id(schema_payload):
+        fail("PARAMETER_SCHEMA_HASH_MISMATCH", trace["trace_id"])
+    plan_payload = {"assignments": assignments}
+    if shard_plan["plan_hash"] != content_id(plan_payload):
+        fail("SHARD_PLAN_HASH_MISMATCH", trace["trace_id"])
+
+    assigned_parameters = [item["parameter_id"] for item in assignments]
+    if sorted(assigned_parameters) != parameter_ids:
+        fail(
+            "SHARD_PLAN_NOT_EXACT_SCHEMA_PARTITION",
+            "every schema parameter must have exactly one assignment",
+        )
+    if any(item["domain_id"] not in domain_ids for item in assignments):
+        fail("SHARD_PLAN_UNKNOWN_DOMAIN", trace["trace_id"])
+    required_contexts = {item["vote_context_id"] for item in assignments}
+    if len(required_contexts) != len(assignments):
+        fail("SHARD_PLAN_DUPLICATE_VOTE_CONTEXT", trace["trace_id"])
+
+    config_payload = {
+        "domain_ids": domain_ids,
+        "parameter_schema_hash": parameter_schema["schema_hash"],
+        "shard_plan_hash": shard_plan["plan_hash"],
+    }
+    if round_config["body_hash"] != content_id(config_payload):
+        fail("ROUND_CONFIG_HASH_MISMATCH", trace["trace_id"])
+    if round_config["parameter_schema_hash"] != parameter_schema["schema_hash"]:
+        fail("ROUND_CONFIG_SCHEMA_MISMATCH", trace["trace_id"])
+    if round_config["shard_plan_hash"] != shard_plan["plan_hash"]:
+        fail("ROUND_CONFIG_SHARD_PLAN_MISMATCH", trace["trace_id"])
+
+    contract_payload = {
+        "round_id": contract["round_id"],
+        "round_config": round_config,
+        "parameter_schema": parameter_schema,
+        "shard_plan": shard_plan,
+    }
+    if contract["contract_id"] != content_id(contract_payload):
+        fail("ROUND_CONTRACT_HASH_MISMATCH", trace["trace_id"])
+    return required_contexts, round_config["body_hash"]
+
+
 def verify_quorum(
     event: dict[str, Any],
     votes: dict[tuple[str, str, str, str], set[str]],
@@ -105,6 +183,8 @@ def check_trace(path: Path) -> dict[str, Any]:
     if trace["formal_semantics_id"] != expected_semantics:
         fail("FORMAL_SEMANTICS_MISMATCH", trace["trace_id"])
 
+    required_parameter_contexts, round_config_hash = verify_round_contract(trace)
+
     votes: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
     durable_votes: dict[tuple[str, str], str] = {}
     commitments: dict[tuple[str, str], str] = {}
@@ -129,6 +209,9 @@ def check_trace(path: Path) -> dict[str, Any]:
         body = event["body_hash"]
         outcome = event["outcome"]
         accepted = outcome in {"ACCEPTED", "FINALIZED"}
+
+        if event["round_id"] != trace["round_contract"]["round_id"]:
+            fail("EVENT_OUTSIDE_ROUND_CONTRACT", f"event {index}")
 
         if event["logical_time"] < last_logical_time:
             fail("LOGICAL_TIME_REGRESSION", f"event {index}")
@@ -163,6 +246,9 @@ def check_trace(path: Path) -> dict[str, Any]:
                 if previous is not None and previous != body:
                     fail("ISC_MEMBERSHIP_MUTATION", event["round_id"])
             verify_quorum(event, votes)
+
+        if action == "ACT-CONFIG-FINALIZE" and accepted and body != round_config_hash:
+            fail("FINALIZED_ROUND_CONFIG_MISMATCH", f"event {index}")
 
         if action == "ACT-COMMIT" and accepted:
             if event["request_id"] is None or body is None:
@@ -202,24 +288,34 @@ def check_trace(path: Path) -> dict[str, Any]:
         if action == "ACT-PARAM-FINALIZE" and accepted:
             if not (set(event["parent_hashes"]) & apc_results):
                 fail("PARAMETER_QC_WRONG_PARENT", context or f"event-{index}")
+            if context not in required_parameter_contexts:
+                fail("PARAMETER_QC_UNPLANNED_KEY", context or f"event-{index}")
             result = event_identity(event)
             parameter_results_by_context[context].append(result)
             certified_objects.add(result)
 
         if action == "ACT-ROOT-ASSEMBLE" and accepted:
-            expected = {
-                result
-                for results in parameter_results_by_context.values()
-                for result in results
-            }
-            exactly_one_per_key = all(
-                len(results) == 1
-                for results in parameter_results_by_context.values()
-            )
-            if not expected or set(event["artifact_refs"]) != expected:
-                fail("AGGREGATE_INCOMPLETE_COVERAGE", f"event {index}")
-            if not exactly_one_per_key:
+            if any(
+                len(parameter_results_by_context[context]) > 1
+                for context in required_parameter_contexts
+            ):
                 fail("AGGREGATE_DUPLICATE_COVERAGE", f"event {index}")
+            missing = {
+                context
+                for context in required_parameter_contexts
+                if len(parameter_results_by_context[context]) != 1
+            }
+            if missing:
+                fail(
+                    "AGGREGATE_INCOMPLETE_REQUIRED_MATRIX",
+                    f"event {index} missing {sorted(missing)}",
+                )
+            expected = {
+                parameter_results_by_context[context][0]
+                for context in required_parameter_contexts
+            }
+            if set(event["artifact_refs"]) != expected:
+                fail("AGGREGATE_ARTIFACT_MATRIX_MISMATCH", f"event {index}")
 
         if action == "ACT-ROOT-FINALIZE" and accepted:
             result = event_identity(event)
@@ -269,6 +365,7 @@ def check_trace(path: Path) -> dict[str, Any]:
         "trace_id": trace["trace_id"],
         "events": len(trace["events"]),
         "terminal_outcome": trace["terminal_outcome"],
+        "required_parameter_key_count": len(required_parameter_contexts),
         "status": "PASS",
     }
 

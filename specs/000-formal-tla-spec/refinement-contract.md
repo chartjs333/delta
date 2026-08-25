@@ -33,6 +33,14 @@ artifact_refs
 
 Fields not relevant to an action use an explicit canonical absence value, never omission with ambiguous semantics.
 
+Every trace also contains one top-level immutable `round_contract`. It binds the
+round ID, content-addressed RoundConfig projection, parameter-schema payload and
+exact shard-plan assignments. Each assignment fixes
+`(parameter_id, domain_id, shard_id, vote_context_id)`. The schema, plan,
+RoundConfig projection and complete contract each carry independently recomputed
+canonical SHA-256 IDs; an implementation cannot derive the required key set from
+the parameter events that happened to appear in the trace.
+
 ## 3. Projection rules
 
 - One externally visible certified state change maps to exactly one formal action.
@@ -57,7 +65,10 @@ A trace passes when:
 2. each adjacent state pair satisfies an allowed formal action or documented stuttering relation;
 3. every projected invariant holds;
 4. terminal outcome matches `APPLIED`, `ABORTED` or allowed blocked state;
-5. exact canonical byte/hash conformance tests separately validate concrete serialization/arithmetic.
+5. every accepted ParameterQC belongs to the immutable RoundConfig/schema/shard
+   plan matrix and AggregateRoot assembly contains exactly one result for every
+   required matrix key, even when a required key has no preceding trace event;
+6. exact canonical byte/hash conformance tests separately validate concrete serialization/arithmetic.
 
 Trace refinement does not replace implementation tests, cryptographic verification or performance/quality benchmarks.
 
@@ -71,7 +82,8 @@ The checker MUST reject traces containing:
 - ISC membership mutation;
 - EC/APC adding a non-ISC ticket;
 - parameter QC with another parent view;
-- incomplete/duplicate AggregateRoot coverage;
+- incomplete/duplicate AggregateRoot coverage relative to the immutable
+  RoundConfig/schema/shard-plan matrix, not merely the observed ParameterQCs;
 - unchecked overflow/saturation event accepted as result;
 - current pointer transition without ApplyQC;
 - local/partial artifact publication;

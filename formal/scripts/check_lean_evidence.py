@@ -19,20 +19,56 @@ sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 from formal_artifacts import sha256_file, write_canonical_json  # noqa: E402
 
 
-THEOREMS = {
-    "PO-Q1": ("DeltaReduce/Quorum.lean", "quorumIntersection"),
-    "PO-Q2": ("DeltaReduce/Quorum.lean", "conflictingQCImpossible"),
-    "PO-A1": ("DeltaReduce/FixedPoint.lean", "signedProductBound"),
-    "PO-A2": ("DeltaReduce/FixedPoint.lean", "flatAccumulatorBound"),
-    "PO-A3": ("DeltaReduce/FixedPoint.lean", "commonDenominatorNumeratorSafe"),
-    "PO-H1": ("DeltaReduce/Hierarchy.lean", "exactDomainShardPartition"),
-    "PO-H2": ("DeltaReduce/Hierarchy.lean", "hierarchicalEqualsFlat"),
-    "PO-C1": ("DeltaReduce/Coverage.lean", "canonicalRootUnique"),
-    "PO-AP1": ("DeltaReduce/Apply.lean", "applyVoteUniqueness"),
-    "PO-AP2": ("DeltaReduce/Apply.lean", "advanceCurrentReplayIdempotent"),
-    "PO-D1": ("DeltaReduce/Apply.lean", "domainMixturePreserved"),
-    "PO-R1": ("DeltaReduce/Apply.lean", "abortPreservesCurrent"),
-    "PO-R2": ("DeltaReduce/Apply.lean", "replayRecordIdempotent"),
+OBLIGATIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
+    "PO-Q1": ("DeltaReduce/Quorum.lean", (("intersection", "quorumIntersection"),)),
+    "PO-Q2": (
+        "DeltaReduce/Quorum.lean",
+        (("conflicting-qc-impossibility", "conflictingQCImpossible"),),
+    ),
+    "PO-A1": ("DeltaReduce/FixedPoint.lean", (("product-bound", "signedProductBound"),)),
+    "PO-A2": (
+        "DeltaReduce/FixedPoint.lean",
+        (("flat-accumulator-bound", "flatAccumulatorBound"),),
+    ),
+    "PO-A3": (
+        "DeltaReduce/FixedPoint.lean",
+        (
+            ("numerator-accumulator-bound", "commonDenominatorNumeratorSafe"),
+            ("positive-input-denominator", "reducedRationalDenominatorPositive"),
+            ("canonical-reduced-input", "reducedRationalIsCoprime"),
+            ("positive-common-denominator", "commonDenominatorPositive"),
+            ("input-denominator-divides-common", "eachDenominatorDividesCommon"),
+            ("round-below-half", "canonicalRoundBelowHalf"),
+            ("round-at-or-above-half", "canonicalRoundAtOrAboveHalf"),
+            ("round-half-tie-toward-positive", "canonicalRoundTieTowardPositive"),
+            ("rounding-deterministic", "canonicalRoundDeterministic"),
+        ),
+    ),
+    "PO-H1": ("DeltaReduce/Hierarchy.lean", (("exact-partition", "exactDomainShardPartition"),)),
+    "PO-H2": ("DeltaReduce/Hierarchy.lean", (("hierarchy-equals-flat", "hierarchicalEqualsFlat"),)),
+    "PO-C1": ("DeltaReduce/Coverage.lean", (("canonical-root-unique", "canonicalRootUnique"),)),
+    "PO-AP1": ("DeltaReduce/Apply.lean", (("honest-vote-unique", "applyVoteUniqueness"),)),
+    "PO-AP2": (
+        "DeltaReduce/Apply.lean",
+        (
+            ("apply-qc-unique", "applyQCUniqueness"),
+            ("current-unique-from-qc-intersection", "currentStateUniqueFromQCIntersection"),
+            ("current-cas-accepted", "advanceCurrentAccepted"),
+            ("current-replay-idempotent", "advanceCurrentReplayIdempotent"),
+        ),
+    ),
+    "PO-D1": ("DeltaReduce/Apply.lean", (("domain-mixture-preserved", "domainMixturePreserved"),)),
+    "PO-R1": ("DeltaReduce/Apply.lean", (("abort-preserves-current", "abortPreservesCurrent"),)),
+    "PO-R2": (
+        "DeltaReduce/Apply.lean",
+        (
+            ("durable-vote-journal-restored", "recoveryRestoresDurableVoteJournal"),
+            ("certificates-restored", "recoveryRestoresCertificates"),
+            ("current-checkpoint-restored", "recoveryRestoresCurrentCheckpoint"),
+            ("full-observational-equivalence", "fullRecoveryObservationalEquivalence"),
+            ("restart-recovery-idempotent", "restartRecoveryIdempotent"),
+        ),
+    ),
 }
 ALLOWED_AXIOMS = {"propext", "Quot.sound", "Classical.choice"}
 
@@ -57,19 +93,40 @@ def main() -> int:
             errors.append(f"{source.relative_to(ROOT)} declares an axiom")
 
     theorem_records: list[dict[str, object]] = []
-    for proof_id, (relative, theorem) in THEOREMS.items():
+    conjunct_records: list[dict[str, object]] = []
+    for proof_id, (relative, conjuncts) in OBLIGATIONS.items():
         source = PROOFS / relative
         text = without_comments(source.read_text(encoding="utf-8")) if source.is_file() else ""
-        found = bool(re.search(rf"\btheorem\s+{re.escape(theorem)}\b", text))
-        if not found:
-            errors.append(f"{proof_id} theorem {theorem} is missing")
+        obligation_conjuncts: list[dict[str, object]] = []
+        for conjunct_id, theorem in conjuncts:
+            found = bool(re.search(rf"\btheorem\s+{re.escape(theorem)}\b", text))
+            if not found:
+                errors.append(
+                    f"{proof_id} conjunct {conjunct_id} theorem {theorem} is missing"
+                )
+            record: dict[str, object] = {
+                "id": f"{proof_id}:{conjunct_id}",
+                "proof_obligation_id": proof_id,
+                "conjunct": conjunct_id,
+                "source": f"formal/proofs/{relative}",
+                "source_sha256": sha256_file(source) if source.is_file() else None,
+                "theorem": f"DeltaReduce.{theorem}",
+                "status": "PASS" if found else "FAIL",
+            }
+            obligation_conjuncts.append(record)
+            conjunct_records.append(record)
         theorem_records.append(
             {
                 "id": proof_id,
                 "source": f"formal/proofs/{relative}",
                 "source_sha256": sha256_file(source) if source.is_file() else None,
-                "theorem": f"DeltaReduce.{theorem}",
-                "status": "PASS" if found else "FAIL",
+                "theorem": obligation_conjuncts[0]["theorem"],
+                "normative_conjuncts": obligation_conjuncts,
+                "status": (
+                    "PASS"
+                    if all(item["status"] == "PASS" for item in obligation_conjuncts)
+                    else "FAIL"
+                ),
             }
         )
 
@@ -116,12 +173,25 @@ def main() -> int:
         errors.append(f"undeclared axioms: {unknown_axioms}")
     if "sorryAx" in output or "declaration uses 'sorry'" in output:
         errors.append("kernel audit reports a proof placeholder")
-    for theorem_record in theorem_records:
-        theorem = str(theorem_record["theorem"])
+    for conjunct_record in conjunct_records:
+        theorem = str(conjunct_record["theorem"])
         if theorem not in axiom_dependencies:
             errors.append(f"axiom dependency result missing for {theorem}")
-            theorem_record["status"] = "FAIL"
-        theorem_record["kernel_axioms"] = axiom_dependencies.get(theorem, [])
+            conjunct_record["status"] = "FAIL"
+        conjunct_record["kernel_axioms"] = axiom_dependencies.get(theorem, [])
+    for theorem_record in theorem_records:
+        conjuncts = theorem_record["normative_conjuncts"]
+        assert isinstance(conjuncts, list)
+        theorem_record["status"] = (
+            "PASS" if all(item["status"] == "PASS" for item in conjuncts) else "FAIL"
+        )
+        theorem_record["kernel_axioms"] = sorted(
+            {
+                axiom
+                for item in conjuncts
+                for axiom in item.get("kernel_axioms", [])
+            }
+        )
     if "#print axioms" not in (
         PROOFS / "DeltaReduce" / "AxiomAudit.lean"
     ).read_text(encoding="utf-8"):
@@ -136,6 +206,17 @@ def main() -> int:
         "allowed_kernel_axioms": sorted(ALLOWED_AXIOMS),
         "reported_kernel_axioms": reported_axioms,
         "theorems": theorem_records,
+        "normative_conjuncts": conjunct_records,
+        "conjunct_completeness": {
+            "expected": len(conjunct_records),
+            "verified": sum(item["status"] == "PASS" for item in conjunct_records),
+            "status": (
+                "PASS"
+                if conjunct_records
+                and all(item["status"] == "PASS" for item in conjunct_records)
+                else "FAIL"
+            ),
+        },
         "errors": errors,
     }
     write_canonical_json(ROOT / "formal" / "reports" / "lean-proof-report.json", report)

@@ -44,7 +44,7 @@ SplitInit ==
     /\ volatileVotes = SplitVotes
     /\ messages = SplitVotes
     /\ messageMultiplicity =
-        [vote \in VoteRecords |-> IF vote \in SplitVotes THEN 1 ELSE 0]
+        {MessageCopy(vote, 1) : vote \in SplitVotes}
     /\ receivedVotes = {}
     /\ finalizedCertificates = {}
     /\ durableSequence = [validator \in Validators |-> 1]

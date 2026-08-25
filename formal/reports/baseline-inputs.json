@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0.0",
   "formal_semantics_version": "1.0.0",
-  "formal_semantics_id": "sha256:76e1ccb9e658b7819ef3dee1e732d189d7ed7fd9bc6e0d138634edb914bff18d",
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
   "formal_semantics_id_status": "published_T057",
   "feature_branch": "000-formal-tla-spec",
   "branch_head_at_freeze": "050ceb1eca6f55ff665a37b9f907003aa0833c59",
   "declared_base_commit": "e40e697cb67d94a6bc6bc0be9b395e58252c3d19",
   "hash_algorithm": "sha256",
   "input_bundle_canonicalization": "Normalize each UTF-8 text input CRLF/CR to LF before SHA-256; sort paths by ordinal repository-relative path; for each input encode path, one TAB, lowercase SHA-256, one LF as UTF-8; concatenate records and SHA-256 the result.",
-  "input_bundle_sha256": "d2ff2119d547c48a2e6e0404c8de22cf87599b799ce6cde2234237bd2832413c",
+  "input_bundle_sha256": "de4641ef1b28353d461eb56779e1400141db4678e42aa053527e0b4fc623d2d0",
   "inputs": [
     {
       "role": "execution_contract",
@@ -31,6 +31,11 @@
       "sha256": "bbfe6e23ca0658d23b41350fb3eb70df62fdfae124c2b460890fac16b77d30e9"
     },
     {
+      "role": "canonical_rational_rounding_decision",
+      "path": "docs/adr/0002-canonical-rational-rounding.md",
+      "sha256": "560c4b5f2bf76008a6e71803f9b98958aa5bcb443bd6bb86c2559fcd245dcf50"
+    },
+    {
       "role": "authoritative_branch_topology",
       "path": "specs/ROADMAP.md",
       "sha256": "33bcd78026537b0ae6483ee4d1deb3133063681c2dfa8c8ea890706cae80d491"
@@ -38,37 +43,37 @@
     {
       "role": "normative_failure_recovery_contract",
       "path": "specs/000-formal-tla-spec/failure-semantics.md",
-      "sha256": "36123243475c9a17a6a6e3884f5cf8d4adce9c644c33be1785e115d60cb42459"
+      "sha256": "abc6a7999b8258fac915405c8e446be3cd57d50c81c0b8504f6757f489d49cab"
     },
     {
       "role": "normative_parametric_proof_contract",
       "path": "specs/000-formal-tla-spec/proof-obligations.md",
-      "sha256": "0c4c23f0ceb1ef5f78eed54e56f8707cfba6d20dfd1c5d698fee02d5ceed3385"
+      "sha256": "942488fb0d88cb299c0c23f3b414c51258780a2290402b3e3439c6ff20c795f0"
     },
     {
       "role": "normative_refinement_contract",
       "path": "specs/000-formal-tla-spec/refinement-contract.md",
-      "sha256": "d85fa6d564dc4a647f63750270c3806958d4815eabce7ff34daaf65b1788d94c"
+      "sha256": "42ddfc4675b667744236f0eacd5bd35c55ba5957eaa59b7e2b8e87172be029fe"
     },
     {
       "role": "feature_specification",
       "path": "specs/000-formal-tla-spec/spec.md",
-      "sha256": "d21a6136c7fb420850f983c64bdf5099699a03a52baae3e0fd11225ef4ac3c7f"
+      "sha256": "4c723b178649277a170b227fc718fc38355be9ce6765bb9b2f86af81bbee3327"
     },
     {
       "role": "feature_plan",
       "path": "specs/000-formal-tla-spec/plan.md",
-      "sha256": "556b571267d90456b14f67d99f0d77b0b74f8fbe9360f8b933e83bf815970f65"
+      "sha256": "7c7ab970373621790ebf31175a2a7b0c22f178ab1fe60be31ba28107bade58f9"
     },
     {
       "role": "feature_tasks",
       "path": "specs/000-formal-tla-spec/tasks.md",
-      "sha256": "fb36e8317d3f10caae9a373964f74034f887ba91384580c4da6e7b4b1941bd69"
+      "sha256": "55c690e61072928e7b8cb48f30b119ec81245599ba058cff89afca12541cc251"
     },
     {
       "role": "stable_formal_id_registry",
       "path": "formal/reports/formal-id-registry.json",
-      "sha256": "07eb370592e880c5e53bab12f6fe62db8e19820be187744e072dc044ab8dc329"
+      "sha256": "093dec75225cbec157fb7ca696f417e6dc594165c21e951ded662815568ab798"
     }
   ],
   "cross_branch_contract_validation": {
