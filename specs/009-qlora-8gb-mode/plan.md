@@ -1,0 +1,126 @@
+# Implementation Plan: Certified Fixed-Ticket QLoRA Mode for 8 GiB GPUs
+
+**Branch**: `009-qlora-8gb-mode` | **Date**: 2026-08-23 | **Spec**: `spec.md`
+
+## Summary
+
+Add an immutable base/quantization/adapter schema, adapter-only local training for fixed tickets, canonical adapter q-vector integration with the full certificate chain, deterministic adapter ApplyQC, content-addressed base reuse and a preregistered physical 8 GiB qualification gate.
+
+## Technical Context
+
+- Python 3.12/PyTorch reference worker stack.
+- Reference QLoRA adapter integration behind a backend-neutral port; external libraries and versions are pinned by the mode profile.
+- Tiny local model/mock quantized backend for offline CI.
+- Base and tokenizer imported into existing CAS/P2P; no runtime dependency on a public registry after import.
+- Local worker arithmetic may use declared FP16/BF16 kernels, but consensus input is only canonical `int16-fixed-v1` adapter shards.
+- Existing ISC/EC/APC/ParameterShardQC/AggregateRootQC/ApplyQC implementations are reused without alternate formulas.
+- Physical memory gate records allocator and device evidence under an exact committed configuration.
+
+## Constitution Check
+
+| Principle | Design response | Gate |
+| --- | --- | --- |
+| Fixed work | QLoRA uses immutable domain tickets and requires `A_j=H` | Completion/abort tests |
+| Integer consensus | Adapter delta normalized then canonical q encoded | No-float-reduce test |
+| Certificate lineage | Base/schema fingerprints in every certificate stage | Mismatch corpus |
+| Domain mixture | Adapter ApplyQC uses fixed `pi_d` | Speed-independence regression |
+| Atomic model | Only ApplyQC advances adapter current pointer | Four-validator/crash tests |
+| Evidence | 8 GiB claim tied to exact physical profile | Qualification artifact |
+
+**Pre-implementation result**: PASS. Any proposal that adapts `H`, aggregates floating adapter deltas or allows base mutation is an automatic STOP.
+
+## Architecture and Data Flow
+
+```text
+BaseModelManifest + QuantizedBaseProfile
+                 │
+                 ▼
+        frozen quantized base
+                 + AdapterParameterSchema + parent adapter
+                 │
+       fixed DomainPureWorkTicket
+                 │
+                 ▼
+       local adapter-only training
+                 │ A_j=H
+                 ▼
+normalized adapter delta → int16 q shards → C/AC
+                 │
+        ISC → EC → APC → shard QCs
+                 │
+        AggregateRootQC → adapter ApplyQC
+                 │
+ certified adapter checkpoint → P2P (base reused)
+```
+
+## Project Structure
+
+```text
+src/deltatorrent/qlora/
+  manifests.py
+  backend.py
+  model_loader.py
+  adapter_schema.py
+  preflight.py
+  trainer.py
+  contribution.py
+  composition.py
+  qualification.py
+  telemetry.py
+src/deltatorrent/apply/adapter_engine.py
+src/deltatorrent/cli/qlora.py
+configs/qlora/8gb-reference.yaml
+tests/fixtures/models/tiny_qlora/
+tests/unit/test_frozen_base.py
+tests/unit/test_adapter_schema.py
+tests/integration/test_fixed_qlora_ticket.py
+tests/integration/test_adapter_certificate_chain.py
+tests/integration/test_adapter_apply_qc.py
+tests/integration/test_base_cache_reuse.py
+tests/hardware/test_qlora_8gb_qualification.py
+```
+
+## Implementation Sequence
+
+1. Freeze base, quantization, adapter and composition canonical contracts plus license/provenance policy.
+2. Implement offline tiny backend and exact adapter schema resolution.
+3. Implement compatibility/memory preflight and frozen-base/adapter-only invariants.
+4. Integrate fixed-ticket local training, full-completion rule and normalized adapter contribution.
+5. Connect adapter shards to feature-004 and full feature-008 certificate chain.
+6. Implement deterministic adapter outer apply and ApplyQC/current pointer.
+7. Implement P2P base reuse, adapter checkpoint composition/resume/evaluation.
+8. Freeze and execute the physical 8 GiB qualification profile.
+9. Publish evidence and run final cross-artifact/Constitution checks.
+
+## Test Strategy
+
+- Base/tokenizer/quantization/adapter-schema golden fingerprints.
+- Frozen parameter, buffer, optimizer membership and payload-set tests.
+- Fixed `B/H`, `A_j=H`, OOM/incomplete/cancellation no-commit matrix.
+- Base/schema/mode mismatch at every certificate stage.
+- Direct fixed-point adapter aggregate and four-validator ApplyQC equality.
+- Current-pointer crash/replay and base-mutation rejection.
+- P2P base cache and adapter-only transfer byte accounting.
+- Resume/composition compatibility and derived-export provenance.
+- Separate physical 8 GiB memory qualification.
+
+## Observability
+
+Record mode/base/schema/profile/certificate hashes, trainable/total parameters, base/adapter/q bytes, ticket completion, peak memory, cache reuse, robust/aggregation/apply timings and qualification result. Never log model-access tokens, private keys or raw training examples.
+
+## Rollout and Rollback
+
+Run tiny offline and shadow certificate paths first. Enable hardware profile only after configuration/license sign-off. Rollback disables future QLoRA rounds and retains the last ApplyQC-certified adapter; it never mutates the base or downgrades certificate requirements.
+
+## Risks and Mitigations
+
+- **Backend version drift**: exact profile fingerprint and hard compatibility check.
+- **Hidden base mutation**: pre/post logical hash, optimizer/gradient/payload assertions.
+- **8 GiB variability**: committed physical profile with explicit headroom and no generalized claim.
+- **Adapter schema ambiguity**: resolved ordered names/shapes committed before ticketing.
+- **Apply nondeterminism**: existing portable exact apply profile and byte conformance.
+- **License leakage**: operator import and repository/secret scans.
+
+## Exit Gate
+
+Offline and physical qualification gates pass; full fixed ticket is required; base remains immutable; adapter-only fixed-point certificate/ApplyQC path is exact; base cache reuse is demonstrated; full quality and final Constitution Check pass.
