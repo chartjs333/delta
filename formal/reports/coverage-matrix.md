@@ -97,11 +97,14 @@ is an unconditional STOP.
 ## Liveness coverage and claim boundaries
 
 All positive liveness rows start from real empty `Init` before the named
-milestone and exclude timeout/HardAbort as progress. They require eventual
-synchrony, fair delivery/actions, bounded computation and an honest responsive
-quorum in every required committee. Artifact-dependent rows additionally require
-exact required bytes to remain available or repairable. These assumptions are
-absent from safety configs.
+milestone and exclude timeout/HardAbort as progress. Each config applies `WF`
+to its explicitly restricted, phase-specific composed progress relation; it
+does not claim a separate fairness conjunct for every disjunct. Together with
+eventual synchrony, bounded computation and an honest responsive quorum, the
+restricted relations make the required transport and phase transitions
+progress. Artifact-dependent rows additionally require exact required bytes to
+remain available or repairable. These assumptions are absent from safety
+configs.
 
 | Temporal property | Progress actions | Positive config | Additional assumption | Required negative countercheck | Status |
 | --- | --- | --- | --- | --- | --- |
