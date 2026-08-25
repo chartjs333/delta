@@ -91,7 +91,9 @@ def main() -> int:
         "schema_version": "1.0.0",
         "status": "PASS",
         "countercheck_id": "COUNTERCHECK-NO-FAIRNESS",
-        "removed_assumptions": ["weak fairness for protocol progress actions"],
+        "removed_assumptions": [
+            "weak fairness for the composed AppliedLivenessNext progress relation"
+        ],
         "expected_property_id": "LIVE-APPLIED-REACHED",
         "outcome": "EXPECTED_TEMPORAL_COUNTEREXAMPLE",
         "module": {

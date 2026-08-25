@@ -181,7 +181,7 @@ def main() -> int:
         ),
         "liveness_assumptions": [
             "eventual synchrony after a finite disruption",
-            "weak fairness for each declared progress action",
+            "weak fairness for each phase-specific composed progress relation",
             "an honest responsive quorum remains available",
             "required certified artifact bytes remain available or repairable",
             "bounded deterministic local computation",
