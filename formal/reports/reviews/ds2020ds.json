@@ -1,0 +1,13 @@
+{
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "independent": true,
+  "reviewed_commit": "1e6e0f6f70056161d95933e71494ec390c7c1151",
+  "reviewer_id": "ds2020ds",
+  "scope": [
+    "COVERAGE",
+    "LIVENESS",
+    "MODEL",
+    "PROOFS"
+  ],
+  "status": "PASS"
+}
