@@ -2,86 +2,109 @@
 
 ## Required reading order
 
-Before changing any implementation or protocol artifact, read:
+Before changing implementation or protocol artifacts, read:
 
 1. `.specify/memory/constitution.md`;
 2. `docs/adr/0000-formal-verification-gate.md`;
 3. `docs/adr/0001-deltareduce-v1.md`;
-4. `specs/ROADMAP.md`;
-5. `specs/000-formal-tla-spec/failure-semantics.md` and `proof-obligations.md` when present in the current stacked branch;
-6. the current branch's `spec.md`;
-7. the current branch's `plan.md`;
-8. the current branch's `tasks.md`.
+4. `docs/adr/0010-hybrid-runtime-boundary.md`;
+5. `specs/ROADMAP.md` and `specs/HYBRID-RUNTIME-MAP.md`;
+6. `specs/000-formal-tla-spec/failure-semantics.md`, `proof-obligations.md` and `refinement-contract.md`;
+7. current feature `spec.md`, `plan.md`, `tasks.md`;
+8. current feature `runtime-profile.md` and `runtime-tasks.md` when present.
 
-The current authoritative branch is the implementation boundary. Do not implement later branches opportunistically and do not base work on a superseded legacy ref.
+The current branch is the implementation boundary. Later feature behavior must not be implemented opportunistically.
 
 ## Formal-first STOP rule
 
-- `000-formal-tla-spec` is the only branch allowed to begin without a prior Formal GO.
-- No implementation task in `001–011` may start until the exact compatible `FormalVerificationReport(decision=GO)` has been verified.
-- Any change to state transitions, vote/QC semantics, deadlines, failure/recovery, availability, certificate parentage, fixed-point bounds, hierarchical composition or Apply current-state behavior MUST update the TLA+/proof artifacts first and rerun the affected formal gate.
-- A failed invariant, liveness assumption, theorem, counterexample regression or refinement check is an unconditional STOP. Tests or operational work in a later branch cannot waive it.
-- TLC finite-state success is not a substitute for parametric arithmetic/quorum proofs; theorem-prover success is not a substitute for failure/interleaving model checking. Both are required where declared.
+- No implementation task in `001–011` starts until the exact merged `FormalVerificationReport(GO)` is verified.
+- Current accepted formal semantics ID is `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+- Any new externally visible transition, changed vote/QC context, deadline, failure terminal, durability ordering, availability rule, certificate edge, arithmetic precondition or current-state behavior returns to feature 000 first.
+- A failed model, proof, production-mutant, refinement or compatibility gate is an unconditional STOP.
 
-## Branch discipline
+## Hybrid boundary rules
 
-- Feature branches are stacked in numeric order as declared in `specs/ROADMAP.md`.
-- A branch may rely only on `main` and its declared predecessor.
-- Each implementation commit references one or more task IDs.
-- Mark a task `[x]` only after its tests and acceptance evidence pass.
-- A deliberate protocol change requires an ADR and updates to every affected spec, formal model, proof, task list, fixture, compatibility contract and traceability entry.
+### C++ core and native runtime
 
-## DeltaReduce v1 non-negotiable invariants
+- `delta-core-cpp` contains no socket, DNS, TLS, wall-clock or filesystem adapter.
+- `delta-runtime-cpp` is the only owner of consensus WAL, snapshots, durable vote journal and single-writer state reactor.
+- Consensus code uses fixed-width integers, checked arithmetic, explicit endian conversion and deterministic ordering.
+- Raw struct memory, padding, pointer values, `unordered_map` iteration and host locale never define canonical bytes or state hashes.
+- No exception crosses the C ABI. Every exported function is `noexcept` and returns a versioned status.
+- No accepted consensus path uses floating-point addition or compiler `fast-math`.
 
-- There is no single authoritative round coordinator; consensus state is replicated across `3f+1` validators.
-- A finalized certificate or state transition requires at least `2f+1` valid votes from the configured validator set.
-- Every work ticket is domain-pure and fixes `domain_id`, `B`, `H`, parent checkpoint, parameter schema and arithmetic profile.
-- Adaptive `H_i`, device-speed weighting, stale-update weighting and post-open mutation of ticket budgets are forbidden.
-- Workers normalize by the effective optimizer-step count `A_j` before quantization.
-- Consensus reduction uses canonical integer fixed-point arithmetic only. FP16/BF16/FP32/FP64 addition is forbidden in parameter reduce and certified clipping/weight application.
-- The round must prove accumulator headroom before ticketing opens; saturation, wraparound and platform-dependent overflow behavior are forbidden.
-- The exact input tuple set `{T_j, C_j, AC_j}` is frozen before seed `ρ_t` exists.
-- `InputSetCertificate → EligibilityCertificate/AggregationPlanCertificate → ParameterShardQC → AggregateRootQC → ApplyQC` lineage is immutable and context-bound.
-- A model/checkpoint becomes current only through one valid `ApplyQC` for its parent `AggregateRootQC`.
-- Keep reduce and distribution planes separate. Never P2P-broadcast worker-local shards, commitments or regional partials.
-- Every model, dataset shard, ticket, commitment, availability proof, certificate, delta shard and manifest is versioned, canonically serialized and content-addressed.
-- Reject wrong-parent/schema/config/domain, duplicate ticket commitment, unavailable data, mixed-view shard roots, replayed votes and unsafe serialization before semantic use.
-- Never use Python pickle for data received from another process or machine.
-- Permissioned validator/worker identities are mandatory through the pilot.
+### C ABI / FFM
 
-## Failure and recovery contract
+- The FFI is a small versioned C ABI; no `std::string`, `std::vector`, reference, template, virtual type or compiler-specific enum crosses it.
+- ABI structures include `abi_major`, `abi_minor` and `struct_size` where extensibility is required.
+- The primary API is command/effect based; Java cannot reconstruct state-machine semantics through fine-grained setters.
+- C++ never retains a pointer to Java/Netty-owned memory after the downcall returns.
+- Zero-copy is optional. A bounded-copy fallback is mandatory and must produce identical canonical outputs.
+- Startup fails on incompatible ABI, schema, protocol, build or `formal_semantics_id`.
 
-- Loss of proposer or signatures triggers deterministic view/leader change while the soft deadline permits it; failure to obtain quorum by the hard deadline yields certified abort, never arrival-order fallback.
-- A commitment lacking `AC_j` may be omitted only before ISC according to the frozen close policy. After ISC, loss of required shard availability triggers repair/retrieval attempts and then round abort if bytes cannot be recovered; the input set cannot be rewritten.
-- Restarted validators recover their durable vote journal before processing new proposals and cannot sign a conflicting body for the same context.
-- Network partitions preserve safety. Liveness is claimed only under the exact eventual-synchrony and honest-quorum assumptions in the formal model.
-- Apply failure or insufficient quorum preserves the parent current checkpoint. Existing ApplyQC can be replayed to repair the pointer idempotently.
+### Java node
+
+- Reference runtime is JDK 25; JDK 26 runs as a compatibility lane unless a later ADR changes the baseline.
+- Netty owns connections, TLS sessions, framing, rate limits, backpressure and peer routing.
+- Java treats consensus payload/effects as opaque canonical bytes except transport envelope fields explicitly assigned to it.
+- FFM/WAL calls never block a Netty event loop; they run on the dedicated consensus reactor boundary.
+- Java delivers opaque timer tokens only. It cannot call `change_view`, `abort` or `apply` directly by phase name.
+- Direct `ByteBuf` lifetime is explicitly retained/released around synchronous FFM use; heap/composite buffers use bounded staging memory.
+
+### Python worker
+
+- Python/PyTorch owns local training, token/data accounting, QLoRA and evaluation.
+- A worker contribution becomes consensus-visible only as canonical normalized/quantized bytes.
+- Python object layout, pickle and framework checkpoint internals never define network protocol bytes.
+
+## Persist-before-expose
+
+A native transition returning outbound votes/messages must follow:
+
+```text
+validate command → compute candidate → append WAL → durability barrier
+→ commit state root → return canonical effects → Java sends
+```
+
+If durability fails, no externally sendable effect is returned. Replay returns the same effect identity idempotently.
+
+## Threading
+
+- Exactly one consensus reactor thread may call mutating native functions for one runtime handle.
+- Netty event loops submit bounded commands through an MPSC queue.
+- Read-only diagnostics require explicitly documented snapshot semantics.
+- Single writer removes local data races but does not replace BFT ordering or formal refinement.
 
 ## Quality gates
 
 ```text
-# Formal branch / formal-impact changes
+# Formal or semantic-impact changes
 make formal-check
 
-# Python implementation branches
+# Python
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src
-uv run pytest
+uv run mypy delta-worker-python/src
+uv run pytest delta-worker-python/tests
+
+# C++ reference shape (instantiated by feature 003)
+cmake --preset ci
+cmake --build --preset ci
+ctest --preset ci
+
+# Java reference shape (instantiated by feature 003/005)
+./gradlew --no-daemon check
+
+# Cross-language
+make conformance
 ```
 
-Mandatory formal gates include:
+C++ gates include GCC and Clang, ASan/UBSan, a separate TSan lane, parser fuzzing and cross-compiler state-root fixtures. Java gates include JDK 25 reference and JDK 26 compatibility. Cross-language gates compare exact canonical bytes, status codes, ABI descriptor and formal traces.
 
-- TLA+ syntax and TLC safety models;
-- liveness checks under declared fairness/availability assumptions;
-- theorem-prover builds for parametric quorum, fixed-point, hierarchy and apply claims;
-- expected counterexamples for intentionally weakened mutants;
-- implementation-trace projection/refinement checks for code-bearing protocol branches.
+## Branch discipline and evidence
 
-Additional implementation gates include deterministic serialization fixtures, bit-for-bit independent aggregation, seed-after-ISC properties, Frankenstein rejection, ApplyQC uniqueness and restart/replay tests.
-
-Network tests must be deterministic, timeout-bounded and runnable without public internet. GPU-only tests require a CPU or mocked smoke path. Scientific comparisons use the same token budget, domain ticket counts, seeds, data manifest and evaluation protocol.
-
-## Evidence
-
-Formal, performance, quality, BFT tolerance and 8 GB claims require content-addressed machine-readable manifests and measured/proved evidence. Targets and unexecuted proof obligations must not be presented as achieved results.
+- Feature commits reference existing `T###` and supplemental `HR###-*` task IDs.
+- Mark tasks complete only with machine-readable evidence.
+- Performance, zero-copy, latency, 8 GB and native-crash-containment claims remain targets until measured.
+- Embedded FFM and isolated native sidecar are distinct deployment profiles; do not claim crash isolation for embedded mode.
+- Secrets, private data, restricted model weights, generated native binaries and private keys are never committed.
