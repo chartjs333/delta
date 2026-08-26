@@ -29,8 +29,8 @@ These tasks supplement `tasks.md`. They are mandatory and use `HR001-*` IDs to a
 
 ## Final gate
 
-- [ ] **HR001-014** Run Python quality gates, protocol contract tests, dependency-boundary tests and formal compatibility verification.
-- [ ] **HR001-015** Publish a start-ready evidence note stating exactly which directories are placeholders and which contain executable code.
+- [x] **HR001-014** Run Python quality gates, protocol contract tests, dependency-boundary tests and formal compatibility verification.
+- [x] **HR001-015** Publish a start-ready evidence note stating exactly which directories are placeholders and which contain executable code.
 
 ## Dependency rule
 

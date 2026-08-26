@@ -41,6 +41,8 @@ TASK_IDS = [
     "HR001-009",
     "HR001-010",
     "HR001-011",
+    "HR001-014",
+    "HR001-015",
     "T001",
     "T002",
     "T003",
@@ -87,6 +89,7 @@ FOUNDATION_ROOT_FILES = (
     "pyproject.toml",
     "uv.lock",
     "specs/001-reproducible-training-baseline/scripts/verify_foundation.py",
+    "specs/001-reproducible-training-baseline/evidence/start-ready.md",
 )
 
 
