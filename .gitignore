@@ -80,6 +80,8 @@ formal/proofs/.lake/
 formal/proofs/build/
 formal/proofs/lake-packages/
 formal/toolchain/windows/
+formal/toolchain/cache/*
+!formal/toolchain/cache/README.md
 
 # Editors / OS
 .idea/
