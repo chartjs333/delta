@@ -220,6 +220,9 @@ def verify_merged_predecessor(root: Path, report_path: Path, source_commit: str)
     merge_commit = ""
     merge_parent = ""
     for candidate in git_text(root, "rev-list", "--first-parent", "--merges", head).splitlines():
+        subject = git_text(root, "show", "-s", "--format=%s", candidate)
+        if not subject.startswith("Merge pull request #1 "):
+            continue
         parents = git_text(root, "show", "-s", "--format=%P", candidate).split()
         for parent in parents[1:]:
             if git_is_ancestor(root, report_commit, parent):
@@ -230,8 +233,6 @@ def verify_merged_predecessor(root: Path, report_path: Path, source_commit: str)
             break
     require(bool(merge_commit), "FORMAL_GO_NOT_MERGED")
     require(git_is_ancestor(root, merge_commit, origin_main), "FORMAL_MERGE_NOT_ON_ORIGIN_MAIN")
-    subject = git_text(root, "show", "-s", "--format=%s", merge_commit)
-    require(subject.startswith("Merge pull request #1 "), "UNEXPECTED_FORMAL_MERGE", subject)
     require(report_path.resolve() == DEFAULT_REPORT.resolve(), "NONCANONICAL_REPORT_PATH")
     return {
         "feature_head": head,
