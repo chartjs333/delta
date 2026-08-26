@@ -108,13 +108,13 @@ class FilesystemArtifactStore:
             raise DeltaError(
                 ErrorCode.ARTIFACT_NOT_FOUND,
                 "referenced artifact does not exist",
-                {"content_id": reference.content_id},
+                {"content_id": reference.content_id, "locator": reference.locator},
             ) from exc
         if len(value) != reference.byte_length or sha256_content_id(value) != reference.content_id:
             raise DeltaError(
                 ErrorCode.ARTIFACT_HASH_MISMATCH,
                 "artifact bytes do not match the immutable reference",
-                {"content_id": reference.content_id},
+                {"content_id": reference.content_id, "locator": reference.locator},
             )
         return value
 

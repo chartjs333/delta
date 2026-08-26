@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from deltatorrent import __version__
-from deltatorrent.cli import baseline, netem
+from deltatorrent.cli import artifacts, baseline, netem
 from deltatorrent.domain.errors import DeltaError
 from deltatorrent.domain.formal_compat import FORMAL_SEMANTICS_ID
 
@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=__version__)
     subcommands = parser.add_subparsers(dest="command", required=True)
     subcommands.add_parser("formal-id", help="print the accepted formal semantics ID")
+    artifacts.configure(subcommands.add_parser("artifacts", help="artifact bundle operations"))
     baseline.configure(subcommands.add_parser("baseline", help="single-node reference training"))
     netem.configure(subcommands.add_parser("netem", help="deterministic WAN emulation"))
     return parser
@@ -30,6 +31,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "formal-id":
             print(FORMAL_SEMANTICS_ID)
             return 0
+        if args.command == "artifacts":
+            return artifacts.execute(args, Path.cwd())
         if args.command == "baseline":
             return baseline.execute(args, Path.cwd())
         if args.command == "netem":

@@ -53,9 +53,9 @@
 
 ## Phase 5: US3 — Artifact verification
 
-- [ ] T028 [US3] Реализовать recursive bundle verifier в `src/deltatorrent/artifacts/verifier.py`.
-- [ ] T029 [US3] Реализовать `artifacts verify` command в `src/deltatorrent/cli/artifacts.py`.
-- [ ] T030 [P] [US3] Добавить corruption fixtures и verifier tests в `tests/integration/test_artifact_verification.py`.
+- [x] T028 [US3] Реализовать recursive bundle verifier в `src/deltatorrent/artifacts/verifier.py`.
+- [x] T029 [US3] Реализовать `artifacts verify` command в `src/deltatorrent/cli/artifacts.py`.
+- [x] T030 [P] [US3] Добавить corruption fixtures и verifier tests в `tests/integration/test_artifact_verification.py`.
 
 ## Final Phase: Validation and documentation
 
