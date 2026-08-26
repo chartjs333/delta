@@ -14,12 +14,12 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Создать Python 3.12 package, dependency groups и CLI entry point в `pyproject.toml`.
-- [ ] T002 Зафиксировать dependency resolution в `uv.lock` и документировать update policy в `docs/dependencies.md`.
-- [ ] T003 [P] Настроить ruff, mypy и pytest defaults в `pyproject.toml`.
-- [ ] T004 [P] Добавить CI workflow с offline CPU gate в `.github/workflows/ci.yml`.
-- [ ] T005 [P] Добавить статический запрет unsafe pickle/deserialization в `tests/architecture/test_safe_serialization.py`.
-- [ ] T006 [P] Add formal semantics compatibility loader/action-ID registry in `src/deltatorrent/domain/formal_compat.py` without importing TLA/tooling at runtime.
+- [x] T001 Создать Python 3.12 package, dependency groups и CLI entry point в `pyproject.toml`.
+- [x] T002 Зафиксировать dependency resolution в `uv.lock` и документировать update policy в `docs/dependencies.md`.
+- [x] T003 [P] Настроить ruff, mypy и pytest defaults в `pyproject.toml`.
+- [x] T004 [P] Добавить CI workflow с offline CPU gate в `.github/workflows/ci.yml`.
+- [x] T005 [P] Добавить статический запрет unsafe pickle/deserialization в `tests/architecture/test_safe_serialization.py`.
+- [x] T006 [P] Add formal semantics compatibility loader/action-ID registry in `src/deltatorrent/domain/formal_compat.py` without importing TLA/tooling at runtime.
 
 ## Phase 2: Foundational domain and artifact contracts
 

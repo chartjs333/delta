@@ -14,14 +14,11 @@ import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any, NoReturn
 
-
 ROOT = Path(__file__).resolve().parents[3]
 FEATURE_ROOT = ROOT / "specs" / "001-reproducible-training-baseline"
 DEFAULT_REPORT = ROOT / "formal" / "reports" / "formal-verification-report.json"
 DEFAULT_OUTPUT = FEATURE_ROOT / "evidence" / "formal-prerequisite.json"
-EXPECTED_SEMANTICS_ID = (
-    "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
-)
+EXPECTED_SEMANTICS_ID = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
 EXPECTED_SOURCE_COMMIT = "1e6e0f6f70056161d95933e71494ec390c7c1151"
 SEMANTICS_DOMAIN = "deltareduce.formal-semantics.v1"
 REVIEW_SCOPE = {"COVERAGE", "LIVENESS", "MODEL", "PROOFS"}
@@ -172,8 +169,7 @@ def git_bytes(root: Path, *args: str, check: bool = True) -> bytes:
         ["git", *args],
         cwd=root,
         check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
     if check and completed.returncode != 0:
         reject(
@@ -274,7 +270,9 @@ def verify_evidence_graph(report: dict[str, Any], root: Path) -> dict[str, dict[
         identifier = node.get("id")
         require(isinstance(identifier, str) and identifier not in by_id, "EVIDENCE_ID_INVALID")
         by_id[identifier] = node
-        require(node.get("media_type") == "application/json", "EVIDENCE_MEDIA_TYPE_INVALID", identifier)
+        require(
+            node.get("media_type") == "application/json", "EVIDENCE_MEDIA_TYPE_INVALID", identifier
+        )
         relative = str(node.get("path", ""))
         safe_repo_path(root, relative)
         value = tracked_bytes(root, relative)
@@ -294,8 +292,11 @@ def verify_source_and_semantics(report: dict[str, Any], root: Path) -> dict[str,
     require(source.get("clean") is True, "SOURCE_TREE_NOT_CLEAN")
     require(source.get("commit") == EXPECTED_SOURCE_COMMIT, "SOURCE_COMMIT_MISMATCH")
     manifest_relative = str(source.get("manifest_path", ""))
-    manifest_path = safe_repo_path(root, manifest_relative)
-    require(sha256_tracked(root, manifest_relative) == source.get("tree_sha256"), "SOURCE_MANIFEST_HASH_MISMATCH")
+    safe_repo_path(root, manifest_relative)
+    require(
+        sha256_tracked(root, manifest_relative) == source.get("tree_sha256"),
+        "SOURCE_MANIFEST_HASH_MISMATCH",
+    )
     manifest = load_tracked_json(root, manifest_relative)
     require(manifest.get("commit") == EXPECTED_SOURCE_COMMIT, "SOURCE_MANIFEST_COMMIT_MISMATCH")
     files = manifest.get("files")
@@ -339,12 +340,20 @@ def verify_source_and_semantics(report: dict[str, Any], root: Path) -> dict[str,
 
 def verify_baseline_inputs(report: dict[str, Any], root: Path) -> dict[str, Any]:
     declared = report.get("baseline_inputs")
-    require(isinstance(declared, dict) and declared.get("verified") is True, "BASELINE_INPUTS_UNVERIFIED")
+    require(
+        isinstance(declared, dict) and declared.get("verified") is True,
+        "BASELINE_INPUTS_UNVERIFIED",
+    )
     relative_path = str(declared.get("path", ""))
     path = safe_repo_path(root, relative_path)
-    require(sha256_tracked(root, relative_path) == declared.get("sha256"), "BASELINE_INPUTS_HASH_MISMATCH")
+    require(
+        sha256_tracked(root, relative_path) == declared.get("sha256"),
+        "BASELINE_INPUTS_HASH_MISMATCH",
+    )
     baseline = load_tracked_json(root, relative_path)
-    require(baseline.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "BASELINE_SEMANTICS_MISMATCH")
+    require(
+        baseline.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "BASELINE_SEMANTICS_MISMATCH"
+    )
     require(
         baseline.get("input_bundle_sha256") == declared.get("input_bundle_sha256"),
         "BASELINE_BUNDLE_ID_MISMATCH",
@@ -355,7 +364,9 @@ def verify_baseline_inputs(report: dict[str, Any], root: Path) -> dict[str, Any]
     overlay: list[dict[str, str]] = []
     bundle_records: list[str] = []
     roles = {item.get("role") for item in inputs}
-    require(PROTECTED_BASELINE_ROLES | REFINEMENT_OVERLAY_ROLES == roles, "BASELINE_ROLE_SET_MISMATCH")
+    require(
+        PROTECTED_BASELINE_ROLES | REFINEMENT_OVERLAY_ROLES == roles, "BASELINE_ROLE_SET_MISMATCH"
+    )
     for item in inputs:
         relative = str(item.get("path", ""))
         declared_hash = str(item.get("sha256", ""))
@@ -431,12 +442,19 @@ def verify_report_records(
         evidence_id = review.get("evidence_id")
         payload = loaded_evidence.get(str(evidence_id))
         require(payload is not None, "REVIEW_EVIDENCE_MISSING")
-        require(review.get("independent") is True and payload.get("independent") is True, "REVIEW_NOT_INDEPENDENT")
-        require(review.get("status") == "PASS" and payload.get("status") == "PASS", "REVIEW_NOT_PASS")
+        require(
+            review.get("independent") is True and payload.get("independent") is True,
+            "REVIEW_NOT_INDEPENDENT",
+        )
+        require(
+            review.get("status") == "PASS" and payload.get("status") == "PASS", "REVIEW_NOT_PASS"
+        )
         require(set(review.get("scope", [])) == REVIEW_SCOPE, "REVIEW_SCOPE_INVALID")
         require(set(payload.get("scope", [])) == REVIEW_SCOPE, "REVIEW_PAYLOAD_SCOPE_INVALID")
         require(payload.get("reviewed_commit") == EXPECTED_SOURCE_COMMIT, "REVIEW_SOURCE_MISMATCH")
-        require(payload.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "REVIEW_SEMANTICS_MISMATCH")
+        require(
+            payload.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "REVIEW_SEMANTICS_MISMATCH"
+        )
         reviewer = str(review.get("reviewer_id", ""))
         require(reviewer == payload.get("reviewer_id") and reviewer, "REVIEWER_ID_MISMATCH")
         require(reviewer not in reviewer_ids, "REVIEWER_ID_DUPLICATE")
@@ -444,26 +462,46 @@ def verify_report_records(
         review_records.append({"evidence_id": str(evidence_id), "reviewer_id": reviewer})
 
     toolchain = loaded_evidence["EVIDENCE-TOOLCHAINS"]
-    require(toolchain.get("status") == "PASS" and toolchain.get("errors") == [], "TOOLCHAIN_EVIDENCE_FAILED")
+    require(
+        toolchain.get("status") == "PASS" and toolchain.get("errors") == [],
+        "TOOLCHAIN_EVIDENCE_FAILED",
+    )
     toolchain_checks = toolchain.get("checks")
     require(isinstance(toolchain_checks, list), "TOOLCHAIN_CHECKS_MISSING")
-    require({item.get("id") for item in toolchain_checks} == TOOLCHAIN_IDS, "TOOLCHAIN_EVIDENCE_ID_SET_MISMATCH")
-    require(all(item.get("status") == "PASS" for item in toolchain_checks), "TOOLCHAIN_CHECK_FAILED")
+    require(
+        {item.get("id") for item in toolchain_checks} == TOOLCHAIN_IDS,
+        "TOOLCHAIN_EVIDENCE_ID_SET_MISMATCH",
+    )
+    require(
+        all(item.get("status") == "PASS" for item in toolchain_checks), "TOOLCHAIN_CHECK_FAILED"
+    )
     locks = toolchain.get("locks")
     require(isinstance(locks, dict), "TOOLCHAIN_LOCKS_MISSING")
     for identifier, relative in LOCK_PATHS.items():
-        require(sha256_tracked(root, relative) == locks.get(identifier), "TOOLCHAIN_LOCK_HASH_MISMATCH", identifier)
+        require(
+            sha256_tracked(root, relative) == locks.get(identifier),
+            "TOOLCHAIN_LOCK_HASH_MISMATCH",
+            identifier,
+        )
 
     reproduction = loaded_evidence["EVIDENCE-REPRODUCIBILITY"]
-    require(reproduction.get("status") == "PASS" and reproduction.get("errors") == [], "REPRODUCTION_FAILED")
-    require(reproduction.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "REPRODUCTION_SEMANTICS_MISMATCH")
+    require(
+        reproduction.get("status") == "PASS" and reproduction.get("errors") == [],
+        "REPRODUCTION_FAILED",
+    )
+    require(
+        reproduction.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID,
+        "REPRODUCTION_SEMANTICS_MISMATCH",
+    )
     checks = reproduction.get("checks")
     require(isinstance(checks, list) and len(checks) == 12, "REPRODUCTION_CHECK_COUNT_MISMATCH")
     require(all(item.get("status") == "PASS" for item in checks), "REPRODUCTION_CHECK_FAILED")
 
     semantics = loaded_evidence["EVIDENCE-SEMANTICS"]
     require(semantics.get("status") == "published", "SEMANTICS_EVIDENCE_UNPUBLISHED")
-    require(semantics.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "SEMANTICS_EVIDENCE_MISMATCH")
+    require(
+        semantics.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "SEMANTICS_EVIDENCE_MISMATCH"
+    )
     return {
         "coverage_requirements": len(requirements),
         "model_checks": len(config_ids),
@@ -535,8 +573,7 @@ def run_formal_report_verifier(root: Path, report_path: Path) -> dict[str, Any]:
             command,
             cwd=snapshot,
             check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             encoding="utf-8",
         )
@@ -547,8 +584,14 @@ def run_formal_report_verifier(root: Path, report_path: Path) -> dict[str, Any]:
         result = json.loads(lines[-1])
     except json.JSONDecodeError as exc:
         reject("FORMAL_REPORT_VERIFIER_INVALID_JSON", str(exc))
-    require(result.get("status") == "PASS" and result.get("decision") == "GO", "FORMAL_REPORT_VERIFIER_REJECTED")
-    require(result.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID, "FORMAL_REPORT_VERIFIER_SEMANTICS_MISMATCH")
+    require(
+        result.get("status") == "PASS" and result.get("decision") == "GO",
+        "FORMAL_REPORT_VERIFIER_REJECTED",
+    )
+    require(
+        result.get("formal_semantics_id") == EXPECTED_SEMANTICS_ID,
+        "FORMAL_REPORT_VERIFIER_SEMANTICS_MISMATCH",
+    )
     return result
 
 

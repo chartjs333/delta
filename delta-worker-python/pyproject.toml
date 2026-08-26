@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "deltatorrent-worker"
+version = "0.1.0"
+description = "DeltaReduce worker-local reproducible scientific baseline"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[project.scripts]
+delta = "deltatorrent.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/deltatorrent"]
+
+[tool.uv]
+package = true

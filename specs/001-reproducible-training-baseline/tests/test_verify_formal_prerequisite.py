@@ -9,7 +9,6 @@ import unittest
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = (
     ROOT
@@ -37,8 +36,7 @@ class FormalPrerequisiteVerifierTests(unittest.TestCase):
             [sys.executable, str(SCRIPT), "--check-only", "--report", str(report)],
             cwd=ROOT,
             check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             encoding="utf-8",
             timeout=30,

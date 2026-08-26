@@ -1,8 +1,12 @@
 PYTHON ?= python3
+UV ?= uv
 FORMAL_RUNNER := $(PYTHON) formal/scripts/run_formal_gate.py
+PREREQUISITE := specs/001-reproducible-training-baseline/scripts/verify_formal_prerequisite.py
+FOUNDATION := specs/001-reproducible-training-baseline/scripts/verify_foundation.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
-	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check
+	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
+	prerequisite protocol-check python-check foundation-check conformance
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -39,3 +43,20 @@ formal-report:
 
 formal-check: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety \
 	formal-liveness formal-proofs formal-mutants formal-refinement formal-report
+
+prerequisite:
+	$(UV) run python $(PREREQUISITE) --check-only
+
+protocol-check:
+	$(UV) run pytest delta-worker-python/tests/contract delta-worker-python/tests/architecture
+
+python-check:
+	$(UV) run ruff check .
+	$(UV) run ruff format --check .
+	$(UV) run mypy delta-worker-python/src
+	$(UV) run pytest delta-worker-python/tests
+
+foundation-check:
+	$(UV) run python $(FOUNDATION) --check-only
+
+conformance: prerequisite protocol-check foundation-check

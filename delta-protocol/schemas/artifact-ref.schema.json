@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:artifact-ref:1",
+  "title": "DeltaReduce ArtifactRef v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["byte_length", "content_id", "media_type", "schema_id", "schema_version"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "schema_id": {"type": "string", "pattern": "^SCHEMA-[A-Z0-9-]+-V[0-9]+$"},
+    "media_type": {"type": "string", "minLength": 1, "maxLength": 255},
+    "byte_length": {"type": "integer", "minimum": 0},
+    "content_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

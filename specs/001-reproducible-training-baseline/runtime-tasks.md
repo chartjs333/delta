@@ -10,20 +10,20 @@ These tasks supplement `tasks.md`. They are mandatory and use `HR001-*` IDs to a
 
 ## Phase HR1: polyglot repository foundation
 
-- [ ] **HR001-004** Create the top-level component directories and ownership README files for `delta-protocol`, `delta-worker-python`, `delta-core-cpp`, `delta-runtime-cpp`, `delta-ffi`, `delta-node-java` and `integration`.
-- [ ] **HR001-005** Define dependency-direction checks: protocol imports nothing runtime-specific; Python worker cannot import native/JVM implementations; future Java and C++ modules consume only canonical contracts.
-- [ ] **HR001-006** Add root build orchestration documentation without introducing native/JVM production code; define pinned toolchain manifests as future inputs rather than silently using host defaults.
+- [x] **HR001-004** Create the top-level component directories and ownership README files for `delta-protocol`, `delta-worker-python`, `delta-core-cpp`, `delta-runtime-cpp`, `delta-ffi`, `delta-node-java` and `integration`.
+- [x] **HR001-005** Define dependency-direction checks: protocol imports nothing runtime-specific; Python worker cannot import native/JVM implementations; future Java and C++ modules consume only canonical contracts.
+- [x] **HR001-006** Add root build orchestration documentation without introducing native/JVM production code; define pinned toolchain manifests as future inputs rather than silently using host defaults.
 
 ## Phase HR2: canonical shared contracts
 
-- [ ] **HR001-007** Create runtime-neutral artifact/media/schema registry under `delta-protocol/`.
-- [ ] **HR001-008** Add canonical JSON and safe tensor fixture vectors with exact expected bytes and SHA-256.
-- [ ] **HR001-009** Add formal action/outcome/error projection fixtures used by the Python baseline.
-- [ ] **HR001-010** Add negative tests proving Python memory layout, pickle, map iteration order and locale cannot define protocol bytes.
+- [x] **HR001-007** Create runtime-neutral artifact/media/schema registry under `delta-protocol/`.
+- [x] **HR001-008** Add canonical JSON and safe tensor fixture vectors with exact expected bytes and SHA-256.
+- [x] **HR001-009** Add formal action/outcome/error projection fixtures used by the Python baseline.
+- [x] **HR001-010** Add negative tests proving Python memory layout, pickle, map iteration order and locale cannot define protocol bytes.
 
 ## Phase HR3: Python baseline integration
 
-- [ ] **HR001-011** Place the Python package under `delta-worker-python/` or document an equivalent migration-compatible layout before T001 implementation.
+- [x] **HR001-011** Place the Python package under `delta-worker-python/` or document an equivalent migration-compatible layout before T001 implementation.
 - [ ] **HR001-012** Bind run/checkpoint manifests to protocol schema and formal-semantics compatibility fields.
 - [ ] **HR001-013** Export legal artifact lifecycle/recovery traces and verify them with the feature-000 trace checker where applicable.
 

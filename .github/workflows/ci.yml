@@ -1,0 +1,60 @@
+name: 001 Python foundation
+
+on:
+  push:
+    branches: [001-reproducible-training-baseline]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+
+      - name: Install pinned workspace tool
+        run: python3 -m pip install --disable-pip-version-check uv==0.6.14
+
+      - name: Materialize locked environment
+        run: uv sync --frozen
+
+      - name: Verify merged formal prerequisite
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/001-reproducible-training-baseline/scripts/verify_formal_prerequisite.py --check-only
+          uv run python -m unittest discover -s specs/001-reproducible-training-baseline/tests -v
+
+      - name: Run offline Python and protocol gates
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy delta-worker-python/src
+          uv run pytest delta-worker-python/tests
+
+      - name: Verify deterministic foundation evidence
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: uv run python specs/001-reproducible-training-baseline/scripts/verify_foundation.py --check-only
