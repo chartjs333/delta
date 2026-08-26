@@ -1,76 +1,72 @@
-# DeltaReduce v1 formal-first Spec Kit roadmap
+# DeltaReduce v1 formal-first hybrid-runtime roadmap
+
+## Gate status
+
+Feature `000-formal-tla-spec` has a deterministic `GO` for formal semantics:
+
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
+
+Implementation work remains blocked until PR #1 is merged and the merged evidence is independently verified by feature 001 T000/HR001-001.
 
 ## Branch topology
 
-Branches are stacked. Each authoritative branch adds only its own specification directory and uses the previous authoritative feature head as parent.
+| Order | Branch | Base | Primary exit gate | Runtime focus |
+| ---: | --- | --- | --- | --- |
+| 0 | `000-formal-tla-spec` | `main` | Formal GO | TLA+/Lean/refinement/evidence |
+| 1 | `001-reproducible-training-baseline` | `000-formal-tla-spec` | merged Formal GO + deterministic baseline | Python worker + protocol foundation |
+| 2 | `002-local-round-engine` | `001-reproducible-training-baseline` | fixed ticket reconstructs worker state | Python/PyTorch local engine |
+| 3 | `003-bft-round-state-machine` | `002-local-round-engine` | C++ traces refine TLA+; four nodes agree exactly | C++ core/runtime/WAL, C ABI, Java FFM harness |
+| 4 | `004-compressed-delta-protocol` | `003-bft-round-state-machine` | exact fixed-point bytes and proof instances | C++ codec/shards + cross-language fixtures |
+| 5 | `005-content-addressed-p2p-distribution` | `004-compressed-delta-protocol` | certified object survives seed loss | Java Netty P2P, safe FFM ingress |
+| 6 | `006-regional-hierarchical-reduce` | `005-content-addressed-p2p-distribution` | formal and empirical flat equality | C++ hierarchy + Java routing |
+| 7 | `007-domain-pure-ticket-scheduling` | `006-regional-hierarchical-reduce` | deterministic quota/lease safety | C++ scheduler state + Java admission |
+| 8 | `008-certificates-and-consensus` | `007-domain-pure-ticket-scheduling` | full chain, Frankenstein reject, ApplyQC unique | C++ certificates/apply + Java TLS/timers |
+| 9 | `009-qlora-8gb-mode` | `008-certificates-and-consensus` | frozen base and certified adapter run | Python QLoRA + C++ adapter core + Java node |
+| 10 | `010-wan-benchmark-and-quality` | `009-qlora-8gb-mode` | preregistered GO result | polyglot E2E/sanitizer/fuzz/WAN/quality |
+| 11 | `011-multiregion-pilot` | `010-wan-benchmark-and-quality` | signed pilot decision | packaged native/JVM nodes + Python workers |
 
-| Order | Branch | Base | Primary exit gate |
-| ---: | --- | --- | --- |
-| 0 | `000-formal-tla-spec` | `main` | TLC safety/liveness models, parametric proofs, counterexample mutants and Formal GO |
-| 1 | `001-reproducible-training-baseline` | `000-formal-tla-spec` | Formal GO verified; deterministic local reference and offline WAN tests |
-| 2 | `002-local-round-engine` | `001-reproducible-training-baseline` | Parent minus final local delta reconstructs worker state |
-| 3 | `003-bft-round-state-machine` | `002-local-round-engine` | Implementation traces refine TLA+; four aggregators produce identical hashes for 100 tickets |
-| 4 | `004-compressed-delta-protocol` | `003-bft-round-state-machine` | Canonical fixed-point shards and machine-checked accumulator proof pass boundary corpus |
-| 5 | `005-content-addressed-p2p-distribution` | `004-compressed-delta-protocol` | Certified object download survives initial-seed loss without violating formal availability semantics |
-| 6 | `006-regional-hierarchical-reduce` | `005-content-addressed-p2p-distribution` | Hierarchical integer result is formally and empirically equal to flat reference |
-| 7 | `007-domain-pure-ticket-scheduling` | `006-regional-hierarchical-reduce` | Deterministic fixed-ticket plan preserves configured domain quotas and lease safety |
-| 8 | `008-certificates-and-consensus` | `007-domain-pure-ticket-scheduling` | Certificate implementation refines parent graph; Frankenstein shard rejected; ApplyQC unique |
-| 9 | `009-qlora-8gb-mode` | `008-certificates-and-consensus` | Frozen base and certified adapter-only 8 GB reference run |
-| 10 | `010-wan-benchmark-and-quality` | `009-qlora-8gb-mode` | Preregistered quality, BFT, WAN, determinism and formal-regression gates pass |
-| 11 | `011-multiregion-pilot` | `010-wan-benchmark-and-quality` | Compatible Formal GO and Benchmark GO; 20–50-worker pilot yields signed decision evidence |
+## Normative implementation artifacts
 
-## Superseded branches
+Every feature keeps original `spec.md`, `plan.md`, `tasks.md` and adds:
 
-These refs are historical only and MUST NOT be used as bases:
+- `runtime-profile.md`: language/runtime ownership, boundary and formal-impact rules;
+- `runtime-tasks.md`: supplemental mandatory implementation tasks;
+- `checklists/hybrid-runtime.md`: readiness and boundary checklist.
 
-| Legacy ref | Replaced by | Reason |
-| --- | --- | --- |
-| `003-central-round-coordinator` | `003-bft-round-state-machine` | Central authority is incompatible with BFT replicated state. |
-| `007-adaptive-heterogeneous-scheduling` | `007-domain-pure-ticket-scheduling` | Adaptive `H_i` and stale weighting are forbidden. |
-| `008-permissioned-trust-and-resilience` | `008-certificates-and-consensus` | Identity-only resilience is insufficient; explicit certificate/QC lineage is mandatory. |
+The hybrid addenda may narrow implementation choices but cannot weaken the Constitution or formal semantics.
+
+## Cross-feature runtime invariants
+
+- C++ core does not perform network I/O or read wall-clock time.
+- C++ native runtime owns single-writer state, WAL and durable recovery.
+- Java owns transport, TLS, peers, backpressure, opaque timers and operations—not consensus decisions.
+- Python owns worker-local ML and evaluation—not validator state.
+- Cross-runtime communication uses canonical bytes and a versioned C ABI.
+- Native effects become visible only after durable commit.
+- Java-owned memory is borrowed synchronously and never retained by native code.
+- Zero-copy is a fast path with mandatory bounded-copy fallback.
+- Timer events use opaque tokens and stale-token rejection.
+- Every runtime binds the same protocol/schema/formal semantics IDs.
+- Embedded FFM and isolated sidecar profiles are tested and reported separately.
+
+## Formal impact classes
+
+- `NONE`: documentation/build change with no protocol-visible behavior.
+- `REFINEMENT_ONLY`: implementation choice already representable by accepted formal actions; requires trace/refinement evidence.
+- `SEMANTIC`: changes an external action/precondition/outcome/durability/failure rule; must return to 000 and obtain a new Formal GO before code.
+
+ADR-0010 is initially classified `REFINEMENT_ONLY`. Discovery of a new action such as an unmodeled timeout fallback, partial durability outcome or alternate current-state transition automatically reclassifies it as `SEMANTIC` and stops implementation.
+
+## Superseded refs
+
+`003-central-round-coordinator`, `007-adaptive-heterogeneous-scheduling` and `008-permissioned-trust-and-resilience` remain historical only.
 
 ## Execution protocol
 
-1. Implement and validate `000-formal-tla-spec` first.
-2. Do not begin any code-bearing branch without exact compatible `FormalVerificationReport(decision=GO)`.
-3. Implement and validate one subsequent authoritative branch at a time.
-4. Run Spec Kit cross-artifact and formal-impact analysis before code and after any amendment.
-5. Use task IDs in commits and keep `tasks.md`, traceability and formal evidence current.
-6. Merge/promote only after feature and affected formal gates pass.
-7. Stop on any model, theorem, refinement, certificate, arithmetic, determinism or quality failure; never bypass it with a later feature.
-
-## Formal baseline obligations
-
-- **F-SAFETY**: no conflicting finalized config, ISC, EC, APC, shard QC, aggregate root or ApplyQC under `n=3f+1`, quorum `2f+1`, honest no-double-vote.
-- **F-FREEZE**: inputs and ticket/domain parameters cannot change after their certified freeze points; no valid seed exists before ISC.
-- **F-AVAIL**: only AC-covered inputs enter ISC; post-ISC loss triggers repair or safe abort, never membership rewrite.
-- **F-ATOMIC**: AggregateRootQC covers every required domain×shard once and cannot mix parent views.
-- **F-APPLY**: only one ApplyQC/current checkpoint per aggregate/height; abort/recovery preserves the parent.
-- **F-RECOVERY**: journal replay, duplicate messages and crash/restart are idempotent and cannot create a second vote/transition.
-- **F-LIVENESS**: progress is conditional on eventual synchrony, honest quorum, artifact availability and fairness; outside assumptions only safety is required.
-- **F-ARITH**: accumulator bounds, hierarchical-flat equality and exact rational/fixed-point composition are parametrically proved.
-- **F-PLANES**: local/partial artifacts never become distribution objects.
-
-## Cross-feature invariants
-
-- A ticket names one domain, immutable data range, fixed `B`, fixed `H`, parent checkpoint and arithmetic profile.
-- Worker speed can affect admission or ticket count before freeze, never the domain mixture or certified scalar weight.
-- One `ticket_id` maps to at most one commitment root.
-- Shards become eligible only after availability certification.
-- Exact inputs are frozen before `ρ_t` exists.
-- Consensus clipping, weighting and summation use canonical integer/rational arithmetic; floating addition is prohibited.
-- Fixed-point headroom is proven for the worst-case eligible set before aggregation and revalidated for actual APC coefficients.
-- Every parameter shard QC references one ISC/EC/APC view; `AggregateRootQC` atomically binds the complete shard set.
-- One aggregate root can finalize at most one `ApplyQC`.
-- Only certified global immutable objects enter P2P distribution.
-- Network operations are idempotent, timeout-bounded and replay-protected.
-- Permissioned identity is mandatory through the pilot.
-
-## Deferred research
-
-- permissionless participation, Sybil resistance and economic incentives;
-- privacy-preserving secure aggregation and zero-knowledge proof of training;
-- adaptive/local-staleness policies, unless a future constitutional amendment reintroduces them;
-- advanced sparse/low-rank codecs that cannot satisfy canonical fixed-point proofs;
-- WAN tensor/sequence parallelism, distributed MoE and block-local objectives;
-- full dense multi-billion pretraining on isolated 8 GB GPUs.
+1. Merge and verify 000.
+2. Implement one stacked branch at a time.
+3. Read both original feature artifacts and hybrid addenda.
+4. Run formal-impact analysis before code and after design changes.
+5. Require exact cross-language fixtures before optimizing.
+6. Treat unsafe native behavior, pointer lifetime ambiguity, WAL ordering ambiguity or event-loop blocking as STOP defects.
+7. Promote only after feature, formal-refinement and runtime-boundary gates pass.

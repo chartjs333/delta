@@ -1,0 +1,1 @@
+{"expected_error":"PARTIAL_OR_UNCERTIFIED_PUBLICATION","expected_status":"FAIL","formal_semantics_id":"sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6","sha256":"5bd7c02b97983067f7d8ec46b2c49667d1cebba65067c2362bd261df572a54be","source":"formal/fixtures/traces/illegal/partial-publication.json"}

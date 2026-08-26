@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:training-state:1",
+  "title": "DeltaReduce safe training state metadata v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "checkpoint_id",
+    "formal_semantics_id",
+    "model_schema_id",
+    "optimizer",
+    "rng",
+    "run_id",
+    "sampler",
+    "scaler",
+    "scheduler",
+    "schema_version"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "checkpoint_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "run_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "model_schema_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "optimizer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "step"],
+      "properties": {
+        "kind": {"const": "CANONICAL_ADAMW_V1"},
+        "step": {"type": "integer", "minimum": 0}
+      }
+    },
+    "rng": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["torch_cpu_hex"],
+      "properties": {"torch_cpu_hex": {"type": "string", "pattern": "^[0-9a-f]+$"}}
+    },
+    "sampler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cursor", "sample_count", "seed"],
+      "properties": {
+        "cursor": {"type": "integer", "minimum": 0},
+        "sample_count": {"type": "integer", "minimum": 1},
+        "seed": {"type": "integer", "minimum": 0}
+      }
+    },
+    "scheduler": {"type": "null"},
+    "scaler": {"type": "null"}
+  }
+}

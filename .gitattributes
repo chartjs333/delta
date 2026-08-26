@@ -1,0 +1,2 @@
+# Canonical protocol, proof, fixture, and source bytes are LF on every platform.
+* text=auto eol=lf

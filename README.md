@@ -1,74 +1,114 @@
 # DeltaTorrent / DeltaReduce v1
 
-DeltaTorrent — исследовательская система для обучения и дообучения языковых моделей на географически распределённой сети GPU с ограниченной памятью и нестабильными WAN-соединениями. **DeltaReduce v1** является authoritative архитектурой её reduce/apply plane.
+DeltaTorrent — formal-first система распределённого обучения и дообучения языковых моделей на географически распределённых GPU. **DeltaReduce v1** является authoritative архитектурой reduce/apply plane.
 
-Репозиторий находится на стадии **formal-first, specification-first**. До реализации Python/PyTorch-веток протокол обязан пройти нулевой этап: executable TLA+ model checking для BFT lifecycle/failure/recovery и параметрические theorem-prover proofs для quorum/fixed-point/hierarchical/apply утверждений.
+Формальный predecessor `000-formal-tla-spec` получил `FormalVerificationReport(decision=GO)` для formal semantics:
 
-## Архитектурный мандат DeltaReduce v1
+```text
+sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6
+```
 
-1. **Нет единственного authoritative coordinator.** Раунд исполняется детерминированной BFT state machine с validator set размером `3f+1`; quorum certificate требует не менее `2f+1` подписей.
-2. **Только Domain-Pure Work Tickets.** Каждый ticket связан ровно с одним data domain `d`, фиксированным batch/token budget `B` и фиксированным числом local optimizer steps `H`.
-3. **Нет adaptive `H_i`.** Неоднородность устройств влияет на admission, число назначаемых tickets и deadlines, но не меняет `B`, `H`, domain mixture `π_d` или математический вес ticket после фиксации `RoundConfig`.
-4. **Нет FP32 accumulation в consensus reduce.** Worker нормализует local accumulation по effective step count `A_j`, затем квантует её по зафиксированному fixed-point profile. Parameter shards суммируются только в INT64/INT128-compatible integer space с доказанной границей переполнения.
-5. **Input freeze предшествует randomness.** Exact set `{T_j, C_j, AC_j}` фиксируется до генерации seed `ρ_t`; seed не может влиять на включение commitments задним числом.
-6. **Каждый переход сертифицирован.** Certificate chain развивается от input set через eligibility/aggregation plan и parameter QCs к `AggregateRootQC` и `ApplyQC`.
-7. **Reduce и distribution разделены.** P2P swarm распространяет только одинаковые immutable datasets, checkpoints, certified global aggregates и applied checkpoints. Worker commitments, local shards и regional partials не являются distributable objects.
-8. **Формальная модель предшествует коду.** Safety/failure/recovery semantics и parametric proof obligations фиксируются в `000-formal-tla-spec`; изменение протокольной семантики без обновления модели и повторного formal gate запрещено.
+Implementation branches всё равно начинают работу только после merge PR #1 и независимой проверки merged evidence.
 
-## Порядок реализации
+## Неподвижные протокольные инварианты
 
-| Шаг | Feature-ветка | Результат |
+1. Нет единственного authoritative coordinator: state machine реплицирована на `3f+1` validators, QC требует `2f+1` подписей.
+2. Каждый `WorkTicket` domain-pure и фиксирует data range, `B`, `H`, parent, schema и arithmetic profile.
+3. Adaptive `H_i`, stale weighting и device-speed mathematical weights запрещены.
+4. Consensus reduce/apply выполняется в canonical integer/rational fixed-point space; FP accumulation запрещена.
+5. `{T_j,C_j,AC_j}` фиксируется до seed `ρ_t`.
+6. Certificate lineage: `ISC → EC → APC → ParameterShardQC → AggregateRootQC → ApplyQC`.
+7. Только ApplyQC может продвинуть current checkpoint.
+8. Reduce и distribution planes разделены: local/partial artifacts не входят в P2P swarm.
+9. Protocol-semantic change сначала меняет formal baseline, а затем код.
+
+## Hybrid Runtime v1
+
+Reference implementation использует три runtime, разделённые по fault domain и workload:
+
+| Runtime | Ответственность | Не имеет права делать |
+| --- | --- | --- |
+| **C++20/23 pure core** | canonical parsing, legality, fixed-point math, certificates, deterministic next state | sockets, wall-clock decisions, JVM/Python object access |
+| **C++ native runtime** | single-writer reactor, WAL, snapshots, durable vote guard, recovery ordering | выбирать peers/маршруты, интерпретировать transport topology |
+| **Java reference node** | JDK 25 reference runtime, Netty, TLS, peer sessions, backpressure, opaque timers, observability, FFM | выбирать transition, quorum, bucket membership, coefficient или current checkpoint |
+| **Python/PyTorch worker** | local training, data/token accounting, QLoRA, normalized pseudo-gradient, evaluation | consensus reduce/apply, current-state authority |
+
+Главный boundary principle:
+
+> C++ не знает о соединениях; Java не принимает протокольных решений; Python не является validator state machine.
+
+Подробности: `docs/adr/0010-hybrid-runtime-boundary.md`, `docs/architecture/hybrid-runtime.md`, `specs/HYBRID-RUNTIME-MAP.md`.
+
+## FFI contract
+
+- Java вызывает только маленький versioned **C ABI** через FFM; C++ ABI никогда не пересекает границу.
+- Command/effect API передаёт canonical bytes, а не набор fine-grained setters.
+- Все mutating calls выполняются одним consensus reactor thread.
+- Native runtime делает durable commit до возврата outbound effects (`persist-before-expose`).
+- C++ exceptions не пересекают ABI; возвращаются versioned numeric status codes.
+- Java-owned direct memory заимствуется только на время синхронного downcall; native pointer не сохраняется.
+- Zero-copy ingress является fast path. Heap/composite/non-contiguous input использует bounded direct-copy fallback с идентичным результатом.
+- Java доставляет opaque `timer_token`; только C++ решает, разрешён ли timeout transition.
+- Startup handshake проверяет ABI, protocol/schema versions, build ID и `formal_semantics_id`.
+
+## Репозиторий
+
+```text
+formal/                 TLA+, Lean, mutants, refinement, evidence
+delta-protocol/         canonical schemas, IDs and cross-language fixtures
+delta-worker-python/    Python/PyTorch baseline, local engine, QLoRA
+delta-core-cpp/         pure deterministic protocol core
+delta-runtime-cpp/      single-writer reactor, WAL, snapshot, recovery
+delta-ffi/              C ABI and generated/handwritten Java bindings
+delta-node-java/        Netty/TLS/P2P/timers/operations shell
+integration/            polyglot traces, crash matrix, E2E and benchmark fixtures
+```
+
+## Последовательность веток
+
+| Шаг | Ветка | Runtime focus |
 | ---: | --- | --- |
-| 0 | `000-formal-tla-spec` | TLA+ BFT/failure/recovery model, theorem-prover proofs и обязательный Formal GO |
-| 1 | `001-reproducible-training-baseline` | Воспроизводимый single-node baseline и WAN-эмулятор, заблокированные до Formal GO |
-| 2 | `002-local-round-engine` | Локальный optimizer engine и canonical pseudo-gradient |
-| 3 | `003-bft-round-state-machine` | Реализация, refinement и bit-exact conformance BFT lifecycle |
-| 4 | `004-compressed-delta-protocol` | Canonical fixed-point quantization, shard envelopes и machine-checked overflow proofs |
-| 5 | `005-content-addressed-p2p-distribution` | Проверяемая P2P-раздача только certified global objects |
-| 6 | `006-regional-hierarchical-reduce` | Региональные/parameter-shard BFT committees и formal flat-equivalence obligation |
-| 7 | `007-domain-pure-ticket-scheduling` | Детерминированное планирование fixed `B/H` tickets по domains |
-| 8 | `008-certificates-and-consensus` | ISC/EC/APC, shard QCs, AggregateRootQC, ApplyQC и refinement gate |
-| 9 | `009-qlora-8gb-mode` | Adapter-only fixed-ticket QLoRA для квалифицированных 8 GB GPU |
-| 10 | `010-wan-benchmark-and-quality` | Token/domain-matched WAN, BFT, safety и quality gates |
-| 11 | `011-multiregion-pilot` | Permissioned pilot на 20–50 workers и 3–5 регионах |
+| 0 | `000-formal-tla-spec` | executable semantics and parametric proofs — GO established |
+| 1 | `001-reproducible-training-baseline` | Python scientific baseline + runtime-neutral protocol foundation |
+| 2 | `002-local-round-engine` | Python fixed-ticket worker engine |
+| 3 | `003-bft-round-state-machine` | C++ pure core/runtime/WAL + C ABI + minimal Java FFM harness |
+| 4 | `004-compressed-delta-protocol` | C++ fixed-point/shard implementation and cross-language byte conformance |
+| 5 | `005-content-addressed-p2p-distribution` | Java Netty P2P and zero-copy fast path with safe fallback |
+| 6 | `006-regional-hierarchical-reduce` | C++ integer hierarchy + Java regional routing |
+| 7 | `007-domain-pure-ticket-scheduling` | C++ deterministic plan/lease state + Java admission telemetry |
+| 8 | `008-certificates-and-consensus` | C++ full certificate/apply chain + Java TLS/message/timer shell |
+| 9 | `009-qlora-8gb-mode` | Python QLoRA worker + C++ adapter aggregate/apply + Java node |
+| 10 | `010-wan-benchmark-and-quality` | Python+C+++Java E2E, sanitizer/fuzz/crash and quality benchmark |
+| 11 | `011-multiregion-pilot` | packaged validator/node/worker deployment and fault campaign |
 
-Полный authoritative набор спецификаций находится в последней стековой ветке `011-multiregion-pilot`. Карта зависимостей, formal obligations и exit gates находится в `specs/ROADMAP.md`.
+Каждая feature directory содержит исходные `spec.md`, `plan.md`, `tasks.md` и обязательные hybrid addenda `runtime-profile.md`/`runtime-tasks.md`.
 
-## Formal gate
+## С чего начинается реализация
 
-Ветка `000-formal-tla-spec` должна завершиться content-addressed `FormalVerificationReport(decision=GO)`. Минимальный gate включает:
+1. Merge PR #1 (`000-formal-tla-spec`).
+2. Перестроить/проверить `001-reproducible-training-baseline` поверх merged main.
+3. Выполнить `T000` и `HR001-001`: offline verify Formal GO and semantics ID.
+4. Зафиксировать polyglot directory boundaries и `delta-protocol` canonical fixtures.
+5. Реализовать Python baseline; C++/Java production code до feature 003 не добавлять.
 
-- TLC safety checking для `f=1`, четырёх validators, message reorder/duplicate/drop, crash/restart, partition, equivocation и storage loss;
-- liveness checking только под явно заданными fairness/eventual-synchrony/quorum/availability assumptions;
-- machine-checked parametric proofs для quorum intersection, accumulator safety, hierarchical-flat equality и Apply uniqueness;
-- зафиксированные counterexample traces для намеренно сломанных вариантов;
-- refinement/trace contract, обязательный для реализационных веток `003`, `004`, `006` и `008`.
+## Воспроизводимый CPU smoke
 
-`001` и все последующие code-bearing branches не могут начинать implementation tasks при отсутствии exact compatible Formal GO.
+После `uv sync --frozen` минимальный baseline и полная рекурсивная проверка его immutable bundle
+запускаются так:
 
-## Superseded legacy refs
+```text
+uv run delta baseline run configs/baseline/cpu-smoke-v1.json
+uv run delta artifacts verify runs/cpu-smoke-v1/runs/cpu-smoke-v1/run-manifest.json --root runs/cpu-smoke-v1
+uv run delta netem smoke configs/netem/wan-smoke-v1.json
+```
 
-Следующие исторические ветки больше не входят в execution path и не должны использоваться как base:
-
-- `003-central-round-coordinator`;
-- `007-adaptive-heterogeneous-scheduling`;
-- `008-permissioned-trust-and-resilience`.
-
-Они сохранены только для audit/history. Их контракты central authority, adaptive `H_i`, stale weighting и FP32 reduce заменены DeltaReduce v1.
-
-## Как выполнять очередной шаг
-
-1. Начать с `000-formal-tla-spec` и получить Formal GO.
-2. Переключиться на очередную authoritative feature-ветку из таблицы.
-3. Прочитать `.specify/memory/constitution.md`, `docs/adr/0000-formal-verification-gate.md`, `specs/ROADMAP.md`, formal failure/proof artifacts, затем `spec.md`, `plan.md` и `tasks.md` текущей функции.
-4. Запустить cross-artifact и formal-impact analysis; central coordinator, adaptive local steps, FP consensus accumulation и несогласованная с TLA+ transition semantics считаются blocking defects.
-5. Реализовывать задачи по порядку, связывая commits с task IDs и formal trace obligations.
-6. Пройти feature exit gate, regression formal gate и final Constitution Check до перехода к следующей ветке.
+Повторное использование завершённого `run_id` намеренно запрещено. Полный контракт,
+межплатформенные границы и offline gate описаны в `docs/reproducibility.md`.
 
 ## Целевой MVP
 
-Первый убедительный WAN-прототип должен поддерживать 20–50 remote workers класса 8 GB, 3–5 регионов, permissioned BFT validator set, full-training workload порядка 100–300 млн параметров либо QLoRA, fixed domain-pure tickets, canonical INT16-style worker vectors, INT64/INT128 accumulation, certificate hierarchy и P2P-раздачу certified global checkpoints.
+20–50 permissioned workers класса 8 GB, 3–5 регионов, fixed domain-pure tickets, canonical INT16-style vectors, checked INT64/INT128 accumulation, BFT certificate chain, ApplyQC current state и P2P-раздача certified global checkpoints.
 
 ## Источники и supersession
 
-Исходная концепция DeltaTorrent сохранена в `docs/source/deltatorrent-concept.ru.md`. Архитектурная поправка DeltaReduce v1 сохранена в `docs/source/deltareduce-v1-amendment.md` и имеет приоритет в вопросах central coordination, local-step adaptivity, reduce arithmetic и consensus certification. ADR-0000 и Constitution 2.1.0 дополнительно требуют formal verification до production implementation.
+Исходная концепция сохранена в `docs/source/deltatorrent-concept.ru.md`. Она остаётся основанием для длительного local training, WAN realism и разделения reduce/distribution. DeltaReduce v1 и formal baseline supersede central coordination, adaptive `H_i`, stale weighting и FP32 consensus accumulation. Hybrid Runtime v1 — implementation decision, а не утверждение исходного концептуального документа.

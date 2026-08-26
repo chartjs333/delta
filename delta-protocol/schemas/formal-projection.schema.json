@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:formal-projection:1",
+  "title": "Feature 001 formal projection vector",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["action_id", "error_code", "formal_semantics_id", "outcome", "schema_version"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"},
+    "action_id": {
+      "enum": ["ACT-ARTIFACT-CORRUPT", "ACT-ARTIFACT-LOSE", "ACT-ARTIFACT-REPAIR", "ACT-PUBLISH"]
+    },
+    "outcome": {"enum": ["ACCEPTED", "BLOCKED", "FAULT", "FINALIZED", "NO_OP", "REJECTED", "STUTTER"]},
+    "error_code": {"type": ["string", "null"], "pattern": "^[A-Z][A-Z0-9_]{0,127}$"}
+  }
+}

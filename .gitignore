@@ -1,29 +1,11 @@
-# Compiled class file
-*.class
-
-# Log file
+# Logs and crash output
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs
 hs_err_pid*
 replay_pid*
+core
+core.*
 
-# DeltaTorrent / Python research artifacts
+# Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -33,7 +15,7 @@ __pycache__/
 build/
 dist/
 *.egg-info/
-artifacts/
+/artifacts/
 checkpoints/
 runs/
 *.safetensors
@@ -48,7 +30,40 @@ runs/
 certs/
 keys/
 
-# TLA+/TLC/Apalache generated artifacts
+# CMake / C++
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+out/
+compile_commands.json
+Testing/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.dSYM/
+*.profraw
+*.profdata
+*.gcda
+*.gcno
+corpus-crashes/
+
+# Java / Gradle
+.gradle/
+**/build/
+*.class
+*.jar
+*.war
+*.ear
+*.hprof
+.jextract-cache/
+delta-ffi/generated/
+
+# TLA+/TLC/Apalache
 .tla-toolbox/
 .toolbox/
 states/
@@ -60,14 +75,19 @@ MC_*.out
 formal/build/
 formal/reports/local/
 
-# Lean generated artifacts
+# Lean
 formal/proofs/.lake/
 formal/proofs/build/
 formal/proofs/lake-packages/
 formal/toolchain/windows/
+formal/toolchain/cache/*
+!formal/toolchain/cache/README.md
 
 # Editors / OS
 .idea/
 .vscode/
+.settings/
+.project
+.classpath
 .DS_Store
 Thumbs.db

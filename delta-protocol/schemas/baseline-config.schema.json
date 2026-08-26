@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:baseline-config:1",
+  "title": "DeltaReduce BaselineConfig v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "batch_size", "beta1_ppm", "beta2_ppm", "checkpoint_every_optimizer_steps",
+    "corpus_path", "device", "dtype", "epsilon_nanos", "gradient_accumulation_steps",
+    "hidden_size", "learning_rate_nanos", "optimizer_steps", "output_dir", "run_id",
+    "schema_version", "seed", "sequence_length", "tokenizer_path", "vocab_size",
+    "weight_decay_ppm"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "run_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "corpus_path": {"type": "string", "minLength": 1},
+    "tokenizer_path": {"type": "string", "minLength": 1},
+    "output_dir": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "device": {"const": "cpu"},
+    "dtype": {"const": "float32"},
+    "sequence_length": {"type": "integer", "minimum": 1},
+    "batch_size": {"type": "integer", "minimum": 1},
+    "gradient_accumulation_steps": {"type": "integer", "minimum": 1},
+    "optimizer_steps": {"type": "integer", "minimum": 1},
+    "checkpoint_every_optimizer_steps": {"type": "integer", "minimum": 1},
+    "vocab_size": {"type": "integer", "minimum": 2},
+    "hidden_size": {"type": "integer", "minimum": 1},
+    "learning_rate_nanos": {"type": "integer", "minimum": 1},
+    "weight_decay_ppm": {"type": "integer", "minimum": 0, "maximum": 1000000},
+    "beta1_ppm": {"type": "integer", "minimum": 0, "maximum": 999999},
+    "beta2_ppm": {"type": "integer", "minimum": 0, "maximum": 999999},
+    "epsilon_nanos": {"type": "integer", "minimum": 1}
+  }
+}

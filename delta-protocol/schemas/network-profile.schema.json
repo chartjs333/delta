@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:network-profile:1",
+  "title": "DeltaReduce NetworkProfile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bandwidth_bytes_per_second", "disconnect_windows", "jitter_ms", "latency_ms",
+    "loss_ppm", "operation_deadline_ms", "profile_id", "reorder_ppm", "schema_version",
+    "seed"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "profile_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "latency_ms": {"type": "integer", "minimum": 0},
+    "jitter_ms": {"type": "integer", "minimum": 0},
+    "bandwidth_bytes_per_second": {"type": "integer", "minimum": 1},
+    "loss_ppm": {"type": "integer", "minimum": 0, "maximum": 1000000},
+    "reorder_ppm": {"type": "integer", "minimum": 0, "maximum": 1000000},
+    "operation_deadline_ms": {"type": "integer", "minimum": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "disconnect_windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["end_ms", "start_ms"],
+        "properties": {
+          "start_ms": {"type": "integer", "minimum": 0},
+          "end_ms": {"type": "integer", "minimum": 1}
+        }
+      }
+    }
+  }
+}

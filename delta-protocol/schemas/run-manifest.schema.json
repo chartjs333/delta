@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:run-manifest:1",
+  "title": "DeltaReduce RunManifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifacts",
+    "checkpoint_refs",
+    "code_revision",
+    "config_id",
+    "dataset_id",
+    "dependency_lock_id",
+    "failure_code",
+    "formal_semantics_id",
+    "model_id",
+    "platform",
+    "processed_tokens",
+    "run_id",
+    "schema_version",
+    "seeds",
+    "status",
+    "tokenizer_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "status": {"enum": ["RUNNING", "COMPLETED", "FAILED"]},
+    "config_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "code_revision": {"type": "string", "minLength": 1, "maxLength": 128},
+    "dependency_lock_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "dataset_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "model_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "tokenizer_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "processed_tokens": {"type": "integer", "minimum": 0},
+    "platform": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string"}
+    },
+    "seeds": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "integer", "minimum": 0}
+    },
+    "artifacts": {"type": "array", "items": {"$ref": "artifact-ref.schema.json"}},
+    "checkpoint_refs": {"type": "array", "items": {"$ref": "artifact-ref.schema.json"}},
+    "failure_code": {"type": ["string", "null"], "pattern": "^[A-Z][A-Z0-9_]{0,127}$"}
+  }
+}

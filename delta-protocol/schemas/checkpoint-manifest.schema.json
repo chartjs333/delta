@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:checkpoint-manifest:1",
+  "title": "DeltaReduce CheckpointManifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifacts",
+    "boundary",
+    "checkpoint_id",
+    "formal_semantics_id",
+    "optimizer_step",
+    "processed_tokens",
+    "run_id",
+    "sampler_cursor",
+    "schema_version",
+    "step"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "checkpoint_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "step": {"type": "integer", "minimum": 0},
+    "optimizer_step": {"type": "integer", "minimum": 0},
+    "processed_tokens": {"type": "integer", "minimum": 0},
+    "sampler_cursor": {"type": "integer", "minimum": 0},
+    "boundary": {"const": "OPTIMIZER_STEP"},
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "artifact-ref.schema.json"}
+    }
+  }
+}
