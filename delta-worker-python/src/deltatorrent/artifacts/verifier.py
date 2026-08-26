@@ -52,7 +52,8 @@ class BundleVerifier:
         self._require_identity(direct, "SCHEMA-CORPUS-TEXT-V1", manifest.dataset_id)
         self._require_identity(direct, "SCHEMA-TOKENIZER-V1", manifest.tokenizer_id)
         self._require_identity(direct, "SCHEMA-UV-LOCK-V1", manifest.dependency_lock_id)
-        self._require_single(direct, "SCHEMA-METRICS-JSONL-V1")
+        if manifest.status is RunStatus.COMPLETED:
+            self._require_single(direct, "SCHEMA-METRICS-JSONL-V1")
         for reference in manifest.artifacts:
             self._verify_reference(reference)
 

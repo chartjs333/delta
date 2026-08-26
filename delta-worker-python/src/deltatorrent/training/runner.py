@@ -68,6 +68,13 @@ class MetricsJournal:
             os.fsync(stream.fileno())
 
 
+_NUMERIC_FAILURES = {
+    "NON_FINITE_GRADIENT",
+    "NON_FINITE_LOSS",
+    "NON_FINITE_OPTIMIZER_STATE",
+}
+
+
 def run_baseline(
     config: BaselineConfig,
     *,
@@ -120,29 +127,45 @@ def run_baseline(
     metrics_locator = f"runs/{config.run_id}/metrics.jsonl"
     journal = MetricsJournal(output / metrics_locator, resume=resume_checkpoint is not None)
     final_checkpoint: SavedCheckpoint | None = None
-    while state.optimizer_step < config.optimizer_steps:
-        prior_tokens = state.processed_tokens
-        started = time.perf_counter()
-        (metric,) = train_to_optimizer_step(state, config, samples, state.optimizer_step + 1)
-        elapsed = max(time.perf_counter() - started, sys.float_info.min)
-        interval_tokens = state.processed_tokens - prior_tokens
-        journal.append(
-            {
-                "learning_rate": metric.learning_rate,
-                "loss": metric.loss,
-                "optimizer_step": metric.optimizer_step,
-                "peak_memory_bytes": None,
-                "processed_tokens": metric.processed_tokens,
-                "schema_version": "1.0.0",
-                "step": metric.step,
-                "throughput_tokens_per_second": interval_tokens / elapsed,
-                "wall_time_seconds": elapsed,
-            }
-        )
-        if state.optimizer_step % config.checkpoint_every_optimizer_steps == 0:
-            final_checkpoint = save_checkpoint(
-                store, state, config, f"optimizer-step-{state.optimizer_step}"
+    try:
+        while state.optimizer_step < config.optimizer_steps:
+            prior_tokens = state.processed_tokens
+            started = time.perf_counter()
+            (metric,) = train_to_optimizer_step(state, config, samples, state.optimizer_step + 1)
+            elapsed = max(time.perf_counter() - started, sys.float_info.min)
+            interval_tokens = state.processed_tokens - prior_tokens
+            journal.append(
+                {
+                    "learning_rate": metric.learning_rate,
+                    "loss": metric.loss,
+                    "optimizer_step": metric.optimizer_step,
+                    "peak_memory_bytes": None,
+                    "processed_tokens": metric.processed_tokens,
+                    "schema_version": "1.0.0",
+                    "step": metric.step,
+                    "throughput_tokens_per_second": interval_tokens / elapsed,
+                    "wall_time_seconds": elapsed,
+                }
             )
+            if state.optimizer_step % config.checkpoint_every_optimizer_steps == 0:
+                final_checkpoint = save_checkpoint(
+                    store, state, config, f"optimizer-step-{state.optimizer_step}"
+                )
+    except DeltaError as exc:
+        if exc.message not in _NUMERIC_FAILURES and exc.code is not ErrorCode.UNSAFE_SERIALIZATION:
+            raise
+        _publish_failed_run(
+            store=store,
+            output=output,
+            repository_root=repository_root,
+            config=config,
+            state=state,
+            base_artifacts=(config_ref, corpus_ref, tokenizer_ref, lock_ref),
+            metrics_locator=metrics_locator,
+            final_checkpoint=final_checkpoint,
+            failure_code=(exc.message if exc.message in _NUMERIC_FAILURES else "NON_FINITE_METRIC"),
+        )
+        raise
     if final_checkpoint is None or final_checkpoint.manifest.optimizer_step != state.optimizer_step:
         final_checkpoint = save_checkpoint(
             store, state, config, f"optimizer-step-{state.optimizer_step}"
@@ -169,14 +192,58 @@ def run_baseline(
         artifacts=(config_ref, corpus_ref, tokenizer_ref, lock_ref, metrics_ref),
         checkpoint_refs=(final_checkpoint.named_manifest_ref,),
     )
-    manifest_bytes = canonical_json_bytes(run_manifest.to_dict())
-    run_manifest_ref = store.publish_named(
-        f"runs/{config.run_id}/run-manifest.json",
-        manifest_bytes,
+    run_manifest_ref = _publish_run_manifest(store, run_manifest)
+    return BaselineRunResult(run_manifest, run_manifest_ref, final_checkpoint)
+
+
+def _publish_failed_run(
+    *,
+    store: FilesystemArtifactStore,
+    output: Path,
+    repository_root: Path,
+    config: BaselineConfig,
+    state: TrainingState,
+    base_artifacts: tuple[ArtifactRef, ...],
+    metrics_locator: str,
+    final_checkpoint: SavedCheckpoint | None,
+    failure_code: str,
+) -> None:
+    artifacts = base_artifacts
+    metrics_path = output / metrics_locator
+    if metrics_path.is_file():
+        metrics_ref = store.publish_named(
+            metrics_locator,
+            metrics_path.read_bytes(),
+            media_type="application/vnd.deltareduce.metrics+jsonl;version=1",
+            schema_id="SCHEMA-METRICS-JSONL-V1",
+        )
+        artifacts = (*artifacts, metrics_ref)
+    manifest = RunManifest(
+        run_id=config.run_id,
+        status=RunStatus.FAILED,
+        config_id=base_artifacts[0].content_id,
+        code_revision=_code_revision(repository_root),
+        dependency_lock_id=base_artifacts[3].content_id,
+        dataset_id=base_artifacts[1].content_id,
+        model_id=parameter_schema_id(state.model),
+        tokenizer_id=base_artifacts[2].content_id,
+        processed_tokens=state.processed_tokens,
+        platform=_platform_fingerprint(config),
+        seeds={"data": config.seed, "model": config.seed, "torch": config.seed},
+        artifacts=artifacts,
+        checkpoint_refs=(final_checkpoint.named_manifest_ref,) if final_checkpoint else (),
+        failure_code=failure_code,
+    )
+    _publish_run_manifest(store, manifest)
+
+
+def _publish_run_manifest(store: FilesystemArtifactStore, manifest: RunManifest) -> ArtifactRef:
+    return store.publish_named(
+        f"runs/{manifest.run_id}/run-manifest.json",
+        canonical_json_bytes(manifest.to_dict()),
         media_type="application/vnd.deltareduce.run-manifest+json;version=1",
         schema_id="SCHEMA-RUN-MANIFEST-V1",
     )
-    return BaselineRunResult(run_manifest, run_manifest_ref, final_checkpoint)
 
 
 def _code_revision(root: Path) -> str:

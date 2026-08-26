@@ -68,6 +68,16 @@ class CanonicalAdamW:
                     parameter.mul_(1.0 - self.learning_rate * self.weight_decay)
                 denominator = second.sqrt().div_(math.sqrt(bias2)).add_(self.epsilon)
                 parameter.addcdiv_(first, denominator, value=-(self.learning_rate / bias1))
+                if not bool(
+                    torch.isfinite(parameter).all()
+                    and torch.isfinite(first).all()
+                    and torch.isfinite(second).all()
+                ):
+                    raise DeltaError(
+                        ErrorCode.INVALID_MANIFEST,
+                        "NON_FINITE_OPTIMIZER_STATE",
+                        {"name": name},
+                    )
                 parameter.grad = None
 
 

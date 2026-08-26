@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 from deltatorrent.artifacts.canonical_json import canonical_json_bytes
 from deltatorrent.artifacts.filesystem import FilesystemArtifactStore
+from deltatorrent.artifacts.verifier import BundleVerifier
 from deltatorrent.cli.main import main
 from deltatorrent.domain.errors import DeltaError, ErrorCode
 from deltatorrent.training.baseline import TrainingState, train_to_optimizer_step
@@ -72,6 +73,31 @@ def test_metrics_journal_rejects_non_finite_values(tmp_path: Path) -> None:
         journal.append({"loss": float("nan")})
     assert captured.value.code is ErrorCode.UNSAFE_SERIALIZATION
     assert not (tmp_path / "metrics.jsonl").exists()
+
+
+def test_non_finite_training_publishes_failed_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config = replace(
+        BaselineConfig.from_json_file(CONFIG),
+        run_id="failed-run",
+        output_dir=str(tmp_path),
+    )
+
+    def fail_training(*args: object, **kwargs: object) -> tuple[()]:
+        raise DeltaError(ErrorCode.INVALID_MANIFEST, "NON_FINITE_LOSS")
+
+    monkeypatch.setattr("deltatorrent.training.runner.train_to_optimizer_step", fail_training)
+    with pytest.raises(DeltaError, match="NON_FINITE_LOSS"):
+        run_baseline(config, repository_root=ROOT)
+
+    manifest_path = tmp_path / "runs/failed-run/run-manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["status"] == "FAILED"
+    assert manifest["failure_code"] == "NON_FINITE_LOSS"
+    assert manifest["checkpoint_refs"] == []
+    verified = BundleVerifier(tmp_path, ROOT / "delta-protocol/registry.json").verify(manifest_path)
+    assert verified.verified_objects == 4
 
 
 def test_cli_resume_completes_from_safe_optimizer_boundary(
