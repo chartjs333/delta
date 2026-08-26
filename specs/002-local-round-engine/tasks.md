@@ -94,14 +94,14 @@ protocol registry and exact Formal GO.
 
 ## Final Phase: Validation and documentation
 
-- [ ] T027 Document `LocalDelta` sign, `A_j=H` guard and normalized contribution contract in
+- [x] T027 Document `LocalDelta` sign, `A_j=H` guard and normalized contribution contract in
   `docs/local-round-contract.md`.
-- [ ] T028 Add deterministic `DomainPureWorkTicket` in
+- [x] T028 Add deterministic `DomainPureWorkTicket` in
   `configs/worker/smoke-ticket.json`.
-- [ ] T029 Add architecture tests prohibiting local contributions in distribution and native/JVM
+- [x] T029 Add architecture tests prohibiting local contributions in distribution and native/JVM
   validator dependencies in
   `delta-worker-python/tests/architecture/test_reduce_distribution_boundary.py`.
-- [ ] T030 Run formal projection/cross-artifact analysis and record evidence in
+- [x] T030 Run formal projection/cross-artifact analysis and record evidence in
   `specs/002-local-round-engine/evidence/final-compatibility.json`.
 - [ ] T031 Run the full offline quality gate and final Constitution Check; record evidence in
   `specs/002-local-round-engine/evidence/exit-gate.md`.

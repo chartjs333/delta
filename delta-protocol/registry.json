@@ -21,6 +21,11 @@
       "sha256": "8a4eea1807ffdb1733f48e66a17adfc2f1e903b69bb346fc91aa03c14cdb7502"
     },
     {
+      "id": "FEATURE004-ENCODER-INPUTS-001",
+      "path": "fixtures/local-round/feature004-encoder-inputs-v1.json",
+      "sha256": "956bb05edaf0b4ad83ca8b7f010eef2fc8949cacb243660e6d0b6db2d8800afd"
+    },
+    {
       "id": "LOCAL-ROUND-COMPLETION-001",
       "path": "fixtures/local-round/local-round-completion-v1.json",
       "sha256": "b8ca59a3560e77f3dd7cf538ec27ed4d97a9a8f8975786597bc6ecd04e2274fe"

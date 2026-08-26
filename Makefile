@@ -3,10 +3,12 @@ UV ?= uv
 FORMAL_RUNNER := $(PYTHON) formal/scripts/run_formal_gate.py
 PREREQUISITE := specs/001-reproducible-training-baseline/scripts/verify_formal_prerequisite.py
 FOUNDATION := specs/001-reproducible-training-baseline/scripts/verify_foundation.py
+LOCAL_ROUND_PREDECESSOR := specs/002-local-round-engine/scripts/verify_predecessor.py
+LOCAL_ROUND_COMPATIBILITY := specs/002-local-round-engine/scripts/verify_final_compatibility.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
-	prerequisite protocol-check python-check foundation-check conformance
+	prerequisite protocol-check python-check foundation-check conformance local-round-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -60,3 +62,7 @@ foundation-check:
 	$(UV) run python $(FOUNDATION) --check-only
 
 conformance: prerequisite protocol-check foundation-check
+
+local-round-check: protocol-check python-check
+	$(UV) run python $(LOCAL_ROUND_PREDECESSOR) --check-only
+	$(UV) run python $(LOCAL_ROUND_COMPATIBILITY) --check-only

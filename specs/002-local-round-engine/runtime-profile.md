@@ -3,6 +3,7 @@
 **Status**: Normative hybrid-runtime addendum  
 **Runtime owner**: Python 3.12 + PyTorch worker  
 **Formal impact**: `REFINEMENT_ONLY`
+**Formal semantics**: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
 ## Boundary
 

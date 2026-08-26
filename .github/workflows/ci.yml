@@ -1,8 +1,8 @@
-name: 001 Python foundation
+name: Python worker quality
 
 on:
   push:
-    branches: [001-reproducible-training-baseline]
+    branches: [001-reproducible-training-baseline, 002-local-round-engine]
   pull_request:
 
 permissions:
@@ -70,3 +70,15 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
           UV_OFFLINE: "true"
         run: uv run python specs/001-reproducible-training-baseline/scripts/verify_foundation.py --check-only
+
+      - name: Verify feature 002 compatibility when present
+        if: ${{ hashFiles('specs/002-local-round-engine/evidence/final-compatibility.json') != '' }}
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/002-local-round-engine/scripts/verify_predecessor.py --check-only
+          uv run python specs/002-local-round-engine/scripts/verify_final_compatibility.py --check-only
