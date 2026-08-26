@@ -23,13 +23,13 @@
 
 ## Phase 2: Foundational domain and artifact contracts
 
-- [ ] T007 Реализовать typed errors и stable error codes в `src/deltatorrent/domain/errors.py`.
-- [ ] T008 Реализовать `ArtifactRef`, `RunManifest` и `CheckpointManifest` в `src/deltatorrent/domain/manifests.py`.
-- [ ] T009 Реализовать canonical JSON и SHA-256 helpers в `src/deltatorrent/artifacts/canonical_json.py`.
-- [ ] T010 Реализовать atomic filesystem artifact store в `src/deltatorrent/artifacts/filesystem.py`.
-- [ ] T011 [P] Добавить schema/canonicalization contract tests в `tests/contract/test_manifest_contracts.py`.
-- [ ] T012 [P] Добавить atomic publish/crash-cleanup tests в `tests/unit/test_filesystem_artifact_store.py`.
-- [ ] T013 [P] Add legal/illegal artifact lifecycle projection fixtures in `tests/fixtures/formal/001/` and contract tests.
+- [x] T007 Реализовать typed errors и stable error codes в `src/deltatorrent/domain/errors.py`.
+- [x] T008 Реализовать `ArtifactRef`, `RunManifest` и `CheckpointManifest` в `src/deltatorrent/domain/manifests.py`.
+- [x] T009 Реализовать canonical JSON и SHA-256 helpers в `src/deltatorrent/artifacts/canonical_json.py`.
+- [x] T010 Реализовать atomic filesystem artifact store в `src/deltatorrent/artifacts/filesystem.py`.
+- [x] T011 [P] Добавить schema/canonicalization contract tests в `tests/contract/test_manifest_contracts.py`.
+- [x] T012 [P] Добавить atomic publish/crash-cleanup tests в `tests/unit/test_filesystem_artifact_store.py`.
+- [x] T013 [P] Add legal/illegal artifact lifecycle projection fixtures in `tests/fixtures/formal/001/` and contract tests.
 
 ## Phase 3: US1 — Reproducible baseline
 

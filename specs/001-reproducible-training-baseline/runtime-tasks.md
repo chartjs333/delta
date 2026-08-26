@@ -24,8 +24,8 @@ These tasks supplement `tasks.md`. They are mandatory and use `HR001-*` IDs to a
 ## Phase HR3: Python baseline integration
 
 - [x] **HR001-011** Place the Python package under `delta-worker-python/` or document an equivalent migration-compatible layout before T001 implementation.
-- [ ] **HR001-012** Bind run/checkpoint manifests to protocol schema and formal-semantics compatibility fields.
-- [ ] **HR001-013** Export legal artifact lifecycle/recovery traces and verify them with the feature-000 trace checker where applicable.
+- [x] **HR001-012** Bind run/checkpoint manifests to protocol schema and formal-semantics compatibility fields.
+- [x] **HR001-013** Export legal artifact lifecycle/recovery traces and verify them with the feature-000 trace checker where applicable.
 
 ## Final gate
 

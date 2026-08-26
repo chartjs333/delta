@@ -91,6 +91,41 @@ FOUNDATION_ROOT_FILES = (
     "specs/001-reproducible-training-baseline/scripts/verify_foundation.py",
     "specs/001-reproducible-training-baseline/evidence/start-ready.md",
 )
+FOUNDATION_COMPONENT_FILES = (
+    "delta-core-cpp/README.md",
+    "delta-ffi/README.md",
+    "delta-node-java/README.md",
+    "delta-protocol/README.md",
+    "delta-protocol/action-registry/formal-projection-v1.json",
+    "delta-protocol/fixtures/canonical-json/canonical-json-v1.json",
+    "delta-protocol/fixtures/formal/artifact-projection-v1.json",
+    "delta-protocol/fixtures/safe-tensor/safe-tensor-i32-v1.json",
+    "delta-protocol/registry.json",
+    "delta-protocol/schemas/artifact-ref.schema.json",
+    "delta-protocol/schemas/checkpoint-manifest.schema.json",
+    "delta-protocol/schemas/formal-projection.schema.json",
+    "delta-protocol/schemas/protocol-registry.schema.json",
+    "delta-protocol/schemas/run-manifest.schema.json",
+    "delta-protocol/schemas/safe-tensor-envelope-v1.json",
+    "delta-runtime-cpp/README.md",
+    "delta-worker-python/README.md",
+    "delta-worker-python/pyproject.toml",
+    "delta-worker-python/src/deltatorrent/__init__.py",
+    "delta-worker-python/src/deltatorrent/cli.py",
+    "delta-worker-python/src/deltatorrent/domain/__init__.py",
+    "delta-worker-python/src/deltatorrent/domain/formal_compat.py",
+    "delta-worker-python/src/deltatorrent/protocol/__init__.py",
+    "delta-worker-python/src/deltatorrent/protocol/canonical.py",
+    "delta-worker-python/src/deltatorrent/py.typed",
+    "delta-worker-python/tests/architecture/test_dependency_boundaries.py",
+    "delta-worker-python/tests/architecture/test_safe_serialization.py",
+    "delta-worker-python/tests/conftest.py",
+    "delta-worker-python/tests/contract/test_protocol_fixtures.py",
+    "delta-worker-python/tests/contract/test_registry.py",
+    "integration/README.md",
+    "integration/cross-language/README.md",
+    "integration/traces/README.md",
+)
 
 
 class FoundationError(RuntimeError):
@@ -145,17 +180,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def foundation_paths() -> list[Path]:
-    targets = (*FOUNDATION_ROOT_FILES, *COMPONENTS)
-    completed = subprocess.run(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "--", *targets],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    )
-    require(completed.returncode == 0, "GIT_FILE_LIST_FAILED", completed.stderr.strip())
-    paths = [ROOT / relative for relative in completed.stdout.splitlines() if relative]
+    paths = [ROOT / relative for relative in (*FOUNDATION_ROOT_FILES, *FOUNDATION_COMPONENT_FILES)]
     return sorted(set(paths), key=lambda path: path.relative_to(ROOT).as_posix())
 
 
