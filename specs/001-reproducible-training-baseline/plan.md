@@ -14,7 +14,7 @@ No package or production source task may start before the formal prerequisite pa
 - **Language/runtime**: Python 3.12.
 - **Dependency/build**: `uv`, `pyproject.toml`, committed lockfile.
 - **ML runtime**: PyTorch; `safetensors` for tensor payload.
-- **Schema/validation**: typed domain dataclasses/Pydantic boundary models; canonical JSON UTF-8 with sorted keys.
+- **Schema/validation**: strict typed dataclasses and runtime-neutral JSON Schemas; canonical JSON UTF-8 with sorted keys.
 - **CLI**: thin composition layer; business logic callable as Python API.
 - **Tests**: pytest, property tests where valuable; ruff and mypy.
 - **Storage**: filesystem artifact store with atomic publish; interface allows later CAS replacement.
@@ -56,7 +56,10 @@ DatasetManifest ────────────────┤             
 NetworkProfile ──▶ FaultyStream/Proxy ──▶ local loopback scenario
 ```
 
-Training code depends on ports `ArtifactWriter`, `MetricsSink`, `Clock` and `DeviceRuntime`; filesystem, real clock and CLI remain adapters. Reproducibility class fixes platform/device/dtype contract. Trace projection is limited to formal abstractions actually used by this branch.
+The mathematical training core is separated from orchestration. The runner composes the
+filesystem artifact store, metrics journal, platform clock and CLI adapters around it.
+Reproducibility class fixes the platform/device/dtype contract. Trace projection is limited to
+formal abstractions actually used by this branch.
 
 ## Project Structure
 
@@ -126,7 +129,8 @@ specs/001-reproducible-training-baseline/evidence/
 ## Observability
 
 - `metrics.jsonl`: step/token/loss/lr/throughput/memory.
-- `events.jsonl`: lifecycle, checkpoint, retry, timeout and fault events with stable action/outcome IDs.
+- Typed errors, WAN schedules and committed refinement fixtures expose the lifecycle/fault events
+  used by this feature with stable action/outcome IDs.
 - `run-manifest.json`: final status and artifact graph.
 - `formal-prerequisite.json`: verified report/evidence/semantics IDs.
 - Manifests/metrics are authoritative evidence; logs are diagnostic.
@@ -144,6 +148,41 @@ This feature does not modify a remote system. Rollback returns to the previous c
 - **Leaked `tc` rules**: context manager/finalizer and cleanup verification.
 - **Manifest before data**: two-phase atomic publish; manifest last.
 - **Trace overclaim**: project only abstractions used by 001; full BFT refinement belongs to 003/008.
+
+## Final Constitution Check
+
+**Executed**: 2026-08-26 against the complete implementation diff and the authoritative
+feature-000 Formal GO.
+
+**Formal impact**: `REFINEMENT_ONLY`; the final analyzer rediscovered all 24 semantic artifacts,
+rederived
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
+and found no new formal action, failure terminal or protocol-visible durability outcome.
+
+| Constitution principle | Final evidence | Result |
+| --- | --- | --- |
+| I. Scientific correctness | Fixed corpus/tokenizer/config/seeds, exact non-padding token count, immutable manifests, repeat and resume tests; no downstream-quality claim is made at this baseline milestone | PASS |
+| II. Formal before implementation | Merged GO, source/evidence graph and exact semantics independently verified fail-closed before production work and again at exit | PASS |
+| III. Replicated state | Feature 001 introduces no coordinator, validator or authoritative global state API | PASS (out of scope preserved) |
+| IV. Domain-pure fixed work | No WorkTicket or adaptive distributed scheduling is implemented in this branch | PASS (out of scope preserved) |
+| V. Integer consensus arithmetic | Floating point is confined to worker-local reference training; no reduce/certified arithmetic is implemented | PASS (boundary preserved) |
+| VI. Input freeze and lineage | No certificate or seed-after-ISC behavior is introduced; artifacts retain explicit immutable parent references | PASS |
+| VII. Certified Apply | No current-checkpoint or Apply authority is implemented | PASS (out of scope preserved) |
+| VIII. Plane separation | No worker-local artifact enters a P2P plane; this feature has no distribution implementation | PASS |
+| IX. Safe boundaries | Safetensors plus strict JSON only, static pickle prohibition, traversal rejection and hash-before-use tests | PASS |
+| X. Failure/recovery | Atomic publish, optimizer-boundary resume, corruption detection, identity-preserving repair projections and terminal numeric `FAILED` manifests | PASS |
+| XI. WAN/observability/reversibility | Seeded latency/jitter/bandwidth/loss/reorder/disconnect/deadline suite, structured metrics/errors, immutable offline exit evidence and cleanup paths | PASS |
+| XII. Replaceable interfaces | Runtime-neutral schemas/media IDs/canonical fixtures and dependency-boundary tests separate domain contracts from Python, storage and netem adapters | PASS |
+
+Engineering gates passed offline: lock/frozen sync, ruff, format, strict mypy, 57 pytest tests,
+six fail-closed prerequisite tests, foundation evidence, final formal compatibility and WAN smoke.
+The two GitHub Actions runs for the audited source commit also passed. Detailed commands and
+content hashes are recorded in `evidence/exit-gate.md` and
+`evidence/final-compatibility.json`.
+
+**Final result**: PASS. This closes feature 001 without changing or overstating the accepted
+formal semantics; later distributed protocol work remains blocked on its own stacked branch
+gates.
 
 ## Exit Gate
 

@@ -3,7 +3,7 @@
 **Feature Branch**: `001-reproducible-training-baseline`  
 **Created**: 2026-08-21  
 **Last amended**: 2026-08-23  
-**Status**: In progress — merged compatible `000` Formal GO verified by T000/HR001-001
+**Status**: Complete — exit gate and final Constitution/formal-compatibility checks PASS
 **Depends on**: `000-formal-tla-spec`
 
 ## Formal Prerequisite

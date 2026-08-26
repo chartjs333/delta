@@ -63,7 +63,7 @@
 - [x] T032 Добавить committed smoke configs в `configs/baseline/`.
 - [x] T033 Run formal-impact/cross-artifact analysis and verify no semantic drift from the bound `formal_semantics_id`.
 - [x] T034 Выполнить полный offline quality gate и приложить команды/результаты в `specs/001-reproducible-training-baseline/evidence/exit-gate.md`.
-- [ ] T035 Повторить Constitution Check по final diff в `plan.md` and reverify Formal GO compatibility.
+- [x] T035 Повторить Constitution Check по final diff в `plan.md` and reverify Formal GO compatibility.
 
 ## Dependencies
 

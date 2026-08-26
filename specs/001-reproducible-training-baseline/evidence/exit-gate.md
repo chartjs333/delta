@@ -1,10 +1,14 @@
 # Feature 001 offline exit gate
 
-**Decision**: PASS  
-**Executed**: 2026-08-26, Europe/Berlin  
-**Source commit**: `ee7bbacb0a3fd04c941599ac476307b921c3f8f2`  
+**Decision**: PASS
+
+**Executed**: 2026-08-26, Europe/Berlin
+
+**Source commit**: `ee7bbacb0a3fd04c941599ac476307b921c3f8f2`
+
 **Environment**: Python 3.12.1, uv 0.6.14, PyTorch 2.6.0+cpu,
-Windows 10.0.19045  
+Windows 10.0.19045
+
 **Network policy**: `PUBLIC_NETWORK_BLOCKED`; `HTTP_PROXY`, `HTTPS_PROXY` and
 `ALL_PROXY` pointed to closed loopback port 9, `UV_OFFLINE=true`, and `NO_PROXY` was limited to
 loopback.
@@ -67,4 +71,3 @@ Both GitHub workflow executions for the source commit completed successfully:
 
 - PR run: `https://github.com/chartjs333/delta/actions/runs/32974466504`;
 - push run: `https://github.com/chartjs333/delta/actions/runs/32974459370`.
-
