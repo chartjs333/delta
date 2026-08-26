@@ -18,21 +18,22 @@ protocol registry and exact Formal GO.
 
 ## Phase 1: Runtime-neutral domain contracts
 
-- [ ] T001 Define strict `DomainPureWorkTicket` schema and Python model in
+- [x] T001 Define strict `DomainPureWorkTicket` schema and Python model in
   `delta-protocol/schemas/domain-pure-work-ticket-v1.json` and
   `delta-worker-python/src/deltatorrent/domain/tickets.py`.
-- [ ] T002 Define canonical `ParameterSchema`, tied aliases and fingerprint contract in
+- [x] T002 Define canonical `ParameterSchema`, tied aliases and fingerprint contract in
+  `delta-protocol/schemas/parameter-schema-v1.json` and
   `delta-worker-python/src/deltatorrent/domain/parameters.py`.
-- [ ] T003 Define `LocalRoundCompletion`, internal `LocalDelta` and commit-eligible
+- [x] T003 Define `LocalRoundCompletion`, internal `LocalDelta` and commit-eligible
   `NormalizedContributionCandidate` contracts in
   `delta-protocol/schemas/local-round-completion-v1.json`,
   `delta-protocol/schemas/normalized-contribution-candidate-v1.json` and
   `delta-worker-python/src/deltatorrent/domain/updates.py`.
-- [ ] T004 [P] Define worker lifecycle and terminal state transitions in
+- [x] T004 [P] Define worker lifecycle and terminal state transitions in
   `delta-worker-python/src/deltatorrent/domain/worker_state.py`.
-- [ ] T005 [P] Add canonical positive/negative ticket, completion and contribution fixtures in
+- [x] T005 [P] Add canonical positive/negative ticket, completion and contribution fixtures in
   `delta-protocol/fixtures/local-round/`.
-- [ ] T006 Add schema/canonical-bytes/state-machine tests in
+- [x] T006 Add schema/canonical-bytes/state-machine tests in
   `delta-worker-python/tests/contract/test_local_round_contract.py`.
 
 ## Phase 2: Foundational math and accounting

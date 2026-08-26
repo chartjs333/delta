@@ -99,6 +99,7 @@ delta-protocol/
     domain-pure-work-ticket-v1.json
     local-round-completion-v1.json
     normalized-contribution-candidate-v1.json
+    parameter-schema-v1.json
   fixtures/local-round/
 
 delta-worker-python/src/deltatorrent/

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:domain-pure-work-ticket:1",
+  "title": "DeltaReduce DomainPureWorkTicket v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "arithmetic_profile_id", "batch_budget", "data", "data_range", "deterministic_seed",
+    "domain_id", "formal_semantics_id", "logical_deadline_ms", "optimizer_profile_id",
+    "parameter_schema_id", "parent_model", "schema_version", "step_budget", "ticket_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"},
+    "ticket_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "domain_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "data": {"$ref": "artifact-ref.schema.json"},
+    "data_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["end", "start"],
+      "properties": {
+        "start": {"type": "integer", "minimum": 0},
+        "end": {"type": "integer", "minimum": 1}
+      }
+    },
+    "batch_budget": {"type": "integer", "minimum": 1},
+    "step_budget": {"type": "integer", "minimum": 1},
+    "parent_model": {"$ref": "artifact-ref.schema.json"},
+    "parameter_schema_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "optimizer_profile_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "arithmetic_profile_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "deterministic_seed": {"type": "integer", "minimum": 0},
+    "logical_deadline_ms": {"type": "integer", "minimum": 1}
+  }
+}

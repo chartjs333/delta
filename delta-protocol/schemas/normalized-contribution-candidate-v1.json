@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:normalized-contribution-candidate:1",
+  "title": "DeltaReduce NormalizedContributionCandidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "arithmetic_profile_id", "completion_id", "domain_id", "effective_steps",
+    "formal_semantics_id", "normalization_denominator", "normalized_delta",
+    "optimizer_profile_id", "parameter_schema_id", "parent_model_id", "schema_version",
+    "step_budget", "storage_dtype", "tensor_order", "ticket_fingerprint", "ticket_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"},
+    "ticket_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "domain_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "ticket_fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "completion_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "parent_model_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "parameter_schema_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "optimizer_profile_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "arithmetic_profile_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "effective_steps": {"type": "integer", "minimum": 1},
+    "step_budget": {"type": "integer", "minimum": 1},
+    "normalization_denominator": {"type": "integer", "minimum": 1},
+    "normalized_delta": {"$ref": "artifact-ref.schema.json"},
+    "storage_dtype": {"const": "float32"},
+    "tensor_order": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]{0,255}$"}
+    }
+  }
+}
