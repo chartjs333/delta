@@ -1,6 +1,8 @@
 # Hybrid Runtime Tasks: 002 Local Round Engine
 
-- [ ] **HR002-001** Verify feature-001 protocol registry and merged Formal GO compatibility before local-engine code.
+- [x] **HR002-001** Verify the merged feature-001 commit/exit/foundation/final-compatibility
+  evidence, protocol registry, exact Formal GO/semantics and no drift before local-engine code;
+  bind the result to T000 evidence.
 - [ ] **HR002-002** Define runtime-neutral `DomainPureWorkTicket`, completion and contribution-candidate schemas under `delta-protocol/`.
 - [ ] **HR002-003** Bind Python local engine to immutable `B/H/domain/data/parent/schema/profile` and reject any mutation.
 - [ ] **HR002-004** Implement exact `A_j=H` completion guard and non-padding token accounting.

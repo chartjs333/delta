@@ -8,7 +8,14 @@
 
 Feature 002 implements worker-local fixed-ticket training only. It does not load the native validator library, open validator sockets or mutate replicated consensus state.
 
-The Python worker consumes a canonical `DomainPureWorkTicket`, executes exactly its fixed data range, `B` and `H`, requires `A_j = H`, computes `Delta_j = parent - final`, normalizes by `A_j` and publishes a contribution candidate through runtime-neutral `delta-protocol` contracts.
+The Python worker consumes a canonical `DomainPureWorkTicket`, executes exactly its fixed data
+range, `B` and `H`, requires `A_j = H`, computes internal
+`LocalDelta = parent - final`, normalizes it by `A_j` and publishes a
+`NormalizedContributionCandidate` through runtime-neutral `delta-protocol` contracts.
+
+`LocalDelta` is reconstruction/reference state and is never itself commit-eligible. Only the
+normalized candidate may be eligible, and only after complete execution. Every incomplete path
+publishes terminal `LocalRoundCompletion` evidence without a candidate.
 
 ## Required output boundary
 
@@ -16,7 +23,8 @@ The local engine emits:
 
 - parent/model/schema/ticket/domain identifiers;
 - exact effective step and non-padding token counts;
-- safe tensor artifact for the normalized pseudo-gradient reference;
+- safe tensor artifact for the normalized pseudo-gradient reference, never raw `LocalDelta` as an
+  eligible output;
 - canonical metadata and content hashes;
 - complete/incomplete/cancelled/OOM terminal reason;
 - formal trace projection for the local completion handoff.

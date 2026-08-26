@@ -1,66 +1,109 @@
-# Implementation Plan: Локальный worker round и псевдоградиент
+# Implementation Plan: Локальный worker round и нормализованный contribution
 
-**Branch**: `002-local-round-engine` | **Date**: 2026-08-21 | **Spec**: `spec.md`
+**Branch**: `002-local-round-engine` | **Date**: 2026-08-26 | **Spec**: `spec.md`
 
 ## Summary
 
-Расширить baseline training primitives отдельным application service `LocalRoundEngine`. Domain layer определяет assignment, schema, lifecycle и update manifest; training layer выполняет детерминированный local AdamW; delta layer вычисляет/проверяет `parent - final`; filesystem adapter публикует result атомарно. Первый adapter — in-process/CLI, чтобы математический contract был доказан до появления coordinator transport.
+After independently verifying the merged feature-001 exit evidence and exact Formal GO, extend
+the Python/PyTorch baseline with `LocalRoundEngine`. Runtime-neutral contracts define an immutable
+`DomainPureWorkTicket`, terminal `LocalRoundCompletion` and complete-only
+`NormalizedContributionCandidate`. The engine executes exactly the ticket data, `B` and `H`,
+builds internal `LocalDelta = parent - final`, proves reconstruction under the worker-local FP32
+contract and publishes `LocalDelta/A_j` only when `A_j=H`.
+
+No package or production task begins before T000/HR002-001 passes. Feature 002 introduces no
+quantization, validator state, global reduction, C++/Java production logic or P2P publication.
 
 ## Technical Context
 
-- Наследует Python/PyTorch/artifact contracts feature `001`.
-- Canonical delta payload: safetensors с FP32 tensors в parameter-schema order.
-- State persistence: assignment journal и immutable result refs в filesystem store.
-- Cancellation: injected monotonic clock и cancellation token.
-- Validation: exact schema/tensor-set checks, finite scan, global/per-tensor norm summaries.
-- Concurrency: один active execution на assignment ID; repository lock/compare-and-set semantics.
+- **Mandatory predecessor**: merge commit `7795d3209fb5e3093cc4450c4d49701137d4aab4`
+  and independently verified feature-001 exit evidence.
+- **Formal binding**:
+  `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+- **Runtime**: Python 3.12 + PyTorch worker; reuse the locked feature-001 workspace.
+- **Canonical contracts**: runtime-neutral JSON Schemas/fixtures under `delta-protocol` before
+  Python orchestration.
+- **Tensor formats**: safetensors; canonical FP32 order from `ParameterSchema`; no pickle.
+- **State persistence**: atomic ticket claim, immutable completion/candidate refs and manifest-last
+  filesystem publication.
+- **Accounting**: `A_j` is committed optimizer updates; non-padding tokens/cursor commit at the same
+  optimizer boundary.
+- **Cancellation/faults**: injected monotonic clock, cancellation token and deterministic fault
+  points.
+- **Validation**: ticket bindings, exact tensor set/shape/schema, finite scan, reconstruction,
+  `A_j=H`, per-tensor/global norm limits.
+- **Concurrency**: one canonical claim/outcome per `ticket_id`; exact replay is idempotent and
+  conflicting reuse fails closed.
 
-## Constitution Check
+## Pre-implementation Constitution Check
 
 | Principle | Design response | Gate |
 | --- | --- | --- |
-| Scientific correctness | Local math сравнивается с direct reference; tokens считаются на committed optimizer boundaries | Numerical/reference suite |
-| Reduce/distribution separation | Артефакт явно типизирован как worker-local и запрещён в distribution interfaces | Architecture test |
-| Versioned state | Assignment, parameter schema, parent и update content-addressed | Contract tests |
-| Heterogeneity bounded | Step/token/deadline limits explicit; adaptive policy ещё не вводится | Boundary tests |
-| Permissioned security | Identity пока logical; unsafe payloads и non-finite data отвергаются | Validation suite |
-| Reversible increments | In-process adapter, atomic result, cancellation и rollback path | Integration gate |
+| Scientific correctness | Direct reference, exact data range, `H`, optimizer-boundary token ledger and reconstruction are explicit | parity/accounting suite |
+| Formal before code | T000/HR002-001 verifies merged 001 evidence, Formal GO and exact semantics before T001 | predecessor gate |
+| Domain-pure fixed work | Ticket immutably binds domain/data/`B`/`H`/parent/schema/profiles; no adaptive mutation | contract/boundary tests |
+| Integer consensus boundary | Feature emits normalized FP32 reference only; fixed-point/quantization remains feature 004 | architecture fixture gate |
+| Reduce/distribution separation | Worker-local media cannot enter P2P/global distribution | architecture test |
+| Safe boundaries | strict canonical schemas, safetensors, hash-before-use and no native/JVM dependency | validation/static gates |
+| Explicit failure/recovery | incomplete paths publish terminal evidence and never an eligible candidate | failure/idempotency suite |
+| WAN/observability/reversibility | structured ticket metrics, timeout-bounded injected faults, atomic outcome and rollback path | integration/exit gate |
+| Replaceable interfaces | protocol schemas/bytes are independent of Python object layout and artifact backend | canonical fixture tests |
 
-**Pre-implementation result**: PASS.
+**Pre-implementation result**: PASS. T000/HR002-001 verified merge commit `7795d320`, all four
+feature-001 exit evidence artifacts, the 13-schema/13-media protocol registry, the exact Formal GO,
+two distinct human reviewers and all 24 semantic artifacts. The same formal semantics ID was
+rederived with no new public action/failure/durability outcome. Canonical evidence is recorded in
+`evidence/predecessor-gate.json`. Any later incompatible drift remains a STOP and cannot be waived
+by Python tests.
 
-## Architecture and Data Flow
+## Architecture and data flow
 
 ```text
-RoundAssignment + parent ref + data refs
+DomainPureWorkTicket + parent/data refs
                  │
                  ▼
-        AssignmentValidator
+        immutable binding validator
+                 │
+           atomic ticket claim
                  │
                  ▼
          LocalRoundEngine
       ┌──────────┴──────────┐
       ▼                     ▼
-Baseline training core   Token ledger
+reused AdamW step core   committed token/data ledger
       │                     │
       └──── final state ─────┘
                  │
                  ▼
-       DeltaBuilder(parent - final)
+     LocalDelta = parent - final
                  │
-      schema/finite/norm validation
+       reconstruct/finite/norm checks
+                 │
+          require A_j = H
                  │
                  ▼
- atomic tensor publish → LocalUpdateManifest
+ NormalizedContributionCandidate = LocalDelta / A_j
+                 │
+                 ▼
+ safe tensor publish → terminal completion → candidate manifest last
 ```
 
-`LocalRoundEngine` работает через ports `ModelLoader`, `DatasetResolver`, `UpdateRepository`, `Clock`, `CancellationToken` и metrics sink. Никакой coordinator-specific логики внутри engine нет.
+If any precondition or execution step is incomplete, the lower candidate branch is absent and the
+engine publishes only `LocalRoundCompletion` with the stable terminal reason and observed counters.
 
-## Project Structure
+## Project structure
 
 ```text
-src/deltatorrent/
+delta-protocol/
+  schemas/
+    domain-pure-work-ticket-v1.json
+    local-round-completion-v1.json
+    normalized-contribution-candidate-v1.json
+  fixtures/local-round/
+
+delta-worker-python/src/deltatorrent/
   domain/
-    assignments.py
+    tickets.py
     parameters.py
     updates.py
     worker_state.py
@@ -68,65 +111,95 @@ src/deltatorrent/
     local_round.py
     token_accounting.py
   delta/
+    schema.py
     builder.py
     reconstruction.py
+    normalization.py
     validation.py
   worker/
+    validation.py
     engine.py
+    telemetry.py
+    update_writer.py
     repository.py
-  cli/
-    worker.py
-tests/
-  unit/test_parameter_schema.py
-  unit/test_token_accounting.py
-  unit/test_delta_math.py
-  contract/test_local_update_contract.py
-  integration/test_local_round_engine.py
-  integration/test_worker_idempotency.py
-configs/worker/
+  cli/worker.py
+
+delta-worker-python/tests/
+  unit/
+  contract/
+  integration/
+  architecture/
+
+configs/worker/smoke-ticket.json
 docs/local-round-contract.md
+specs/002-local-round-engine/evidence/
 ```
 
-## Implementation Sequence
+## Implementation sequence
 
-1. Зафиксировать assignment/update/schema domain contracts и stable serialization fixtures.
-2. Реализовать parameter schema fingerprint и exact tensor mapping.
-3. Выделить reusable local-training loop из baseline без изменения baseline semantics.
-4. Ввести committed token ledger и stop-policy state machine.
-5. Реализовать delta builder/reconstructor и numerical validators.
-6. Реализовать idempotent update repository и atomic publication.
-7. Собрать engine, cancellation и CLI vertical slice.
-8. Закрыть direct-reference, reconstruction, retry/conflict и cancellation-race tests.
+0. Verify merged feature-001/Formal GO/protocol evidence and record T000/HR002-001.
+1. Freeze canonical ticket, completion and normalized-candidate schemas/fixtures before Python
+   orchestration.
+2. Implement typed domain models, parameter schema and stable canonical fingerprints.
+3. Add exact optimizer-boundary token/data ledger and reuse local AdamW without baseline drift.
+4. Build internal `LocalDelta`, prove `final = parent - LocalDelta`, validate tensor/finite/norm
+   conditions and normalize by `A_j` only after `A_j=H`.
+5. Complete one deterministic vertical slice from ticket validation through recursive immutable
+   bundle verification.
+6. Add atomic claims, exact replay, conflict/concurrency and every incomplete terminal path.
+7. Publish runtime-neutral positive/negative FP32 inputs for the later independent feature-004
+   encoder; do not implement q-bytes.
+8. Run final formal projection, cross-artifact, offline quality and Constitution gates.
 
-## Test Strategy
+## Test strategy
 
-- **Unit**: schema aliasing/order, stop policy, token ledger, delta sign, finite/norm guards.
-- **Property**: произвольные малые tensor sets удовлетворяют `parent - delta ≈ final`.
-- **Contract**: canonical JSON fixture для assignment/update; backward read текущей schema version.
-- **Integration**: direct loop parity, deadline/cancel, data exhaustion, atomic crash points.
-- **Architecture**: domain import boundaries и невозможность публикации local update в distribution plane.
-- **Resource**: CPU mandatory; optional CUDA verifies mixed-precision-to-FP32 delta path.
+- **Prerequisite**: merged predecessor, missing/corrupt evidence, semantics/registry drift and
+  non-refinement fail closed.
+- **Contract**: strict schema, canonical bytes/hashes, immutable ticket fields, terminal/candidate
+  exclusivity and backward-read policy.
+- **Unit**: aliases/order, ledger boundaries, delta sign, reconstruction, normalization, finite and
+  norm guards.
+- **Integration**: direct parity, exact range/`H`, recursive bundle verification, exact retry,
+  conflict/concurrency, deadline/cancel/OOM/data exhaustion/non-finite and crash points.
+- **Architecture**: no native/JVM validator dependency; worker-local media rejected by distribution.
+- **Platform**: CPU required; optional CUDA may test mixed-precision-to-FP32 conversion without a
+  cross-platform bitwise claim.
+- **Offline**: committed inputs only; public network blocked after dependency materialization.
 
 ## Observability
 
-Events: assignment accepted/rejected, model/data resolved, local step committed, cancellation observed, delta validated, result published. Metrics: micro/optimizer steps, non-padding tokens, loss, step time, peak memory, delta L2/max norm, data exhaustion и completion reason.
+- canonical ticket claim and terminal completion records;
+- optimizer/micro steps, `A_j`, non-padding tokens and exact cursor/range;
+- loss, step time, measured peak memory and delta/candidate norm summaries;
+- stable incomplete reason for cancellation, deadline, OOM, data exhaustion or non-finite state;
+- candidate content IDs only for `COMPLETED` plus `A_j=H`.
 
-## Rollout and Rollback
+## Rollout and rollback
 
-Новый worker API experimental и вызывается только локально. Feature flag не нужен, поскольку существующий baseline command остаётся неизменным. Rollback удаляет worker composition/API, но сохраняет schema fixtures для предотвращения случайного повторного использования version IDs.
+The API is local/in-process and additive to the feature-001 baseline. Rollback removes worker
+composition while retaining published schema IDs/fixtures so versions cannot be silently reused.
+Temporary or staged candidate bytes remain non-eligible until the canonical candidate manifest is
+atomically published. A formal incompatibility stops this branch instead of creating a local
+exception.
 
-## Risks and Mitigations
+## Risks and mitigations
 
-- **Sign confusion**: константа/документированный contract и reconstruction tests во всех слоях.
-- **Token overcount after partial accumulation**: commit ledger обновляется только вместе с optimizer step.
-- **Tied parameters duplicated**: alias table в schema и один canonical tensor owner.
-- **Race duplicate execution**: compare-and-set assignment claim и immutable result.
-- **Большой FP32 peak**: явно измерять; streaming delta отложен до необходимости.
+- **Assignment/ticket ambiguity**: `DomainPureWorkTicket` is the sole protocol contract;
+  application wrappers cannot redefine its fields.
+- **Raw/normalized confusion**: distinct types/media/schema IDs and reconstruction/normalization
+  tests enforce the boundary.
+- **Partial eligibility**: `A_j=H` guard precedes candidate creation; terminal evidence is separate.
+- **Token overcount**: ledger commits cursor/tokens only with optimizer update.
+- **Tied parameter duplication**: canonical owner plus explicit alias table.
+- **Race/replay**: atomic claim and immutable canonical input fingerprint/outcome.
+- **Memory peak**: measure and document; streaming remains a later optimization.
+- **Scope leak**: architecture tests prohibit distribution, native/JVM and accepted quantization.
 
-## Exit Gate
+## Exit gate
 
-- Direct reference parity и reconstruction tests зелёные.
-- Все malformed/wrong-parent/non-finite inputs отвергаются.
-- Retry/cancellation/crash-point suite не оставляет partial published updates.
-- Local update media type изолирован от distribution plane.
-- Полный quality gate и final Constitution Check проходят.
+- T000–T031 and HR002-001–HR002-009 complete.
+- Direct reference parity, exact ticket range/`H`, reconstruction and normalization tests pass.
+- Incomplete paths have terminal evidence and no eligible candidate.
+- Runtime-neutral bytes and feature-004 reference inputs are committed without q-byte acceptance.
+- Formal compatibility, protocol conformance, offline Python quality and final Constitution Check
+  pass with immutable evidence.

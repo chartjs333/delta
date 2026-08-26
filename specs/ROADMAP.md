@@ -6,7 +6,9 @@ Feature `000-formal-tla-spec` has a deterministic `GO` for formal semantics:
 
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
-Implementation work remains blocked until PR #1 is merged and the merged evidence is independently verified by feature 001 T000/HR001-001.
+Features 000 and 001 are merged. Feature 002 T000/HR002-001 independently verified the merged
+feature-001 exit evidence, protocol registry, Formal GO and exact semantics ID; its
+runtime-neutral T001 contracts may begin.
 
 ## Branch topology
 

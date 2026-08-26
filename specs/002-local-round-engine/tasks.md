@@ -1,69 +1,128 @@
-# Tasks: Локальный worker round и псевдоградиент
+# Tasks: Локальный worker round и нормализованный contribution
 
-**Input**: `spec.md`, `plan.md`, constitution и реализованный exit gate feature `001`.
+**Input**: `spec.md`, `plan.md`, Constitution 2.1.0, merged feature-001 exit evidence,
+protocol registry and exact Formal GO.
 
-## Phase 1: Domain contracts
+## Format
 
-- [ ] T001 Определить `RoundAssignment` и stop-policy schema в `src/deltatorrent/domain/assignments.py`.
-- [ ] T002 Определить `ParameterSchema`, aliases и fingerprint contract в `src/deltatorrent/domain/parameters.py`.
-- [ ] T003 Определить `LocalDelta` и `LocalUpdateManifest` в `src/deltatorrent/domain/updates.py`.
-- [ ] T004 [P] Определить worker lifecycle/state transitions в `src/deltatorrent/domain/worker_state.py`.
-- [ ] T005 [P] Добавить canonical assignment/update fixtures в `tests/fixtures/contracts/local_round/`.
-- [ ] T006 Добавить schema and state-machine tests в `tests/contract/test_local_update_contract.py`.
+`- [ ] T### [P?] [US#?] Action with exact path`
+
+Каждый implementation commit указывает один или несколько `T*`/`HR002-*` IDs. Задача
+отмечается `[x]` только после прохождения её acceptance evidence.
+
+## Phase 0: Predecessor and formal compatibility STOP
+
+- [x] T000 [HR002-001] Offline verify merged feature-001 exit evidence, protocol registry,
+  Formal GO, exact `formal_semantics_id` and absence of semantic drift; record evidence in
+  `specs/002-local-round-engine/evidence/predecessor-gate.json`. STOP all T001+ on failure.
+
+## Phase 1: Runtime-neutral domain contracts
+
+- [ ] T001 Define strict `DomainPureWorkTicket` schema and Python model in
+  `delta-protocol/schemas/domain-pure-work-ticket-v1.json` and
+  `delta-worker-python/src/deltatorrent/domain/tickets.py`.
+- [ ] T002 Define canonical `ParameterSchema`, tied aliases and fingerprint contract in
+  `delta-worker-python/src/deltatorrent/domain/parameters.py`.
+- [ ] T003 Define `LocalRoundCompletion`, internal `LocalDelta` and commit-eligible
+  `NormalizedContributionCandidate` contracts in
+  `delta-protocol/schemas/local-round-completion-v1.json`,
+  `delta-protocol/schemas/normalized-contribution-candidate-v1.json` and
+  `delta-worker-python/src/deltatorrent/domain/updates.py`.
+- [ ] T004 [P] Define worker lifecycle and terminal state transitions in
+  `delta-worker-python/src/deltatorrent/domain/worker_state.py`.
+- [ ] T005 [P] Add canonical positive/negative ticket, completion and contribution fixtures in
+  `delta-protocol/fixtures/local-round/`.
+- [ ] T006 Add schema/canonical-bytes/state-machine tests in
+  `delta-worker-python/tests/contract/test_local_round_contract.py`.
 
 ## Phase 2: Foundational math and accounting
 
-- [ ] T007 Реализовать parameter traversal/fingerprint и tied-parameter handling в `src/deltatorrent/delta/schema.py`.
-- [ ] T008 Реализовать committed optimizer-boundary token ledger в `src/deltatorrent/training/token_accounting.py`.
-- [ ] T009 Рефакторить reusable local AdamW step loop без изменения baseline в `src/deltatorrent/training/local_round.py`.
-- [ ] T010 Реализовать FP32 delta builder с соглашением `parent - final` в `src/deltatorrent/delta/builder.py`.
-- [ ] T011 [P] Реализовать reconstruction helper в `src/deltatorrent/delta/reconstruction.py`.
-- [ ] T012 Реализовать tensor-set, finite и norm validation в `src/deltatorrent/delta/validation.py`.
-- [ ] T013 [P] Добавить property/reference tests delta math в `tests/unit/test_delta_math.py`.
-- [ ] T014 [P] Добавить parameter schema и token-ledger tests в `tests/unit/test_parameter_schema.py` и `tests/unit/test_token_accounting.py`.
+- [ ] T007 Implement canonical parameter traversal/fingerprint and tied-parameter handling in
+  `delta-worker-python/src/deltatorrent/delta/schema.py`.
+- [ ] T008 Implement exact optimizer-boundary token ledger in
+  `delta-worker-python/src/deltatorrent/training/token_accounting.py`.
+- [ ] T009 Refactor a reusable local AdamW step loop without changing baseline semantics in
+  `delta-worker-python/src/deltatorrent/training/local_round.py`.
+- [ ] T010 Implement internal FP32 `LocalDelta = parent - final` builder in
+  `delta-worker-python/src/deltatorrent/delta/builder.py`.
+- [ ] T011 [P] Implement `final = parent - LocalDelta` reconstruction helper in
+  `delta-worker-python/src/deltatorrent/delta/reconstruction.py`.
+- [ ] T012 Implement exact `A_j = H` eligibility guard, `LocalDelta / A_j` normalization,
+  tensor-set/finite/norm validation in
+  `delta-worker-python/src/deltatorrent/delta/normalization.py` and
+  `delta-worker-python/src/deltatorrent/delta/validation.py`.
+- [ ] T013 [P] Add property/reference reconstruction, normalization and validation tests in
+  `delta-worker-python/tests/unit/test_delta_math.py`.
+- [ ] T014 [P] Add parameter-schema and committed-ledger tests in
+  `delta-worker-python/tests/unit/test_parameter_schema.py` and
+  `delta-worker-python/tests/unit/test_token_accounting.py`.
 
-## Phase 3: US1 — Execute local round
+## Phase 3: US1 — Complete one fixed local ticket
 
-- [ ] T015 [US1] Реализовать assignment validator/resolvers в `src/deltatorrent/worker/validation.py`.
-- [ ] T016 [US1] Реализовать `LocalRoundEngine` orchestration в `src/deltatorrent/worker/engine.py`.
-- [ ] T017 [US1] Подключить lifecycle и structured metrics в `src/deltatorrent/worker/telemetry.py`.
-- [ ] T018 [US1] Добавить `worker run-assignment` CLI в `src/deltatorrent/cli/worker.py`.
-- [ ] T019 [US1] Добавить direct-reference parity/data-exhaustion tests в `tests/integration/test_local_round_engine.py`.
+- [ ] T015 [US1] Implement ticket validator and immutable parent/data resolvers in
+  `delta-worker-python/src/deltatorrent/worker/validation.py`.
+- [ ] T016 [US1] Implement `LocalRoundEngine` orchestration in
+  `delta-worker-python/src/deltatorrent/worker/engine.py`.
+- [ ] T017 [US1] Connect lifecycle, terminal evidence and structured metrics in
+  `delta-worker-python/src/deltatorrent/worker/telemetry.py`.
+- [ ] T018 [US1] Add `worker run-ticket` CLI in
+  `delta-worker-python/src/deltatorrent/cli/worker.py`.
+- [ ] T019 [US1] Add direct-reference parity, exact data-range and `A_j=H` tests in
+  `delta-worker-python/tests/integration/test_local_round_engine.py`.
 
-## Phase 4: US2 — Reconstruct and validate update
+## Phase 4: US2 — Reconstruct and publish an eligible contribution
 
-- [ ] T020 [US2] Интегрировать safe FP32 update artifact writer в `src/deltatorrent/worker/update_writer.py`.
-- [ ] T021 [US2] Добавить reconstruction/wrong-schema/malformed update tests в `tests/integration/test_local_update_reconstruction.py`.
-- [ ] T022 [P] [US2] Добавить mixed-precision optional CUDA test в `tests/integration/test_local_round_cuda.py`.
+- [ ] T020 [US2] Integrate safe normalized FP32 contribution writer in
+  `delta-worker-python/src/deltatorrent/worker/update_writer.py`.
+- [ ] T021 [US2] Add canonical metadata, reconstruction, wrong-schema and malformed-update tests
+  in `delta-worker-python/tests/integration/test_local_update_reconstruction.py`.
+- [ ] T022 [P] [US2] Add optional mixed-precision CUDA-to-FP32 reference test in
+  `delta-worker-python/tests/integration/test_local_round_cuda.py`.
 
-## Phase 5: US3 — Idempotency and cancellation
+## Phase 5: US3 — Failure, idempotency and cancellation
 
-- [ ] T023 [US3] Реализовать atomic assignment claim/result repository в `src/deltatorrent/worker/repository.py`.
-- [ ] T024 [US3] Реализовать injected cancellation/deadline checks в `src/deltatorrent/worker/engine.py`.
-- [ ] T025 [US3] Добавить retry/conflict/cancel/crash-point suite в `tests/integration/test_worker_idempotency.py`.
-- [ ] T026 [P] [US3] Добавить concurrency test для одного assignment ID в `tests/integration/test_worker_concurrency.py`.
+- [ ] T023 [US3] Implement atomic ticket claim/result repository in
+  `delta-worker-python/src/deltatorrent/worker/repository.py`.
+- [ ] T024 [US3] Implement injected cancellation/deadline checks at microbatch boundaries in
+  `delta-worker-python/src/deltatorrent/worker/engine.py`.
+- [ ] T025 [US3] Add retry/conflict/crash/cancel/deadline/partial-accumulation/data-exhaustion/
+  OOM/non-finite suite proving candidate absence and terminal-evidence presence in
+  `delta-worker-python/tests/integration/test_worker_idempotency.py`.
+- [ ] T026 [P] [US3] Add concurrent-claim test for one `ticket_id` in
+  `delta-worker-python/tests/integration/test_worker_concurrency.py`.
 
 ## Final Phase: Validation and documentation
 
-- [ ] T027 Добавить local-round contract и sign convention в `docs/local-round-contract.md`.
-- [ ] T028 Добавить deterministic sample assignment в `configs/worker/smoke-assignment.json`.
-- [ ] T029 Добавить architecture test запрета local update в distribution plane в `tests/architecture/test_reduce_distribution_boundary.py`.
-- [ ] T030 Выполнить cross-artifact analysis и зафиксировать evidence в `specs/002-local-round-engine/evidence.md`.
-- [ ] T031 Выполнить полный quality gate и final Constitution Check.
+- [ ] T027 Document `LocalDelta` sign, `A_j=H` guard and normalized contribution contract in
+  `docs/local-round-contract.md`.
+- [ ] T028 Add deterministic `DomainPureWorkTicket` in
+  `configs/worker/smoke-ticket.json`.
+- [ ] T029 Add architecture tests prohibiting local contributions in distribution and native/JVM
+  validator dependencies in
+  `delta-worker-python/tests/architecture/test_reduce_distribution_boundary.py`.
+- [ ] T030 Run formal projection/cross-artifact analysis and record evidence in
+  `specs/002-local-round-engine/evidence/final-compatibility.json`.
+- [ ] T031 Run the full offline quality gate and final Constitution Check; record evidence in
+  `specs/002-local-round-engine/evidence/exit-gate.md`.
+
+## Supplemental mandatory runtime tasks
+
+`HR002-002–HR002-009` in `runtime-tasks.md` are part of this exit gate. In particular,
+`HR002-008` publishes runtime-neutral feature-004 encoder inputs but MUST NOT implement INT16
+quantization, C++ or Java production code.
 
 ## Dependencies
 
-- T001–T006 блокируют persisted implementation.
-- T007–T014 блокируют engine publication.
-- T015–T019 формируют первый вертикальный slice.
-- T020 зависит от delta math и artifact store feature `001`.
-- T023 должен быть завершён до retry/concurrency tests.
-- T029–T031 выполняются после всех user stories.
-
-## Implementation Strategy
-
-Сначала доказать math/schema без transport, затем выполнить один детерминированный local round end-to-end. Идемпотентность и cancellation добавляются до объявления API готовым. Не вводить multi-worker coordinator, compression или networking в этой ветке.
+- T000/HR002-001 is a hard prerequisite for every T001+ and HR002-002+ task.
+- T001–T006 block persisted implementation.
+- T007–T014 block contribution publication.
+- T015–T021 form the first complete vertical slice.
+- T023 must precede retry/concurrency tests.
+- T029–T031 and HR002-009 execute after all user stories.
 
 ## Exit Gate
 
-Все T001–T031 выполнены; local engine совпадает с reference; reconstruction, malformed input, retry/conflict и cancellation tests зелёные; architecture boundary и quality commands проходят.
+T000–T031 and HR002-001–HR002-009 complete; one deterministic fixed ticket matches the direct
+reference, uses exactly its immutable data range, satisfies `A_j=H`, reconstructs final state and
+publishes canonical normalized metadata. Every incomplete path publishes terminal evidence and no
+eligible candidate. Formal compatibility, architecture boundaries and offline quality gates pass.
