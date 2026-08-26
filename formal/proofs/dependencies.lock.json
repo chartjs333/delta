@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "source": {
+    "project": "leanprover-community/mathlib4",
+    "commit": "520045ab14e26149ee970e2e617ca04b09bde5d6",
+    "lake_manifest_sha256": "015c7e00ead0f05f2a72b32d9bdef782d4689d05a6297f0ceb0ab5d196c164bd"
+  },
+  "review_policy": "Only the exact commits below may enter the theorem build. A changed commit, URL or license hash requires dependency review and invalidates theorem evidence.",
+  "packages": [
+    {"name": "mathlib", "url": "https://github.com/leanprover-community/mathlib4", "rev": "520045ab14e26149ee970e2e617ca04b09bde5d6", "direct": true, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"},
+    {"name": "plausible", "url": "https://github.com/leanprover-community/plausible", "rev": "e12c1910fe855cbfc38803cd4e55543906d5fa62", "direct": false, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"name": "LeanSearchClient", "url": "https://github.com/leanprover-community/LeanSearchClient", "rev": "c5d5b8fe6e5158def25cd28eb94e4141ad97c843", "direct": false, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"name": "importGraph", "url": "https://github.com/leanprover-community/import-graph", "rev": "7e9612bf0b9ee66db3cb5b9988a35afc706f5a12", "direct": false, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"name": "proofwidgets", "url": "https://github.com/leanprover-community/ProofWidgets4", "rev": "6e311e2a844da9b2cc3971187df2fe0066947b93", "direct": false, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"name": "aesop", "url": "https://github.com/leanprover-community/aesop", "rev": "a7dbf0c63b694e47f425f3dcddbc0e178bb432d3", "direct": false, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"name": "Qq", "url": "https://github.com/leanprover-community/quote4", "rev": "38d591e778f100aec9762bb582f9c7f55f50e9dc", "direct": false, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"name": "batteries", "url": "https://github.com/leanprover-community/batteries", "rev": "023ce7d62a0531e22a5331e20b587817a80d49ff", "direct": false, "license": "Apache-2.0", "license_path": "LICENSE", "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"},
+    {"name": "Cli", "url": "https://github.com/leanprover/lean4-cli", "rev": "88679d088c9720c27ebdf2ba4dafe17341747f94", "direct": false, "license": "MIT", "license_path": "LICENSE", "license_sha256": "f7e95706807e931782b6efd9a9d2789508a52423ad67b56ee7e5e324362d4aac"}
+  ]
+}

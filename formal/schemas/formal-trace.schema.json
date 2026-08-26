@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.invalid/schemas/formal-trace.schema.json",
+  "title": "DeltaReduce v1 canonical formal trace",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "formal_semantics_id",
+    "trace_id",
+    "abstraction_version",
+    "round_contract",
+    "initial_state_root",
+    "terminal_state_root",
+    "terminal_outcome",
+    "events"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "trace_id": {"type": "string", "pattern": "^TRACE-[A-Z0-9][A-Z0-9._-]{0,127}$"},
+    "abstraction_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "round_contract": {"$ref": "#/$defs/roundContract"},
+    "initial_state_root": {"$ref": "#/$defs/contentId"},
+    "terminal_state_root": {"$ref": "#/$defs/contentId"},
+    "terminal_outcome": {
+      "type": "string",
+      "enum": ["APPLIED", "ABORTED", "BLOCKED", "IN_PROGRESS"]
+    },
+    "events": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/event"}
+    }
+  },
+  "$defs": {
+    "contentId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableContentId": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableIdentifier": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "parameterAssignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parameter_id", "domain_id", "shard_id", "vote_context_id"],
+      "properties": {
+        "parameter_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "domain_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "shard_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "vote_context_id": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
+    "roundContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "round_id",
+        "round_config",
+        "parameter_schema",
+        "shard_plan"
+      ],
+      "properties": {
+        "contract_id": {"$ref": "#/$defs/contentId"},
+        "round_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "round_config": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["body_hash", "domain_ids", "parameter_schema_hash", "shard_plan_hash"],
+          "properties": {
+            "body_hash": {"$ref": "#/$defs/contentId"},
+            "domain_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1, "maxLength": 256}
+            },
+            "parameter_schema_hash": {"$ref": "#/$defs/contentId"},
+            "shard_plan_hash": {"$ref": "#/$defs/contentId"}
+          }
+        },
+        "parameter_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema_hash", "parameter_ids"],
+          "properties": {
+            "schema_hash": {"$ref": "#/$defs/contentId"},
+            "parameter_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1, "maxLength": 256}
+            }
+          }
+        },
+        "shard_plan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["plan_hash", "assignments"],
+          "properties": {
+            "plan_hash": {"$ref": "#/$defs/contentId"},
+            "assignments": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/parameterAssignment"}
+            }
+          }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "action_id",
+        "round_id",
+        "height",
+        "view",
+        "validator_epoch",
+        "actor_id",
+        "actor_role",
+        "request_id",
+        "vote_context_id",
+        "parent_hashes",
+        "body_hash",
+        "result_hash",
+        "prior_state_root",
+        "next_state_root",
+        "durable_sequence",
+        "logical_time",
+        "outcome",
+        "error_code",
+        "artifact_refs"
+      ],
+      "properties": {
+        "schema_version": {"const": "1.0.0"},
+        "action_id": {
+          "type": "string",
+          "enum": [
+            "ACT-ABORT-FINALIZE",
+            "ACT-ABORT-VOTE",
+            "ACT-APC-FINALIZE",
+            "ACT-APC-VOTE",
+            "ACT-APPLY-COMPUTE",
+            "ACT-APPLY-FINALIZE",
+            "ACT-APPLY-VOTE",
+            "ACT-ARTIFACT-CORRUPT",
+            "ACT-ARTIFACT-LOSE",
+            "ACT-ARTIFACT-REPAIR",
+            "ACT-AVAIL-ATTEST",
+            "ACT-AVAIL-FINALIZE",
+            "ACT-COMMIT",
+            "ACT-CONFIG-FINALIZE",
+            "ACT-CONFIG-PROPOSE",
+            "ACT-CONFIG-VOTE",
+            "ACT-CRASH",
+            "ACT-CURRENT-ADVANCE",
+            "ACT-EC-FINALIZE",
+            "ACT-EC-VOTE",
+            "ACT-INPUT-CLOSE",
+            "ACT-ISC-FINALIZE",
+            "ACT-ISC-VOTE",
+            "ACT-JOURNAL-RECOVER",
+            "ACT-LEASE-EXPIRE",
+            "ACT-LEASE-OPEN",
+            "ACT-LEASE-REASSIGN",
+            "ACT-LEASE-RENEW",
+            "ACT-LOGICAL-TIME-ADVANCE",
+            "ACT-MESSAGE-DELIVER",
+            "ACT-MESSAGE-DROP",
+            "ACT-MESSAGE-DUPLICATE",
+            "ACT-MESSAGE-ENQUEUE",
+            "ACT-MESSAGE-REPLAY",
+            "ACT-PARAM-FINALIZE",
+            "ACT-PARAM-PROPOSE",
+            "ACT-PARAM-VOTE",
+            "ACT-PARTITION-ENABLE",
+            "ACT-PARTITION-HEAL",
+            "ACT-PUBLISH",
+            "ACT-RESTART",
+            "ACT-ROOT-ASSEMBLE",
+            "ACT-ROOT-FINALIZE",
+            "ACT-ROOT-VOTE",
+            "ACT-SEED-GENERATE",
+            "ACT-TICKET-ISSUE",
+            "ACT-TIMEOUT-SOFT",
+            "ACT-VIEW-FINALIZE",
+            "ACT-VIEW-VOTE"
+          ]
+        },
+        "round_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "height": {"type": "integer", "minimum": 0},
+        "view": {"type": "integer", "minimum": 0},
+        "validator_epoch": {"type": "string", "minLength": 1, "maxLength": 256},
+        "actor_id": {"$ref": "#/$defs/nullableIdentifier"},
+        "actor_role": {
+          "type": ["string", "null"],
+          "enum": ["WORKER", "VALIDATOR", "STORAGE", "P2P_PEER", "SYSTEM", null]
+        },
+        "request_id": {"$ref": "#/$defs/nullableIdentifier"},
+        "vote_context_id": {"$ref": "#/$defs/nullableIdentifier"},
+        "parent_hashes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/contentId"}
+        },
+        "body_hash": {"$ref": "#/$defs/nullableContentId"},
+        "result_hash": {"$ref": "#/$defs/nullableContentId"},
+        "prior_state_root": {"$ref": "#/$defs/contentId"},
+        "next_state_root": {"$ref": "#/$defs/contentId"},
+        "durable_sequence": {"type": ["integer", "null"], "minimum": 0},
+        "logical_time": {"type": "integer", "minimum": 0},
+        "outcome": {
+          "type": "string",
+          "enum": ["ACCEPTED", "REJECTED", "FINALIZED", "NO_OP", "STUTTER", "FAULT", "BLOCKED"]
+        },
+        "error_code": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z][A-Z0-9_]{0,127}$"
+        },
+        "artifact_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/contentId"}
+        }
+      }
+    }
+  }
+}

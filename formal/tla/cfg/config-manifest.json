@@ -1,0 +1,462 @@
+{
+  "schema_version": "1.0.0",
+  "configs": [
+    {
+      "id": "CFG-CONFIG-QC",
+      "kind": "safety",
+      "module": "DeltaReduceConfigHarness.tla",
+      "config": "cfg/config-qc-uniqueness.cfg",
+      "workers": 4,
+      "fingerprint_index": 32,
+      "seed": 2026082401,
+      "timeout_seconds": 600,
+      "required_action_coverage": []
+    },
+    {
+      "id": "CFG-SAFETY-F1",
+      "kind": "safety",
+      "module": "DeltaReduceF1Harness.tla",
+      "config": "cfg/safety-f1.cfg",
+      "workers": 4,
+      "fingerprint_index": 41,
+      "seed": 2026082409,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "AdvanceLogicalTime",
+        "SoftTimeout",
+        "VoteViewChange",
+        "ViewChangeAction",
+        "VoteHardAbort",
+        "HardAbortAction"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-CRASH-RECOVERY",
+      "kind": "safety",
+      "module": "DeltaReduce.tla",
+      "config": "cfg/vote-crash-recovery.cfg",
+      "workers": 4,
+      "fingerprint_index": 59,
+      "seed": 2026082402,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "EnabledFailureNext",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-CONFIG",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-config.cfg",
+      "workers": 4,
+      "fingerprint_index": 60,
+      "seed": 2026082415,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PersistConfigVote",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "ConfigCrashBefore",
+        "ConfigCrashAfterPersist",
+        "ConfigCrashAfterSend",
+        "ConfigRestart",
+        "ConfigRecover",
+        "ConfigDrop",
+        "ConfigDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-ISC",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-isc.cfg",
+      "workers": 4,
+      "fingerprint_index": 61,
+      "seed": 2026082416,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveVoteISC", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "ISCCrashBefore", "ISCCrashAfterPersist", "ISCCrashAfterSend",
+        "ISCRestart", "ISCRecover", "ISCDrop", "ISCDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-EC",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-ec.cfg",
+      "workers": 4,
+      "fingerprint_index": 62,
+      "seed": 2026082417,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveVoteEC", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "ECCrashBefore", "ECCrashAfterPersist", "ECCrashAfterSend",
+        "ECRestart", "ECRecover", "ECDrop", "ECDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-APC",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-apc.cfg",
+      "workers": 4,
+      "fingerprint_index": 63,
+      "seed": 2026082418,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveVoteAPC", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "APCCrashBefore", "APCCrashAfterPersist", "APCCrashAfterSend",
+        "APCRestart", "APCRecover", "APCDrop", "APCDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-PARAMETER",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-parameter.cfg",
+      "workers": 4,
+      "fingerprint_index": 57,
+      "seed": 2026082419,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveVoteParameter", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "ParameterCrashBefore", "ParameterCrashAfterPersist", "ParameterCrashAfterSend",
+        "ParameterRestart", "ParameterRecover", "ParameterDrop", "ParameterDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-AGGREGATE",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-aggregate.cfg",
+      "workers": 4,
+      "fingerprint_index": 56,
+      "seed": 2026082420,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveVoteAggregate", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "AggregateCrashBefore", "AggregateCrashAfterPersist", "AggregateCrashAfterSend",
+        "AggregateRestart", "AggregateRecover", "AggregateDrop", "AggregateDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-APPLY",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-apply.cfg",
+      "workers": 4,
+      "fingerprint_index": 55,
+      "seed": 2026082421,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveVoteApply", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "ApplyCrashBefore", "ApplyCrashAfterPersist", "ApplyCrashAfterSend",
+        "ApplyRestart", "ApplyRecover", "ApplyDrop", "ApplyDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-VIEW",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-view.cfg",
+      "workers": 4,
+      "fingerprint_index": 54,
+      "seed": 2026082422,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "VoteViewChange", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "ViewCrashBefore", "ViewCrashAfterPersist", "ViewCrashAfterSend",
+        "ViewRestart", "ViewRecover", "ViewDrop", "ViewDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-VOTE-LIFECYCLE-ABORT",
+      "kind": "safety",
+      "module": "DeltaReduceVoteLifecycleHarness.tla",
+      "config": "cfg/vote-lifecycle-abort.cfg",
+      "workers": 4,
+      "fingerprint_index": 53,
+      "seed": 2026082423,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "VoteHardAbort", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
+        "AbortCrashBefore", "AbortCrashAfterPersist", "AbortCrashAfterSend",
+        "AbortRestart", "AbortRecover", "AbortDrop", "AbortDuplicate"
+      ]
+    },
+    {
+      "id": "CFG-TICKET-LEASE-AVAILABILITY",
+      "kind": "safety",
+      "module": "DeltaReduce.tla",
+      "config": "cfg/ticket-lease-availability.cfg",
+      "workers": 4,
+      "fingerprint_index": 11,
+      "seed": 2026082403,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "IssueTicket",
+        "LeaseTicket",
+        "ExpireLease",
+        "ReassignTicket",
+        "CommitTicket",
+        "RejectStaleCommitment",
+        "RejectCommitmentEquivocation",
+        "ObserveACShortfall",
+        "FinalizeAvailability"
+      ]
+    },
+    {
+      "id": "CFG-AVAILABILITY-LOSS-REPAIR",
+      "kind": "safety",
+      "module": "DeltaReduce.tla",
+      "config": "cfg/availability-loss-repair.cfg",
+      "workers": 4,
+      "fingerprint_index": 44,
+      "seed": 2026082404,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "UploadArtifact",
+        "AttestAvailability",
+        "ObserveACShortfall",
+        "FinalizeAvailability",
+        "CloseInput",
+        "VoteISCAction",
+        "FinalizeISCAction",
+        "LoseArtifactPreFreeze",
+        "LoseArtifactPostFreeze",
+        "CorruptArtifact",
+        "RepairArtifact"
+      ]
+    },
+    {
+      "id": "CFG-INPUT-FREEZE-SEED",
+      "kind": "safety",
+      "module": "DeltaReduce.tla",
+      "config": "cfg/input-freeze-seed.cfg",
+      "workers": 4,
+      "fingerprint_index": 7,
+      "seed": 2026082405,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "CloseInput",
+        "VoteISCAction",
+        "FinalizeISCAction",
+        "GenerateSeedAction",
+        "VoteECAction",
+        "FinalizeECAction",
+        "VoteAPCAction",
+        "FinalizeAPCAction",
+        "RejectLateCommitment",
+        "RejectLateAvailability",
+        "RejectEarlySeed",
+        "RejectWrongSeedParent",
+        "RejectConflictingSeedAction",
+        "RejectConflictingISC",
+        "RejectConflictingECAction",
+        "RejectConflictingAPCAction",
+        "ReplayMessage"
+      ]
+    },
+    {
+      "id": "CFG-CERTIFICATE-FRANKENSTEIN",
+      "kind": "safety",
+      "module": "DeltaReduce.tla",
+      "config": "cfg/certificate-frankenstein.cfg",
+      "workers": 4,
+      "fingerprint_index": 53,
+      "seed": 2026082406,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "RequestIncompleteInputAbort",
+        "RejectInvalidECParentAction",
+        "RejectECMembershipAction",
+        "RejectNormEvidenceAction",
+        "RejectInvalidAPCParentAction",
+        "RejectAPCMembershipAction",
+        "RejectWrongCoefficientProfileAction",
+        "RequestUnsafePlanAbortAction"
+      ]
+    },
+    {
+      "id": "CFG-SPLIT-BRAIN-PARTITION",
+      "kind": "safety",
+      "module": "DeltaReducePartitionHarness.tla",
+      "config": "cfg/split-brain-partition.cfg",
+      "workers": 4,
+      "fingerprint_index": 37,
+      "seed": 2026082410,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "SplitDeliverMessage",
+        "SplitDropMessage",
+        "SplitDuplicateMessage",
+        "SplitEnablePartition",
+        "SplitHealPartition"
+      ]
+    },
+    {
+      "id": "CFG-ARITHMETIC-BOUNDARY",
+      "kind": "safety",
+      "module": "DeltaReducePhase6Harness.tla",
+      "config": "cfg/arithmetic-boundary.cfg",
+      "workers": 4,
+      "fingerprint_index": 19,
+      "seed": 2026082407,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "ProposeParameterResultAction",
+        "VoteParameterAction",
+        "FinalizeParameterQCAction",
+        "RejectParameterWrongParentAction",
+        "RejectParameterUncheckedAction",
+        "RejectParameterOverflowAction",
+        "RejectConflictingParameterAction"
+      ]
+    },
+    {
+      "id": "CFG-APPLY-RECOVERY",
+      "kind": "safety",
+      "module": "DeltaReducePhase6Harness.tla",
+      "config": "cfg/apply-recovery.cfg",
+      "workers": 4,
+      "fingerprint_index": 27,
+      "seed": 2026082408,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "ProposeParameterResultAction",
+        "VoteParameterAction",
+        "FinalizeParameterQCAction",
+        "AssembleAggregateRootAction",
+        "VoteAggregateRootAction",
+        "FinalizeAggregateRootQCAction",
+        "RejectIncompleteAggregateAction",
+        "RejectDuplicateAggregateAction",
+        "RejectMixedAggregateAction",
+        "RejectConflictingAggregateAction",
+        "ComputeApplyCandidateAction",
+        "VoteApplyAction",
+        "FinalizeApplyQCAction",
+        "RejectWrongApplyParentAction",
+        "RejectConflictingApplyAction",
+        "CrashAfterApplyQCBeforePointerAction",
+        "AdvanceCurrentCheckpointAction",
+        "ReplayCurrentAdvanceAction",
+        "RejectCurrentConflictAction",
+        "PublishCertifiedObjectAction",
+        "RejectForbiddenPublicationAction"
+      ]
+    },
+    {
+      "id": "CFG-LIVENESS-CONFIG-QC",
+      "kind": "liveness",
+      "module": "DeltaReduceLivenessHarness.tla",
+      "config": "cfg/liveness-config.cfg",
+      "workers": 4,
+      "fingerprint_index": 14,
+      "seed": 2026082412,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "ProposeRoundConfig",
+        "PersistConfigVote",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "FinalizeRoundConfig"
+      ]
+    },
+    {
+      "id": "CFG-LIVENESS-ISC",
+      "kind": "liveness",
+      "module": "DeltaReduceLivenessHarness.tla",
+      "config": "cfg/liveness-isc.cfg",
+      "workers": 4,
+      "fingerprint_index": 15,
+      "seed": 2026082413,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "IssueTicket",
+        "CommitTicket",
+        "FinalizeAvailability",
+        "PositiveCloseInput",
+        "PositiveVoteISC",
+        "PositiveFinalizeISC"
+      ]
+    },
+    {
+      "id": "CFG-LIVENESS-PLAN",
+      "kind": "liveness",
+      "module": "DeltaReduceLivenessHarness.tla",
+      "config": "cfg/liveness-plan.cfg",
+      "workers": 4,
+      "fingerprint_index": 16,
+      "seed": 2026082414,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveGenerateSeed",
+        "PositiveVoteEC",
+        "PositiveFinalizeEC",
+        "PositiveVoteAPC",
+        "PositiveFinalizeAPC"
+      ]
+    },
+    {
+      "id": "CFG-LIVENESS-EVENTUAL-SYNCHRONY",
+      "kind": "liveness",
+      "module": "DeltaReduceLivenessHarness.tla",
+      "config": "cfg/liveness-eventual-synchrony.cfg",
+      "workers": 4,
+      "fingerprint_index": 13,
+      "seed": 2026082411,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveProposeParameter",
+        "PositiveVoteParameter",
+        "PositiveFinalizeParameter",
+        "PositiveAssembleAggregate",
+        "PositiveVoteAggregate",
+        "PositiveFinalizeAggregate",
+        "PositiveComputeApply",
+        "PositiveVoteApply",
+        "PositiveFinalizeApply",
+        "PositiveAdvanceCurrent"
+      ]
+    },
+    {
+      "id": "CFG-LIVENESS-VIEW-CHANGE",
+      "kind": "liveness",
+      "module": "DeltaReduceLivenessHarness.tla",
+      "config": "cfg/liveness-view.cfg",
+      "workers": 4,
+      "fingerprint_index": 17,
+      "seed": 2026082415,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveAdvanceToSoftDeadline",
+        "SoftTimeout",
+        "VoteViewChange",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "PositiveFinalizeViewChange"
+      ]
+    },
+    {
+      "id": "CFG-LIVENESS-ABORT-QC",
+      "kind": "liveness",
+      "module": "DeltaReduceLivenessHarness.tla",
+      "config": "cfg/liveness-abort.cfg",
+      "workers": 4,
+      "fingerprint_index": 18,
+      "seed": 2026082416,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "AdvanceLogicalTime",
+        "VoteHardAbort",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "PositiveFinalizeHardAbort"
+      ]
+    }
+  ]
+}

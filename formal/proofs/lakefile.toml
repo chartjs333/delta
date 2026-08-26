@@ -1,0 +1,11 @@
+name = "DeltaReduceFormalProofs"
+version = "1.0.0"
+defaultTargets = ["DeltaReduce"]
+
+[[lean_lib]]
+name = "DeltaReduce"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "520045ab14e26149ee970e2e617ca04b09bde5d6"

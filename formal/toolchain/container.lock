@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "platform": "linux/amd64",
+  "base_image": "docker.io/library/python:3.12.11-bookworm",
+  "base_manifest_digest": "sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0",
+  "base_index_digest": "sha256:13c9584604a99ca134c4f41800f74ffc64ee6ac8cf555cf1e704a6087fc84f12",
+  "source_revision": "https://github.com/docker-library/python/tree/093598a0190ba9074b899d6a0a21a00c859aac56/3.12/bookworm",
+  "network_policy": "Docker build consumes only the locally verified formal/toolchain/cache artifacts. Gate execution uses --network none. The pinned base image must already exist in the local OCI cache for a fully offline rebuild."
+}
