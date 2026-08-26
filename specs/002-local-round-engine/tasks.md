@@ -60,24 +60,24 @@ protocol registry and exact Formal GO.
 
 ## Phase 3: US1 — Complete one fixed local ticket
 
-- [ ] T015 [US1] Implement ticket validator and immutable parent/data resolvers in
+- [x] T015 [US1] Implement ticket validator and immutable parent/data resolvers in
   `delta-worker-python/src/deltatorrent/worker/validation.py`.
-- [ ] T016 [US1] Implement `LocalRoundEngine` orchestration in
+- [x] T016 [US1] Implement `LocalRoundEngine` orchestration in
   `delta-worker-python/src/deltatorrent/worker/engine.py`.
-- [ ] T017 [US1] Connect lifecycle, terminal evidence and structured metrics in
+- [x] T017 [US1] Connect lifecycle, terminal evidence and structured metrics in
   `delta-worker-python/src/deltatorrent/worker/telemetry.py`.
-- [ ] T018 [US1] Add `worker run-ticket` CLI in
+- [x] T018 [US1] Add `worker run-ticket` CLI in
   `delta-worker-python/src/deltatorrent/cli/worker.py`.
-- [ ] T019 [US1] Add direct-reference parity, exact data-range and `A_j=H` tests in
+- [x] T019 [US1] Add direct-reference parity, exact data-range and `A_j=H` tests in
   `delta-worker-python/tests/integration/test_local_round_engine.py`.
 
 ## Phase 4: US2 — Reconstruct and publish an eligible contribution
 
-- [ ] T020 [US2] Integrate safe normalized FP32 contribution writer in
+- [x] T020 [US2] Integrate safe normalized FP32 contribution writer in
   `delta-worker-python/src/deltatorrent/worker/update_writer.py`.
-- [ ] T021 [US2] Add canonical metadata, reconstruction, wrong-schema and malformed-update tests
+- [x] T021 [US2] Add canonical metadata, reconstruction, wrong-schema and malformed-update tests
   in `delta-worker-python/tests/integration/test_local_update_reconstruction.py`.
-- [ ] T022 [P] [US2] Add optional mixed-precision CUDA-to-FP32 reference test in
+- [x] T022 [P] [US2] Add optional mixed-precision CUDA-to-FP32 reference test in
   `delta-worker-python/tests/integration/test_local_round_cuda.py`.
 
 ## Phase 5: US3 — Failure, idempotency and cancellation

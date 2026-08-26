@@ -42,7 +42,14 @@ class Tokenizer:
     @classmethod
     def from_json_file(cls, path: Path) -> Tokenizer:
         try:
-            value = json.loads(path.read_text(encoding="utf-8"))
+            return cls.from_json_bytes(path.read_bytes())
+        except OSError as exc:
+            raise DeltaError(ErrorCode.SCHEMA_INVALID, "TOKENIZER_JSON_INVALID") from exc
+
+    @classmethod
+    def from_json_bytes(cls, payload: bytes) -> Tokenizer:
+        try:
+            value = json.loads(payload.decode("utf-8"))
         except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise DeltaError(ErrorCode.SCHEMA_INVALID, "TOKENIZER_JSON_INVALID") from exc
         if not isinstance(value, dict) or set(value) != {
@@ -72,9 +79,16 @@ def load_samples(
     corpus: Path, tokenizer: Tokenizer, sequence_length: int
 ) -> tuple[TokenSample, ...]:
     try:
-        tokens = tokenizer.encode(corpus.read_text(encoding="utf-8"))
+        text = corpus.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         raise DeltaError(ErrorCode.SCHEMA_INVALID, "CORPUS_INVALID") from exc
+    return load_samples_from_text(text, tokenizer, sequence_length)
+
+
+def load_samples_from_text(
+    text: str, tokenizer: Tokenizer, sequence_length: int
+) -> tuple[TokenSample, ...]:
+    tokens = tokenizer.encode(text)
     width = sequence_length + 1
     samples = tuple(
         TokenSample(window[:-1], window[1:])
