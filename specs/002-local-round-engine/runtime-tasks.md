@@ -5,7 +5,7 @@
   bind the result to T000 evidence.
 - [x] **HR002-002** Define runtime-neutral `DomainPureWorkTicket`, completion and contribution-candidate schemas under `delta-protocol/`.
 - [ ] **HR002-003** Bind Python local engine to immutable `B/H/domain/data/parent/schema/profile` and reject any mutation.
-- [ ] **HR002-004** Implement exact `A_j=H` completion guard and non-padding token accounting.
+- [x] **HR002-004** Implement exact `A_j=H` completion guard and non-padding token accounting.
 - [ ] **HR002-005** Emit normalized pseudo-gradient reference artifacts in a safe format and canonical metadata bytes.
 - [ ] **HR002-006** Add complete, partial, OOM, cancellation, data-exhaustion and replay trace fixtures.
 - [ ] **HR002-007** Add architecture test proving no native/JVM validator dependency is introduced.

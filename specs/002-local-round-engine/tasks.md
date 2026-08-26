@@ -38,23 +38,23 @@ protocol registry and exact Formal GO.
 
 ## Phase 2: Foundational math and accounting
 
-- [ ] T007 Implement canonical parameter traversal/fingerprint and tied-parameter handling in
+- [x] T007 Implement canonical parameter traversal/fingerprint and tied-parameter handling in
   `delta-worker-python/src/deltatorrent/delta/schema.py`.
-- [ ] T008 Implement exact optimizer-boundary token ledger in
+- [x] T008 Implement exact optimizer-boundary token ledger in
   `delta-worker-python/src/deltatorrent/training/token_accounting.py`.
-- [ ] T009 Refactor a reusable local AdamW step loop without changing baseline semantics in
+- [x] T009 Refactor a reusable local AdamW step loop without changing baseline semantics in
   `delta-worker-python/src/deltatorrent/training/local_round.py`.
-- [ ] T010 Implement internal FP32 `LocalDelta = parent - final` builder in
+- [x] T010 Implement internal FP32 `LocalDelta = parent - final` builder in
   `delta-worker-python/src/deltatorrent/delta/builder.py`.
-- [ ] T011 [P] Implement `final = parent - LocalDelta` reconstruction helper in
+- [x] T011 [P] Implement `final = parent - LocalDelta` reconstruction helper in
   `delta-worker-python/src/deltatorrent/delta/reconstruction.py`.
-- [ ] T012 Implement exact `A_j = H` eligibility guard, `LocalDelta / A_j` normalization,
+- [x] T012 Implement exact `A_j = H` eligibility guard, `LocalDelta / A_j` normalization,
   tensor-set/finite/norm validation in
   `delta-worker-python/src/deltatorrent/delta/normalization.py` and
   `delta-worker-python/src/deltatorrent/delta/validation.py`.
-- [ ] T013 [P] Add property/reference reconstruction, normalization and validation tests in
+- [x] T013 [P] Add property/reference reconstruction, normalization and validation tests in
   `delta-worker-python/tests/unit/test_delta_math.py`.
-- [ ] T014 [P] Add parameter-schema and committed-ledger tests in
+- [x] T014 [P] Add parameter-schema and committed-ledger tests in
   `delta-worker-python/tests/unit/test_parameter_schema.py` and
   `delta-worker-python/tests/unit/test_token_accounting.py`.
 

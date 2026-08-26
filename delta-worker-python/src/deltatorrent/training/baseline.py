@@ -7,21 +7,12 @@ from dataclasses import dataclass, field
 
 import torch
 from torch import Tensor, nn
-from torch.nn import functional as functional
 
 from deltatorrent.domain.errors import DeltaError, ErrorCode
 from deltatorrent.training.config import BaselineConfig
 from deltatorrent.training.data import DeterministicSampler, TokenSample
+from deltatorrent.training.local_round import TrainingMetric, train_one_optimizer_step
 from deltatorrent.training.model import TinyCausalLM
-
-
-@dataclass(frozen=True, slots=True)
-class TrainingMetric:
-    step: int
-    optimizer_step: int
-    processed_tokens: int
-    loss: float
-    learning_rate: float
 
 
 @dataclass(slots=True)
@@ -122,36 +113,7 @@ def train_to_optimizer_step(
         or target_optimizer_step > config.optimizer_steps
     ):
         raise ValueError("TRAINING_TARGET_INVALID")
-    accumulated_loss = 0.0
     metrics: list[TrainingMetric] = []
     while state.optimizer_step < target_optimizer_step:
-        indices = state.sampler.take(config.batch_size)
-        inputs = torch.tensor([samples[index].inputs for index in indices], dtype=torch.long)
-        targets = torch.tensor([samples[index].targets for index in indices], dtype=torch.long)
-        logits = state.model(inputs)
-        loss = functional.cross_entropy(
-            logits.reshape(-1, config.vocab_size),
-            targets.reshape(-1),
-            ignore_index=0,
-        )
-        if not bool(torch.isfinite(loss)):
-            raise DeltaError(ErrorCode.INVALID_MANIFEST, "NON_FINITE_LOSS")
-        (loss / config.gradient_accumulation_steps).backward()  # type: ignore[no-untyped-call]
-        accumulated_loss += float(loss.detach())
-        state.micro_step += 1
-        state.processed_tokens += int(targets.ne(0).sum())
-        if state.micro_step % config.gradient_accumulation_steps != 0:
-            continue
-        state.optimizer.step()
-        state.optimizer_step += 1
-        metrics.append(
-            TrainingMetric(
-                step=state.micro_step,
-                optimizer_step=state.optimizer_step,
-                processed_tokens=state.processed_tokens,
-                loss=accumulated_loss / config.gradient_accumulation_steps,
-                learning_rate=config.learning_rate,
-            )
-        )
-        accumulated_loss = 0.0
+        metrics.append(train_one_optimizer_step(state, config, samples))
     return tuple(metrics)
