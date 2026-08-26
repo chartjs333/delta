@@ -91,6 +91,20 @@ integration/            polyglot traces, crash matrix, E2E and benchmark fixture
 4. Зафиксировать polyglot directory boundaries и `delta-protocol` canonical fixtures.
 5. Реализовать Python baseline; C++/Java production code до feature 003 не добавлять.
 
+## Воспроизводимый CPU smoke
+
+После `uv sync --frozen` минимальный baseline и полная рекурсивная проверка его immutable bundle
+запускаются так:
+
+```text
+uv run delta baseline run configs/baseline/cpu-smoke-v1.json
+uv run delta artifacts verify runs/cpu-smoke-v1/runs/cpu-smoke-v1/run-manifest.json --root runs/cpu-smoke-v1
+uv run delta netem smoke configs/netem/wan-smoke-v1.json
+```
+
+Повторное использование завершённого `run_id` намеренно запрещено. Полный контракт,
+межплатформенные границы и offline gate описаны в `docs/reproducibility.md`.
+
 ## Целевой MVP
 
 20–50 permissioned workers класса 8 GB, 3–5 регионов, fixed domain-pure tickets, canonical INT16-style vectors, checked INT64/INT128 accumulation, BFT certificate chain, ApplyQC current state и P2P-раздача certified global checkpoints.
