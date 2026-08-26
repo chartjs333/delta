@@ -103,7 +103,7 @@ protocol registry and exact Formal GO.
   `delta-worker-python/tests/architecture/test_reduce_distribution_boundary.py`.
 - [x] T030 Run formal projection/cross-artifact analysis and record evidence in
   `specs/002-local-round-engine/evidence/final-compatibility.json`.
-- [ ] T031 Run the full offline quality gate and final Constitution Check; record evidence in
+- [x] T031 Run the full offline quality gate and final Constitution Check; record evidence in
   `specs/002-local-round-engine/evidence/exit-gate.md`.
 
 ## Supplemental mandatory runtime tasks
