@@ -2,10 +2,26 @@ name: Formal verification gate
 
 on:
   pull_request:
+    # AGENTS/ROADMAP runtime overlays are checked by each feature's fail-closed
+    # formal-prerequisite gate. Run the heavyweight gate only for protected inputs.
+    paths:
+      - ".specify/memory/constitution.md"
+      - "docs/adr/0000-formal-verification-gate.md"
+      - "docs/adr/0001-deltareduce-v1.md"
+      - "docs/adr/0002-canonical-rational-rounding.md"
+      - "formal/**"
+      - "specs/000-formal-tla-spec/**"
   push:
     branches:
       - main
       - 000-formal-tla-spec
+    paths:
+      - ".specify/memory/constitution.md"
+      - "docs/adr/0000-formal-verification-gate.md"
+      - "docs/adr/0001-deltareduce-v1.md"
+      - "docs/adr/0002-canonical-rational-rounding.md"
+      - "formal/**"
+      - "specs/000-formal-tla-spec/**"
   workflow_dispatch:
 
 permissions:
