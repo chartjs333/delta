@@ -33,7 +33,7 @@ No package or production source task may start before the formal prerequisite pa
 | Safe boundaries | unsafe deserialization prohibited | static gate |
 | Observable increments | JSONL metrics/events, typed failures, independent exit gate | full branch gate |
 
-**Pre-implementation result**: BLOCKED until T000 verifies compatible Formal GO. Repeat against final diff and formal semantics ID.
+**Pre-implementation result**: PASS — T000/HR001-001 independently verified the merged Formal GO and recorded its report, evidence graph, source, toolchain and semantics hashes in `evidence/formal-prerequisite.json`. Repeat against the final diff and formal semantics ID at T035.
 
 ## Architecture and Data Flow
 

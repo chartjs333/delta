@@ -10,7 +10,7 @@
 
 ## Phase 0: Mandatory Formal GO prerequisite
 
-- [ ] T000 [US0] Implement/execute offline verifier for the exact `FormalVerificationReport(decision=GO)`; validate source/spec/Constitution/ADR/tool/evidence/formal-semantics compatibility and record hashes in `specs/001-reproducible-training-baseline/evidence/formal-prerequisite.json`. STOP all T001+ on any failure.
+- [x] T000 [US0] Implement/execute offline verifier for the exact `FormalVerificationReport(decision=GO)`; validate source/spec/Constitution/ADR/tool/evidence/formal-semantics compatibility and record hashes in `specs/001-reproducible-training-baseline/evidence/formal-prerequisite.json`. STOP all T001+ on any failure.
 
 ## Phase 1: Setup
 

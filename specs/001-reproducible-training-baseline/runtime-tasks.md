@@ -4,9 +4,9 @@ These tasks supplement `tasks.md`. They are mandatory and use `HR001-*` IDs to a
 
 ## Phase HR0: predecessor and architecture gate
 
-- [ ] **HR001-001** Verify that PR #1 is merged and independently validate the exact `FormalVerificationReport(GO)`, source commit, evidence graph and `formal_semantics_id`; write `specs/001-reproducible-training-baseline/evidence/formal-prerequisite.json`.
-- [ ] **HR001-002** Run a formal-impact classification for ADR-0010 and confirm `REFINEMENT_ONLY`; any required new formal action, timer transition, durability rule or failure terminal is a STOP and returns to feature 000.
-- [ ] **HR001-003** Record the accepted runtime decisions and source provenance in `docs/adr/0010-hybrid-runtime-boundary.md`, `docs/architecture/hybrid-runtime.md` and `docs/source/hybrid-runtime-v1-amendment.md`.
+- [x] **HR001-001** Verify that PR #1 is merged and independently validate the exact `FormalVerificationReport(GO)`, source commit, evidence graph and `formal_semantics_id`; write `specs/001-reproducible-training-baseline/evidence/formal-prerequisite.json`.
+- [x] **HR001-002** Run a formal-impact classification for ADR-0010 and confirm `REFINEMENT_ONLY`; any required new formal action, timer transition, durability rule or failure terminal is a STOP and returns to feature 000.
+- [x] **HR001-003** Record the accepted runtime decisions and source provenance in `docs/adr/0010-hybrid-runtime-boundary.md`, `docs/architecture/hybrid-runtime.md` and `docs/source/hybrid-runtime-v1-amendment.md`.
 
 ## Phase HR1: polyglot repository foundation
 
