@@ -30,7 +30,8 @@ def test_one_optimizer_step_matches_frozen_numeric_reference() -> None:
     metrics = train_to_optimizer_step(state, config, samples, 1)
     assert len(metrics) == 1
     assert metrics[0].processed_tokens == 16
-    assert metrics[0].loss == pytest.approx(2.890206217765808, abs=1e-7)
+    # MKL/oneDNN reduction order differs slightly across supported CPU platforms.
+    assert metrics[0].loss == pytest.approx(2.890206217765808, abs=5e-7)
     assert parameter_schema_id(state.model) == (
         "sha256:2e6342ebcadc1437c1b22a9d14ffe2fccf82e5dbdae210dc16783ae31bdd853b"
     )
