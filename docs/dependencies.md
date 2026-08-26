@@ -15,3 +15,8 @@ Feature 001 uses one committed root `uv.lock` for the virtual workspace and the
 The lock resolves build and development tools as well as direct runtime dependencies, so a
 successful offline run can consume a pre-populated verified cache without contacting a package
 index.
+
+Feature 001 pins PyTorch 2.6.0 from the explicit official `pytorch-cpu` wheel index; CUDA wheels
+and host-provided PyTorch installations are not part of the reference class. NumPy is locked
+because the safe-tensor encoder uses its CPU byte bridge, and `safetensors` is the only tensor
+checkpoint codec. Neither `torch.save` nor a pickle-compatible codec is allowed.

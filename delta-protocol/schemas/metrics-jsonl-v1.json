@@ -1,0 +1,1 @@
+{"append_unit":"one canonical finite JSON object plus LF","fields":["learning_rate","loss","optimizer_step","peak_memory_bytes","processed_tokens","schema_version","step","throughput_tokens_per_second","wall_time_seconds"],"format":"JSONL","schema_id":"SCHEMA-METRICS-JSONL-V1","schema_version":"1.0.0"}

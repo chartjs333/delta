@@ -33,15 +33,15 @@
 
 ## Phase 3: US1 — Reproducible baseline
 
-- [ ] T014 [US1] Определить строгую `BaselineConfig` и version migration boundary в `src/deltatorrent/training/config.py`.
-- [ ] T015 [P] [US1] Добавить synthetic corpus и tokenizer fixtures в `tests/fixtures/corpus/` и `tests/fixtures/tokenizer/`.
-- [ ] T016 [US1] Реализовать deterministic sampler, batching и non-padding token accounting в `src/deltatorrent/training/data.py`.
-- [ ] T017 [P] [US1] Реализовать tiny causal LM factory и parameter-schema fingerprint в `src/deltatorrent/training/model.py`.
-- [ ] T018 [US1] Реализовать baseline AdamW/gradient-accumulation loop и finite guards в `src/deltatorrent/training/baseline.py`.
-- [ ] T019 [US1] Реализовать safe checkpoint snapshot/restore всех RNG, optimizer и cursor states в `src/deltatorrent/training/checkpoint.py`.
-- [ ] T020 [US1] Реализовать `baseline run/resume` commands в `src/deltatorrent/cli/baseline.py`.
-- [ ] T021 [P] [US1] Добавить one-step numerical reference и token-count tests в `tests/unit/test_baseline_math.py`.
-- [ ] T022 [US1] Добавить repeated-run determinism и continuous-vs-resume tests в `tests/integration/test_baseline_reproducibility.py`.
+- [x] T014 [US1] Определить строгую `BaselineConfig` и version migration boundary в `src/deltatorrent/training/config.py`.
+- [x] T015 [P] [US1] Добавить synthetic corpus и tokenizer fixtures в `tests/fixtures/corpus/` и `tests/fixtures/tokenizer/`.
+- [x] T016 [US1] Реализовать deterministic sampler, batching и non-padding token accounting в `src/deltatorrent/training/data.py`.
+- [x] T017 [P] [US1] Реализовать tiny causal LM factory и parameter-schema fingerprint в `src/deltatorrent/training/model.py`.
+- [x] T018 [US1] Реализовать baseline AdamW/gradient-accumulation loop и finite guards в `src/deltatorrent/training/baseline.py`.
+- [x] T019 [US1] Реализовать safe checkpoint snapshot/restore всех RNG, optimizer и cursor states в `src/deltatorrent/training/checkpoint.py`.
+- [x] T020 [US1] Реализовать `baseline run/resume` commands в `src/deltatorrent/cli/baseline.py`.
+- [x] T021 [P] [US1] Добавить one-step numerical reference и token-count tests в `tests/unit/test_baseline_math.py`.
+- [x] T022 [US1] Добавить repeated-run determinism и continuous-vs-resume tests в `tests/integration/test_baseline_reproducibility.py`.
 
 ## Phase 4: US2 — WAN emulation
 
@@ -60,7 +60,7 @@
 ## Final Phase: Validation and documentation
 
 - [ ] T031 Записать baseline и reproducibility guide в `docs/reproducibility.md`.
-- [ ] T032 Добавить committed smoke configs в `configs/baseline/`.
+- [x] T032 Добавить committed smoke configs в `configs/baseline/`.
 - [ ] T033 Run formal-impact/cross-artifact analysis and verify no semantic drift from the bound `formal_semantics_id`.
 - [ ] T034 Выполнить полный offline quality gate и приложить команды/результаты в `specs/001-reproducible-training-baseline/evidence/exit-gate.md`.
 - [ ] T035 Повторить Constitution Check по final diff в `plan.md` and reverify Formal GO compatibility.
