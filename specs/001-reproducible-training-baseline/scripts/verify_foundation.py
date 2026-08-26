@@ -107,6 +107,7 @@ FOUNDATION_COMPONENT_FILES = (
     "delta-protocol/schemas/corpus-text-v1.json",
     "delta-protocol/schemas/formal-projection.schema.json",
     "delta-protocol/schemas/metrics-jsonl-v1.json",
+    "delta-protocol/schemas/network-profile.schema.json",
     "delta-protocol/schemas/protocol-registry.schema.json",
     "delta-protocol/schemas/run-manifest.schema.json",
     "delta-protocol/schemas/safe-tensor-envelope-v1.json",

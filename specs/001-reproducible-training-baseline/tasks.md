@@ -45,11 +45,11 @@
 
 ## Phase 4: US2 — WAN emulation
 
-- [ ] T023 [US2] Определить `NetworkProfile`, fault events и validation rules в `src/deltatorrent/domain/network.py`.
-- [ ] T024 [US2] Реализовать seeded unprivileged faulty stream/proxy в `src/deltatorrent/adapters/netem/simulated.py`.
-- [ ] T025 [P] [US2] Реализовать cleanup-safe optional Linux `tc/netem` adapter в `src/deltatorrent/adapters/netem/linux_tc.py`.
-- [ ] T026 [US2] Реализовать `netem smoke` command и sample profiles в `src/deltatorrent/cli/netem.py` и `configs/netem/`.
-- [ ] T027 [US2] Добавить deterministic loss/jitter/disconnect/deadline tests в `tests/integration/test_network_profiles.py`.
+- [x] T023 [US2] Определить `NetworkProfile`, fault events и validation rules в `src/deltatorrent/domain/network.py`.
+- [x] T024 [US2] Реализовать seeded unprivileged faulty stream/proxy в `src/deltatorrent/adapters/netem/simulated.py`.
+- [x] T025 [P] [US2] Реализовать cleanup-safe optional Linux `tc/netem` adapter в `src/deltatorrent/adapters/netem/linux_tc.py`.
+- [x] T026 [US2] Реализовать `netem smoke` command и sample profiles в `src/deltatorrent/cli/netem.py` и `configs/netem/`.
+- [x] T027 [US2] Добавить deterministic loss/jitter/disconnect/deadline tests в `tests/integration/test_network_profiles.py`.
 
 ## Phase 5: US3 — Artifact verification
 
