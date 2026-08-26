@@ -23,6 +23,15 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Bind canonical main ref for pull requests
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -n "$PR_BASE_SHA" ]; then
+            git cat-file -e "$PR_BASE_SHA^{commit}"
+            git update-ref refs/remotes/origin/main "$PR_BASE_SHA"
+          fi
+
       - name: Install pinned workspace tool
         run: python3 -m pip install --disable-pip-version-check uv==0.6.14
 
