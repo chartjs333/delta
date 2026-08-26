@@ -82,14 +82,14 @@ protocol registry and exact Formal GO.
 
 ## Phase 5: US3 — Failure, idempotency and cancellation
 
-- [ ] T023 [US3] Implement atomic ticket claim/result repository in
+- [x] T023 [US3] Implement atomic ticket claim/result repository in
   `delta-worker-python/src/deltatorrent/worker/repository.py`.
-- [ ] T024 [US3] Implement injected cancellation/deadline checks at microbatch boundaries in
+- [x] T024 [US3] Implement injected cancellation/deadline checks at microbatch boundaries in
   `delta-worker-python/src/deltatorrent/worker/engine.py`.
-- [ ] T025 [US3] Add retry/conflict/crash/cancel/deadline/partial-accumulation/data-exhaustion/
+- [x] T025 [US3] Add retry/conflict/crash/cancel/deadline/partial-accumulation/data-exhaustion/
   OOM/non-finite suite proving candidate absence and terminal-evidence presence in
   `delta-worker-python/tests/integration/test_worker_idempotency.py`.
-- [ ] T026 [P] [US3] Add concurrent-claim test for one `ticket_id` in
+- [x] T026 [P] [US3] Add concurrent-claim test for one `ticket_id` in
   `delta-worker-python/tests/integration/test_worker_concurrency.py`.
 
 ## Final Phase: Validation and documentation

@@ -41,6 +41,11 @@
       "sha256": "b2e41ffaf836d0fa80bf5afc6d21a66fd9b54237b569f45e919f35675b7df7d6"
     },
     {
+      "id": "LOCAL-ROUND-TRACES-001",
+      "path": "fixtures/local-round/traces-v1.json",
+      "sha256": "c6ce7ed745d863a8f77f88e5bb42182f6a8fc991fa7d5f160125b0593c1aa361"
+    },
+    {
       "id": "SAFE-TENSOR-001",
       "path": "fixtures/safe-tensor/safe-tensor-i32-v1.json",
       "sha256": "82b99a179ccf2e1d19d77e0a837a88fb9edac3d6504e0479c3845c35903d902d"

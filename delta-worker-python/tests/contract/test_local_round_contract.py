@@ -57,12 +57,30 @@ def _mutate(value: dict[str, Any], mutation: dict[str, Any]) -> dict[str, Any]:
 
 
 def test_positive_fixtures_are_canonical_json_documents() -> None:
-    for name in (*POSITIVE_FIXTURES, "negative-v1.json"):
+    for name in (*POSITIVE_FIXTURES, "negative-v1.json", "traces-v1.json"):
         path = FIXTURES / name
         raw = path.read_bytes()
         value = _load(path)
         assert raw.endswith(b"\n") and not raw.endswith(b"\n\n")
         assert raw[:-1] == canonical_json_bytes(value)
+
+
+def test_failure_trace_fixture_covers_required_runtime_outcomes() -> None:
+    trace = _load(FIXTURES / "traces-v1.json")
+    assert trace["formal_semantics_id"] == FORMAL_SEMANTICS_ID
+    cases = trace["cases"]
+    assert isinstance(cases, list)
+    assert {case["id"] for case in cases} == {
+        "cancellation",
+        "complete",
+        "data-exhaustion",
+        "exact-replay",
+        "oom",
+        "partial-accumulation",
+    }
+    assert all(
+        case["expected_candidate"] is (case["expected_status"] == "COMPLETED") for case in cases
+    )
 
 
 def test_positive_contract_lineage_and_exact_round_trips() -> None:

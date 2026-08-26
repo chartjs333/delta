@@ -26,6 +26,7 @@ def configure(parser: argparse.ArgumentParser) -> None:
     run.add_argument("tokenizer_ref", type=Path)
     run.add_argument("--store-root", type=Path, required=True)
     run.add_argument("--worker-id", default="worker-local-1")
+    run.add_argument("--recover-incomplete", action="store_true")
     run.add_argument("--per-tensor-norm-ceiling-microunits", type=int, default=1_000_000_000_000)
     run.add_argument("--global-norm-ceiling-microunits", type=int, default=1_000_000_000_000)
 
@@ -65,6 +66,10 @@ def execute(args: argparse.Namespace, repository_root: Path) -> int:
         store=store,
         limits=limits,
     )
-    result = LocalRoundEngine(store, worker_id=args.worker_id).run(resolved)
+    result = LocalRoundEngine(
+        store,
+        worker_id=args.worker_id,
+        recover_incomplete=args.recover_incomplete,
+    ).run(resolved)
     print(json.dumps(result.to_dict(), sort_keys=True, separators=(",", ":")))
     return 0

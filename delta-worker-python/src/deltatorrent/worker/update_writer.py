@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
 import torch
@@ -80,6 +80,23 @@ class PublishedLocalRound:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class PublishedFailure:
+    parameter_schema_ref: ArtifactRef
+    completion_ref: ArtifactRef
+    completion: LocalRoundCompletion
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "candidate": None,
+            "completion": self.completion_ref.to_dict(),
+            "parameter_schema": self.parameter_schema_ref.to_dict(),
+            "schema_version": "1.0.0",
+            "status": self.completion.status.value,
+            "ticket_id": self.completion.ticket_id,
+        }
+
+
 class LocalUpdateWriter:
     def __init__(self, store: FilesystemArtifactStore) -> None:
         self.store = store
@@ -96,6 +113,7 @@ class LocalUpdateWriter:
         limits: LocalRoundLimits,
         wall_time_ms: int,
         peak_memory_bytes: int,
+        after_stage: Callable[[str], None] | None = None,
     ) -> PublishedLocalRound:
         if accounting.effective_steps != ticket.step_budget or accounting.pending_micro_steps:
             raise DeltaError(
@@ -117,7 +135,11 @@ class LocalUpdateWriter:
         if schema_ref.content_id != ticket.parameter_schema_id:
             raise DeltaError(ErrorCode.INVALID_WORK_TICKET, "PUBLISHED_SCHEMA_ID_MISMATCH")
         local_ref = self._publish_tensors(local_delta)
+        if after_stage is not None:
+            after_stage("AFTER_LOCAL_DELTA_ARTIFACT")
         normalized_ref = self._publish_tensors(normalized_delta)
+        if after_stage is not None:
+            after_stage("AFTER_NORMALIZED_DELTA_ARTIFACT")
         tensor_order = included_tensor_names(parameter_schema)
         local_contract = LocalDelta(
             ticket_id=ticket.ticket_id,
@@ -172,6 +194,8 @@ class LocalUpdateWriter:
         )
         if completion_ref.content_id != completion.fingerprint:
             raise DeltaError(ErrorCode.INVALID_LOCAL_COMPLETION, "COMPLETION_ID_MISMATCH")
+        if after_stage is not None:
+            after_stage("AFTER_COMPLETION_MANIFEST")
         candidate = NormalizedContributionCandidate(
             arithmetic_profile_id=ticket.arithmetic_profile_id,
             completion_id=completion.fingerprint,
@@ -203,6 +227,73 @@ class LocalUpdateWriter:
             candidate_ref=candidate_ref,
             completion=completion,
             candidate=candidate,
+        )
+
+    def publish_failure(
+        self,
+        *,
+        ticket: DomainPureWorkTicket,
+        worker_id: str,
+        parameter_schema: ParameterSchema,
+        accounting: TokenAccountingRecord,
+        status: CompletionStatus,
+        reason: CompletionReason,
+        failure_code: str,
+        wall_time_ms: int,
+        peak_memory_bytes: int,
+    ) -> PublishedFailure:
+        schema_ref = self.store.publish_json(
+            parameter_schema.to_dict(),
+            media_type="application/vnd.deltareduce.parameter-schema+json;version=1",
+            schema_id="SCHEMA-PARAMETER-SCHEMA-V1",
+        )
+        completion = LocalRoundCompletion(
+            arithmetic_profile_id=ticket.arithmetic_profile_id,
+            batch_budget=ticket.batch_budget,
+            candidate_eligible=False,
+            cursor_end=accounting.cursor_end,
+            cursor_start=accounting.cursor_start,
+            data_id=ticket.data.content_id,
+            data_range_end=ticket.data_range.end,
+            data_range_start=ticket.data_range.start,
+            deterministic_seed=ticket.deterministic_seed,
+            domain_id=ticket.domain_id,
+            effective_steps=accounting.effective_steps,
+            failure_code=failure_code,
+            local_delta=None,
+            logical_deadline_ms=ticket.logical_deadline_ms,
+            micro_steps=accounting.observed_micro_steps,
+            numerical_summary=NumericalSummary(
+                all_finite=False,
+                global_l2_norm_fp64_bits=None,
+                max_abs_fp32_bits=None,
+            ),
+            optimizer_profile_id=ticket.optimizer_profile_id,
+            parameter_schema_id=ticket.parameter_schema_id,
+            parent_model_id=ticket.parent_model.content_id,
+            processed_tokens=accounting.processed_tokens,
+            producer_version=f"deltatorrent-worker-{__version__}",
+            reason=reason,
+            resource_summary=ResourceSummary(
+                peak_memory_bytes=peak_memory_bytes,
+                wall_time_ms=wall_time_ms,
+            ),
+            status=status,
+            step_budget=ticket.step_budget,
+            ticket_fingerprint=ticket.fingerprint,
+            ticket_id=ticket.ticket_id,
+            worker_id=worker_id,
+        )
+        completion_ref = self.store.publish_named(
+            f"local-round/{ticket.ticket_id}/completion.json",
+            canonical_json_bytes(completion.to_dict()),
+            media_type="application/vnd.deltareduce.local-round-completion+json;version=1",
+            schema_id="SCHEMA-LOCAL-ROUND-COMPLETION-V1",
+        )
+        return PublishedFailure(
+            parameter_schema_ref=schema_ref,
+            completion_ref=completion_ref,
+            completion=completion,
         )
 
     def verify_success(
