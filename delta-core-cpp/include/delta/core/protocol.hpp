@@ -95,6 +95,21 @@ struct QuorumCertificate {
   bool operator==(const QuorumCertificate&) const = default;
 };
 
+struct Vote {
+  std::string body_hash;
+  std::string context_id;
+  std::uint64_t durable_sequence;
+  std::uint64_t height;
+  std::string kind;
+  std::string round_id;
+  std::string signature_id;
+  std::string validator_epoch_id;
+  std::string validator_id;
+  std::uint64_t view;
+
+  bool operator==(const Vote&) const = default;
+};
+
 struct IntegerProfile {
   std::uint32_t accumulator_bits;
   std::string byte_order;
@@ -161,6 +176,9 @@ struct WalRecord {
 [[nodiscard]] QuorumCertificate parse_quorum_certificate(
     std::span<const std::byte> bytes,
     const canonical::Limits& limits = {});
+[[nodiscard]] Vote parse_vote(
+    std::span<const std::byte> bytes,
+    const canonical::Limits& limits = {});
 [[nodiscard]] PreparedIntegerShard parse_prepared_integer_shard(
     std::span<const std::byte> bytes,
     const canonical::Limits& limits = {});
@@ -178,6 +196,7 @@ struct WalRecord {
 [[nodiscard]] canonical::Bytes encode(
     const QuorumCertificate& value,
     const canonical::Limits& limits = {});
+[[nodiscard]] canonical::Bytes encode(const Vote& value, const canonical::Limits& limits = {});
 [[nodiscard]] canonical::Bytes encode(
     const PreparedIntegerShard& value,
     const canonical::Limits& limits = {});

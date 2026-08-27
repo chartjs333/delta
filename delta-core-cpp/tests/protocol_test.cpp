@@ -97,6 +97,7 @@ void test_explicit_golden_types() {
   const auto shard_bytes = golden(10U);
   const auto effect_bytes = golden(7U);
   const auto wal_bytes = golden(8U);
+  const auto vote_bytes = golden(3U);
 
   const auto command = protocol::parse_command(command_bytes);
   expect(command.command_kind == "FINALIZE_ROUND_CONFIG", "command kind mismatch");
@@ -129,6 +130,10 @@ void test_explicit_golden_types() {
   const auto wal_record = protocol::parse_wal_record(wal_bytes);
   expect(wal_record.sequence == 1U, "WAL sequence mismatch");
   expect(protocol::encode(wal_record) == wal_bytes, "WAL encoding differs from golden bytes");
+
+  const auto vote = protocol::parse_vote(vote_bytes);
+  expect(vote.validator_id == "validator-1", "vote validator mismatch");
+  expect(protocol::encode(vote) == vote_bytes, "vote encoding differs from golden bytes");
 }
 
 void test_command_fails_closed() {

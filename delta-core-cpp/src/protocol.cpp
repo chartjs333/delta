@@ -467,6 +467,48 @@ QuorumCertificate parse_quorum_certificate(
   return result;
 }
 
+Vote parse_vote(std::span<const std::byte> bytes, const canonical::Limits& limits) {
+  auto envelope = decode_expected(bytes, Type::vote, limits);
+  constexpr std::array expected = {
+      std::string_view{"body_hash"},
+      std::string_view{"context_id"},
+      std::string_view{"durable_sequence"},
+      std::string_view{"formal_semantics_id"},
+      std::string_view{"height"},
+      std::string_view{"kind"},
+      std::string_view{"round_id"},
+      std::string_view{"schema_version"},
+      std::string_view{"signature_id"},
+      std::string_view{"type_name"},
+      std::string_view{"validator_epoch_id"},
+      std::string_view{"validator_id"},
+      std::string_view{"view"},
+  };
+  require_fields(envelope.fields, expected);
+  require_common(envelope.fields, Type::vote);
+  Vote result{
+      text(envelope.fields, "body_hash"),
+      text(envelope.fields, "context_id"),
+      parse_u64_decimal(text(envelope.fields, "durable_sequence")),
+      parse_u64_decimal(text(envelope.fields, "height")),
+      text(envelope.fields, "kind"),
+      text(envelope.fields, "round_id"),
+      text(envelope.fields, "signature_id"),
+      text(envelope.fields, "validator_epoch_id"),
+      text(envelope.fields, "validator_id"),
+      parse_u64_decimal(text(envelope.fields, "view")),
+  };
+  require_content_id(result.body_hash);
+  require_ascii_id(result.context_id);
+  require(result.durable_sequence > 0U, ErrorCode::state_invalid, "vote sequence is zero");
+  require_ascii_id(result.kind);
+  require_ascii_id(result.round_id);
+  require_content_id(result.signature_id);
+  require_content_id(result.validator_epoch_id);
+  require_ascii_id(result.validator_id);
+  return result;
+}
+
 PreparedIntegerShard parse_prepared_integer_shard(
     std::span<const std::byte> bytes,
     const canonical::Limits& limits) {
@@ -655,6 +697,30 @@ canonical::Bytes encode(const QuorumCertificate& value, const canonical::Limits&
   };
   auto bytes = canonical::encode(envelope, limits);
   static_cast<void>(parse_quorum_certificate(bytes, limits));
+  return bytes;
+}
+
+canonical::Bytes encode(const Vote& value, const canonical::Limits& limits) {
+  const Envelope envelope{
+      Type::vote,
+      {
+          {"body_hash", Value::text(value.body_hash)},
+          {"context_id", Value::text(value.context_id)},
+          {"durable_sequence", Value::text(decimal(value.durable_sequence))},
+          {"formal_semantics_id", Value::text(std::string(formal_semantics_id))},
+          {"height", Value::text(decimal(value.height))},
+          {"kind", Value::text(value.kind)},
+          {"round_id", Value::text(value.round_id)},
+          {"schema_version", Value::text(std::string(schema_version))},
+          {"signature_id", Value::text(value.signature_id)},
+          {"type_name", Value::text(std::string(canonical::type_name(Type::vote)))},
+          {"validator_epoch_id", Value::text(value.validator_epoch_id)},
+          {"validator_id", Value::text(value.validator_id)},
+          {"view", Value::text(decimal(value.view))},
+      },
+  };
+  auto bytes = canonical::encode(envelope, limits);
+  static_cast<void>(parse_vote(bytes, limits));
   return bytes;
 }
 

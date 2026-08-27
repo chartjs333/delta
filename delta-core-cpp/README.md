@@ -10,6 +10,8 @@ compiler extensions. The `bft-int-fixture-v1` pre-open gate proves the conservat
 `ticket-count * coefficient-bound * value-bound + headroom` expression fits the selected width.
 The pure transition entry point consumes only canonical prior-state and command bytes and returns
 linked canonical next-state, effect-batch and WAL-record bytes plus their domain-separated IDs.
+Pure consensus guards enforce durable vote uniqueness, exact validator membership/quorum policy,
+commitment idempotency/equivocation, complete availability coverage and immutable input freeze.
 
 The library is standard-library-only and deliberately has no socket, filesystem, wall-clock,
 thread, JVM, Python or floating-point dependency. Runtime durability belongs to

@@ -55,6 +55,7 @@ REQUIRED_CMAKE_FRAGMENTS = (
     "delta_core_protocol_test",
     "delta_core_arithmetic_test",
     "delta_core_transition_test",
+    "delta_core_consensus_test",
     "delta_runtime_target_test",
     "delta_ffi_target_test",
 )
