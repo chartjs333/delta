@@ -7,7 +7,7 @@ Feature `000-formal-tla-spec` has a deterministic `GO` for formal semantics:
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
 Features 000 and 001 are merged. Feature 002 completed its offline exit gate against implementation
-source `c66a4ca2c48c6de096782110eb8b835a6494cd27`: the deterministic local ticket lifecycle,
+source `30dccd27325b851438f1df6ca8409ebad21bb5e5`: the deterministic local ticket lifecycle,
 protocol/architecture suites and final `REFINEMENT_ONLY` compatibility check pass. Feature 002 is
 ready for merge review; feature 003 remains blocked until that merge is complete.
 

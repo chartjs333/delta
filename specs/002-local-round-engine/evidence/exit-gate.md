@@ -4,7 +4,7 @@
 
 **Executed**: 2026-08-26, Europe/Berlin
 
-**Implementation source commit**: `c66a4ca2c48c6de096782110eb8b835a6494cd27`
+**Implementation source commit**: `30dccd27325b851438f1df6ca8409ebad21bb5e5`
 
 **Environment**: Python 3.12.1, uv 0.6.14, PyTorch 2.6.0+cpu,
 Windows 10.0.19045
@@ -24,7 +24,7 @@ Windows JRE, TLA+ jar, Lean toolchain and Lake dependency cache.
 - Predecessor evidence SHA-256:
   `9edbc2454895498a7c0570b0011359b84be8ed12d2408206aa63a40ee22d52b5`.
 - Final compatibility evidence SHA-256:
-  `9868a974945b30a061a609c78a93bfb41bae6ebe1ae207c55121790b0e5cf83e`.
+  `916d9b3e2fa21eaf67fe2642381c883a1441896990744d332771e0019ccaed11`.
 - The final compatibility analyzer rediscovered all 24 semantic artifacts, rederived the same
   formal semantics ID, found no formal-source diff and found no new action ID, failure terminal or
   protocol-visible durability outcome. Classification remains `REFINEMENT_ONLY`.
@@ -49,7 +49,7 @@ All implementation commands ran fail-fast with public network access blocked.
 | Lock integrity | `uv lock --check` | PASS; 25 packages resolved, no lock mutation |
 | Offline environment | `uv sync --frozen --offline` | PASS; 24 packages audited |
 | Lint | `uv run ruff check .` | PASS |
-| Formatting | `uv run ruff format --check .` | PASS; 135 files formatted |
+| Formatting | `uv run ruff format --check .` | PASS; 136 files formatted |
 | Types | `uv run mypy delta-worker-python/src` | PASS; 48 source files |
 | Python suite | `uv run pytest delta-worker-python/tests -q` | PASS; 106 passed, 1 optional CUDA skip |
 | Protocol/architecture | `uv run pytest delta-worker-python/tests/contract delta-worker-python/tests/architecture -q` | PASS; 42 tests |
@@ -62,6 +62,8 @@ All implementation commands ran fail-fast with public network access blocked.
 
 - one deterministic domain-pure ticket binds the exact data range, `B`, `H`, parent checkpoint,
   parameter schema, optimizer profile and arithmetic profile;
+- the smoke parent is one exact all-zero FP32 safetensors state derived from the frozen parameter
+  schema, independent of platform-specific random-normal implementations;
 - worker execution consumes exactly the ticket range and reaches `A_j=H` before candidate
   eligibility;
 - parent minus final local state reconstructs the emitted `LocalDelta`, and division by `A_j`
