@@ -34,6 +34,7 @@ endfunction()
 
 add_library(delta_core STATIC
   delta-core-cpp/src/canonical.cpp
+  delta-core-cpp/src/protocol.cpp
   delta-core-cpp/src/sha256.cpp)
 add_library(delta::core ALIAS delta_core)
 target_include_directories(
@@ -57,6 +58,14 @@ if(BUILD_TESTING)
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
   delta_target_defaults(delta_core_canonical_test)
   add_test(NAME delta_core.canonical COMMAND delta_core_canonical_test)
+
+  add_executable(delta_core_protocol_test delta-core-cpp/tests/protocol_test.cpp)
+  target_link_libraries(delta_core_protocol_test PRIVATE delta::core)
+  target_compile_definitions(
+    delta_core_protocol_test
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+  delta_target_defaults(delta_core_protocol_test)
+  add_test(NAME delta_core.protocol COMMAND delta_core_protocol_test)
 
   add_executable(delta_runtime_target_test delta-runtime-cpp/tests/target_smoke_test.cpp)
   target_link_libraries(delta_runtime_target_test PRIVATE delta::runtime)

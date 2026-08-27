@@ -52,6 +52,7 @@ REQUIRED_CMAKE_FRAGMENTS = (
     "/fp:strict",
     "DELTA_CXX_STANDARD",
     "delta_core_canonical_test",
+    "delta_core_protocol_test",
     "delta_runtime_target_test",
     "delta_ffi_target_test",
 )

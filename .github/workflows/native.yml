@@ -64,6 +64,18 @@ jobs:
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -o "$output"
                 "$output"
+                protocol_output="/tmp/delta-core-protocol${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/tests/protocol_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$protocol_output"
+                "$protocol_output"
               done
             '
 

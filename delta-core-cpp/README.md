@@ -2,7 +2,9 @@
 
 Pure deterministic DeltaReduce protocol core. The feature-003 slice currently implements the
 bounded `delta-canonical-binary-v1` value/envelope parser, encoder, domain-separated content IDs
-and cross-language golden-vector checks.
+and cross-language golden-vector checks. Explicit `Command`, `RoundState`, `QuorumCertificate` and
+`PreparedIntegerShard` types reject unknown fields, wrong field types, non-canonical decimal
+values, invalid identifiers, malformed quorum arrays and incompatible integer fixture profiles.
 
 The library is standard-library-only and deliberately has no socket, filesystem, wall-clock,
 thread, JVM, Python or floating-point dependency. Runtime durability belongs to
