@@ -74,16 +74,6 @@ void require_vote(const protocol::Vote& vote) {
       [](const Commitment& item, std::string_view key) { return item.ticket_id < key; });
 }
 
-[[nodiscard]] auto find_commitment(
-    const std::vector<Commitment>& commitments,
-    std::string_view ticket_id) {
-  return std::lower_bound(
-      commitments.begin(),
-      commitments.end(),
-      ticket_id,
-      [](const Commitment& item, std::string_view key) { return item.ticket_id < key; });
-}
-
 [[nodiscard]] auto find_availability(
     std::vector<AvailabilityProof>& proofs,
     std::string_view ticket_id) {
