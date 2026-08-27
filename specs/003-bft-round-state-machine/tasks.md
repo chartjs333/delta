@@ -14,13 +14,13 @@ Every task is incomplete until its declared tests and content-addressed evidence
 
 ## Phase 1: Canonical protocol contracts
 
-- [ ] T004 Define the feature-003 schema registry and domain-separated hash namespaces in `delta-protocol/schemas/003/`.
-- [ ] T005 Define canonical `RoundConfig`, validator-set and fixed-ticket schema plus valid fixtures.
-- [ ] T006 [P] Define canonical vote, QC, signer-set and stable rejection schema plus valid/invalid fixtures.
-- [ ] T007 [P] Define canonical prior-state, command, next-state and effect-batch schema plus fixtures.
-- [ ] T008 [P] Define canonical WAL record, snapshot and ABI descriptor schema plus fixtures.
-- [ ] T009 Add malformed, duplicate-key, non-canonical-integer, wrong-version and cross-language fixture corpora.
-- [ ] T010 Add a runtime-neutral fixture validator and golden-hash manifest; require independent decoding without application internals.
+- [x] T004 Define the feature-003 schema registry and domain-separated hash namespaces in `delta-protocol/schemas/003/`.
+- [x] T005 Define canonical `RoundConfig`, validator-set and fixed-ticket schema plus valid fixtures.
+- [x] T006 [P] Define canonical vote, QC, signer-set and stable rejection schema plus valid/invalid fixtures.
+- [x] T007 [P] Define canonical prior-state, command, next-state and effect-batch schema plus fixtures.
+- [x] T008 [P] Define canonical WAL record, snapshot and ABI descriptor schema plus fixtures.
+- [x] T009 Add malformed, duplicate-key, non-canonical-integer, wrong-version and cross-language fixture corpora.
+- [x] T010 Add a runtime-neutral fixture validator and golden-hash manifest; require independent decoding without application internals.
 
 ## Phase 2: Toolchains and architecture gates
 

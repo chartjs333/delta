@@ -2,7 +2,7 @@ name: Python worker quality
 
 on:
   push:
-    branches: [001-reproducible-training-baseline, 002-local-round-engine]
+    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine]
   pull_request:
 
 permissions:
@@ -72,8 +72,8 @@ jobs:
           UV_OFFLINE: "true"
         run: uv run python specs/001-reproducible-training-baseline/scripts/verify_foundation.py --check-only
 
-      - name: Verify feature 002 compatibility when present
-        if: ${{ hashFiles('specs/002-local-round-engine/evidence/final-compatibility.json') != '' }}
+      - name: Reproduce feature 002 compatibility on its branch
+        if: ${{ github.ref_name == '002-local-round-engine' || github.head_ref == '002-local-round-engine' }}
         env:
           ALL_PROXY: http://127.0.0.1:9
           HTTPS_PROXY: http://127.0.0.1:9
@@ -83,3 +83,17 @@ jobs:
         run: |
           uv run python specs/002-local-round-engine/scripts/verify_predecessor.py --check-only
           uv run python specs/002-local-round-engine/scripts/verify_final_compatibility.py --check-only
+
+      - name: Verify feature 003 prerequisite and contract evidence
+        if: ${{ github.ref_name == '003-bft-round-state-machine' || github.head_ref == '003-bft-round-state-machine' }}
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/003-bft-round-state-machine/scripts/verify_preflight.py --check-only
+          uv run python specs/003-bft-round-state-machine/scripts/verify_native_toolchains.py --check-only
+          uv run python specs/003-bft-round-state-machine/scripts/verify_protocol_contracts.py --check-only
+          uv run pytest specs/003-bft-round-state-machine/tests

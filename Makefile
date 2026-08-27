@@ -5,10 +5,14 @@ PREREQUISITE := specs/001-reproducible-training-baseline/scripts/verify_formal_p
 FOUNDATION := specs/001-reproducible-training-baseline/scripts/verify_foundation.py
 LOCAL_ROUND_PREDECESSOR := specs/002-local-round-engine/scripts/verify_predecessor.py
 LOCAL_ROUND_COMPATIBILITY := specs/002-local-round-engine/scripts/verify_final_compatibility.py
+BFT_PREFLIGHT := specs/003-bft-round-state-machine/scripts/verify_preflight.py
+BFT_TOOLCHAINS := specs/003-bft-round-state-machine/scripts/verify_native_toolchains.py
+BFT_PROTOCOL := specs/003-bft-round-state-machine/scripts/verify_protocol_contracts.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
-	prerequisite protocol-check python-check foundation-check conformance local-round-check
+	prerequisite protocol-check python-check foundation-check conformance local-round-check \
+	bft-preflight bft-contracts
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -66,3 +70,11 @@ conformance: prerequisite protocol-check foundation-check
 local-round-check: protocol-check python-check
 	$(UV) run python $(LOCAL_ROUND_PREDECESSOR) --check-only
 	$(UV) run python $(LOCAL_ROUND_COMPATIBILITY) --check-only
+
+bft-preflight:
+	$(UV) run python $(BFT_PREFLIGHT) --check-only
+	$(UV) run python $(BFT_TOOLCHAINS) --check-only
+
+bft-contracts: bft-preflight protocol-check
+	$(UV) run python $(BFT_PROTOCOL) --check-only
+	$(UV) run pytest specs/003-bft-round-state-machine/tests
