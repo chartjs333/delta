@@ -278,7 +278,11 @@ class Runtime::Impl {
     if (work.crash_point == CrashPoint::after_wal_append_before_durability) {
       simulated_crash("simulated crash after WAL append before durability");
     }
+#if defined(DELTA_NATIVE_MUTANT_EXPOSE_BEFORE_DURABILITY)
+    static_cast<void>(entry);
+#else
     wal_.append_and_sync(entry, false);
+#endif
     if (work.crash_point == CrashPoint::after_durability_before_commit) {
       simulated_crash("simulated crash after durability before commit");
     }

@@ -139,6 +139,72 @@ if(BUILD_TESTING)
   delta_target_defaults(delta_runtime_test)
   add_test(NAME delta_runtime.behavior COMMAND delta_runtime_test)
 
+  add_executable(delta_runtime_trace_exporter delta-runtime-cpp/tests/trace_exporter.cpp)
+  target_link_libraries(delta_runtime_trace_exporter PRIVATE delta::runtime)
+  target_compile_definitions(
+    delta_runtime_trace_exporter
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+  delta_target_defaults(delta_runtime_trace_exporter)
+  add_test(
+    NAME delta_runtime.trace_export
+    COMMAND delta_runtime_trace_exporter "${CMAKE_CURRENT_BINARY_DIR}/native-traces")
+
+  add_executable(delta_runtime_native_exit_test delta-runtime-cpp/tests/native_exit_test.cpp)
+  target_link_libraries(delta_runtime_native_exit_test PRIVATE delta::runtime)
+  target_compile_definitions(
+    delta_runtime_native_exit_test
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json"
+            DELTA_PREPARED_100_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json")
+  delta_target_defaults(delta_runtime_native_exit_test)
+  add_test(NAME delta_runtime.native_exit COMMAND delta_runtime_native_exit_test)
+
+  add_library(delta_core_view_mutant STATIC
+    EXCLUDE_FROM_ALL
+    delta-core-cpp/src/arithmetic.cpp
+    delta-core-cpp/src/canonical.cpp
+    delta-core-cpp/src/consensus.cpp
+    delta-core-cpp/src/protocol.cpp
+    delta-core-cpp/src/sha256.cpp
+    delta-core-cpp/src/transition.cpp)
+  target_include_directories(
+    delta_core_view_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+  target_compile_definitions(delta_core_view_mutant PRIVATE DELTA_NATIVE_MUTANT_ALLOW_VIEW_JUMP)
+  delta_target_defaults(delta_core_view_mutant)
+  add_executable(delta_core_view_mutant_test EXCLUDE_FROM_ALL delta-runtime-cpp/tests/native_mutant_test.cpp)
+  target_link_libraries(delta_core_view_mutant_test PRIVATE delta_core_view_mutant)
+  target_compile_definitions(
+    delta_core_view_mutant_test
+    PRIVATE DELTA_EXPECT_VIEW_MUTANT
+            DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+  delta_target_defaults(delta_core_view_mutant_test)
+
+  add_library(delta_runtime_durability_mutant STATIC
+    EXCLUDE_FROM_ALL
+    delta-runtime-cpp/src/runtime.cpp
+    delta-runtime-cpp/src/wal.cpp)
+  target_include_directories(
+    delta_runtime_durability_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
+  target_compile_definitions(
+    delta_runtime_durability_mutant PRIVATE DELTA_NATIVE_MUTANT_EXPOSE_BEFORE_DURABILITY)
+  target_link_libraries(delta_runtime_durability_mutant PUBLIC delta::core)
+  if(NOT WIN32)
+    target_compile_options(delta_runtime_durability_mutant PRIVATE -pthread)
+    target_link_options(delta_runtime_durability_mutant PUBLIC -pthread)
+  endif()
+  delta_target_defaults(delta_runtime_durability_mutant)
+  add_executable(
+    delta_runtime_durability_mutant_test
+    EXCLUDE_FROM_ALL
+    delta-runtime-cpp/tests/native_mutant_test.cpp)
+  target_link_libraries(delta_runtime_durability_mutant_test PRIVATE delta_runtime_durability_mutant)
+  target_compile_definitions(
+    delta_runtime_durability_mutant_test
+    PRIVATE DELTA_EXPECT_DURABILITY_MUTANT
+            DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+  delta_target_defaults(delta_runtime_durability_mutant_test)
+
   add_executable(delta_ffi_target_test delta-ffi/tests/target_smoke_test.cpp)
   target_link_libraries(delta_ffi_target_test PRIVATE delta::ffi)
   delta_target_defaults(delta_ffi_target_test)
@@ -151,4 +217,12 @@ if(BUILD_TESTING)
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_abi_test)
   add_test(NAME delta_ffi.abi COMMAND delta_ffi_abi_test)
+
+  add_executable(delta_ffi_fuzz_smoke_test delta-ffi/tests/fuzz_smoke_test.cpp)
+  target_link_libraries(delta_ffi_fuzz_smoke_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_fuzz_smoke_test
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+  delta_target_defaults(delta_ffi_fuzz_smoke_test)
+  add_test(NAME delta_ffi.fuzz_smoke COMMAND delta_ffi_fuzz_smoke_test)
 endif()

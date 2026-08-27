@@ -60,8 +60,11 @@ REQUIRED_CMAKE_FRAGMENTS = (
     "delta_core_prepared_100_test",
     "delta_runtime_target_test",
     "delta_runtime_test",
+    "delta_runtime_trace_exporter",
+    "delta_runtime_native_exit_test",
     "delta_ffi_target_test",
     "delta_ffi_abi_test",
+    "delta_ffi_fuzz_smoke_test",
 )
 
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))

@@ -97,7 +97,13 @@ void expect_consensus_error(consensus::ErrorCode expected, Operation operation) 
 }
 
 [[nodiscard]] std::filesystem::path case_directory(std::string_view name) {
-  auto path = std::filesystem::temp_directory_path() / "delta-runtime-003-tests" / name;
+#if defined(_MSVC_LANG)
+  constexpr auto language_mode = _MSVC_LANG;
+#else
+  constexpr auto language_mode = __cplusplus;
+#endif
+  auto path = std::filesystem::temp_directory_path() / "delta-runtime-003-tests" /
+              std::to_string(language_mode) / name;
   std::error_code error;
   std::filesystem::remove_all(path, error);
   expect(!error, "cannot clean exact runtime test directory");

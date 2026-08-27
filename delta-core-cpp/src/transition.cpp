@@ -41,10 +41,17 @@ void apply_command(protocol::RoundState& state, const protocol::Command& command
   }
   require(!terminal(state.phase), ErrorCode::terminal_state, "terminal state rejects transitions");
   if (command.command_kind == "ADVANCE_VIEW") {
+#if defined(DELTA_NATIVE_MUTANT_ALLOW_VIEW_JUMP)
+    require(
+        state.view != std::numeric_limits<std::uint64_t>::max(),
+        ErrorCode::view_mismatch,
+        "mutant only retains the view overflow guard");
+#else
     require(
         state.view != std::numeric_limits<std::uint64_t>::max() && command.view == state.view + 1U,
         ErrorCode::view_mismatch,
         "view-change command does not name the next view");
+#endif
     state.view = command.view;
     state.durable_sequence = next_sequence(state.durable_sequence);
     return;

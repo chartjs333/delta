@@ -186,6 +186,8 @@ jobs:
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -o "$ffi_output"
                 "$ffi_output"
+                /bin/sh /workspace/specs/003-bft-round-state-machine/scripts/run_native_phase6.sh \
+                  "$COMPILER" "$standard" "/tmp/delta-native-phase6-${standard}"
               done
             '
 

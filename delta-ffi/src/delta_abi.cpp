@@ -102,6 +102,13 @@ constexpr delta_runtime_descriptor_t descriptor{
   return DELTA_STATUS_OK;
 }
 
+void reset_output(delta_output_buffer_t* output) noexcept {
+  if (output != nullptr) {
+    output->required = 0U;
+    output->written = 0U;
+  }
+}
+
 [[nodiscard]] delta_status_t map_runtime_error(delta::runtime::ErrorCode code) noexcept {
   switch (code) {
     case delta::runtime::ErrorCode::invalid_config:
@@ -270,6 +277,7 @@ delta_status_t delta_runtime_submit_borrowed(
     delta_runtime_t* runtime,
     delta_bytes_view_t command,
     delta_output_buffer_t* effect_output) {
+  reset_output(effect_output);
   return boundary([runtime, command, effect_output] {
     return submit_common(runtime, copy_bytes(command), effect_output);
   });
@@ -279,6 +287,7 @@ delta_status_t delta_runtime_submit_copy(
     delta_runtime_t* runtime,
     delta_bytes_view_t command,
     delta_output_buffer_t* effect_output) {
+  reset_output(effect_output);
   return boundary([runtime, command, effect_output] {
     auto owned_copy = copy_bytes(command);
     return submit_common(runtime, canonical::Bytes(owned_copy), effect_output);
@@ -288,6 +297,7 @@ delta_status_t delta_runtime_submit_copy(
 delta_status_t delta_runtime_state(
     delta_runtime_t* runtime,
     delta_output_buffer_t* state_output) {
+  reset_output(state_output);
   return boundary([runtime, state_output] {
     if (runtime == nullptr || runtime->instance == nullptr || state_output == nullptr) {
       return DELTA_STATUS_INVALID_ARGUMENT;

@@ -90,7 +90,13 @@ void expect(bool condition, std::string_view message) {
 }
 
 [[nodiscard]] std::filesystem::path fresh_directory(std::string_view name) {
-  auto result = std::filesystem::temp_directory_path() / "delta-ffi-003-tests" / name;
+#if defined(_MSVC_LANG)
+  constexpr auto language_mode = _MSVC_LANG;
+#else
+  constexpr auto language_mode = __cplusplus;
+#endif
+  auto result = std::filesystem::temp_directory_path() / "delta-ffi-003-tests" /
+                std::to_string(language_mode) / name;
   std::error_code error;
   std::filesystem::remove_all(result, error);
   expect(!error, "cannot clean exact ABI test directory");

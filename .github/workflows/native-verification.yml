@@ -1,0 +1,66 @@
+name: Native sanitizer matrix
+
+on:
+  push:
+    branches: [003-bft-round-state-machine]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-sanitizers-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  address-undefined:
+    name: Clang ASan UBSan core runtime ABI fuzz
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision content-addressed Clang image
+        env:
+          COMPILER_IMAGE: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+        run: docker pull "$COMPILER_IMAGE"
+
+      - name: Run ASan and UBSan offline
+        env:
+          COMPILER_IMAGE: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+        run: |
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --workdir /workspace \
+            "$COMPILER_IMAGE" \
+            /bin/sh /workspace/specs/003-bft-round-state-machine/scripts/run_native_sanitizers.sh \
+              address-undefined clang++ /tmp/delta-sanitizers
+
+  thread:
+    name: GCC TSan reactor recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision content-addressed GCC image
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: docker pull "$COMPILER_IMAGE"
+
+      - name: Run TSan offline
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: |
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --workdir /workspace \
+            "$COMPILER_IMAGE" \
+            /bin/sh /workspace/specs/003-bft-round-state-machine/scripts/run_native_sanitizers.sh \
+              thread g++ /tmp/delta-tsan

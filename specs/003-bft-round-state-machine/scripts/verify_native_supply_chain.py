@@ -24,7 +24,12 @@ EXPECTED_ARCHITECTURE_EVIDENCE_SHA256 = (
 )
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".java"}
 SOURCE_PREFIXES = ("delta-core-cpp/", "delta-runtime-cpp/", "delta-ffi/", "delta-node-java/")
-EXPLICIT_SOURCE_PATHS = (".github/workflows/native.yml", "CMakeLists.txt", "CMakePresets.json")
+EXPLICIT_SOURCE_PATHS = (
+    ".github/workflows/native-verification.yml",
+    ".github/workflows/native.yml",
+    "CMakeLists.txt",
+    "CMakePresets.json",
+)
 
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 from formal_artifacts import canonical_json_bytes  # noqa: E402
