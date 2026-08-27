@@ -156,9 +156,7 @@ def verify_all() -> dict[str, Any]:
             return_code, result = run_accepted_checker(checker, target)
             error = result.get("error", "")
             require(return_code != 0 and reason in error, "MUTANT_COUNTEREXAMPLE_INVALID", name)
-            mutant_results.append(
-                {"expected_reason": reason, "fixture": name, "status": "PASS"}
-            )
+            mutant_results.append({"expected_reason": reason, "fixture": name, "status": "PASS"})
 
     artifacts = []
     for path in [
