@@ -44,13 +44,13 @@ Every task is incomplete until its declared tests and content-addressed evidence
 
 ## Phase 4: Native runtime and durability
 
-- [ ] T025 [HR003-009] Implement one-handle single-writer reactor with a bounded MPSC submission port.
-- [ ] T026 [HR003-010] Implement the append-only canonical WAL format, checksum, monotonic sequence and durability barrier.
-- [ ] T027 [HR003-011] Implement verified snapshots, WAL replay and deterministic state-root recovery.
-- [ ] T028 [HR003-011] Recover the durable vote journal before command admission and reject conflicting post-restart votes.
-- [ ] T029 [HR003-012] Implement persist-before-expose effect release and idempotent request/effect replay.
-- [ ] T030 [HR003-013] Add crash injection before/during/after append, durability, commit and effect-return boundaries.
-- [ ] T031 Add bounded restart, corrupt/torn-record, stale/duplicate command and uninterrupted-versus-replayed equivalence tests.
+- [x] T025 [HR003-009] Implement one-handle single-writer reactor with a bounded MPSC submission port.
+- [x] T026 [HR003-010] Implement the append-only canonical WAL format, checksum, monotonic sequence and durability barrier.
+- [x] T027 [HR003-011] Implement verified snapshots, WAL replay and deterministic state-root recovery.
+- [x] T028 [HR003-011] Recover the durable vote journal before command admission and reject conflicting post-restart votes.
+- [x] T029 [HR003-012] Implement persist-before-expose effect release and idempotent request/effect replay.
+- [x] T030 [HR003-013] Add crash injection before/during/after append, durability, commit and effect-return boundaries.
+- [x] T031 Add bounded restart, corrupt/torn-record, stale/duplicate command and uninterrupted-versus-replayed equivalence tests.
 
 ## Phase 5: Versioned C ABI and Java FFM harness
 

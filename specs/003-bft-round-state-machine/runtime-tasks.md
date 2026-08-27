@@ -16,11 +16,11 @@
 
 ## HR003 Phase 2 — native runtime and durability
 
-- [ ] **HR003-009** Implement one-handle single-writer reactor and bounded MPSC submission port.
-- [ ] **HR003-010** Implement append-only WAL record format, checksum, sequence and durability barrier.
-- [ ] **HR003-011** Implement snapshot, WAL replay and vote-journal recovery before command admission.
-- [ ] **HR003-012** Implement persist-before-expose effect release and idempotent request/effect replay.
-- [ ] **HR003-013** Add crash injection at every append/durability/commit/effect boundary.
+- [x] **HR003-009** Implement one-handle single-writer reactor and bounded MPSC submission port.
+- [x] **HR003-010** Implement append-only WAL record format, checksum, sequence and durability barrier.
+- [x] **HR003-011** Implement snapshot, WAL replay and vote-journal recovery before command admission.
+- [x] **HR003-012** Implement persist-before-expose effect release and idempotent request/effect replay.
+- [x] **HR003-013** Add crash injection at every append/durability/commit/effect boundary.
 
 ## HR003 Phase 3 — C ABI and Java FFM harness
 
