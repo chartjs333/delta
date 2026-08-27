@@ -22,11 +22,13 @@ BFT_ABI_FFM_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_abi_ff
 BFT_NATIVE_REFINEMENT := specs/003-bft-round-state-machine/scripts/verify_native_refinement.py
 BFT_NATIVE_PHASE6_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_native_phase6_execution.py
 BFT_FINAL_COMPATIBILITY := specs/003-bft-round-state-machine/scripts/verify_final_compatibility.py
+FIXEDPOINT_PREFLIGHT := specs/004-compressed-delta-protocol/scripts/verify_preflight.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
 	prerequisite protocol-check python-check foundation-check conformance local-round-check \
-	bft-preflight bft-contracts bft-core-architecture bft-final bft-check bft-native
+	bft-preflight bft-contracts bft-core-architecture bft-final bft-check bft-native \
+	fixedpoint-preflight
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -112,6 +114,10 @@ bft-final: bft-contracts bft-core-architecture
 	$(UV) run python $(BFT_FINAL_COMPATIBILITY) --check-only
 
 bft-check: python-check bft-final
+
+fixedpoint-preflight:
+	$(UV) run python $(FIXEDPOINT_PREFLIGHT) --check-only
+	$(UV) run pytest specs/004-compressed-delta-protocol/tests
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

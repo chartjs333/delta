@@ -2,7 +2,7 @@ name: Python worker quality
 
 on:
   push:
-    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine]
+    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine, 004-compressed-delta-protocol]
   pull_request:
 
 permissions:
@@ -111,3 +111,15 @@ jobs:
           uv run python specs/003-bft-round-state-machine/scripts/verify_native_phase6_execution.py --check-only
           uv run python specs/003-bft-round-state-machine/scripts/verify_final_compatibility.py --check-only
           uv run pytest specs/003-bft-round-state-machine/tests
+
+      - name: Verify feature 004 exact predecessor preflight
+        if: ${{ github.ref_name == '004-compressed-delta-protocol' || github.head_ref == '004-compressed-delta-protocol' }}
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/004-compressed-delta-protocol/scripts/verify_preflight.py --check-only
+          uv run pytest specs/004-compressed-delta-protocol/tests
