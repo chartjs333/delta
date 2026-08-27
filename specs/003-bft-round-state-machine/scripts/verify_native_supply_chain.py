@@ -20,7 +20,7 @@ EXPECTED_TOOLCHAIN_EVIDENCE_SHA256 = (
     "dfc8037582fbbe99539cf635e57e9ae64b41c9c7b2d4e32a47e8fcc347763197"
 )
 EXPECTED_ARCHITECTURE_EVIDENCE_SHA256 = (
-    "31b108b76576109a94ef5460dde646349db4a22b88f41ee229169175418b896b"
+    "6cf59a23a1825693dd9ae586214f1d14fecd44b4213a2d97bd90c61a7de2df30"
 )
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".java"}
 SOURCE_PREFIXES = ("delta-core-cpp/", "delta-runtime-cpp/", "delta-ffi/", "delta-node-java/")
