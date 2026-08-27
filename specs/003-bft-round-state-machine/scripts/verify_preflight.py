@@ -346,7 +346,9 @@ def _source_paths(revision: str) -> list[str]:
 
 def verify_architecture(source_commit: str) -> dict[str, Any]:
     findings: list[dict[str, str]] = []
-    planned_paths = [path for path in SOURCE_ARTIFACTS if path.startswith("specs/003-")]
+    planned_paths = [
+        path for path in SOURCE_ARTIFACTS if path.startswith("specs/003-") and path.endswith(".md")
+    ]
     planned_text = "\n".join(
         tracked_bytes(path, source_commit).decode("utf-8") for path in planned_paths
     )
