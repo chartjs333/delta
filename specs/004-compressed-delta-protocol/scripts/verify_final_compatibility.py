@@ -199,6 +199,10 @@ def build(source_commit: str) -> dict[str, object]:
             "tree": source["tree"],
         },
         "status": "PASS",
+        "task_ledger": [
+            evidence_artifact(FEATURE / "tasks.md"),
+            evidence_artifact(FEATURE / "runtime-tasks.md"),
+        ],
         "task_ids": ["T046", "T047", "HR004-012"],
         "unsupported_claims": [
             "AARCH64_WITHOUT_PINNED_RUNNER",

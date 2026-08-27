@@ -41,87 +41,87 @@ producer and Java is an opaque-byte/FFM conformance harness. `task-map.md` is no
 
 ## Phase 2: Toolchain and architecture gates
 
-- [ ] T013 [HR004-008] Bind the pinned GCC/Clang C++20/23, CMake, JDK 25/26 and Python toolchains
+- [x] T013 [HR004-008] Bind the pinned GCC/Clang C++20/23, CMake, JDK 25/26 and Python toolchains
   to content-addressed execution manifests.
-- [ ] T014 Define isolated CMake targets for fixed-point, shard, fuzz and conformance tests without
+- [x] T014 Define isolated CMake targets for fixed-point, shard, fuzz and conformance tests without
   new external runtime dependencies.
-- [ ] T015 [HR004-010] Add architecture checks proving no accepted float codec, dynamic worker
+- [x] T015 [HR004-010] Add architecture checks proving no accepted float codec, dynamic worker
   scale, q→float reduce, implicit saturation, Python authority or residual runtime exists.
-- [ ] T016 Add offline CI lanes for compiler modes, Java conformance, sanitizers and bounded fuzz.
+- [x] T016 Add offline CI lanes for compiler modes, Java conformance, sanitizers and bounded fuzz.
 
 ## Phase 3: Authoritative portable C++ encoder
 
-- [ ] T017 [HR004-003] Implement explicit profile/scale/q/proof domain types and canonical
+- [x] T017 [HR004-003] Implement explicit profile/scale/q/proof domain types and canonical
   encoders without raw-memory struct serialization.
-- [ ] T018 [HR004-003] Implement reduced positive-denominator rational scale parsing and checked
+- [x] T018 [HR004-003] Implement reduced positive-denominator rational scale parsing and checked
   intermediate numerator arithmetic.
-- [ ] T019 [HR004-003] Implement portable signed round-to-nearest-ties-to-even with explicit
+- [x] T019 [HR004-003] Implement portable signed round-to-nearest-ties-to-even with explicit
   positive/negative half-way behavior.
-- [ ] T020 [HR004-003] Implement fail-closed INT16 encoding over the shared lattice with no
+- [x] T020 [HR004-003] Implement fail-closed INT16 encoding over the shared lattice with no
   saturation, wraparound, NaN/Inf coercion or platform casts.
-- [ ] T021 [HR004-003] Implement checked INT64 and portable INT128 product/add/prefix helpers and
+- [x] T021 [HR004-003] Implement checked INT64 and portable INT128 product/add/prefix helpers and
   exact accumulator width selection.
-- [ ] T022 Add zero, smallest-nonzero, half-way, signed-limit, first-out-of-range and huge-input
+- [x] T022 Add zero, smallest-nonzero, half-way, signed-limit, first-out-of-range and huge-input
   native tests.
-- [ ] T023 [HR004-008] Require GCC/Clang C++20/23 byte/hash identity against frozen vectors.
+- [x] T023 [HR004-008] Require GCC/Clang C++20/23 byte/hash identity against frozen vectors.
 
 ## Phase 4: Deterministic shards and language boundary
 
-- [ ] T024 [HR004-004] Implement exact schema-covering deterministic shard planning with no gap,
+- [x] T024 [HR004-004] Implement exact schema-covering deterministic shard planning with no gap,
   overlap or duplicate ordinal.
-- [ ] T025 [HR004-004] Implement bounded canonical shard envelopes and writer with explicit
+- [x] T025 [HR004-004] Implement bounded canonical shard envelopes and writer with explicit
   context/range/length fields.
-- [ ] T026 [HR004-004] Implement a streaming reader/verifier that validates limits and context
+- [x] T026 [HR004-004] Implement a streaming reader/verifier that validates limits and context
   before allocation or payload exposure.
-- [ ] T027 Implement domain-separated leaf hashes, ordered shard table and commitment root.
-- [ ] T028 Add reorder/idempotent-duplicate/conflicting-duplicate/corrupt/truncated/oversized/
+- [x] T027 Implement domain-separated leaf hashes, ordered shard table and commitment root.
+- [x] T028 Add reorder/idempotent-duplicate/conflicting-duplicate/corrupt/truncated/oversized/
   trailing-data tests.
-- [ ] T029 [HR004-009] Add parser fuzz/allocation-limit corpus and production-parser mutant cases.
-- [ ] T030 [HR004-007] Add JDK 25/26 FFM direct/copy byte-preservation and malformed-envelope
+- [x] T029 [HR004-009] Add parser fuzz/allocation-limit corpus and production-parser mutant cases.
+- [x] T030 [HR004-007] Add JDK 25/26 FFM direct/copy byte-preservation and malformed-envelope
   conformance without q decoding or aggregation.
 
 ## Phase 5: Concrete theorem-precondition evidence
 
-- [ ] T031 [HR004-001] [HR004-005] Define a content-addressed proof instance binding theorem IDs,
+- [x] T031 [HR004-001] [HR004-005] Define a content-addressed proof instance binding theorem IDs,
   `Q`, `A`, `Nmax`, product/partial/final widths, denominator metadata and config/profile/schema
   hashes.
-- [ ] T032 [HR004-005] Implement fail-closed native validation of every proof precondition before
+- [x] T032 [HR004-005] Implement fail-closed native validation of every proof precondition before
   ticketing and every actual input bound before arithmetic.
-- [ ] T033 [HR004-005] Add mandatory `maximum-safe: PASS` and `first-unsafe: REJECT` INT64/INT128
+- [x] T033 [HR004-005] Add mandatory `maximum-safe: PASS` and `first-unsafe: REJECT` INT64/INT128
   fixtures, including multiplication and incremental-prefix boundaries.
-- [ ] T034 [HR004-001] Verify the exact Lean source/build/axiom metadata and named theorem-to-field
+- [x] T034 [HR004-001] Verify the exact Lean source/build/axiom metadata and named theorem-to-field
   mapping for every concrete instance.
-- [ ] T035 Add proof invalidation tests for any profile, scale, count, coefficient, shard coverage,
+- [x] T035 Add proof invalidation tests for any profile, scale, count, coefficient, shard coverage,
   config or schema hash change.
 
 ## Phase 6: Feature-003 direct-q integration and refinement
 
-- [ ] T036 [HR004-011] Stream bounded verified q values directly into existing feature-003
+- [x] T036 [HR004-011] Stream bounded verified q values directly into existing feature-003
   checked integer accumulators with no float conversion.
-- [ ] T037 [HR004-011] Regress feature-003 prior state plus canonical q stream through native
+- [x] T037 [HR004-011] Regress feature-003 prior state plus canonical q stream through native
   state/effect/WAL execution and require exact deterministic identity or an explicitly versioned
   compatibility fixture.
-- [ ] T038 [HR004-006] Compare independent Python and authoritative C++ q/payload/envelope/root
+- [x] T038 [HR004-006] Compare independent Python and authoritative C++ q/payload/envelope/root
   bytes for the full golden corpus.
-- [ ] T039 [HR004-011] Export legal direct-q/unsafe-bound traces to the accepted refinement checker
+- [x] T039 [HR004-011] Export legal direct-q/unsafe-bound traces to the accepted refinement checker
   and require unchecked-overflow/saturation production mutants to be rejected.
-- [ ] T040 Add distribution-plane denylist regression for worker q shards and contribution
+- [x] T040 Add distribution-plane denylist regression for worker q shards and contribution
   manifests.
 
 ## Phase 7: Native verification matrix
 
-- [ ] T041 [HR004-009] Run ASan/UBSan and bounded parser fuzz lanes over encoder, proof validator,
+- [x] T041 [HR004-009] Run ASan/UBSan and bounded parser fuzz lanes over encoder, proof validator,
   shard writer/reader and C ABI boundary.
-- [ ] T042 [HR004-008] Run GCC/Clang C++20/23 and endian identity; add aarch64 only when an exact
+- [x] T042 [HR004-008] Run GCC/Clang C++20/23 and endian identity; add aarch64 only when an exact
   pinned runner is available and report absence without overclaiming.
-- [ ] T043 [HR004-007] Run JDK 25/26 direct/copy/malformed input parity against the real native
+- [x] T043 [HR004-007] Run JDK 25/26 direct/copy/malformed input parity against the real native
   boundary.
-- [ ] T044 [HR004-010] Re-run architecture/static gates and require zero float/dynamic-scale/
+- [x] T044 [HR004-010] Re-run architecture/static gates and require zero float/dynamic-scale/
   saturation/Python-authority/residual paths.
 
 ## Finalization
 
-- [ ] T045 Document profile, proof-instance, parser and direct-q integration without claiming
+- [x] T045 Document profile, proof-instance, parser and direct-q integration without claiming
   quality, WAN, residual, transport, hierarchy or Apply completion.
 - [ ] T046 [HR004-012] Publish content-addressed profile, proof, compiler, parser, Java,
   sanitizer, refinement and feature-003 regression evidence.
