@@ -102,4 +102,5 @@ jobs:
           uv run python specs/003-bft-round-state-machine/scripts/verify_core_protocol_execution.py --check-only
           uv run python specs/003-bft-round-state-machine/scripts/verify_core_arithmetic_execution.py --check-only
           uv run python specs/003-bft-round-state-machine/scripts/verify_core_transition_execution.py --check-only
+          uv run python specs/003-bft-round-state-machine/scripts/verify_core_consensus_execution.py --check-only
           uv run pytest specs/003-bft-round-state-machine/tests
