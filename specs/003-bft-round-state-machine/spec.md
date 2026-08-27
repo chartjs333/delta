@@ -2,8 +2,10 @@
 
 **Feature Branch**: `003-bft-round-state-machine`  
 **Created**: 2026-08-23  
-**Status**: Planned — ready for implementation  
+**Status**: Planned — SpecKit reconciled; Phase 0 evidence required before implementation
 **Depends on**: `002-local-round-engine`
+**Constitution**: 2.1.0
+**Formal Semantics**: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
 ## 1. Architectural Mandate
 
@@ -19,11 +21,11 @@ All non-deterministic training arithmetic is resolved locally by the worker befo
 
 - **Domain-Pure Work Ticket**: a worker receives a ticket bound to exactly one data domain `d`, one immutable data range, fixed batch/token budget `B`, fixed local optimizer steps `H`, one parent checkpoint and one parameter schema.
 - **Normalized Pseudo-Gradient**: after completing the ticket, the worker computes its local pseudo-gradient using feature 002 and divides it by the effective optimizer-step count `A_j` to produce `hat(Delta)_{j,d}`. A ticket is complete only when `A_j = H`; partial tickets cannot become eligible.
-- **Canonical Quantization**: each parameter shard is quantized under the `FixedPointProfile` named by `RoundConfig`, producing signed integer vector `q_{j,s}`.
+- **Prepared Integer Fixture Input**: feature 003 consumes signed integer vectors `q_{j,s}` encoded by the minimal `bft-int-fixture-v1` conformance profile. The worker-side production quantizer is not implemented in this feature.
 - **INT64/INT128 Accumulator**: validators sum canonical integer values in a checked accumulator. Floating-point addition is banned in the BFT reduce phase.
 - **Overflow Proof**: before `TICKETING_OPEN`, configuration validation proves that every possible `sum_j a_j q_{j,s}` fits the selected accumulator bounds, including signed extremes and declared clipping/weight headroom.
 
-Feature 003 provides the minimal conformance profile required for the exit gate. Feature 004 specifies scalable wire/shard codecs and complete profile negotiation.
+Feature 003 provides only the integer width, byte order, canonical zero and tensor/shard ordering needed by its conformance fixture. Feature 004 owns production `int16-fixed-v1` encoding, rounding/clipping rules, scalable wire/shard codecs and complete profile negotiation.
 
 ## 3. State Machine Lifecycle
 
@@ -112,7 +114,7 @@ Validators restart or replay messages after a crash.
 - Ticket with zero/negative `B`, `H`, `A_j`, empty domain or data overlap not allowed by config.
 - Worker finishes fewer/more than `H` effective optimizer steps.
 - Parameter schema with zero-length tensor, tied aliases or shard boundary inside a tensor.
-- Quantization value exactly at positive/negative limit and tie-to-even boundary.
+- Prepared integer fixture value exactly at the positive/negative accumulator boundary.
 - Negative coefficient `a_j`, zero coefficient or denominator mismatch.
 - INT64 proof passes but runtime is configured for INT128, and vice versa.
 - Merkle tree with odd leaf count, duplicate leaf index or inconsistent leaf length.
@@ -136,8 +138,8 @@ Validators restart or replay messages after a crash.
 - **FR-007**: Ticket generation MUST be canonical and preserve the per-domain ticket counts declared by `RoundConfig`.
 - **FR-008**: Ticket `B`, `H`, domain, data range and arithmetic profile MUST NOT change after `RoundConfigQC`.
 - **FR-009**: A completed worker contribution MUST report `A_j`; only `A_j=H` can be committed for eligibility.
-- **FR-010**: The worker normalized pseudo-gradient MUST be defined as `hat(Delta)_{j,d}=Delta_{j,d}/A_j` before quantization; exact local formula/profile metadata MUST be committed.
-- **FR-011**: The minimal feature-003 quantizer MUST define integer width, scale representation, clipping/rejection rule, rounding, byte order, tensor order and canonical zero encoding.
+- **FR-010**: The feature-002 worker artifact MUST attest that `hat(Delta)_{j,d}=Delta_{j,d}/A_j` was computed with `A_j=H`; feature 003 MUST bind that artifact and MUST NOT reinterpret or recompute worker floating-point values.
+- **FR-011**: The minimal feature-003 `bft-int-fixture-v1` profile MUST define signed integer width, byte order, tensor/shard order and canonical zero encoding. It MUST NOT claim a production quantization, rounding, clipping or scale contract.
 - **FR-012**: `Commitment C_j` MUST be a Merkle root over canonical metadata plus ordered shard leaves and MUST bind round/config/ticket/domain/parent/schema/profile.
 - **FR-013**: `CommitUniqueness` MUST hold: one `ticket_id` can map to at most one distinct `C_j`; exact retry is idempotent and conflicting reuse is evidence of equivocation.
 - **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.
@@ -197,6 +199,7 @@ Validators restart or replay messages after a crash.
 - Validator and worker membership is permissioned for v1.
 - Feature 002 remains the worker-local training primitive; feature 003 constrains valid completion to exact fixed-ticket semantics.
 - The reference BFT harness may run in-process/loopback, but state and certificate contracts are production-shaped.
+- The authoritative implementation is the native C++ core/runtime exposed through the versioned C ABI; Java is a conformance harness and Python is limited to existing fixture/evidence tooling.
 - Robust clipping, randomized bucketing, full certificate hierarchy and outer-model application are completed by feature 008.
 
 ## 9. Out of Scope
@@ -206,4 +209,6 @@ Validators restart or replay messages after a crash.
 - Floating-point consensus reduction or tolerance-based aggregate equality.
 - Robust Byzantine ML filtering beyond structural/lineage checks.
 - Full ISC/EC/APC/AggregateRootQC/ApplyQC semantics.
+- Production quantization, `int16-fixed-v1`, rounding/clipping policy, scalable delta codecs and profile negotiation (feature 004).
+- Protobuf/gRPC, Netty/TLS and production P2P transport (features 005/008).
 - P2P distribution, QLoRA qualification and real WAN performance claims.

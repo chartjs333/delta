@@ -1,13 +1,13 @@
 # Specification Quality Checklist: 003 BFT Round State Machine
 
 **Reviewed**: 2026-08-23  
-**Status**: Ready for implementation
+**Status**: SpecKit reconciled; Phase 0 evidence pending
 
 ## Source fidelity
 
 - [x] Central coordinator is explicitly replaced by a `3f+1` BFT state machine.
 - [x] Domain-pure tickets bind one domain and fixed `B/H`.
-- [x] Worker normalization by `A_j` precedes quantization.
+- [x] Feature 002 owns worker normalization; feature 003 consumes only bound, prepared integer fixture values.
 - [x] FP32 reduction is forbidden; INT64/INT128 fixed-point accumulation is mandatory.
 - [x] Lifecycle states and the four-aggregator/100-ticket exit gate are preserved.
 
@@ -37,5 +37,7 @@
 ## Readiness decision
 
 - [x] No unresolved `[NEEDS CLARIFICATION]` markers remain.
-- [x] Feature depends only on completed `001–002` and Constitution 2.0.0.
+- [x] Feature depends only on merged `001–002`, Constitution 2.1.0 and exact accepted formal semantics.
 - [x] Failure of any BFT, arithmetic or bit-identity gate blocks feature 004.
+- [x] Production quantization/codecs are deferred to 004; protobuf/gRPC and production transport are absent from 003.
+- [ ] Content-addressed Phase 0 predecessor/formal/architecture/formal-impact evidence passes before native source is created.

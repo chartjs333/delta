@@ -1,157 +1,141 @@
 # Implementation Plan: DeltaReduce v1 BFT Round State Machine
 
-**Branch**: `003-bft-round-state-machine` | **Date**: 2026-08-23 | **Spec**: `spec.md`
+**Branch**: `003-bft-round-state-machine` | **Date**: 2026-08-27 | **Spec**: `spec.md`
+**Constitution**: 2.1.0
+**Formal Semantics**: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
+**Formal Impact**: `REFINEMENT_ONLY`, unless implementation requires an action or outcome absent from the accepted semantics
 
 ## Summary
 
-Implement a transport-independent deterministic transition core, fixed domain-pure ticket generator, commitment/availability lifecycle and checked integer parameter reducer. A four-node (`f=1`) deterministic BFT harness provides the mandatory reference. Production BFT/storage adapters remain replaceable and cannot redefine canonical bytes or arithmetic.
+Implement the feature-003 validator as a C++ pure deterministic transition core, a C++ single-writer durable runtime, a versioned C ABI and a minimal Java FFM conformance harness. Python remains limited to existing fixture and evidence tooling. Transport, production quantization and compressed delta codecs are later-feature work.
+
+No production source may be created until Phase 0 emits a passing, content-addressed `evidence/preflight.json` that binds both predecessors, the exact Formal GO, all formal artifacts, ADR-0010, the current source tree and a zero-finding architecture scan.
 
 ## Technical Context
 
-- Python 3.12 reference implementation using typed immutable dataclasses/models.
-- Worker-local training remains PyTorch from features 001–002; no PyTorch tensor reduction is used inside consensus.
-- Reference fixed-point arithmetic uses Python integers plus explicit INT64/INT128 range checks; optimized native kernels may be added only after conformance.
-- Hashing: SHA-256 over domain-separated canonical binary encodings.
-- Merkle trees: explicit leaf/node prefixes, ordered leaves and defined odd-node behavior.
-- Signatures: deterministic test keys in fixtures; production validator keys arrive through a signing-port interface.
-- Durable state: append-only vote/transition journal plus content-addressed artifacts.
-- Networking: injected deterministic message bus first, loopback gRPC adapter second.
-- Time: logical consensus height/view and injected monotonic deadlines; wall clock never influences arithmetic or ordering.
+- Core language: portable C++20 baseline, continuously compiled in C++20 and C++23 modes with pinned GCC and Clang toolchains.
+- Native runtime: one reactor thread owns each handle; bounded MPSC submission, canonical WAL, durability barrier, snapshot and deterministic recovery.
+- ABI: versioned C header with opaque handles, byte slices, caller-buffer size negotiation, stable status values and no exception escape.
+- Java: JDK 25 FFM conformance harness plus JDK 26 compatibility lane; no Java-owned consensus decisions.
+- Arithmetic: checked fixed-width integer operations over prepared `bft-int-fixture-v1` values; no floating-point reduction.
+- Canonical data: explicit encoders only; raw C/C++ object layout and unordered iteration are forbidden.
+- Hashing: SHA-256 over versioned, domain-separated canonical bytes.
+- Durability: no vote/message/timer effect becomes visible before its canonical WAL record is durable.
+- Time and network: inputs are canonical commands/effects. The pure core has no clock, socket, filesystem, JVM or Python dependency.
+
+Production `int16-fixed-v1` quantization, rounding/clipping, compressed codecs and profile negotiation belong to feature 004. Protobuf/gRPC, Netty/TLS and P2P transport belong to features 005/008.
 
 ## Constitution Check
 
 | Principle | Design response | Gate |
 | --- | --- | --- |
-| Replicated state | `3f+1` validator harness, `2f+1` QCs, no authoritative singleton | Conflicting-config/vote tests |
-| Fixed work | One-domain tickets with immutable `B/H` | Ticket golden fixtures |
-| Integer arithmetic | Checked INT64/INT128 reference reducer | Boundary and overflow corpus |
-| Input freeze | Seed service requires finalized input root | State/property tests |
-| Certificate lineage | Every vote/result binds exact parent roots | Wrong-view rejection tests |
-| Plane separation | Local/partial media types absent from distribution allowlist | Architecture tests |
-| Reversibility | Journal replay and deterministic abort | Crash matrix |
+| Formal-first | Exact Formal GO and 24-artifact manifest are prerequisites | `evidence/preflight.json` |
+| Replicated state | `3f+1` validators, `2f+1` QCs, no authoritative singleton | Conflicting-command and vote tests |
+| Deterministic core | Pure C++ transition over prior state plus canonical command bytes | Architecture and golden-state tests |
+| Integer arithmetic | Checked fixed-width operations over prepared integer fixtures | Boundary and first-overflow corpus |
+| Input freeze | Seed command requires finalized input root | State/refinement tests |
+| Durable voting | WAL durability precedes effect exposure | Crash matrix and replay tests |
+| Runtime boundary | Versioned C ABI; Java drives bytes, never transitions | ABI mismatch and direct/copy parity tests |
 
-**Pre-implementation result**: PASS. Any implementation proposal containing central authoritative state, adaptive `H_i` or floating reduction is an automatic STOP.
+**Pre-implementation result**: PENDING Phase 0 evidence. Any central authority, adaptive work, floating reduction, Java-owned transition or missing durability outcome is a hard STOP.
 
 ## Architecture and Data Flow
 
 ```text
-RoundConfig command
-       │
-       ▼
-DeterministicTransitionCore
-  ├─ ValidatorSet / VoteGuard / QCVerifier
-  ├─ FixedTicketGenerator
-  ├─ CommitmentRegistry
-  ├─ AvailabilityVerifier
-  ├─ InputFreezer ──▶ SeedDeriver
-  ├─ IntegerShardReducer
-  ├─ ParameterQCAssembler
-  └─ StateJournal / StateRoot
-       │
-       ▼
-BFT engine adapter / loopback transport / storage peers
+canonical command/state bytes
+          |
+          v
+delta-core-cpp (pure transition)
+          |
+          +--> candidate state bytes/root
+          +--> canonical effect/WAL-record bytes
+                         |
+                         v
+delta-runtime-cpp (single writer, WAL, snapshot, recovery)
+                         |
+                         v
+delta-ffi (versioned C ABI) <--> delta-node-java (JDK FFM harness)
 ```
 
-The transition core accepts only canonical commands plus prior certified state and returns deterministic events/state bytes. It performs no network I/O, file enumeration, random calls or floating arithmetic.
+The core performs no I/O. The runtime persists and commits one transition before returning its exact effect batch. The Java harness validates descriptor IDs and exercises the ABI; it does not implement consensus or transport.
 
 ## Project Structure
 
 ```text
-src/deltatorrent/
-  domain/
-    round_config.py
-    tickets.py
-    commitments.py
-    availability.py
-    consensus.py
-    aggregates.py
-  fixedpoint/
-    profile.py
-    quantize.py
-    checked.py
-    bounds.py
-  consensus/
-    transition.py
-    validator_set.py
-    vote_guard.py
-    qc.py
-    state_store.py
-    bft_harness.py
-  reduce/
-    integer_shard.py
-    assembly.py
-  availability/
-    storage_peer.py
-    verifier.py
-  adapters/grpc/
-    consensus_server.py
-    consensus_client.py
-  cli/round.py
-proto/deltareduce/consensus/v1/consensus.proto
-tests/
-  contract/test_round_config_bytes.py
-  contract/test_ticket_bytes.py
-  contract/test_vote_qc_bytes.py
-  unit/test_checked_accumulator.py
-  unit/test_commit_uniqueness.py
-  unit/test_input_freeze.py
-  unit/test_transition_model.py
-  integration/test_four_validator_round.py
-  integration/test_100_ticket_bit_identity.py
-  integration/test_consensus_recovery.py
-  property/test_seed_after_freeze.py
-  architecture/test_no_central_or_float_reduce.py
+delta-protocol/
+  schemas/003/
+  fixtures/003/{valid,invalid,cross-language}/
+delta-core-cpp/
+  include/delta/core/
+  src/
+  tests/
+  toolchain/
+delta-runtime-cpp/
+  include/delta/runtime/
+  src/{reactor,wal,recovery}/
+  tests/
+delta-ffi/
+  include/delta_abi.h
+  src/
+  tests/
+  toolchain/
+delta-node-java/
+  src/
+  gradle/
+  toolchains.toml
+integration/traces/003/
+specs/003-bft-round-state-machine/evidence/
 ```
 
 ## Implementation Sequence
 
-1. Freeze canonical schemas, hash domains, Merkle rules and validator-set/QC contracts.
-2. Implement checked INT64/INT128 primitives and pre-round overflow proof before any BFT orchestration.
-3. Implement deterministic fixed ticket generation and golden fixtures.
-4. Implement pure transition/state-root function and exhaustive model-based state tests.
-5. Implement durable vote guard, QC verifier and four-validator deterministic harness.
-6. Add commitment uniqueness, shard Merkle verification and availability certificates.
-7. Add input freeze and seed gate; prove seed-order property.
-8. Implement canonical integer shard reduce and complete ParameterQC assembly.
-9. Add restart/replay journal, loopback adapter, CLI and structured telemetry.
-10. Run 100-ticket/four-aggregator exit gate and final Constitution Check.
+1. Reconcile SpecKit artifacts and freeze one T-to-HR task map.
+2. Produce Phase 0 predecessor, formal, architecture and formal-impact evidence; stop on any finding.
+3. Freeze compiler, CMake/Ninja, JDK/jextract and dependency manifests before production source.
+4. Freeze canonical schemas, hash domains, valid/invalid/cross-language bytes and ABI descriptor fields.
+5. Implement explicit C++ types, fail-closed parsers and checked integer helpers.
+6. Implement the pure transition/state/effect/WAL-record function and cross-compiler golden tests.
+7. Implement the single-writer reactor, WAL, durability barriers, snapshots and journal-first recovery.
+8. Freeze and implement the C ABI, then the JDK 25 FFM harness and JDK 26 lane.
+9. Export normal/view-change/abort/crash/recovery traces and run formal refinement plus production-mutant regressions.
+10. Run four native runtimes over 100 prepared integer tickets, sanitizer/fuzz gates and publish final evidence.
 
 ## Test Strategy
 
-- **Golden contracts**: round/ticket/commitment/AC/vote/QC/state bytes and hashes.
-- **Model-based state**: all legal and illegal transitions, including late/racing messages.
-- **BFT safety**: conflicting proposals, duplicate signers, wrong epochs, equivocation and quorum intersection.
-- **Arithmetic**: signed boundaries, multiplication bounds, exact rounding, zero values and first-overflow vectors.
-- **Availability**: missing/corrupt shards, duplicate attestations, wrong retention epoch and restart.
-- **Order properties**: message/shard arrival permutations produce identical canonical outputs.
-- **Seed property**: no seed can be constructed without the finalized input-freeze root.
-- **Recovery**: crash before/after vote journal, QC persist, state root and aggregate artifact.
-- **Architecture**: no coordinator singleton, no floating add in reduce modules, no distribution of local artifacts.
+- **Canonical contracts**: exact valid, invalid and cross-language command/state/effect/WAL/descriptor bytes and hashes.
+- **Pure transition**: all legal/illegal state changes, wrong parent/view/schema/profile and message-order permutations.
+- **BFT safety**: conflicting proposals, duplicate signers, wrong epochs, vote uniqueness and quorum intersection.
+- **Arithmetic**: signed fixed-width boundaries, exact zero, safe maximum and first overflow over prepared integers.
+- **Durability**: crash injection before/during/after append, durability, commit and effect exposure.
+- **ABI/FFM**: mismatch matrix, output sizing, pointer lifetime, release, retries and direct/copy parity.
+- **Portability**: GCC/Clang, C++20/C++23, little-endian fixtures and explicit rejection of incompatible data.
+- **Formal refinement**: accepted legal traces, rejected illegal traces and applicable production mutants.
+- **Native exit**: four independent runtimes process 100 tickets and produce identical state/effect/WAL hashes.
 
 ## Observability
 
-Expose round height/view/state root, validator votes/QCs, ticket and availability counts, late/rejected/equivocation reasons, accumulator type/headroom, shard progress, logical deadlines and abort reason. Logs contain IDs/hashes only, never full vectors, private keys or dataset content.
+The runtime emits canonical effects containing IDs, hashes, height/view, stable rejection categories and logical deadlines. It never logs tensor payloads, private keys or dataset contents. Observability cannot alter transition state or durability ordering.
 
 ## Rollout and Rollback
 
-Roll out first as an in-process four-validator harness, then as loopback processes with injected storage peers. A failed or partitioned round deterministically enters/stays non-applied/aborted and retains the parent checkpoint. Protocol identifiers are immutable; rollback disables the new round version rather than reinterpreting existing bytes.
+Feature 003 is exercised first through the offline native harness and Java FFM conformance lane. A failed round preserves the parent checkpoint. Protocol, ABI, schema and formal-semantics IDs are immutable; rollback disables an unsupported descriptor rather than reinterpreting durable bytes.
 
 ## Risks and Mitigations
 
-- **Consensus implementation risk**: keep a pure transition core and independent BFT adapter; validate against model traces.
-- **Integer overflow**: prove conservative bounds before open and check every runtime operation.
-- **Quantization ambiguity**: golden vectors fix rounding, scale, endianness and zero encoding.
-- **Vote after crash**: persist vote intent before send and key by full context.
-- **Seed manipulation**: make seed derivation structurally impossible without input-freeze QC.
-- **Unavailable committed shards**: require AC coverage before freeze.
-- **Hidden central authority**: architecture tests reject singleton current-state mutation APIs.
+- **Spec/runtime drift**: one normative task map and exact artifact IDs gate source creation.
+- **Undefined native behavior**: checked arithmetic, explicit encoders, sanitizers and fuzzing.
+- **Vote exposure before durability**: one WAL/commit/effect sequence with crash injection at every boundary.
+- **Cross-language lifetime errors**: caller-owned synchronous slices, explicit handle ownership and bounded-copy fallback.
+- **Hidden transport coupling**: pure-core dependency scan and absence of socket symbols.
+- **Semantic discovery**: reclassify as `SEMANTIC`, amend feature 000 and obtain a new Formal GO before continuing.
 
 ## Exit Gate
 
-- All canonical schema and state-machine tests pass.
-- Four validators (`f=1`) finalize a 100-ticket round under message permutations.
-- Four independent aggregators produce byte-identical shard bytes, QCs and state root.
-- Accumulator boundary suite proves safe maximum and rejects unsafe configuration/runtime operations.
-- Commit equivocation, wrong-view shard and seed-before-freeze attempts are rejected.
-- Crash/replay matrix shows no double vote or divergent transition.
-- Full quality gate and final Constitution Check pass.
+- Phase 0 evidence binds merged features 001–002, exact Formal GO, all formal artifacts, ADR-0010 and zero architecture findings.
+- Canonical schema, descriptor and cross-language byte fixtures pass on pinned toolchains.
+- Four native validators (`f=1`) process 100 prepared integer tickets and emit byte-identical state/effect/WAL hashes.
+- Unsafe arithmetic, equivocation, wrong-view input, unavailable shards and seed-before-freeze fail closed.
+- Crash/replay produces no double vote, partial effect or divergent state.
+- GCC/Clang C++20/23, JDK 25/26, ASan/UBSan, separate TSan and parser-fuzz gates pass.
+- Legal and illegal implementation traces satisfy the accepted formal refinement checker and applicable production mutants remain detectable.
+- Final evidence and Constitution 2.1.0 checks pass.
