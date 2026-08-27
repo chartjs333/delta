@@ -42,7 +42,7 @@ struct Value {
   static Value array(Array value);
   static Value map(Map value);
 
-  bool operator==(const Value&) const = default;
+  bool operator==(const Value& other) const;
 };
 
 struct Envelope {

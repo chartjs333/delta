@@ -331,6 +331,8 @@ Value Value::array(Array value) {
 
 Value Value::map(Map value) { return Value{Data{std::in_place_type<Map>, std::move(value)}}; }
 
+bool Value::operator==(const Value& other) const { return data == other.data; }
+
 DecodeError::DecodeError(ErrorCode code, std::string message)
     : std::runtime_error(std::move(message)), code_(code) {}
 
