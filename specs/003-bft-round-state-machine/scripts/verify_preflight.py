@@ -199,17 +199,11 @@ def verify_feature002(source_commit: str) -> dict[str, Any]:
     parents = git_text("show", "-s", "--format=%P", EXPECTED_FEATURE002_MERGE).split()
     require(parents == [EXPECTED_FEATURE002_PARENT], "FEATURE002_SQUASH_PARENT_INVALID")
     merge_tree = git_text("rev-parse", f"{EXPECTED_FEATURE002_MERGE}^{{tree}}")
-    head_tree = git_text("rev-parse", f"{EXPECTED_FEATURE002_HEAD}^{{tree}}")
-    require(
-        merge_tree == head_tree == EXPECTED_FEATURE002_TREE,
-        "FEATURE002_MERGED_TREE_INVALID",
-    )
+    # A squash-merged PR head is not part of main's ancestry and GitHub's checkout
+    # does not promise to fetch deleted feature refs.  The immutable merge tree and
+    # content-addressed exit evidence are the offline-verifiable acceptance boundary.
+    require(merge_tree == EXPECTED_FEATURE002_TREE, "FEATURE002_MERGED_TREE_INVALID")
     require_ancestor(EXPECTED_FEATURE002_MERGE, source_commit, "FEATURE002_MERGE_NOT_ANCESTOR")
-    require_ancestor(
-        EXPECTED_FEATURE002_IMPLEMENTATION,
-        EXPECTED_FEATURE002_HEAD,
-        "FEATURE002_IMPLEMENTATION_NOT_ANCESTOR",
-    )
 
     artifacts = []
     for path, expected in sorted(EXPECTED_FEATURE002_EVIDENCE.items()):

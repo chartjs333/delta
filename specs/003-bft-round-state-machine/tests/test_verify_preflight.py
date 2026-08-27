@@ -33,3 +33,18 @@ def test_legacy_implementation_patterns_cover_detached_plan() -> None:
 
     for identifier, example in forbidden_examples.items():
         assert MODULE.LEGACY_IMPLEMENTATION_PATTERNS[identifier].search(example)
+
+
+def test_feature002_verification_does_not_require_detached_pr_objects(monkeypatch) -> None:
+    original = MODULE.git_text
+
+    def reject_detached(*arguments: str) -> str:
+        assert MODULE.EXPECTED_FEATURE002_HEAD not in arguments
+        assert MODULE.EXPECTED_FEATURE002_IMPLEMENTATION not in arguments
+        return original(*arguments)
+
+    monkeypatch.setattr(MODULE, "git_text", reject_detached)
+    result = MODULE.verify_feature002("HEAD")
+
+    assert result["accepted_branch_head"] == MODULE.EXPECTED_FEATURE002_HEAD
+    assert result["merged_tree"] == MODULE.EXPECTED_FEATURE002_TREE
