@@ -65,15 +65,15 @@ Every task is incomplete until its declared tests and content-addressed evidence
 
 ## Phase 6: Refinement and native verification
 
-- [ ] T040 [HR003-022] Export canonical normal, view-change, abort, crash and recovery implementation traces.
-- [ ] T041 [HR003-022] Validate legal and illegal traces against the exact accepted feature-000 refinement checker.
-- [ ] T042 [HR003-023] Run applicable mutations against real production transition/durability paths and require expected counterexamples.
-- [ ] T043 [HR003-020] Run four independent native runtimes (`f=1`) over 100 prepared integer tickets and compare exact state/effect/WAL hashes.
-- [ ] T044 [HR003-020] Compare crash/restart execution with uninterrupted execution byte-for-byte.
-- [ ] T045 [HR003-021] Run ASan/UBSan lanes on core, runtime and ABI tests.
-- [ ] T046 [HR003-021] Run a separate TSan lane over reactor submission, shutdown and recovery.
-- [ ] T047 [HR003-021] Run bounded parser and ABI fuzz smoke lanes over the canonical invalid corpus.
-- [ ] T048 Re-run architecture/static gates and require no forbidden dependencies, symbols or implementation paths.
+- [x] T040 [HR003-022] Export canonical normal, view-change, abort, crash and recovery implementation traces.
+- [x] T041 [HR003-022] Validate legal and illegal traces against the exact accepted feature-000 refinement checker.
+- [x] T042 [HR003-023] Run applicable mutations against real production transition/durability paths and require expected counterexamples.
+- [x] T043 [HR003-020] Run four independent native runtimes (`f=1`) over 100 prepared integer tickets and compare exact state/effect/WAL hashes.
+- [x] T044 [HR003-020] Compare crash/restart execution with uninterrupted execution byte-for-byte.
+- [x] T045 [HR003-021] Run ASan/UBSan lanes on core, runtime and ABI tests.
+- [x] T046 [HR003-021] Run a separate TSan lane over reactor submission, shutdown and recovery.
+- [x] T047 [HR003-021] Run bounded parser and ABI fuzz smoke lanes over the canonical invalid corpus.
+- [x] T048 Re-run architecture/static gates and require no forbidden dependencies, symbols or implementation paths.
 
 ## Finalization
 

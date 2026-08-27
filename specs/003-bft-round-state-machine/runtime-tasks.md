@@ -33,10 +33,10 @@
 
 ## HR003 Phase 4 — verification
 
-- [ ] **HR003-020** Run four independent native runtimes over 100 pre-encoded integer tickets and compare exact state/effect/WAL hashes.
-- [ ] **HR003-021** Run ASan/UBSan, separate TSan and parser fuzz smoke lanes.
-- [ ] **HR003-022** Export normal/view-change/abort/crash/recovery traces and validate formal refinement.
-- [ ] **HR003-023** Verify all relevant production mutants remain detectable against the native trace/conformance path.
+- [x] **HR003-020** Run four independent native runtimes over 100 pre-encoded integer tickets and compare exact state/effect/WAL hashes.
+- [x] **HR003-021** Run ASan/UBSan, separate TSan and parser fuzz smoke lanes.
+- [x] **HR003-022** Export normal/view-change/abort/crash/recovery traces and validate formal refinement.
+- [x] **HR003-023** Verify all relevant production mutants remain detectable against the native trace/conformance path.
 - [ ] **HR003-024** Publish ABI, durability, compiler, sanitizer, Java compatibility and formal-refinement evidence.
 
 ## STOP rule
