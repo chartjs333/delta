@@ -10,8 +10,8 @@
 
 - [x] **HR003-004** Define explicit canonical C++ domain types and encoders without serializing raw memory.
 - [x] **HR003-005** Implement checked fixed-width helpers for prepared `bft-int-fixture-v1` values; production quantization/rounding/clipping remains feature 004 scope.
-- [ ] **HR003-006** Implement pure transition entry point over prior state and canonical command bytes.
-- [ ] **HR003-007** Implement deterministic state/effect/WAL-record canonical encoders and hashes.
+- [x] **HR003-006** Implement pure transition entry point over prior state and canonical command bytes.
+- [x] **HR003-007** Implement deterministic state/effect/WAL-record canonical encoders and hashes.
 - [ ] **HR003-008** Add GCC/Clang cross-compiler golden-state and endian fixtures.
 
 ## HR003 Phase 2 — native runtime and durability
