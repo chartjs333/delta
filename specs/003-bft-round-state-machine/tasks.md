@@ -40,7 +40,7 @@ Every task is incomplete until its declared tests and content-addressed evidence
 - [x] T021 [HR003-007] Implement deterministic next-state, effect-batch and WAL-record encoders and hashes.
 - [x] T022 Add legal/illegal transition, quorum, vote-uniqueness, commitment, availability, input-freeze and abort tests.
 - [x] T023 [HR003-008] Add GCC/Clang cross-compiler and endian golden-byte/state-root fixtures.
-- [ ] T024 Run the pure core over the canonical 100-ticket prepared-integer fixture and require exact repeatability.
+- [x] T024 Run the pure core over the canonical 100-ticket prepared-integer fixture and require exact repeatability.
 
 ## Phase 4: Native runtime and durability
 
