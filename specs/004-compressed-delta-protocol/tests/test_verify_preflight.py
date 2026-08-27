@@ -3,15 +3,26 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "verify_preflight.py"
+EVIDENCE = Path(__file__).resolve().parents[1] / "evidence" / "preflight.json"
 SPEC = importlib.util.spec_from_file_location("verify_feature004_preflight", SCRIPT)
 assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
+
+
+def test_canonical_preflight_evidence_is_accepted() -> None:
+    document = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    result = MODULE.verify(document["source"]["commit"])
+
+    assert MODULE.canonical_json_bytes(result) == EVIDENCE.read_bytes()
+    assert result["status"] == "PASS"
+    assert result["semantic_completeness_claimed"] is False
 
 
 def test_exact_predecessor_formal_and_architecture_are_accepted() -> None:

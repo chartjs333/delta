@@ -8,16 +8,16 @@ producer and Java is an opaque-byte/FFM conformance harness. `task-map.md` is no
 
 ## Phase 0: Mandatory predecessor/formal STOP
 
-- [ ] T000 [HR004-001] Verify the exact feature-003 merge, source, evidence overlay, final
+- [x] T000 [HR004-001] Verify the exact feature-003 merge, source, evidence overlay, final
   compatibility hash, task closure and ancestry.
-- [ ] T001 [HR004-001] Reverify exact Formal GO/semantics and the accepted PO-A1/PO-A2/PO-A3
+- [x] T001 [HR004-001] Reverify exact Formal GO/semantics and the accepted PO-A1/PO-A2/PO-A3
   theorem artifact/conjunct metadata without claiming PO-A3 proves worker ties-to-even.
-- [ ] T002 [HR004-010] Scan the merged tree and planned feature-004 paths for accepted FP
+- [x] T002 [HR004-010] Scan the merged tree and planned feature-004 paths for accepted FP
   contribution formats, q→float reduce, per-worker scales, saturation, legacy Python authority and
   residual runtime; require zero findings.
-- [ ] T003 [HR004-001] Classify the reconciled plan as `REFINEMENT_ONLY`, bind the concrete Lean
+- [x] T003 [HR004-001] Classify the reconciled plan as `REFINEMENT_ONLY`, bind the concrete Lean
   proof-instance boundary and stop on any new arithmetic/durability/failure semantic.
-- [ ] T004 Emit content-addressed `evidence/preflight.json` binding T000–T003 and the exact
+- [x] T004 Emit content-addressed `evidence/preflight.json` binding T000–T003 and the exact
   reconciled SpecKit source tree; block every production-source task until it passes.
 
 ## Phase 1: Runtime-neutral profile and golden contracts
