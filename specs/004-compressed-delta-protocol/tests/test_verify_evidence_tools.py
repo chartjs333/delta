@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -26,6 +27,14 @@ def test_final_task_parser_is_exact() -> None:
     runtime = "- [x] **HR004-001** valid\n- [ ] **HR004-002** open\n"
     assert final.task_ids(semantic, "T") == {"T001", "T003"}
     assert final.task_ids(runtime, "HR004-") == {"HR004-001"}
+
+
+def test_final_reads_commitment_root_from_canonical_manifest() -> None:
+    final = load("verify_final_compatibility")
+    fixture = json.loads(
+        (ROOT / "delta-protocol/fixtures/004/cross-language/golden-v1.json").read_text()
+    )
+    assert final.golden_commitment_root(fixture) == final.ROOT_ID
 
 
 def test_native_evidence_fails_closed() -> None:

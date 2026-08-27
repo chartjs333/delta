@@ -90,6 +90,16 @@ def evidence_artifact(path: Path) -> dict[str, str]:
     }
 
 
+def golden_commitment_root(document: dict[str, object]) -> str:
+    manifest = document.get("manifest")
+    require(isinstance(manifest, dict), "GOLDEN_MANIFEST_INVALID")
+    value = manifest.get("value")
+    require(isinstance(value, dict), "GOLDEN_MANIFEST_VALUE_INVALID")
+    root = value.get("commitment_root")
+    require(isinstance(root, str), "GOLDEN_COMMITMENT_ROOT_INVALID")
+    return root
+
+
 def build(source_commit: str) -> dict[str, object]:
     phase = verify_phase_evidence()
     native_raw = NATIVE_EVIDENCE.read_bytes()
@@ -135,7 +145,7 @@ def build(source_commit: str) -> dict[str, object]:
     require(golden["profile"]["content_id"] == PROFILE_ID, "PROFILE_ID_DRIFT")
     require(golden["fixedpoint_config"]["content_id"] == CONFIG_ID, "CONFIG_ID_DRIFT")
     require(golden["proof_instance"]["content_id"] == PROOF_ID, "PROOF_ID_DRIFT")
-    require(golden["commitment_root"] == ROOT_ID, "COMMITMENT_ROOT_DRIFT")
+    require(golden_commitment_root(golden) == ROOT_ID, "COMMITMENT_ROOT_DRIFT")
     direct = json.loads(
         (ROOT / "delta-protocol/fixtures/004/cross-language/direct-q-100-v1.json").read_text(
             encoding="utf-8"
