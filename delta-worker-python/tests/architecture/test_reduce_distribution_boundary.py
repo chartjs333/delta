@@ -6,17 +6,15 @@ import json
 from pathlib import Path
 
 import pytest
+import torch
 from deltatorrent.artifacts.canonical_json import canonical_json_bytes, sha256_content_id
-from deltatorrent.delta.builder import snapshot_fp32_parameters
-from deltatorrent.delta.schema import derive_parameter_schema
 from deltatorrent.domain.errors import DeltaError
 from deltatorrent.domain.manifests import ArtifactRef
-from deltatorrent.domain.parameters import ParameterSchema
+from deltatorrent.domain.parameters import LogicalDType, ParameterSchema
 from deltatorrent.domain.planes import WORKER_LOCAL_MEDIA_TYPES, require_distribution_eligible
 from deltatorrent.domain.tickets import DomainPureWorkTicket
-from deltatorrent.training.baseline import TrainingState
 from deltatorrent.training.config import BaselineConfig
-from deltatorrent.training.data import Tokenizer, load_samples
+from deltatorrent.training.data import Tokenizer
 from deltatorrent.worker.validation import (
     LocalRoundLimits,
     arithmetic_profile_id,
@@ -79,11 +77,19 @@ def test_smoke_ticket_and_feature004_inputs_are_content_bound_without_qbytes() -
     config = BaselineConfig.from_json_file(ROOT / "configs/baseline/cpu-smoke-v1.json")
     tokenizer_path = ROOT / config.tokenizer_path
     corpus_path = ROOT / config.corpus_path
-    tokenizer = Tokenizer.from_json_file(tokenizer_path)
-    samples = load_samples(corpus_path, tokenizer, config.sequence_length)
-    state = TrainingState.create(config, len(samples))
-    derived_schema = derive_parameter_schema(state.model)
-    parent_bytes = save_tensors(snapshot_fp32_parameters(state.model, derived_schema))
+    Tokenizer.from_json_file(tokenizer_path)
+    expected_shapes = {
+        "embedding.weight": (config.vocab_size, config.hidden_size),
+        "output.bias": (config.vocab_size,),
+        "output.weight": (config.vocab_size, config.hidden_size),
+    }
+    assert {item.name: item.shape for item in schema.parameters} == expected_shapes
+    assert all(
+        item.logical_dtype is LogicalDType.FLOAT32 and item.trainable for item in schema.parameters
+    )
+    parent_bytes = save_tensors(
+        {item.name: torch.zeros(item.shape, dtype=torch.float32) for item in schema.parameters}
+    )
     tokenizer_id = sha256_content_id(tokenizer_path.read_bytes())
     limits = LocalRoundLimits()
     assert ticket.data.content_id == sha256_content_id(corpus_path.read_bytes())

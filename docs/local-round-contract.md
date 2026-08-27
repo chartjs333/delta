@@ -70,8 +70,9 @@ delta worker run-ticket TICKET CONFIG PARAMETER_SCHEMA TOKENIZER_REF \
 
 All JSON manifests are canonical and all tensor payloads use safetensors. Pickle and Python
 memory-layout serialization are forbidden. `configs/worker/smoke-ticket.json` is the deterministic
-ticket vector; its parent content ID is reproducible from the baseline model seed and canonical
-parameter schema.
+ticket vector. Its parent is the canonical all-zero FP32 safetensors state defined by the frozen
+parameter schema; this avoids binding the protocol fixture to platform-specific normal-distribution
+implementations while retaining one exact parent content ID.
 
 ## Formal boundary
 
