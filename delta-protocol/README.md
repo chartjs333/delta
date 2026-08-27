@@ -14,3 +14,11 @@ Feature 003 adds `delta-canonical-binary-v1`: an explicit envelope and typed-val
 immutable type codes and hash domains. Its valid, invalid and cross-language fixtures are data
 contracts only; the Python verifier is fixture/evidence tooling and does not implement validator
 state transitions.
+
+Feature-003 consumers use `fixtures/003/valid/protocol-inputs-v1.json` for canonical protocol
+objects, `fixtures/003/invalid/canonical-binary-negative-v1.json` for fail-closed decoding,
+`fixtures/003/cross-language/golden-v1.json` for byte identity,
+`core-portability-v1.json` for compiler/endian identity and `prepared-100-v1.json` for the bounded
+native exit run. `schemas/003/delta-abi-v1.json` mirrors the frozen C descriptor. Every registered
+path is verified against its SHA-256 before use; fixture JSON is never an alternate consensus
+implementation.

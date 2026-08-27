@@ -1,21 +1,20 @@
 # delta-core-cpp
 
-Pure deterministic DeltaReduce protocol core. The feature-003 slice currently implements the
-bounded `delta-canonical-binary-v1` value/envelope parser, encoder, domain-separated content IDs
-and cross-language golden-vector checks. Explicit `Command`, `RoundState`, `QuorumCertificate` and
-`PreparedIntegerShard` types reject unknown fields, wrong field types, non-canonical decimal
-values, invalid identifiers, malformed quorum arrays and incompatible integer fixture profiles.
-Portable checked signed arithmetic covers INT64 and a two-limb INT128 implementation without
-compiler extensions. The `bft-int-fixture-v1` pre-open gate proves the conservative
-`ticket-count * coefficient-bound * value-bound + headroom` expression fits the selected width.
-The pure transition entry point consumes only canonical prior-state and command bytes and returns
-linked canonical next-state, effect-batch and WAL-record bytes plus their domain-separated IDs.
-Pure consensus guards enforce durable vote uniqueness, exact validator membership/quorum policy,
-commitment idempotency/equivocation, complete availability coverage and immutable input freeze.
+Pure deterministic DeltaReduce feature-003 protocol core. It implements the bounded
+`delta-canonical-binary-v1` parser/encoder, domain-separated content IDs, checked INT64 and
+portable two-limb INT128 arithmetic, conservative accumulator-headroom validation and the pure
+`prior-state bytes + command bytes -> next-state/effect/WAL bytes` transition.
 
-The library is standard-library-only and deliberately has no socket, filesystem, wall-clock,
-thread, JVM, Python or floating-point dependency. Runtime durability belongs to
-`delta-runtime-cpp`; transport belongs to later feature branches.
+Explicit `Command`, `RoundState`, `QuorumCertificate` and `PreparedIntegerShard` types reject
+unknown fields, non-canonical integers, malformed identifiers and signer sets, incompatible
+profiles and unsafe bounds. Consensus guards enforce validator membership and `2f+1` quorum,
+durable vote uniqueness, commitment idempotency/equivocation, complete availability coverage,
+input freeze before seed and deterministic abort/view-change behavior.
+
+The core owns no I/O. It is standard-library-only and has no socket, filesystem, wall-clock,
+thread, JVM, Python or floating-point-reduce dependency. `delta-runtime-cpp` owns serialization of
+commands and durability; later features own production quantization, certificate-hierarchy
+completion and transport.
 
 Configure and run the isolated targets with:
 
@@ -26,3 +25,7 @@ ctest --preset cpp20
 ```
 
 The `cpp23` preset exercises the compatibility language mode.
+
+The cross-language golden, endian, accumulator and 100-ticket prepared-integer inputs live under
+`delta-protocol/fixtures/003/`. `make bft-check` verifies their registered hashes and the
+content-addressed feature-003 evidence.

@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-bft-round-state-machine`  
 **Created**: 2026-08-23  
-**Status**: Planned — SpecKit reconciled; Phase 0 evidence required before implementation
+**Status**: Implemented — final content-addressed exit evidence required for acceptance
 **Depends on**: `002-local-round-engine`
 **Constitution**: 2.1.0
 **Formal Semantics**: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
