@@ -45,9 +45,19 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
 delta_target_defaults(delta_core)
 
-add_library(delta_runtime INTERFACE)
+add_library(delta_runtime STATIC
+  delta-runtime-cpp/src/runtime.cpp
+  delta-runtime-cpp/src/wal.cpp)
 add_library(delta::runtime ALIAS delta_runtime)
-target_link_libraries(delta_runtime INTERFACE delta::core)
+target_include_directories(
+  delta_runtime
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
+target_link_libraries(delta_runtime PUBLIC delta::core)
+if(NOT WIN32)
+  target_compile_options(delta_runtime PRIVATE -pthread)
+  target_link_options(delta_runtime PUBLIC -pthread)
+endif()
+delta_target_defaults(delta_runtime)
 
 add_library(delta_ffi INTERFACE)
 add_library(delta::ffi ALIAS delta_ffi)
@@ -113,6 +123,14 @@ if(BUILD_TESTING)
   target_link_libraries(delta_runtime_target_test PRIVATE delta::runtime)
   delta_target_defaults(delta_runtime_target_test)
   add_test(NAME delta_runtime.target COMMAND delta_runtime_target_test)
+
+  add_executable(delta_runtime_test delta-runtime-cpp/tests/runtime_test.cpp)
+  target_link_libraries(delta_runtime_test PRIVATE delta::runtime)
+  target_compile_definitions(
+    delta_runtime_test
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+  delta_target_defaults(delta_runtime_test)
+  add_test(NAME delta_runtime.behavior COMMAND delta_runtime_test)
 
   add_executable(delta_ffi_target_test delta-ffi/tests/target_smoke_test.cpp)
   target_link_libraries(delta_ffi_target_test PRIVATE delta::ffi)

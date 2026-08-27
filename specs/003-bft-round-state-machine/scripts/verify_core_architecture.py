@@ -44,9 +44,9 @@ CMAKE_FORBIDDEN_PATTERNS = {
 
 REQUIRED_CMAKE_FRAGMENTS = (
     "add_library(delta_core STATIC",
-    "add_library(delta_runtime INTERFACE)",
+    "add_library(delta_runtime STATIC",
     "add_library(delta_ffi INTERFACE)",
-    "target_link_libraries(delta_runtime INTERFACE delta::core)",
+    "target_link_libraries(delta_runtime PUBLIC delta::core)",
     "target_link_libraries(delta_ffi INTERFACE delta::runtime)",
     "-fno-fast-math",
     "/fp:strict",
@@ -56,7 +56,10 @@ REQUIRED_CMAKE_FRAGMENTS = (
     "delta_core_arithmetic_test",
     "delta_core_transition_test",
     "delta_core_consensus_test",
+    "delta_core_portability_test",
+    "delta_core_prepared_100_test",
     "delta_runtime_target_test",
+    "delta_runtime_test",
     "delta_ffi_target_test",
 )
 

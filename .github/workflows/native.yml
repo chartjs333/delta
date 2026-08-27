@@ -141,6 +141,23 @@ jobs:
                   -DDELTA_PREPARED_100_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json\" \
                   -o "$prepared_output"
                 "$prepared_output"
+                runtime_output="/tmp/delta-runtime-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -pthread \
+                  -I/workspace/delta-core-cpp/include \
+                  -I/workspace/delta-runtime-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-runtime-cpp/src/runtime.cpp \
+                  /workspace/delta-runtime-cpp/src/wal.cpp \
+                  /workspace/delta-runtime-cpp/tests/runtime_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$runtime_output"
+                "$runtime_output"
               done
             '
 
