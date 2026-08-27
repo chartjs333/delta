@@ -6,12 +6,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 PROTOCOL = ROOT / "delta-protocol"
 WORKER_SOURCE = ROOT / "delta-worker-python" / "src"
-PLACEHOLDERS = (
-    "delta-core-cpp",
-    "delta-runtime-cpp",
-    "delta-ffi",
-    "delta-node-java",
-)
+COMPONENT_FORBIDDEN_SUFFIXES = {
+    "delta-core-cpp": {".class", ".jar", ".java", ".py"},
+    "delta-runtime-cpp": {".class", ".jar", ".java", ".py"},
+    "delta-ffi": {".class", ".jar", ".java", ".py"},
+    "delta-node-java": {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".py"},
+}
 FORBIDDEN_IMPORT_PREFIXES = (
     "delta_core_cpp",
     "delta_runtime_cpp",
@@ -46,11 +46,14 @@ def test_worker_does_not_import_native_or_jvm_components() -> None:
     assert violations == []
 
 
-def test_native_and_jvm_components_are_documentation_only() -> None:
-    for directory in PLACEHOLDERS:
-        files = sorted(
-            path.relative_to(ROOT / directory).as_posix()
-            for path in (ROOT / directory).rglob("*")
-            if path.is_file()
+def test_native_and_jvm_components_preserve_language_ownership() -> None:
+    violations: list[str] = []
+    for directory, forbidden_suffixes in COMPONENT_FORBIDDEN_SUFFIXES.items():
+        component = ROOT / directory
+        assert (component / "README.md").is_file()
+        violations.extend(
+            path.relative_to(ROOT).as_posix()
+            for path in component.rglob("*")
+            if path.is_file() and path.suffix.lower() in forbidden_suffixes
         )
-        assert files == ["README.md"]
+    assert violations == []
