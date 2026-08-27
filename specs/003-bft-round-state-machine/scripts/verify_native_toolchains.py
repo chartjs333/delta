@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[3]
 FEATURE = ROOT / "specs" / "003-bft-round-state-machine"
 DEFAULT_OUTPUT = FEATURE / "evidence" / "toolchain-locks.json"
 EXPECTED_FORMAL_ID = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
-EXPECTED_PREFLIGHT_SHA256 = "978d0dfed831e9de079a4efb18cb4c279d11a31db06c28c55fc320928bc8557d"
+EXPECTED_PREFLIGHT_SHA256 = "d1ec3f6b7589415b1879dae64c582a953fbce57c306dbfd4eb320aa65d0dc2de"
 
 LOCK_PATHS = (
     "delta-core-cpp/toolchain/build-tools.lock.json",
@@ -41,6 +41,18 @@ EXPECTED = {
     "jextract": (
         "25-jextract+2-4",
         "d0cc481abc1adb16fb9514e1c5e0bfc08d38c29228bece667fb5054ceaffaa42",
+    ),
+}
+EXPECTED_EXECUTION_IMAGES = {
+    "gcc": (
+        "docker.io/library/gcc",
+        "14.2.0",
+        "sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82",
+    ),
+    "clang": (
+        "docker.io/silkeh/clang",
+        "20-bookworm",
+        "sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4",
     ),
 }
 ALLOWED_HOSTS = {"github.com", "download.java.net"}
@@ -150,6 +162,14 @@ def verify_compilers(revision: str) -> dict[str, Any]:
         require(item.get("cxx_standard_modes") == ["c++20", "c++23"], "CXX_MODES_INVALID", family)
         require(item.get("source", {}).get("commit") == commit, "COMPILER_SOURCE_INVALID", family)
         require(isinstance(item.get("license"), str), "COMPILER_LICENSE_MISSING", family)
+        image, tag, digest = EXPECTED_EXECUTION_IMAGES[family]
+        require(
+            item.get("execution_image", {}).get("image") == image
+            and item.get("execution_image", {}).get("tag") == tag
+            and item.get("execution_image", {}).get("linux_amd64_manifest") == digest,
+            "COMPILER_EXECUTION_IMAGE_INVALID",
+            family,
+        )
     host = lock.get("host_contract")
     require(
         host

@@ -1,0 +1,68 @@
+name: Native core matrix
+
+on:
+  push:
+    branches: [003-bft-round-state-machine]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-core-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  canonical-core:
+    name: ${{ matrix.family }} C++20/C++23
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: gcc-14.2.0
+            compiler: g++
+            image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+            version_pattern: g++ (GCC) 14.2.0
+          - family: clang-20.1.8
+            compiler: clang++
+            image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+            version_pattern: clang version 20.1.8
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision content-addressed compiler image
+        run: docker pull "${{ matrix.image }}"
+
+      - name: Compile and test both language modes offline
+        env:
+          COMPILER: ${{ matrix.compiler }}
+          COMPILER_IMAGE: ${{ matrix.image }}
+          EXPECTED_VERSION: ${{ matrix.version_pattern }}
+        run: |
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --workdir /workspace \
+            --env COMPILER \
+            --env EXPECTED_VERSION \
+            "$COMPILER_IMAGE" \
+            sh -eu -c '
+              "$COMPILER" --version | head -n 1 | grep -F "$EXPECTED_VERSION"
+              for standard in 20 23; do
+                output="/tmp/delta-core-cpp${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/tests/canonical_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$output"
+                "$output"
+              done
+            '

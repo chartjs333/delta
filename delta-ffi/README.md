@@ -1,4 +1,5 @@
 # delta-ffi
 
-Placeholder ownership boundary for feature 001. The versioned C ABI and generated bindings begin
-in feature 003. No C++ ABI, Java-owned pointer retention or production FFM code is introduced here.
+Feature-003 ownership boundary for the versioned C ABI. The `delta_ffi` CMake target is isolated
+now and depends on the native runtime boundary; the opaque ABI and generated JDK 25 FFM bindings
+follow after native recovery is proven. No C++ ABI or Java-owned pointer retention is exposed.

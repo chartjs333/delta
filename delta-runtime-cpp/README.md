@@ -1,7 +1,5 @@
 # delta-runtime-cpp
 
-Placeholder ownership boundary for feature 001. Production native runtime code begins in feature
-003.
-
-Future owner: single-writer consensus reactor, WAL, snapshots and persist-before-expose recovery.
-This directory is intentionally documentation-only in feature 001.
+Feature-003 ownership boundary for the single-writer consensus reactor, WAL, snapshots and
+persist-before-expose recovery. The `delta_runtime` CMake target is isolated now; durability source
+is introduced only after the pure transition core passes its canonical-byte gates.

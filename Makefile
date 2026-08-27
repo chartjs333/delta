@@ -8,11 +8,12 @@ LOCAL_ROUND_COMPATIBILITY := specs/002-local-round-engine/scripts/verify_final_c
 BFT_PREFLIGHT := specs/003-bft-round-state-machine/scripts/verify_preflight.py
 BFT_TOOLCHAINS := specs/003-bft-round-state-machine/scripts/verify_native_toolchains.py
 BFT_PROTOCOL := specs/003-bft-round-state-machine/scripts/verify_protocol_contracts.py
+BFT_CORE_ARCHITECTURE := specs/003-bft-round-state-machine/scripts/verify_core_architecture.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
 	prerequisite protocol-check python-check foundation-check conformance local-round-check \
-	bft-preflight bft-contracts
+	bft-preflight bft-contracts bft-core-architecture bft-native
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -78,3 +79,14 @@ bft-preflight:
 bft-contracts: bft-preflight protocol-check
 	$(UV) run python $(BFT_PROTOCOL) --check-only
 	$(UV) run pytest specs/003-bft-round-state-machine/tests
+
+bft-core-architecture:
+	$(UV) run python $(BFT_CORE_ARCHITECTURE) --check-only
+
+bft-native: bft-contracts bft-core-architecture
+	cmake --preset cpp20
+	cmake --build --preset cpp20 --parallel
+	ctest --preset cpp20
+	cmake --preset cpp23
+	cmake --build --preset cpp23 --parallel
+	ctest --preset cpp23
