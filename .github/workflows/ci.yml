@@ -62,7 +62,8 @@ jobs:
           uv run mypy delta-worker-python/src
           uv run pytest delta-worker-python/tests
 
-      - name: Verify deterministic foundation evidence
+      - name: Reproduce feature 001 foundation evidence on its branch
+        if: ${{ github.ref_name == '001-reproducible-training-baseline' || github.head_ref == '001-reproducible-training-baseline' }}
         env:
           ALL_PROXY: http://127.0.0.1:9
           HTTPS_PROXY: http://127.0.0.1:9
