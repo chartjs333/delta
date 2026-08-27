@@ -80,6 +80,8 @@ delta_status_t delta_fixedpoint_shard_validate_copy(
     if (!valid_view(envelope)) {
       return DELTA_STATUS_INVALID_ARGUMENT;
     }
+    const auto borrowed = std::as_bytes(std::span(envelope.data, envelope.size));
+    delta::shards::validate_opaque_shard(borrowed);
     std::vector<std::byte> owned;
     owned.reserve(envelope.size);
     for (std::size_t index = 0U; index < envelope.size; ++index) {

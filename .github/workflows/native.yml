@@ -225,6 +225,7 @@ jobs:
                   -I/workspace/delta-core-cpp/include \
                   -I/workspace/delta-runtime-cpp/include \
                   -I/workspace/delta-ffi/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
                   /workspace/delta-core-cpp/src/canonical.cpp \
                   /workspace/delta-core-cpp/src/consensus.cpp \
                   /workspace/delta-core-cpp/src/protocol.cpp \
@@ -311,6 +312,7 @@ jobs:
               -I/workspace/delta-core-cpp/include \
               -I/workspace/delta-runtime-cpp/include \
               -I/workspace/delta-ffi/include \
+              /workspace/delta-core-cpp/src/arithmetic.cpp \
               /workspace/delta-core-cpp/src/canonical.cpp \
               /workspace/delta-core-cpp/src/consensus.cpp \
               /workspace/delta-core-cpp/src/protocol.cpp \

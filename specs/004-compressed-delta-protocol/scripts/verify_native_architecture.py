@@ -175,6 +175,12 @@ def verify_sources() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
         "does not participate in consensus acceptance" in oracle_text,
         "PYTHON_ORACLE_BOUNDARY_MISSING",
     )
+    fixedpoint_ffi = (ROOT / "delta-ffi" / "src" / "fixedpoint_abi.cpp").read_text(encoding="utf-8")
+    require(
+        fixedpoint_ffi.index("validate_opaque_shard(borrowed)")
+        < fixedpoint_ffi.index("owned.reserve(envelope.size)"),
+        "FFI_COPY_ALLOCATES_BEFORE_VALIDATION",
+    )
     residual_paths = [
         path
         for root in (ROOT / "delta-core-cpp", ROOT / "delta-worker-python" / "src")

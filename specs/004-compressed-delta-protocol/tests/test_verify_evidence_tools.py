@@ -22,8 +22,10 @@ def load(name: str):  # type: ignore[no-untyped-def]
 
 def test_final_task_parser_is_exact() -> None:
     final = load("verify_final_compatibility")
-    text = "- [x] T001 valid\n- [ ] T002 open\n- [x] T003 valid\n"
-    assert final.task_ids(text, "T") == {"T001", "T003"}
+    semantic = "- [x] T001 valid\n- [ ] T002 open\n- [x] T003 valid\n"
+    runtime = "- [x] **HR004-001** valid\n- [ ] **HR004-002** open\n"
+    assert final.task_ids(semantic, "T") == {"T001", "T003"}
+    assert final.task_ids(runtime, "HR004-") == {"HR004-001"}
 
 
 def test_native_evidence_fails_closed() -> None:

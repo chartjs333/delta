@@ -59,7 +59,7 @@ def tracked_text(commit: str, path: str) -> str:
 
 
 def task_ids(text: str, prefix: str) -> set[str]:
-    return set(re.findall(rf"^- \[x\] ({prefix}\d{{3}})\b", text, flags=re.MULTILINE))
+    return set(re.findall(rf"^- \[x\] (?:\*\*)?({prefix}\d{{3}})\b", text, flags=re.MULTILINE))
 
 
 def current_task_ids(path: Path, prefix: str) -> set[str]:
