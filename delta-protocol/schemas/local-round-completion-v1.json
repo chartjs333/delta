@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:schema:local-round-completion:1",
+  "title": "DeltaReduce LocalRoundCompletion v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "arithmetic_profile_id", "batch_budget", "candidate_eligible", "cursor_end", "cursor_start",
+    "data_id", "data_range_end", "data_range_start", "deterministic_seed", "domain_id",
+    "effective_steps", "failure_code", "formal_semantics_id", "local_delta",
+    "logical_deadline_ms", "micro_steps", "numerical_summary", "optimizer_profile_id",
+    "parameter_schema_id", "parent_model_id", "processed_tokens", "producer_version", "reason",
+    "resource_summary", "schema_version", "status", "step_budget", "ticket_fingerprint",
+    "ticket_id", "worker_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "formal_semantics_id": {"const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"},
+    "ticket_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "domain_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "worker_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "ticket_fingerprint": {"$ref": "#/$defs/contentId"},
+    "data_id": {"$ref": "#/$defs/contentId"},
+    "data_range_start": {"type": "integer", "minimum": 0},
+    "data_range_end": {"type": "integer", "minimum": 1},
+    "parent_model_id": {"$ref": "#/$defs/contentId"},
+    "parameter_schema_id": {"$ref": "#/$defs/contentId"},
+    "optimizer_profile_id": {"$ref": "#/$defs/contentId"},
+    "arithmetic_profile_id": {"$ref": "#/$defs/contentId"},
+    "batch_budget": {"type": "integer", "minimum": 1},
+    "step_budget": {"type": "integer", "minimum": 1},
+    "deterministic_seed": {"type": "integer", "minimum": 0},
+    "logical_deadline_ms": {"type": "integer", "minimum": 1},
+    "effective_steps": {"type": "integer", "minimum": 0},
+    "micro_steps": {"type": "integer", "minimum": 0},
+    "processed_tokens": {"type": "integer", "minimum": 0},
+    "cursor_start": {"type": "integer", "minimum": 0},
+    "cursor_end": {"type": "integer", "minimum": 0},
+    "status": {"enum": ["CANCELLED", "COMPLETED", "FAILED"]},
+    "reason": {"enum": ["CANCELLED", "DATA_EXHAUSTED", "DEADLINE", "EXACT_H", "INTERNAL_FAILURE", "NON_FINITE", "OOM"]},
+    "candidate_eligible": {"type": "boolean"},
+    "local_delta": {"oneOf": [{"$ref": "#/$defs/localDelta"}, {"type": "null"}]},
+    "failure_code": {"type": ["string", "null"], "pattern": "^[A-Z][A-Z0-9_]{0,127}$"},
+    "numerical_summary": {"$ref": "#/$defs/numericalSummary"},
+    "resource_summary": {"$ref": "#/$defs/resourceSummary"},
+    "producer_version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,127}$"}
+  },
+  "$defs": {
+    "contentId": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "tensorOrder": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]{0,255}$"}
+    },
+    "localDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact", "parameter_schema_id", "parent_model_id", "sign_convention",
+        "storage_dtype", "tensor_order", "ticket_fingerprint", "ticket_id"
+      ],
+      "properties": {
+        "artifact": {"$ref": "artifact-ref.schema.json"},
+        "parameter_schema_id": {"$ref": "#/$defs/contentId"},
+        "parent_model_id": {"$ref": "#/$defs/contentId"},
+        "sign_convention": {"const": "PARENT_MINUS_FINAL"},
+        "storage_dtype": {"const": "float32"},
+        "tensor_order": {"$ref": "#/$defs/tensorOrder"},
+        "ticket_fingerprint": {"$ref": "#/$defs/contentId"},
+        "ticket_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"}
+      }
+    },
+    "numericalSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["all_finite", "global_l2_norm_fp64_bits", "max_abs_fp32_bits"],
+      "properties": {
+        "all_finite": {"type": "boolean"},
+        "global_l2_norm_fp64_bits": {"type": ["string", "null"], "pattern": "^[0-9a-f]{16}$"},
+        "max_abs_fp32_bits": {"type": ["string", "null"], "pattern": "^[0-9a-f]{8}$"}
+      }
+    },
+    "resourceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["peak_memory_bytes", "wall_time_ms"],
+      "properties": {
+        "peak_memory_bytes": {"type": "integer", "minimum": 0},
+        "wall_time_ms": {"type": "integer", "minimum": 0}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "COMPLETED"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "candidate_eligible": {"const": true},
+          "reason": {"const": "EXACT_H"},
+          "failure_code": {"type": "null"},
+          "local_delta": {"$ref": "#/$defs/localDelta"},
+          "numerical_summary": {
+            "properties": {
+              "all_finite": {"const": true},
+              "global_l2_norm_fp64_bits": {"type": "string"},
+              "max_abs_fp32_bits": {"type": "string"}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "candidate_eligible": {"const": false},
+          "failure_code": {"type": "string"},
+          "local_delta": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "CANCELLED"}}, "required": ["status"]},
+      "then": {"properties": {"reason": {"const": "CANCELLED"}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "FAILED"}}, "required": ["status"]},
+      "then": {"properties": {"reason": {"enum": ["DATA_EXHAUSTED", "DEADLINE", "INTERNAL_FAILURE", "NON_FINITE", "OOM"]}}}
+    }
+  ]
+}

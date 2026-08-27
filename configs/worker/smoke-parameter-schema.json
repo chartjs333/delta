@@ -1,0 +1,1 @@
+{"frozen_omission_policy":"OMIT_FROZEN","parameters":[{"logical_dtype":"float32","name":"embedding.weight","shape":[18,8],"trainable":true},{"logical_dtype":"float32","name":"output.bias","shape":[18],"trainable":true},{"logical_dtype":"float32","name":"output.weight","shape":[18,8],"trainable":true}],"schema_version":"1.0.0","tied_aliases":{}}

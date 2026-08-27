@@ -1,1 +1,236 @@
-{"action_registry":{"id":"FORMAL-PROJECTION-V1","path":"action-registry/formal-projection-v1.json","sha256":"1de4e556901c0aecc8679ff54708d499ec8b5335eba5e5233f9d793b4447bac6"},"fixtures":[{"id":"CANONICAL-JSON-001","path":"fixtures/canonical-json/canonical-json-v1.json","sha256":"61ddd50bb35a3ef943b49359b597cf141b7683ab9fd5c72858fabd13e9bdd482"},{"id":"FORMAL-PROJECTION-001","path":"fixtures/formal/artifact-projection-v1.json","sha256":"7afd8adb8a9fc9c8f84daf5d6d08e39943769b541e0513f4f90938651c776b5b"},{"id":"SAFE-TENSOR-001","path":"fixtures/safe-tensor/safe-tensor-i32-v1.json","sha256":"82b99a179ccf2e1d19d77e0a837a88fb9edac3d6504e0479c3845c35903d902d"}],"formal_semantics_id":"sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6","media_types":[{"id":"MEDIA-ARTIFACT-REF-V1","schema_id":"SCHEMA-ARTIFACT-REF-V1","value":"application/vnd.deltareduce.artifact-ref+json;version=1"},{"id":"MEDIA-BASELINE-CONFIG-V1","schema_id":"SCHEMA-BASELINE-CONFIG-V1","value":"application/vnd.deltareduce.baseline-config+json;version=1"},{"id":"MEDIA-CHECKPOINT-MANIFEST-V1","schema_id":"SCHEMA-CHECKPOINT-MANIFEST-V1","value":"application/vnd.deltareduce.checkpoint-manifest+json;version=1"},{"id":"MEDIA-CORPUS-TEXT-V1","schema_id":"SCHEMA-CORPUS-TEXT-V1","value":"text/plain;charset=utf-8"},{"id":"MEDIA-FORMAL-PROJECTION-V1","schema_id":"SCHEMA-FORMAL-PROJECTION-V1","value":"application/vnd.deltareduce.formal-projection+json;version=1"},{"id":"MEDIA-METRICS-JSONL-V1","schema_id":"SCHEMA-METRICS-JSONL-V1","value":"application/vnd.deltareduce.metrics+jsonl;version=1"},{"id":"MEDIA-NETWORK-PROFILE-V1","schema_id":"SCHEMA-NETWORK-PROFILE-V1","value":"application/vnd.deltareduce.network-profile+json;version=1"},{"id":"MEDIA-PROTOCOL-REGISTRY-V1","schema_id":"SCHEMA-PROTOCOL-REGISTRY-V1","value":"application/vnd.deltareduce.protocol-registry+json;version=1"},{"id":"MEDIA-RUN-MANIFEST-V1","schema_id":"SCHEMA-RUN-MANIFEST-V1","value":"application/vnd.deltareduce.run-manifest+json;version=1"},{"id":"MEDIA-SAFETENSORS-V1","schema_id":"SCHEMA-SAFETENSORS-V1","value":"application/vnd.safetensors"},{"id":"MEDIA-TOKENIZER-V1","schema_id":"SCHEMA-TOKENIZER-V1","value":"application/vnd.deltareduce.tokenizer+json;version=1"},{"id":"MEDIA-TRAINING-STATE-V1","schema_id":"SCHEMA-TRAINING-STATE-V1","value":"application/vnd.deltareduce.training-state+json;version=1"},{"id":"MEDIA-UV-LOCK-V1","schema_id":"SCHEMA-UV-LOCK-V1","value":"application/vnd.deltareduce.uv-lock+toml;version=1"}],"registry_id":"DELTA-PROTOCOL-V1","schema_version":"1.0.0","schemas":[{"id":"SCHEMA-ARTIFACT-REF-V1","path":"schemas/artifact-ref.schema.json","sha256":"7edd5f08e1a8e7e42daf31fbeef4650f0d03083563f02aa594bd10b7ff0aca67"},{"id":"SCHEMA-BASELINE-CONFIG-V1","path":"schemas/baseline-config.schema.json","sha256":"17c0fdd1ee644cdf306edaabc9a86499bea71426ad07f53e4e6f73fb39e1a13f"},{"id":"SCHEMA-CHECKPOINT-MANIFEST-V1","path":"schemas/checkpoint-manifest.schema.json","sha256":"f73061a9bce4d6a48d17d10edd52f8e59e0ec87f91bd00c6d5dcdd39a764769b"},{"id":"SCHEMA-CORPUS-TEXT-V1","path":"schemas/corpus-text-v1.json","sha256":"dc3f1383a7600425abe5b492ba8d3a8b5974841d0ba18c6e0fe94f91867755c3"},{"id":"SCHEMA-FORMAL-PROJECTION-V1","path":"schemas/formal-projection.schema.json","sha256":"40e88e7335a299f9e74eee82b6e21845269dacf97cdad07013413d06e19ee21e"},{"id":"SCHEMA-METRICS-JSONL-V1","path":"schemas/metrics-jsonl-v1.json","sha256":"f972fef4e61358becfe219e835b7cf29bfdfef2be286b26655df651518f6ae84"},{"id":"SCHEMA-NETWORK-PROFILE-V1","path":"schemas/network-profile.schema.json","sha256":"dbf7858c0fb805376b6cdf21d38590239ca6525a20890d3930839144f48bacbe"},{"id":"SCHEMA-PROTOCOL-REGISTRY-V1","path":"schemas/protocol-registry.schema.json","sha256":"bcd0eebb48890563a8d2976b591c83e2e332087cd4b0af19a58fc63934e3da33"},{"id":"SCHEMA-RUN-MANIFEST-V1","path":"schemas/run-manifest.schema.json","sha256":"f856e3b8b4b27d878a6f412c905dfcd61c3820f75def52ec2d445e58458785e0"},{"id":"SCHEMA-SAFETENSORS-V1","path":"schemas/safe-tensor-envelope-v1.json","sha256":"ce5d7b7d8475ddd2f85841d4944eef9f9cce4d79cd0ab8bac0655d65733834c1"},{"id":"SCHEMA-TOKENIZER-V1","path":"schemas/tokenizer.schema.json","sha256":"bcbfaf88ba6a1e01d0c2c560513c55fcafed7faaeb7e3f72e99efed4031031b8"},{"id":"SCHEMA-TRAINING-STATE-V1","path":"schemas/training-state.schema.json","sha256":"91b787b9fbe5783c348d2636cecaa299bbfac2155a0e6b543eecad3594249791"},{"id":"SCHEMA-UV-LOCK-V1","path":"schemas/uv-lock-v1.json","sha256":"ad8c64bf9c715bf770d44e49292571bd773c234fcf340b6335ee2ba8f58c842f"}]}
+{
+  "action_registry": {
+    "id": "FORMAL-PROJECTION-V1",
+    "path": "action-registry/formal-projection-v1.json",
+    "sha256": "1de4e556901c0aecc8679ff54708d499ec8b5335eba5e5233f9d793b4447bac6"
+  },
+  "fixtures": [
+    {
+      "id": "CANONICAL-JSON-001",
+      "path": "fixtures/canonical-json/canonical-json-v1.json",
+      "sha256": "61ddd50bb35a3ef943b49359b597cf141b7683ab9fd5c72858fabd13e9bdd482"
+    },
+    {
+      "id": "FORMAL-PROJECTION-001",
+      "path": "fixtures/formal/artifact-projection-v1.json",
+      "sha256": "7afd8adb8a9fc9c8f84daf5d6d08e39943769b541e0513f4f90938651c776b5b"
+    },
+    {
+      "id": "LOCAL-ROUND-TICKET-001",
+      "path": "fixtures/local-round/domain-pure-work-ticket-v1.json",
+      "sha256": "8a4eea1807ffdb1733f48e66a17adfc2f1e903b69bb346fc91aa03c14cdb7502"
+    },
+    {
+      "id": "FEATURE004-ENCODER-INPUTS-001",
+      "path": "fixtures/local-round/feature004-encoder-inputs-v1.json",
+      "sha256": "956bb05edaf0b4ad83ca8b7f010eef2fc8949cacb243660e6d0b6db2d8800afd"
+    },
+    {
+      "id": "LOCAL-ROUND-COMPLETION-001",
+      "path": "fixtures/local-round/local-round-completion-v1.json",
+      "sha256": "b8ca59a3560e77f3dd7cf538ec27ed4d97a9a8f8975786597bc6ecd04e2274fe"
+    },
+    {
+      "id": "LOCAL-ROUND-NEGATIVE-001",
+      "path": "fixtures/local-round/negative-v1.json",
+      "sha256": "61085be58b3d91859ff5292b648fcaee07a19b344fe479e7325daa96952d4f5f"
+    },
+    {
+      "id": "LOCAL-ROUND-CANDIDATE-001",
+      "path": "fixtures/local-round/normalized-contribution-candidate-v1.json",
+      "sha256": "10f5911764482e2aadea511849315a2cccbd0f35c3d107187f6c6df501755980"
+    },
+    {
+      "id": "LOCAL-ROUND-PARAMETER-SCHEMA-001",
+      "path": "fixtures/local-round/parameter-schema-v1.json",
+      "sha256": "b2e41ffaf836d0fa80bf5afc6d21a66fd9b54237b569f45e919f35675b7df7d6"
+    },
+    {
+      "id": "LOCAL-ROUND-TRACES-001",
+      "path": "fixtures/local-round/traces-v1.json",
+      "sha256": "c6ce7ed745d863a8f77f88e5bb42182f6a8fc991fa7d5f160125b0593c1aa361"
+    },
+    {
+      "id": "SAFE-TENSOR-001",
+      "path": "fixtures/safe-tensor/safe-tensor-i32-v1.json",
+      "sha256": "82b99a179ccf2e1d19d77e0a837a88fb9edac3d6504e0479c3845c35903d902d"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "media_types": [
+    {
+      "id": "MEDIA-ARTIFACT-REF-V1",
+      "schema_id": "SCHEMA-ARTIFACT-REF-V1",
+      "value": "application/vnd.deltareduce.artifact-ref+json;version=1"
+    },
+    {
+      "id": "MEDIA-BASELINE-CONFIG-V1",
+      "schema_id": "SCHEMA-BASELINE-CONFIG-V1",
+      "value": "application/vnd.deltareduce.baseline-config+json;version=1"
+    },
+    {
+      "id": "MEDIA-CHECKPOINT-MANIFEST-V1",
+      "schema_id": "SCHEMA-CHECKPOINT-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.checkpoint-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-CORPUS-TEXT-V1",
+      "schema_id": "SCHEMA-CORPUS-TEXT-V1",
+      "value": "text/plain;charset=utf-8"
+    },
+    {
+      "id": "MEDIA-DOMAIN-PURE-WORK-TICKET-V1",
+      "schema_id": "SCHEMA-DOMAIN-PURE-WORK-TICKET-V1",
+      "value": "application/vnd.deltareduce.domain-pure-work-ticket+json;version=1"
+    },
+    {
+      "id": "MEDIA-FORMAL-PROJECTION-V1",
+      "schema_id": "SCHEMA-FORMAL-PROJECTION-V1",
+      "value": "application/vnd.deltareduce.formal-projection+json;version=1"
+    },
+    {
+      "id": "MEDIA-LOCAL-ROUND-COMPLETION-V1",
+      "schema_id": "SCHEMA-LOCAL-ROUND-COMPLETION-V1",
+      "value": "application/vnd.deltareduce.local-round-completion+json;version=1"
+    },
+    {
+      "id": "MEDIA-METRICS-JSONL-V1",
+      "schema_id": "SCHEMA-METRICS-JSONL-V1",
+      "value": "application/vnd.deltareduce.metrics+jsonl;version=1"
+    },
+    {
+      "id": "MEDIA-NETWORK-PROFILE-V1",
+      "schema_id": "SCHEMA-NETWORK-PROFILE-V1",
+      "value": "application/vnd.deltareduce.network-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-NORMALIZED-CONTRIBUTION-CANDIDATE-V1",
+      "schema_id": "SCHEMA-NORMALIZED-CONTRIBUTION-CANDIDATE-V1",
+      "value": "application/vnd.deltareduce.normalized-contribution-candidate+json;version=1"
+    },
+    {
+      "id": "MEDIA-PARAMETER-SCHEMA-V1",
+      "schema_id": "SCHEMA-PARAMETER-SCHEMA-V1",
+      "value": "application/vnd.deltareduce.parameter-schema+json;version=1"
+    },
+    {
+      "id": "MEDIA-PROTOCOL-REGISTRY-V1",
+      "schema_id": "SCHEMA-PROTOCOL-REGISTRY-V1",
+      "value": "application/vnd.deltareduce.protocol-registry+json;version=1"
+    },
+    {
+      "id": "MEDIA-RUN-MANIFEST-V1",
+      "schema_id": "SCHEMA-RUN-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.run-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-SAFETENSORS-V1",
+      "schema_id": "SCHEMA-SAFETENSORS-V1",
+      "value": "application/vnd.safetensors"
+    },
+    {
+      "id": "MEDIA-TOKENIZER-V1",
+      "schema_id": "SCHEMA-TOKENIZER-V1",
+      "value": "application/vnd.deltareduce.tokenizer+json;version=1"
+    },
+    {
+      "id": "MEDIA-TRAINING-STATE-V1",
+      "schema_id": "SCHEMA-TRAINING-STATE-V1",
+      "value": "application/vnd.deltareduce.training-state+json;version=1"
+    },
+    {
+      "id": "MEDIA-UV-LOCK-V1",
+      "schema_id": "SCHEMA-UV-LOCK-V1",
+      "value": "application/vnd.deltareduce.uv-lock+toml;version=1"
+    }
+  ],
+  "registry_id": "DELTA-PROTOCOL-V1",
+  "schema_version": "1.0.0",
+  "schemas": [
+    {
+      "id": "SCHEMA-ARTIFACT-REF-V1",
+      "path": "schemas/artifact-ref.schema.json",
+      "sha256": "7edd5f08e1a8e7e42daf31fbeef4650f0d03083563f02aa594bd10b7ff0aca67"
+    },
+    {
+      "id": "SCHEMA-BASELINE-CONFIG-V1",
+      "path": "schemas/baseline-config.schema.json",
+      "sha256": "17c0fdd1ee644cdf306edaabc9a86499bea71426ad07f53e4e6f73fb39e1a13f"
+    },
+    {
+      "id": "SCHEMA-CHECKPOINT-MANIFEST-V1",
+      "path": "schemas/checkpoint-manifest.schema.json",
+      "sha256": "f73061a9bce4d6a48d17d10edd52f8e59e0ec87f91bd00c6d5dcdd39a764769b"
+    },
+    {
+      "id": "SCHEMA-CORPUS-TEXT-V1",
+      "path": "schemas/corpus-text-v1.json",
+      "sha256": "dc3f1383a7600425abe5b492ba8d3a8b5974841d0ba18c6e0fe94f91867755c3"
+    },
+    {
+      "id": "SCHEMA-DOMAIN-PURE-WORK-TICKET-V1",
+      "path": "schemas/domain-pure-work-ticket-v1.json",
+      "sha256": "1a3ede783032f528430a1fbfc4499bc8b2e031d2a9373cf5df860188673e2c1b"
+    },
+    {
+      "id": "SCHEMA-FORMAL-PROJECTION-V1",
+      "path": "schemas/formal-projection.schema.json",
+      "sha256": "40e88e7335a299f9e74eee82b6e21845269dacf97cdad07013413d06e19ee21e"
+    },
+    {
+      "id": "SCHEMA-LOCAL-ROUND-COMPLETION-V1",
+      "path": "schemas/local-round-completion-v1.json",
+      "sha256": "9923edf8a994be4d5ba0abb15f1e68b3d077bf62d50e6b183ec0d807f0e09dd6"
+    },
+    {
+      "id": "SCHEMA-METRICS-JSONL-V1",
+      "path": "schemas/metrics-jsonl-v1.json",
+      "sha256": "f972fef4e61358becfe219e835b7cf29bfdfef2be286b26655df651518f6ae84"
+    },
+    {
+      "id": "SCHEMA-NETWORK-PROFILE-V1",
+      "path": "schemas/network-profile.schema.json",
+      "sha256": "dbf7858c0fb805376b6cdf21d38590239ca6525a20890d3930839144f48bacbe"
+    },
+    {
+      "id": "SCHEMA-NORMALIZED-CONTRIBUTION-CANDIDATE-V1",
+      "path": "schemas/normalized-contribution-candidate-v1.json",
+      "sha256": "a952398b940fe6cebc4656da3993df44e59f4ce04ef008ed661f780f15580389"
+    },
+    {
+      "id": "SCHEMA-PARAMETER-SCHEMA-V1",
+      "path": "schemas/parameter-schema-v1.json",
+      "sha256": "12ac1fdbb33a0aa3811257054c316f9decccdf9ce00c31386d9d59d0568c6e28"
+    },
+    {
+      "id": "SCHEMA-PROTOCOL-REGISTRY-V1",
+      "path": "schemas/protocol-registry.schema.json",
+      "sha256": "bcd0eebb48890563a8d2976b591c83e2e332087cd4b0af19a58fc63934e3da33"
+    },
+    {
+      "id": "SCHEMA-RUN-MANIFEST-V1",
+      "path": "schemas/run-manifest.schema.json",
+      "sha256": "f856e3b8b4b27d878a6f412c905dfcd61c3820f75def52ec2d445e58458785e0"
+    },
+    {
+      "id": "SCHEMA-SAFETENSORS-V1",
+      "path": "schemas/safe-tensor-envelope-v1.json",
+      "sha256": "ce5d7b7d8475ddd2f85841d4944eef9f9cce4d79cd0ab8bac0655d65733834c1"
+    },
+    {
+      "id": "SCHEMA-TOKENIZER-V1",
+      "path": "schemas/tokenizer.schema.json",
+      "sha256": "bcbfaf88ba6a1e01d0c2c560513c55fcafed7faaeb7e3f72e99efed4031031b8"
+    },
+    {
+      "id": "SCHEMA-TRAINING-STATE-V1",
+      "path": "schemas/training-state.schema.json",
+      "sha256": "91b787b9fbe5783c348d2636cecaa299bbfac2155a0e6b543eecad3594249791"
+    },
+    {
+      "id": "SCHEMA-UV-LOCK-V1",
+      "path": "schemas/uv-lock-v1.json",
+      "sha256": "ad8c64bf9c715bf770d44e49292571bd773c234fcf340b6335ee2ba8f58c842f"
+    }
+  ]
+}
