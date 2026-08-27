@@ -116,7 +116,7 @@ jobs:
           mkdir --parents "$RUNNER_TEMP/java-classes"
           "$RUNNER_TEMP/jdk/bin/javac" \
             --release "$JDK_FEATURE" \
-            --directory "$RUNNER_TEMP/java-classes" \
+            -d "$RUNNER_TEMP/java-classes" \
             delta-node-java/src/test/java/io/deltareduce/node/RuntimeDescriptorCompatibility.java
           "$RUNNER_TEMP/jdk/bin/java" \
             --class-path "$RUNNER_TEMP/java-classes" \

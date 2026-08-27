@@ -296,7 +296,7 @@ class Reader {
             "map keys are not strictly increasing");
         auto child = decode_value(reader, limits, depth + 1U);
         prior = key;
-        values.emplace_back(std::move(key), std::move(child));
+        values.push_back(MapEntry{std::move(key), std::move(child)});
       }
       return Value::map(std::move(values));
     }
@@ -306,6 +306,18 @@ class Reader {
 }
 
 }  // namespace
+
+Value::Value(Data value) : data(std::move(value)) {}
+
+Value::Value(const Value& other) = default;
+
+Value::Value(Value&& other) noexcept = default;
+
+Value& Value::operator=(const Value& other) = default;
+
+Value& Value::operator=(Value&& other) noexcept = default;
+
+Value::~Value() = default;
 
 Value Value::boolean(bool value) { return Value{Data{std::in_place_type<bool>, value}}; }
 

@@ -14,6 +14,8 @@ namespace delta::core::canonical {
 
 using Bytes = std::vector<std::byte>;
 
+struct MapEntry;
+
 enum class Type : std::uint16_t {
   round_config = 1,
   work_ticket = 2,
@@ -29,10 +31,17 @@ enum class Type : std::uint16_t {
 
 struct Value {
   using Array = std::vector<Value>;
-  using Map = std::vector<std::pair<std::string, Value>>;
+  using Map = std::vector<MapEntry>;
   using Data = std::variant<bool, std::uint64_t, std::int64_t, Bytes, std::string, Array, Map>;
 
   Data data;
+
+  explicit Value(Data value);
+  Value(const Value& other);
+  Value(Value&& other) noexcept;
+  Value& operator=(const Value& other);
+  Value& operator=(Value&& other) noexcept;
+  ~Value();
 
   static Value boolean(bool value);
   static Value unsigned_integer(std::uint64_t value);
@@ -43,6 +52,13 @@ struct Value {
   static Value map(Map value);
 
   bool operator==(const Value& other) const;
+};
+
+struct MapEntry {
+  std::string key;
+  Value value;
+
+  bool operator==(const MapEntry& other) const = default;
 };
 
 struct Envelope {
