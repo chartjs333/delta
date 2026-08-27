@@ -97,4 +97,5 @@ jobs:
           uv run python specs/003-bft-round-state-machine/scripts/verify_native_toolchains.py --check-only
           uv run python specs/003-bft-round-state-machine/scripts/verify_protocol_contracts.py --check-only
           uv run python specs/003-bft-round-state-machine/scripts/verify_core_architecture.py --check-only
+          uv run python specs/003-bft-round-state-machine/scripts/verify_native_supply_chain.py --check-only
           uv run pytest specs/003-bft-round-state-machine/tests
