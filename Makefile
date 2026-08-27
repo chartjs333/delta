@@ -15,6 +15,7 @@ BFT_CORE_PROTOCOL_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_
 BFT_CORE_ARITHMETIC_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_core_arithmetic_execution.py
 BFT_CORE_TRANSITION_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_core_transition_execution.py
 BFT_CORE_CONSENSUS_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_core_consensus_execution.py
+BFT_CORE_PORTABILITY_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_core_portability_execution.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -94,6 +95,7 @@ bft-core-architecture:
 	$(UV) run python $(BFT_CORE_ARITHMETIC_EXECUTION) --check-only
 	$(UV) run python $(BFT_CORE_TRANSITION_EXECUTION) --check-only
 	$(UV) run python $(BFT_CORE_CONSENSUS_EXECUTION) --check-only
+	$(UV) run python $(BFT_CORE_PORTABILITY_EXECUTION) --check-only
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20
