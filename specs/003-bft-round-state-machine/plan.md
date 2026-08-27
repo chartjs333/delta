@@ -37,7 +37,7 @@ Production `int16-fixed-v1` quantization, rounding/clipping, compressed codecs a
 | Durable voting | WAL durability precedes effect exposure | Crash matrix and replay tests |
 | Runtime boundary | Versioned C ABI; Java drives bytes, never transitions | ABI mismatch and direct/copy parity tests |
 
-**Pre-implementation result**: PENDING Phase 0 evidence. Any central authority, adaptive work, floating reduction, Java-owned transition or missing durability outcome is a hard STOP.
+**Pre-implementation result**: PASS in `evidence/preflight.json`; production source remains blocked until T011 freezes the toolchains. Any central authority, adaptive work, floating reduction, Java-owned transition or missing durability outcome is a hard STOP.
 
 ## Architecture and Data Flow
 

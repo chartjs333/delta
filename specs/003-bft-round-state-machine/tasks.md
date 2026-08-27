@@ -7,10 +7,10 @@ Every task is incomplete until its declared tests and content-addressed evidence
 
 ## Phase 0: Mandatory pre-implementation STOP
 
-- [ ] T000 [HR003-001] Verify the exact feature-001 and feature-002 merge commits and their accepted exit-evidence manifests.
-- [ ] T001 [HR003-001] Verify the exact Formal GO/semantics ID and rederive the 24 formal artifact hashes from the merged baseline.
-- [ ] T002 [HR003-003] Scan the authoritative lineage and planned native tree for a coordinator, adaptive/stale/device weighting, floating reduce, Java/Python validator state and forbidden core dependencies; require zero findings.
-- [ ] T003 [HR003-002] Classify ADR-0010 and the planned implementation as `REFINEMENT_ONLY`; emit content-addressed `evidence/preflight.json` binding T000–T002 and stop on any mismatch.
+- [x] T000 [HR003-001] Verify the exact feature-001 and feature-002 merge commits and their accepted exit-evidence manifests.
+- [x] T001 [HR003-001] Verify the exact Formal GO/semantics ID and rederive the 24 formal artifact hashes from the merged baseline.
+- [x] T002 [HR003-003] Scan the authoritative lineage and planned native tree for a coordinator, adaptive/stale/device weighting, floating reduce, Java/Python validator state and forbidden core dependencies; require zero findings.
+- [x] T003 [HR003-002] Classify ADR-0010 and the planned implementation as `REFINEMENT_ONLY`; emit content-addressed `evidence/preflight.json` binding T000–T002 and stop on any mismatch.
 
 ## Phase 1: Canonical protocol contracts
 

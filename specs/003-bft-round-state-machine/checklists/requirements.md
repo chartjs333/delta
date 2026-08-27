@@ -1,7 +1,7 @@
 # Specification Quality Checklist: 003 BFT Round State Machine
 
 **Reviewed**: 2026-08-23  
-**Status**: SpecKit reconciled; Phase 0 evidence pending
+**Status**: Phase 0 passed; toolchain freeze pending
 
 ## Source fidelity
 
@@ -40,4 +40,4 @@
 - [x] Feature depends only on merged `001–002`, Constitution 2.1.0 and exact accepted formal semantics.
 - [x] Failure of any BFT, arithmetic or bit-identity gate blocks feature 004.
 - [x] Production quantization/codecs are deferred to 004; protobuf/gRPC and production transport are absent from 003.
-- [ ] Content-addressed Phase 0 predecessor/formal/architecture/formal-impact evidence passes before native source is created.
+- [x] Content-addressed Phase 0 predecessor/formal/architecture/formal-impact evidence passes before native source is created.
