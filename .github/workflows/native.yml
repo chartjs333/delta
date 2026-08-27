@@ -76,6 +76,15 @@ jobs:
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -o "$protocol_output"
                 "$protocol_output"
+                arithmetic_output="/tmp/delta-core-arithmetic${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
+                  /workspace/delta-core-cpp/tests/arithmetic_test.cpp \
+                  -o "$arithmetic_output"
+                "$arithmetic_output"
               done
             '
 

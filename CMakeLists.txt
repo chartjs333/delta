@@ -33,6 +33,7 @@ function(delta_target_defaults target)
 endfunction()
 
 add_library(delta_core STATIC
+  delta-core-cpp/src/arithmetic.cpp
   delta-core-cpp/src/canonical.cpp
   delta-core-cpp/src/protocol.cpp
   delta-core-cpp/src/sha256.cpp)
@@ -66,6 +67,11 @@ if(BUILD_TESTING)
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
   delta_target_defaults(delta_core_protocol_test)
   add_test(NAME delta_core.protocol COMMAND delta_core_protocol_test)
+
+  add_executable(delta_core_arithmetic_test delta-core-cpp/tests/arithmetic_test.cpp)
+  target_link_libraries(delta_core_arithmetic_test PRIVATE delta::core)
+  delta_target_defaults(delta_core_arithmetic_test)
+  add_test(NAME delta_core.arithmetic COMMAND delta_core_arithmetic_test)
 
   add_executable(delta_runtime_target_test delta-runtime-cpp/tests/target_smoke_test.cpp)
   target_link_libraries(delta_runtime_target_test PRIVATE delta::runtime)
