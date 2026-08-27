@@ -173,7 +173,7 @@ jobs:
                   /workspace/delta-core-cpp/src/fixedpoint/rounding.cpp \
                   /workspace/delta-core-cpp/src/fixedpoint/scale.cpp \
                   /workspace/delta-core-cpp/tests/fixedpoint_test.cpp \
-                  -DDELTA_FIXEDPOINT_FIXTURE_PATH="/workspace/delta-protocol/fixtures/004/cross-language/golden-v1.json" \
+                  -DDELTA_FIXEDPOINT_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/004/cross-language/golden-v1.json\" \
                   -o "$fixedpoint_output"
                 "$fixedpoint_output"
                 shards_output="/tmp/delta-shards-${standard}"
@@ -198,7 +198,7 @@ jobs:
                   /workspace/delta-core-cpp/src/shards/plan.cpp \
                   /workspace/delta-core-cpp/src/shards/reader.cpp \
                   /workspace/delta-core-cpp/tests/shards_test.cpp \
-                  -DDELTA_FIXEDPOINT_GOLDEN_PATH="/workspace/delta-protocol/fixtures/004/cross-language/golden-v1.json" \
+                  -DDELTA_FIXEDPOINT_GOLDEN_PATH=\"/workspace/delta-protocol/fixtures/004/cross-language/golden-v1.json\" \
                   -o "$shards_output"
                 "$shards_output"
                 runtime_output="/tmp/delta-runtime-${standard}"

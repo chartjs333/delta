@@ -27,13 +27,16 @@ FIXEDPOINT_CONTRACTS := specs/004-compressed-delta-protocol/scripts/verify_proto
 FIXEDPOINT_ARCHITECTURE := specs/004-compressed-delta-protocol/scripts/verify_native_architecture.py
 FIXEDPOINT_PROOFS := specs/004-compressed-delta-protocol/scripts/verify_proof_instances.py
 FIXEDPOINT_REFINEMENT := specs/004-compressed-delta-protocol/scripts/verify_direct_q_refinement.py
+FIXEDPOINT_PHASE_EVIDENCE := specs/004-compressed-delta-protocol/scripts/verify_phase_evidence.py
+FIXEDPOINT_NATIVE_EXECUTION := specs/004-compressed-delta-protocol/scripts/verify_native_execution.py
+FIXEDPOINT_FINAL := specs/004-compressed-delta-protocol/scripts/verify_final_compatibility.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
 	prerequisite protocol-check python-check foundation-check conformance local-round-check \
 	bft-preflight bft-contracts bft-core-architecture bft-final bft-check bft-native \
 	fixedpoint-preflight fixedpoint-contracts fixedpoint-architecture fixedpoint-proofs \
-	fixedpoint-refinement
+	fixedpoint-refinement fixedpoint-evidence fixedpoint-final fixedpoint-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -140,6 +143,15 @@ fixedpoint-proofs: fixedpoint-architecture
 fixedpoint-refinement: fixedpoint-proofs
 	$(UV) run python $(FIXEDPOINT_REFINEMENT) --check-only
 	$(UV) run pytest specs/004-compressed-delta-protocol/tests/test_verify_direct_q_refinement.py
+
+fixedpoint-evidence: fixedpoint-refinement
+	$(UV) run python $(FIXEDPOINT_PHASE_EVIDENCE) --check-only
+	$(UV) run python $(FIXEDPOINT_NATIVE_EXECUTION) --check-only
+
+fixedpoint-final: fixedpoint-evidence
+	$(UV) run python $(FIXEDPOINT_FINAL) --check-only
+
+fixedpoint-check: python-check fixedpoint-final
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

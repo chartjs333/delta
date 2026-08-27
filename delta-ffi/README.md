@@ -15,6 +15,12 @@ returns `DELTA_STATUS_BUFFER_TOO_SMALL` and the exact `required` size without co
 request, so retry is idempotent. Every exported function catches native exceptions and clears
 partial output metadata before returning a stable status.
 
+Feature 004 adds `delta_fixedpoint_shard_validate_borrowed` and
+`delta_fixedpoint_shard_validate_copy`. Both invoke the production bounded DRQ1 parser, negotiate a
+caller-owned output buffer and return the exact input envelope only after structural, payload-hash
+and canonical INT16 checks pass. The borrowed function retains no pointer; the copy function owns a
+temporary copy for the call. Context-specific admission remains in the native shard reader.
+
 The JDK 25/26 FFM harness is test-only orchestration of this exact ABI. It neither owns consensus
 logic nor turns borrowed native memory into a long-lived Java view. Transport remains outside this
 library.

@@ -22,3 +22,9 @@ objects, `fixtures/003/invalid/canonical-binary-negative-v1.json` for fail-close
 native exit run. `schemas/003/delta-abi-v1.json` mirrors the frozen C descriptor. Every registered
 path is verified against its SHA-256 before use; fixture JSON is never an alternate consensus
 implementation.
+
+Feature 004 registers `int16-fixed-v1`, reduced rational scale tables, fixed-point configs,
+deterministic shard plans, encoded manifests/shards and concrete accumulator proof instances. The
+cross-language golden fixture binds source rationals, q values, little-endian payload/envelope
+bytes, shard leaves and the commitment root. `direct-q-100-v1.json` separately versions the
+feature-003 state/effect/WAL result of consuming verified q values without float conversion.

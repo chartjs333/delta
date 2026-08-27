@@ -107,11 +107,12 @@ struct EnvelopeView {
     reject(ErrorCode::payload_length_mismatch, "INT16 payload length is odd");
   }
   for (std::size_t offset = 0U; offset < payload.size(); offset += 2U) {
-    const auto raw = static_cast<std::uint16_t>(std::to_integer<std::uint8_t>(payload[offset])) |
-                     static_cast<std::uint16_t>(
-                         static_cast<std::uint16_t>(
-                             std::to_integer<std::uint8_t>(payload[offset + 1U]))
-                         << 8U);
+    const std::uint16_t raw = static_cast<std::uint16_t>(
+        static_cast<std::uint16_t>(std::to_integer<std::uint8_t>(payload[offset])) |
+        static_cast<std::uint16_t>(
+            static_cast<std::uint16_t>(
+                std::to_integer<std::uint8_t>(payload[offset + 1U]))
+            << 8U));
     const auto wide = raw <= 0x7fffU ? static_cast<std::int32_t>(raw)
                                      : static_cast<std::int32_t>(raw) - 65'536;
     if (wide < delta::fixedpoint::q_min || wide > delta::fixedpoint::q_max) {
@@ -150,11 +151,12 @@ VerifiedShard read_shard(
   std::vector<std::int16_t> values;
   values.reserve(expected_header.element_count);
   for (std::size_t offset = 0U; offset < payload.size(); offset += 2U) {
-    const auto raw = static_cast<std::uint16_t>(std::to_integer<std::uint8_t>(payload[offset])) |
-                     static_cast<std::uint16_t>(
-                         static_cast<std::uint16_t>(
-                             std::to_integer<std::uint8_t>(payload[offset + 1U]))
-                         << 8U);
+    const std::uint16_t raw = static_cast<std::uint16_t>(
+        static_cast<std::uint16_t>(std::to_integer<std::uint8_t>(payload[offset])) |
+        static_cast<std::uint16_t>(
+            static_cast<std::uint16_t>(
+                std::to_integer<std::uint8_t>(payload[offset + 1U]))
+            << 8U));
     const auto wide = raw <= 0x7fffU ? static_cast<std::int32_t>(raw)
                                      : static_cast<std::int32_t>(raw) - 65'536;
     if (wide < delta::fixedpoint::q_min || wide > delta::fixedpoint::q_max) {

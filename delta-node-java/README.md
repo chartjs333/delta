@@ -9,3 +9,8 @@ The harness owns no validator state, transition rule, vote journal or native poi
 declared arena/call lifetime. ABI/schema/protocol/formal/build mismatch cases fail before command
 admission. No protobuf, gRPC, Netty or Java transport dependency is introduced; authenticated
 transport remains feature 005 scope.
+
+Feature 004 adds opaque DRQ1 heap/direct copy tests and `NativeFixedPointFfmConformance`. The latter
+calls both production C ABI shard-validation entry points on JDK 25 and JDK 26 and requires exact
+bytes for valid envelopes and stable rejection for truncated, trailing, corrupt and oversized
+inputs. Java does not decode q values, choose scales or aggregate contributions.
