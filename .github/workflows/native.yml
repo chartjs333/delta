@@ -111,6 +111,20 @@ jobs:
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -o "$consensus_output"
                 "$consensus_output"
+                portability_output="/tmp/delta-core-portability${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/tests/portability_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -DDELTA_PORTABILITY_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/core-portability-v1.json\" \
+                  -o "$portability_output"
+                "$portability_output"
               done
             '
 
