@@ -95,6 +95,8 @@ void test_explicit_golden_types() {
   const auto state_bytes = golden(5U);
   const auto qc_bytes = golden(4U);
   const auto shard_bytes = golden(10U);
+  const auto effect_bytes = golden(7U);
+  const auto wal_bytes = golden(8U);
 
   const auto command = protocol::parse_command(command_bytes);
   expect(command.command_kind == "FINALIZE_ROUND_CONFIG", "command kind mismatch");
@@ -117,6 +119,16 @@ void test_explicit_golden_types() {
           shard.values.back() == 9223372036854775807LL,
       "prepared shard signed boundary mismatch");
   expect(protocol::encode(shard) == shard_bytes, "prepared shard encoding differs from golden bytes");
+
+  const auto effect_batch = protocol::parse_effect_batch(effect_bytes);
+  expect(effect_batch.effects.size() == 2U, "effect batch size mismatch");
+  expect(
+      protocol::encode(effect_batch) == effect_bytes,
+      "effect batch encoding differs from golden bytes");
+
+  const auto wal_record = protocol::parse_wal_record(wal_bytes);
+  expect(wal_record.sequence == 1U, "WAL sequence mismatch");
+  expect(protocol::encode(wal_record) == wal_bytes, "WAL encoding differs from golden bytes");
 }
 
 void test_command_fails_closed() {

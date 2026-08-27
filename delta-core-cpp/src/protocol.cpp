@@ -213,6 +213,38 @@ void require_unique(const std::vector<std::string>& values) {
   };
 }
 
+[[nodiscard]] Effect parse_effect(const Value& encoded) {
+  const auto* fields = std::get_if<Value::Map>(&encoded.data);
+  require(fields != nullptr, ErrorCode::array_item_invalid, "effect is not a map");
+  constexpr std::array expected = {
+      std::string_view{"body_hash"},
+      std::string_view{"effect_id"},
+      std::string_view{"kind"},
+      std::string_view{"target_id"},
+  };
+  require_fields(*fields, expected);
+  Effect result{
+      text(*fields, "body_hash"),
+      text(*fields, "effect_id"),
+      text(*fields, "kind"),
+      text(*fields, "target_id"),
+  };
+  require_content_id(result.body_hash);
+  require_ascii_id(result.effect_id);
+  require_ascii_id(result.kind);
+  require_ascii_id(result.target_id);
+  return result;
+}
+
+[[nodiscard]] Value encode_effect(const Effect& effect) {
+  return Value::map({
+      {"body_hash", Value::text(effect.body_hash)},
+      {"effect_id", Value::text(effect.effect_id)},
+      {"kind", Value::text(effect.kind)},
+      {"target_id", Value::text(effect.target_id)},
+  });
+}
+
 [[nodiscard]] std::string decimal(std::uint64_t value) { return std::to_string(value); }
 
 [[nodiscard]] std::string decimal(std::int64_t value) { return std::to_string(value); }
@@ -480,6 +512,80 @@ PreparedIntegerShard parse_prepared_integer_shard(
   return result;
 }
 
+EffectBatch parse_effect_batch(std::span<const std::byte> bytes, const canonical::Limits& limits) {
+  auto envelope = decode_expected(bytes, Type::effect_batch, limits);
+  constexpr std::array expected = {
+      std::string_view{"effects"},
+      std::string_view{"formal_semantics_id"},
+      std::string_view{"next_state_root"},
+      std::string_view{"prior_state_root"},
+      std::string_view{"request_id"},
+      std::string_view{"round_id"},
+      std::string_view{"schema_version"},
+      std::string_view{"type_name"},
+  };
+  require_fields(envelope.fields, expected);
+  require_common(envelope.fields, Type::effect_batch);
+  EffectBatch result{
+      {},
+      text(envelope.fields, "next_state_root"),
+      text(envelope.fields, "prior_state_root"),
+      text(envelope.fields, "request_id"),
+      text(envelope.fields, "round_id"),
+  };
+  require_content_id(result.next_state_root);
+  require_content_id(result.prior_state_root);
+  require_ascii_id(result.request_id);
+  require_ascii_id(result.round_id);
+  const auto& encoded_effects = array(envelope.fields, "effects");
+  require(!encoded_effects.empty(), ErrorCode::array_item_invalid, "effect batch is empty");
+  result.effects.reserve(encoded_effects.size());
+  for (const auto& encoded : encoded_effects) {
+    result.effects.push_back(parse_effect(encoded));
+  }
+  for (std::size_t index = 1; index < result.effects.size(); ++index) {
+    require(
+        result.effects[index - 1U].effect_id < result.effects[index].effect_id,
+        ErrorCode::array_not_canonical,
+        "effect IDs are not strictly increasing");
+  }
+  return result;
+}
+
+WalRecord parse_wal_record(std::span<const std::byte> bytes, const canonical::Limits& limits) {
+  auto envelope = decode_expected(bytes, Type::wal_record, limits);
+  constexpr std::array expected = {
+      std::string_view{"command_id"},
+      std::string_view{"effect_batch_id"},
+      std::string_view{"formal_semantics_id"},
+      std::string_view{"next_state_root"},
+      std::string_view{"prior_state_root"},
+      std::string_view{"record_kind"},
+      std::string_view{"round_id"},
+      std::string_view{"schema_version"},
+      std::string_view{"sequence"},
+      std::string_view{"type_name"},
+  };
+  require_fields(envelope.fields, expected);
+  require_common(envelope.fields, Type::wal_record);
+  WalRecord result{
+      text(envelope.fields, "command_id"),
+      text(envelope.fields, "effect_batch_id"),
+      text(envelope.fields, "next_state_root"),
+      text(envelope.fields, "prior_state_root"),
+      text(envelope.fields, "record_kind"),
+      text(envelope.fields, "round_id"),
+      parse_u64_decimal(text(envelope.fields, "sequence")),
+  };
+  require_content_id(result.command_id);
+  require_content_id(result.effect_batch_id);
+  require_content_id(result.next_state_root);
+  require_content_id(result.prior_state_root);
+  require_constant(envelope.fields, "record_kind", "TRANSITION");
+  require_ascii_id(result.round_id);
+  return result;
+}
+
 canonical::Bytes encode(const Command& value, const canonical::Limits& limits) {
   const Envelope envelope{
       Type::command,
@@ -576,6 +682,51 @@ canonical::Bytes encode(const PreparedIntegerShard& value, const canonical::Limi
   };
   auto bytes = canonical::encode(envelope, limits);
   static_cast<void>(parse_prepared_integer_shard(bytes, limits));
+  return bytes;
+}
+
+canonical::Bytes encode(const EffectBatch& value, const canonical::Limits& limits) {
+  Value::Array effects;
+  effects.reserve(value.effects.size());
+  for (const auto& effect : value.effects) {
+    effects.push_back(encode_effect(effect));
+  }
+  const Envelope envelope{
+      Type::effect_batch,
+      {
+          {"effects", Value::array(std::move(effects))},
+          {"formal_semantics_id", Value::text(std::string(formal_semantics_id))},
+          {"next_state_root", Value::text(value.next_state_root)},
+          {"prior_state_root", Value::text(value.prior_state_root)},
+          {"request_id", Value::text(value.request_id)},
+          {"round_id", Value::text(value.round_id)},
+          {"schema_version", Value::text(std::string(schema_version))},
+          {"type_name", Value::text(std::string(canonical::type_name(Type::effect_batch)))},
+      },
+  };
+  auto bytes = canonical::encode(envelope, limits);
+  static_cast<void>(parse_effect_batch(bytes, limits));
+  return bytes;
+}
+
+canonical::Bytes encode(const WalRecord& value, const canonical::Limits& limits) {
+  const Envelope envelope{
+      Type::wal_record,
+      {
+          {"command_id", Value::text(value.command_id)},
+          {"effect_batch_id", Value::text(value.effect_batch_id)},
+          {"formal_semantics_id", Value::text(std::string(formal_semantics_id))},
+          {"next_state_root", Value::text(value.next_state_root)},
+          {"prior_state_root", Value::text(value.prior_state_root)},
+          {"record_kind", Value::text(value.record_kind)},
+          {"round_id", Value::text(value.round_id)},
+          {"schema_version", Value::text(std::string(schema_version))},
+          {"sequence", Value::text(decimal(value.sequence))},
+          {"type_name", Value::text(std::string(canonical::type_name(Type::wal_record)))},
+      },
+  };
+  auto bytes = canonical::encode(envelope, limits);
+  static_cast<void>(parse_wal_record(bytes, limits));
   return bytes;
 }
 

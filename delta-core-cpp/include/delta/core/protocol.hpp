@@ -117,6 +117,37 @@ struct PreparedIntegerShard {
   bool operator==(const PreparedIntegerShard&) const = default;
 };
 
+struct Effect {
+  std::string body_hash;
+  std::string effect_id;
+  std::string kind;
+  std::string target_id;
+
+  bool operator==(const Effect&) const = default;
+};
+
+struct EffectBatch {
+  std::vector<Effect> effects;
+  std::string next_state_root;
+  std::string prior_state_root;
+  std::string request_id;
+  std::string round_id;
+
+  bool operator==(const EffectBatch&) const = default;
+};
+
+struct WalRecord {
+  std::string command_id;
+  std::string effect_batch_id;
+  std::string next_state_root;
+  std::string prior_state_root;
+  std::string record_kind;
+  std::string round_id;
+  std::uint64_t sequence;
+
+  bool operator==(const WalRecord&) const = default;
+};
+
 [[nodiscard]] std::string_view round_phase_name(RoundPhase phase);
 [[nodiscard]] std::uint64_t parse_u64_decimal(std::string_view value);
 [[nodiscard]] std::int64_t parse_i64_decimal(std::string_view value);
@@ -133,6 +164,12 @@ struct PreparedIntegerShard {
 [[nodiscard]] PreparedIntegerShard parse_prepared_integer_shard(
     std::span<const std::byte> bytes,
     const canonical::Limits& limits = {});
+[[nodiscard]] EffectBatch parse_effect_batch(
+    std::span<const std::byte> bytes,
+    const canonical::Limits& limits = {});
+[[nodiscard]] WalRecord parse_wal_record(
+    std::span<const std::byte> bytes,
+    const canonical::Limits& limits = {});
 
 [[nodiscard]] canonical::Bytes encode(const Command& value, const canonical::Limits& limits = {});
 [[nodiscard]] canonical::Bytes encode(
@@ -143,6 +180,12 @@ struct PreparedIntegerShard {
     const canonical::Limits& limits = {});
 [[nodiscard]] canonical::Bytes encode(
     const PreparedIntegerShard& value,
+    const canonical::Limits& limits = {});
+[[nodiscard]] canonical::Bytes encode(
+    const EffectBatch& value,
+    const canonical::Limits& limits = {});
+[[nodiscard]] canonical::Bytes encode(
+    const WalRecord& value,
     const canonical::Limits& limits = {});
 
 }  // namespace delta::core::protocol

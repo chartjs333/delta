@@ -8,6 +8,8 @@ values, invalid identifiers, malformed quorum arrays and incompatible integer fi
 Portable checked signed arithmetic covers INT64 and a two-limb INT128 implementation without
 compiler extensions. The `bft-int-fixture-v1` pre-open gate proves the conservative
 `ticket-count * coefficient-bound * value-bound + headroom` expression fits the selected width.
+The pure transition entry point consumes only canonical prior-state and command bytes and returns
+linked canonical next-state, effect-batch and WAL-record bytes plus their domain-separated IDs.
 
 The library is standard-library-only and deliberately has no socket, filesystem, wall-clock,
 thread, JVM, Python or floating-point dependency. Runtime durability belongs to

@@ -85,6 +85,19 @@ jobs:
                   /workspace/delta-core-cpp/tests/arithmetic_test.cpp \
                   -o "$arithmetic_output"
                 "$arithmetic_output"
+                transition_output="/tmp/delta-core-transition${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/tests/transition_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$transition_output"
+                "$transition_output"
               done
             '
 
