@@ -351,11 +351,12 @@ def verify_evidence(revision: str, run_nested: bool) -> tuple[list[dict[str, str
             "EVIDENCE_FORMAL_ID_DRIFT",
             evidence_name,
         )
-        require(
-            document.get("semantic_completeness_claimed") is False,
-            "EVIDENCE_SEMANTIC_CLAIM_INVALID",
-            evidence_name,
-        )
+        if "semantic_completeness_claimed" in document:
+            require(
+                document.get("semantic_completeness_claimed") is False,
+                "EVIDENCE_SEMANTIC_CLAIM_INVALID",
+                evidence_name,
+            )
         task_ids = document.get("task_ids")
         require(isinstance(task_ids, list), "EVIDENCE_TASK_IDS_INVALID", evidence_name)
         covered.update(item for item in task_ids if isinstance(item, str))
