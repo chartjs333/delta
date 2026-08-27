@@ -125,6 +125,22 @@ jobs:
                   -DDELTA_PORTABILITY_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/core-portability-v1.json\" \
                   -o "$portability_output"
                 "$portability_output"
+                prepared_output="/tmp/delta-core-prepared-100-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/tests/prepared_100_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -DDELTA_PREPARED_100_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json\" \
+                  -o "$prepared_output"
+                "$prepared_output"
               done
             '
 

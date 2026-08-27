@@ -100,6 +100,15 @@ if(BUILD_TESTING)
   delta_target_defaults(delta_core_portability_test)
   add_test(NAME delta_core.portability COMMAND delta_core_portability_test)
 
+  add_executable(delta_core_prepared_100_test delta-core-cpp/tests/prepared_100_test.cpp)
+  target_link_libraries(delta_core_prepared_100_test PRIVATE delta::core)
+  target_compile_definitions(
+    delta_core_prepared_100_test
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json"
+            DELTA_PREPARED_100_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json")
+  delta_target_defaults(delta_core_prepared_100_test)
+  add_test(NAME delta_core.prepared_100 COMMAND delta_core_prepared_100_test)
+
   add_executable(delta_runtime_target_test delta-runtime-cpp/tests/target_smoke_test.cpp)
   target_link_libraries(delta_runtime_target_test PRIVATE delta::runtime)
   delta_target_defaults(delta_runtime_target_test)
