@@ -23,10 +23,12 @@ jobs:
         include:
           - family: gcc-14.2.0
             compiler: g++
+            c_compiler: gcc
             image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
             version_pattern: g++ (GCC) 14.2.0
           - family: clang-20.1.8
             compiler: clang++
+            c_compiler: clang
             image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
             version_pattern: clang version 20.1.8
     steps:
@@ -41,6 +43,7 @@ jobs:
       - name: Compile and test both language modes offline
         env:
           COMPILER: ${{ matrix.compiler }}
+          C_COMPILER: ${{ matrix.c_compiler }}
           COMPILER_IMAGE: ${{ matrix.image }}
           EXPECTED_VERSION: ${{ matrix.version_pattern }}
         run: |
@@ -48,10 +51,15 @@ jobs:
             --volume "$GITHUB_WORKSPACE:/workspace:ro" \
             --workdir /workspace \
             --env COMPILER \
+            --env C_COMPILER \
             --env EXPECTED_VERSION \
             "$COMPILER_IMAGE" \
             sh -eu -c '
               "$COMPILER" --version | head -n 1 | grep -F "$EXPECTED_VERSION"
+              "$C_COMPILER" -std=c11 -Wall -Wextra -Wpedantic -Werror \
+                -I/workspace/delta-ffi/include \
+                -c /workspace/delta-ffi/tests/header_c_test.c \
+                -o /tmp/delta-abi-header-c.o
               for standard in 20 23; do
                 output="/tmp/delta-core-cpp${standard}"
                 "$COMPILER" \
@@ -158,6 +166,26 @@ jobs:
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -o "$runtime_output"
                 "$runtime_output"
+                ffi_output="/tmp/delta-ffi-abi-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -pthread \
+                  -I/workspace/delta-core-cpp/include \
+                  -I/workspace/delta-runtime-cpp/include \
+                  -I/workspace/delta-ffi/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-runtime-cpp/src/runtime.cpp \
+                  /workspace/delta-runtime-cpp/src/wal.cpp \
+                  /workspace/delta-ffi/src/delta_abi.cpp \
+                  /workspace/delta-ffi/tests/abi_test.cpp \
+                  -DDELTA_FFI_BUILD \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$ffi_output"
+                "$ffi_output"
               done
             '
 
@@ -197,6 +225,37 @@ jobs:
           mkdir "$RUNNER_TEMP/jdk"
           tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" --directory "$RUNNER_TEMP/jdk" --strip-components=1
 
+      - name: Provision content-addressed native FFM compiler
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: docker pull "$COMPILER_IMAGE"
+
+      - name: Build native FFM library offline
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: |
+          mkdir --parents "$RUNNER_TEMP/native"
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$RUNNER_TEMP/native:/native" \
+            --workdir /workspace \
+            "$COMPILER_IMAGE" \
+            g++ -std=c++20 -shared -fPIC -pthread \
+              -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+              -I/workspace/delta-core-cpp/include \
+              -I/workspace/delta-runtime-cpp/include \
+              -I/workspace/delta-ffi/include \
+              /workspace/delta-core-cpp/src/canonical.cpp \
+              /workspace/delta-core-cpp/src/consensus.cpp \
+              /workspace/delta-core-cpp/src/protocol.cpp \
+              /workspace/delta-core-cpp/src/sha256.cpp \
+              /workspace/delta-core-cpp/src/transition.cpp \
+              /workspace/delta-runtime-cpp/src/runtime.cpp \
+              /workspace/delta-runtime-cpp/src/wal.cpp \
+              /workspace/delta-ffi/src/delta_abi.cpp \
+              -DDELTA_FFI_BUILD \
+              -o /native/libdelta_ffi.so
+
       - name: Compile and verify descriptor with offline execution policy
         env:
           ALL_PROXY: http://127.0.0.1:9
@@ -211,8 +270,16 @@ jobs:
           "$RUNNER_TEMP/jdk/bin/javac" \
             --release "$JDK_FEATURE" \
             -d "$RUNNER_TEMP/java-classes" \
-            delta-node-java/src/test/java/io/deltareduce/node/RuntimeDescriptorCompatibility.java
+            delta-node-java/src/test/java/io/deltareduce/node/RuntimeDescriptorCompatibility.java \
+            delta-node-java/src/test/java/io/deltareduce/node/NativeRuntimeFfmConformance.java
           "$RUNNER_TEMP/jdk/bin/java" \
             --class-path "$RUNNER_TEMP/java-classes" \
             io.deltareduce.node.RuntimeDescriptorCompatibility \
             delta-protocol/fixtures/003/cross-language/golden-v1.json
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.NativeRuntimeFfmConformance \
+            "$RUNNER_TEMP/native/libdelta_ffi.so" \
+            delta-protocol/fixtures/003/cross-language/golden-v1.json \
+            "$RUNNER_TEMP/ffm-runtime-$JDK_FEATURE"

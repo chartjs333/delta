@@ -40,6 +40,7 @@ add_library(delta_core STATIC
   delta-core-cpp/src/sha256.cpp
   delta-core-cpp/src/transition.cpp)
 add_library(delta::core ALIAS delta_core)
+set_target_properties(delta_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(
   delta_core
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
@@ -49,6 +50,7 @@ add_library(delta_runtime STATIC
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
 add_library(delta::runtime ALIAS delta_runtime)
+set_target_properties(delta_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(
   delta_runtime
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
@@ -59,9 +61,14 @@ if(NOT WIN32)
 endif()
 delta_target_defaults(delta_runtime)
 
-add_library(delta_ffi INTERFACE)
+add_library(delta_ffi SHARED delta-ffi/src/delta_abi.cpp)
 add_library(delta::ffi ALIAS delta_ffi)
-target_link_libraries(delta_ffi INTERFACE delta::runtime)
+target_include_directories(
+  delta_ffi
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include>)
+target_compile_definitions(delta_ffi PRIVATE DELTA_FFI_BUILD)
+target_link_libraries(delta_ffi PUBLIC delta::runtime)
+delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
   add_executable(delta_core_canonical_test delta-core-cpp/tests/canonical_test.cpp)
@@ -136,4 +143,12 @@ if(BUILD_TESTING)
   target_link_libraries(delta_ffi_target_test PRIVATE delta::ffi)
   delta_target_defaults(delta_ffi_target_test)
   add_test(NAME delta_ffi.target COMMAND delta_ffi_target_test)
+
+  add_executable(delta_ffi_abi_test delta-ffi/tests/abi_test.cpp)
+  target_link_libraries(delta_ffi_abi_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_abi_test
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+  delta_target_defaults(delta_ffi_abi_test)
+  add_test(NAME delta_ffi.abi COMMAND delta_ffi_abi_test)
 endif()

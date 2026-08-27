@@ -45,9 +45,9 @@ CMAKE_FORBIDDEN_PATTERNS = {
 REQUIRED_CMAKE_FRAGMENTS = (
     "add_library(delta_core STATIC",
     "add_library(delta_runtime STATIC",
-    "add_library(delta_ffi INTERFACE)",
+    "add_library(delta_ffi SHARED",
     "target_link_libraries(delta_runtime PUBLIC delta::core)",
-    "target_link_libraries(delta_ffi INTERFACE delta::runtime)",
+    "target_link_libraries(delta_ffi PUBLIC delta::runtime)",
     "-fno-fast-math",
     "/fp:strict",
     "DELTA_CXX_STANDARD",
@@ -61,6 +61,7 @@ REQUIRED_CMAKE_FRAGMENTS = (
     "delta_runtime_target_test",
     "delta_runtime_test",
     "delta_ffi_target_test",
+    "delta_ffi_abi_test",
 )
 
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
