@@ -27,7 +27,7 @@ Every task is incomplete until its declared tests and content-addressed evidence
 - [x] T011 [HR003-002] Freeze GCC/Clang, CMake/Ninja, C++ modes, JDK 25/26, jextract and build/dependency lock manifests.
 - [x] T012 Define CMake targets for `delta-core-cpp`, `delta-runtime-cpp`, `delta-ffi` and their isolated tests.
 - [x] T013 [HR003-003] Add architecture checks proving the pure core has no socket, filesystem, wall-clock, JVM, Python or floating-reduce dependency.
-- [ ] T014 Add offline CI lanes for GCC/Clang in C++20/C++23 modes and JDK 25/26 descriptor compatibility.
+- [x] T014 Add offline CI lanes for GCC/Clang in C++20/C++23 modes and JDK 25/26 descriptor compatibility.
 - [x] T015 Publish content-addressed compiler, dependency, source and license manifests.
 
 ## Phase 3: C++ pure core
