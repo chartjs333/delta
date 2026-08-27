@@ -3,7 +3,7 @@
 ## HR003 Phase 0 — exact prerequisites
 
 - [x] **HR003-001** Verify the exact feature-001/002 merge commits and exit evidence, the Formal GO `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`, and rederive all 24 formal artifact hashes.
-- [ ] **HR003-002** Before production source, freeze C++/Java toolchain manifests, the compiler/JDK/jextract matrix and the ADR-0010 `REFINEMENT_ONLY` formal-impact report.
+- [x] **HR003-002** Before production source, freeze C++/Java toolchain manifests, the compiler/JDK/jextract matrix and the ADR-0010 `REFINEMENT_ONLY` formal-impact report.
 - [ ] **HR003-003** Create architecture tests proving `delta-core-cpp` has no socket, filesystem, wall-clock, JVM or Python dependency.
 
 ## HR003 Phase 1 — C++ pure core

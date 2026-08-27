@@ -1,7 +1,7 @@
 # Specification Quality Checklist: 003 BFT Round State Machine
 
 **Reviewed**: 2026-08-23  
-**Status**: Phase 0 passed; toolchain freeze pending
+**Status**: Phase 0 and toolchain freeze passed; canonical contracts next
 
 ## Source fidelity
 
