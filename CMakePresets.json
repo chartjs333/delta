@@ -1,0 +1,63 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "native-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "BUILD_TESTING": "ON",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "DELTA_WARNINGS_AS_ERRORS": "ON"
+      }
+    },
+    {
+      "name": "cpp20",
+      "inherits": "native-base",
+      "cacheVariables": {
+        "DELTA_CXX_STANDARD": "20"
+      }
+    },
+    {
+      "name": "cpp23",
+      "inherits": "native-base",
+      "cacheVariables": {
+        "DELTA_CXX_STANDARD": "23"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "cpp20",
+      "configurePreset": "cpp20"
+    },
+    {
+      "name": "cpp23",
+      "configurePreset": "cpp23"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "cpp20",
+      "configurePreset": "cpp20",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "cpp23",
+      "configurePreset": "cpp23",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

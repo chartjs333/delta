@@ -4,6 +4,8 @@ hs_err_pid*
 replay_pid*
 core
 core.*
+!/delta-core-cpp/include/delta/core/
+!/delta-core-cpp/include/delta/core/**
 
 # Python
 __pycache__/

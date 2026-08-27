@@ -1,0 +1,287 @@
+name: Native core matrix
+
+on:
+  push:
+    branches: [003-bft-round-state-machine]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-core-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  canonical-core:
+    name: ${{ matrix.family }} C++20/C++23
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: gcc-14.2.0
+            compiler: g++
+            c_compiler: gcc
+            image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+            version_pattern: g++ (GCC) 14.2.0
+          - family: clang-20.1.8
+            compiler: clang++
+            c_compiler: clang
+            image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+            version_pattern: clang version 20.1.8
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision content-addressed compiler image
+        run: docker pull "${{ matrix.image }}"
+
+      - name: Compile and test both language modes offline
+        env:
+          COMPILER: ${{ matrix.compiler }}
+          C_COMPILER: ${{ matrix.c_compiler }}
+          COMPILER_IMAGE: ${{ matrix.image }}
+          EXPECTED_VERSION: ${{ matrix.version_pattern }}
+        run: |
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --workdir /workspace \
+            --env COMPILER \
+            --env C_COMPILER \
+            --env EXPECTED_VERSION \
+            "$COMPILER_IMAGE" \
+            sh -eu -c '
+              "$COMPILER" --version | head -n 1 | grep -F "$EXPECTED_VERSION"
+              "$C_COMPILER" -std=c11 -Wall -Wextra -Wpedantic -Werror \
+                -I/workspace/delta-ffi/include \
+                -c /workspace/delta-ffi/tests/header_c_test.c \
+                -o /tmp/delta-abi-header-c.o
+              for standard in 20 23; do
+                output="/tmp/delta-core-cpp${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/tests/canonical_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$output"
+                "$output"
+                protocol_output="/tmp/delta-core-protocol${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/tests/protocol_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$protocol_output"
+                "$protocol_output"
+                arithmetic_output="/tmp/delta-core-arithmetic${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
+                  /workspace/delta-core-cpp/tests/arithmetic_test.cpp \
+                  -o "$arithmetic_output"
+                "$arithmetic_output"
+                transition_output="/tmp/delta-core-transition${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/tests/transition_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$transition_output"
+                "$transition_output"
+                consensus_output="/tmp/delta-core-consensus${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/tests/consensus_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$consensus_output"
+                "$consensus_output"
+                portability_output="/tmp/delta-core-portability${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/tests/portability_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -DDELTA_PORTABILITY_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/core-portability-v1.json\" \
+                  -o "$portability_output"
+                "$portability_output"
+                prepared_output="/tmp/delta-core-prepared-100-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/tests/prepared_100_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -DDELTA_PREPARED_100_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json\" \
+                  -o "$prepared_output"
+                "$prepared_output"
+                runtime_output="/tmp/delta-runtime-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -pthread \
+                  -I/workspace/delta-core-cpp/include \
+                  -I/workspace/delta-runtime-cpp/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-runtime-cpp/src/runtime.cpp \
+                  /workspace/delta-runtime-cpp/src/wal.cpp \
+                  /workspace/delta-runtime-cpp/tests/runtime_test.cpp \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$runtime_output"
+                "$runtime_output"
+                ffi_output="/tmp/delta-ffi-abi-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -pthread \
+                  -I/workspace/delta-core-cpp/include \
+                  -I/workspace/delta-runtime-cpp/include \
+                  -I/workspace/delta-ffi/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-runtime-cpp/src/runtime.cpp \
+                  /workspace/delta-runtime-cpp/src/wal.cpp \
+                  /workspace/delta-ffi/src/delta_abi.cpp \
+                  /workspace/delta-ffi/tests/abi_test.cpp \
+                  -DDELTA_FFI_BUILD \
+                  -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -o "$ffi_output"
+                "$ffi_output"
+                /bin/sh /workspace/specs/003-bft-round-state-machine/scripts/run_native_phase6.sh \
+                  "$COMPILER" "$standard" "/tmp/delta-native-phase6-${standard}"
+              done
+            '
+
+  runtime-descriptor:
+    name: JDK ${{ matrix.feature }} runtime descriptor
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2.1
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2.1%2B1/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2.1_1.tar.gz
+            archive_sha256: 451c12e68747bcfa2fb5a2c16b00483fedb9fa6d77bc962d30957f76ac17044d
+            archive_size: 144463785
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" --directory "$RUNNER_TEMP/jdk" --strip-components=1
+
+      - name: Provision content-addressed native FFM compiler
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: docker pull "$COMPILER_IMAGE"
+
+      - name: Build native FFM library offline
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: |
+          mkdir --parents "$RUNNER_TEMP/native"
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$RUNNER_TEMP/native:/native" \
+            --workdir /workspace \
+            "$COMPILER_IMAGE" \
+            g++ -std=c++20 -shared -fPIC -pthread \
+              -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+              -I/workspace/delta-core-cpp/include \
+              -I/workspace/delta-runtime-cpp/include \
+              -I/workspace/delta-ffi/include \
+              /workspace/delta-core-cpp/src/canonical.cpp \
+              /workspace/delta-core-cpp/src/consensus.cpp \
+              /workspace/delta-core-cpp/src/protocol.cpp \
+              /workspace/delta-core-cpp/src/sha256.cpp \
+              /workspace/delta-core-cpp/src/transition.cpp \
+              /workspace/delta-runtime-cpp/src/runtime.cpp \
+              /workspace/delta-runtime-cpp/src/wal.cpp \
+              /workspace/delta-ffi/src/delta_abi.cpp \
+              -DDELTA_FFI_BUILD \
+              -o /native/libdelta_ffi.so
+
+      - name: Compile and verify descriptor with offline execution policy
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          EXPECTED_VERSION: ${{ matrix.version }}
+          JDK_FEATURE: ${{ matrix.feature }}
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "$EXPECTED_VERSION"
+          mkdir --parents "$RUNNER_TEMP/java-classes"
+          "$RUNNER_TEMP/jdk/bin/javac" \
+            --release "$JDK_FEATURE" \
+            -d "$RUNNER_TEMP/java-classes" \
+            delta-node-java/src/test/java/io/deltareduce/node/RuntimeDescriptorCompatibility.java \
+            delta-node-java/src/test/java/io/deltareduce/node/NativeRuntimeFfmConformance.java
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.RuntimeDescriptorCompatibility \
+            delta-protocol/fixtures/003/cross-language/golden-v1.json
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.NativeRuntimeFfmConformance \
+            "$RUNNER_TEMP/native/libdelta_ffi.so" \
+            delta-protocol/fixtures/003/cross-language/golden-v1.json \
+            "$RUNNER_TEMP/ffm-runtime-$JDK_FEATURE"
