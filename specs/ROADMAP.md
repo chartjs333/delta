@@ -6,11 +6,13 @@ Feature `000-formal-tla-spec` has a deterministic `GO` for formal semantics:
 
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
-Features 000, 001 and 002 are merged. Feature 002 merged as
-`a48d2af86fc7a976cb20b6be28058d22b09cec54` after its deterministic local-ticket,
-protocol/architecture and final `REFINEMENT_ONLY` compatibility gates passed. Feature 003 is
-restacked on that merge and remains implementation-blocked until its content-addressed Phase 0
-predecessor/formal/architecture/formal-impact evidence passes.
+Features 000–003 are merged. Feature 003 merged as
+`53da4d3c0b236726566fb242fdcae84032b42679` after its native core/runtime, ABI/FFM,
+compiler/sanitizer, refinement and final `REFINEMENT_ONLY` gates passed. Its verified source is
+`189e5f155b787c2d1d391630fc599b67ea366bba` and its evidence overlay is
+`f4f2101969d14709834ab6b6d60e88755d710334`. Feature 004 is restacked on that merge and remains
+implementation-blocked until its content-addressed predecessor/formal/arithmetic/architecture
+preflight passes.
 
 ## Branch topology
 

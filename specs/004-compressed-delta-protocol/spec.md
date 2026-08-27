@@ -2,8 +2,10 @@
 
 **Feature Branch**: `004-compressed-delta-protocol`  
 **Created**: 2026-08-23  
-**Status**: Planned — ready for implementation  
-**Depends on**: `003-bft-round-state-machine`
+**Status**: Planned — SpecKit reconciled; Phase 0 evidence required before implementation
+
+**Depends on**: merged `003-bft-round-state-machine` commit
+`53da4d3c0b236726566fb242fdcae84032b42679`
 
 ## Summary
 
@@ -54,18 +56,24 @@ Before ticketing, configuration tooling computes exact worst-case accumulator bo
 3. **Given** any unsafe coefficient/count/profile change, **When** config validation runs, **Then** the previous proof becomes invalid and ticketing remains closed.
 4. **Given** a runtime value inconsistent with the proof assumptions, **When** reduction encounters it, **Then** the contribution/round aborts rather than saturating.
 
-### US4 — Preserve optional worker-local quantization residual safely (Priority: P2)
+### US4 — Reject unapproved residual state (Priority: P2)
 
-A future-compatible optional profile may retain quantization residual at the worker, but residual state must not weaken ticket or certificate determinism.
+DeltaReduce v1 does not enable a residual profile. The mandatory implementation rejects residual
+metadata/state and leaves any future transactional residual semantics to a separately versioned,
+formally classified profile.
 
-**Independent Test**: exact retry uses identical candidate bytes; rejected/unfrozen tickets do not advance residual; schema/profile/ticket-lineage changes require explicit reset/migration.
+**Independent Test**: every attempt to enable an unknown residual profile or submit residual state
+fails before candidate creation and does not mutate worker/runtime state.
 
 **Acceptance Scenarios**:
 
-1. **Given** residual mode disabled (DeltaReduce v1 default), **When** a ticket is encoded, **Then** no residual state is read or written.
-2. **Given** an enabled approved residual profile, **When** a candidate is created, **Then** prior residual version, normalized input hash, encoded root and candidate next-residual hash are atomically linked.
-3. **Given** unknown/rejected/late outcome, **When** retry/recovery runs, **Then** candidate bytes are reused and current residual is unchanged.
-4. **Given** the exact protocol-defined inclusion certificate, **When** residual commit runs, **Then** the candidate advances at most once.
+1. **Given** `int16-fixed-v1`, **When** a ticket is encoded, **Then** no residual state is read or written.
+2. **Given** an unknown residual profile, **When** validation starts, **Then** it fails before
+   encoding or commitment creation.
+3. **Given** residual fields in an otherwise valid manifest, **When** parsing runs, **Then** the
+   manifest is rejected as non-canonical for this version.
+4. **Given** a future residual proposal, **When** it changes retry/durability/inclusion behavior,
+   **Then** implementation stops until its formal-impact and versioned protocol contracts pass.
 
 ## Edge Cases
 
@@ -106,10 +114,14 @@ A future-compatible optional profile may retain quantization residual at the wor
 - **FR-018**: Reducers MUST verify the proof/config hash and every input range assumption before arithmetic.
 - **FR-019**: Runtime checked arithmetic failure MUST prevent a ParameterQC and emit deterministic evidence; saturation/wraparound is never a valid result.
 - **FR-020**: Independent conformance fixtures MUST include source representation, expected q-values, envelope bytes, shard hashes, Merkle root and accumulator-bound result.
-- **FR-021**: Optional residual mode MUST be a separate allowlisted profile and disabled by default in DeltaReduce v1.
-- **FR-022**: Residual candidates MUST be keyed by worker, parent, schema, profile, ticket and prior residual version and MUST reuse exact bytes on unknown-outcome retry.
-- **FR-023**: Residual state MUST advance only on the exact inclusion certificate named by the profile; rejected/late/aborted/unknown tickets cannot advance it.
-- **FR-024**: Schema/profile change MUST require explicit reset or certified migration; silent reuse is forbidden.
+- **FR-021**: Residual mode MUST NOT be in the feature-004 accepted profile allowlist and is disabled
+  by default in DeltaReduce v1.
+- **FR-022**: Residual metadata/state MUST be rejected by the mandatory feature-004 parser before
+  candidate creation.
+- **FR-023**: Any future residual profile MUST be separately versioned and must complete formal
+  impact, exact retry, durability and inclusion-certificate review before implementation.
+- **FR-024**: Schema/profile changes MUST invalidate the current proof instance and require a new
+  versioned profile; silent reuse or migration is forbidden.
 - **FR-025**: Metrics MUST include source/q/shard bytes, encode time, zero/range counts, quantization error summaries (worker-local diagnostic only), accumulator headroom and parser failures.
 - **FR-026**: Worker-local encoded shards remain reduce-plane artifacts and MUST be rejected by the distribution publisher.
 
@@ -140,7 +152,8 @@ A future-compatible optional profile may retain quantization residual at the wor
 - **SC-004**: INT64/INT128 safety corpus accepts the maximum safe case and rejects the first unsafe case/config mutation.
 - **SC-005**: Integration with feature 003 streams q-values directly into checked integer accumulators and preserves the 100-ticket bit-identity hashes.
 - **SC-006**: Float contribution formats, dynamic scales, wrong profiles and malformed envelopes are rejected before consensus arithmetic.
-- **SC-007**: Optional residual retry/rejection/crash tests never advance state without the configured inclusion certificate.
+- **SC-007**: Residual profiles and residual state fields are rejected without producing bytes or
+  mutating worker/runtime state.
 
 ## Assumptions
 
@@ -157,3 +170,4 @@ A future-compatible optional profile may retain quantization residual at the wor
 - Quality-based scale tuning after ticketing opens.
 - P2P transfer of worker contributions.
 - Robust filtering, AggregateRootQC and ApplyQC.
+- Error-feedback residual runtime or residual-state migration.

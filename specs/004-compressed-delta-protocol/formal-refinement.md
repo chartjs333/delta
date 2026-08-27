@@ -4,7 +4,17 @@ This file is normative for `004-compressed-delta-protocol`.
 
 ## Formal baseline dependency
 
-The branch MUST bind the compatible `formal_semantics_id` and the theorem artifacts PO-A1, PO-A2 and PO-A3 from `000-formal-tla-spec`. A profile is not safe merely because boundary tests pass.
+The branch MUST bind formal semantics
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
+and the accepted `formal/proofs/DeltaReduce/FixedPoint.lean` artifact. A profile is not safe merely
+because boundary tests pass.
+
+PO-A1 (`signedProductBound`, `intermediateProductFits`) and PO-A2
+(`flatAccumulatorBound`, `everyCanonicalPrefixFits`) support the q/coefficient product and
+incremental/final accumulator preconditions. PO-A3 supports reduced rational coefficients,
+positive/common denominators, safe numerator accumulation and the formal canonical coefficient
+rounding rule. PO-A3 does not prove the worker encoder's ties-to-even quantization rule; independent
+golden byte conformance covers that pre-consensus canonicalization.
 
 ## Concrete proof instantiation
 
