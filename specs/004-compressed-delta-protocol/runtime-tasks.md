@@ -12,7 +12,7 @@
 - [x] **HR004-009** Add ASan/UBSan, parser libFuzzer and allocation-limit corpus.
 - [x] **HR004-010** Add architecture test rejecting FP contribution formats, per-worker scales and q-to-float consensus conversion.
 - [x] **HR004-011** Rerun feature-003 bit-identity/refinement traces through direct q streaming.
-- [ ] **HR004-012** Publish profile, proof-instance, compiler, parser and cross-language evidence.
+- [x] **HR004-012** Publish profile, proof-instance, compiler, parser and cross-language evidence.
 
 ## STOP rule
 

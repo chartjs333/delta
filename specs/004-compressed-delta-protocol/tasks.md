@@ -123,9 +123,9 @@ producer and Java is an opaque-byte/FFM conformance harness. `task-map.md` is no
 
 - [x] T045 Document profile, proof-instance, parser and direct-q integration without claiming
   quality, WAN, residual, transport, hierarchy or Apply completion.
-- [ ] T046 [HR004-012] Publish content-addressed profile, proof, compiler, parser, Java,
+- [x] T046 [HR004-012] Publish content-addressed profile, proof, compiler, parser, Java,
   sanitizer, refinement and feature-003 regression evidence.
-- [ ] T047 Run cross-artifact consistency, complete offline quality gate and final Constitution
+- [x] T047 Run cross-artifact consistency, complete offline quality gate and final Constitution
   2.1.0 check; emit deterministic exit evidence.
 
 ## Dependencies
