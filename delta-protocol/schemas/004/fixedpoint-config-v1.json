@@ -1,0 +1,26 @@
+{
+  "$defs": {
+    "contentId": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+    "decimal": {"pattern": "^(0|[1-9][0-9]*)$", "type": "string"}
+  },
+  "$id": "urn:deltareduce:schema:fixedpoint-config:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_width_bits": {"enum": [64, 128]},
+    "base_round_config_id": {"$ref": "#/$defs/contentId"},
+    "coefficient_abs_max": {"$ref": "#/$defs/decimal"},
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "max_eligible_contributions": {"$ref": "#/$defs/decimal"},
+    "parameter_schema_id": {"$ref": "#/$defs/contentId"},
+    "profile_id": {"$ref": "#/$defs/contentId"},
+    "q_abs_max": {"const": "32767"},
+    "scale_table_id": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.0.0"},
+    "shard_plan_id": {"$ref": "#/$defs/contentId"},
+    "type_name": {"const": "FIXEDPOINT_ROUND_CONFIG"}
+  },
+  "required": ["accumulator_width_bits", "base_round_config_id", "coefficient_abs_max", "formal_semantics_id", "max_eligible_contributions", "parameter_schema_id", "profile_id", "q_abs_max", "scale_table_id", "schema_version", "shard_plan_id", "type_name"],
+  "title": "DeltaReduce fixed-point RoundConfig binding v1",
+  "type": "object"
+}

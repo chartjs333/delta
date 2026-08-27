@@ -123,4 +123,7 @@ jobs:
         run: |
           uv run python specs/004-compressed-delta-protocol/scripts/verify_preflight.py --check-only
           uv run python specs/004-compressed-delta-protocol/scripts/verify_protocol_contracts.py --check-only
+          uv run python specs/004-compressed-delta-protocol/scripts/verify_native_architecture.py --check-only
+          uv run python specs/004-compressed-delta-protocol/scripts/verify_proof_instances.py --check-only
+          uv run python specs/004-compressed-delta-protocol/scripts/verify_direct_q_refinement.py --check-only
           uv run pytest specs/004-compressed-delta-protocol/tests

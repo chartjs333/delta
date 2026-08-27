@@ -34,7 +34,6 @@ from fixedpoint_contracts import (  # noqa: E402
     FIXTURES,
     LEAN_SOURCE_ID,
     PARAMETER_SCHEMA_ID,
-    ROUND_CONFIG_ID,
     THEOREMS,
     TICKET_ID,
 )
@@ -55,6 +54,7 @@ EXPECTED_SCHEMA_IDS: Final = {
     ),
     "encoded-shard-v1.json": "urn:deltareduce:schema:encoded-shard:1",
     "fixed-point-profile-v1.json": "urn:deltareduce:schema:fixed-point-profile:1",
+    "fixedpoint-config-v1.json": "urn:deltareduce:schema:fixedpoint-config:1",
     "scale-table-v1.json": "urn:deltareduce:schema:scale-table:1",
     "shard-plan-v1.json": "urn:deltareduce:schema:shard-plan:1",
 }
@@ -298,6 +298,7 @@ def verify_golden(golden: dict[str, object]) -> dict[str, str]:
     scale = _verify_identified(golden["scale_table"], "deltareduce.004.scale-table.v1")
     plan = _verify_identified(golden["shard_plan"], "deltareduce.004.shard-plan.v1")
     proof = _verify_identified(golden["proof_instance"], "deltareduce.004.proof-instance.v1")
+    config = _verify_identified(golden["fixedpoint_config"], "deltareduce.004.fixedpoint-config.v1")
     manifest = _verify_identified(golden["manifest"], "deltareduce.004.manifest.v1")
     verify_proof(proof, expected_width=64)
     valid = load_json(FIXTURE_DIR / "valid" / "fixedpoint-contract-v1.json")
@@ -319,6 +320,15 @@ def verify_golden(golden: dict[str, object]) -> dict[str, str]:
     )
     require(scale_value["profile_id"] == profile["content_id"], "SCALE_PROFILE_MISMATCH")
     require(plan_value["scale_table_id"] == scale["content_id"], "PLAN_SCALE_MISMATCH")
+    config_value = config["value"]
+    require(isinstance(config_value, dict), "FIXEDPOINT_CONFIG_VALUE_INVALID")
+    require(config_value["profile_id"] == profile["content_id"], "CONFIG_PROFILE_MISMATCH")
+    require(config_value["scale_table_id"] == scale["content_id"], "CONFIG_SCALE_MISMATCH")
+    require(config_value["shard_plan_id"] == plan["content_id"], "CONFIG_PLAN_MISMATCH")
+    require(config_value["parameter_schema_id"] == PARAMETER_SCHEMA_ID, "CONFIG_SCHEMA_MISMATCH")
+    proof_value = proof["value"]
+    require(isinstance(proof_value, dict), "PROOF_VALUE_INVALID")
+    require(proof_value["config_id"] == config["content_id"], "PROOF_CONFIG_MISMATCH")
     entries = plan_value["entries"]
     require(isinstance(entries, list) and len(entries) == 5, "PLAN_ENTRY_COUNT_INVALID")
     cursor = 0
@@ -391,7 +401,7 @@ def verify_golden(golden: dict[str, object]) -> dict[str, str]:
         require(header["shard_plan_id"] == plan["content_id"], "SHARD_PLAN_INVALID")
         require(header["proof_instance_id"] == proof["content_id"], "SHARD_PROOF_INVALID")
         require(header["parameter_schema_id"] == PARAMETER_SCHEMA_ID, "SHARD_SCHEMA_INVALID")
-        require(header["round_config_id"] == ROUND_CONFIG_ID, "SHARD_CONFIG_INVALID")
+        require(header["round_config_id"] == config["content_id"], "SHARD_CONFIG_INVALID")
         require(header["ticket_id"] == TICKET_ID, "SHARD_TICKET_INVALID")
         require(header["ordinal"] == entry["ordinal"], "SHARD_ORDINAL_INVALID")
         current_leaf = leaf_id(envelope)
@@ -407,6 +417,7 @@ def verify_golden(golden: dict[str, object]) -> dict[str, str]:
     )
     return {
         "commitment_root": root,
+        "fixedpoint_config_id": str(config["content_id"]),
         "manifest_id": str(manifest["content_id"]),
         "profile_id": str(profile["content_id"]),
         "proof_instance_id": str(proof["content_id"]),

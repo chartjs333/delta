@@ -114,6 +114,12 @@ DELTA_API delta_status_t delta_runtime_state(
     delta_output_buffer_t* state_output);
 DELTA_API delta_status_t delta_runtime_snapshot(delta_runtime_t* runtime);
 DELTA_API delta_status_t delta_runtime_release(delta_runtime_t** runtime);
+DELTA_API delta_status_t delta_fixedpoint_shard_validate_borrowed(
+    delta_bytes_view_t envelope,
+    delta_output_buffer_t* envelope_output);
+DELTA_API delta_status_t delta_fixedpoint_shard_validate_copy(
+    delta_bytes_view_t envelope,
+    delta_output_buffer_t* envelope_output);
 
 #ifdef __cplusplus
 }

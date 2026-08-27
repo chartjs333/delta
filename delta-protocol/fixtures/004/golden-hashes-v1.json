@@ -3,27 +3,33 @@
     {
       "id": "FIXEDPOINT004-CROSS-LANGUAGE-GOLDEN-V1",
       "path": "fixtures/004/cross-language/golden-v1.json",
-      "sha256": "14be7562e867758b4278e495da261d51c052c1308099d9a357fdf0c95cf8a6d3"
+      "sha256": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216"
+    },
+    {
+      "id": "FIXEDPOINT004-DIRECT-Q-100-V1",
+      "path": "fixtures/004/cross-language/direct-q-100-v1.json",
+      "sha256": "b99af951973b26c348dbb08354c8fa2778244626fc09fa20002cdaf45cf17277"
     },
     {
       "id": "FIXEDPOINT004-NEGATIVE-V1",
       "path": "fixtures/004/invalid/fixedpoint-negative-v1.json",
-      "sha256": "3dcc61858c2ae0628558181183e07b9eb5bd91581ecac724ebb28d2811b18543"
+      "sha256": "dfce62bc11840b89108cd687d5c6567bcbd8e8528eeca293621e6cbc66ef0cfd"
     },
     {
       "id": "FIXEDPOINT004-VALID-CONTRACT-V1",
       "path": "fixtures/004/valid/fixedpoint-contract-v1.json",
-      "sha256": "f9a607504bbca3f84af6f4db5b8173029e21aac3c3ff0445932c410c6ab865f4"
+      "sha256": "5d54d38d184aa736e011682d99c909f27ac611abfdd060d01b169de2bf2406c9"
     }
   ],
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
   "identities": {
-    "commitment_root": "sha256:bbcb9d6e94668eacc8c3f947832b3a0744b1ee65011b6dbee4b02e4619867787",
-    "manifest_id": "sha256:cd1301e234e977079ca84a248b56db8f4560e822342bb9fc9ee420893d1f6c46",
+    "commitment_root": "sha256:e80916a8ec7d634b4c3524d873c13144b7760c7552e6788132a75fce5456296d",
+    "fixedpoint_config_id": "sha256:34bc08c316dfe22efe155ed11b866bcc0daf7ef8c3c7389c56b2f2c707443629",
+    "manifest_id": "sha256:6b24994dde9f03ccde6acb42abb080ec9dcc2e111a81d781948a3ac1d10446ec",
     "profile_id": "sha256:17c8d23790047966e42f3204502623c74a0ff0383319d23e67ab15cf92fe3e61",
-    "proof_instance_id": "sha256:e09098577825d3a71a4c03c1e5a12d14c3c5646234aae0d37c85e7ec1d3b5793",
-    "scale_table_id": "sha256:e7409ed79e33407b2df867ab00d1c07fe7ddd6d52049150c34bcc76abe4c9b32",
-    "shard_plan_id": "sha256:8d0ab224574404d8100c93e8d91d657b4b646ac77bd039bb4098b44ffc4a665b"
+    "proof_instance_id": "sha256:993b4d5104810dd26a3159b60cf8fe9afe6154cdcca90d22b577ae1b6d1ac076",
+    "scale_table_id": "sha256:434092f82188337d0a273cd13c93e06dec55ae842df0498e4d52caa1d1844205",
+    "shard_plan_id": "sha256:4c644a3254edb3d7bff009bbe91ee99df6051516362fa1a1eac6f0a803a9c7a1"
   },
   "schema_version": "1.0.0",
   "semantic_completeness_claimed": false,

@@ -29,7 +29,7 @@ from deltatorrent.reference.fixedpoint_encoder import (  # noqa: E402
 PARAMETER_SCHEMA_ID: Final = (
     "sha256:f43c0259749b15ae0d0154a6e9094774c7ea65e55adefbaea400a6201acb6239"
 )
-ROUND_CONFIG_ID: Final = "sha256:" + "1" * 64
+BASE_ROUND_CONFIG_ID: Final = "sha256:" + "1" * 64
 PARENT_CHECKPOINT_ID: Final = "sha256:" + "b" * 64
 TICKET_ID: Final = "ticket-002-fixture"
 LEAN_SOURCE_ID: Final = "sha256:6d8c715eacf55f99a2bbc5fca7242610d871a1ef76ae58d51305b81e66364736"
@@ -106,6 +106,7 @@ def _identified(domain: str, value: object) -> dict[str, object]:
 def _proof(
     profile_id: str,
     scale_table_id: str,
+    config_id: str,
     *,
     coefficient_abs_max: int,
     max_eligible: int,
@@ -119,7 +120,7 @@ def _proof(
     return {
         "coefficient_abs_max": str(coefficient_abs_max),
         "common_denominator": "1",
-        "config_id": ROUND_CONFIG_ID,
+        "config_id": config_id,
         "final_abs_bound": str(final),
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
         "lean_artifact_sha256": LEAN_SOURCE_ID,
@@ -145,7 +146,6 @@ def contract_components() -> dict[str, object]:
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
         "parameter_schema_id": PARAMETER_SCHEMA_ID,
         "profile_id": profile_id,
-        "round_config_id": ROUND_CONFIG_ID,
         "schema_version": "1.0.0",
         "segments": [
             {
@@ -201,20 +201,46 @@ def contract_components() -> dict[str, object]:
         "type_name": "SHARD_PLAN",
     }
     plan = _identified("deltareduce.004.shard-plan.v1", plan_value)
+    plan_id = str(plan["content_id"])
+    config64_value = {
+        "accumulator_width_bits": 64,
+        "base_round_config_id": BASE_ROUND_CONFIG_ID,
+        "coefficient_abs_max": "65538",
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "max_eligible_contributions": str((1 << 32) - 1),
+        "parameter_schema_id": PARAMETER_SCHEMA_ID,
+        "profile_id": profile_id,
+        "q_abs_max": "32767",
+        "scale_table_id": scale_table_id,
+        "schema_version": "1.0.0",
+        "shard_plan_id": plan_id,
+        "type_name": "FIXEDPOINT_ROUND_CONFIG",
+    }
+    config128_value = {
+        **config64_value,
+        "accumulator_width_bits": 128,
+        "coefficient_abs_max": str((1 << 63) - 1),
+    }
+    config64 = _identified("deltareduce.004.fixedpoint-config.v1", config64_value)
+    config128 = _identified("deltareduce.004.fixedpoint-config.v1", config128_value)
     proof64_value = _proof(
         profile_id,
         scale_table_id,
+        str(config64["content_id"]),
         coefficient_abs_max=65_538,
         max_eligible=(1 << 32) - 1,
     )
     proof128_value = _proof(
         profile_id,
         scale_table_id,
+        str(config128["content_id"]),
         coefficient_abs_max=(1 << 63) - 1,
         max_eligible=(1 << 32) - 1,
     )
     return {
         "profile": profile,
+        "fixedpoint_config_int128": config128,
+        "fixedpoint_config_int64": config64,
         "proof_int128": _identified("deltareduce.004.proof-instance.v1", proof128_value),
         "proof_int64_maximum_safe": _identified("deltareduce.004.proof-instance.v1", proof64_value),
         "scale_table": scale_table,
@@ -244,6 +270,7 @@ def golden_fixture() -> dict[str, object]:
     scale_table_id = str(components["scale_table"]["content_id"])  # type: ignore[index]
     plan_id = str(components["shard_plan"]["content_id"])  # type: ignore[index]
     proof_id = str(components["proof_int64_maximum_safe"]["content_id"])  # type: ignore[index]
+    config_id = str(components["fixedpoint_config_int64"]["content_id"])  # type: ignore[index]
     source = _source_values()
     quantized: list[int] = []
     for item in source:
@@ -268,7 +295,7 @@ def golden_fixture() -> dict[str, object]:
             "payload_sha256": payload_id,
             "profile_id": profile_id,
             "proof_instance_id": proof_id,
-            "round_config_id": ROUND_CONFIG_ID,
+            "round_config_id": config_id,
             "scale_table_id": scale_table_id,
             "schema_version": "1.0.0",
             "segment_id": str(entry["segment_id"]),
@@ -306,7 +333,7 @@ def golden_fixture() -> dict[str, object]:
         "parent_checkpoint_id": PARENT_CHECKPOINT_ID,
         "profile_id": profile_id,
         "proof_instance_id": proof_id,
-        "round_config_id": ROUND_CONFIG_ID,
+        "round_config_id": config_id,
         "scale_table_id": scale_table_id,
         "schema_version": "1.0.0",
         "shard_plan_id": plan_id,
@@ -419,6 +446,7 @@ def golden_fixture() -> dict[str, object]:
     return {
         "boundary_vectors": boundary_vectors,
         "expected": {"code": "OK", "proof_result": "PASS", "status": "ACCEPT"},
+        "fixedpoint_config": components["fixedpoint_config_int64"],
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
         "manifest": _identified("deltareduce.004.manifest.v1", manifest),
         "normalized_source": source,
@@ -445,11 +473,17 @@ def valid_fixture() -> dict[str, object]:
 
 
 def invalid_fixture() -> dict[str, object]:
-    profile_id = str(contract_components()["profile"]["content_id"])  # type: ignore[index]
-    scale_id = str(contract_components()["scale_table"]["content_id"])  # type: ignore[index]
+    components = contract_components()
+    profile_id = str(components["profile"]["content_id"])  # type: ignore[index]
+    scale_id = str(components["scale_table"]["content_id"])  # type: ignore[index]
+    unsafe_config_value = dict(components["fixedpoint_config_int64"]["value"])  # type: ignore[index]
+    unsafe_config_value["coefficient_abs_max"] = "65539"
+    unsafe_config = _identified("deltareduce.004.fixedpoint-config.v1", unsafe_config_value)
+    config_id = str(unsafe_config["content_id"])
     first_unsafe = _proof(
         profile_id,
         scale_id,
+        config_id,
         coefficient_abs_max=65_539,
         max_eligible=(1 << 32) - 1,
         result="REJECT",
@@ -595,6 +629,7 @@ def invalid_fixture() -> dict[str, object]:
             {
                 "category": "proof",
                 "expected_code": "ACCUMULATOR_BOUND_UNSAFE",
+                "fixedpoint_config": unsafe_config,
                 "id": "int64-first-unsafe",
                 "proof": first_unsafe,
             },

@@ -24,12 +24,16 @@ BFT_NATIVE_PHASE6_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_
 BFT_FINAL_COMPATIBILITY := specs/003-bft-round-state-machine/scripts/verify_final_compatibility.py
 FIXEDPOINT_PREFLIGHT := specs/004-compressed-delta-protocol/scripts/verify_preflight.py
 FIXEDPOINT_CONTRACTS := specs/004-compressed-delta-protocol/scripts/verify_protocol_contracts.py
+FIXEDPOINT_ARCHITECTURE := specs/004-compressed-delta-protocol/scripts/verify_native_architecture.py
+FIXEDPOINT_PROOFS := specs/004-compressed-delta-protocol/scripts/verify_proof_instances.py
+FIXEDPOINT_REFINEMENT := specs/004-compressed-delta-protocol/scripts/verify_direct_q_refinement.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
 	prerequisite protocol-check python-check foundation-check conformance local-round-check \
 	bft-preflight bft-contracts bft-core-architecture bft-final bft-check bft-native \
-	fixedpoint-preflight fixedpoint-contracts
+	fixedpoint-preflight fixedpoint-contracts fixedpoint-architecture fixedpoint-proofs \
+	fixedpoint-refinement
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -124,6 +128,18 @@ fixedpoint-contracts: fixedpoint-preflight
 	$(UV) run python $(FIXEDPOINT_CONTRACTS) --check-only
 	$(UV) run pytest delta-worker-python/tests/contract/test_fixedpoint_reference.py \
 		specs/004-compressed-delta-protocol/tests/test_verify_protocol_contracts.py
+
+fixedpoint-architecture: fixedpoint-contracts
+	$(UV) run python $(FIXEDPOINT_ARCHITECTURE) --check-only
+	$(UV) run pytest specs/004-compressed-delta-protocol/tests/test_verify_native_architecture.py
+
+fixedpoint-proofs: fixedpoint-architecture
+	$(UV) run python $(FIXEDPOINT_PROOFS) --check-only
+	$(UV) run pytest specs/004-compressed-delta-protocol/tests/test_verify_proof_instances.py
+
+fixedpoint-refinement: fixedpoint-proofs
+	$(UV) run python $(FIXEDPOINT_REFINEMENT) --check-only
+	$(UV) run pytest specs/004-compressed-delta-protocol/tests/test_verify_direct_q_refinement.py
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

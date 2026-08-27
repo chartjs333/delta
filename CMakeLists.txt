@@ -46,6 +46,34 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
 delta_target_defaults(delta_core)
 
+add_library(delta_fixedpoint STATIC
+  delta-core-cpp/src/fixedpoint/bounds.cpp
+  delta-core-cpp/src/fixedpoint/checked.cpp
+  delta-core-cpp/src/fixedpoint/direct_q.cpp
+  delta-core-cpp/src/fixedpoint/encoder.cpp
+  delta-core-cpp/src/fixedpoint/profile.cpp
+  delta-core-cpp/src/fixedpoint/rounding.cpp
+  delta-core-cpp/src/fixedpoint/scale.cpp)
+add_library(delta::fixedpoint ALIAS delta_fixedpoint)
+set_target_properties(delta_fixedpoint PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_fixedpoint
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_fixedpoint PUBLIC delta::core)
+delta_target_defaults(delta_fixedpoint)
+
+add_library(delta_shards STATIC
+  delta-core-cpp/src/shards/envelope.cpp
+  delta-core-cpp/src/shards/plan.cpp
+  delta-core-cpp/src/shards/reader.cpp)
+add_library(delta::shards ALIAS delta_shards)
+set_target_properties(delta_shards PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_shards
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_shards PUBLIC delta::fixedpoint)
+delta_target_defaults(delta_shards)
+
 add_library(delta_runtime STATIC
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
@@ -61,13 +89,15 @@ if(NOT WIN32)
 endif()
 delta_target_defaults(delta_runtime)
 
-add_library(delta_ffi SHARED delta-ffi/src/delta_abi.cpp)
+add_library(delta_ffi SHARED
+  delta-ffi/src/delta_abi.cpp
+  delta-ffi/src/fixedpoint_abi.cpp)
 add_library(delta::ffi ALIAS delta_ffi)
 target_include_directories(
   delta_ffi
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include>)
 target_compile_definitions(delta_ffi PRIVATE DELTA_FFI_BUILD)
-target_link_libraries(delta_ffi PUBLIC delta::runtime)
+target_link_libraries(delta_ffi PUBLIC delta::runtime delta::shards)
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
@@ -91,6 +121,86 @@ if(BUILD_TESTING)
   target_link_libraries(delta_core_arithmetic_test PRIVATE delta::core)
   delta_target_defaults(delta_core_arithmetic_test)
   add_test(NAME delta_core.arithmetic COMMAND delta_core_arithmetic_test)
+
+  add_executable(delta_fixedpoint_test delta-core-cpp/tests/fixedpoint_test.cpp)
+  target_link_libraries(delta_fixedpoint_test PRIVATE delta::fixedpoint)
+  target_compile_definitions(
+    delta_fixedpoint_test
+    PRIVATE DELTA_FIXEDPOINT_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/004/cross-language/golden-v1.json")
+  delta_target_defaults(delta_fixedpoint_test)
+  add_test(NAME delta_core.fixedpoint COMMAND delta_fixedpoint_test)
+
+  add_executable(delta_direct_q_test delta-core-cpp/tests/direct_q_test.cpp)
+  target_link_libraries(delta_direct_q_test PRIVATE delta::fixedpoint)
+  delta_target_defaults(delta_direct_q_test)
+  add_test(NAME delta_core.direct_q COMMAND delta_direct_q_test)
+
+  add_library(delta_fixedpoint_unchecked_count_mutant STATIC
+    delta-core-cpp/src/fixedpoint/bounds.cpp
+    delta-core-cpp/src/fixedpoint/checked.cpp
+    delta-core-cpp/src/fixedpoint/direct_q.cpp
+    delta-core-cpp/src/fixedpoint/encoder.cpp
+    delta-core-cpp/src/fixedpoint/profile.cpp
+    delta-core-cpp/src/fixedpoint/rounding.cpp
+    delta-core-cpp/src/fixedpoint/scale.cpp)
+  target_include_directories(
+    delta_fixedpoint_unchecked_count_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+  target_link_libraries(delta_fixedpoint_unchecked_count_mutant PUBLIC delta::core)
+  target_compile_definitions(
+    delta_fixedpoint_unchecked_count_mutant
+    PRIVATE DELTA_FIXEDPOINT_MUTANT_UNCHECKED_COUNT)
+  delta_target_defaults(delta_fixedpoint_unchecked_count_mutant)
+  add_executable(
+    delta_fixedpoint_unchecked_count_mutant_test
+    delta-core-cpp/tests/direct_q_test.cpp)
+  target_link_libraries(
+    delta_fixedpoint_unchecked_count_mutant_test
+    PRIVATE delta_fixedpoint_unchecked_count_mutant)
+  delta_target_defaults(delta_fixedpoint_unchecked_count_mutant_test)
+  add_test(
+    NAME delta_core.mutant_unchecked_count
+    COMMAND delta_fixedpoint_unchecked_count_mutant_test)
+  set_tests_properties(delta_core.mutant_unchecked_count PROPERTIES WILL_FAIL TRUE)
+
+  add_executable(delta_shards_test delta-core-cpp/tests/shards_test.cpp)
+  target_link_libraries(delta_shards_test PRIVATE delta::shards)
+  target_compile_definitions(
+    delta_shards_test
+    PRIVATE DELTA_FIXEDPOINT_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/004/cross-language/golden-v1.json")
+  delta_target_defaults(delta_shards_test)
+  add_test(NAME delta_core.shards COMMAND delta_shards_test)
+
+  foreach(mutant IN ITEMS UNBOUNDED_HEADER SKIP_CONTEXT)
+    string(TOLOWER "${mutant}" mutant_lower)
+    set(mutant_library "delta_shards_${mutant_lower}_mutant")
+    set(mutant_test "${mutant_library}_test")
+    add_library(${mutant_library} STATIC
+      delta-core-cpp/src/shards/envelope.cpp
+      delta-core-cpp/src/shards/plan.cpp
+      delta-core-cpp/src/shards/reader.cpp)
+    target_include_directories(
+      ${mutant_library}
+      PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+    target_link_libraries(${mutant_library} PUBLIC delta::fixedpoint)
+    target_compile_definitions(
+      ${mutant_library} PRIVATE "DELTA_FIXEDPOINT_MUTANT_${mutant}")
+    delta_target_defaults(${mutant_library})
+    add_executable(${mutant_test} delta-core-cpp/tests/shards_test.cpp)
+    target_link_libraries(${mutant_test} PRIVATE ${mutant_library})
+    target_compile_definitions(
+      ${mutant_test}
+      PRIVATE DELTA_FIXEDPOINT_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/004/cross-language/golden-v1.json")
+    delta_target_defaults(${mutant_test})
+    add_test(NAME "delta_core.mutant_${mutant_lower}" COMMAND ${mutant_test})
+    set_tests_properties("delta_core.mutant_${mutant_lower}" PROPERTIES WILL_FAIL TRUE)
+  endforeach()
+
+  add_executable(delta_fixedpoint_parser_fuzz delta-core-cpp/fuzz/fixedpoint_parser_fuzz.cpp)
+  target_link_libraries(delta_fixedpoint_parser_fuzz PRIVATE delta::shards)
+  target_compile_definitions(delta_fixedpoint_parser_fuzz PRIVATE DELTA_FIXEDPOINT_FUZZ_SMOKE_MAIN)
+  delta_target_defaults(delta_fixedpoint_parser_fuzz)
+  add_test(NAME delta_core.fixedpoint_parser_fuzz COMMAND delta_fixedpoint_parser_fuzz)
 
   add_executable(delta_core_transition_test delta-core-cpp/tests/transition_test.cpp)
   target_link_libraries(delta_core_transition_test PRIVATE delta::core)
@@ -118,11 +228,12 @@ if(BUILD_TESTING)
   add_test(NAME delta_core.portability COMMAND delta_core_portability_test)
 
   add_executable(delta_core_prepared_100_test delta-core-cpp/tests/prepared_100_test.cpp)
-  target_link_libraries(delta_core_prepared_100_test PRIVATE delta::core)
+  target_link_libraries(delta_core_prepared_100_test PRIVATE delta::fixedpoint)
   target_compile_definitions(
     delta_core_prepared_100_test
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json"
-            DELTA_PREPARED_100_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json")
+            DELTA_PREPARED_100_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json"
+            DELTA_DIRECT_Q_100_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/004/cross-language/direct-q-100-v1.json")
   delta_target_defaults(delta_core_prepared_100_test)
   add_test(NAME delta_core.prepared_100 COMMAND delta_core_prepared_100_test)
 
@@ -214,7 +325,8 @@ if(BUILD_TESTING)
   target_link_libraries(delta_ffi_abi_test PRIVATE delta::ffi)
   target_compile_definitions(
     delta_ffi_abi_test
-    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+    PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json"
+            DELTA_FIXEDPOINT_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/004/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_abi_test)
   add_test(NAME delta_ffi.abi COMMAND delta_ffi_abi_test)
 

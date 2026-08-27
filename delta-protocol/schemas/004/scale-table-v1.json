@@ -29,13 +29,12 @@
     "formal_semantics_id": {"$ref": "#/$defs/contentId"},
     "parameter_schema_id": {"$ref": "#/$defs/contentId"},
     "profile_id": {"$ref": "#/$defs/contentId"},
-    "round_config_id": {"$ref": "#/$defs/contentId"},
     "schema_version": {"const": "1.0.0"},
     "segments": {"items": {"$ref": "#/$defs/segment"}, "maxItems": 65536, "minItems": 1, "type": "array"},
     "total_elements": {"maximum": 1073741824, "minimum": 1, "type": "integer"},
     "type_name": {"const": "QUANTIZATION_SCALE_TABLE"}
   },
-  "required": ["formal_semantics_id", "parameter_schema_id", "profile_id", "round_config_id", "schema_version", "segments", "total_elements", "type_name"],
+  "required": ["formal_semantics_id", "parameter_schema_id", "profile_id", "schema_version", "segments", "total_elements", "type_name"],
   "title": "DeltaReduce quantization scale table v1",
   "type": "object"
 }

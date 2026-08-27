@@ -29,15 +29,18 @@ def test_cross_language_identity_is_frozen() -> None:
     result = _module().verify_all()  # type: ignore[attr-defined]
     assert result["golden"] == {
         "commitment_root": (
-            "sha256:bbcb9d6e94668eacc8c3f947832b3a0744b1ee65011b6dbee4b02e4619867787"
+            "sha256:e80916a8ec7d634b4c3524d873c13144b7760c7552e6788132a75fce5456296d"
         ),
-        "manifest_id": "sha256:cd1301e234e977079ca84a248b56db8f4560e822342bb9fc9ee420893d1f6c46",
+        "fixedpoint_config_id": (
+            "sha256:34bc08c316dfe22efe155ed11b866bcc0daf7ef8c3c7389c56b2f2c707443629"
+        ),
+        "manifest_id": "sha256:6b24994dde9f03ccde6acb42abb080ec9dcc2e111a81d781948a3ac1d10446ec",
         "profile_id": "sha256:17c8d23790047966e42f3204502623c74a0ff0383319d23e67ab15cf92fe3e61",
         "proof_instance_id": (
-            "sha256:e09098577825d3a71a4c03c1e5a12d14c3c5646234aae0d37c85e7ec1d3b5793"
+            "sha256:993b4d5104810dd26a3159b60cf8fe9afe6154cdcca90d22b577ae1b6d1ac076"
         ),
         "q_values": 36,
-        "scale_table_id": "sha256:e7409ed79e33407b2df867ab00d1c07fe7ddd6d52049150c34bcc76abe4c9b32",
-        "shard_plan_id": "sha256:8d0ab224574404d8100c93e8d91d657b4b646ac77bd039bb4098b44ffc4a665b",
+        "scale_table_id": "sha256:434092f82188337d0a273cd13c93e06dec55ae842df0498e4d52caa1d1844205",
+        "shard_plan_id": "sha256:4c644a3254edb3d7bff009bbe91ee99df6051516362fa1a1eac6f0a803a9c7a1",
         "shards": 5,
     }
