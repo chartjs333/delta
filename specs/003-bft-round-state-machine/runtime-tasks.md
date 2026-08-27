@@ -24,12 +24,12 @@
 
 ## HR003 Phase 3 — C ABI and Java FFM harness
 
-- [ ] **HR003-014** Freeze `delta_abi.h`, descriptor, opaque handle, status taxonomy and size-negotiation rules.
-- [ ] **HR003-015** Add boundary wrapper that catches all native exceptions without publishing partial state.
-- [ ] **HR003-016** Implement JDK 25 FFM binding/harness and JDK 26 compatibility lane without protobuf/gRPC, transport or Java-owned consensus logic.
-- [ ] **HR003-017** Implement direct borrowed-memory and bounded-copy paths with identical fixture results.
-- [ ] **HR003-018** Add ABI/formal-semantics/schema/build mismatch startup matrix.
-- [ ] **HR003-019** Add pointer-lifetime, release, output-capacity and repeated-call tests.
+- [x] **HR003-014** Freeze `delta_abi.h`, descriptor, opaque handle, status taxonomy and size-negotiation rules.
+- [x] **HR003-015** Add boundary wrapper that catches all native exceptions without publishing partial state.
+- [x] **HR003-016** Implement JDK 25 FFM binding/harness and JDK 26 compatibility lane without protobuf/gRPC, transport or Java-owned consensus logic.
+- [x] **HR003-017** Implement direct borrowed-memory and bounded-copy paths with identical fixture results.
+- [x] **HR003-018** Add ABI/formal-semantics/schema/build mismatch startup matrix.
+- [x] **HR003-019** Add pointer-lifetime, release, output-capacity and repeated-call tests.
 
 ## HR003 Phase 4 — verification
 

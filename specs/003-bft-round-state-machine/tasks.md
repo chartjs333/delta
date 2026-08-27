@@ -54,14 +54,14 @@ Every task is incomplete until its declared tests and content-addressed evidence
 
 ## Phase 5: Versioned C ABI and Java FFM harness
 
-- [ ] T032 [HR003-014] Freeze `delta_abi.h`, descriptor fields, opaque handles, stable status taxonomy and size-negotiation rules.
-- [ ] T033 [HR003-015] Implement the C boundary wrapper; catch every native exception and expose no partial state/effect.
-- [ ] T034 [HR003-014] [HR003-019] Implement caller-buffer negotiation, synchronous borrowed-memory rules and explicit handle release.
-- [ ] T035 [HR003-016] Implement the minimal JDK 25 FFM descriptor/open/submit/snapshot/close conformance harness.
-- [ ] T036 [HR003-016] Add the JDK 26 compatibility lane without protobuf, gRPC, Netty or Java consensus logic.
-- [ ] T037 [HR003-017] Require direct borrowed-memory and bounded-copy paths to produce identical canonical effects.
-- [ ] T038 [HR003-018] Add ABI/schema/protocol/formal-semantics/build mismatch startup tests that fail closed.
-- [ ] T039 [HR003-019] Add pointer-lifetime, release, output-capacity retry and repeated-call tests.
+- [x] T032 [HR003-014] Freeze `delta_abi.h`, descriptor fields, opaque handles, stable status taxonomy and size-negotiation rules.
+- [x] T033 [HR003-015] Implement the C boundary wrapper; catch every native exception and expose no partial state/effect.
+- [x] T034 [HR003-014] [HR003-019] Implement caller-buffer negotiation, synchronous borrowed-memory rules and explicit handle release.
+- [x] T035 [HR003-016] Implement the minimal JDK 25 FFM descriptor/open/submit/snapshot/close conformance harness.
+- [x] T036 [HR003-016] Add the JDK 26 compatibility lane without protobuf, gRPC, Netty or Java consensus logic.
+- [x] T037 [HR003-017] Require direct borrowed-memory and bounded-copy paths to produce identical canonical effects.
+- [x] T038 [HR003-018] Add ABI/schema/protocol/formal-semantics/build mismatch startup tests that fail closed.
+- [x] T039 [HR003-019] Add pointer-lifetime, release, output-capacity retry and repeated-call tests.
 
 ## Phase 6: Refinement and native verification
 
