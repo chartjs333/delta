@@ -34,8 +34,8 @@ Every task is incomplete until its declared tests and content-addressed evidence
 
 - [x] T016 [HR003-004] Implement explicit canonical C++ domain types and encoders without raw-memory serialization.
 - [x] T017 [HR003-004] Implement bounded fail-closed parsers for commands, prior state, QCs and prepared integer fixtures.
-- [ ] T018 [HR003-005] Implement checked fixed-width signed add/multiply helpers for INT64 and INT128 paths.
-- [ ] T019 [HR003-005] Implement conservative accumulator-bound validation for `bft-int-fixture-v1`; do not implement a production quantizer.
+- [x] T018 [HR003-005] Implement checked fixed-width signed add/multiply helpers for INT64 and INT128 paths.
+- [x] T019 [HR003-005] Implement conservative accumulator-bound validation for `bft-int-fixture-v1`; do not implement a production quantizer.
 - [ ] T020 [HR003-006] Implement the pure transition entry point over prior-state bytes and canonical command bytes.
 - [ ] T021 [HR003-007] Implement deterministic next-state, effect-batch and WAL-record encoders and hashes.
 - [ ] T022 Add legal/illegal transition, quorum, vote-uniqueness, commitment, availability, input-freeze and abort tests.

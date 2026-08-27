@@ -12,6 +12,7 @@ BFT_CORE_ARCHITECTURE := specs/003-bft-round-state-machine/scripts/verify_core_a
 BFT_SUPPLY_CHAIN := specs/003-bft-round-state-machine/scripts/verify_native_supply_chain.py
 BFT_TOOLCHAIN_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_toolchain_execution.py
 BFT_CORE_PROTOCOL_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_core_protocol_execution.py
+BFT_CORE_ARITHMETIC_EXECUTION := specs/003-bft-round-state-machine/scripts/verify_core_arithmetic_execution.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -88,6 +89,7 @@ bft-core-architecture:
 	$(UV) run python $(BFT_SUPPLY_CHAIN) --check-only
 	$(UV) run python $(BFT_TOOLCHAIN_EXECUTION) --check-only
 	$(UV) run python $(BFT_CORE_PROTOCOL_EXECUTION) --check-only
+	$(UV) run python $(BFT_CORE_ARITHMETIC_EXECUTION) --check-only
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20
