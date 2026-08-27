@@ -5,7 +5,8 @@ MPSC submission port and one single-writer reactor; callers never mutate consens
 
 For every accepted command the reactor computes the pure transition, appends a canonical
 checksummed WAL record with a monotonic sequence, crosses the durability barrier, commits the new
-in-memory state and only then releases the canonical effect bytes. A request ID is idempotent;
+in-memory state and only then releases the canonical effect bytes. This is the
+`persist-before-expose` rule. A request ID is idempotent;
 conflicting reuse is rejected. Effects are never exposed from an append that is torn, corrupt or
 not durable.
 
