@@ -4,7 +4,39 @@
     "path": "action-registry/formal-projection-v1.json",
     "sha256": "1de4e556901c0aecc8679ff54708d499ec8b5335eba5e5233f9d793b4447bac6"
   },
+  "extensions": [
+    {
+      "id": "ENCODING-DELTA-CANONICAL-BINARY-V1",
+      "path": "schemas/003/canonical-binary-v1.md",
+      "sha256": "393cd207a2cd3fd4da366be56095a3467e3184c2c5db1d300d1c07d49cdd7aff"
+    },
+    {
+      "id": "HASH-DOMAINS-BFT-003-V1",
+      "path": "schemas/003/hash-domains-v1.json",
+      "sha256": "88867a682c0639af55d4fef1ad75c6ced81f9fe44bf6551ee179a787e354aab4"
+    },
+    {
+      "id": "REGISTRY-BFT-003-V1",
+      "path": "schemas/003/registry-v1.json",
+      "sha256": "9ffdecd6f133f0b6f66d95d452ecc5724fef0c43c30defde3232126e6a0db699"
+    }
+  ],
   "fixtures": [
+    {
+      "id": "BFT003-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/003/cross-language/golden-v1.json",
+      "sha256": "74869c753707c5e2958960dbbc907b9be6535111192ba9d06f6d4f5b3dc97c6d"
+    },
+    {
+      "id": "BFT003-CANONICAL-NEGATIVE-V1",
+      "path": "fixtures/003/invalid/canonical-binary-negative-v1.json",
+      "sha256": "aad572b9d755516ce7bf1e2d094bbf44f852b06023a13a255d05a9724da9a3f8"
+    },
+    {
+      "id": "BFT003-PROTOCOL-INPUTS-V1",
+      "path": "fixtures/003/valid/protocol-inputs-v1.json",
+      "sha256": "1145cb544067605f492fb46fd50e43897f5a061c6f5e142c0c31f8576a4fb5c8"
+    },
     {
       "id": "CANONICAL-JSON-001",
       "path": "fixtures/canonical-json/canonical-json-v1.json",
@@ -67,6 +99,11 @@
       "id": "MEDIA-BASELINE-CONFIG-V1",
       "schema_id": "SCHEMA-BASELINE-CONFIG-V1",
       "value": "application/vnd.deltareduce.baseline-config+json;version=1"
+    },
+    {
+      "id": "MEDIA-BFT-CANONICAL-BINARY-V1",
+      "schema_id": "SCHEMA-BFT-PROTOCOL-TYPES-V1",
+      "value": "application/vnd.deltareduce.bft-envelope;version=1"
     },
     {
       "id": "MEDIA-CHECKPOINT-MANIFEST-V1",
@@ -148,6 +185,11 @@
   "schema_version": "1.0.0",
   "schemas": [
     {
+      "id": "SCHEMA-BFT-PROTOCOL-TYPES-V1",
+      "path": "schemas/003/protocol-types-v1.json",
+      "sha256": "1ea1e636b4e797aa99775165175ba4edeed53fe8b8add9625eca74ffb56f6f44"
+    },
+    {
       "id": "SCHEMA-ARTIFACT-REF-V1",
       "path": "schemas/artifact-ref.schema.json",
       "sha256": "7edd5f08e1a8e7e42daf31fbeef4650f0d03083563f02aa594bd10b7ff0aca67"
@@ -205,7 +247,7 @@
     {
       "id": "SCHEMA-PROTOCOL-REGISTRY-V1",
       "path": "schemas/protocol-registry.schema.json",
-      "sha256": "bcd0eebb48890563a8d2976b591c83e2e332087cd4b0af19a58fc63934e3da33"
+      "sha256": "0164b99c150b5956eb51bc6746daf94e5fbbdd85e69c735bac10181e47116b5d"
     },
     {
       "id": "SCHEMA-RUN-MANIFEST-V1",

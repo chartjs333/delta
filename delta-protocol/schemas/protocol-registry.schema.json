@@ -12,6 +12,7 @@
     "media_types": {"type": "array", "minItems": 1, "uniqueItems": true},
     "schemas": {"type": "array", "minItems": 1, "uniqueItems": true},
     "fixtures": {"type": "array", "minItems": 1, "uniqueItems": true},
+    "extensions": {"type": "array", "minItems": 1, "uniqueItems": true},
     "action_registry": {"type": "object"}
   }
 }
