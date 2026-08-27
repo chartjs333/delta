@@ -19,6 +19,16 @@
       "id": "REGISTRY-BFT-003-V1",
       "path": "schemas/003/registry-v1.json",
       "sha256": "9ffdecd6f133f0b6f66d95d452ecc5724fef0c43c30defde3232126e6a0db699"
+    },
+    {
+      "id": "ENCODING-FIXEDPOINT-004-V1",
+      "path": "schemas/004/canonical-fixedpoint-v1.md",
+      "sha256": "67d9fe21d6c0a41e0167953f3f8794039319478b6f49d0ffe44090d774dc7702"
+    },
+    {
+      "id": "REGISTRY-FIXEDPOINT-004-V1",
+      "path": "schemas/004/registry-v1.json",
+      "sha256": "f486f3f8f9f25511db9036ab8a1bd14e3c0d04ff35af66df223e94002cc3090f"
     }
   ],
   "fixtures": [
@@ -36,6 +46,26 @@
       "id": "BFT003-PROTOCOL-INPUTS-V1",
       "path": "fixtures/003/valid/protocol-inputs-v1.json",
       "sha256": "1145cb544067605f492fb46fd50e43897f5a061c6f5e142c0c31f8576a4fb5c8"
+    },
+    {
+      "id": "FIXEDPOINT004-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/004/cross-language/golden-v1.json",
+      "sha256": "14be7562e867758b4278e495da261d51c052c1308099d9a357fdf0c95cf8a6d3"
+    },
+    {
+      "id": "FIXEDPOINT004-GOLDEN-HASHES-V1",
+      "path": "fixtures/004/golden-hashes-v1.json",
+      "sha256": "806802c4bde62cf3cc72dd9a6cc62357c7a29e1e547275068274c53017216748"
+    },
+    {
+      "id": "FIXEDPOINT004-NEGATIVE-V1",
+      "path": "fixtures/004/invalid/fixedpoint-negative-v1.json",
+      "sha256": "3dcc61858c2ae0628558181183e07b9eb5bd91581ecac724ebb28d2811b18543"
+    },
+    {
+      "id": "FIXEDPOINT004-VALID-CONTRACT-V1",
+      "path": "fixtures/004/valid/fixedpoint-contract-v1.json",
+      "sha256": "f9a607504bbca3f84af6f4db5b8173029e21aac3c3ff0445932c410c6ab865f4"
     },
     {
       "id": "CANONICAL-JSON-001",
@@ -104,6 +134,36 @@
       "id": "MEDIA-BFT-CANONICAL-BINARY-V1",
       "schema_id": "SCHEMA-BFT-PROTOCOL-TYPES-V1",
       "value": "application/vnd.deltareduce.bft-envelope;version=1"
+    },
+    {
+      "id": "MEDIA-ACCUMULATOR-PROOF-INSTANCE-V1",
+      "schema_id": "SCHEMA-ACCUMULATOR-PROOF-INSTANCE-V1",
+      "value": "application/vnd.deltareduce.accumulator-proof+json;version=1"
+    },
+    {
+      "id": "MEDIA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "schema_id": "SCHEMA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.encoded-contribution+json;version=1"
+    },
+    {
+      "id": "MEDIA-ENCODED-SHARD-V1",
+      "schema_id": "SCHEMA-ENCODED-SHARD-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-shard;version=1"
+    },
+    {
+      "id": "MEDIA-FIXEDPOINT-PROFILE-V1",
+      "schema_id": "SCHEMA-FIXEDPOINT-PROFILE-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-QUANTIZATION-SCALE-TABLE-V1",
+      "schema_id": "SCHEMA-QUANTIZATION-SCALE-TABLE-V1",
+      "value": "application/vnd.deltareduce.quantization-scale-table+json;version=1"
+    },
+    {
+      "id": "MEDIA-SHARD-PLAN-V1",
+      "schema_id": "SCHEMA-SHARD-PLAN-V1",
+      "value": "application/vnd.deltareduce.shard-plan+json;version=1"
     },
     {
       "id": "MEDIA-CHECKPOINT-MANIFEST-V1",
@@ -188,6 +248,36 @@
       "id": "SCHEMA-BFT-PROTOCOL-TYPES-V1",
       "path": "schemas/003/protocol-types-v1.json",
       "sha256": "1ea1e636b4e797aa99775165175ba4edeed53fe8b8add9625eca74ffb56f6f44"
+    },
+    {
+      "id": "SCHEMA-ACCUMULATOR-PROOF-INSTANCE-V1",
+      "path": "schemas/004/accumulator-proof-instance-v1.json",
+      "sha256": "91a0c848a1133c4bbc1a6e8f6d230e92acbba570f50bc0266d56669472a7b3a1"
+    },
+    {
+      "id": "SCHEMA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "path": "schemas/004/encoded-contribution-manifest-v1.json",
+      "sha256": "24bda981f70af49f762c6c414c28392de3e46532206271f676e419eb61012c49"
+    },
+    {
+      "id": "SCHEMA-ENCODED-SHARD-V1",
+      "path": "schemas/004/encoded-shard-v1.json",
+      "sha256": "0192f6f53b71993f32f99dece337125d4a61b80dbf0b386d7dab72ca2260fa40"
+    },
+    {
+      "id": "SCHEMA-FIXEDPOINT-PROFILE-V1",
+      "path": "schemas/004/fixed-point-profile-v1.json",
+      "sha256": "596888c06c7698163e91e725eb08ad27c543dd93f3693dac0903b50be36afc1f"
+    },
+    {
+      "id": "SCHEMA-QUANTIZATION-SCALE-TABLE-V1",
+      "path": "schemas/004/scale-table-v1.json",
+      "sha256": "3dbe8eedd6c125e2b7d74f2d29702d7022854690841f477a6aed8ccb02332056"
+    },
+    {
+      "id": "SCHEMA-SHARD-PLAN-V1",
+      "path": "schemas/004/shard-plan-v1.json",
+      "sha256": "88f1a3ba61e10c6f536b5900c47e5ef84fa8819c4e49bcd298074e959cee6399"
     },
     {
       "id": "SCHEMA-ARTIFACT-REF-V1",

@@ -1,0 +1,31 @@
+{
+  "artifacts": [
+    {
+      "id": "FIXEDPOINT004-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/004/cross-language/golden-v1.json",
+      "sha256": "14be7562e867758b4278e495da261d51c052c1308099d9a357fdf0c95cf8a6d3"
+    },
+    {
+      "id": "FIXEDPOINT004-NEGATIVE-V1",
+      "path": "fixtures/004/invalid/fixedpoint-negative-v1.json",
+      "sha256": "3dcc61858c2ae0628558181183e07b9eb5bd91581ecac724ebb28d2811b18543"
+    },
+    {
+      "id": "FIXEDPOINT004-VALID-CONTRACT-V1",
+      "path": "fixtures/004/valid/fixedpoint-contract-v1.json",
+      "sha256": "f9a607504bbca3f84af6f4db5b8173029e21aac3c3ff0445932c410c6ab865f4"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "identities": {
+    "commitment_root": "sha256:bbcb9d6e94668eacc8c3f947832b3a0744b1ee65011b6dbee4b02e4619867787",
+    "manifest_id": "sha256:cd1301e234e977079ca84a248b56db8f4560e822342bb9fc9ee420893d1f6c46",
+    "profile_id": "sha256:17c8d23790047966e42f3204502623c74a0ff0383319d23e67ab15cf92fe3e61",
+    "proof_instance_id": "sha256:e09098577825d3a71a4c03c1e5a12d14c3c5646234aae0d37c85e7ec1d3b5793",
+    "scale_table_id": "sha256:e7409ed79e33407b2df867ab00d1c07fe7ddd6d52049150c34bcc76abe4c9b32",
+    "shard_plan_id": "sha256:8d0ab224574404d8100c93e8d91d657b4b646ac77bd039bb4098b44ffc4a665b"
+  },
+  "schema_version": "1.0.0",
+  "semantic_completeness_claimed": false,
+  "type_name": "FIXEDPOINT_GOLDEN_HASH_MANIFEST"
+}

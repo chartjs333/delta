@@ -16,6 +16,11 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
+def _preflight_source() -> str:
+    document = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    return str(document["source"]["commit"])
+
+
 def test_canonical_preflight_evidence_is_accepted() -> None:
     document = json.loads(EVIDENCE.read_text(encoding="utf-8"))
     result = MODULE.verify(document["source"]["commit"])
@@ -26,7 +31,7 @@ def test_canonical_preflight_evidence_is_accepted() -> None:
 
 
 def test_exact_predecessor_formal_and_architecture_are_accepted() -> None:
-    source = MODULE.git_text("rev-parse", "HEAD")
+    source = _preflight_source()
 
     assert MODULE.verify_feature003(source)["status"] == "PASS"
     assert MODULE.verify_formal(source)["status"] == "PASS"
@@ -37,7 +42,7 @@ def test_exact_predecessor_formal_and_architecture_are_accepted() -> None:
 def test_wrong_feature003_compatibility_hash_is_rejected(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    source = MODULE.git_text("rev-parse", "HEAD")
+    source = _preflight_source()
     monkeypatch.setattr(MODULE, "EXPECTED_FEATURE003_COMPAT_SHA256", "0" * 64)
 
     with pytest.raises(MODULE.PreflightError, match="FEATURE003_COMPATIBILITY_HASH_MISMATCH"):
@@ -45,7 +50,7 @@ def test_wrong_feature003_compatibility_hash_is_rejected(
 
 
 def test_po_a3_worker_rounding_overclaim_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
-    source = MODULE.git_text("rev-parse", "HEAD")
+    source = _preflight_source()
     original = MODULE.tracked_text
 
     def changed_text(path: str, revision: str) -> str:

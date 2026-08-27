@@ -1,0 +1,38 @@
+{
+  "$id": "urn:deltareduce:schema:fixed-point-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_widths": {"const": [64, 128]},
+    "byte_order": {"const": "LITTLE_ENDIAN"},
+    "element_encoding": {"const": "SIGNED_TWOS_COMPLEMENT_INT16"},
+    "formal_semantics_id": {"const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"},
+    "limits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_header_bytes": {"const": 65536},
+        "max_payload_bytes": {"const": 1048576},
+        "max_segments": {"const": 65536},
+        "max_shards": {"const": 4096},
+        "max_total_elements": {"const": 1073741824}
+      },
+      "required": ["max_header_bytes", "max_payload_bytes", "max_segments", "max_shards", "max_total_elements"],
+      "type": "object"
+    },
+    "out_of_range_action": {"const": "REJECT"},
+    "profile_name": {"const": "int16-fixed-v1"},
+    "q_max": {"const": 32767},
+    "q_min": {"const": -32767},
+    "residual_mode": {"const": "FORBIDDEN"},
+    "rounding": {"const": "ROUND_TO_NEAREST_TIES_TO_EVEN"},
+    "scale_granularity": {"const": "CANONICAL_PARAMETER_SEGMENT"},
+    "scale_representation": {"const": "REDUCED_POSITIVE_RATIONAL_U32"},
+    "schema_version": {"const": "1.0.0"},
+    "source_representation": {"const": "REDUCED_RATIONAL_I64_U32"},
+    "trailing_bytes_action": {"const": "REJECT"},
+    "type_name": {"const": "FIXED_POINT_PROFILE"}
+  },
+  "required": ["accumulator_widths", "byte_order", "element_encoding", "formal_semantics_id", "limits", "out_of_range_action", "profile_name", "q_max", "q_min", "residual_mode", "rounding", "scale_granularity", "scale_representation", "schema_version", "source_representation", "trailing_bytes_action", "type_name"],
+  "title": "DeltaReduce fixed-point profile v1",
+  "type": "object"
+}

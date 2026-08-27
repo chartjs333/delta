@@ -1,0 +1,35 @@
+{
+  "$defs": {
+    "contentId": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+    "entry": {
+      "additionalProperties": false,
+      "properties": {
+        "element_count": {"maximum": 524288, "minimum": 1, "type": "integer"},
+        "element_start": {"maximum": 1073741823, "minimum": 0, "type": "integer"},
+        "ordinal": {"maximum": 4095, "minimum": 0, "type": "integer"},
+        "payload_bytes": {"maximum": 1048576, "minimum": 2, "type": "integer"},
+        "segment_id": {"maxLength": 255, "minLength": 1, "type": "string"},
+        "segment_offset": {"maximum": 1073741823, "minimum": 0, "type": "integer"}
+      },
+      "required": ["element_count", "element_start", "ordinal", "payload_bytes", "segment_id", "segment_offset"],
+      "type": "object"
+    }
+  },
+  "$id": "urn:deltareduce:schema:shard-plan:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "entries": {"items": {"$ref": "#/$defs/entry"}, "maxItems": 4096, "minItems": 1, "type": "array"},
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "parameter_schema_id": {"$ref": "#/$defs/contentId"},
+    "profile_id": {"$ref": "#/$defs/contentId"},
+    "scale_table_id": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.0.0"},
+    "target_payload_bytes": {"maximum": 1048576, "minimum": 2, "multipleOf": 2, "type": "integer"},
+    "total_elements": {"maximum": 1073741824, "minimum": 1, "type": "integer"},
+    "type_name": {"const": "SHARD_PLAN"}
+  },
+  "required": ["entries", "formal_semantics_id", "parameter_schema_id", "profile_id", "scale_table_id", "schema_version", "target_payload_bytes", "total_elements", "type_name"],
+  "title": "DeltaReduce deterministic shard plan v1",
+  "type": "object"
+}
