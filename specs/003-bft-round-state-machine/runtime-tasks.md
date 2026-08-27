@@ -37,7 +37,7 @@
 - [x] **HR003-021** Run ASan/UBSan, separate TSan and parser fuzz smoke lanes.
 - [x] **HR003-022** Export normal/view-change/abort/crash/recovery traces and validate formal refinement.
 - [x] **HR003-023** Verify all relevant production mutants remain detectable against the native trace/conformance path.
-- [ ] **HR003-024** Publish ABI, durability, compiler, sanitizer, Java compatibility and formal-refinement evidence.
+- [x] **HR003-024** Publish ABI, durability, compiler, sanitizer, Java compatibility and formal-refinement evidence.
 
 ## STOP rule
 

@@ -77,10 +77,10 @@ Every task is incomplete until its declared tests and content-addressed evidence
 
 ## Finalization
 
-- [ ] T049 Update runtime, ABI, durability, recovery and fixture documentation without claiming later-feature transport or quantization.
-- [ ] T050 [HR003-024] Publish content-addressed compiler, ABI, sanitizer, Java, native-exit and formal-refinement evidence.
-- [ ] T051 Run cross-artifact consistency checks across spec, task map, schemas, descriptors, fixtures, reports and source commit.
-- [ ] T052 Run the complete offline phase gate and final Constitution 2.1.0 check; mark tasks complete only from passing evidence.
+- [x] T049 Update runtime, ABI, durability, recovery and fixture documentation without claiming later-feature transport or quantization.
+- [x] T050 [HR003-024] Publish content-addressed compiler, ABI, sanitizer, Java, native-exit and formal-refinement evidence.
+- [x] T051 Run cross-artifact consistency checks across spec, task map, schemas, descriptors, fixtures, reports and source commit.
+- [x] T052 Run the complete offline phase gate and final Constitution 2.1.0 check; mark tasks complete only from passing evidence.
 
 ## Dependencies
 
