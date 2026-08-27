@@ -2,7 +2,7 @@
 
 - [ ] **HR004-001** Bind exact merged feature-003 evidence, the accepted formal semantics ID and
   PO-A1/PO-A2 plus the rational-coefficient-only PO-A3 boundary before production source.
-- [ ] **HR004-002** Freeze `int16-fixed-v1` scale/rounding/endian/range profile in `delta-protocol`.
+- [x] **HR004-002** Freeze `int16-fixed-v1` scale/rounding/endian/range profile in `delta-protocol`.
 - [ ] **HR004-003** Implement portable C++ reference encoder and checked accumulator helpers.
 - [ ] **HR004-004** Implement deterministic shard plan/envelope writer and bounded streaming reader.
 - [ ] **HR004-005** Generate concrete theorem-precondition evidence for maximum-safe and first-unsafe profiles.

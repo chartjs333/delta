@@ -22,21 +22,21 @@ producer and Java is an opaque-byte/FFM conformance harness. `task-map.md` is no
 
 ## Phase 1: Runtime-neutral profile and golden contracts
 
-- [ ] T005 [HR004-002] Freeze `int16-fixed-v1`: signed range, rational scale representation,
+- [x] T005 [HR004-002] Freeze `int16-fixed-v1`: signed range, rational scale representation,
   segment/shard scale granularity, signed ties-to-even, canonical zero, little endian, range action,
   maximum shard count/size and accumulator-width selection.
-- [ ] T006 [HR004-002] Define versioned profile, scale-table, contribution-manifest, shard,
+- [x] T006 [HR004-002] Define versioned profile, scale-table, contribution-manifest, shard,
   shard-plan and accumulator-proof-instance schemas in `delta-protocol/schemas/004/`.
-- [ ] T007 [HR004-002] Define valid and bounded invalid profile/shard/proof fixtures, including
+- [x] T007 [HR004-002] Define valid and bounded invalid profile/shard/proof fixtures, including
   zero-denominator, non-reduced fraction, wrong context and allocation-limit cases.
-- [ ] T008 [HR004-002] Commit cross-language golden vectors containing normalized source, profile
+- [x] T008 [HR004-002] Commit cross-language golden vectors containing normalized source, profile
   bytes, q integers, payload/envelope bytes, leaf/root hashes, status and proof result.
-- [ ] T009 [HR004-006] Implement the independent Python fixture producer under
+- [x] T009 [HR004-006] Implement the independent Python fixture producer under
   `delta-worker-python/src/deltatorrent/reference/` without importing native acceptance code.
-- [ ] T010 Register every schema/fixture/media type and publish a deterministic golden-hash
+- [x] T010 Register every schema/fixture/media type and publish a deterministic golden-hash
   manifest.
-- [ ] T011 Add runtime-neutral schema/fixture verification and negative canonicalization tests.
-- [ ] T012 Verify task-map, schema IDs, Formal ID and feature-003 descriptor compatibility before
+- [x] T011 Add runtime-neutral schema/fixture verification and negative canonicalization tests.
+- [x] T012 Verify task-map, schema IDs, Formal ID and feature-003 descriptor compatibility before
   native implementation.
 
 ## Phase 2: Toolchain and architecture gates
