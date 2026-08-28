@@ -1,0 +1,52 @@
+{
+  "$id": "urn:deltareduce:schema:certification-policy:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "forbidden_media_types": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "policies": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 2,
+      "type": "array"
+    },
+    "registry_name": {
+      "const": "distribution-certification-policies-v1"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CERTIFICATION_POLICY_REGISTRY"
+    },
+    "unknown_policy_action": {
+      "const": "REJECT"
+    },
+    "weaker_policy_action": {
+      "const": "REJECT"
+    }
+  },
+  "required": [
+    "forbidden_media_types",
+    "formal_semantics_id",
+    "policies",
+    "registry_name",
+    "schema_version",
+    "type_name",
+    "unknown_policy_action",
+    "weaker_policy_action"
+  ],
+  "title": "DeltaReduce certification policy registry v1",
+  "type": "object"
+}

@@ -24,3 +24,10 @@ temporary copy for the call. Context-specific admission remains in the native sh
 The JDK 25/26 FFM harness is test-only orchestration of this exact ABI. It neither owns consensus
 logic nor turns borrowed native memory into a long-lived Java view. Transport remains outside this
 library.
+
+Feature 005 adds `delta_distribution_policy_evaluate_borrowed` and
+`delta_distribution_policy_evaluate_copy`. Both execute the same production manifest/certificate
+policy verifier and return one canonical typed decision effect. Semantic denials are successful
+evaluations with `status=REJECT`; malformed lengths/flags still use stable ABI status codes. The
+copy entry point checks attacker-controlled bounds before allocating. The borrowed entry point is
+synchronous and retains neither input pointer.

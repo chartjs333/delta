@@ -1,0 +1,210 @@
+name: Feature 005 distribution verification
+
+on:
+  push:
+    branches: [005-content-addressed-p2p-distribution]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: distribution-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-policy:
+    name: ${{ matrix.family }} native policy C++20/C++23
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: gcc-14.2.0
+            compiler: g++
+            image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+          - family: clang-20.1.8
+            compiler: clang++
+            image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision content-addressed compiler
+        run: docker pull "${{ matrix.image }}"
+
+      - name: Compile native boundary and kill production mutants offline
+        env:
+          COMPILER: ${{ matrix.compiler }}
+          COMPILER_IMAGE: ${{ matrix.image }}
+        run: |
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --workdir /workspace \
+            --env COMPILER \
+            "$COMPILER_IMAGE" \
+            sh -eu -c '
+              for standard in 20 23; do
+                common="-std=c++$standard -Wall -Wextra -Wpedantic -Werror -fno-fast-math -I/workspace/delta-core-cpp/include"
+                output="/tmp/distribution-$standard"
+                $COMPILER $common \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/distribution/certification_policy.cpp \
+                  /workspace/delta-core-cpp/src/distribution/manifest_verifier.cpp \
+                  /workspace/delta-core-cpp/tests/distribution_test.cpp \
+                  -DDELTA_DISTRIBUTION_GOLDEN_PATH=\"/workspace/delta-protocol/fixtures/005/cross-language/golden-v1.json\" \
+                  -o "$output"
+                "$output"
+                for mutant in ALLOW_DOWNGRADE ALLOW_FORBIDDEN ALLOW_NONCANONICAL; do
+                  mutant_output="/tmp/distribution-$standard-$mutant"
+                  $COMPILER $common \
+                    /workspace/delta-core-cpp/src/canonical.cpp \
+                    /workspace/delta-core-cpp/src/sha256.cpp \
+                    /workspace/delta-core-cpp/src/distribution/certification_policy.cpp \
+                    /workspace/delta-core-cpp/src/distribution/manifest_verifier.cpp \
+                    /workspace/delta-core-cpp/tests/distribution_test.cpp \
+                    -DDELTA_DISTRIBUTION_MUTANT_$mutant \
+                    -DDELTA_DISTRIBUTION_GOLDEN_PATH=\"/workspace/delta-protocol/fixtures/005/cross-language/golden-v1.json\" \
+                    -o "$mutant_output"
+                  if "$mutant_output"; then
+                    echo "production distribution mutant escaped: $mutant" >&2
+                    exit 1
+                  fi
+                done
+                fuzz_output="/tmp/distribution-fuzz-$standard"
+                $COMPILER $common \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/distribution/certification_policy.cpp \
+                  /workspace/delta-core-cpp/src/distribution/manifest_verifier.cpp \
+                  /workspace/delta-core-cpp/fuzz/distribution_parser_fuzz.cpp \
+                  -DDELTA_DISTRIBUTION_FUZZ_SMOKE_MAIN \
+                  -o "$fuzz_output"
+                "$fuzz_output"
+                ffi_output="/tmp/distribution-ffi-$standard"
+                $COMPILER $common -I/workspace/delta-ffi/include \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/distribution/certification_policy.cpp \
+                  /workspace/delta-core-cpp/src/distribution/manifest_verifier.cpp \
+                  /workspace/delta-ffi/src/distribution_abi.cpp \
+                  /workspace/delta-ffi/tests/distribution_abi_test.cpp \
+                  -DDELTA_FFI_BUILD \
+                  -DDELTA_DISTRIBUTION_GOLDEN_PATH=\"/workspace/delta-protocol/fixtures/005/cross-language/golden-v1.json\" \
+                  -o "$ffi_output"
+                "$ffi_output"
+              done
+            '
+
+  java-data-plane:
+    name: JDK ${{ matrix.feature }} Netty/FFM data plane
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision and verify exact JDK and Netty artifacts
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir --parents "$RUNNER_TEMP/jdk" "$RUNNER_TEMP/netty"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" --directory "$RUNNER_TEMP/jdk" --strip-components=1
+          curl --fail --location --retry 3 \
+            --output "$RUNNER_TEMP/netty/netty-buffer.jar" \
+            https://repo1.maven.org/maven2/io/netty/netty-buffer/4.1.137.Final/netty-buffer-4.1.137.Final.jar
+          curl --fail --location --retry 3 \
+            --output "$RUNNER_TEMP/netty/netty-common.jar" \
+            https://repo1.maven.org/maven2/io/netty/netty-common/4.1.137.Final/netty-common-4.1.137.Final.jar
+          echo "f474b14c7734f15e0540394cb6f39d67777b7581a42919e4ac89d253d4efd929  $RUNNER_TEMP/netty/netty-buffer.jar" | sha256sum --check --strict
+          echo "d31926b01adcc07af86f5e27b81b6d6c115df17d366e835d1fc3f5a1924e7e52  $RUNNER_TEMP/netty/netty-common.jar" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/netty/netty-buffer.jar")" = 365383
+          test "$(stat --format=%s "$RUNNER_TEMP/netty/netty-common.jar")" = 740314
+
+      - name: Provision content-addressed native compiler
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: docker pull "$COMPILER_IMAGE"
+
+      - name: Build native policy FFM library offline
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: |
+          mkdir --parents "$RUNNER_TEMP/native"
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$RUNNER_TEMP/native:/native" \
+            --workdir /workspace \
+            "$COMPILER_IMAGE" \
+            g++ -std=c++20 -shared -fPIC \
+              -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+              -I/workspace/delta-core-cpp/include \
+              -I/workspace/delta-ffi/include \
+              /workspace/delta-core-cpp/src/canonical.cpp \
+              /workspace/delta-core-cpp/src/sha256.cpp \
+              /workspace/delta-core-cpp/src/distribution/certification_policy.cpp \
+              /workspace/delta-core-cpp/src/distribution/manifest_verifier.cpp \
+              /workspace/delta-ffi/src/distribution_abi.cpp \
+              -DDELTA_FFI_BUILD \
+              -o /native/libdelta_ffi.so
+
+      - name: Compile and run complete data plane offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          EXPECTED_VERSION: ${{ matrix.version }}
+          JDK_FEATURE: ${{ matrix.feature }}
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "$EXPECTED_VERSION"
+          mkdir --parents "$RUNNER_TEMP/classes" "$RUNNER_TEMP/run"
+          NETTY_CP="$RUNNER_TEMP/netty/netty-buffer.jar:$RUNNER_TEMP/netty/netty-common.jar"
+          "$RUNNER_TEMP/jdk/bin/javac" \
+            --release "$JDK_FEATURE" \
+            -Xlint:all -Werror \
+            --class-path "$NETTY_CP" \
+            -d "$RUNNER_TEMP/classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/DistributionModel.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/NativePolicy.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/CasStore.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/Telemetry.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/Publisher.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/PeerPlane.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/DownloadJournal.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/Downloader.java \
+            delta-node-java/src/main/java/io/deltareduce/node/distribution/SwarmService.java \
+            delta-node-java/src/test/java/io/deltareduce/node/distribution/DistributionConformance.java
+          "$RUNNER_TEMP/jdk/bin/java" \
+            -Dio.netty.noUnsafe=true \
+            --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/classes:$NETTY_CP" \
+            io.deltareduce.node.distribution.DistributionConformance \
+            "$RUNNER_TEMP/native/libdelta_ffi.so" \
+            delta-protocol/fixtures/005/cross-language/golden-v1.json \
+            "$RUNNER_TEMP/run"

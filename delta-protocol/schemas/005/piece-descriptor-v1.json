@@ -1,0 +1,34 @@
+{
+  "$id": "urn:deltareduce:schema:piece-descriptor:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "content_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "length": {
+      "maximum": 1048576,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "offset": {
+      "maximum": 8589934592,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "ordinal": {
+      "maximum": 8191,
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "content_id",
+    "length",
+    "offset",
+    "ordinal"
+  ],
+  "title": "DeltaReduce piece descriptor v1",
+  "type": "object"
+}

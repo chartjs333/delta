@@ -1,0 +1,70 @@
+{
+  "$id": "urn:deltareduce:schema:peer-advertisement:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "available_ordinals": {
+      "items": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "maxItems": 8192,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "endpoint": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "lease_epoch": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "lease_expires_at_tick": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "max_streams": {
+      "maximum": 8,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "peer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "project_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "request_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "PEER_ADVERTISEMENT"
+    }
+  },
+  "required": [
+    "available_ordinals",
+    "endpoint",
+    "lease_epoch",
+    "lease_expires_at_tick",
+    "manifest_id",
+    "max_streams",
+    "peer_id",
+    "project_id",
+    "request_id",
+    "schema_version",
+    "type_name"
+  ],
+  "title": "DeltaReduce peer advertisement v1",
+  "type": "object"
+}

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -94,23 +95,30 @@ class TicketResultRepository:
 
     @staticmethod
     def _create_once(path: Path, value: bytes) -> bool:
-        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0)
-        try:
-            descriptor = os.open(path, flags, 0o600)
-        except FileExistsError:
-            return False
+        descriptor, temporary_name = tempfile.mkstemp(
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+        )
+        temporary = Path(temporary_name)
         try:
             with os.fdopen(descriptor, "wb") as stream:
                 stream.write(value)
                 stream.flush()
                 os.fsync(stream.fileno())
-        except Exception:
-            path.unlink(missing_ok=True)
-            raise
-        if os.name != "nt":
-            directory = os.open(path.parent, os.O_RDONLY)
             try:
-                os.fsync(directory)
-            finally:
-                os.close(directory)
-        return True
+                os.link(temporary, path)
+            except FileExistsError:
+                return False
+            if os.name != "nt":
+                directory = os.open(path.parent, os.O_RDONLY)
+                try:
+                    os.fsync(directory)
+                finally:
+                    os.close(directory)
+            return True
+        finally:
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError:
+                pass

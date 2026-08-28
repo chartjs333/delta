@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    {
+      "path": "cross-language/golden-v1.json",
+      "sha256": "c44aa341ce4709319b947165f7f50b04c5bccd5129046364923c42a0bd52f4bb"
+    },
+    {
+      "path": "invalid/distribution-negative-v1.json",
+      "sha256": "8077a692d3dacd14519b49c23985c5b430bbf962309d796b30cc6c126d505134"
+    },
+    {
+      "path": "valid/distribution-contract-v1.json",
+      "sha256": "601cbb3832cfc76c14bec01046fac78cbc82a2847805d707679c179c52cabd88"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "schema_version": "1.0.0",
+  "type_name": "DISTRIBUTION_GOLDEN_HASH_MANIFEST"
+}

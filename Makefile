@@ -30,13 +30,20 @@ FIXEDPOINT_REFINEMENT := specs/004-compressed-delta-protocol/scripts/verify_dire
 FIXEDPOINT_PHASE_EVIDENCE := specs/004-compressed-delta-protocol/scripts/verify_phase_evidence.py
 FIXEDPOINT_NATIVE_EXECUTION := specs/004-compressed-delta-protocol/scripts/verify_native_execution.py
 FIXEDPOINT_FINAL := specs/004-compressed-delta-protocol/scripts/verify_final_compatibility.py
+DISTRIBUTION_PREFLIGHT := specs/005-content-addressed-p2p-distribution/scripts/verify_preflight.py
+DISTRIBUTION_CONTRACTS := specs/005-content-addressed-p2p-distribution/scripts/verify_protocol_contracts.py
+DISTRIBUTION_REFINEMENT := specs/005-content-addressed-p2p-distribution/scripts/verify_distribution_refinement.py
+DISTRIBUTION_PHASE_EVIDENCE := specs/005-content-addressed-p2p-distribution/scripts/verify_phase_evidence.py
+DISTRIBUTION_FINAL := specs/005-content-addressed-p2p-distribution/scripts/verify_final_compatibility.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
 	prerequisite protocol-check python-check foundation-check conformance local-round-check \
 	bft-preflight bft-contracts bft-core-architecture bft-final bft-check bft-native \
 	fixedpoint-preflight fixedpoint-contracts fixedpoint-architecture fixedpoint-proofs \
-	fixedpoint-refinement fixedpoint-evidence fixedpoint-final fixedpoint-check
+	fixedpoint-refinement fixedpoint-evidence fixedpoint-final fixedpoint-check \
+	distribution-preflight distribution-contracts distribution-refinement \
+	distribution-evidence distribution-final distribution-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -152,6 +159,25 @@ fixedpoint-final: fixedpoint-evidence
 	$(UV) run python $(FIXEDPOINT_FINAL) --check-only
 
 fixedpoint-check: python-check fixedpoint-final
+
+distribution-preflight:
+	$(UV) run python $(DISTRIBUTION_PREFLIGHT) --check-only
+
+distribution-contracts: distribution-preflight
+	$(UV) run python $(DISTRIBUTION_CONTRACTS) --check-only
+	$(UV) run pytest specs/005-content-addressed-p2p-distribution/tests/test_verify_protocol_contracts.py
+
+distribution-refinement: distribution-contracts
+	$(UV) run python $(DISTRIBUTION_REFINEMENT) --check-only
+	$(UV) run pytest specs/005-content-addressed-p2p-distribution/tests/test_verify_distribution_refinement.py
+
+distribution-evidence: distribution-refinement
+	$(UV) run python $(DISTRIBUTION_PHASE_EVIDENCE) --check-only
+
+distribution-final: distribution-evidence
+	$(UV) run python $(DISTRIBUTION_FINAL) --check-only
+
+distribution-check: python-check distribution-final
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

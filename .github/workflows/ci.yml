@@ -2,7 +2,7 @@ name: Python worker quality
 
 on:
   push:
-    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine, 004-compressed-delta-protocol]
+    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine, 004-compressed-delta-protocol, 005-content-addressed-p2p-distribution]
   pull_request:
 
 permissions:
@@ -131,4 +131,22 @@ jobs:
             uv run python specs/004-compressed-delta-protocol/scripts/verify_phase_evidence.py --check-only
             uv run python specs/004-compressed-delta-protocol/scripts/verify_native_execution.py --check-only
             uv run python specs/004-compressed-delta-protocol/scripts/verify_final_compatibility.py --check-only
+          fi
+
+      - name: Verify feature 005 certified distribution
+        if: ${{ github.ref_name == '005-content-addressed-p2p-distribution' || github.head_ref == '005-content-addressed-p2p-distribution' }}
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/005-content-addressed-p2p-distribution/scripts/verify_preflight.py --check-only
+          uv run python specs/005-content-addressed-p2p-distribution/scripts/verify_protocol_contracts.py --check-only
+          uv run python specs/005-content-addressed-p2p-distribution/scripts/verify_distribution_refinement.py --check-only
+          uv run pytest specs/005-content-addressed-p2p-distribution/tests
+          if [ -f specs/005-content-addressed-p2p-distribution/evidence/final-compatibility.json ]; then
+            uv run python specs/005-content-addressed-p2p-distribution/scripts/verify_phase_evidence.py --check-only
+            uv run python specs/005-content-addressed-p2p-distribution/scripts/verify_final_compatibility.py --check-only
           fi
