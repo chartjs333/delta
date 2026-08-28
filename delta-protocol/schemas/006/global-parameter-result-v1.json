@@ -1,0 +1,118 @@
+{
+  "$id": "urn:deltareduce:schema:global-parameter-result:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "coefficient_denominator": {
+      "pattern": "^(0|-?[1-9][0-9]*)$",
+      "type": "string"
+    },
+    "coefficient_numerator_sum": {
+      "pattern": "^(0|-?[1-9][0-9]*)$",
+      "type": "string"
+    },
+    "coefficient_plan_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "domain_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "eligible_count": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "fixedpoint_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_semantics_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "frozen_input_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "global_regional_set_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "hierarchy_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "numerator": {
+      "items": {
+        "pattern": "^(0|-?[1-9][0-9]*)$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scale_table_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "shard_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shard_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "topology_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "type_name": {
+      "const": "GLOBAL_PARAMETER_RESULT"
+    }
+  },
+  "required": [
+    "accumulator_proof_instance_id",
+    "coefficient_denominator",
+    "coefficient_numerator_sum",
+    "coefficient_plan_root",
+    "domain_id",
+    "eligible_count",
+    "fixedpoint_config_id",
+    "formal_semantics_id",
+    "frozen_input_root",
+    "global_regional_set_id",
+    "hierarchy_proof_instance_id",
+    "numerator",
+    "parent_checkpoint_id",
+    "profile_id",
+    "round_config_id",
+    "scale_table_id",
+    "schema_version",
+    "shard_id",
+    "shard_plan_id",
+    "topology_id",
+    "type_name"
+  ],
+  "title": "DeltaReduce checked global parameter result v1",
+  "type": "object"
+}

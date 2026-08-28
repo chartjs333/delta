@@ -1,0 +1,122 @@
+{
+  "artifacts": [
+    {
+      "id": "SCHEMA-GLOBAL-PARAMETER-QC-V1",
+      "path": "schemas/006/global-parameter-qc-v1.json",
+      "sha256": "4db23dbe309d8f9f4467b95c7569798d586c91ec412e2c6a6da856057eb35d13"
+    },
+    {
+      "id": "SCHEMA-GLOBAL-PARAMETER-RESULT-V1",
+      "path": "schemas/006/global-parameter-result-v1.json",
+      "sha256": "38b276e020843b5f2090a6ec0cb63b30d01ff10d7194b7b292ad1d3c86802905"
+    },
+    {
+      "id": "SCHEMA-GLOBAL-REGIONAL-SET-V1",
+      "path": "schemas/006/global-regional-set-v1.json",
+      "sha256": "a8abadcb152ae6e80d2791d0d217195dbbc2a9c3537c9963a51f6bf65ddd5528"
+    },
+    {
+      "id": "SCHEMA-HIERARCHICAL-AGGREGATE-ROOT-V1",
+      "path": "schemas/006/hierarchical-aggregate-root-v1.json",
+      "sha256": "72f3913c01683ab8df597ffecfc8e5810b1ef4d71089bd92d23e4a198f3be5fa"
+    },
+    {
+      "id": "SCHEMA-HIERARCHY-PROOF-INSTANCE-V1",
+      "path": "schemas/006/hierarchy-proof-instance-v1.json",
+      "sha256": "1ae63805668c7f52e27e5dfa1770dc261a0da6701b90f116596edce0df78cd8d"
+    },
+    {
+      "id": "SCHEMA-REDUCE-TOPOLOGY-V1",
+      "path": "schemas/006/reduce-topology-v1.json",
+      "sha256": "8975d1b1f22be2c09accf08cf55af4ce6a6df344ebc530b1469244bfb4738ea9"
+    },
+    {
+      "id": "SCHEMA-REGIONAL-INPUT-SET-V1",
+      "path": "schemas/006/regional-input-set-v1.json",
+      "sha256": "3ed6aba0e976bbc4000c908a310730a8d1c178cf9e7c24619b1d7ae7d5abecf0"
+    },
+    {
+      "id": "SCHEMA-REGIONAL-SHARD-QC-V1",
+      "path": "schemas/006/regional-shard-qc-v1.json",
+      "sha256": "2196d98fc6bc2a0318d18d8730f260954e377fd2b3c3a455dcd02a07a24b5733"
+    },
+    {
+      "id": "SCHEMA-REGIONAL-SHARD-RESULT-V1",
+      "path": "schemas/006/regional-shard-result-v1.json",
+      "sha256": "f69b4815965cc12b1c252d79e3b9fd85bfe74802fce3a6d4eefd2924c03ba8ed"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "HIERARCHY006-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/006/cross-language/golden-v1.json",
+      "sha256": "ef7df37b90e88386633e6699d2f63c2bb20d1f862742a3acdc63ec66bd668a5b"
+    },
+    {
+      "id": "HIERARCHY006-GOLDEN-HASHES-V1",
+      "path": "fixtures/006/golden-hashes-v1.json",
+      "sha256": "4fff7d021737d221ca6bdd6a0664c20966ad8428713fed8ca750995a38fc7621"
+    },
+    {
+      "id": "HIERARCHY006-NEGATIVE-V1",
+      "path": "fixtures/006/invalid/hierarchy-negative-v1.json",
+      "sha256": "f2f3e4daab3465f0140e05f4e5f8b99d8752dff21d780669b5859e73cbc060b6"
+    },
+    {
+      "id": "HIERARCHY006-VALID-CONTRACT-V1",
+      "path": "fixtures/006/valid/hierarchy-contract-v1.json",
+      "sha256": "c2b16b6ee7442fc1a72ceb1fde484faa18216ea765c6ddfb1feeb9d0a32fd531"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "media_types": [
+    {
+      "id": "MEDIA-REDUCE-TOPOLOGY-V1",
+      "schema_id": "SCHEMA-REDUCE-TOPOLOGY-V1",
+      "value": "application/vnd.deltareduce.reduce-topology+json;version=1"
+    },
+    {
+      "id": "MEDIA-REGIONAL-INPUT-SET-V1",
+      "schema_id": "SCHEMA-REGIONAL-INPUT-SET-V1",
+      "value": "application/vnd.deltareduce.input-candidate;version=1"
+    },
+    {
+      "id": "MEDIA-REGIONAL-SHARD-RESULT-V1",
+      "schema_id": "SCHEMA-REGIONAL-SHARD-RESULT-V1",
+      "value": "application/vnd.deltareduce.regional-partial;version=1"
+    },
+    {
+      "id": "MEDIA-REGIONAL-SHARD-QC-V1",
+      "schema_id": "SCHEMA-REGIONAL-SHARD-QC-V1",
+      "value": "application/vnd.deltareduce.regional-partial;version=1"
+    },
+    {
+      "id": "MEDIA-GLOBAL-REGIONAL-SET-V1",
+      "schema_id": "SCHEMA-GLOBAL-REGIONAL-SET-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-GLOBAL-PARAMETER-RESULT-V1",
+      "schema_id": "SCHEMA-GLOBAL-PARAMETER-RESULT-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-GLOBAL-PARAMETER-QC-V1",
+      "schema_id": "SCHEMA-GLOBAL-PARAMETER-QC-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-HIERARCHICAL-AGGREGATE-ROOT-V1",
+      "schema_id": "SCHEMA-HIERARCHICAL-AGGREGATE-ROOT-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-HIERARCHY-PROOF-INSTANCE-V1",
+      "schema_id": "SCHEMA-HIERARCHY-PROOF-INSTANCE-V1",
+      "value": "application/vnd.deltareduce.hierarchy-proof+json;version=1"
+    }
+  ],
+  "registry_version": "006.1.0",
+  "schema_version": "1.0.0",
+  "semantic_completeness_claimed": false
+}

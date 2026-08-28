@@ -161,4 +161,5 @@ jobs:
           UV_OFFLINE: "true"
         run: |
           uv run python specs/006-regional-hierarchical-reduce/scripts/verify_preflight.py --check-only
-          uv run pytest specs/006-regional-hierarchical-reduce/tests/test_verify_preflight.py
+          uv run python specs/006-regional-hierarchical-reduce/scripts/verify_protocol_contracts.py --check-only
+          uv run pytest specs/006-regional-hierarchical-reduce/tests

@@ -1,0 +1,128 @@
+{
+  "$id": "urn:deltareduce:schema:regional-shard-qc:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "body_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "coefficient_plan_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "committee_epoch": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "domain_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "fixedpoint_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_semantics_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "frozen_input_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "hierarchy_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "phase": {
+      "const": "REGIONAL_RESULT"
+    },
+    "profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "quorum_threshold": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "region_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scale_table_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "shard_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shard_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "signer_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 3,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "topology_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "type_name": {
+      "const": "REGIONAL_SHARD_QC"
+    },
+    "view": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "accumulator_proof_instance_id",
+    "body_id",
+    "coefficient_plan_root",
+    "committee_epoch",
+    "domain_id",
+    "fixedpoint_config_id",
+    "formal_semantics_id",
+    "frozen_input_root",
+    "hierarchy_proof_instance_id",
+    "parent_checkpoint_id",
+    "phase",
+    "profile_id",
+    "quorum_threshold",
+    "region_id",
+    "round_config_id",
+    "scale_table_id",
+    "schema_version",
+    "shard_id",
+    "shard_plan_id",
+    "signer_ids",
+    "topology_id",
+    "type_name",
+    "view"
+  ],
+  "title": "DeltaReduce basic regional shard QC envelope v1",
+  "type": "object"
+}
