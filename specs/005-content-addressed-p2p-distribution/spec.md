@@ -2,8 +2,12 @@
 
 **Feature Branch**: `005-content-addressed-p2p-distribution`  
 **Created**: 2026-08-23  
-**Status**: Planned — ready for implementation  
-**Depends on**: `004-compressed-delta-protocol`
+**Status**: Planned — implementation blocked until exact predecessor preflight
+**Depends on**: merged `004-compressed-delta-protocol`
+
+**Exact predecessor**: merge `bd31efaa6d521bbfc3362ad9aac39455bd29a098`, source
+`22dd996b5d169763bfde49f32c1b1b18f2656493`, evidence overlay
+`29fb4138499a348f90d6bbc44e77fe6d1914e25f`.
 
 ## Summary
 

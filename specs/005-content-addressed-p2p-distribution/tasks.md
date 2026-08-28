@@ -1,65 +1,102 @@
-# Tasks: Content-Addressed P2P Distribution of Certified Objects
+# Tasks: Certified Content-Addressed P2P Distribution
 
-**Input**: `spec.md`, `plan.md`, Constitution 2.0.0 and completed feature `004`.
+**Input**: `spec.md`, `plan.md`, Constitution 2.1.0, accepted Formal GO and merged feature 004
+`bd31efaa6d521bbfc3362ad9aac39455bd29a098`.
 
-## Phase 0: Authority/boundary STOP
+The authoritative certification boundary is native C++/C ABI. Java JDK 25 owns the bounded data
+plane and executes native decisions. `task-map.md` is normative.
 
-- [ ] T000 Remove/block coordinator-signer authority and every distribution path for worker/partial artifacts; record preflight evidence.
+## Phase 0: Mandatory predecessor/formal STOP
 
-## Phase 1: Contracts and policies
+- [ ] T000 [HR005-012] Verify exact feature-004 merge/source/evidence/report ancestry and hashes.
+- [ ] T001 [HR005-012] Reverify accepted Formal GO, `PublishCertifiedObject`, repair,
+  plane-separation and current-state preservation semantics.
+- [ ] T002 [HR005-003] Scan for Java-side certification authority, coordinator signer fallback,
+  policy downgrade and accepted local/partial distribution paths; require zero findings.
+- [ ] T003 Classify the design as `REFINEMENT_ONLY`, bind the exact registry/trace boundary and stop
+  on any new publication/current-state/failure outcome.
+- [ ] T004 Emit content-addressed `evidence/preflight.json` binding T000–T003 and the reconciled
+  SpecKit source tree; block all production-source tasks until it passes.
 
-- [ ] T001 Define canonical `ObjectManifest`, `PieceDescriptor` and object-ID rules in `src/deltatorrent/distribution/manifests.py`.
-- [ ] T002 Define immutable `CertificationPolicy` registry and media-type strength requirements in `src/deltatorrent/distribution/policies.py`.
-- [ ] T003 Implement feature-003 aggregated-transition-QC verifier adapter.
-- [ ] T004 Define peer advertisement, lease and download-journal contracts.
-- [ ] T005 Create object/piece/policy golden fixtures in `tests/fixtures/contracts/deltareduce_v1/005/`.
-- [ ] T006 Add contract tests in `tests/contract/test_object_manifest_bytes.py`.
+## Phase 1: Runtime-neutral canonical contracts
 
-## Phase 2: CAS and publication
+- [ ] T005 Define bounded canonical object-manifest, piece-descriptor and piece-profile schemas.
+- [ ] T006 Define immutable certification-policy registry with media strength and hard denylist.
+- [ ] T007 Define peer-advertisement, download-journal and bounded transport-envelope schemas.
+- [ ] T008 Freeze object identity, Merkle domains/odd-leaf rule, empty/short-final-piece behavior and
+  all allocation limits before implementation.
+- [ ] T009 Create valid, invalid and cross-language fixtures covering lineage, policy, bounds,
+  overlap/gap/duplicate, forbidden media and future inactive Apply policy.
+- [ ] T010 Register every schema/media/policy ID and publish deterministic golden hashes.
 
-- [ ] T007 Implement filesystem CAS with atomic verified visibility and quotas in `src/deltatorrent/adapters/storage/filesystem_cas.py`.
-- [ ] T008 Implement deterministic piece/Merkle publisher in `src/deltatorrent/distribution/publisher.py`.
-- [ ] T009 Enforce media allowlist/denylist before chunking.
-- [ ] T010 Enforce certification policy/root verification before publication.
-- [ ] T011 Add idempotent publish and semantic-lineage identity tests.
+## Phase 2: Toolchains and native certification boundary
 
-## Phase 3: Peer and discovery plane
+- [ ] T011 [HR005-001] Bind pinned JDK 25, JDK 26 compatibility, native compilers and offline
+  dependency/tool execution manifests.
+- [ ] T012 [HR005-003] Implement native canonical manifest and certification-policy verifier.
+- [ ] T013 [HR005-012] Reject unknown/weaker policy, wrong source/certificate root, forbidden media
+  and current checkpoint without ApplyQC before semantic use.
+- [ ] T014 [HR005-003] [HR005-004] [HR005-005] [HR005-006] Add bounded C ABI plus synchronous
+  borrowed-direct and owned-copy
+  FFM commands returning identical typed status/effect/hash results.
+- [ ] T015 [HR005-010, HR005-012] Add production parser/policy mutants, allocation corpus and exact
+  legal/rejected refinement traces.
 
-- [ ] T012 Implement bounded peer manifest/availability/piece service in `src/deltatorrent/distribution/peer.py`.
-- [ ] T013 Implement non-authoritative multi-endpoint registry/lease adapter in `src/deltatorrent/distribution/registry.py`.
-- [ ] T014 Implement verified-piece-only advertisement/seeding.
-- [ ] T015 Add lease replay, false availability, endless stream and registry-outage tests.
+## Phase 3: Java CAS and deterministic publication
 
-## Phase 4: Resumable multi-peer download
+- [ ] T016 [HR005-008] Implement immutable piece/manifest CAS with quota checks, atomic visibility
+  and path/symlink safety.
+- [ ] T017 Implement deterministic Java chunking, piece tree and object ID matching frozen fixtures.
+- [ ] T018 [HR005-003] Require native policy acceptance before chunking, CAS publication or
+  advertisement; Java cannot construct an allow decision.
+- [ ] T019 Add idempotent publication, same-bytes/different-lineage identity, crash and quota tests.
 
-- [ ] T016 Implement atomic `DownloadJournal` in `src/deltatorrent/distribution/journal.py`.
-- [ ] T017 Implement deterministic bounded piece scheduler in `src/deltatorrent/distribution/scheduler.py`.
-- [ ] T018 Implement multi-peer downloader/retry/backoff/cancellation in `src/deltatorrent/distribution/downloader.py`.
-- [ ] T019 Implement safe CAS materialization in `src/deltatorrent/distribution/materialize.py`.
-- [ ] T020 Add corrupt/slow/reordered three-peer test in `tests/integration/test_multi_peer_download.py`.
-- [ ] T021 Add restart, verified-piece reuse and bit-rot tests.
+## Phase 4: Bounded permissioned peer plane and memory lifetime
 
-## Phase 5: Seed loss and policy evolution
+- [ ] T020 [HR005-002] [HR005-007] Implement authenticated bounded manifest/bitfield/piece framing,
+  cancellation, rate limits and backpressure.
+- [ ] T021 [HR005-007] Implement non-authoritative leased discovery snapshots and replay rejection.
+- [ ] T022 Implement verified-piece-only advertisement and seeding with immutable object context.
+- [ ] T023 [HR005-004] [HR005-005] [HR005-006] Implement retained direct fast path and bounded
+  staging-copy
+  fallback with exact parity and no retained native pointer.
+- [ ] T024 [HR005-009] [HR005-010] Add leak/lifetime/event-loop-blocking and
+  corrupt/oversized/endless/truncated stream matrices.
 
-- [ ] T022 Add initial-seed-loss scenario in `tests/integration/test_seed_loss.py`.
-- [ ] T023 Add unavailable-piece/quota/cancellation terminal-state tests.
-- [ ] T024 Add certification-policy unknown/downgrade tests.
-- [ ] T025 Add future `apply-qc-v1` fixture/registration seam without implementing feature-008 semantics.
-- [ ] T026 Add architecture media-boundary tests in `tests/architecture/test_distribution_media_boundary.py`.
-- [ ] T027 Add malicious metadata/path parser corpus in `tests/security/test_distribution_parser_paths.py`.
+## Phase 5: Resumable download, repair and seed loss
 
-## Final Phase
+- [ ] T025 [HR005-008] Implement atomic journal, deterministic missing-piece schedule, bounded
+  parallel retry/cancellation and verified-piece reuse.
+- [ ] T026 Implement final full-object/lineage/policy revalidation and atomic CAS materialization.
+- [ ] T027 [HR005-011] Add three-peer corrupt/slow/reordered, restart, bit-rot, registry-outage and
+  initial-seed-loss complete-union scenario.
+- [ ] T028 [HR005-011] Add incomplete-union `PIECE_UNAVAILABLE`, quota/cancellation and resumable
+  state preservation with certified current state unchanged.
 
-- [ ] T028 Implement `swarm publish/seed/fetch/inspect/verify` CLI.
-- [ ] T029 Add distribution/certification telemetry.
-- [ ] T030 Document object, peer and policy protocol in `docs/deltareduce/distribution.md`.
-- [ ] T031 Publish exit evidence and run cross-artifact analysis.
-- [ ] T032 Run full quality gate and final Constitution Check.
+## Finalization
+
+- [ ] T029 Add inspect/publish/seed/fetch/verify service commands and structured telemetry without
+  logging payloads or claiming WAN performance.
+- [ ] T030 Document object, policy, C ABI/FFM, peer, CAS/journal and recovery protocols plus claim
+  boundaries.
+- [ ] T031 [HR005-013] Publish content-addressed contracts, policy, compiler/JDK, memory lifetime,
+  backpressure, seed-loss and refinement evidence.
+- [ ] T032 Run cross-artifact consistency, complete offline quality gate and final Constitution
+  2.1.0 check; emit deterministic compatibility evidence.
 
 ## Dependencies
 
-T000 is mandatory. T001–T006 block all storage/network work. T007–T011 block seeding. T012–T015 block multi-peer tests. T016–T021 block seed-loss tests. T022–T027 are the primary safety/resilience gate. T028–T032 are final.
+- T000–T004 are sequential and block all production source.
+- T005–T010 freeze bytes, limits and IDs before native or Java code consumes them.
+- T011–T015 make native policy acceptance available before publication or networking.
+- T016–T019 block advertisement/seeding.
+- T020–T024 block multi-peer recovery tests.
+- T025–T028 form the primary resilience and seed-loss gate.
+- T029–T032 close documentation, execution and evidence.
 
-## Exit Gate
+## Exit gate
 
-All tasks pass; certified object IDs are stable; three-peer/restart/seed-loss scenarios reconstruct exact bytes; unknown/weaker certification and forbidden artifact classes fail closed.
+All T000–T032 and HR005-001–HR005-013 obligations pass; canonical IDs are stable; native policy
+and Java direct/copy outcomes agree; three-peer/restart/seed-loss scenarios reconstruct exact bytes;
+incomplete union preserves the resumable journal and current state; unknown/weaker policy and every
+forbidden artifact class fail closed.

@@ -13,3 +13,11 @@
 - [ ] **HR005-011** Add seed-loss, registry outage, restart and incomplete-union scenarios.
 - [ ] **HR005-012** Add native certification downgrade and forbidden-media negative traces.
 - [ ] **HR005-013** Publish P2P, memory-lifetime, backpressure, policy and formal-refinement evidence.
+
+## STOP rule
+
+Peer authentication protects feature-005 distribution only. It does not implement feature-008
+consensus/certificate transport and cannot authorize a certificate, weaken a policy or make an
+object current. Any Java-side allow decision, downgrade fallback, alternate publication terminal
+or new current-state transition is `SEMANTIC`: stop, amend feature 000 and obtain a compatible
+Formal GO before implementation.
