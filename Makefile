@@ -49,6 +49,8 @@ SCHEDULING_ADMISSION := specs/007-domain-pure-ticket-scheduling/scripts/verify_n
 SCHEDULING_LIFECYCLE := specs/007-domain-pure-ticket-scheduling/scripts/verify_native_lifecycle.py
 SCHEDULING_BOUNDARY := specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_boundary.py
 SCHEDULING_REFINEMENT := specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_refinement.py
+SCHEDULING_CI := specs/007-domain-pure-ticket-scheduling/scripts/capture_scheduling_ci.py
+SCHEDULING_FINAL := specs/007-domain-pure-ticket-scheduling/scripts/verify_final_compatibility.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -60,7 +62,8 @@ SCHEDULING_REFINEMENT := specs/007-domain-pure-ticket-scheduling/scripts/verify_
 	distribution-evidence distribution-final distribution-check hierarchy-preflight hierarchy-contracts \
 	hierarchy-native-topology hierarchy-execution hierarchy-evidence hierarchy-final hierarchy-check \
 	scheduling-preflight scheduling-contracts scheduling-native-planner scheduling-native-admission \
-	scheduling-native-lifecycle scheduling-boundary scheduling-refinement
+	scheduling-native-lifecycle scheduling-boundary scheduling-refinement scheduling-ci \
+	scheduling-final scheduling-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -263,6 +266,15 @@ scheduling-refinement: scheduling-boundary
 	ctest --preset cpp20 -R "delta_core.scheduling_trace_export" --output-on-failure
 	$(UV) run python $(SCHEDULING_REFINEMENT) --check-only \
 		--trace-dir out/build/cpp20/scheduling-traces
+
+scheduling-ci:
+	$(UV) run python $(SCHEDULING_CI) --check-only
+
+scheduling-final: scheduling-refinement scheduling-ci
+	$(UV) run python $(SCHEDULING_FINAL) --check-only \
+		--trace-dir out/build/cpp20/scheduling-traces
+
+scheduling-check: python-check scheduling-final
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

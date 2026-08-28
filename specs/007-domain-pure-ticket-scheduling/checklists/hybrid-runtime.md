@@ -1,6 +1,6 @@
 # Checklist: 007 Scheduling Runtime
 
-**Status**: Preflight and canonical-contract gates pass; native implementation starts at T011.
+**Status**: Native refinement PASS; final exact-source compatibility evidence starts at T030.
 
 - [x] C++ owns all plan and lease state transitions.
 - [x] Java capability collection cannot change mathematical weights.

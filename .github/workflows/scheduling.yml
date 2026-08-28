@@ -187,8 +187,25 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify committed boundary evidence when present
+      - name: Reproduce native scheduling refinement traces
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_scheduling_lifecycle_test
+          ctest --preset cpp20 -R "delta_core.scheduling_trace_export" --output-on-failure
+
+      - name: Verify committed boundary, refinement and final evidence when present
         run: |
           if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-boundary.json ]; then
             python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_boundary.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-refinement.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_refinement.py \
+              --check-only --trace-dir out/build/cpp20/scheduling-traces
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-ci.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/capture_scheduling_ci.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/final-compatibility.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_final_compatibility.py \
+              --check-only --trace-dir out/build/cpp20/scheduling-traces
           fi

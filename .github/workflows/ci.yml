@@ -194,3 +194,6 @@ jobs:
           if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-boundary.json ]; then
             uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_boundary.py --check-only
           fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-ci.json ]; then
+            uv run python specs/007-domain-pure-ticket-scheduling/scripts/capture_scheduling_ci.py --check-only
+          fi
