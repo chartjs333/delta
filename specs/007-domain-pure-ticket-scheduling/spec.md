@@ -2,8 +2,17 @@
 
 **Feature Branch**: `007-domain-pure-ticket-scheduling`  
 **Created**: 2026-08-23  
-**Status**: Planned — ready for implementation  
+**Status**: Restacked — production implementation blocked by T000–T010
 **Depends on**: `006-regional-hierarchical-reduce`
+
+**Exact predecessor**: feature-006 merge
+`827d3393acf347c9b45eabdb3d652bdc98bcfe75`, verified source
+`90cc7fac96675694bab15f4e1ae1e5c6e3f525be`, evidence overlay
+`b487ea81851cfd5b4769579392798841cb18afc0` and final report SHA-256
+`d16f9cfc62efe95e902b301823c136c0530db68b1cfb48788c6a239ade123800`.
+
+**Formal impact**: `REFINEMENT_ONLY` against
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
 
 ## Summary
 
@@ -12,6 +21,11 @@ This feature replaces legacy adaptive heterogeneous scheduling. DeltaReduce v1 h
 `RoundConfig` fixes, for every domain `d`, the ticket count `K_d`, batch/token budget `B_d`, local optimizer steps `H_d`, data-allocation policy and later domain-mixture coefficient `pi_d`. Every emitted ticket is immutable and domain-pure. Worker capability may determine eligibility, concurrency and how many complete tickets a worker can lease before the round closes, but it cannot change a ticket's `B/H/domain/data`, cannot create device-speed weights and cannot alter `pi_d`.
 
 A ticket may be reassigned only before a commitment exists and only under a predeclared deterministic lease-expiry rule. After `C_j` is accepted, worker/ticket binding is immutable for that round.
+
+The authoritative planner, eligibility decision, lease epoch, timer-token validation,
+commit-versus-expiry ordering and recovery state live in the native C++ runtime. Java collects and
+transports authenticated capability evidence and opaque effects only. Python remains a worker-local
+ML runtime and is not a scheduling authority.
 
 ## User Scenarios & Testing
 
@@ -109,6 +123,18 @@ Researchers verify that schedule outcomes do not change the configured domain-le
 - **FR-022**: Simulation API MUST replay worker eligibility, lease, disconnect and region-failure traces with deterministic logical time.
 - **FR-023**: Metrics MUST include eligible/excluded workers, tickets by domain/worker/region, lease epochs, completion/miss rates, planned/actual full-ticket time and infeasibility reasons.
 - **FR-024**: Planning/service APIs MUST be transport-independent and operate through the BFT transition command path.
+- **FR-025**: Canonical plan, eligibility, lease, expiry, renewal, reassignment, infeasibility and
+  commitment-ordering decisions MUST execute in the native C++ single-writer state and recover from
+  its durable journal before new commands are accepted.
+- **FR-026**: Java MUST treat capability, plan, lease and timer payloads as bounded canonical bytes;
+  it MUST NOT decide eligibility, lease epoch, expiry validity, reassignment or commitment acceptance.
+- **FR-027**: Lease timers MUST be native-issued opaque tokens bound to round, ticket, lease epoch and
+  logical deadline; stale, duplicate and reordered timer delivery MUST be an idempotent no-op.
+- **FR-028**: Borrowed-direct and owned-copy C ABI paths MUST produce identical decisions, return
+  bounded effects and retain no Java-owned pointer after a call.
+- **FR-029**: Native scheduling executions MUST export implementation-derived traces for the accepted
+  formal action vocabulary; any newly required action, failure terminal or deadline fallback is a
+  semantic STOP requiring a new Formal GO.
 
 ### Non-Functional Requirements
 
@@ -127,6 +153,10 @@ Researchers verify that schedule outcomes do not change the configured domain-le
 - **InfeasibilityReport**: exact unmet constraints without policy mutation.
 - **SchedulingTrace**: replayable logical-time events and decisions.
 
+Native C++ owns the canonical state of every entity above. Java may retain operational transport
+metadata, while Python may consume an already finalized ticket; neither runtime may author or repair
+the certified scheduling state.
+
 ## Success Criteria
 
 - **SC-001**: 50-worker heterogeneous fixtures produce deterministic plans and exact per-domain ticket quotas.
@@ -136,6 +166,10 @@ Researchers verify that schedule outcomes do not change the configured domain-le
 - **SC-005**: Different speed scenarios change ownership/concurrency only, not domain ticket set or `pi_d`.
 - **SC-006**: Infeasible capacity causes explicit failure without shrinking H/B/quotas.
 - **SC-007**: Architecture tests reject adaptive/stale/device-weight code and schemas.
+- **SC-008**: C++20/C++23, sanitizer, C ABI and JDK 25/26 matrices accept byte-identical scheduling
+  decisions and opaque effects.
+- **SC-009**: Legal lease/recovery traces refine the accepted formal vocabulary and illegal
+  adaptive-H, device-weight, stale-timer and old-holder traces are rejected.
 
 ## Assumptions
 
@@ -151,3 +185,6 @@ Researchers verify that schedule outcomes do not change the configured domain-le
 - Throughput-, energy- or reputation-based mathematical weights.
 - Learned/RL scheduling and cloud procurement.
 - Permissionless job market/economics.
+- Python or Java scheduling/state-machine authority.
+- New certificate types, ApplyQC/current-pointer behavior or post-ISC randomness semantics reserved
+  for feature 008.

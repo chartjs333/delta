@@ -2,6 +2,14 @@
 
 This file is normative for `007-domain-pure-ticket-scheduling`.
 
+**Formal semantics**:
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+
+**Classification**: `REFINEMENT_ONLY`. The implementation may refine the existing ticket lease,
+logical deadline, reassignment, commitment, restart/recovery and hard-abort actions. A new externally
+visible action, precondition, durability outcome, failure terminal, timer fallback or randomness use
+reclassifies the branch as `SEMANTIC` and blocks production work pending a new Formal GO.
+
 ## Refined state/actions
 
 The implementation projects immutable ticket-plan, `LeaseTicket`, bounded renewal if enabled, `ExpireLease`, `ReassignTicket`, `CommitTicket`, replay and hard-deadline actions.
@@ -23,3 +31,5 @@ The implementation projects immutable ticket-plan, `LeaseTicket`, bounded renewa
 3. 50-worker input permutations produce one abstract plan/lease trace modulo actor assignment allowed by the fixed deterministic policy.
 4. Relevant ticket/commit/freeze mutants remain detectable.
 5. Formal-impact report binds exact policy and semantics IDs.
+6. The exact feature-006 source/evidence/final-report chain is rederived before any production source
+   is accepted.

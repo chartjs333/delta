@@ -1,5 +1,8 @@
 # Hybrid Runtime Tasks: 007 Domain-Pure Ticket Scheduling
 
+Every obligation below is mandatory and mapped to semantic tasks in `task-map.md`. None authorizes
+production work before the exact predecessor/Formal GO and canonical contract gates pass.
+
 - [ ] **HR007-001** Freeze canonical capability, eligibility, plan, lease, timer-token and infeasibility schemas.
 - [ ] **HR007-002** Implement C++ exact domain quota/data/ticket planner.
 - [ ] **HR007-003** Implement C++ capability-policy validator and math-neutral lease allocation.
