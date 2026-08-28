@@ -2,7 +2,7 @@ name: Python worker quality
 
 on:
   push:
-    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine, 004-compressed-delta-protocol, 005-content-addressed-p2p-distribution, 006-regional-hierarchical-reduce]
+    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine, 004-compressed-delta-protocol, 005-content-addressed-p2p-distribution, 006-regional-hierarchical-reduce, 007-domain-pure-ticket-scheduling]
   pull_request:
 
 permissions:
@@ -164,3 +164,17 @@ jobs:
           uv run python specs/006-regional-hierarchical-reduce/scripts/verify_protocol_contracts.py --check-only
           uv run python specs/006-regional-hierarchical-reduce/scripts/verify_native_topology.py --check-only
           uv run pytest specs/006-regional-hierarchical-reduce/tests
+
+      - name: Verify feature 007 scheduling preflight
+        if: ${{ github.ref_name == '007-domain-pure-ticket-scheduling' || github.head_ref == '007-domain-pure-ticket-scheduling' }}
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run pytest specs/007-domain-pure-ticket-scheduling/tests
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/preflight.json ]; then
+            uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_preflight.py --check-only
+          fi

@@ -42,6 +42,7 @@ HIERARCHY_EXECUTION := specs/006-regional-hierarchical-reduce/scripts/verify_hie
 HIERARCHY_NATIVE := specs/006-regional-hierarchical-reduce/scripts/verify_native_hierarchy.py
 HIERARCHY_CI := specs/006-regional-hierarchical-reduce/scripts/capture_hierarchy_ci.py
 HIERARCHY_FINAL := specs/006-regional-hierarchical-reduce/scripts/verify_final_compatibility.py
+SCHEDULING_PREFLIGHT := specs/007-domain-pure-ticket-scheduling/scripts/verify_preflight.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -51,7 +52,8 @@ HIERARCHY_FINAL := specs/006-regional-hierarchical-reduce/scripts/verify_final_c
 	fixedpoint-refinement fixedpoint-evidence fixedpoint-final fixedpoint-check \
 	distribution-preflight distribution-contracts distribution-refinement \
 	distribution-evidence distribution-final distribution-check hierarchy-preflight hierarchy-contracts \
-	hierarchy-native-topology hierarchy-execution hierarchy-evidence hierarchy-final hierarchy-check
+	hierarchy-native-topology hierarchy-execution hierarchy-evidence hierarchy-final hierarchy-check \
+	scheduling-preflight
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -214,6 +216,10 @@ hierarchy-final: hierarchy-evidence
 	$(UV) run python $(HIERARCHY_FINAL) --check-only --trace-dir out/build/cpp20/hierarchy-traces
 
 hierarchy-check: python-check hierarchy-final
+
+scheduling-preflight:
+	$(UV) run python $(SCHEDULING_PREFLIGHT) --check-only
+	$(UV) run pytest specs/007-domain-pure-ticket-scheduling/tests/test_verify_preflight.py
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20
