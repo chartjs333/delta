@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-domain-pure-ticket-scheduling`  
 **Created**: 2026-08-23  
-**Status**: Native admission PASS — durable lease lifecycle implementation starts at T019
+**Status**: Native lifecycle PASS — C ABI and Java transport adapter implementation starts at T024
 **Depends on**: `006-regional-hierarchical-reduce`
 
 **Exact predecessor**: feature-006 merge

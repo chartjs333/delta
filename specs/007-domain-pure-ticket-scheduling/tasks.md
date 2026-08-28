@@ -57,15 +57,15 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
 
 ## Phase 4: Native durable lease lifecycle
 
-- [ ] T019 [HR007-004, HR007-005] Implement native-issued opaque timer tokens, logical expiry and
+- [x] T019 [HR007-004, HR007-005] Implement native-issued opaque timer tokens, logical expiry and
   stale/duplicate/reordered timer rejection.
-- [ ] T020 [HR007-004] Persist renew/expire/reassign transitions before effects and recover exact
+- [x] T020 [HR007-004] Persist renew/expire/reassign transitions before effects and recover exact
   lease/timer state before accepting commands.
-- [ ] T021 [HR007-004] Preserve ticket ID/domain/data/B/H/profile across bounded renewal and
+- [x] T021 [HR007-004] Preserve ticket ID/domain/data/B/H/profile across bounded renewal and
   reassignment; increment lease epoch and retain exact lineage.
-- [ ] T022 [HR007-004, HR007-009] Order commitment versus expiry/current lease epoch through native
+- [x] T022 [HR007-004, HR007-009] Order commitment versus expiry/current lease epoch through native
   state so at most one accepted root binds a ticket.
-- [ ] T023 [HR007-009, HR007-010] Add crash/restart/replay, old/new holder, after-commit expiry,
+- [x] T023 [HR007-009, HR007-010] Add crash/restart/replay, old/new holder, after-commit expiry,
   max-epoch, hard-deadline and missing-capacity terminal scenarios.
 
 ## Phase 5: C ABI and Java transport/admission only
