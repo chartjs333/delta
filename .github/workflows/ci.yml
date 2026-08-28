@@ -2,7 +2,7 @@ name: Python worker quality
 
 on:
   push:
-    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine, 004-compressed-delta-protocol, 005-content-addressed-p2p-distribution]
+    branches: [001-reproducible-training-baseline, 002-local-round-engine, 003-bft-round-state-machine, 004-compressed-delta-protocol, 005-content-addressed-p2p-distribution, 006-regional-hierarchical-reduce]
   pull_request:
 
 permissions:
@@ -150,3 +150,15 @@ jobs:
             uv run python specs/005-content-addressed-p2p-distribution/scripts/verify_phase_evidence.py --check-only
             uv run python specs/005-content-addressed-p2p-distribution/scripts/verify_final_compatibility.py --check-only
           fi
+
+      - name: Verify feature 006 hierarchy preflight
+        if: ${{ github.ref_name == '006-regional-hierarchical-reduce' || github.head_ref == '006-regional-hierarchical-reduce' }}
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/006-regional-hierarchical-reduce/scripts/verify_preflight.py --check-only
+          uv run pytest specs/006-regional-hierarchical-reduce/tests/test_verify_preflight.py

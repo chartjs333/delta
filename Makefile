@@ -35,6 +35,7 @@ DISTRIBUTION_CONTRACTS := specs/005-content-addressed-p2p-distribution/scripts/v
 DISTRIBUTION_REFINEMENT := specs/005-content-addressed-p2p-distribution/scripts/verify_distribution_refinement.py
 DISTRIBUTION_PHASE_EVIDENCE := specs/005-content-addressed-p2p-distribution/scripts/verify_phase_evidence.py
 DISTRIBUTION_FINAL := specs/005-content-addressed-p2p-distribution/scripts/verify_final_compatibility.py
+HIERARCHY_PREFLIGHT := specs/006-regional-hierarchical-reduce/scripts/verify_preflight.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -43,7 +44,7 @@ DISTRIBUTION_FINAL := specs/005-content-addressed-p2p-distribution/scripts/verif
 	fixedpoint-preflight fixedpoint-contracts fixedpoint-architecture fixedpoint-proofs \
 	fixedpoint-refinement fixedpoint-evidence fixedpoint-final fixedpoint-check \
 	distribution-preflight distribution-contracts distribution-refinement \
-	distribution-evidence distribution-final distribution-check
+	distribution-evidence distribution-final distribution-check hierarchy-preflight
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -178,6 +179,10 @@ distribution-final: distribution-evidence
 	$(UV) run python $(DISTRIBUTION_FINAL) --check-only
 
 distribution-check: python-check distribution-final
+
+hierarchy-preflight:
+	$(UV) run python $(HIERARCHY_PREFLIGHT) --check-only
+	$(UV) run pytest specs/006-regional-hierarchical-reduce/tests/test_verify_preflight.py
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20
