@@ -44,6 +44,7 @@ HIERARCHY_CI := specs/006-regional-hierarchical-reduce/scripts/capture_hierarchy
 HIERARCHY_FINAL := specs/006-regional-hierarchical-reduce/scripts/verify_final_compatibility.py
 SCHEDULING_PREFLIGHT := specs/007-domain-pure-ticket-scheduling/scripts/verify_preflight.py
 SCHEDULING_CONTRACTS := specs/007-domain-pure-ticket-scheduling/scripts/verify_protocol_contracts.py
+SCHEDULING_NATIVE := specs/007-domain-pure-ticket-scheduling/scripts/verify_native_planner.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -54,7 +55,7 @@ SCHEDULING_CONTRACTS := specs/007-domain-pure-ticket-scheduling/scripts/verify_p
 	distribution-preflight distribution-contracts distribution-refinement \
 	distribution-evidence distribution-final distribution-check hierarchy-preflight hierarchy-contracts \
 	hierarchy-native-topology hierarchy-execution hierarchy-evidence hierarchy-final hierarchy-check \
-	scheduling-preflight scheduling-contracts
+	scheduling-preflight scheduling-contracts scheduling-native-planner
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -226,6 +227,14 @@ scheduling-contracts: scheduling-preflight
 	$(UV) run python specs/007-domain-pure-ticket-scheduling/scripts/scheduling_contracts.py --check
 	$(UV) run python $(SCHEDULING_CONTRACTS) --check-only
 	$(UV) run pytest specs/007-domain-pure-ticket-scheduling/tests/test_scheduling_contracts.py
+
+scheduling-native-planner: scheduling-contracts
+	cmake --preset cpp20
+	cmake --build --preset cpp20 --parallel --target delta_scheduling_planner_test \
+		delta_scheduling_adapt_work_mutant_test delta_scheduling_overlap_ranges_mutant_test \
+		delta_scheduling_skip_infeasibility_mutant_test delta_scheduling_contract_fuzz
+	ctest --preset cpp20 -R "delta_core.scheduling" --output-on-failure
+	$(UV) run python $(SCHEDULING_NATIVE) --check-only
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

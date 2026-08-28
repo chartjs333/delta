@@ -1,0 +1,85 @@
+name: Feature 007 scheduling verification
+
+on:
+  push:
+    branches: [007-domain-pure-ticket-scheduling]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduling-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-planner:
+    name: Native C++${{ matrix.standard }} scheduling planner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        standard: [20, 23]
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure native scheduling
+        run: cmake --preset "cpp${{ matrix.standard }}"
+
+      - name: Build native planner and production mutants
+        run: >-
+          cmake --build --preset "cpp${{ matrix.standard }}" --parallel
+          --target delta_scheduling_planner_test
+          delta_scheduling_adapt_work_mutant_test
+          delta_scheduling_overlap_ranges_mutant_test
+          delta_scheduling_skip_infeasibility_mutant_test
+          delta_scheduling_contract_fuzz
+
+      - name: Verify exact planner, permutations, mutants and fuzz smoke
+        run: >-
+          ctest --preset "cpp${{ matrix.standard }}"
+          -R "delta_core.scheduling"
+          --output-on-failure
+
+      - name: Verify committed native planner evidence when present
+        run: |
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-planner.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_native_planner.py --check-only
+          fi
+
+  sanitizer:
+    name: Clang ASan UBSan scheduling planner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Configure scheduling sanitizers
+        run: >-
+          cmake -S . -B out/build/scheduling-sanitizer
+          -DBUILD_TESTING=ON
+          -DDELTA_CXX_STANDARD=20
+          -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+
+      - name: Build sanitized scheduling targets
+        run: >-
+          cmake --build out/build/scheduling-sanitizer --parallel
+          --target delta_scheduling_planner_test delta_scheduling_contract_fuzz
+
+      - name: Run scheduling sanitizers
+        run: >-
+          ctest --test-dir out/build/scheduling-sanitizer
+          -R "delta_core.scheduling_(planner|contract_fuzz)"
+          --output-on-failure

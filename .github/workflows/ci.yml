@@ -182,3 +182,6 @@ jobs:
             uv run python specs/007-domain-pure-ticket-scheduling/scripts/scheduling_contracts.py --check
             uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_protocol_contracts.py --check-only
           fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-planner.json ]; then
+            uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_native_planner.py --check-only
+          fi
