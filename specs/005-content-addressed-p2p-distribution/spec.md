@@ -2,7 +2,7 @@
 
 **Feature Branch**: `005-content-addressed-p2p-distribution`  
 **Created**: 2026-08-23  
-**Status**: GO — implementation and content-addressed execution evidence complete
+**Status**: Implemented — final content-addressed execution evidence pending
 **Depends on**: merged `004-compressed-delta-protocol`
 
 **Exact predecessor**: merge `bd31efaa6d521bbfc3362ad9aac39455bd29a098`, source

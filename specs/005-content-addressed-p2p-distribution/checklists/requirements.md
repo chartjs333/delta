@@ -1,7 +1,7 @@
 # Specification Quality Checklist: 005 Certified P2P Distribution
 
 **Reviewed**: 2026-08-23  
-**Status**: Complete — final compatibility gate PASS
+**Status**: Implementation complete — final compatibility gate pending
 
 - [x] BFT state/certificate root, not a coordinator signer, defines trusted object identity.
 - [x] Discovery is explicitly non-authoritative.
