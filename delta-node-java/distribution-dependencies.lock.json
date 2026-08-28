@@ -1,0 +1,30 @@
+{
+  "format_version": 1,
+  "java": {
+    "compatibility_features": [
+      25,
+      26
+    ],
+    "primary_feature": 25,
+    "toolchains_manifest": "delta-node-java/toolchains.toml"
+  },
+  "maven_artifacts": [
+    {
+      "coordinate": "io.netty:netty-buffer:4.1.137.Final",
+      "length": 365383,
+      "sha256": "f474b14c7734f15e0540394cb6f39d67777b7581a42919e4ac89d253d4efd929",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-buffer/4.1.137.Final/netty-buffer-4.1.137.Final.jar"
+    },
+    {
+      "coordinate": "io.netty:netty-common:4.1.137.Final",
+      "length": 740314,
+      "sha256": "d31926b01adcc07af86f5e27b81b6d6c115df17d366e835d1fc3f5a1924e7e52",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-common/4.1.137.Final/netty-common-4.1.137.Final.jar"
+    }
+  ],
+  "offline_execution": {
+    "network": "disabled_after_provisioning",
+    "repository": "content-addressed-jars"
+  },
+  "type_name": "DISTRIBUTION_DEPENDENCY_LOCK"
+}

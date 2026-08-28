@@ -120,6 +120,16 @@ DELTA_API delta_status_t delta_fixedpoint_shard_validate_borrowed(
 DELTA_API delta_status_t delta_fixedpoint_shard_validate_copy(
     delta_bytes_view_t envelope,
     delta_output_buffer_t* envelope_output);
+DELTA_API delta_status_t delta_distribution_policy_evaluate_borrowed(
+    delta_bytes_view_t canonical_manifest,
+    delta_bytes_view_t canonical_certificate,
+    uint8_t request_make_current,
+    delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_distribution_policy_evaluate_copy(
+    delta_bytes_view_t canonical_manifest,
+    delta_bytes_view_t canonical_certificate,
+    uint8_t request_make_current,
+    delta_output_buffer_t* effect_output);
 
 #ifdef __cplusplus
 }

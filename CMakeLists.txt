@@ -74,6 +74,17 @@ target_include_directories(
 target_link_libraries(delta_shards PUBLIC delta::fixedpoint)
 delta_target_defaults(delta_shards)
 
+add_library(delta_distribution STATIC
+  delta-core-cpp/src/distribution/certification_policy.cpp
+  delta-core-cpp/src/distribution/manifest_verifier.cpp)
+add_library(delta::distribution ALIAS delta_distribution)
+set_target_properties(delta_distribution PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_distribution
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_distribution PUBLIC delta::core)
+delta_target_defaults(delta_distribution)
+
 add_library(delta_runtime STATIC
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
@@ -91,13 +102,14 @@ delta_target_defaults(delta_runtime)
 
 add_library(delta_ffi SHARED
   delta-ffi/src/delta_abi.cpp
+  delta-ffi/src/distribution_abi.cpp
   delta-ffi/src/fixedpoint_abi.cpp)
 add_library(delta::ffi ALIAS delta_ffi)
 target_include_directories(
   delta_ffi
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include>)
 target_compile_definitions(delta_ffi PRIVATE DELTA_FFI_BUILD)
-target_link_libraries(delta_ffi PUBLIC delta::runtime delta::shards)
+target_link_libraries(delta_ffi PUBLIC delta::runtime delta::shards delta::distribution)
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
@@ -201,6 +213,47 @@ if(BUILD_TESTING)
   target_compile_definitions(delta_fixedpoint_parser_fuzz PRIVATE DELTA_FIXEDPOINT_FUZZ_SMOKE_MAIN)
   delta_target_defaults(delta_fixedpoint_parser_fuzz)
   add_test(NAME delta_core.fixedpoint_parser_fuzz COMMAND delta_fixedpoint_parser_fuzz)
+
+  add_executable(delta_distribution_test delta-core-cpp/tests/distribution_test.cpp)
+  target_link_libraries(delta_distribution_test PRIVATE delta::distribution)
+  target_compile_definitions(
+    delta_distribution_test
+    PRIVATE DELTA_DISTRIBUTION_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/005/cross-language/golden-v1.json")
+  delta_target_defaults(delta_distribution_test)
+  add_test(NAME delta_core.distribution COMMAND delta_distribution_test)
+
+  foreach(mutant IN ITEMS ALLOW_DOWNGRADE ALLOW_FORBIDDEN ALLOW_NONCANONICAL)
+    string(TOLOWER "${mutant}" mutant_lower)
+    set(mutant_library "delta_distribution_${mutant_lower}_mutant")
+    set(mutant_test "${mutant_library}_test")
+    add_library(${mutant_library} STATIC
+      delta-core-cpp/src/distribution/certification_policy.cpp
+      delta-core-cpp/src/distribution/manifest_verifier.cpp)
+    target_include_directories(
+      ${mutant_library}
+      PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+    target_link_libraries(${mutant_library} PUBLIC delta::core)
+    target_compile_definitions(
+      ${mutant_library} PRIVATE "DELTA_DISTRIBUTION_MUTANT_${mutant}")
+    delta_target_defaults(${mutant_library})
+    add_executable(${mutant_test} delta-core-cpp/tests/distribution_test.cpp)
+    target_link_libraries(${mutant_test} PRIVATE ${mutant_library})
+    target_compile_definitions(
+      ${mutant_test}
+      PRIVATE DELTA_DISTRIBUTION_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/005/cross-language/golden-v1.json")
+    delta_target_defaults(${mutant_test})
+    add_test(NAME "delta_core.distribution_mutant_${mutant_lower}" COMMAND ${mutant_test})
+    set_tests_properties(
+      "delta_core.distribution_mutant_${mutant_lower}" PROPERTIES WILL_FAIL TRUE)
+  endforeach()
+
+  add_executable(
+    delta_distribution_parser_fuzz delta-core-cpp/fuzz/distribution_parser_fuzz.cpp)
+  target_link_libraries(delta_distribution_parser_fuzz PRIVATE delta::distribution)
+  target_compile_definitions(
+    delta_distribution_parser_fuzz PRIVATE DELTA_DISTRIBUTION_FUZZ_SMOKE_MAIN)
+  delta_target_defaults(delta_distribution_parser_fuzz)
+  add_test(NAME delta_core.distribution_parser_fuzz COMMAND delta_distribution_parser_fuzz)
 
   add_executable(delta_core_transition_test delta-core-cpp/tests/transition_test.cpp)
   target_link_libraries(delta_core_transition_test PRIVATE delta::core)
@@ -329,6 +382,14 @@ if(BUILD_TESTING)
             DELTA_FIXEDPOINT_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/004/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_abi_test)
   add_test(NAME delta_ffi.abi COMMAND delta_ffi_abi_test)
+
+  add_executable(delta_ffi_distribution_test delta-ffi/tests/distribution_abi_test.cpp)
+  target_link_libraries(delta_ffi_distribution_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_distribution_test
+    PRIVATE DELTA_DISTRIBUTION_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/005/cross-language/golden-v1.json")
+  delta_target_defaults(delta_ffi_distribution_test)
+  add_test(NAME delta_ffi.distribution COMMAND delta_ffi_distribution_test)
 
   add_executable(delta_ffi_fuzz_smoke_test delta-ffi/tests/fuzz_smoke_test.cpp)
   target_link_libraries(delta_ffi_fuzz_smoke_test PRIVATE delta::ffi)

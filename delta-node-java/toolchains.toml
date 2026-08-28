@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 baseline_id = "temurin-25.0.4.1+1-linux-x64"
-compatibility_id = "temurin-26.0.2.1+1-linux-x64"
+compatibility_id = "temurin-26.0.2+10-linux-x64"
 
 [[toolchains]]
 id = "temurin-25.0.4.1+1-linux-x64"
@@ -16,14 +16,14 @@ archive_size_bytes = 141329719
 license = "GPL-2.0-only WITH Classpath-exception-2.0"
 
 [[toolchains]]
-id = "temurin-26.0.2.1+1-linux-x64"
+id = "temurin-26.0.2+10-linux-x64"
 feature = 26
 role = "COMPATIBILITY"
-version = "26.0.2.1+1"
+version = "26.0.2+10"
 vendor = "Eclipse Temurin"
 architecture = "x64"
 os = "linux"
-archive_url = "https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2.1%2B1/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2.1_1.tar.gz"
-archive_sha256 = "451c12e68747bcfa2fb5a2c16b00483fedb9fa6d77bc962d30957f76ac17044d"
-archive_size_bytes = 144463785
+archive_url = "https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz"
+archive_sha256 = "56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802"
+archive_size_bytes = 144453933
 license = "GPL-2.0-only WITH Classpath-exception-2.0"
