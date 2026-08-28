@@ -20,14 +20,14 @@ plane and executes native decisions. `task-map.md` is normative.
 
 ## Phase 1: Runtime-neutral canonical contracts
 
-- [ ] T005 Define bounded canonical object-manifest, piece-descriptor and piece-profile schemas.
-- [ ] T006 Define immutable certification-policy registry with media strength and hard denylist.
-- [ ] T007 Define peer-advertisement, download-journal and bounded transport-envelope schemas.
-- [ ] T008 Freeze object identity, Merkle domains/odd-leaf rule, empty/short-final-piece behavior and
+- [x] T005 Define bounded canonical object-manifest, piece-descriptor and piece-profile schemas.
+- [x] T006 Define immutable certification-policy registry with media strength and hard denylist.
+- [x] T007 Define peer-advertisement, download-journal and bounded transport-envelope schemas.
+- [x] T008 Freeze object identity, Merkle domains/odd-leaf rule, empty/short-final-piece behavior and
   all allocation limits before implementation.
-- [ ] T009 Create valid, invalid and cross-language fixtures covering lineage, policy, bounds,
+- [x] T009 Create valid, invalid and cross-language fixtures covering lineage, policy, bounds,
   overlap/gap/duplicate, forbidden media and future inactive Apply policy.
-- [ ] T010 Register every schema/media/policy ID and publish deterministic golden hashes.
+- [x] T010 Register every schema/media/policy ID and publish deterministic golden hashes.
 
 ## Phase 2: Toolchains and native certification boundary
 
