@@ -46,13 +46,13 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
 
 ## Phase 3: Native capability and initial lease decisions
 
-- [ ] T015 [HR007-003] Validate authenticated capability evidence against exact
+- [x] T015 [HR007-003] Validate authenticated capability evidence against exact
   model/schema/mode/fixed-point/memory/expiry policy and emit stable eligibility reasons.
-- [ ] T016 [HR007-003, HR007-007] Implement deterministic capacity-aware ownership/concurrency
+- [x] T016 [HR007-003, HR007-007] Implement deterministic capacity-aware ownership/concurrency
   without copying throughput, memory, device or timing into `a_j`, `pi_d` or ticket bytes.
-- [ ] T017 [HR007-003, HR007-008] Produce byte-identical initial leases across shuffled inputs and
+- [x] T017 [HR007-003, HR007-008] Produce byte-identical initial leases across shuffled inputs and
   prove fast/slow scenarios change ownership/concurrency only.
-- [ ] T018 [HR007-008, HR007-010] Add expired, manipulated, missing-evidence, region-loss and
+- [x] T018 [HR007-008, HR007-010] Add expired, manipulated, missing-evidence, region-loss and
   insufficient-capacity matrices.
 
 ## Phase 4: Native durable lease lifecycle

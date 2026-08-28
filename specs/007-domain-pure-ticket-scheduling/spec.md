@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-domain-pure-ticket-scheduling`  
 **Created**: 2026-08-23  
-**Status**: Native planner PASS — capability and initial lease implementation starts at T015
+**Status**: Native admission PASS — durable lease lifecycle implementation starts at T019
 **Depends on**: `006-regional-hierarchical-reduce`
 
 **Exact predecessor**: feature-006 merge

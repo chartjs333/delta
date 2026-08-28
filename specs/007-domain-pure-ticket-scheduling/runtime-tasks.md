@@ -5,7 +5,7 @@ production work before the exact predecessor/Formal GO and canonical contract ga
 
 - [x] **HR007-001** Freeze canonical capability, eligibility, plan, lease, timer-token and infeasibility schemas.
 - [x] **HR007-002** Implement C++ exact domain quota/data/ticket planner.
-- [ ] **HR007-003** Implement C++ capability-policy validator and math-neutral lease allocation.
+- [x] **HR007-003** Implement C++ capability-policy validator and math-neutral lease allocation.
 - [ ] **HR007-004** Implement native lease epoch/expiry/renew/reassign transitions and WAL durability.
 - [ ] **HR007-005** Implement opaque lease timer effects and stale-token rejection.
 - [ ] **HR007-006** Implement Java authenticated capability collection and transport-only admission adapter.
