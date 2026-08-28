@@ -41,6 +41,11 @@ SOURCE_ARTIFACTS: Final = (
     "specs/006-regional-hierarchical-reduce/tasks.md",
     "specs/006-regional-hierarchical-reduce/tests/test_verify_hierarchy_execution.py",
 )
+EVIDENCE_OVERLAY_ARTIFACTS: Final = {
+    "specs/006-regional-hierarchical-reduce/evidence/final-compatibility.json",
+    "specs/006-regional-hierarchical-reduce/evidence/hierarchy-ci.json",
+    "specs/006-regional-hierarchical-reduce/evidence/native-hierarchy.json",
+}
 
 sys.path.insert(0, str(FEATURE / "scripts"))
 from verify_hierarchy_execution import verify_trace_dir  # noqa: E402
@@ -99,7 +104,12 @@ def validate_source(commit: str) -> list[dict[str, str]]:
     )
     require(not formal_diff, "FORMAL_SOURCE_DIFF_PRESENT", formal_diff)
     changed = set(git_text("diff", "--name-only", PREDECESSOR, commit).splitlines())
-    require(changed == set(SOURCE_ARTIFACTS), "SOURCE_SCOPE_INVALID", ",".join(sorted(changed)))
+    source_changed = changed - EVIDENCE_OVERLAY_ARTIFACTS
+    require(
+        source_changed == set(SOURCE_ARTIFACTS),
+        "SOURCE_SCOPE_INVALID",
+        ",".join(sorted(source_changed)),
+    )
     hierarchy = source_bytes(commit, "delta-core-cpp/src/reduce/hierarchy.cpp").decode()
     test = source_bytes(commit, "delta-core-cpp/tests/hierarchy_reduce_test.cpp").decode()
     ffi = source_bytes(commit, "delta-ffi/src/hierarchy_abi.cpp").decode()
