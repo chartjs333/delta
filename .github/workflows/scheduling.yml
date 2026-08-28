@@ -36,6 +36,8 @@ jobs:
           cmake --build --preset "cpp${{ matrix.standard }}" --parallel
           --target delta_scheduling_planner_test
           delta_scheduling_eligibility_test
+          delta_scheduling_lifecycle_test
+          delta_scheduling_durability_mutant_test
           delta_scheduling_adapt_work_mutant_test
           delta_scheduling_overlap_ranges_mutant_test
           delta_scheduling_skip_infeasibility_mutant_test
@@ -54,6 +56,9 @@ jobs:
           fi
           if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-admission.json ]; then
             python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_native_admission.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-lifecycle.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_native_lifecycle.py --check-only
           fi
 
   sanitizer:
@@ -81,7 +86,7 @@ jobs:
         run: >-
           cmake --build out/build/scheduling-sanitizer --parallel
           --target delta_scheduling_planner_test delta_scheduling_eligibility_test
-          delta_scheduling_contract_fuzz
+          delta_scheduling_lifecycle_test delta_scheduling_contract_fuzz
 
       - name: Run scheduling sanitizers
         run: >-
