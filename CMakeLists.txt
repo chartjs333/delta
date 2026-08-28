@@ -85,6 +85,16 @@ target_include_directories(
 target_link_libraries(delta_distribution PUBLIC delta::core)
 delta_target_defaults(delta_distribution)
 
+add_library(delta_hierarchy STATIC
+  delta-core-cpp/src/reduce/topology.cpp)
+add_library(delta::hierarchy ALIAS delta_hierarchy)
+set_target_properties(delta_hierarchy PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_hierarchy
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_hierarchy PUBLIC delta::fixedpoint)
+delta_target_defaults(delta_hierarchy)
+
 add_library(delta_runtime STATIC
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
@@ -254,6 +264,45 @@ if(BUILD_TESTING)
     delta_distribution_parser_fuzz PRIVATE DELTA_DISTRIBUTION_FUZZ_SMOKE_MAIN)
   delta_target_defaults(delta_distribution_parser_fuzz)
   add_test(NAME delta_core.distribution_parser_fuzz COMMAND delta_distribution_parser_fuzz)
+
+  add_executable(delta_hierarchy_test delta-core-cpp/tests/hierarchy_test.cpp)
+  target_link_libraries(delta_hierarchy_test PRIVATE delta::hierarchy)
+  target_compile_definitions(
+    delta_hierarchy_test
+    PRIVATE DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json")
+  delta_target_defaults(delta_hierarchy_test)
+  add_test(NAME delta_core.hierarchy COMMAND delta_hierarchy_test)
+
+  foreach(mutant IN ITEMS SKIP_COVERAGE SKIP_SHARD_COVERAGE UNCHECKED_OVERFLOW)
+    string(TOLOWER "${mutant}" mutant_lower)
+    set(mutant_library "delta_hierarchy_${mutant_lower}_mutant")
+    set(mutant_test "${mutant_library}_test")
+    add_library(${mutant_library} STATIC delta-core-cpp/src/reduce/topology.cpp)
+    target_include_directories(
+      ${mutant_library}
+      PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+    target_link_libraries(${mutant_library} PUBLIC delta::fixedpoint)
+    target_compile_definitions(${mutant_library} PRIVATE "DELTA_HIERARCHY_MUTANT_${mutant}")
+    delta_target_defaults(${mutant_library})
+    add_executable(${mutant_test} delta-core-cpp/tests/hierarchy_test.cpp)
+    target_link_libraries(${mutant_test} PRIVATE ${mutant_library})
+    target_compile_definitions(
+      ${mutant_test}
+      PRIVATE DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json")
+    delta_target_defaults(${mutant_test})
+    add_test(NAME "delta_core.hierarchy_mutant_${mutant_lower}" COMMAND ${mutant_test})
+    set_tests_properties(
+      "delta_core.hierarchy_mutant_${mutant_lower}" PROPERTIES WILL_FAIL TRUE)
+  endforeach()
+
+  add_executable(delta_hierarchy_parser_fuzz delta-core-cpp/fuzz/hierarchy_parser_fuzz.cpp)
+  target_link_libraries(delta_hierarchy_parser_fuzz PRIVATE delta::hierarchy)
+  target_compile_definitions(
+    delta_hierarchy_parser_fuzz
+    PRIVATE DELTA_HIERARCHY_FUZZ_SMOKE_MAIN
+            DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json")
+  delta_target_defaults(delta_hierarchy_parser_fuzz)
+  add_test(NAME delta_core.hierarchy_parser_fuzz COMMAND delta_hierarchy_parser_fuzz)
 
   add_executable(delta_core_transition_test delta-core-cpp/tests/transition_test.cpp)
   target_link_libraries(delta_core_transition_test PRIVATE delta::core)
