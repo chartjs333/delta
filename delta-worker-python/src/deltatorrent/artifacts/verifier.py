@@ -157,11 +157,17 @@ class BundleVerifier:
             raise DeltaError(ErrorCode.INVALID_MANIFEST, "CHECKPOINT_STATE_MISMATCH")
 
     def _verify_reference(self, reference: ArtifactRef) -> bytes:
-        expected_schema = self._media_schemas.get(reference.media_type)
-        if expected_schema is None:
+        if reference.media_type not in self._media_schemas:
             raise DeltaError(
                 ErrorCode.UNKNOWN_MEDIA_TYPE,
                 "artifact media type is not registered",
+                {"content_id": reference.content_id, "media_type": reference.media_type},
+            )
+        expected_schema = self._media_schemas[reference.media_type]
+        if expected_schema is None:
+            raise DeltaError(
+                ErrorCode.INVALID_SCHEMA_ID,
+                "shared denylisted media type cannot select an artifact schema",
                 {"content_id": reference.content_id, "media_type": reference.media_type},
             )
         if expected_schema != reference.schema_id:
@@ -174,7 +180,7 @@ class BundleVerifier:
         self._verified.add((reference.content_id, reference.locator))
         return value
 
-    def _load_registry(self) -> dict[str, str]:
+    def _load_registry(self) -> dict[str, str | None]:
         try:
             registry_bytes = self.registry_path.read_bytes()
         except OSError as exc:
@@ -204,15 +210,16 @@ class BundleVerifier:
             if actual != record["sha256"]:
                 raise DeltaError(ErrorCode.ARTIFACT_HASH_MISMATCH, "registry schema hash mismatch")
             schema_ids.add(str(record["id"]))
-        result: dict[str, str] = {}
+        result: dict[str, str | None] = {}
         for record in media_types:
             if not isinstance(record, dict) or set(record) != {"id", "schema_id", "value"}:
                 raise DeltaError(ErrorCode.INVALID_MANIFEST, "REGISTRY_MEDIA_TYPE_INVALID")
             schema_id = str(record["schema_id"])
             media_type = str(record["value"])
-            if schema_id not in schema_ids or media_type in result:
+            if schema_id not in schema_ids:
                 raise DeltaError(ErrorCode.INVALID_MANIFEST, "REGISTRY_MEDIA_TYPE_INVALID")
-            result[media_type] = schema_id
+            prior = result.get(media_type)
+            result[media_type] = schema_id if prior is None and media_type not in result else None
         return result
 
     def _read_trust_root(self, path: Path) -> bytes:

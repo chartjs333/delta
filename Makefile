@@ -38,6 +38,10 @@ DISTRIBUTION_FINAL := specs/005-content-addressed-p2p-distribution/scripts/verif
 HIERARCHY_PREFLIGHT := specs/006-regional-hierarchical-reduce/scripts/verify_preflight.py
 HIERARCHY_CONTRACTS := specs/006-regional-hierarchical-reduce/scripts/verify_protocol_contracts.py
 HIERARCHY_NATIVE_TOPOLOGY := specs/006-regional-hierarchical-reduce/scripts/verify_native_topology.py
+HIERARCHY_EXECUTION := specs/006-regional-hierarchical-reduce/scripts/verify_hierarchy_execution.py
+HIERARCHY_NATIVE := specs/006-regional-hierarchical-reduce/scripts/verify_native_hierarchy.py
+HIERARCHY_CI := specs/006-regional-hierarchical-reduce/scripts/capture_hierarchy_ci.py
+HIERARCHY_FINAL := specs/006-regional-hierarchical-reduce/scripts/verify_final_compatibility.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -47,7 +51,7 @@ HIERARCHY_NATIVE_TOPOLOGY := specs/006-regional-hierarchical-reduce/scripts/veri
 	fixedpoint-refinement fixedpoint-evidence fixedpoint-final fixedpoint-check \
 	distribution-preflight distribution-contracts distribution-refinement \
 	distribution-evidence distribution-final distribution-check hierarchy-preflight hierarchy-contracts \
-	hierarchy-native-topology
+	hierarchy-native-topology hierarchy-execution hierarchy-evidence hierarchy-final hierarchy-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -194,6 +198,22 @@ hierarchy-contracts: hierarchy-preflight
 hierarchy-native-topology: hierarchy-contracts
 	$(UV) run python $(HIERARCHY_NATIVE_TOPOLOGY) --check-only
 	$(UV) run pytest specs/006-regional-hierarchical-reduce/tests/test_verify_native_topology.py
+
+hierarchy-execution: hierarchy-native-topology
+	cmake --preset cpp20
+	cmake --build --preset cpp20 --parallel
+	ctest --preset cpp20 -R "delta_core.hierarchy|delta_ffi.hierarchy" --output-on-failure
+	$(UV) run python $(HIERARCHY_EXECUTION) --trace-dir out/build/cpp20/hierarchy-traces
+	$(UV) run pytest specs/006-regional-hierarchical-reduce/tests/test_verify_hierarchy_execution.py
+
+hierarchy-evidence: hierarchy-execution
+	$(UV) run python $(HIERARCHY_NATIVE) --check-only --trace-dir out/build/cpp20/hierarchy-traces
+	$(UV) run python $(HIERARCHY_CI) --check-only
+
+hierarchy-final: hierarchy-evidence
+	$(UV) run python $(HIERARCHY_FINAL) --check-only --trace-dir out/build/cpp20/hierarchy-traces
+
+hierarchy-check: python-check hierarchy-final
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

@@ -44,46 +44,46 @@ owns bounded routing and executes native effects without making mathematical or 
 
 ## Phase 3: Native regional committees
 
-- [ ] T015 [HR006-003] Derive each `(region,domain,shard)` input set from the exact frozen routing
+- [x] T015 [HR006-003] Derive each `(region,domain,shard)` input set from the exact frozen routing
   table and verify lineage/profile/proof roots.
-- [ ] T016 [HR006-003] Stream checked integer `a_j*q_j` operations into the exact regional
+- [x] T016 [HR006-003] Stream checked integer `a_j*q_j` operations into the exact regional
   numerator and metadata totals without q-to-float conversion or division.
-- [ ] T017 [HR006-003] Emit canonical regional result/vote/QC bodies through the feature-003
+- [x] T017 [HR006-003] Emit canonical regional result/vote/QC bodies through the feature-003
   persist-before-send and no-double-vote lifecycle.
-- [ ] T018 [HR006-008, HR006-009] Add unequal-count, duplicate/retry, conflict, restart,
+- [x] T018 [HR006-008, HR006-009] Add unequal-count, duplicate/retry, conflict, restart,
   proposer-failure, quorum-loss and artifact-repair/abort scenarios.
 
 ## Phase 4: Native global parameter committees
 
-- [ ] T019 [HR006-004] Require exactly one finalized regional result for every immutable required
+- [x] T019 [HR006-004] Require exactly one finalized regional result for every immutable required
   `(region,domain,shard)` key; exact replay is idempotent and conflict fails closed.
-- [ ] T020 [HR006-004] Sum regional integer numerators and exact count/coefficient/denominator
+- [x] T020 [HR006-004] Sum regional integer numerators and exact count/coefficient/denominator
   metadata with checked arithmetic and no average-of-averages.
-- [ ] T021 [HR006-004] Emit canonical global parameter result/vote/QC bodies with one uniform
+- [x] T021 [HR006-004] Emit canonical global parameter result/vote/QC bodies with one uniform
   topology/input/profile/proof/epoch context.
-- [ ] T022 [HR006-008, HR006-009] Add missing/duplicate/mixed-view/wrong-epoch/overflow/quorum-loss
+- [x] T022 [HR006-008, HR006-009] Add missing/duplicate/mixed-view/wrong-epoch/overflow/quorum-loss
   and recovery matrices.
 
 ## Phase 5: Complete hierarchy and exact flat oracle
 
-- [ ] T023 [HR006-005] Assemble complete exact domain×parameter-shard coverage in canonical order.
-- [ ] T024 [HR006-007] Compare three unequal regions, multiple domains and shards against the flat
+- [x] T023 [HR006-005] Assemble complete exact domain×parameter-shard coverage in canonical order.
+- [x] T024 [HR006-007] Compare three unequal regions, multiple domains and shards against the flat
   checked-integer C++ oracle byte-for-byte across arrival/parallel/retry permutations.
-- [ ] T025 [HR006-008] Kill hierarchy, unchecked-overflow, partial-coverage and
+- [x] T025 [HR006-008] Kill hierarchy, unchecked-overflow, partial-coverage and
   average-of-averages production mutants and export legal/illegal refinement traces.
 
 ## Phase 6: C ABI and Java routing only
 
-- [ ] T026 [HR006-006] Add bounded C ABI commands with synchronous borrowed-direct and owned-copy
+- [x] T026 [HR006-006] Add bounded C ABI commands with synchronous borrowed-direct and owned-copy
   parity; native retains no Java pointer.
-- [ ] T027 [HR006-006, HR006-007] Implement Java topology delivery, permissioned committee routing,
+- [x] T027 [HR006-006, HR006-007] Implement Java topology delivery, permissioned committee routing,
   bounded streams, deadlines, cancellation, backpressure, retry and telemetry without math/QC authority.
-- [ ] T028 [HR006-009] Add direct/copy, shuffled delivery, crash/restart, soft-view-change,
+- [x] T028 [HR006-009] Add direct/copy, shuffled delivery, crash/restart, soft-view-change,
   hard-abort and event-loop/lifetime conformance suites.
 
 ## Finalization
 
-- [ ] T029 [HR006-010, HR006-011] Regress the distribution denylist for every partial and measure
+- [x] T029 [HR006-010, HR006-011] Regress the distribution denylist for every partial and measure
   exact flat-versus-hierarchical cross-region objects/bytes without claiming WAN performance.
 - [ ] T030 [HR006-011] Publish theorem-instance, flat-equivalence, compiler/JDK, sanitizer,
   transport, failure/refinement and final Constitution 2.1.0 compatibility evidence.

@@ -24,6 +24,7 @@ extern "C" {
 #define DELTA_ABI_DESCRIPTOR_SIZE UINT32_C(64)
 #define DELTA_ABI_OPEN_OPTIONS_SIZE UINT32_C(128)
 #define DELTA_ABI_OUTPUT_BUFFER_SIZE UINT32_C(32)
+#define DELTA_HIERARCHY_CONTEXT_SIZE UINT32_C(168)
 #define DELTA_SCHEMA_VERSION "1.0.0"
 #define DELTA_PROTOCOL_VERSION "003.1.0"
 #define DELTA_RUNTIME_PROFILE "embedded-ffm"
@@ -94,6 +95,21 @@ typedef struct delta_runtime_open_options {
   delta_bytes_view_t expected_schema_set_id;
 } delta_runtime_open_options_t;
 
+typedef struct delta_hierarchy_context {
+  uint32_t struct_size;
+  uint32_t reserved;
+  delta_bytes_view_t accumulator_proof_instance_id;
+  delta_bytes_view_t coefficient_plan_root;
+  delta_bytes_view_t fixedpoint_config_id;
+  delta_bytes_view_t formal_semantics_id;
+  delta_bytes_view_t frozen_input_root;
+  delta_bytes_view_t parent_checkpoint_id;
+  delta_bytes_view_t profile_id;
+  delta_bytes_view_t round_config_id;
+  delta_bytes_view_t scale_table_id;
+  delta_bytes_view_t shard_plan_id;
+} delta_hierarchy_context_t;
+
 DELTA_API delta_status_t delta_runtime_descriptor(
     uint32_t caller_struct_size,
     delta_runtime_descriptor_t* output);
@@ -129,6 +145,16 @@ DELTA_API delta_status_t delta_distribution_policy_evaluate_copy(
     delta_bytes_view_t canonical_manifest,
     delta_bytes_view_t canonical_certificate,
     uint8_t request_make_current,
+    delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_hierarchy_contract_validate_borrowed(
+    const delta_hierarchy_context_t* expected_context,
+    delta_bytes_view_t canonical_topology,
+    delta_bytes_view_t canonical_proof,
+    delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_hierarchy_contract_validate_copy(
+    const delta_hierarchy_context_t* expected_context,
+    delta_bytes_view_t canonical_topology,
+    delta_bytes_view_t canonical_proof,
     delta_output_buffer_t* effect_output);
 
 #ifdef __cplusplus

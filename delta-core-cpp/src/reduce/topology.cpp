@@ -281,7 +281,7 @@ void validate_sorted_labels(const std::vector<std::string>& values, const char* 
           "topology label is invalid");
 }
 
-[[nodiscard]] bool fits_width(
+[[maybe_unused, nodiscard]] bool fits_width(
     delta::core::arithmetic::Int128 value,
     delta::core::arithmetic::AccumulatorWidth width) noexcept {
   if (width == delta::core::arithmetic::AccumulatorWidth::int128) {
@@ -657,7 +657,7 @@ void validate_topology(const Topology& topology, const Limits& limits) {
   }
 
   std::set<std::string> shard_ids;
-  std::uint64_t expected_start = 0U;
+  [[maybe_unused]] std::uint64_t expected_start = 0U;
   std::string prior_shard;
   for (const auto& shard : topology.shards) {
     require(label_valid(shard.shard_id) && shard_ids.insert(shard.shard_id).second,
@@ -693,7 +693,7 @@ void validate_hierarchy_proof(
   const auto expected_product = proof_multiply(
       delta::core::arithmetic::Int128::from_u64(proof.q_abs_max),
       delta::core::arithmetic::Int128::from_u64(proof.coefficient_abs_max));
-  const auto expected_final = proof_multiply(
+  [[maybe_unused]] const auto expected_final = proof_multiply(
       expected_product,
       delta::core::arithmetic::Int128::from_u64(proof.max_eligible_contributions));
 #if !defined(DELTA_HIERARCHY_MUTANT_UNCHECKED_OVERFLOW)
