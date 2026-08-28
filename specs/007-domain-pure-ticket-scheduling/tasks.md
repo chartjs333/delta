@@ -21,17 +21,17 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
 
 ## Phase 1: Runtime-neutral canonical contracts
 
-- [ ] T005 [HR007-001] Freeze canonical `DomainTicketPolicy`, dataset allocation constraints and
+- [x] T005 [HR007-001] Freeze canonical `DomainTicketPolicy`, dataset allocation constraints and
   immutable `WorkTicket` schemas with exact domain/data/B/H/parent/profile context.
-- [ ] T006 [HR007-001] Freeze `CapabilityProfile`, `EligibilityDecision` and stable reason-code
+- [x] T006 [HR007-001] Freeze `CapabilityProfile`, `EligibilityDecision` and stable reason-code
   schemas without coefficient, mixture or robust-weight outputs.
-- [ ] T007 [HR007-001] Freeze `RoundTicketPlan`, `TicketLease`, bounded renewal and prior-lease
+- [x] T007 [HR007-001] Freeze `RoundTicketPlan`, `TicketLease`, bounded renewal and prior-lease
   lineage schemas.
-- [ ] T008 [HR007-001, HR007-005] Freeze opaque native lease-timer token and exact infeasibility
+- [x] T008 [HR007-001, HR007-005] Freeze opaque native lease-timer token and exact infeasibility
   report schemas with logical deadlines and bounded transition policy.
-- [ ] T009 [HR007-001, HR007-007] Register schema/media/domain IDs and add valid, invalid and
+- [x] T009 [HR007-001, HR007-007] Register schema/media/domain IDs and add valid, invalid and
   cross-language fixtures for permutations, mismatches and forbidden math fields.
-- [ ] T010 [HR007-001, HR007-012] Publish deterministic contract evidence and parser/allocation
+- [x] T010 [HR007-001, HR007-012] Publish deterministic contract evidence and parser/allocation
   limits; no C++/Java production scheduling source may precede this gate.
 
 ## Phase 2: Native exact ticket planner

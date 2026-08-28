@@ -1,6 +1,6 @@
 # Checklist: 007 Scheduling Runtime
 
-**Status**: Reconciled with Constitution 2.1.0; implementation gates remain open.
+**Status**: Preflight and canonical-contract gates pass; native implementation starts at T011.
 
 - [x] C++ owns all plan and lease state transitions.
 - [x] Java capability collection cannot change mathematical weights.
@@ -9,4 +9,4 @@
 - [x] Lease/commit races and recovery are formal trace gates.
 - [x] Python has no planning, admission, lease or commitment-ordering authority.
 - [x] Exact feature-006 predecessor and Formal GO preflight evidence passes.
-- [ ] Canonical scheduling schemas and cross-language fixtures are frozen before production code.
+- [x] Canonical scheduling schemas and cross-language fixtures are frozen before production code.
