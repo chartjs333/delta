@@ -70,11 +70,11 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
 
 ## Phase 5: C ABI and Java transport/admission only
 
-- [ ] T024 [HR007-006] Add bounded C ABI commands/effects with synchronous borrowed-direct and
+- [x] T024 [HR007-006] Add bounded C ABI commands/effects with synchronous borrowed-direct and
   owned-copy parity; native retains no Java-owned pointer.
-- [ ] T025 [HR007-005, HR007-006] Implement Java authenticated capability collection, bounded plan/
+- [x] T025 [HR007-005, HR007-006] Implement Java authenticated capability collection, bounded plan/
   lease transport, opaque timer callbacks, backpressure, cancellation and telemetry without decisions.
-- [ ] T026 [HR007-006, HR007-007] Add JDK 25/26 FFM conformance and static authority tests proving
+- [x] T026 [HR007-006, HR007-007] Add JDK 25/26 FFM conformance and static authority tests proving
   Java cannot alter eligibility, epoch, deadlines, ticket math or commitment ordering.
 
 ## Phase 6: Refinement, quality and final evidence

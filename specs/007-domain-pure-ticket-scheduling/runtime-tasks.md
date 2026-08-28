@@ -7,8 +7,8 @@ production work before the exact predecessor/Formal GO and canonical contract ga
 - [x] **HR007-002** Implement C++ exact domain quota/data/ticket planner.
 - [x] **HR007-003** Implement C++ capability-policy validator and math-neutral lease allocation.
 - [x] **HR007-004** Implement native lease epoch/expiry/renew/reassign transitions and WAL durability.
-- [ ] **HR007-005** Implement opaque lease timer effects and stale-token rejection.
-- [ ] **HR007-006** Implement Java authenticated capability collection and transport-only admission adapter.
+- [x] **HR007-005** Implement opaque lease timer effects and stale-token rejection.
+- [x] **HR007-006** Implement Java authenticated capability collection and transport-only admission adapter.
 - [ ] **HR007-007** Add static/schema test proving device speed/memory cannot enter `pi_d`, `a_j` or robust coefficients.
 - [ ] **HR007-008** Add 50-worker input permutation and fast/slow ownership scenarios.
 - [x] **HR007-009** Add commit-versus-expiry, old/new holder, restart/replay and max-epoch tests.
