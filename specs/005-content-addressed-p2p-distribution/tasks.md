@@ -79,9 +79,9 @@ plane and executes native decisions. `task-map.md` is normative.
   logging payloads or claiming WAN performance.
 - [x] T030 Document object, policy, C ABI/FFM, peer, CAS/journal and recovery protocols plus claim
   boundaries.
-- [ ] T031 [HR005-013] Publish content-addressed contracts, policy, compiler/JDK, memory lifetime,
+- [x] T031 [HR005-013] Publish content-addressed contracts, policy, compiler/JDK, memory lifetime,
   backpressure, seed-loss and refinement evidence.
-- [ ] T032 Run cross-artifact consistency, complete offline quality gate and final Constitution
+- [x] T032 Run cross-artifact consistency, complete offline quality gate and final Constitution
   2.1.0 check; emit deterministic compatibility evidence.
 
 ## Dependencies

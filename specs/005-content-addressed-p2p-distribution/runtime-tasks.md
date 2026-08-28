@@ -12,7 +12,7 @@
 - [x] **HR005-010** Add corrupt/oversized/endless/truncated/parser allocation tests.
 - [x] **HR005-011** Add seed-loss, registry outage, restart and incomplete-union scenarios.
 - [x] **HR005-012** Add native certification downgrade and forbidden-media negative traces.
-- [ ] **HR005-013** Publish P2P, memory-lifetime, backpressure, policy and formal-refinement evidence.
+- [x] **HR005-013** Publish P2P, memory-lifetime, backpressure, policy and formal-refinement evidence.
 
 ## STOP rule
 
