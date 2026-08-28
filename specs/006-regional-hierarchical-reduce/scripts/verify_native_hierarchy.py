@@ -76,8 +76,11 @@ def source_bytes(commit: str, path: str) -> bytes:
 def validate_source(commit: str) -> list[dict[str, str]]:
     require(git_text("rev-parse", f"{commit}^{{commit}}") == commit, "SOURCE_COMMIT_INVALID")
     require(
-        git_text("rev-parse", f"{commit}^") == git_text("rev-parse", PREDECESSOR),
-        "SOURCE_PARENT_INVALID",
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", PREDECESSOR, commit], cwd=ROOT
+        ).returncode
+        == 0,
+        "SOURCE_PREDECESSOR_INVALID",
     )
     require(
         subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"], cwd=ROOT).returncode
@@ -186,7 +189,10 @@ def build(commit: str, trace_root: Path) -> dict[str, Any]:
             "cpp20": {"compiler": "MSVC 19.29", "ctest_passed": 37, "status": "PASS"},
             "cpp23": {"compiler": "MSVC 19.29", "hierarchy_ctest_passed": 10, "status": "PASS"},
             "jdk25": {"version": "25.0.4.1", "status": "PASS"},
-            "jdk26": {"version": "26.0.2", "status": "PASS"},
+            "jdk26": {
+                "coverage": "COVERED_BY_EXACT_SOURCE_CI_MATRIX",
+                "status": "NOT_RUN_LOCALLY",
+            },
         },
         "phase": "006-native-hierarchy",
         "schema_version": "1.0.0",
