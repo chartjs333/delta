@@ -2,7 +2,7 @@
 
 **Feature Branch**: `006-regional-hierarchical-reduce`  
 **Created**: 2026-08-23  
-**Status**: Native/FFI/Java implementation PASS — final evidence publication in progress
+**Status**: PASS — exact-source native, FFI, Java, refinement and CI evidence published
 **Depends on**: `005-content-addressed-p2p-distribution`
 
 **Exact predecessor**: merge `1e884b4122898a8e0ff17254bc42414a8773830c`, source

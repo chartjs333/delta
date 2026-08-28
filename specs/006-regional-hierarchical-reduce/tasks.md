@@ -85,7 +85,7 @@ owns bounded routing and executes native effects without making mathematical or 
 
 - [x] T029 [HR006-010, HR006-011] Regress the distribution denylist for every partial and measure
   exact flat-versus-hierarchical cross-region objects/bytes without claiming WAN performance.
-- [ ] T030 [HR006-011] Publish theorem-instance, flat-equivalence, compiler/JDK, sanitizer,
+- [x] T030 [HR006-011] Publish theorem-instance, flat-equivalence, compiler/JDK, sanitizer,
   transport, failure/refinement and final Constitution 2.1.0 compatibility evidence.
 
 ## Dependencies

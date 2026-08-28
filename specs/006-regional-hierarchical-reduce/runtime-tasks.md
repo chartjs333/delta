@@ -10,4 +10,4 @@
 - [x] **HR006-008** Add missing/duplicate/overlap/mixed-view/overflow/quorum-loss negative matrix.
 - [x] **HR006-009** Add committee crash/restart and post-ISC artifact repair/abort traces.
 - [x] **HR006-010** Add P2P denylist tests for every regional/global partial media type.
-- [ ] **HR006-011** Measure cross-region objects/bytes versus flat fan-in and publish theorem-instance, flat-equivalence, transport and refinement evidence.
+- [x] **HR006-011** Measure cross-region objects/bytes versus flat fan-in and publish theorem-instance, flat-equivalence, transport and refinement evidence.
