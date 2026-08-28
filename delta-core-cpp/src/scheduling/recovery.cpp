@@ -746,14 +746,15 @@ class LeaseStateMachine::Impl final {
           bytes.size() - cursor >= 8U,
           ErrorCode::canonical_json_invalid,
           "scheduling journal has a partial header");
-      Reader header(std::span(bytes).subspan(cursor, 8U));
+      Reader header(std::span<const std::byte>(bytes.data(), bytes.size()).subspan(cursor, 8U));
       require(equal_magic(header.take(4U)), ErrorCode::canonical_json_invalid, "journal magic mismatch");
       const auto length = static_cast<std::size_t>(header.u32());
       require(
           length <= maximum_frame_size && length <= bytes.size() - cursor,
           ErrorCode::canonical_json_invalid,
           "scheduling journal frame is truncated");
-      const auto event = decode_event(std::span(bytes).subspan(cursor, length));
+      const auto event = decode_event(
+          std::span<const std::byte>(bytes.data(), bytes.size()).subspan(cursor, length));
       apply_event(event, true);
       cursor += length;
     }

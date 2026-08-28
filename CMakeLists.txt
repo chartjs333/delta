@@ -129,14 +129,16 @@ add_library(delta_ffi SHARED
   delta-ffi/src/delta_abi.cpp
   delta-ffi/src/distribution_abi.cpp
   delta-ffi/src/fixedpoint_abi.cpp
-  delta-ffi/src/hierarchy_abi.cpp)
+  delta-ffi/src/hierarchy_abi.cpp
+  delta-ffi/src/scheduling_abi.cpp)
 add_library(delta::ffi ALIAS delta_ffi)
 target_include_directories(
   delta_ffi
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include>)
 target_compile_definitions(delta_ffi PRIVATE DELTA_FFI_BUILD)
 target_link_libraries(
-  delta_ffi PUBLIC delta::runtime delta::shards delta::distribution delta::hierarchy)
+  delta_ffi PUBLIC delta::runtime delta::shards delta::distribution delta::hierarchy
+                   delta::scheduling)
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
@@ -589,6 +591,14 @@ if(BUILD_TESTING)
     PRIVATE DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_hierarchy_test)
   add_test(NAME delta_ffi.hierarchy COMMAND delta_ffi_hierarchy_test)
+
+  add_executable(delta_ffi_scheduling_test delta-ffi/tests/scheduling_abi_test.cpp)
+  target_link_libraries(delta_ffi_scheduling_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_scheduling_test
+    PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+  delta_target_defaults(delta_ffi_scheduling_test)
+  add_test(NAME delta_ffi.scheduling COMMAND delta_ffi_scheduling_test)
 
   add_executable(delta_ffi_fuzz_smoke_test delta-ffi/tests/fuzz_smoke_test.cpp)
   target_link_libraries(delta_ffi_fuzz_smoke_test PRIVATE delta::ffi)
