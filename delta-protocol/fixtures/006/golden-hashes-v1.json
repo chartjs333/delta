@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    {
+      "path": "cross-language/golden-v1.json",
+      "sha256": "ef7df37b90e88386633e6699d2f63c2bb20d1f862742a3acdc63ec66bd668a5b"
+    },
+    {
+      "path": "invalid/hierarchy-negative-v1.json",
+      "sha256": "f2f3e4daab3465f0140e05f4e5f8b99d8752dff21d780669b5859e73cbc060b6"
+    },
+    {
+      "path": "valid/hierarchy-contract-v1.json",
+      "sha256": "c2b16b6ee7442fc1a72ceb1fde484faa18216ea765c6ddfb1feeb9d0a32fd531"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "schema_version": "1.0.0",
+  "type_name": "HIERARCHY_GOLDEN_HASH_MANIFEST"
+}

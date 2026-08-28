@@ -25,3 +25,10 @@ storage, verified-piece-only advertisements, deterministic multi-peer repair and
 cannot construct an `ACCEPT`, reinterpret an aggregate as current or distribute worker-local
 partials. Dependencies and JDK 25/26 lanes are frozen in `distribution-dependencies.lock.json` and
 `toolchains.toml`; CI provisions them by size/SHA-256 and runs offline afterward.
+
+Feature 006 adds `NativeHierarchy` and `HierarchyRouter`. Native C++ validates the canonical
+topology/theorem instance and remains the sole owner of partition, arithmetic and committee-QC
+semantics. Java binds its routing projection to the returned topology ID and moves only bounded
+opaque bytes through permissioned regional queues with deadline, cancellation, retry,
+backpressure and telemetry controls. It exposes no sum, averaging, signer-selection or QC-building
+API.

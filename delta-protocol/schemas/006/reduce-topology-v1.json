@@ -1,0 +1,100 @@
+{
+  "$id": "urn:deltareduce:schema:reduce-topology:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "coefficient_plan_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "domains": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "fixedpoint_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_semantics_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "frozen_input_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "hard_deadline_tick": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scale_table_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "shard_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "shards": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "soft_deadline_tick": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "type_name": {
+      "const": "REDUCE_TOPOLOGY"
+    },
+    "validator_epoch": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "accumulator_proof_instance_id",
+    "coefficient_plan_root",
+    "domains",
+    "fixedpoint_config_id",
+    "formal_semantics_id",
+    "frozen_input_root",
+    "hard_deadline_tick",
+    "parent_checkpoint_id",
+    "profile_id",
+    "round_config_id",
+    "scale_table_id",
+    "schema_version",
+    "shard_plan_id",
+    "shards",
+    "soft_deadline_tick",
+    "type_name",
+    "validator_epoch"
+  ],
+  "title": "DeltaReduce immutable regional reduce topology v1",
+  "type": "object"
+}

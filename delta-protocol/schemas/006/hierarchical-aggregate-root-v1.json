@@ -1,0 +1,95 @@
+{
+  "$id": "urn:deltareduce:schema:hierarchical-aggregate-root:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "coefficient_plan_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "coverage": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "fixedpoint_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_semantics_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "frozen_input_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "hierarchy_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "required_domain_shards": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scale_table_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "shard_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "topology_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "type_name": {
+      "const": "HIERARCHICAL_AGGREGATE_ROOT"
+    }
+  },
+  "required": [
+    "accumulator_proof_instance_id",
+    "coefficient_plan_root",
+    "coverage",
+    "fixedpoint_config_id",
+    "formal_semantics_id",
+    "frozen_input_root",
+    "hierarchy_proof_instance_id",
+    "parent_checkpoint_id",
+    "profile_id",
+    "required_domain_shards",
+    "round_config_id",
+    "scale_table_id",
+    "schema_version",
+    "shard_plan_id",
+    "topology_id",
+    "type_name"
+  ],
+  "title": "DeltaReduce complete hierarchical aggregate root v1",
+  "type": "object"
+}

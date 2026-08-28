@@ -1,0 +1,107 @@
+{
+  "$id": "urn:deltareduce:schema:global-regional-set:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "coefficient_plan_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "domain_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "fixedpoint_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_semantics_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "frozen_input_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "hierarchy_proof_instance_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "regional_results": {
+      "items": {
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "required_regions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scale_table_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "shard_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shard_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "topology_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "type_name": {
+      "const": "GLOBAL_REGIONAL_SET"
+    }
+  },
+  "required": [
+    "accumulator_proof_instance_id",
+    "coefficient_plan_root",
+    "domain_id",
+    "fixedpoint_config_id",
+    "formal_semantics_id",
+    "frozen_input_root",
+    "hierarchy_proof_instance_id",
+    "parent_checkpoint_id",
+    "profile_id",
+    "regional_results",
+    "required_regions",
+    "round_config_id",
+    "scale_table_id",
+    "schema_version",
+    "shard_id",
+    "shard_plan_id",
+    "topology_id",
+    "type_name"
+  ],
+  "title": "DeltaReduce exact global regional set v1",
+  "type": "object"
+}

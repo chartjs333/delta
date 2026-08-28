@@ -1,0 +1,174 @@
+name: Feature 006 hierarchy verification
+
+on:
+  push:
+    branches: [006-regional-hierarchical-reduce]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hierarchy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Native C++${{ matrix.standard }} hierarchy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        standard: [20, 23]
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Configure native hierarchy
+        run: cmake --preset "cpp${{ matrix.standard }}"
+
+      - name: Build native hierarchy and production mutants
+        run: cmake --build --preset "cpp${{ matrix.standard }}" --parallel
+
+      - name: Verify topology, reducers, durability, ABI and flat equivalence
+        run: ctest --preset "cpp${{ matrix.standard }}" -R "delta_core.hierarchy|delta_ffi.hierarchy" --output-on-failure
+
+      - name: Verify implementation-derived hierarchy refinement traces
+        run: >-
+          python3 specs/006-regional-hierarchical-reduce/scripts/verify_hierarchy_execution.py
+          --trace-dir "out/build/cpp${{ matrix.standard }}/hierarchy-traces"
+
+  sanitizer:
+    name: Clang ASan UBSan hierarchy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Configure hierarchy sanitizers
+        run: >-
+          cmake -S . -B out/build/hierarchy-sanitizer
+          -DBUILD_TESTING=ON
+          -DDELTA_CXX_STANDARD=20
+          -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+          -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
+
+      - name: Build hierarchy sanitizer targets
+        run: >-
+          cmake --build out/build/hierarchy-sanitizer --parallel
+          --target delta_hierarchy_test delta_hierarchy_parser_fuzz
+          delta_hierarchy_reduce_test delta_ffi_hierarchy_test
+
+      - name: Run hierarchy sanitizers
+        run: >-
+          ctest --test-dir out/build/hierarchy-sanitizer
+          -R "delta_core.hierarchy$|delta_core.hierarchy_parser_fuzz|delta_core.hierarchy_reduce|delta_ffi.hierarchy"
+          --output-on-failure
+
+  java-routing:
+    name: JDK ${{ matrix.feature }} hierarchy FFM routing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir --parents "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" --directory "$RUNNER_TEMP/jdk" --strip-components=1
+
+      - name: Build native FFM hierarchy library
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_ffi
+
+      - name: Compile Java routing layer offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          mkdir --parents "$RUNNER_TEMP/java-classes"
+          "$RUNNER_TEMP/jdk/bin/javac" --release "${{ matrix.feature }}" \
+            -d "$RUNNER_TEMP/java-classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/hierarchy/NativeHierarchy.java \
+            delta-node-java/src/main/java/io/deltareduce/node/hierarchy/HierarchyRouter.java \
+            delta-node-java/src/test/java/io/deltareduce/node/hierarchy/HierarchyConformance.java
+
+      - name: Verify FFM parity and routing conformance offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "${{ matrix.version }}"
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.hierarchy.HierarchyConformance \
+            "$GITHUB_WORKSPACE/out/build/cpp20/libdelta_ffi.so" \
+            "$GITHUB_WORKSPACE/delta-protocol/fixtures/006/cross-language/golden-v1.json"
+
+  phase-gate:
+    name: Feature 006 final evidence
+    needs: [native, sanitizer, java-routing]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Reproduce C++20 hierarchy traces
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_hierarchy_reduce_test
+          ctest --preset cpp20 -R "delta_core.hierarchy_(reduce|trace_export)" --output-on-failure
+
+      - name: Verify committed final evidence overlay when present
+        run: |
+          if [ -f specs/006-regional-hierarchical-reduce/evidence/final-compatibility.json ]; then
+            python3 specs/006-regional-hierarchical-reduce/scripts/verify_native_hierarchy.py \
+              --check-only --trace-dir out/build/cpp20/hierarchy-traces
+            python3 specs/006-regional-hierarchical-reduce/scripts/capture_hierarchy_ci.py --check-only
+            python3 specs/006-regional-hierarchical-reduce/scripts/verify_final_compatibility.py \
+              --check-only --trace-dir out/build/cpp20/hierarchy-traces
+          fi

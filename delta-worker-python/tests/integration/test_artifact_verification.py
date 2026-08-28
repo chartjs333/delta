@@ -17,6 +17,24 @@ CONFIG = ROOT / "configs" / "baseline" / "cpu-smoke-v1.json"
 REGISTRY = ROOT / "delta-protocol" / "registry.json"
 
 
+def test_shared_partial_media_type_cannot_select_artifact_schema(tmp_path: Path) -> None:
+    verifier = BundleVerifier(tmp_path, REGISTRY)
+    reference = ArtifactRef(
+        content_id="sha256:" + "0" * 64,
+        media_type="application/vnd.deltareduce.regional-partial;version=1",
+        schema_id="SCHEMA-REGIONAL-SHARD-RESULT-V1",
+        schema_version="1.0.0",
+        byte_length=0,
+        locator="partials/forbidden.json",
+    )
+
+    with pytest.raises(DeltaError) as captured:
+        verifier._verify_reference(reference)
+
+    assert captured.value.code is ErrorCode.INVALID_SCHEMA_ID
+    assert "shared denylisted media type" in captured.value.message
+
+
 @pytest.fixture(scope="module")
 def verified_bundle(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, BaselineRunResult]:
     output = tmp_path_factory.mktemp("verified-bundle")
