@@ -1,0 +1,97 @@
+{
+  "$id": "urn:deltareduce:schema:infeasibility-report:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "INFEASIBILITY_REPORT"
+    },
+    "assignment_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "hard_deadline_tick": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "immutable_policy_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "outcome": {
+      "const": "INFEASIBLE"
+    },
+    "reason_codes": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "unmet_constraints": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "available_slots": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "domain_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          },
+          "required_slots": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "available_slots",
+          "domain_id",
+          "required_slots"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "assignment_policy_id",
+    "formal_semantics_id",
+    "hard_deadline_tick",
+    "immutable_policy_ids",
+    "outcome",
+    "reason_codes",
+    "round_config_id",
+    "schema_version",
+    "type_name",
+    "unmet_constraints"
+  ],
+  "title": "DeltaReduce infeasibility-report v1",
+  "type": "object"
+}

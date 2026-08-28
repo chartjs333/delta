@@ -43,6 +43,7 @@ HIERARCHY_NATIVE := specs/006-regional-hierarchical-reduce/scripts/verify_native
 HIERARCHY_CI := specs/006-regional-hierarchical-reduce/scripts/capture_hierarchy_ci.py
 HIERARCHY_FINAL := specs/006-regional-hierarchical-reduce/scripts/verify_final_compatibility.py
 SCHEDULING_PREFLIGHT := specs/007-domain-pure-ticket-scheduling/scripts/verify_preflight.py
+SCHEDULING_CONTRACTS := specs/007-domain-pure-ticket-scheduling/scripts/verify_protocol_contracts.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -53,7 +54,7 @@ SCHEDULING_PREFLIGHT := specs/007-domain-pure-ticket-scheduling/scripts/verify_p
 	distribution-preflight distribution-contracts distribution-refinement \
 	distribution-evidence distribution-final distribution-check hierarchy-preflight hierarchy-contracts \
 	hierarchy-native-topology hierarchy-execution hierarchy-evidence hierarchy-final hierarchy-check \
-	scheduling-preflight
+	scheduling-preflight scheduling-contracts
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -220,6 +221,11 @@ hierarchy-check: python-check hierarchy-final
 scheduling-preflight:
 	$(UV) run python $(SCHEDULING_PREFLIGHT) --check-only
 	$(UV) run pytest specs/007-domain-pure-ticket-scheduling/tests/test_verify_preflight.py
+
+scheduling-contracts: scheduling-preflight
+	$(UV) run python specs/007-domain-pure-ticket-scheduling/scripts/scheduling_contracts.py --check
+	$(UV) run python $(SCHEDULING_CONTRACTS) --check-only
+	$(UV) run pytest specs/007-domain-pure-ticket-scheduling/tests/test_scheduling_contracts.py
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

@@ -1,0 +1,156 @@
+{
+  "$id": "urn:deltareduce:schema:round-ticket-plan:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "ROUND_TICKET_PLAN"
+    },
+    "assignment_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "capability_snapshot_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "decisions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "decision_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "worker_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision_id",
+          "worker_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "lease_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "hard_deadline_tick": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "lease_duration_ticks": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maximum_lease_epochs": {
+          "maximum": 1024,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maximum_renewals": {
+          "maximum": 64,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "hard_deadline_tick",
+        "lease_duration_ticks",
+        "maximum_lease_epochs",
+        "maximum_renewals"
+      ],
+      "type": "object"
+    },
+    "parameter_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "policies": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "domain_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          },
+          "policy_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain_id",
+          "policy_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "tickets": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "ticket_content_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "ticket_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticket_content_id",
+          "ticket_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "assignment_policy_id",
+    "capability_snapshot_root",
+    "decisions",
+    "formal_semantics_id",
+    "lease_policy",
+    "parameter_schema_id",
+    "parent_checkpoint_id",
+    "policies",
+    "round_config_id",
+    "schema_version",
+    "tickets",
+    "type_name"
+  ],
+  "title": "DeltaReduce round-ticket-plan v1",
+  "type": "object"
+}

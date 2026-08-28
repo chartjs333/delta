@@ -178,3 +178,7 @@ jobs:
           if [ -f specs/007-domain-pure-ticket-scheduling/evidence/preflight.json ]; then
             uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_preflight.py --check-only
           fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/protocol-contracts.json ]; then
+            uv run python specs/007-domain-pure-ticket-scheduling/scripts/scheduling_contracts.py --check
+            uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_protocol_contracts.py --check-only
+          fi

@@ -1,0 +1,113 @@
+{
+  "$id": "urn:deltareduce:schema:domain-ticket-policy:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "DOMAIN_TICKET_POLICY"
+    },
+    "allocation_policy": {
+      "enum": [
+        "CONTIGUOUS_NO_OVERLAP"
+      ]
+    },
+    "arithmetic_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "batch_budget": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "dataset_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "domain_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    },
+    "eligibility_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "mixture_coefficient_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "parameter_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "region_ids": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "step_budget": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "ticket_count": {
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "token_cursor_end": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "token_cursor_start": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "allocation_policy",
+    "arithmetic_profile_id",
+    "batch_budget",
+    "dataset_manifest_id",
+    "domain_id",
+    "eligibility_policy_id",
+    "formal_semantics_id",
+    "mixture_coefficient_id",
+    "parameter_schema_id",
+    "parent_checkpoint_id",
+    "region_ids",
+    "round_config_id",
+    "schema_version",
+    "step_budget",
+    "ticket_count",
+    "token_cursor_end",
+    "token_cursor_start",
+    "type_name"
+  ],
+  "title": "DeltaReduce domain-ticket-policy v1",
+  "type": "object"
+}
