@@ -603,12 +603,16 @@ def write_registries() -> None:
         capture_output=True,
     ).stdout
     root = json.loads(baseline.decode("utf-8"))
-    root["schemas"] = [
-        item for item in root["schemas"] if not str(item["path"]).startswith("schemas/005/")
-    ] + schema_records
-    root["fixtures"] = [
-        item for item in root["fixtures"] if not str(item["path"]).startswith("fixtures/005/")
-    ] + fixture_records
+    root["schemas"] = sorted(
+        [item for item in root["schemas"] if not str(item["path"]).startswith("schemas/005/")]
+        + schema_records,
+        key=lambda item: str(item["path"]),
+    )
+    root["fixtures"] = sorted(
+        [item for item in root["fixtures"] if not str(item["path"]).startswith("fixtures/005/")]
+        + fixture_records,
+        key=lambda item: str(item["path"]),
+    )
     root["extensions"] = [
         item for item in root["extensions"] if item["id"] != "REGISTRY-DISTRIBUTION-005-V1"
     ] + [

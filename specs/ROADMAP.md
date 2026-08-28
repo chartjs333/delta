@@ -13,9 +13,9 @@ compiler/sanitizer, refinement and final `REFINEMENT_ONLY` gates passed. Its ver
 `f4f2101969d14709834ab6b6d60e88755d710334`. Feature 004 merged as
 `bd31efaa6d521bbfc3362ad9aac39455bd29a098`; its verified source is
 `22dd996b5d169763bfde49f32c1b1b18f2656493` and evidence overlay is
-`29fb4138499a348f90d6bbc44e77fe6d1914e25f`. Feature 005 is restacked on that merge and remains
-implementation-blocked until its content-addressed predecessor/formal/policy/architecture
-preflight passes.
+`29fb4138499a348f90d6bbc44e77fe6d1914e25f`. Feature 005 is restacked on that merge; its exact
+predecessor/formal/policy/architecture preflight and implementation gates pass, with final
+content-addressed execution evidence pending.
 
 ## Branch topology
 

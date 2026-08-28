@@ -37,3 +37,9 @@ content-addressed feature-003 evidence.
 Feature-004 profile, proof, cross-language shard and direct-q fixtures live under
 `delta-protocol/fixtures/004/`. `make fixedpoint-refinement` reproduces their contract,
 architecture, proof-instance and formal-refinement gates.
+
+Feature 005 adds the standard-library-only distribution certification boundary. It accepts only
+bounded canonical manifest/certificate bytes under the exact frozen policy registry and rejects
+unknown/inactive/weaker policy, forbidden media, wrong lineage/root and aggregate-as-current use.
+Piece layout is exact, contiguous and bounded. Production mutants weaken policy downgrade,
+forbidden-media and canonical parsing checks; all are required to fail the real test suite.

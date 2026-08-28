@@ -31,53 +31,53 @@ plane and executes native decisions. `task-map.md` is normative.
 
 ## Phase 2: Toolchains and native certification boundary
 
-- [ ] T011 [HR005-001] Bind pinned JDK 25, JDK 26 compatibility, native compilers and offline
+- [x] T011 [HR005-001] Bind pinned JDK 25, JDK 26 compatibility, native compilers and offline
   dependency/tool execution manifests.
-- [ ] T012 [HR005-003] Implement native canonical manifest and certification-policy verifier.
-- [ ] T013 [HR005-012] Reject unknown/weaker policy, wrong source/certificate root, forbidden media
+- [x] T012 [HR005-003] Implement native canonical manifest and certification-policy verifier.
+- [x] T013 [HR005-012] Reject unknown/weaker policy, wrong source/certificate root, forbidden media
   and current checkpoint without ApplyQC before semantic use.
-- [ ] T014 [HR005-003] [HR005-004] [HR005-005] [HR005-006] Add bounded C ABI plus synchronous
+- [x] T014 [HR005-003] [HR005-004] [HR005-005] [HR005-006] Add bounded C ABI plus synchronous
   borrowed-direct and owned-copy
   FFM commands returning identical typed status/effect/hash results.
-- [ ] T015 [HR005-010, HR005-012] Add production parser/policy mutants, allocation corpus and exact
+- [x] T015 [HR005-010, HR005-012] Add production parser/policy mutants, allocation corpus and exact
   legal/rejected refinement traces.
 
 ## Phase 3: Java CAS and deterministic publication
 
-- [ ] T016 [HR005-008] Implement immutable piece/manifest CAS with quota checks, atomic visibility
+- [x] T016 [HR005-008] Implement immutable piece/manifest CAS with quota checks, atomic visibility
   and path/symlink safety.
-- [ ] T017 Implement deterministic Java chunking, piece tree and object ID matching frozen fixtures.
-- [ ] T018 [HR005-003] Require native policy acceptance before chunking, CAS publication or
+- [x] T017 Implement deterministic Java chunking, piece tree and object ID matching frozen fixtures.
+- [x] T018 [HR005-003] Require native policy acceptance before chunking, CAS publication or
   advertisement; Java cannot construct an allow decision.
-- [ ] T019 Add idempotent publication, same-bytes/different-lineage identity, crash and quota tests.
+- [x] T019 Add idempotent publication, same-bytes/different-lineage identity, crash and quota tests.
 
 ## Phase 4: Bounded permissioned peer plane and memory lifetime
 
-- [ ] T020 [HR005-002] [HR005-007] Implement authenticated bounded manifest/bitfield/piece framing,
+- [x] T020 [HR005-002] [HR005-007] Implement authenticated bounded manifest/bitfield/piece framing,
   cancellation, rate limits and backpressure.
-- [ ] T021 [HR005-007] Implement non-authoritative leased discovery snapshots and replay rejection.
-- [ ] T022 Implement verified-piece-only advertisement and seeding with immutable object context.
-- [ ] T023 [HR005-004] [HR005-005] [HR005-006] Implement retained direct fast path and bounded
+- [x] T021 [HR005-007] Implement non-authoritative leased discovery snapshots and replay rejection.
+- [x] T022 Implement verified-piece-only advertisement and seeding with immutable object context.
+- [x] T023 [HR005-004] [HR005-005] [HR005-006] Implement retained direct fast path and bounded
   staging-copy
   fallback with exact parity and no retained native pointer.
-- [ ] T024 [HR005-009] [HR005-010] Add leak/lifetime/event-loop-blocking and
+- [x] T024 [HR005-009] [HR005-010] Add leak/lifetime/event-loop-blocking and
   corrupt/oversized/endless/truncated stream matrices.
 
 ## Phase 5: Resumable download, repair and seed loss
 
-- [ ] T025 [HR005-008] Implement atomic journal, deterministic missing-piece schedule, bounded
+- [x] T025 [HR005-008] Implement atomic journal, deterministic missing-piece schedule, bounded
   parallel retry/cancellation and verified-piece reuse.
-- [ ] T026 Implement final full-object/lineage/policy revalidation and atomic CAS materialization.
-- [ ] T027 [HR005-011] Add three-peer corrupt/slow/reordered, restart, bit-rot, registry-outage and
+- [x] T026 Implement final full-object/lineage/policy revalidation and atomic CAS materialization.
+- [x] T027 [HR005-011] Add three-peer corrupt/slow/reordered, restart, bit-rot, registry-outage and
   initial-seed-loss complete-union scenario.
-- [ ] T028 [HR005-011] Add incomplete-union `PIECE_UNAVAILABLE`, quota/cancellation and resumable
+- [x] T028 [HR005-011] Add incomplete-union `PIECE_UNAVAILABLE`, quota/cancellation and resumable
   state preservation with certified current state unchanged.
 
 ## Finalization
 
-- [ ] T029 Add inspect/publish/seed/fetch/verify service commands and structured telemetry without
+- [x] T029 Add inspect/publish/seed/fetch/verify service commands and structured telemetry without
   logging payloads or claiming WAN performance.
-- [ ] T030 Document object, policy, C ABI/FFM, peer, CAS/journal and recovery protocols plus claim
+- [x] T030 Document object, policy, C ABI/FFM, peer, CAS/journal and recovery protocols plus claim
   boundaries.
 - [ ] T031 [HR005-013] Publish content-addressed contracts, policy, compiler/JDK, memory lifetime,
   backpressure, seed-loss and refinement evidence.

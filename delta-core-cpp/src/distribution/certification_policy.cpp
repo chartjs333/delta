@@ -25,7 +25,8 @@ struct JsonValue {
   std::uint64_t unsigned_integer = 0U;
   std::string string;
   std::vector<JsonValue> array;
-  std::vector<std::pair<std::string, JsonValue>> object;
+  std::vector<std::string> object_keys;
+  std::vector<JsonValue> object_values;
 };
 
 class ParseError final : public std::runtime_error {
@@ -112,7 +113,9 @@ class CanonicalJsonParser final {
       require(prior_key.empty() || prior_key < key, "object keys are not canonical");
       require(take(':'), "object colon is missing");
       require(++members_ <= max_members, "JSON member limit exceeded");
-      result.object.emplace_back(key, parse_value(depth));
+      auto value = parse_value(depth);
+      result.object_keys.push_back(key);
+      result.object_values.push_back(std::move(value));
       prior_key = std::move(key);
       if (take('}')) {
         return result;
@@ -199,10 +202,12 @@ class CanonicalJsonParser final {
   if (object.type != JsonType::object) {
     return nullptr;
   }
-  const auto item = std::lower_bound(
-      object.object.begin(), object.object.end(), key,
-      [](const auto& candidate, std::string_view expected) { return candidate.first < expected; });
-  return item != object.object.end() && item->first == key ? &item->second : nullptr;
+  const auto item = std::lower_bound(object.object_keys.begin(), object.object_keys.end(), key);
+  if (item == object.object_keys.end() || *item != key) {
+    return nullptr;
+  }
+  const auto index = static_cast<std::size_t>(item - object.object_keys.begin());
+  return &object.object_values[index];
 }
 
 [[nodiscard]] const std::string* string_member(const JsonValue& object, std::string_view key) {
