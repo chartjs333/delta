@@ -214,6 +214,7 @@ RoundTicketPlan plan_round_tickets(
   PlanContext canonical_context = context;
   canonical_context.decisions = std::move(decisions);
   RoundTicketPlan result;
+  result.lease_policy = canonical_context.lease_policy;
   result.policies = std::move(policies);
   std::uint64_t total_tickets = 0U;
   for (const auto& policy : result.policies) {

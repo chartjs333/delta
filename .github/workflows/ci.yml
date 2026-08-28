@@ -185,3 +185,6 @@ jobs:
           if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-planner.json ]; then
             uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_native_planner.py --check-only
           fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-admission.json ]; then
+            uv run python specs/007-domain-pure-ticket-scheduling/scripts/verify_native_admission.py --check-only
+          fi

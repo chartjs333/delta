@@ -33,6 +33,7 @@ struct TicketRecord {
 };
 
 struct RoundTicketPlan {
+  LeasePolicy lease_policy;
   std::vector<DomainTicketPolicy> policies;
   std::vector<std::string> policy_ids;
   std::vector<TicketRecord> tickets;

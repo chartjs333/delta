@@ -98,6 +98,8 @@ delta_target_defaults(delta_hierarchy)
 
 add_library(delta_scheduling STATIC
   delta-core-cpp/src/scheduling/contracts.cpp
+  delta-core-cpp/src/scheduling/eligibility.cpp
+  delta-core-cpp/src/scheduling/leases.cpp
   delta-core-cpp/src/scheduling/planner.cpp)
 add_library(delta::scheduling ALIAS delta_scheduling)
 set_target_properties(delta_scheduling PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -362,6 +364,16 @@ if(BUILD_TESTING)
     PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
   delta_target_defaults(delta_scheduling_planner_test)
   add_test(NAME delta_core.scheduling_planner COMMAND delta_scheduling_planner_test)
+
+  add_executable(
+    delta_scheduling_eligibility_test
+    delta-core-cpp/tests/scheduling_eligibility_test.cpp)
+  target_link_libraries(delta_scheduling_eligibility_test PRIVATE delta::scheduling)
+  target_compile_definitions(
+    delta_scheduling_eligibility_test
+    PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+  delta_target_defaults(delta_scheduling_eligibility_test)
+  add_test(NAME delta_core.scheduling_eligibility COMMAND delta_scheduling_eligibility_test)
 
   foreach(mutant IN ITEMS ADAPT_WORK OVERLAP_RANGES SKIP_INFEASIBILITY)
     string(TOLOWER "${mutant}" mutant_lower)
