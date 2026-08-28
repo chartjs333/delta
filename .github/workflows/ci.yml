@@ -162,4 +162,5 @@ jobs:
         run: |
           uv run python specs/006-regional-hierarchical-reduce/scripts/verify_preflight.py --check-only
           uv run python specs/006-regional-hierarchical-reduce/scripts/verify_protocol_contracts.py --check-only
+          uv run python specs/006-regional-hierarchical-reduce/scripts/verify_native_topology.py --check-only
           uv run pytest specs/006-regional-hierarchical-reduce/tests

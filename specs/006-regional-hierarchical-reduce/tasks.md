@@ -34,12 +34,12 @@ owns bounded routing and executes native effects without making mathematical or 
 
 ## Phase 2: Native exact topology boundary
 
-- [ ] T011 [HR006-002] Implement C++ canonical topology parser and immutable context validation.
-- [ ] T012 [HR006-002] Implement exact ticket/region/domain partition and parameter-shard coverage
+- [x] T011 [HR006-002] Implement C++ canonical topology parser and immutable context validation.
+- [x] T012 [HR006-002] Implement exact ticket/region/domain partition and parameter-shard coverage
   validation before any committee starts.
-- [ ] T013 [HR006-005] Validate concrete coefficient, denominator and regional/global accumulator
+- [x] T013 [HR006-005] Validate concrete coefficient, denominator and regional/global accumulator
   bounds against the frozen theorem instance.
-- [ ] T014 [HR006-008] Add topology parser fuzz, allocation limits and production overlap/gap/
+- [x] T014 [HR006-008] Add topology parser fuzz, allocation limits and production overlap/gap/
   unsafe-bound mutants.
 
 ## Phase 3: Native regional committees
