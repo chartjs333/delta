@@ -9,9 +9,9 @@ production work before the exact predecessor/Formal GO and canonical contract ga
 - [x] **HR007-004** Implement native lease epoch/expiry/renew/reassign transitions and WAL durability.
 - [x] **HR007-005** Implement opaque lease timer effects and stale-token rejection.
 - [x] **HR007-006** Implement Java authenticated capability collection and transport-only admission adapter.
-- [ ] **HR007-007** Add static/schema test proving device speed/memory cannot enter `pi_d`, `a_j` or robust coefficients.
-- [ ] **HR007-008** Add 50-worker input permutation and fast/slow ownership scenarios.
+- [x] **HR007-007** Add static/schema test proving device speed/memory cannot enter `pi_d`, `a_j` or robust coefficients.
+- [x] **HR007-008** Add 50-worker input permutation and fast/slow ownership scenarios.
 - [x] **HR007-009** Add commit-versus-expiry, old/new holder, restart/replay and max-epoch tests.
-- [ ] **HR007-010** Add infeasible capacity tests proving no work/quota mutation.
-- [ ] **HR007-011** Export scheduling/lease/timer traces and run formal refinement.
+- [x] **HR007-010** Add infeasible capacity tests proving no work/quota mutation.
+- [x] **HR007-011** Export scheduling/lease/timer traces and run formal refinement.
 - [ ] **HR007-012** Publish determinism, timing, speed-independence and boundary evidence.

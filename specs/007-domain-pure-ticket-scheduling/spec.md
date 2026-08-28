@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-domain-pure-ticket-scheduling`  
 **Created**: 2026-08-23  
-**Status**: C ABI/Java boundary PASS — native refinement and final evidence start at T027
+**Status**: Native refinement PASS — final quality, operations and compatibility evidence start at T030
 **Depends on**: `006-regional-hierarchical-reduce`
 
 **Exact predecessor**: feature-006 merge

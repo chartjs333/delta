@@ -79,11 +79,11 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
 
 ## Phase 6: Refinement, quality and final evidence
 
-- [ ] T027 [HR007-011] Export implementation-derived legal plan/lease/expire/reassign/commit/restart
+- [x] T027 [HR007-011] Export implementation-derived legal plan/lease/expire/reassign/commit/restart
   traces and require acceptance by the exact feature-000 refinement checker.
-- [ ] T028 [HR007-007, HR007-009, HR007-011] Reject old-holder, post-commit reassignment,
+- [x] T028 [HR007-007, HR007-009, HR007-011] Reject old-holder, post-commit reassignment,
   adaptive-H, device-weight, stale-timer and early-randomness traces; kill production mutants.
-- [ ] T029 [HR007-008, HR007-012] Measure deterministic 50-worker planning and speed-independence
+- [x] T029 [HR007-008, HR007-012] Measure deterministic 50-worker planning and speed-independence
   evidence without converting the target into a safety or WAN claim.
 - [ ] T030 [HR007-012] Run C++20/C++23, Clang ASan/UBSan, native fuzz, C ABI, JDK 25/26 and full
   Python quality/regression matrices.
