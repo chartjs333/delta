@@ -9,14 +9,14 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
 
 ## Phase 0: Mandatory predecessor/formal STOP
 
-- [ ] T000 [HR007-012] Verify exact feature-006 merge/source/evidence/report ancestry and hashes.
-- [ ] T001 [HR007-011] Revalidate Formal GO, ticket/lease/deadline/recovery actions, failure semantics
+- [x] T000 [HR007-012] Verify exact feature-006 merge/source/evidence/report ancestry and hashes.
+- [x] T001 [HR007-011] Revalidate Formal GO, ticket/lease/deadline/recovery actions, failure semantics
   and every runtime precondition used by feature 007.
-- [ ] T002 [HR007-011] Prove zero formal source diff and classify the planned implementation
+- [x] T002 [HR007-011] Prove zero formal source diff and classify the planned implementation
   `REFINEMENT_ONLY`; any new action/precondition/outcome is an unconditional STOP.
-- [ ] T003 [HR007-007] Prove zero adaptive-H/B, stale/device-derived mathematical weight,
+- [x] T003 [HR007-007] Prove zero adaptive-H/B, stale/device-derived mathematical weight,
   Python/Java scheduling authority and pre-ISC randomness paths in the authoritative lineage.
-- [ ] T004 [HR007-012] Emit content-addressed `evidence/preflight.json` binding T000–T003 and block
+- [x] T004 [HR007-012] Emit content-addressed `evidence/preflight.json` binding T000–T003 and block
   every production-source task until it passes.
 
 ## Phase 1: Runtime-neutral canonical contracts

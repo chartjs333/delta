@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-domain-pure-ticket-scheduling`  
 **Created**: 2026-08-23  
-**Status**: Restacked — production implementation blocked by T000–T010
+**Status**: Preflight PASS — production implementation blocked by T005–T010
 **Depends on**: `006-regional-hierarchical-reduce`
 
 **Exact predecessor**: feature-006 merge
