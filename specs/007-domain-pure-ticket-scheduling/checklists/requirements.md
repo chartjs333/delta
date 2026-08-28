@@ -1,7 +1,7 @@
 # Specification Quality Checklist: 007 Domain-Pure Ticket Scheduling
 
 **Reviewed**: 2026-08-23  
-**Status**: Native refinement PASS — final exact-source compatibility evidence starts at T030
+**Status**: EXIT PASS — Constitution 2.1.0 compatibility evidence is published
 
 - [x] Legacy adaptive `H_i` and stale weighting are explicitly replaced.
 - [x] Every domain fixes `K_d/B_d/H_d`; every ticket is immutable/domain-pure.

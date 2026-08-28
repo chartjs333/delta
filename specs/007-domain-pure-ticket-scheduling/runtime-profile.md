@@ -11,8 +11,9 @@
 `90cc7fac96675694bab15f4e1ae1e5c6e3f525be`, evidence
 `b487ea81851cfd5b4769579392798841cb18afc0`.
 
-No production source may be added until the exact predecessor/Formal GO preflight and canonical
-scheduling schema gate pass.
+The exact predecessor/Formal GO preflight, canonical scheduling schema, native/Java boundary,
+recovery/refinement and final compatibility gates pass. This profile does not authorize feature-008
+certificate, seed, ApplyQC or current-pointer behavior.
 
 ## Responsibility split
 

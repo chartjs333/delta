@@ -14,4 +14,4 @@ production work before the exact predecessor/Formal GO and canonical contract ga
 - [x] **HR007-009** Add commit-versus-expiry, old/new holder, restart/replay and max-epoch tests.
 - [x] **HR007-010** Add infeasible capacity tests proving no work/quota mutation.
 - [x] **HR007-011** Export scheduling/lease/timer traces and run formal refinement.
-- [ ] **HR007-012** Publish determinism, timing, speed-independence and boundary evidence.
+- [x] **HR007-012** Publish determinism, timing, speed-independence and boundary evidence.

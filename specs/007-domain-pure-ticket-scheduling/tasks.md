@@ -85,13 +85,13 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
   adaptive-H, device-weight, stale-timer and early-randomness traces; kill production mutants.
 - [x] T029 [HR007-008, HR007-012] Measure deterministic 50-worker planning and speed-independence
   evidence without converting the target into a safety or WAN claim.
-- [ ] T030 [HR007-012] Run C++20/C++23, Clang ASan/UBSan, native fuzz, C ABI, JDK 25/26 and full
+- [x] T030 [HR007-012] Run C++20/C++23, Clang ASan/UBSan, native fuzz, C ABI, JDK 25/26 and full
   Python quality/regression matrices.
-- [ ] T031 [HR007-012] Publish exact-source CI, recovery/refinement, boundary and determinism
+- [x] T031 [HR007-012] Publish exact-source CI, recovery/refinement, boundary and determinism
   evidence with `semantic_completeness_claimed=false`.
-- [ ] T032 [HR007-012] Document native fixed-ticket scheduling, Java adapter operations,
+- [x] T032 [HR007-012] Document native fixed-ticket scheduling, Java adapter operations,
   observability, rollback and explicit feature-008 boundary.
-- [ ] T033 [HR007-012] Publish final Constitution 2.1.0 compatibility report and close the phase.
+- [x] T033 [HR007-012] Publish final Constitution 2.1.0 compatibility report and close the phase.
 
 ## Dependencies
 

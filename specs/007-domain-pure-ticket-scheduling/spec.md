@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-domain-pure-ticket-scheduling`  
 **Created**: 2026-08-23  
-**Status**: Native refinement PASS — final quality, operations and compatibility evidence start at T030
+**Status**: EXIT PASS — final Constitution 2.1.0 compatibility evidence published
 **Depends on**: `006-regional-hierarchical-reduce`
 
 **Exact predecessor**: feature-006 merge
@@ -13,6 +13,9 @@
 
 **Formal impact**: `REFINEMENT_ONLY` against
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+
+**Final verified source**: `781cdbd76d812bf66323a3d1d11ca93f4b9d8333`; final compatibility
+report SHA-256: `2b45bf2dba25b15db624a02ee11e530a967961220e414ab04054428d44f59ef3`.
 
 ## Summary
 

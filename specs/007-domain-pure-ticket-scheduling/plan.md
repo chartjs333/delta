@@ -44,8 +44,8 @@ with fixed work and explicit infeasibility.
 | Runtime authority | C++ decides; Java transports; Python trains | Boundary/static/C ABI tests |
 | Recovery | Persist native lease transition before effects | Crash/restart/replay tests |
 
-**Reconciliation result**: PASS. T000–T010 and HR007-001 are complete; native production
-implementation starts at T011.
+**Final result**: EXIT PASS. T000–T033 and HR007-001–HR007-012 are complete; feature 008 remains
+closed until it passes its own predecessor, Formal GO and implementation gates.
 
 ## Architecture and Data Flow
 

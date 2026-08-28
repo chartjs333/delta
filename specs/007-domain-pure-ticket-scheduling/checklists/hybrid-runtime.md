@@ -1,6 +1,6 @@
 # Checklist: 007 Scheduling Runtime
 
-**Status**: Native refinement PASS; final exact-source compatibility evidence starts at T030.
+**Status**: EXIT PASS; exact-source compatibility evidence is published with no feature-008 claim.
 
 - [x] C++ owns all plan and lease state transitions.
 - [x] Java capability collection cannot change mathematical weights.

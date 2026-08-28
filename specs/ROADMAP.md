@@ -22,8 +22,11 @@ source is `01f200b193733a1b474ad755c5c0c739b3189a96`, evidence overlay is
 source is `90cc7fac96675694bab15f4e1ae1e5c6e3f525be`, evidence overlay is
 `b487ea81851cfd5b4769579392798841cb18afc0`, and final report SHA-256 is
 `d16f9cfc62efe95e902b301823c136c0530db68b1cfb48788c6a239ade123800`. Feature 007 is restacked on
-that merge and remains production-implementation-blocked until its exact predecessor/Formal GO
-preflight and canonical scheduling contract gate pass.
+that merge and has completed its exact predecessor/Formal GO, canonical contract, native lifecycle,
+C ABI/Java boundary, refinement and exact-source compatibility gates. Feature 008 remains closed
+until feature 007 is merged and its own formal/implementation gates pass. Feature-007 verified
+source is `781cdbd76d812bf66323a3d1d11ca93f4b9d8333`; its final report SHA-256 is
+`2b45bf2dba25b15db624a02ee11e530a967961220e414ab04054428d44f59ef3`.
 
 ## Branch topology
 
