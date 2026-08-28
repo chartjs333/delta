@@ -1,0 +1,63 @@
+{
+  "$id": "urn:deltareduce:schema:piece-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "hash_algorithm": {
+      "const": "SHA-256"
+    },
+    "leaf_domain": {
+      "const": "deltareduce.005.piece-leaf.v1"
+    },
+    "limits": {
+      "type": "object"
+    },
+    "node_domain": {
+      "const": "deltareduce.005.piece-node.v1"
+    },
+    "object_domain": {
+      "const": "deltareduce.005.object-manifest.v1"
+    },
+    "odd_leaf_rule": {
+      "const": "PROMOTE_ODD_UNCHANGED"
+    },
+    "piece_content_domain": {
+      "const": "deltareduce.005.piece.v1"
+    },
+    "profile_name": {
+      "const": "piece-1m-sha256-v1"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "target_piece_bytes": {
+      "const": 1048576
+    },
+    "type_name": {
+      "const": "PIECE_PROFILE"
+    },
+    "zero_length_rule": {
+      "const": "ZERO_PIECES_DOMAIN_SEPARATED_EMPTY_ROOT"
+    }
+  },
+  "required": [
+    "formal_semantics_id",
+    "hash_algorithm",
+    "leaf_domain",
+    "limits",
+    "node_domain",
+    "object_domain",
+    "odd_leaf_rule",
+    "piece_content_domain",
+    "profile_name",
+    "schema_version",
+    "target_piece_bytes",
+    "type_name",
+    "zero_length_rule"
+  ],
+  "title": "DeltaReduce piece profile v1",
+  "type": "object"
+}

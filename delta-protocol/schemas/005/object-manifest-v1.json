@@ -1,0 +1,89 @@
+{
+  "$id": "urn:deltareduce:schema:object-manifest:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "certificate_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "certificate_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "media_type": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payload_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "piece_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "piece_tree_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "pieces": {
+      "items": {
+        "$ref": "urn:deltareduce:schema:piece-descriptor:1"
+      },
+      "maxItems": 8192,
+      "type": "array"
+    },
+    "policy_registry_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "project_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "source_state": {
+      "enum": [
+        "AGGREGATED",
+        "APPLIED"
+      ]
+    },
+    "source_state_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "total_length": {
+      "maximum": 8589934592,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "type_name": {
+      "const": "OBJECT_MANIFEST"
+    }
+  },
+  "required": [
+    "certificate_policy_id",
+    "certificate_root",
+    "formal_semantics_id",
+    "media_type",
+    "payload_sha256",
+    "piece_profile_id",
+    "piece_tree_root",
+    "pieces",
+    "policy_registry_id",
+    "project_id",
+    "schema_version",
+    "source_state",
+    "source_state_root",
+    "total_length",
+    "type_name"
+  ],
+  "title": "DeltaReduce object manifest v1",
+  "type": "object"
+}

@@ -1,0 +1,44 @@
+{
+  "$id": "urn:deltareduce:schema:download-journal:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attempts": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "request_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "DOWNLOAD_JOURNAL"
+    },
+    "verified_pieces": {
+      "items": {
+        "type": "object"
+      },
+      "maxItems": 8192,
+      "type": "array"
+    }
+  },
+  "required": [
+    "attempts",
+    "manifest_id",
+    "request_id",
+    "schema_version",
+    "type_name",
+    "verified_pieces"
+  ],
+  "title": "DeltaReduce download journal v1",
+  "type": "object"
+}

@@ -29,6 +29,11 @@
       "id": "REGISTRY-FIXEDPOINT-004-V1",
       "path": "schemas/004/registry-v1.json",
       "sha256": "7046f9430be23b06b18b977cc3e47648cdd3cdb859a741f6826aecbff92d05f5"
+    },
+    {
+      "id": "REGISTRY-DISTRIBUTION-005-V1",
+      "path": "schemas/005/registry-v1.json",
+      "sha256": "0b4ae84d4099653cbeeef739d55bacd32d3cf156953512c8c35f93a52990e35e"
     }
   ],
   "fixtures": [
@@ -121,6 +126,26 @@
       "id": "SAFE-TENSOR-001",
       "path": "fixtures/safe-tensor/safe-tensor-i32-v1.json",
       "sha256": "82b99a179ccf2e1d19d77e0a837a88fb9edac3d6504e0479c3845c35903d902d"
+    },
+    {
+      "id": "DISTRIBUTION005-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/005/cross-language/golden-v1.json",
+      "sha256": "c44aa341ce4709319b947165f7f50b04c5bccd5129046364923c42a0bd52f4bb"
+    },
+    {
+      "id": "DISTRIBUTION005-GOLDEN-HASHES-V1",
+      "path": "fixtures/005/golden-hashes-v1.json",
+      "sha256": "82383069c279e0d9c03135966764892dd08bc36c486aaa2084d3f3e32185502f"
+    },
+    {
+      "id": "DISTRIBUTION005-NEGATIVE-V1",
+      "path": "fixtures/005/invalid/distribution-negative-v1.json",
+      "sha256": "8077a692d3dacd14519b49c23985c5b430bbf962309d796b30cc6c126d505134"
+    },
+    {
+      "id": "DISTRIBUTION005-VALID-CONTRACT-V1",
+      "path": "fixtures/005/valid/distribution-contract-v1.json",
+      "sha256": "601cbb3832cfc76c14bec01046fac78cbc82a2847805d707679c179c52cabd88"
     }
   ],
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
@@ -249,6 +274,36 @@
       "id": "MEDIA-UV-LOCK-V1",
       "schema_id": "SCHEMA-UV-LOCK-V1",
       "value": "application/vnd.deltareduce.uv-lock+toml;version=1"
+    },
+    {
+      "id": "MEDIA-CERTIFICATION-POLICY-V1",
+      "schema_id": "SCHEMA-CERTIFICATION-POLICY-V1",
+      "value": "application/vnd.deltareduce.certification-policy+json;version=1"
+    },
+    {
+      "id": "MEDIA-DOWNLOAD-JOURNAL-V1",
+      "schema_id": "SCHEMA-DOWNLOAD-JOURNAL-V1",
+      "value": "application/vnd.deltareduce.download-journal+json;version=1"
+    },
+    {
+      "id": "MEDIA-OBJECT-MANIFEST-V1",
+      "schema_id": "SCHEMA-OBJECT-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.object-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-PEER-ADVERTISEMENT-V1",
+      "schema_id": "SCHEMA-PEER-ADVERTISEMENT-V1",
+      "value": "application/vnd.deltareduce.peer-advertisement+json;version=1"
+    },
+    {
+      "id": "MEDIA-PIECE-PROFILE-V1",
+      "schema_id": "SCHEMA-PIECE-PROFILE-V1",
+      "value": "application/vnd.deltareduce.piece-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-TRANSPORT-ENVELOPE-V1",
+      "schema_id": "SCHEMA-TRANSPORT-ENVELOPE-V1",
+      "value": "application/vnd.deltareduce.transport-envelope+json;version=1"
     }
   ],
   "registry_id": "DELTA-PROTOCOL-V1",
@@ -378,6 +433,41 @@
       "id": "SCHEMA-UV-LOCK-V1",
       "path": "schemas/uv-lock-v1.json",
       "sha256": "ad8c64bf9c715bf770d44e49292571bd773c234fcf340b6335ee2ba8f58c842f"
+    },
+    {
+      "id": "SCHEMA-CERTIFICATION-POLICY-V1",
+      "path": "schemas/005/certification-policy-v1.json",
+      "sha256": "5fd599e226c21a32051a903906b33a5e46d730f6a9c79dd13bfbaa2e4d711c02"
+    },
+    {
+      "id": "SCHEMA-DOWNLOAD-JOURNAL-V1",
+      "path": "schemas/005/download-journal-v1.json",
+      "sha256": "1d8adc433adc61c3b74c17e19cf6bd02d6a7b67da2df59156d9ee9dbc811fd36"
+    },
+    {
+      "id": "SCHEMA-OBJECT-MANIFEST-V1",
+      "path": "schemas/005/object-manifest-v1.json",
+      "sha256": "352e965db476787810e29f342a9924a8b35ef44f88317a10e9a7de519942d5f2"
+    },
+    {
+      "id": "SCHEMA-PEER-ADVERTISEMENT-V1",
+      "path": "schemas/005/peer-advertisement-v1.json",
+      "sha256": "e3da6fb47dee0d6bf350eb64f3e982dca040acd512ef064b40b9503c8ceeb25f"
+    },
+    {
+      "id": "SCHEMA-PIECE-DESCRIPTOR-V1",
+      "path": "schemas/005/piece-descriptor-v1.json",
+      "sha256": "80445af1e629d1a2bb2e4d04779c1fdc4f6c023757a56c494fba743c290c5347"
+    },
+    {
+      "id": "SCHEMA-PIECE-PROFILE-V1",
+      "path": "schemas/005/piece-profile-v1.json",
+      "sha256": "d10694224f66390a294902841d6e5d4999103e77effd4480e7099feb2275afb4"
+    },
+    {
+      "id": "SCHEMA-TRANSPORT-ENVELOPE-V1",
+      "path": "schemas/005/transport-envelope-v1.json",
+      "sha256": "b6c2da5462e115d1904584a49cea71c35f22741ffbb43f0228d392c057b3d533"
     }
   ]
 }
