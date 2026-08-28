@@ -21,15 +21,15 @@ owns bounded routing and executes native effects without making mathematical or 
 
 ## Phase 1: Runtime-neutral topology and proof contracts
 
-- [ ] T005 [HR006-001] Freeze canonical `ReduceTopology`, ticket-to-region mapping, domain
+- [x] T005 [HR006-001] Freeze canonical `ReduceTopology`, ticket-to-region mapping, domain
   ownership, parameter shard ranges, committee epochs, deadlines and topology root schema.
-- [ ] T006 Define regional input/result/basic-QC and global regional-set/result/basic-QC schemas.
-- [ ] T007 Define complete hierarchical aggregate-root schema without activating feature-008
+- [x] T006 Define regional input/result/basic-QC and global regional-set/result/basic-QC schemas.
+- [x] T007 Define complete hierarchical aggregate-root schema without activating feature-008
   certificate hierarchy or Apply/current transitions.
-- [ ] T008 [HR006-005] Define content-addressed PO-H1/PO-H2/PO-A theorem-precondition instance.
-- [ ] T009 Add valid, invalid and cross-language fixtures for unequal regions, multiple domains,
+- [x] T008 [HR006-005] Define content-addressed PO-H1/PO-H2/PO-A theorem-precondition instance.
+- [x] T009 Add valid, invalid and cross-language fixtures for unequal regions, multiple domains,
   multiple shards, overlaps, gaps, duplicates, wrong context and unsafe bounds.
-- [ ] T010 Register every schema/media/domain ID and hard-deny every regional/global partial in
+- [x] T010 Register every schema/media/domain ID and hard-deny every regional/global partial in
   the feature-005 distribution policy.
 
 ## Phase 2: Native exact topology boundary

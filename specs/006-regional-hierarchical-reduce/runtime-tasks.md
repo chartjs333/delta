@@ -1,10 +1,10 @@
 # Hybrid Runtime Tasks: 006 Regional Hierarchical Reduce
 
-- [ ] **HR006-001** Freeze `ReduceTopology` canonical schema and bind PO-H1/PO-H2/PO-A proof artifacts.
+- [x] **HR006-001** Freeze `ReduceTopology` canonical schema and bind PO-H1/PO-H2/PO-A proof artifacts.
 - [ ] **HR006-002** Implement C++ exact topology/partition/shard coverage validator.
 - [ ] **HR006-003** Implement C++ regional integer reducer and native QC durability path.
 - [ ] **HR006-004** Implement C++ global regional-set validator and checked partial summation.
-- [ ] **HR006-005** Generate content-addressed theorem-precondition instance for the actual topology/profile/APC.
+- [x] **HR006-005** Generate content-addressed theorem-precondition instance for the actual topology/profile/APC.
 - [ ] **HR006-006** Implement bounded C ABI commands plus Java regional/global route tables and streams without math decisions.
 - [ ] **HR006-007** Add shuffled/parallel/retry transport order tests with exact output identity.
 - [ ] **HR006-008** Add missing/duplicate/overlap/mixed-view/overflow/quorum-loss negative matrix.
