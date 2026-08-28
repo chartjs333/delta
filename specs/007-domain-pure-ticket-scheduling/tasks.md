@@ -36,12 +36,12 @@ and telemetry. Python owns worker-local ML only. `task-map.md` is normative.
 
 ## Phase 2: Native exact ticket planner
 
-- [ ] T011 [HR007-002] Implement bounded C++ canonical parsers and immutable context validation.
-- [ ] T012 [HR007-002] Implement exact per-domain quota, deterministic data-range ownership,
+- [x] T011 [HR007-002] Implement bounded C++ canonical parsers and immutable context validation.
+- [x] T012 [HR007-002] Implement exact per-domain quota, deterministic data-range ownership,
   overlap rejection and ticket ID/order construction.
-- [ ] T013 [HR007-002, HR007-010] Implement exact feasibility validation that returns canonical
+- [x] T013 [HR007-002, HR007-010] Implement exact feasibility validation that returns canonical
   unmet constraints without changing K/B/H, data ranges or `pi_d`.
-- [ ] T014 [HR007-007, HR007-008, HR007-010] Add input permutations, invalid policy/data coverage,
+- [x] T014 [HR007-007, HR007-008, HR007-010] Add input permutations, invalid policy/data coverage,
   50-worker and production adaptive-work/infeasibility mutants.
 
 ## Phase 3: Native capability and initial lease decisions
