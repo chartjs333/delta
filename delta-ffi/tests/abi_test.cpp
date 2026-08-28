@@ -45,8 +45,10 @@ void expect(bool condition, std::string_view message) {
   return result;
 }
 
-[[nodiscard]] std::vector<std::uint8_t> golden(std::uint16_t type_code) {
-  std::ifstream input(DELTA_GOLDEN_FIXTURE_PATH, std::ios::binary);
+[[nodiscard]] std::vector<std::uint8_t> golden_from(
+    std::string_view path,
+    std::uint16_t type_code) {
+  std::ifstream input(std::string(path), std::ios::binary);
   expect(input.good(), "cannot open canonical golden fixture");
   const std::string document{
       std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
@@ -61,6 +63,23 @@ void expect(bool condition, std::string_view message) {
   }
   fail("registered golden vector not found");
 }
+
+[[nodiscard]] std::vector<std::uint8_t> golden(std::uint16_t type_code) {
+  return golden_from(DELTA_GOLDEN_FIXTURE_PATH, type_code);
+}
+
+#if defined(DELTA_FIXEDPOINT_GOLDEN_FIXTURE_PATH)
+[[nodiscard]] std::vector<std::uint8_t> fixedpoint_golden() {
+  std::ifstream input(DELTA_FIXEDPOINT_GOLDEN_FIXTURE_PATH, std::ios::binary);
+  expect(input.good(), "cannot open fixed-point golden fixture");
+  const std::string document{
+      std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+  const std::regex pattern(R"REGEX("envelope_hex":"([0-9a-f]+)")REGEX");
+  std::smatch match;
+  expect(std::regex_search(document, match, pattern), "fixed-point golden envelope not found");
+  return decode_hex(match[1].str());
+}
+#endif
 
 [[nodiscard]] delta_bytes_view_t view(std::string_view value) {
   return {reinterpret_cast<const std::uint8_t*>(value.data()), value.size()};
@@ -243,6 +262,49 @@ void test_open_submit_snapshot_release_and_memory_rules() {
          "repeated null handle release was not idempotent");
 }
 
+#if defined(DELTA_FIXEDPOINT_GOLDEN_FIXTURE_PATH)
+[[nodiscard]] std::vector<std::uint8_t> retry_fixedpoint_shard(
+    const std::vector<std::uint8_t>& envelope,
+    bool copy_path) {
+  delta_output_buffer_t sizing{nullptr, 0U, 0U, 0U};
+  const auto first = copy_path
+                         ? delta_fixedpoint_shard_validate_copy(view(envelope), &sizing)
+                         : delta_fixedpoint_shard_validate_borrowed(view(envelope), &sizing);
+  expect(first == DELTA_STATUS_BUFFER_TOO_SMALL, "fixed-point sizing did not request retry");
+  expect(
+      sizing.required == envelope.size() && sizing.written == 0U,
+      "fixed-point sizing exposed partial bytes");
+  std::vector<std::uint8_t> output(sizing.required);
+  delta_output_buffer_t destination{output.data(), output.size(), 0U, 0U};
+  const auto second = copy_path
+                          ? delta_fixedpoint_shard_validate_copy(view(envelope), &destination)
+                          : delta_fixedpoint_shard_validate_borrowed(view(envelope), &destination);
+  expect(second == DELTA_STATUS_OK, "fixed-point retry failed");
+  expect(destination.required == output.size() && destination.written == output.size(),
+         "fixed-point retry size fields mismatch");
+  return output;
+}
+
+void test_fixedpoint_native_boundary() {
+  const auto envelope = fixedpoint_golden();
+  expect(retry_fixedpoint_shard(envelope, false) == envelope,
+         "borrowed fixed-point boundary changed bytes");
+  expect(retry_fixedpoint_shard(envelope, true) == envelope,
+         "copy fixed-point boundary changed bytes");
+
+  auto malformed = envelope;
+  malformed.back() ^= 1U;
+  std::vector<std::uint8_t> sentinel(8U, 0x5aU);
+  delta_output_buffer_t rejected{sentinel.data(), sentinel.size(), 99U, 99U};
+  expect(
+      delta_fixedpoint_shard_validate_borrowed(view(malformed), &rejected) ==
+          DELTA_STATUS_INVALID_ARGUMENT,
+      "corrupt fixed-point shard escaped stable status mapping");
+  expect(rejected.required == 0U && rejected.written == 0U,
+         "rejected fixed-point shard exposed partial output metadata");
+}
+#endif
+
 }  // namespace
 
 int main() {
@@ -250,6 +312,9 @@ int main() {
     test_frozen_descriptor_and_status_taxonomy();
     test_startup_mismatch_matrix();
     test_open_submit_snapshot_release_and_memory_rules();
+#if defined(DELTA_FIXEDPOINT_GOLDEN_FIXTURE_PATH)
+    test_fixedpoint_native_boundary();
+#endif
   } catch (const std::exception& error) {
     std::cerr << "delta_ffi ABI test failed: " << error.what() << '\n';
     return 1;

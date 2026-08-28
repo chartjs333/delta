@@ -2,7 +2,7 @@ name: Native sanitizer matrix
 
 on:
   push:
-    branches: [003-bft-round-state-machine]
+    branches: [003-bft-round-state-machine, 004-compressed-delta-protocol]
   pull_request:
 
 permissions:
@@ -38,6 +38,17 @@ jobs:
             "$COMPILER_IMAGE" \
             /bin/sh /workspace/specs/003-bft-round-state-machine/scripts/run_native_sanitizers.sh \
               address-undefined clang++ /tmp/delta-sanitizers
+
+      - name: Run feature-004 parser and FFI sanitizers offline
+        env:
+          COMPILER_IMAGE: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+        run: |
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --workdir /workspace \
+            "$COMPILER_IMAGE" \
+            /bin/sh /workspace/specs/004-compressed-delta-protocol/scripts/run_native_fixedpoint_sanitizers.sh \
+              clang++ /tmp/delta-fixedpoint-sanitizers
 
   thread:
     name: GCC TSan reactor recovery

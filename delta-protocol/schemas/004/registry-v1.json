@@ -1,0 +1,113 @@
+{
+  "artifacts": [
+    {
+      "id": "SCHEMA-ACCUMULATOR-PROOF-INSTANCE-V1",
+      "path": "schemas/004/accumulator-proof-instance-v1.json",
+      "sha256": "91a0c848a1133c4bbc1a6e8f6d230e92acbba570f50bc0266d56669472a7b3a1"
+    },
+    {
+      "id": "ENCODING-FIXEDPOINT-004-V1",
+      "path": "schemas/004/canonical-fixedpoint-v1.md",
+      "sha256": "67d9fe21d6c0a41e0167953f3f8794039319478b6f49d0ffe44090d774dc7702"
+    },
+    {
+      "id": "SCHEMA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "path": "schemas/004/encoded-contribution-manifest-v1.json",
+      "sha256": "24bda981f70af49f762c6c414c28392de3e46532206271f676e419eb61012c49"
+    },
+    {
+      "id": "SCHEMA-ENCODED-SHARD-V1",
+      "path": "schemas/004/encoded-shard-v1.json",
+      "sha256": "0192f6f53b71993f32f99dece337125d4a61b80dbf0b386d7dab72ca2260fa40"
+    },
+    {
+      "id": "SCHEMA-FIXEDPOINT-CONFIG-V1",
+      "path": "schemas/004/fixedpoint-config-v1.json",
+      "sha256": "fde0a37b96c86fe211932345d0eff33abd7ea696ec0200f2b9968a5acb44d508"
+    },
+    {
+      "id": "SCHEMA-FIXEDPOINT-PROFILE-V1",
+      "path": "schemas/004/fixed-point-profile-v1.json",
+      "sha256": "596888c06c7698163e91e725eb08ad27c543dd93f3693dac0903b50be36afc1f"
+    },
+    {
+      "id": "SCHEMA-QUANTIZATION-SCALE-TABLE-V1",
+      "path": "schemas/004/scale-table-v1.json",
+      "sha256": "665fae849c5bc83068bcf0c41c5525048a5f08655c93fe78da6475ea24bab181"
+    },
+    {
+      "id": "SCHEMA-SHARD-PLAN-V1",
+      "path": "schemas/004/shard-plan-v1.json",
+      "sha256": "88f1a3ba61e10c6f536b5900c47e5ef84fa8819c4e49bcd298074e959cee6399"
+    }
+  ],
+  "encoding_id": "delta-fixedpoint-shard-v1",
+  "fixtures": [
+    {
+      "id": "FIXEDPOINT004-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/004/cross-language/golden-v1.json",
+      "sha256": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216"
+    },
+    {
+      "id": "FIXEDPOINT004-DIRECT-Q-100-V1",
+      "path": "fixtures/004/cross-language/direct-q-100-v1.json",
+      "sha256": "b99af951973b26c348dbb08354c8fa2778244626fc09fa20002cdaf45cf17277"
+    },
+    {
+      "id": "FIXEDPOINT004-GOLDEN-HASHES-V1",
+      "path": "fixtures/004/golden-hashes-v1.json",
+      "sha256": "9bc8fff848b2c721b7d60ef8c6912243668fde23c92cb3231754573ff60c8980"
+    },
+    {
+      "id": "FIXEDPOINT004-NEGATIVE-V1",
+      "path": "fixtures/004/invalid/fixedpoint-negative-v1.json",
+      "sha256": "dfce62bc11840b89108cd687d5c6567bcbd8e8528eeca293621e6cbc66ef0cfd"
+    },
+    {
+      "id": "FIXEDPOINT004-VALID-CONTRACT-V1",
+      "path": "fixtures/004/valid/fixedpoint-contract-v1.json",
+      "sha256": "5d54d38d184aa736e011682d99c909f27ac611abfdd060d01b169de2bf2406c9"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "media_types": [
+    {
+      "id": "MEDIA-ACCUMULATOR-PROOF-INSTANCE-V1",
+      "schema_id": "SCHEMA-ACCUMULATOR-PROOF-INSTANCE-V1",
+      "value": "application/vnd.deltareduce.accumulator-proof+json;version=1"
+    },
+    {
+      "id": "MEDIA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "schema_id": "SCHEMA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.encoded-contribution+json;version=1"
+    },
+    {
+      "id": "MEDIA-ENCODED-SHARD-V1",
+      "schema_id": "SCHEMA-ENCODED-SHARD-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-shard;version=1"
+    },
+    {
+      "id": "MEDIA-FIXEDPOINT-CONFIG-V1",
+      "schema_id": "SCHEMA-FIXEDPOINT-CONFIG-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-config+json;version=1"
+    },
+    {
+      "id": "MEDIA-FIXEDPOINT-PROFILE-V1",
+      "schema_id": "SCHEMA-FIXEDPOINT-PROFILE-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-QUANTIZATION-SCALE-TABLE-V1",
+      "schema_id": "SCHEMA-QUANTIZATION-SCALE-TABLE-V1",
+      "value": "application/vnd.deltareduce.quantization-scale-table+json;version=1"
+    },
+    {
+      "id": "MEDIA-SHARD-PLAN-V1",
+      "schema_id": "SCHEMA-SHARD-PLAN-V1",
+      "value": "application/vnd.deltareduce.shard-plan+json;version=1"
+    }
+  ],
+  "registry_version": "004.1.0",
+  "schema_version": "1.0.0",
+  "semantic_completeness_claimed": false
+}

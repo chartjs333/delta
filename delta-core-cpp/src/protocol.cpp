@@ -187,9 +187,17 @@ void require_unique(const std::vector<std::string>& values) {
       text(fields, "profile_id"),
       u32(fields, "value_bits"),
   };
-  require(
+  constexpr std::string_view fixedpoint_profile_id =
+      "sha256:17c8d23790047966e42f3204502623c74a0ff0383319d23e67ab15cf92fe3e61";
+  const bool feature003_profile =
       result.accumulator_bits == 128U && result.byte_order == "BIG_ENDIAN" &&
-          result.profile_id == "bft-int-fixture-v1" && result.value_bits == 64U,
+      result.profile_id == "bft-int-fixture-v1" && result.value_bits == 64U;
+  const bool feature004_profile =
+      (result.accumulator_bits == 64U || result.accumulator_bits == 128U) &&
+      result.byte_order == "LITTLE_ENDIAN" && result.profile_id == fixedpoint_profile_id &&
+      result.value_bits == 16U;
+  require(
+      feature003_profile || feature004_profile,
       ErrorCode::profile_invalid,
       "prepared shard integer profile mismatch");
   return result;

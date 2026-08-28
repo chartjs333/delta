@@ -1,0 +1,27 @@
+{
+  "$defs": {"contentId": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"}},
+  "$id": "urn:deltareduce:schema:encoded-shard:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "element_count": {"maximum": 524288, "minimum": 1, "type": "integer"},
+    "element_start": {"maximum": 1073741823, "minimum": 0, "type": "integer"},
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "ordinal": {"maximum": 4095, "minimum": 0, "type": "integer"},
+    "parameter_schema_id": {"$ref": "#/$defs/contentId"},
+    "payload_sha256": {"$ref": "#/$defs/contentId"},
+    "profile_id": {"$ref": "#/$defs/contentId"},
+    "proof_instance_id": {"$ref": "#/$defs/contentId"},
+    "round_config_id": {"$ref": "#/$defs/contentId"},
+    "scale_table_id": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.0.0"},
+    "segment_id": {"maxLength": 255, "minLength": 1, "type": "string"},
+    "segment_offset": {"maximum": 1073741823, "minimum": 0, "type": "integer"},
+    "shard_plan_id": {"$ref": "#/$defs/contentId"},
+    "ticket_id": {"maxLength": 255, "minLength": 1, "pattern": "^[A-Za-z0-9._/-]+$", "type": "string"},
+    "type_name": {"const": "ENCODED_INT16_SHARD"}
+  },
+  "required": ["element_count", "element_start", "formal_semantics_id", "ordinal", "parameter_schema_id", "payload_sha256", "profile_id", "proof_instance_id", "round_config_id", "scale_table_id", "schema_version", "segment_id", "segment_offset", "shard_plan_id", "ticket_id", "type_name"],
+  "title": "DeltaReduce encoded INT16 shard header v1",
+  "type": "object"
+}

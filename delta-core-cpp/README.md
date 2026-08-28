@@ -11,10 +11,14 @@ profiles and unsafe bounds. Consensus guards enforce validator membership and `2
 durable vote uniqueness, commitment idempotency/equivocation, complete availability coverage,
 input freeze before seed and deterministic abort/view-change behavior.
 
+Feature 004 adds the authoritative `int16-fixed-v1` encoder, reduced rational scales, portable
+ties-to-even rounding, concrete INT64/INT128 proof validation, deterministic DRQ1 shard planning,
+bounded parsing and direct-q adaptation. Verified q values are widened directly into the existing
+checked integer accumulator; they are never converted to float for consensus reduction.
+
 The core owns no I/O. It is standard-library-only and has no socket, filesystem, wall-clock,
 thread, JVM, Python or floating-point-reduce dependency. `delta-runtime-cpp` owns serialization of
-commands and durability; later features own production quantization, certificate-hierarchy
-completion and transport.
+commands and durability; later features own certificate-hierarchy completion and transport.
 
 Configure and run the isolated targets with:
 
@@ -29,3 +33,7 @@ The `cpp23` preset exercises the compatibility language mode.
 The cross-language golden, endian, accumulator and 100-ticket prepared-integer inputs live under
 `delta-protocol/fixtures/003/`. `make bft-check` verifies their registered hashes and the
 content-addressed feature-003 evidence.
+
+Feature-004 profile, proof, cross-language shard and direct-q fixtures live under
+`delta-protocol/fixtures/004/`. `make fixedpoint-refinement` reproduces their contract,
+architecture, proof-instance and formal-refinement gates.

@@ -1,0 +1,46 @@
+{
+  "$defs": {
+    "contentId": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+    "shard": {
+      "additionalProperties": false,
+      "properties": {
+        "element_count": {"maximum": 524288, "minimum": 1, "type": "integer"},
+        "element_start": {"maximum": 1073741823, "minimum": 0, "type": "integer"},
+        "envelope_bytes": {"maximum": 1114128, "minimum": 18, "type": "integer"},
+        "leaf_id": {"$ref": "#/$defs/contentId"},
+        "ordinal": {"maximum": 4095, "minimum": 0, "type": "integer"},
+        "payload_bytes": {"maximum": 1048576, "minimum": 2, "type": "integer"},
+        "segment_id": {"maxLength": 255, "minLength": 1, "type": "string"},
+        "segment_offset": {"maximum": 1073741823, "minimum": 0, "type": "integer"}
+      },
+      "required": ["element_count", "element_start", "envelope_bytes", "leaf_id", "ordinal", "payload_bytes", "segment_id", "segment_offset"],
+      "type": "object"
+    }
+  },
+  "$id": "urn:deltareduce:schema:encoded-contribution-manifest:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aggregation_steps": {"maximum": 4294967295, "minimum": 1, "type": "integer"},
+    "commitment_root": {"$ref": "#/$defs/contentId"},
+    "domain_id": {"maxLength": 255, "minLength": 1, "type": "string"},
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "parameter_schema_id": {"$ref": "#/$defs/contentId"},
+    "parent_checkpoint_id": {"$ref": "#/$defs/contentId"},
+    "profile_id": {"$ref": "#/$defs/contentId"},
+    "proof_instance_id": {"$ref": "#/$defs/contentId"},
+    "round_config_id": {"$ref": "#/$defs/contentId"},
+    "scale_table_id": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.0.0"},
+    "shard_plan_id": {"$ref": "#/$defs/contentId"},
+    "shards": {"items": {"$ref": "#/$defs/shard"}, "maxItems": 4096, "minItems": 1, "type": "array"},
+    "ticket_id": {"maxLength": 255, "minLength": 1, "pattern": "^[A-Za-z0-9._/-]+$", "type": "string"},
+    "total_elements": {"maximum": 1073741824, "minimum": 1, "type": "integer"},
+    "total_envelope_bytes": {"maximum": 4563468288, "minimum": 18, "type": "integer"},
+    "total_payload_bytes": {"maximum": 2147483648, "minimum": 2, "type": "integer"},
+    "type_name": {"const": "ENCODED_CONTRIBUTION_MANIFEST"}
+  },
+  "required": ["aggregation_steps", "commitment_root", "domain_id", "formal_semantics_id", "parameter_schema_id", "parent_checkpoint_id", "profile_id", "proof_instance_id", "round_config_id", "scale_table_id", "schema_version", "shard_plan_id", "shards", "ticket_id", "total_elements", "total_envelope_bytes", "total_payload_bytes", "type_name"],
+  "title": "DeltaReduce encoded contribution manifest v1",
+  "type": "object"
+}

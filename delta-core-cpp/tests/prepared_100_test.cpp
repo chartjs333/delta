@@ -3,6 +3,8 @@
 #include <delta/core/consensus.hpp>
 #include <delta/core/protocol.hpp>
 #include <delta/core/transition.hpp>
+#include <delta/fixedpoint/direct_q.hpp>
+#include <delta/fixedpoint/profile.hpp>
 
 #include <algorithm>
 #include <array>
@@ -23,6 +25,7 @@ namespace canonical = delta::core::canonical;
 namespace consensus = delta::core::consensus;
 namespace protocol = delta::core::protocol;
 namespace transition = delta::core::transition;
+namespace fixed = delta::fixedpoint;
 
 namespace {
 
@@ -37,6 +40,8 @@ struct FixtureResult {
   std::array<arithmetic::Int128, 4> sums;
   std::string prepared_transcript_sha256;
   std::string frozen_transcript_sha256;
+  std::string effect_transcript_sha256;
+  std::string wal_transcript_sha256;
   std::string eligible_state_id;
   canonical::Bytes eligible_state_bytes;
 
@@ -151,9 +156,10 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
 
 [[nodiscard]] protocol::PreparedIntegerShard make_shard(
     std::uint32_t index,
-    const std::string& fixture) {
+    const std::string& fixture,
+    bool direct_q) {
   const auto signed_index = static_cast<std::int64_t>(index);
-  return protocol::PreparedIntegerShard{
+  protocol::PreparedIntegerShard legacy{
       static_cast<std::int64_t>(index % 5U) - 2,
       derived_id("leaf:", ticket_id(index)),
       {128U, "BIG_ENDIAN", field(fixture, "integer_profile_id"), 64U},
@@ -168,9 +174,56 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
           1,
       },
   };
+  if (!direct_q) {
+    return legacy;
+  }
+  std::vector<std::int16_t> values;
+  values.reserve(legacy.values.size());
+  for (const auto value : legacy.values) {
+    expect(value >= fixed::q_min && value <= fixed::q_max, "feature-003 q value exceeds INT16");
+    values.push_back(static_cast<std::int16_t>(value));
+  }
+  constexpr std::uint64_t product = 65'534U;
+  constexpr std::uint64_t final = product * 100U;
+  const fixed::ConcreteProofInstance proof{
+      {
+          std::string(fixed::fixed_profile_id()),
+          2U,
+          100U,
+          arithmetic::AccumulatorWidth::int64,
+          arithmetic::Int128::from_i64(0),
+      },
+      1U,
+      "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      arithmetic::Int128::from_u64(final),
+      std::string(fixed::formal_semantics_id()),
+      "sha256:6d8c715eacf55f99a2bbc5fca7242610d871a1ef76ae58d51305b81e66364736",
+      arithmetic::Int128::from_u64(final),
+      arithmetic::Int128::from_u64(product),
+      arithmetic::AccumulatorWidth::int64,
+      32'767U,
+      "PASS",
+      "sha256:434092f82188337d0a273cd13c93e06dec55ae842df0498e4d52caa1d1844205",
+      "1.0.0",
+      fixed::required_theorem_bindings(),
+  };
+  return fixed::prepare_direct_q(
+      fixed::DirectQContext{
+          legacy.coefficient,
+          legacy.input_leaf_id,
+          legacy.parameter_id,
+          legacy.round_id,
+          legacy.shard_id,
+          legacy.ticket_id,
+      },
+      values,
+      proof,
+      fixed::derive_proof_instance_id(proof));
 }
 
-[[nodiscard]] std::vector<PreparedRecord> make_records(const std::string& fixture) {
+[[nodiscard]] std::vector<PreparedRecord> make_records(
+    const std::string& fixture,
+    bool direct_q) {
   const auto count = unsigned_field(fixture, "ticket_count");
   expect(count == 100U, "prepared fixture must contain exactly 100 tickets");
   expect(unsigned_field(fixture, "value_count") == 4U, "prepared fixture value width changed");
@@ -182,7 +235,7 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
   std::vector<PreparedRecord> records;
   records.reserve(count);
   for (std::uint32_t index = 0; index < count; ++index) {
-    auto shard = make_shard(index, fixture);
+    auto shard = make_shard(index, fixture, direct_q);
     auto bytes = protocol::encode(shard);
     expect(protocol::parse_prepared_integer_shard(bytes) == shard, "prepared shard roundtrip failed");
     const auto commitment = canonical::content_id(canonical::Type::prepared_integer_shard, bytes);
@@ -214,8 +267,11 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
   return transition::apply(protocol::encode(state), protocol::encode(command));
 }
 
-[[nodiscard]] FixtureResult run_fixture(const std::string& fixture, bool reverse_arrival) {
-  auto records = make_records(fixture);
+[[nodiscard]] FixtureResult run_fixture(
+    const std::string& fixture,
+    bool reverse_arrival,
+    bool direct_q) {
+  auto records = make_records(fixture, direct_q);
   std::vector<std::string> permitted;
   permitted.reserve(records.size());
   for (const auto& record : records) {
@@ -274,8 +330,20 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
   }
 
   auto state = protocol::parse_round_state(golden(5U));
+  canonical::Bytes effect_transcript;
+  canonical::Bytes wal_transcript;
+  const auto apply_and_record = [&effect_transcript, &wal_transcript](
+                                    const protocol::RoundState& prior,
+                                    std::string kind,
+                                    std::string request,
+                                    std::string body) {
+    auto result = apply_command(prior, std::move(kind), std::move(request), std::move(body));
+    append_framed(effect_transcript, result.effect_batch_bytes);
+    append_framed(wal_transcript, result.wal_record_bytes);
+    return result;
+  };
   for (const auto& record : records) {
-    state = apply_command(
+    state = apply_and_record(
                 state,
                 "ACCEPT_COMMITMENT",
                 "request-commit-" + record.shard.ticket_id,
@@ -283,14 +351,14 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
                 .next_state;
   }
   for (const auto& record : records) {
-    state = apply_command(
+    state = apply_and_record(
                 state,
                 "ACCEPT_AVAILABILITY",
                 "request-availability-" + record.shard.ticket_id,
                 record.availability_id)
                 .next_state;
   }
-  const auto final = apply_command(
+  const auto final = apply_and_record(
       state,
       "FINALIZE_INPUT_FREEZE",
       "request-freeze-100",
@@ -304,6 +372,8 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
       sums,
       canonical::sha256_hex(prepared_transcript),
       canonical::sha256_hex(frozen_transcript),
+      canonical::sha256_hex(effect_transcript),
+      canonical::sha256_hex(wal_transcript),
       final.next_state_id,
       final.next_state_bytes,
   };
@@ -318,9 +388,10 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
 
 void test_exact_100_ticket_repeatability() {
   const auto fixture = load(DELTA_PREPARED_100_FIXTURE_PATH);
+  const auto direct_fixture = load(DELTA_DIRECT_Q_100_FIXTURE_PATH);
   expect(field(fixture, "formal_semantics_id") == protocol::formal_semantics_id, "formal ID mismatch");
-  const auto forward = run_fixture(fixture, false);
-  const auto reverse = run_fixture(fixture, true);
+  const auto forward = run_fixture(fixture, false, false);
+  const auto reverse = run_fixture(fixture, true, false);
   expect(forward == reverse, "arrival order changed exact prepared-100 result");
   for (std::size_t index = 0; index < forward.sums.size(); ++index) {
     expect(
@@ -339,6 +410,30 @@ void test_exact_100_ticket_repeatability() {
   expect(
       forward.eligible_state_id == field(fixture, "expected_eligible_state_id"),
       "eligible state ID mismatch");
+
+  const auto direct_forward = run_fixture(fixture, false, true);
+  const auto direct_reverse = run_fixture(fixture, true, true);
+  expect(direct_forward == direct_reverse, "arrival order changed direct-q regression result");
+  expect(direct_forward.sums == forward.sums, "direct q changed exact feature-003 accumulator sums");
+  expect(
+      direct_forward.eligible_state_bytes == forward.eligible_state_bytes,
+      "direct q changed feature-003 eligible state bytes");
+  expect(
+      direct_forward.prepared_transcript_sha256 ==
+          field(direct_fixture, "prepared_transcript_sha256"),
+      "direct-q prepared transcript hash mismatch");
+  expect(
+      direct_forward.frozen_transcript_sha256 == field(direct_fixture, "frozen_transcript_sha256"),
+      "direct-q frozen transcript hash mismatch");
+  expect(
+      direct_forward.effect_transcript_sha256 == field(direct_fixture, "effect_transcript_sha256"),
+      "direct-q effect transcript hash mismatch");
+  expect(
+      direct_forward.wal_transcript_sha256 == field(direct_fixture, "wal_transcript_sha256"),
+      "direct-q WAL transcript hash mismatch");
+  expect(
+      direct_forward.eligible_state_id == field(direct_fixture, "eligible_state_id"),
+      "direct-q eligible state ID mismatch");
 }
 
 }  // namespace

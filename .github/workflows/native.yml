@@ -2,7 +2,7 @@ name: Native core matrix
 
 on:
   push:
-    branches: [003-bft-round-state-machine]
+    branches: [003-bft-round-state-machine, 004-compressed-delta-protocol]
   pull_request:
 
 permissions:
@@ -144,11 +144,63 @@ jobs:
                   /workspace/delta-core-cpp/src/protocol.cpp \
                   /workspace/delta-core-cpp/src/sha256.cpp \
                   /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/bounds.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/checked.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/direct_q.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/profile.cpp \
                   /workspace/delta-core-cpp/tests/prepared_100_test.cpp \
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -DDELTA_PREPARED_100_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json\" \
+                  -DDELTA_DIRECT_Q_100_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/004/cross-language/direct-q-100-v1.json\" \
                   -o "$prepared_output"
                 "$prepared_output"
+                fixedpoint_output="/tmp/delta-fixedpoint-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/bounds.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/checked.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/direct_q.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/encoder.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/profile.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/rounding.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/scale.cpp \
+                  /workspace/delta-core-cpp/tests/fixedpoint_test.cpp \
+                  -DDELTA_FIXEDPOINT_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/004/cross-language/golden-v1.json\" \
+                  -o "$fixedpoint_output"
+                "$fixedpoint_output"
+                shards_output="/tmp/delta-shards-${standard}"
+                "$COMPILER" \
+                  "-std=c++${standard}" \
+                  -Wall -Wextra -Wpedantic -Werror -fno-fast-math \
+                  -I/workspace/delta-core-cpp/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
+                  /workspace/delta-core-cpp/src/canonical.cpp \
+                  /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/protocol.cpp \
+                  /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/src/transition.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/bounds.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/checked.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/direct_q.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/encoder.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/profile.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/rounding.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/scale.cpp \
+                  /workspace/delta-core-cpp/src/shards/envelope.cpp \
+                  /workspace/delta-core-cpp/src/shards/plan.cpp \
+                  /workspace/delta-core-cpp/src/shards/reader.cpp \
+                  /workspace/delta-core-cpp/tests/shards_test.cpp \
+                  -DDELTA_FIXEDPOINT_GOLDEN_PATH=\"/workspace/delta-protocol/fixtures/004/cross-language/golden-v1.json\" \
+                  -o "$shards_output"
+                "$shards_output"
                 runtime_output="/tmp/delta-runtime-${standard}"
                 "$COMPILER" \
                   "-std=c++${standard}" \
@@ -173,6 +225,7 @@ jobs:
                   -I/workspace/delta-core-cpp/include \
                   -I/workspace/delta-runtime-cpp/include \
                   -I/workspace/delta-ffi/include \
+                  /workspace/delta-core-cpp/src/arithmetic.cpp \
                   /workspace/delta-core-cpp/src/canonical.cpp \
                   /workspace/delta-core-cpp/src/consensus.cpp \
                   /workspace/delta-core-cpp/src/protocol.cpp \
@@ -181,9 +234,21 @@ jobs:
                   /workspace/delta-runtime-cpp/src/runtime.cpp \
                   /workspace/delta-runtime-cpp/src/wal.cpp \
                   /workspace/delta-ffi/src/delta_abi.cpp \
+                  /workspace/delta-ffi/src/fixedpoint_abi.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/bounds.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/checked.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/direct_q.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/encoder.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/profile.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/rounding.cpp \
+                  /workspace/delta-core-cpp/src/fixedpoint/scale.cpp \
+                  /workspace/delta-core-cpp/src/shards/envelope.cpp \
+                  /workspace/delta-core-cpp/src/shards/plan.cpp \
+                  /workspace/delta-core-cpp/src/shards/reader.cpp \
                   /workspace/delta-ffi/tests/abi_test.cpp \
                   -DDELTA_FFI_BUILD \
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
+                  -DDELTA_FIXEDPOINT_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/004/cross-language/golden-v1.json\" \
                   -o "$ffi_output"
                 "$ffi_output"
                 /bin/sh /workspace/specs/003-bft-round-state-machine/scripts/run_native_phase6.sh \
@@ -247,6 +312,7 @@ jobs:
               -I/workspace/delta-core-cpp/include \
               -I/workspace/delta-runtime-cpp/include \
               -I/workspace/delta-ffi/include \
+              /workspace/delta-core-cpp/src/arithmetic.cpp \
               /workspace/delta-core-cpp/src/canonical.cpp \
               /workspace/delta-core-cpp/src/consensus.cpp \
               /workspace/delta-core-cpp/src/protocol.cpp \
@@ -255,6 +321,17 @@ jobs:
               /workspace/delta-runtime-cpp/src/runtime.cpp \
               /workspace/delta-runtime-cpp/src/wal.cpp \
               /workspace/delta-ffi/src/delta_abi.cpp \
+              /workspace/delta-ffi/src/fixedpoint_abi.cpp \
+              /workspace/delta-core-cpp/src/fixedpoint/bounds.cpp \
+              /workspace/delta-core-cpp/src/fixedpoint/checked.cpp \
+              /workspace/delta-core-cpp/src/fixedpoint/direct_q.cpp \
+              /workspace/delta-core-cpp/src/fixedpoint/encoder.cpp \
+              /workspace/delta-core-cpp/src/fixedpoint/profile.cpp \
+              /workspace/delta-core-cpp/src/fixedpoint/rounding.cpp \
+              /workspace/delta-core-cpp/src/fixedpoint/scale.cpp \
+              /workspace/delta-core-cpp/src/shards/envelope.cpp \
+              /workspace/delta-core-cpp/src/shards/plan.cpp \
+              /workspace/delta-core-cpp/src/shards/reader.cpp \
               -DDELTA_FFI_BUILD \
               -o /native/libdelta_ffi.so
 
@@ -273,7 +350,11 @@ jobs:
             --release "$JDK_FEATURE" \
             -d "$RUNNER_TEMP/java-classes" \
             delta-node-java/src/test/java/io/deltareduce/node/RuntimeDescriptorCompatibility.java \
-            delta-node-java/src/test/java/io/deltareduce/node/NativeRuntimeFfmConformance.java
+            delta-node-java/src/test/java/io/deltareduce/node/NativeRuntimeFfmConformance.java \
+            delta-node-java/src/test/java/io/deltareduce/node/FixedPointEnvelopeConformance.java \
+            delta-node-java/src/test/java/io/deltareduce/node/DirectCopyParity.java \
+            delta-node-java/src/test/java/io/deltareduce/node/MalformedEnvelopeConformance.java \
+            delta-node-java/src/test/java/io/deltareduce/node/NativeFixedPointFfmConformance.java
           "$RUNNER_TEMP/jdk/bin/java" \
             --class-path "$RUNNER_TEMP/java-classes" \
             io.deltareduce.node.RuntimeDescriptorCompatibility \
@@ -285,3 +366,21 @@ jobs:
             "$RUNNER_TEMP/native/libdelta_ffi.so" \
             delta-protocol/fixtures/003/cross-language/golden-v1.json \
             "$RUNNER_TEMP/ffm-runtime-$JDK_FEATURE"
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.FixedPointEnvelopeConformance \
+            delta-protocol/fixtures/004/cross-language/golden-v1.json
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.DirectCopyParity \
+            delta-protocol/fixtures/004/cross-language/golden-v1.json
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.MalformedEnvelopeConformance \
+            delta-protocol/fixtures/004/cross-language/golden-v1.json
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.NativeFixedPointFfmConformance \
+            "$RUNNER_TEMP/native/libdelta_ffi.so" \
+            delta-protocol/fixtures/004/cross-language/golden-v1.json

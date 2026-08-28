@@ -1,0 +1,40 @@
+{
+  "$defs": {
+    "contentId": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+    "segment": {
+      "additionalProperties": false,
+      "properties": {
+        "element_count": {"maximum": 1073741824, "minimum": 1, "type": "integer"},
+        "element_start": {"maximum": 1073741823, "minimum": 0, "type": "integer"},
+        "quantum": {
+          "additionalProperties": false,
+          "properties": {
+            "denominator": {"maximum": 4294967295, "minimum": 1, "type": "integer"},
+            "numerator": {"pattern": "^[1-9][0-9]{0,9}$", "type": "string"}
+          },
+          "required": ["denominator", "numerator"],
+          "type": "object"
+        },
+        "segment_id": {"maxLength": 255, "minLength": 1, "pattern": "^[A-Za-z0-9._/-]+$", "type": "string"},
+        "segment_ordinal": {"maximum": 65535, "minimum": 0, "type": "integer"}
+      },
+      "required": ["element_count", "element_start", "quantum", "segment_id", "segment_ordinal"],
+      "type": "object"
+    }
+  },
+  "$id": "urn:deltareduce:schema:scale-table:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "parameter_schema_id": {"$ref": "#/$defs/contentId"},
+    "profile_id": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.0.0"},
+    "segments": {"items": {"$ref": "#/$defs/segment"}, "maxItems": 65536, "minItems": 1, "type": "array"},
+    "total_elements": {"maximum": 1073741824, "minimum": 1, "type": "integer"},
+    "type_name": {"const": "QUANTIZATION_SCALE_TABLE"}
+  },
+  "required": ["formal_semantics_id", "parameter_schema_id", "profile_id", "schema_version", "segments", "total_elements", "type_name"],
+  "title": "DeltaReduce quantization scale table v1",
+  "type": "object"
+}
