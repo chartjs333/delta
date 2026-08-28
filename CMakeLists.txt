@@ -387,6 +387,9 @@ if(BUILD_TESTING)
     PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
   delta_target_defaults(delta_scheduling_lifecycle_test)
   add_test(NAME delta_core.scheduling_lifecycle COMMAND delta_scheduling_lifecycle_test)
+  add_test(
+    NAME delta_core.scheduling_trace_export
+    COMMAND delta_scheduling_lifecycle_test "${CMAKE_BINARY_DIR}/scheduling-traces")
 
   add_library(delta_scheduling_durability_mutant STATIC
     delta-core-cpp/src/scheduling/contracts.cpp

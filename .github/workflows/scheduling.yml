@@ -61,6 +61,10 @@ jobs:
           if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-lifecycle.json ]; then
             python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_native_lifecycle.py --check-only
           fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-refinement.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_refinement.py \
+              --check-only --trace-dir "out/build/cpp${{ matrix.standard }}/scheduling-traces"
+          fi
 
   sanitizer:
     name: Clang ASan UBSan scheduling planner
@@ -93,7 +97,7 @@ jobs:
       - name: Run scheduling sanitizers
         run: >-
           ctest --test-dir out/build/scheduling-sanitizer
-          -R "delta_core.scheduling_(planner|contract_fuzz)|delta_ffi.scheduling"
+          -R "delta_core.scheduling_(planner|eligibility|lifecycle|trace_export|contract_fuzz)|delta_ffi.scheduling"
           --output-on-failure
 
   java-adapter:

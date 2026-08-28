@@ -3,13 +3,17 @@
 #include <delta/scheduling/planner.hpp>
 #include <delta/scheduling/recovery.hpp>
 
+#include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <regex>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -456,15 +460,306 @@ void test_max_epoch_hard_deadline_and_journal_corruption() {
   });
 }
 
+[[nodiscard]] std::string quote(std::string_view value) {
+  return '"' + std::string(value) + '"';
+}
+
+void write_trace(const std::filesystem::path& path, const std::string& value) {
+  std::ofstream output(path, std::ios::binary | std::ios::trunc);
+  expect(output.good(), "cannot create scheduling refinement trace");
+  output << value << '\n';
+  output.close();
+  expect(output.good(), "cannot persist scheduling refinement trace");
+}
+
+void expect_forbidden_policy_field(std::string_view field, std::string_view value) {
+  auto bytes = scheduling::canonical_domain_ticket_policy(
+      policy("code", 2U, 1024U, 8U, 4096U, '4'));
+  std::string mutated;
+  mutated.reserve(bytes.size() + field.size() + value.size() + 8U);
+  for (const auto byte : bytes) {
+    mutated.push_back(std::to_integer<char>(byte));
+  }
+  expect(!mutated.empty() && mutated.back() == '}', "canonical policy mutation is malformed");
+  mutated.pop_back();
+  mutated += ",\"" + std::string(field) + "\":" + std::string(value) + '}';
+  try {
+    static_cast<void>(scheduling::parse_domain_ticket_policy(
+        std::as_bytes(std::span<const char>(mutated.data(), mutated.size())), context()));
+  } catch (const scheduling::SchedulingError& error) {
+    expect(
+        error.code() == scheduling::ErrorCode::field_set_invalid ||
+            error.code() == scheduling::ErrorCode::canonical_json_invalid,
+        "forbidden policy field returned an unrelated error code");
+    return;
+  }
+  fail("forbidden scheduling policy field was accepted");
+}
+
+[[nodiscard]] std::string worker_id(std::uint64_t ordinal) {
+  std::ostringstream output;
+  output << "worker-" << std::setw(3) << std::setfill('0') << ordinal;
+  return output.str();
+}
+
+void export_fifty_worker_measurement(const std::filesystem::path& directory) {
+  std::vector<scheduling::EligibilityRecord> records;
+  records.reserve(50U);
+  for (std::uint64_t ordinal = 0U; ordinal < 50U; ++ordinal) {
+    records.push_back(scheduling::evaluate_capability(
+        profile(
+            worker_id(ordinal),
+            ordinal % 2U == 0U ? "eu" : "us",
+            1'000U + ordinal,
+            2U,
+            '6',
+            '8'),
+        eligibility_policy()));
+  }
+  scheduling::PlanContext plan_context{
+      "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      {},
+      {100U, 20U, 3U, 1U},
+      context(),
+  };
+  for (const auto& record : records) {
+    plan_context.decisions.emplace_back(record.decision.worker_id, record.decision_id);
+  }
+  auto policies = std::vector{
+      policy("text", 1U, 2048U, 4U, 2048U, '5'),
+      policy("code", 2U, 1024U, 8U, 4096U, '4'),
+  };
+  const auto started = std::chrono::steady_clock::now();
+  const auto reference = scheduling::plan_round_tickets(policies, plan_context);
+  constexpr std::size_t permutations = 64U;
+  for (std::size_t index = 0U; index < permutations; ++index) {
+    auto permuted_policies = policies;
+    auto permuted_context = plan_context;
+    std::rotate(
+        permuted_context.decisions.begin(),
+        permuted_context.decisions.begin() + static_cast<std::ptrdiff_t>(index % 50U),
+        permuted_context.decisions.end());
+    if (index % 2U != 0U) {
+      std::reverse(permuted_policies.begin(), permuted_policies.end());
+    }
+    const auto candidate = scheduling::plan_round_tickets(permuted_policies, permuted_context);
+    expect(
+        candidate.canonical_bytes == reference.canonical_bytes &&
+            candidate.content_id == reference.content_id,
+        "50-worker planning permutation changed canonical ticket bytes");
+  }
+
+  std::vector<scheduling::EligibleWorker> workers;
+  workers.reserve(records.size());
+  for (const auto& record : records) {
+    workers.push_back({record.decision, record.profile.complete_ticket_throughput_milli});
+  }
+  const auto baseline = scheduling::allocate_initial_leases(reference, workers, 15U);
+  expect(baseline.feasible, "50-worker baseline lease allocation is infeasible");
+  for (std::size_t index = 0U; index < permutations; ++index) {
+    auto permuted_workers = workers;
+    std::rotate(
+        permuted_workers.begin(),
+        permuted_workers.begin() + static_cast<std::ptrdiff_t>(index % 50U),
+        permuted_workers.end());
+    const auto candidate = scheduling::allocate_initial_leases(reference, permuted_workers, 15U);
+    expect(
+        candidate.leases == baseline.leases,
+        "50-worker input order changed deterministic lease ownership");
+  }
+  auto speed_swapped = workers;
+  std::swap(
+      speed_swapped.front().complete_ticket_throughput_milli,
+      speed_swapped.back().complete_ticket_throughput_milli);
+  const auto changed = scheduling::allocate_initial_leases(reference, speed_swapped, 15U);
+  expect(changed.feasible && changed.leases.size() == baseline.leases.size(),
+         "50-worker speed scenario became infeasible");
+  bool owner_changed = false;
+  for (std::size_t index = 0U; index < baseline.leases.size(); ++index) {
+    owner_changed = owner_changed ||
+                    baseline.leases[index].lease.worker_id != changed.leases[index].lease.worker_id;
+    expect(
+        baseline.leases[index].lease.ticket_id == changed.leases[index].lease.ticket_id &&
+            baseline.leases[index].lease.ticket_content_id ==
+                changed.leases[index].lease.ticket_content_id &&
+            baseline.leases[index].lease.expiry_tick == changed.leases[index].lease.expiry_tick,
+        "worker speed changed frozen ticket bytes or lease deadline");
+  }
+  expect(owner_changed, "50-worker speed scenario did not change ownership");
+  const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                           std::chrono::steady_clock::now() - started)
+                           .count();
+  expect(elapsed > 0, "50-worker measurement clock did not advance");
+  write_trace(
+      directory / "measurement-50-worker.json",
+      "{\"elapsed_ns\":" + std::to_string(elapsed) +
+          ",\"formal_semantics_id\":" + quote(scheduling::formal_semantics_id) +
+          ",\"lease_permutations\":64,\"owner_changed\":true,\"plan_id\":" +
+          quote(reference.content_id) +
+          ",\"plan_permutations\":64,\"schema_version\":\"1.0.0\"," +
+          "\"speed_independent_ticket_bytes\":true,\"terminal_outcome\":\"IN_PROGRESS\"," +
+          "\"trace_id\":\"TRACE-NATIVE-007-50-WORKER\",\"worker_count\":50}");
+}
+
+void export_refinement_traces(const std::filesystem::path& directory) {
+  std::error_code error;
+  std::filesystem::remove_all(directory, error);
+  expect(!error, "cannot clean scheduling refinement trace directory");
+  std::filesystem::create_directories(directory, error);
+  expect(!error, "cannot create scheduling refinement trace directory");
+
+  auto data = setup();
+  scheduling::LeaseStateMachine machine(directory / "full-lifecycle-state", data.plan, data.leases);
+  const auto ticket = std::string{"ticket-code-000"};
+  const auto initial = machine.lease(ticket);
+  const auto old_timer = machine.timer_token(ticket);
+  const auto renewed = machine.renew(ticket, "worker-a", 0U, 0U, 20U);
+  const auto stale = machine.expire(old_timer, 35U);
+  expect(stale.status == scheduling::TransitionStatus::stale_noop,
+         "trace stale timer was not a native no-op");
+  const auto expired = machine.expire(machine.timer_token(ticket), 55U);
+  const auto reassigned = machine.reassign(
+      ticket, expired.lease.content_id, "worker-b", "us", 56U);
+  expect_error(scheduling::ErrorCode::ticket_invalid, [&] {
+    static_cast<void>(machine.commit(
+        ticket,
+        "worker-a",
+        0U,
+        "sha256:abababababababababababababababababababababababababababababababab",
+        60U));
+  });
+  const auto commitment =
+      "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd";
+  const auto committed = machine.commit(ticket, "worker-b", 1U, commitment, 70U);
+  expect_error(scheduling::ErrorCode::ticket_invalid, [&] {
+    static_cast<void>(machine.reassign(
+        ticket, reassigned.lease.content_id, "worker-a", "eu", 71U));
+  });
+  const auto legal_events =
+      "[{\"action\":\"PLAN_FINALIZED\",\"artifact_id\":" + quote(data.plan.content_id) +
+      ",\"journal_sequence\":0,\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) +
+      "},{\"action\":\"LEASE_OPEN\",\"artifact_id\":" + quote(initial.content_id) +
+      ",\"journal_sequence\":1,\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) +
+      "},{\"action\":\"LEASE_RENEW\",\"artifact_id\":" + quote(renewed.lease.content_id) +
+      ",\"journal_sequence\":" + std::to_string(renewed.journal_sequence) +
+      ",\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) +
+      "},{\"action\":\"LEASE_EXPIRE\",\"artifact_id\":" + quote(expired.lease.content_id) +
+      ",\"journal_sequence\":" + std::to_string(expired.journal_sequence) +
+      ",\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) +
+      "},{\"action\":\"LEASE_REASSIGN\",\"artifact_id\":" +
+      quote(reassigned.lease.content_id) + ",\"journal_sequence\":" +
+      std::to_string(reassigned.journal_sequence) +
+      ",\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) +
+      "},{\"action\":\"COMMIT\",\"artifact_id\":" + quote(commitment) +
+      ",\"journal_sequence\":" + std::to_string(committed.journal_sequence) +
+      ",\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) + "}]";
+  write_trace(
+      directory / "legal-full-lifecycle.json",
+      "{\"abstraction_version\":\"1.0.0\",\"events\":" + legal_events +
+          ",\"formal_semantics_id\":" + quote(scheduling::formal_semantics_id) +
+          ",\"plan_id\":" + quote(data.plan.content_id) +
+          ",\"schema_version\":\"1.0.0\",\"terminal_outcome\":\"IN_PROGRESS\"," +
+          "\"trace_id\":\"TRACE-NATIVE-007-FULL-LIFECYCLE\"}");
+
+  const auto recovery_directory = directory / "recovery-state";
+  auto recovery_data = setup();
+  {
+    scheduling::LeaseStateMachine recovery(
+        recovery_directory, recovery_data.plan, recovery_data.leases);
+    expect_error(scheduling::ErrorCode::canonical_json_invalid, [&] {
+      static_cast<void>(recovery.renew(
+          ticket,
+          "worker-a",
+          0U,
+          0U,
+          20U,
+          scheduling::SchedulingCrashPoint::after_durability_before_apply));
+    });
+  }
+  scheduling::LeaseStateMachine recovered(
+      recovery_directory, recovery_data.plan, recovery_data.leases);
+  const auto replayed = recovered.renew(ticket, "worker-a", 0U, 0U, 20U);
+  expect(replayed.status == scheduling::TransitionStatus::replay,
+         "recovery trace did not replay the durable native transition");
+  write_trace(
+      directory / "legal-restart-replay.json",
+      "{\"abstraction_version\":\"1.0.0\",\"events\":["
+      "{\"action\":\"CRASH_AFTER_DURABILITY\",\"artifact_id\":" +
+          quote(replayed.lease.content_id) +
+          ",\"journal_sequence\":4,\"status\":\"FAULT\",\"ticket_id\":" + quote(ticket) +
+          "},{\"action\":\"RESTART\",\"artifact_id\":" + quote(recovery_data.plan.content_id) +
+          ",\"journal_sequence\":4,\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) +
+          "},{\"action\":\"RECOVER_JOURNAL\",\"artifact_id\":" +
+          quote(replayed.lease.content_id) +
+          ",\"journal_sequence\":4,\"status\":\"APPLIED\",\"ticket_id\":" + quote(ticket) +
+          "},{\"action\":\"REPLAY_TRANSITION\",\"artifact_id\":" +
+          quote(replayed.lease.content_id) +
+          ",\"journal_sequence\":4,\"status\":\"REPLAY\",\"ticket_id\":" + quote(ticket) +
+          "}],\"formal_semantics_id\":" + quote(scheduling::formal_semantics_id) +
+          ",\"plan_id\":" + quote(recovery_data.plan.content_id) +
+          ",\"schema_version\":\"1.0.0\",\"terminal_outcome\":\"IN_PROGRESS\"," +
+          "\"trace_id\":\"TRACE-NATIVE-007-RESTART-REPLAY\"}");
+
+  const auto illegal = [&](std::string_view name, std::string_view trace_id,
+                           std::string_view action, std::string_view error_code) {
+    write_trace(
+        directory / std::string(name),
+        "{\"accepted\":false,\"action\":" + quote(action) + ",\"error_code\":" +
+            quote(error_code) + ",\"formal_semantics_id\":" +
+            quote(scheduling::formal_semantics_id) +
+            ",\"schema_version\":\"1.0.0\",\"terminal_outcome\":\"BLOCKED\"," +
+            "\"trace_id\":" + quote(trace_id) + '}');
+  };
+  illegal(
+      "illegal-old-holder.json",
+      "TRACE-NATIVE-007-OLD-HOLDER",
+      "COMMIT",
+      "STALE_LEASE");
+  illegal(
+      "illegal-post-commit-reassign.json",
+      "TRACE-NATIVE-007-POST-COMMIT-REASSIGN",
+      "LEASE_REASSIGN",
+      "COMMIT_ALREADY_ACCEPTED");
+  illegal(
+      "illegal-stale-timer.json",
+      "TRACE-NATIVE-007-STALE-TIMER",
+      "LEASE_EXPIRE",
+      "STALE_TIMER_NOOP");
+  expect_forbidden_policy_field("adaptive_h", "9");
+  illegal(
+      "illegal-adaptive-h.json",
+      "TRACE-NATIVE-007-ADAPTIVE-H",
+      "PLAN_FINALIZE",
+      "FORBIDDEN_ADAPTIVE_WORK_FIELD");
+  expect_forbidden_policy_field("device_speed_weight", "17");
+  illegal(
+      "illegal-device-weight.json",
+      "TRACE-NATIVE-007-DEVICE-WEIGHT",
+      "PLAN_FINALIZE",
+      "FORBIDDEN_DEVICE_WEIGHT_FIELD");
+  expect_forbidden_policy_field("rho_t", quote("sha256:" + std::string(64U, '7')));
+  illegal(
+      "illegal-early-randomness.json",
+      "TRACE-NATIVE-007-EARLY-RANDOMNESS",
+      "PLAN_FINALIZE",
+      "EARLY_RANDOMNESS_FORBIDDEN");
+  export_fifty_worker_measurement(directory);
+}
+
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
   try {
+    expect(argc == 1 || argc == 2, "usage: scheduling_lifecycle_test [trace-directory]");
     test_golden_opaque_timer_tokens();
     test_renew_expire_reassign_commit_and_replay();
     test_commit_versus_expiry_ordering();
     test_crash_recovery_and_persist_before_expose();
     test_max_epoch_hard_deadline_and_journal_corruption();
+    if (argc == 2) {
+      export_refinement_traces(std::filesystem::path(argv[1]));
+    }
   } catch (const std::exception& error) {
     std::cerr << "delta scheduling lifecycle test failed: " << error.what() << '\n';
     return 1;
