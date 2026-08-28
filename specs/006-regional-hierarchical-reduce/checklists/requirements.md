@@ -1,7 +1,7 @@
 # Specification Quality Checklist: 006 Hierarchical BFT Integer Reduce
 
 **Reviewed**: 2026-08-23  
-**Status**: Specification reconciled — implementation blocked until exact preflight
+**Status**: Specification reconciled — exact predecessor/formal preflight PASS
 
 - [x] Regional/global committees replace central routing authority.
 - [x] Regional outputs are integer sums, not floating averages.

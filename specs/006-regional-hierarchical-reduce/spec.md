@@ -2,7 +2,7 @@
 
 **Feature Branch**: `006-regional-hierarchical-reduce`  
 **Created**: 2026-08-23  
-**Status**: Planned — implementation blocked until exact predecessor/formal preflight
+**Status**: Phase 0 PASS — protocol contract freeze in progress
 **Depends on**: `005-content-addressed-p2p-distribution`
 
 **Exact predecessor**: merge `1e884b4122898a8e0ff17254bc42414a8773830c`, source

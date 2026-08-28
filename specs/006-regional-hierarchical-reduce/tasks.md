@@ -9,14 +9,14 @@ owns bounded routing and executes native effects without making mathematical or 
 
 ## Phase 0: Mandatory predecessor/formal STOP
 
-- [ ] T000 [HR006-008] Verify exact feature-005 merge/source/evidence/report ancestry and hashes.
-- [ ] T001 [HR006-001] Reverify Formal GO, PO-H1, PO-H2 and PO-A1–PO-A3 artifacts and required
+- [x] T000 [HR006-008] Verify exact feature-005 merge/source/evidence/report ancestry and hashes.
+- [x] T001 [HR006-001] Reverify Formal GO, PO-H1, PO-H2 and PO-A1–PO-A3 artifacts and required
   runtime preconditions.
-- [ ] T002 [HR006-008] Reverify feature-004 profile/proof identities and feature-005 object,
+- [x] T002 [HR006-008] Reverify feature-004 profile/proof identities and feature-005 object,
   piece-profile, certification-policy and partial-media denylist identities.
-- [ ] T003 Prove zero authoritative float-reduce, average-of-averages, central fallback,
+- [x] T003 Prove zero authoritative float-reduce, average-of-averages, central fallback,
   post-freeze exclusion and partial-object publication paths; classify `REFINEMENT_ONLY`.
-- [ ] T004 Emit content-addressed `evidence/preflight.json` binding T000–T003 and block all
+- [x] T004 Emit content-addressed `evidence/preflight.json` binding T000–T003 and block all
   production-source tasks until it passes.
 
 ## Phase 1: Runtime-neutral topology and proof contracts
