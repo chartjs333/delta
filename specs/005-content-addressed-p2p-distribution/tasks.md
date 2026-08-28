@@ -8,14 +8,14 @@ plane and executes native decisions. `task-map.md` is normative.
 
 ## Phase 0: Mandatory predecessor/formal STOP
 
-- [ ] T000 [HR005-012] Verify exact feature-004 merge/source/evidence/report ancestry and hashes.
-- [ ] T001 [HR005-012] Reverify accepted Formal GO, `PublishCertifiedObject`, repair,
+- [x] T000 [HR005-012] Verify exact feature-004 merge/source/evidence/report ancestry and hashes.
+- [x] T001 [HR005-012] Reverify accepted Formal GO, `PublishCertifiedObject`, repair,
   plane-separation and current-state preservation semantics.
-- [ ] T002 [HR005-003] Scan for Java-side certification authority, coordinator signer fallback,
+- [x] T002 [HR005-003] Scan for Java-side certification authority, coordinator signer fallback,
   policy downgrade and accepted local/partial distribution paths; require zero findings.
-- [ ] T003 Classify the design as `REFINEMENT_ONLY`, bind the exact registry/trace boundary and stop
+- [x] T003 Classify the design as `REFINEMENT_ONLY`, bind the exact registry/trace boundary and stop
   on any new publication/current-state/failure outcome.
-- [ ] T004 Emit content-addressed `evidence/preflight.json` binding T000–T003 and the reconciled
+- [x] T004 Emit content-addressed `evidence/preflight.json` binding T000–T003 and the reconciled
   SpecKit source tree; block all production-source tasks until it passes.
 
 ## Phase 1: Runtime-neutral canonical contracts
