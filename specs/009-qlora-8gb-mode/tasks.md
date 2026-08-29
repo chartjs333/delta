@@ -77,13 +77,13 @@ certificate graph without QLoRA-specific ISC/root/ApplyQC types.
 
 - [x] T037 Select and license-review the exact reference model/revision; record the decision without committing weights/tokens.
 - [x] T038 Freeze `configs/qlora/8gb-reference.json` before execution.
-- [ ] T039 Implement the physical qualification harness in `delta-worker-python/src/deltatorrent/qlora/qualification.py` and `delta-worker-python/tests/hardware/test_qlora_8gb_qualification.py`.
+- [x] T039 Implement the physical qualification harness in `delta-worker-python/src/deltatorrent/qlora/qualification.py` and `delta-worker-python/tests/hardware/test_qlora_8gb_qualification.py`.
 - [ ] T040 Execute one complete fixed ticket plus certified adapter path on the designated physical GPU.
 - [ ] T041 Record device/runtime/config/peak/headroom/base-hash/adapter-ratio and result evidence.
 
 ## Final Phase
 
-- [ ] T042 Add Python QLoRA/qualification telemetry and `qlora import/preflight/train/compose/qualify` CLI plus Java cache/transport telemetry.
+- [x] T042 Add Python QLoRA/qualification telemetry and `qlora import/preflight/train/compose/qualify` CLI plus Java cache/transport telemetry.
 - [ ] T043 Document mode, operational import and qualification in `docs/deltareduce/qlora-8gb.md`.
 - [ ] T044 Publish exit evidence and run cross-artifact analysis.
 - [ ] T045 Run full quality gate, secret/license scan and final Constitution Check.

@@ -7,6 +7,7 @@ import hashlib
 import importlib.metadata
 import json
 import os
+import platform
 import subprocess
 import time
 from dataclasses import dataclass
@@ -102,11 +103,21 @@ def _software_versions(profile: dict[str, Any], torch: Any) -> dict[str, str]:
     actual = {name: importlib.metadata.version(package) for name, package in names.items()}
     actual["pytorch"] = str(torch.__version__)
     actual["cuda_runtime"] = str(torch.version.cuda)
+    actual["python"] = platform.python_version()
     expected = profile["software"]
     for name, value in actual.items():
         if value != str(expected[name]):
             raise QualificationError(f"SOFTWARE_VERSION_MISMATCH:{name}:{value}:{expected[name]}")
     return actual
+
+
+def _source_observation() -> dict[str, object]:
+    commit = _run("git", "rev-parse", "HEAD")
+    tree = _run("git", "rev-parse", "HEAD^{tree}")
+    dirty_paths = _run("git", "status", "--porcelain=v1").splitlines()
+    if dirty_paths:
+        raise QualificationError("PHYSICAL_SOURCE_TREE_NOT_CLEAN")
+    return {"commit": commit, "tree": tree, "worktree_clean": True}
 
 
 def _tensor_state(model: Any, torch: Any) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -240,6 +251,7 @@ def run_physical_qualification(
     native_library: Path,
 ) -> dict[str, object]:
     profile = load_profile(profile_path)
+    source = _source_observation()
     gpu = probe_gpu()
     validate_physical_readiness(profile, gpu)
     started = time.monotonic()
@@ -477,6 +489,7 @@ def run_physical_qualification(
         },
         "schema_version": "1.0.0",
         "software": versions,
+        "source": source,
         "status": "PASS",
         "ticket": {
             "actual_optimizer_steps": actual_steps,
