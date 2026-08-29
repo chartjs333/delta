@@ -26,27 +26,27 @@ certificate graph without QLoRA-specific ISC/root/ApplyQC types.
 
 ## Phase 2: Backend, schema and frozen-base invariants
 
-- [ ] T006 Define the backend-neutral quantized-model/adapter port in `delta-worker-python/src/deltatorrent/qlora/backend.py`.
-- [ ] T007 Implement tiny/mock offline backend and pinned production adapter.
-- [ ] T008 Implement deterministic target-module resolution and ordered adapter schema in `delta-worker-python/src/deltatorrent/qlora/adapter_schema.py`.
-- [ ] T009 Implement pre/post base logical-hash and buffer checks.
-- [ ] T010 Add zero/duplicate/unexpected target, tied parameter and backend-version mismatch tests under `delta-worker-python/tests/qlora/`.
-- [ ] T011 Add optimizer/gradient/payload tests proving base tensors never participate and approved ephemeral caches are the only excluded base state.
+- [x] T006 Define the backend-neutral quantized-model/adapter port in `delta-worker-python/src/deltatorrent/qlora/backend.py`.
+- [x] T007 Implement tiny/mock offline backend and pinned production adapter.
+- [x] T008 Implement deterministic target-module resolution and ordered adapter schema in `delta-worker-python/src/deltatorrent/qlora/adapter_schema.py`.
+- [x] T009 Implement pre/post base logical-hash and buffer checks.
+- [x] T010 Add zero/duplicate/unexpected target, tied parameter and backend-version mismatch tests under `delta-worker-python/tests/qlora/`.
+- [x] T011 Add optimizer/gradient/payload tests proving base tensors never participate and approved ephemeral caches are the only excluded base state.
 
 ## Phase 3: Compatibility and memory preflight
 
-- [ ] T012 Implement exact accelerator/kernel/dtype/model/profile compatibility checks in `delta-worker-python/src/deltatorrent/qlora/preflight.py`.
-- [ ] T013 Implement memory estimate, configured hard budget and runtime peak recorder.
-- [ ] T014 Add unsupported kernel/dtype/sequence/batch/profile test matrix.
-- [ ] T015 Add preflight and runtime budget-exceeded no-publication tests.
+- [x] T012 Implement exact accelerator/kernel/dtype/model/profile compatibility checks in `delta-worker-python/src/deltatorrent/qlora/preflight.py`.
+- [x] T013 Implement memory estimate, configured hard budget and runtime peak recorder.
+- [x] T014 Add unsupported kernel/dtype/sequence/batch/profile test matrix.
+- [x] T015 Add preflight and runtime budget-exceeded no-publication tests.
 
 ## Phase 4: Fixed-ticket local adapter training
 
-- [ ] T016 Implement the feature-007 ticket adapter and full `A_j=H` completion guard in `delta-worker-python/src/deltatorrent/qlora/trainer.py`.
-- [ ] T017 Implement adapter-only local optimizer and deterministic data/accounting integration.
-- [ ] T018 Implement `parent_adapter-final_adapter`, `A_j` normalization and adapter contribution manifest in `delta-worker-python/src/deltatorrent/qlora/contribution.py`.
-- [ ] T019 Integrate canonical `int16-fixed-v1` adapter sharding/commitment.
-- [ ] T020 Add full-ticket reference, OOM, cancellation, data-exhaustion and partial-step tests in `delta-worker-python/tests/qlora/test_fixed_ticket.py`.
+- [x] T016 Implement the feature-007 ticket adapter and full `A_j=H` completion guard in `delta-worker-python/src/deltatorrent/qlora/trainer.py`.
+- [x] T017 Implement adapter-only local optimizer and deterministic data/accounting integration.
+- [x] T018 Implement `parent_adapter-final_adapter`, `A_j` normalization and adapter contribution manifest in `delta-worker-python/src/deltatorrent/qlora/contribution.py`.
+- [x] T019 Integrate canonical `int16-fixed-v1` adapter sharding/commitment.
+- [x] T020 Add full-ticket reference, OOM, cancellation, data-exhaustion and partial-step tests in `delta-worker-python/tests/qlora/test_fixed_ticket.py`.
 
 ## Phase 5: Certificate and hierarchical reduce integration
 

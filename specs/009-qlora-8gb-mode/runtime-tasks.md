@@ -1,9 +1,9 @@
 # Hybrid Runtime Tasks: 009 Certified QLoRA Mode
 
 - [x] **HR009-001** Freeze runtime-neutral base/tokenizer/quantization/adapter schemas and fingerprints.
-- [ ] **HR009-002** Implement Python backend-neutral QLoRA loader, deterministic target resolution and frozen-base assertions.
-- [ ] **HR009-003** Implement fixed-ticket adapter-only optimizer, full `A_j=H` guard and memory evidence.
-- [ ] **HR009-004** Emit normalized adapter contribution fixtures through feature-004 canonical encoding.
+- [x] **HR009-002** Implement Python backend-neutral QLoRA loader, deterministic target resolution and frozen-base assertions.
+- [x] **HR009-003** Implement fixed-ticket adapter-only optimizer, full `A_j=H` guard and memory evidence.
+- [x] **HR009-004** Emit normalized adapter contribution fixtures through feature-004 canonical encoding.
 - [ ] **HR009-005** Add C++ mode/base/schema compatibility to ISC/EC/APC/shard/root/apply contexts.
 - [ ] **HR009-006** Implement C++ exact adapter coverage and adapter-only outer apply.
 - [ ] **HR009-007** Implement Java content-addressed base cache and ApplyQC adapter transfer.
