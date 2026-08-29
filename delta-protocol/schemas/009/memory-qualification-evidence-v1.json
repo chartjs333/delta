@@ -1,0 +1,78 @@
+{
+  "$id": "urn:deltareduce:schema:009:memory-qualification-evidence:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "MEMORY_QUALIFICATION_EVIDENCE"
+    },
+    "available_memory_at_start_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "base_hash_after": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "base_hash_before": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "claim_eligible": {
+      "type": "boolean"
+    },
+    "completed_optimizer_steps": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "host_offload_peak_bytes": {
+      "const": 0
+    },
+    "memory_qualification_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "peak_allocated_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "peak_reserved_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_HARDWARE"
+      ]
+    }
+  },
+  "required": [
+    "available_memory_at_start_bytes",
+    "base_hash_after",
+    "base_hash_before",
+    "claim_eligible",
+    "completed_optimizer_steps",
+    "formal_semantics_id",
+    "host_offload_peak_bytes",
+    "memory_qualification_profile_id",
+    "peak_allocated_bytes",
+    "peak_reserved_bytes",
+    "schema_version",
+    "status",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 memory-qualification-evidence v1",
+  "type": "object"
+}

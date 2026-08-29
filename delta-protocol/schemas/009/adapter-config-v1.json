@@ -1,0 +1,74 @@
+{
+  "$id": "urn:deltareduce:schema:009:adapter-config:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "ADAPTER_CONFIG"
+    },
+    "alpha": {
+      "maximum": 4096,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "bias_policy": {
+      "enum": [
+        "NONE"
+      ]
+    },
+    "dropout_ppm": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "initialization": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+-]+$",
+      "type": "string"
+    },
+    "ordered_target_modules": {
+      "items": {
+        "maxLength": 512,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "rank": {
+      "maximum": 1024,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "trainable_dtype": {
+      "enum": [
+        "FLOAT16",
+        "BFLOAT16",
+        "FLOAT32"
+      ]
+    }
+  },
+  "required": [
+    "alpha",
+    "bias_policy",
+    "dropout_ppm",
+    "formal_semantics_id",
+    "initialization",
+    "ordered_target_modules",
+    "rank",
+    "schema_version",
+    "trainable_dtype",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 adapter-config v1",
+  "type": "object"
+}

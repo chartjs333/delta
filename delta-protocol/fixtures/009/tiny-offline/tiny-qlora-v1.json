@@ -1,0 +1,1 @@
+{"initial_adapter_values":{"model.layer0.lora_A":[0,0,0,0],"model.layer0.lora_B":[0,0,0,0]},"model_inputs":[[1,2],[2,1],[1,1],[2,2]],"targets":[[0,1],[1,0],[1,1],[0,0]],"tokenizer":{"1":"alpha","2":"beta"},"valid_contract_id":"sha256:01d49f9450612cfd737e9610ff8ccc384d15dba71ccd4850fd44019d0449fdf0"}
