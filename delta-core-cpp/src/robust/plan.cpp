@@ -222,14 +222,14 @@ PlanResult build_plan(
             certificates::is_label(contribution.domain_id),
         certificates::ErrorCode::identifier_invalid,
         "contribution identity is invalid");
-    for (const auto value : contribution.q_values) {
 #if !defined(DELTA_ROBUST_MUTANT_SKIP_Q_BOUND)
+    for (const auto value : contribution.q_values) {
       require(
           value >= -profile.maximum_absolute_q && value <= profile.maximum_absolute_q,
           certificates::ErrorCode::accumulator_unsafe,
           "contribution exceeds the certified q bound");
-#endif
     }
+#endif
     const auto norm = exact_squared_norm(contribution.q_values);
     norms.push_back(norm);
     norm_transcript += contribution.ticket_id + ":" + std::to_string(norm) + ";";
