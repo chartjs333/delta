@@ -494,7 +494,7 @@ def verify(source_commit: str) -> dict[str, Any]:
         "semantic_completeness_claimed": False,
         "source": verify_source(source_commit),
         "status": "PASS",
-        "task_ids": ["T000", "T037", "T038", "HR009-011"],
+        "task_ids": ["T000", "T037", "T038"],
     }
 
 
