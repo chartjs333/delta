@@ -194,7 +194,7 @@ def build(source_ref: str) -> dict[str, object]:
         "## Physical preflight and qualification",
         "## Recorded result",
         "## Composition, resume and rollback",
-        "does not claim that every 8 GiB device",
+        "does not claim that every 8 GiB",
     ):
         require(marker in docs, f"OPERATIONS_DOCUMENTATION_INCOMPLETE:{marker}")
 
