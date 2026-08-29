@@ -27,10 +27,10 @@ contract, native lifecycle, C ABI/Java boundary, refinement and exact-source com
 passed. Its verified source is `781cdbd76d812bf66323a3d1d11ca93f4b9d8333`, evidence overlay is
 `08a118c5d52a0a4f6658249cb65ea15e538904c2`, and final report SHA-256 is
 `2b45bf2dba25b15db624a02ee11e530a967961220e414ab04054428d44f59ef3`. Feature 008 has deterministic
-branch EXIT PASS on exact source `fbb528dcc404bd42653c8fb9cb5b74ef34219253`: its native
+branch EXIT PASS on exact source `4ef4daead4e3fcdf19d6947cf8120c4974af09fe`: its native
 certificate/robust/apply, durability, C ABI, JDK25/26, production-mutant, sanitizer and refinement
 gates pass with inherited Formal GO and `semantic_completeness_claimed=false`; final report
-SHA-256 is `0a67041dc03dcc7fb2afcb17a919b2ab4980e47a025fdc7c6f0e4a7f93038ac2`. Merge remains pending
+SHA-256 is `fb7b9f572923e3d8a8e24195f630474ed836ff0a7ef6454b7d31d3f930a4cc9c`. Merge remains pending
 until the evidence overlay checks complete.
 
 ## Branch topology
