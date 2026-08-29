@@ -48,7 +48,7 @@
     {
       "id": "REGISTRY-CERTIFICATE-008-V1",
       "path": "schemas/008/registry-v1.json",
-      "sha256": "c0009435c088a4024b068b6e92c2258126deb847b9be7455b390be45bf4d9fdb"
+      "sha256": "b06f39e37d31082bdba74fcf4bc7bcc654a7446c2f5c8354be4f18f9c16f8c37"
     }
   ],
   "fixtures": [
@@ -150,17 +150,17 @@
     {
       "id": "CERTIFICATE008-CROSS-LANGUAGE-GOLDEN-V1",
       "path": "fixtures/008/cross-language/golden-v1.json",
-      "sha256": "5a254b283be4953d700a89a401a66b1f030cc8a887d9b1562ca8eb944ac34087"
+      "sha256": "bb1452213f353fbbfe063087f9e7d3f6440d57d9bc0aead89cbd6791e0124629"
     },
     {
       "id": "CERTIFICATE008-NEGATIVE-V1",
       "path": "fixtures/008/invalid/certificate-negative-v1.json",
-      "sha256": "f4d65a85604b9c40479dce896bfdb798f5928a3df94e60762ca68e14957db130"
+      "sha256": "7da9a412153dd2dff42cd6d5695a4875fda0d06d07cdc8abfbeba02a52928a7b"
     },
     {
       "id": "CERTIFICATE008-VALID-CONTRACT-V1",
       "path": "fixtures/008/valid/certificate-contract-v1.json",
-      "sha256": "5a254b283be4953d700a89a401a66b1f030cc8a887d9b1562ca8eb944ac34087"
+      "sha256": "bb1452213f353fbbfe063087f9e7d3f6440d57d9bc0aead89cbd6791e0124629"
     },
     {
       "id": "CANONICAL-JSON-001",
@@ -682,7 +682,7 @@
     {
       "id": "SCHEMA-AGGREGATION-PLAN-CERTIFICATE-V1",
       "path": "schemas/008/aggregation-plan-certificate-v1.json",
-      "sha256": "df0e25555bfcce94521f61174df62f1bdc958913407a5780a01b03ab5c89894d"
+      "sha256": "f2eed2561e9873e1bc929837a99d636f752d05d7538a12fc1444e760b2feaa78"
     },
     {
       "id": "SCHEMA-APPLY-ARITHMETIC-PROFILE-V1",
@@ -707,12 +707,12 @@
     {
       "id": "SCHEMA-ELIGIBILITY-CERTIFICATE-V1",
       "path": "schemas/008/eligibility-certificate-v1.json",
-      "sha256": "0e2a592e57c977a4e2534f7e3699ea35f6a5b80d82d6066f7f4c2d3b17288fc4"
+      "sha256": "bdcf77f78dd5bac0d9d3bdc7bf34df8268d809063d3c7c6814edd15a43af0852"
     },
     {
       "id": "SCHEMA-INPUT-SET-CERTIFICATE-V1",
       "path": "schemas/008/input-set-certificate-v1.json",
-      "sha256": "13219c7a9623308e00beee74b8b239096baa518f355e420351f2e109459117ee"
+      "sha256": "6822bbf6cbb02002b1f6fc398300538b150a258774c9e9c8853e73babdde37e6"
     },
     {
       "id": "SCHEMA-NORM-EVIDENCE-V1",

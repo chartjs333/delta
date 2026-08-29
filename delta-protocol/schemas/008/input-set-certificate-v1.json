@@ -53,6 +53,17 @@
       "minimum": 1,
       "type": "integer"
     },
+    "signer_ids": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
     "tuples": {
       "items": {
         "additionalProperties": false,
@@ -100,6 +111,7 @@
     "round_config_id",
     "round_id",
     "schema_version",
+    "signer_ids",
     "tuples",
     "type_name",
     "validator_epoch_id",

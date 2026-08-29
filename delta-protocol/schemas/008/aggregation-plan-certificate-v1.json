@@ -87,9 +87,25 @@
       "minimum": 1,
       "type": "integer"
     },
+    "quorum_threshold": {
+      "maximum": 1024,
+      "minimum": 1,
+      "type": "integer"
+    },
     "seed_transcript_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
+    },
+    "signer_ids": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
     },
     "transcript_root": {
       "pattern": "^sha256:[0-9a-f]{64}$",
@@ -145,10 +161,12 @@
     "input_set_certificate_id",
     "iteration_count",
     "parameter_schema_id",
+    "quorum_threshold",
     "round_config_id",
     "round_id",
     "schema_version",
     "seed_transcript_id",
+    "signer_ids",
     "transcript_root",
     "type_name",
     "validator_epoch_id",
