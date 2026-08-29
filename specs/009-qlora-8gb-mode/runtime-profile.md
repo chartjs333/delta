@@ -4,6 +4,9 @@
 **Consensus runtime**: C++ adapter fixed-point/certificate/apply path  
 **Transport runtime**: Java base/adapter artifact transfer and node shell  
 **Formal impact**: `REFINEMENT_ONLY` specialization of the existing certificate graph
+**Exact predecessor**: feature-008 merge `62124e58062d876dc4c2fd903b57cfc7d89872d7`
+**Formal semantics ID**: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
+**Semantic completeness claimed**: `false`
 
 ## Python worker ownership
 
@@ -24,6 +27,13 @@ Java transfers and caches immutable base/tokenizer objects, transports adapter c
 The 8 GiB claim is bound to an exact profile: physical device, available/nominal VRAM, driver/runtime, model revision, sequence/batch/accumulation, fixed `B/H`, adapter config, kernels, offload/checkpoint flags and peak allocated/reserved memory.
 
 Python records memory evidence. Java/C++ processes record their own host/off-heap/native memory separately. No generalized 8 GiB claim follows from a tiny mock run.
+
+The physical runner identity and immutable qualification profile are hard evidence prerequisites.
+If no qualifying physical runner is available, offline Python, native C++ and Java work may proceed,
+but the feature exit remains `BLOCKED_HARDWARE` and cannot be reported as `PASS`.
+
+No runtime may introduce a QLoRA-specific certificate hierarchy. QLoRA state is a context-bound
+specialization of the feature-008 ISC/EC/APC/shard/root/ApplyQC/current chain.
 
 ## Exit additions
 

@@ -2,8 +2,14 @@
 
 **Feature Branch**: `009-qlora-8gb-mode`  
 **Created**: 2026-08-23  
-**Status**: Planned — ready for implementation  
-**Depends on**: `008-certificates-and-consensus`
+**Status**: SpecKit reconciled — exact preflight and hardware readiness gate implementation
+**Depends on**: feature-008 merge `62124e58062d876dc4c2fd903b57cfc7d89872d7`
+**Feature-008 source**: `4ef4daead4e3fcdf19d6947cf8120c4974af09fe`
+**Feature-008 evidence**: `d86473a3f864b4e61d2312584afa080c8fd4fbab`
+**Feature-008 report SHA-256**: `fb7b9f572923e3d8a8e24195f630474ed836ff0a7ef6454b7d31d3f930a4cc9c`
+**Formal semantics**: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
+**Formal impact**: `REFINEMENT_ONLY`
+**Semantic completeness claimed**: `false`
 
 ## Summary
 
@@ -19,6 +25,13 @@ QLoRA does not relax any DeltaReduce invariant:
 - base parameters, buffers and quantization metadata are immutable and never enter adapter deltas, residuals or outer optimizer state.
 
 The statement “runs on an 8 GiB GPU” is valid only for an exact committed hardware/model/configuration profile backed by measured peak-memory evidence. It is not a general claim for every model, sequence length, kernel or operating system.
+
+Feature 009 specializes the existing feature-008 certificate graph through
+`TrainingMode=QLORA_ADAPTER`, immutable base/tokenizer/quantization/schema fingerprints and a parent
+adapter hash. It MUST NOT create parallel `QLoRAInputSetCertificate`, `QLoRAAggregateRootQC`,
+`QLoRAApplyQC` or equivalent certificate types. Discovery of a new protocol-visible state, failure
+terminal, durability outcome or partial-apply transition reclassifies the work as `SEMANTIC` and is
+an unconditional STOP pending a new feature-000 Formal GO.
 
 ## User Scenarios & Testing
 
@@ -158,6 +171,8 @@ A researcher resumes training or evaluates one certified adapter against its imm
 - **FR-036**: The qualification profile MUST be frozen before the hardware run and contain exact external model revision, approved license, batch/sequence/accumulation, fixed `B/H`, LoRA config, backend versions, memory limit/headroom and success threshold.
 - **FR-037**: An 8 GiB claim MAY be published only with measured evidence from the exact physical GPU/runtime/profile.
 - **FR-038**: Metrics MUST include base/adapter/trainable parameter counts and bytes, cache hit, ticket steps/tokens, q/shard bytes, peak memory, kernel/offload/checkpointing flags, certificate latency and ApplyQC result.
+- **FR-039**: The physical qualification runner and frozen execution profile MUST be identified before a physical 8 GiB claim is attempted; without them the feature exit decision is `BLOCKED_HARDWARE`, never `PASS`.
+- **FR-040**: Feature 009 MUST reuse the feature-008 ISC, SeedTranscript, EC, APC, ParameterShardQC, AggregateRootQC, ApplyQC and current-pointer types without a parallel QLoRA certificate hierarchy.
 
 ### Non-Functional Requirements
 
