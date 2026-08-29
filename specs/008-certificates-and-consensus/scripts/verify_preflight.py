@@ -207,8 +207,7 @@ def validate_feature007_document(document: dict[str, Any]) -> None:
     )
     require(isinstance(ci, dict) and ci.get("status") == "PASS", "FEATURE007_CI_INVALID")
     require(
-        ci.get("source")
-        == {"commit": source.get("commit"), "tree": source.get("tree")},
+        ci.get("source") == {"commit": source.get("commit"), "tree": source.get("tree")},
         "FEATURE007_CI_SOURCE_DRIFT",
     )
 
