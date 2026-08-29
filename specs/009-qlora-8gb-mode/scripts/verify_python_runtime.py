@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -65,9 +66,13 @@ def build(commit: str) -> dict[str, object]:
         encoding="utf-8",
         errors="replace",
     )
-    summary = next(
+    summary_line = next(
         line for line in reversed(pytest_result.stdout.splitlines()) if "passed" in line
     )
+    match = re.search(r"([0-9]+) passed", summary_line)
+    if match is None:
+        raise RuntimeError("PYTEST_SUMMARY_INVALID")
+    summary = f"{match.group(1)} passed"
     return {
         "checks": [
             "BACKEND_NEUTRAL_LOADER_AND_PINNED_PRODUCTION_ADAPTER",
