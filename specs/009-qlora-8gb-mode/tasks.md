@@ -76,7 +76,7 @@ certificate graph without QLoRA-specific ISC/root/ApplyQC types.
 ## Phase 8: Physical 8 GiB qualification
 
 - [ ] T037 Select and license-review the exact reference model/revision; record the decision without committing weights/tokens.
-- [ ] T038 Freeze `configs/qlora/8gb-reference.yaml` before execution.
+- [ ] T038 Freeze `configs/qlora/8gb-reference.json` before execution.
 - [ ] T039 Implement the physical qualification harness in `delta-worker-python/src/deltatorrent/qlora/qualification.py` and `delta-worker-python/tests/hardware/test_qlora_8gb_qualification.py`.
 - [ ] T040 Execute one complete fixed ticket plus certified adapter path on the designated physical GPU.
 - [ ] T041 Record device/runtime/config/peak/headroom/base-hash/adapter-ratio and result evidence.

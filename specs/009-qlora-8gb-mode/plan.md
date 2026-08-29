@@ -121,7 +121,7 @@ delta-node-java/src/main/java/io/deltareduce/node/qlora/
   AdapterCheckpointPublisher.java
   QLoRATelemetry.java
 
-configs/qlora/8gb-reference.yaml
+configs/qlora/8gb-reference.json
 delta-worker-python/tests/fixtures/models/tiny_qlora/
 delta-worker-python/tests/qlora/
 specs/009-qlora-8gb-mode/{scripts,tests,evidence}/
