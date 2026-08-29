@@ -18,11 +18,11 @@ certificate graph without QLoRA-specific ISC/root/ApplyQC types.
 
 ## Phase 1: Base, mode and adapter contracts
 
-- [ ] T001 Define closed runtime-neutral schemas for mode, base, quantization, adapter config/schema, ticket context, contribution, checkpoint, composition and memory qualification under `delta-protocol/schemas/009/`.
-- [ ] T002 Define canonical fingerprints, exact resolved ordered target-module list and explicit base-omission/ephemeral-cache policy in protocol schemas and fixtures.
+- [x] T001 Define closed runtime-neutral schemas for mode, base, quantization, adapter config/schema, ticket context, contribution, checkpoint, composition and memory qualification under `delta-protocol/schemas/009/`.
+- [x] T002 Define canonical fingerprints, exact resolved ordered target-module list and explicit base-omission/ephemeral-cache policy in protocol schemas and fixtures.
 - [ ] T003 Define license/provenance/access-policy fields and repository-safe import contract in `delta-worker-python/src/deltatorrent/qlora/manifests.py`.
 - [ ] T004 Create tiny offline base/tokenizer/adapter fixtures under `delta-protocol/fixtures/009/tiny-offline/` and `delta-worker-python/tests/fixtures/models/tiny_qlora/` without external downloads.
-- [ ] T005 Add deterministic schema generator/validator plus valid, invalid and cross-language golden fingerprint tests under `specs/009-qlora-8gb-mode/`.
+- [x] T005 Add deterministic schema generator/validator plus valid, invalid and cross-language golden fingerprint tests under `specs/009-qlora-8gb-mode/`.
 
 ## Phase 2: Backend, schema and frozen-base invariants
 
