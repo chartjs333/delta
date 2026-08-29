@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,7 @@ ROOT = Path(__file__).parents[3]
 PROFILE = ROOT / "configs" / "qlora" / "8gb-reference.json"
 
 
+@pytest.mark.skipif(shutil.which("nvidia-smi") is None, reason="designated GPU probe unavailable")
 def test_frozen_physical_profile_matches_designated_gpu() -> None:
     profile = load_profile(PROFILE)
     validate_physical_readiness(profile, probe_gpu())
