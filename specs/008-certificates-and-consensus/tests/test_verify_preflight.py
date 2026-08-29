@@ -23,7 +23,6 @@ def valid_feature007_document(module):  # type: ignore[no-untyped-def]
         "commit": module.FEATURE007_SOURCE,
         "tree": "tree",
     }
-    child = {"source": source, "status": "PASS"}
     return {
         "classification": "REFINEMENT_ONLY",
         "formal": {
@@ -33,11 +32,11 @@ def valid_feature007_document(module):  # type: ignore[no-untyped-def]
             "source_diff": [],
             "status": "GO",
         },
-        "native_admission": child.copy(),
-        "native_lifecycle": child.copy(),
-        "native_planner": child.copy(),
-        "scheduling_ci": {"status": "PASS"},
-        "scheduling_refinement": {"status": "PASS"},
+        "refinement": {"status": "PASS"},
+        "scheduling_ci": {
+            "source": {"commit": module.FEATURE007_SOURCE, "tree": "tree"},
+            "status": "PASS",
+        },
         "semantic_completeness_claimed": False,
         "source": source,
         "status": "PASS",

@@ -199,17 +199,18 @@ def validate_feature007_document(document: dict[str, Any]) -> None:
     source = document.get("source")
     require(isinstance(source, dict), "FEATURE007_SOURCE_INVALID")
     require(source.get("commit") == FEATURE007_SOURCE, "FEATURE007_SOURCE_DRIFT")
-    for key in ("native_planner", "native_admission", "native_lifecycle"):
-        child = document.get(key)
-        require(isinstance(child, dict) and child.get("status") == "PASS", f"{key.upper()}_INVALID")
-        require(child.get("source") == source, f"{key.upper()}_SOURCE_DRIFT")
-    refinement = document.get("scheduling_refinement")
+    refinement = document.get("refinement")
     ci = document.get("scheduling_ci")
     require(
         isinstance(refinement, dict) and refinement.get("status") == "PASS",
-        "REFINEMENT_INVALID",
+        "FEATURE007_REFINEMENT_INVALID",
     )
     require(isinstance(ci, dict) and ci.get("status") == "PASS", "FEATURE007_CI_INVALID")
+    require(
+        ci.get("source")
+        == {"commit": source.get("commit"), "tree": source.get("tree")},
+        "FEATURE007_CI_SOURCE_DRIFT",
+    )
 
 
 def verify_feature007(source_commit: str) -> dict[str, Any]:
