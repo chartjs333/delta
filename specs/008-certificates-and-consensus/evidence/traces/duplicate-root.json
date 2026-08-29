@@ -1,0 +1,1 @@
+{"accepted":false,"expected_reason":"DUPLICATE_AGGREGATE","formal_fixture":"formal/fixtures/traces/illegal/duplicate-aggregate.json","formal_semantics_id":"sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6","schema_version":"1.0.0","trace_id":"TRACE-008-DUPLICATE-ROOT"}

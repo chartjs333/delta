@@ -1,0 +1,136 @@
+{
+  "$id": "urn:deltareduce:schema:apply-arithmetic-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "APPLY_ARITHMETIC_PROFILE"
+    },
+    "accumulator_proof_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "domain_weights": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "domain_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          },
+          "pi": {
+            "additionalProperties": false,
+            "properties": {
+              "denominator": {
+                "maximum": 9007199254740991,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "numerator": {
+                "pattern": "^-?(0|[1-9][0-9]*)$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "denominator",
+              "numerator"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "domain_id",
+          "pi"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "learning_rate": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "numerator": {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "denominator",
+        "numerator"
+      ],
+      "type": "object"
+    },
+    "momentum": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "numerator": {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "denominator",
+        "numerator"
+      ],
+      "type": "object"
+    },
+    "nesterov": {
+      "const": true
+    },
+    "rounding": {
+      "const": "HALF_TOWARD_POSITIVE"
+    },
+    "weight_decay": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "numerator": {
+          "pattern": "^-?(0|[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "denominator",
+        "numerator"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "accumulator_proof_id",
+    "domain_weights",
+    "formal_semantics_id",
+    "learning_rate",
+    "momentum",
+    "nesterov",
+    "rounding",
+    "schema_version",
+    "type_name",
+    "weight_decay"
+  ],
+  "title": "DeltaReduce apply-arithmetic-profile v1",
+  "type": "object"
+}

@@ -1,0 +1,193 @@
+name: Feature 008 certificate and Apply verification
+
+on:
+  push:
+    branches: [008-certificates-and-consensus]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: certificates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Native C++${{ matrix.standard }} certificate chain
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        standard: [20, 23]
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Configure native certificate chain
+        run: cmake --preset "cpp${{ matrix.standard }}"
+      - name: Build chain, ABI, production mutants and fuzz
+        run: >-
+          cmake --build --preset "cpp${{ matrix.standard }}" --parallel
+          --target delta_certificates_test delta_ffi_certificates_test
+          delta_certificate_contract_fuzz
+          delta_certificates_seed_parent_mutant_test
+          delta_certificates_observed_coverage_mutant_test
+          delta_robust_coefficient_mutant_test
+          delta_current_apply_qc_mutant_test
+      - name: Run exact chain and negative corpus
+        run: >-
+          ctest --preset "cpp${{ matrix.standard }}"
+          -R "delta_core.certificates|delta_core.certificate_mutant|delta_core.certificate_contract_fuzz|delta_ffi.certificates"
+          --output-on-failure
+      - name: Verify committed phase evidence when present
+        run: |
+          if [ -f specs/008-certificates-and-consensus/evidence/final-compatibility.json ]; then
+            python3 specs/008-certificates-and-consensus/scripts/verify_final_compatibility.py --check-only
+          fi
+
+  sanitizer:
+    name: Clang ASan UBSan certificate chain
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Configure sanitizers
+        run: >-
+          cmake -S . -B out/build/certificates-sanitizer
+          -DBUILD_TESTING=ON -DDELTA_CXX_STANDARD=20 -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+      - name: Build sanitized targets
+        run: >-
+          cmake --build out/build/certificates-sanitizer --parallel
+          --target delta_certificates_test delta_certificate_contract_fuzz
+          delta_ffi_certificates_test
+      - name: Run sanitizers
+        run: >-
+          ctest --test-dir out/build/certificates-sanitizer
+          -R "delta_core.certificates|delta_core.certificate_contract_fuzz|delta_ffi.certificates"
+          --output-on-failure
+
+  thread-sanitizer:
+    name: Clang TSan certificate durability
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Configure thread sanitizer
+        run: >-
+          cmake -S . -B out/build/certificates-tsan
+          -DBUILD_TESTING=ON -DDELTA_CXX_STANDARD=20 -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread"
+      - name: Build durable certificate runtime
+        run: >-
+          cmake --build out/build/certificates-tsan --parallel
+          --target delta_certificates_test
+      - name: Run thread sanitizer
+        run: >-
+          ctest --test-dir out/build/certificates-tsan
+          -R "delta_core.certificates" --output-on-failure
+
+  java-adapter:
+    name: JDK ${{ matrix.feature }} certificate FFM adapter
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir --parents "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" --directory "$RUNNER_TEMP/jdk" --strip-components=1
+      - name: Build native FFM library
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_ffi delta_ffi_certificates_test
+          ctest --preset cpp20 -R "delta_ffi.certificates" --output-on-failure
+      - name: Compile Java opaque adapters offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          mkdir --parents "$RUNNER_TEMP/java-classes"
+          "$RUNNER_TEMP/jdk/bin/javac" --release "${{ matrix.feature }}" -d "$RUNNER_TEMP/java-classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/certificates/NativeCertificateVerifier.java \
+            delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java \
+            delta-node-java/src/main/java/io/deltareduce/node/certificates/CertificateTimerService.java \
+            delta-node-java/src/main/java/io/deltareduce/node/apply/ArtifactEffectAdapter.java \
+            delta-node-java/src/main/java/io/deltareduce/node/apply/CurrentCheckpointPublisher.java \
+            delta-node-java/src/test/java/io/deltareduce/node/certificates/CertificatesConformance.java
+      - name: Verify native-only certificate authority offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "${{ matrix.version }}"
+          "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.certificates.CertificatesConformance \
+            "$GITHUB_WORKSPACE/out/build/cpp20/libdelta_ffi.so" \
+            "$GITHUB_WORKSPACE/delta-protocol/fixtures/008/cross-language/golden-v1.json"
+
+  phase-gate:
+    name: Certificate refinement and evidence gate
+    needs: [native, sanitizer, thread-sanitizer, java-adapter]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify deterministic committed evidence when present
+        run: |
+          if [ -f specs/008-certificates-and-consensus/evidence/native-execution.json ]; then
+            python3 specs/008-certificates-and-consensus/scripts/verify_native_execution.py --check-only
+          fi
+          if [ -f specs/008-certificates-and-consensus/evidence/certificate-refinement.json ]; then
+            python3 specs/008-certificates-and-consensus/scripts/verify_certificate_refinement.py --check-only
+          fi
+          if [ -f specs/008-certificates-and-consensus/evidence/final-compatibility.json ]; then
+            python3 specs/008-certificates-and-consensus/scripts/verify_final_compatibility.py --check-only
+          fi

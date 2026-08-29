@@ -31,3 +31,10 @@ policy verifier and return one canonical typed decision effect. Semantic denials
 evaluations with `status=REJECT`; malformed lengths/flags still use stable ABI status codes. The
 copy entry point checks attacker-controlled bounds before allocating. The borrowed entry point is
 synchronous and retains neither input pointer.
+
+Feature 008 adds `delta_certificate_inspect_borrowed` and
+`delta_certificate_inspect_copy`. Both accept bounded canonical certificate bytes, verify their
+content ID, formal-semantics ID, media type and domain, and return a caller-owned canonical
+inspection result through size negotiation. Java receives only this verifier result; it never
+reconstructs votes, quorums, robust weights, aggregate roots, Apply candidates or current-state
+decisions.

@@ -43,3 +43,11 @@ bounded canonical manifest/certificate bytes under the exact frozen policy regis
 unknown/inactive/weaker policy, forbidden media, wrong lineage/root and aggregate-as-current use.
 Piece layout is exact, contiguous and bounded. Production mutants weaken policy downgrade,
 forbidden-media and canonical parsing checks; all are required to fail the real test suite.
+
+Feature 008 adds the native certificate, robust-reduce and deterministic-apply authority. Every
+ISC/EC/APC/ParameterShardQC/AggregateRootQC/ApplyQC body is canonically serialized, context-bound,
+signer-bound and checked against the immutable parent graph. Aggregate coverage is derived from
+the frozen RoundConfig domain-by-shard matrix and committed by a domain-separated Merkle tree;
+observed leaves can never redefine the requirement set. Robust filtering and Apply use checked
+integer/rational arithmetic only. `delta-runtime-cpp` supplies the shared persist-before-expose
+vote journal and the ApplyQC-authorized, crash-recoverable current-pointer compare-and-set.

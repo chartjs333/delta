@@ -82,7 +82,7 @@ set_target_properties(delta_distribution PROPERTIES POSITION_INDEPENDENT_CODE ON
 target_include_directories(
   delta_distribution
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
-target_link_libraries(delta_distribution PUBLIC delta::core)
+target_link_libraries(delta_distribution PUBLIC delta::core delta::certificates)
 delta_target_defaults(delta_distribution)
 
 add_library(delta_hierarchy STATIC
@@ -110,7 +110,39 @@ target_include_directories(
 target_link_libraries(delta_scheduling PUBLIC delta::core)
 delta_target_defaults(delta_scheduling)
 
+add_library(delta_certificates STATIC
+  delta-core-cpp/src/certificates/contracts.cpp
+  delta-core-cpp/src/certificates/verifier.cpp)
+add_library(delta::certificates ALIAS delta_certificates)
+set_target_properties(delta_certificates PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_certificates
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_certificates PUBLIC delta::core)
+delta_target_defaults(delta_certificates)
+
+add_library(delta_robust STATIC
+  delta-core-cpp/src/robust/plan.cpp)
+add_library(delta::robust ALIAS delta_robust)
+set_target_properties(delta_robust PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_robust
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_robust PUBLIC delta::certificates)
+delta_target_defaults(delta_robust)
+
+add_library(delta_apply STATIC
+  delta-core-cpp/src/apply/engine.cpp)
+add_library(delta::apply ALIAS delta_apply)
+set_target_properties(delta_apply PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_apply
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_apply PUBLIC delta::certificates)
+delta_target_defaults(delta_apply)
+
 add_library(delta_runtime STATIC
+  delta-runtime-cpp/src/certificate_runtime.cpp
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
 add_library(delta::runtime ALIAS delta_runtime)
@@ -118,7 +150,7 @@ set_target_properties(delta_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(
   delta_runtime
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
-target_link_libraries(delta_runtime PUBLIC delta::core)
+target_link_libraries(delta_runtime PUBLIC delta::core delta::certificates)
 if(NOT WIN32)
   target_compile_options(delta_runtime PRIVATE -pthread)
   target_link_options(delta_runtime PUBLIC -pthread)
@@ -126,6 +158,7 @@ endif()
 delta_target_defaults(delta_runtime)
 
 add_library(delta_ffi SHARED
+  delta-ffi/src/certificates_abi.cpp
   delta-ffi/src/delta_abi.cpp
   delta-ffi/src/distribution_abi.cpp
   delta-ffi/src/fixedpoint_abi.cpp
@@ -138,10 +171,104 @@ target_include_directories(
 target_compile_definitions(delta_ffi PRIVATE DELTA_FFI_BUILD)
 target_link_libraries(
   delta_ffi PUBLIC delta::runtime delta::shards delta::distribution delta::hierarchy
-                   delta::scheduling)
+                   delta::scheduling delta::certificates delta::apply)
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
+  add_executable(
+    delta_certificates_test
+    delta-core-cpp/tests/certificates_test.cpp)
+  target_link_libraries(
+    delta_certificates_test
+    PRIVATE delta::certificates delta::robust delta::apply delta::runtime delta::distribution)
+  delta_target_defaults(delta_certificates_test)
+  add_test(NAME delta_core.certificates COMMAND delta_certificates_test)
+
+  add_executable(
+    delta_certificate_contract_fuzz
+    delta-core-cpp/fuzz/certificate_contract_fuzz.cpp)
+  target_link_libraries(
+    delta_certificate_contract_fuzz PRIVATE delta::certificates delta::apply)
+  delta_target_defaults(delta_certificate_contract_fuzz)
+  add_test(NAME delta_core.certificate_contract_fuzz COMMAND delta_certificate_contract_fuzz)
+
+  foreach(mutant IN ITEMS SEED_PARENT OBSERVED_COVERAGE)
+    string(TOLOWER "${mutant}" mutant_lower)
+    set(mutant_library "delta_certificates_${mutant_lower}_mutant")
+    set(mutant_test "${mutant_library}_test")
+    add_library(${mutant_library} STATIC
+      delta-core-cpp/src/certificates/contracts.cpp
+      delta-core-cpp/src/certificates/verifier.cpp)
+    target_include_directories(
+      ${mutant_library}
+      PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+    target_link_libraries(${mutant_library} PUBLIC delta::core)
+    target_compile_definitions(
+      ${mutant_library} PRIVATE "DELTA_CERTIFICATE_MUTANT_${mutant}")
+    delta_target_defaults(${mutant_library})
+    add_executable(${mutant_test} delta-core-cpp/tests/certificates_mutant_test.cpp)
+    target_link_libraries(
+      ${mutant_test}
+      PRIVATE ${mutant_library} delta::robust delta::runtime)
+    target_compile_definitions(
+      ${mutant_test} PRIVATE "DELTA_EXPECT_${mutant}_MUTANT")
+    delta_target_defaults(${mutant_test})
+    add_test(NAME "delta_core.certificate_mutant_${mutant_lower}" COMMAND ${mutant_test})
+    set_tests_properties(
+      "delta_core.certificate_mutant_${mutant_lower}" PROPERTIES WILL_FAIL TRUE)
+  endforeach()
+
+  add_library(delta_robust_coefficient_mutant STATIC delta-core-cpp/src/robust/plan.cpp)
+  target_include_directories(
+    delta_robust_coefficient_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+  target_link_libraries(delta_robust_coefficient_mutant PUBLIC delta::certificates)
+  target_compile_definitions(
+    delta_robust_coefficient_mutant PRIVATE DELTA_ROBUST_MUTANT_SKIP_Q_BOUND)
+  delta_target_defaults(delta_robust_coefficient_mutant)
+  add_executable(
+    delta_robust_coefficient_mutant_test
+    delta-core-cpp/tests/certificates_mutant_test.cpp)
+  target_link_libraries(
+    delta_robust_coefficient_mutant_test
+    PRIVATE delta_robust_coefficient_mutant delta::runtime)
+  target_compile_definitions(
+    delta_robust_coefficient_mutant_test PRIVATE DELTA_EXPECT_COEFFICIENT_MUTANT)
+  delta_target_defaults(delta_robust_coefficient_mutant_test)
+  add_test(
+    NAME delta_core.certificate_mutant_coefficient
+    COMMAND delta_robust_coefficient_mutant_test)
+  set_tests_properties(delta_core.certificate_mutant_coefficient PROPERTIES WILL_FAIL TRUE)
+
+  add_library(delta_current_apply_qc_mutant STATIC
+    delta-runtime-cpp/src/certificate_runtime.cpp
+    delta-runtime-cpp/src/runtime.cpp
+    delta-runtime-cpp/src/wal.cpp)
+  target_include_directories(
+    delta_current_apply_qc_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
+  target_link_libraries(delta_current_apply_qc_mutant PUBLIC delta::core delta::certificates)
+  if(NOT WIN32)
+    target_compile_options(delta_current_apply_qc_mutant PRIVATE -pthread)
+    target_link_options(delta_current_apply_qc_mutant PUBLIC -pthread)
+  endif()
+  target_compile_definitions(
+    delta_current_apply_qc_mutant PRIVATE DELTA_CURRENT_MUTANT_SKIP_APPLY_QC)
+  delta_target_defaults(delta_current_apply_qc_mutant)
+  add_executable(
+    delta_current_apply_qc_mutant_test
+    delta-core-cpp/tests/certificates_mutant_test.cpp)
+  target_link_libraries(
+    delta_current_apply_qc_mutant_test
+    PRIVATE delta_current_apply_qc_mutant delta::robust)
+  target_compile_definitions(
+    delta_current_apply_qc_mutant_test PRIVATE DELTA_EXPECT_CURRENT_MUTANT)
+  delta_target_defaults(delta_current_apply_qc_mutant_test)
+  add_test(
+    NAME delta_core.certificate_mutant_current
+    COMMAND delta_current_apply_qc_mutant_test)
+  set_tests_properties(delta_core.certificate_mutant_current PROPERTIES WILL_FAIL TRUE)
+
   add_executable(delta_core_canonical_test delta-core-cpp/tests/canonical_test.cpp)
   target_link_libraries(delta_core_canonical_test PRIVATE delta::core)
   target_compile_definitions(
@@ -594,6 +721,14 @@ if(BUILD_TESTING)
     PRIVATE DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_hierarchy_test)
   add_test(NAME delta_ffi.hierarchy COMMAND delta_ffi_hierarchy_test)
+
+  add_executable(delta_ffi_certificates_test delta-ffi/tests/certificates_abi_test.cpp)
+  target_link_libraries(delta_ffi_certificates_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_certificates_test
+    PRIVATE DELTA_CERTIFICATE_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/008/cross-language/golden-v1.json")
+  delta_target_defaults(delta_ffi_certificates_test)
+  add_test(NAME delta_ffi.certificates COMMAND delta_ffi_certificates_test)
 
   add_executable(delta_ffi_scheduling_test delta-ffi/tests/scheduling_abi_test.cpp)
   target_link_libraries(delta_ffi_scheduling_test PRIVATE delta::ffi)

@@ -41,3 +41,10 @@ apply backpressure, cancel delivery and publish operational counters; it cannot 
 eligibility, change a ticket, advance a lease epoch/deadline, select a commitment winner or use
 device metrics as aggregation weights. Native C++ remains the only scheduling and lease-state
 authority, including stale/reordered timer handling and restart recovery.
+
+Feature 008 adds `NativeCertificateVerifier`, `AuthenticatedCertificateTransport`,
+`CertificateTimerService`, `ArtifactEffectAdapter` and `CurrentCheckpointPublisher`. The FFM
+adapter routes canonical bytes to the bounded native certificate inspector and requires borrowed
+direct/copy parity. Java authenticates, delays, reorders, duplicates or drops opaque frames and
+executes only bounded native-authored artifact/current effects. It has no quorum, robust-plan,
+root-coverage, apply arithmetic or current-state decision API.

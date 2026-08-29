@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 
+#include <delta/certificates/contracts.hpp>
+
 namespace delta::distribution {
 
 inline constexpr std::size_t max_manifest_bytes = 1U * 1024U * 1024U;
@@ -41,6 +43,14 @@ struct PolicyDecision {
     std::span<const std::byte> canonical_manifest,
     std::span<const std::byte> canonical_certificate,
     bool request_make_current = false);
+
+// Feature 008 activation of the feature-005 reserved apply-qc-v1 policy. The generic feature-005
+// evaluator remains backward-compatible and inactive; current publication must use this stronger
+// entry point with an already verified native ApplyQC body.
+[[nodiscard]] PolicyDecision evaluate_applied_checkpoint(
+    std::span<const std::byte> canonical_manifest,
+    const certificates::ApplyQc& apply_qc,
+    bool request_make_current = true);
 
 [[nodiscard]] std::string object_manifest_id(std::span<const std::byte> canonical_manifest);
 

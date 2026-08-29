@@ -26,6 +26,7 @@ extern "C" {
 #define DELTA_ABI_OUTPUT_BUFFER_SIZE UINT32_C(32)
 #define DELTA_HIERARCHY_CONTEXT_SIZE UINT32_C(168)
 #define DELTA_SCHEDULING_ELIGIBILITY_CONTEXT_SIZE UINT32_C(184)
+#define DELTA_CERTIFICATE_INSPECT_CONTEXT_SIZE UINT32_C(40)
 #define DELTA_SCHEMA_VERSION "1.0.0"
 #define DELTA_PROTOCOL_VERSION "003.1.0"
 #define DELTA_RUNTIME_PROFILE "embedded-ffm"
@@ -129,6 +130,27 @@ typedef struct delta_scheduling_eligibility_context {
   uint64_t minimum_sample_count;
 } delta_scheduling_eligibility_context_t;
 
+typedef enum delta_certificate_kind {
+  DELTA_CERTIFICATE_INPUT_SET = 1,
+  DELTA_CERTIFICATE_SEED_TRANSCRIPT = 2,
+  DELTA_CERTIFICATE_NORM_EVIDENCE = 3,
+  DELTA_CERTIFICATE_ELIGIBILITY = 4,
+  DELTA_CERTIFICATE_AGGREGATION_PLAN = 5,
+  DELTA_CERTIFICATE_PARAMETER_SHARD_QC = 6,
+  DELTA_CERTIFICATE_AGGREGATE_ROOT_QC = 7,
+  DELTA_CERTIFICATE_APPLY_PROFILE = 8,
+  DELTA_CERTIFICATE_APPLY_CANDIDATE = 9,
+  DELTA_CERTIFICATE_APPLY_QC = 10,
+  DELTA_CERTIFICATE_CURRENT_POINTER_COMMAND = 11
+} delta_certificate_kind_t;
+
+typedef struct delta_certificate_inspect_context {
+  uint32_t struct_size;
+  uint32_t kind;
+  delta_bytes_view_t expected_content_id;
+  delta_bytes_view_t expected_formal_semantics_id;
+} delta_certificate_inspect_context_t;
+
 DELTA_API delta_status_t delta_runtime_descriptor(
     uint32_t caller_struct_size,
     delta_runtime_descriptor_t* output);
@@ -183,6 +205,14 @@ DELTA_API delta_status_t delta_scheduling_capability_evaluate_copy(
     const delta_scheduling_eligibility_context_t* policy,
     delta_bytes_view_t canonical_profile,
     delta_output_buffer_t* decision_output);
+DELTA_API delta_status_t delta_certificate_inspect_borrowed(
+    const delta_certificate_inspect_context_t* context,
+    delta_bytes_view_t canonical_certificate,
+    delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_certificate_inspect_copy(
+    const delta_certificate_inspect_context_t* context,
+    delta_bytes_view_t canonical_certificate,
+    delta_output_buffer_t* effect_output);
 
 #ifdef __cplusplus
 }
