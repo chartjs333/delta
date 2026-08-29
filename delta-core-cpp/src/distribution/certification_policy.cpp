@@ -430,7 +430,6 @@ PolicyDecision evaluate_applied_checkpoint(
     const auto manifest_text = std::string_view(
         reinterpret_cast<const char*>(canonical_manifest.data()), canonical_manifest.size());
     manifest = CanonicalJsonParser(manifest_text).parse();
-    (void)certificates::content_id(apply_qc);
   } catch (const std::exception&) {
     return reject("CANONICAL_JSON_INVALID", manifest_id, std::string(inactive_apply_policy_id));
   }
