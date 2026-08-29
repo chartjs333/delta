@@ -2,8 +2,20 @@
 
 **Feature Branch**: `008-certificates-and-consensus`  
 **Created**: 2026-08-23  
-**Status**: Planned — ready for implementation  
-**Depends on**: `007-domain-pure-ticket-scheduling`
+**Status**: SpecKit reconciled — exact predecessor/formal preflight required before implementation
+**Depends on**: merged `007-domain-pure-ticket-scheduling`
+
+**Constitution**: 2.1.0
+
+**Exact predecessor**: feature-007 merge `2054f31ef0f6750645b924ef337a35d1737c619d`,
+verified source `781cdbd76d812bf66323a3d1d11ca93f4b9d8333`, evidence overlay
+`08a118c5d52a0a4f6658249cb65ea15e538904c2` and final-report SHA-256
+`2b45bf2dba25b15db624a02ee11e530a967961220e414ab04054428d44f59ef3`.
+
+**Formal impact**: `REFINEMENT_ONLY` against
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+Any new certificate type, parent edge, deadline/failure outcome, partial-apply state or current-state
+transition is `SEMANTIC` and stops implementation until feature 000 obtains a new Formal GO.
 
 ## 1. Certificate Hierarchy
 

@@ -1,5 +1,8 @@
 # Hybrid Runtime Tasks: 008 Certificates and Apply Consensus
 
+Every obligation below is mandatory and mapped to semantic tasks in `task-map.md`. None authorizes
+new formal actions, parent edges, fallback outcomes or Java/Python consensus authority.
+
 ## Certificate graph
 
 - [ ] **HR008-001** Freeze C++ canonical bodies/vote contexts/effect types for ISC, seed, EC, APC, shard, root and Apply.

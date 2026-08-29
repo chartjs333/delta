@@ -1,7 +1,7 @@
 # Specification Quality Checklist: 008 Certificates and Consensus
 
 **Reviewed**: 2026-08-23  
-**Status**: Ready for implementation
+**Status**: Specification reconciled — exact predecessor/formal preflight pending
 
 ## Source fidelity
 
@@ -32,3 +32,6 @@
 - [x] Independent scenarios cover full chain, robust plan, aggregate, apply and malicious view.
 - [x] Limitations of robust filtering are not overstated.
 - [x] No unresolved clarification remains; any chain/arithmetic/Frankenstein/ApplyQC failure blocks feature 009.
+- [x] Constitution 2.1.0, exact merged feature-007 predecessor and formal semantics ID are explicit.
+- [x] C++ is certificate/robust/apply authority; Java is transport/timer/artifact adapter and Python is worker-local.
+- [x] Semantic tasks and HR008 obligations have a complete normative task map.

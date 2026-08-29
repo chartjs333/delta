@@ -2,19 +2,31 @@
 
 **Branch**: `008-certificates-and-consensus` | **Date**: 2026-08-23 | **Spec**: `spec.md`
 
+**Constitution**: 2.1.0
+
+**Formal impact**: `REFINEMENT_ONLY` against
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+
+**Exact predecessor**: feature-007 merge `2054f31ef0f6750645b924ef337a35d1737c619d`,
+verified source `781cdbd76d812bf66323a3d1d11ca93f4b9d8333`, evidence overlay
+`08a118c5d52a0a4f6658249cb65ea15e538904c2` and final-report SHA-256
+`2b45bf2dba25b15db624a02ee11e530a967961220e414ab04054428d44f59ef3`.
+
 ## Summary
 
 Implement the complete parent-certificate chain, exact post-ISC randomness/bucketing, canonical norm/trimming/centered-clipping plan, parameter-shard QCs, atomic AggregateRootQC and deterministic outer-model ApplyQC. Extend feature-005 certification policies so only ApplyQC-certified checkpoints become current/distributable as applied models.
 
 ## Technical Context
 
-- Reuse BFT vote guards/QC verification from feature 003.
-- Canonical certificate bodies and Merkle tables use existing hash/serialization rules.
-- Norm and robust-policy reference implementation uses arbitrary-precision integers/rationals with explicit fixed-width output coefficients.
+- Reuse native BFT vote guards/QC verification from feature 003 and the durable native runtime.
+- Runtime-neutral JSON schemas and canonical binary bodies replace protobuf/Python authority.
+- C++ norm and robust-policy authority uses checked integers/canonical rationals with explicit fixed-width output coefficients.
 - Seed source is an adapter behind a transcript-verification port; mandatory tests use deterministic threshold-share/beacon fixtures.
-- Parameter committees consume only q shards plus finalized APC.
-- Apply reference path uses checked integer/fixed-point arithmetic and canonical checkpoint serialization; optimized kernels must match exact bytes.
-- Durable publication uses content-addressed artifacts and current-pointer CAS keyed by parent/ApplyQC.
+- Parameter committees consume only q shards plus finalized APC through bounded native APIs.
+- C++ apply uses checked integer/fixed-point arithmetic and canonical checkpoint serialization; optimized kernels must match exact bytes.
+- The native runtime owns vote/apply WAL recovery and current-pointer CAS keyed by parent/ApplyQC.
+- Java 25/26 owns authenticated opaque delivery, opaque timers and bounded artifact effects only.
+- Python remains worker-local and has no validator, certificate, robust, root or apply authority.
 
 ## Constitution Check
 
@@ -27,7 +39,8 @@ Implement the complete parent-certificate chain, exact post-ISC randomness/bucke
 | Domain mixture | Separate domain shards until exact apply | Speed-independent fixture |
 | Atomic model | Current pointer requires ApplyQC | Crash/CAS matrix |
 
-**Pre-implementation result**: PASS.
+**SpecKit reconciliation result**: PASS. Production implementation remains blocked until the exact
+predecessor/Formal GO/forbidden-authority preflight and canonical schema gate pass.
 
 ## Architecture and Data Flow
 
@@ -53,56 +66,54 @@ ExactNormEngine ──▶ EligibilityEngine ──▶ EC
                               ApplyQC + current CAS
 ```
 
+## Mandatory preflight
+
+No production source may be added until content-addressed evidence rederives the exact feature-007
+merge/source/evidence/report chain, revalidates Formal GO and the feature-004/005/006 identities used
+by certificate arithmetic, distribution and hierarchy, proves zero formal source diff, classifies the
+work `REFINEMENT_ONLY`, and finds zero pre-ISC randomness, floating robust/apply arithmetic,
+single-signer current path or Java/Python certificate authority.
+
 ## Project Structure
 
 ```text
-src/deltatorrent/domain/certificates.py
-src/deltatorrent/certificates/
-  isc.py
-  seed.py
-  ec.py
-  apc.py
-  parameter_qc.py
-  aggregate_root.py
-  verifier.py
-  replay.py
-src/deltatorrent/robust/
-  norms.py
-  trimming.py
-  bucketing.py
-  centered_clipping.py
-  coefficients.py
-  transcript.py
-src/deltatorrent/apply/
-  profile.py
-  domain_mix.py
-  momentum.py
-  nesterov.py
-  engine.py
-  qc.py
-  publisher.py
-proto/deltareduce/certificates/v1/certificates.proto
-tests/contract/test_certificate_bytes.py
-tests/unit/test_exact_norms.py
-tests/unit/test_robust_plan.py
-tests/integration/test_certificate_chain.py
-tests/integration/test_frankenstein_rejection.py
-tests/integration/test_apply_qc_uniqueness.py
-tests/architecture/test_certificate_parentage_and_no_float_apply.py
+delta-protocol/
+  schemas/008/{input-set-certificate,seed-transcript,norm-evidence,
+               eligibility-certificate,aggregation-plan-certificate,
+               parameter-shard-qc,aggregate-root-qc,apply-arithmetic-profile,
+               apply-candidate,apply-qc,current-pointer-command}-v1.json
+  fixtures/008/{valid,invalid,cross-language}/
+delta-core-cpp/
+  include/delta/{certificates,robust,apply}/
+  src/{certificates,robust,apply}/
+  tests/certificates_*.cpp
+  fuzz/certificate_contract_fuzz.cpp
+delta-runtime-cpp/
+  src/certificates/{vote_wal,certificate_recovery}.cpp
+  src/apply/{apply_wal,artifact_transaction,current_pointer}.cpp
+delta-ffi/
+  src/{certificates_abi,apply_abi}.cpp
+  tests/certificates_abi_test.cpp
+delta-node-java/src/main/java/io/deltareduce/node/
+  certificates/{AuthenticatedCertificateTransport,NativeCertificateVerifier,
+                SeedShareTransport,CertificateTimerService}.java
+  apply/{ArtifactEffectAdapter,CurrentCheckpointPublisher,ApplyTelemetry}.java
+specs/008-certificates-and-consensus/
+  scripts/ evidence/ tests/
 ```
 
 ## Implementation Sequence
 
-1. Freeze all certificate/vote/body canonical schemas and parent graph.
-2. Implement ISC builder/verifier and structural seed gate.
-3. Implement seed transcript adapter/fixtures and post-ISC derivation.
-4. Implement exact norm evidence, trimming and EC.
-5. Implement bucketing, fixed-iteration centered clipping, coefficient quantization and APC-specific bound proof.
-6. Integrate parameter committees with APC and form ParameterShardQCs.
-7. Implement aggregate completeness/Merkle root and AggregateRootQC.
-8. Implement deterministic domain mix/outer optimizer, ApplyQC and current-pointer transaction.
-9. Register distribution certification policies and run malicious/recovery suites.
-10. Publish full chain evidence and final Constitution Check.
+1. Pass exact feature-007 predecessor, Formal GO and forbidden-authority preflight.
+2. Freeze runtime-neutral certificate/vote/effect schemas, bytes, IDs and exact parent graph.
+3. Generalize native persist-before-send vote lifecycle to every certificate/QC class.
+4. Implement ISC builder/verifier and structurally unavailable pre-ISC seed path.
+5. Implement exact norm evidence, EC, bucketing, centered clipping and APC proof revalidation.
+6. Integrate parameter committees and exact required matrix into ShardQC/AggregateRootQC.
+7. Implement deterministic apply, ApplyQC, artifact transaction and current-pointer CAS/replay.
+8. Expose bounded C ABI and Java opaque transport/timer/artifact adapters without authority.
+9. Export legal/illegal/crash traces, kill production mutants and pass exact formal refinement.
+10. Publish exact-source compiler/JDK/sanitizer/fuzz evidence and final Constitution Check.
 
 ## Test Strategy
 

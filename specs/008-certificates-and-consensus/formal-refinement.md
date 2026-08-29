@@ -2,6 +2,12 @@
 
 This file is normative for `008-certificates-and-consensus`.
 
+**Classification**: `REFINEMENT_ONLY` against
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+
+No new formal action ID, certificate type, parent edge, deadline/failure terminal, partial-apply state
+or alternative current transition is authorized. Discovery of one is an unconditional semantic STOP.
+
 ## Bound formal graph
 
 Implementation MUST refine the exact certificate/action graph:
