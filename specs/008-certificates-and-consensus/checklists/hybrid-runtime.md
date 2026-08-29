@@ -10,4 +10,4 @@
 - [ ] Current state changes only through native ApplyQC CAS/replay.
 - [ ] Java/C++ crash and delivery traces are accepted as refinement evidence.
 - [x] Exact feature-007 predecessor and Formal GO preflight evidence passes.
-- [ ] Canonical certificate/apply schemas and fixtures are frozen before production code.
+- [x] Canonical certificate/apply schemas and fixtures are frozen before production code.

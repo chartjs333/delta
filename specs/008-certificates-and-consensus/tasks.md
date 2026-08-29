@@ -24,17 +24,17 @@ transport, opaque timers and bounded artifact effects only. Python owns worker-l
 
 ## Phase 1: Runtime-neutral canonical contracts
 
-- [ ] T006 [HR008-001] Freeze canonical ISC, SeedTranscript, NormEvidence, EC, APC, ShardQC,
+- [x] T006 [HR008-001] Freeze canonical ISC, SeedTranscript, NormEvidence, EC, APC, ShardQC,
   AggregateRootQC, ApplyProfile, ApplyCandidate, ApplyQC and CurrentPointerCommand schemas.
-- [ ] T007 [HR008-001, HR008-003] Freeze the one legal parent graph, vote contexts, signer-role
+- [x] T007 [HR008-001, HR008-003] Freeze the one legal parent graph, vote contexts, signer-role
   scopes, quorum rules and stable rejection codes.
-- [ ] T008 [HR008-001, HR008-009] Freeze immutable RoundConfig-derived domain×shard requirement
+- [x] T008 [HR008-001, HR008-009] Freeze immutable RoundConfig-derived domain×shard requirement
   matrix, canonical leaf order, Merkle bodies and coverage proof contract.
-- [ ] T009 [HR008-001, HR008-015] Freeze bounded native command/effect envelopes, opaque timer
+- [x] T009 [HR008-001, HR008-015] Freeze bounded native command/effect envelopes, opaque timer
   tokens, artifact transaction effects and C ABI size negotiation.
-- [ ] T010 [HR008-001] Register schema/media/domain IDs; protobuf is not an authoritative encoding.
-- [ ] T011 [HR008-001, HR008-016] Add valid, invalid and cross-language full-chain fixtures.
-- [ ] T012 [HR008-019] Publish deterministic contract evidence before production consumers.
+- [x] T010 [HR008-001] Register schema/media/domain IDs; protobuf is not an authoritative encoding.
+- [x] T011 [HR008-001, HR008-016] Add valid, invalid and cross-language full-chain fixtures.
+- [x] T012 [HR008-019] Publish deterministic contract evidence before production consumers.
 
 ## Phase 2: Native durable vote lifecycle, ISC and seed
 
