@@ -27,6 +27,7 @@ extern "C" {
 #define DELTA_HIERARCHY_CONTEXT_SIZE UINT32_C(168)
 #define DELTA_SCHEDULING_ELIGIBILITY_CONTEXT_SIZE UINT32_C(184)
 #define DELTA_CERTIFICATE_INSPECT_CONTEXT_SIZE UINT32_C(40)
+#define DELTA_QLORA_CONTEXT_SIZE UINT32_C(104)
 #define DELTA_SCHEMA_VERSION "1.0.0"
 #define DELTA_PROTOCOL_VERSION "003.1.0"
 #define DELTA_RUNTIME_PROFILE "embedded-ffm"
@@ -151,6 +152,17 @@ typedef struct delta_certificate_inspect_context {
   delta_bytes_view_t expected_formal_semantics_id;
 } delta_certificate_inspect_context_t;
 
+typedef struct delta_qlora_context {
+  uint32_t struct_size;
+  uint32_t reserved;
+  delta_bytes_view_t adapter_parameter_schema_id;
+  delta_bytes_view_t base_model_manifest_id;
+  delta_bytes_view_t parent_adapter_id;
+  delta_bytes_view_t quantized_base_profile_id;
+  delta_bytes_view_t tokenizer_hash;
+  delta_bytes_view_t training_mode_id;
+} delta_qlora_context_t;
+
 DELTA_API delta_status_t delta_runtime_descriptor(
     uint32_t caller_struct_size,
     delta_runtime_descriptor_t* output);
@@ -213,6 +225,9 @@ DELTA_API delta_status_t delta_certificate_inspect_copy(
     const delta_certificate_inspect_context_t* context,
     delta_bytes_view_t canonical_certificate,
     delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_qlora_context_id(
+    const delta_qlora_context_t* context,
+    delta_output_buffer_t* content_id_output);
 
 #ifdef __cplusplus
 }

@@ -141,6 +141,17 @@ target_include_directories(
 target_link_libraries(delta_apply PUBLIC delta::certificates)
 delta_target_defaults(delta_apply)
 
+add_library(delta_qlora STATIC
+  delta-core-cpp/src/qlora/adapter_apply.cpp
+  delta-core-cpp/src/qlora/context.cpp)
+add_library(delta::qlora ALIAS delta_qlora)
+set_target_properties(delta_qlora PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_qlora
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_qlora PUBLIC delta::apply delta::certificates)
+delta_target_defaults(delta_qlora)
+
 add_library(delta_runtime STATIC
   delta-runtime-cpp/src/certificate_runtime.cpp
   delta-runtime-cpp/src/runtime.cpp
@@ -163,6 +174,7 @@ add_library(delta_ffi SHARED
   delta-ffi/src/distribution_abi.cpp
   delta-ffi/src/fixedpoint_abi.cpp
   delta-ffi/src/hierarchy_abi.cpp
+  delta-ffi/src/qlora_abi.cpp
   delta-ffi/src/scheduling_abi.cpp)
 add_library(delta::ffi ALIAS delta_ffi)
 target_include_directories(
@@ -171,10 +183,23 @@ target_include_directories(
 target_compile_definitions(delta_ffi PRIVATE DELTA_FFI_BUILD)
 target_link_libraries(
   delta_ffi PUBLIC delta::runtime delta::shards delta::distribution delta::hierarchy
-                   delta::scheduling delta::certificates delta::apply)
+                   delta::scheduling delta::certificates delta::apply delta::qlora)
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
+  add_executable(
+    delta_qlora_certificate_chain_test
+    delta-core-cpp/tests/qlora_certificate_chain_test.cpp)
+  target_link_libraries(
+    delta_qlora_certificate_chain_test PRIVATE delta::qlora delta::robust)
+  delta_target_defaults(delta_qlora_certificate_chain_test)
+  add_test(NAME delta_core.qlora_certificate_chain COMMAND delta_qlora_certificate_chain_test)
+
+  add_executable(delta_qlora_apply_test delta-core-cpp/tests/qlora_apply_test.cpp)
+  target_link_libraries(delta_qlora_apply_test PRIVATE delta::qlora delta::runtime)
+  delta_target_defaults(delta_qlora_apply_test)
+  add_test(NAME delta_core.qlora_apply COMMAND delta_qlora_apply_test)
+
   add_executable(
     delta_certificates_test
     delta-core-cpp/tests/certificates_test.cpp)
@@ -737,6 +762,11 @@ if(BUILD_TESTING)
     PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_scheduling_test)
   add_test(NAME delta_ffi.scheduling COMMAND delta_ffi_scheduling_test)
+
+  add_executable(delta_ffi_qlora_test delta-ffi/tests/qlora_abi_test.cpp)
+  target_link_libraries(delta_ffi_qlora_test PRIVATE delta::ffi)
+  delta_target_defaults(delta_ffi_qlora_test)
+  add_test(NAME delta_ffi.qlora COMMAND delta_ffi_qlora_test)
 
   add_executable(delta_ffi_fuzz_smoke_test delta-ffi/tests/fuzz_smoke_test.cpp)
   target_link_libraries(delta_ffi_fuzz_smoke_test PRIVATE delta::ffi)
