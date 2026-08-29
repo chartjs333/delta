@@ -1,5 +1,6 @@
 #include <delta/certificates/verifier.hpp>
 #include <delta/qlora/adapter_apply.hpp>
+#include <delta/qlora/distribution.hpp>
 #include <delta/runtime/certificate_runtime.hpp>
 
 #include <array>
@@ -198,12 +199,39 @@ void test_wrong_parent_profile_and_base_mutation_are_rejected() {
       "conflicting adapter ApplyQC was accepted");
 }
 
+void test_qlora_media_registry_requires_existing_apply_qc() {
+  const auto binding = qlora_context();
+  const auto value = chain();
+  expect(
+      delta::qlora::validate_media_policy(
+          binding,
+          delta::qlora::base_media_type,
+          binding.base_model_manifest_id) == delta::qlora::MediaDisposition::certified_base,
+      "certified QLoRA base media was rejected");
+  expect(
+      delta::qlora::validate_media_policy(
+          binding,
+          delta::qlora::adapter_checkpoint_media_type,
+          value.apply_qc.next_model_hash,
+          &value.apply_qc) == delta::qlora::MediaDisposition::applied_adapter,
+      "ApplyQC adapter media was rejected");
+  expect_certificate_error(
+      [&] {
+        (void)delta::qlora::validate_media_policy(
+            binding,
+            delta::qlora::adapter_checkpoint_media_type,
+            value.apply_qc.next_model_hash);
+      },
+      "adapter media without ApplyQC was accepted");
+}
+
 }  // namespace
 
 int main() {
   try {
     test_four_validator_apply_and_wal_equality();
     test_wrong_parent_profile_and_base_mutation_are_rejected();
+    test_qlora_media_registry_requires_existing_apply_qc();
   } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';
     return 1;

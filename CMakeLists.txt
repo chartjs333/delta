@@ -143,7 +143,8 @@ delta_target_defaults(delta_apply)
 
 add_library(delta_qlora STATIC
   delta-core-cpp/src/qlora/adapter_apply.cpp
-  delta-core-cpp/src/qlora/context.cpp)
+  delta-core-cpp/src/qlora/context.cpp
+  delta-core-cpp/src/qlora/distribution.cpp)
 add_library(delta::qlora ALIAS delta_qlora)
 set_target_properties(delta_qlora PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(
