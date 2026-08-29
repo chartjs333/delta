@@ -254,6 +254,10 @@ def run_physical_qualification(
     source = _source_observation()
     gpu = probe_gpu()
     validate_physical_readiness(profile, gpu)
+    cublas_workspace = os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+    if cublas_workspace not in {None, ":4096:8"}:
+        raise QualificationError("PHYSICAL_CUBLAS_WORKSPACE_CONFIG_MISMATCH")
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     started = time.monotonic()
     import torch
     from peft import (  # type: ignore[import-not-found]
@@ -470,6 +474,10 @@ def run_physical_qualification(
             "uuid": gpu.uuid,
         },
         "formal_semantics_id": FORMAL_ID,
+        "execution": {
+            "cublas_workspace_config": os.environ["CUBLAS_WORKSPACE_CONFIG"],
+            "deterministic_algorithms": True,
+        },
         "memory": {
             "hard_max_reserved_bytes": hard_max,
             "headroom_bytes": gpu.total_memory_bytes - peak_reserved,
