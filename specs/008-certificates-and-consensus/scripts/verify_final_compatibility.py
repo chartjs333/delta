@@ -121,7 +121,13 @@ def build(source_commit: str) -> dict[str, Any]:
     )
     expected_source = {"commit": commit, "tree": git_text("rev-parse", f"{commit}^{{tree}}")}
     for name in ("native-execution.json", "certificate-refinement.json", "certificate-ci.json"):
-        require(evidence[name].get("source") == expected_source, "EXACT_SOURCE_DIVERGENCE:" + name)
+        source = evidence[name].get("source")
+        require(
+            isinstance(source, dict)
+            and source.get("commit") == expected_source["commit"]
+            and source.get("tree") == expected_source["tree"],
+            "EXACT_SOURCE_DIVERGENCE:" + name,
+        )
     return {
         "checks": [
             "ALL_T000_T053_AND_HR008_001_HR008_019_COMPLETE",

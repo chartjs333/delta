@@ -116,14 +116,14 @@ transport, opaque timers and bounded artifact effects only. Python owns worker-l
   ApplyQC/current mutants against real native actions.
 - [x] T048 [HR008-013, HR008-018] Run four-validator byte/state/effect/WAL equality and exact
   feature-000 refinement/proof-precondition checks.
-- [ ] T049 [HR008-008, HR008-015] Run C++20/C++23, GCC/Clang, ASan/UBSan/TSan, fuzz, C ABI,
+- [x] T049 [HR008-008, HR008-015] Run C++20/C++23, GCC/Clang, ASan/UBSan/TSan, fuzz, C ABI,
   JDK25/26 and full Python regression matrices.
-- [ ] T050 [HR008-019] Publish certificate/robust/apply/durability/Java/refinement evidence with
+- [x] T050 [HR008-019] Publish certificate/robust/apply/durability/Java/refinement evidence with
   `semantic_completeness_claimed=false`.
 - [x] T051 [HR008-019] Document protocol, operations, observability, recovery, rollback and explicit
   feature-009 boundary.
-- [ ] T052 [HR008-019] Capture exact-source CI evidence and rerun predecessor/Formal compatibility.
-- [ ] T053 [HR008-019] Publish final Constitution 2.1.0 compatibility report and close the phase.
+- [x] T052 [HR008-019] Capture exact-source CI evidence and rerun predecessor/Formal compatibility.
+- [x] T053 [HR008-019] Publish final Constitution 2.1.0 compatibility report and close the phase.
 
 ## Dependencies
 

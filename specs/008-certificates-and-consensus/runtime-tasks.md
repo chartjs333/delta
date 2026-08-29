@@ -32,4 +32,4 @@ new formal actions, parent edges, fallback outcomes or Java/Python consensus aut
 - [x] **HR008-016** Add Frankenstein, early-seed, unsafe-coefficient, wrong-parent, duplicate/incomplete root and conflicting-Apply negative matrix.
 - [x] **HR008-017** Add architecture tests proving Java cannot implement quorum/robust/apply decisions and C++ has no socket dependency.
 - [x] **HR008-018** Export full successful/failure/crash/recovery traces and run formal refinement plus production-mutant regression.
-- [ ] **HR008-019** Publish certificate, robust, apply, durability, Java delivery and formal evidence.
+- [x] **HR008-019** Publish certificate, robust, apply, durability, Java delivery and formal evidence.

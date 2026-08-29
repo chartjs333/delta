@@ -1,6 +1,6 @@
 # Checklist: 008 Certificate Runtime
 
-**Status**: Native implementation and local conformance pass; exact-source CI evidence pending.
+**Status**: PASS — native implementation, refinement and exact-source CI evidence complete.
 
 - [x] The entire certificate and Apply graph is native and matches formal semantics.
 - [x] Every QC vote uses one durable persist-before-send lifecycle.
