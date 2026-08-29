@@ -10,16 +10,16 @@ transport, opaque timers and bounded artifact effects only. Python owns worker-l
 
 ## Phase 0: Mandatory predecessor/formal STOP
 
-- [ ] T000 [HR008-019] Verify exact feature-007 merge/source/evidence/report ancestry and hashes.
-- [ ] T001 [HR008-018] Revalidate Formal GO, full certificate graph, failure/recovery semantics and
+- [x] T000 [HR008-019] Verify exact feature-007 merge/source/evidence/report ancestry and hashes.
+- [x] T001 [HR008-018] Revalidate Formal GO, full certificate graph, failure/recovery semantics and
   every Lean/runtime precondition used by feature 008.
-- [ ] T002 [HR008-018] Prove zero formal source diff and classify the implementation
+- [x] T002 [HR008-018] Prove zero formal source diff and classify the implementation
   `REFINEMENT_ONLY`; any new action, parent edge, precondition or outcome is an unconditional STOP.
-- [ ] T003 [HR008-017] Prove zero single-signer current, pre-ISC randomness, floating robust/apply,
+- [x] T003 [HR008-017] Prove zero single-signer current, pre-ISC randomness, floating robust/apply,
   tolerance assembly, Java/Python certificate authority and device-derived consensus weight paths.
-- [ ] T004 [HR008-019] Bind exact feature-004 arithmetic, feature-005 distribution, feature-006
+- [x] T004 [HR008-019] Bind exact feature-004 arithmetic, feature-005 distribution, feature-006
   hierarchy and feature-007 ticket/lease identities needed by this phase.
-- [ ] T005 [HR008-019] Emit content-addressed `evidence/preflight.json` and block every production
+- [x] T005 [HR008-019] Emit content-addressed `evidence/preflight.json` and block every production
   source task until T000–T004 pass.
 
 ## Phase 1: Runtime-neutral canonical contracts
