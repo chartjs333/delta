@@ -1,0 +1,116 @@
+{
+  "$id": "urn:deltareduce:schema:capability-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAPABILITY_PROFILE"
+    },
+    "arithmetic_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "complete_ticket_throughput_milli": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "expires_at_tick": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "identity_epoch": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "max_concurrent_leases": {
+      "maximum": 1024,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "measured_at_tick": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "measurement_artifact_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "memory_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "model_mode": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    },
+    "parameter_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "region_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sample_count": {
+      "maximum": 1000000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "signature_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "software_build_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "worker_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "arithmetic_profile_id",
+    "complete_ticket_throughput_milli",
+    "expires_at_tick",
+    "formal_semantics_id",
+    "identity_epoch",
+    "max_concurrent_leases",
+    "measured_at_tick",
+    "measurement_artifact_id",
+    "memory_bytes",
+    "model_mode",
+    "parameter_schema_id",
+    "region_id",
+    "round_config_id",
+    "sample_count",
+    "schema_version",
+    "signature_id",
+    "software_build_id",
+    "type_name",
+    "worker_id"
+  ],
+  "title": "DeltaReduce capability-profile v1",
+  "type": "object"
+}

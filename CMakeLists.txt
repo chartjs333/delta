@@ -96,6 +96,20 @@ target_include_directories(
 target_link_libraries(delta_hierarchy PUBLIC delta::fixedpoint)
 delta_target_defaults(delta_hierarchy)
 
+add_library(delta_scheduling STATIC
+  delta-core-cpp/src/scheduling/contracts.cpp
+  delta-core-cpp/src/scheduling/eligibility.cpp
+  delta-core-cpp/src/scheduling/leases.cpp
+  delta-core-cpp/src/scheduling/planner.cpp
+  delta-core-cpp/src/scheduling/recovery.cpp)
+add_library(delta::scheduling ALIAS delta_scheduling)
+set_target_properties(delta_scheduling PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(
+  delta_scheduling
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+target_link_libraries(delta_scheduling PUBLIC delta::core)
+delta_target_defaults(delta_scheduling)
+
 add_library(delta_runtime STATIC
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
@@ -115,14 +129,16 @@ add_library(delta_ffi SHARED
   delta-ffi/src/delta_abi.cpp
   delta-ffi/src/distribution_abi.cpp
   delta-ffi/src/fixedpoint_abi.cpp
-  delta-ffi/src/hierarchy_abi.cpp)
+  delta-ffi/src/hierarchy_abi.cpp
+  delta-ffi/src/scheduling_abi.cpp)
 add_library(delta::ffi ALIAS delta_ffi)
 target_include_directories(
   delta_ffi
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include>)
 target_compile_definitions(delta_ffi PRIVATE DELTA_FFI_BUILD)
 target_link_libraries(
-  delta_ffi PUBLIC delta::runtime delta::shards delta::distribution delta::hierarchy)
+  delta_ffi PUBLIC delta::runtime delta::shards delta::distribution delta::hierarchy
+                   delta::scheduling)
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
@@ -344,6 +360,97 @@ if(BUILD_TESTING)
       "delta_core.hierarchy_mutant_${mutant_lower}" PROPERTIES WILL_FAIL TRUE)
   endforeach()
 
+  add_executable(delta_scheduling_planner_test delta-core-cpp/tests/scheduling_planner_test.cpp)
+  target_link_libraries(delta_scheduling_planner_test PRIVATE delta::scheduling)
+  target_compile_definitions(
+    delta_scheduling_planner_test
+    PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+  delta_target_defaults(delta_scheduling_planner_test)
+  add_test(NAME delta_core.scheduling_planner COMMAND delta_scheduling_planner_test)
+
+  add_executable(
+    delta_scheduling_eligibility_test
+    delta-core-cpp/tests/scheduling_eligibility_test.cpp)
+  target_link_libraries(delta_scheduling_eligibility_test PRIVATE delta::scheduling)
+  target_compile_definitions(
+    delta_scheduling_eligibility_test
+    PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+  delta_target_defaults(delta_scheduling_eligibility_test)
+  add_test(NAME delta_core.scheduling_eligibility COMMAND delta_scheduling_eligibility_test)
+
+  add_executable(
+    delta_scheduling_lifecycle_test
+    delta-core-cpp/tests/scheduling_lifecycle_test.cpp)
+  target_link_libraries(delta_scheduling_lifecycle_test PRIVATE delta::scheduling)
+  target_compile_definitions(
+    delta_scheduling_lifecycle_test
+    PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+  delta_target_defaults(delta_scheduling_lifecycle_test)
+  add_test(NAME delta_core.scheduling_lifecycle COMMAND delta_scheduling_lifecycle_test)
+  add_test(
+    NAME delta_core.scheduling_trace_export
+    COMMAND delta_scheduling_lifecycle_test "${CMAKE_BINARY_DIR}/scheduling-traces")
+
+  add_library(delta_scheduling_durability_mutant STATIC
+    delta-core-cpp/src/scheduling/contracts.cpp
+    delta-core-cpp/src/scheduling/eligibility.cpp
+    delta-core-cpp/src/scheduling/leases.cpp
+    delta-core-cpp/src/scheduling/planner.cpp
+    delta-core-cpp/src/scheduling/recovery.cpp)
+  target_include_directories(
+    delta_scheduling_durability_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+  target_link_libraries(delta_scheduling_durability_mutant PUBLIC delta::core)
+  target_compile_definitions(
+    delta_scheduling_durability_mutant
+    PRIVATE DELTA_SCHEDULING_MUTANT_EXPOSE_BEFORE_DURABILITY)
+  delta_target_defaults(delta_scheduling_durability_mutant)
+  add_executable(
+    delta_scheduling_durability_mutant_test
+    delta-core-cpp/tests/scheduling_lifecycle_test.cpp)
+  target_link_libraries(
+    delta_scheduling_durability_mutant_test PRIVATE delta_scheduling_durability_mutant)
+  target_compile_definitions(
+    delta_scheduling_durability_mutant_test
+    PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+  delta_target_defaults(delta_scheduling_durability_mutant_test)
+  add_test(
+    NAME delta_core.scheduling_mutant_expose_before_durability
+    COMMAND delta_scheduling_durability_mutant_test)
+  set_tests_properties(
+    delta_core.scheduling_mutant_expose_before_durability PROPERTIES WILL_FAIL TRUE)
+
+  foreach(mutant IN ITEMS ADAPT_WORK OVERLAP_RANGES SKIP_INFEASIBILITY)
+    string(TOLOWER "${mutant}" mutant_lower)
+    set(mutant_library "delta_scheduling_${mutant_lower}_mutant")
+    set(mutant_test "${mutant_library}_test")
+    add_library(${mutant_library} STATIC
+      delta-core-cpp/src/scheduling/contracts.cpp
+      delta-core-cpp/src/scheduling/planner.cpp)
+    target_include_directories(
+      ${mutant_library}
+      PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+    target_link_libraries(${mutant_library} PUBLIC delta::core)
+    target_compile_definitions(${mutant_library} PRIVATE "DELTA_SCHEDULING_MUTANT_${mutant}")
+    delta_target_defaults(${mutant_library})
+    add_executable(${mutant_test} delta-core-cpp/tests/scheduling_planner_test.cpp)
+    target_link_libraries(${mutant_test} PRIVATE ${mutant_library})
+    target_compile_definitions(
+      ${mutant_test}
+      PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+    delta_target_defaults(${mutant_test})
+    add_test(NAME "delta_core.scheduling_mutant_${mutant_lower}" COMMAND ${mutant_test})
+    set_tests_properties(
+      "delta_core.scheduling_mutant_${mutant_lower}" PROPERTIES WILL_FAIL TRUE)
+  endforeach()
+
+  add_executable(delta_scheduling_contract_fuzz delta-core-cpp/fuzz/scheduling_contract_fuzz.cpp)
+  target_link_libraries(delta_scheduling_contract_fuzz PRIVATE delta::scheduling)
+  target_compile_definitions(
+    delta_scheduling_contract_fuzz PRIVATE DELTA_SCHEDULING_FUZZ_SMOKE_MAIN)
+  delta_target_defaults(delta_scheduling_contract_fuzz)
+  add_test(NAME delta_core.scheduling_contract_fuzz COMMAND delta_scheduling_contract_fuzz)
+
   add_executable(delta_core_transition_test delta-core-cpp/tests/transition_test.cpp)
   target_link_libraries(delta_core_transition_test PRIVATE delta::core)
   target_compile_definitions(
@@ -487,6 +594,14 @@ if(BUILD_TESTING)
     PRIVATE DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_hierarchy_test)
   add_test(NAME delta_ffi.hierarchy COMMAND delta_ffi_hierarchy_test)
+
+  add_executable(delta_ffi_scheduling_test delta-ffi/tests/scheduling_abi_test.cpp)
+  target_link_libraries(delta_ffi_scheduling_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_scheduling_test
+    PRIVATE DELTA_SCHEDULING_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/007/cross-language/golden-v1.json")
+  delta_target_defaults(delta_ffi_scheduling_test)
+  add_test(NAME delta_ffi.scheduling COMMAND delta_ffi_scheduling_test)
 
   add_executable(delta_ffi_fuzz_smoke_test delta-ffi/tests/fuzz_smoke_test.cpp)
   target_link_libraries(delta_ffi_fuzz_smoke_test PRIVATE delta::ffi)

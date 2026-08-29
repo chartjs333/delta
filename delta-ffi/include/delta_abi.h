@@ -25,6 +25,7 @@ extern "C" {
 #define DELTA_ABI_OPEN_OPTIONS_SIZE UINT32_C(128)
 #define DELTA_ABI_OUTPUT_BUFFER_SIZE UINT32_C(32)
 #define DELTA_HIERARCHY_CONTEXT_SIZE UINT32_C(168)
+#define DELTA_SCHEDULING_ELIGIBILITY_CONTEXT_SIZE UINT32_C(184)
 #define DELTA_SCHEMA_VERSION "1.0.0"
 #define DELTA_PROTOCOL_VERSION "003.1.0"
 #define DELTA_RUNTIME_PROFILE "embedded-ffm"
@@ -110,6 +111,24 @@ typedef struct delta_hierarchy_context {
   delta_bytes_view_t shard_plan_id;
 } delta_hierarchy_context_t;
 
+typedef struct delta_scheduling_eligibility_context {
+  uint32_t struct_size;
+  uint32_t reserved;
+  delta_bytes_view_t arithmetic_profile_id;
+  delta_bytes_view_t parameter_schema_id;
+  delta_bytes_view_t round_config_id;
+  delta_bytes_view_t eligibility_policy_id;
+  delta_bytes_view_t model_mode;
+  delta_bytes_view_t allowed_domain_ids_csv;
+  delta_bytes_view_t allowed_region_ids_csv;
+  delta_bytes_view_t allowed_software_build_ids_csv;
+  delta_bytes_view_t trusted_signature_ids_csv;
+  uint64_t decision_tick;
+  uint64_t identity_epoch;
+  uint64_t minimum_memory_bytes;
+  uint64_t minimum_sample_count;
+} delta_scheduling_eligibility_context_t;
+
 DELTA_API delta_status_t delta_runtime_descriptor(
     uint32_t caller_struct_size,
     delta_runtime_descriptor_t* output);
@@ -156,6 +175,14 @@ DELTA_API delta_status_t delta_hierarchy_contract_validate_copy(
     delta_bytes_view_t canonical_topology,
     delta_bytes_view_t canonical_proof,
     delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_scheduling_capability_evaluate_borrowed(
+    const delta_scheduling_eligibility_context_t* policy,
+    delta_bytes_view_t canonical_profile,
+    delta_output_buffer_t* decision_output);
+DELTA_API delta_status_t delta_scheduling_capability_evaluate_copy(
+    const delta_scheduling_eligibility_context_t* policy,
+    delta_bytes_view_t canonical_profile,
+    delta_output_buffer_t* decision_output);
 
 #ifdef __cplusplus
 }

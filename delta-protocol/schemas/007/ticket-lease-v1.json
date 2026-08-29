@@ -1,0 +1,101 @@
+{
+  "$id": "urn:deltareduce:schema:ticket-lease:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "TICKET_LEASE"
+    },
+    "expiry_tick": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "issue_tick": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "lease_epoch": {
+      "maximum": 1024,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "prior_lease_id": {
+      "anyOf": [
+        {
+          "const": "NONE"
+        },
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      ]
+    },
+    "region_route": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    },
+    "renewal_count": {
+      "maximum": 64,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "ACTIVE"
+      ]
+    },
+    "ticket_content_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ticket_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    },
+    "worker_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "expiry_tick",
+    "formal_semantics_id",
+    "issue_tick",
+    "lease_epoch",
+    "plan_id",
+    "prior_lease_id",
+    "region_route",
+    "renewal_count",
+    "round_config_id",
+    "schema_version",
+    "state",
+    "ticket_content_id",
+    "ticket_id",
+    "type_name",
+    "worker_id"
+  ],
+  "title": "DeltaReduce ticket-lease v1",
+  "type": "object"
+}

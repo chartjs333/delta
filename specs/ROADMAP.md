@@ -6,7 +6,7 @@ Feature `000-formal-tla-spec` has a deterministic `GO` for formal semantics:
 
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
-Features 000–005 are merged. Feature 003 merged as
+Features 000–006 are merged. Feature 003 merged as
 `53da4d3c0b236726566fb242fdcae84032b42679` after its native core/runtime, ABI/FFM,
 compiler/sanitizer, refinement and final `REFINEMENT_ONLY` gates passed. Its verified source is
 `189e5f155b787c2d1d391630fc599b67ea366bba` and its evidence overlay is
@@ -17,9 +17,16 @@ compiler/sanitizer, refinement and final `REFINEMENT_ONLY` gates passed. Its ver
 `1e884b4122898a8e0ff17254bc42414a8773830c` with deterministic `REFINEMENT_ONLY` GO; its verified
 source is `01f200b193733a1b474ad755c5c0c739b3189a96`, evidence overlay is
 `be5d72305bfd883a5bd99607df6c2788014bfd0a`, and final report SHA-256 is
-`7f7f86ad5021107688277ab626b266a61c7e633eb5c401e44c7778b98733dad6`. Feature 006 is restacked
-on that merge and remains implementation-blocked until its exact predecessor/formal/hierarchy
-preflight passes.
+`7f7f86ad5021107688277ab626b266a61c7e633eb5c401e44c7778b98733dad6`. Feature 006 merged as
+`827d3393acf347c9b45eabdb3d652bdc98bcfe75` with deterministic `REFINEMENT_ONLY` GO; its verified
+source is `90cc7fac96675694bab15f4e1ae1e5c6e3f525be`, evidence overlay is
+`b487ea81851cfd5b4769579392798841cb18afc0`, and final report SHA-256 is
+`d16f9cfc62efe95e902b301823c136c0530db68b1cfb48788c6a239ade123800`. Feature 007 is restacked on
+that merge and has completed its exact predecessor/Formal GO, canonical contract, native lifecycle,
+C ABI/Java boundary, refinement and exact-source compatibility gates. Feature 008 remains closed
+until feature 007 is merged and its own formal/implementation gates pass. Feature-007 verified
+source is `781cdbd76d812bf66323a3d1d11ca93f4b9d8333`; its final report SHA-256 is
+`2b45bf2dba25b15db624a02ee11e530a967961220e414ab04054428d44f59ef3`.
 
 ## Branch topology
 

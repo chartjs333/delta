@@ -32,3 +32,12 @@ semantics. Java binds its routing projection to the returned topology ID and mov
 opaque bytes through permissioned regional queues with deadline, cancellation, retry,
 backpressure and telemetry controls. It exposes no sum, averaging, signer-selection or QC-building
 API.
+
+Feature 007 adds `NativeScheduling`, `CapabilityCollector`, `AdmissionTransport` and
+`LeaseTimerRouter`. Java submits authenticated canonical capability bytes through the bounded
+borrowed-direct or owned-copy C ABI and receives a byte-exact native eligibility decision. Plan,
+lease and timer-token artifacts remain defensive-copy opaque payloads in bounded queues. Java may
+apply backpressure, cancel delivery and publish operational counters; it cannot calculate
+eligibility, change a ticket, advance a lease epoch/deadline, select a commitment winner or use
+device metrics as aggregation weights. Native C++ remains the only scheduling and lease-state
+authority, including stale/reordered timer handling and restart recovery.

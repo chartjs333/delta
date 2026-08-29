@@ -1,0 +1,211 @@
+name: Feature 007 scheduling verification
+
+on:
+  push:
+    branches: [007-domain-pure-ticket-scheduling]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduling-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-planner:
+    name: Native C++${{ matrix.standard }} scheduling planner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        standard: [20, 23]
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure native scheduling
+        run: cmake --preset "cpp${{ matrix.standard }}"
+
+      - name: Build native planner and production mutants
+        run: >-
+          cmake --build --preset "cpp${{ matrix.standard }}" --parallel
+          --target delta_scheduling_planner_test
+          delta_scheduling_eligibility_test
+          delta_scheduling_lifecycle_test
+          delta_ffi_scheduling_test
+          delta_scheduling_durability_mutant_test
+          delta_scheduling_adapt_work_mutant_test
+          delta_scheduling_overlap_ranges_mutant_test
+          delta_scheduling_skip_infeasibility_mutant_test
+          delta_scheduling_contract_fuzz
+
+      - name: Verify exact planner, permutations, mutants and fuzz smoke
+        run: >-
+          ctest --preset "cpp${{ matrix.standard }}"
+          -R "delta_core.scheduling|delta_ffi.scheduling"
+          --output-on-failure
+
+      - name: Verify committed native planner evidence when present
+        run: |
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-planner.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_native_planner.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-admission.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_native_admission.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/native-lifecycle.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_native_lifecycle.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-refinement.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_refinement.py \
+              --check-only --trace-dir "out/build/cpp${{ matrix.standard }}/scheduling-traces"
+          fi
+
+  sanitizer:
+    name: Clang ASan UBSan scheduling planner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Configure scheduling sanitizers
+        run: >-
+          cmake -S . -B out/build/scheduling-sanitizer
+          -DBUILD_TESTING=ON
+          -DDELTA_CXX_STANDARD=20
+          -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+
+      - name: Build sanitized scheduling targets
+        run: >-
+          cmake --build out/build/scheduling-sanitizer --parallel
+          --target delta_scheduling_planner_test delta_scheduling_eligibility_test
+          delta_scheduling_lifecycle_test delta_scheduling_contract_fuzz
+          delta_ffi_scheduling_test
+
+      - name: Run scheduling sanitizers
+        run: >-
+          ctest --test-dir out/build/scheduling-sanitizer
+          -R "delta_core.scheduling_(planner|eligibility|lifecycle|trace_export|contract_fuzz)|delta_ffi.scheduling"
+          --output-on-failure
+
+  java-adapter:
+    name: JDK ${{ matrix.feature }} scheduling FFM adapter
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir --parents "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" --directory "$RUNNER_TEMP/jdk" --strip-components=1
+
+      - name: Build native scheduling FFM library
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_ffi delta_ffi_scheduling_test
+          ctest --preset cpp20 -R "delta_ffi.scheduling" --output-on-failure
+
+      - name: Compile Java transport adapter offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          mkdir --parents "$RUNNER_TEMP/java-classes"
+          "$RUNNER_TEMP/jdk/bin/javac" --release "${{ matrix.feature }}" \
+            -d "$RUNNER_TEMP/java-classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/scheduling/NativeScheduling.java \
+            delta-node-java/src/main/java/io/deltareduce/node/scheduling/CapabilityCollector.java \
+            delta-node-java/src/main/java/io/deltareduce/node/scheduling/SchedulingTelemetry.java \
+            delta-node-java/src/main/java/io/deltareduce/node/scheduling/AdmissionTransport.java \
+            delta-node-java/src/main/java/io/deltareduce/node/scheduling/LeaseTimerRouter.java \
+            delta-node-java/src/test/java/io/deltareduce/node/scheduling/SchedulingConformance.java
+
+      - name: Verify FFM parity and transport-only conformance offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "${{ matrix.version }}"
+          "$RUNNER_TEMP/jdk/bin/java" \
+            --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.scheduling.SchedulingConformance \
+            "$GITHUB_WORKSPACE/out/build/cpp20/libdelta_ffi.so" \
+            "$GITHUB_WORKSPACE/delta-protocol/fixtures/007/cross-language/golden-v1.json"
+
+  boundary-gate:
+    name: Scheduling ABI and Java boundary evidence
+    needs: [native-planner, sanitizer, java-adapter]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Reproduce native scheduling refinement traces
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_scheduling_lifecycle_test
+          ctest --preset cpp20 -R "delta_core.scheduling_trace_export" --output-on-failure
+
+      - name: Verify committed boundary, refinement and final evidence when present
+        run: |
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-boundary.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_boundary.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-refinement.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_refinement.py \
+              --check-only --trace-dir out/build/cpp20/scheduling-traces
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/scheduling-ci.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/capture_scheduling_ci.py --check-only
+          fi
+          if [ -f specs/007-domain-pure-ticket-scheduling/evidence/final-compatibility.json ]; then
+            python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_final_compatibility.py \
+              --check-only --trace-dir out/build/cpp20/scheduling-traces
+          fi

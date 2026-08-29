@@ -1,0 +1,73 @@
+{
+  "$id": "urn:deltareduce:schema:lease-timer-token:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "LEASE_TIMER_TOKEN"
+    },
+    "effect_kind": {
+      "const": "LEASE_EXPIRY"
+    },
+    "expiry_tick": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "lease_epoch": {
+      "maximum": 1024,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "lease_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ticket_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    },
+    "token_nonce": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "worker_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "effect_kind",
+    "expiry_tick",
+    "formal_semantics_id",
+    "lease_epoch",
+    "lease_id",
+    "plan_id",
+    "round_config_id",
+    "schema_version",
+    "ticket_id",
+    "token_nonce",
+    "type_name",
+    "worker_id"
+  ],
+  "title": "DeltaReduce lease-timer-token v1",
+  "type": "object"
+}

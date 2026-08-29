@@ -39,6 +39,11 @@
       "id": "REGISTRY-HIERARCHY-006-V1",
       "path": "schemas/006/registry-v1.json",
       "sha256": "703223bc62ffbcde0e600fcbbfab23e070344348b925c21a9c57daa618db6865"
+    },
+    {
+      "id": "REGISTRY-SCHEDULING-007-V1",
+      "path": "schemas/007/registry-v1.json",
+      "sha256": "9efb5ffb434785df610582edd1a8b299f424d9ef27d08ef7e8e9be51b26db51f"
     }
   ],
   "fixtures": [
@@ -121,6 +126,21 @@
       "id": "HIERARCHY006-VALID-CONTRACT-V1",
       "path": "fixtures/006/valid/hierarchy-contract-v1.json",
       "sha256": "c2b16b6ee7442fc1a72ceb1fde484faa18216ea765c6ddfb1feeb9d0a32fd531"
+    },
+    {
+      "id": "SCHEDULING007-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/007/cross-language/golden-v1.json",
+      "sha256": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e"
+    },
+    {
+      "id": "SCHEDULING007-NEGATIVE-V1",
+      "path": "fixtures/007/invalid/scheduling-negative-v1.json",
+      "sha256": "5f27ac5eae9a8d92609f588b9e98abda1db854f51d452d60d70c1c8020941c17"
+    },
+    {
+      "id": "SCHEDULING007-VALID-CONTRACT-V1",
+      "path": "fixtures/007/valid/scheduling-contract-v1.json",
+      "sha256": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e"
     },
     {
       "id": "CANONICAL-JSON-001",
@@ -374,6 +394,46 @@
       "id": "MEDIA-HIERARCHY-PROOF-INSTANCE-V1",
       "schema_id": "SCHEMA-HIERARCHY-PROOF-INSTANCE-V1",
       "value": "application/vnd.deltareduce.hierarchy-proof+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAPABILITY-PROFILE-V1",
+      "schema_id": "SCHEMA-CAPABILITY-PROFILE-V1",
+      "value": "application/vnd.deltareduce.capability-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-DOMAIN-TICKET-POLICY-V1",
+      "schema_id": "SCHEMA-DOMAIN-TICKET-POLICY-V1",
+      "value": "application/vnd.deltareduce.domain-ticket-policy+json;version=1"
+    },
+    {
+      "id": "MEDIA-ELIGIBILITY-DECISION-V1",
+      "schema_id": "SCHEMA-ELIGIBILITY-DECISION-V1",
+      "value": "application/vnd.deltareduce.eligibility-decision+json;version=1"
+    },
+    {
+      "id": "MEDIA-INFEASIBILITY-REPORT-V1",
+      "schema_id": "SCHEMA-INFEASIBILITY-REPORT-V1",
+      "value": "application/vnd.deltareduce.infeasibility-report+json;version=1"
+    },
+    {
+      "id": "MEDIA-LEASE-TIMER-TOKEN-V1",
+      "schema_id": "SCHEMA-LEASE-TIMER-TOKEN-V1",
+      "value": "application/vnd.deltareduce.lease-timer-token+json;version=1"
+    },
+    {
+      "id": "MEDIA-ROUND-TICKET-PLAN-V1",
+      "schema_id": "SCHEMA-ROUND-TICKET-PLAN-V1",
+      "value": "application/vnd.deltareduce.round-ticket-plan+json;version=1"
+    },
+    {
+      "id": "MEDIA-TICKET-LEASE-V1",
+      "schema_id": "SCHEMA-TICKET-LEASE-V1",
+      "value": "application/vnd.deltareduce.ticket-lease+json;version=1"
+    },
+    {
+      "id": "MEDIA-SCHEDULING-WORK-TICKET-V1",
+      "schema_id": "SCHEMA-SCHEDULING-WORK-TICKET-V1",
+      "value": "application/vnd.deltareduce.scheduling-work-ticket+json;version=1"
     }
   ],
   "registry_id": "DELTA-PROTOCOL-V1",
@@ -498,6 +558,46 @@
       "id": "SCHEMA-REGIONAL-SHARD-RESULT-V1",
       "path": "schemas/006/regional-shard-result-v1.json",
       "sha256": "f69b4815965cc12b1c252d79e3b9fd85bfe74802fce3a6d4eefd2924c03ba8ed"
+    },
+    {
+      "id": "SCHEMA-CAPABILITY-PROFILE-V1",
+      "path": "schemas/007/capability-profile-v1.json",
+      "sha256": "01c61adfb784de4f8efc1b31995c87b4580624c586db501008b5154f38702ddc"
+    },
+    {
+      "id": "SCHEMA-DOMAIN-TICKET-POLICY-V1",
+      "path": "schemas/007/domain-ticket-policy-v1.json",
+      "sha256": "524f789ffe773f8f75480467c6fb7c3f35faa135346d0233574851b7f37c7916"
+    },
+    {
+      "id": "SCHEMA-ELIGIBILITY-DECISION-V1",
+      "path": "schemas/007/eligibility-decision-v1.json",
+      "sha256": "5b489b5823dc0295e889107aa0478da8628da484acd854bd3e3c9e7179a19fb2"
+    },
+    {
+      "id": "SCHEMA-INFEASIBILITY-REPORT-V1",
+      "path": "schemas/007/infeasibility-report-v1.json",
+      "sha256": "2e03965a83bc26c3a16a40efa1feffd271fdd54a2241ca8295475bcece6dc9d8"
+    },
+    {
+      "id": "SCHEMA-LEASE-TIMER-TOKEN-V1",
+      "path": "schemas/007/lease-timer-token-v1.json",
+      "sha256": "931fe9f40f5055c3990957d51f562b1d7e6d4cd06a40216b852ec4a201a3e48e"
+    },
+    {
+      "id": "SCHEMA-ROUND-TICKET-PLAN-V1",
+      "path": "schemas/007/round-ticket-plan-v1.json",
+      "sha256": "dc012a37d29bea03720050f1ceba30c4e1090dc2c8eec703130de2d13d28a62f"
+    },
+    {
+      "id": "SCHEMA-TICKET-LEASE-V1",
+      "path": "schemas/007/ticket-lease-v1.json",
+      "sha256": "de1149c1872376604d30337fffd1b35f4e93e256452fefd47d24d0c91eba2924"
+    },
+    {
+      "id": "SCHEMA-SCHEDULING-WORK-TICKET-V1",
+      "path": "schemas/007/work-ticket-v1.json",
+      "sha256": "8addab4ded8c76ea47050e08ee7e5024b552bece14ee5b066f5452bc6908cea9"
     },
     {
       "id": "SCHEMA-ARTIFACT-REF-V1",
