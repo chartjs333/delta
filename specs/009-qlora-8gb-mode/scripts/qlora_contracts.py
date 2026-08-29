@@ -862,6 +862,10 @@ def root_registry_bytes(registry: dict[str, Any]) -> bytes:
     root["fixtures"].extend(registry["fixtures"])
     root["media_types"].extend(registry["media_types"])
     root["schemas"].extend(registry["artifacts"])
+    root["extensions"] = sorted(root["extensions"], key=lambda entry: entry["path"])
+    root["fixtures"] = sorted(root["fixtures"], key=lambda entry: entry["path"])
+    root["media_types"] = sorted(root["media_types"], key=lambda entry: entry["id"])
+    root["schemas"] = sorted(root["schemas"], key=lambda entry: entry["path"])
     return pretty_json_bytes(root)
 
 
