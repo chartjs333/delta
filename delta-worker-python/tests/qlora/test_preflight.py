@@ -68,9 +68,7 @@ def test_exact_preflight_and_runtime_peak_pass() -> None:
         ("microbatch_size", 3, "PREFLIGHT_MICROBATCH_SIZE_MISMATCH"),
     ],
 )
-def test_preflight_rejects_compatibility_mismatch(
-    field: str, value: object, code: str
-) -> None:
+def test_preflight_rejects_compatibility_mismatch(field: str, value: object, code: str) -> None:
     profile = _profile()
     observation = replace(_observation(), **{field: value})
     estimate = estimate_memory(

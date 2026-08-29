@@ -104,9 +104,7 @@ def test_terminal_failures_never_publish(kind: str, expected: str) -> None:
         batches = batches[:1]
     elif kind == "partial":
         batches = (Batch(batches[0].inputs, batches[0].targets, 3), batches[1])
-    result = train_fixed_ticket(
-        backend, ticket, batches, learning_rate=0.01, cancelled=cancelled
-    )
+    result = train_fixed_ticket(backend, ticket, batches, learning_rate=0.01, cancelled=cancelled)
 
     assert result.status == expected
     assert not result.eligible_for_commitment

@@ -65,9 +65,7 @@ def test_unexpected_and_tied_adapter_parameters_are_rejected() -> None:
 def test_optimizer_rejects_missing_or_base_parameters() -> None:
     _, backend = load_tiny_backend(FIXTURE)
     with pytest.raises(AdapterSchemaError, match="OPTIMIZER_PARAMETER_SET_MISMATCH"):
-        assert_adapter_only_optimizer(
-            backend, (backend._adapters["model.layer0.lora_A"],)
-        )
+        assert_adapter_only_optimizer(backend, (backend._adapters["model.layer0.lora_A"],))
     base = next(iter(backend.base_tensors().values()))
     base.requires_grad_(True)
     with pytest.raises(AdapterSchemaError, match="OPTIMIZER_PARAMETER_SET_MISMATCH"):

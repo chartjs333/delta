@@ -132,3 +132,7 @@ jobs:
           test -f specs/009-qlora-8gb-mode/evidence/protocol-contracts.json
           test -f specs/009-qlora-8gb-mode/evidence/python-runtime.json
           test -f specs/009-qlora-8gb-mode/evidence/native-runtime.json
+          test -f specs/009-qlora-8gb-mode/evidence/transport-runtime.json
+          test -f specs/009-qlora-8gb-mode/evidence/physical-qualification.json
+          test -f specs/009-qlora-8gb-mode/evidence/physical-gate.json
+          python3 specs/009-qlora-8gb-mode/scripts/verify_physical_qualification.py --check-only

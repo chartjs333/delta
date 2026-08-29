@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import math
@@ -221,6 +222,7 @@ def build() -> dict[str, object]:
         },
         "native_source_commit": native_source_commit,
         "schema_version": "1.0.0",
+        "semantic_completeness_claimed": False,
         "source": {"commit": commit, "tree": tree},
         "status": "PASS",
         "task_ids": ["T039", "T040", "T041", "HR009-011"],
@@ -228,11 +230,18 @@ def build() -> dict[str, object]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check-only", action="store_true")
+    arguments = parser.parse_args()
     report = build()
-    OUTPUT.write_text(
-        json.dumps(report, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    if arguments.check_only:
+        committed, _ = load_canonical(OUTPUT)
+        require(committed == report, "PHYSICAL_GATE_EVIDENCE_MISMATCH")
+    else:
+        OUTPUT.write_text(
+            json.dumps(report, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     print(json.dumps(report, ensure_ascii=False, separators=(",", ":"), sort_keys=True))
     return 0
 

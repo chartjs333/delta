@@ -87,8 +87,7 @@ class BaseModelManifest:
             *_strings(value["weight_shard_ids"], "BASE_WEIGHT_SHARDS_INVALID"),
         )
         if any(
-            not isinstance(item, str) or _CONTENT_ID.fullmatch(item) is None
-            for item in content_ids
+            not isinstance(item, str) or _CONTENT_ID.fullmatch(item) is None for item in content_ids
         ):
             raise _fail("BASE_CONTENT_ID_INVALID")
         base = _strings(value["persistent_base_parameters"], "BASE_PARAMETERS_INVALID")
