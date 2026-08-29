@@ -6,6 +6,7 @@ import ctypes
 import hashlib
 import importlib.metadata
 import json
+import math
 import os
 import platform
 import subprocess
@@ -34,6 +35,59 @@ class GpuObservation:
     free_memory_bytes: int
     driver_version: str
     compute_capability: str
+
+
+class _Fp32StateAdamW:
+    """Adapter-only AdamW with the two FP32 moments budgeted by preflight."""
+
+    def __init__(self, parameters: list[Any], torch: Any, *, learning_rate: float) -> None:
+        if not parameters or learning_rate <= 0:
+            raise QualificationError("PHYSICAL_OPTIMIZER_CONFIGURATION_INVALID")
+        self.parameters = parameters
+        self._torch = torch
+        self._learning_rate = learning_rate
+        self._step = 0
+        self._first_moments = [
+            torch.zeros_like(parameter, dtype=torch.float32) for parameter in parameters
+        ]
+        self._second_moments = [
+            torch.zeros_like(parameter, dtype=torch.float32) for parameter in parameters
+        ]
+
+    @property
+    def state_bytes(self) -> int:
+        return sum(
+            value.numel() * value.element_size()
+            for value in (*self._first_moments, *self._second_moments)
+        )
+
+    def zero_grad(self) -> None:
+        for parameter in self.parameters:
+            parameter.grad = None
+
+    def step(self) -> None:
+        beta1 = 0.9
+        beta2 = 0.999
+        epsilon = 1e-8
+        self._step += 1
+        bias_correction1 = 1.0 - beta1**self._step
+        bias_correction2_root = math.sqrt(1.0 - beta2**self._step)
+        with self._torch.no_grad():
+            for parameter, first, second in zip(
+                self.parameters, self._first_moments, self._second_moments, strict=True
+            ):
+                if parameter.grad is None:
+                    raise QualificationError("PHYSICAL_ADAPTER_GRADIENT_MISSING")
+                gradient = parameter.grad.float()
+                if not self._torch.isfinite(gradient).all():
+                    raise QualificationError("PHYSICAL_ADAPTER_GRADIENT_NONFINITE")
+                first.mul_(beta1).add_(gradient, alpha=1.0 - beta1)
+                second.mul_(beta2).addcmul_(gradient, gradient, value=1.0 - beta2)
+                denominator = second.sqrt().div_(bias_correction2_root).add_(epsilon)
+                update = first.div(denominator).mul_(self._learning_rate / bias_correction1)
+                parameter.copy_((parameter.float() - update).to(parameter.dtype))
+                if not self._torch.isfinite(parameter).all():
+                    raise QualificationError("PHYSICAL_ADAPTER_UPDATE_NONFINITE")
 
 
 def _run(*args: str) -> str:
@@ -238,9 +292,9 @@ def _context_id_native(library: Path, context: dict[str, str]) -> tuple[str, str
         "type_name": "QLORA_CONTEXT_BINDING",
     }
     document = canonical_json_bytes(canonical)
-    expected = "sha256:" + hashlib.sha256(
-        b"deltareduce.009.qlora-context.v1\x00" + document
-    ).hexdigest()
+    expected = (
+        "sha256:" + hashlib.sha256(b"deltareduce.009.qlora-context.v1\x00" + document).hexdigest()
+    )
     if native_id != expected:
         raise QualificationError("NATIVE_PYTHON_QLORA_CONTEXT_ID_MISMATCH")
     return native_id, hashlib.sha256(library.read_bytes()).hexdigest()
@@ -332,10 +386,8 @@ def run_physical_qualification(
     parent_adapters = {
         name: value.detach().cpu().clone() for name, value in sorted(adapters.items())
     }
-    optimizer = torch.optim.AdamW(list(adapters.values()), lr=1e-4, weight_decay=0.0)
-    if {id(value) for group in optimizer.param_groups for value in group["params"]} != {
-        id(value) for value in adapters.values()
-    }:
+    optimizer = _Fp32StateAdamW(list(adapters.values()), torch, learning_rate=1e-4)
+    if {id(value) for value in optimizer.parameters} != {id(value) for value in adapters.values()}:
         raise QualificationError("PHYSICAL_OPTIMIZER_PARAMETER_SET_MISMATCH")
     ticket = profile["ticket"]
     sequence_length = int(ticket["sequence_length"])
@@ -346,7 +398,7 @@ def run_physical_qualification(
     model.train()
     vocabulary_size = int(model.config.vocab_size)
     for step in range(optimizer_steps):
-        optimizer.zero_grad(set_to_none=True)
+        optimizer.zero_grad()
         for microstep in range(accumulation):
             offset = step * accumulation + microstep
             input_ids = (
@@ -413,13 +465,16 @@ def run_physical_qualification(
     schema, _ = _adapter_schema(adapters, profile, base_id, tokenizer_hash)
     schema["quantized_base_profile_id"] = quant_id
     adapter_schema_id = sha256_content_id(canonical_json_bytes(schema))
-    parent_adapter_id = "sha256:" + hashlib.sha256(
-        b"deltareduce.009.parent-adapter.v1\x00"
-        + b"".join(
-            name.encode() + value.contiguous().numpy().tobytes()
-            for name, value in parent_adapters.items()
-        )
-    ).hexdigest()
+    parent_adapter_id = (
+        "sha256:"
+        + hashlib.sha256(
+            b"deltareduce.009.parent-adapter.v1\x00"
+            + b"".join(
+                name.encode() + value.contiguous().numpy().tobytes()
+                for name, value in parent_adapters.items()
+            )
+        ).hexdigest()
+    )
     training_mode_id = sha256_content_id(
         canonical_json_bytes(
             {
@@ -485,6 +540,13 @@ def run_physical_qualification(
             "peak_allocated_bytes": peak_allocated,
             "peak_reserved_bytes": peak_reserved,
             "required_headroom_bytes": required_headroom,
+        },
+        "optimizer": {
+            "adapter_only": True,
+            "learning_rate": "0.0001",
+            "state_bytes": optimizer.state_bytes,
+            "state_dtype": "FLOAT32",
+            "type": "ADAMW",
         },
         "native": {
             "certificate_path_tests": "REQUIRED_SEPARATE_EXACT_SOURCE_PASS",
