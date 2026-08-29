@@ -417,4 +417,44 @@ PolicyDecision evaluate_certified_manifest(
   return PolicyDecision{true, "OK", manifest_id, *policy, "ACT-PUBLISH"};
 }
 
+PolicyDecision evaluate_applied_checkpoint(
+    std::span<const std::byte> canonical_manifest,
+    const certificates::ApplyQc& apply_qc,
+    bool request_make_current) {
+  if (canonical_manifest.size() > max_manifest_bytes) {
+    return reject("MANIFEST_TOO_LARGE");
+  }
+  const auto manifest_id = object_manifest_id(canonical_manifest);
+  JsonValue manifest;
+  try {
+    const auto manifest_text = std::string_view(
+        reinterpret_cast<const char*>(canonical_manifest.data()), canonical_manifest.size());
+    manifest = CanonicalJsonParser(manifest_text).parse();
+    (void)certificates::content_id(apply_qc);
+  } catch (const std::exception&) {
+    return reject("CANONICAL_JSON_INVALID", manifest_id, std::string(inactive_apply_policy_id));
+  }
+  const auto* policy = string_member(manifest, "certificate_policy_id");
+  const auto* registry = string_member(manifest, "policy_registry_id");
+  const auto* media = string_member(manifest, "media_type");
+  const auto* source_state = string_member(manifest, "source_state");
+  const auto* certificate_root = string_member(manifest, "certificate_root");
+  const auto* formal_id = string_member(manifest, "formal_semantics_id");
+  if (!request_make_current || policy == nullptr || *policy != inactive_apply_policy_id ||
+      registry == nullptr || *registry != policy_registry_id || media == nullptr ||
+      *media != "application/vnd.deltareduce.checkpoint;version=1" || source_state == nullptr ||
+      *source_state != "APPLIED" || certificate_root == nullptr ||
+      *certificate_root != apply_qc.next_model_hash || formal_id == nullptr ||
+      *formal_id != formal_semantics_id) {
+    return reject("APPLY_POLICY_MISMATCH", manifest_id, std::string(inactive_apply_policy_id));
+  }
+  return PolicyDecision{
+      true,
+      "OK",
+      manifest_id,
+      std::string(inactive_apply_policy_id),
+      "ACT-APPLY-CURRENT",
+  };
+}
+
 }  // namespace delta::distribution

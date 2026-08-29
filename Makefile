@@ -51,6 +51,12 @@ SCHEDULING_BOUNDARY := specs/007-domain-pure-ticket-scheduling/scripts/verify_sc
 SCHEDULING_REFINEMENT := specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_refinement.py
 SCHEDULING_CI := specs/007-domain-pure-ticket-scheduling/scripts/capture_scheduling_ci.py
 SCHEDULING_FINAL := specs/007-domain-pure-ticket-scheduling/scripts/verify_final_compatibility.py
+CERTIFICATES_PREFLIGHT := specs/008-certificates-and-consensus/scripts/verify_preflight.py
+CERTIFICATES_CONTRACTS := specs/008-certificates-and-consensus/scripts/verify_protocol_contracts.py
+CERTIFICATES_NATIVE := specs/008-certificates-and-consensus/scripts/verify_native_execution.py
+CERTIFICATES_REFINEMENT := specs/008-certificates-and-consensus/scripts/verify_certificate_refinement.py
+CERTIFICATES_CI := specs/008-certificates-and-consensus/scripts/capture_certificate_ci.py
+CERTIFICATES_FINAL := specs/008-certificates-and-consensus/scripts/verify_final_compatibility.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -63,7 +69,9 @@ SCHEDULING_FINAL := specs/007-domain-pure-ticket-scheduling/scripts/verify_final
 	hierarchy-native-topology hierarchy-execution hierarchy-evidence hierarchy-final hierarchy-check \
 	scheduling-preflight scheduling-contracts scheduling-native-planner scheduling-native-admission \
 	scheduling-native-lifecycle scheduling-boundary scheduling-refinement scheduling-ci \
-	scheduling-final scheduling-check
+	scheduling-final scheduling-check certificates-preflight certificates-contracts \
+	certificates-native certificates-refinement certificates-ci certificates-final \
+	certificates-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -275,6 +283,39 @@ scheduling-final: scheduling-refinement scheduling-ci
 		--trace-dir out/build/cpp20/scheduling-traces
 
 scheduling-check: python-check scheduling-final
+
+certificates-preflight:
+	$(UV) run python $(CERTIFICATES_PREFLIGHT) --check-only
+	$(UV) run pytest specs/008-certificates-and-consensus/tests/test_verify_preflight.py
+
+certificates-contracts: certificates-preflight
+	$(UV) run python specs/008-certificates-and-consensus/scripts/certificate_contracts.py --check
+	$(UV) run python $(CERTIFICATES_CONTRACTS) --check-only
+	$(UV) run pytest specs/008-certificates-and-consensus/tests/test_certificate_contracts.py \
+		specs/008-certificates-and-consensus/tests/test_verify_protocol_contracts.py
+
+certificates-native: certificates-contracts
+	cmake --preset cpp20
+	cmake --build --preset cpp20 --parallel --target delta_certificates_test \
+		delta_ffi_certificates_test delta_certificate_contract_fuzz \
+		delta_certificates_seed_parent_mutant_test \
+		delta_certificates_observed_coverage_mutant_test \
+		delta_robust_coefficient_mutant_test delta_current_apply_qc_mutant_test
+	ctest --preset cpp20 -R "delta_core.certificates|delta_core.certificate_mutant|delta_core.certificate_contract_fuzz|delta_ffi.certificates" \
+		--output-on-failure
+	$(UV) run python $(CERTIFICATES_NATIVE) --check-only
+
+certificates-refinement: certificates-native
+	$(UV) run python specs/008-certificates-and-consensus/scripts/generate_refinement_traces.py --check
+	$(UV) run python $(CERTIFICATES_REFINEMENT) --check-only
+
+certificates-ci:
+	$(UV) run python $(CERTIFICATES_CI) --check-only
+
+certificates-final: certificates-refinement certificates-ci
+	$(UV) run python $(CERTIFICATES_FINAL) --check-only
+
+certificates-check: python-check certificates-final
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

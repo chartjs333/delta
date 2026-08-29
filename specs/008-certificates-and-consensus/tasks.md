@@ -38,89 +38,89 @@ transport, opaque timers and bounded artifact effects only. Python owns worker-l
 
 ## Phase 2: Native durable vote lifecycle, ISC and seed
 
-- [ ] T013 [HR008-002] Generalize prepare→persist→barrier→expose→send/replay lifecycle to every
+- [x] T013 [HR008-002] Generalize prepare→persist→barrier→expose→send/replay lifecycle to every
   certificate/QC vote class with one exact context guard.
-- [ ] T014 [HR008-002, HR008-003] Implement native WAL recovery, exact replay, conflicting-body and
+- [x] T014 [HR008-002, HR008-003] Implement native WAL recovery, exact replay, conflicting-body and
   wrong-role/epoch guards before new commands are accepted.
-- [ ] T015 [HR008-003] Implement standalone bounded native certificate-chain verifier.
-- [ ] T016 [HR008-006] Implement exact tuple validation/order/root, ISC QC and a structurally
+- [x] T015 [HR008-003] Implement standalone bounded native certificate-chain verifier.
+- [x] T016 [HR008-006] Implement exact tuple validation/order/root, ISC QC and a structurally
   unavailable pre-ISC randomness API.
-- [ ] T017 [HR008-006, HR008-014] Verify seed shares/transcript against ISC/epoch/profile and reject
+- [x] T017 [HR008-006, HR008-014] Verify seed shares/transcript against ISC/epoch/profile and reject
   stale opaque timeout/share effects.
-- [ ] T018 [HR008-008, HR008-016] Test duplicate/wrong/late tuples, early seed, conflicting ISC and
+- [x] T018 [HR008-008, HR008-016] Test duplicate/wrong/late tuples, early seed, conflicting ISC and
   persist/send/crash/restart permutations.
 
 ## Phase 3: Exact EC/APC robust plan
 
-- [ ] T019 [HR008-005] Implement checked exact norm evidence, scale unification, ordering and
+- [x] T019 [HR008-005] Implement checked exact norm evidence, scale unification, ordering and
   overflow rules without floating arithmetic.
-- [ ] T020 [HR008-005] Implement deterministic trimming/ties/gamma and EC ISC-subset validation.
-- [ ] T021 [HR008-005, HR008-006] Implement post-ISC seed bucketing that cannot alter membership.
-- [ ] T022 [HR008-005] Implement fixed-iteration centered clipping, canonical rational weights and
+- [x] T020 [HR008-005] Implement deterministic trimming/ties/gamma and EC ISC-subset validation.
+- [x] T021 [HR008-005, HR008-006] Implement post-ISC seed bucketing that cannot alter membership.
+- [x] T022 [HR008-005] Implement fixed-iteration centered clipping, canonical rational weights and
   transcript root with all rounding/tie cases explicit.
-- [ ] T023 [HR008-007] Revalidate feature-004 accumulator/headroom proofs against actual APC
+- [x] T023 [HR008-007] Revalidate feature-004 accumulator/headroom proofs against actual APC
   coefficients and reject every unsafe/noncanonical plan.
-- [ ] T024 [HR008-003, HR008-005] Build/verify EC and APC QCs with exact parents and canonical bytes.
-- [ ] T025 [HR008-008, HR008-016] Add reordered delivery, norm/trim/bucket/tie/empty/zero-distance,
+- [x] T024 [HR008-003, HR008-005] Build/verify EC and APC QCs with exact parents and canonical bytes.
+- [x] T025 [HR008-008, HR008-016] Add reordered delivery, norm/trim/bucket/tie/empty/zero-distance,
   wrong-parent, membership mutation and unsafe coefficient matrices.
 
 ## Phase 4: ParameterShardQC and AggregateRootQC
 
-- [ ] T026 [HR008-003] Execute APC exact weights in checked integer shard reducers and verify all
+- [x] T026 [HR008-003] Execute APC exact weights in checked integer shard reducers and verify all
   config/ISC/EC/APC/domain/shard/profile parents.
-- [ ] T027 [HR008-002, HR008-003] Form durable ParameterShardQC votes/QCs under the common lifecycle.
-- [ ] T028 [HR008-009] Derive the immutable required domain×shard key matrix from RoundConfig,
+- [x] T027 [HR008-002, HR008-003] Form durable ParameterShardQC votes/QCs under the common lifecycle.
+- [x] T028 [HR008-009] Derive the immutable required domain×shard key matrix from RoundConfig,
   schema and sharding plan; never infer requirements from observed trace leaves.
-- [ ] T029 [HR008-009] Validate exact-once coverage and build canonical AggregateRootQC bytes.
-- [ ] T030 [HR008-016] Reject missing, duplicate, overlap, wrong-domain/shard/epoch and mixed-view
+- [x] T029 [HR008-009] Validate exact-once coverage and build canonical AggregateRootQC bytes.
+- [x] T030 [HR008-016] Reject missing, duplicate, overlap, wrong-domain/shard/epoch and mixed-view
   Frankenstein proposals before root voting.
-- [ ] T031 [HR008-013] Prove four native validators produce identical complete shard/root bytes.
+- [x] T031 [HR008-013] Prove four native validators produce identical complete shard/root bytes.
 
 ## Phase 5: Deterministic native apply and current state
 
-- [ ] T032 [HR008-010] Freeze and validate exact ApplyArithmeticProfile representations, ordering,
+- [x] T032 [HR008-010] Freeze and validate exact ApplyArithmeticProfile representations, ordering,
   rounding, decay and Nesterov formula.
-- [ ] T033 [HR008-010] Implement checked domain mixture, momentum, weight decay, Nesterov and
+- [x] T033 [HR008-010] Implement checked domain mixture, momentum, weight decay, Nesterov and
   canonical model/optimizer artifact hashing with no scheduler/device influence.
-- [ ] T034 [HR008-010, HR008-013] Produce identical ApplyCandidate bytes/hashes on four validators.
-- [ ] T035 [HR008-002, HR008-011] Persist Apply vote before exposing its frame and form one ApplyQC.
-- [ ] T036 [HR008-011, HR008-012] Implement native artifact transaction and ApplyQC-bound
+- [x] T034 [HR008-010, HR008-013] Produce identical ApplyCandidate bytes/hashes on four validators.
+- [x] T035 [HR008-002, HR008-011] Persist Apply vote before exposing its frame and form one ApplyQC.
+- [x] T036 [HR008-011, HR008-012] Implement native artifact transaction and ApplyQC-bound
   compare-and-set; Java executes only bounded native effects.
-- [ ] T037 [HR008-011, HR008-013] Recover/replay after every vote, QC, artifact and pointer crash
+- [x] T037 [HR008-011, HR008-013] Recover/replay after every vote, QC, artifact and pointer crash
   boundary with no double vote/apply and idempotent pointer repair.
-- [ ] T038 [HR008-014, HR008-016] Reject stale timers, wrong parent/profile/state, overflow,
+- [x] T038 [HR008-014, HR008-016] Reject stale timers, wrong parent/profile/state, overflow,
   conflicting ApplyQC and current-without-ApplyQC.
-- [ ] T039 [HR008-012] Require feature-005 `aggregate-root-qc-v1`/`apply-qc-v1` policy strength for
+- [x] T039 [HR008-012] Require feature-005 `aggregate-root-qc-v1`/`apply-qc-v1` policy strength for
   aggregate/current distribution without letting storage success choose current state.
 
 ## Phase 6: C ABI, Java boundary, operations and security
 
-- [ ] T040 [HR008-015] Add bounded certificate/apply C ABI borrowed-direct and owned-copy parity,
+- [x] T040 [HR008-015] Add bounded certificate/apply C ABI borrowed-direct and owned-copy parity,
   including output-size negotiation and negative size/lifetime tests.
-- [ ] T041 [HR008-004, HR008-008] Implement Java authenticated opaque certificate/share delivery,
+- [x] T041 [HR008-004, HR008-008] Implement Java authenticated opaque certificate/share delivery,
   reorder/duplicate/drop/delay/backpressure and native verifier routing only.
-- [ ] T042 [HR008-012, HR008-014] Implement Java opaque timers and bounded artifact read/write/repair
+- [x] T042 [HR008-012, HR008-014] Implement Java opaque timers and bounded artifact read/write/repair
   effects; `CurrentCheckpointPublisher` may execute only a validated native effect.
-- [ ] T043 [HR008-017] Add architecture gates proving C++ has no socket/wall-clock dependency and
+- [x] T043 [HR008-017] Add architecture gates proving C++ has no socket/wall-clock dependency and
   Java has no quorum, robust, aggregate-root, apply or current-state decision logic.
-- [ ] T044 [HR008-003, HR008-015] Add offline inspect/verify/replay entry points, role/revocation/
+- [x] T044 [HR008-003, HR008-015] Add offline inspect/verify/replay entry points, role/revocation/
   duplicate/replay corpus and bounded streaming verification.
 
 ## Phase 7: Refinement, mutants, quality and final evidence
 
-- [ ] T045 [HR008-018] Export a full legal ISC→Seed→EC→APC→ShardQC→AggregateRootQC→ApplyQC→
+- [x] T045 [HR008-018] Export a full legal ISC→Seed→EC→APC→ShardQC→AggregateRootQC→ApplyQC→
   AdvanceCurrent trace plus vote/artifact/pointer crash/recovery traces.
-- [ ] T046 [HR008-016, HR008-018] Reject early-seed, membership mutation, wrong-parent,
+- [x] T046 [HR008-016, HR008-018] Reject early-seed, membership mutation, wrong-parent,
   incomplete/duplicate root, Frankenstein, conflicting apply and uncertified-current traces.
-- [ ] T047 [HR008-016, HR008-018] Kill production durability, seed-order, coverage, coefficient and
+- [x] T047 [HR008-016, HR008-018] Kill production durability, seed-order, coverage, coefficient and
   ApplyQC/current mutants against real native actions.
-- [ ] T048 [HR008-013, HR008-018] Run four-validator byte/state/effect/WAL equality and exact
+- [x] T048 [HR008-013, HR008-018] Run four-validator byte/state/effect/WAL equality and exact
   feature-000 refinement/proof-precondition checks.
 - [ ] T049 [HR008-008, HR008-015] Run C++20/C++23, GCC/Clang, ASan/UBSan/TSan, fuzz, C ABI,
   JDK25/26 and full Python regression matrices.
 - [ ] T050 [HR008-019] Publish certificate/robust/apply/durability/Java/refinement evidence with
   `semantic_completeness_claimed=false`.
-- [ ] T051 [HR008-019] Document protocol, operations, observability, recovery, rollback and explicit
+- [x] T051 [HR008-019] Document protocol, operations, observability, recovery, rollback and explicit
   feature-009 boundary.
 - [ ] T052 [HR008-019] Capture exact-source CI evidence and rerun predecessor/Formal compatibility.
 - [ ] T053 [HR008-019] Publish final Constitution 2.1.0 compatibility report and close the phase.
