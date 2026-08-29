@@ -50,20 +50,20 @@ certificate graph without QLoRA-specific ISC/root/ApplyQC types.
 
 ## Phase 5: Certificate and hierarchical reduce integration
 
-- [ ] T021 Add C++ `QLORA_ADAPTER` base/tokenizer/quantization/schema context compatibility to the existing ISC/EC/APC paths under `delta-core-cpp/include/delta/qlora/` and `delta-core-cpp/src/qlora/`.
-- [ ] T022 Configure existing C++ robust norm/bucketing/clipping over canonical adapter q-vectors without a second certificate engine.
-- [ ] T023 Add the immutable adapter domain×parameter required-key matrix and committee tests.
-- [ ] T024 Add direct fixed-point aggregate comparison in `delta-core-cpp/tests/qlora_certificate_chain_test.cpp`.
-- [ ] T025 Add base/tokenizer/quantization/rank/target/profile mismatch rejection fixtures and native tests.
-- [ ] T026 Add production base-tensor injection and incomplete/extra adapter coverage mutants and tests.
+- [x] T021 Add C++ `QLORA_ADAPTER` base/tokenizer/quantization/schema context compatibility to the existing ISC/EC/APC paths under `delta-core-cpp/include/delta/qlora/` and `delta-core-cpp/src/qlora/`.
+- [x] T022 Configure existing C++ robust norm/bucketing/clipping over canonical adapter q-vectors without a second certificate engine.
+- [x] T023 Add the immutable adapter domain×parameter required-key matrix and committee tests.
+- [x] T024 Add direct fixed-point aggregate comparison in `delta-core-cpp/tests/qlora_certificate_chain_test.cpp`.
+- [x] T025 Add base/tokenizer/quantization/rank/target/profile mismatch rejection fixtures and native tests.
+- [x] T026 Add production base-tensor injection and incomplete/extra adapter coverage mutants and tests.
 
 ## Phase 6: Adapter ApplyQC and publication
 
-- [ ] T027 Implement exact adapter-only domain-mix/outer apply specialization in `delta-core-cpp/include/delta/qlora/adapter_apply.hpp` and `delta-core-cpp/src/qlora/`.
-- [ ] T028 Bind the existing AggregateRootQC and ApplyQC contexts to mode/base/tokenizer/quantization/schema/parent-adapter fingerprints without new QC types.
-- [ ] T029 Implement the adapter checkpoint/current-pointer effect through the existing native ApplyQC WAL/CAS transaction.
-- [ ] T030 Add four-validator byte/hash/effect/WAL equality and ApplyQC uniqueness tests in `delta-core-cpp/tests/qlora_apply_test.cpp`.
-- [ ] T031 Add base mutation/wrong parent/profile and native crash/replay tests plus bounded C ABI parity in `delta-ffi/src/qlora_abi.cpp` and `delta-ffi/tests/qlora_abi_test.cpp`.
+- [x] T027 Implement exact adapter-only domain-mix/outer apply specialization in `delta-core-cpp/include/delta/qlora/adapter_apply.hpp` and `delta-core-cpp/src/qlora/`.
+- [x] T028 Bind the existing AggregateRootQC and ApplyQC contexts to mode/base/tokenizer/quantization/schema/parent-adapter fingerprints without new QC types.
+- [x] T029 Implement the adapter checkpoint/current-pointer effect through the existing native ApplyQC WAL/CAS transaction.
+- [x] T030 Add four-validator byte/hash/effect/WAL equality and ApplyQC uniqueness tests in `delta-core-cpp/tests/qlora_apply_test.cpp`.
+- [x] T031 Add base mutation/wrong parent/profile and native crash/replay tests plus bounded C ABI parity in `delta-ffi/src/qlora_abi.cpp` and `delta-ffi/tests/qlora_abi_test.cpp`.
 
 ## Phase 7: Distribution, composition and resume
 
