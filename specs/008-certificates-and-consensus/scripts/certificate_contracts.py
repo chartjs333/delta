@@ -231,6 +231,7 @@ def schema_documents() -> dict[str, dict[str, Any]]:
             {
                 "input_root": content_id(),
                 "quorum_threshold": uint(1024, 1),
+                "signer_ids": array(ascii_string(), unique=True),
                 "tuples": array(input_tuple),
             },
         ),
@@ -257,7 +258,9 @@ def schema_documents() -> dict[str, dict[str, Any]]:
                 "entries": array(eligibility_entry),
                 "input_set_certificate_id": content_id(),
                 "norm_evidence_id": content_id(),
+                "quorum_threshold": uint(1024, 1),
                 "robust_profile_id": content_id(),
+                "signer_ids": array(ascii_string(), unique=True),
             },
         ),
         "aggregation-plan-certificate": schema_document(
@@ -268,7 +271,9 @@ def schema_documents() -> dict[str, dict[str, Any]]:
                 "eligibility_certificate_id": content_id(),
                 "input_set_certificate_id": content_id(),
                 "iteration_count": uint(1024, 1),
+                "quorum_threshold": uint(1024, 1),
                 "seed_transcript_id": content_id(),
+                "signer_ids": array(ascii_string(), unique=True),
                 "transcript_root": content_id(),
                 "weights": array(weight),
             },
@@ -445,6 +450,7 @@ def contract_fixture() -> dict[str, Any]:
             **context(),
             "input_root": cid("input-root"),
             "quorum_threshold": 3,
+            "signer_ids": ["validator-0", "validator-1", "validator-2"],
             "tuples": tuples,
         },
     )
@@ -494,7 +500,9 @@ def contract_fixture() -> dict[str, Any]:
             "entries": eligibility_entries,
             "input_set_certificate_id": isc["content_id"],
             "norm_evidence_id": norms["content_id"],
+            "quorum_threshold": 3,
             "robust_profile_id": ROBUST_PROFILE_ID,
+            "signer_ids": ["validator-0", "validator-1", "validator-2"],
         },
     )
     apc = identified(
@@ -510,7 +518,9 @@ def contract_fixture() -> dict[str, Any]:
             "eligibility_certificate_id": ec["content_id"],
             "input_set_certificate_id": isc["content_id"],
             "iteration_count": 4,
+            "quorum_threshold": 3,
             "seed_transcript_id": seed["content_id"],
+            "signer_ids": ["validator-0", "validator-1", "validator-2"],
             "transcript_root": cid("clipping-transcript"),
             "weights": [
                 {"alpha": {"denominator": 3, "numerator": "1"}, "ticket_id": item["ticket_id"]}

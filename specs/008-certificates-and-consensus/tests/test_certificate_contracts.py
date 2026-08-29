@@ -30,6 +30,15 @@ def test_all_canonical_schemas_are_closed() -> None:
     schemas = module.schema_documents()
     assert len(schemas) == 11
     assert all(schema["additionalProperties"] is False for schema in schemas.values())
+    for name in (
+        "input-set-certificate",
+        "eligibility-certificate",
+        "aggregation-plan-certificate",
+        "parameter-shard-qc",
+        "aggregate-root-qc",
+        "apply-qc",
+    ):
+        assert "signer_ids" in schemas[name]["required"]
 
 
 def test_early_seed_fails_schema() -> None:
