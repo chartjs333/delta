@@ -150,12 +150,15 @@ def verify(source_commit: str) -> dict[str, Any]:
     }
 
 
-def source_for_run(check_only: bool) -> str:
+def source_for_run(check_only: bool, source_commit: str | None) -> str:
     if not check_only:
-        require(
-            not git_text("status", "--porcelain", "--untracked-files=all"), "SOURCE_TREE_NOT_CLEAN"
-        )
-        return git_text("rev-parse", "HEAD")
+        if source_commit is None:
+            require(
+                not git_text("status", "--porcelain", "--untracked-files=all"),
+                "SOURCE_TREE_NOT_CLEAN",
+            )
+            source_commit = "HEAD"
+        return git_text("rev-parse", f"{source_commit}^{{commit}}")
     require(OUTPUT.is_file(), "CONTRACT_EVIDENCE_MISSING")
     document = json.loads(OUTPUT.read_text(encoding="utf-8"))
     source = document.get("source", {}).get("commit")
@@ -166,9 +169,12 @@ def source_for_run(check_only: bool) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check-only", action="store_true")
+    parser.add_argument("--source-commit")
+    parser.add_argument("--write", action="store_true")
     arguments = parser.parse_args()
     try:
-        result = verify(source_for_run(arguments.check_only))
+        require(arguments.check_only != arguments.write, "EXACT_MODE_REQUIRED")
+        result = verify(source_for_run(arguments.check_only, arguments.source_commit))
         encoded = canonical_json_bytes(result)
         if arguments.check_only:
             require(OUTPUT.read_bytes() == encoded, "CONTRACT_EVIDENCE_STALE")

@@ -117,6 +117,27 @@ def identified(domain: str, value: dict[str, Any]) -> dict[str, Any]:
     return {"bytes_hex": encoded.hex(), "content_id": f"sha256:{digest}", "value": value}
 
 
+def aggregate_merkle_root(leaves: list[dict[str, str]]) -> str:
+    level = [
+        hashlib.sha256(b"deltareduce.008.aggregate-leaf.v1\0" + canonical_json_bytes(leaf)).digest()
+        for leaf in leaves
+    ]
+    require(bool(level), "AGGREGATE_MERKLE_EMPTY")
+    while len(level) > 1:
+        parents = []
+        for index in range(0, len(level), 2):
+            if index + 1 == len(level):
+                parents.append(level[index])
+            else:
+                parents.append(
+                    hashlib.sha256(
+                        b"deltareduce.008.aggregate-node.v1\0" + level[index] + level[index + 1]
+                    ).digest()
+                )
+        level = parents
+    return "sha256:" + level[0].hex()
+
+
 def content_id() -> dict[str, Any]:
     return {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"}
 
@@ -566,7 +587,7 @@ def contract_fixture() -> dict[str, Any]:
             "eligibility_certificate_id": ec["content_id"],
             "input_set_certificate_id": isc["content_id"],
             "leaves": leaves,
-            "merkle_root": cid("aggregate-root"),
+            "merkle_root": aggregate_merkle_root(leaves),
             "quorum_threshold": 3,
             "required_keys": required_keys,
             "signer_ids": ["validator-0", "validator-1", "validator-2"],
@@ -792,6 +813,10 @@ def validate_contract(document: dict[str, Any]) -> dict[str, Any]:
         "REQUIRED_MATRIX_INVALID",
     )
     require(leaves == required, "AGGREGATE_COVERAGE_DRIFT")
+    require(
+        root["merkle_root"] == aggregate_merkle_root(root["leaves"]),
+        "AGGREGATE_MERKLE_DRIFT",
+    )
     shard_ids = {item["content_id"] for item in shards}
     require(
         {item["parameter_shard_qc_id"] for item in root["leaves"]} == shard_ids,

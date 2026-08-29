@@ -60,17 +60,17 @@
     {
       "id": "CERTIFICATE008-CROSS-LANGUAGE-GOLDEN-V1",
       "path": "fixtures/008/cross-language/golden-v1.json",
-      "sha256": "bb1452213f353fbbfe063087f9e7d3f6440d57d9bc0aead89cbd6791e0124629"
+      "sha256": "adb42ccc2619007913cb4cacb8587a42d3a699b115fc20666db78436b685b108"
     },
     {
       "id": "CERTIFICATE008-NEGATIVE-V1",
       "path": "fixtures/008/invalid/certificate-negative-v1.json",
-      "sha256": "7da9a412153dd2dff42cd6d5695a4875fda0d06d07cdc8abfbeba02a52928a7b"
+      "sha256": "cc3292f12c97538785a59892d27327f8c6a1088ff2364e313e680443688e6f56"
     },
     {
       "id": "CERTIFICATE008-VALID-CONTRACT-V1",
       "path": "fixtures/008/valid/certificate-contract-v1.json",
-      "sha256": "bb1452213f353fbbfe063087f9e7d3f6440d57d9bc0aead89cbd6791e0124629"
+      "sha256": "adb42ccc2619007913cb4cacb8587a42d3a699b115fc20666db78436b685b108"
     }
   ],
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
