@@ -67,11 +67,11 @@ certificate graph without QLoRA-specific ISC/root/ApplyQC types.
 
 ## Phase 7: Distribution, composition and resume
 
-- [ ] T032 Register certified base and ApplyQC adapter media policies in the existing C++ distribution verifier and Java transport registry.
-- [ ] T033 Implement content-addressed base/tokenizer/profile cache reuse and adapter-only fetch in `delta-node-java/src/main/java/io/deltareduce/node/qlora/BaseObjectCache.java` and `AdapterTransport.java`.
-- [ ] T034 Implement exact native-verified composition/resume/evaluation metadata in Python and Java `ModelComposition` adapters.
-- [ ] T035 Add Java base-cache byte accounting proving the second adapter fetch transfers zero base bytes.
-- [ ] T036 Add incompatible resume and derived export provenance/license tests across Python and Java boundaries.
+- [x] T032 Register certified base and ApplyQC adapter media policies in the existing C++ distribution verifier and Java transport registry.
+- [x] T033 Implement content-addressed base/tokenizer/profile cache reuse and adapter-only fetch in `delta-node-java/src/main/java/io/deltareduce/node/qlora/BaseObjectCache.java` and `AdapterTransport.java`.
+- [x] T034 Implement exact native-verified composition/resume/evaluation metadata in Python and Java `ModelComposition` adapters.
+- [x] T035 Add Java base-cache byte accounting proving the second adapter fetch transfers zero base bytes.
+- [x] T036 Add incompatible resume and derived export provenance/license tests across Python and Java boundaries.
 
 ## Phase 8: Physical 8 GiB qualification
 
