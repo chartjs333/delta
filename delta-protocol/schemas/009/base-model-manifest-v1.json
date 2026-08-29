@@ -1,0 +1,108 @@
+{
+  "$id": "urn:deltareduce:schema:009:base-model-manifest:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "BASE_MODEL_MANIFEST"
+    },
+    "access_policy": {
+      "const": "PUBLIC_NO_TOKEN"
+    },
+    "approved_ephemeral_caches": {
+      "items": {
+        "maxLength": 160,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+-]+$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "config_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "license": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+-]+$",
+      "type": "string"
+    },
+    "model_repository": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+-]+$",
+      "type": "string"
+    },
+    "model_revision": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+-]+$",
+      "type": "string"
+    },
+    "persistent_base_parameters": {
+      "items": {
+        "maxLength": 512,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "persistent_protocol_buffers": {
+      "items": {
+        "maxLength": 512,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+-]+$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "redistribution_allowed": {
+      "type": "boolean"
+    },
+    "tokenizer_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "weight_shard_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "access_policy",
+    "approved_ephemeral_caches",
+    "config_hash",
+    "formal_semantics_id",
+    "license",
+    "model_repository",
+    "model_revision",
+    "persistent_base_parameters",
+    "persistent_protocol_buffers",
+    "redistribution_allowed",
+    "schema_version",
+    "tokenizer_hash",
+    "type_name",
+    "weight_shard_ids"
+  ],
+  "title": "DeltaReduce feature-009 base-model-manifest v1",
+  "type": "object"
+}

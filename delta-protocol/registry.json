@@ -49,6 +49,11 @@
       "id": "REGISTRY-CERTIFICATE-008-V1",
       "path": "schemas/008/registry-v1.json",
       "sha256": "b38d031cec88d1eb9056c7e9466be228592bdcf411c9abc24afb2a284c8d6568"
+    },
+    {
+      "id": "REGISTRY-QLORA-009",
+      "path": "schemas/009/registry-v1.json",
+      "sha256": "dabe65925d9c6acf5ce7944e0b5707523385323ee81ebd6227679a395c37b5f5"
     }
   ],
   "fixtures": [
@@ -163,6 +168,26 @@
       "sha256": "adb42ccc2619007913cb4cacb8587a42d3a699b115fc20666db78436b685b108"
     },
     {
+      "id": "QLORA009-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/009/cross-language/golden-v1.json",
+      "sha256": "c2982a55e642a1f03ad07d82e9d3d5e1bb9c24f9be6c0d8124e25d819d1abcd9"
+    },
+    {
+      "id": "QLORA009-NEGATIVE-V1",
+      "path": "fixtures/009/invalid/qlora-negative-v1.json",
+      "sha256": "dd27ffcf04bae232055418dc633c8471752a219d1ab7bd0bfc7fc140c420e461"
+    },
+    {
+      "id": "QLORA009-TINY-OFFLINE-V1",
+      "path": "fixtures/009/tiny-offline/tiny-qlora-v1.json",
+      "sha256": "4dfc4b035c4b7649114fba949e0e6b5dab1f154c1233e5f3572ea1c925bed279"
+    },
+    {
+      "id": "QLORA009-VALID-CONTRACT-V1",
+      "path": "fixtures/009/valid/qlora-contract-v1.json",
+      "sha256": "c2982a55e642a1f03ad07d82e9d3d5e1bb9c24f9be6c0d8124e25d819d1abcd9"
+    },
+    {
       "id": "CANONICAL-JSON-001",
       "path": "fixtures/canonical-json/canonical-json-v1.json",
       "sha256": "61ddd50bb35a3ef943b49359b597cf141b7683ab9fd5c72858fabd13e9bdd482"
@@ -216,244 +241,24 @@
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
   "media_types": [
     {
-      "id": "MEDIA-ARTIFACT-REF-V1",
-      "schema_id": "SCHEMA-ARTIFACT-REF-V1",
-      "value": "application/vnd.deltareduce.artifact-ref+json;version=1"
-    },
-    {
-      "id": "MEDIA-BASELINE-CONFIG-V1",
-      "schema_id": "SCHEMA-BASELINE-CONFIG-V1",
-      "value": "application/vnd.deltareduce.baseline-config+json;version=1"
-    },
-    {
-      "id": "MEDIA-BFT-CANONICAL-BINARY-V1",
-      "schema_id": "SCHEMA-BFT-PROTOCOL-TYPES-V1",
-      "value": "application/vnd.deltareduce.bft-envelope;version=1"
-    },
-    {
       "id": "MEDIA-ACCUMULATOR-PROOF-INSTANCE-V1",
       "schema_id": "SCHEMA-ACCUMULATOR-PROOF-INSTANCE-V1",
       "value": "application/vnd.deltareduce.accumulator-proof+json;version=1"
     },
     {
-      "id": "MEDIA-ENCODED-CONTRIBUTION-MANIFEST-V1",
-      "schema_id": "SCHEMA-ENCODED-CONTRIBUTION-MANIFEST-V1",
-      "value": "application/vnd.deltareduce.encoded-contribution+json;version=1"
+      "id": "MEDIA-ADAPTER-CONFIG-009-V1",
+      "schema_id": "SCHEMA-ADAPTER-CONFIG-009-V1",
+      "value": "application/vnd.deltareduce.adapter-config+json;version=1"
     },
     {
-      "id": "MEDIA-ENCODED-SHARD-V1",
-      "schema_id": "SCHEMA-ENCODED-SHARD-V1",
-      "value": "application/vnd.deltareduce.fixedpoint-shard;version=1"
+      "id": "MEDIA-ADAPTER-CONTRIBUTION-MANIFEST-009-V1",
+      "schema_id": "SCHEMA-ADAPTER-CONTRIBUTION-MANIFEST-009-V1",
+      "value": "application/vnd.deltareduce.adapter-contribution-manifest+json;version=1"
     },
     {
-      "id": "MEDIA-FIXEDPOINT-CONFIG-V1",
-      "schema_id": "SCHEMA-FIXEDPOINT-CONFIG-V1",
-      "value": "application/vnd.deltareduce.fixedpoint-config+json;version=1"
-    },
-    {
-      "id": "MEDIA-FIXEDPOINT-PROFILE-V1",
-      "schema_id": "SCHEMA-FIXEDPOINT-PROFILE-V1",
-      "value": "application/vnd.deltareduce.fixedpoint-profile+json;version=1"
-    },
-    {
-      "id": "MEDIA-QUANTIZATION-SCALE-TABLE-V1",
-      "schema_id": "SCHEMA-QUANTIZATION-SCALE-TABLE-V1",
-      "value": "application/vnd.deltareduce.quantization-scale-table+json;version=1"
-    },
-    {
-      "id": "MEDIA-SHARD-PLAN-V1",
-      "schema_id": "SCHEMA-SHARD-PLAN-V1",
-      "value": "application/vnd.deltareduce.shard-plan+json;version=1"
-    },
-    {
-      "id": "MEDIA-CHECKPOINT-MANIFEST-V1",
-      "schema_id": "SCHEMA-CHECKPOINT-MANIFEST-V1",
-      "value": "application/vnd.deltareduce.checkpoint-manifest+json;version=1"
-    },
-    {
-      "id": "MEDIA-CORPUS-TEXT-V1",
-      "schema_id": "SCHEMA-CORPUS-TEXT-V1",
-      "value": "text/plain;charset=utf-8"
-    },
-    {
-      "id": "MEDIA-DOMAIN-PURE-WORK-TICKET-V1",
-      "schema_id": "SCHEMA-DOMAIN-PURE-WORK-TICKET-V1",
-      "value": "application/vnd.deltareduce.domain-pure-work-ticket+json;version=1"
-    },
-    {
-      "id": "MEDIA-FORMAL-PROJECTION-V1",
-      "schema_id": "SCHEMA-FORMAL-PROJECTION-V1",
-      "value": "application/vnd.deltareduce.formal-projection+json;version=1"
-    },
-    {
-      "id": "MEDIA-LOCAL-ROUND-COMPLETION-V1",
-      "schema_id": "SCHEMA-LOCAL-ROUND-COMPLETION-V1",
-      "value": "application/vnd.deltareduce.local-round-completion+json;version=1"
-    },
-    {
-      "id": "MEDIA-METRICS-JSONL-V1",
-      "schema_id": "SCHEMA-METRICS-JSONL-V1",
-      "value": "application/vnd.deltareduce.metrics+jsonl;version=1"
-    },
-    {
-      "id": "MEDIA-NETWORK-PROFILE-V1",
-      "schema_id": "SCHEMA-NETWORK-PROFILE-V1",
-      "value": "application/vnd.deltareduce.network-profile+json;version=1"
-    },
-    {
-      "id": "MEDIA-NORMALIZED-CONTRIBUTION-CANDIDATE-V1",
-      "schema_id": "SCHEMA-NORMALIZED-CONTRIBUTION-CANDIDATE-V1",
-      "value": "application/vnd.deltareduce.normalized-contribution-candidate+json;version=1"
-    },
-    {
-      "id": "MEDIA-PARAMETER-SCHEMA-V1",
-      "schema_id": "SCHEMA-PARAMETER-SCHEMA-V1",
-      "value": "application/vnd.deltareduce.parameter-schema+json;version=1"
-    },
-    {
-      "id": "MEDIA-PROTOCOL-REGISTRY-V1",
-      "schema_id": "SCHEMA-PROTOCOL-REGISTRY-V1",
-      "value": "application/vnd.deltareduce.protocol-registry+json;version=1"
-    },
-    {
-      "id": "MEDIA-RUN-MANIFEST-V1",
-      "schema_id": "SCHEMA-RUN-MANIFEST-V1",
-      "value": "application/vnd.deltareduce.run-manifest+json;version=1"
-    },
-    {
-      "id": "MEDIA-SAFETENSORS-V1",
-      "schema_id": "SCHEMA-SAFETENSORS-V1",
-      "value": "application/vnd.safetensors"
-    },
-    {
-      "id": "MEDIA-TOKENIZER-V1",
-      "schema_id": "SCHEMA-TOKENIZER-V1",
-      "value": "application/vnd.deltareduce.tokenizer+json;version=1"
-    },
-    {
-      "id": "MEDIA-TRAINING-STATE-V1",
-      "schema_id": "SCHEMA-TRAINING-STATE-V1",
-      "value": "application/vnd.deltareduce.training-state+json;version=1"
-    },
-    {
-      "id": "MEDIA-UV-LOCK-V1",
-      "schema_id": "SCHEMA-UV-LOCK-V1",
-      "value": "application/vnd.deltareduce.uv-lock+toml;version=1"
-    },
-    {
-      "id": "MEDIA-CERTIFICATION-POLICY-V1",
-      "schema_id": "SCHEMA-CERTIFICATION-POLICY-V1",
-      "value": "application/vnd.deltareduce.certification-policy+json;version=1"
-    },
-    {
-      "id": "MEDIA-DOWNLOAD-JOURNAL-V1",
-      "schema_id": "SCHEMA-DOWNLOAD-JOURNAL-V1",
-      "value": "application/vnd.deltareduce.download-journal+json;version=1"
-    },
-    {
-      "id": "MEDIA-OBJECT-MANIFEST-V1",
-      "schema_id": "SCHEMA-OBJECT-MANIFEST-V1",
-      "value": "application/vnd.deltareduce.object-manifest+json;version=1"
-    },
-    {
-      "id": "MEDIA-PEER-ADVERTISEMENT-V1",
-      "schema_id": "SCHEMA-PEER-ADVERTISEMENT-V1",
-      "value": "application/vnd.deltareduce.peer-advertisement+json;version=1"
-    },
-    {
-      "id": "MEDIA-PIECE-PROFILE-V1",
-      "schema_id": "SCHEMA-PIECE-PROFILE-V1",
-      "value": "application/vnd.deltareduce.piece-profile+json;version=1"
-    },
-    {
-      "id": "MEDIA-TRANSPORT-ENVELOPE-V1",
-      "schema_id": "SCHEMA-TRANSPORT-ENVELOPE-V1",
-      "value": "application/vnd.deltareduce.transport-envelope+json;version=1"
-    },
-    {
-      "id": "MEDIA-REDUCE-TOPOLOGY-V1",
-      "schema_id": "SCHEMA-REDUCE-TOPOLOGY-V1",
-      "value": "application/vnd.deltareduce.reduce-topology+json;version=1"
-    },
-    {
-      "id": "MEDIA-REGIONAL-INPUT-SET-V1",
-      "schema_id": "SCHEMA-REGIONAL-INPUT-SET-V1",
-      "value": "application/vnd.deltareduce.input-candidate;version=1"
-    },
-    {
-      "id": "MEDIA-REGIONAL-SHARD-RESULT-V1",
-      "schema_id": "SCHEMA-REGIONAL-SHARD-RESULT-V1",
-      "value": "application/vnd.deltareduce.regional-partial;version=1"
-    },
-    {
-      "id": "MEDIA-REGIONAL-SHARD-QC-V1",
-      "schema_id": "SCHEMA-REGIONAL-SHARD-QC-V1",
-      "value": "application/vnd.deltareduce.regional-partial;version=1"
-    },
-    {
-      "id": "MEDIA-GLOBAL-REGIONAL-SET-V1",
-      "schema_id": "SCHEMA-GLOBAL-REGIONAL-SET-V1",
-      "value": "application/vnd.deltareduce.parameter-partial;version=1"
-    },
-    {
-      "id": "MEDIA-GLOBAL-PARAMETER-RESULT-V1",
-      "schema_id": "SCHEMA-GLOBAL-PARAMETER-RESULT-V1",
-      "value": "application/vnd.deltareduce.parameter-partial;version=1"
-    },
-    {
-      "id": "MEDIA-GLOBAL-PARAMETER-QC-V1",
-      "schema_id": "SCHEMA-GLOBAL-PARAMETER-QC-V1",
-      "value": "application/vnd.deltareduce.parameter-partial;version=1"
-    },
-    {
-      "id": "MEDIA-HIERARCHICAL-AGGREGATE-ROOT-V1",
-      "schema_id": "SCHEMA-HIERARCHICAL-AGGREGATE-ROOT-V1",
-      "value": "application/vnd.deltareduce.parameter-partial;version=1"
-    },
-    {
-      "id": "MEDIA-HIERARCHY-PROOF-INSTANCE-V1",
-      "schema_id": "SCHEMA-HIERARCHY-PROOF-INSTANCE-V1",
-      "value": "application/vnd.deltareduce.hierarchy-proof+json;version=1"
-    },
-    {
-      "id": "MEDIA-CAPABILITY-PROFILE-V1",
-      "schema_id": "SCHEMA-CAPABILITY-PROFILE-V1",
-      "value": "application/vnd.deltareduce.capability-profile+json;version=1"
-    },
-    {
-      "id": "MEDIA-DOMAIN-TICKET-POLICY-V1",
-      "schema_id": "SCHEMA-DOMAIN-TICKET-POLICY-V1",
-      "value": "application/vnd.deltareduce.domain-ticket-policy+json;version=1"
-    },
-    {
-      "id": "MEDIA-ELIGIBILITY-DECISION-V1",
-      "schema_id": "SCHEMA-ELIGIBILITY-DECISION-V1",
-      "value": "application/vnd.deltareduce.eligibility-decision+json;version=1"
-    },
-    {
-      "id": "MEDIA-INFEASIBILITY-REPORT-V1",
-      "schema_id": "SCHEMA-INFEASIBILITY-REPORT-V1",
-      "value": "application/vnd.deltareduce.infeasibility-report+json;version=1"
-    },
-    {
-      "id": "MEDIA-LEASE-TIMER-TOKEN-V1",
-      "schema_id": "SCHEMA-LEASE-TIMER-TOKEN-V1",
-      "value": "application/vnd.deltareduce.lease-timer-token+json;version=1"
-    },
-    {
-      "id": "MEDIA-ROUND-TICKET-PLAN-V1",
-      "schema_id": "SCHEMA-ROUND-TICKET-PLAN-V1",
-      "value": "application/vnd.deltareduce.round-ticket-plan+json;version=1"
-    },
-    {
-      "id": "MEDIA-TICKET-LEASE-V1",
-      "schema_id": "SCHEMA-TICKET-LEASE-V1",
-      "value": "application/vnd.deltareduce.ticket-lease+json;version=1"
-    },
-    {
-      "id": "MEDIA-SCHEDULING-WORK-TICKET-V1",
-      "schema_id": "SCHEMA-SCHEDULING-WORK-TICKET-V1",
-      "value": "application/vnd.deltareduce.scheduling-work-ticket+json;version=1"
+      "id": "MEDIA-ADAPTER-PARAMETER-SCHEMA-009-V1",
+      "schema_id": "SCHEMA-ADAPTER-PARAMETER-SCHEMA-009-V1",
+      "value": "application/vnd.deltareduce.adapter-parameter-schema+json;version=1"
     },
     {
       "id": "MEDIA-AGGREGATE-ROOT-QC-V1",
@@ -481,9 +286,64 @@
       "value": "application/vnd.deltareduce.apply-qc+json;version=1"
     },
     {
+      "id": "MEDIA-ARTIFACT-REF-V1",
+      "schema_id": "SCHEMA-ARTIFACT-REF-V1",
+      "value": "application/vnd.deltareduce.artifact-ref+json;version=1"
+    },
+    {
+      "id": "MEDIA-BASE-MODEL-MANIFEST-009-V1",
+      "schema_id": "SCHEMA-BASE-MODEL-MANIFEST-009-V1",
+      "value": "application/vnd.deltareduce.base-model-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-BASELINE-CONFIG-V1",
+      "schema_id": "SCHEMA-BASELINE-CONFIG-V1",
+      "value": "application/vnd.deltareduce.baseline-config+json;version=1"
+    },
+    {
+      "id": "MEDIA-BFT-CANONICAL-BINARY-V1",
+      "schema_id": "SCHEMA-BFT-PROTOCOL-TYPES-V1",
+      "value": "application/vnd.deltareduce.bft-envelope;version=1"
+    },
+    {
+      "id": "MEDIA-CAPABILITY-PROFILE-V1",
+      "schema_id": "SCHEMA-CAPABILITY-PROFILE-V1",
+      "value": "application/vnd.deltareduce.capability-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-CERTIFICATION-POLICY-V1",
+      "schema_id": "SCHEMA-CERTIFICATION-POLICY-V1",
+      "value": "application/vnd.deltareduce.certification-policy+json;version=1"
+    },
+    {
+      "id": "MEDIA-CHECKPOINT-MANIFEST-V1",
+      "schema_id": "SCHEMA-CHECKPOINT-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.checkpoint-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-CORPUS-TEXT-V1",
+      "schema_id": "SCHEMA-CORPUS-TEXT-V1",
+      "value": "text/plain;charset=utf-8"
+    },
+    {
       "id": "MEDIA-CURRENT-POINTER-COMMAND-V1",
       "schema_id": "SCHEMA-CURRENT-POINTER-COMMAND-V1",
       "value": "application/vnd.deltareduce.current-pointer-command+json;version=1"
+    },
+    {
+      "id": "MEDIA-DOMAIN-PURE-WORK-TICKET-V1",
+      "schema_id": "SCHEMA-DOMAIN-PURE-WORK-TICKET-V1",
+      "value": "application/vnd.deltareduce.domain-pure-work-ticket+json;version=1"
+    },
+    {
+      "id": "MEDIA-DOMAIN-TICKET-POLICY-V1",
+      "schema_id": "SCHEMA-DOMAIN-TICKET-POLICY-V1",
+      "value": "application/vnd.deltareduce.domain-ticket-policy+json;version=1"
+    },
+    {
+      "id": "MEDIA-DOWNLOAD-JOURNAL-V1",
+      "schema_id": "SCHEMA-DOWNLOAD-JOURNAL-V1",
+      "value": "application/vnd.deltareduce.download-journal+json;version=1"
     },
     {
       "id": "MEDIA-ELIGIBILITY-CERTIFICATE-V1",
@@ -491,9 +351,109 @@
       "value": "application/vnd.deltareduce.eligibility-certificate+json;version=1"
     },
     {
+      "id": "MEDIA-ELIGIBILITY-DECISION-V1",
+      "schema_id": "SCHEMA-ELIGIBILITY-DECISION-V1",
+      "value": "application/vnd.deltareduce.eligibility-decision+json;version=1"
+    },
+    {
+      "id": "MEDIA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "schema_id": "SCHEMA-ENCODED-CONTRIBUTION-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.encoded-contribution+json;version=1"
+    },
+    {
+      "id": "MEDIA-ENCODED-SHARD-V1",
+      "schema_id": "SCHEMA-ENCODED-SHARD-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-shard;version=1"
+    },
+    {
+      "id": "MEDIA-FIXEDPOINT-CONFIG-V1",
+      "schema_id": "SCHEMA-FIXEDPOINT-CONFIG-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-config+json;version=1"
+    },
+    {
+      "id": "MEDIA-FIXEDPOINT-PROFILE-V1",
+      "schema_id": "SCHEMA-FIXEDPOINT-PROFILE-V1",
+      "value": "application/vnd.deltareduce.fixedpoint-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-FORMAL-PROJECTION-V1",
+      "schema_id": "SCHEMA-FORMAL-PROJECTION-V1",
+      "value": "application/vnd.deltareduce.formal-projection+json;version=1"
+    },
+    {
+      "id": "MEDIA-GLOBAL-ADAPTER-CHECKPOINT-009-V1",
+      "schema_id": "SCHEMA-GLOBAL-ADAPTER-CHECKPOINT-009-V1",
+      "value": "application/vnd.deltareduce.global-adapter-checkpoint+json;version=1"
+    },
+    {
+      "id": "MEDIA-GLOBAL-PARAMETER-QC-V1",
+      "schema_id": "SCHEMA-GLOBAL-PARAMETER-QC-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-GLOBAL-PARAMETER-RESULT-V1",
+      "schema_id": "SCHEMA-GLOBAL-PARAMETER-RESULT-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-GLOBAL-REGIONAL-SET-V1",
+      "schema_id": "SCHEMA-GLOBAL-REGIONAL-SET-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-HIERARCHICAL-AGGREGATE-ROOT-V1",
+      "schema_id": "SCHEMA-HIERARCHICAL-AGGREGATE-ROOT-V1",
+      "value": "application/vnd.deltareduce.parameter-partial;version=1"
+    },
+    {
+      "id": "MEDIA-HIERARCHY-PROOF-INSTANCE-V1",
+      "schema_id": "SCHEMA-HIERARCHY-PROOF-INSTANCE-V1",
+      "value": "application/vnd.deltareduce.hierarchy-proof+json;version=1"
+    },
+    {
+      "id": "MEDIA-INFEASIBILITY-REPORT-V1",
+      "schema_id": "SCHEMA-INFEASIBILITY-REPORT-V1",
+      "value": "application/vnd.deltareduce.infeasibility-report+json;version=1"
+    },
+    {
       "id": "MEDIA-INPUT-SET-CERTIFICATE-V1",
       "schema_id": "SCHEMA-INPUT-SET-CERTIFICATE-V1",
       "value": "application/vnd.deltareduce.input-set-certificate+json;version=1"
+    },
+    {
+      "id": "MEDIA-LEASE-TIMER-TOKEN-V1",
+      "schema_id": "SCHEMA-LEASE-TIMER-TOKEN-V1",
+      "value": "application/vnd.deltareduce.lease-timer-token+json;version=1"
+    },
+    {
+      "id": "MEDIA-LOCAL-ROUND-COMPLETION-V1",
+      "schema_id": "SCHEMA-LOCAL-ROUND-COMPLETION-V1",
+      "value": "application/vnd.deltareduce.local-round-completion+json;version=1"
+    },
+    {
+      "id": "MEDIA-MEMORY-QUALIFICATION-EVIDENCE-009-V1",
+      "schema_id": "SCHEMA-MEMORY-QUALIFICATION-EVIDENCE-009-V1",
+      "value": "application/vnd.deltareduce.memory-qualification-evidence+json;version=1"
+    },
+    {
+      "id": "MEDIA-MEMORY-QUALIFICATION-PROFILE-009-V1",
+      "schema_id": "SCHEMA-MEMORY-QUALIFICATION-PROFILE-009-V1",
+      "value": "application/vnd.deltareduce.memory-qualification-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-METRICS-JSONL-V1",
+      "schema_id": "SCHEMA-METRICS-JSONL-V1",
+      "value": "application/vnd.deltareduce.metrics+jsonl;version=1"
+    },
+    {
+      "id": "MEDIA-MODEL-COMPOSITION-MANIFEST-009-V1",
+      "schema_id": "SCHEMA-MODEL-COMPOSITION-MANIFEST-009-V1",
+      "value": "application/vnd.deltareduce.model-composition-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-NETWORK-PROFILE-V1",
+      "schema_id": "SCHEMA-NETWORK-PROFILE-V1",
+      "value": "application/vnd.deltareduce.network-profile+json;version=1"
     },
     {
       "id": "MEDIA-NORM-EVIDENCE-V1",
@@ -501,14 +461,134 @@
       "value": "application/vnd.deltareduce.norm-evidence+json;version=1"
     },
     {
+      "id": "MEDIA-NORMALIZED-CONTRIBUTION-CANDIDATE-V1",
+      "schema_id": "SCHEMA-NORMALIZED-CONTRIBUTION-CANDIDATE-V1",
+      "value": "application/vnd.deltareduce.normalized-contribution-candidate+json;version=1"
+    },
+    {
+      "id": "MEDIA-OBJECT-MANIFEST-V1",
+      "schema_id": "SCHEMA-OBJECT-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.object-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-PARAMETER-SCHEMA-V1",
+      "schema_id": "SCHEMA-PARAMETER-SCHEMA-V1",
+      "value": "application/vnd.deltareduce.parameter-schema+json;version=1"
+    },
+    {
       "id": "MEDIA-PARAMETER-SHARD-QC-V1",
       "schema_id": "SCHEMA-PARAMETER-SHARD-QC-V1",
       "value": "application/vnd.deltareduce.parameter-shard-qc+json;version=1"
     },
     {
+      "id": "MEDIA-PEER-ADVERTISEMENT-V1",
+      "schema_id": "SCHEMA-PEER-ADVERTISEMENT-V1",
+      "value": "application/vnd.deltareduce.peer-advertisement+json;version=1"
+    },
+    {
+      "id": "MEDIA-PIECE-PROFILE-V1",
+      "schema_id": "SCHEMA-PIECE-PROFILE-V1",
+      "value": "application/vnd.deltareduce.piece-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-PROTOCOL-REGISTRY-V1",
+      "schema_id": "SCHEMA-PROTOCOL-REGISTRY-V1",
+      "value": "application/vnd.deltareduce.protocol-registry+json;version=1"
+    },
+    {
+      "id": "MEDIA-QLORA-TICKET-CONTEXT-009-V1",
+      "schema_id": "SCHEMA-QLORA-TICKET-CONTEXT-009-V1",
+      "value": "application/vnd.deltareduce.qlora-ticket-context+json;version=1"
+    },
+    {
+      "id": "MEDIA-QUANTIZATION-SCALE-TABLE-V1",
+      "schema_id": "SCHEMA-QUANTIZATION-SCALE-TABLE-V1",
+      "value": "application/vnd.deltareduce.quantization-scale-table+json;version=1"
+    },
+    {
+      "id": "MEDIA-QUANTIZED-BASE-PROFILE-009-V1",
+      "schema_id": "SCHEMA-QUANTIZED-BASE-PROFILE-009-V1",
+      "value": "application/vnd.deltareduce.quantized-base-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-REDUCE-TOPOLOGY-V1",
+      "schema_id": "SCHEMA-REDUCE-TOPOLOGY-V1",
+      "value": "application/vnd.deltareduce.reduce-topology+json;version=1"
+    },
+    {
+      "id": "MEDIA-REGIONAL-INPUT-SET-V1",
+      "schema_id": "SCHEMA-REGIONAL-INPUT-SET-V1",
+      "value": "application/vnd.deltareduce.input-candidate;version=1"
+    },
+    {
+      "id": "MEDIA-REGIONAL-SHARD-QC-V1",
+      "schema_id": "SCHEMA-REGIONAL-SHARD-QC-V1",
+      "value": "application/vnd.deltareduce.regional-partial;version=1"
+    },
+    {
+      "id": "MEDIA-REGIONAL-SHARD-RESULT-V1",
+      "schema_id": "SCHEMA-REGIONAL-SHARD-RESULT-V1",
+      "value": "application/vnd.deltareduce.regional-partial;version=1"
+    },
+    {
+      "id": "MEDIA-ROUND-TICKET-PLAN-V1",
+      "schema_id": "SCHEMA-ROUND-TICKET-PLAN-V1",
+      "value": "application/vnd.deltareduce.round-ticket-plan+json;version=1"
+    },
+    {
+      "id": "MEDIA-RUN-MANIFEST-V1",
+      "schema_id": "SCHEMA-RUN-MANIFEST-V1",
+      "value": "application/vnd.deltareduce.run-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-SAFETENSORS-V1",
+      "schema_id": "SCHEMA-SAFETENSORS-V1",
+      "value": "application/vnd.safetensors"
+    },
+    {
+      "id": "MEDIA-SCHEDULING-WORK-TICKET-V1",
+      "schema_id": "SCHEMA-SCHEDULING-WORK-TICKET-V1",
+      "value": "application/vnd.deltareduce.scheduling-work-ticket+json;version=1"
+    },
+    {
       "id": "MEDIA-SEED-TRANSCRIPT-V1",
       "schema_id": "SCHEMA-SEED-TRANSCRIPT-V1",
       "value": "application/vnd.deltareduce.seed-transcript+json;version=1"
+    },
+    {
+      "id": "MEDIA-SHARD-PLAN-V1",
+      "schema_id": "SCHEMA-SHARD-PLAN-V1",
+      "value": "application/vnd.deltareduce.shard-plan+json;version=1"
+    },
+    {
+      "id": "MEDIA-TICKET-LEASE-V1",
+      "schema_id": "SCHEMA-TICKET-LEASE-V1",
+      "value": "application/vnd.deltareduce.ticket-lease+json;version=1"
+    },
+    {
+      "id": "MEDIA-TOKENIZER-V1",
+      "schema_id": "SCHEMA-TOKENIZER-V1",
+      "value": "application/vnd.deltareduce.tokenizer+json;version=1"
+    },
+    {
+      "id": "MEDIA-TRAINING-MODE-009-V1",
+      "schema_id": "SCHEMA-TRAINING-MODE-009-V1",
+      "value": "application/vnd.deltareduce.training-mode+json;version=1"
+    },
+    {
+      "id": "MEDIA-TRAINING-STATE-V1",
+      "schema_id": "SCHEMA-TRAINING-STATE-V1",
+      "value": "application/vnd.deltareduce.training-state+json;version=1"
+    },
+    {
+      "id": "MEDIA-TRANSPORT-ENVELOPE-V1",
+      "schema_id": "SCHEMA-TRANSPORT-ENVELOPE-V1",
+      "value": "application/vnd.deltareduce.transport-envelope+json;version=1"
+    },
+    {
+      "id": "MEDIA-UV-LOCK-V1",
+      "schema_id": "SCHEMA-UV-LOCK-V1",
+      "value": "application/vnd.deltareduce.uv-lock+toml;version=1"
     }
   ],
   "registry_id": "DELTA-PROTOCOL-V1",
@@ -728,6 +808,61 @@
       "id": "SCHEMA-SEED-TRANSCRIPT-V1",
       "path": "schemas/008/seed-transcript-v1.json",
       "sha256": "cd397471a4beec5f259f76b1450f01c39a86de17c43a8397c5e449dd07256193"
+    },
+    {
+      "id": "SCHEMA-ADAPTER-CONFIG-009-V1",
+      "path": "schemas/009/adapter-config-v1.json",
+      "sha256": "3cb8ecc62b31738abf3f0d79b1a42d62810da578d27b8d8e584be7cf4ee9479e"
+    },
+    {
+      "id": "SCHEMA-ADAPTER-CONTRIBUTION-MANIFEST-009-V1",
+      "path": "schemas/009/adapter-contribution-manifest-v1.json",
+      "sha256": "bdb2b6faae64cb04a63aed39615b4b0c72707afb3c4db607f68e083cd23bc9e0"
+    },
+    {
+      "id": "SCHEMA-ADAPTER-PARAMETER-SCHEMA-009-V1",
+      "path": "schemas/009/adapter-parameter-schema-v1.json",
+      "sha256": "c36fe51cf0c22b4ef4db4300cfaf1059add34a1d6f1c7a1f7691eff2c16968d2"
+    },
+    {
+      "id": "SCHEMA-BASE-MODEL-MANIFEST-009-V1",
+      "path": "schemas/009/base-model-manifest-v1.json",
+      "sha256": "4feb571e8aaa47924f7121fd12bb6ef1f0f7a5f148fd6e3e88ca5e7ce21bdd92"
+    },
+    {
+      "id": "SCHEMA-GLOBAL-ADAPTER-CHECKPOINT-009-V1",
+      "path": "schemas/009/global-adapter-checkpoint-v1.json",
+      "sha256": "cddc5cdf6c7d48bd46895459f934a88b0c1b84ba9e0728f7dd3c18209242a0e1"
+    },
+    {
+      "id": "SCHEMA-MEMORY-QUALIFICATION-EVIDENCE-009-V1",
+      "path": "schemas/009/memory-qualification-evidence-v1.json",
+      "sha256": "580d973f64ed35dc9c0e9baca37400dbfd3ff497217fdc2eb26700e5f5488780"
+    },
+    {
+      "id": "SCHEMA-MEMORY-QUALIFICATION-PROFILE-009-V1",
+      "path": "schemas/009/memory-qualification-profile-v1.json",
+      "sha256": "26f2e134bbe80b5ad3bf1851d8379c778cfaa2833fbe4e127ab4f205f51cc364"
+    },
+    {
+      "id": "SCHEMA-MODEL-COMPOSITION-MANIFEST-009-V1",
+      "path": "schemas/009/model-composition-manifest-v1.json",
+      "sha256": "e4ebfd4ec31aa0895bb9136bf6af2063fde069baf7e15c166fb0d06518f29902"
+    },
+    {
+      "id": "SCHEMA-QLORA-TICKET-CONTEXT-009-V1",
+      "path": "schemas/009/qlora-ticket-context-v1.json",
+      "sha256": "32981ebcb535acd436f26a7e3ce6ff4e83d511e9a088beddbf1f6c4243d039e1"
+    },
+    {
+      "id": "SCHEMA-QUANTIZED-BASE-PROFILE-009-V1",
+      "path": "schemas/009/quantized-base-profile-v1.json",
+      "sha256": "4090bb670cbdc578062a4c80d50912429f18be400f7e827332e5d730759c475e"
+    },
+    {
+      "id": "SCHEMA-TRAINING-MODE-009-V1",
+      "path": "schemas/009/training-mode-v1.json",
+      "sha256": "05684e231aa187464bedb324b4cdae7f87b867089b926e24cba183233554e999"
     },
     {
       "id": "SCHEMA-ARTIFACT-REF-V1",

@@ -1,0 +1,101 @@
+{
+  "$id": "urn:deltareduce:schema:009:adapter-contribution-manifest:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "ADAPTER_CONTRIBUTION_MANIFEST"
+    },
+    "actual_optimizer_steps": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "adapter_parameter_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "base_model_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "commitment_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "memory_qualification_evidence_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ordered_shards": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "encoded_shard_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "parameter_name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+-]+$",
+            "type": "string"
+          },
+          "shard_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "encoded_shard_id",
+          "parameter_name",
+          "shard_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "parent_adapter_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "quantized_base_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ticket_context_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "training_mode_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "actual_optimizer_steps",
+    "adapter_parameter_schema_id",
+    "base_model_manifest_id",
+    "commitment_root",
+    "formal_semantics_id",
+    "memory_qualification_evidence_id",
+    "ordered_shards",
+    "parent_adapter_id",
+    "quantized_base_profile_id",
+    "schema_version",
+    "ticket_context_id",
+    "training_mode_id",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 adapter-contribution-manifest v1",
+  "type": "object"
+}

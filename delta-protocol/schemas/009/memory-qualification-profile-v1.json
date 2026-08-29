@@ -1,0 +1,71 @@
+{
+  "$id": "urn:deltareduce:schema:009:memory-qualification-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "MEMORY_QUALIFICATION_PROFILE"
+    },
+    "gpu_name": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+-]+$",
+      "type": "string"
+    },
+    "gpu_total_memory_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "hard_max_reserved_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "host_offload_limit_bytes": {
+      "const": 0
+    },
+    "profile_kind": {
+      "enum": [
+        "TINY_OFFLINE",
+        "PHYSICAL_8_GIB"
+      ]
+    },
+    "required_headroom_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "runner_id": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+-]+$",
+      "type": "string"
+    },
+    "software_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "formal_semantics_id",
+    "gpu_name",
+    "gpu_total_memory_bytes",
+    "hard_max_reserved_bytes",
+    "host_offload_limit_bytes",
+    "profile_kind",
+    "required_headroom_bytes",
+    "runner_id",
+    "schema_version",
+    "software_profile_id",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 memory-qualification-profile v1",
+  "type": "object"
+}

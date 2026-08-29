@@ -1,0 +1,138 @@
+name: Feature 009 certified QLoRA verification
+
+on:
+  push:
+    branches: [009-qlora-8gb-mode]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qlora-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Native C++${{ matrix.standard }} QLoRA authority
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        standard: [20, 23]
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Build strict native authority
+        run: |
+          cmake --preset "cpp${{ matrix.standard }}"
+          cmake --build --preset "cpp${{ matrix.standard }}" --parallel \
+            --target delta_qlora_certificate_chain_test delta_qlora_apply_test delta_ffi_qlora_test
+      - name: Verify certificate, ApplyQC, WAL and bounded C ABI
+        run: ctest --preset "cpp${{ matrix.standard }}" -R "qlora" --output-on-failure
+
+  sanitizer:
+    name: Clang ASan UBSan QLoRA boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Configure sanitizers
+        run: >-
+          cmake -S . -B out/build/qlora-sanitizer
+          -DBUILD_TESTING=ON -DDELTA_CXX_STANDARD=20 -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+      - name: Build and run sanitized targets
+        run: |
+          cmake --build out/build/qlora-sanitizer --parallel \
+            --target delta_qlora_certificate_chain_test delta_qlora_apply_test delta_ffi_qlora_test
+          ctest --test-dir out/build/qlora-sanitizer -R "qlora" --output-on-failure
+
+  java-transport:
+    name: Java ${{ matrix.feature }} base-cache and adapter transport
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir --parents "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" \
+            --directory "$RUNNER_TEMP/jdk" --strip-components=1
+      - name: Compile Java transport boundary offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          mkdir --parents "$RUNNER_TEMP/java-classes"
+          "$RUNNER_TEMP/jdk/bin/javac" --release "${{ matrix.feature }}" -Xlint:all -Werror \
+            -d "$RUNNER_TEMP/java-classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/qlora/*.java \
+            delta-node-java/src/test/java/io/deltareduce/node/qlora/QloraConformance.java
+      - name: Verify zero base refetch and composition boundary offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "${{ matrix.version }}"
+          "$RUNNER_TEMP/jdk/bin/java" --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.qlora.QloraConformance
+
+  boundary-gate:
+    name: QLoRA native and transport boundary gate
+    needs: [native, sanitizer, java-transport]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify committed deterministic evidence when present
+        run: |
+          test -f specs/009-qlora-8gb-mode/evidence/preflight.json
+          test -f specs/009-qlora-8gb-mode/evidence/protocol-contracts.json
+          test -f specs/009-qlora-8gb-mode/evidence/python-runtime.json
+          test -f specs/009-qlora-8gb-mode/evidence/native-runtime.json
+          test -f specs/009-qlora-8gb-mode/evidence/transport-runtime.json
+          test -f specs/009-qlora-8gb-mode/evidence/physical-qualification.json
+          test -f specs/009-qlora-8gb-mode/evidence/physical-gate.json
+          python3 specs/009-qlora-8gb-mode/scripts/verify_physical_qualification.py --check-only

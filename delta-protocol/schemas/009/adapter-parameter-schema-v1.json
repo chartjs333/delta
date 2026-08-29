@@ -1,0 +1,113 @@
+{
+  "$id": "urn:deltareduce:schema:009:adapter-parameter-schema:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "ADAPTER_PARAMETER_SCHEMA"
+    },
+    "adapter_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "base_model_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ordered_parameters": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "alias_owner": {
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+-]+$",
+            "type": "string"
+          },
+          "logical_dtype": {
+            "enum": [
+              "FLOAT16",
+              "BFLOAT16",
+              "FLOAT32"
+            ]
+          },
+          "lora_rank": {
+            "maximum": 1024,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+-]+$",
+            "type": "string"
+          },
+          "shape": {
+            "items": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "target_module": {
+            "maxLength": 512,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alias_owner",
+          "logical_dtype",
+          "lora_rank",
+          "name",
+          "shape",
+          "target_module"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "ordered_target_modules": {
+      "items": {
+        "maxLength": 512,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "quantized_base_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "tokenizer_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "adapter_config_id",
+    "base_model_manifest_id",
+    "formal_semantics_id",
+    "ordered_parameters",
+    "ordered_target_modules",
+    "quantized_base_profile_id",
+    "schema_version",
+    "tokenizer_hash",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 adapter-parameter-schema v1",
+  "type": "object"
+}

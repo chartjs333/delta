@@ -1,0 +1,31 @@
+{
+  "$id": "urn:deltareduce:schema:009:training-mode:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "TRAINING_MODE"
+    },
+    "mode": {
+      "const": "QLORA_ADAPTER"
+    },
+    "parallel_certificate_graph": {
+      "const": false
+    }
+  },
+  "required": [
+    "formal_semantics_id",
+    "mode",
+    "parallel_certificate_graph",
+    "schema_version",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 training-mode v1",
+  "type": "object"
+}

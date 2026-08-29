@@ -1,0 +1,34 @@
+{
+  "base_manifest": {
+    "access_policy": "PUBLIC_NO_TOKEN",
+    "approved_ephemeral_caches": [],
+    "config_hash": "sha256:eba4e86cfa429462fae75cf17809e7c9249c373e93329a8a6e1551fd1979f80c",
+    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+    "license": "CC0-1.0",
+    "model_repository": "local/tiny-qlora-fixture",
+    "model_revision": "fixture-v1",
+    "persistent_base_parameters": [
+      "model.embed.weight",
+      "model.layer0.weight",
+      "model.output.weight"
+    ],
+    "persistent_protocol_buffers": ["model.layer0.scale"],
+    "redistribution_allowed": true,
+    "schema_version": "1.0.0",
+    "tokenizer_hash": "sha256:5b98a7417e72453662487f6b50aa87752a1e91d98571f7f9eda8a349e866eabf",
+    "type_name": "BASE_MODEL_MANIFEST",
+    "weight_shard_ids": [
+      "sha256:e11fa58b9d52ea39571be379e25a56bc82ee008af606f01873b5b2b7d56cf37a"
+    ]
+  },
+  "files": {
+    "config": "config.json",
+    "tokenizer": "tokenizer.json",
+    "weights": ["base.safetensors.json"]
+  },
+  "import_policy": {
+    "local_files_only": true,
+    "trust_remote_code": false,
+    "use_safetensors": true
+  }
+}

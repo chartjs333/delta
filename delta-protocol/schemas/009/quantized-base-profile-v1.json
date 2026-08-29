@@ -1,0 +1,69 @@
+{
+  "$id": "urn:deltareduce:schema:009:quantized-base-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "QUANTIZED_BASE_PROFILE"
+    },
+    "backend": {
+      "enum": [
+        "MOCK_INT4",
+        "BITSANDBYTES"
+      ]
+    },
+    "backend_version": {
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+-]+$",
+      "type": "string"
+    },
+    "base_model_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "compute_dtype": {
+      "enum": [
+        "FLOAT16",
+        "BFLOAT16",
+        "FLOAT32"
+      ]
+    },
+    "double_quantization": {
+      "type": "boolean"
+    },
+    "fallback_policy": {
+      "const": "REJECT"
+    },
+    "quantization_type": {
+      "enum": [
+        "NF4",
+        "MOCK_SYMMETRIC_INT4"
+      ]
+    },
+    "storage_bits": {
+      "const": 4
+    }
+  },
+  "required": [
+    "backend",
+    "backend_version",
+    "base_model_manifest_id",
+    "compute_dtype",
+    "double_quantization",
+    "fallback_policy",
+    "formal_semantics_id",
+    "quantization_type",
+    "schema_version",
+    "storage_bits",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 quantized-base-profile v1",
+  "type": "object"
+}

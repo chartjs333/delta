@@ -1,0 +1,68 @@
+{
+  "$id": "urn:deltareduce:schema:009:global-adapter-checkpoint:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "GLOBAL_ADAPTER_CHECKPOINT"
+    },
+    "adapter_parameter_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "aggregate_root_qc_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "apply_qc_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "base_model_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "next_adapter_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "next_outer_optimizer_state_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "parent_adapter_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "quantized_base_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "training_mode_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "adapter_parameter_schema_id",
+    "aggregate_root_qc_id",
+    "apply_qc_id",
+    "base_model_manifest_id",
+    "formal_semantics_id",
+    "next_adapter_id",
+    "next_outer_optimizer_state_id",
+    "parent_adapter_id",
+    "quantized_base_profile_id",
+    "schema_version",
+    "training_mode_id",
+    "type_name"
+  ],
+  "title": "DeltaReduce feature-009 global-adapter-checkpoint v1",
+  "type": "object"
+}
