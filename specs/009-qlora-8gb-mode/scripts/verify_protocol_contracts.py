@@ -217,7 +217,7 @@ def verify(source_commit: str) -> dict[str, Any]:
         "source": verify_source(source_commit, paths),
         "source_boundary": verify_source_boundary(source_commit),
         "status": "PASS",
-        "task_ids": ["T001", "T002", "T003", "T004", "T005", "HR009-001"],
+        "task_ids": ["T001", "T002", "T005"],
         "validation": validation,
     }
 
