@@ -11,4 +11,4 @@
 - [x] **HR009-009** Add four-validator adapter ApplyQC equality and crash/replay tests.
 - [x] **HR009-010** Add base-cache byte accounting and incompatible resume/composition tests.
 - [x] **HR009-011** Identify the physical runner, freeze its exact 8 GiB qualification profile and run it; emit `BLOCKED_HARDWARE` instead of `PASS` when the runner is unavailable.
-- [ ] **HR009-012** Publish Python memory, C++ certificate/apply, Java cache/transport and formal-refinement evidence.
+- [x] **HR009-012** Publish Python memory, C++ certificate/apply, Java cache/transport and formal-refinement evidence.

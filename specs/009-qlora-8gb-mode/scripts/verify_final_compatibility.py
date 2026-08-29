@@ -27,12 +27,17 @@ EVIDENCE_NAMES: Final = (
 SOURCE_ARTIFACTS: Final = (
     ".github/workflows/qlora.yml",
     "configs/qlora/8gb-reference.json",
+    "delta-protocol/registry.json",
+    "delta-worker-python/src/deltatorrent/qlora/qualification.py",
+    "delta-worker-python/tests/hardware/test_qlora_8gb_qualification.py",
     "docs/deltareduce/qlora-8gb.md",
     "specs/009-qlora-8gb-mode/runtime-tasks.md",
     "specs/009-qlora-8gb-mode/scripts/capture_qlora_ci.py",
+    "specs/009-qlora-8gb-mode/scripts/qlora_contracts.py",
     "specs/009-qlora-8gb-mode/scripts/verify_final_compatibility.py",
     "specs/009-qlora-8gb-mode/scripts/verify_physical_qualification.py",
     "specs/009-qlora-8gb-mode/tasks.md",
+    "specs/009-qlora-8gb-mode/tests/test_verify_protocol_contracts.py",
 )
 FORBIDDEN_BINARY_SUFFIXES: Final = (
     ".bin",
@@ -125,6 +130,38 @@ def verify_repository_safety(source_commit: str) -> dict[str, object]:
     }
 
 
+def verify_protocol_registry(source_commit: str) -> dict[str, object]:
+    registry = json.loads(source_bytes(source_commit, "delta-protocol/registry.json"))
+    schemas = registry["schemas"]
+    fixtures = registry["fixtures"]
+    require(
+        [item["path"] for item in schemas] == sorted(item["path"] for item in schemas),
+        "PROTOCOL_SCHEMA_REGISTRY_NOT_SORTED",
+    )
+    require(
+        [item["path"] for item in fixtures] == sorted(item["path"] for item in fixtures),
+        "PROTOCOL_FIXTURE_REGISTRY_NOT_SORTED",
+    )
+    records = [*schemas, *fixtures, registry["action_registry"]]
+    paths = [item["path"] for item in records]
+    require(len(paths) == len(set(paths)), "PROTOCOL_REGISTRY_DUPLICATE_PATH")
+    for item in records:
+        require(
+            hashlib.sha256(
+                source_bytes(source_commit, "delta-protocol/" + item["path"])
+            ).hexdigest()
+            == item["sha256"],
+            f"PROTOCOL_REGISTRY_HASH_DRIFT:{item['path']}",
+        )
+    qlora_schemas = [item for item in schemas if item["path"].startswith("schemas/009/")]
+    require(len(qlora_schemas) == 11, "QLORA_PROTOCOL_SCHEMA_COUNT_INVALID")
+    return {
+        "qlora_schema_count": len(qlora_schemas),
+        "record_count": len(records),
+        "status": "PASS",
+    }
+
+
 def build(source_ref: str) -> dict[str, object]:
     source_commit = git_text("rev-parse", source_ref)
     require(git_text("merge-base", PREDECESSOR, source_commit) == PREDECESSOR, "WRONG_PREDECESSOR")
@@ -195,6 +232,7 @@ def build(source_ref: str) -> dict[str, object]:
     ci = evidence["qlora-ci.json"]
     require(ci["source"]["commit"] == source_commit, "CI_SOURCE_DIVERGENCE")
     safety = verify_repository_safety(source_commit)
+    registry = verify_protocol_registry(source_commit)
     constitution = source_bytes(source_commit, ".specify/memory/constitution.md").decode()
     require("**Version**: 2.1.0" in constitution, "CONSTITUTION_VERSION_INVALID")
 
@@ -238,6 +276,7 @@ def build(source_ref: str) -> dict[str, object]:
         },
         "inherited_feature008": preflight["feature008"],
         "physical": physical,
+        "protocol_registry": registry,
         "repository_safety": safety,
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,

@@ -85,8 +85,8 @@ certificate graph without QLoRA-specific ISC/root/ApplyQC types.
 
 - [x] T042 Add Python QLoRA/qualification telemetry and `qlora import/preflight/train/compose/qualify` CLI plus Java cache/transport telemetry.
 - [x] T043 Document mode, operational import and qualification in `docs/deltareduce/qlora-8gb.md`.
-- [ ] T044 Publish exit evidence and run cross-artifact analysis.
-- [ ] T045 Run full quality gate, secret/license scan and final Constitution Check.
+- [x] T044 Publish exit evidence and run cross-artifact analysis.
+- [x] T045 Run full quality gate, secret/license scan and final Constitution Check.
 
 ## Dependencies
 
