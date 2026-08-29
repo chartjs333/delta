@@ -1,0 +1,160 @@
+{
+  "$id": "urn:deltareduce:schema:aggregation-plan-certificate:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "AGGREGATION_PLAN_CERTIFICATE"
+    },
+    "arithmetic_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "height": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "parameter_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "round_config_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "round_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "type": "string"
+    },
+    "validator_epoch_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "view": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "accumulator_proof_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "bucket_assignments": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bucket_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          },
+          "ticket_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bucket_id",
+          "ticket_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "eligibility_certificate_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "input_set_certificate_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "iteration_count": {
+      "maximum": 1024,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "seed_transcript_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "transcript_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "weights": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "alpha": {
+            "additionalProperties": false,
+            "properties": {
+              "denominator": {
+                "maximum": 9007199254740991,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "numerator": {
+                "pattern": "^-?(0|[1-9][0-9]*)$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "denominator",
+              "numerator"
+            ],
+            "type": "object"
+          },
+          "ticket_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alpha",
+          "ticket_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "accumulator_proof_id",
+    "arithmetic_profile_id",
+    "bucket_assignments",
+    "eligibility_certificate_id",
+    "formal_semantics_id",
+    "height",
+    "input_set_certificate_id",
+    "iteration_count",
+    "parameter_schema_id",
+    "round_config_id",
+    "round_id",
+    "schema_version",
+    "seed_transcript_id",
+    "transcript_root",
+    "type_name",
+    "validator_epoch_id",
+    "view",
+    "weights"
+  ],
+  "title": "DeltaReduce aggregation-plan-certificate v1",
+  "type": "object"
+}
