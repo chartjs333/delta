@@ -1,0 +1,71 @@
+{
+  "$id": "urn:deltareduce:schema:010:evidence-manifest:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "EVIDENCE_MANIFEST"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "evidence": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "content_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "EFFICIENCY",
+              "FORMAL",
+              "QUALITY",
+              "RESILIENCE",
+              "SAFETY"
+            ]
+          }
+        },
+        "required": [
+          "content_id",
+          "kind"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "run_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 2,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "benchmark_definition_id",
+    "complete",
+    "evidence",
+    "formal_semantics_id",
+    "run_ids",
+    "schema_version",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 evidence-manifest v1",
+  "type": "object"
+}

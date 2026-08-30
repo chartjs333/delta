@@ -1,0 +1,145 @@
+{
+  "$id": "urn:deltareduce:schema:010:benchmark-result:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_RESULT"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "GO",
+        "NO_GO"
+      ]
+    },
+    "evidence_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "failed_or_missing": {
+      "items": {
+        "maxLength": 180,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "gate_table": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "gate_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "reason": {
+            "maxLength": 320,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "FAIL",
+              "PASS"
+            ]
+          }
+        },
+        "required": [
+          "gate_id",
+          "mandatory",
+          "reason",
+          "status"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "limitations": {
+      "items": {
+        "maxLength": 320,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "measured_values": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "metric_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "value": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "metric_id",
+          "unit",
+          "value"
+        ],
+        "type": "object"
+      },
+      "minItems": 0,
+      "type": "array"
+    },
+    "run_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 2,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "benchmark_definition_id",
+    "decision",
+    "evidence_manifest_id",
+    "failed_or_missing",
+    "formal_semantics_id",
+    "gate_table",
+    "limitations",
+    "measured_values",
+    "run_ids",
+    "schema_version",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 benchmark-result v1",
+  "type": "object"
+}

@@ -1,0 +1,92 @@
+{
+  "$id": "urn:deltareduce:schema:010:fault-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "FAULT_PROFILE"
+    },
+    "events": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "CRASH",
+              "DELAY",
+              "DISCONNECT",
+              "DROP_STORAGE",
+              "DUPLICATE",
+              "PARTITION",
+              "REORDER",
+              "RESTART"
+            ]
+          },
+          "actor_class": {
+            "enum": [
+              "COLLECTOR",
+              "REGION",
+              "STORAGE",
+              "VALIDATOR",
+              "WORKER"
+            ]
+          },
+          "assumptions_hold": {
+            "type": "boolean"
+          },
+          "at_step": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "event_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "expected_outcome": {
+            "enum": [
+              "ABORTED",
+              "APPLIED",
+              "BLOCKED",
+              "RECOVERED"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "actor_class",
+          "assumptions_hold",
+          "at_step",
+          "event_id",
+          "expected_outcome"
+        ],
+        "type": "object"
+      },
+      "minItems": 0,
+      "type": "array"
+    },
+    "profile_id": {
+      "maxLength": 180,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "events",
+    "formal_semantics_id",
+    "profile_id",
+    "schema_version",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 fault-profile v1",
+  "type": "object"
+}

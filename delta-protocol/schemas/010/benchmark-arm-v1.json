@@ -1,0 +1,73 @@
+{
+  "$id": "urn:deltareduce:schema:010:benchmark-arm:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_ARM"
+    },
+    "allowed_differences": {
+      "items": {
+        "maxLength": 180,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "arm_id": {
+      "maxLength": 180,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+      "type": "string"
+    },
+    "deployment_profile": {
+      "enum": [
+        "EMBEDDED_FFM",
+        "ISOLATED_SIDECAR",
+        "PYTHON"
+      ]
+    },
+    "kind": {
+      "enum": [
+        "CERTIFIED_QLORA",
+        "FLAT_NATIVE",
+        "HIERARCHICAL_NATIVE",
+        "SCIENTIFIC_REFERENCE"
+      ]
+    },
+    "mandatory": {
+      "type": "boolean"
+    },
+    "runtime_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "workload_identity": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "allowed_differences",
+    "arm_id",
+    "deployment_profile",
+    "formal_semantics_id",
+    "kind",
+    "mandatory",
+    "runtime_profile_id",
+    "schema_version",
+    "type_name",
+    "workload_identity"
+  ],
+  "title": "DeltaReduce Feature 010 benchmark-arm v1",
+  "type": "object"
+}
