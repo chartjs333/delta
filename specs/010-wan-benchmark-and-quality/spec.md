@@ -2,8 +2,25 @@
 
 **Feature Branch**: `010-wan-benchmark-and-quality`  
 **Created**: 2026-08-23  
-**Status**: Planned — ready for implementation  
+**Status**: Reconciled — implementation in progress
 **Depends on**: `009-qlora-8gb-mode`
+
+## Authoritative baseline
+
+Feature 010 is based on the exact merged Feature 009 lineage:
+
+- merge commit: `007eb08aa3aaee849128ba428274a9fbda561bf8`;
+- verified source: `f43e39fa1c60d256bab5d7e37e0756f28438d5e4`;
+- evidence overlay: `a5e73b41feb2dad73aa11d810d0c700c548e11ba`;
+- final compatibility report SHA-256:
+  `95b312b45f3c2df4293ceaa0cbb16dd1e89c5d12a86c890211353a45798516ef`;
+- inherited formal semantics:
+  `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+
+The formal-impact classification is `REGRESSION_ONLY`. A benchmark must not add a protocol action,
+certificate-parent edge, failure terminal, durability outcome or current-state transition. Discovery
+of any such behavior is a semantic STOP and requires a new Feature 000 Formal GO before implementation
+continues.
 
 ## Summary
 
@@ -21,6 +38,12 @@ Before a real multi-region pilot, DeltaReduce v1 must prove more than training l
 The benchmark configuration, hypotheses, comparison arms, thresholds, exclusions and decision rule are frozen and certified before execution. Thresholds cannot be relaxed after results are observed. Performance targets are reported as measured outcomes, not assumed capabilities.
 
 A successful benchmark yields a `BenchmarkResultQC` with decision `GO`. Any failed mandatory gate yields `NO_GO`; there is no partial or operator-overridden GO for feature 011.
+
+`BenchmarkDefinitionQC` and `BenchmarkResultQC` are benchmark-governance attestations. They authorize
+experiment execution and Feature 011 admission respectively; they are not DeltaReduce runtime
+certificates, do not extend the
+`ISC → EC → APC → ParameterShardQC → AggregateRootQC → ApplyQC` lineage, and cannot change the
+current checkpoint.
 
 ## Benchmark Arms
 
@@ -261,7 +284,7 @@ After all mandatory run manifests are sealed, evaluator validators execute the d
 - **NFR-002**: Primary quality evidence includes the preregistered number of independent repetitions/seeds; a single favorable run cannot substitute.
 - **NFR-003**: Evidence verifier MUST fail closed on missing, altered, unsigned or incompatible artifacts.
 - **NFR-004**: Reported targets and measured outcomes MUST be clearly distinguished.
-- **NFR-005**: No benchmark task may weaken Constitution 2.0.0 to improve performance.
+- **NFR-005**: No benchmark task may weaken Constitution 2.1.0 to improve performance.
 - **NFR-006**: BenchmarkResultQC certifies evidence evaluation, not a universal convergence or security guarantee beyond the tested definition.
 
 ### Key Entities

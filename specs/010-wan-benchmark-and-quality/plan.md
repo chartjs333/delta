@@ -2,6 +2,13 @@
 
 **Branch**: `010-wan-benchmark-and-quality` | **Date**: 2026-08-23 | **Spec**: `spec.md`
 
+**Authority**: Constitution 2.1.0; Feature 009 merge
+`007eb08aa3aaee849128ba428274a9fbda561bf8`; inherited formal semantics
+`sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
+
+**Formal impact**: `REGRESSION_ONLY`. Benchmark governance attestations gate Feature 011 but never
+participate in protocol certificate parentage or current-state application.
+
 ## Summary
 
 Build a reproducible benchmark control plane that freezes workload/gates before execution, launches token/domain-matched reference and DeltaReduce arms, injects deterministic WAN/Byzantine/churn profiles, collects immutable evidence, computes quality/efficiency/safety gates and produces a quorum-certified GO/NO_GO result.
@@ -57,48 +64,73 @@ BenchmarkResult → evaluator QC → GO/NO_GO
 ## Project Structure
 
 ```text
-src/deltatorrent/benchmark/
+delta-worker-python/src/deltatorrent/benchmark/
   definition.py
+  preregistration.py
   review.py
   orchestrator.py
   arms.py
-  network_profiles.py
-  fault_profiles.py
-  attacks.py
+  reconciliation.py
   evidence.py
   quality.py
-  efficiency.py
   safety.py
+  efficiency.py
   resilience.py
   decision.py
-  verifier.py
   report.py
-  telemetry.py
-src/deltatorrent/cli/benchmark.py
-configs/benchmark/primary.yaml
-configs/benchmark/network/
-configs/benchmark/faults/
-tests/contract/test_benchmark_definition_bytes.py
-tests/integration/test_benchmark_reproducibility.py
-tests/integration/test_attack_corpus.py
-tests/integration/test_seed_loss_and_churn.py
-tests/integration/test_go_no_go_decision.py
-tests/architecture/test_benchmark_cannot_weaken_protocol.py
-reports/README.md
+  verifier.py
+
+delta-node-java/src/main/java/io/deltareduce/node/benchmark/
+  RuntimeIdentityCollector.java
+  NetworkFaultController.java
+  ProcessProfileRunner.java
+  EmbeddedFfmRunner.java
+  SidecarRunner.java
+  NettyMetricsCollector.java
+  BenchmarkTransport.java
+
+delta-runtime-cpp/src/benchmark/
+  trace_export.cpp
+  fault_control.cpp
+  metrics.cpp
+  sidecar_server.cpp
+
+delta-ffi/src/benchmark_abi.cpp
+
+delta-protocol/schemas/010/
+  benchmark-definition-v1.json
+  benchmark-definition-attestation-v1.json
+  benchmark-arm-v1.json
+  network-profile-v1.json
+  fault-profile-v1.json
+  run-manifest-v1.json
+  environment-manifest-v1.json
+  quality-evidence-v1.json
+  safety-evidence-v1.json
+  efficiency-evidence-v1.json
+  resilience-evidence-v1.json
+  evidence-manifest-v1.json
+  benchmark-result-v1.json
+  benchmark-result-qc-v1.json
+
+configs/benchmark/
+integration/benchmark/
+reports/benchmark/
 ```
 
 ## Implementation Sequence
 
-1. Freeze benchmark definition/result/evidence/compatibility canonical schemas and reviewer QC rules.
-2. Implement definition completeness validation and preregistration workflow.
-3. Implement reproducible environment/build/data/model/evaluation capture.
-4. Implement arm orchestration and token/domain identity reconciliation.
-5. Implement deterministic network/fault/attack harnesses.
-6. Implement immutable evidence collector and offline verifier.
-7. Implement safety, quality, efficiency and resilience analyzers.
-8. Implement deterministic all-mandatory GO/NO_GO and ResultQC.
-9. Run emulated primary benchmark; only after pass run approved real-WAN variant.
-10. Publish report/evidence and final Constitution Check.
+1. Verify the exact Feature 003–009 predecessor/evidence chain and inherited Formal GO.
+2. Freeze benchmark definition/result/evidence/compatibility canonical schemas and reviewer rules.
+3. Implement definition completeness validation and immutable preregistration workflow.
+4. Complete a tiny synthetic vertical slice without claiming primary evidence.
+5. Freeze the exact primary definition, thresholds, missing-run policy and embedded/sidecar policy.
+6. Implement reproducible environment/build/data/model/evaluation capture.
+7. Implement arm orchestration, token/domain reconciliation and both deployment profiles.
+8. Implement deterministic network/fault/attack harnesses and formal-regression projection.
+9. Implement immutable evidence collection, offline verification and all gate analyzers.
+10. Run emulated primary benchmark; only after pass run an approved real-WAN variant.
+11. Produce the deterministic governance ResultQC, report and final Constitution Check.
 
 ## Test Strategy
 

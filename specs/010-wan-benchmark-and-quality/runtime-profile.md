@@ -4,6 +4,14 @@
 **Compatibility lanes**: JDK 26, GCC/Clang, supported CPU architectures  
 **Formal impact**: regression-only; no benchmark override of accepted semantics
 
+**Exact predecessor**: Feature 009 merge `007eb08aa3aaee849128ba428274a9fbda561bf8`,
+source `f43e39fa1c60d256bab5d7e37e0756f28438d5e4`, evidence
+`a5e73b41feb2dad73aa11d810d0c700c548e11ba`, final-report SHA-256
+`95b312b45f3c2df4293ceaa0cbb16dd1e89c5d12a86c890211353a45798516ef`.
+
+Benchmark definition/result QCs are governance attestations only. They do not enter the protocol
+certificate lineage and cannot mutate the runtime current checkpoint.
+
 ## Benchmark identity additions
 
 `BenchmarkDefinition` binds:
