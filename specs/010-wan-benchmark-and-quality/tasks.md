@@ -47,10 +47,10 @@ runtime certificate graph or change current state.
 ## Phase 5: Immutable evidence collection
 
 - [x] T023 Implement append-only/content-addressed run evidence collector in `delta-worker-python/src/deltatorrent/benchmark/evidence.py`.
-- [ ] T024 Collect ticket/certificate/checkpoint/model/evaluation identities.
-- [ ] T025 Collect phase timing, byte accounting, GPU/resource and P2P metrics.
+- [x] T024 Collect ticket/certificate/checkpoint/model/evaluation identities.
+- [x] T025 Collect phase timing, byte accounting, GPU/resource and P2P metrics.
 - [x] T026 Implement offline evidence graph verifier in `delta-worker-python/src/deltatorrent/benchmark/verifier.py`.
-- [ ] T027 Add missing/mutated/reordered/incompatible evidence tests.
+- [x] T027 Add missing/mutated/reordered/incompatible evidence tests.
 
 ## Phase 6: Protocol determinism and safety gate
 

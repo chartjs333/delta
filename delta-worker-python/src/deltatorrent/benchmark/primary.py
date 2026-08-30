@@ -62,6 +62,9 @@ class ExecutionPlan:
     repetition: int
     processed_tokens: int
     domains: tuple[str, ...]
+    ticket_plan_id: str
+    parent_checkpoint_id: str
+    evaluation_ids: tuple[str, ...]
 
     @property
     def content_id(self) -> str:
@@ -76,6 +79,9 @@ class ExecutionPlan:
                 "processed_tokens": self.processed_tokens,
                 "repetition": self.repetition,
                 "seed": self.seed,
+                "ticket_plan_id": self.ticket_plan_id,
+                "parent_checkpoint_id": self.parent_checkpoint_id,
+                "evaluation_ids": list(self.evaluation_ids),
             }
         )
 
@@ -123,6 +129,9 @@ class PrimaryArmAdapter:
             repetition=repetition,
             processed_tokens=definition.B,
             domains=tuple(item.domain_id for item in definition.domain_weights),
+            ticket_plan_id=definition.ticket_plan_id,
+            parent_checkpoint_id=definition.base_model_id,
+            evaluation_ids=definition.evaluation_ids,
         )
 
     def admit(self, plan: ExecutionPlan, observation: RunObservation) -> RunObservation:
@@ -136,6 +145,9 @@ class PrimaryArmAdapter:
             and observation.repetition == plan.repetition
             and observation.processed_tokens == plan.processed_tokens
             and tuple(domain for domain, _ in observation.domain_ticket_counts) == plan.domains
+            and observation.ticket_plan_id == plan.ticket_plan_id
+            and observation.parent_checkpoint_id == plan.parent_checkpoint_id
+            and len(observation.evaluation_artifact_ids) == len(plan.evaluation_ids)
         )
         if not identity:
             raise PrimaryRunError("PRIMARY_OBSERVATION_IDENTITY_DRIFT")
@@ -143,6 +155,8 @@ class PrimaryArmAdapter:
             raise PrimaryRunError("PRIMARY_TERMINAL_OUTCOME_INVALID")
         if observation.total_us <= 0 or observation.useful_compute_us > observation.total_us:
             raise PrimaryRunError("PRIMARY_OBSERVATION_ACCOUNTING_INVALID")
+        if observation.arm.kind != "SCIENTIFIC_REFERENCE" and len(observation.certificate_ids) < 6:
+            raise PrimaryRunError("PRIMARY_CERTIFICATE_EVIDENCE_INCOMPLETE")
         return observation
 
 

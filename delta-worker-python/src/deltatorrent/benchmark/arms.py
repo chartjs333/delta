@@ -88,11 +88,77 @@ class RunObservation:
     terminal_outcome: str
     protocol_hash: str
     checkpoint_id: str
+    ticket_plan_id: str
+    parent_checkpoint_id: str
+    certificate_ids: tuple[str, ...]
+    model_artifact_id: str
+    evaluation_artifact_ids: tuple[str, ...]
     samples: tuple[MetricSample, ...]
     phase_latencies_us: tuple[tuple[str, int], ...]
     bytes_sent: int
     useful_compute_us: int
     total_us: int
+    zero_copy_eligible: int
+    zero_copy_hits: int
+    copy_fallback_bytes: int
+    gpu_utilization_ppm: int
+    gpu_peak_reserved_bytes: int
+    host_offload_bytes: int
+
+    def __post_init__(self) -> None:
+        identities = (
+            self.definition_id,
+            self.environment_manifest_id,
+            self.network_profile_id,
+            self.fault_profile_id,
+            self.protocol_hash,
+            self.checkpoint_id,
+            self.ticket_plan_id,
+            self.parent_checkpoint_id,
+            self.model_artifact_id,
+            *self.certificate_ids,
+            *self.evaluation_artifact_ids,
+        )
+        if any(_CONTENT_ID.fullmatch(value) is None for value in identities):
+            raise ArmError("RUN_ARTIFACT_IDENTITY_INVALID")
+        if len(set(self.certificate_ids)) != len(self.certificate_ids) or len(
+            set(self.evaluation_artifact_ids)
+        ) != len(self.evaluation_artifact_ids):
+            raise ArmError("RUN_ARTIFACT_IDENTITY_DUPLICATE")
+        emitted_ids = (
+            self.protocol_hash,
+            self.checkpoint_id,
+            self.model_artifact_id,
+            *self.certificate_ids,
+            *self.evaluation_artifact_ids,
+        )
+        if len(set(emitted_ids)) != len(emitted_ids):
+            raise ArmError("RUN_OUTPUT_IDENTITY_DUPLICATE")
+        if len({item.metric_id for item in self.samples}) != len(self.samples) or len(
+            {phase for phase, _ in self.phase_latencies_us}
+        ) != len(self.phase_latencies_us):
+            raise ArmError("RUN_METRIC_IDENTITY_DUPLICATE")
+        counters = (
+            self.processed_tokens,
+            self.bytes_sent,
+            self.useful_compute_us,
+            self.total_us,
+            self.zero_copy_eligible,
+            self.zero_copy_hits,
+            self.copy_fallback_bytes,
+            self.gpu_utilization_ppm,
+            self.gpu_peak_reserved_bytes,
+            self.host_offload_bytes,
+        )
+        if any(value < 0 for value in counters):
+            raise ArmError("RUN_ACCOUNTING_NEGATIVE")
+        if (
+            self.zero_copy_hits > self.zero_copy_eligible
+            or self.gpu_utilization_ppm > 1_000_000
+            or self.useful_compute_us > self.total_us
+            or sum(value for _, value in self.phase_latencies_us) > self.total_us
+        ):
+            raise ArmError("RUN_ACCOUNTING_INVALID")
 
     @property
     def output_id(self) -> str:
@@ -103,12 +169,21 @@ class RunObservation:
                     {
                         "arm_id": self.arm.content_id,
                         "checkpoint_id": self.checkpoint_id,
+                        "certificate_ids": list(self.certificate_ids),
+                        "copy_fallback_bytes": self.copy_fallback_bytes,
+                        "evaluation_artifact_ids": list(self.evaluation_artifact_ids),
+                        "gpu_peak_reserved_bytes": self.gpu_peak_reserved_bytes,
+                        "gpu_utilization_ppm": self.gpu_utilization_ppm,
+                        "host_offload_bytes": self.host_offload_bytes,
+                        "model_artifact_id": self.model_artifact_id,
                         "protocol_hash": self.protocol_hash,
                         "samples": [
                             {"metric_id": item.metric_id, "unit": item.unit, "value": item.value}
                             for item in self.samples
                         ],
                         "seed": self.seed,
+                        "zero_copy_eligible": self.zero_copy_eligible,
+                        "zero_copy_hits": self.zero_copy_hits,
                     }
                 )
             ).hexdigest()
@@ -128,14 +203,21 @@ class RunObservation:
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "namespace": f"benchmark-010-{self.arm.arm_id}-{self.seed}-{self.repetition}",
             "network_profile_id": self.network_profile_id,
-            "output_ids": [self.output_id],
-            "parent_checkpoint_id": "sha256:" + "1" * 64,
+            "output_ids": [
+                self.output_id,
+                self.protocol_hash,
+                self.checkpoint_id,
+                self.model_artifact_id,
+                *self.certificate_ids,
+                *self.evaluation_artifact_ids,
+            ],
+            "parent_checkpoint_id": self.parent_checkpoint_id,
             "processed_tokens": self.processed_tokens,
             "repetition": self.repetition,
             "schema_version": "1.0.0",
             "seed": self.seed,
             "terminal_outcome": self.terminal_outcome,
-            "ticket_plan_id": "sha256:" + "2" * 64,
+            "ticket_plan_id": self.ticket_plan_id,
             "type_name": "RUN_MANIFEST",
         }
 
@@ -167,6 +249,26 @@ class SyntheticArmRunner:
         digest = hashlib.sha256(f"{definition_id}:{seed}".encode()).hexdigest()
         protocol_hash = "sha256:" + digest
         checkpoint_id = "sha256:" + hashlib.sha256(f"checkpoint:{seed}".encode()).hexdigest()
+        ticket_plan_id = definition.ticket_plan_id
+        parent_checkpoint_id = definition.base_model_id
+        model_artifact_id = (
+            "sha256:"
+            + hashlib.sha256(f"model:{definition_id}:{arm.arm_id}:{seed}".encode()).hexdigest()
+        )
+        certificate_ids = (
+            tuple(
+                "sha256:"
+                + hashlib.sha256(f"certificate:{kind}:{arm.arm_id}:{seed}".encode()).hexdigest()
+                for kind in ("isc", "ec", "apc", "parameter-shard", "aggregate-root", "apply")
+            )
+            if arm.kind != "SCIENTIFIC_REFERENCE"
+            else ()
+        )
+        evaluation_artifact_ids = tuple(
+            "sha256:"
+            + hashlib.sha256(f"evaluation:{evaluation_id}:{arm.arm_id}:{seed}".encode()).hexdigest()
+            for evaluation_id in definition.evaluation_ids
+        )
         deployment_cost = {
             "PYTHON": 0,
             "EMBEDDED_FFM": 200,
@@ -200,9 +302,22 @@ class SyntheticArmRunner:
             terminal_outcome="APPLIED",
             protocol_hash=protocol_hash,
             checkpoint_id=checkpoint_id,
+            ticket_plan_id=ticket_plan_id,
+            parent_checkpoint_id=parent_checkpoint_id,
+            certificate_ids=certificate_ids,
+            model_artifact_id=model_artifact_id,
+            evaluation_artifact_ids=evaluation_artifact_ids,
             samples=samples,
             phase_latencies_us=phase_latencies,
             bytes_sent=1_000 + deployment_cost,
             useful_compute_us=9_000,
             total_us=10_000 + deployment_cost,
+            zero_copy_eligible=1 if arm.deployment_profile != "PYTHON" else 0,
+            zero_copy_hits=1 if arm.deployment_profile == "EMBEDDED_FFM" else 0,
+            copy_fallback_bytes=1_000 + deployment_cost
+            if arm.deployment_profile != "EMBEDDED_FFM"
+            else 0,
+            gpu_utilization_ppm=500_000,
+            gpu_peak_reserved_bytes=1_000_000,
+            host_offload_bytes=0,
         )

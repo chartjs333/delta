@@ -214,6 +214,8 @@ class BenchmarkDefinition:
     seeds: tuple[int, ...]
     source_commit: str
     source_tree: str
+    ticket_plan_id: str
+    base_model_id: str
     primary: bool
     raw: dict[str, Any]
 
@@ -324,6 +326,8 @@ class BenchmarkDefinition:
             seeds=seeds,
             source_commit=source_commit,
             source_tree=source_tree,
+            ticket_plan_id=_content_id(value["ticket_plan_id"], "TICKET_PLAN_ID_INVALID"),
+            base_model_id=_content_id(value["base_model_id"], "BASE_MODEL_ID_INVALID"),
             primary=primary,
             raw=dict(value),
         )

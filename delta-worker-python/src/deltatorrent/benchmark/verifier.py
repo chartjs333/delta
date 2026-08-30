@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,6 +15,9 @@ from deltatorrent.protocol.canonical import canonical_json_bytes
 
 class VerificationError(ValueError):
     """Stable fail-closed offline evidence verification error."""
+
+
+_CONTENT_ID = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +52,8 @@ class OfflineVerifier:
         if manifest.get("complete") is not True:
             raise VerificationError("EVIDENCE_MANIFEST_INCOMPLETE")
         run_ids = [reference.content_id for reference in bundle.run_refs]
+        if not run_ids or len(set(run_ids)) != len(run_ids):
+            raise VerificationError("EVIDENCE_MANIFEST_RUN_SET_INVALID")
         if manifest.get("run_ids") != run_ids:
             raise VerificationError("EVIDENCE_MANIFEST_RUN_SET_MISMATCH")
         for reference in bundle.run_refs:
@@ -63,15 +69,25 @@ class OfflineVerifier:
         manifest_evidence = manifest.get("evidence")
         if not isinstance(manifest_evidence, list):
             raise VerificationError("EVIDENCE_MANIFEST_GRAPH_INVALID")
-        manifest_ids = {
-            str(item.get("kind")): str(item.get("content_id"))
+        if any(
+            not isinstance(item, dict)
+            or set(item) != {"content_id", "kind"}
+            or _CONTENT_ID.fullmatch(str(item.get("content_id"))) is None
+            for item in manifest_evidence
+        ):
+            raise VerificationError("EVIDENCE_MANIFEST_GRAPH_INVALID")
+        pairs = [
+            (str(item["kind"]), str(item["content_id"]))
             for item in manifest_evidence
             if isinstance(item, dict)
-        }
+        ]
+        if len({kind for kind, _ in pairs}) != len(pairs):
+            raise VerificationError("EVIDENCE_MANIFEST_GRAPH_INVALID")
+        manifest_ids = dict(pairs)
+        if set(manifest_ids) != {"EFFICIENCY", "FORMAL", "QUALITY", "RESILIENCE", "SAFETY"}:
+            raise VerificationError("EVIDENCE_MANIFEST_GRAPH_INVALID")
         if any(manifest_ids.get(kind) != content_id for kind, content_id in evidence_ids.items()):
             raise VerificationError("EVIDENCE_MANIFEST_GRAPH_INVALID")
-        if "FORMAL" not in manifest_ids:
-            raise VerificationError("FORMAL_REGRESSION_EVIDENCE_MISSING")
         return VerificationResult(
             definition_id=bundle.definition_id,
             manifest_id=bundle.manifest_ref.content_id,

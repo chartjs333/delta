@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -56,6 +57,57 @@ def test_offline_verifier_detects_mutated_object(tmp_path: Path) -> None:
 
     with pytest.raises(Exception, match="artifact bytes do not match"):
         OfflineVerifier(tmp_path / "objects").verify(result.evidence_bundle)
+
+
+def test_offline_verifier_detects_missing_object(tmp_path: Path) -> None:
+    result = execute_synthetic_fixture(FIXTURE, tmp_path)
+    reference = result.evidence_bundle.run_refs[0]
+    (tmp_path / "objects" / Path(reference.locator)).unlink()
+
+    with pytest.raises(Exception, match="referenced artifact does not exist"):
+        OfflineVerifier(tmp_path / "objects").verify(result.evidence_bundle)
+
+
+def test_offline_verifier_rejects_reordered_run_graph(tmp_path: Path) -> None:
+    result = execute_synthetic_fixture(FIXTURE, tmp_path)
+    reordered = replace(
+        result.evidence_bundle, run_refs=tuple(reversed(result.evidence_bundle.run_refs))
+    )
+
+    with pytest.raises(Exception, match="EVIDENCE_MANIFEST_RUN_SET_MISMATCH"):
+        OfflineVerifier(tmp_path / "objects").verify(reordered)
+
+
+def test_offline_verifier_rejects_incompatible_definition(tmp_path: Path) -> None:
+    result = execute_synthetic_fixture(FIXTURE, tmp_path)
+    incompatible = replace(result.evidence_bundle, definition_id="sha256:" + "f" * 64)
+
+    with pytest.raises(Exception, match="EVIDENCE_MANIFEST_DEFINITION_MISMATCH"):
+        OfflineVerifier(tmp_path / "objects").verify(incompatible)
+
+
+def test_run_and_efficiency_evidence_uses_observed_identities_and_counters(tmp_path: Path) -> None:
+    result = execute_synthetic_fixture(FIXTURE, tmp_path)
+    efficiency_ref = next(
+        reference
+        for kind, reference in result.evidence_bundle.evidence_refs
+        if kind == "EFFICIENCY"
+    )
+    efficiency = json.loads((tmp_path / "objects" / efficiency_ref.locator).read_bytes())
+    assert efficiency["zero_copy_hit_rate_ppm"] == 500_000
+    assert efficiency["zero_copy_fallback_bytes"] == 5_000
+    assert {item["metric_id"] for item in efficiency["metrics"]} == {
+        "bytes_per_token",
+        "gpu_utilization_ppm",
+        "network_share_ppm",
+    }
+
+    run_ref = result.evidence_bundle.run_refs[-1]
+    run = json.loads((tmp_path / "objects" / run_ref.locator).read_bytes())
+    assert run["ticket_plan_id"].startswith("sha256:")
+    assert run["parent_checkpoint_id"].startswith("sha256:")
+    assert len(run["output_ids"]) >= 10
+    assert len(run["output_ids"]) == len(set(run["output_ids"]))
 
 
 def test_machine_report_is_canonical(tmp_path: Path) -> None:

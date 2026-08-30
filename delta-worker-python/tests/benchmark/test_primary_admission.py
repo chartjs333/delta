@@ -38,11 +38,26 @@ def observation(plan: ExecutionPlan) -> RunObservation:
         terminal_outcome="APPLIED",
         protocol_hash="sha256:" + "1" * 64,
         checkpoint_id="sha256:" + "2" * 64,
+        ticket_plan_id=plan.ticket_plan_id,
+        parent_checkpoint_id=plan.parent_checkpoint_id,
+        certificate_ids=()
+        if plan.arm.kind == "SCIENTIFIC_REFERENCE"
+        else tuple("sha256:" + str(index) * 64 for index in range(4, 10)),
+        model_artifact_id="sha256:" + "a" * 64,
+        evaluation_artifact_ids=tuple(
+            "sha256:" + chr(ord("b") + index) * 64 for index, _ in enumerate(plan.evaluation_ids)
+        ),
         samples=(MetricSample("validation_loss_micro", 2_000_000, "micro-loss"),),
         phase_latencies_us=(("native_transition", 100),),
         bytes_sent=1024,
         useful_compute_us=9_000,
         total_us=10_000,
+        zero_copy_eligible=1,
+        zero_copy_hits=1,
+        copy_fallback_bytes=0,
+        gpu_utilization_ppm=500_000,
+        gpu_peak_reserved_bytes=3_000_000,
+        host_offload_bytes=0,
     )
 
 
@@ -84,6 +99,24 @@ def test_primary_observation_identity_drift_is_rejected() -> None:
     )
     with pytest.raises(PrimaryRunError, match="PRIMARY_OBSERVATION_IDENTITY_DRIFT"):
         adapter.admit(plan, replace(observation(plan), processed_tokens=definition.B - 1))
+
+
+def test_distributed_primary_requires_complete_certificate_evidence() -> None:
+    definition, arms = inputs()
+    arm = arms[1]
+    adapter = adapter_for(arm)
+    plan = adapter.plan(
+        definition,
+        arm,
+        environment_manifest_id="sha256:" + "3" * 64,
+        network_profile_id=definition.network_profile_ids[0],
+        fault_profile_id=definition.fault_profile_ids[0],
+        seed=definition.seeds[0],
+        repetition=1,
+    )
+
+    with pytest.raises(PrimaryRunError, match="PRIMARY_CERTIFICATE_EVIDENCE_INCOMPLETE"):
+        adapter.admit(plan, replace(observation(plan), certificate_ids=()))
 
 
 def test_wrong_adapter_and_seed_are_rejected() -> None:

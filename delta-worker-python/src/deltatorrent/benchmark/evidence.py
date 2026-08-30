@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -32,6 +33,7 @@ _MEDIA = {
         "SCHEMA-SAFETY-EVIDENCE-010-V1",
     ),
 }
+_CONTENT_ID = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 class EvidenceError(ValueError):
@@ -72,6 +74,20 @@ class EvidenceCollector:
         resilience: dict[str, object],
         formal_regression_id: str,
     ) -> EvidenceBundle:
+        if (
+            _CONTENT_ID.fullmatch(definition_id) is None
+            or _CONTENT_ID.fullmatch(formal_regression_id) is None
+        ):
+            raise EvidenceError("EVIDENCE_IDENTITY_INVALID")
+        if not runs or any(run.definition_id != definition_id for run in runs):
+            raise EvidenceError("RUN_DEFINITION_MISMATCH")
+        if len({run.content_id for run in runs}) != len(runs):
+            raise EvidenceError("RUN_IDENTITY_DUPLICATE")
+        if any(
+            document.get("benchmark_definition_id") != definition_id
+            for document in (quality, safety, efficiency, resilience)
+        ):
+            raise EvidenceError("EVIDENCE_DEFINITION_MISMATCH")
         run_refs = tuple(self._publish("RUN", run.manifest) for run in runs)
         evidence_refs = tuple(
             (kind, self._publish(kind, document))
@@ -82,11 +98,6 @@ class EvidenceCollector:
                 ("RESILIENCE", resilience),
             )
         )
-        if any(
-            document.get("benchmark_definition_id") != definition_id
-            for document in (quality, safety, efficiency, resilience)
-        ):
-            raise EvidenceError("EVIDENCE_DEFINITION_MISMATCH")
         manifest = {
             "benchmark_definition_id": definition_id,
             "complete": True,
