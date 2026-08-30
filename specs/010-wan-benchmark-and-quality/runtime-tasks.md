@@ -3,7 +3,7 @@
 ## Identity and environment
 
 - [x] **HR010-001** Extend BenchmarkDefinition with C++/ABI/Java/Python/build/formal semantics and deployment-profile identities.
-- [ ] **HR010-002** Freeze primary compiler/JDK/Python/Netty/native flags and canonical fixture corpus before results.
+- [x] **HR010-002** Freeze primary compiler/JDK/Python/Netty/native flags and canonical fixture corpus before results.
 - [ ] **HR010-003** Add runtime compatibility admission and evidence capture.
 
 ## Exact cross-language gates

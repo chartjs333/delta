@@ -22,15 +22,15 @@ runtime certificate graph or change current state.
 
 ## Phase 2: Preregistration and completeness
 
-- [ ] T008 Implement definition completeness/license/immutable-dependency validation.
+- [x] T008 Implement definition completeness/license/immutable-dependency validation.
 - [x] T009 Implement benchmark governance review/attestation workflow in `delta-worker-python/src/deltatorrent/benchmark/review.py` without adding runtime certificate types.
-- [ ] T010 Freeze exact primary model/mode, dataset/domain policy, fixed tickets, evaluation tasks, repetitions/seeds, thresholds and missing-run rules in `configs/benchmark/primary.yaml`.
-- [ ] T011 Freeze network/fault/attack profiles under `configs/benchmark/`.
+- [x] T010 Freeze exact primary model/mode, dataset/domain policy, fixed tickets, evaluation tasks, repetitions/seeds, thresholds and missing-run rules in `configs/benchmark/primary.yaml`.
+- [x] T011 Freeze network/fault/attack profiles under `configs/benchmark/`.
 - [x] T012 Add post-QC mutation, missing-threshold and mutable-dependency rejection tests.
 
 ## Phase 3: Reproducible execution foundation
 
-- [ ] T013 Implement source/build/image/dependency/SBOM/environment capture.
+- [x] T013 Implement source/build/image/dependency/SBOM/environment capture.
 - [x] T014 Implement isolated benchmark namespace and deterministic run orchestrator in `delta-worker-python/src/deltatorrent/benchmark/orchestrator.py`.
 - [ ] T015 Implement scientific, flat, hierarchical and selected QLoRA/full-model arm adapters.
 - [x] T016 Implement token/domain/workload identity reconciliation before run comparison.
@@ -89,7 +89,7 @@ runtime certificate graph or change current state.
 
 ## Final Phase
 
-- [ ] T051 Implement benchmark CLI and operational documentation.
+- [x] T051 Implement benchmark CLI and operational documentation.
 - [ ] T052 Publish complete evidence/report under content-addressed artifact refs; do not commit restricted data/model weights.
 - [ ] T053 Run cross-artifact analysis and architecture guard under `integration/benchmark/` proving that benchmark code cannot weaken protocol semantics.
 - [ ] T054 Run full quality gate and final Constitution Check.
