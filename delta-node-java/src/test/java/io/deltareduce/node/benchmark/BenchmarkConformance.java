@@ -1,9 +1,14 @@
 package io.deltareduce.node.benchmark;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
+import java.util.regex.Pattern;
 
 public final class BenchmarkConformance {
   private BenchmarkConformance() {}
@@ -12,22 +17,49 @@ public final class BenchmarkConformance {
     runtimeIdentitiesAreExact();
     networkAndTransportAreDeterministic();
     embeddedAndSidecarAreSeparated();
-    if (args.length == 2) {
-      externalSidecarSurvivesRestart(Path.of(args[0]), Path.of(args[1]));
+    if (args.length == 2 || args.length == 3) {
+      externalSidecarSurvivesRestart(
+          Path.of(args[0]), Path.of(args[1]), args.length == 3 ? Path.of(args[2]) : null);
     } else if (args.length != 0) {
       throw new IllegalArgumentException("expected SIDECAR JOURNAL arguments");
     }
     metricsFailClosed();
   }
 
-  private static void externalSidecarSurvivesRestart(Path executable, Path journal) {
+  private static void externalSidecarSurvivesRestart(
+      Path executable, Path journal, Path crossLanguageFixture) {
     byte[] request = "external-sidecar".getBytes(StandardCharsets.US_ASCII);
-    try (var endpoint = new SidecarRunner.ExternalEndpoint(executable, journal, 64)) {
-      var runner = new SidecarRunner(endpoint, 64);
+    try (var endpoint = new SidecarRunner.ExternalEndpoint(executable, journal, 8192)) {
+      var runner = new SidecarRunner(endpoint, 8192);
       var result = runner.run(new ProcessProfileRunner.Request("external", request));
       require(result.crashContained() && result.replayExact());
       require(result.responseId().equals(BenchmarkContracts.sha256(request)));
+      if (crossLanguageFixture != null) {
+        verifyCrossLanguageFixture(runner, crossLanguageFixture);
+      }
     }
+  }
+
+  private static void verifyCrossLanguageFixture(ProcessProfileRunner runner, Path fixture) {
+    var bytesHex = Pattern.compile("\\\"bytes_hex\\\":\\\"([0-9a-f]+)\\\"");
+    var hashes = new ArrayList<String>();
+    try {
+      var matcher = bytesHex.matcher(Files.readString(fixture, StandardCharsets.UTF_8));
+      while (matcher.find()) {
+        byte[] canonicalBytes = HexFormat.of().parseHex(matcher.group(1));
+        String requestId = "fixture-" + hashes.size();
+        var result = runner.run(new ProcessProfileRunner.Request(requestId, canonicalBytes));
+        String expected = BenchmarkContracts.sha256(canonicalBytes);
+        require(result.replayExact() && result.responseId().equals(expected));
+        hashes.add(expected);
+      }
+    } catch (IOException error) {
+      throw new IllegalStateException("cross-language fixture read failed", error);
+    }
+    require(hashes.size() >= 14);
+    String aggregate =
+        BenchmarkContracts.sha256(String.join("\n", hashes).getBytes(StandardCharsets.US_ASCII));
+    System.out.println("CROSS_LANGUAGE " + hashes.size() + " " + aggregate);
   }
 
   private static void runtimeIdentitiesAreExact() {
