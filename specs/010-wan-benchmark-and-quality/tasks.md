@@ -38,7 +38,7 @@ runtime certificate graph or change current state.
 
 ## Phase 4: WAN and fault harness
 
-- [ ] T018 Implement deterministic unprivileged network/fault profiles across `delta-worker-python/src/deltatorrent/benchmark/`, `delta-node-java/.../benchmark/` and `delta-runtime-cpp/src/benchmark/`.
+- [x] T018 Implement deterministic unprivileged network/fault profiles across `delta-worker-python/src/deltatorrent/benchmark/`, `delta-node-java/.../benchmark/` and `delta-runtime-cpp/src/benchmark/`.
 - [ ] T019 [P] Implement optional `tc/netem` adapter and profile-conformance tests.
 - [ ] T020 Implement worker/validator/storage/region crash, restart, partition and churn traces in `fault_profiles.py`.
 - [ ] T021 Implement Byzantine attack corpus in `attacks.py`.

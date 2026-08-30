@@ -8,7 +8,7 @@
 
 ## Exact cross-language gates
 
-- [ ] **HR010-004** Run Python/C++/Java exact canonical bytes, hashes, status and negative parsing corpus.
+- [x] **HR010-004** Run Python/C++/Java exact canonical bytes, hashes, status and negative parsing corpus.
 - [ ] **HR010-005** Run GCC/Clang and supported architecture exact state/effect comparison.
 - [ ] **HR010-006** Run direct-versus-copy FFM and flat-versus-hierarchy exact comparison.
 - [ ] **HR010-007** Run complete implementation trace projection/refinement and production-mutant regression.
@@ -22,7 +22,7 @@
 
 ## Embedded versus sidecar
 
-- [ ] **HR010-012** Implement/freeze isolated-sidecar IPC profile or preregister a formal risk decision for omission.
+- [x] **HR010-012** Implement/freeze isolated-sidecar IPC profile or preregister a formal risk decision for omission.
 - [ ] **HR010-013** Compare embedded/native-process crash containment, restart/replay, latency and throughput.
 - [ ] **HR010-014** Select the pilot validator profile through immutable benchmark evidence.
 
