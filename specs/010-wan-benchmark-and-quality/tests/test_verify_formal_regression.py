@@ -56,6 +56,7 @@ def test_formal_source_and_semantic_identity_are_frozen() -> None:
     module = load_script()
 
     assert module.FORMAL_SOURCE == "1e6e0f6f70056161d95933e71494ec390c7c1151"
+    assert module.FORMAL_GO == "7abd0f43f8f1b15ec9aa6c3d2c80b32bfb4a6eca"
     assert module.FORMAL_ID == (
         "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
     )

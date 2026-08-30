@@ -14,6 +14,7 @@ from typing import Final
 ROOT: Final = Path(__file__).resolve().parents[3]
 OUTPUT: Final = ROOT / "specs/010-wan-benchmark-and-quality/evidence/formal-regression.json"
 FORMAL_SOURCE: Final = "1e6e0f6f70056161d95933e71494ec390c7c1151"
+FORMAL_GO: Final = "7abd0f43f8f1b15ec9aa6c3d2c80b32bfb4a6eca"
 FORMAL_ID: Final = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
 FORMAL_REPORT: Final = ROOT / "formal/reports/formal-verification-report.json"
 
@@ -195,12 +196,6 @@ def build(
     environment: dict[str, str] | None = None,
 ) -> dict[str, object]:
     require(re.fullmatch(r"[0-9a-f]{40}", commit) is not None, "SOURCE_COMMIT_INVALID")
-    run(
-        "python",
-        "formal/scripts/verify_formal_report.py",
-        str(FORMAL_REPORT),
-        "--require-go",
-    )
     formal_diff = run(
         "git",
         "diff",
@@ -213,6 +208,11 @@ def build(
     require(not formal_diff, "FORMAL_SOURCE_DIFF")
     report = json.loads(FORMAL_REPORT.read_text(encoding="utf-8"))
     require(report.get("decision") == "GO" and report.get("formal_semantics_id") == FORMAL_ID, "GO")
+    require(
+        FORMAL_REPORT.read_bytes()
+        == git_bytes(FORMAL_GO, "formal/reports/formal-verification-report.json"),
+        "FORMAL_GO_OVERLAY_REPORT_DRIFT",
+    )
     return {
         "checks": [
             "EXACT_FORMAL_SOURCE_RERUN",
@@ -230,6 +230,7 @@ def build(
         else {"host": platform.platform(), "python": platform.python_version()},
         "execution": execution,
         "formal": {
+            "go_commit": FORMAL_GO,
             "report_sha256": sha256(FORMAL_REPORT),
             "semantic_artifacts": semantic_artifacts(),
             "source_commit": FORMAL_SOURCE,
