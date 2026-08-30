@@ -9,22 +9,22 @@
 ## Exact cross-language gates
 
 - [x] **HR010-004** Run Python/C++/Java exact canonical bytes, hashes, status and negative parsing corpus.
-- [ ] **HR010-005** Run GCC/Clang and supported architecture exact state/effect comparison.
+- [x] **HR010-005** Run GCC/Clang and supported architecture exact state/effect comparison.
 - [ ] **HR010-006** Run direct-versus-copy FFM and flat-versus-hierarchy exact comparison.
 - [x] **HR010-007** Run complete implementation trace projection/refinement and production-mutant regression.
 
 ## Safety and failure gates
 
-- [ ] **HR010-008** Execute ASan/UBSan, separate TSan and parser fuzz campaigns at preregistered bounds.
-- [ ] **HR010-009** Execute WAL/durability/effect/current crash matrix and verify replay identity.
+- [x] **HR010-008** Execute ASan/UBSan, separate TSan and parser fuzz campaigns at preregistered bounds.
+- [x] **HR010-009** Execute WAL/durability/effect/current crash matrix and verify replay identity.
 - [ ] **HR010-010** Execute Netty leak, event-loop block, backpressure, stream bound and stale timer matrix.
 - [ ] **HR010-011** Execute ABI/schema/formal-semantics mismatch and native pointer lifetime negatives.
 
 ## Embedded versus sidecar
 
 - [x] **HR010-012** Implement/freeze isolated-sidecar IPC profile or preregister a formal risk decision for omission.
-- [ ] **HR010-013** Compare embedded/native-process crash containment, restart/replay, latency and throughput.
-- [ ] **HR010-014** Select the pilot validator profile through immutable benchmark evidence.
+- [x] **HR010-013** Compare embedded/native-process crash containment, restart/replay, latency and throughput.
+- [x] **HR010-014** Select the pilot validator profile through immutable benchmark evidence.
 
 ## Reporting
 
