@@ -154,6 +154,10 @@ target_link_libraries(delta_qlora PUBLIC delta::apply delta::certificates)
 delta_target_defaults(delta_qlora)
 
 add_library(delta_runtime STATIC
+  delta-runtime-cpp/src/benchmark/fault_control.cpp
+  delta-runtime-cpp/src/benchmark/metrics.cpp
+  delta-runtime-cpp/src/benchmark/sidecar_server.cpp
+  delta-runtime-cpp/src/benchmark/trace_export.cpp
   delta-runtime-cpp/src/certificate_runtime.cpp
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
@@ -170,6 +174,7 @@ endif()
 delta_target_defaults(delta_runtime)
 
 add_library(delta_ffi SHARED
+  delta-ffi/src/benchmark_abi.cpp
   delta-ffi/src/certificates_abi.cpp
   delta-ffi/src/delta_abi.cpp
   delta-ffi/src/distribution_abi.cpp
@@ -188,6 +193,19 @@ target_link_libraries(
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
+  add_executable(delta_benchmark_sidecar delta-runtime-cpp/src/benchmark/sidecar_main.cpp)
+  delta_target_defaults(delta_benchmark_sidecar)
+
+  add_executable(delta_runtime_benchmark_test delta-runtime-cpp/tests/benchmark_test.cpp)
+  target_link_libraries(delta_runtime_benchmark_test PRIVATE delta::runtime)
+  delta_target_defaults(delta_runtime_benchmark_test)
+  add_test(NAME delta_runtime.benchmark COMMAND delta_runtime_benchmark_test)
+
+  add_executable(delta_ffi_benchmark_test delta-ffi/tests/benchmark_abi_test.cpp)
+  target_link_libraries(delta_ffi_benchmark_test PRIVATE delta::ffi)
+  delta_target_defaults(delta_ffi_benchmark_test)
+  add_test(NAME delta_ffi.benchmark COMMAND delta_ffi_benchmark_test)
+
   add_executable(
     delta_qlora_certificate_chain_test
     delta-core-cpp/tests/qlora_certificate_chain_test.cpp)

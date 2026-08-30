@@ -1,0 +1,99 @@
+package io.deltareduce.node.benchmark;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+
+public final class BenchmarkConformance {
+  private BenchmarkConformance() {}
+
+  public static void main(String[] args) {
+    runtimeIdentitiesAreExact();
+    networkAndTransportAreDeterministic();
+    embeddedAndSidecarAreSeparated();
+    if (args.length == 2) {
+      externalSidecarSurvivesRestart(Path.of(args[0]), Path.of(args[1]));
+    } else if (args.length != 0) {
+      throw new IllegalArgumentException("expected SIDECAR JOURNAL arguments");
+    }
+    metricsFailClosed();
+  }
+
+  private static void externalSidecarSurvivesRestart(Path executable, Path journal) {
+    byte[] request = "external-sidecar".getBytes(StandardCharsets.US_ASCII);
+    try (var endpoint = new SidecarRunner.ExternalEndpoint(executable, journal, 64)) {
+      var runner = new SidecarRunner(endpoint, 64);
+      var result = runner.run(new ProcessProfileRunner.Request("external", request));
+      require(result.crashContained() && result.replayExact());
+      require(result.responseId().equals(BenchmarkContracts.sha256(request)));
+    }
+  }
+
+  private static void runtimeIdentitiesAreExact() {
+    String id = "sha256:" + "1".repeat(64);
+    var identities = new RuntimeIdentityCollector().collect(id, id, id, id, id, "EMBEDDED_FFM");
+    require(identities.get("formal_semantics_id").equals(BenchmarkContracts.FORMAL_SEMANTICS_ID));
+    require(identities.get("deployment_profile").equals("EMBEDDED_FFM"));
+  }
+
+  private static void networkAndTransportAreDeterministic() {
+    var faults = new NetworkFaultController(17, 80, 5, 10_000, 1_000, 5_000);
+    require(faults.decision(42).equals(faults.decision(42)));
+    var transport = new BenchmarkTransport(64, 2);
+    byte[] message = "canonical".getBytes(StandardCharsets.US_ASCII);
+    String id = BenchmarkContracts.sha256(message);
+    require(Arrays.equals(message, transport.deliver(id, message)));
+    require(Arrays.equals(message, transport.deliver(id, message)));
+  }
+
+  private static void embeddedAndSidecarAreSeparated() {
+    byte[] request = "request".getBytes(StandardCharsets.US_ASCII);
+    var embedded = new EmbeddedFfmRunner(bytes -> bytes.clone());
+    var embeddedResult = embedded.run(new ProcessProfileRunner.Request("embedded", request));
+    require(!embeddedResult.crashContained() && embeddedResult.replayExact());
+
+    final class Endpoint implements SidecarRunner.SidecarEndpoint {
+      private final LinkedHashMap<String, byte[]> responses = new LinkedHashMap<>();
+
+      @Override
+      public byte[] execute(String requestId, byte[] bytes) {
+        return responses.computeIfAbsent(requestId, ignored -> bytes.clone()).clone();
+      }
+
+      @Override
+      public void crash() {}
+
+      @Override
+      public void restart() {}
+    }
+    var sidecar = new SidecarRunner(new Endpoint(), 64);
+    var sidecarResult = sidecar.run(new ProcessProfileRunner.Request("sidecar", request));
+    require(sidecarResult.crashContained() && sidecarResult.replayExact());
+    require(sidecarResult.responseId().equals(embeddedResult.responseId()));
+  }
+
+  private static void metricsFailClosed() {
+    var metrics = new NettyMetricsCollector();
+    metrics.add("queue.bytes", 16);
+    require(metrics.snapshot().get("queue.bytes") == 16L);
+    metrics.requireClean(0, 0, 2, 2);
+    expectRejected(() -> metrics.requireClean(1, 0, 0, 2));
+    expectRejected(() -> new BenchmarkTransport(1, 1).deliver("not-an-id", new byte[0]));
+  }
+
+  private static void expectRejected(Runnable operation) {
+    try {
+      operation.run();
+      throw new AssertionError("expected rejection");
+    } catch (IllegalArgumentException expected) {
+      // Expected fail-closed boundary.
+    }
+  }
+
+  private static void require(boolean condition) {
+    if (!condition) {
+      throw new AssertionError("benchmark conformance failed");
+    }
+  }
+}
