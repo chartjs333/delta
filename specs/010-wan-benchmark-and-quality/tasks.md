@@ -41,7 +41,7 @@ runtime certificate graph or change current state.
 - [x] T018 Implement deterministic unprivileged network/fault profiles across `delta-worker-python/src/deltatorrent/benchmark/`, `delta-node-java/.../benchmark/` and `delta-runtime-cpp/src/benchmark/`.
 - [ ] T019 [P] Implement optional `tc/netem` adapter and profile-conformance tests.
 - [x] T020 Implement worker/validator/storage/region crash, restart, partition and churn traces in `fault_profiles.py`.
-- [ ] T021 Implement Byzantine attack corpus in `attacks.py`.
+- [x] T021 Implement Byzantine attack corpus in `attacks.py`.
 - [x] T022 Add exact trace replay and terminal-outcome tests.
 
 ## Phase 5: Immutable evidence collection

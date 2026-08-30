@@ -6,12 +6,15 @@
 #include <delta/runtime/certificate_runtime.hpp>
 
 #include <cstdint>
+#include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -28,6 +31,14 @@ using delta::certificates::InputSetCertificate;
 using delta::certificates::ParameterShardQc;
 using delta::certificates::ShardKey;
 
+struct AttackRecord {
+  std::string attack_id;
+  std::string boundary;
+  std::string error_code;
+};
+
+std::vector<AttackRecord> attack_records;
+
 [[noreturn]] void fail(const char* message) { throw std::runtime_error(message); }
 
 void expect(bool condition, const char* message) {
@@ -36,15 +47,78 @@ void expect(bool condition, const char* message) {
   }
 }
 
+void record_attack(std::string attack_id, std::string boundary, std::string error_code) {
+  const auto duplicate = std::find_if(
+      attack_records.begin(),
+      attack_records.end(),
+      [&attack_id](const AttackRecord& item) { return item.attack_id == attack_id; });
+  expect(duplicate == attack_records.end(), "duplicate production attack record");
+  attack_records.push_back(
+      AttackRecord{std::move(attack_id), std::move(boundary), std::move(error_code)});
+}
+
+void write_attack_report(const std::filesystem::path& path) {
+  std::sort(
+      attack_records.begin(),
+      attack_records.end(),
+      [](const AttackRecord& left, const AttackRecord& right) {
+        return left.attack_id < right.attack_id;
+      });
+  constexpr std::string_view expected_ids[] = {
+      "ac-mutation",
+      "certificate-downgrade",
+      "commitment-equivocation",
+      "conflicting-apply",
+      "conflicting-config",
+      "current-without-applyqc",
+      "duplicate-root",
+      "frankenstein-shard",
+      "incomplete-root",
+      "seed-before-isc",
+      "unsafe-accumulator",
+      "vote-equivocation",
+      "wrong-epoch",
+  };
+  expect(attack_records.size() == std::size(expected_ids), "production attack corpus is incomplete");
+  for (std::size_t index = 0U; index < attack_records.size(); ++index) {
+    expect(
+        attack_records[index].attack_id == expected_ids[index],
+        "production attack corpus IDs drifted");
+  }
+  std::ofstream output(path, std::ios::binary | std::ios::trunc);
+  expect(output.good(), "cannot create production attack report");
+  output << "{\"attacks\":[";
+  for (std::size_t index = 0U; index < attack_records.size(); ++index) {
+    if (index != 0U) output << ',';
+    const auto& item = attack_records[index];
+    output << "{\"attack_id\":\"" << item.attack_id << "\",\"boundary\":\""
+           << item.boundary << "\",\"current_unchanged\":true,\"error_code\":\""
+           << item.error_code << "\",\"rejected\":true}";
+  }
+  output
+      << "],\"formal_semantics_id\":\""
+      << delta::certificates::formal_semantics_id
+      << "\",\"mutation_scope\":\"PRODUCTION_MODULE_BOUNDARY\",\"schema_version\":\"1.0.0\","
+         "\"status\":\"PASS\",\"type_name\":\"PRODUCTION_ATTACK_REPORT\"}\n";
+  output.flush();
+  expect(output.good(), "cannot flush production attack report");
+}
+
 template <typename Function>
 void expect_certificate_error(
     Function function,
     delta::certificates::ErrorCode expected,
-    const char* message) {
+    const char* message,
+    std::string_view attack_id = {},
+    std::string_view boundary = {},
+    std::string_view error_code = {}) {
   try {
     function();
   } catch (const delta::certificates::CertificateError& error) {
     expect(error.code() == expected, message);
+    if (!attack_id.empty()) {
+      record_attack(std::string(attack_id), std::string(boundary), std::string(error_code));
+    }
     return;
   }
   fail(message);
@@ -289,6 +363,24 @@ void test_golden_and_chain() {
   expect(
       publish.accepted && publish.formal_action_id == "ACT-APPLY-CURRENT",
       "feature-005 apply-qc-v1 distribution strength was not activated by native ApplyQC");
+  auto downgraded_manifest = manifest;
+  const auto policy_offset = downgraded_manifest.find(delta::distribution::inactive_apply_policy_id);
+  expect(policy_offset != std::string::npos, "apply policy fixture is missing");
+  downgraded_manifest.replace(
+      policy_offset,
+      delta::distribution::inactive_apply_policy_id.size(),
+      delta::distribution::aggregate_policy_id);
+  const auto downgraded_bytes =
+      std::as_bytes(std::span(downgraded_manifest.data(), downgraded_manifest.size()));
+  const auto downgrade =
+      delta::distribution::evaluate_applied_checkpoint(downgraded_bytes, chain.apply_qc, true);
+  expect(
+      !downgrade.accepted && downgrade.code == "APPLY_POLICY_MISMATCH",
+      "weaker aggregate certificate was accepted as current");
+  record_attack(
+      "certificate-downgrade",
+      "delta::distribution::evaluate_applied_checkpoint",
+      downgrade.code);
 }
 
 void test_rejections() {
@@ -297,12 +389,27 @@ void test_rejections() {
       context(),
       delta::certificates::ValidatorPolicy{
           id('e'), {"validator-0", "validator-1", "validator-2", "validator-3"}, 3U});
+  auto conflicting_config = chain.seed;
+  conflicting_config.context.round_config_id = id('f');
+  expect_certificate_error(
+      [&] {
+        (void)verifier.verify_seed(
+            conflicting_config, delta::certificates::content_id(chain.isc));
+      },
+      delta::certificates::ErrorCode::context_mismatch,
+      "conflicting round config was accepted",
+      "conflicting-config",
+      "delta::certificates::ChainVerifier::verify_seed",
+      "CONTEXT_MISMATCH");
   auto early_seed = chain.seed;
   early_seed.input_set_certificate_id = id('f');
   expect_certificate_error(
       [&] { (void)verifier.verify_seed(early_seed, delta::certificates::content_id(chain.isc)); },
       delta::certificates::ErrorCode::parent_mismatch,
-      "early/wrong-parent seed was accepted");
+      "early/wrong-parent seed was accepted",
+      "seed-before-isc",
+      "delta::certificates::ChainVerifier::verify_seed",
+      "PARENT_MISMATCH");
   const delta::certificates::OpaqueTimerToken timer{
       context(), "VIEW-TIMEOUT", 10U, 20U, id('6')};
   expect_certificate_error(
@@ -310,6 +417,20 @@ void test_rejections() {
       delta::certificates::ErrorCode::stale_timer,
       "stale opaque timer was accepted");
   verifier.verify_timer(timer, 10U);
+  auto mutated_input_set = chain.isc;
+  mutated_input_set.tuples[0].availability_certificate_id = id('f');
+  expect_certificate_error(
+      [&] {
+        (void)verifier.verify_eligibility(
+            chain.robust.eligibility,
+            mutated_input_set,
+            delta::certificates::content_id(chain.robust.norms));
+      },
+      delta::certificates::ErrorCode::parent_mismatch,
+      "post-ISC availability mutation was accepted",
+      "ac-mutation",
+      "delta::certificates::ChainVerifier::verify_eligibility",
+      "PARENT_MISMATCH");
   auto mutated = chain.robust.eligibility;
   mutated.entries[0].ticket_id = "ticket-999";
   expect_certificate_error(
@@ -332,7 +453,10 @@ void test_rejections() {
             chain.shards);
       },
       delta::certificates::ErrorCode::coverage_incomplete,
-      "incomplete aggregate root was accepted");
+      "incomplete aggregate root was accepted",
+      "incomplete-root",
+      "delta::certificates::ChainVerifier::verify_root",
+      "COVERAGE_INCOMPLETE");
   auto mixed = chain.shards;
   mixed[1].context.view = 1U;
   expect_certificate_error(
@@ -346,7 +470,44 @@ void test_rejections() {
             mixed);
       },
       delta::certificates::ErrorCode::context_mismatch,
-      "mixed-view Frankenstein root was accepted");
+      "mixed-view Frankenstein root was accepted",
+      "frankenstein-shard",
+      "delta::certificates::ChainVerifier::verify_root",
+      "CONTEXT_MISMATCH");
+  auto duplicate = chain.root;
+  duplicate.leaves[1] = duplicate.leaves[0];
+  expect_certificate_error(
+      [&] {
+        (void)verifier.verify_root(
+            duplicate,
+            delta::certificates::content_id(chain.isc),
+            delta::certificates::content_id(chain.robust.eligibility),
+            delta::certificates::content_id(chain.robust.plan),
+            chain.required,
+            chain.shards);
+      },
+      delta::certificates::ErrorCode::coverage_incomplete,
+      "duplicate aggregate leaf was accepted",
+      "duplicate-root",
+      "delta::certificates::ChainVerifier::verify_root",
+      "COVERAGE_INCOMPLETE");
+  auto wrong_epoch = chain.root;
+  wrong_epoch.context.validator_epoch_id = id('f');
+  expect_certificate_error(
+      [&] {
+        (void)verifier.verify_root(
+            wrong_epoch,
+            delta::certificates::content_id(chain.isc),
+            delta::certificates::content_id(chain.robust.eligibility),
+            delta::certificates::content_id(chain.robust.plan),
+            chain.required,
+            chain.shards);
+      },
+      delta::certificates::ErrorCode::context_mismatch,
+      "wrong-epoch aggregate root was accepted",
+      "wrong-epoch",
+      "delta::certificates::ChainVerifier::verify_root",
+      "CONTEXT_MISMATCH");
   expect_certificate_error(
       [] {
         const std::vector<std::int64_t> values{
@@ -354,7 +515,10 @@ void test_rejections() {
         (void)delta::robust::exact_squared_norm(values);
       },
       delta::certificates::ErrorCode::arithmetic_invalid,
-      "norm overflow was accepted");
+      "norm overflow was accepted",
+      "unsafe-accumulator",
+      "delta::robust::exact_squared_norm",
+      "ARITHMETIC_INVALID");
 }
 
 void test_rounding() {
@@ -368,6 +532,35 @@ void test_vote_and_pointer_recovery() {
   const auto chain = make_chain();
   const auto directory = std::filesystem::temp_directory_path() / "delta-008-certificate-test";
   std::filesystem::remove_all(directory);
+  {
+    delta::runtime::Runtime runtime({directory / "commitments", initial_state(), 16U});
+    const auto state = delta::core::protocol::parse_round_state(runtime.state_bytes());
+    delta::core::protocol::Command command{
+        "validator-0",
+        id('8'),
+        "ACCEPT_COMMITMENT",
+        state.height,
+        10U,
+        "attack-commitment-equivocation",
+        state.round_id,
+        state.view,
+    };
+    (void)runtime.submit(delta::core::protocol::encode(command));
+    const auto accepted_state = runtime.state_bytes();
+    command.body_hash = id('9');
+    bool rejected = false;
+    try {
+      (void)runtime.submit(delta::core::protocol::encode(command));
+    } catch (const delta::runtime::RuntimeError& error) {
+      rejected = error.code() == delta::runtime::ErrorCode::request_conflict;
+    }
+    expect(rejected, "conflicting commitment request was accepted");
+    expect(runtime.state_bytes() == accepted_state, "conflicting commitment changed state");
+    record_attack(
+        "commitment-equivocation",
+        "delta::runtime::Runtime::submit",
+        "REQUEST_CONFLICT");
+  }
   {
     delta::runtime::CertificateVoteRuntime runtime(directory / "votes", initial_state());
     std::uint64_t sequence = 1U;
@@ -411,10 +604,14 @@ void test_vote_and_pointer_recovery() {
     bool rejected = false;
     try {
       (void)recovered.persist_and_expose(conflict);
-    } catch (const delta::core::consensus::ConsensusError&) {
-      rejected = true;
+    } catch (const delta::core::consensus::ConsensusError& error) {
+      rejected = error.code() == delta::core::consensus::ErrorCode::conflicting_vote;
     }
     expect(rejected, "conflicting durable vote was accepted");
+    record_attack(
+        "vote-equivocation",
+        "delta::runtime::CertificateVoteRuntime::persist_and_expose",
+        "CONFLICTING_VOTE");
   }
 
   const delta::runtime::PointerState initial{id('b'), id('7'), {}, 7U};
@@ -425,6 +622,44 @@ void test_vote_and_pointer_recovery() {
       chain.apply_qc.next_model_hash,
       chain.apply_qc.next_optimizer_hash,
   };
+  {
+    ChainVerifier verifier(
+        context(),
+        delta::certificates::ValidatorPolicy{
+            id('e'), {"validator-0", "validator-1", "validator-2", "validator-3"}, 3U});
+    auto uncertified = chain.apply_qc;
+    uncertified.signer_ids.clear();
+    expect_certificate_error(
+        [&] {
+          (void)verifier.verify_apply(
+              uncertified,
+              chain.candidate,
+              chain.apply_qc.aggregate_root_qc_id,
+              delta::certificates::content_id(chain.profile));
+        },
+        delta::certificates::ErrorCode::quorum_invalid,
+        "current transition without ApplyQC quorum was accepted",
+        "current-without-applyqc",
+        "delta::certificates::ChainVerifier::verify_apply",
+        "QUORUM_INVALID");
+  }
+  {
+    delta::runtime::CurrentPointerStore store(directory / "pointer-conflict", initial);
+    auto conflicting_apply_qc = chain.apply_qc;
+    conflicting_apply_qc.next_model_hash = id('f');
+    bool rejected = false;
+    try {
+      (void)store.advance(command, conflicting_apply_qc);
+    } catch (const delta::runtime::RuntimeError& error) {
+      rejected = error.code() == delta::runtime::ErrorCode::request_conflict;
+    }
+    expect(rejected, "conflicting ApplyQC was accepted");
+    expect(store.state() == initial, "conflicting ApplyQC changed current state");
+    record_attack(
+        "conflicting-apply",
+        "delta::runtime::CurrentPointerStore::advance",
+        "REQUEST_CONFLICT");
+  }
   {
     delta::runtime::CurrentPointerStore store(directory / "pointer-torn", initial);
     bool crashed = false;
@@ -464,12 +699,21 @@ void test_vote_and_pointer_recovery() {
 
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
   try {
+    expect(
+        argc == 1 || (argc == 3 && std::string_view(argv[1]) == "--attack-report"),
+        "usage: delta_certificates_test [--attack-report PATH]");
     test_golden_and_chain();
     test_rejections();
     test_rounding();
     test_vote_and_pointer_recovery();
+    if (argc == 3) {
+      write_attack_report(argv[2]);
+    } else {
+      write_attack_report(
+          std::filesystem::temp_directory_path() / "delta-010-production-attacks.json");
+    }
   } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';
     return 1;
