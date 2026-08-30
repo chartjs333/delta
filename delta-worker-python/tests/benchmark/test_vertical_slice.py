@@ -68,6 +68,30 @@ def test_offline_verifier_detects_missing_object(tmp_path: Path) -> None:
         OfflineVerifier(tmp_path / "objects").verify(result.evidence_bundle)
 
 
+def test_offline_verifier_reconstructs_complete_graph_from_manifest_id(tmp_path: Path) -> None:
+    result = execute_synthetic_fixture(FIXTURE, tmp_path)
+
+    verified = OfflineVerifier(tmp_path / "objects").verify_manifest(
+        result.evidence_bundle.manifest_ref.content_id
+    )
+
+    assert verified.definition_id == result.evidence_bundle.definition_id
+    assert verified.verified_object_count == 1 + result.run_count + 5
+
+
+def test_offline_verifier_requires_stored_formal_evidence(tmp_path: Path) -> None:
+    result = execute_synthetic_fixture(FIXTURE, tmp_path)
+    formal_ref = next(
+        reference for kind, reference in result.evidence_bundle.evidence_refs if kind == "FORMAL"
+    )
+    (tmp_path / "objects" / Path(formal_ref.locator)).unlink()
+
+    with pytest.raises(Exception, match="EVIDENCE_OBJECT_MISSING"):
+        OfflineVerifier(tmp_path / "objects").verify_manifest(
+            result.evidence_bundle.manifest_ref.content_id
+        )
+
+
 def test_offline_verifier_rejects_reordered_run_graph(tmp_path: Path) -> None:
     result = execute_synthetic_fixture(FIXTURE, tmp_path)
     reordered = replace(

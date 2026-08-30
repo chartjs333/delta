@@ -58,7 +58,7 @@
     {
       "id": "REGISTRY-BENCHMARK-010",
       "path": "schemas/010/registry-v1.json",
-      "sha256": "4ac1511af6a1cd790baa4c7d4818f4acc9cb65b435b92f61f34ff347d052ef4c"
+      "sha256": "813a2ee0e2cab7db4c9b9b39315bb916a40910dd046b558b362a48ec2059f896"
     }
   ],
   "fixtures": [
@@ -195,12 +195,12 @@
     {
       "id": "BENCHMARK010-CROSS-LANGUAGE-GOLDEN-V1",
       "path": "fixtures/010/cross-language/golden-v1.json",
-      "sha256": "6adf06933e4bdea923a2d16e8364e0bea07c80844ac55e3220e01f2314932454"
+      "sha256": "7f69edbee6c7bc7f23bea3c435350965103b7a9ebe5e4b091c41cc098468b836"
     },
     {
       "id": "BENCHMARK010-NEGATIVE-V1",
       "path": "fixtures/010/invalid/benchmark-negative-v1.json",
-      "sha256": "4ef72b3a82a24625b6d6422ec6a8c93498fffe3a06bc212702eb5c334679f05f"
+      "sha256": "d6afeef313b8361c8fed7c9775fade619417eeb8851e129d2d632238ce97658b"
     },
     {
       "id": "BENCHMARK010-SYNTHETIC-V1",
@@ -210,7 +210,7 @@
     {
       "id": "BENCHMARK010-VALID-CONTRACT-V1",
       "path": "fixtures/010/valid/benchmark-contract-v1.json",
-      "sha256": "6adf06933e4bdea923a2d16e8364e0bea07c80844ac55e3220e01f2314932454"
+      "sha256": "7f69edbee6c7bc7f23bea3c435350965103b7a9ebe5e4b091c41cc098468b836"
     },
     {
       "id": "CANONICAL-JSON-001",
@@ -444,6 +444,11 @@
       "id": "MEDIA-FIXEDPOINT-PROFILE-V1",
       "schema_id": "SCHEMA-FIXEDPOINT-PROFILE-V1",
       "value": "application/vnd.deltareduce.fixedpoint-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-FORMAL-EVIDENCE-010-V1",
+      "schema_id": "SCHEMA-FORMAL-EVIDENCE-010-V1",
+      "value": "application/vnd.deltareduce.formal-evidence+json;version=1"
     },
     {
       "id": "MEDIA-FORMAL-PROJECTION-V1",
@@ -1003,6 +1008,11 @@
       "id": "SCHEMA-FAULT-PROFILE-010-V1",
       "path": "schemas/010/fault-profile-v1.json",
       "sha256": "052fec4cd9a15f42ddb5f60e09a40f5b27410b4208110b11e3bec0f445b23a78"
+    },
+    {
+      "id": "SCHEMA-FORMAL-EVIDENCE-010-V1",
+      "path": "schemas/010/formal-evidence-v1.json",
+      "sha256": "0b98306f5358cb692ed14a0079b7518beebbf6614a53d86005240cb570d2b4e1"
     },
     {
       "id": "SCHEMA-NETWORK-PROFILE-010-V1",

@@ -20,7 +20,7 @@ def test_generated_contracts_are_current() -> None:
 def test_schemas_are_closed_and_governance_only() -> None:
     schemas = MODULE.schema_documents()
 
-    assert len(schemas) == 14
+    assert len(schemas) == 15
     assert all(schema["additionalProperties"] is False for schema in schemas.values())
     serialized = json.dumps(schemas, sort_keys=True)
     assert "protocol_current_transition" in serialized

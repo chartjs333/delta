@@ -29,6 +29,7 @@ SCHEMAS: Final = {
     "safety-evidence": ("SCHEMA-SAFETY-EVIDENCE-010-V1", "SAFETY_EVIDENCE"),
     "efficiency-evidence": ("SCHEMA-EFFICIENCY-EVIDENCE-010-V1", "EFFICIENCY_EVIDENCE"),
     "resilience-evidence": ("SCHEMA-RESILIENCE-EVIDENCE-010-V1", "RESILIENCE_EVIDENCE"),
+    "formal-evidence": ("SCHEMA-FORMAL-EVIDENCE-010-V1", "FORMAL_EVIDENCE"),
     "evidence-manifest": ("SCHEMA-EVIDENCE-MANIFEST-010-V1", "EVIDENCE_MANIFEST"),
     "benchmark-result": ("SCHEMA-BENCHMARK-RESULT-010-V1", "BENCHMARK_RESULT"),
     "benchmark-result-qc": ("SCHEMA-BENCHMARK-RESULT-QC-010-V1", "BENCHMARK_RESULT_QC"),
@@ -404,6 +405,19 @@ def schema_documents() -> dict[str, dict[str, Any]]:
                     )
                 ),
                 "status": {"enum": ["FAIL", "PASS"]},
+            },
+        ),
+        "formal-evidence": schema_document(
+            "formal-evidence",
+            {
+                "benchmark_definition_id": content_id(),
+                "classification": {"const": "REGRESSION_ONLY"},
+                "formal_go_overlay_commit": commit_id(),
+                "formal_report_id": content_id(),
+                "formal_source_commit": commit_id(),
+                "regression_report_id": content_id(),
+                "semantic_completeness_claimed": {"const": False},
+                "status": {"const": "PASS"},
             },
         ),
         "evidence-manifest": schema_document(
@@ -804,8 +818,22 @@ def fixture_artifacts() -> dict[str, dict[str, Any]]:
             "status": "PASS",
         },
     )
+    artifacts["formal"] = identified(
+        "formal-evidence",
+        {
+            **common("FORMAL_EVIDENCE"),
+            "benchmark_definition_id": definition_id,
+            "classification": "REGRESSION_ONLY",
+            "formal_go_overlay_commit": "7abd0f43f8f1b15ec9aa6c3d2c80b32bfb4a6eca",
+            "formal_report_id": artifacts["definition"]["value"]["formal_report_id"],
+            "formal_source_commit": "1e6e0f6f70056161d95933e71494ec390c7c1151",
+            "regression_report_id": hash_id("formal-regression-execution-report"),
+            "semantic_completeness_claimed": False,
+            "status": "PASS",
+        },
+    )
     evidence = [
-        {"content_id": hash_id("formal-regression"), "kind": "FORMAL"},
+        {"content_id": artifacts["formal"]["content_id"], "kind": "FORMAL"},
         {"content_id": artifacts["quality"]["content_id"], "kind": "QUALITY"},
         {"content_id": artifacts["safety"]["content_id"], "kind": "SAFETY"},
         {"content_id": artifacts["efficiency"]["content_id"], "kind": "EFFICIENCY"},
@@ -1019,7 +1047,7 @@ def validate_chain(artifacts: dict[str, dict[str, Any]]) -> dict[str, object]:
     require(evidence_manifest["complete"], "EVIDENCE_MANIFEST_INCOMPLETE")
     require(evidence_manifest["run_ids"] == run_ids, "EVIDENCE_RUN_SET_MISMATCH")
     expected_evidence_ids = {
-        hash_id("formal-regression"),
+        artifacts["formal"]["content_id"],
         artifacts["quality"]["content_id"],
         artifacts["safety"]["content_id"],
         artifacts["efficiency"]["content_id"],

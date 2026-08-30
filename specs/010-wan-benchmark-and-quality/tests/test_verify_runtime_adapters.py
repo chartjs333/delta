@@ -18,8 +18,8 @@ def load_script() -> ModuleType:
 
 def test_golden_aggregate_is_exact_and_complete() -> None:
     count, aggregate = load_script().golden_hash_aggregate()
-    assert count == 18
-    assert aggregate == "sha256:34caa122b80bc044baaaed7a90b8b68ef82f379ccbabbee193a825044948302f"
+    assert count == 19
+    assert aggregate == "sha256:5c6a7e2e235d234bc643824e3637dc68848bd9a0328890f66c028165d8c10ae2"
 
 
 def test_recorded_environment_is_fail_closed() -> None:

@@ -16,6 +16,10 @@ _MEDIA = {
         "application/vnd.deltareduce.efficiency-evidence+json;version=1",
         "SCHEMA-EFFICIENCY-EVIDENCE-010-V1",
     ),
+    "FORMAL": (
+        "application/vnd.deltareduce.formal-evidence+json;version=1",
+        "SCHEMA-FORMAL-EVIDENCE-010-V1",
+    ),
     "QUALITY": (
         "application/vnd.deltareduce.quality-evidence+json;version=1",
         "SCHEMA-QUALITY-EVIDENCE-010-V1",
@@ -72,12 +76,9 @@ class EvidenceCollector:
         safety: dict[str, object],
         efficiency: dict[str, object],
         resilience: dict[str, object],
-        formal_regression_id: str,
+        formal: dict[str, object],
     ) -> EvidenceBundle:
-        if (
-            _CONTENT_ID.fullmatch(definition_id) is None
-            or _CONTENT_ID.fullmatch(formal_regression_id) is None
-        ):
+        if _CONTENT_ID.fullmatch(definition_id) is None:
             raise EvidenceError("EVIDENCE_IDENTITY_INVALID")
         if not runs or any(run.definition_id != definition_id for run in runs):
             raise EvidenceError("RUN_DEFINITION_MISMATCH")
@@ -85,13 +86,16 @@ class EvidenceCollector:
             raise EvidenceError("RUN_IDENTITY_DUPLICATE")
         if any(
             document.get("benchmark_definition_id") != definition_id
-            for document in (quality, safety, efficiency, resilience)
+            for document in (formal, quality, safety, efficiency, resilience)
         ):
             raise EvidenceError("EVIDENCE_DEFINITION_MISMATCH")
+        if formal.get("type_name") != "FORMAL_EVIDENCE" or formal.get("status") != "PASS":
+            raise EvidenceError("FORMAL_EVIDENCE_INVALID")
         run_refs = tuple(self._publish("RUN", run.manifest) for run in runs)
         evidence_refs = tuple(
             (kind, self._publish(kind, document))
             for kind, document in (
+                ("FORMAL", formal),
                 ("QUALITY", quality),
                 ("SAFETY", safety),
                 ("EFFICIENCY", efficiency),
@@ -102,11 +106,8 @@ class EvidenceCollector:
             "benchmark_definition_id": definition_id,
             "complete": True,
             "evidence": [
-                {"content_id": formal_regression_id, "kind": "FORMAL"},
-                *[
-                    {"content_id": reference.content_id, "kind": kind}
-                    for kind, reference in evidence_refs
-                ],
+                {"content_id": reference.content_id, "kind": kind}
+                for kind, reference in evidence_refs
             ],
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "run_ids": [item.content_id for item in run_refs],

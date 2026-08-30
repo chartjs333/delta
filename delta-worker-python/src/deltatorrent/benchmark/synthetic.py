@@ -110,6 +110,19 @@ def execute_synthetic_fixture(fixture_path: Path, output_root: Path) -> Syntheti
     )
     efficiency = analyze_efficiency(definition, definition.content_id, orchestration.runs)
     resilience = analyze_resilience(definition.content_id, synthetic_scenarios())
+    formal = {
+        "benchmark_definition_id": definition.content_id,
+        "classification": "REGRESSION_ONLY",
+        "formal_go_overlay_commit": "7abd0f43f8f1b15ec9aa6c3d2c80b32bfb4a6eca",
+        "formal_report_id": definition.raw["formal_report_id"],
+        "formal_semantics_id": definition.raw["formal_semantics_id"],
+        "formal_source_commit": "1e6e0f6f70056161d95933e71494ec390c7c1151",
+        "regression_report_id": "sha256:" + "6" * 64,
+        "schema_version": "1.0.0",
+        "semantic_completeness_claimed": False,
+        "status": "PASS",
+        "type_name": "FORMAL_EVIDENCE",
+    }
     collector = EvidenceCollector(output_root / "objects")
     bundle = collector.collect(
         definition_id=definition.content_id,
@@ -118,7 +131,7 @@ def execute_synthetic_fixture(fixture_path: Path, output_root: Path) -> Syntheti
         safety=safety.document,
         efficiency=efficiency.document,
         resilience=resilience.document,
-        formal_regression_id="sha256:" + "6" * 64,
+        formal=formal,
     )
     verification = OfflineVerifier(output_root / "objects").verify(bundle)
     profiles = {item.deployment_profile for item in arms}
