@@ -91,7 +91,7 @@ runtime certificate graph or change current state.
 
 - [x] T051 Implement benchmark CLI and operational documentation.
 - [ ] T052 Publish complete evidence/report under content-addressed artifact refs; do not commit restricted data/model weights.
-- [ ] T053 Run cross-artifact analysis and architecture guard under `integration/benchmark/` proving that benchmark code cannot weaken protocol semantics.
+- [x] T053 Run cross-artifact analysis and architecture guard proving that benchmark code cannot weaken protocol semantics.
 - [ ] T054 Run full quality gate and final Constitution Check.
 
 ## Dependencies
