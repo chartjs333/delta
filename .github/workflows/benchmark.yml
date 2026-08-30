@@ -1,0 +1,168 @@
+name: Feature 010 benchmark runtime qualification
+
+on:
+  push:
+    branches: [010-wan-benchmark-and-quality]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: benchmark-010-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-compatibility:
+    name: ${{ matrix.compiler }} C++${{ matrix.standard }} runtime qualification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+        standard: [20, 23]
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Configure strict native runtime
+        run: >-
+          cmake -S . -B out/build/benchmark-runtime
+          -DBUILD_TESTING=ON
+          -DDELTA_CXX_STANDARD=${{ matrix.standard }}
+          -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+      - name: Build benchmark, durability, hierarchy and ApplyQC targets
+        run: >-
+          cmake --build out/build/benchmark-runtime --parallel
+          --target delta_runtime_benchmark_test delta_ffi_benchmark_test
+          delta_runtime_test delta_certificates_test delta_hierarchy_reduce_test
+          delta_qlora_apply_test delta_benchmark_sidecar
+      - name: Verify exact outcomes and crash matrices
+        run: >-
+          ctest --test-dir out/build/benchmark-runtime
+          -R "delta_(runtime\.benchmark|ffi\.benchmark|runtime\.behavior|core\.certificates|core\.hierarchy_reduce|core\.qlora_apply)"
+          --output-on-failure
+
+  address-undefined:
+    name: Clang ASan UBSan benchmark runtime
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Configure ASan and UBSan
+        run: >-
+          cmake -S . -B out/build/benchmark-asan
+          -DBUILD_TESTING=ON -DDELTA_CXX_STANDARD=20 -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
+      - name: Build sanitized production boundaries and parsers
+        run: >-
+          cmake --build out/build/benchmark-asan --parallel
+          --target delta_runtime_benchmark_test delta_ffi_benchmark_test
+          delta_runtime_test delta_certificates_test delta_certificate_contract_fuzz
+          delta_fixedpoint_parser_fuzz delta_distribution_parser_fuzz
+          delta_hierarchy_parser_fuzz delta_scheduling_contract_fuzz
+      - name: Run sanitized qualification
+        run: >-
+          ctest --test-dir out/build/benchmark-asan
+          -R "delta_(runtime\.benchmark|ffi\.benchmark|runtime\.behavior|core\.certificates|core\.certificate_contract_fuzz|core\.fixedpoint_parser_fuzz|core\.distribution_parser_fuzz|core\.hierarchy_parser_fuzz|core\.scheduling_contract_fuzz)"
+          --output-on-failure
+
+  thread-sanitizer:
+    name: GCC TSan WAL and sidecar replay
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Configure TSan separately
+        run: >-
+          cmake -S . -B out/build/benchmark-tsan
+          -DBUILD_TESTING=ON -DDELTA_CXX_STANDARD=20 -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer -fno-sanitize-recover=all"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread -fno-sanitize-recover=all"
+      - name: Build concurrent runtime and durable certificate targets
+        run: >-
+          cmake --build out/build/benchmark-tsan --parallel
+          --target delta_runtime_benchmark_test delta_runtime_test delta_certificates_test
+      - name: Run TSan qualification
+        run: >-
+          ctest --test-dir out/build/benchmark-tsan
+          -R "delta_(runtime\.benchmark|runtime\.behavior|core\.certificates)"
+          --output-on-failure
+
+  java-sidecar:
+    name: Java transport and real sidecar replay
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Build the isolated native sidecar
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_benchmark_sidecar
+      - name: Compile the bounded Java benchmark adapters offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          mkdir --parents "$RUNNER_TEMP/classes" "$RUNNER_TEMP/run"
+          javac --release 17 -Xlint:all -Werror -d "$RUNNER_TEMP/classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java
+      - name: Verify boundary negatives and crash-contained exact replay
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: >-
+          java -ea -cp "$RUNNER_TEMP/classes"
+          io.deltareduce.node.benchmark.BenchmarkConformance
+          "$GITHUB_WORKSPACE/out/build/cpp20/delta_benchmark_sidecar"
+          "$RUNNER_TEMP/run/sidecar.journal"
+          "$GITHUB_WORKSPACE/delta-protocol/fixtures/010/cross-language/golden-v1.json"
+
+  evidence-gate:
+    name: Benchmark deterministic evidence gate
+    needs: [native-compatibility, address-undefined, thread-sanitizer, java-sidecar]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind canonical main ref for pull requests
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -n "$PR_BASE_SHA" ]; then
+            git cat-file -e "$PR_BASE_SHA^{commit}"
+            git update-ref refs/remotes/origin/main "$PR_BASE_SHA"
+          fi
+      - name: Verify only committed non-primary evidence
+        run: |
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_preflight.py --check-only
+          python3 specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_formal_regression.py --check-only
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_production_attacks.py --check-only
+          test ! -f reports/benchmark/primary/benchmark-result-qc.json
+          echo "Primary scientific/WAN result remains fail-closed until measured evidence exists."
