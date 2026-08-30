@@ -56,10 +56,10 @@ runtime certificate graph or change current state.
 
 - [ ] T028 Execute repeated independent validator/aggregator/apply processes and compare exact hashes.
 - [ ] T029 Execute flat versus hierarchical exact equality at primary workload scale.
-- [ ] T030 Run conflicting config/commit/vote, seed-before-ISC and AC mutation attacks.
-- [ ] T031 Run mixed-view Frankenstein, incomplete/duplicate aggregate and wrong-epoch attacks.
-- [ ] T032 Run unsafe accumulator/runtime overflow and conflicting ApplyQC attacks.
-- [ ] T033 Run P2P certificate downgrade attack.
+- [x] T030 Run conflicting config/commit/vote, seed-before-ISC and AC mutation attacks.
+- [x] T031 Run mixed-view Frankenstein, incomplete/duplicate aggregate and wrong-epoch attacks.
+- [x] T032 Run unsafe accumulator/runtime overflow and conflicting ApplyQC attacks.
+- [x] T033 Run P2P certificate downgrade attack.
 - [x] T034 Implement deterministic safety gate analyzer in `delta-worker-python/src/deltatorrent/benchmark/safety.py`.
 
 ## Phase 7: Scientific quality gate
