@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /** JDK 25/26 measurement harness for the actual embedded benchmark C ABI. */
+@SuppressWarnings("restricted")
 public final class BenchmarkFfmConformance {
   private static final int OK = 0;
   private static final int BUFFER_TOO_SMALL = 7;
