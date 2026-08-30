@@ -18,13 +18,25 @@ public final class EmbeddedFfmRunner implements ProcessProfileRunner {
   @Override
   public Result run(Request request) {
     byte[] input = request.canonicalBytes();
+    long firstStart = System.nanoTime();
     byte[] output = Objects.requireNonNull(endpoint.execute(input.clone()), "native response");
+    long firstMicros = elapsedMicros(firstStart);
+    long replayStart = System.nanoTime();
+    byte[] replay = Objects.requireNonNull(endpoint.execute(input.clone()), "native replay response");
+    long replayMicros = elapsedMicros(replayStart);
     return new Result(
         "EMBEDDED_FFM",
         BenchmarkContracts.sha256(output),
-        input.length + output.length,
+        firstMicros,
+        replayMicros,
         0,
+        input.length,
+        output.length,
         false,
-        java.util.Arrays.equals(output, endpoint.execute(input.clone())));
+        java.util.Arrays.equals(output, replay));
+  }
+
+  private static long elapsedMicros(long startNanos) {
+    return Math.max(1, (System.nanoTime() - startNanos + 999) / 1_000);
   }
 }

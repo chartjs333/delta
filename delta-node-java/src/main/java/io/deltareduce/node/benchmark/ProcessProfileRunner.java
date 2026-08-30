@@ -21,12 +21,20 @@ public interface ProcessProfileRunner {
       String deploymentProfile,
       String responseId,
       long latencyMicros,
+      long replayLatencyMicros,
       long restartMicros,
+      long requestBytes,
+      long responseBytes,
       boolean crashContained,
       boolean replayExact) {
     public Result {
       BenchmarkContracts.require(
-          latencyMicros >= 0 && restartMicros >= 0, "negative process-profile measurement");
+          latencyMicros >= 0
+              && replayLatencyMicros >= 0
+              && restartMicros >= 0
+              && requestBytes >= 0
+              && responseBytes >= 0,
+          "negative process-profile measurement");
       BenchmarkContracts.requireContentId(responseId, "response ID");
     }
   }

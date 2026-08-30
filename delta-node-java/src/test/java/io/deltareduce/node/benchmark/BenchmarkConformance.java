@@ -34,6 +34,22 @@ public final class BenchmarkConformance {
       var result = runner.run(new ProcessProfileRunner.Request("external", request));
       require(result.crashContained() && result.replayExact());
       require(result.responseId().equals(BenchmarkContracts.sha256(request)));
+      require(result.requestBytes() == request.length && result.responseBytes() == request.length);
+      require(
+          result.latencyMicros() > 0
+              && result.replayLatencyMicros() > 0
+              && result.restartMicros() > 0);
+      System.out.println(
+          "PROCESS_PROFILE ISOLATED_SIDECAR "
+              + result.requestBytes()
+              + " "
+              + result.responseBytes()
+              + " "
+              + result.latencyMicros()
+              + " "
+              + result.replayLatencyMicros()
+              + " "
+              + result.restartMicros());
       if (crossLanguageFixture != null) {
         verifyCrossLanguageFixture(runner, crossLanguageFixture);
       }

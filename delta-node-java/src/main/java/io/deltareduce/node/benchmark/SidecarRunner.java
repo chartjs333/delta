@@ -132,16 +132,29 @@ public final class SidecarRunner implements ProcessProfileRunner {
   public Result run(Request request) {
     byte[] input = request.canonicalBytes();
     BenchmarkContracts.require(input.length <= maximumPayloadBytes, "sidecar request too large");
+    long firstStart = System.nanoTime();
     byte[] first = endpoint.execute(request.requestId(), input.clone());
+    long firstMicros = elapsedMicros(firstStart);
+    long restartStart = System.nanoTime();
     endpoint.crash();
     endpoint.restart();
+    long restartMicros = elapsedMicros(restartStart);
+    long replayStart = System.nanoTime();
     byte[] replay = endpoint.execute(request.requestId(), input.clone());
+    long replayMicros = elapsedMicros(replayStart);
     return new Result(
         "ISOLATED_SIDECAR",
         BenchmarkContracts.sha256(first),
-        2L * input.length + first.length,
-        1,
+        firstMicros,
+        replayMicros,
+        restartMicros,
+        input.length,
+        first.length,
         true,
         Arrays.equals(first, replay));
+  }
+
+  private static long elapsedMicros(long startNanos) {
+    return Math.max(1, (System.nanoTime() - startNanos + 999) / 1_000);
   }
 }
