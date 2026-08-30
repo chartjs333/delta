@@ -67,6 +67,11 @@ public final class BenchmarkConformance {
     var identities = new RuntimeIdentityCollector().collect(id, id, id, id, id, "EMBEDDED_FFM");
     require(identities.get("formal_semantics_id").equals(BenchmarkContracts.FORMAL_SEMANTICS_ID));
     require(identities.get("deployment_profile").equals("EMBEDDED_FFM"));
+    expectRejected(
+        () -> new RuntimeIdentityCollector().collect("sha256:" + "0".repeat(63), id, id, id, id,
+            "EMBEDDED_FFM"));
+    expectRejected(
+        () -> new RuntimeIdentityCollector().collect(id, id, id, id, id, "UNREGISTERED"));
   }
 
   private static void networkAndTransportAreDeterministic() {
@@ -111,6 +116,23 @@ public final class BenchmarkConformance {
     require(metrics.snapshot().get("queue.bytes") == 16L);
     metrics.requireClean(0, 0, 2, 2);
     expectRejected(() -> metrics.requireClean(1, 0, 0, 2));
+    expectRejected(() -> metrics.requireClean(0, 1, 0, 2));
+    expectRejected(() -> metrics.requireClean(0, 0, 3, 2));
+    expectRejected(() -> metrics.requireClean(0, 0, -1, 2));
+    expectRejected(() -> metrics.add("UPPERCASE", 1));
+    expectRejected(() -> metrics.add("queue.bytes", -1));
+
+    var transport = new BenchmarkTransport(4, 1);
+    byte[] first = {1};
+    String firstId = BenchmarkContracts.sha256(first);
+    byte[] delivered = transport.deliver(firstId, first);
+    delivered[0] = 9;
+    require(transport.deliver(firstId, first)[0] == 1);
+    expectRejected(() -> transport.deliver(firstId, new byte[] {2}));
+    expectRejected(() -> transport.deliver(BenchmarkContracts.sha256(new byte[] {3}), new byte[] {3}));
+    expectRejected(
+        () -> new BenchmarkTransport(1, 1).deliver(
+            BenchmarkContracts.sha256(new byte[] {1, 2}), new byte[] {1, 2}));
     expectRejected(() -> new BenchmarkTransport(1, 1).deliver("not-an-id", new byte[0]));
   }
 
