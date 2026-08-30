@@ -11,7 +11,7 @@
 - [x] **HR010-004** Run Python/C++/Java exact canonical bytes, hashes, status and negative parsing corpus.
 - [ ] **HR010-005** Run GCC/Clang and supported architecture exact state/effect comparison.
 - [ ] **HR010-006** Run direct-versus-copy FFM and flat-versus-hierarchy exact comparison.
-- [ ] **HR010-007** Run complete implementation trace projection/refinement and production-mutant regression.
+- [x] **HR010-007** Run complete implementation trace projection/refinement and production-mutant regression.
 
 ## Safety and failure gates
 
