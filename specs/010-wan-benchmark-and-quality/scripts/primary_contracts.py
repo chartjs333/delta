@@ -332,7 +332,7 @@ def runtime_policy(commit: str) -> dict[str, object]:
         exact_physical_runner_profile="configs/qlora/8gb-reference.json",
         execution_image="NONE_LOCAL_PHYSICAL_PINNED_SOFTWARE",
         isolation_policy="COMPARE_BOTH",
-        jdk_contract="JDK_25_FFM_WITH_JDK17_TRANSPORT_CONFORMANCE",
+        jdk_contract="JDK_25_AND_26_FFM_WITH_JDK17_TRANSPORT_CONFORMANCE",
         jdk_compatibility=["25.0.4.1", "26.0.2"],
         mismatch_action="REJECT_BEFORE_RUN",
         native_runtime_evidence_id=tracked_id(
@@ -340,6 +340,13 @@ def runtime_policy(commit: str) -> dict[str, object]:
             "specs/010-wan-benchmark-and-quality/evidence/runtime-adapters.json",
         ),
         protocol_authority="CXX_ONLY",
+        pilot_selection={
+            "cross_jdk_agreement_required": True,
+            "eligible_profiles": ["EMBEDDED_FFM", "ISOLATED_SIDECAR"],
+            "minimum_repetitions_per_jdk_and_profile": 5,
+            "require_crash_containment": True,
+            "selection_rule": "REQUIRE_CRASH_CONTAINMENT_THEN_LOWEST_P95_LATENCY",
+        },
         process_profile_repetitions=5,
         python_contract="CPYTHON_3_12_UV_LOCKED",
         sanitizer_campaigns={
@@ -362,6 +369,7 @@ def runtime_policy(commit: str) -> dict[str, object]:
                     "delta_distribution_parser_fuzz",
                     "delta_hierarchy_parser_fuzz",
                     "delta_scheduling_contract_fuzz",
+                    "delta_ffi_fuzz_smoke_test",
                 ],
             },
             "thread": {
