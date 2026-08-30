@@ -333,6 +333,7 @@ def runtime_policy(commit: str) -> dict[str, object]:
         execution_image="NONE_LOCAL_PHYSICAL_PINNED_SOFTWARE",
         isolation_policy="COMPARE_BOTH",
         jdk_contract="JDK_25_FFM_WITH_JDK17_TRANSPORT_CONFORMANCE",
+        jdk_compatibility=["25.0.4.1", "26.0.2"],
         mismatch_action="REJECT_BEFORE_RUN",
         native_runtime_evidence_id=tracked_id(
             commit,
@@ -340,6 +341,38 @@ def runtime_policy(commit: str) -> dict[str, object]:
         ),
         protocol_authority="CXX_ONLY",
         python_contract="CPYTHON_3_12_UV_LOCKED",
+        sanitizer_campaigns={
+            "address_undefined": {
+                "executions": 1,
+                "targets": [
+                    "delta_runtime_benchmark_test",
+                    "delta_ffi_benchmark_test",
+                    "delta_runtime_test",
+                    "delta_certificates_test",
+                ],
+            },
+            "parser_fuzz": {
+                "certificate_contract_mutations": 2_000,
+                "executions": 1,
+                "ffi_parser_abi_cases": 2_052,
+                "targets": [
+                    "delta_certificate_contract_fuzz",
+                    "delta_fixedpoint_parser_fuzz",
+                    "delta_distribution_parser_fuzz",
+                    "delta_hierarchy_parser_fuzz",
+                    "delta_scheduling_contract_fuzz",
+                ],
+            },
+            "thread": {
+                "executions": 1,
+                "targets": [
+                    "delta_runtime_benchmark_test",
+                    "delta_runtime_test",
+                    "delta_certificates_test",
+                ],
+            },
+        },
+        supported_architectures=["x86_64"],
     )
 
 
