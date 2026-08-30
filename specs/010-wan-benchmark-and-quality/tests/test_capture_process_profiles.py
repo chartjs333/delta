@@ -36,13 +36,18 @@ def test_process_profile_evidence_binds_exact_github_jobs() -> None:
         jdk25=raw_profile(),
         jdk26=raw_profile(),
         source_commit="a" * 40,
+        execution_commit="b" * 40,
         workflow_run_id=11,
         jdk25_job_id=12,
         jdk26_job_id=13,
+        jdk25_artifact_id=14,
+        jdk26_artifact_id=15,
     )
 
     assert evidence["selected_profile"] == "ISOLATED_SIDECAR"
     assert evidence["github"]["workflow_run_id"] == 11
+    assert evidence["github"]["head_source_commit"] == "a" * 40
+    assert evidence["github"]["execution_commit"] == "b" * 40
     assert [item["jdk_feature"] for item in evidence["github"]["jobs"]] == [25, 26]
 
 
@@ -52,7 +57,10 @@ def test_process_profile_evidence_rejects_ambiguous_job_identity() -> None:
             jdk25=raw_profile(),
             jdk26=raw_profile(),
             source_commit="a" * 40,
+            execution_commit="b" * 40,
             workflow_run_id=11,
             jdk25_job_id=12,
             jdk26_job_id=12,
+            jdk25_artifact_id=14,
+            jdk26_artifact_id=15,
         )
