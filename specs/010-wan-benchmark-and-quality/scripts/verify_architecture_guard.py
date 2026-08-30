@@ -108,6 +108,7 @@ def registry_projection(registry: dict[str, object]) -> dict[str, object]:
             if isinstance(item, dict)
             and "/010/" not in str(item.get("path", ""))
             and not str(item.get("id", "")).startswith(("BENCHMARK010-", "MEDIA-BENCHMARK"))
+            and not (name == "media_types" and "-010-" in str(item.get("schema_id", "")))
         ]
 
     return {
