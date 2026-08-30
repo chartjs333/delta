@@ -194,12 +194,21 @@ class RunObservation:
         return {
             "arm_id": self.arm.content_id,
             "benchmark_definition_id": self.definition_id,
+            "bytes_sent": self.bytes_sent,
+            "certificate_ids": list(self.certificate_ids),
+            "checkpoint_id": self.checkpoint_id,
+            "copy_fallback_bytes": self.copy_fallback_bytes,
             "domain_ticket_counts": [
                 {"count": count, "domain_id": domain_id}
                 for domain_id, count in self.domain_ticket_counts
             ],
             "environment_manifest_id": self.environment_manifest_id,
+            "evaluation_artifact_ids": list(self.evaluation_artifact_ids),
             "fault_profile_id": self.fault_profile_id,
+            "gpu_peak_reserved_bytes": self.gpu_peak_reserved_bytes,
+            "gpu_utilization_ppm": self.gpu_utilization_ppm,
+            "host_offload_bytes": self.host_offload_bytes,
+            "model_artifact_id": self.model_artifact_id,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "namespace": f"benchmark-010-{self.arm.arm_id}-{self.seed}-{self.repetition}",
             "network_profile_id": self.network_profile_id,
@@ -212,13 +221,22 @@ class RunObservation:
                 *self.evaluation_artifact_ids,
             ],
             "parent_checkpoint_id": self.parent_checkpoint_id,
+            "phase_latencies": [
+                {"microseconds": value, "phase_id": phase}
+                for phase, value in self.phase_latencies_us
+            ],
             "processed_tokens": self.processed_tokens,
+            "protocol_hash": self.protocol_hash,
             "repetition": self.repetition,
             "schema_version": "1.0.0",
             "seed": self.seed,
             "terminal_outcome": self.terminal_outcome,
             "ticket_plan_id": self.ticket_plan_id,
+            "total_us": self.total_us,
             "type_name": "RUN_MANIFEST",
+            "useful_compute_us": self.useful_compute_us,
+            "zero_copy_eligible": self.zero_copy_eligible,
+            "zero_copy_hits": self.zero_copy_hits,
         }
 
     @property

@@ -308,20 +308,39 @@ def schema_documents() -> dict[str, dict[str, Any]]:
             {
                 "arm_id": content_id(),
                 "benchmark_definition_id": content_id(),
+                "bytes_sent": uint(),
+                "certificate_ids": array(content_id(), minimum=0, unique=True),
+                "checkpoint_id": content_id(),
+                "copy_fallback_bytes": uint(),
                 "domain_ticket_counts": array(
                     strict_object({"count": uint(), "domain_id": text()})
                 ),
                 "environment_manifest_id": content_id(),
+                "evaluation_artifact_ids": array(content_id(), unique=True),
                 "fault_profile_id": content_id(),
+                "gpu_peak_reserved_bytes": uint(),
+                "gpu_utilization_ppm": uint(1_000_000),
+                "host_offload_bytes": uint(),
+                "model_artifact_id": content_id(),
                 "namespace": text(),
                 "network_profile_id": content_id(),
                 "output_ids": array(content_id(), minimum=0, unique=True),
                 "parent_checkpoint_id": content_id(),
+                "phase_latencies": array(
+                    strict_object({"microseconds": uint(), "phase_id": text()}), minimum=0
+                ),
                 "processed_tokens": uint(),
+                "protocol_hash": content_id(),
                 "repetition": uint(1000, 1),
                 "seed": uint(2**31 - 1),
-                "terminal_outcome": {"enum": ["ABORTED", "APPLIED", "BLOCKED"]},
+                "terminal_outcome": {
+                    "enum": ["ABORTED", "APPLIED", "BLOCKED", "PIECE_UNAVAILABLE"]
+                },
                 "ticket_plan_id": content_id(),
+                "total_us": uint(),
+                "useful_compute_us": uint(),
+                "zero_copy_eligible": uint(),
+                "zero_copy_hits": uint(),
             },
         ),
         "quality-evidence": schema_document(
@@ -643,24 +662,59 @@ def fixture_artifacts() -> dict[str, dict[str, Any]]:
         ("run_embedded", "arm_embedded", 17),
         ("run_sidecar", "arm_sidecar", 29),
     ):
+        certificates = (
+            []
+            if arm_key == "arm_reference"
+            else [hash_id(f"certificate:{key}:{index}") for index in range(6)]
+        )
+        evaluations = [hash_id(f"evaluation:{key}:{index}") for index in range(2)]
+        checkpoint_id = hash_id(f"checkpoint:{key}")
+        model_artifact_id = hash_id(f"model:{key}")
+        protocol_hash = hash_id(f"protocol:{key}")
+        output_ids = [
+            hash_id(f"output:{key}"),
+            protocol_hash,
+            checkpoint_id,
+            model_artifact_id,
+            *certificates,
+            *evaluations,
+        ]
         artifacts[key] = identified(
             "run-manifest",
             {
                 **common("RUN_MANIFEST"),
                 "arm_id": artifacts[arm_key]["content_id"],
                 "benchmark_definition_id": definition_id,
+                "bytes_sent": 1024,
+                "certificate_ids": certificates,
+                "checkpoint_id": checkpoint_id,
+                "copy_fallback_bytes": 1024 if arm_key != "arm_embedded" else 0,
                 "domain_ticket_counts": [{"count": 1, "domain_id": "tiny-text"}],
                 "environment_manifest_id": artifacts["environment"]["content_id"],
+                "evaluation_artifact_ids": evaluations,
                 "fault_profile_id": artifacts["fault_profile"]["content_id"],
+                "gpu_peak_reserved_bytes": 1_000_000,
+                "gpu_utilization_ppm": 500_000,
+                "host_offload_bytes": 0,
+                "model_artifact_id": model_artifact_id,
                 "namespace": f"benchmark-010-{key}",
                 "network_profile_id": artifacts["network_profile"]["content_id"],
-                "output_ids": [hash_id(f"output:{key}")],
+                "output_ids": output_ids,
                 "parent_checkpoint_id": hash_id("tiny-parent-checkpoint"),
+                "phase_latencies": [
+                    {"microseconds": 100, "phase_id": "native_transition"},
+                    {"microseconds": 75, "phase_id": "wal"},
+                ],
                 "processed_tokens": 8,
+                "protocol_hash": protocol_hash,
                 "repetition": 1,
                 "seed": seed,
                 "terminal_outcome": "APPLIED",
                 "ticket_plan_id": hash_id("tiny-ticket-plan"),
+                "total_us": 10_000,
+                "useful_compute_us": 9_000,
+                "zero_copy_eligible": 1 if arm_key != "arm_reference" else 0,
+                "zero_copy_hits": 1 if arm_key == "arm_embedded" else 0,
             },
         )
         run_ids.append(artifacts[key]["content_id"])
@@ -912,6 +966,23 @@ def validate_chain(artifacts: dict[str, dict[str, Any]]) -> dict[str, object]:
         require(run["arm_id"] == arm["content_id"], "RUN_ARM_MISMATCH")
         require(run["processed_tokens"] == definition["B"], "RUN_TOKEN_MISMATCH")
         require(run["ticket_plan_id"] == definition["ticket_plan_id"], "RUN_TICKET_MISMATCH")
+        require(run["zero_copy_hits"] <= run["zero_copy_eligible"], "RUN_ZERO_COPY_INVALID")
+        require(run["useful_compute_us"] <= run["total_us"], "RUN_TIME_ACCOUNTING_INVALID")
+        require(
+            sum(item["microseconds"] for item in run["phase_latencies"]) <= run["total_us"],
+            "RUN_PHASE_ACCOUNTING_INVALID",
+        )
+        required_outputs = {
+            run["protocol_hash"],
+            run["checkpoint_id"],
+            run["model_artifact_id"],
+            *run["certificate_ids"],
+            *run["evaluation_artifact_ids"],
+        }
+        require(required_outputs <= set(run["output_ids"]), "RUN_OUTPUT_GRAPH_INCOMPLETE")
+        require(run["evaluation_artifact_ids"], "RUN_EVALUATION_EVIDENCE_MISSING")
+        if arm["value"]["kind"] != "SCIENTIFIC_REFERENCE":
+            require(len(run["certificate_ids"]) >= 6, "RUN_CERTIFICATE_EVIDENCE_MISSING")
 
     quality = artifacts["quality"]["value"]
     require(quality["benchmark_definition_id"] == definition_id, "QUALITY_DEFINITION_MISMATCH")

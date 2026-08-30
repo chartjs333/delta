@@ -20,6 +20,29 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "bytes_sent": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "certificate_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "copy_fallback_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
     "domain_ticket_counts": {
       "items": {
         "additionalProperties": false,
@@ -49,7 +72,35 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "evaluation_artifact_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
     "fault_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "gpu_peak_reserved_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "gpu_utilization_ppm": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "host_offload_bytes": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "model_artifact_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
@@ -76,10 +127,39 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "phase_latencies": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "microseconds": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "phase_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "microseconds",
+          "phase_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 0,
+      "type": "array"
+    },
     "processed_tokens": {
       "maximum": 9007199254740991,
       "minimum": 0,
       "type": "integer"
+    },
+    "protocol_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
     },
     "repetition": {
       "maximum": 1000,
@@ -95,32 +175,68 @@
       "enum": [
         "ABORTED",
         "APPLIED",
-        "BLOCKED"
+        "BLOCKED",
+        "PIECE_UNAVAILABLE"
       ]
     },
     "ticket_plan_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
+    },
+    "total_us": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "useful_compute_us": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "zero_copy_eligible": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "zero_copy_hits": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
     }
   },
   "required": [
     "arm_id",
     "benchmark_definition_id",
+    "bytes_sent",
+    "certificate_ids",
+    "checkpoint_id",
+    "copy_fallback_bytes",
     "domain_ticket_counts",
     "environment_manifest_id",
+    "evaluation_artifact_ids",
     "fault_profile_id",
     "formal_semantics_id",
+    "gpu_peak_reserved_bytes",
+    "gpu_utilization_ppm",
+    "host_offload_bytes",
+    "model_artifact_id",
     "namespace",
     "network_profile_id",
     "output_ids",
     "parent_checkpoint_id",
+    "phase_latencies",
     "processed_tokens",
+    "protocol_hash",
     "repetition",
     "schema_version",
     "seed",
     "terminal_outcome",
     "ticket_plan_id",
-    "type_name"
+    "total_us",
+    "type_name",
+    "useful_compute_us",
+    "zero_copy_eligible",
+    "zero_copy_hits"
   ],
   "title": "DeltaReduce Feature 010 run-manifest v1",
   "type": "object"

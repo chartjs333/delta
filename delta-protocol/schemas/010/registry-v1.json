@@ -28,7 +28,7 @@
     {
       "id": "SCHEMA-RUN-MANIFEST-010-V1",
       "path": "schemas/010/run-manifest-v1.json",
-      "sha256": "5408c69b6f02e1b65b9a90a10c90794f4b21f6e8949eed77bf6ce09a3b17ffa2"
+      "sha256": "83f08067eca056f6960e8f58615b76ca820d729b858b9f00092e871044e3236d"
     },
     {
       "id": "SCHEMA-ENVIRONMENT-MANIFEST-010-V1",
@@ -75,22 +75,22 @@
     {
       "id": "BENCHMARK010-VALID-CONTRACT-V1",
       "path": "fixtures/010/valid/benchmark-contract-v1.json",
-      "sha256": "9b709e1012c79345955df4e4d065959866b3b17492cb4b10bb2450091f1337e1"
+      "sha256": "6adf06933e4bdea923a2d16e8364e0bea07c80844ac55e3220e01f2314932454"
     },
     {
       "id": "BENCHMARK010-CROSS-LANGUAGE-GOLDEN-V1",
       "path": "fixtures/010/cross-language/golden-v1.json",
-      "sha256": "9b709e1012c79345955df4e4d065959866b3b17492cb4b10bb2450091f1337e1"
+      "sha256": "6adf06933e4bdea923a2d16e8364e0bea07c80844ac55e3220e01f2314932454"
     },
     {
       "id": "BENCHMARK010-NEGATIVE-V1",
       "path": "fixtures/010/invalid/benchmark-negative-v1.json",
-      "sha256": "09596f1ee10ce04a97975ff6ea08f9959f705b59ca886f9b16d70b7a8eb000c3"
+      "sha256": "4ef72b3a82a24625b6d6422ec6a8c93498fffe3a06bc212702eb5c334679f05f"
     },
     {
       "id": "BENCHMARK010-SYNTHETIC-V1",
       "path": "fixtures/010/synthetic/tiny-benchmark-v1.json",
-      "sha256": "b1f4b049b3555e1b1de2166f3680424868577af4498ec90a9b09d76f1e5deaf9"
+      "sha256": "50eff8255b22524021e9225f0bcb9b653e56127d535bed4e50e1b6ede4d5bf6f"
     }
   ],
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
