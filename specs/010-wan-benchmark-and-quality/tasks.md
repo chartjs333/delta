@@ -8,8 +8,8 @@ runtime certificate graph or change current state.
 
 ## Phase 0: Mandatory STOP prerequisites
 
-- [ ] T000 Verify features 003–009 exit evidence and compatibility; any missing/failed determinism, certificate, fixed-point, ApplyQC or 8 GiB mode gate blocks primary benchmark execution.
-- [ ] T001 Search benchmark code/config for adaptive `H`, stale acceptance, FP consensus fallback, threshold override or central-current authority; record zero-tolerance preflight evidence.
+- [x] T000 Verify features 003–009 exit evidence and compatibility; any missing/failed determinism, certificate, fixed-point, ApplyQC or 8 GiB mode gate blocks primary benchmark execution.
+- [x] T001 Search benchmark code/config for adaptive `H`, stale acceptance, FP consensus fallback, threshold override or central-current authority; record zero-tolerance preflight evidence.
 
 ## Phase 1: Definition, evidence and result contracts
 
