@@ -70,10 +70,11 @@ jobs:
           delta_runtime_test delta_certificates_test delta_certificate_contract_fuzz
           delta_fixedpoint_parser_fuzz delta_distribution_parser_fuzz
           delta_hierarchy_parser_fuzz delta_scheduling_contract_fuzz
+          delta_ffi_fuzz_smoke_test
       - name: Run sanitized qualification
         run: >-
           ctest --test-dir out/build/benchmark-asan
-          -R "delta_(runtime\.benchmark|ffi\.benchmark|runtime\.behavior|core\.certificates|core\.certificate_contract_fuzz|core\.fixedpoint_parser_fuzz|core\.distribution_parser_fuzz|core\.hierarchy_parser_fuzz|core\.scheduling_contract_fuzz)"
+          -R "delta_(runtime\.benchmark|ffi\.(benchmark|fuzz_smoke)|runtime\.behavior|core\.certificates|core\.certificate_contract_fuzz|core\.fixedpoint_parser_fuzz|core\.distribution_parser_fuzz|core\.hierarchy_parser_fuzz|core\.scheduling_contract_fuzz)"
           --output-on-failure
 
   thread-sanitizer:

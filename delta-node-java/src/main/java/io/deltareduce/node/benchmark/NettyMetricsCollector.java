@@ -22,9 +22,22 @@ public final class NettyMetricsCollector {
     return Map.copyOf(result);
   }
 
-  public void requireClean(long activeBuffers, long eventLoopBlockMicros, long queueDepth, long queueLimit) {
+  public void requireClean(
+      long activeBuffers,
+      long eventLoopBlockMicros,
+      long queueDepth,
+      long queueLimit,
+      long activeStreams,
+      long streamLimit,
+      long staleTimerCallbacks) {
     BenchmarkContracts.require(activeBuffers == 0, "Netty buffer leak");
     BenchmarkContracts.require(eventLoopBlockMicros == 0, "event loop blocked");
-    BenchmarkContracts.require(queueDepth >= 0 && queueDepth <= queueLimit, "backpressure bound exceeded");
+    BenchmarkContracts.require(
+        queueLimit >= 0 && queueDepth >= 0 && queueDepth <= queueLimit,
+        "backpressure bound exceeded");
+    BenchmarkContracts.require(
+        streamLimit >= 0 && activeStreams >= 0 && activeStreams <= streamLimit,
+        "stream bound exceeded");
+    BenchmarkContracts.require(staleTimerCallbacks == 0, "stale timer callback observed");
   }
 }

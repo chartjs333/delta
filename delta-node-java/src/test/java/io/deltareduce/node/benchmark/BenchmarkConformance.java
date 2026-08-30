@@ -130,11 +130,16 @@ public final class BenchmarkConformance {
     var metrics = new NettyMetricsCollector();
     metrics.add("queue.bytes", 16);
     require(metrics.snapshot().get("queue.bytes") == 16L);
-    metrics.requireClean(0, 0, 2, 2);
-    expectRejected(() -> metrics.requireClean(1, 0, 0, 2));
-    expectRejected(() -> metrics.requireClean(0, 1, 0, 2));
-    expectRejected(() -> metrics.requireClean(0, 0, 3, 2));
-    expectRejected(() -> metrics.requireClean(0, 0, -1, 2));
+    metrics.requireClean(0, 0, 2, 2, 2, 2, 0);
+    expectRejected(() -> metrics.requireClean(1, 0, 0, 2, 0, 2, 0));
+    expectRejected(() -> metrics.requireClean(0, 1, 0, 2, 0, 2, 0));
+    expectRejected(() -> metrics.requireClean(0, 0, 3, 2, 0, 2, 0));
+    expectRejected(() -> metrics.requireClean(0, 0, -1, 2, 0, 2, 0));
+    expectRejected(() -> metrics.requireClean(0, 0, 0, -1, 0, 2, 0));
+    expectRejected(() -> metrics.requireClean(0, 0, 0, 2, 3, 2, 0));
+    expectRejected(() -> metrics.requireClean(0, 0, 0, 2, -1, 2, 0));
+    expectRejected(() -> metrics.requireClean(0, 0, 0, 2, 0, -1, 0));
+    expectRejected(() -> metrics.requireClean(0, 0, 0, 2, 0, 2, 1));
     expectRejected(() -> metrics.add("UPPERCASE", 1));
     expectRejected(() -> metrics.add("queue.bytes", -1));
 
