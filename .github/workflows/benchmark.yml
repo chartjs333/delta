@@ -177,7 +177,7 @@ jobs:
       - name: Build the bounded benchmark C ABI
         run: |
           cmake --preset cpp20
-          cmake --build --preset cpp20 --parallel --target delta_ffi
+          cmake --build --preset cpp20 --parallel --target delta_ffi delta_benchmark_sidecar
       - name: Compile the FFM measurement harness offline
         env:
           ALL_PROXY: http://127.0.0.1:9
@@ -189,8 +189,9 @@ jobs:
           "$RUNNER_TEMP/jdk/bin/javac" --release "${{ matrix.feature }}" -Xlint:all -Werror \
             -d "$RUNNER_TEMP/classes" \
             delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java \
             delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkFfmConformance.java
-      - name: Measure actual embedded native FFM path
+      - name: Compare actual embedded FFM and isolated sidecar paths
         env:
           ALL_PROXY: http://127.0.0.1:9
           HTTPS_PROXY: http://127.0.0.1:9
@@ -198,10 +199,32 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
         run: |
           "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "${{ matrix.version }}"
-          "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
-            --class-path "$RUNNER_TEMP/classes" \
-            io.deltareduce.node.benchmark.BenchmarkFfmConformance \
-            "$GITHUB_WORKSPACE/out/build/cpp20/libdelta_ffi.so"
+          : > "$RUNNER_TEMP/process-profile.txt"
+          for repetition in 1 2 3 4 5; do
+            "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
+              --class-path "$RUNNER_TEMP/classes" \
+              io.deltareduce.node.benchmark.BenchmarkFfmConformance \
+              "$GITHUB_WORKSPACE/out/build/cpp20/libdelta_ffi.so" \
+              | tee --append "$RUNNER_TEMP/process-profile.txt"
+            "$RUNNER_TEMP/jdk/bin/java" -ea --class-path "$RUNNER_TEMP/classes" \
+              io.deltareduce.node.benchmark.BenchmarkConformance \
+              "$GITHUB_WORKSPACE/out/build/cpp20/delta_benchmark_sidecar" \
+              "$RUNNER_TEMP/sidecar-$repetition.journal" \
+              "$GITHUB_WORKSPACE/delta-protocol/fixtures/010/cross-language/golden-v1.json" \
+              | tee --append "$RUNNER_TEMP/process-profile.txt"
+          done
+          test "$(grep --count '^PROCESS_PROFILE EMBEDDED_FFM ' "$RUNNER_TEMP/process-profile.txt")" = 5
+          test "$(grep --count '^PROCESS_PROFILE ISOLATED_SIDECAR ' "$RUNNER_TEMP/process-profile.txt")" = 5
+          sha256sum "$RUNNER_TEMP/process-profile.txt" | tee "$RUNNER_TEMP/process-profile.sha256"
+      - name: Retain immutable process-profile measurements
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: benchmark-process-profile-jdk${{ matrix.feature }}-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/process-profile.txt
+            ${{ runner.temp }}/process-profile.sha256
+          if-no-files-found: error
+          retention-days: 30
 
   evidence-gate:
     name: Benchmark deterministic evidence gate

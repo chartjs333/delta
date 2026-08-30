@@ -340,6 +340,7 @@ def runtime_policy(commit: str) -> dict[str, object]:
             "specs/010-wan-benchmark-and-quality/evidence/runtime-adapters.json",
         ),
         protocol_authority="CXX_ONLY",
+        process_profile_repetitions=5,
         python_contract="CPYTHON_3_12_UV_LOCKED",
         sanitizer_campaigns={
             "address_undefined": {
