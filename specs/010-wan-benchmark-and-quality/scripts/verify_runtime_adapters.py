@@ -179,8 +179,8 @@ def exercise_python() -> dict[str, str]:
         "delta-worker-python/tests/benchmark/test_profiles.py",
         "delta-worker-python/tests/benchmark/test_vertical_slice.py",
     )
-    require("12 passed" in tests, "PYTHON_PROFILE_TESTS_FAILED")
-    return {"negative_cases": "10/10 rejected", "summary": "12/12 passed"}
+    require("14 passed" in tests, "PYTHON_PROFILE_TESTS_FAILED")
+    return {"negative_cases": "10/10 rejected", "summary": "14/14 passed"}
 
 
 def capture_environment() -> dict[str, str]:
