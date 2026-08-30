@@ -58,7 +58,7 @@ def semantic_artifacts() -> list[dict[str, str]]:
         path = value.get("path")
         expected = value.get("sha256")
         require(isinstance(path, str) and isinstance(expected, str), "FORMAL_ARTIFACT_FIELDS")
-        current = hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+        current = hashlib.sha256(git_bytes("HEAD", path)).hexdigest()
         source_hash = hashlib.sha256(git_bytes(FORMAL_SOURCE, path)).hexdigest()
         require(current == expected == source_hash, f"FORMAL_ARTIFACT_DRIFT:{path}")
         result.append({"path": path, "sha256": expected})
