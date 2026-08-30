@@ -9,14 +9,17 @@ import os
 import platform
 import re
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Final
 
-from deltatorrent.benchmark.attacks import production_rejection_corpus
-from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
-
 ROOT: Final = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "delta-worker-python/src"))
+
+from deltatorrent.benchmark.attacks import production_rejection_corpus  # noqa: E402
+from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID  # noqa: E402
+
 OUTPUT: Final = ROOT / "specs/010-wan-benchmark-and-quality/evidence/production-attacks.json"
 TARGET: Final = "delta_certificates_test"
 FILES: Final = (
