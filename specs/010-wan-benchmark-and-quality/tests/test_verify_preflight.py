@@ -65,6 +65,9 @@ def test_forbidden_architecture_patterns_are_detected(text: str, code: str) -> N
 
 
 def test_governance_qc_language_is_not_flagged_as_runtime_authority() -> None:
-    assert MODULE.scan_forbidden_text(
-        "BenchmarkResultQC is a governance attestation and cannot change current state."
-    ) == []
+    assert (
+        MODULE.scan_forbidden_text(
+            "BenchmarkResultQC is a governance attestation and cannot change current state."
+        )
+        == []
+    )

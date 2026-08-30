@@ -13,27 +13,27 @@ runtime certificate graph or change current state.
 
 ## Phase 1: Definition, evidence and result contracts
 
-- [ ] T002 Define `BenchmarkDefinition`, arm, threshold, fault/network profile and compatibility models in `delta-worker-python/src/deltatorrent/benchmark/definition.py` and `delta-protocol/schemas/010/`.
-- [ ] T003 Define `RunManifest`, environment/build/data/evaluation and immutable evidence graph models.
-- [ ] T004 Define gate table, `BenchmarkResult`, GO/NO_GO decision and reviewer/evaluator QCs.
-- [ ] T005 Implement canonical serialization/hash/signature contexts.
-- [ ] T006 Create golden definition/run/evidence/result fixtures in `delta-protocol/fixtures/010/`.
-- [ ] T007 Add contract/mutation tests in `delta-worker-python/tests/benchmark/` and cross-runtime fixture consumers.
+- [x] T002 Define `BenchmarkDefinition`, arm, threshold, fault/network profile and compatibility models in `delta-worker-python/src/deltatorrent/benchmark/definition.py` and `delta-protocol/schemas/010/`.
+- [x] T003 Define `RunManifest`, environment/build/data/evaluation and immutable evidence graph models.
+- [x] T004 Define gate table, `BenchmarkResult`, GO/NO_GO decision and reviewer/evaluator QCs.
+- [x] T005 Implement canonical serialization/hash/signature contexts.
+- [x] T006 Create golden definition/run/evidence/result fixtures in `delta-protocol/fixtures/010/`.
+- [x] T007 Add contract/mutation tests in `delta-worker-python/tests/benchmark/` and cross-runtime fixture consumers.
 
 ## Phase 2: Preregistration and completeness
 
 - [ ] T008 Implement definition completeness/license/immutable-dependency validation.
-- [ ] T009 Implement benchmark governance review/attestation workflow in `delta-worker-python/src/deltatorrent/benchmark/review.py` without adding runtime certificate types.
+- [x] T009 Implement benchmark governance review/attestation workflow in `delta-worker-python/src/deltatorrent/benchmark/review.py` without adding runtime certificate types.
 - [ ] T010 Freeze exact primary model/mode, dataset/domain policy, fixed tickets, evaluation tasks, repetitions/seeds, thresholds and missing-run rules in `configs/benchmark/primary.yaml`.
 - [ ] T011 Freeze network/fault/attack profiles under `configs/benchmark/`.
-- [ ] T012 Add post-QC mutation, missing-threshold and mutable-dependency rejection tests.
+- [x] T012 Add post-QC mutation, missing-threshold and mutable-dependency rejection tests.
 
 ## Phase 3: Reproducible execution foundation
 
 - [ ] T013 Implement source/build/image/dependency/SBOM/environment capture.
-- [ ] T014 Implement isolated benchmark namespace and deterministic run orchestrator in `delta-worker-python/src/deltatorrent/benchmark/orchestrator.py`.
+- [x] T014 Implement isolated benchmark namespace and deterministic run orchestrator in `delta-worker-python/src/deltatorrent/benchmark/orchestrator.py`.
 - [ ] T015 Implement scientific, flat, hierarchical and selected QLoRA/full-model arm adapters.
-- [ ] T016 Implement token/domain/workload identity reconciliation before run comparison.
+- [x] T016 Implement token/domain/workload identity reconciliation before run comparison.
 - [ ] T017 Add environment drift, wrong arm and token/domain mismatch tests.
 
 ## Phase 4: WAN and fault harness
@@ -46,10 +46,10 @@ runtime certificate graph or change current state.
 
 ## Phase 5: Immutable evidence collection
 
-- [ ] T023 Implement append-only/content-addressed run evidence collector in `delta-worker-python/src/deltatorrent/benchmark/evidence.py`.
+- [x] T023 Implement append-only/content-addressed run evidence collector in `delta-worker-python/src/deltatorrent/benchmark/evidence.py`.
 - [ ] T024 Collect ticket/certificate/checkpoint/model/evaluation identities.
 - [ ] T025 Collect phase timing, byte accounting, GPU/resource and P2P metrics.
-- [ ] T026 Implement offline evidence graph verifier in `delta-worker-python/src/deltatorrent/benchmark/verifier.py`.
+- [x] T026 Implement offline evidence graph verifier in `delta-worker-python/src/deltatorrent/benchmark/verifier.py`.
 - [ ] T027 Add missing/mutated/reordered/incompatible evidence tests.
 
 ## Phase 6: Protocol determinism and safety gate
@@ -60,13 +60,13 @@ runtime certificate graph or change current state.
 - [ ] T031 Run mixed-view Frankenstein, incomplete/duplicate aggregate and wrong-epoch attacks.
 - [ ] T032 Run unsafe accumulator/runtime overflow and conflicting ApplyQC attacks.
 - [ ] T033 Run P2P certificate downgrade attack.
-- [ ] T034 Implement deterministic safety gate analyzer in `delta-worker-python/src/deltatorrent/benchmark/safety.py`.
+- [x] T034 Implement deterministic safety gate analyzer in `delta-worker-python/src/deltatorrent/benchmark/safety.py`.
 
 ## Phase 7: Scientific quality gate
 
 - [ ] T035 Execute preregistered reference and DeltaReduce repetitions/seeds with equal token/domain exposure.
 - [ ] T036 Run validation loss/perplexity and all preregistered downstream/post-training evaluations.
-- [ ] T037 Implement quality joins/statistics/thresholds/missing-run policy in `delta-worker-python/src/deltatorrent/benchmark/quality.py`.
+- [x] T037 Implement quality joins/statistics/thresholds/missing-run policy in `delta-worker-python/src/deltatorrent/benchmark/quality.py`.
 - [ ] T038 Add normal-loss-but-downstream-failure and missing-seed tests.
 - [ ] T039 Record fixed-point/robust diagnostics and required ablations.
 
@@ -76,15 +76,15 @@ runtime certificate graph or change current state.
 - [ ] T041 Execute initial seed loss with complete and incomplete remaining piece unions.
 - [ ] T042 Execute approximately 10% worker loss with sufficient and insufficient domain capacity.
 - [ ] T043 Execute validator/storage crash/restart and region delay/partition scenarios.
-- [ ] T044 Implement efficiency and resilience analyzers in `efficiency.py` and `resilience.py`.
+- [x] T044 Implement efficiency and resilience analyzers in `efficiency.py` and `resilience.py`.
 - [ ] T045 Run approved real-WAN pre-pilot variant only after emulated mandatory gates pass.
 
 ## Phase 9: Decision and certified report
 
-- [ ] T046 Implement deterministic all-mandatory decision function in `delta-worker-python/src/deltatorrent/benchmark/decision.py`.
-- [ ] T047 Implement result evaluator vote/QC path and no-override guard.
-- [ ] T048 Generate machine-readable and human-readable reports from the same immutable gate table.
-- [ ] T049 Add GO-all-pass, one-gate-fail, missing-evidence and incompatible-definition tests in `integration/benchmark/` and runtime-local suites.
+- [x] T046 Implement deterministic all-mandatory decision function in `delta-worker-python/src/deltatorrent/benchmark/decision.py`.
+- [x] T047 Implement result evaluator vote/QC path and no-override guard.
+- [x] T048 Generate machine-readable and human-readable reports from the same immutable gate table.
+- [x] T049 Add GO-all-pass, one-gate-fail, missing-evidence and incompatible-definition tests in `integration/benchmark/` and runtime-local suites.
 - [ ] T050 Produce and verify `BenchmarkResultQC` for the primary definition.
 
 ## Final Phase

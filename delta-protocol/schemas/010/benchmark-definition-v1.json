@@ -43,6 +43,10 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "compiler_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "compatibility_policy_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
@@ -53,6 +57,19 @@
     },
     "decision_function": {
       "const": "ALL_MANDATORY"
+    },
+    "dependency_lock_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "deployment_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
     },
     "domain_manifest_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
@@ -95,8 +112,24 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "formal_trace_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "isolation_policy": {
       "const": "COMPARE_BOTH"
+    },
+    "jdk_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "license_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
     },
     "metric_definitions": {
       "items": {
@@ -188,6 +221,20 @@
     "missing_run_policy": {
       "const": "FAIL_CLOSED"
     },
+    "model_mode": {
+      "enum": [
+        "FULL_MODEL",
+        "QLORA_ADAPTER"
+      ]
+    },
+    "native_build_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "netty_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "network_profile_ids": {
       "items": {
         "pattern": "^sha256:[0-9a-f]{64}$",
@@ -232,6 +279,10 @@
       "minItems": 1,
       "type": "array"
     },
+    "physical_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "primary": {
       "type": "boolean"
     },
@@ -239,12 +290,33 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "python_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "qlora_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "refinement_evidence_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
     "repetitions": {
       "maximum": 1000,
       "minimum": 1,
       "type": "integer"
     },
     "robust_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sbom_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
@@ -270,6 +342,10 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "theorem_build_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "tokenizer_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
@@ -283,8 +359,11 @@
     "arm_ids",
     "base_model_id",
     "compatibility_policy_id",
+    "compiler_profile_id",
     "dataset_manifest_id",
     "decision_function",
+    "dependency_lock_ids",
+    "deployment_policy_id",
     "domain_manifest_id",
     "evaluation_ids",
     "exclusions",
@@ -292,20 +371,33 @@
     "fixedpoint_profile_id",
     "formal_report_id",
     "formal_semantics_id",
+    "formal_trace_schema_id",
+    "image_id",
     "isolation_policy",
+    "jdk_profile_id",
+    "license_policy_id",
     "metric_definitions",
     "missing_run_policy",
+    "model_mode",
+    "native_build_id",
+    "netty_profile_id",
     "network_profile_ids",
     "optimizer_profile_id",
+    "physical_profile_id",
     "pi_d",
     "primary",
     "protocol_registry_id",
+    "python_profile_id",
+    "qlora_profile_id",
+    "refinement_evidence_ids",
     "repetitions",
     "robust_profile_id",
+    "sbom_id",
     "schema_version",
     "seeds",
     "source_commit",
     "source_tree",
+    "theorem_build_id",
     "ticket_plan_id",
     "tokenizer_id",
     "type_name"

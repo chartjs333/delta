@@ -2,7 +2,7 @@
 
 ## Identity and environment
 
-- [ ] **HR010-001** Extend BenchmarkDefinition with C++/ABI/Java/Python/build/formal semantics and deployment-profile identities.
+- [x] **HR010-001** Extend BenchmarkDefinition with C++/ABI/Java/Python/build/formal semantics and deployment-profile identities.
 - [ ] **HR010-002** Freeze primary compiler/JDK/Python/Netty/native flags and canonical fixture corpus before results.
 - [ ] **HR010-003** Add runtime compatibility admission and evidence capture.
 
@@ -30,5 +30,5 @@
 
 - [ ] **HR010-015** Report zero-copy eligibility/hit rate, copy fallback bytes and phase latency decomposition.
 - [ ] **HR010-016** Join runtime gates with token/domain-matched scientific quality and WAN/P2P gates.
-- [ ] **HR010-017** Make any failed mandatory runtime/formal gate force deterministic `NO_GO`.
+- [x] **HR010-017** Make any failed mandatory runtime/formal gate force deterministic `NO_GO`.
 - [ ] **HR010-018** Publish complete offline-verifiable polyglot evidence and BenchmarkResultQC.

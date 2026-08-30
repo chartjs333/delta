@@ -3,7 +3,7 @@
     {
       "id": "SCHEMA-BENCHMARK-DEFINITION-010-V1",
       "path": "schemas/010/benchmark-definition-v1.json",
-      "sha256": "4814f41993db8038b27e7caa482c4c679f2c53541f1d0a9de556ceea55f291f9"
+      "sha256": "1fcc34052db1e2d899f19718d90541b4edc1630f64b9996fd4959b02414f1557"
     },
     {
       "id": "SCHEMA-BENCHMARK-DEFINITION-ATTESTATION-010-V1",
@@ -75,22 +75,22 @@
     {
       "id": "BENCHMARK010-VALID-CONTRACT-V1",
       "path": "fixtures/010/valid/benchmark-contract-v1.json",
-      "sha256": "89a8c094304c6d2327a4c1b8161644a91a35973ca9edf4bb021b87cbf3f1b2cd"
+      "sha256": "9b709e1012c79345955df4e4d065959866b3b17492cb4b10bb2450091f1337e1"
     },
     {
       "id": "BENCHMARK010-CROSS-LANGUAGE-GOLDEN-V1",
       "path": "fixtures/010/cross-language/golden-v1.json",
-      "sha256": "89a8c094304c6d2327a4c1b8161644a91a35973ca9edf4bb021b87cbf3f1b2cd"
+      "sha256": "9b709e1012c79345955df4e4d065959866b3b17492cb4b10bb2450091f1337e1"
     },
     {
       "id": "BENCHMARK010-NEGATIVE-V1",
       "path": "fixtures/010/invalid/benchmark-negative-v1.json",
-      "sha256": "1a4784831164b61014badbf2a5312819a9d71616987124218b28746df1bdfa4c"
+      "sha256": "09596f1ee10ce04a97975ff6ea08f9959f705b59ca886f9b16d70b7a8eb000c3"
     },
     {
       "id": "BENCHMARK010-SYNTHETIC-V1",
       "path": "fixtures/010/synthetic/tiny-benchmark-v1.json",
-      "sha256": "24a612aaf6f1a4a1c1e6f114e5bce35e33c16a76d7a855a0f70c6dc5d029cd32"
+      "sha256": "b1f4b049b3555e1b1de2166f3680424868577af4498ec90a9b09d76f1e5deaf9"
     }
   ],
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
