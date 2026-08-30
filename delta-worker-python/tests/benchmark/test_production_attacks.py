@@ -21,9 +21,7 @@ def report() -> dict[str, object]:
                 "error_code": error_code,
                 "rejected": True,
             }
-            for attack_id, (boundary, error_code) in sorted(
-                PRODUCTION_ATTACK_BOUNDARIES.items()
-            )
+            for attack_id, (boundary, error_code) in sorted(PRODUCTION_ATTACK_BOUNDARIES.items())
         ],
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
         "mutation_scope": "PRODUCTION_MODULE_BOUNDARY",
