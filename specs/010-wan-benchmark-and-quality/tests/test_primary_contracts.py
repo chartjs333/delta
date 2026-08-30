@@ -6,6 +6,9 @@ import subprocess
 from pathlib import Path
 from types import ModuleType
 
+from deltatorrent.benchmark.fault_profiles import FaultProfile
+from deltatorrent.benchmark.network_profiles import NetworkProfile, simulate
+
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "specs/010-wan-benchmark-and-quality/scripts/primary_contracts.py"
 
@@ -52,3 +55,22 @@ def test_external_dependencies_are_immutable_and_licensed() -> None:
         assert artifact["license"]
         if "sha256" in artifact:
             assert len(artifact["sha256"]) == 64
+
+
+def test_primary_network_and_fault_traces_are_executable_and_exact() -> None:
+    module = load_script()
+    network_document = module.networks()
+    for value in network_document["profiles"]:
+        network = NetworkProfile.from_dict(value)
+        assert simulate(network, 128) == simulate(network, 128)
+    fault = FaultProfile.from_dict(module.faults()["trace_profile"])
+    assert [event.actor_class for event in fault.events] == [
+        "WORKER",
+        "VALIDATOR",
+        "VALIDATOR",
+        "STORAGE",
+        "STORAGE",
+        "REGION",
+        "REGION",
+    ]
+    assert all(event.expected_outcome for event in fault.events)

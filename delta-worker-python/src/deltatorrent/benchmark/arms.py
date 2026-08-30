@@ -26,6 +26,7 @@ class ArmSpec:
     mandatory: bool
     workload_identity: str
     runtime_profile_id: str
+    topology: str
 
     @classmethod
     def from_wrapper(cls, wrapper: dict[str, Any]) -> ArmSpec:
@@ -55,6 +56,14 @@ class ArmSpec:
             mandatory=value["mandatory"],
             workload_identity=str(value["workload_identity"]),
             runtime_profile_id=str(value["runtime_profile_id"]),
+            topology=str(
+                value.get(
+                    "topology",
+                    "SINGLE_NODE_REFERENCE"
+                    if value["deployment_profile"] == "PYTHON"
+                    else "FLAT_BFT",
+                )
+            ),
         )
 
 

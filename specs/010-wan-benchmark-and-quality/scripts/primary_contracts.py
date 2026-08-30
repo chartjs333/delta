@@ -211,37 +211,46 @@ def arms(workload_id: str) -> dict[str, object]:
 def networks() -> dict[str, object]:
     profiles = [
         {
-            "bandwidth_bps": 1_000_000_000,
-            "disconnect_steps": [],
+            "bandwidth_kbps": 1_000_000,
+            "disconnect_ms": 0,
             "duplication_ppm": 0,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "jitter_ms": 0,
             "loss_ppm": 0,
             "profile_id": "lan-control",
             "reordering_ppm": 0,
             "rtt_ms": 1,
+            "schema_version": "1.0.0",
             "seed": 10_001,
+            "type_name": "NETWORK_PROFILE",
         },
         {
-            "bandwidth_bps": 100_000_000,
-            "disconnect_steps": [180, 181],
+            "bandwidth_kbps": 100_000,
+            "disconnect_ms": 2_000,
             "duplication_ppm": 100,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "jitter_ms": 5,
             "loss_ppm": 1_000,
             "profile_id": "wan-regional",
             "reordering_ppm": 500,
             "rtt_ms": 40,
+            "schema_version": "1.0.0",
             "seed": 10_002,
+            "type_name": "NETWORK_PROFILE",
         },
         {
-            "bandwidth_bps": 25_000_000,
-            "disconnect_steps": [120, 121, 122, 123],
+            "bandwidth_kbps": 25_000,
+            "disconnect_ms": 4_000,
             "duplication_ppm": 500,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "jitter_ms": 20,
             "loss_ppm": 5_000,
             "profile_id": "wan-intercontinental",
             "reordering_ppm": 2_000,
             "rtt_ms": 160,
+            "schema_version": "1.0.0",
             "seed": 10_003,
+            "type_name": "NETWORK_PROFILE",
         },
     ]
     real_wan = {
@@ -266,6 +275,32 @@ def faults() -> dict[str, object]:
         ("regional-delay-eventual-synchrony", "APPLIED"),
         ("regional-partition-hard-deadline", "ABORTED"),
     ]
+    events = [
+        ("worker-loss-10pct", "WORKER", "CRASH", 100, "APPLIED"),
+        ("validator-crash", "VALIDATOR", "CRASH", 120, "VIEW_CHANGE"),
+        ("validator-restart", "VALIDATOR", "RESTART", 140, "RECOVERED"),
+        ("storage-crash", "STORAGE", "CRASH", 160, "RETRIEVAL"),
+        ("storage-restart", "STORAGE", "RESTART", 180, "RECOVERED"),
+        ("regional-delay", "REGION", "DELAY", 200, "APPLIED"),
+        ("regional-partition", "REGION", "PARTITION", 240, "ABORTED"),
+    ]
+    trace_profile = {
+        "events": [
+            {
+                "action": action,
+                "actor_class": actor,
+                "assumptions_hold": True,
+                "at_step": step,
+                "event_id": event_id,
+                "expected_outcome": outcome,
+            }
+            for event_id, actor, action, step, outcome in events
+        ],
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "profile_id": "primary-crash-restart-partition-v1",
+        "schema_version": "1.0.0",
+        "type_name": "FAULT_PROFILE",
+    }
     return profile(
         "PRIMARY_FAULT_AND_ATTACK_PROFILES",
         attacks=[
@@ -285,6 +320,7 @@ def faults() -> dict[str, object]:
         scenarios=[
             {"expected_terminal": outcome, "scenario_id": name} for name, outcome in scenarios
         ],
+        trace_profile=trace_profile,
     )
 
 
@@ -382,7 +418,7 @@ def metrics(commit: str) -> dict[str, object]:
             "micro-loss",
             "MEAN",
             "NON_INFERIORITY",
-            3_000_000,
+            100_000,
         ),
         item(
             "downstream_lambada_accuracy_ppm",
@@ -391,7 +427,7 @@ def metrics(commit: str) -> dict[str, object]:
             "ppm",
             "MEAN",
             "NON_INFERIORITY",
-            350_000,
+            20_000,
         ),
         item(
             "post_training_hellaswag_accuracy_ppm",
@@ -400,7 +436,7 @@ def metrics(commit: str) -> dict[str, object]:
             "ppm",
             "MEAN",
             "NON_INFERIORITY",
-            350_000,
+            20_000,
         ),
         item(
             "per_domain_wikitext_loss_micro",
@@ -409,7 +445,7 @@ def metrics(commit: str) -> dict[str, object]:
             "micro-loss",
             "MEAN",
             "NON_INFERIORITY",
-            3_100_000,
+            100_000,
         ),
         item(
             "network_share_ppm",
@@ -500,7 +536,7 @@ def definition_document(commit: str, documents: dict[str, dict[str, object]]) ->
             if str(item["role"]).startswith(("VALIDATION", "DOWNSTREAM", "POST_TRAINING"))
         ],
         "exclusions": ["NO_POST_HOC_RUN_OR_METRIC_EXCLUSIONS"],
-        "fault_profile_ids": [object_id(faults_document)],
+        "fault_profile_ids": [object_id(faults_document["trace_profile"])],
         "fixedpoint_profile_id": tracked_id(
             commit, "delta-core-cpp/toolchain/fixedpoint-targets.lock.json"
         ),

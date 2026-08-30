@@ -32,17 +32,17 @@ runtime certificate graph or change current state.
 
 - [x] T013 Implement source/build/image/dependency/SBOM/environment capture.
 - [x] T014 Implement isolated benchmark namespace and deterministic run orchestrator in `delta-worker-python/src/deltatorrent/benchmark/orchestrator.py`.
-- [ ] T015 Implement scientific, flat, hierarchical and selected QLoRA/full-model arm adapters.
+- [x] T015 Implement scientific, flat, hierarchical and selected QLoRA/full-model arm adapters.
 - [x] T016 Implement token/domain/workload identity reconciliation before run comparison.
-- [ ] T017 Add environment drift, wrong arm and token/domain mismatch tests.
+- [x] T017 Add environment drift, wrong arm and token/domain mismatch tests.
 
 ## Phase 4: WAN and fault harness
 
 - [x] T018 Implement deterministic unprivileged network/fault profiles across `delta-worker-python/src/deltatorrent/benchmark/`, `delta-node-java/.../benchmark/` and `delta-runtime-cpp/src/benchmark/`.
 - [ ] T019 [P] Implement optional `tc/netem` adapter and profile-conformance tests.
-- [ ] T020 Implement worker/validator/storage/region crash, restart, partition and churn traces in `fault_profiles.py`.
+- [x] T020 Implement worker/validator/storage/region crash, restart, partition and churn traces in `fault_profiles.py`.
 - [ ] T021 Implement Byzantine attack corpus in `attacks.py`.
-- [ ] T022 Add exact trace replay and terminal-outcome tests.
+- [x] T022 Add exact trace replay and terminal-outcome tests.
 
 ## Phase 5: Immutable evidence collection
 
@@ -67,7 +67,7 @@ runtime certificate graph or change current state.
 - [ ] T035 Execute preregistered reference and DeltaReduce repetitions/seeds with equal token/domain exposure.
 - [ ] T036 Run validation loss/perplexity and all preregistered downstream/post-training evaluations.
 - [x] T037 Implement quality joins/statistics/thresholds/missing-run policy in `delta-worker-python/src/deltatorrent/benchmark/quality.py`.
-- [ ] T038 Add normal-loss-but-downstream-failure and missing-seed tests.
+- [x] T038 Add normal-loss-but-downstream-failure and missing-seed tests.
 - [ ] T039 Record fixed-point/robust diagnostics and required ablations.
 
 ## Phase 8: WAN efficiency, P2P and resilience gates
