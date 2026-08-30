@@ -14,6 +14,7 @@ _LINE: Final = re.compile(
     rb"PROCESS_PROFILE (EMBEDDED_FFM|ISOLATED_SIDECAR) "
     rb"([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)"
 )
+_CROSS_LANGUAGE: Final = re.compile(rb"CROSS_LANGUAGE ([0-9]+) (sha256:[0-9a-f]{64})")
 _PROFILES: Final = ("EMBEDDED_FFM", "ISOLATED_SIDECAR")
 _JDK_FEATURES: Final = (25, 26)
 
@@ -32,16 +33,21 @@ class ProcessSample:
     restart_us: int
 
 
-def _parse(raw: bytes) -> tuple[ProcessSample, ...]:
+def _parse(raw: bytes, repetitions: int) -> tuple[tuple[ProcessSample, ...], int, str]:
     try:
         lines = raw.splitlines()
     except AttributeError as exc:
         raise ProcessProfileError("PROCESS_PROFILE_BYTES_INVALID") from exc
     samples: list[ProcessSample] = []
+    cross_language: list[tuple[int, str]] = []
     for line in lines:
         match = _LINE.fullmatch(line)
         if match is None:
-            raise ProcessProfileError("PROCESS_PROFILE_LINE_INVALID")
+            cross_match = _CROSS_LANGUAGE.fullmatch(line)
+            if cross_match is None:
+                raise ProcessProfileError("PROCESS_PROFILE_LINE_INVALID")
+            cross_language.append((int(cross_match.group(1)), cross_match.group(2).decode("ascii")))
+            continue
         profile = match.group(1).decode("ascii")
         values = tuple(int(match.group(index)) for index in range(2, 7))
         sample = ProcessSample(profile, *values)
@@ -55,7 +61,13 @@ def _parse(raw: bytes) -> tuple[ProcessSample, ...]:
         ):
             raise ProcessProfileError("PROCESS_PROFILE_MEASUREMENT_INVALID")
         samples.append(sample)
-    return tuple(samples)
+    if (
+        len(cross_language) != repetitions
+        or len(set(cross_language)) != 1
+        or cross_language[0][0] <= 0
+    ):
+        raise ProcessProfileError("PROCESS_PROFILE_CROSS_LANGUAGE_INVALID")
+    return tuple(samples), *cross_language[0]
 
 
 def _median(values: list[int]) -> int:
@@ -82,7 +94,7 @@ def analyze_process_profiles(
     artifacts: list[dict[str, object]] = []
     for feature in _JDK_FEATURES:
         raw = measurements[feature]
-        samples = _parse(raw)
+        samples, cross_language_count, cross_language_aggregate = _parse(raw, repetitions)
         for profile in _PROFILES:
             selected = [item for item in samples if item.deployment_profile == profile]
             if len(selected) != repetitions:
@@ -103,6 +115,8 @@ def analyze_process_profiles(
         artifacts.append(
             {
                 "byte_length": len(raw),
+                "cross_language_aggregate": cross_language_aggregate,
+                "cross_language_artifact_count": cross_language_count,
                 "jdk_feature": feature,
                 "raw_sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
             }

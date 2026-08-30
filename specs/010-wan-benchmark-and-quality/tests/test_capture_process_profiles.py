@@ -26,6 +26,7 @@ def raw_profile() -> bytes:
                 f"PROCESS_PROFILE EMBEDDED_FFM 19 19 {10 + repetition} {11 + repetition} 0",
                 f"PROCESS_PROFILE ISOLATED_SIDECAR 16 16 {100 + repetition} "
                 f"{110 + repetition} {500 + repetition}",
+                "CROSS_LANGUAGE 19 sha256:" + "c" * 64,
             )
         )
     return ("\n".join(lines) + "\n").encode()

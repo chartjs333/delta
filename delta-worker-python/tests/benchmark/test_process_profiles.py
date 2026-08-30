@@ -22,6 +22,7 @@ def raw_profile(*, embedded_restart: int = 0, sidecar_restart: int = 500) -> byt
             f"PROCESS_PROFILE ISOLATED_SIDECAR 16 16 {100 + repetition} "
             f"{110 + repetition} {sidecar_restart + repetition}"
         )
+        lines.append("CROSS_LANGUAGE 19 sha256:" + "c" * 64)
     return ("\n".join(lines) + "\n").encode()
 
 
@@ -55,7 +56,14 @@ def test_process_profiles_select_crash_contained_sidecar() -> None:
         ),
         (
             {25: raw_profile(), 26: b"\n".join(raw_profile().splitlines()[:-1]) + b"\n"},
-            "PROCESS_PROFILE_REPETITION_SET_INVALID",
+            "PROCESS_PROFILE_CROSS_LANGUAGE_INVALID",
+        ),
+        (
+            {
+                25: raw_profile(),
+                26: raw_profile().replace(b"CROSS_LANGUAGE 19", b"CROSS_LANGUAGE 18", 1),
+            },
+            "PROCESS_PROFILE_CROSS_LANGUAGE_INVALID",
         ),
     ],
 )
