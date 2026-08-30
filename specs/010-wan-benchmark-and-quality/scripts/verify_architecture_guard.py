@@ -31,6 +31,7 @@ ALLOWED_PREFIXES: Final = (
     "delta-worker-python/src/deltatorrent/benchmark/",
     "delta-worker-python/tests/benchmark/",
     "docs/benchmark-operations.md",
+    "reports/benchmark/",
     "specs/010-wan-benchmark-and-quality/",
 )
 ALLOWED_EXACT: Final = {
