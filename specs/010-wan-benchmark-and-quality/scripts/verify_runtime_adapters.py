@@ -43,6 +43,7 @@ FILES: Final = (
     "delta-node-java/src/main/java/io/deltareduce/node/benchmark/RuntimeIdentityCollector.java",
     "delta-node-java/src/main/java/io/deltareduce/node/benchmark/SidecarRunner.java",
     "delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java",
+    "delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkFfmConformance.java",
     "delta-protocol/fixtures/010/cross-language/golden-v1.json",
     "specs/010-wan-benchmark-and-quality/scripts/verify_runtime_adapters.py",
 )
@@ -122,7 +123,9 @@ def exercise_native() -> list[dict[str, str]]:
 def java_sources() -> list[str]:
     main = ROOT / "delta-node-java/src/main/java/io/deltareduce/node/benchmark"
     test = ROOT / "delta-node-java/src/test/java/io/deltareduce/node/benchmark"
-    return [str(path) for path in sorted((*main.glob("*.java"), *test.glob("*.java")))]
+    return [
+        str(path) for path in sorted((*main.glob("*.java"), test / "BenchmarkConformance.java"))
+    ]
 
 
 def exercise_java(expected_count: int, expected_hash: str) -> list[dict[str, str]]:

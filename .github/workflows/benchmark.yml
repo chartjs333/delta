@@ -139,9 +139,73 @@ jobs:
           "$RUNNER_TEMP/run/sidecar.journal"
           "$GITHUB_WORKSPACE/delta-protocol/fixtures/010/cross-language/golden-v1.json"
 
+  jdk-ffm:
+    name: JDK ${{ matrix.feature }} embedded FFM measurement
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir --parents "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" \
+            --directory "$RUNNER_TEMP/jdk" --strip-components=1
+      - name: Build the bounded benchmark C ABI
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel --target delta_ffi
+      - name: Compile the FFM measurement harness offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          mkdir --parents "$RUNNER_TEMP/classes"
+          "$RUNNER_TEMP/jdk/bin/javac" --release "${{ matrix.feature }}" -Xlint:all -Werror \
+            -d "$RUNNER_TEMP/classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkFfmConformance.java
+      - name: Measure actual embedded native FFM path
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F "${{ matrix.version }}"
+          "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/classes" \
+            io.deltareduce.node.benchmark.BenchmarkFfmConformance \
+            "$GITHUB_WORKSPACE/out/build/cpp20/libdelta_ffi.so"
+
   evidence-gate:
     name: Benchmark deterministic evidence gate
-    needs: [native-compatibility, address-undefined, thread-sanitizer, java-sidecar]
+    needs: [native-compatibility, address-undefined, thread-sanitizer, java-sidecar, jdk-ffm]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
