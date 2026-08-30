@@ -35,6 +35,62 @@ make benchmark-check
 The preregistration store is create-only. Replaying identical bytes is allowed; writing different
 bytes under an existing definition identity is rejected.
 
+## Primary execution boundary
+
+The primary control plane stages the complete mandatory arm/seed matrix only after the exact
+definition attestation and environment identity have been verified:
+
+```text
+uv run delta benchmark plan-primary \
+  configs/benchmark/primary.yaml \
+  configs/benchmark/primary-definition-attestation.json \
+  configs/benchmark/arms-v1.json \
+  /approved/environment-manifest.json \
+  /evidence/primary-execution
+```
+
+Planning emits `PLANNED_NOT_EXECUTED`; execution plans are not evidence. The environment manifest
+must be canonical JSON and must bind the exact source commit/tree, ABI, compiler, image, JDK,
+Netty, Python and dependency identities frozen by the definition.
+
+An approved measured runner can execute the matrix through the explicit process boundary:
+
+```text
+uv run delta benchmark execute-primary \
+  configs/benchmark/primary.yaml \
+  configs/benchmark/primary-definition-attestation.json \
+  configs/benchmark/arms-v1.json \
+  /approved/environment-manifest.json \
+  /evidence/primary-execution \
+  --timeout-seconds 86400 -- /approved/primary-runner
+```
+
+For every plan the executor appends two arguments to the runner command: the immutable plan path
+and a fresh observation-output path. The runner must write one canonical
+`PRIMARY_RUN_OBSERVATION` containing the measured `RUN_MANIFEST` and metric samples, then return
+zero. Identity drift, a noncanonical observation, incomplete distributed certificate evidence,
+timeout, nonzero exit, or an attempted overwrite fails closed. Successfully admitted runs remain
+`RUNS_ADMITTED_NOT_EVALUATED`; they do not constitute `GO` until the separate quality, exactness,
+WAN/resilience, evidence, and ResultQC gates pass.
+
+Runs produced on approved remote hosts can be ingested without re-executing them:
+
+```text
+uv run delta benchmark collect-primary \
+  configs/benchmark/primary.yaml \
+  configs/benchmark/primary-definition-attestation.json \
+  configs/benchmark/arms-v1.json \
+  /approved/environment-manifest.json \
+  /evidence/primary-execution \
+  /incoming/observation-*.json
+```
+
+Collection is partial and fail-closed until all plan identities exist. Require the complete,
+token/domain-reconciled arm/seed inventory with `verify-primary-runs` using the same five primary
+arguments. Even a complete run inventory remains `RUN_SET_COMPLETE_NOT_GATE_EVALUATED`; exact
+flat/hierarchy comparison, scientific metrics, WAN/fault scenarios and the final evidence graph are
+separate mandatory gates.
+
 ## Synthetic control-plane smoke
 
 ```text

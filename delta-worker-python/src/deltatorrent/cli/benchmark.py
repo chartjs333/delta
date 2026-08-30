@@ -17,6 +17,13 @@ from deltatorrent.benchmark.preregistration import (
     PreregisteredDefinition,
     PreregistrationStore,
 )
+from deltatorrent.benchmark.primary import load_primary_arms
+from deltatorrent.benchmark.primary_executor import (
+    PrimaryEnvironment,
+    PrimaryExecutionSet,
+    PrimaryExecutionStore,
+    build_execution_set,
+)
 from deltatorrent.benchmark.report import parse_machine_report
 from deltatorrent.benchmark.review import GovernanceAttestation
 from deltatorrent.benchmark.synthetic import execute_synthetic_fixture
@@ -46,10 +53,45 @@ def configure(parser: argparse.ArgumentParser) -> None:
     synthetic.add_argument("fixture", type=Path)
     synthetic.add_argument("output", type=Path)
 
+    plan_primary = commands.add_parser(
+        "plan-primary", help="stage the complete create-only primary arm execution matrix"
+    )
+    _primary_arguments(plan_primary)
+
+    execute_primary = commands.add_parser(
+        "execute-primary", help="run the primary arm matrix through an external measured runner"
+    )
+    _primary_arguments(execute_primary)
+    execute_primary.add_argument("--timeout-seconds", type=int, default=86_400)
+    execute_primary.add_argument(
+        "runner",
+        nargs=argparse.REMAINDER,
+        help="runner command; receives PLAN_PATH and OBSERVATION_OUTPUT_PATH",
+    )
+
+    collect_primary = commands.add_parser(
+        "collect-primary", help="admit externally measured primary observations create-only"
+    )
+    _primary_arguments(collect_primary)
+    collect_primary.add_argument("observations", nargs="+", type=Path)
+
+    verify_primary = commands.add_parser(
+        "verify-primary-runs", help="require and reconcile the complete primary arm/seed run set"
+    )
+    _primary_arguments(verify_primary)
+
     verify_report = commands.add_parser(
         "verify-report", help="verify canonical machine-report encoding"
     )
     verify_report.add_argument("report", type=Path)
+
+
+def _primary_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("definition", type=Path)
+    parser.add_argument("attestation", type=Path)
+    parser.add_argument("arms", type=Path)
+    parser.add_argument("environment", type=Path)
+    parser.add_argument("output", type=Path)
 
 
 def _load_object(path: Path, code: str) -> dict[str, Any]:
@@ -114,6 +156,17 @@ def _attestation(path: Path, definition: BenchmarkDefinition) -> GovernanceAttes
     )
 
 
+def _primary_execution(args: argparse.Namespace) -> PrimaryExecutionSet:
+    definition = load_definition(args.definition)
+    preregistration = PreregisteredDefinition(
+        definition,
+        _attestation(args.attestation, definition),
+    )
+    arms = load_primary_arms(args.arms, definition)
+    environment = PrimaryEnvironment.load(args.environment, definition)
+    return build_execution_set(preregistration, arms, environment)
+
+
 def execute(args: argparse.Namespace) -> int:
     try:
         if args.benchmark_command == "validate-definition":
@@ -157,6 +210,84 @@ def execute(args: argparse.Namespace) -> int:
                         "fixture_class": result.fixture_class,
                         "run_count": result.run_count,
                         "status": result.verification.status,
+                    },
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.benchmark_command == "plan-primary":
+            execution = _primary_execution(args)
+            index = PrimaryExecutionStore(args.output).stage(execution)
+            print(
+                json.dumps(
+                    {
+                        "definition_id": execution.definition_id,
+                        "execution_index_id": execution.content_id,
+                        "path": index.as_posix(),
+                        "plan_count": len(execution.plans),
+                        "status": "PLANNED_NOT_EXECUTED",
+                    },
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.benchmark_command == "execute-primary":
+            execution = _primary_execution(args)
+            runner = tuple(args.runner)
+            if runner[:1] == ("--",):
+                runner = runner[1:]
+            runs = PrimaryExecutionStore(args.output).execute_all(
+                execution,
+                runner,
+                timeout_seconds=args.timeout_seconds,
+            )
+            print(
+                json.dumps(
+                    {
+                        "definition_id": execution.definition_id,
+                        "execution_index_id": execution.content_id,
+                        "run_count": len(runs),
+                        "status": "RUNS_ADMITTED_NOT_EVALUATED",
+                    },
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.benchmark_command == "collect-primary":
+            execution = _primary_execution(args)
+            store = PrimaryExecutionStore(args.output)
+            collected = store.collect(execution, tuple(args.observations))
+            admitted_count = sum(store.observation_path(plan).is_file() for plan in execution.plans)
+            print(
+                json.dumps(
+                    {
+                        "admitted_count": admitted_count,
+                        "collected_count": len(collected),
+                        "definition_id": execution.definition_id,
+                        "required_count": len(execution.plans),
+                        "status": (
+                            "COMPLETE_RUN_SET_ADMITTED_NOT_EVALUATED"
+                            if admitted_count == len(execution.plans)
+                            else "PARTIAL_RUN_SET_FAIL_CLOSED"
+                        ),
+                    },
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.benchmark_command == "verify-primary-runs":
+            execution = _primary_execution(args)
+            runs = PrimaryExecutionStore(args.output).load_complete(execution)
+            print(
+                json.dumps(
+                    {
+                        "definition_id": execution.definition_id,
+                        "run_count": len(runs),
+                        "status": "RUN_SET_COMPLETE_NOT_GATE_EVALUATED",
                     },
                     separators=(",", ":"),
                     sort_keys=True,
