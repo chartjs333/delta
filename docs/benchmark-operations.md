@@ -37,6 +37,22 @@ bytes under an existing definition identity is rejected.
 
 ## Primary execution boundary
 
+The current primary Definition is stopped before Stage B execution. Reproduce the recorded
+fail-closed decision with:
+
+```text
+uv run python \
+  specs/010-wan-benchmark-and-quality/scripts/verify_stage_b_scientific_prerun.py \
+  --check-only
+```
+
+The evidence at
+`specs/010-wan-benchmark-and-quality/evidence/primary-scientific-prerun.json` records zero
+scientific executions and keeps `T035`, `T036`, `T039` and `HR010-016` open. Do not create an
+observation with the synthetic runner or provision an unbound GPU environment to bypass this
+STOP. A further governance decision is required before changing the frozen Definition or its
+scientific execution identity.
+
 The primary control plane stages the complete mandatory arm/seed matrix only after the exact
 definition attestation and environment identity have been verified:
 

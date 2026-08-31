@@ -64,6 +64,11 @@ runtime certificate graph or change current state.
 
 ## Phase 7: Scientific quality gate
 
+Stage B pre-run status: `STOP_BEFORE_PRIMARY_SCIENTIFIC_EXECUTION`; no primary observation exists.
+The reproducible reasons are recorded in
+`evidence/primary-scientific-prerun.json`. The tasks below remain incomplete pending a new explicit
+governance decision; synthetic observations and an unbound runner/environment are forbidden.
+
 - [ ] T035 Execute preregistered reference and DeltaReduce repetitions/seeds with equal token/domain exposure.
 - [ ] T036 Run validation loss/perplexity and all preregistered downstream/post-training evaluations.
 - [x] T037 Implement quality joins/statistics/thresholds/missing-run policy in `delta-worker-python/src/deltatorrent/benchmark/quality.py`.
