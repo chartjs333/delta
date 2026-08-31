@@ -67,23 +67,31 @@ class ExecutionPlan:
     evaluation_ids: tuple[str, ...]
 
     @property
+    def document(self) -> dict[str, object]:
+        """Canonical runner input; the definition remains the methodology authority."""
+        return {
+            "arm_kind": self.arm.kind,
+            "arm_id": self.arm.content_id,
+            "arm_name": self.arm.arm_id,
+            "benchmark_definition_id": self.definition_id,
+            "deployment_profile": self.arm.deployment_profile,
+            "domains": list(self.domains),
+            "environment_manifest_id": self.environment_manifest_id,
+            "evaluation_ids": list(self.evaluation_ids),
+            "fault_profile_id": self.fault_profile_id,
+            "network_profile_id": self.network_profile_id,
+            "parent_checkpoint_id": self.parent_checkpoint_id,
+            "processed_tokens": self.processed_tokens,
+            "repetition": self.repetition,
+            "seed": self.seed,
+            "ticket_plan_id": self.ticket_plan_id,
+            "topology": self.arm.topology,
+            "workload_identity": self.arm.workload_identity,
+        }
+
+    @property
     def content_id(self) -> str:
-        return _object_id(
-            {
-                "arm_id": self.arm.content_id,
-                "benchmark_definition_id": self.definition_id,
-                "domains": list(self.domains),
-                "environment_manifest_id": self.environment_manifest_id,
-                "fault_profile_id": self.fault_profile_id,
-                "network_profile_id": self.network_profile_id,
-                "processed_tokens": self.processed_tokens,
-                "repetition": self.repetition,
-                "seed": self.seed,
-                "ticket_plan_id": self.ticket_plan_id,
-                "parent_checkpoint_id": self.parent_checkpoint_id,
-                "evaluation_ids": list(self.evaluation_ids),
-            }
-        )
+        return _object_id(self.document)
 
 
 class PrimaryArmAdapter:

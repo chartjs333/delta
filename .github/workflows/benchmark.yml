@@ -254,3 +254,71 @@ jobs:
           python3 specs/010-wan-benchmark-and-quality/scripts/verify_production_attacks.py --check-only
           test ! -f reports/benchmark/primary/benchmark-result-qc.json
           echo "Primary scientific/WAN result remains fail-closed until measured evidence exists."
+
+  primary-executor-qualification:
+    name: Primary executor exact-source qualification
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == '010a-primary-executor' }}
+    needs: [evidence-gate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source and evidence overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned workspace tool
+        run: python3 -m pip install --disable-pip-version-check uv==0.6.14
+      - name: Materialize locked environment
+        run: uv sync --frozen
+      - name: Verify portable executor and Python gates offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy delta-worker-python/src
+          uv run pytest delta-worker-python/tests \
+            --junitxml="$RUNNER_TEMP/primary-executor-pytest.xml"
+          uv run pytest specs/010-wan-benchmark-and-quality/tests
+      - name: Reproduce definition and regression evidence
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/010-wan-benchmark-and-quality/scripts/primary_contracts.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/verify_formal_regression.py --check-only
+          uv run python specs/010-wan-benchmark-and-quality/scripts/verify_production_attacks.py --check-only
+          uv run python specs/010-wan-benchmark-and-quality/scripts/verify_architecture_guard.py --check-only
+          test ! -f reports/benchmark/primary/benchmark-result-qc.json
+      - name: Emit machine-readable exact-source qualification
+        run: >-
+          uv run python
+          specs/010-wan-benchmark-and-quality/scripts/verify_primary_executor_ci.py
+          --workflow-run-id "${{ github.run_id }}"
+          --github-sha "$GITHUB_SHA"
+          --junitxml "$RUNNER_TEMP/primary-executor-pytest.xml"
+          --completed-check pytest
+          --completed-check ruff
+          --completed-check format
+          --completed-check mypy
+          --completed-check formal_regression
+          --completed-check production_attacks
+          --completed-check architecture_guard
+          --completed-check executor_negative_matrix
+          --completed-check create_only_concurrency
+          --completed-check cli_round_trip
+      - name: Retain exact-source qualification artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: primary-executor-ci-qualification-${{ github.run_id }}
+          path: specs/010-wan-benchmark-and-quality/evidence/primary-executor-ci-qualification.json
+          if-no-files-found: error
+          retention-days: 30
