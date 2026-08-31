@@ -8,6 +8,9 @@ endif()
 
 option(STAGE_A_BUILD_SOURCE_TESTS "Register qualified-source negative tests" OFF)
 set(BUILD_TESTING ${STAGE_A_BUILD_SOURCE_TESTS} CACHE BOOL "Qualified source tests" FORCE)
+if(STAGE_A_BUILD_SOURCE_TESTS)
+  enable_testing()
+endif()
 add_subdirectory("${DELTA_SOURCE_ROOT}" delta-qualified-source EXCLUDE_FROM_ALL)
 
 add_executable(stage_a_primary_exactness_probe primary_exactness_probe.cpp)
