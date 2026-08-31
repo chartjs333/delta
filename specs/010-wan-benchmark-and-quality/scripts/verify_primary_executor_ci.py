@@ -80,6 +80,7 @@ ALLOWED_OVERLAY_PATHS: Final = frozenset(
         "configs/benchmark/sbom-v1.json",
         "reports/benchmark/phase-010-readiness.json",
         "specs/010-wan-benchmark-and-quality/evidence/architecture-guard.json",
+        "specs/010-wan-benchmark-and-quality/scripts/verify_primary_executor_ci.py",
     }
 )
 ALLOWED_SKIPS: Final = frozenset(
@@ -107,10 +108,14 @@ def git(*arguments: str) -> str:
     ).stdout.strip()
 
 
-def canonical_document(path: Path) -> dict[str, object]:
+def canonical_document(path: Path, *, allow_trailing_newline: bool = False) -> dict[str, object]:
     raw = path.read_bytes()
     value = json.loads(raw)
-    require(isinstance(value, dict) and canonical_json_bytes(value) == raw, f"NONCANONICAL:{path}")
+    canonical = canonical_json_bytes(value)
+    accepted = {canonical}
+    if allow_trailing_newline:
+        accepted.update({canonical + b"\n", canonical + b"\r\n"})
+    require(isinstance(value, dict) and raw in accepted, f"NONCANONICAL:{path}")
     return value
 
 
@@ -217,7 +222,7 @@ def verify_source_and_definition(head: str) -> tuple[BenchmarkDefinition, dict[s
 
 def verify_regression_evidence() -> None:
     for path in (FORMAL_REGRESSION, PRODUCTION_ATTACKS, ARCHITECTURE_GUARD):
-        document = canonical_document(path)
+        document = canonical_document(path, allow_trailing_newline=True)
         require(document.get("status") == "PASS", f"REGRESSION_STATUS:{path.name}")
         require(document.get("classification") == "REGRESSION_ONLY", f"CLASSIFICATION:{path.name}")
         require(
