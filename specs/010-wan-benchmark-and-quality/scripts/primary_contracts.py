@@ -36,6 +36,7 @@ FEATURE_REPORT_IDS: Final = (
     "sha256:95b312b45f3c2df4293ceaa0cbb16dd1e89c5d12a86c890211353a45798516ef",
 )
 CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
+PREDECESSOR_DEFINITION_SEAL: Final = "620d83e47cd448615f1fa08cc3fc379afaaf3c42"
 
 
 def require(condition: bool, reason: str) -> None:
@@ -642,6 +643,54 @@ def attestation(definition: BenchmarkDefinition) -> dict[str, object]:
     return value.to_dict()
 
 
+def supersession(
+    definition: BenchmarkDefinition, attestation_value: dict[str, object]
+) -> dict[str, object]:
+    predecessor_value = json.loads(
+        tracked_bytes(PREDECESSOR_DEFINITION_SEAL, "configs/benchmark/primary.yaml")
+    )
+    predecessor_attestation = json.loads(
+        tracked_bytes(
+            PREDECESSOR_DEFINITION_SEAL,
+            "configs/benchmark/primary-definition-attestation.json",
+        )
+    )
+    require(
+        isinstance(predecessor_value, dict) and isinstance(predecessor_attestation, dict),
+        "PREDECESSOR_DEFINITION_INVALID",
+    )
+    predecessor = BenchmarkDefinition.from_dict(predecessor_value)
+    changed_fields = sorted(
+        key
+        for key in set(predecessor_value) | set(definition.raw)
+        if predecessor_value.get(key) != definition.raw.get(key)
+    )
+    require(
+        changed_fields == ["sbom_id", "source_commit", "source_tree"],
+        f"PRIMARY_DEFINITION_SUPERSESSION_DRIFT:{changed_fields}",
+    )
+    return {
+        "changed_fields": changed_fields,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "predecessor": {
+            "benchmark_definition_id": predecessor.content_id,
+            "definition_attestation_id": object_id(predecessor_attestation),
+            "seal_commit": PREDECESSOR_DEFINITION_SEAL,
+        },
+        "primary_results_exist": False,
+        "replacement": {
+            "benchmark_definition_id": definition.content_id,
+            "definition_attestation_id": object_id(attestation_value),
+            "source_commit": definition.source_commit,
+            "source_tree": definition.source_tree,
+        },
+        "schema_version": "1.0.0",
+        "scientific_fields_unchanged": True,
+        "status": "SUPERSEDED_BEFORE_PRIMARY_RESULTS",
+        "type_name": "BENCHMARK_DEFINITION_SUPERSESSION",
+    }
+
+
 def expected_outputs(commit: str) -> dict[Path, bytes]:
     dependencies = external_dependencies()
     workload_document = workload()
@@ -659,8 +708,10 @@ def expected_outputs(commit: str) -> dict[Path, bytes]:
     documents["sbom-v1.json"] = sbom(commit, dependencies)
     definition_value = definition_document(commit, documents)
     definition = BenchmarkDefinition.from_dict(definition_value)
+    attestation_value = attestation(definition)
     documents["primary.yaml"] = definition_value
-    documents["primary-definition-attestation.json"] = attestation(definition)
+    documents["primary-definition-attestation.json"] = attestation_value
+    documents["primary-definition-supersession.json"] = supersession(definition, attestation_value)
     return {OUTPUT_ROOT / name: canonical_json_bytes(value) for name, value in documents.items()}
 
 

@@ -23,6 +23,7 @@ from deltatorrent.benchmark.primary_executor import (
     PrimaryExecutionSet,
     PrimaryExecutionStore,
     build_execution_set,
+    identify_runner,
 )
 from deltatorrent.benchmark.report import parse_machine_report
 from deltatorrent.benchmark.review import GovernanceAttestation
@@ -63,11 +64,18 @@ def configure(parser: argparse.ArgumentParser) -> None:
     )
     _primary_arguments(execute_primary)
     execute_primary.add_argument("--timeout-seconds", type=int, default=86_400)
+    execute_primary.add_argument("--runner-id", required=True)
     execute_primary.add_argument(
         "runner",
         nargs=argparse.REMAINDER,
         help="runner command; receives PLAN_PATH and OBSERVATION_OUTPUT_PATH",
     )
+
+    identify_primary_runner = commands.add_parser(
+        "identify-primary-runner",
+        help="hash every runner file argument and the secret-free execution environment",
+    )
+    identify_primary_runner.add_argument("runner", nargs=argparse.REMAINDER)
 
     collect_primary = commands.add_parser(
         "collect-primary", help="admit externally measured primary observations create-only"
@@ -241,6 +249,7 @@ def execute(args: argparse.Namespace) -> int:
             runs = PrimaryExecutionStore(args.output).execute_all(
                 execution,
                 runner,
+                runner_id=args.runner_id,
                 timeout_seconds=args.timeout_seconds,
             )
             print(
@@ -250,6 +259,21 @@ def execute(args: argparse.Namespace) -> int:
                         "execution_index_id": execution.content_id,
                         "run_count": len(runs),
                         "status": "RUNS_ADMITTED_NOT_EVALUATED",
+                    },
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.benchmark_command == "identify-primary-runner":
+            runner = tuple(args.runner)
+            if runner[:1] == ("--",):
+                runner = runner[1:]
+            print(
+                json.dumps(
+                    {
+                        "runner_id": identify_runner(runner),
+                        "status": "IDENTIFIED_NOT_EXECUTED",
                     },
                     separators=(",", ":"),
                     sort_keys=True,

@@ -6,11 +6,15 @@ import hashlib
 import json
 import os
 import re
+import shutil
+import signal
 import subprocess
 import tempfile
+import threading
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, BinaryIO, Final
 
 from deltatorrent.benchmark.arms import ArmSpec, MetricSample, RunObservation
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID, BenchmarkDefinition
@@ -21,6 +25,7 @@ from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content
 
 _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
 _COMMIT_ID: Final = re.compile(r"^[0-9a-f]{40}$")
+_RUNNER_CAPTURE_LIMIT: Final = 65_536
 _ENVIRONMENT_FIELDS: Final = {
     "abi_descriptor_id",
     "accelerator",
@@ -120,6 +125,8 @@ def _content_ids(value: object, code: str, *, minimum: int = 0) -> tuple[str, ..
 
 
 def _canonical_object(path: Path, code: str) -> tuple[dict[str, Any], bytes]:
+    if path.is_symlink() or not path.is_file():
+        raise _fail(code)
     try:
         raw = path.read_bytes()
         value = json.loads(raw)
@@ -128,6 +135,244 @@ def _canonical_object(path: Path, code: str) -> tuple[dict[str, Any], bytes]:
     if not isinstance(value, dict) or canonical_json_bytes(value) != raw:
         raise _fail(code)
     return value, raw
+
+
+def _safe_store_path(root: Path, path: Path) -> Path:
+    root = root.resolve()
+    candidate = path.absolute()
+    try:
+        relative = candidate.relative_to(root)
+    except ValueError as exc:
+        raise _fail("PRIMARY_EXECUTION_STORE_PATH_ESCAPE") from exc
+    cursor = root
+    for part in relative.parts:
+        cursor /= part
+        if cursor.is_symlink():
+            raise _fail("PRIMARY_EXECUTION_STORE_SYMLINK_FORBIDDEN")
+    return candidate
+
+
+def _fsync_directory(path: Path) -> None:
+    if os.name != "posix":
+        return
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _publish_create_only(root: Path, path: Path, value: bytes) -> None:
+    target = _safe_store_path(root, path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    _safe_store_path(root, target)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=".publish.", suffix=".tmp", dir=target.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(value)
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            os.link(temporary, target, follow_symlinks=False)
+        except FileExistsError:
+            if target.is_symlink() or not target.is_file():
+                raise _fail("PRIMARY_EXECUTION_IMMUTABLE_CONFLICT") from None
+            try:
+                existing = target.read_bytes()
+            except OSError as exc:
+                raise _fail("PRIMARY_EXECUTION_STORE_READ_FAILED") from exc
+            if existing != value:
+                raise _fail("PRIMARY_EXECUTION_IMMUTABLE_CONFLICT") from None
+            return
+        _fsync_directory(target.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+@dataclass(frozen=True, slots=True)
+class _RunnerFile:
+    argument_index: int
+    path: Path
+    content_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedRunner:
+    command: tuple[str, ...]
+    files: tuple[_RunnerFile, ...]
+    environment: Mapping[str, str]
+    content_id: str
+
+
+def _safe_runner_environment() -> dict[str, str]:
+    environment = {
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PYTHONHASHSEED": "0",
+    }
+    if os.name == "nt":
+        system_root = os.environ.get("SystemRoot", r"C:\Windows")
+        environment.update({"SYSTEMROOT": system_root, "WINDIR": system_root})
+    return environment
+
+
+def _prepare_runner(runner: tuple[str, ...]) -> _PreparedRunner:
+    if not runner or any(not item for item in runner):
+        raise _fail("PRIMARY_RUNNER_COMMAND_INVALID")
+    executable = shutil.which(runner[0])
+    if executable is None:
+        candidate = Path(runner[0]).resolve(strict=False)
+        if candidate.is_file():
+            executable = str(candidate)
+    if executable is None:
+        raise _fail("PRIMARY_RUNNER_EXECUTABLE_INVALID")
+    command = list(runner)
+    command[0] = str(Path(executable).resolve())
+    files: list[_RunnerFile] = []
+    identity_arguments: list[dict[str, object]] = []
+    for index, argument in enumerate(command):
+        candidate = Path(argument)
+        if index == 0 or candidate.is_file():
+            if candidate.is_symlink():
+                raise _fail("PRIMARY_RUNNER_DEPENDENCY_INVALID")
+            resolved = candidate.resolve()
+            if not resolved.is_file():
+                raise _fail("PRIMARY_RUNNER_DEPENDENCY_INVALID")
+            content_id = hash_file(resolved)
+            files.append(_RunnerFile(index, resolved, content_id))
+            command[index] = str(resolved)
+            identity_arguments.append(
+                {"argument_index": index, "kind": "FILE", "sha256": content_id}
+            )
+        else:
+            identity_arguments.append(
+                {"argument_index": index, "kind": "LITERAL", "value": argument}
+            )
+    environment = _safe_runner_environment()
+    document = {
+        "arguments": identity_arguments,
+        "environment": environment,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "schema_version": "1.0.0",
+        "stderr_retained_bytes": 0,
+        "stdout_retained_bytes": 0,
+        "type_name": "PRIMARY_RUNNER_IDENTITY",
+    }
+    return _PreparedRunner(
+        tuple(command),
+        tuple(files),
+        environment,
+        sha256_content_id(canonical_json_bytes(document)),
+    )
+
+
+def identify_runner(runner: tuple[str, ...]) -> str:
+    """Identify every file argument plus the secret-free environment before execution."""
+    return _prepare_runner(runner).content_id
+
+
+@dataclass(slots=True)
+class _BoundedCapture:
+    digest: Any
+    total_bytes: int = 0
+
+    @classmethod
+    def create(cls) -> _BoundedCapture:
+        return cls(hashlib.sha256())
+
+    def drain(self, stream: BinaryIO) -> None:
+        while True:
+            chunk = stream.read(8192)
+            if not chunk:
+                return
+            self.digest.update(chunk)
+            self.total_bytes += len(chunk)
+
+    @property
+    def content_id(self) -> str:
+        return f"sha256:{self.digest.hexdigest()}"
+
+
+@dataclass(frozen=True, slots=True)
+class _ProcessResult:
+    returncode: int
+    timed_out: bool
+    stdout: _BoundedCapture
+    stderr: _BoundedCapture
+
+
+def _terminate_process_tree(process: subprocess.Popen[bytes]) -> None:
+    if os.name == "posix":
+        killpg = getattr(os, "killpg", None)
+        sigkill = getattr(signal, "SIGKILL", 9)
+        if not callable(killpg):
+            raise _fail("PRIMARY_RUNNER_PROCESS_GROUP_UNAVAILABLE")
+        try:
+            killpg(process.pid, sigkill)
+        except ProcessLookupError:
+            pass
+    else:
+        taskkill = shutil.which("taskkill")
+        if taskkill is not None:
+            subprocess.run(
+                (taskkill, "/PID", str(process.pid), "/T", "/F"),
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        if process.poll() is None:
+            process.kill()
+
+
+def _run_external(
+    prepared: _PreparedRunner,
+    plan_path: Path,
+    output_path: Path,
+    *,
+    cwd: Path,
+    timeout_seconds: int,
+) -> _ProcessResult:
+    creationflags = 0
+    start_new_session = os.name == "posix"
+    if os.name == "nt":
+        creationflags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    process = subprocess.Popen(
+        (*prepared.command, str(plan_path), str(output_path)),
+        cwd=cwd,
+        env=dict(prepared.environment),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=start_new_session,
+        creationflags=creationflags,
+    )
+    if process.stdout is None or process.stderr is None:
+        _terminate_process_tree(process)
+        raise _fail("PRIMARY_RUNNER_CAPTURE_FAILED")
+    stdout = _BoundedCapture.create()
+    stderr = _BoundedCapture.create()
+    threads = (
+        threading.Thread(target=stdout.drain, args=(process.stdout,), daemon=True),
+        threading.Thread(target=stderr.drain, args=(process.stderr,), daemon=True),
+    )
+    for thread in threads:
+        thread.start()
+    timed_out = False
+    try:
+        process.wait(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        _terminate_process_tree(process)
+        process.wait()
+    finally:
+        _terminate_process_tree(process)
+        for thread in threads:
+            thread.join(timeout=5)
+        for stream in (process.stdout, process.stderr):
+            stream.close()
+    return _ProcessResult(process.returncode, timed_out, stdout, stderr)
 
 
 @dataclass(frozen=True, slots=True)
@@ -450,45 +695,26 @@ def parse_observation(
     return admitted, raw
 
 
-def _write_create_only(path: Path, value: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except FileExistsError:
-        try:
-            existing = path.read_bytes()
-        except OSError as exc:
-            raise _fail("PRIMARY_EXECUTION_STORE_READ_FAILED") from exc
-        if existing != value:
-            raise _fail("PRIMARY_EXECUTION_IMMUTABLE_CONFLICT") from None
-        return
-    try:
-        with os.fdopen(descriptor, "wb") as stream:
-            stream.write(value)
-            stream.flush()
-            os.fsync(stream.fileno())
-    except BaseException:
-        path.unlink(missing_ok=True)
-        raise
-
-
 class PrimaryExecutionStore:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
         self.root.mkdir(parents=True, exist_ok=True)
 
     def stage(self, execution: PrimaryExecutionSet) -> Path:
-        _write_create_only(
-            self.root / "environment-manifest.json", execution.environment.canonical_bytes
+        _publish_create_only(
+            self.root,
+            self.root / "environment-manifest.json",
+            execution.environment.canonical_bytes,
         )
         for plan in execution.plans:
             digest = plan.content_id.removeprefix("sha256:")
-            _write_create_only(
+            _publish_create_only(
+                self.root,
                 self.root / "plans" / f"{digest}.json",
                 canonical_json_bytes(plan_record(plan)),
             )
         target = self.root / "execution-index.json"
-        _write_create_only(target, canonical_json_bytes(execution.index))
+        _publish_create_only(self.root, target, canonical_json_bytes(execution.index))
         return target
 
     def plan_path(self, plan: ExecutionPlan) -> Path:
@@ -497,9 +723,56 @@ class PrimaryExecutionStore:
     def observation_path(self, plan: ExecutionPlan) -> Path:
         return self.root / "runs" / plan.content_id.removeprefix("sha256:") / "observation.json"
 
+    def receipt_path(self, plan: ExecutionPlan, runner_id: str, status: str) -> Path:
+        runner_digest = _content_id(runner_id, "PRIMARY_RUNNER_ID_INVALID").removeprefix("sha256:")
+        if not re.fullmatch(r"[A-Z_]+", status):
+            raise _fail("PRIMARY_RUNNER_RECEIPT_STATUS_INVALID")
+        return (
+            self.root
+            / "runs"
+            / plan.content_id.removeprefix("sha256:")
+            / "receipts"
+            / f"{runner_digest}.{status.lower()}.json"
+        )
+
+    def _record_receipt(
+        self,
+        plan: ExecutionPlan,
+        runner_id: str,
+        result: _ProcessResult,
+        status: str,
+        *,
+        observation_id: str | None = None,
+    ) -> None:
+        exit_code = result.returncode if result.returncode >= 0 else None
+        termination_signal = -result.returncode if result.returncode < 0 else None
+        document = {
+            "execution_plan_id": plan.content_id,
+            "exit_code": exit_code,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "observation_id": observation_id,
+            "runner_id": runner_id,
+            "schema_version": "1.0.0",
+            "signal": termination_signal,
+            "status": status,
+            "stderr_bytes": result.stderr.total_bytes,
+            "stderr_sha256": result.stderr.content_id,
+            "stderr_truncated": result.stderr.total_bytes > _RUNNER_CAPTURE_LIMIT,
+            "stdout_bytes": result.stdout.total_bytes,
+            "stdout_sha256": result.stdout.content_id,
+            "stdout_truncated": result.stdout.total_bytes > _RUNNER_CAPTURE_LIMIT,
+            "timed_out": result.timed_out,
+            "type_name": "PRIMARY_RUNNER_RECEIPT",
+        }
+        _publish_create_only(
+            self.root,
+            self.receipt_path(plan, runner_id, status),
+            canonical_json_bytes(document),
+        )
+
     def admit_file(self, plan: ExecutionPlan, path: Path) -> RunObservation:
         observation, raw = parse_observation(path, plan)
-        _write_create_only(self.observation_path(plan), raw)
+        _publish_create_only(self.root, self.observation_path(plan), raw)
         return observation
 
     def collect(
@@ -546,10 +819,10 @@ class PrimaryExecutionStore:
         plan: ExecutionPlan,
         runner: tuple[str, ...],
         *,
+        runner_id: str,
         timeout_seconds: int,
     ) -> RunObservation:
-        if not runner or any(not item for item in runner):
-            raise _fail("PRIMARY_RUNNER_COMMAND_INVALID")
+        _content_id(runner_id, "PRIMARY_RUNNER_ID_INVALID")
         if timeout_seconds < 1:
             raise _fail("PRIMARY_RUNNER_TIMEOUT_INVALID")
         plan_path = self.plan_path(plan)
@@ -560,8 +833,12 @@ class PrimaryExecutionStore:
         if existing.is_file():
             observation, _ = parse_observation(existing, plan)
             return observation
+        prepared = _prepare_runner(runner)
+        if prepared.content_id != runner_id:
+            raise _fail("PRIMARY_RUNNER_ID_MISMATCH")
         run_dir = existing.parent
         run_dir.mkdir(parents=True, exist_ok=True)
+        _safe_store_path(self.root, run_dir)
         descriptor, temporary_name = tempfile.mkstemp(
             prefix=".observation.", suffix=".tmp", dir=run_dir
         )
@@ -570,19 +847,37 @@ class PrimaryExecutionStore:
         temporary.unlink(missing_ok=True)
         try:
             try:
-                process = subprocess.run(
-                    (*runner, str(plan_path), str(temporary)),
-                    capture_output=True,
-                    check=False,
-                    timeout=timeout_seconds,
+                result = _run_external(
+                    prepared,
+                    plan_path,
+                    temporary,
+                    cwd=self.root,
+                    timeout_seconds=timeout_seconds,
                 )
-            except (OSError, subprocess.TimeoutExpired) as exc:
+            except OSError as exc:
                 raise _fail("PRIMARY_RUNNER_EXECUTION_FAILED") from exc
-            if process.returncode != 0:
-                raise _fail(f"PRIMARY_RUNNER_EXIT_{process.returncode}")
+            for dependency in prepared.files:
+                if hash_file(dependency.path) != dependency.content_id:
+                    self._record_receipt(plan, runner_id, result, "DEPENDENCY_MUTATED")
+                    raise _fail("PRIMARY_RUNNER_DEPENDENCY_MUTATED")
+            if result.timed_out:
+                self._record_receipt(plan, runner_id, result, "TIMEOUT")
+                raise _fail("PRIMARY_RUNNER_TIMEOUT")
+            if result.returncode != 0:
+                self._record_receipt(plan, runner_id, result, "FAILED")
+                raise _fail(f"PRIMARY_RUNNER_EXIT_{result.returncode}")
             if not temporary.is_file():
+                self._record_receipt(plan, runner_id, result, "OUTPUT_MISSING")
                 raise _fail("PRIMARY_RUNNER_OBSERVATION_MISSING")
-            return self.admit_file(plan, temporary)
+            observation = self.admit_file(plan, temporary)
+            self._record_receipt(
+                plan,
+                runner_id,
+                result,
+                "PASS",
+                observation_id=sha256_content_id(temporary.read_bytes()),
+            )
+            return observation
         finally:
             temporary.unlink(missing_ok=True)
 
@@ -591,18 +886,25 @@ class PrimaryExecutionStore:
         execution: PrimaryExecutionSet,
         runner: tuple[str, ...],
         *,
+        runner_id: str,
         timeout_seconds: int,
     ) -> tuple[RunObservation, ...]:
         self.stage(execution)
         return tuple(
-            self.execute_plan(plan, runner, timeout_seconds=timeout_seconds)
+            self.execute_plan(
+                plan,
+                runner,
+                runner_id=runner_id,
+                timeout_seconds=timeout_seconds,
+            )
             for plan in execution.plans
         )
 
 
 def write_observation(path: Path, plan: ExecutionPlan, observation: RunObservation) -> None:
     """Runner helper used by trusted adapters to emit exactly one canonical observation."""
-    _write_create_only(path, canonical_json_bytes(observation_record(plan, observation)))
+    root = path.parent.resolve()
+    _publish_create_only(root, path, canonical_json_bytes(observation_record(plan, observation)))
 
 
 def verify_plan_record(path: Path, plan: ExecutionPlan) -> str:

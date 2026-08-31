@@ -56,20 +56,28 @@ Netty, Python and dependency identities frozen by the definition.
 An approved measured runner can execute the matrix through the explicit process boundary:
 
 ```text
+uv run delta benchmark identify-primary-runner -- /approved/primary-runner
+
 uv run delta benchmark execute-primary \
+  --timeout-seconds 86400 \
+  --runner-id sha256:<identified-runner-id> \
   configs/benchmark/primary.yaml \
   configs/benchmark/primary-definition-attestation.json \
   configs/benchmark/arms-v1.json \
   /approved/environment-manifest.json \
   /evidence/primary-execution \
-  --timeout-seconds 86400 -- /approved/primary-runner
+  -- /approved/primary-runner
 ```
 
 For every plan the executor appends two arguments to the runner command: the immutable plan path
 and a fresh observation-output path. The runner must write one canonical
 `PRIMARY_RUN_OBSERVATION` containing the measured `RUN_MANIFEST` and metric samples, then return
-zero. Identity drift, a noncanonical observation, incomplete distributed certificate evidence,
-timeout, nonzero exit, or an attempted overwrite fails closed. Successfully admitted runs remain
+zero. The runner identity binds every file argument and a minimal secret-free environment; file
+hashes are checked again after process termination. Stdout/stderr are drained with bounded memory
+and retained only as byte counts and hashes. A hard timeout terminates the process tree, and an
+immutable receipt records exit code or signal. Identity drift, a noncanonical observation,
+incomplete distributed certificate evidence, timeout, nonzero exit, dependency mutation, symlink
+escape, or an attempted overwrite fails closed. Successfully admitted runs remain
 `RUNS_ADMITTED_NOT_EVALUATED`; they do not constitute `GO` until the separate quality, exactness,
 WAN/resilience, evidence, and ResultQC gates pass.
 
