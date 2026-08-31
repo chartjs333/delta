@@ -60,6 +60,7 @@ CERTIFICATES_FINAL := specs/008-certificates-and-consensus/scripts/verify_final_
 BENCHMARK_PREFLIGHT := specs/010-wan-benchmark-and-quality/scripts/verify_preflight.py
 BENCHMARK_CONTRACTS := specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py
 BENCHMARK_PRIMARY := specs/010-wan-benchmark-and-quality/scripts/primary_contracts.py
+BENCHMARK_STAGE_B_PRERUN := specs/010-wan-benchmark-and-quality/scripts/verify_stage_b_scientific_prerun.py
 BENCHMARK_RUNTIME := specs/010-wan-benchmark-and-quality/scripts/verify_runtime_adapters.py
 BENCHMARK_ATTACKS := specs/010-wan-benchmark-and-quality/scripts/verify_production_attacks.py
 BENCHMARK_FORMAL := specs/010-wan-benchmark-and-quality/scripts/verify_formal_regression.py
@@ -327,6 +328,7 @@ benchmark-contracts:
 	$(UV) run python $(BENCHMARK_PREFLIGHT) --check-only
 	$(UV) run python $(BENCHMARK_CONTRACTS)
 	$(UV) run python $(BENCHMARK_PRIMARY)
+	$(UV) run python $(BENCHMARK_STAGE_B_PRERUN) --check-only
 	$(UV) run pytest specs/010-wan-benchmark-and-quality/tests
 
 benchmark-runtime: benchmark-contracts

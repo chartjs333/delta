@@ -256,6 +256,11 @@ jobs:
             python3 specs/010-wan-benchmark-and-quality/scripts/stage_a_primary_exactness.py \
               verify-recorded
           fi
+          if test -f specs/010-wan-benchmark-and-quality/evidence/primary-scientific-prerun.json; then
+            python3 \
+              specs/010-wan-benchmark-and-quality/scripts/verify_stage_b_scientific_prerun.py \
+              --check-only
+          fi
           test ! -f reports/benchmark/primary/benchmark-result-qc.json
           echo "Primary scientific/WAN result remains fail-closed until measured evidence exists."
 
