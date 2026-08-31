@@ -1,0 +1,102 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:gpu-environment-lock-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "GPU_ENVIRONMENT_LOCK"
+    },
+    "cpu_portable_lock_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "cuda_runtime_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "image_scope": {
+      "const": "PINNED_CUDA_BASE_PLUS_HASH_LOCKED_PYTHON_ENVIRONMENT"
+    },
+    "immutable_resolution": {
+      "const": true
+    },
+    "oci_image_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "platform_locks": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "target": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "sha256",
+          "target"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "python": {
+      "const": "3.12.1"
+    },
+    "required_packages": {
+      "minProperties": 6,
+      "type": "object"
+    },
+    "requirements_input_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sbom_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scientific_use": {
+      "const": true
+    }
+  },
+  "required": [
+    "cpu_portable_lock_id",
+    "cuda_runtime_id",
+    "formal_semantics_id",
+    "image_scope",
+    "immutable_resolution",
+    "oci_image_digest",
+    "platform_locks",
+    "policy_id",
+    "python",
+    "required_packages",
+    "requirements_input_id",
+    "sbom_id",
+    "schema_version",
+    "scientific_use",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 gpu-environment-lock-v1"
+}

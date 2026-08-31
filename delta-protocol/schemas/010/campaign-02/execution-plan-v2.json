@@ -1,0 +1,234 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:execution-plan-v2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "type_name": {
+      "const": "PRIMARY_EXECUTION_PLAN"
+    },
+    "arm_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "dataset_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "definition_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evaluation_implementation_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evaluation_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evaluation_runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "execution_authorization_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "execution_class": {
+      "enum": [
+        "NON_PRIMARY_SMOKE",
+        "PRIMARY_MEASURED"
+      ]
+    },
+    "hardware_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "model_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "optimizer_steps_per_ticket": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "processed_tokens": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "repetition": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "seed": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "ticket_count": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "tickets": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "domain_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "optimizer_steps": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ordinal": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ticket_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "tokens_per_optimizer_step": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "tokens_per_ticket": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "domain_id",
+          "optimizer_steps",
+          "ordinal",
+          "ticket_id",
+          "tokens_per_optimizer_step",
+          "tokens_per_ticket"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "tokenizer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "tokens_per_optimizer_step": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "tokens_per_ticket": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "total_tokens_per_arm_run": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "workload_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "writer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "arm_id",
+    "benchmark_definition_id",
+    "campaign_id",
+    "dataset_ids",
+    "definition_attestation_id",
+    "environment_id",
+    "evaluation_implementation_ids",
+    "evaluation_profile_ids",
+    "evaluation_runner_id",
+    "execution_authorization_id",
+    "execution_class",
+    "formal_semantics_id",
+    "hardware_id",
+    "image_id",
+    "model_id",
+    "optimizer_steps_per_ticket",
+    "processed_tokens",
+    "repetition",
+    "runner_id",
+    "schema_version",
+    "seed",
+    "source_commit",
+    "source_tree",
+    "ticket_count",
+    "tickets",
+    "tokenizer_id",
+    "tokens_per_optimizer_step",
+    "tokens_per_ticket",
+    "total_tokens_per_arm_run",
+    "type_name",
+    "workload_id",
+    "writer_id"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 execution-plan-v2"
+}

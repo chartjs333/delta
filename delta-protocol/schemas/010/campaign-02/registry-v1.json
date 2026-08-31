@@ -1,0 +1,122 @@
+{
+  "artifacts": [
+    {
+      "id": "SCHEMA-CAMPAIGN02-WORKLOAD-010-V2",
+      "path": "schemas/010/campaign-02/workload-v2.json",
+      "sha256": "7d3f30556f97617d59a83f6137fa7e0cd1ae8ce6f61b96ab010cc32580ece492"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
+      "path": "schemas/010/campaign-02/execution-plan-v2.json",
+      "sha256": "38afcba533a1cc42886e6c3dd3d1b77a1abbf084c6148359f6e9cbe55eb95a50"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
+      "path": "schemas/010/campaign-02/evaluator-profile-v1.json",
+      "sha256": "164f6fbee00c23f7c0dd7f285e5cc4d89811f591146fcbd820bcac8434efc93f"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-MEASURED-EVALUATION-010-V1",
+      "path": "schemas/010/campaign-02/measured-evaluation-v1.json",
+      "sha256": "34d13279b98cb2d42c5edf27a409a670eea880016c06ad42032e7e1f87e90d02"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-COMPONENT-IDENTITY-010-V1",
+      "path": "schemas/010/campaign-02/component-identity-v1.json",
+      "sha256": "2ba1ac988f8e38ac2fa931f0aa19f4525da7437402843c0ccd7b32d817fe7cf5"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
+      "path": "schemas/010/campaign-02/observation-v2.json",
+      "sha256": "75a333b763054f8950b4830016746e8fdfe894f8db7ff696e56a668df5c18cdf"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
+      "path": "schemas/010/campaign-02/observation-receipt-v1.json",
+      "sha256": "bbaf01a0f29b0726b34bbe97fa16191787b61a9abcb7f7cd0a4b3670cc4794aa"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
+      "path": "schemas/010/campaign-02/gpu-environment-lock-v1.json",
+      "sha256": "414d0a3f8085b400fd6efd556e56109dfdd8dc93de920282670c43d70bd3e1f2"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-HELLASWAG_NEGATIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/hellaswag-negative-v1.json",
+      "sha256": "62be9fa8b7c7795829f8bef3ad5d418c161e1e23f77244990864a63114424bf0"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-HELLASWAG_POSITIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/hellaswag-positive-v1.json",
+      "sha256": "5c89ddad12cdfeda23efb56a9e1009a18181402eb5304d883d7e2ba6b202c4d8"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-LAMBADA_NEGATIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/lambada-negative-v1.json",
+      "sha256": "e2d168f5955fe638fac2bcb4c4d9371d3a45a0a7d76f046c671fa9b1db424e1b"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-LAMBADA_POSITIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/lambada-positive-v1.json",
+      "sha256": "1d52afea60bef362fd9ae774b10b656d71a8dd579240fba9bf473141e1d2bc15"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-WIKITEXT_NEGATIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/wikitext-negative-v1.json",
+      "sha256": "910965b6e150b16ecf30fc6a2b44a52d7361e9c5765a6bcc9105eabbb15a7fa6"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-WIKITEXT_POSITIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/wikitext-positive-v1.json",
+      "sha256": "d21f12390300b3f85eec819d67947c4bfb589eab9cb5caa20b086cb321fe8feb"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "media_types": [
+    {
+      "id": "MEDIA-CAMPAIGN02-WORKLOAD-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-WORKLOAD-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.workload-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-EXECUTION-PLAN-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.execution-plan-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-EVALUATOR-PROFILE-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.evaluator-profile-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-MEASURED-EVALUATION-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-MEASURED-EVALUATION-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.measured-evaluation-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-COMPONENT-IDENTITY-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-COMPONENT-IDENTITY-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.component-identity-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-OBSERVATION-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.observation-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-OBSERVATION-RECEIPT-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.observation-receipt-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.gpu-environment-lock-v1+json;version=1"
+    }
+  ],
+  "registry_version": "010.2.0-remediation",
+  "schema_version": "1.0.0",
+  "semantic_completeness_claimed": false
+}

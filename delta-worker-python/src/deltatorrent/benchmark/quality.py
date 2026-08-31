@@ -5,8 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from deltatorrent.benchmark.arms import RunObservation
+from deltatorrent.benchmark.campaign02 import CampaignExecutionPlan
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID, BenchmarkDefinition
+from deltatorrent.benchmark.evaluators.common import MeasuredEvaluation, MetricValue
 from deltatorrent.benchmark.reconciliation import ReconciliationResult
+from deltatorrent.protocol.canonical import canonical_json_bytes
 
 
 class QualityError(ValueError):
@@ -19,12 +22,74 @@ class QualityResult:
     status: str
 
 
+@dataclass(frozen=True, slots=True)
+class VerifiedMeasuredOutput:
+    """Evaluator-produced, identity-checked inputs safe for later quality aggregation."""
+
+    execution_plan_id: str
+    evaluation_ids: tuple[str, ...]
+    metrics: tuple[MetricValue, ...]
+
+
+def verify_measured_outputs(
+    plan: CampaignExecutionPlan,
+    evaluations: tuple[MeasuredEvaluation, ...],
+) -> VerifiedMeasuredOutput:
+    """Verify measured evaluator outputs without recomputing or accepting manual metrics."""
+    if len(evaluations) != len(plan.evaluation_profile_ids):
+        raise QualityError("QUALITY_MEASURED_EVALUATION_SET_INCOMPLETE")
+    required = {"wikitext", "lambada", "hellaswag"}
+    if {item.evaluator_id for item in evaluations} != required:
+        raise QualityError("QUALITY_MEASURED_EVALUATOR_SET_INVALID")
+    metrics: list[MetricValue] = []
+    evaluation_ids: list[str] = []
+    expected = zip(
+        plan.dataset_ids,
+        plan.evaluation_profile_ids,
+        plan.evaluation_implementation_ids,
+        evaluations,
+        strict=True,
+    )
+    for dataset_id, profile_id, implementation_id, evaluation in expected:
+        context = evaluation.context
+        if (
+            context.execution_plan_id != plan.content_id
+            or context.evaluator_profile_id != profile_id
+            or context.environment_id != plan.environment_id
+            or context.tokenizer_id != plan.tokenizer_id
+            or context.dataset_id != dataset_id
+            or context.evaluator_implementation_id != implementation_id
+            or canonical_json_bytes(evaluation.document) != evaluation.canonical_bytes
+            or evaluation.document.get("source_class") != "MEASURED_MODEL_INFERENCE"
+        ):
+            raise QualityError("QUALITY_MEASURED_EVALUATION_IDENTITY_INVALID")
+        evaluation_ids.append(evaluation.content_id)
+        metrics.extend(evaluation.metrics)
+    if len({item.metric_id for item in metrics}) != len(metrics):
+        raise QualityError("QUALITY_MEASURED_METRIC_DUPLICATE")
+    required_metrics = {
+        "validation_loss_micro",
+        "validation_perplexity_micro",
+        "per_domain_wikitext_loss_micro",
+        "downstream_lambada_accuracy_ppm",
+        "post_training_hellaswag_accuracy_ppm",
+    }
+    if not required_metrics <= {item.metric_id for item in metrics}:
+        raise QualityError("QUALITY_MEASURED_METRIC_SET_INCOMPLETE")
+    return VerifiedMeasuredOutput(
+        execution_plan_id=plan.content_id,
+        evaluation_ids=tuple(evaluation_ids),
+        metrics=tuple(metrics),
+    )
+
+
 def analyze_quality(
     definition: BenchmarkDefinition,
     definition_id: str,
     runs: tuple[RunObservation, ...],
     reconciliation: ReconciliationResult,
 ) -> QualityResult:
+    """Legacy Campaign 01 aggregation; Campaign 02 uses ``verify_measured_outputs`` first."""
     if reconciliation.status != "PASS":
         raise QualityError("QUALITY_RECONCILIATION_NOT_PASS")
     samples: dict[str, dict[str, list[int]]] = {}

@@ -1,0 +1,104 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:component-identity-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "PRIMARY_COMPONENT_IDENTITY"
+    },
+    "component": {
+      "enum": [
+        "PRIMARY_EVALUATION_RUNNER",
+        "PRIMARY_OBSERVATION_WRITER",
+        "PRIMARY_SCIENTIFIC_RUNNER"
+      ]
+    },
+    "create_only_store_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "executable_hashes": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "content_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "content_id",
+          "path"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "hardware_compatibility_class_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "model_data_staging_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "output_schema_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "timeout_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "component",
+    "create_only_store_policy_id",
+    "environment_id",
+    "executable_hashes",
+    "formal_semantics_id",
+    "hardware_compatibility_class_id",
+    "image_id",
+    "model_data_staging_policy_id",
+    "output_schema_ids",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "timeout_policy_id",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 component-identity-v1"
+}

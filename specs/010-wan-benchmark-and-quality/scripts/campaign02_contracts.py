@@ -1,0 +1,426 @@
+"""Generate Campaign 02 remediation schemas and registry entries."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from typing import Final
+
+ROOT: Final = Path(__file__).resolve().parents[3]
+FORMAL_ID: Final = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+SCHEMA_ROOT: Final = ROOT / "delta-protocol/schemas/010/campaign-02"
+REGISTRY_PATH: Final = SCHEMA_ROOT / "registry-v1.json"
+
+SCHEMAS: Final = {
+    "workload-v2": ("SCHEMA-CAMPAIGN02-WORKLOAD-010-V2", "CAMPAIGN_WORKLOAD", "2.0.0"),
+    "execution-plan-v2": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
+        "PRIMARY_EXECUTION_PLAN",
+        "2.0.0",
+    ),
+    "evaluator-profile-v1": (
+        "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
+        "EVALUATOR_PROFILE",
+        "1.0.0",
+    ),
+    "measured-evaluation-v1": (
+        "SCHEMA-CAMPAIGN02-MEASURED-EVALUATION-010-V1",
+        "MEASURED_EVALUATION",
+        "1.0.0",
+    ),
+    "component-identity-v1": (
+        "SCHEMA-CAMPAIGN02-COMPONENT-IDENTITY-010-V1",
+        "PRIMARY_COMPONENT_IDENTITY",
+        "1.0.0",
+    ),
+    "observation-v2": (
+        "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
+        "PRIMARY_RUN_OBSERVATION",
+        "2.0.0",
+    ),
+    "observation-receipt-v1": (
+        "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
+        "PRIMARY_OBSERVATION_RECEIPT",
+        "1.0.0",
+    ),
+    "gpu-environment-lock-v1": (
+        "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
+        "GPU_ENVIRONMENT_LOCK",
+        "1.0.0",
+    ),
+}
+
+
+class Campaign02SchemaError(RuntimeError):
+    pass
+
+
+def canonical(value: object) -> bytes:
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode()
+
+
+def pretty(value: object) -> bytes:
+    return (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode()
+
+
+def digest(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def content_id() -> dict[str, object]:
+    return {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"}
+
+
+def commit_id() -> dict[str, object]:
+    return {"pattern": "^[0-9a-f]{40}$", "type": "string"}
+
+
+def uint(minimum: int = 0) -> dict[str, object]:
+    return {"maximum": 9_007_199_254_740_991, "minimum": minimum, "type": "integer"}
+
+
+def text() -> dict[str, object]:
+    return {"minLength": 1, "type": "string"}
+
+
+def array(item: dict[str, object], minimum: int = 1, unique: bool = False) -> dict[str, object]:
+    value: dict[str, object] = {"items": item, "minItems": minimum, "type": "array"}
+    if unique:
+        value["uniqueItems"] = True
+    return value
+
+
+def strict(properties: dict[str, object]) -> dict[str, object]:
+    return {
+        "additionalProperties": False,
+        "properties": properties,
+        "required": sorted(properties),
+        "type": "object",
+    }
+
+
+def schema(name: str, properties: dict[str, object]) -> dict[str, object]:
+    _, type_name, version = SCHEMAS[name]
+    all_properties = {
+        "formal_semantics_id": {"const": FORMAL_ID},
+        "schema_version": {"const": version},
+        "type_name": {"const": type_name},
+        **properties,
+    }
+    return {
+        "$id": f"urn:deltareduce:schema:010:campaign-02:{name}",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        **strict(all_properties),
+        "title": f"DeltaReduce Feature 010 Campaign 02 {name}",
+    }
+
+
+def schema_documents() -> dict[str, dict[str, object]]:
+    domain_count = strict({"domain_id": text(), "ticket_count": uint(1)})
+    ticket = strict(
+        {
+            "domain_id": text(),
+            "optimizer_steps": uint(1),
+            "ordinal": uint(),
+            "ticket_id": content_id(),
+            "tokens_per_optimizer_step": uint(1),
+            "tokens_per_ticket": uint(1),
+        }
+    )
+    metric = strict({"metric_id": text(), "unit": text(), "value": uint()})
+    executable = strict({"content_id": content_id(), "path": text()})
+    ticket_result = strict(
+        {
+            "certificate_ids": array(content_id(), minimum=0, unique=True),
+            "checkpoint_id": content_id(),
+            "contribution_id": content_id(),
+            "domain_id": text(),
+            "optimizer_steps": uint(1),
+            "processed_tokens": uint(1),
+            "ticket_id": content_id(),
+        }
+    )
+    lock_ref = strict({"path": text(), "sha256": content_id(), "target": text()})
+    return {
+        "workload-v2": schema(
+            "workload-v2",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "domain_ticket_counts": array(domain_count),
+                "execution_class": {"const": "DESIGN_ONLY_NO_PRIMARY_EXECUTION"},
+                "optimizer_steps_per_ticket": uint(1),
+                "ticket_count": uint(1),
+                "tokens_per_optimizer_step": uint(1),
+                "tokens_per_ticket": uint(1),
+                "total_tokens_per_arm_run": uint(1),
+            },
+        ),
+        "execution-plan-v2": schema(
+            "execution-plan-v2",
+            {
+                "arm_id": content_id(),
+                "benchmark_definition_id": content_id(),
+                "campaign_id": {"const": "campaign-02"},
+                "dataset_ids": array(content_id(), unique=True),
+                "definition_attestation_id": content_id(),
+                "environment_id": content_id(),
+                "evaluation_implementation_ids": array(content_id(), unique=True),
+                "evaluation_profile_ids": array(content_id(), unique=True),
+                "evaluation_runner_id": content_id(),
+                "execution_authorization_id": content_id(),
+                "execution_class": {"enum": ["NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"]},
+                "hardware_id": content_id(),
+                "image_id": content_id(),
+                "model_id": content_id(),
+                "optimizer_steps_per_ticket": uint(1),
+                "processed_tokens": uint(1),
+                "repetition": uint(1),
+                "runner_id": content_id(),
+                "seed": uint(),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "ticket_count": uint(1),
+                "tickets": array(ticket),
+                "tokenizer_id": content_id(),
+                "tokens_per_optimizer_step": uint(1),
+                "tokens_per_ticket": uint(1),
+                "total_tokens_per_arm_run": uint(1),
+                "workload_id": content_id(),
+                "writer_id": content_id(),
+            },
+        ),
+        "evaluator-profile-v1": schema(
+            "evaluator-profile-v1",
+            {
+                "dataset_id": content_id(),
+                "evaluator_id": {"enum": ["hellaswag", "lambada", "wikitext"]},
+                "method": {"minProperties": 1, "type": "object"},
+                "tokenizer_id": content_id(),
+            },
+        ),
+        "measured-evaluation-v1": schema(
+            "measured-evaluation-v1",
+            {
+                "checkpoint_id": content_id(),
+                "dataset_id": content_id(),
+                "environment_id": content_id(),
+                "evaluator_id": {"enum": ["hellaswag", "lambada", "wikitext"]},
+                "evaluator_implementation_id": content_id(),
+                "evaluator_profile_id": content_id(),
+                "execution_plan_id": content_id(),
+                "item_count": uint(1),
+                "item_evidence_root": content_id(),
+                "method_observation": {"minProperties": 1, "type": "object"},
+                "metrics": array(metric),
+                "model_id": content_id(),
+                "scored_token_count": uint(),
+                "source_class": {"const": "MEASURED_MODEL_INFERENCE"},
+                "tokenizer_id": content_id(),
+            },
+        ),
+        "component-identity-v1": schema(
+            "component-identity-v1",
+            {
+                "component": {
+                    "enum": [
+                        "PRIMARY_EVALUATION_RUNNER",
+                        "PRIMARY_OBSERVATION_WRITER",
+                        "PRIMARY_SCIENTIFIC_RUNNER",
+                    ]
+                },
+                "create_only_store_policy_id": content_id(),
+                "environment_id": content_id(),
+                "executable_hashes": array(executable),
+                "hardware_compatibility_class_id": content_id(),
+                "image_id": content_id(),
+                "model_data_staging_policy_id": content_id(),
+                "output_schema_ids": array(content_id(), unique=True),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "timeout_policy_id": content_id(),
+            },
+        ),
+        "observation-v2": schema(
+            "observation-v2",
+            {
+                "arm_id": content_id(),
+                "benchmark_definition_id": content_id(),
+                "campaign_id": {"const": "campaign-02"},
+                "dataset_ids": array(content_id(), unique=True),
+                "definition_attestation_id": content_id(),
+                "environment_id": content_id(),
+                "evaluation_ids": array(content_id(), unique=True),
+                "evaluation_implementation_ids": array(content_id(), unique=True),
+                "evaluation_runner_id": content_id(),
+                "execution_authorization_id": content_id(),
+                "execution_class": {"enum": ["NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"]},
+                "execution_plan_id": content_id(),
+                "hardware_id": content_id(),
+                "image_id": content_id(),
+                "model_artifact_id": content_id(),
+                "processed_tokens": uint(1),
+                "raw_artifact_ids": array(content_id(), unique=True),
+                "repetition": uint(1),
+                "runner_id": content_id(),
+                "seed": uint(),
+                "source_class": {"enum": ["MEASURED_HARDWARE", "NON_PRIMARY_SMOKE"]},
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "ticket_results": array(ticket_result),
+                "tokenizer_id": content_id(),
+                "workload_id": content_id(),
+                "writer_id": content_id(),
+            },
+        ),
+        "observation-receipt-v1": schema(
+            "observation-receipt-v1",
+            {
+                "artifact_ids": array(content_id(), unique=True),
+                "create_only": {"const": True},
+                "execution_plan_id": content_id(),
+                "observation_id": content_id(),
+                "status": {"const": "PUBLISHED"},
+                "writer_id": content_id(),
+            },
+        ),
+        "gpu-environment-lock-v1": schema(
+            "gpu-environment-lock-v1",
+            {
+                "cpu_portable_lock_id": content_id(),
+                "cuda_runtime_id": text(),
+                "image_scope": {"const": "PINNED_CUDA_BASE_PLUS_HASH_LOCKED_PYTHON_ENVIRONMENT"},
+                "immutable_resolution": {"const": True},
+                "oci_image_digest": content_id(),
+                "platform_locks": array(lock_ref),
+                "policy_id": content_id(),
+                "python": {"const": "3.12.1"},
+                "required_packages": {"minProperties": 6, "type": "object"},
+                "requirements_input_id": content_id(),
+                "sbom_id": content_id(),
+                "scientific_use": {"const": True},
+            },
+        ),
+    }
+
+
+def fixture_entries() -> list[dict[str, object]]:
+    result: list[dict[str, object]] = []
+    for path in sorted((ROOT / "delta-protocol/fixtures/010/campaign-02").rglob("*.json")):
+        relative = path.relative_to(ROOT / "delta-protocol").as_posix()
+        result.append(
+            {
+                "id": "BENCHMARK010-CAMPAIGN02-" + path.stem.upper().replace("-", "_"),
+                "path": relative,
+                "sha256": digest(path.read_bytes()),
+            }
+        )
+    return result
+
+
+def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
+    artifacts = []
+    media_types = []
+    for name, (schema_id, _, version) in SCHEMAS.items():
+        path = f"schemas/010/campaign-02/{name}.json"
+        artifacts.append({"id": schema_id, "path": path, "sha256": digest(pretty(schemas[name]))})
+        media_types.append(
+            {
+                "id": "MEDIA-CAMPAIGN02-" + name.upper(),
+                "schema_id": schema_id,
+                "value": (
+                    f"application/vnd.deltareduce.campaign-02.{name}+json;"
+                    f"version={version.split('.')[0]}"
+                ),
+            }
+        )
+    return {
+        "artifacts": artifacts,
+        "fixtures": fixture_entries(),
+        "formal_semantics_id": FORMAL_ID,
+        "media_types": media_types,
+        "registry_version": "010.2.0-remediation",
+        "schema_version": "1.0.0",
+        "semantic_completeness_claimed": False,
+    }
+
+
+def root_registry(registry_value: dict[str, object]) -> bytes:
+    root_path = ROOT / "delta-protocol/registry.json"
+    root = json.loads(root_path.read_bytes())
+    if not isinstance(root, dict):
+        raise Campaign02SchemaError("ROOT_REGISTRY_INVALID")
+    schema_ids = {item[0] for item in SCHEMAS.values()}
+    root["extensions"] = [
+        item
+        for item in root["extensions"]
+        if item.get("id") != "REGISTRY-BENCHMARK-010-CAMPAIGN-02"
+    ]
+    root["fixtures"] = [
+        item
+        for item in root["fixtures"]
+        if not str(item.get("id", "")).startswith("BENCHMARK010-CAMPAIGN02-")
+    ]
+    root["media_types"] = [
+        item for item in root["media_types"] if item.get("schema_id") not in schema_ids
+    ]
+    root["schemas"] = [item for item in root["schemas"] if item.get("id") not in schema_ids]
+    registry_bytes = pretty(registry_value)
+    root["extensions"].append(
+        {
+            "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
+            "path": "schemas/010/campaign-02/registry-v1.json",
+            "sha256": digest(registry_bytes),
+        }
+    )
+    root["fixtures"].extend(registry_value["fixtures"])
+    root["media_types"].extend(registry_value["media_types"])
+    root["schemas"].extend(registry_value["artifacts"])
+    for field, key in (
+        ("extensions", "path"),
+        ("fixtures", "path"),
+        ("media_types", "id"),
+        ("schemas", "path"),
+    ):
+        root[field] = sorted(root[field], key=lambda item: item[key])
+    return pretty(root)
+
+
+def expected_outputs() -> dict[Path, bytes]:
+    schemas = schema_documents()
+    registry_value = registry(schemas)
+    outputs = {SCHEMA_ROOT / f"{name}.json": pretty(value) for name, value in schemas.items()}
+    outputs[REGISTRY_PATH] = pretty(registry_value)
+    outputs[ROOT / "delta-protocol/registry.json"] = root_registry(registry_value)
+    return outputs
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--write", action="store_true")
+    arguments = parser.parse_args()
+    outputs = expected_outputs()
+    if arguments.write:
+        for path, value in outputs.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(value)
+    else:
+        for path, expected in outputs.items():
+            if not path.is_file() or path.read_bytes() != expected:
+                raise Campaign02SchemaError(f"CAMPAIGN02_SCHEMA_OUTPUT_DRIFT:{path.name}")
+    print(
+        canonical(
+            {
+                "fixture_count": len(fixture_entries()),
+                "schema_count": len(SCHEMAS),
+                "semantic_completeness_claimed": False,
+                "status": "PASS",
+            }
+        ).decode()
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
