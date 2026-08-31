@@ -15,17 +15,28 @@ satisfy any Campaign 02 gate. No task in this file authorizes primary execution.
 
 - [x] **C2-001** Seal Campaign 01 closure as
   `TERMINATED_NO_GO_AFTER_STAGE_A_BEFORE_SCIENTIFIC_EXECUTION` and record zero scientific runs.
-- [ ] **C2-002** Define explicit optimizer-step, per-ticket and per-arm token accounting.
-- [ ] **C2-003** Implement an immutable GPU environment lock, image recipe and identity verifier.
-- [ ] **C2-004** Implement and fixture the measured WikiText evaluator.
-- [ ] **C2-005** Implement and fixture the measured LAMBADA evaluator.
-- [ ] **C2-006** Implement and fixture the measured HellaSwag evaluator.
-- [ ] **C2-007** Implement exact-plan `PrimaryScientificRunner` and `PrimaryEvaluationRunner`.
-- [ ] **C2-008** Implement create-only `PrimaryObservationWriter` with immutable receipts.
-- [ ] **C2-009** Run the remediation portable positive/negative test suite.
-- [ ] **C2-010** Run exact GPU environment and designated-hardware qualification.
+- [x] **C2-002** Define explicit optimizer-step, per-ticket and per-arm token accounting.
+- [x] **C2-003** Implement an immutable GPU environment lock, pinned OCI base, SBOM and
+  identity verifier.
+- [x] **C2-004** Implement and fixture the measured WikiText evaluator.
+- [x] **C2-005** Implement and fixture the measured LAMBADA evaluator.
+- [x] **C2-006** Implement and fixture the measured HellaSwag evaluator.
+- [x] **C2-007** Implement exact-plan `PrimaryScientificRunner` and `PrimaryEvaluationRunner`.
+- [x] **C2-008** Implement create-only `PrimaryObservationWriter` with immutable receipts.
+- [x] **C2-009** Run the remediation portable positive/negative test suite.
+- [x] **C2-010** Run exact GPU environment and designated-hardware qualification.
 - [ ] **C2-011** Run exact-source remediation CI.
-- [ ] **C2-012** Freeze the Campaign 02 remediation source commit/tree and derived component IDs.
+- [x] **C2-012** Freeze the Campaign 02 remediation source commit/tree and derived component IDs.
+
+Machine-readable evidence:
+
+- `evidence/campaign-02-hardware-qualification.json` — designated GPU, exact runtime and
+  non-primary QLoRA/NF4 qualification;
+- `evidence/campaign-02-exact-source-qualification.json` — source commit/tree, portable test
+  manifest, evaluator implementation IDs and runner/writer IDs.
+
+`C2-011` remains open until the dedicated GitHub workflow reproduces the tracked exact-source
+qualification artifact. Its completion does not authorize primary execution.
 
 ## Definition branch and governance STOP
 
