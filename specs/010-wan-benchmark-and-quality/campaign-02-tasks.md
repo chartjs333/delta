@@ -25,7 +25,7 @@ satisfy any Campaign 02 gate. No task in this file authorizes primary execution.
 - [x] **C2-008** Implement create-only `PrimaryObservationWriter` with immutable receipts.
 - [x] **C2-009** Run the remediation portable positive/negative test suite.
 - [x] **C2-010** Run exact GPU environment and designated-hardware qualification.
-- [ ] **C2-011** Run exact-source remediation CI.
+- [x] **C2-011** Run exact-source remediation CI.
 - [x] **C2-012** Freeze the Campaign 02 remediation source commit/tree and derived component IDs.
 
 Machine-readable evidence:
@@ -34,9 +34,10 @@ Machine-readable evidence:
   non-primary QLoRA/NF4 qualification;
 - `evidence/campaign-02-exact-source-qualification.json` — source commit/tree, portable test
   manifest, evaluator implementation IDs and runner/writer IDs.
+- `evidence/campaign-02-exact-source-ci-receipt.json` — passing dedicated workflow run and
+  immutable artifact digests.
 
-`C2-011` remains open until the dedicated GitHub workflow reproduces the tracked exact-source
-qualification artifact. Its completion does not authorize primary execution.
+Completion of `C2-011` does not authorize primary execution.
 
 ## Definition branch and governance STOP
 
