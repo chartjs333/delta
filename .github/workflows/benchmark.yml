@@ -322,3 +322,263 @@ jobs:
           path: specs/010-wan-benchmark-and-quality/evidence/primary-executor-ci-qualification.json
           if-no-files-found: error
           retention-days: 30
+
+  stage-a-native-exactness:
+    name: Stage A ${{ matrix.compiler }} C++${{ matrix.standard }} exactness
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == '010b-primary-exactness' }}
+    needs: [evidence-gate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+        standard: [20, 23]
+    steps:
+      - name: Check out Stage A control overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: control
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Check out immutable qualified source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          path: qualified-source
+          persist-credentials: false
+          ref: c460f3003277bb81db86f9afc1d7211e27870001
+      - name: Configure exact-source harness and negative matrix
+        run: >-
+          cmake -S control/specs/010-wan-benchmark-and-quality/stage-a-harness
+          -B out/stage-a-native
+          -DDELTA_SOURCE_ROOT="$GITHUB_WORKSPACE/qualified-source"
+          -DSTAGE_A_BUILD_SOURCE_TESTS=ON
+          -DDELTA_CXX_STANDARD=${{ matrix.standard }}
+          -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+      - name: Build probe and exact native boundaries
+        run: >-
+          cmake --build out/stage-a-native --parallel
+          --target stage_a_primary_exactness_probe
+          delta_ffi_abi_test delta_ffi_certificates_test delta_ffi_hierarchy_test
+          delta_ffi_scheduling_test delta_runtime_test delta_certificates_test
+      - name: Execute exact native negative matrix
+        run: |
+          ctest --test-dir out/stage-a-native \
+            -R '^delta_(core\.certificates|ffi\.(abi|certificates|hierarchy|scheduling)|runtime\.behavior)$' \
+            --output-on-failure --output-junit "$RUNNER_TEMP/stage-a-native-ctest.xml"
+      - name: Execute four independent primary exactness processes
+        env:
+          CONTROL_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 control/specs/010-wan-benchmark-and-quality/scripts/stage_a_primary_exactness.py \
+            native-lane \
+            --source-root qualified-source \
+            --probe out/stage-a-native/stage_a_primary_exactness_probe \
+            --compiler '${{ matrix.compiler }}' \
+            --standard '${{ matrix.standard }}' \
+            --ctest-junit "$RUNNER_TEMP/stage-a-native-ctest.xml" \
+            --run-root "$RUNNER_TEMP/stage-a-processes" \
+            --control-head "$CONTROL_HEAD" \
+            --output "$RUNNER_TEMP/stage-a-native-lane.json"
+      - name: Retain create-only native lane
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stage-a-native-${{ matrix.compiler }}-cpp${{ matrix.standard }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/stage-a-native-lane.json
+          if-no-files-found: error
+          retention-days: 30
+
+  stage-a-java-exactness:
+    name: Stage A JDK ${{ matrix.feature }} FFM boundaries
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == '010b-primary-exactness' }}
+    needs: [evidence-gate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out Stage A control overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: control
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Check out immutable qualified source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          path: qualified-source
+          persist-credentials: false
+          ref: c460f3003277bb81db86f9afc1d7211e27870001
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir --parents "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" \
+            --directory "$RUNNER_TEMP/jdk" --strip-components=1
+      - name: Build exact qualified-source C ABI
+        run: |
+          cmake -S qualified-source -B out/stage-a-java \
+            -DBUILD_TESTING=OFF -DDELTA_CXX_STANDARD=20 \
+            -DDELTA_WARNINGS_AS_ERRORS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build out/stage-a-java --parallel --target delta_ffi
+      - name: Compile exact Java FFM and transport boundaries offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          mkdir --parents "$RUNNER_TEMP/java-classes"
+          "$RUNNER_TEMP/jdk/bin/javac" --release '${{ matrix.feature }}' \
+            -Xlint:all,-restricted -Werror \
+            -d "$RUNNER_TEMP/java-classes" \
+            qualified-source/delta-node-java/src/test/java/io/deltareduce/node/NativeRuntimeFfmConformance.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/hierarchy/NativeHierarchy.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/hierarchy/HierarchyRouter.java \
+            qualified-source/delta-node-java/src/test/java/io/deltareduce/node/hierarchy/HierarchyConformance.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/certificates/NativeCertificateVerifier.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/certificates/CertificateTimerService.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/apply/ArtifactEffectAdapter.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/apply/CurrentCheckpointPublisher.java \
+            qualified-source/delta-node-java/src/test/java/io/deltareduce/node/certificates/CertificatesConformance.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/NativeScheduling.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/CapabilityCollector.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/SchedulingTelemetry.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/AdmissionTransport.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/LeaseTimerRouter.java \
+            qualified-source/delta-node-java/src/test/java/io/deltareduce/node/scheduling/SchedulingConformance.java \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            qualified-source/delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java
+      - name: Execute exact FFM parity and boundary negative matrix
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          set -o pipefail
+          : > "$RUNNER_TEMP/stage-a-java.log"
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 \
+            | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          head -n 1 "$RUNNER_TEMP/stage-a-java.log" | grep -F '${{ matrix.version }}'
+          "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.NativeRuntimeFfmConformance \
+            "$GITHUB_WORKSPACE/out/stage-a-java/libdelta_ffi.so" \
+            qualified-source/delta-protocol/fixtures/003/cross-language/golden-v1.json \
+            "$RUNNER_TEMP/ffm-runtime-${{ matrix.feature }}" \
+            2>&1 | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          echo 'STAGE_A_JAVA_PASS NativeRuntimeFfmConformance' | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.hierarchy.HierarchyConformance \
+            "$GITHUB_WORKSPACE/out/stage-a-java/libdelta_ffi.so" \
+            qualified-source/delta-protocol/fixtures/006/cross-language/golden-v1.json \
+            2>&1 | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          echo 'STAGE_A_JAVA_PASS HierarchyConformance' | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.certificates.CertificatesConformance \
+            "$GITHUB_WORKSPACE/out/stage-a-java/libdelta_ffi.so" \
+            qualified-source/delta-protocol/fixtures/008/cross-language/golden-v1.json \
+            2>&1 | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          echo 'STAGE_A_JAVA_PASS CertificatesConformance' | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          "$RUNNER_TEMP/jdk/bin/java" --enable-native-access=ALL-UNNAMED \
+            --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.scheduling.SchedulingConformance \
+            "$GITHUB_WORKSPACE/out/stage-a-java/libdelta_ffi.so" \
+            qualified-source/delta-protocol/fixtures/007/cross-language/golden-v1.json \
+            2>&1 | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          echo 'STAGE_A_JAVA_PASS SchedulingConformance' | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          "$RUNNER_TEMP/jdk/bin/java" -ea --class-path "$RUNNER_TEMP/java-classes" \
+            io.deltareduce.node.benchmark.BenchmarkConformance \
+            2>&1 | tee --append "$RUNNER_TEMP/stage-a-java.log"
+          echo 'STAGE_A_JAVA_PASS BenchmarkConformance' | tee --append "$RUNNER_TEMP/stage-a-java.log"
+      - name: Emit create-only JDK lane evidence
+        env:
+          CONTROL_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 control/specs/010-wan-benchmark-and-quality/scripts/stage_a_primary_exactness.py \
+            java-lane \
+            --source-root qualified-source \
+            --feature '${{ matrix.feature }}' \
+            --version '${{ matrix.version }}' \
+            --archive-sha256 '${{ matrix.archive_sha256 }}' \
+            --log "$RUNNER_TEMP/stage-a-java.log" \
+            --control-head "$CONTROL_HEAD" \
+            --output "$RUNNER_TEMP/stage-a-java-lane.json"
+      - name: Retain create-only JDK lane
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stage-a-java-jdk${{ matrix.feature }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/stage-a-java-lane.json
+          if-no-files-found: error
+          retention-days: 30
+
+  stage-a-admission:
+    name: Stage A exact-source admission
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == '010b-primary-exactness' }}
+    needs: [stage-a-native-exactness, stage-a-java-exactness]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out Stage A control overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Download all immutable Stage A lanes
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          path: ${{ runner.temp }}/stage-a-lanes
+          pattern: stage-a-*-${{ github.run_id }}
+      - name: Aggregate the closed matrix
+        env:
+          CONTROL_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 specs/010-wan-benchmark-and-quality/scripts/stage_a_primary_exactness.py \
+            aggregate \
+            --lanes-dir "$RUNNER_TEMP/stage-a-lanes" \
+            --workflow-run-id '${{ github.run_id }}' \
+            --workflow-head "$CONTROL_HEAD" \
+            --output "$RUNNER_TEMP/primary-exactness.json"
+      - name: Re-verify regression-only boundary at admitted head
+        run: |
+          python3 specs/010-wan-benchmark-and-quality/scripts/primary_contracts.py
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_formal_regression.py --check-only
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_production_attacks.py --check-only
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_architecture_guard.py
+          test ! -f reports/benchmark/primary/benchmark-result-qc.json
+      - name: Retain Stage A admission artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: primary-exactness-stage-a-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/primary-exactness.json
+            specs/010-wan-benchmark-and-quality/evidence/architecture-guard.json
+          if-no-files-found: error
+          retention-days: 30
