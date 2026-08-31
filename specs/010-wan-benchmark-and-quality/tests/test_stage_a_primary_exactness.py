@@ -120,3 +120,12 @@ def test_incomplete_java_negative_matrix_fails_closed() -> None:
     java[0]["checks"] = java[0]["checks"][:-1]
     with pytest.raises(MODULE.StageAError, match="JAVA_CHECK_SET_INCOMPLETE"):
         MODULE.aggregate_documents(native, java, workflow_run_id="123", workflow_head=HEAD)
+
+
+def test_recorded_receipt_payload_drift_fails_closed() -> None:
+    evidence = MODULE.canonical_document(MODULE.DEFAULT_OUTPUT)
+    receipt = MODULE.canonical_document(MODULE.RECORDED_RECEIPT)
+    mutated = copy.deepcopy(receipt)
+    mutated["evidence_payload_sha256"] = "sha256:" + "0" * 64
+    with pytest.raises(MODULE.StageAError, match="RECEIPT_PAYLOAD_DIGEST"):
+        MODULE.verify_recorded_documents(evidence, mutated)

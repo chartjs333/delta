@@ -17,6 +17,10 @@ AUTHORIZATION: Final = ROOT / "reports/benchmark/primary-execution-authorization
 DEFINITION: Final = ROOT / "configs/benchmark/primary.yaml"
 ATTESTATION: Final = ROOT / "configs/benchmark/primary-definition-attestation.json"
 DEFAULT_OUTPUT: Final = ROOT / "specs/010-wan-benchmark-and-quality/evidence/primary-exactness.json"
+RECORDED_RECEIPT: Final = (
+    ROOT / "specs/010-wan-benchmark-and-quality/evidence/primary-exactness-ci-receipt.json"
+)
+READINESS: Final = ROOT / "reports/benchmark/phase-010-readiness.json"
 
 DEFINITION_ID: Final = "sha256:dd607651128bca0b8edfa861093945b0bac2355c93d9d45b4c8b08457fba4244"
 ATTESTATION_ID: Final = "sha256:3b92d83ae0e4e98f52ff9126b5efb4381e26d8977b5cf64eb2762f0533207fe5"
@@ -25,6 +29,16 @@ SOURCE_COMMIT: Final = "c460f3003277bb81db86f9afc1d7211e27870001"
 SOURCE_TREE: Final = "d34d6b5b434bd5a81b7b202380ac500435c9b75d"
 EXECUTOR_MERGE_COMMIT: Final = "ab71af60d3731a55f98b27c8d787be40c3b7a171"
 EXECUTOR_WORKFLOW_RUN: Final = 33358317458
+STAGE_A_WORKFLOW_RUN: Final = "33363201877"
+STAGE_A_CONTROL_HEAD: Final = "4b743acebfa289c86926c8e3e52289f92a610305"
+STAGE_A_ARTIFACT_ID: Final = 9747436380
+STAGE_A_ARCHIVE_DIGEST: Final = (
+    "sha256:f6ae62ed0ffa1162eb022842d3d47ae586a3bc9a4bacd6160ecb824034e2882e"
+)
+STAGE_A_PAYLOAD_SHA256: Final = (
+    "sha256:bfe4ca91c5dc3f6c286da271f0276fad94821ba5749a0a0e036b1b10a92cb929"
+)
+STAGE_A_TASK_IDS: Final = frozenset({"T028", "T029", "HR010-006", "HR010-010", "HR010-011"})
 
 NATIVE_MATRIX: Final = frozenset(
     {("g++", "20"), ("g++", "23"), ("clang++", "20"), ("clang++", "23")}
@@ -335,6 +349,121 @@ def lane_content_id(lane: dict[str, object]) -> str:
     return sha256_id(canonical_bytes(lane))
 
 
+def verify_recorded_documents(
+    evidence: dict[str, object], receipt: dict[str, object]
+) -> dict[str, object]:
+    require(evidence.get("type_name") == "PRIMARY_EXACTNESS_EVIDENCE", "EVIDENCE_TYPE")
+    require(evidence.get("status") == "PASS", "EVIDENCE_STATUS")
+    require(evidence.get("control_head") == STAGE_A_CONTROL_HEAD, "EVIDENCE_CONTROL_HEAD")
+    require(evidence.get("workflow_run_id") == STAGE_A_WORKFLOW_RUN, "EVIDENCE_WORKFLOW_RUN")
+    require(evidence.get("benchmark_definition_id") == DEFINITION_ID, "EVIDENCE_DEFINITION")
+    require(evidence.get("formal_semantics_id") == FORMAL_ID, "EVIDENCE_FORMAL")
+    require(evidence.get("source_commit") == SOURCE_COMMIT, "EVIDENCE_SOURCE_COMMIT")
+    require(evidence.get("source_tree") == SOURCE_TREE, "EVIDENCE_SOURCE_TREE")
+    require(evidence.get("primary_scientific_execution_count") == 0, "SCIENTIFIC_RUN_EXECUTED")
+    require(evidence.get("real_wan_authorized") is False, "REAL_WAN_AUTHORIZED")
+    require(evidence.get("result_qc_authorized") is False, "RESULT_QC_AUTHORIZED")
+    require(evidence.get("feature_011_authorized") is False, "FEATURE_011_AUTHORIZED")
+    require(set(evidence.get("task_ids", [])) == STAGE_A_TASK_IDS, "EVIDENCE_TASK_IDS")
+    native = evidence.get("native_lanes")
+    java = evidence.get("java_lanes")
+    require(isinstance(native, list) and len(native) == 4, "RECORDED_NATIVE_LANES")
+    require(isinstance(java, list) and len(java) == 2, "RECORDED_JAVA_LANES")
+    require(
+        {(str(item.get("compiler")), str(item.get("standard"))) for item in native}
+        == NATIVE_MATRIX,
+        "RECORDED_NATIVE_MATRIX",
+    )
+    require(
+        {str(item.get("jdk_feature")) for item in java} == set(JDK_MATRIX), "RECORDED_JDK_MATRIX"
+    )
+    process_result = evidence.get("primary_exactness_result")
+    require(isinstance(process_result, dict), "RECORDED_PROCESS_RESULT")
+    verify_process_result(canonical_bytes(process_result) + b"\n")
+    require(
+        sha256_id(canonical_bytes(evidence)) == STAGE_A_PAYLOAD_SHA256,
+        "RECORDED_PAYLOAD_DIGEST",
+    )
+    require(receipt.get("type_name") == "PRIMARY_EXACTNESS_CI_RECEIPT", "RECEIPT_TYPE")
+    require(receipt.get("status") == "PASS", "RECEIPT_STATUS")
+    require(receipt.get("workflow_conclusion") == "success", "RECEIPT_WORKFLOW_STATUS")
+    require(receipt.get("workflow_run_id") == STAGE_A_WORKFLOW_RUN, "RECEIPT_WORKFLOW_RUN")
+    require(receipt.get("control_head") == STAGE_A_CONTROL_HEAD, "RECEIPT_CONTROL_HEAD")
+    require(receipt.get("artifact_id") == STAGE_A_ARTIFACT_ID, "RECEIPT_ARTIFACT_ID")
+    require(receipt.get("archive_digest") == STAGE_A_ARCHIVE_DIGEST, "RECEIPT_ARCHIVE_DIGEST")
+    require(
+        receipt.get("evidence_payload_sha256") == STAGE_A_PAYLOAD_SHA256,
+        "RECEIPT_PAYLOAD_DIGEST",
+    )
+    require(set(receipt.get("task_ids", [])) == STAGE_A_TASK_IDS, "RECEIPT_TASK_IDS")
+    prior_failure = receipt.get("prior_harness_failure")
+    require(isinstance(prior_failure, dict), "PRIOR_FAILURE_MISSING")
+    require(prior_failure.get("retained") is True, "PRIOR_FAILURE_NOT_RETAINED")
+    require(prior_failure.get("scientific_execution_count") == 0, "PRIOR_SCIENTIFIC_RUN")
+    return {
+        "archive_digest": STAGE_A_ARCHIVE_DIGEST,
+        "benchmark_definition_id": DEFINITION_ID,
+        "control_head": STAGE_A_CONTROL_HEAD,
+        "evidence_payload_sha256": STAGE_A_PAYLOAD_SHA256,
+        "source_commit": SOURCE_COMMIT,
+        "source_tree": SOURCE_TREE,
+        "status": "PASS",
+        "task_ids": sorted(STAGE_A_TASK_IDS),
+        "workflow_run_id": STAGE_A_WORKFLOW_RUN,
+    }
+
+
+def verify_recorded(_: argparse.Namespace) -> dict[str, object]:
+    authorization_id = verify_control()
+    evidence = canonical_document(DEFAULT_OUTPUT)
+    receipt = canonical_document(RECORDED_RECEIPT)
+    summary = verify_recorded_documents(evidence, receipt)
+    require(evidence.get("authorization_id") == authorization_id, "RECORDED_AUTHORIZATION")
+    readiness = canonical_document(READINESS)
+    require(readiness.get("decision") == "NO_GO", "READINESS_DECISION")
+    require(readiness.get("feature011_blocked") is True, "READINESS_FEATURE_011")
+    require(
+        readiness.get("primary_exactness_evidence")
+        == "specs/010-wan-benchmark-and-quality/evidence/primary-exactness.json",
+        "READINESS_EVIDENCE_PATH",
+    )
+    missing = set(readiness.get("missing_gate_ids", []))
+    require(
+        not missing
+        & {
+            "PRIMARY_PROCESS_EXACTNESS_T028_T029",
+            "RUNTIME_EXACTNESS_HR010_006",
+            "NETTY_NATIVE_MATRIX_HR010_010",
+            "POINTER_LIFETIME_NEGATIVES_HR010_011",
+        },
+        "READINESS_STAGE_A_STILL_MISSING",
+    )
+    required_task_lines = {
+        (
+            "- [x] T028 Execute repeated independent validator/aggregator/apply processes "
+            "and compare exact hashes."
+        ),
+        "- [x] T029 Execute flat versus hierarchical exact equality at primary workload scale.",
+        (
+            "- [x] **HR010-006** Run direct-versus-copy FFM and flat-versus-hierarchy "
+            "exact comparison."
+        ),
+        (
+            "- [x] **HR010-010** Execute Netty leak, event-loop block, backpressure, "
+            "stream bound and stale timer matrix."
+        ),
+        (
+            "- [x] **HR010-011** Execute ABI/schema/formal-semantics mismatch and native "
+            "pointer lifetime negatives."
+        ),
+    }
+    task_text = (ROOT / "specs/010-wan-benchmark-and-quality/tasks.md").read_text()
+    task_text += (ROOT / "specs/010-wan-benchmark-and-quality/runtime-tasks.md").read_text()
+    require(required_task_lines <= set(task_text.splitlines()), "TASK_COMPLETION_DRIFT")
+    print(canonical_bytes(summary).decode())
+    return summary
+
+
 def aggregate_documents(
     native: list[dict[str, object]],
     java: list[dict[str, object]],
@@ -495,6 +624,9 @@ def parser() -> argparse.ArgumentParser:
     aggregate_parser.add_argument("--workflow-head", required=True)
     aggregate_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     aggregate_parser.set_defaults(function=aggregate)
+
+    recorded = commands.add_parser("verify-recorded")
+    recorded.set_defaults(function=verify_recorded)
     return root
 
 

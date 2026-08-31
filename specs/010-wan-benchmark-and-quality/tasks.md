@@ -54,8 +54,8 @@ runtime certificate graph or change current state.
 
 ## Phase 6: Protocol determinism and safety gate
 
-- [ ] T028 Execute repeated independent validator/aggregator/apply processes and compare exact hashes.
-- [ ] T029 Execute flat versus hierarchical exact equality at primary workload scale.
+- [x] T028 Execute repeated independent validator/aggregator/apply processes and compare exact hashes.
+- [x] T029 Execute flat versus hierarchical exact equality at primary workload scale.
 - [x] T030 Run conflicting config/commit/vote, seed-before-ISC and AC mutation attacks.
 - [x] T031 Run mixed-view Frankenstein, incomplete/duplicate aggregate and wrong-epoch attacks.
 - [x] T032 Run unsafe accumulator/runtime overflow and conflicting ApplyQC attacks.

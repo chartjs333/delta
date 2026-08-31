@@ -252,6 +252,10 @@ jobs:
           python3 specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py
           python3 specs/010-wan-benchmark-and-quality/scripts/verify_formal_regression.py --check-only
           python3 specs/010-wan-benchmark-and-quality/scripts/verify_production_attacks.py --check-only
+          if test -f specs/010-wan-benchmark-and-quality/evidence/primary-exactness.json; then
+            python3 specs/010-wan-benchmark-and-quality/scripts/stage_a_primary_exactness.py \
+              verify-recorded
+          fi
           test ! -f reports/benchmark/primary/benchmark-result-qc.json
           echo "Primary scientific/WAN result remains fail-closed until measured evidence exists."
 
