@@ -80,6 +80,7 @@ ALLOWED_OVERLAY_PATHS: Final = frozenset(
         "configs/benchmark/sbom-v1.json",
         "reports/benchmark/phase-010-readiness.json",
         "specs/010-wan-benchmark-and-quality/evidence/architecture-guard.json",
+        "specs/010-wan-benchmark-and-quality/evidence/primary-executor-ci-qualification.json",
         "specs/010-wan-benchmark-and-quality/scripts/verify_primary_executor_ci.py",
     }
 )
