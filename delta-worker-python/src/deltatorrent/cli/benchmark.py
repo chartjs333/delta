@@ -166,6 +166,8 @@ def _attestation(path: Path, definition: BenchmarkDefinition) -> GovernanceAttes
 
 def _primary_execution(args: argparse.Namespace) -> PrimaryExecutionSet:
     definition = load_definition(args.definition)
+    if definition.campaign_id == "campaign-02":
+        raise BenchmarkCliError("LEGACY_PRIMARY_PATH_FORBIDDEN")
     preregistration = PreregisteredDefinition(
         definition,
         _attestation(args.attestation, definition),

@@ -1,9 +1,14 @@
 # Campaign 02 remediation and staged execution tasks
 
-**Authority**: `APPROVED_FOR_NEW_CAMPAIGN_REMEDIATION_ONLY`
+**Remediation authority**: `APPROVED_FOR_NEW_CAMPAIGN_REMEDIATION_ONLY`
+
+**Execution-binding remediation authority**: PR #16 governance review `CHANGES_REQUIRED`
 
 **Source branch**: `010e-primary-campaign-remediation` from
 `661494c84cfcdb365c21542b46a5ebfe3a91cd8d`
+
+**Execution-binding branch**: `010g-campaign02-execution-binding` from remediation merge
+`8e945ac9713de5898d3abdb10ad2474079a87260`
 
 **Formal impact**: `REGRESSION_ONLY` against
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
@@ -65,6 +70,29 @@ The remaining tasks begin only after remediation is merged into
 - [ ] **C2-014** Create the methodology diff, definition attestation and readiness record.
 - [ ] **C2-015** Verify no scientific observation predates the new attestation.
 - [ ] **C2-016** Obtain a separate governance authorization before any new Stage A execution.
+
+## Execution-binding remediation after PR #16 review
+
+The Definition `sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af`
+and its quorum-shaped unsigned record are superseded before execution. They remain immutable audit
+history and cannot satisfy the tasks below.
+
+- [x] **C2-017** Publish the pre-execution supersession record with zero observations and no
+  execution authorization.
+- [x] **C2-018** Source-seal distinct workload-contract, domain-manifest and exact ordered
+  ticket-plan identities.
+- [x] **C2-019** Implement the only Campaign 02 Definition-to-`CampaignExecutionPlan` compiler and
+  make every legacy primary CLI route fail closed for Campaign 02.
+- [x] **C2-020** Implement detached Ed25519 benchmark-review votes, validator-set/key-custody
+  manifests and cryptographic quorum verification without generating governance approvals.
+- [ ] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
+  execution-binding source.
+- [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
+  workload/domain/ticket IDs and qualified runtime lineage.
+- [ ] **C2-023** Obtain independent detached signatures and verify temporal closure at the actual
+  terminal reviewed HEAD.
+- [ ] **C2-024** Obtain a new separate governance decision before any Stage A execution. This task
+  replaces, but does not retroactively complete, C2-016 for the superseded Definition.
 
 ## Unconditional STOP conditions
 

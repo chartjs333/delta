@@ -1,0 +1,83 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:benchmark-definition-attestation-v2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_DEFINITION_ATTESTATION"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "f_b": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "governance_only": {
+      "const": true
+    },
+    "independent_approval": {
+      "const": true
+    },
+    "ordered_signers": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "ordered_vote_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "quorum_threshold": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "signature_set_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "validator_set_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "verified_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "benchmark_definition_id",
+    "f_b",
+    "formal_semantics_id",
+    "governance_only",
+    "independent_approval",
+    "ordered_signers",
+    "ordered_vote_ids",
+    "quorum_threshold",
+    "schema_version",
+    "signature_set_root",
+    "type_name",
+    "validator_set_id",
+    "verified_at"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 benchmark-definition-attestation-v2"
+}

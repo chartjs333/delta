@@ -14,11 +14,51 @@ SCHEMA_ROOT: Final = ROOT / "delta-protocol/schemas/010/campaign-02"
 REGISTRY_PATH: Final = SCHEMA_ROOT / "registry-v1.json"
 
 SCHEMAS: Final = {
+    "benchmark-definition-v2": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-010-V2",
+        "BENCHMARK_DEFINITION",
+        "2.0.0",
+    ),
+    "benchmark-review-validator-set-v1": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-REVIEW-VALIDATOR-SET-010-V1",
+        "BENCHMARK_REVIEW_VALIDATOR_SET",
+        "1.0.0",
+    ),
+    "benchmark-definition-vote-v1": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-VOTE-010-V1",
+        "BENCHMARK_DEFINITION_VOTE",
+        "1.0.0",
+    ),
+    "benchmark-definition-attestation-v2": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-ATTESTATION-010-V2",
+        "BENCHMARK_DEFINITION_ATTESTATION",
+        "2.0.0",
+    ),
+    "domain-manifest-v1": (
+        "SCHEMA-CAMPAIGN02-DOMAIN-MANIFEST-010-V1",
+        "CAMPAIGN_DOMAIN_MANIFEST",
+        "1.0.0",
+    ),
+    "ticket-plan-v1": (
+        "SCHEMA-CAMPAIGN02-TICKET-PLAN-010-V1",
+        "CAMPAIGN_TICKET_PLAN",
+        "1.0.0",
+    ),
+    "qualified-runtime-lineage-v1": (
+        "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V1",
+        "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE",
+        "1.0.0",
+    ),
     "workload-v2": ("SCHEMA-CAMPAIGN02-WORKLOAD-010-V2", "CAMPAIGN_WORKLOAD", "2.0.0"),
     "execution-plan-v2": (
         "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
         "PRIMARY_EXECUTION_PLAN",
         "2.0.0",
+    ),
+    "execution-plan-v3": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V3",
+        "PRIMARY_EXECUTION_PLAN",
+        "3.0.0",
     ),
     "evaluator-profile-v1": (
         "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
@@ -217,7 +257,123 @@ def schema_documents() -> dict[str, dict[str, object]]:
         }
     )
     lock_ref = strict({"path": text(), "sha256": content_id(), "target": text()})
-    return {
+    base_definition = json.loads(
+        (ROOT / "delta-protocol/schemas/010/benchmark-definition-v1.json").read_bytes()
+    )
+    base_properties = dict(base_definition["properties"])
+    for field in ("formal_semantics_id", "schema_version", "type_name"):
+        del base_properties[field]
+    definition_v2_properties = {
+        **base_properties,
+        "campaign_id": {"const": "campaign-02"},
+        "qualified_runtime_lineage_id": content_id(),
+        "workload_contract_id": content_id(),
+    }
+    domain = strict(
+        {
+            "dataset_id": content_id(),
+            "denominator": uint(1),
+            "domain_id": text(),
+            "numerator": uint(1),
+            "ticket_count": uint(1),
+        }
+    )
+    timestamp = {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$", "type": "string"}
+    validator = strict(
+        {
+            "controller_id": text(),
+            "key_custody_statement_id": content_id(),
+            "public_key": {"pattern": "^[A-Za-z0-9+/]{43}=$", "type": "string"},
+            "public_key_id": content_id(),
+            "signature_algorithm": {"const": "ED25519"},
+            "valid_from": timestamp,
+            "valid_until": {"oneOf": [{"type": "null"}, timestamp]},
+            "validator_id": text(),
+        }
+    )
+    policy_binding = strict(
+        {
+            "arm_id": content_id(),
+            "arm_name": text(),
+            "policy": certified_policy,
+            "repetition": uint(1),
+            "seed": uint(),
+        }
+    )
+    documents = {
+        "benchmark-definition-v2": schema("benchmark-definition-v2", definition_v2_properties),
+        "benchmark-review-validator-set-v1": schema(
+            "benchmark-review-validator-set-v1",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "f_b": uint(),
+                "purpose": {"const": "BENCHMARK_DEFINITION_REVIEW"},
+                "validators": array(validator, unique=True),
+            },
+        ),
+        "benchmark-definition-vote-v1": schema(
+            "benchmark-definition-vote-v1",
+            {
+                "benchmark_definition_id": content_id(),
+                "public_key_id": content_id(),
+                "purpose": {"const": "BENCHMARK_DEFINITION_REVIEW"},
+                "signature": {"pattern": "^[A-Za-z0-9+/]{86}==$", "type": "string"},
+                "signature_algorithm": {"const": "ED25519"},
+                "signed_message_sha256": content_id(),
+                "signer_id": text(),
+                "submitted_at": timestamp,
+                "validator_set_id": content_id(),
+            },
+        ),
+        "benchmark-definition-attestation-v2": schema(
+            "benchmark-definition-attestation-v2",
+            {
+                "benchmark_definition_id": content_id(),
+                "f_b": uint(),
+                "governance_only": {"const": True},
+                "independent_approval": {"const": True},
+                "ordered_signers": array(text(), unique=True),
+                "ordered_vote_ids": array(content_id(), unique=True),
+                "quorum_threshold": uint(1),
+                "signature_set_root": content_id(),
+                "validator_set_id": content_id(),
+                "verified_at": timestamp,
+            },
+        ),
+        "domain-manifest-v1": schema(
+            "domain-manifest-v1",
+            {"campaign_id": {"const": "campaign-02"}, "domains": array(domain, unique=True)},
+        ),
+        "ticket-plan-v1": schema(
+            "ticket-plan-v1",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "domain_manifest_id": content_id(),
+                "tickets": array(ticket, unique=True),
+                "workload_contract_id": content_id(),
+            },
+        ),
+        "qualified-runtime-lineage-v1": schema(
+            "qualified-runtime-lineage-v1",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "certified_plan_bindings": array(policy_binding, unique=True),
+                "dataset_ids": array(content_id(), unique=True),
+                "environment_id": content_id(),
+                "evaluation_implementation_ids": array(content_id(), unique=True),
+                "evaluation_profile_ids": array(content_id(), unique=True),
+                "evaluation_runner_id": content_id(),
+                "hardware_id": content_id(),
+                "image_id": content_id(),
+                "model_id": content_id(),
+                "parent_checkpoint_id": content_id(),
+                "runner_id": content_id(),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "tokenizer_id": content_id(),
+                "writer_id": content_id(),
+            },
+        ),
         "workload-v2": schema(
             "workload-v2",
             {
@@ -468,6 +624,37 @@ def schema_documents() -> dict[str, dict[str, object]]:
             },
         ),
     }
+    execution_v2 = documents["execution-plan-v2"]
+    execution_v2_properties = execution_v2["properties"]
+    assert isinstance(execution_v2_properties, dict)
+    documents["execution-plan-v3"] = schema(
+        "execution-plan-v3",
+        {
+            **{
+                key: value
+                for key, value in execution_v2_properties.items()
+                if key not in {"formal_semantics_id", "schema_version", "type_name"}
+            },
+            "domain_manifest_id": content_id(),
+            "qualified_runtime_lineage_id": content_id(),
+            "ticket_plan_id": content_id(),
+        },
+        result_class_union=[
+            {
+                "properties": {
+                    "certified_round_policy": {"type": "null"},
+                    "result_class": {"const": "REFERENCE"},
+                }
+            },
+            {
+                "properties": {
+                    "certified_round_policy": certified_policy,
+                    "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                }
+            },
+        ],
+    )
+    return documents
 
 
 def fixture_entries() -> list[dict[str, object]]:
@@ -505,7 +692,7 @@ def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
         "fixtures": fixture_entries(),
         "formal_semantics_id": FORMAL_ID,
         "media_types": media_types,
-        "registry_version": "010.2.1-remediation",
+        "registry_version": "010.3.0-execution-binding",
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,
     }

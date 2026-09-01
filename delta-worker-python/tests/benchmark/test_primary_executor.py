@@ -668,7 +668,7 @@ def test_runner_timeout_terminates_process_tree(tmp_path: Path) -> None:
     for _ in range(50):
         try:
             os.kill(child_pid, 0)
-        except OSError:
+        except (OSError, SystemError):
             break
         time.sleep(0.02)
     else:

@@ -22,10 +22,10 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 10
+    assert len(module.SCHEMAS) == 18
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.2.1-remediation"
+    assert registry["registry_version"] == "010.3.0-execution-binding"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
     observation = json.loads(
@@ -43,6 +43,15 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
         (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v2.json").read_bytes()
     )
     assert len(execution_plan["oneOf"]) == 2
+    bound_execution_plan = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v3.json").read_bytes()
+    )
+    assert len(bound_execution_plan["oneOf"]) == 2
+    assert {
+        "domain_manifest_id",
+        "qualified_runtime_lineage_id",
+        "ticket_plan_id",
+    } <= set(bound_execution_plan["required"])
 
 
 def test_gpu_environment_has_separate_hash_locked_platforms_and_cpu_lock() -> None:

@@ -19,7 +19,7 @@ FORMAL_SEMANTICS_ID: Final = (
 _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
 _COMMIT_ID: Final = re.compile(r"^[0-9a-f]{40}$")
 _COMMON_FIELDS: Final = {"formal_semantics_id", "schema_version", "type_name"}
-_DEFINITION_FIELDS: Final = _COMMON_FIELDS | {
+_DEFINITION_FIELDS_V1: Final = _COMMON_FIELDS | {
     "B",
     "H",
     "abi_descriptor_id",
@@ -66,6 +66,11 @@ _DEFINITION_FIELDS: Final = _COMMON_FIELDS | {
     "ticket_plan_id",
     "theorem_build_id",
     "tokenizer_id",
+}
+_DEFINITION_FIELDS_V2: Final = _DEFINITION_FIELDS_V1 | {
+    "campaign_id",
+    "qualified_runtime_lineage_id",
+    "workload_contract_id",
 }
 _METRIC_FIELDS: Final = {
     "aggregation",
@@ -217,15 +222,27 @@ class BenchmarkDefinition:
     ticket_plan_id: str
     base_model_id: str
     primary: bool
+    campaign_id: str | None
+    workload_contract_id: str | None
+    qualified_runtime_lineage_id: str | None
     raw: dict[str, Any]
 
     @classmethod
     def from_dict(cls, value: object) -> BenchmarkDefinition:
-        if not isinstance(value, dict) or set(value) != _DEFINITION_FIELDS:
+        if not isinstance(value, dict):
+            raise _fail("BENCHMARK_DEFINITION_FIELDS_INVALID")
+        version_value = value.get("schema_version")
+        if not isinstance(version_value, str):
+            raise _fail("BENCHMARK_DEFINITION_VERSION_INVALID")
+        version = version_value
+        expected_fields = {
+            "1.0.0": _DEFINITION_FIELDS_V1,
+            "2.0.0": _DEFINITION_FIELDS_V2,
+        }.get(version)
+        if expected_fields is None or set(value) != expected_fields:
             raise _fail("BENCHMARK_DEFINITION_FIELDS_INVALID")
         if (
             value["type_name"] != "BENCHMARK_DEFINITION"
-            or value["schema_version"] != "1.0.0"
             or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
         ):
             raise _fail("BENCHMARK_DEFINITION_VERSION_INVALID")
@@ -307,6 +324,18 @@ class BenchmarkDefinition:
         primary = value["primary"]
         if not isinstance(primary, bool):
             raise _fail("PRIMARY_FLAG_INVALID")
+        campaign_id: str | None = None
+        workload_contract_id: str | None = None
+        qualified_runtime_lineage_id: str | None = None
+        if version == "2.0.0":
+            campaign_id = _string(value["campaign_id"], "CAMPAIGN_ID_INVALID")
+            workload_contract_id = _content_id(
+                value["workload_contract_id"], "WORKLOAD_CONTRACT_ID_INVALID"
+            )
+            qualified_runtime_lineage_id = _content_id(
+                value["qualified_runtime_lineage_id"],
+                "QUALIFIED_RUNTIME_LINEAGE_ID_INVALID",
+            )
         return cls(
             B=_integer(value["B"], "B_INVALID", minimum=1),
             H=_integer(value["H"], "H_INVALID", minimum=1),
@@ -329,6 +358,9 @@ class BenchmarkDefinition:
             ticket_plan_id=_content_id(value["ticket_plan_id"], "TICKET_PLAN_ID_INVALID"),
             base_model_id=_content_id(value["base_model_id"], "BASE_MODEL_ID_INVALID"),
             primary=primary,
+            campaign_id=campaign_id,
+            workload_contract_id=workload_contract_id,
+            qualified_runtime_lineage_id=qualified_runtime_lineage_id,
             raw=dict(value),
         )
 
@@ -338,7 +370,10 @@ class BenchmarkDefinition:
 
     @property
     def content_id(self) -> str:
-        domain = b"deltareduce.010.benchmark-definition.v1\0"
+        domain = {
+            "1.0.0": b"deltareduce.010.benchmark-definition.v1\0",
+            "2.0.0": b"deltareduce.010.benchmark-definition.v2\0",
+        }[self.raw["schema_version"]]
         return "sha256:" + hashlib.sha256(domain + self.canonical_bytes).hexdigest()
 
 

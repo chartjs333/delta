@@ -474,6 +474,8 @@ def build_execution_set(
     environment: PrimaryEnvironment,
 ) -> PrimaryExecutionSet:
     definition = preregistration.definition
+    if definition.campaign_id == "campaign-02":
+        raise _fail("LEGACY_PRIMARY_PATH_FORBIDDEN")
     if not definition.primary:
         raise _fail("PRIMARY_EXECUTOR_REQUIRES_PRIMARY_DEFINITION")
     if tuple(item.content_id for item in arms) != definition.arm_ids:

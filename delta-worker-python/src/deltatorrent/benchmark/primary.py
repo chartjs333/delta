@@ -65,11 +65,12 @@ class ExecutionPlan:
     ticket_plan_id: str
     parent_checkpoint_id: str
     evaluation_ids: tuple[str, ...]
+    campaign_id: str | None = None
 
     @property
     def document(self) -> dict[str, object]:
         """Canonical runner input; the definition remains the methodology authority."""
-        return {
+        document: dict[str, object] = {
             "arm_kind": self.arm.kind,
             "arm_id": self.arm.content_id,
             "arm_name": self.arm.arm_id,
@@ -88,6 +89,9 @@ class ExecutionPlan:
             "topology": self.arm.topology,
             "workload_identity": self.arm.workload_identity,
         }
+        if self.campaign_id is not None:
+            document["campaign_id"] = self.campaign_id
+        return document
 
     @property
     def content_id(self) -> str:
@@ -113,6 +117,8 @@ class PrimaryArmAdapter:
         seed: int,
         repetition: int,
     ) -> ExecutionPlan:
+        if definition.campaign_id == "campaign-02":
+            raise PrimaryRunError("LEGACY_PRIMARY_PATH_FORBIDDEN")
         if not definition.primary:
             raise PrimaryRunError("PRIMARY_ADAPTER_REQUIRES_PRIMARY_DEFINITION")
         if arm.content_id not in definition.arm_ids:
@@ -140,9 +146,12 @@ class PrimaryArmAdapter:
             ticket_plan_id=definition.ticket_plan_id,
             parent_checkpoint_id=definition.base_model_id,
             evaluation_ids=definition.evaluation_ids,
+            campaign_id=definition.campaign_id,
         )
 
     def admit(self, plan: ExecutionPlan, observation: RunObservation) -> RunObservation:
+        if plan.campaign_id == "campaign-02":
+            raise PrimaryRunError("LEGACY_PRIMARY_PATH_FORBIDDEN")
         identity = (
             observation.definition_id == plan.definition_id
             and observation.arm == plan.arm

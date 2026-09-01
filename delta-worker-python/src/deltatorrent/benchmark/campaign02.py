@@ -31,6 +31,29 @@ _WORKLOAD_FIELDS: Final = {
     "total_tokens_per_arm_run",
     "type_name",
 }
+_DOMAIN_MANIFEST_FIELDS: Final = {
+    "campaign_id",
+    "domains",
+    "formal_semantics_id",
+    "schema_version",
+    "type_name",
+}
+_DOMAIN_ENTRY_FIELDS: Final = {
+    "dataset_id",
+    "denominator",
+    "domain_id",
+    "numerator",
+    "ticket_count",
+}
+_TICKET_PLAN_FIELDS: Final = {
+    "campaign_id",
+    "domain_manifest_id",
+    "formal_semantics_id",
+    "schema_version",
+    "tickets",
+    "type_name",
+    "workload_contract_id",
+}
 
 
 class Campaign02ContractError(ValueError):
@@ -156,6 +179,96 @@ def load_workload_contract(path: Path) -> WorkloadContract:
     if not isinstance(value, dict) or canonical_json_bytes(value) + b"\n" != raw:
         raise _fail("CAMPAIGN02_WORKLOAD_CANONICAL_BYTES_INVALID")
     return WorkloadContract.from_dict(value)
+
+
+@dataclass(frozen=True, slots=True)
+class CampaignDomain:
+    domain_id: str
+    dataset_id: str
+    ticket_count: int
+    numerator: int
+    denominator: int
+
+    @classmethod
+    def from_dict(cls, value: object) -> CampaignDomain:
+        if not isinstance(value, dict) or set(value) != _DOMAIN_ENTRY_FIELDS:
+            raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_ENTRY_FIELDS_INVALID")
+        numerator = _positive_integer(
+            value["numerator"], "CAMPAIGN02_DOMAIN_MIXTURE_NUMERATOR_INVALID"
+        )
+        denominator = _positive_integer(
+            value["denominator"], "CAMPAIGN02_DOMAIN_MIXTURE_DENOMINATOR_INVALID"
+        )
+        if numerator != denominator:
+            raise _fail("CAMPAIGN02_DOMAIN_MIXTURE_NOT_NORMALIZED")
+        return cls(
+            domain_id=_string(value["domain_id"], "CAMPAIGN02_DOMAIN_ID_INVALID"),
+            dataset_id=_content_id(value["dataset_id"], "CAMPAIGN02_DOMAIN_DATASET_ID_INVALID"),
+            ticket_count=_positive_integer(
+                value["ticket_count"], "CAMPAIGN02_DOMAIN_TICKET_COUNT_INVALID"
+            ),
+            numerator=numerator,
+            denominator=denominator,
+        )
+
+    @property
+    def document(self) -> dict[str, object]:
+        return {
+            "dataset_id": self.dataset_id,
+            "denominator": self.denominator,
+            "domain_id": self.domain_id,
+            "numerator": self.numerator,
+            "ticket_count": self.ticket_count,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class CampaignDomainManifest:
+    campaign_id: str
+    domains: tuple[CampaignDomain, ...]
+    raw: dict[str, Any]
+
+    @classmethod
+    def from_dict(cls, value: object) -> CampaignDomainManifest:
+        if not isinstance(value, dict) or set(value) != _DOMAIN_MANIFEST_FIELDS:
+            raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_FIELDS_INVALID")
+        if (
+            value.get("type_name") != "CAMPAIGN_DOMAIN_MANIFEST"
+            or value.get("schema_version") != "1.0.0"
+            or value.get("formal_semantics_id") != FORMAL_SEMANTICS_ID
+            or value.get("campaign_id") != "campaign-02"
+        ):
+            raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_HEADER_INVALID")
+        domains_raw = value["domains"]
+        if not isinstance(domains_raw, list) or not domains_raw:
+            raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_EMPTY")
+        domains = tuple(CampaignDomain.from_dict(item) for item in domains_raw)
+        if tuple(item.domain_id for item in domains) != tuple(
+            sorted(item.domain_id for item in domains)
+        ) or len({item.domain_id for item in domains}) != len(domains):
+            raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_ORDER_INVALID")
+        return cls("campaign-02", domains, dict(value))
+
+    @property
+    def canonical_bytes(self) -> bytes:
+        return canonical_json_bytes(self.raw)
+
+    @property
+    def content_id(self) -> str:
+        return sha256_content_id(
+            b"deltareduce.010.campaign-domain-manifest.v1\0" + self.canonical_bytes
+        )
+
+
+def load_domain_manifest(path: Path) -> CampaignDomainManifest:
+    try:
+        raw = path.read_bytes()
+        value = json.loads(raw)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_JSON_INVALID") from exc
+    if not isinstance(value, dict) or canonical_json_bytes(value) + b"\n" != raw:
+        raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_CANONICAL_BYTES_INVALID")
+    return CampaignDomainManifest.from_dict(value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -293,6 +406,125 @@ def allocate_tickets(workload: WorkloadContract) -> tuple[TicketAllocation, ...]
 
 
 @dataclass(frozen=True, slots=True)
+class CampaignTicketPlan:
+    campaign_id: str
+    workload_contract_id: str
+    domain_manifest_id: str
+    tickets: tuple[TicketAllocation, ...]
+    raw: dict[str, Any]
+
+    @classmethod
+    def from_dict(
+        cls,
+        value: object,
+        workload: WorkloadContract,
+        domain_manifest: CampaignDomainManifest,
+    ) -> CampaignTicketPlan:
+        if not isinstance(value, dict) or set(value) != _TICKET_PLAN_FIELDS:
+            raise _fail("CAMPAIGN02_TICKET_PLAN_FIELDS_INVALID")
+        if (
+            value.get("type_name") != "CAMPAIGN_TICKET_PLAN"
+            or value.get("schema_version") != "1.0.0"
+            or value.get("formal_semantics_id") != FORMAL_SEMANTICS_ID
+            or value.get("campaign_id") != "campaign-02"
+            or value.get("workload_contract_id") != workload.content_id
+            or value.get("domain_manifest_id") != domain_manifest.content_id
+        ):
+            raise _fail("CAMPAIGN02_TICKET_PLAN_HEADER_INVALID")
+        tickets_raw = value["tickets"]
+        if not isinstance(tickets_raw, list):
+            raise _fail("CAMPAIGN02_TICKET_PLAN_TICKETS_INVALID")
+        tickets: list[TicketAllocation] = []
+        for item in tickets_raw:
+            if not isinstance(item, dict) or set(item) != {
+                "domain_id",
+                "optimizer_steps",
+                "ordinal",
+                "ticket_id",
+                "tokens_per_optimizer_step",
+                "tokens_per_ticket",
+            }:
+                raise _fail("CAMPAIGN02_TICKET_PLAN_TICKET_FIELDS_INVALID")
+            ticket_id = _content_id(item["ticket_id"], "CAMPAIGN02_TICKET_ID_INVALID")
+            ordinal = item["ordinal"]
+            if isinstance(ordinal, bool) or not isinstance(ordinal, int) or ordinal < 0:
+                raise _fail("CAMPAIGN02_TICKET_ORDINAL_INVALID")
+            tickets.append(
+                TicketAllocation(
+                    ticket_id=ticket_id,
+                    domain_id=_string(item["domain_id"], "CAMPAIGN02_DOMAIN_ID_INVALID"),
+                    ordinal=ordinal,
+                    tokens_per_optimizer_step=_positive_integer(
+                        item["tokens_per_optimizer_step"],
+                        "CAMPAIGN02_TOKENS_PER_STEP_INVALID",
+                    ),
+                    optimizer_steps=_positive_integer(
+                        item["optimizer_steps"], "CAMPAIGN02_STEPS_PER_TICKET_INVALID"
+                    ),
+                    tokens_per_ticket=_positive_integer(
+                        item["tokens_per_ticket"], "CAMPAIGN02_TOKENS_PER_TICKET_INVALID"
+                    ),
+                )
+            )
+        expected = allocate_tickets(workload)
+        if tuple(tickets) != expected:
+            raise _fail("CAMPAIGN02_TICKET_PLAN_ALLOCATION_MISMATCH")
+        manifest_counts = tuple(
+            (item.domain_id, item.ticket_count) for item in domain_manifest.domains
+        )
+        workload_counts = tuple(
+            (item.domain_id, item.ticket_count) for item in workload.domain_ticket_counts
+        )
+        if manifest_counts != workload_counts:
+            raise _fail("CAMPAIGN02_DOMAIN_MANIFEST_WORKLOAD_MISMATCH")
+        return cls(
+            campaign_id="campaign-02",
+            workload_contract_id=workload.content_id,
+            domain_manifest_id=domain_manifest.content_id,
+            tickets=tuple(tickets),
+            raw=dict(value),
+        )
+
+    @property
+    def canonical_bytes(self) -> bytes:
+        return canonical_json_bytes(self.raw)
+
+    @property
+    def content_id(self) -> str:
+        return sha256_content_id(
+            b"deltareduce.010.campaign-ticket-plan.v1\0" + self.canonical_bytes
+        )
+
+
+def build_ticket_plan(
+    workload: WorkloadContract, domain_manifest: CampaignDomainManifest
+) -> CampaignTicketPlan:
+    value: dict[str, Any] = {
+        "campaign_id": "campaign-02",
+        "domain_manifest_id": domain_manifest.content_id,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "schema_version": "1.0.0",
+        "tickets": [item.document for item in allocate_tickets(workload)],
+        "type_name": "CAMPAIGN_TICKET_PLAN",
+        "workload_contract_id": workload.content_id,
+    }
+    return CampaignTicketPlan.from_dict(value, workload, domain_manifest)
+
+
+def load_ticket_plan(
+    path: Path, workload: WorkloadContract, domain_manifest: CampaignDomainManifest
+) -> CampaignTicketPlan:
+    try:
+        raw = path.read_bytes()
+        value = json.loads(raw)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise _fail("CAMPAIGN02_TICKET_PLAN_JSON_INVALID") from exc
+    if not isinstance(value, dict) or canonical_json_bytes(value) + b"\n" != raw:
+        raise _fail("CAMPAIGN02_TICKET_PLAN_CANONICAL_BYTES_INVALID")
+    return CampaignTicketPlan.from_dict(value, workload, domain_manifest)
+
+
+@dataclass(frozen=True, slots=True)
 class CampaignExecutionPlan:
     execution_class: str
     result_class: str
@@ -326,6 +558,9 @@ class CampaignExecutionPlan:
     evaluation_implementation_ids: tuple[str, ...]
     tickets: tuple[TicketAllocation, ...]
     certified_round_policy: CertifiedRoundPolicy | None = None
+    domain_manifest_id: str | None = None
+    ticket_plan_id: str | None = None
+    qualified_runtime_lineage_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.execution_class not in {"NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"}:
@@ -364,6 +599,20 @@ class CampaignExecutionPlan:
         )
         if any(_CONTENT_ID.fullmatch(value) is None for value in identities):
             raise _fail("CAMPAIGN02_PLAN_IDENTITY_INVALID")
+        execution_binding_ids = (
+            self.domain_manifest_id,
+            self.ticket_plan_id,
+            self.qualified_runtime_lineage_id,
+        )
+        if any(value is not None for value in execution_binding_ids) and (
+            any(value is None for value in execution_binding_ids)
+            or any(
+                _CONTENT_ID.fullmatch(value) is None
+                for value in execution_binding_ids
+                if value is not None
+            )
+        ):
+            raise _fail("CAMPAIGN02_PLAN_EXECUTION_BINDING_INVALID")
         if (
             _COMMIT_ID.fullmatch(self.source_commit) is None
             or _COMMIT_ID.fullmatch(self.source_tree) is None
@@ -412,7 +661,7 @@ class CampaignExecutionPlan:
 
     @property
     def document(self) -> dict[str, object]:
-        return {
+        document: dict[str, object] = {
             "arm_id": self.arm_id,
             "benchmark_definition_id": self.benchmark_definition_id,
             "campaign_id": self.campaign_id,
@@ -440,7 +689,7 @@ class CampaignExecutionPlan:
             "result_class": self.result_class,
             "round_id": self.round_id,
             "runner_id": self.runner_id,
-            "schema_version": "2.0.0",
+            "schema_version": "3.0.0" if self.ticket_plan_id is not None else "2.0.0",
             "seed": self.seed,
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
@@ -454,11 +703,24 @@ class CampaignExecutionPlan:
             "workload_id": self.workload_id,
             "writer_id": self.writer_id,
         }
+        if self.ticket_plan_id is not None:
+            document.update(
+                {
+                    "domain_manifest_id": self.domain_manifest_id,
+                    "qualified_runtime_lineage_id": self.qualified_runtime_lineage_id,
+                    "ticket_plan_id": self.ticket_plan_id,
+                }
+            )
+        return document
 
     @property
     def content_id(self) -> str:
+        version = b"v3" if self.ticket_plan_id is not None else b"v2"
         return sha256_content_id(
-            b"deltareduce.010.primary-execution-plan.v2\0" + canonical_json_bytes(self.document)
+            b"deltareduce.010.primary-execution-plan."
+            + version
+            + b"\0"
+            + canonical_json_bytes(self.document)
         )
 
 
@@ -499,3 +761,13 @@ def authorize_execution_class(authorization: dict[str, Any], plan: CampaignExecu
         or authorization.get("source_tree") != plan.source_tree
     ):
         raise _fail("CAMPAIGN02_PRIMARY_EXECUTION_NOT_AUTHORIZED")
+    if (
+        plan.domain_manifest_id is None
+        or plan.ticket_plan_id is None
+        or plan.qualified_runtime_lineage_id is None
+        or authorization.get("domain_manifest_id") != plan.domain_manifest_id
+        or authorization.get("ticket_plan_id") != plan.ticket_plan_id
+        or authorization.get("qualified_runtime_lineage_id") != plan.qualified_runtime_lineage_id
+        or authorization.get("workload_contract_id") != plan.workload_id
+    ):
+        raise _fail("CAMPAIGN02_PRIMARY_EXECUTION_BINDING_REQUIRED")

@@ -1,0 +1,179 @@
+"""Generate source-sealed Campaign 02 domain/ticket identities and supersession record."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Final
+
+from deltatorrent.benchmark.campaign02 import (
+    CampaignDomainManifest,
+    build_ticket_plan,
+    load_workload_contract,
+)
+from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
+from deltatorrent.protocol.canonical import canonical_json_bytes
+
+ROOT: Final = Path(__file__).resolve().parents[3]
+CONFIG: Final = ROOT / "configs/benchmark/campaign-02"
+REPORTS: Final = ROOT / "reports/benchmark/campaigns/campaign-02"
+DOMAIN_PATH: Final = CONFIG / "domain-manifest-v1.json"
+TICKET_PLAN_PATH: Final = CONFIG / "ticket-plan-v1.json"
+SUPERSESSION_PATH: Final = REPORTS / "definition-supersession-execution-binding.json"
+QUALIFICATION_SUPERSESSION_PATH: Final = (
+    REPORTS / "qualification-supersession-execution-binding.json"
+)
+READINESS_PATH: Final = REPORTS / "execution-binding-remediation-readiness.json"
+SUPERSEDED_DEFINITION_ID: Final = (
+    "sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af"
+)
+SUPERSEDED_ATTESTATION_ID: Final = (
+    "sha256:6c59421bb773e4fe12a0df3414507682b93ae008ab04e75191292ab7a64b83f7"
+)
+
+
+class Campaign02BindingArtifactError(RuntimeError):
+    """Stable generator/check rejection."""
+
+
+def _load(path: Path) -> dict[str, object]:
+    value = json.loads(path.read_bytes())
+    if not isinstance(value, dict):
+        raise Campaign02BindingArtifactError(f"CAMPAIGN02_OBJECT_INVALID:{path.name}")
+    return value
+
+
+def expected_outputs() -> dict[Path, bytes]:
+    workload = load_workload_contract(CONFIG / "workload-v2.json")
+    wikitext = _load(CONFIG / "evaluators/wikitext-v1.json")
+    domain_value = {
+        "campaign_id": "campaign-02",
+        "domains": [
+            {
+                "dataset_id": wikitext["dataset_id"],
+                "denominator": 1,
+                "domain_id": "wikitext-en",
+                "numerator": 1,
+                "ticket_count": 32,
+            }
+        ],
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "schema_version": "1.0.0",
+        "type_name": "CAMPAIGN_DOMAIN_MANIFEST",
+    }
+    domain_manifest = CampaignDomainManifest.from_dict(domain_value)
+    ticket_plan = build_ticket_plan(workload, domain_manifest)
+    supersession = {
+        "authorization": {
+            "benchmark_result_qc_authorized": False,
+            "feature_011_authorized": False,
+            "primary_execution_authorized": False,
+            "real_wan_authorized": False,
+            "stage_a_authorized": False,
+            "stage_b_authorized": False,
+            "stage_c_authorized": False,
+        },
+        "benchmark_result_qc": "ABSENT",
+        "execution_authorization": "ABSENT",
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "observation_counts": {
+            "primary_observations": 0,
+            "scientific_observations": 0,
+            "stage_a_receipts": 0,
+        },
+        "reason_codes": [
+            "QUALIFIED_PRIMARY_EXECUTION_PATH_NOT_BOUND_TO_CAMPAIGN02_WORKLOAD",
+            "SYNTHETIC_SIGNER_LABELS_WITHOUT_SIGNATURE_EVIDENCE",
+        ],
+        "replacement_definition_required": True,
+        "schema_version": "1.0.0",
+        "status": "SUPERSEDED_BEFORE_EXECUTION",
+        "superseded_attestation_id": SUPERSEDED_ATTESTATION_ID,
+        "superseded_definition_id": SUPERSEDED_DEFINITION_ID,
+        "type_name": "CAMPAIGN02_DEFINITION_SUPERSESSION",
+    }
+    qualification_supersession = {
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "primary_observations_created": 0,
+        "reason": "QUALIFIED_PRIMARY_EXECUTION_PATH_NOT_BOUND_TO_CAMPAIGN02_WORKLOAD",
+        "replacement_qualification_required": True,
+        "schema_version": "1.0.0",
+        "status": "SUPERSEDED_BEFORE_EXECUTION",
+        "superseded_source": {
+            "commit": "660710818a7a45708231ae03da78bac9bbc0abc9",
+            "tree": "553f63928e13cf785798e8b1adfb53176e01629d",
+        },
+        "type_name": "CAMPAIGN02_SOURCE_QUALIFICATION_SUPERSESSION",
+    }
+    readiness = {
+        "authorization": {
+            "feature_011_authorized": False,
+            "primary_execution_authorized": False,
+            "real_wan_authorized": False,
+            "result_qc_authorized": False,
+            "stage_a_authorized": False,
+            "stage_b_authorized": False,
+            "stage_c_authorized": False,
+        },
+        "cryptographic_governance": {
+            "independent_votes_present": 0,
+            "private_keys_committed": False,
+            "status": "IMPLEMENTED_AWAITING_EXTERNAL_VALIDATOR_ACTIONS",
+        },
+        "definition_created": False,
+        "execution_authorization": "ABSENT",
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "identity_bindings": {
+            "all_distinct": len(
+                {workload.content_id, domain_manifest.content_id, ticket_plan.content_id}
+            )
+            == 3,
+            "domain_manifest_id": domain_manifest.content_id,
+            "ticket_plan_id": ticket_plan.content_id,
+            "workload_contract_id": workload.content_id,
+        },
+        "legacy_primary_path": "FORBIDDEN_FOR_CAMPAIGN02",
+        "next_required_gate": "C2_021_SOURCE_AND_DESIGNATED_GPU_REQUALIFICATION",
+        "schema_version": "1.0.0",
+        "status": "SOURCE_REMEDIATION_IN_PROGRESS_NO_EXECUTION",
+        "type_name": "CAMPAIGN02_EXECUTION_BINDING_REMEDIATION_READINESS",
+    }
+    return {
+        DOMAIN_PATH: canonical_json_bytes(domain_manifest.raw) + b"\n",
+        TICKET_PLAN_PATH: canonical_json_bytes(ticket_plan.raw) + b"\n",
+        SUPERSESSION_PATH: canonical_json_bytes(supersession) + b"\n",
+        QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(qualification_supersession) + b"\n",
+        READINESS_PATH: canonical_json_bytes(readiness) + b"\n",
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--write", action="store_true")
+    arguments = parser.parse_args()
+    outputs = expected_outputs()
+    if arguments.write:
+        for path, value in outputs.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(value)
+    else:
+        for path, expected in outputs.items():
+            if not path.is_file() or path.read_bytes() != expected:
+                raise Campaign02BindingArtifactError(
+                    f"CAMPAIGN02_EXECUTION_BINDING_OUTPUT_DRIFT:{path.name}"
+                )
+    print(
+        canonical_json_bytes(
+            {
+                "output_count": len(outputs),
+                "primary_execution_authorized": False,
+                "status": "PASS",
+            }
+        ).decode()
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

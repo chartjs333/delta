@@ -1,0 +1,1 @@
+{"campaign_id":"campaign-02","domains":[{"dataset_id":"sha256:22dd0aff7ee297d8a28a2ae5ab47e3190faeccb917c81e623457097aeceabfb6","denominator":1,"domain_id":"wikitext-en","numerator":1,"ticket_count":32}],"formal_semantics_id":"sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6","schema_version":"1.0.0","type_name":"CAMPAIGN_DOMAIN_MANIFEST"}
