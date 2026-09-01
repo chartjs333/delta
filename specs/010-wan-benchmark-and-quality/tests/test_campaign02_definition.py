@@ -106,3 +106,51 @@ def test_campaign02_methodology_diff_rejects_coordinated_threshold_drift() -> No
     mutated = MODULE.BenchmarkDefinition.from_dict(mutated_value)
     with pytest.raises(MODULE.Campaign02DefinitionError, match="METRIC_SCIENTIFIC_FIELD_DRIFT"):
         MODULE.methodology_diff(mutated, workload, arms, mutated_metrics, lineage)
+
+
+def test_campaign02_attestation_outputs_are_current() -> None:
+    readiness = load(MODULE.READINESS_PATH)
+    outputs = MODULE.attestation_outputs(readiness["definition_created_commit"])
+    MODULE.check_outputs(outputs)
+
+
+def test_campaign02_definition_attestation_has_exact_quorum() -> None:
+    definition, *_ = MODULE.load_definition_outputs()
+    attestation = load(MODULE.ATTESTATION_PATH)
+    assert attestation["type_name"] == "BENCHMARK_DEFINITION_ATTESTATION"
+    assert attestation["benchmark_definition_id"] == definition.content_id
+    assert attestation["governance_only"] is True
+    assert attestation["f_b"] == 1
+    assert attestation["quorum_threshold"] == 3
+    assert attestation["ordered_signers"] == [
+        "benchmark-validator-0",
+        "benchmark-validator-1",
+        "benchmark-validator-2",
+    ]
+
+
+def test_campaign02_methodology_diff_separates_allowed_changes() -> None:
+    diff = load(MODULE.METHODOLOGY_DIFF_PATH)
+    assert diff["campaign_transition"] == "CAMPAIGN_01_TO_CAMPAIGN_02"
+    assert diff["status"] == "PASS"
+    assert diff["predecessor_definition_id"] == MODULE.FORBIDDEN_DEFINITION_IDS[0]
+    assert diff["replacement_definition_id"] not in MODULE.FORBIDDEN_DEFINITION_IDS
+    assert diff["scientific_observations_used_to_change_methodology"] == 0
+    assert all(value is False for value in diff["prohibited_result_driven_changes"].values())
+    assert diff["required_blocker_remediation"]["gpu_environment_id"] == (MODULE.GPU_ENVIRONMENT_ID)
+
+
+def test_campaign02_readiness_is_definition_only() -> None:
+    definition, *_ = MODULE.load_definition_outputs()
+    attestation = load(MODULE.ATTESTATION_PATH)
+    diff = load(MODULE.METHODOLOGY_DIFF_PATH)
+    readiness = load(MODULE.READINESS_PATH)
+    assert readiness["definition_id"] == definition.content_id
+    assert readiness["definition_attestation_id"] == MODULE.object_id(attestation)
+    assert readiness["methodology_diff_id"] == MODULE.object_id(diff)
+    assert readiness["definition_created_commit"] == ("a2eaf47e17c616e78a4ec4666fcb33c030a765e6")
+    assert readiness["c2_016_status"] == "OPEN_REQUIRES_SEPARATE_GOVERNANCE_DECISION"
+    assert readiness["execution_plan"]["execution_allowed"] is False
+    assert readiness["execution_plan"]["missing_run_policy"] == "FAIL_CLOSED"
+    assert all(value is False for value in readiness["authorization"].values())
+    assert readiness["primary_observations_created"] == 0
