@@ -30,7 +30,7 @@ satisfy any Campaign 02 gate. No task in this file authorizes primary execution.
   run-level finalization rejection matrix.
 - [x] **C2-010** Reissue exact GPU environment and designated-hardware qualification for the new
   source commit/tree.
-- [ ] **C2-011** Run exact-source remediation CI for the replacement source seal.
+- [x] **C2-011** Run exact-source remediation CI for the replacement source seal.
 - [x] **C2-012** Freeze the replacement Campaign 02 remediation source commit/tree and derived
   component IDs.
 
