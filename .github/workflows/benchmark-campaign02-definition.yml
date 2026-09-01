@@ -1,0 +1,91 @@
+name: Campaign 02 Definition construction qualification
+
+on:
+  pull_request:
+    branches: [010-wan-benchmark-and-quality]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: campaign-02-definition-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  definition-construction:
+    name: Definition, methodology and temporal-integrity gates
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          github.head_ref == '010f-primary-campaign-definition' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out Definition branch
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install pinned portable workspace tool
+        run: python3 -m pip install --disable-pip-version-check uv==0.6.14
+
+      - name: Materialize CPU-only portable environment
+        run: uv sync --frozen
+
+      - name: Verify immutable Definition outputs
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_definition.py \
+            --check-definition
+          uv run python \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_definition.py \
+            --check-attestation
+          uv run python \
+            specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_definition_temporal.py
+
+      - name: Run Definition negative and governance gates
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run ruff check \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_definition.py \
+            specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_definition_temporal.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_definition.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_definition_temporal.py
+          uv run ruff format --check \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_definition.py \
+            specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_definition_temporal.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_definition.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_definition_temporal.py
+          uv run pytest \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_definition.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_definition_temporal.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py \
+            --junitxml="$RUNNER_TEMP/campaign-02-definition.xml"
+          git diff --exit-code
+
+      - name: Retain Definition review package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign-02-definition-${{ github.run_id }}
+          path: |
+            configs/benchmark/campaign-02/definition-v1.json
+            configs/benchmark/campaign-02/definition-attestation-v1.json
+            configs/benchmark/campaign-02/qualified-runtime-lineage-v1.json
+            reports/benchmark/campaigns/campaign-02/methodology-diff.json
+            reports/benchmark/campaigns/campaign-02/definition-readiness.json
+            specs/010-wan-benchmark-and-quality/evidence/campaign-02-definition-temporal-integrity.json
+            ${{ runner.temp }}/campaign-02-definition.xml
+          if-no-files-found: error
+          retention-days: 30
