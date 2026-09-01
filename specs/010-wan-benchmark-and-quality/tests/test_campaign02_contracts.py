@@ -65,6 +65,7 @@ def test_gpu_environment_has_separate_hash_locked_platforms_and_cpu_lock() -> No
     assert lock.document["required_packages"] == {
         "accelerate": "1.14.0",
         "bitsandbytes": "0.50.2",
+        "cryptography": "46.0.7",
         "huggingface_hub": "1.29.0",
         "peft": "0.20.0",
         "torch": "2.6.0+cu124",

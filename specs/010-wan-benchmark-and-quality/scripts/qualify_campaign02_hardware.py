@@ -26,6 +26,7 @@ PROFILE: Final = ROOT / "configs/qlora/8gb-reference.json"
 REQUIRED: Final = {
     "accelerate": "1.14.0",
     "bitsandbytes": "0.50.2",
+    "cryptography": "46.0.7",
     "huggingface_hub": "1.29.0",
     "peft": "0.20.0",
     "torch": "2.6.0+cu124",
@@ -60,7 +61,14 @@ def file_id(path: Path) -> str:
 def distribution_versions() -> dict[str, str]:
     actual = {
         name: importlib.metadata.version(name.replace("_", "-"))
-        for name in ("accelerate", "bitsandbytes", "huggingface_hub", "peft", "transformers")
+        for name in (
+            "accelerate",
+            "bitsandbytes",
+            "cryptography",
+            "huggingface_hub",
+            "peft",
+            "transformers",
+        )
     }
     import torch
 

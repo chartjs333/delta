@@ -14,7 +14,12 @@ from typing import Any, Final
 ROOT: Final = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "delta-worker-python/src"))
 
-from deltatorrent.benchmark.campaign02 import load_workload_contract  # noqa: E402
+from deltatorrent.benchmark.campaign02 import (  # noqa: E402
+    WorkloadContract,
+    load_domain_manifest,
+    load_ticket_plan,
+    load_workload_contract,
+)
 from deltatorrent.benchmark.evaluators.common import load_evaluator_profile  # noqa: E402
 from deltatorrent.benchmark.gpu_environment import (  # noqa: E402
     verify_gpu_environment_outputs,
@@ -22,7 +27,7 @@ from deltatorrent.benchmark.gpu_environment import (  # noqa: E402
 from deltatorrent.benchmark.measured_runner import ComponentIdentity  # noqa: E402
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id  # noqa: E402
 
-PREDECESSOR: Final = "661494c84cfcdb365c21542b46a5ebfe3a91cd8d"
+PREDECESSOR: Final = "8e945ac9713de5898d3abdb10ad2474079a87260"
 FORMAL_ID: Final = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
 OLD_DEFINITION: Final = "sha256:dd607651128bca0b8edfa861093945b0bac2355c93d9d45b4c8b08457fba4244"
 IMMUTABLE_CAMPAIGN01: Final = (
@@ -50,6 +55,14 @@ EVALUATOR_SOURCES: Final = {
         "delta-worker-python/src/deltatorrent/benchmark/evaluators/hellaswag.py",
     ),
 }
+EXECUTION_BINDING_SOURCES: Final = (
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_binding.py",
+    "delta-worker-python/src/deltatorrent/benchmark/definition.py",
+    "delta-worker-python/src/deltatorrent/benchmark/governance.py",
+    "delta-worker-python/src/deltatorrent/benchmark/primary.py",
+    "delta-worker-python/src/deltatorrent/benchmark/primary_executor.py",
+)
 
 
 class Campaign02ExactSourceError(RuntimeError):
@@ -139,6 +152,24 @@ def verify_governance() -> dict[str, object]:
         / "reports/benchmark/campaigns/campaign-02/qualification-supersession-native-chain.json",
         "CAMPAIGN02_NATIVE_CHAIN_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    definition_supersession = canonical_file(
+        ROOT
+        / "reports/benchmark/campaigns/campaign-02"
+        / "definition-supersession-execution-binding.json",
+        "CAMPAIGN02_DEFINITION_SUPERSESSION_INVALID",
+    )
+    execution_binding_supersession = canonical_file(
+        ROOT
+        / "reports/benchmark/campaigns/campaign-02"
+        / "qualification-supersession-execution-binding.json",
+        "CAMPAIGN02_EXECUTION_BINDING_QUALIFICATION_SUPERSESSION_INVALID",
+    )
+    readiness = canonical_file(
+        ROOT
+        / "reports/benchmark/campaigns/campaign-02"
+        / "execution-binding-remediation-readiness.json",
+        "CAMPAIGN02_EXECUTION_BINDING_READINESS_INVALID",
+    )
     require(
         closure.get("benchmark_definition_id") == OLD_DEFINITION
         and closure.get("status") == "TERMINATED_NO_GO_AFTER_STAGE_A_BEFORE_SCIENTIFIC_EXECUTION"
@@ -184,8 +215,65 @@ def verify_governance() -> dict[str, object]:
         and native_chain_supersession.get("scientific_observations_created") is False,
         "CAMPAIGN02_NATIVE_CHAIN_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    authorization_flags = definition_supersession.get("authorization")
+    observation_counts = definition_supersession.get("observation_counts")
+    require(
+        definition_supersession.get("status") == "SUPERSEDED_BEFORE_EXECUTION"
+        and definition_supersession.get("superseded_definition_id")
+        == "sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af"
+        and definition_supersession.get("superseded_attestation_id")
+        == "sha256:6c59421bb773e4fe12a0df3414507682b93ae008ab04e75191292ab7a64b83f7"
+        and definition_supersession.get("replacement_definition_required") is True
+        and definition_supersession.get("execution_authorization") == "ABSENT"
+        and definition_supersession.get("benchmark_result_qc") == "ABSENT"
+        and isinstance(authorization_flags, dict)
+        and authorization_flags
+        and all(value is False for value in authorization_flags.values())
+        and observation_counts
+        == {
+            "primary_observations": 0,
+            "scientific_observations": 0,
+            "stage_a_receipts": 0,
+        },
+        "CAMPAIGN02_DEFINITION_SUPERSESSION_INVALID",
+    )
+    require(
+        execution_binding_supersession.get("status") == "SUPERSEDED_BEFORE_EXECUTION"
+        and execution_binding_supersession.get("reason")
+        == "QUALIFIED_PRIMARY_EXECUTION_PATH_NOT_BOUND_TO_CAMPAIGN02_WORKLOAD"
+        and execution_binding_supersession.get("replacement_qualification_required") is True
+        and execution_binding_supersession.get("primary_observations_created") == 0,
+        "CAMPAIGN02_EXECUTION_BINDING_QUALIFICATION_SUPERSESSION_INVALID",
+    )
+    readiness_flags = readiness.get("authorization")
+    cryptographic_governance = readiness.get("cryptographic_governance")
+    require(
+        readiness.get("status") == "SOURCE_REMEDIATION_IN_PROGRESS_NO_EXECUTION"
+        and readiness.get("definition_created") is False
+        and readiness.get("execution_authorization") == "ABSENT"
+        and readiness.get("legacy_primary_path") == "FORBIDDEN_FOR_CAMPAIGN02"
+        and readiness.get("next_required_gate")
+        == "C2_021_SOURCE_AND_DESIGNATED_GPU_REQUALIFICATION"
+        and isinstance(readiness_flags, dict)
+        and readiness_flags
+        and all(value is False for value in readiness_flags.values())
+        and cryptographic_governance
+        == {
+            "independent_votes_present": 0,
+            "private_keys_committed": False,
+            "status": "IMPLEMENTED_AWAITING_EXTERNAL_VALIDATOR_ACTIONS",
+        },
+        "CAMPAIGN02_EXECUTION_BINDING_READINESS_INVALID",
+    )
     return {
         "campaign01_closure_id": sha256_content_id(canonical_json_bytes(closure)),
+        "definition_supersession_id": sha256_content_id(
+            canonical_json_bytes(definition_supersession)
+        ),
+        "execution_binding_qualification_supersession_id": sha256_content_id(
+            canonical_json_bytes(execution_binding_supersession)
+        ),
+        "execution_binding_readiness_id": sha256_content_id(canonical_json_bytes(readiness)),
         "old_qualification_supersession_id": sha256_content_id(canonical_json_bytes(supersession)),
         "native_chain_qualification_supersession_id": sha256_content_id(
             canonical_json_bytes(native_chain_supersession)
@@ -214,6 +302,24 @@ def verify_junit(path: Path) -> dict[str, object]:
         }
     )
     require(len(cases) == tests, "CAMPAIGN02_PORTABLE_JUNIT_DUPLICATE_CASE")
+    case_names = {item.rsplit("::", 1)[-1] for item in cases}
+    required_cases = {
+        "test_campaign02_compiler_creates_exact_15_plan_matrix",
+        "test_campaign02_distinct_workload_domain_and_ticket_plan_ids",
+        "test_campaign02_forged_signature_is_rejected",
+        "test_campaign02_legacy_primary_adapter_is_forbidden",
+        "test_campaign02_plan_total_cannot_fall_back_to_per_ticket_b",
+        "test_campaign02_signature_over_noncanonical_bytes_is_rejected",
+    }
+    require(
+        required_cases <= case_names
+        and sum(
+            name.startswith("test_all_legacy_primary_cli_routes_reject_campaign02[")
+            for name in case_names
+        )
+        == 4,
+        "CAMPAIGN02_EXECUTION_BINDING_PORTABLE_COVERAGE_MISSING",
+    )
     manifest = {
         "errors": errors,
         "failures": failures,
@@ -275,6 +381,74 @@ def verify_cross_verifier_corpus() -> dict[str, object]:
         "case_count": len(cases),
         "content_id": sha256_content_id(path.read_bytes()),
         "status": "PASS",
+    }
+
+
+def verify_execution_binding(
+    source_commit: str,
+    source_tree: str,
+    workload: WorkloadContract,
+) -> dict[str, object]:
+    domain_manifest = load_domain_manifest(
+        ROOT / "configs/benchmark/campaign-02/domain-manifest-v1.json"
+    )
+    ticket_plan = load_ticket_plan(
+        ROOT / "configs/benchmark/campaign-02/ticket-plan-v1.json",
+        workload,
+        domain_manifest,
+    )
+    identities = {
+        workload.content_id,
+        domain_manifest.content_id,
+        ticket_plan.content_id,
+    }
+    require(len(identities) == 3, "CAMPAIGN02_EXECUTION_BINDING_ID_ALIAS")
+    require(
+        ticket_plan.workload_contract_id == workload.content_id
+        and ticket_plan.domain_manifest_id == domain_manifest.content_id
+        and len(ticket_plan.tickets) == 32
+        and tuple(item.ordinal for item in ticket_plan.tickets) == tuple(range(32))
+        and all(item.tokens_per_optimizer_step == 1024 for item in ticket_plan.tickets)
+        and all(item.optimizer_steps == 32 for item in ticket_plan.tickets)
+        and all(item.tokens_per_ticket == 32_768 for item in ticket_plan.tickets)
+        and sum(item.tokens_per_ticket for item in ticket_plan.tickets) == 1_048_576,
+        "CAMPAIGN02_EXECUTION_BINDING_TICKET_PLAN_INVALID",
+    )
+    source_files = [artifact(source_commit, path) for path in EXECUTION_BINDING_SOURCES]
+    manifest = {
+        "campaign_id": "campaign-02",
+        "domain_manifest_id": domain_manifest.content_id,
+        "formal_semantics_id": FORMAL_ID,
+        "source_commit": source_commit,
+        "source_files": source_files,
+        "source_tree": source_tree,
+        "ticket_plan_id": ticket_plan.content_id,
+        "type_name": "CAMPAIGN02_EXECUTION_BINDING_IMPLEMENTATION_IDENTITY",
+        "workload_contract_id": workload.content_id,
+    }
+    return {
+        "base_plan_count": 15,
+        "certified_result_arms": [
+            "flat-embedded",
+            "flat-sidecar",
+            "hierarchy-embedded",
+            "hierarchy-sidecar",
+        ],
+        "domain_manifest_id": domain_manifest.content_id,
+        "implementation_id": sha256_content_id(
+            b"deltareduce.010.campaign02-execution-binding-implementation.v1\0"
+            + canonical_json_bytes(manifest)
+        ),
+        "implementation_manifest": manifest,
+        "legacy_campaign02_primary_path": "FAIL_CLOSED",
+        "optimizer_steps_per_ticket": 32,
+        "reference_result_arms": ["scientific-reference"],
+        "status": "PASS",
+        "ticket_count": 32,
+        "ticket_plan_id": ticket_plan.content_id,
+        "tokens_per_ticket": 32_768,
+        "total_tokens_per_arm_run": 1_048_576,
+        "workload_contract_id": workload.content_id,
     }
 
 
@@ -348,7 +522,12 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
         and workload.total_tokens_per_arm_run == 1_048_576,
         "CAMPAIGN02_WORKLOAD_CONTRACT_INVALID",
     )
+    execution_binding = verify_execution_binding(source_commit, source_tree, workload)
     gpu_lock = verify_gpu_environment_outputs(ROOT)
+    require(
+        gpu_lock.document["required_packages"].get("cryptography") == "46.0.7",
+        "CAMPAIGN02_GOVERNANCE_CRYPTOGRAPHY_NOT_SOURCE_LOCKED",
+    )
     portable = verify_junit(portable_junit)
     cross_verifier_corpus = verify_cross_verifier_corpus()
     hardware = canonical_file(hardware_evidence, "CAMPAIGN02_HARDWARE_EVIDENCE_INVALID")
@@ -465,10 +644,13 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "configs/benchmark/campaign-02/gpu-environment-lock-v1.json",
             "configs/benchmark/campaign-02/gpu-environment-policy-v1.json",
             "configs/benchmark/campaign-02/gpu-linux-x86_64.lock",
+            "configs/benchmark/campaign-02/domain-manifest-v1.json",
             "configs/benchmark/campaign-02/gpu-windows-x86_64.lock",
             "configs/benchmark/campaign-02/runner-policy-v1.json",
+            "configs/benchmark/campaign-02/ticket-plan-v1.json",
             "configs/benchmark/campaign-02/workload-v2.json",
             "delta-protocol/fixtures/010/campaign-02/native-chain-conformance-v1.json",
+            *EXECUTION_BINDING_SOURCES,
         }
     )
     return {
@@ -485,6 +667,11 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "FINAL_CHECKPOINT_APPLY_QC_RUNTIME_WAL_BINDING_PASS",
             "NATIVE_CHAIN_ADMISSION_RECEIPT_WRITER_BINDING_PASS",
             "CREATE_ONLY_TYPED_OBSERVATION_WRITER_PASS",
+            "DISTINCT_WORKLOAD_DOMAIN_AND_TICKET_IDENTITIES_PASS",
+            "EXACT_15_PLAN_CAMPAIGN02_EXECUTION_BINDER_PASS",
+            "LEGACY_PRIMARY_PATH_FAIL_CLOSED_FOR_CAMPAIGN02_PASS",
+            "ED25519_DETACHED_GOVERNANCE_VERIFIER_SOURCE_LOCKED_PASS",
+            "SUPERSEDED_DEFINITION_AND_QUALIFICATION_NO_EXECUTION_PASS",
             "PORTABLE_EXACT_SOURCE_TESTS_PASS",
             "DESIGNATED_GPU_HARDWARE_QUALIFICATION_PASS",
             "NO_PRIMARY_OBSERVATION_OR_DEFINITION_CREATED",
@@ -502,6 +689,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
         },
         "cross_verifier_corpus": cross_verifier_corpus,
         "definition_construction_eligible_after_remediation_merge": True,
+        "execution_binding": execution_binding,
         "evaluator_implementations": evaluator_identities,
         "formal_semantics_id": FORMAL_ID,
         "governance": governance,
@@ -540,6 +728,10 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "C2-010",
             "C2-011",
             "C2-012",
+            "C2-017",
+            "C2-018",
+            "C2-019",
+            "C2-020",
         ],
         "type_name": "CAMPAIGN02_EXACT_SOURCE_QUALIFICATION",
         "workload": {
