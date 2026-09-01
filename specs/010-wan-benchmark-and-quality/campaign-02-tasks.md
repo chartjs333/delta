@@ -21,17 +21,17 @@ satisfy any Campaign 02 gate. No task in this file authorizes primary execution.
 - [x] **C2-004** Implement and fixture the measured WikiText evaluator.
 - [x] **C2-005** Implement and fixture the measured LAMBADA evaluator.
 - [x] **C2-006** Implement and fixture the measured HellaSwag evaluator.
-- [x] **C2-007** Implement exact-plan `PrimaryScientificRunner` and `PrimaryEvaluationRunner`,
+- [ ] **C2-007** Implement exact-plan `PrimaryScientificRunner` and `PrimaryEvaluationRunner`,
   including explicit run-level reference/certified finalization and Feature 008 chain admission.
-- [x] **C2-008** Implement create-only `PrimaryObservationWriter` with immutable receipts and a
+- [ ] **C2-008** Implement create-only `PrimaryObservationWriter` with immutable receipts and a
   required `run_result` union that cannot confuse a local ticket artifact with the applied
   checkpoint.
-- [x] **C2-009** Run the remediation portable positive/negative test suite, including the
+- [ ] **C2-009** Run the remediation portable positive/negative test suite, including the
   run-level finalization rejection matrix.
-- [x] **C2-010** Reissue exact GPU environment and designated-hardware qualification for the new
+- [ ] **C2-010** Reissue exact GPU environment and designated-hardware qualification for the new
   source commit/tree.
-- [x] **C2-011** Run exact-source remediation CI for the replacement source seal.
-- [x] **C2-012** Freeze the replacement Campaign 02 remediation source commit/tree and derived
+- [ ] **C2-011** Run exact-source remediation CI for the replacement source seal.
+- [ ] **C2-012** Freeze the replacement Campaign 02 remediation source commit/tree and derived
   component IDs.
 
 Machine-readable evidence:
@@ -49,6 +49,12 @@ The source/evidence chain ending at `2157d81abd3543a3b3c4ba8655797c1a363c036f` i
 audit history and is superseded by
 `reports/benchmark/campaigns/campaign-02/qualification-supersession.json`. It cannot satisfy any
 Campaign 02 Definition or execution prerequisite.
+
+The replacement source/evidence chain ending at
+`55187704e7310edb71e53f4114726b25cd659dc8` is also retained as audit history and is superseded by
+`reports/benchmark/campaigns/campaign-02/qualification-supersession-native-chain.json` because its
+primary admission path did not invoke the authoritative native Feature 008 `ChainVerifier` over
+the complete bundle.
 
 ## Definition branch and governance STOP
 

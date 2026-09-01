@@ -75,11 +75,22 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
           UV_OFFLINE: "true"
         run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --target \
+            delta_ffi_certificate_chain_test \
+            delta_ffi_certificate_chain_seed_parent_mutant_test \
+            delta_ffi_certificate_chain_observed_coverage_mutant_test \
+            --parallel 2
+          ctest --test-dir out/build/cpp20 \
+            --output-on-failure \
+            -R '^delta_ffi\.certificate_chain(_mutant_.*)?$'
           uv run ruff check \
             delta-worker-python/src/deltatorrent/benchmark \
             delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
+            delta-worker-python/tests/benchmark/generate_native_chain_corpus.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
             specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
@@ -89,8 +100,10 @@ jobs:
           uv run ruff format --check \
             delta-worker-python/src/deltatorrent/benchmark \
             delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
+            delta-worker-python/tests/benchmark/generate_native_chain_corpus.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
             specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
@@ -101,6 +114,7 @@ jobs:
           uv run pytest \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
             specs/010-wan-benchmark-and-quality/tests/test_benchmark_contracts.py \
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py \
             --junitxml="$RUNNER_TEMP/campaign-02-portable.xml"

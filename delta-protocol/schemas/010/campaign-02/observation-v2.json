@@ -217,6 +217,14 @@
               "pattern": "^sha256:[0-9a-f]{64}$",
               "type": "string"
             },
+            "native_chain_admission_receipt_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "native_chain_verifier_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
             "ordered_contribution_ids": {
               "items": {
                 "pattern": "^sha256:[0-9a-f]{64}$",
@@ -284,6 +292,8 @@
             "eligibility_certificate_id",
             "final_checkpoint_id",
             "input_set_certificate_id",
+            "native_chain_admission_receipt_id",
+            "native_chain_verifier_id",
             "ordered_contribution_ids",
             "ordered_ticket_ids",
             "parameter_shard_qc_ids",
@@ -546,6 +556,14 @@
               "pattern": "^sha256:[0-9a-f]{64}$",
               "type": "string"
             },
+            "native_chain_admission_receipt_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "native_chain_verifier_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
             "ordered_contribution_ids": {
               "items": {
                 "pattern": "^sha256:[0-9a-f]{64}$",
@@ -613,6 +631,8 @@
             "eligibility_certificate_id",
             "final_checkpoint_id",
             "input_set_certificate_id",
+            "native_chain_admission_receipt_id",
+            "native_chain_verifier_id",
             "ordered_contribution_ids",
             "ordered_ticket_ids",
             "parameter_shard_qc_ids",

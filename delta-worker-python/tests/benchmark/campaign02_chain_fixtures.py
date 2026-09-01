@@ -18,6 +18,7 @@ from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.feature008_admission import (
     CertificateArtifact,
     Feature008CertificateBundle,
+    NativeChainAdmissionReceipt,
 )
 from deltatorrent.benchmark.measured_runner import (
     CertifiedRoundMeasurement,
@@ -33,6 +34,54 @@ ROOT = Path(__file__).resolve().parents[3]
 
 def content_id(label: str) -> str:
     return "sha256:" + hashlib.sha256(label.encode()).hexdigest()
+
+
+class FixtureNativeChainVerifier:
+    """Deterministic receipt issuer for non-primary Python preflight unit tests."""
+
+    native_build_id = content_id("fixture-native-build")
+
+    def verify(
+        self,
+        plan: CampaignExecutionPlan,
+        result: CertifiedRoundMeasurement,
+        canonical_bundle: bytes,
+    ) -> NativeChainAdmissionReceipt:
+        policy = plan.certified_round_policy
+        assert policy is not None
+        bundle = result.certificate_bundle
+        native_identity = canonical_json_bytes(
+            {
+                "formal_semantics_id": FORMAL_SEMANTICS_ID,
+                "native_build_id": self.native_build_id,
+                "type_name": "DELTA_CERTIFICATE_CHAIN_VERIFIER",
+            }
+        )
+        value = {
+            "aggregate_root_qc_id": bundle.aggregate_root.content_id,
+            "apply_qc_id": bundle.apply_qc.content_id,
+            "certificate_bundle_id": sha256_content_id(
+                b"deltareduce.010.native-chain-admission-bundle.v1\0" + canonical_bundle
+            ),
+            "certified_round_policy_id": policy.content_id,
+            "checkpoint_wal_sha256": result.checkpoint_wal_sha256,
+            "effect_set_id": result.effect_set_id,
+            "execution_plan_id": plan.content_id,
+            "final_checkpoint_id": result.final_checkpoint_id,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "input_set_certificate_id": bundle.input_set.content_id,
+            "native_build_id": self.native_build_id,
+            "native_chain_verifier_id": sha256_content_id(
+                b"deltareduce.010.native-chain-verifier.v1\0" + native_identity
+            ),
+            "runtime_state_id": result.runtime_state_id,
+            "runtime_wal_sha256": result.runtime_wal_sha256,
+            "schema_version": "1.0.0",
+            "status": "ACCEPT",
+            "type_name": "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_RECEIPT",
+        }
+        canonical = canonical_json_bytes(value)
+        return NativeChainAdmissionReceipt(canonical, value)
 
 
 def authorization() -> dict[str, object]:

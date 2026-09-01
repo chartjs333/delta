@@ -50,6 +50,16 @@ SCHEMAS: Final = {
         "GPU_ENVIRONMENT_LOCK",
         "1.0.0",
     ),
+    "native-chain-admission-bundle-v1": (
+        "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-010-V1",
+        "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_BUNDLE",
+        "1.0.0",
+    ),
+    "native-chain-admission-receipt-v1": (
+        "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-010-V1",
+        "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_RECEIPT",
+        "1.0.0",
+    ),
 }
 
 
@@ -191,6 +201,8 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "eligibility_certificate_id": content_id(),
             "final_checkpoint_id": content_id(),
             "input_set_certificate_id": content_id(),
+            "native_chain_admission_receipt_id": content_id(),
+            "native_chain_verifier_id": content_id(),
             "ordered_contribution_ids": array(content_id(), unique=True),
             "ordered_ticket_ids": array(content_id(), unique=True),
             "parameter_shard_qc_ids": array(content_id(), unique=True),
@@ -396,6 +408,63 @@ def schema_documents() -> dict[str, dict[str, object]]:
                 "requirements_input_id": content_id(),
                 "sbom_id": content_id(),
                 "scientific_use": {"const": True},
+            },
+        ),
+        "native-chain-admission-bundle-v1": schema(
+            "native-chain-admission-bundle-v1",
+            {
+                "aggregate_root_qc": {"minProperties": 1, "type": "object"},
+                "aggregation_plan_certificate": {"minProperties": 1, "type": "object"},
+                "apply_arithmetic_profile": {"minProperties": 1, "type": "object"},
+                "apply_candidate": {"minProperties": 1, "type": "object"},
+                "apply_qc": {"minProperties": 1, "type": "object"},
+                "checkpoint_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "current_pointer_command": {"minProperties": 1, "type": "object"},
+                "effect_set_id": content_id(),
+                "eligibility_certificate": {"minProperties": 1, "type": "object"},
+                "execution_plan_id": content_id(),
+                "expected_input_tuples": array(
+                    strict(
+                        {
+                            "availability_certificate_id": content_id(),
+                            "commitment_id": content_id(),
+                            "domain_id": text(),
+                            "ticket_id": content_id(),
+                        }
+                    )
+                ),
+                "final_checkpoint_id": content_id(),
+                "input_set_certificate": {"minProperties": 1, "type": "object"},
+                "norm_evidence": {"minProperties": 1, "type": "object"},
+                "ordered_contributions": array(
+                    strict({"contribution_id": content_id(), "ticket_id": content_id()})
+                ),
+                "parameter_shard_qcs": array({"minProperties": 1, "type": "object"}),
+                "parent_checkpoint_id": content_id(),
+                "policy": certified_policy,
+                "runtime_state_id": content_id(),
+                "runtime_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "seed_transcript": {"minProperties": 1, "type": "object"},
+                "terminal_outcome": {"const": "APPLIED"},
+            },
+        ),
+        "native-chain-admission-receipt-v1": schema(
+            "native-chain-admission-receipt-v1",
+            {
+                "aggregate_root_qc_id": content_id(),
+                "apply_qc_id": content_id(),
+                "certificate_bundle_id": content_id(),
+                "certified_round_policy_id": content_id(),
+                "checkpoint_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "effect_set_id": content_id(),
+                "execution_plan_id": content_id(),
+                "final_checkpoint_id": content_id(),
+                "input_set_certificate_id": content_id(),
+                "native_build_id": content_id(),
+                "native_chain_verifier_id": content_id(),
+                "runtime_state_id": content_id(),
+                "runtime_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "status": {"const": "ACCEPT"},
             },
         ),
     }

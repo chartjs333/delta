@@ -58,7 +58,7 @@
     {
       "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
       "path": "schemas/010/campaign-02/registry-v1.json",
-      "sha256": "094028453a066cbcff08e4736f0d07f7b65c5754a86722da72c17551a74a6615"
+      "sha256": "56b9dd1c14fc25e5aa31e1946c2281e63edb0ff408d36e884424bfda5a45027c"
     },
     {
       "id": "REGISTRY-BENCHMARK-010",
@@ -226,6 +226,11 @@
       "id": "BENCHMARK010-CAMPAIGN02-WIKITEXT_POSITIVE_V1",
       "path": "fixtures/010/campaign-02/evaluators/wikitext-positive-v1.json",
       "sha256": "d21f12390300b3f85eec819d67947c4bfb589eab9cb5caa20b086cb321fe8feb"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-NATIVE_CHAIN_CONFORMANCE_V1",
+      "path": "fixtures/010/campaign-02/native-chain-conformance-v1.json",
+      "sha256": "9d6cc278220ba797c783ae1dd1846f7a335bcf483932b2e8fc9c7785fe0c6233"
     },
     {
       "id": "BENCHMARK010-CROSS-LANGUAGE-GOLDEN-V1",
@@ -414,6 +419,16 @@
       "id": "MEDIA-CAMPAIGN02-MEASURED-EVALUATION-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-MEASURED-EVALUATION-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.measured-evaluation-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.native-chain-admission-bundle-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.native-chain-admission-receipt-v1+json;version=1"
     },
     {
       "id": "MEDIA-CAMPAIGN02-OBSERVATION-RECEIPT-V1",
@@ -1090,6 +1105,16 @@
       "sha256": "34d13279b98cb2d42c5edf27a409a670eea880016c06ad42032e7e1f87e90d02"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-010-V1",
+      "path": "schemas/010/campaign-02/native-chain-admission-bundle-v1.json",
+      "sha256": "e7fe37d3d97fb2e1b0a10a7d358ce28837b2ff22bc1c8cab2ff45264d95e9e51"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-010-V1",
+      "path": "schemas/010/campaign-02/native-chain-admission-receipt-v1.json",
+      "sha256": "e73b2fd9999fa4db0a3ce869121d927e25e45b6cf759de3403e03a6ca726ad1a"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
       "path": "schemas/010/campaign-02/observation-receipt-v1.json",
       "sha256": "bbaf01a0f29b0726b34bbe97fa16191787b61a9abcb7f7cd0a4b3670cc4794aa"
@@ -1097,7 +1122,7 @@
     {
       "id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
       "path": "schemas/010/campaign-02/observation-v2.json",
-      "sha256": "b993d92ac73fab858907ba08de6416aff179e9278a4591a949bb62c6013dc040"
+      "sha256": "9d660393be0b4eb50efa9b5016db3035a88c443c1e98a6612e947710c6075cb8"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-WORKLOAD-010-V2",

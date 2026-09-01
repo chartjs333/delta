@@ -22,11 +22,11 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 8
+    assert len(module.SCHEMAS) == 10
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
     assert registry["registry_version"] == "010.2.1-remediation"
-    assert len(registry["fixtures"]) == 6
+    assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
     observation = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/observation-v2.json").read_bytes()
@@ -36,6 +36,9 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     ticket = observation["properties"]["ticket_results"]["items"]
     assert "checkpoint_id" not in ticket["properties"]
     assert "certificate_ids" not in ticket["properties"]
+    certified_result = observation["properties"]["run_result"]["oneOf"][1]
+    assert "native_chain_admission_receipt_id" in certified_result["properties"]
+    assert "native_chain_verifier_id" in certified_result["properties"]
     execution_plan = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v2.json").read_bytes()
     )

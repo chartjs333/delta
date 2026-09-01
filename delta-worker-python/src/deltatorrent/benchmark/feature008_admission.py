@@ -1,10 +1,8 @@
-"""Run-level admission against the accepted Feature 008 certificate chain.
+"""Run-level admission against the authoritative native Feature 008 chain verifier.
 
-The benchmark does not invent a second certificate graph.  This adapter checks
-the canonical Feature 008 artifacts and applies the same parent, membership,
-quorum, coverage and ApplyQC obligations as ``delta::certificates::ChainVerifier``.
-A primary measured certified run additionally requires the native Feature 008
-inspection boundary to accept every canonical artifact.
+Python performs fail-closed typed preflight, then submits one canonical complete
+bundle to the C ABI.  Only the content-addressed receipt from the native C++
+``delta::certificates::ChainVerifier`` can admit a certified observation.
 """
 
 from __future__ import annotations
@@ -12,8 +10,10 @@ from __future__ import annotations
 import ctypes
 import hashlib
 import json
+import math
 import re
 from dataclasses import dataclass, field
+from itertools import pairwise
 from pathlib import Path
 from typing import Any, Final, Protocol
 
@@ -243,6 +243,195 @@ def _certificate_id(type_name: str, payload: bytes) -> str:
     return sha256_content_id(domain.encode("ascii") + b"\0" + payload)
 
 
+def _label(value: object, code: str) -> str:
+    if not isinstance(value, str) or re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", value) is None:
+        raise _fail(code)
+    return value
+
+
+def _canonical_i64(value: object, code: str, *, non_negative: bool = False) -> int:
+    if not isinstance(value, str) or re.fullmatch(r"0|-?[1-9][0-9]*", value) is None:
+        raise _fail(code)
+    parsed = int(value)
+    if not -(2**63) <= parsed < 2**63 or (non_negative and parsed < 0):
+        raise _fail(code)
+    return parsed
+
+
+def _rational(value: object, code: str, *, non_negative: bool = False) -> None:
+    item = _mapping(value, code)
+    _require(set(item) == {"denominator", "numerator"}, code)
+    denominator = item.get("denominator")
+    _require(
+        isinstance(denominator, int)
+        and not isinstance(denominator, bool)
+        and 0 < denominator < 2**64,
+        code,
+    )
+    assert isinstance(denominator, int)
+    numerator = _canonical_i64(item.get("numerator"), code, non_negative=non_negative)
+    _require(math.gcd(abs(numerator), denominator) == 1, code)
+
+
+def _strict_order(values: list[Any], key: Any, code: str) -> None:
+    projected = [key(item) for item in values]
+    _require(all(left < right for left, right in pairwise(projected)), code)
+
+
+def _canonical_content_array(value: object, code: str) -> list[Any]:
+    items = _sequence(value, code)
+    _strict_order(items, lambda item: str(item), code)
+    for item in items:
+        _content_id(item, code)
+    return items
+
+
+def _typed_certificate_preflight(type_name: str, value: dict[str, Any]) -> None:
+    if "signer_ids" in value:
+        signers = _sequence(value["signer_ids"], "FEATURE008_SIGNER_SET_INVALID")
+        _strict_order(
+            signers,
+            lambda item: _label(item, "FEATURE008_SIGNER_SET_INVALID"),
+            "FEATURE008_SIGNER_SET_INVALID",
+        )
+    if type_name == "INPUT_SET_CERTIFICATE":
+        tuples = _sequence(value.get("tuples"), "FEATURE008_ISC_TUPLE_SET_INVALID")
+        _strict_order(
+            tuples,
+            lambda raw: (
+                _label(
+                    _mapping(raw, "FEATURE008_ISC_TUPLE_INVALID").get("ticket_id"),
+                    "FEATURE008_ISC_TUPLE_INVALID",
+                ),
+                _content_id(
+                    _mapping(raw, "FEATURE008_ISC_TUPLE_INVALID").get("commitment_id"),
+                    "FEATURE008_ISC_TUPLE_INVALID",
+                ),
+            ),
+            "FEATURE008_ISC_TUPLE_SET_INVALID",
+        )
+        for raw in tuples:
+            item = _mapping(raw, "FEATURE008_ISC_TUPLE_INVALID")
+            _content_id(item.get("availability_certificate_id"), "FEATURE008_ISC_TUPLE_INVALID")
+            _label(item.get("domain_id"), "FEATURE008_ISC_TUPLE_INVALID")
+    elif type_name == "SEED_TRANSCRIPT":
+        _canonical_content_array(value.get("share_ids"), "FEATURE008_SEED_SHARE_SET_INVALID")
+    elif type_name == "NORM_EVIDENCE":
+        entries = _sequence(value.get("entries"), "FEATURE008_NORM_ENTRY_SET_INVALID")
+        _strict_order(
+            entries,
+            lambda raw: _label(
+                _mapping(raw, "FEATURE008_NORM_ENTRY_INVALID").get("ticket_id"),
+                "FEATURE008_NORM_ENTRY_INVALID",
+            ),
+            "FEATURE008_NORM_ENTRY_SET_INVALID",
+        )
+        for raw in entries:
+            item = _mapping(raw, "FEATURE008_NORM_ENTRY_INVALID")
+            _require(
+                isinstance(item.get("scale_denominator"), int)
+                and not isinstance(item.get("scale_denominator"), bool)
+                and 0 < item["scale_denominator"] < 2**64,
+                "FEATURE008_NORM_ENTRY_INVALID",
+            )
+            _canonical_i64(
+                item.get("squared_norm"), "FEATURE008_NORM_ENTRY_INVALID", non_negative=True
+            )
+    elif type_name == "ELIGIBILITY_CERTIFICATE":
+        entries = _sequence(value.get("entries"), "FEATURE008_EC_ENTRY_SET_INVALID")
+        _strict_order(
+            entries,
+            lambda raw: _label(
+                _mapping(raw, "FEATURE008_EC_ENTRY_INVALID").get("ticket_id"),
+                "FEATURE008_EC_ENTRY_INVALID",
+            ),
+            "FEATURE008_EC_ENTRY_SET_INVALID",
+        )
+        for raw in entries:
+            item = _mapping(raw, "FEATURE008_EC_ENTRY_INVALID")
+            _rational(item.get("gamma"), "FEATURE008_EC_RATIONAL_INVALID", non_negative=True)
+    elif type_name == "AGGREGATION_PLAN_CERTIFICATE":
+        assignments = _sequence(
+            value.get("bucket_assignments"), "FEATURE008_APC_ASSIGNMENT_SET_INVALID"
+        )
+        weights = _sequence(value.get("weights"), "FEATURE008_APC_WEIGHT_SET_INVALID")
+        _strict_order(
+            assignments,
+            lambda raw: _label(
+                _mapping(raw, "FEATURE008_APC_ASSIGNMENT_INVALID").get("ticket_id"),
+                "FEATURE008_APC_ASSIGNMENT_INVALID",
+            ),
+            "FEATURE008_APC_ASSIGNMENT_SET_INVALID",
+        )
+        _strict_order(
+            weights,
+            lambda raw: _label(
+                _mapping(raw, "FEATURE008_APC_WEIGHT_INVALID").get("ticket_id"),
+                "FEATURE008_APC_WEIGHT_INVALID",
+            ),
+            "FEATURE008_APC_WEIGHT_SET_INVALID",
+        )
+        for raw in weights:
+            _rational(
+                _mapping(raw, "FEATURE008_APC_WEIGHT_INVALID").get("alpha"),
+                "FEATURE008_APC_RATIONAL_INVALID",
+                non_negative=True,
+            )
+    elif type_name == "PARAMETER_SHARD_QC":
+        _canonical_content_array(value.get("input_leaf_ids"), "FEATURE008_SHARD_LEAF_SET_INVALID")
+        denominator = value.get("denominator")
+        _require(
+            isinstance(denominator, int)
+            and not isinstance(denominator, bool)
+            and 0 < denominator < 2**64,
+            "FEATURE008_SHARD_DENOMINATOR_INVALID",
+        )
+        for item in _sequence(
+            value.get("result_numerators"), "FEATURE008_SHARD_NUMERATOR_SET_INVALID"
+        ):
+            _canonical_i64(item, "FEATURE008_SHARD_NUMERATOR_INVALID")
+    elif type_name == "AGGREGATE_ROOT_QC":
+        required = _sequence(value.get("required_keys"), "FEATURE008_ROOT_REQUIRED_SET_INVALID")
+        leaves = _sequence(value.get("leaves"), "FEATURE008_ROOT_LEAF_SET_INVALID")
+
+        def key(raw: object) -> tuple[str, str]:
+            mapped = _mapping(raw, "FEATURE008_ROOT_KEY_INVALID")
+            return (
+                _label(mapped.get("domain_id"), "FEATURE008_ROOT_KEY_INVALID"),
+                _label(mapped.get("shard_id"), "FEATURE008_ROOT_KEY_INVALID"),
+            )
+
+        _strict_order(required, key, "FEATURE008_ROOT_REQUIRED_SET_INVALID")
+        _strict_order(leaves, key, "FEATURE008_ROOT_LEAF_SET_INVALID")
+        for raw in leaves:
+            _content_id(
+                _mapping(raw, "FEATURE008_ROOT_LEAF_INVALID").get("parameter_shard_qc_id"),
+                "FEATURE008_ROOT_LEAF_INVALID",
+            )
+    elif type_name == "APPLY_ARITHMETIC_PROFILE":
+        weights = _sequence(value.get("domain_weights"), "FEATURE008_DOMAIN_WEIGHT_SET_INVALID")
+        _strict_order(
+            weights,
+            lambda raw: _label(
+                _mapping(raw, "FEATURE008_DOMAIN_WEIGHT_INVALID").get("domain_id"),
+                "FEATURE008_DOMAIN_WEIGHT_INVALID",
+            ),
+            "FEATURE008_DOMAIN_WEIGHT_SET_INVALID",
+        )
+        for raw in weights:
+            _rational(
+                _mapping(raw, "FEATURE008_DOMAIN_WEIGHT_INVALID").get("pi"),
+                "FEATURE008_DOMAIN_WEIGHT_INVALID",
+                non_negative=True,
+            )
+        for name in ("learning_rate", "momentum", "weight_decay"):
+            _rational(value.get(name), "FEATURE008_APPLY_RATIONAL_INVALID", non_negative=True)
+    elif type_name == "APPLY_CANDIDATE":
+        for name in ("next_model_values", "next_optimizer_values"):
+            for item in _sequence(value.get(name), "FEATURE008_APPLY_VECTOR_INVALID"):
+                _canonical_i64(item, "FEATURE008_APPLY_VECTOR_INVALID")
+
+
 @dataclass(frozen=True, slots=True)
 class CertificateArtifact:
     """One exact canonical Feature 008 artifact and its domain-separated ID."""
@@ -282,6 +471,7 @@ class CertificateArtifact:
             _certificate_id(self.type_name, self.canonical_bytes) == self.content_id,
             "FEATURE008_CERTIFICATE_CONTENT_ID_MISMATCH",
         )
+        _typed_certificate_preflight(self.type_name, value)
         object.__setattr__(self, "value", value)
 
     @property
@@ -354,12 +544,6 @@ class Feature008CertificateBundle:
         )
 
 
-class NativeCertificateInspector(Protocol):
-    """Existing Feature 008 native certificate inspection boundary."""
-
-    def inspect(self, artifact: CertificateArtifact) -> None: ...
-
-
 class _BytesView(ctypes.Structure):
     _fields_ = [("data", ctypes.POINTER(ctypes.c_uint8)), ("size", ctypes.c_size_t)]
 
@@ -373,78 +557,222 @@ class _OutputBuffer(ctypes.Structure):
     ]
 
 
-class _InspectContext(ctypes.Structure):
+class _RuntimeDescriptor(ctypes.Structure):
     _fields_ = [
         ("struct_size", ctypes.c_uint32),
-        ("kind", ctypes.c_uint32),
-        ("expected_content_id", _BytesView),
-        ("expected_formal_semantics_id", _BytesView),
+        ("abi_major", ctypes.c_uint16),
+        ("abi_minor", ctypes.c_uint16),
+        ("feature_bits", ctypes.c_uint64),
+        ("schema_version", ctypes.c_char_p),
+        ("protocol_version", ctypes.c_char_p),
+        ("formal_semantics_id", ctypes.c_char_p),
+        ("build_id", ctypes.c_char_p),
+        ("schema_set_id", ctypes.c_char_p),
+        ("runtime_profile", ctypes.c_char_p),
     ]
 
 
-_NATIVE_KIND: Final = {
-    type_name: index for index, type_name in enumerate(_CERTIFICATE_DOMAINS, start=1)
-}
+class _ChainContext(ctypes.Structure):
+    _fields_ = [
+        ("struct_size", ctypes.c_uint32),
+        ("reserved", ctypes.c_uint32),
+        ("expected_formal_semantics_id", _BytesView),
+        ("expected_native_build_id", _BytesView),
+        ("expected_execution_plan_id", _BytesView),
+        ("expected_certified_round_policy_id", _BytesView),
+        ("expected_parent_checkpoint_id", _BytesView),
+        ("expected_final_checkpoint_id", _BytesView),
+        ("expected_runtime_state_id", _BytesView),
+        ("expected_effect_set_id", _BytesView),
+        ("expected_runtime_wal_sha256", _BytesView),
+        ("expected_checkpoint_wal_sha256", _BytesView),
+    ]
 
 
-class CtypesFeature008NativeInspector:
-    """Invoke the existing Feature 008 C ABI on every admitted certificate artifact."""
+_NATIVE_RECEIPT_FIELDS: Final = frozenset(
+    {
+        "aggregate_root_qc_id",
+        "apply_qc_id",
+        "certificate_bundle_id",
+        "certified_round_policy_id",
+        "checkpoint_wal_sha256",
+        "effect_set_id",
+        "execution_plan_id",
+        "final_checkpoint_id",
+        "formal_semantics_id",
+        "input_set_certificate_id",
+        "native_build_id",
+        "native_chain_verifier_id",
+        "runtime_state_id",
+        "runtime_wal_sha256",
+        "schema_version",
+        "status",
+        "type_name",
+    }
+)
+_NATIVE_BUNDLE_DOMAIN: Final = b"deltareduce.010.native-chain-admission-bundle.v1\0"
+
+
+@dataclass(frozen=True, slots=True)
+class NativeChainAdmissionReceipt:
+    canonical_bytes: bytes
+    value: dict[str, Any]
+
+    def __post_init__(self) -> None:
+        _require(
+            canonical_json_bytes(self.value) == self.canonical_bytes
+            and set(self.value) == _NATIVE_RECEIPT_FIELDS
+            and self.value.get("formal_semantics_id") == FORMAL_SEMANTICS_ID
+            and self.value.get("schema_version") == "1.0.0"
+            and self.value.get("status") == "ACCEPT"
+            and self.value.get("type_name") == "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_RECEIPT",
+            "FEATURE008_NATIVE_RECEIPT_INVALID",
+        )
+
+    @property
+    def content_id(self) -> str:
+        return sha256_content_id(self.canonical_bytes)
+
+
+class NativeChainAdmissionVerifier(Protocol):
+    @property
+    def native_build_id(self) -> str: ...
+
+    def verify(
+        self,
+        plan: Any,
+        result: Any,
+        canonical_bundle: bytes,
+    ) -> NativeChainAdmissionReceipt: ...
+
+
+class CtypesFeature008NativeChainVerifier:
+    """Invoke the authoritative C++ ChainVerifier through the full-bundle C ABI."""
 
     def __init__(self, native_library: Path) -> None:
         try:
             library = ctypes.CDLL(str(native_library.resolve()))
         except OSError as exc:
             raise _fail("FEATURE008_NATIVE_LIBRARY_LOAD_FAILED") from exc
-        function = library.delta_certificate_inspect_copy
+        descriptor_function = library.delta_runtime_descriptor
+        descriptor_function.argtypes = [ctypes.c_uint32, ctypes.POINTER(_RuntimeDescriptor)]
+        descriptor_function.restype = ctypes.c_int
+        descriptor = _RuntimeDescriptor()
+        status = descriptor_function(ctypes.sizeof(_RuntimeDescriptor), ctypes.byref(descriptor))
+        _require(status == 0, "FEATURE008_NATIVE_DESCRIPTOR_FAILED")
+        _require(
+            ctypes.sizeof(_ChainContext) == 168,
+            "FEATURE008_NATIVE_CHAIN_ABI_LAYOUT_INVALID",
+        )
+        formal_id = (descriptor.formal_semantics_id or b"").decode("ascii")
+        native_build_id = (descriptor.build_id or b"").decode("ascii")
+        _require(
+            formal_id == FORMAL_SEMANTICS_ID and _CONTENT_ID.fullmatch(native_build_id) is not None,
+            "FEATURE008_NATIVE_DESCRIPTOR_INCOMPATIBLE",
+        )
+        function = library.delta_certificate_chain_verify_copy
         function.argtypes = [
-            ctypes.POINTER(_InspectContext),
+            ctypes.POINTER(_ChainContext),
             _BytesView,
             ctypes.POINTER(_OutputBuffer),
         ]
         function.restype = ctypes.c_int
         self._library = library
-        self._inspect = function
+        self._verify = function
+        self._native_build_id = native_build_id
+
+    @property
+    def native_build_id(self) -> str:
+        return self._native_build_id
 
     @staticmethod
     def _view(value: bytes) -> tuple[_BytesView, Any]:
         buffer = (ctypes.c_uint8 * len(value)).from_buffer_copy(value)
         return _BytesView(ctypes.cast(buffer, ctypes.POINTER(ctypes.c_uint8)), len(value)), buffer
 
-    def inspect(self, artifact: CertificateArtifact) -> None:
-        content_view, content_buffer = self._view(artifact.content_id.encode("ascii"))
-        formal_view, formal_buffer = self._view(FORMAL_SEMANTICS_ID.encode("ascii"))
-        payload_view, payload_buffer = self._view(artifact.canonical_bytes)
-        context = _InspectContext(
-            ctypes.sizeof(_InspectContext),
-            _NATIVE_KIND[artifact.type_name],
-            content_view,
-            formal_view,
+    def verify(
+        self,
+        plan: Any,
+        result: Any,
+        canonical_bundle: bytes,
+    ) -> NativeChainAdmissionReceipt:
+        policy = plan.certified_round_policy
+        _require(policy is not None, "FEATURE008_PLAN_POLICY_MISSING")
+        return self.verify_canonical_bundle(
+            canonical_bundle,
+            execution_plan_id=plan.content_id,
+            certified_round_policy_id=policy.content_id,
+            parent_checkpoint_id=plan.parent_checkpoint_id,
+            final_checkpoint_id=result.final_checkpoint_id,
+            runtime_state_id=result.runtime_state_id,
+            effect_set_id=result.effect_set_id,
+            runtime_wal_sha256=result.runtime_wal_sha256,
+            checkpoint_wal_sha256=result.checkpoint_wal_sha256,
         )
+
+    def verify_canonical_bundle(
+        self,
+        canonical_bundle: bytes,
+        *,
+        execution_plan_id: str,
+        certified_round_policy_id: str,
+        parent_checkpoint_id: str,
+        final_checkpoint_id: str,
+        runtime_state_id: str,
+        effect_set_id: str,
+        runtime_wal_sha256: str,
+        checkpoint_wal_sha256: str,
+    ) -> NativeChainAdmissionReceipt:
+        """Verify a corpus bundle with explicit run-context bindings."""
+
+        values = (
+            FORMAL_SEMANTICS_ID,
+            self.native_build_id,
+            execution_plan_id,
+            certified_round_policy_id,
+            parent_checkpoint_id,
+            final_checkpoint_id,
+            runtime_state_id,
+            effect_set_id,
+            runtime_wal_sha256,
+            checkpoint_wal_sha256,
+        )
+        views_and_buffers = [self._view(item.encode("ascii")) for item in values]
+        context = _ChainContext(
+            ctypes.sizeof(_ChainContext),
+            0,
+            *(item[0] for item in views_and_buffers),
+        )
+        payload_view, payload_buffer = self._view(canonical_bundle)
         output = _OutputBuffer()
-        first = self._inspect(ctypes.byref(context), payload_view, ctypes.byref(output))
+        first = self._verify(ctypes.byref(context), payload_view, ctypes.byref(output))
+        if first == 13:
+            _require(
+                output.required == 0 and output.written == 0,
+                "FEATURE008_NATIVE_REJECTION_EXPOSED_OUTPUT",
+            )
+            raise _fail("FEATURE008_NATIVE_CHAIN_REJECTED")
         _require(first == 7 and 0 < output.required <= 4096, "FEATURE008_NATIVE_SIZING_FAILED")
         destination = (ctypes.c_uint8 * output.required)()
         output.data = ctypes.cast(destination, ctypes.POINTER(ctypes.c_uint8))
         output.capacity = output.required
         output.written = 0
-        second = self._inspect(ctypes.byref(context), payload_view, ctypes.byref(output))
+        second = self._verify(ctypes.byref(context), payload_view, ctypes.byref(output))
         _require(
             second == 0 and output.written == output.required,
-            "FEATURE008_NATIVE_CERTIFICATE_REJECTED",
+            "FEATURE008_NATIVE_CHAIN_REJECTED",
         )
         try:
-            effect = json.loads(bytes(destination))
+            receipt = json.loads(bytes(destination))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise _fail("FEATURE008_NATIVE_EFFECT_INVALID") from exc
+            raise _fail("FEATURE008_NATIVE_RECEIPT_INVALID") from exc
         _require(
-            isinstance(effect, dict)
-            and effect.get("status") == "ACCEPT"
-            and effect.get("content_id") == artifact.content_id
-            and effect.get("type_name") == artifact.type_name,
-            "FEATURE008_NATIVE_EFFECT_INVALID",
+            isinstance(receipt, dict),
+            "FEATURE008_NATIVE_RECEIPT_INVALID",
         )
-        # Keep buffers live through both downcalls.
-        _ = content_buffer, formal_buffer, payload_buffer, self._library
+        # Keep all caller-owned views live through both downcalls.
+        _ = views_and_buffers, payload_buffer, self._library
+        return NativeChainAdmissionReceipt(bytes(destination), receipt)
 
 
 @dataclass(frozen=True, slots=True)
@@ -456,6 +784,7 @@ class Feature008AdmissionReceipt:
     final_checkpoint_id: str
     canonical_ticket_ids: tuple[str, ...]
     canonical_contribution_ids: tuple[str, ...]
+    native_receipt: NativeChainAdmissionReceipt
 
 
 def _context(value: dict[str, Any]) -> tuple[object, ...]:
@@ -518,11 +847,71 @@ def _runtime_document(
     return value
 
 
+def canonical_native_chain_bundle(
+    plan: Any,
+    contributions: tuple[Any, ...],
+    result: Any,
+) -> bytes:
+    """Build the only canonical input accepted by the native full-chain ABI."""
+
+    policy = plan.certified_round_policy
+    _require(policy is not None, "FEATURE008_PLAN_POLICY_MISSING")
+    by_ticket = {item.ticket_id: item for item in contributions}
+    ordered = tuple(item.ticket_id for item in plan.tickets)
+    _require(
+        len(by_ticket) == len(contributions) and set(by_ticket) == set(ordered),
+        "FEATURE008_CONTRIBUTION_SET_MISMATCH",
+    )
+    bundle: Feature008CertificateBundle = result.certificate_bundle
+    document = {
+        "aggregate_root_qc": bundle.aggregate_root.value,
+        "aggregation_plan_certificate": bundle.aggregation_plan.value,
+        "apply_arithmetic_profile": bundle.apply_profile.value,
+        "apply_candidate": bundle.apply_candidate.value,
+        "apply_qc": bundle.apply_qc.value,
+        "checkpoint_wal_sha256": result.checkpoint_wal_sha256,
+        "current_pointer_command": bundle.current_pointer_command.value,
+        "effect_set_id": result.effect_set_id,
+        "eligibility_certificate": bundle.eligibility.value,
+        "execution_plan_id": plan.content_id,
+        "expected_input_tuples": [
+            {
+                "availability_certificate_id": by_ticket[ticket_id].availability_certificate_id,
+                "commitment_id": by_ticket[ticket_id].commitment_id,
+                "domain_id": by_ticket[ticket_id].domain_id,
+                "ticket_id": ticket_id,
+            }
+            for ticket_id in ordered
+        ],
+        "final_checkpoint_id": result.final_checkpoint_id,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "input_set_certificate": bundle.input_set.value,
+        "norm_evidence": bundle.norm_evidence.value,
+        "ordered_contributions": [
+            {
+                "contribution_id": by_ticket[ticket_id].contribution_id,
+                "ticket_id": ticket_id,
+            }
+            for ticket_id in ordered
+        ],
+        "parameter_shard_qcs": [item.value for item in bundle.parameter_shards],
+        "parent_checkpoint_id": plan.parent_checkpoint_id,
+        "policy": policy.document,
+        "runtime_state_id": result.runtime_state_id,
+        "runtime_wal_sha256": result.runtime_wal_sha256,
+        "schema_version": "1.0.0",
+        "seed_transcript": bundle.seed_transcript.value,
+        "terminal_outcome": result.terminal_outcome,
+        "type_name": "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_BUNDLE",
+    }
+    return canonical_json_bytes(document)
+
+
 class Feature008ChainVerifier:
     """Feature 010 admission adapter for the accepted Feature 008 verifier contract."""
 
-    def __init__(self, native_inspector: NativeCertificateInspector | None = None) -> None:
-        self._native_inspector = native_inspector
+    def __init__(self, native_verifier: NativeChainAdmissionVerifier | None = None) -> None:
+        self._native_verifier = native_verifier
 
     def verify(
         self,
@@ -540,11 +929,16 @@ class Feature008ChainVerifier:
             "FEATURE008_ROUND_PARENT_MISMATCH",
         )
         bundle: Feature008CertificateBundle = result.certificate_bundle
-        if require_native:
-            _require(self._native_inspector is not None, "FEATURE008_NATIVE_VERIFIER_REQUIRED")
-        if self._native_inspector is not None:
-            for artifact in bundle.artifacts:
-                self._native_inspector.inspect(artifact)
+        native_verifier = self._native_verifier
+        _require(
+            native_verifier is not None,
+            (
+                "FEATURE008_NATIVE_VERIFIER_REQUIRED"
+                if require_native
+                else "FEATURE008_NATIVE_RECEIPT_REQUIRED"
+            ),
+        )
+        assert native_verifier is not None
 
         expected_context = (
             policy.arithmetic_profile_id,
@@ -663,24 +1057,22 @@ class Feature008ChainVerifier:
             and ec_order == isc_order,
             "FEATURE008_ELIGIBILITY_MEMBERSHIP_MISMATCH",
         )
-        accepted = sorted(
-            str(item["ticket_id"]) for item in entries if item.get("accepted") is True
-        )
+        accepted = [str(item["ticket_id"]) for item in entries if item.get("accepted") is True]
 
         aggregation_plan = bundle.aggregation_plan.value
-        assignments = sorted(
+        assignments = [
             str(_mapping(item, "FEATURE008_APC_ASSIGNMENT_INVALID").get("ticket_id"))
             for item in _sequence(
                 aggregation_plan.get("bucket_assignments"),
                 "FEATURE008_APC_ASSIGNMENT_SET_INVALID",
             )
-        )
-        weights = sorted(
+        ]
+        weights = [
             str(_mapping(item, "FEATURE008_APC_WEIGHT_INVALID").get("ticket_id"))
             for item in _sequence(
                 aggregation_plan.get("weights"), "FEATURE008_APC_WEIGHT_SET_INVALID"
             )
-        )
+        ]
         _require(
             result.aggregation_plan_certificate_id == bundle.aggregation_plan.content_id
             and aggregation_plan.get("input_set_certificate_id") == bundle.input_set.content_id
@@ -826,6 +1218,26 @@ class Feature008ChainVerifier:
                 "FEATURE008_WAL_ARTIFACT_MISMATCH",
             )
         _require(result.terminal_outcome == "APPLIED", "FEATURE008_TERMINAL_OUTCOME_INVALID")
+        native_bundle = canonical_native_chain_bundle(plan, contributions, result)
+        native_receipt = native_verifier.verify(plan, result, native_bundle)
+        expected_bundle_id = sha256_content_id(_NATIVE_BUNDLE_DOMAIN + native_bundle)
+        receipt = native_receipt.value
+        _require(
+            receipt.get("native_build_id") == native_verifier.native_build_id
+            and receipt.get("certificate_bundle_id") == expected_bundle_id
+            and receipt.get("certified_round_policy_id") == policy.content_id
+            and receipt.get("execution_plan_id") == plan.content_id
+            and receipt.get("input_set_certificate_id") == bundle.input_set.content_id
+            and receipt.get("aggregate_root_qc_id") == bundle.aggregate_root.content_id
+            and receipt.get("apply_qc_id") == bundle.apply_qc.content_id
+            and receipt.get("final_checkpoint_id") == result.final_checkpoint_id
+            and receipt.get("runtime_state_id") == result.runtime_state_id
+            and receipt.get("effect_set_id") == result.effect_set_id
+            and receipt.get("runtime_wal_sha256") == result.runtime_wal_sha256
+            and receipt.get("checkpoint_wal_sha256") == result.checkpoint_wal_sha256
+            and _CONTENT_ID.fullmatch(str(receipt.get("native_chain_verifier_id"))) is not None,
+            "FEATURE008_NATIVE_RECEIPT_BINDING_MISMATCH",
+        )
         return Feature008AdmissionReceipt(
             round_id=result.round_id,
             input_set_certificate_id=bundle.input_set.content_id,
@@ -834,4 +1246,5 @@ class Feature008ChainVerifier:
             final_checkpoint_id=result.final_checkpoint_id,
             canonical_ticket_ids=plan_ticket_ids,
             canonical_contribution_ids=contribution_ids,
+            native_receipt=native_receipt,
         )

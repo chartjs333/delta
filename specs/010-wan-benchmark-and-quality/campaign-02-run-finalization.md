@@ -17,6 +17,7 @@ ticket contributions/commitments/ACs
   → one ISC → one seed/EC/APC context
   → complete required ParameterShardQC matrix
   → one AggregateRootQC → one ApplyQC/current command
+  → authoritative native Feature 008 ChainVerifier admission receipt
   → one run-bound state/effect/WAL finalization receipt
 ```
 
@@ -34,9 +35,16 @@ global checkpoint or global certificate list.
 The execution plan binds the result class. Certified plans additionally bind the Feature 008
 context, validator/quorum policy, accumulator/apply profiles and required shard matrix.
 
+Python structural checks are preflight only. Every certified result that may enter an observation
+must carry a content-addressed native admission receipt produced by the versioned C ABI after the
+authoritative C++ `delta::certificates::ChainVerifier` accepts the complete typed bundle. A missing
+native verifier or receipt is a fail-closed admission error; there is no Python-only primary path.
+
 ## Governance
 
-The earlier source/evidence chain remains immutable audit history and is marked
-`SUPERSEDED_BEFORE_CAMPAIGN02_DEFINITION` because its run-level certified finalization contract was
-incomplete. No Campaign 02 Definition, primary observation, Stage A/B/C run, real-WAN run,
-`BenchmarkResultQC` or Feature 011 artifact is created by this remediation.
+Both earlier source/evidence chains remain immutable audit history and are marked
+`SUPERSEDED_BEFORE_CAMPAIGN02_DEFINITION`: the first had an incomplete run-level finalization
+contract; the second ended at `55187704e7310edb71e53f4114726b25cd659dc8` and lacked the
+authoritative native complete-chain verifier in its admission path. No Campaign 02 Definition,
+primary observation, Stage A/B/C run, real-WAN run, `BenchmarkResultQC` or Feature 011 artifact is
+created by this remediation.

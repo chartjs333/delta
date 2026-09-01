@@ -12,7 +12,9 @@ from typing import Any
 from deltatorrent.benchmark.campaign02 import CampaignExecutionPlan, authorize_execution_class
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.evaluators.common import MeasuredEvaluation
+from deltatorrent.benchmark.feature008_admission import canonical_native_chain_bundle
 from deltatorrent.benchmark.measured_runner import (
+    CertifiedRoundMeasurement,
     ComponentIdentity,
     RawArtifact,
     ScientificRun,
@@ -115,6 +117,91 @@ class PrimaryObservationWriter:
         _publish_create_only(self.root, target, raw)
         return content_id
 
+    @staticmethod
+    def _verify_native_chain_receipt(
+        plan: CampaignExecutionPlan, scientific_run: ScientificRun
+    ) -> None:
+        if scientific_run.result_class != "CERTIFIED_DELTAREDUCE":
+            return
+        result = scientific_run.round_result
+        if not isinstance(result, CertifiedRoundMeasurement):
+            raise _fail("OBSERVATION_CERTIFIED_RESULT_TYPE_INVALID")
+        receipt_id = getattr(result, "native_chain_admission_receipt_id", None)
+        verifier_id = getattr(result, "native_chain_verifier_id", None)
+        artifacts = [item for item in scientific_run.raw_artifacts if item.content_id == receipt_id]
+        if receipt_id is None or verifier_id is None or len(artifacts) != 1:
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_MISSING")
+        try:
+            receipt = json.loads(artifacts[0].data)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_INVALID") from exc
+        fields = {
+            "aggregate_root_qc_id",
+            "apply_qc_id",
+            "certificate_bundle_id",
+            "certified_round_policy_id",
+            "checkpoint_wal_sha256",
+            "effect_set_id",
+            "execution_plan_id",
+            "final_checkpoint_id",
+            "formal_semantics_id",
+            "input_set_certificate_id",
+            "native_build_id",
+            "native_chain_verifier_id",
+            "runtime_state_id",
+            "runtime_wal_sha256",
+            "schema_version",
+            "status",
+            "type_name",
+        }
+        policy = plan.certified_round_policy
+        if (
+            not isinstance(receipt, dict)
+            or set(receipt) != fields
+            or canonical_json_bytes(receipt) != artifacts[0].data
+            or policy is None
+        ):
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_INVALID")
+        canonical_bundle = canonical_native_chain_bundle(
+            plan, scientific_run.ticket_measurements, result
+        )
+        bundle_id = sha256_content_id(
+            b"deltareduce.010.native-chain-admission-bundle.v1\0" + canonical_bundle
+        )
+        native_identity = canonical_json_bytes(
+            {
+                "formal_semantics_id": FORMAL_SEMANTICS_ID,
+                "native_build_id": receipt.get("native_build_id"),
+                "type_name": "DELTA_CERTIFICATE_CHAIN_VERIFIER",
+            }
+        )
+        derived_verifier_id = sha256_content_id(
+            b"deltareduce.010.native-chain-verifier.v1\0" + native_identity
+        )
+        expected = {
+            "aggregate_root_qc_id": result.aggregate_root_qc_id,
+            "apply_qc_id": result.apply_qc_id,
+            "certificate_bundle_id": bundle_id,
+            "certified_round_policy_id": policy.content_id,
+            "checkpoint_wal_sha256": result.checkpoint_wal_sha256,
+            "effect_set_id": result.effect_set_id,
+            "execution_plan_id": plan.content_id,
+            "final_checkpoint_id": result.final_checkpoint_id,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "input_set_certificate_id": result.input_set_certificate_id,
+            "native_chain_verifier_id": verifier_id,
+            "runtime_state_id": result.runtime_state_id,
+            "runtime_wal_sha256": result.runtime_wal_sha256,
+            "schema_version": "1.0.0",
+            "status": "ACCEPT",
+            "type_name": "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_RECEIPT",
+        }
+        if (
+            any(receipt.get(key) != value for key, value in expected.items())
+            or derived_verifier_id != verifier_id
+        ):
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_BINDING_MISMATCH")
+
     def publish(
         self,
         plan: CampaignExecutionPlan,
@@ -137,6 +224,7 @@ class PrimaryObservationWriter:
             raise _fail("OBSERVATION_WRITER_PLAN_IDENTITY_MISMATCH")
         if len(evaluations) != len(plan.evaluation_profile_ids):
             raise _fail("OBSERVATION_EVALUATION_SET_INCOMPLETE")
+        self._verify_native_chain_receipt(plan, scientific_run)
         expected = zip(
             plan.dataset_ids,
             plan.evaluation_profile_ids,

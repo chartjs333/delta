@@ -252,6 +252,12 @@ class CertifiedRoundPolicy:
             "view": self.view,
         }
 
+    @property
+    def content_id(self) -> str:
+        return sha256_content_id(
+            b"deltareduce.010.certified-round-policy.v1\0" + canonical_json_bytes(self.document)
+        )
+
 
 def allocate_tickets(workload: WorkloadContract) -> tuple[TicketAllocation, ...]:
     tickets: list[TicketAllocation] = []

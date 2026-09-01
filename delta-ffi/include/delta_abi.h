@@ -16,6 +16,9 @@
 
 #ifdef __cplusplus
 extern "C" {
+#define DELTA_NOEXCEPT noexcept
+#else
+#define DELTA_NOEXCEPT
 #endif
 
 #define DELTA_ABI_MAJOR UINT16_C(1)
@@ -27,6 +30,7 @@ extern "C" {
 #define DELTA_HIERARCHY_CONTEXT_SIZE UINT32_C(168)
 #define DELTA_SCHEDULING_ELIGIBILITY_CONTEXT_SIZE UINT32_C(184)
 #define DELTA_CERTIFICATE_INSPECT_CONTEXT_SIZE UINT32_C(40)
+#define DELTA_CERTIFICATE_CHAIN_CONTEXT_SIZE UINT32_C(168)
 #define DELTA_QLORA_CONTEXT_SIZE UINT32_C(104)
 #define DELTA_SCHEMA_VERSION "1.0.0"
 #define DELTA_PROTOCOL_VERSION "003.1.0"
@@ -152,6 +156,21 @@ typedef struct delta_certificate_inspect_context {
   delta_bytes_view_t expected_formal_semantics_id;
 } delta_certificate_inspect_context_t;
 
+typedef struct delta_certificate_chain_context {
+  uint32_t struct_size;
+  uint32_t reserved;
+  delta_bytes_view_t expected_formal_semantics_id;
+  delta_bytes_view_t expected_native_build_id;
+  delta_bytes_view_t expected_execution_plan_id;
+  delta_bytes_view_t expected_certified_round_policy_id;
+  delta_bytes_view_t expected_parent_checkpoint_id;
+  delta_bytes_view_t expected_final_checkpoint_id;
+  delta_bytes_view_t expected_runtime_state_id;
+  delta_bytes_view_t expected_effect_set_id;
+  delta_bytes_view_t expected_runtime_wal_sha256;
+  delta_bytes_view_t expected_checkpoint_wal_sha256;
+} delta_certificate_chain_context_t;
+
 typedef struct delta_qlora_context {
   uint32_t struct_size;
   uint32_t reserved;
@@ -225,6 +244,14 @@ DELTA_API delta_status_t delta_certificate_inspect_copy(
     const delta_certificate_inspect_context_t* context,
     delta_bytes_view_t canonical_certificate,
     delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_certificate_chain_verify_borrowed(
+    const delta_certificate_chain_context_t* context,
+    delta_bytes_view_t canonical_bundle,
+    delta_output_buffer_t* receipt_output) DELTA_NOEXCEPT;
+DELTA_API delta_status_t delta_certificate_chain_verify_copy(
+    const delta_certificate_chain_context_t* context,
+    delta_bytes_view_t canonical_bundle,
+    delta_output_buffer_t* receipt_output) DELTA_NOEXCEPT;
 DELTA_API delta_status_t delta_qlora_context_id(
     const delta_qlora_context_t* context,
     delta_output_buffer_t* content_id_output);
@@ -232,5 +259,7 @@ DELTA_API delta_status_t delta_qlora_context_id(
 #ifdef __cplusplus
 }
 #endif
+
+#undef DELTA_NOEXCEPT
 
 #endif

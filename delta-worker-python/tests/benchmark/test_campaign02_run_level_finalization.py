@@ -5,6 +5,7 @@ from dataclasses import replace
 import pytest
 from campaign02_chain_fixtures import (
     CertifiedBackend,
+    FixtureNativeChainVerifier,
     authorization,
     certified_plan,
     certified_result,
@@ -20,10 +21,16 @@ from deltatorrent.benchmark.measured_runner import (
     MeasuredRunnerError,
     PrimaryScientificRunner,
 )
+from deltatorrent.benchmark.observation_writer import (
+    ObservationWriterError,
+    PrimaryObservationWriter,
+)
 
 
 def _run(plan, identity, measured, result):  # type: ignore[no-untyped-def]
-    return PrimaryScientificRunner(identity, Feature008ChainVerifier()).run(
+    return PrimaryScientificRunner(
+        identity, Feature008ChainVerifier(FixtureNativeChainVerifier())
+    ).run(
         plan,
         authorization(),
         CertifiedBackend(plan, measured, result),
@@ -37,6 +44,26 @@ def test_complete_certified_round_is_admitted_once() -> None:
     run = _run(plan, identity, measured, result)
     assert run.final_checkpoint_id == result.certificate_bundle.apply_qc.value["next_model_hash"]
     assert run.result_class == "CERTIFIED_DELTAREDUCE"
+    assert run.round_result.native_chain_admission_receipt_id is not None
+    assert run.round_result.native_chain_verifier_id is not None
+    PrimaryObservationWriter._verify_native_chain_receipt(plan, run)
+
+
+def test_writer_rejects_a_native_receipt_binding_substitution() -> None:
+    plan, identity = certified_plan()
+    measured = contributions(plan)
+    run = _run(plan, identity, measured, certified_result(plan, measured))
+    tampered_result = replace(
+        run.round_result,
+        native_chain_verifier_id=content_id("substituted-native-verifier"),
+    )
+    with pytest.raises(
+        ObservationWriterError,
+        match="OBSERVATION_NATIVE_CHAIN_RECEIPT_BINDING_MISMATCH",
+    ):
+        PrimaryObservationWriter._verify_native_chain_receipt(
+            plan, replace(run, round_result=tampered_result)
+        )
 
 
 def test_last_ticket_local_identity_cannot_be_substituted_as_final() -> None:
@@ -148,9 +175,9 @@ def test_reference_and_certified_result_classes_cannot_be_crossed() -> None:
     reference_plan = replace(plan, result_class="REFERENCE", certified_round_policy=None)
     backend = CertifiedBackend(reference_plan, measured, result, result_class="REFERENCE")
     with pytest.raises(MeasuredRunnerError, match="SCIENTIFIC_RUNNER_RESULT_CLASS_MISMATCH"):
-        PrimaryScientificRunner(identity, Feature008ChainVerifier()).run(
-            reference_plan, authorization(), backend
-        )
+        PrimaryScientificRunner(
+            identity, Feature008ChainVerifier(FixtureNativeChainVerifier())
+        ).run(reference_plan, authorization(), backend)
     backend.finalized = object()
     with pytest.raises(MeasuredRunnerError, match="SCIENTIFIC_RUNNER_FINALIZATION_TYPE_INVALID"):
         _run(plan, identity, measured, backend.finalized)

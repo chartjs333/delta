@@ -134,6 +134,11 @@ def verify_governance() -> dict[str, object]:
         ROOT / "reports/benchmark/campaigns/campaign-02/qualification-supersession.json",
         "CAMPAIGN02_OLD_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    native_chain_supersession = canonical_file(
+        ROOT
+        / "reports/benchmark/campaigns/campaign-02/qualification-supersession-native-chain.json",
+        "CAMPAIGN02_NATIVE_CHAIN_QUALIFICATION_SUPERSESSION_INVALID",
+    )
     require(
         closure.get("benchmark_definition_id") == OLD_DEFINITION
         and closure.get("status") == "TERMINATED_NO_GO_AFTER_STAGE_A_BEFORE_SCIENTIFIC_EXECUTION"
@@ -165,9 +170,26 @@ def verify_governance() -> dict[str, object]:
         and supersession.get("scientific_observations_created") is False,
         "CAMPAIGN02_OLD_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    require(
+        native_chain_supersession.get("status") == "SUPERSEDED_BEFORE_CAMPAIGN02_DEFINITION"
+        and native_chain_supersession.get("reason")
+        == "NATIVE_FEATURE008_CHAIN_VERIFIER_NOT_IN_ADMISSION_PATH"
+        and native_chain_supersession.get("source_commit")
+        == "aa04ca82399c98e43fbe61744bd20ed17b96f87e"
+        and native_chain_supersession.get("source_tree")
+        == "51b989388c7386a8cb8d6711f9415022a72459ea"
+        and native_chain_supersession.get("evidence_head")
+        == "55187704e7310edb71e53f4114726b25cd659dc8"
+        and native_chain_supersession.get("primary_scientific_execution_count") == 0
+        and native_chain_supersession.get("scientific_observations_created") is False,
+        "CAMPAIGN02_NATIVE_CHAIN_QUALIFICATION_SUPERSESSION_INVALID",
+    )
     return {
         "campaign01_closure_id": sha256_content_id(canonical_json_bytes(closure)),
         "old_qualification_supersession_id": sha256_content_id(canonical_json_bytes(supersession)),
+        "native_chain_qualification_supersession_id": sha256_content_id(
+            canonical_json_bytes(native_chain_supersession)
+        ),
         "remediation_authorization_id": sha256_content_id(canonical_json_bytes(authorization)),
         "status": "PASS",
     }
@@ -207,6 +229,52 @@ def verify_junit(path: Path) -> dict[str, object]:
         "status": "PASS",
         "test_cases": cases,
         "tests": tests,
+    }
+
+
+def verify_cross_verifier_corpus() -> dict[str, object]:
+    path = ROOT / "delta-protocol/fixtures/010/campaign-02/native-chain-conformance-v1.json"
+    corpus = canonical_file(path, "CAMPAIGN02_NATIVE_CHAIN_CORPUS_INVALID")
+    cases = corpus.get("cases")
+    require(
+        corpus.get("type_name") == "CAMPAIGN02_NATIVE_CHAIN_CONFORMANCE_CORPUS"
+        and isinstance(cases, list)
+        and len(cases) == 12,
+        "CAMPAIGN02_NATIVE_CHAIN_CORPUS_INVALID",
+    )
+    names = {str(item.get("name")) for item in cases if isinstance(item, dict)}
+    required = {
+        "incomplete-shard-coverage",
+        "invalid-nested-content-id",
+        "noncanonical-squared-norm",
+        "reversed-apc-weights",
+        "unordered-norm-entries",
+        "unordered-seed-shares",
+        "unordered-signers",
+        "unreduced-rational",
+        "valid-complete-chain",
+        "wrong-required-key-order",
+        "wrong-seed-parent",
+        "zero-denominator",
+    }
+    require(names == required, "CAMPAIGN02_NATIVE_CHAIN_CORPUS_CASES_INVALID")
+    accepted = 0
+    for item in cases:
+        require(isinstance(item, dict), "CAMPAIGN02_NATIVE_CHAIN_CORPUS_INVALID")
+        expected = item.get("expected")
+        require(
+            expected in {"ACCEPT", "REJECT"}
+            and item.get("python_admission") == expected
+            and item.get("native_chain_verifier") == expected
+            and item.get("c_abi") == expected,
+            "CAMPAIGN02_NATIVE_CHAIN_CORPUS_DECISION_DIVERGENCE",
+        )
+        accepted += expected == "ACCEPT"
+    require(accepted == 1, "CAMPAIGN02_NATIVE_CHAIN_CORPUS_ACCEPT_COUNT_INVALID")
+    return {
+        "case_count": len(cases),
+        "content_id": sha256_content_id(path.read_bytes()),
+        "status": "PASS",
     }
 
 
@@ -282,6 +350,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
     )
     gpu_lock = verify_gpu_environment_outputs(ROOT)
     portable = verify_junit(portable_junit)
+    cross_verifier_corpus = verify_cross_verifier_corpus()
     hardware = canonical_file(hardware_evidence, "CAMPAIGN02_HARDWARE_EVIDENCE_INVALID")
     require(
         hardware.get("status") == "PASS"
@@ -354,6 +423,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "delta-core-cpp/src/certificates/contracts.cpp",
             "delta-core-cpp/src/certificates/verifier.cpp",
             "delta-ffi/include/delta_abi.h",
+            "delta-ffi/src/certificate_chain_abi.cpp",
             "delta-ffi/src/certificates_abi.cpp",
         ),
         **common,
@@ -398,6 +468,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "configs/benchmark/campaign-02/gpu-windows-x86_64.lock",
             "configs/benchmark/campaign-02/runner-policy-v1.json",
             "configs/benchmark/campaign-02/workload-v2.json",
+            "delta-protocol/fixtures/010/campaign-02/native-chain-conformance-v1.json",
         }
     )
     return {
@@ -409,8 +480,10 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "PINNED_OCI_CUDA_IMAGE_AND_SBOM_PASS",
             "THREE_PREREGISTERED_MEASURED_EVALUATORS_AND_GOLDENS_PASS",
             "SOURCE_BOUND_SCIENTIFIC_EVALUATION_RUNNERS_PASS",
-            "RUN_LEVEL_FEATURE008_CERTIFICATE_CHAIN_ADMISSION_PASS",
+            "AUTHORITATIVE_NATIVE_FEATURE008_CHAIN_ADMISSION_PASS",
+            "CROSS_VERIFIER_CONFORMANCE_CORPUS_PASS",
             "FINAL_CHECKPOINT_APPLY_QC_RUNTIME_WAL_BINDING_PASS",
+            "NATIVE_CHAIN_ADMISSION_RECEIPT_WRITER_BINDING_PASS",
             "CREATE_ONLY_TYPED_OBSERVATION_WRITER_PASS",
             "PORTABLE_EXACT_SOURCE_TESTS_PASS",
             "DESIGNATED_GPU_HARDWARE_QUALIFICATION_PASS",
@@ -427,6 +500,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
                 "value": scientific.document,
             },
         },
+        "cross_verifier_corpus": cross_verifier_corpus,
         "definition_construction_eligible_after_remediation_merge": True,
         "evaluator_implementations": evaluator_identities,
         "formal_semantics_id": FORMAL_ID,

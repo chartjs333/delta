@@ -249,6 +249,8 @@ class CertifiedRoundMeasurement:
     terminal_outcome: str
     certificate_bundle: Feature008CertificateBundle
     artifacts: tuple[RawArtifact, ...]
+    native_chain_admission_receipt_id: str | None = None
+    native_chain_verifier_id: str | None = None
     result_class: str = "CERTIFIED_DELTAREDUCE"
 
     def __post_init__(self) -> None:
@@ -278,9 +280,19 @@ class CertifiedRoundMeasurement:
             r"[0-9a-f]{64}", self.checkpoint_wal_sha256
         ):
             raise _fail("CERTIFIED_ROUND_WAL_IDENTITY_INVALID")
+        native_identities = (
+            self.native_chain_admission_receipt_id,
+            self.native_chain_verifier_id,
+        )
+        if any(value is not None for value in native_identities) and any(
+            value is None or _CONTENT_ID.fullmatch(value) is None for value in native_identities
+        ):
+            raise _fail("CERTIFIED_ROUND_NATIVE_ADMISSION_IDENTITY_INVALID")
 
     @property
     def document(self) -> dict[str, object]:
+        if self.native_chain_admission_receipt_id is None or self.native_chain_verifier_id is None:
+            raise _fail("CERTIFIED_ROUND_NATIVE_ADMISSION_RECEIPT_MISSING")
         return {
             "aggregate_root_qc_id": self.aggregate_root_qc_id,
             "aggregation_plan_certificate_id": self.aggregation_plan_certificate_id,
@@ -290,6 +302,8 @@ class CertifiedRoundMeasurement:
             "eligibility_certificate_id": self.eligibility_certificate_id,
             "final_checkpoint_id": self.final_checkpoint_id,
             "input_set_certificate_id": self.input_set_certificate_id,
+            "native_chain_admission_receipt_id": self.native_chain_admission_receipt_id,
+            "native_chain_verifier_id": self.native_chain_verifier_id,
             "ordered_contribution_ids": list(self.ordered_contribution_ids),
             "ordered_ticket_ids": list(self.ordered_ticket_ids),
             "parameter_shard_qc_ids": list(self.parameter_shard_qc_ids),
@@ -462,6 +476,17 @@ class PrimaryScientificRunner:
                 finalized,
                 ordered_ticket_ids=receipt.canonical_ticket_ids,
                 ordered_contribution_ids=receipt.canonical_contribution_ids,
+                native_chain_admission_receipt_id=receipt.native_receipt.content_id,
+                native_chain_verifier_id=str(
+                    receipt.native_receipt.value["native_chain_verifier_id"]
+                ),
+            )
+            artifacts.append(
+                RawArtifact(
+                    "native-chain-admission-receipt.json",
+                    "application/vnd.deltareduce.campaign-02.native-chain-admission-receipt+json;version=1",
+                    receipt.native_receipt.canonical_bytes,
+                )
             )
             for certificate in finalized.certificate_bundle.artifacts:
                 artifacts.append(

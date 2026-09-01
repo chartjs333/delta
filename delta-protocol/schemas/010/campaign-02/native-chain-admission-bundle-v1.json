@@ -1,0 +1,273 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:native-chain-admission-bundle-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_BUNDLE"
+    },
+    "aggregate_root_qc": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "aggregation_plan_certificate": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "apply_arithmetic_profile": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "apply_candidate": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "apply_qc": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "checkpoint_wal_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "current_pointer_command": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "effect_set_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "eligibility_certificate": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "execution_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "expected_input_tuples": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "availability_certificate_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "commitment_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "domain_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ticket_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "availability_certificate_id",
+          "commitment_id",
+          "domain_id",
+          "ticket_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "final_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "input_set_certificate": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "norm_evidence": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "ordered_contributions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "contribution_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "ticket_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contribution_id",
+          "ticket_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "parameter_shard_qcs": {
+      "items": {
+        "minProperties": 1,
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "policy": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulator_proof_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "apply_arithmetic_profile_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "arithmetic_profile_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "height": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "parameter_schema_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "quorum_threshold": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "required_shards": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "domain_id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "shard_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "domain_id",
+              "shard_id"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "round_config_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "round_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "validator_epoch_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "validator_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "view": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "accumulator_proof_id",
+        "apply_arithmetic_profile_id",
+        "arithmetic_profile_id",
+        "height",
+        "parameter_schema_id",
+        "quorum_threshold",
+        "required_shards",
+        "round_config_id",
+        "round_id",
+        "validator_epoch_id",
+        "validator_ids",
+        "view"
+      ],
+      "type": "object"
+    },
+    "runtime_state_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runtime_wal_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "seed_transcript": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "terminal_outcome": {
+      "const": "APPLIED"
+    }
+  },
+  "required": [
+    "aggregate_root_qc",
+    "aggregation_plan_certificate",
+    "apply_arithmetic_profile",
+    "apply_candidate",
+    "apply_qc",
+    "checkpoint_wal_sha256",
+    "current_pointer_command",
+    "effect_set_id",
+    "eligibility_certificate",
+    "execution_plan_id",
+    "expected_input_tuples",
+    "final_checkpoint_id",
+    "formal_semantics_id",
+    "input_set_certificate",
+    "norm_evidence",
+    "ordered_contributions",
+    "parameter_shard_qcs",
+    "parent_checkpoint_id",
+    "policy",
+    "runtime_state_id",
+    "runtime_wal_sha256",
+    "schema_version",
+    "seed_transcript",
+    "terminal_outcome",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 native-chain-admission-bundle-v1"
+}
