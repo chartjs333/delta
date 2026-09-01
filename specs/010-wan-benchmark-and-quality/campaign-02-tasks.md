@@ -85,7 +85,7 @@ history and cannot satisfy the tasks below.
   make every legacy primary CLI route fail closed for Campaign 02.
 - [x] **C2-020** Implement detached Ed25519 benchmark-review votes, validator-set/key-custody
   manifests and cryptographic quorum verification without generating governance approvals.
-- [ ] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
+- [x] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
   execution-binding source.
 - [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
   workload/domain/ticket IDs and qualified runtime lineage.
@@ -93,6 +93,15 @@ history and cannot satisfy the tasks below.
   terminal reviewed HEAD.
 - [ ] **C2-024** Obtain a new separate governance decision before any Stage A execution. This task
   replaces, but does not retroactively complete, C2-016 for the superseded Definition.
+
+Execution-binding qualification evidence:
+
+- `evidence/campaign-02-execution-binding-hardware-qualification.json` — designated GPU,
+  exact source/runtime and non-primary QLoRA qualification;
+- `evidence/campaign-02-execution-binding-exact-source-qualification.json` — exact source/tree,
+  distinct workload/domain/ticket IDs, binder identity and 72-test portable manifest;
+- `evidence/campaign-02-execution-binding-exact-source-ci-receipt.json` — passing dedicated
+  exact-source workflow, immutable artifact digests and 52-check current-head control summary.
 
 ## Unconditional STOP conditions
 
