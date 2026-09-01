@@ -26,6 +26,20 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Resolve actual terminal reviewed HEAD
+        id: terminal
+        shell: bash
+        run: |
+          actual_head="$(git rev-parse HEAD)"
+          if [[ '${{ github.event_name }}' == 'pull_request' ]]; then
+            expected_head='${{ github.event.pull_request.head.sha }}'
+          else
+            expected_head='${{ github.sha }}'
+          fi
+          test "${actual_head}" = "${expected_head}"
+          printf 'head=%s\n' "${actual_head}" >> "$GITHUB_OUTPUT"
 
       - name: Install pinned portable workspace tool
         run: python3 -m pip install --disable-pip-version-check uv==0.6.14
@@ -49,6 +63,11 @@ jobs:
             --check-attestation
           uv run python \
             specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_definition_temporal.py
+          uv run python \
+            specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_definition_temporal.py \
+            --verified-head '${{ steps.terminal.outputs.head }}' \
+            --terminal-receipt-output "$RUNNER_TEMP/campaign-02-definition-terminal-head.json" \
+            --workflow-run-id "$GITHUB_RUN_ID"
 
       - name: Run Definition negative and governance gates
         env:
@@ -86,6 +105,7 @@ jobs:
             reports/benchmark/campaigns/campaign-02/methodology-diff.json
             reports/benchmark/campaigns/campaign-02/definition-readiness.json
             specs/010-wan-benchmark-and-quality/evidence/campaign-02-definition-temporal-integrity.json
+            ${{ runner.temp }}/campaign-02-definition-terminal-head.json
             ${{ runner.temp }}/campaign-02-definition.xml
           if-no-files-found: error
           retention-days: 30

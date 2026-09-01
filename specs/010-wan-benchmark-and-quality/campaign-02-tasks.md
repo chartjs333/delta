@@ -73,8 +73,11 @@ The remaining tasks begin only after remediation is merged into
 `010-wan-benchmark-and-quality` and branch `010f-primary-campaign-definition` is created.
 
 - [x] **C2-013** Create a new immutable `BenchmarkDefinition`; never edit or reuse Campaign 01.
-- [x] **C2-014** Create the methodology diff, definition attestation and readiness record.
-- [x] **C2-015** Verify no scientific observation predates the new attestation.
+- [ ] **C2-014** Create the methodology diff, cryptographically verified definition attestation
+  and readiness record. Reopened because the recorded signer labels contain no signature evidence.
+- [ ] **C2-015** Verify no scientific observation predates the new attestation and verify the
+  actual terminal reviewed HEAD. Reopened because the checked-in snapshot stopped at an
+  intermediate commit.
 - [ ] **C2-016** Obtain a separate governance authorization before any new Stage A execution.
 
 ## Unconditional STOP conditions

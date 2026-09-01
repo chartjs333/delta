@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = (
     ROOT / "specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_definition_temporal.py"
@@ -67,3 +69,34 @@ def test_campaign02_temporal_evidence_is_current_and_fail_closed() -> None:
     assert current["benchmark_result_qc"] == "ABSENT"
     assert current["execution_authorization"] == "ABSENT"
     assert all(value is False for value in current["authorization"].values())
+
+
+def test_campaign02_terminal_receipt_verifies_actual_checkout_head() -> None:
+    head = MODULE.git("rev-parse", "HEAD")
+    receipt = MODULE.build_terminal_receipt(head, "LOCAL_TEST")
+    assert receipt["actual_head"] == head
+    assert receipt["snapshot_verified_head"] == ("d68907453d898161066c472d48527527f9458812")
+    assert receipt["status"] == "PASS_TERMINAL_HEAD_NO_EXECUTION"
+    assert all(value == 0 for value in receipt["prohibited_artifact_counts"].values())
+
+
+def test_campaign02_observation_after_old_snapshot_rejects_terminal_head(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    head = MODULE.git("rev-parse", "HEAD")
+    campaign_paths = MODULE.campaign_paths
+    current_paths = campaign_paths(head)
+    monkeypatch.setattr(
+        MODULE,
+        "campaign_paths",
+        lambda commit: (
+            [
+                *current_paths,
+                "reports/benchmark/campaigns/campaign-02/observations/post-snapshot.json",
+            ]
+            if commit == head
+            else campaign_paths(commit)
+        ),
+    )
+    with pytest.raises(MODULE.TemporalIntegrityError, match="TERMINAL_HEAD_ARTIFACT_PRESENT"):
+        MODULE.build_terminal_receipt(head, "LOCAL_TEST")
