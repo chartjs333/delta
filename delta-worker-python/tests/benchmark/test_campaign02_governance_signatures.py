@@ -148,6 +148,19 @@ def test_campaign02_duplicate_key_and_controller_are_rejected() -> None:
         BenchmarkReviewValidatorSet.from_dict(duplicate_controller)
 
 
+def test_campaign02_unknown_custody_statement_identifier_is_rejected() -> None:
+    validator_set, _ = _validator_material()
+    unknown_custody = validator_set.document
+    validators = unknown_custody["validators"]
+    assert isinstance(validators, list)
+    validators[0]["key_custody_statement_id"] = "unknown-custody-statement"
+    with pytest.raises(
+        GovernanceSignatureError,
+        match="BENCHMARK_REVIEW_KEY_CUSTODY_ID_INVALID",
+    ):
+        BenchmarkReviewValidatorSet.from_dict(unknown_custody)
+
+
 def test_campaign02_unknown_signer_is_rejected() -> None:
     validator_set, _, votes = _votes()
     unknown = replace(votes[0], signer_id="benchmark-validator-unknown")
@@ -168,11 +181,26 @@ def test_campaign02_insufficient_quorum_is_rejected() -> None:
 
 def test_campaign02_signature_over_noncanonical_bytes_is_rejected() -> None:
     validator_set, keys, votes = _votes()
-    canonical_message = definition_vote_message(DEFINITION_ID, validator_set.content_id)
+    canonical_message = definition_vote_message(
+        DEFINITION_ID,
+        validator_set.content_id,
+        votes[0].signer_id,
+        votes[0].public_key_id,
+        votes[0].submitted_at,
+    )
     noncanonical_signature = keys[0].sign(canonical_message + b" ")
     noncanonical = replace(votes[0], signature=noncanonical_signature)
     with pytest.raises(GovernanceSignatureError, match="BENCHMARK_DEFINITION_SIGNATURE_INVALID"):
         verify_definition_vote(noncanonical, validator_set, DEFINITION_ID)
+
+
+def test_campaign02_changed_submitted_at_invalidates_signature() -> None:
+    validator_set, _, votes = _votes()
+    tampered = replace(votes[0], submitted_at=datetime(2026, 9, 1, 12, 1, tzinfo=UTC))
+    with pytest.raises(
+        GovernanceSignatureError, match="BENCHMARK_DEFINITION_VOTE_MESSAGE_MISMATCH"
+    ):
+        verify_definition_vote(tampered, validator_set, DEFINITION_ID)
 
 
 def test_campaign02_duplicate_vote_is_rejected() -> None:

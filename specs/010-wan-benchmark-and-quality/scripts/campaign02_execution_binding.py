@@ -24,6 +24,9 @@ SUPERSESSION_PATH: Final = REPORTS / "definition-supersession-execution-binding.
 QUALIFICATION_SUPERSESSION_PATH: Final = (
     REPORTS / "qualification-supersession-execution-binding.json"
 )
+STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_PATH: Final = (
+    REPORTS / "qualification-supersession-stage-authorization.json"
+)
 READINESS_PATH: Final = REPORTS / "execution-binding-remediation-readiness.json"
 SUPERSEDED_DEFINITION_ID: Final = (
     "sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af"
@@ -106,6 +109,26 @@ def expected_outputs() -> dict[Path, bytes]:
         },
         "type_name": "CAMPAIGN02_SOURCE_QUALIFICATION_SUPERSESSION",
     }
+    stage_authorization_qualification_supersession = {
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "primary_observations_created": 0,
+        "reason_codes": [
+            "SUPERSEDED_DEFINITION_V1_LEGACY_ROUTE_NOT_CENTRALLY_BLOCKED",
+            "PLAN_CATALOG_AND_STAGE_EXECUTION_AUTHORIZATION_NOT_SEPARATED",
+            "BINDER_TRUSTED_CALLER_CONSTRUCTED_ATTESTATION",
+            "VOTE_SUBMITTED_AT_NOT_SIGNED",
+        ],
+        "replacement_qualification_required": True,
+        "schema_version": "1.0.0",
+        "status": "SUPERSEDED_AFTER_GOVERNANCE_REVIEW_BEFORE_EXECUTION",
+        "superseded_evidence": {
+            "ci_receipt_head": "0d5dcc8af0e2f8563a64a85346671e64dfeb94eb",
+            "evidence_overlay": "2aaf2931d8c808354d69488f1da7171a0b9576a6",
+            "source_commit": "d9b8230d373e484c8fbcdd0a0444ea0ee465e8c3",
+            "source_tree": "c5591557d2ef6617a08f99c91a79e570c391d306",
+        },
+        "type_name": "CAMPAIGN02_SOURCE_QUALIFICATION_SUPERSESSION",
+    }
     readiness = {
         "authorization": {
             "feature_011_authorized": False,
@@ -133,7 +156,7 @@ def expected_outputs() -> dict[Path, bytes]:
             "ticket_plan_id": ticket_plan.content_id,
             "workload_contract_id": workload.content_id,
         },
-        "legacy_primary_path": "FORBIDDEN_FOR_CAMPAIGN02",
+        "legacy_primary_path": "FORBIDDEN_BY_CAMPAIGN_AND_DEFINITION_ID_REGISTRY",
         "next_required_gate": "C2_021_SOURCE_AND_DESIGNATED_GPU_REQUALIFICATION",
         "schema_version": "1.0.0",
         "status": "SOURCE_REMEDIATION_IN_PROGRESS_NO_EXECUTION",
@@ -144,6 +167,10 @@ def expected_outputs() -> dict[Path, bytes]:
         TICKET_PLAN_PATH: canonical_json_bytes(ticket_plan.raw) + b"\n",
         SUPERSESSION_PATH: canonical_json_bytes(supersession) + b"\n",
         QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(qualification_supersession) + b"\n",
+        STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(
+            stage_authorization_qualification_supersession
+        )
+        + b"\n",
         READINESS_PATH: canonical_json_bytes(readiness) + b"\n",
     }
 

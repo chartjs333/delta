@@ -9,7 +9,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from deltatorrent.benchmark.campaign02 import CampaignExecutionPlan, authorize_execution_class
+from deltatorrent.benchmark.campaign02 import (
+    Campaign02PlanCatalogView,
+    CampaignExecutionPlan,
+    authorize_execution_class,
+    execution_authorization_id,
+)
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.evaluators.common import MeasuredEvaluation
 from deltatorrent.benchmark.feature008_admission import canonical_native_chain_bundle
@@ -208,8 +213,17 @@ class PrimaryObservationWriter:
         authorization: dict[str, Any],
         scientific_run: ScientificRun,
         evaluations: tuple[MeasuredEvaluation, ...],
+        *,
+        plan_catalog: Campaign02PlanCatalogView | None = None,
+        predecessor_gate_receipt_ids: tuple[str, ...] = (),
     ) -> PublicationReceipt:
-        authorize_execution_class(authorization, plan)
+        authorize_execution_class(
+            authorization,
+            plan,
+            plan_catalog=plan_catalog,
+            predecessor_gate_receipt_ids=predecessor_gate_receipt_ids,
+            runner_role="OBSERVATION_WRITER",
+        )
         if (
             plan.writer_id != self.identity.content_id
             or plan.environment_id != self.identity.environment_id
@@ -277,7 +291,7 @@ class PrimaryObservationWriter:
             "evaluation_ids": [item.content_id for item in evaluations],
             "evaluation_implementation_ids": list(plan.evaluation_implementation_ids),
             "evaluation_runner_id": plan.evaluation_runner_id,
-            "execution_authorization_id": plan.execution_authorization_id,
+            "execution_authorization_id": execution_authorization_id(authorization),
             "execution_class": plan.execution_class,
             "execution_plan_id": plan.content_id,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,

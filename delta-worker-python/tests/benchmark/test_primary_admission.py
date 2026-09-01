@@ -9,6 +9,7 @@ from deltatorrent.benchmark.arms import ArmSpec, MetricSample, RunObservation
 from deltatorrent.benchmark.definition import BenchmarkDefinition
 from deltatorrent.benchmark.primary import (
     ExecutionPlan,
+    LegacyPrimaryCompatibilityAuthorization,
     PrimaryRunError,
     adapter_for,
     load_primary_arms,
@@ -22,6 +23,13 @@ ARMS = ROOT / "configs/benchmark/arms-v1.json"
 def inputs() -> tuple[BenchmarkDefinition, tuple[ArmSpec, ...]]:
     definition = BenchmarkDefinition.from_dict(json.loads(DEFINITION.read_text(encoding="utf-8")))
     return definition, load_primary_arms(ARMS, definition)
+
+
+def compatibility(definition: BenchmarkDefinition) -> LegacyPrimaryCompatibilityAuthorization:
+    return LegacyPrimaryCompatibilityAuthorization(
+        definition.content_id,
+        ("ADMIT", "COLLECT", "EXECUTE", "PLAN", "VERIFY"),
+    )
 
 
 def observation(plan: ExecutionPlan) -> RunObservation:
@@ -79,6 +87,7 @@ def test_all_primary_arm_classes_plan_and_admit_exact_observations() -> None:
             fault_profile_id=definition.fault_profile_ids[0],
             seed=definition.seeds[0],
             repetition=1,
+            compatibility_authorization=compatibility(definition),
         )
         measured = observation(plan)
         assert adapter.admit(plan, measured) is measured
@@ -96,6 +105,7 @@ def test_primary_observation_identity_drift_is_rejected() -> None:
         fault_profile_id=definition.fault_profile_ids[0],
         seed=definition.seeds[0],
         repetition=1,
+        compatibility_authorization=compatibility(definition),
     )
     with pytest.raises(PrimaryRunError, match="PRIMARY_OBSERVATION_IDENTITY_DRIFT"):
         adapter.admit(plan, replace(observation(plan), processed_tokens=definition.B - 1))
@@ -113,6 +123,7 @@ def test_distributed_primary_requires_complete_certificate_evidence() -> None:
         fault_profile_id=definition.fault_profile_ids[0],
         seed=definition.seeds[0],
         repetition=1,
+        compatibility_authorization=compatibility(definition),
     )
 
     with pytest.raises(PrimaryRunError, match="PRIMARY_CERTIFICATE_EVIDENCE_INCOMPLETE"):
@@ -132,6 +143,7 @@ def test_wrong_adapter_and_seed_are_rejected() -> None:
             fault_profile_id=definition.fault_profile_ids[0],
             seed=definition.seeds[0],
             repetition=1,
+            compatibility_authorization=compatibility(definition),
         )
     with pytest.raises(PrimaryRunError, match="PRIMARY_SEED_REPETITION_MISMATCH"):
         adapter_for(reference).plan(
@@ -142,4 +154,5 @@ def test_wrong_adapter_and_seed_are_rejected() -> None:
             fault_profile_id=definition.fault_profile_ids[0],
             seed=definition.seeds[1],
             repetition=1,
+            compatibility_authorization=compatibility(definition),
         )

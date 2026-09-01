@@ -62,6 +62,7 @@ EXECUTION_BINDING_SOURCES: Final = (
     "delta-worker-python/src/deltatorrent/benchmark/governance.py",
     "delta-worker-python/src/deltatorrent/benchmark/primary.py",
     "delta-worker-python/src/deltatorrent/benchmark/primary_executor.py",
+    "delta-worker-python/src/deltatorrent/cli/benchmark.py",
 )
 
 
@@ -164,6 +165,12 @@ def verify_governance() -> dict[str, object]:
         / "qualification-supersession-execution-binding.json",
         "CAMPAIGN02_EXECUTION_BINDING_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    stage_authorization_supersession = canonical_file(
+        ROOT
+        / "reports/benchmark/campaigns/campaign-02"
+        / "qualification-supersession-stage-authorization.json",
+        "CAMPAIGN02_STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_INVALID",
+    )
     readiness = canonical_file(
         ROOT
         / "reports/benchmark/campaigns/campaign-02"
@@ -245,13 +252,28 @@ def verify_governance() -> dict[str, object]:
         and execution_binding_supersession.get("primary_observations_created") == 0,
         "CAMPAIGN02_EXECUTION_BINDING_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    require(
+        stage_authorization_supersession.get("status")
+        == "SUPERSEDED_AFTER_GOVERNANCE_REVIEW_BEFORE_EXECUTION"
+        and stage_authorization_supersession.get("replacement_qualification_required") is True
+        and stage_authorization_supersession.get("primary_observations_created") == 0
+        and stage_authorization_supersession.get("superseded_evidence")
+        == {
+            "ci_receipt_head": "0d5dcc8af0e2f8563a64a85346671e64dfeb94eb",
+            "evidence_overlay": "2aaf2931d8c808354d69488f1da7171a0b9576a6",
+            "source_commit": "d9b8230d373e484c8fbcdd0a0444ea0ee465e8c3",
+            "source_tree": "c5591557d2ef6617a08f99c91a79e570c391d306",
+        },
+        "CAMPAIGN02_STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_INVALID",
+    )
     readiness_flags = readiness.get("authorization")
     cryptographic_governance = readiness.get("cryptographic_governance")
     require(
         readiness.get("status") == "SOURCE_REMEDIATION_IN_PROGRESS_NO_EXECUTION"
         and readiness.get("definition_created") is False
         and readiness.get("execution_authorization") == "ABSENT"
-        and readiness.get("legacy_primary_path") == "FORBIDDEN_FOR_CAMPAIGN02"
+        and readiness.get("legacy_primary_path")
+        == "FORBIDDEN_BY_CAMPAIGN_AND_DEFINITION_ID_REGISTRY"
         and readiness.get("next_required_gate")
         == "C2_021_SOURCE_AND_DESIGNATED_GPU_REQUALIFICATION"
         and isinstance(readiness_flags, dict)
@@ -277,6 +299,9 @@ def verify_governance() -> dict[str, object]:
         "old_qualification_supersession_id": sha256_content_id(canonical_json_bytes(supersession)),
         "native_chain_qualification_supersession_id": sha256_content_id(
             canonical_json_bytes(native_chain_supersession)
+        ),
+        "stage_authorization_qualification_supersession_id": sha256_content_id(
+            canonical_json_bytes(stage_authorization_supersession)
         ),
         "remediation_authorization_id": sha256_content_id(canonical_json_bytes(authorization)),
         "status": "PASS",
@@ -304,12 +329,19 @@ def verify_junit(path: Path) -> dict[str, object]:
     require(len(cases) == tests, "CAMPAIGN02_PORTABLE_JUNIT_DUPLICATE_CASE")
     case_names = {item.rsplit("::", 1)[-1] for item in cases}
     required_cases = {
-        "test_campaign02_compiler_creates_exact_15_plan_matrix",
+        "test_campaign02_changed_submitted_at_invalidates_signature",
+        "test_campaign02_catalog_compiler_reverifies_every_detached_signature",
+        "test_campaign02_compiler_creates_exact_15_plan_matrix_per_stage",
         "test_campaign02_distinct_workload_domain_and_ticket_plan_ids",
         "test_campaign02_forged_signature_is_rejected",
         "test_campaign02_legacy_primary_adapter_is_forbidden",
         "test_campaign02_plan_total_cannot_fall_back_to_per_ticket_b",
         "test_campaign02_signature_over_noncanonical_bytes_is_rejected",
+        "test_caller_constructed_verified_attestation_cannot_enter_binder",
+        "test_exact_superseded_a4160_is_parseable_but_all_adapter_execution_is_forbidden",
+        "test_stage_a_authorizes_only_exact_stage_a_catalog_plans",
+        "test_stage_authorization_rejects_generic_extra_and_inexact_plan_sets",
+        "test_stage_b_and_c_require_exact_predecessor_gate_receipts",
     }
     require(
         required_cases <= case_names
@@ -319,6 +351,16 @@ def verify_junit(path: Path) -> dict[str, object]:
         )
         == 4,
         "CAMPAIGN02_EXECUTION_BINDING_PORTABLE_COVERAGE_MISSING",
+    )
+    require(
+        sum(
+            name.startswith(
+                "test_exact_a4160_and_unsigned_6c594_are_rejected_by_every_legacy_cli_route["
+            )
+            for name in case_names
+        )
+        == 4,
+        "CAMPAIGN02_SUPERSEDED_DEFINITION_PORTABLE_COVERAGE_MISSING",
     )
     manifest = {
         "errors": errors,
@@ -428,6 +470,7 @@ def verify_execution_binding(
     }
     return {
         "base_plan_count": 15,
+        "catalog_plan_count": 45,
         "certified_result_arms": [
             "flat-embedded",
             "flat-sidecar",
@@ -441,6 +484,8 @@ def verify_execution_binding(
         ),
         "implementation_manifest": manifest,
         "legacy_campaign02_primary_path": "FAIL_CLOSED",
+        "plan_catalog_execution_authorized": False,
+        "plans_per_stage": 15,
         "optimizer_steps_per_ticket": 32,
         "reference_result_arms": ["scientific-reference"],
         "status": "PASS",
@@ -668,9 +713,12 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "NATIVE_CHAIN_ADMISSION_RECEIPT_WRITER_BINDING_PASS",
             "CREATE_ONLY_TYPED_OBSERVATION_WRITER_PASS",
             "DISTINCT_WORKLOAD_DOMAIN_AND_TICKET_IDENTITIES_PASS",
-            "EXACT_15_PLAN_CAMPAIGN02_EXECUTION_BINDER_PASS",
-            "LEGACY_PRIMARY_PATH_FAIL_CLOSED_FOR_CAMPAIGN02_PASS",
-            "ED25519_DETACHED_GOVERNANCE_VERIFIER_SOURCE_LOCKED_PASS",
+            "EXACT_15_PLAN_PER_STAGE_CAMPAIGN02_CATALOG_PASS",
+            "PLAN_CATALOG_COMPILES_WITHOUT_EXECUTION_AUTHORIZATION_PASS",
+            "EXACT_STAGE_AUTHORIZATION_AND_PREDECESSOR_ENFORCEMENT_PASS",
+            "LEGACY_PRIMARY_PATH_FAIL_CLOSED_BY_DEFINITION_ID_REGISTRY_PASS",
+            "ED25519_DETACHED_GOVERNANCE_VERIFIER_BOUND_TO_BINDER_PASS",
+            "VOTE_SIGNER_KEY_AND_SUBMITTED_AT_SIGNATURE_BINDING_PASS",
             "SUPERSEDED_DEFINITION_AND_QUALIFICATION_NO_EXECUTION_PASS",
             "PORTABLE_EXACT_SOURCE_TESTS_PASS",
             "DESIGNATED_GPU_HARDWARE_QUALIFICATION_PASS",

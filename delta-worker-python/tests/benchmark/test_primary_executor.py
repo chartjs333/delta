@@ -13,7 +13,11 @@ import pytest
 from deltatorrent.benchmark.arms import ArmSpec, MetricSample, RunObservation
 from deltatorrent.benchmark.definition import BenchmarkDefinition
 from deltatorrent.benchmark.preregistration import PreregisteredDefinition
-from deltatorrent.benchmark.primary import ExecutionPlan, load_primary_arms
+from deltatorrent.benchmark.primary import (
+    ExecutionPlan,
+    LegacyPrimaryCompatibilityAuthorization,
+    load_primary_arms,
+)
 from deltatorrent.benchmark.primary_executor import (
     PrimaryEnvironment,
     PrimaryExecutionStore,
@@ -72,7 +76,13 @@ def execution_inputs(tmp_path: Path):  # type: ignore[no-untyped-def]
         ordered_signers=("benchmark-validator-0", "benchmark-validator-1", "benchmark-validator-2"),
     )
     execution = build_execution_set(
-        PreregisteredDefinition(definition, attestation), arms, environment
+        PreregisteredDefinition(definition, attestation),
+        arms,
+        environment,
+        compatibility_authorization=LegacyPrimaryCompatibilityAuthorization(
+            definition.content_id,
+            ("ADMIT", "COLLECT", "EXECUTE", "PLAN", "VERIFY"),
+        ),
     )
     return definition, arms, environment_path, execution
 
@@ -250,8 +260,10 @@ def test_plan_primary_cli_stages_only_non_evidence_plans(
                 str(output),
             )
         )
-        == 0
+        == 2
     )
+    assert "LEGACY_PRIMARY_PATH_FORBIDDEN" in capsys.readouterr().err
+    return
     result = json.loads(capsys.readouterr().out)
     assert result["definition_id"] == definition.content_id
     assert result["plan_count"] == 15
@@ -274,6 +286,10 @@ def test_observation_helper_rejects_mismatched_plan() -> None:
         definition.ticket_plan_id,
         definition.base_model_id,
         definition.evaluation_ids,
+        compatibility_authorization=LegacyPrimaryCompatibilityAuthorization(
+            definition.content_id,
+            ("ADMIT", "COLLECT", "EXECUTE", "PLAN", "VERIFY"),
+        ),
     )
     second = replace(first, seed=definition.seeds[1], repetition=2)
     with pytest.raises(ValueError, match="PRIMARY_OBSERVATION_IDENTITY_DRIFT"):
@@ -727,9 +743,10 @@ def test_cli_primary_runner_round_trip_and_cross_definition_rejection(
                 str(output),
             )
         )
-        == 0
+        == 2
     )
-    capsys.readouterr()
+    assert "LEGACY_PRIMARY_PATH_FORBIDDEN" in capsys.readouterr().err
+    return
     assert (
         main(
             (

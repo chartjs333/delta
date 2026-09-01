@@ -51,6 +51,21 @@
       "sha256": "9b5fe21b545a228763f2d40e4577175d4b85f15efb6e6dbd1df29c86d1863dbb"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V4",
+      "path": "schemas/010/campaign-02/execution-plan-v4.json",
+      "sha256": "d181b2c8f53057e58547386d377273711c083d59f5f7bf8e691dddc336ef316b"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V1",
+      "path": "schemas/010/campaign-02/plan-catalog-v1.json",
+      "sha256": "db3fd2ea8da74472502976ed7e5cf673acd8a059c9aa7fd0ccb5238ee0ddf5ff"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
+      "path": "schemas/010/campaign-02/stage-execution-authorization-v1.json",
+      "sha256": "d5c2f2f2ed3a604a03d76501bf5db055daed385e8a983d07d178837cb97a464b"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
       "path": "schemas/010/campaign-02/evaluator-profile-v1.json",
       "sha256": "164f6fbee00c23f7c0dd7f285e5cc4d89811f591146fcbd820bcac8434efc93f"
@@ -181,6 +196,21 @@
       "value": "application/vnd.deltareduce.campaign-02.execution-plan-v3+json;version=3"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-EXECUTION-PLAN-V4",
+      "schema_id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V4",
+      "value": "application/vnd.deltareduce.campaign-02.execution-plan-v4+json;version=4"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-PLAN-CATALOG-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.plan-catalog-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.stage-execution-authorization-v1+json;version=1"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-EVALUATOR-PROFILE-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.evaluator-profile-v1+json;version=1"
@@ -221,7 +251,7 @@
       "value": "application/vnd.deltareduce.campaign-02.native-chain-admission-receipt-v1+json;version=1"
     }
   ],
-  "registry_version": "010.3.0-execution-binding",
+  "registry_version": "010.4.0-stage-authorization",
   "schema_version": "1.0.0",
   "semantic_completeness_claimed": false
 }

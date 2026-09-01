@@ -17,7 +17,11 @@ from deltatorrent.benchmark.preregistration import (
     PreregisteredDefinition,
     PreregistrationStore,
 )
-from deltatorrent.benchmark.primary import load_primary_arms
+from deltatorrent.benchmark.primary import (
+    PrimaryRunError,
+    load_primary_arms,
+    reject_forbidden_primary_definition,
+)
 from deltatorrent.benchmark.primary_executor import (
     PrimaryEnvironment,
     PrimaryExecutionSet,
@@ -166,8 +170,10 @@ def _attestation(path: Path, definition: BenchmarkDefinition) -> GovernanceAttes
 
 def _primary_execution(args: argparse.Namespace) -> PrimaryExecutionSet:
     definition = load_definition(args.definition)
-    if definition.campaign_id == "campaign-02":
-        raise BenchmarkCliError("LEGACY_PRIMARY_PATH_FORBIDDEN")
+    try:
+        reject_forbidden_primary_definition(definition, operation=args.benchmark_command.upper())
+    except PrimaryRunError as exc:
+        raise BenchmarkCliError(str(exc)) from exc
     preregistration = PreregisteredDefinition(
         definition,
         _attestation(args.attestation, definition),
@@ -195,6 +201,10 @@ def execute(args: argparse.Namespace) -> int:
             return 0
         if args.benchmark_command == "preregister":
             definition = load_definition(args.definition)
+            try:
+                reject_forbidden_primary_definition(definition, operation="PREREGISTER")
+            except PrimaryRunError as exc:
+                raise BenchmarkCliError(str(exc)) from exc
             attestation = _attestation(args.attestation, definition)
             target = PreregistrationStore(args.store).seal(
                 PreregisteredDefinition(definition, attestation)

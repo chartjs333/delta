@@ -22,10 +22,10 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 18
+    assert len(module.SCHEMAS) == 21
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.3.0-execution-binding"
+    assert registry["registry_version"] == "010.4.0-stage-authorization"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
     observation = json.loads(
@@ -52,6 +52,25 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
         "qualified_runtime_lineage_id",
         "ticket_plan_id",
     } <= set(bound_execution_plan["required"])
+    catalog_plan = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v4.json").read_bytes()
+    )
+    assert catalog_plan["properties"]["execution_authorized"] == {"const": False}
+    assert "gate_stage" in catalog_plan["required"]
+    assert "execution_authorization_id" not in catalog_plan["properties"]
+    plan_catalog = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/plan-catalog-v1.json").read_bytes()
+    )
+    assert plan_catalog["properties"]["base_plan_count"] == {"const": 15}
+    assert plan_catalog["properties"]["execution_authorized"] == {"const": False}
+    stage_authorization = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/stage-execution-authorization-v1.json"
+        ).read_bytes()
+    )
+    assert stage_authorization["additionalProperties"] is False
+    assert stage_authorization["properties"]["real_wan_authorized"] == {"const": False}
+    assert stage_authorization["properties"]["result_qc_authorized"] == {"const": False}
 
 
 def test_gpu_environment_has_separate_hash_locked_platforms_and_cpu_lock() -> None:

@@ -19,7 +19,13 @@ from typing import Any, BinaryIO, Final
 from deltatorrent.benchmark.arms import ArmSpec, MetricSample, RunObservation
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID, BenchmarkDefinition
 from deltatorrent.benchmark.preregistration import PreregisteredDefinition
-from deltatorrent.benchmark.primary import ExecutionPlan, PrimaryRunError, adapter_for
+from deltatorrent.benchmark.primary import (
+    ExecutionPlan,
+    LegacyPrimaryCompatibilityAuthorization,
+    PrimaryRunError,
+    adapter_for,
+    reject_forbidden_primary_definition,
+)
 from deltatorrent.benchmark.reconciliation import ReconciliationError, reconcile
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
@@ -472,10 +478,18 @@ def build_execution_set(
     preregistration: PreregisteredDefinition,
     arms: tuple[ArmSpec, ...],
     environment: PrimaryEnvironment,
+    *,
+    compatibility_authorization: LegacyPrimaryCompatibilityAuthorization | None = None,
 ) -> PrimaryExecutionSet:
     definition = preregistration.definition
-    if definition.campaign_id == "campaign-02":
-        raise _fail("LEGACY_PRIMARY_PATH_FORBIDDEN")
+    try:
+        reject_forbidden_primary_definition(
+            definition,
+            operation="PLAN",
+            compatibility_authorization=compatibility_authorization,
+        )
+    except PrimaryRunError as exc:
+        raise _fail(str(exc)) from exc
     if not definition.primary:
         raise _fail("PRIMARY_EXECUTOR_REQUIRES_PRIMARY_DEFINITION")
     if tuple(item.content_id for item in arms) != definition.arm_ids:
@@ -495,6 +509,7 @@ def build_execution_set(
                 fault_profile_id=definition.fault_profile_ids[0],
                 seed=seed,
                 repetition=repetition,
+                compatibility_authorization=compatibility_authorization,
             )
             for arm in arms
             for repetition, seed in enumerate(definition.seeds, start=1)
@@ -703,6 +718,16 @@ class PrimaryExecutionStore:
         self.root.mkdir(parents=True, exist_ok=True)
 
     def stage(self, execution: PrimaryExecutionSet) -> Path:
+        try:
+            reject_forbidden_primary_definition(
+                execution.definition,
+                operation="PLAN",
+                compatibility_authorization=(
+                    execution.plans[0].compatibility_authorization if execution.plans else None
+                ),
+            )
+        except PrimaryRunError as exc:
+            raise _fail(str(exc)) from exc
         _publish_create_only(
             self.root,
             self.root / "environment-manifest.json",
@@ -773,6 +798,10 @@ class PrimaryExecutionStore:
         )
 
     def admit_file(self, plan: ExecutionPlan, path: Path) -> RunObservation:
+        try:
+            reject_forbidden_primary_definition(plan, operation="ADMIT")
+        except PrimaryRunError as exc:
+            raise _fail(str(exc)) from exc
         observation, raw = parse_observation(path, plan)
         _publish_create_only(self.root, self.observation_path(plan), raw)
         return observation
@@ -824,6 +853,10 @@ class PrimaryExecutionStore:
         runner_id: str,
         timeout_seconds: int,
     ) -> RunObservation:
+        try:
+            reject_forbidden_primary_definition(plan, operation="EXECUTE")
+        except PrimaryRunError as exc:
+            raise _fail(str(exc)) from exc
         _content_id(runner_id, "PRIMARY_RUNNER_ID_INVALID")
         if timeout_seconds < 1:
             raise _fail("PRIMARY_RUNNER_TIMEOUT_INVALID")

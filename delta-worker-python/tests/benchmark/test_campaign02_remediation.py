@@ -277,7 +277,7 @@ def test_remediation_authorization_cannot_start_primary_execution() -> None:
     )
     authorization = _remediation_authorization()
     with pytest.raises(
-        Campaign02ContractError, match="CAMPAIGN02_PRIMARY_EXECUTION_NOT_AUTHORIZED"
+        Campaign02ContractError, match="CAMPAIGN02_STAGE_AUTHORIZATION_FIELDS_INVALID"
     ):
         authorize_execution_class(authorization, primary)
 

@@ -11,33 +11,40 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from deltatorrent.benchmark.arms import ArmSpec
 from deltatorrent.benchmark.campaign02 import (
+    CAMPAIGN02_GATE_STAGES,
+    CAMPAIGN02_STAGE_TASK_IDS,
     CampaignExecutionPlan,
     CertifiedRoundPolicy,
     ParameterShardKey,
+    authorize_execution_class,
     load_domain_manifest,
     load_ticket_plan,
     load_workload_contract,
 )
 from deltatorrent.benchmark.campaign02_binding import (
     Campaign02BindingError,
+    Campaign02PlanCatalog,
     CertifiedPlanBinding,
     QualifiedRuntimeLineage,
     compile_campaign02_execution_set,
+    compile_campaign02_plan_catalog,
     expected_round_id,
 )
-from deltatorrent.benchmark.definition import BenchmarkDefinition
+from deltatorrent.benchmark.definition import BenchmarkDefinition, load_definition
 from deltatorrent.benchmark.governance import (
     BenchmarkReviewValidatorSet,
+    SignedDefinitionVote,
     VerifiedDefinitionAttestation,
     create_definition_vote,
     finalize_definition_attestation,
 )
-from deltatorrent.benchmark.primary import PrimaryRunError, adapter_for
+from deltatorrent.benchmark.primary import ExecutionPlan, PrimaryRunError, adapter_for
 from deltatorrent.cli.main import main
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
 ROOT = Path(__file__).resolve().parents[3]
 CONFIG = ROOT / "configs/benchmark/campaign-02"
+FIXTURES = ROOT / "delta-worker-python/tests/fixtures/benchmark"
 NOW = datetime(2026, 9, 1, 12, 0, tzinfo=UTC)
 
 
@@ -145,7 +152,13 @@ def _validator_set() -> tuple[BenchmarkReviewValidatorSet, tuple[Ed25519PrivateK
     )
 
 
-def _attestation(definition_id: str) -> VerifiedDefinitionAttestation:
+def _attestation(
+    definition_id: str,
+) -> tuple[
+    VerifiedDefinitionAttestation,
+    BenchmarkReviewValidatorSet,
+    tuple[SignedDefinitionVote, ...],
+]:
     validator_set, private_keys = _validator_set()
     votes = tuple(
         create_definition_vote(
@@ -157,18 +170,20 @@ def _attestation(definition_id: str) -> VerifiedDefinitionAttestation:
         )
         for index in range(3)
     )
-    return finalize_definition_attestation(
+    attestation = finalize_definition_attestation(
         benchmark_definition_id=definition_id,
         validator_set=validator_set,
         votes=votes,
         verified_at=NOW,
     )
+    return attestation, validator_set, votes
 
 
 def _inputs() -> tuple[
     BenchmarkDefinition,
-    VerifiedDefinitionAttestation,
     dict[str, object],
+    BenchmarkReviewValidatorSet,
+    tuple[SignedDefinitionVote, ...],
     object,
     object,
     object,
@@ -248,30 +263,12 @@ def _inputs() -> tuple[
     for metric in value["metric_definitions"]:
         metric["repetitions"] = 3
     definition = BenchmarkDefinition.from_dict(value)
-    attestation = _attestation(definition.content_id)
-    authorization: dict[str, object] = {
-        "benchmark_definition_id": definition.content_id,
-        "campaign_id": "campaign-02",
-        "definition_attestation_id": attestation.content_id,
-        "domain_manifest_id": domain_manifest.content_id,
-        "environment_id": runtime.environment_id,
-        "evaluation_runner_id": runtime.evaluation_runner_id,
-        "formal_semantics_id": value["formal_semantics_id"],
-        "observation_writer_id": runtime.writer_id,
-        "primary_execution_authorized": True,
-        "qualified_runtime_lineage_id": runtime.content_id,
-        "schema_version": "1.0.0",
-        "scientific_runner_id": runtime.runner_id,
-        "source_commit": runtime.source_commit,
-        "source_tree": runtime.source_tree,
-        "ticket_plan_id": ticket_plan.content_id,
-        "type_name": "BENCHMARK_EXECUTION_AUTHORIZATION",
-        "workload_contract_id": workload.content_id,
-    }
+    attestation, validator_set, votes = _attestation(definition.content_id)
     return (
         definition,
-        attestation,
-        authorization,
+        attestation.document,
+        validator_set,
+        votes,
         workload,
         domain_manifest,
         ticket_plan,
@@ -283,8 +280,9 @@ def _inputs() -> tuple[
 def _compile(**updates: object):  # type: ignore[no-untyped-def]
     names = (
         "definition",
-        "attestation",
-        "authorization",
+        "attestation_document",
+        "validator_set",
+        "votes",
         "workload",
         "domain_manifest",
         "ticket_plan",
@@ -293,32 +291,64 @@ def _compile(**updates: object):  # type: ignore[no-untyped-def]
     )
     values = dict(zip(names, _inputs(), strict=True))
     values.update(updates)
-    return compile_campaign02_execution_set(**values)  # type: ignore[arg-type]
+    return compile_campaign02_plan_catalog(**values)  # type: ignore[arg-type]
 
 
-def test_campaign02_compiler_creates_exact_15_plan_matrix() -> None:
-    execution = _compile()
-    assert len(execution.plans) == 15
-    assert len({item.content_id for item in execution.plans}) == 15
-    assert all(item.ticket_count == 32 for item in execution.plans)
-    assert all(item.tokens_per_ticket == 32_768 for item in execution.plans)
-    assert all(item.optimizer_steps_per_ticket == 32 for item in execution.plans)
-    assert all(item.processed_tokens == 1_048_576 for item in execution.plans)
-    assert sum(item.result_class == "REFERENCE" for item in execution.plans) == 3
-    assert sum(item.result_class == "CERTIFIED_DELTAREDUCE" for item in execution.plans) == 12
+def _stage_authorization(
+    catalog: Campaign02PlanCatalog,
+    stage: str,
+    predecessors: tuple[str, ...] = (),
+) -> dict[str, object]:
+    return {
+        "allowed_plan_ids": list(catalog.plan_ids_for_stage(stage)),
+        "authorized_stage": stage,
+        "authorized_task_ids": list(CAMPAIGN02_STAGE_TASK_IDS[stage]),
+        "benchmark_definition_id": catalog.definition_id,
+        "campaign_id": "campaign-02",
+        "definition_attestation_id": catalog.attestation_id,
+        "formal_semantics_id": (
+            "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        ),
+        "plan_catalog_id": catalog.content_id,
+        "real_wan_authorized": False,
+        "required_predecessor_receipt_ids": list(predecessors),
+        "result_qc_authorized": False,
+        "schema_version": "1.0.0",
+        "stage_a_authorized": stage == "STAGE_A_EXACTNESS",
+        "stage_b_authorized": stage == "STAGE_B_SCIENTIFIC",
+        "stage_c_authorized": stage == "STAGE_C_EMULATED_WAN",
+        "type_name": "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION",
+    }
+
+
+def test_campaign02_compiler_creates_exact_15_plan_matrix_per_stage() -> None:
+    catalog = _compile()
+    assert isinstance(catalog, Campaign02PlanCatalog)
+    assert catalog.document["base_plan_count"] == 15
+    assert catalog.document["execution_authorized"] is False
+    assert len(catalog.plans) == 45
+    assert len({item.content_id for item in catalog.plans}) == 45
+    assert all(len(catalog.plan_ids_for_stage(stage)) == 15 for stage in CAMPAIGN02_GATE_STAGES)
+    assert all(item.ticket_count == 32 for item in catalog.plans)
+    assert all(item.tokens_per_ticket == 32_768 for item in catalog.plans)
+    assert all(item.optimizer_steps_per_ticket == 32 for item in catalog.plans)
+    assert all(item.processed_tokens == 1_048_576 for item in catalog.plans)
+    assert sum(item.result_class == "REFERENCE" for item in catalog.plans) == 9
+    assert sum(item.result_class == "CERTIFIED_DELTAREDUCE" for item in catalog.plans) == 36
     assert all(
         (item.result_class == "CERTIFIED_DELTAREDUCE") == (item.certified_round_policy is not None)
-        for item in execution.plans
+        for item in catalog.plans
     )
 
 
-def test_campaign02_compiler_rejects_missing_authorization() -> None:
-    with pytest.raises(Campaign02BindingError, match="CAMPAIGN02_EXECUTION_AUTHORIZATION_REQUIRED"):
-        _compile(authorization=None)
+def test_campaign02_plan_catalog_requires_no_execution_authorization() -> None:
+    catalog = _compile()
+    assert catalog.document["status"] == "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION"
+    assert all(item.execution_authorization_id is None for item in catalog.plans)
 
 
 def test_campaign02_compiler_rejects_wrong_definition_and_attestation() -> None:
-    definition, attestation, *_ = _inputs()
+    definition, attestation_document, *_ = _inputs()
     wrong_value = dict(definition.raw)
     wrong_value["workload_contract_id"] = _id("wrong-workload")
     wrong_definition = BenchmarkDefinition.from_dict(wrong_value)
@@ -326,9 +356,10 @@ def test_campaign02_compiler_rejects_wrong_definition_and_attestation() -> None:
         Campaign02BindingError, match="CAMPAIGN02_DEFINITION_EXECUTION_BINDING_MISMATCH"
     ):
         _compile(definition=wrong_definition)
-    wrong_attestation = replace(attestation, benchmark_definition_id=_id("wrong-definition"))
-    with pytest.raises(Campaign02BindingError, match="CAMPAIGN02_DEFINITION_ATTESTATION_MISMATCH"):
-        _compile(attestation=wrong_attestation)
+    wrong_attestation = dict(attestation_document)
+    wrong_attestation["benchmark_definition_id"] = _id("wrong-definition")
+    with pytest.raises(Campaign02BindingError, match="CAMPAIGN02_DEFINITION_ATTESTATION_INVALID"):
+        _compile(attestation_document=wrong_attestation)
 
 
 def test_campaign02_compiler_rejects_wrong_source_tree() -> None:
@@ -340,11 +371,84 @@ def test_campaign02_compiler_rejects_wrong_source_tree() -> None:
 
 
 def test_campaign02_legacy_primary_adapter_is_forbidden() -> None:
-    definition, _, _, _, _, _, arms, _ = _inputs()
+    definition, *_, arms, _ = _inputs()
     with pytest.raises(PrimaryRunError, match="LEGACY_PRIMARY_PATH_FORBIDDEN"):
         adapter_for(arms[0]).plan(
             definition,
             arms[0],
+            environment_manifest_id=_id("environment"),
+            network_profile_id=definition.network_profile_ids[0],
+            fault_profile_id=definition.fault_profile_ids[0],
+            seed=definition.seeds[0],
+            repetition=1,
+        )
+
+
+def test_exact_superseded_a4160_is_parseable_but_all_adapter_execution_is_forbidden() -> None:
+    definition = load_definition(FIXTURES / "campaign-02-superseded-definition-a4160.json")
+    assert definition.content_id == (
+        "sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af"
+    )
+    assert definition.campaign_id is None
+    arm = ArmSpec(
+        definition.arm_ids[0],
+        "historical-reference",
+        "SCIENTIFIC_REFERENCE",
+        "PYTHON",
+        True,
+        _id("historical-workload"),
+        _id("historical-runtime"),
+        "SINGLE_NODE_REFERENCE",
+    )
+    adapter = adapter_for(arm)
+    with pytest.raises(PrimaryRunError, match="LEGACY_PRIMARY_PATH_FORBIDDEN"):
+        adapter.plan(
+            definition,
+            arm,
+            environment_manifest_id=_id("environment"),
+            network_profile_id=definition.network_profile_ids[0],
+            fault_profile_id=definition.fault_profile_ids[0],
+            seed=definition.seeds[0],
+            repetition=1,
+        )
+    legacy_plan = ExecutionPlan(
+        definition_id=definition.content_id,
+        arm=arm,
+        environment_manifest_id=_id("environment"),
+        network_profile_id=definition.network_profile_ids[0],
+        fault_profile_id=definition.fault_profile_ids[0],
+        seed=definition.seeds[0],
+        repetition=1,
+        processed_tokens=definition.B,
+        domains=tuple(item.domain_id for item in definition.domain_weights),
+        ticket_plan_id=definition.ticket_plan_id,
+        parent_checkpoint_id=definition.base_model_id,
+        evaluation_ids=definition.evaluation_ids,
+    )
+    with pytest.raises(PrimaryRunError, match="LEGACY_PRIMARY_PATH_FORBIDDEN"):
+        adapter.admit(legacy_plan, object())  # type: ignore[arg-type]
+
+
+def test_historical_campaign01_definition_remains_audit_parseable_not_executable() -> None:
+    definition = load_definition(FIXTURES / "historical-campaign-01-definition-dd607.json")
+    assert definition.content_id == (
+        "sha256:dd607651128bca0b8edfa861093945b0bac2355c93d9d45b4c8b08457fba4244"
+    )
+    assert definition.campaign_id is None
+    arm = ArmSpec(
+        definition.arm_ids[0],
+        "historical-reference",
+        "SCIENTIFIC_REFERENCE",
+        "PYTHON",
+        True,
+        _id("historical-workload"),
+        _id("historical-runtime"),
+        "SINGLE_NODE_REFERENCE",
+    )
+    with pytest.raises(PrimaryRunError, match="LEGACY_PRIMARY_PATH_FORBIDDEN"):
+        adapter_for(arm).plan(
+            definition,
+            arm,
             environment_manifest_id=_id("environment"),
             network_profile_id=definition.network_profile_ids[0],
             fault_profile_id=definition.fault_profile_ids[0],
@@ -366,13 +470,13 @@ def test_campaign02_reference_and_certified_classes_cannot_cross() -> None:
 
 
 def test_campaign02_distinct_workload_domain_and_ticket_plan_ids() -> None:
-    execution = _compile()
+    catalog = _compile()
     assert (
         len(
             {
-                execution.workload_contract_id,
-                execution.domain_manifest_id,
-                execution.ticket_plan_id,
+                catalog.workload_contract_id,
+                catalog.domain_manifest_id,
+                catalog.ticket_plan_id,
             }
         )
         == 3
@@ -400,6 +504,125 @@ def test_campaign02_plan_requires_exact_ticket_table() -> None:
 
 def test_campaign02_execution_plan_type_is_strict_runner_contract() -> None:
     assert all(isinstance(item, CampaignExecutionPlan) for item in _compile().plans)
+
+
+def test_caller_constructed_verified_attestation_cannot_enter_binder() -> None:
+    fake = VerifiedDefinitionAttestation(
+        benchmark_definition_id=_id("definition"),
+        validator_set_id=_id("validator-set"),
+        f_b=1,
+        ordered_signers=("a", "b", "c"),
+        ordered_vote_ids=(_id("vote-a"), _id("vote-b"), _id("vote-c")),
+        signature_set_root=_id("signature-root"),
+        verified_at=NOW,
+    )
+    with pytest.raises(
+        Campaign02BindingError,
+        match="CAMPAIGN02_UNVERIFIED_ATTESTATION_INTERFACE_FORBIDDEN",
+    ):
+        compile_campaign02_execution_set(attestation=fake)
+
+
+def test_campaign02_catalog_compiler_reverifies_every_detached_signature() -> None:
+    _, attestation_document, validator_set, votes, *_ = _inputs()
+    forged = replace(
+        votes[0],
+        signature=bytes([votes[0].signature[0] ^ 1]) + votes[0].signature[1:],
+    )
+    forged_attestation = dict(attestation_document)
+    vote_ids = list(forged_attestation["ordered_vote_ids"])
+    vote_ids[vote_ids.index(votes[0].content_id)] = forged.content_id
+    forged_attestation["ordered_vote_ids"] = vote_ids
+    with pytest.raises(Campaign02BindingError, match="BENCHMARK_DEFINITION_SIGNATURE_INVALID"):
+        _compile(
+            attestation_document=forged_attestation,
+            validator_set=validator_set,
+            votes=(forged, *votes[1:]),
+        )
+
+
+def test_stage_a_authorizes_only_exact_stage_a_catalog_plans() -> None:
+    catalog = _compile()
+    stage_a = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
+    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    authorize_execution_class(authorization, stage_a, plan_catalog=catalog)
+
+    stage_b = next(item for item in catalog.plans if item.gate_stage == "STAGE_B_SCIENTIFIC")
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
+        authorize_execution_class(authorization, stage_b, plan_catalog=catalog)
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_RUNNER_ROLE_NOT_AUTHORIZED"):
+        authorize_execution_class(
+            authorization,
+            stage_a,
+            plan_catalog=catalog,
+            runner_role="EVALUATION_RUNNER",
+        )
+    stage_c = next(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
+        authorize_execution_class(authorization, stage_c, plan_catalog=catalog)
+
+
+def test_stage_authorization_rejects_generic_extra_and_inexact_plan_sets() -> None:
+    catalog = _compile()
+    plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_FIELDS_INVALID"):
+        authorize_execution_class(
+            {"primary_execution_authorized": True},
+            plan,
+            plan_catalog=catalog,
+        )
+    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    authorization["extra"] = True
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_FIELDS_INVALID"):
+        authorize_execution_class(authorization, plan, plan_catalog=catalog)
+    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    authorization["allowed_plan_ids"] = authorization["allowed_plan_ids"][:-1]  # type: ignore[index]
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
+        authorize_execution_class(authorization, plan, plan_catalog=catalog)
+    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    authorization["benchmark_definition_id"] = _id("wrong-definition")
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
+        authorize_execution_class(authorization, plan, plan_catalog=catalog)
+
+
+def test_stage_b_and_c_require_exact_predecessor_gate_receipts() -> None:
+    catalog = _compile()
+    stage_a_receipt = _id("accepted-stage-a-gate-receipt")
+    stage_b_receipt = _id("accepted-stage-b-gate-receipt")
+    stage_b = next(item for item in catalog.plans if item.gate_stage == "STAGE_B_SCIENTIFIC")
+    authorization_b = _stage_authorization(
+        catalog,
+        "STAGE_B_SCIENTIFIC",
+        (stage_a_receipt,),
+    )
+    authorize_execution_class(
+        authorization_b,
+        stage_b,
+        plan_catalog=catalog,
+        predecessor_gate_receipt_ids=(stage_a_receipt,),
+        runner_role="SCIENTIFIC_RUNNER",
+    )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_PREDECESSOR_INVALID"):
+        authorize_execution_class(
+            authorization_b,
+            stage_b,
+            plan_catalog=catalog,
+            predecessor_gate_receipt_ids=(_id("wrong-stage-a-receipt"),),
+        )
+
+    stage_c = next(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
+    authorization_c = _stage_authorization(
+        catalog,
+        "STAGE_C_EMULATED_WAN",
+        tuple(sorted((stage_a_receipt, stage_b_receipt))),
+    )
+    authorize_execution_class(
+        authorization_c,
+        stage_c,
+        plan_catalog=catalog,
+        predecessor_gate_receipt_ids=tuple(sorted((stage_a_receipt, stage_b_receipt))),
+        runner_role="NETWORK_FAULT_RUNNER",
+    )
 
 
 @pytest.mark.parametrize(
@@ -431,4 +654,52 @@ def test_all_legacy_primary_cli_routes_reject_campaign02(
     if command == "execute-primary":
         options = ("--runner-id", _id("runner"))
     assert main(("benchmark", command, *options, *common, *suffix)) == 2
+    assert "LEGACY_PRIMARY_PATH_FORBIDDEN" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("command", "suffix"),
+    (
+        ("plan-primary", ()),
+        ("execute-primary", ("--", "runner")),
+        ("collect-primary", ("observation.json",)),
+        ("verify-primary-runs", ()),
+    ),
+)
+def test_exact_a4160_and_unsigned_6c594_are_rejected_by_every_legacy_cli_route(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    command: str,
+    suffix: tuple[str, ...],
+) -> None:
+    common = (
+        str(FIXTURES / "campaign-02-superseded-definition-a4160.json"),
+        str(FIXTURES / "campaign-02-superseded-attestation-6c594.json"),
+        str(tmp_path / "arms.json"),
+        str(tmp_path / "environment.json"),
+        str(tmp_path / "output"),
+    )
+    options: tuple[str, ...] = ()
+    if command == "execute-primary":
+        options = ("--runner-id", _id("runner"))
+    assert main(("benchmark", command, *options, *common, *suffix)) == 2
+    assert "LEGACY_PRIMARY_PATH_FORBIDDEN" in capsys.readouterr().err
+
+
+def test_exact_a4160_cannot_be_preregistered_for_executable_primary_use(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert (
+        main(
+            (
+                "benchmark",
+                "preregister",
+                str(FIXTURES / "campaign-02-superseded-definition-a4160.json"),
+                str(FIXTURES / "campaign-02-superseded-attestation-6c594.json"),
+                str(tmp_path / "store"),
+            )
+        )
+        == 2
+    )
     assert "LEGACY_PRIMARY_PATH_FORBIDDEN" in capsys.readouterr().err

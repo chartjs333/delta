@@ -81,12 +81,13 @@ history and cannot satisfy the tasks below.
   execution authorization.
 - [x] **C2-018** Source-seal distinct workload-contract, domain-manifest and exact ordered
   ticket-plan identities.
-- [x] **C2-019** Implement the only Campaign 02 Definition-to-`CampaignExecutionPlan` compiler and
-  make every legacy primary CLI route fail closed for Campaign 02.
-- [x] **C2-020** Implement detached Ed25519 benchmark-review votes, validator-set/key-custody
-  manifests and cryptographic quorum verification without generating governance approvals.
-- [x] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
-  execution-binding source.
+- [x] **C2-019** Implement the only Campaign 02 Definition-to-plan-catalog compiler, centrally
+  reject every superseded primary Definition, and enforce exact Stage A/B/C authorization scope.
+- [x] **C2-020** Bind the compiler to detached Ed25519 quorum verification and sign every
+  security-relevant vote field, including signer/key identity and `submitted_at`.
+- [ ] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
+  corrected execution-binding and stage-authorization source. The earlier `d9b8230...` source
+  qualification is superseded and cannot complete this task.
 - [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
   workload/domain/ticket IDs and qualified runtime lineage.
 - [ ] **C2-023** Obtain independent detached signatures and verify temporal closure at the actual
@@ -96,12 +97,10 @@ history and cannot satisfy the tasks below.
 
 Execution-binding qualification evidence:
 
-- `evidence/campaign-02-execution-binding-hardware-qualification.json` — designated GPU,
-  exact source/runtime and non-primary QLoRA qualification;
-- `evidence/campaign-02-execution-binding-exact-source-qualification.json` — exact source/tree,
-  distinct workload/domain/ticket IDs, binder identity and 72-test portable manifest;
-- `evidence/campaign-02-execution-binding-exact-source-ci-receipt.json` — passing dedicated
-  exact-source workflow, immutable artifact digests and 52-check current-head control summary.
+- `reports/benchmark/campaigns/campaign-02/qualification-supersession-stage-authorization.json`
+  — records that the prior `d9b8230...` source/evidence chain is historical only;
+- replacement designated-GPU, exact-source and current-head CI artifacts remain absent until the
+  corrected non-evidence source is sealed and qualified.
 
 ## Unconditional STOP conditions
 

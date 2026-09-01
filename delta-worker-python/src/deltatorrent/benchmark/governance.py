@@ -230,13 +230,24 @@ class BenchmarkReviewValidatorSet:
         raise _fail("BENCHMARK_REVIEW_SIGNER_UNKNOWN")
 
 
-def definition_vote_message(benchmark_definition_id: str, validator_set_id: str) -> bytes:
+def definition_vote_message(
+    benchmark_definition_id: str,
+    validator_set_id: str,
+    signer_id: str,
+    public_key_id: str,
+    submitted_at: datetime,
+) -> bytes:
+    if submitted_at.tzinfo != UTC:
+        raise _fail("BENCHMARK_DEFINITION_VOTE_TIMESTAMP_INVALID")
     payload = {
         "benchmark_definition_id": _content_id(
             benchmark_definition_id, "BENCHMARK_DEFINITION_ID_INVALID"
         ),
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "public_key_id": _content_id(public_key_id, "BENCHMARK_REVIEW_PUBLIC_KEY_ID_INVALID"),
         "purpose": "BENCHMARK_DEFINITION_REVIEW",
+        "signer_id": _text(signer_id, "BENCHMARK_REVIEW_SIGNER_ID_INVALID"),
+        "submitted_at": submitted_at.isoformat().replace("+00:00", "Z"),
         "validator_set_id": _content_id(
             validator_set_id, "BENCHMARK_REVIEW_VALIDATOR_SET_ID_INVALID"
         ),
@@ -330,7 +341,13 @@ def create_definition_vote(
     if submitted_at.tzinfo != UTC:
         raise _fail("BENCHMARK_DEFINITION_VOTE_TIMESTAMP_INVALID")
     validator = validator_set.validator(signer_id)
-    message = definition_vote_message(benchmark_definition_id, validator_set.content_id)
+    message = definition_vote_message(
+        benchmark_definition_id,
+        validator_set.content_id,
+        signer_id,
+        validator.public_key_id,
+        submitted_at,
+    )
     return SignedDefinitionVote(
         benchmark_definition_id=benchmark_definition_id,
         validator_set_id=validator_set.content_id,
@@ -359,7 +376,13 @@ def verify_definition_vote(
         validator.valid_until is not None and vote.submitted_at >= validator.valid_until
     ):
         raise _fail("BENCHMARK_DEFINITION_VOTE_KEY_EXPIRED")
-    message = definition_vote_message(benchmark_definition_id, validator_set.content_id)
+    message = definition_vote_message(
+        benchmark_definition_id,
+        validator_set.content_id,
+        vote.signer_id,
+        vote.public_key_id,
+        vote.submitted_at,
+    )
     if vote.signed_message_sha256 != sha256_content_id(message):
         raise _fail("BENCHMARK_DEFINITION_VOTE_MESSAGE_MISMATCH")
     try:

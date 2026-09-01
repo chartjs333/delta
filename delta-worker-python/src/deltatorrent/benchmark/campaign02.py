@@ -11,7 +11,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, Protocol
 
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
@@ -53,6 +53,34 @@ _TICKET_PLAN_FIELDS: Final = {
     "tickets",
     "type_name",
     "workload_contract_id",
+}
+CAMPAIGN02_GATE_STAGES: Final = (
+    "STAGE_A_EXACTNESS",
+    "STAGE_B_SCIENTIFIC",
+    "STAGE_C_EMULATED_WAN",
+)
+CAMPAIGN02_STAGE_TASK_IDS: Final = {
+    "STAGE_A_EXACTNESS": ("HR010-006", "HR010-010", "HR010-011", "T028", "T029"),
+    "STAGE_B_SCIENTIFIC": ("HR010-016", "T035", "T036", "T039"),
+    "STAGE_C_EMULATED_WAN": ("T040", "T041", "T042", "T043", "T044"),
+}
+_STAGE_AUTHORIZATION_FIELDS: Final = {
+    "allowed_plan_ids",
+    "authorized_stage",
+    "authorized_task_ids",
+    "benchmark_definition_id",
+    "campaign_id",
+    "definition_attestation_id",
+    "formal_semantics_id",
+    "plan_catalog_id",
+    "real_wan_authorized",
+    "required_predecessor_receipt_ids",
+    "result_qc_authorized",
+    "schema_version",
+    "stage_a_authorized",
+    "stage_b_authorized",
+    "stage_c_authorized",
+    "type_name",
 }
 
 
@@ -531,7 +559,7 @@ class CampaignExecutionPlan:
     campaign_id: str
     benchmark_definition_id: str
     definition_attestation_id: str
-    execution_authorization_id: str
+    execution_authorization_id: str | None
     arm_id: str
     round_id: str
     seed: int
@@ -561,6 +589,7 @@ class CampaignExecutionPlan:
     domain_manifest_id: str | None = None
     ticket_plan_id: str | None = None
     qualified_runtime_lineage_id: str | None = None
+    gate_stage: str | None = None
 
     def __post_init__(self) -> None:
         if self.execution_class not in {"NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"}:
@@ -581,7 +610,6 @@ class CampaignExecutionPlan:
         identities = (
             self.benchmark_definition_id,
             self.definition_attestation_id,
-            self.execution_authorization_id,
             self.arm_id,
             self.environment_id,
             self.image_id,
@@ -599,6 +627,18 @@ class CampaignExecutionPlan:
         )
         if any(_CONTENT_ID.fullmatch(value) is None for value in identities):
             raise _fail("CAMPAIGN02_PLAN_IDENTITY_INVALID")
+        if self.gate_stage is None:
+            if (
+                self.execution_authorization_id is None
+                or _CONTENT_ID.fullmatch(self.execution_authorization_id) is None
+            ):
+                raise _fail("CAMPAIGN02_PLAN_IDENTITY_INVALID")
+        elif (
+            self.gate_stage not in CAMPAIGN02_GATE_STAGES
+            or self.execution_class != "PRIMARY_MEASURED"
+            or self.execution_authorization_id is not None
+        ):
+            raise _fail("CAMPAIGN02_PLAN_GATE_STAGE_INVALID")
         execution_binding_ids = (
             self.domain_manifest_id,
             self.ticket_plan_id,
@@ -676,7 +716,6 @@ class CampaignExecutionPlan:
             "evaluation_implementation_ids": list(self.evaluation_implementation_ids),
             "evaluation_runner_id": self.evaluation_runner_id,
             "evaluation_profile_ids": list(self.evaluation_profile_ids),
-            "execution_authorization_id": self.execution_authorization_id,
             "execution_class": self.execution_class,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "hardware_id": self.hardware_id,
@@ -689,7 +728,13 @@ class CampaignExecutionPlan:
             "result_class": self.result_class,
             "round_id": self.round_id,
             "runner_id": self.runner_id,
-            "schema_version": "3.0.0" if self.ticket_plan_id is not None else "2.0.0",
+            "schema_version": (
+                "4.0.0"
+                if self.gate_stage is not None
+                else "3.0.0"
+                if self.ticket_plan_id is not None
+                else "2.0.0"
+            ),
             "seed": self.seed,
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
@@ -703,6 +748,15 @@ class CampaignExecutionPlan:
             "workload_id": self.workload_id,
             "writer_id": self.writer_id,
         }
+        if self.gate_stage is None:
+            document["execution_authorization_id"] = self.execution_authorization_id
+        else:
+            document.update(
+                {
+                    "execution_authorized": False,
+                    "gate_stage": self.gate_stage,
+                }
+            )
         if self.ticket_plan_id is not None:
             document.update(
                 {
@@ -715,7 +769,13 @@ class CampaignExecutionPlan:
 
     @property
     def content_id(self) -> str:
-        version = b"v3" if self.ticket_plan_id is not None else b"v2"
+        version = (
+            b"v4"
+            if self.gate_stage is not None
+            else b"v3"
+            if self.ticket_plan_id is not None
+            else b"v2"
+        )
         return sha256_content_id(
             b"deltareduce.010.primary-execution-plan."
             + version
@@ -729,14 +789,37 @@ def execution_authorization_id(authorization: dict[str, Any]) -> str:
         payload = canonical_json_bytes(authorization)
     except TypeError as exc:
         raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_INVALID") from exc
-    return sha256_content_id(b"deltareduce.010.benchmark-execution-authorization.v1\0" + payload)
+    domain = (
+        b"deltareduce.010.benchmark-stage-execution-authorization.v1\0"
+        if authorization.get("type_name") == "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION"
+        else b"deltareduce.010.benchmark-execution-authorization.v1\0"
+    )
+    return sha256_content_id(domain + payload)
 
 
-def authorize_execution_class(authorization: dict[str, Any], plan: CampaignExecutionPlan) -> None:
+class Campaign02PlanCatalogView(Protocol):
+    definition_id: str
+    attestation_id: str
+    plans: tuple[CampaignExecutionPlan, ...]
+
+    @property
+    def content_id(self) -> str: ...
+
+    def plan_ids_for_stage(self, stage: str) -> tuple[str, ...]: ...
+
+
+def authorize_execution_class(
+    authorization: dict[str, Any],
+    plan: CampaignExecutionPlan,
+    *,
+    plan_catalog: Campaign02PlanCatalogView | None = None,
+    predecessor_gate_receipt_ids: tuple[str, ...] = (),
+    runner_role: str | None = None,
+) -> None:
     """Fail closed when remediation-only authorization is used for primary execution."""
-    if plan.execution_authorization_id != execution_authorization_id(authorization):
-        raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_ID_MISMATCH")
     if plan.execution_class == "NON_PRIMARY_SMOKE":
+        if plan.execution_authorization_id != execution_authorization_id(authorization):
+            raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_ID_MISMATCH")
         if (
             authorization.get("type_name") != "BENCHMARK_CAMPAIGN_REMEDIATION_AUTHORIZATION"
             or authorization.get("status") != "APPROVED_DESIGN_AND_QUALIFICATION_ONLY"
@@ -747,27 +830,59 @@ def authorize_execution_class(authorization: dict[str, Any], plan: CampaignExecu
         return
     if plan.execution_class != "PRIMARY_MEASURED":
         raise _fail("CAMPAIGN02_EXECUTION_CLASS_INVALID")
-    if (
-        authorization.get("type_name") != "BENCHMARK_EXECUTION_AUTHORIZATION"
-        or authorization.get("campaign_id") != "campaign-02"
-        or authorization.get("primary_execution_authorized") is not True
-        or authorization.get("benchmark_definition_id") != plan.benchmark_definition_id
-        or authorization.get("definition_attestation_id") != plan.definition_attestation_id
-        or authorization.get("scientific_runner_id") != plan.runner_id
-        or authorization.get("evaluation_runner_id") != plan.evaluation_runner_id
-        or authorization.get("observation_writer_id") != plan.writer_id
-        or authorization.get("environment_id") != plan.environment_id
-        or authorization.get("source_commit") != plan.source_commit
-        or authorization.get("source_tree") != plan.source_tree
-    ):
+    if set(authorization) != _STAGE_AUTHORIZATION_FIELDS:
+        raise _fail("CAMPAIGN02_STAGE_AUTHORIZATION_FIELDS_INVALID")
+    if plan.gate_stage is None or plan_catalog is None:
         raise _fail("CAMPAIGN02_PRIMARY_EXECUTION_NOT_AUTHORIZED")
+    stage = plan.gate_stage
+    expected_flags = {
+        "stage_a_authorized": stage == "STAGE_A_EXACTNESS",
+        "stage_b_authorized": stage == "STAGE_B_SCIENTIFIC",
+        "stage_c_authorized": stage == "STAGE_C_EMULATED_WAN",
+    }
+    expected_plan_ids = plan_catalog.plan_ids_for_stage(stage)
+    allowed_plan_ids = authorization.get("allowed_plan_ids")
+    task_ids = authorization.get("authorized_task_ids")
+    predecessor_ids = authorization.get("required_predecessor_receipt_ids")
     if (
-        plan.domain_manifest_id is None
-        or plan.ticket_plan_id is None
-        or plan.qualified_runtime_lineage_id is None
-        or authorization.get("domain_manifest_id") != plan.domain_manifest_id
-        or authorization.get("ticket_plan_id") != plan.ticket_plan_id
-        or authorization.get("qualified_runtime_lineage_id") != plan.qualified_runtime_lineage_id
-        or authorization.get("workload_contract_id") != plan.workload_id
+        authorization.get("type_name") != "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION"
+        or authorization.get("schema_version") != "1.0.0"
+        or authorization.get("formal_semantics_id") != FORMAL_SEMANTICS_ID
+        or authorization.get("campaign_id") != "campaign-02"
+        or authorization.get("benchmark_definition_id") != plan.benchmark_definition_id
+        or authorization.get("benchmark_definition_id") != plan_catalog.definition_id
+        or authorization.get("definition_attestation_id") != plan.definition_attestation_id
+        or authorization.get("definition_attestation_id") != plan_catalog.attestation_id
+        or authorization.get("plan_catalog_id") != plan_catalog.content_id
+        or authorization.get("authorized_stage") != stage
+        or task_ids != list(CAMPAIGN02_STAGE_TASK_IDS[stage])
+        or allowed_plan_ids != list(expected_plan_ids)
+        or authorization.get("real_wan_authorized") is not False
+        or authorization.get("result_qc_authorized") is not False
+        or any(authorization.get(key) is not value for key, value in expected_flags.items())
     ):
-        raise _fail("CAMPAIGN02_PRIMARY_EXECUTION_BINDING_REQUIRED")
+        raise _fail("CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED")
+    if not isinstance(predecessor_ids, list) or any(
+        not isinstance(item, str) or _CONTENT_ID.fullmatch(item) is None for item in predecessor_ids
+    ):
+        raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_INVALID")
+    required_predecessors = tuple(predecessor_ids)
+    if (
+        required_predecessors != tuple(sorted(set(required_predecessors)))
+        or (stage == "STAGE_A_EXACTNESS" and required_predecessors)
+        or (stage == "STAGE_B_SCIENTIFIC" and len(required_predecessors) < 1)
+        or (stage == "STAGE_C_EMULATED_WAN" and len(required_predecessors) < 2)
+        or predecessor_gate_receipt_ids != required_predecessors
+    ):
+        raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_INVALID")
+    if plan.content_id not in expected_plan_ids or plan not in plan_catalog.plans:
+        raise _fail("CAMPAIGN02_PLAN_NOT_AUTHORIZED")
+    allowed_roles = {
+        "STAGE_A_EXACTNESS": frozenset({"EXACTNESS_RUNNER"}),
+        "STAGE_B_SCIENTIFIC": frozenset(
+            {"SCIENTIFIC_RUNNER", "EVALUATION_RUNNER", "OBSERVATION_WRITER"}
+        ),
+        "STAGE_C_EMULATED_WAN": frozenset({"NETWORK_FAULT_RUNNER"}),
+    }
+    if runner_role is not None and runner_role not in allowed_roles[stage]:
+        raise _fail("CAMPAIGN02_STAGE_RUNNER_ROLE_NOT_AUTHORIZED")

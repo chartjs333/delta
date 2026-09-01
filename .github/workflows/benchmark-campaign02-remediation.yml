@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: campaign-02-execution-binding-${{ github.workflow }}-${{ github.ref }}
+  group: campaign-02-stage-authorization-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-execution-binding-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
+          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-stage-authorization-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
           git -C control cat-file -e "${source_commit}^{commit}"
           git -C control merge-base --is-ancestor 8e945ac9713de5898d3abdb10ad2474079a87260 "${source_commit}"
           printf 'commit=%s\n' "${source_commit}" >> "$GITHUB_OUTPUT"
@@ -153,7 +153,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-execution-binding-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
+          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-stage-authorization-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
           git -C control cat-file -e "${source_commit}^{commit}"
           printf 'commit=%s\n' "${source_commit}" >> "$GITHUB_OUTPUT"
 
@@ -191,16 +191,16 @@ jobs:
           uv run python specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_exact_source.py \
             --source-commit '${{ steps.source.outputs.commit }}' \
             --portable-junit "$RUNNER_TEMP/campaign-02-portable/campaign-02-portable.xml" \
-            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-execution-binding-hardware-qualification.json" \
-            --output "$RUNNER_TEMP/campaign-02-execution-binding-exact-source-qualification.json"
+            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-stage-authorization-hardware-qualification.json" \
+            --output "$RUNNER_TEMP/campaign-02-stage-authorization-exact-source-qualification.json"
           cmp \
-            "$RUNNER_TEMP/campaign-02-execution-binding-exact-source-qualification.json" \
-            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-execution-binding-exact-source-qualification.json"
+            "$RUNNER_TEMP/campaign-02-stage-authorization-exact-source-qualification.json" \
+            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-stage-authorization-exact-source-qualification.json"
 
       - name: Retain immutable exact-source admission artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign-02-execution-binding-exact-source-${{ github.run_id }}
-          path: ${{ runner.temp }}/campaign-02-execution-binding-exact-source-qualification.json
+          name: campaign-02-stage-authorization-exact-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-stage-authorization-exact-source-qualification.json
           if-no-files-found: error
           retention-days: 30

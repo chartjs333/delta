@@ -4,20 +4,23 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any, Final
+from typing import Final
 
 from deltatorrent.benchmark.arms import ArmSpec
 from deltatorrent.benchmark.campaign02 import (
+    CAMPAIGN02_GATE_STAGES,
     CampaignDomainManifest,
     CampaignExecutionPlan,
     CampaignTicketPlan,
     CertifiedRoundPolicy,
     WorkloadContract,
-    authorize_execution_class,
-    execution_authorization_id,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID, BenchmarkDefinition
-from deltatorrent.benchmark.governance import VerifiedDefinitionAttestation
+from deltatorrent.benchmark.governance import (
+    BenchmarkReviewValidatorSet,
+    SignedDefinitionVote,
+    verify_definition_attestation,
+)
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
 _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -195,39 +198,55 @@ class QualifiedRuntimeLineage:
 
 
 @dataclass(frozen=True, slots=True)
-class Campaign02ExecutionSet:
+class Campaign02PlanCatalog:
     definition_id: str
     attestation_id: str
-    authorization_id: str
     workload_contract_id: str
     domain_manifest_id: str
     ticket_plan_id: str
     runtime_lineage_id: str
     plans: tuple[CampaignExecutionPlan, ...]
 
+    def __post_init__(self) -> None:
+        expected_count = 15 * len(CAMPAIGN02_GATE_STAGES)
+        if (
+            len(self.plans) != expected_count
+            or len({item.content_id for item in self.plans}) != expected_count
+            or any(len(self.plan_ids_for_stage(stage)) != 15 for stage in CAMPAIGN02_GATE_STAGES)
+        ):
+            raise _fail("CAMPAIGN02_PLAN_CATALOG_INCOMPLETE")
+
+    def plan_ids_for_stage(self, stage: str) -> tuple[str, ...]:
+        if stage not in CAMPAIGN02_GATE_STAGES:
+            raise _fail("CAMPAIGN02_PLAN_GATE_STAGE_INVALID")
+        return tuple(item.content_id for item in self.plans if item.gate_stage == stage)
+
     @property
     def document(self) -> dict[str, object]:
         return {
-            "authorization_id": self.authorization_id,
+            "base_plan_count": 15,
             "benchmark_definition_id": self.definition_id,
             "campaign_id": "campaign-02",
             "definition_attestation_id": self.attestation_id,
             "domain_manifest_id": self.domain_manifest_id,
-            "execution_allowed": False,
+            "execution_authorized": False,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "plan_ids": [item.content_id for item in self.plans],
+            "plan_ids_by_stage": {
+                stage: list(self.plan_ids_for_stage(stage)) for stage in CAMPAIGN02_GATE_STAGES
+            },
             "qualified_runtime_lineage_id": self.runtime_lineage_id,
             "schema_version": "1.0.0",
-            "status": "COMPILED_REQUIRES_SEPARATE_EXECUTION_INVOCATION",
+            "status": "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION",
             "ticket_plan_id": self.ticket_plan_id,
-            "type_name": "CAMPAIGN02_EXECUTION_SET",
+            "type_name": "CAMPAIGN02_PLAN_CATALOG",
             "workload_contract_id": self.workload_contract_id,
         }
 
     @property
     def content_id(self) -> str:
         return sha256_content_id(
-            b"deltareduce.010.campaign02-execution-set.v1\0" + canonical_json_bytes(self.document)
+            b"deltareduce.010.campaign02-plan-catalog.v1\0" + canonical_json_bytes(self.document)
         )
 
 
@@ -290,135 +309,113 @@ def _validate_arms(
         raise _fail("CAMPAIGN02_ARM_MATRIX_MISMATCH")
 
 
-def _validate_authorization(
-    authorization: dict[str, Any] | None,
-    definition: BenchmarkDefinition,
-    attestation: VerifiedDefinitionAttestation,
-    workload: WorkloadContract,
-    domain_manifest: CampaignDomainManifest,
-    ticket_plan: CampaignTicketPlan,
-    runtime_lineage: QualifiedRuntimeLineage,
-) -> dict[str, Any]:
-    if authorization is None:
-        raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_REQUIRED")
-    expected = {
-        "benchmark_definition_id": definition.content_id,
-        "campaign_id": "campaign-02",
-        "definition_attestation_id": attestation.content_id,
-        "domain_manifest_id": domain_manifest.content_id,
-        "environment_id": runtime_lineage.environment_id,
-        "evaluation_runner_id": runtime_lineage.evaluation_runner_id,
-        "formal_semantics_id": FORMAL_SEMANTICS_ID,
-        "observation_writer_id": runtime_lineage.writer_id,
-        "primary_execution_authorized": True,
-        "qualified_runtime_lineage_id": runtime_lineage.content_id,
-        "scientific_runner_id": runtime_lineage.runner_id,
-        "source_commit": runtime_lineage.source_commit,
-        "source_tree": runtime_lineage.source_tree,
-        "ticket_plan_id": ticket_plan.content_id,
-        "type_name": "BENCHMARK_EXECUTION_AUTHORIZATION",
-        "workload_contract_id": workload.content_id,
-    }
-    if any(authorization.get(key) != value for key, value in expected.items()):
-        raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_BINDING_MISMATCH")
-    return authorization
-
-
-def compile_campaign02_execution_set(
+def compile_campaign02_plan_catalog(
     *,
     definition: BenchmarkDefinition,
-    attestation: VerifiedDefinitionAttestation,
-    authorization: dict[str, Any] | None,
+    attestation_document: dict[str, object],
+    validator_set: BenchmarkReviewValidatorSet,
+    votes: tuple[SignedDefinitionVote, ...],
     workload: WorkloadContract,
     domain_manifest: CampaignDomainManifest,
     ticket_plan: CampaignTicketPlan,
     arms: tuple[ArmSpec, ...],
     runtime_lineage: QualifiedRuntimeLineage,
-) -> Campaign02ExecutionSet:
-    """Create the exact 5-arm x 3-seed matrix after every identity is verified."""
+) -> Campaign02PlanCatalog:
+    """Compile deterministic stage templates without granting execution authority."""
     _validate_definition_bindings(
         definition, workload, domain_manifest, ticket_plan, runtime_lineage
     )
     _validate_arms(definition, arms, workload)
+    vote_map = {item.content_id: item for item in votes}
+    if len(vote_map) != len(votes):
+        raise _fail("CAMPAIGN02_DEFINITION_VOTE_DUPLICATE")
+    attested_vote_ids = attestation_document.get("ordered_vote_ids")
     if (
-        attestation.benchmark_definition_id != definition.content_id
-        or len(attestation.ordered_vote_ids) != attestation.quorum_threshold
+        not isinstance(attested_vote_ids, list)
+        or any(not isinstance(item, str) for item in attested_vote_ids)
+        or set(attested_vote_ids) != set(vote_map)
+        or len(attested_vote_ids) != len(vote_map)
     ):
-        raise _fail("CAMPAIGN02_DEFINITION_ATTESTATION_MISMATCH")
-    authorization_value = _validate_authorization(
-        authorization,
-        definition,
-        attestation,
-        workload,
-        domain_manifest,
-        ticket_plan,
-        runtime_lineage,
-    )
-    authorization_id = execution_authorization_id(authorization_value)
-    plans: list[CampaignExecutionPlan] = []
-    for arm in arms:
-        result_class = (
-            "REFERENCE" if arm.arm_id == "scientific-reference" else "CERTIFIED_DELTAREDUCE"
+        raise _fail("CAMPAIGN02_DEFINITION_VOTE_SET_MISMATCH")
+    try:
+        attestation = verify_definition_attestation(
+            attestation_document,
+            validator_set=validator_set,
+            votes=vote_map,
         )
-        for repetition, seed in enumerate(definition.seeds, start=1):
-            policy = (
-                None
-                if result_class == "REFERENCE"
-                else runtime_lineage.policy_for(arm, seed, repetition)
+    except ValueError as exc:
+        raise _fail(f"CAMPAIGN02_DEFINITION_ATTESTATION_INVALID:{exc}") from exc
+    if attestation.benchmark_definition_id != definition.content_id:
+        raise _fail("CAMPAIGN02_DEFINITION_ATTESTATION_MISMATCH")
+    plans: list[CampaignExecutionPlan] = []
+    for gate_stage in CAMPAIGN02_GATE_STAGES:
+        for arm in arms:
+            result_class = (
+                "REFERENCE" if arm.arm_id == "scientific-reference" else "CERTIFIED_DELTAREDUCE"
             )
-            plan = CampaignExecutionPlan(
-                execution_class="PRIMARY_MEASURED",
-                result_class=result_class,
-                campaign_id="campaign-02",
-                benchmark_definition_id=definition.content_id,
-                definition_attestation_id=attestation.content_id,
-                execution_authorization_id=authorization_id,
-                arm_id=arm.content_id,
-                round_id=expected_round_id(arm.arm_id, seed, repetition),
-                seed=seed,
-                repetition=repetition,
-                source_commit=runtime_lineage.source_commit,
-                source_tree=runtime_lineage.source_tree,
-                environment_id=runtime_lineage.environment_id,
-                image_id=runtime_lineage.image_id,
-                hardware_id=runtime_lineage.hardware_id,
-                runner_id=runtime_lineage.runner_id,
-                evaluation_runner_id=runtime_lineage.evaluation_runner_id,
-                writer_id=runtime_lineage.writer_id,
-                workload_id=workload.content_id,
-                tokens_per_optimizer_step=workload.tokens_per_optimizer_step,
-                optimizer_steps_per_ticket=workload.optimizer_steps_per_ticket,
-                tokens_per_ticket=workload.tokens_per_ticket,
-                ticket_count=workload.ticket_count,
-                total_tokens_per_arm_run=workload.total_tokens_per_arm_run,
-                model_id=runtime_lineage.model_id,
-                parent_checkpoint_id=runtime_lineage.parent_checkpoint_id,
-                tokenizer_id=runtime_lineage.tokenizer_id,
-                dataset_ids=runtime_lineage.dataset_ids,
-                evaluation_profile_ids=runtime_lineage.evaluation_profile_ids,
-                evaluation_implementation_ids=runtime_lineage.evaluation_implementation_ids,
-                tickets=ticket_plan.tickets,
-                certified_round_policy=policy,
-                domain_manifest_id=domain_manifest.content_id,
-                ticket_plan_id=ticket_plan.content_id,
-                qualified_runtime_lineage_id=runtime_lineage.content_id,
-            )
-            authorize_execution_class(authorization_value, plan)
-            plans.append(plan)
+            for repetition, seed in enumerate(definition.seeds, start=1):
+                policy = (
+                    None
+                    if result_class == "REFERENCE"
+                    else runtime_lineage.policy_for(arm, seed, repetition)
+                )
+                plan = CampaignExecutionPlan(
+                    execution_class="PRIMARY_MEASURED",
+                    result_class=result_class,
+                    campaign_id="campaign-02",
+                    benchmark_definition_id=definition.content_id,
+                    definition_attestation_id=attestation.content_id,
+                    execution_authorization_id=None,
+                    arm_id=arm.content_id,
+                    round_id=expected_round_id(arm.arm_id, seed, repetition),
+                    seed=seed,
+                    repetition=repetition,
+                    source_commit=runtime_lineage.source_commit,
+                    source_tree=runtime_lineage.source_tree,
+                    environment_id=runtime_lineage.environment_id,
+                    image_id=runtime_lineage.image_id,
+                    hardware_id=runtime_lineage.hardware_id,
+                    runner_id=runtime_lineage.runner_id,
+                    evaluation_runner_id=runtime_lineage.evaluation_runner_id,
+                    writer_id=runtime_lineage.writer_id,
+                    workload_id=workload.content_id,
+                    tokens_per_optimizer_step=workload.tokens_per_optimizer_step,
+                    optimizer_steps_per_ticket=workload.optimizer_steps_per_ticket,
+                    tokens_per_ticket=workload.tokens_per_ticket,
+                    ticket_count=workload.ticket_count,
+                    total_tokens_per_arm_run=workload.total_tokens_per_arm_run,
+                    model_id=runtime_lineage.model_id,
+                    parent_checkpoint_id=runtime_lineage.parent_checkpoint_id,
+                    tokenizer_id=runtime_lineage.tokenizer_id,
+                    dataset_ids=runtime_lineage.dataset_ids,
+                    evaluation_profile_ids=runtime_lineage.evaluation_profile_ids,
+                    evaluation_implementation_ids=runtime_lineage.evaluation_implementation_ids,
+                    tickets=ticket_plan.tickets,
+                    certified_round_policy=policy,
+                    domain_manifest_id=domain_manifest.content_id,
+                    ticket_plan_id=ticket_plan.content_id,
+                    qualified_runtime_lineage_id=runtime_lineage.content_id,
+                    gate_stage=gate_stage,
+                )
+                plans.append(plan)
     expected_policy_count = 4 * len(definition.seeds)
     if (
-        len(plans) != 15
-        or len({item.content_id for item in plans}) != 15
+        len(plans) != 45
+        or len({item.content_id for item in plans}) != 45
         or len(runtime_lineage.certified_plan_bindings) != expected_policy_count
     ):
         raise _fail("CAMPAIGN02_EXECUTION_MATRIX_INCOMPLETE")
-    return Campaign02ExecutionSet(
+    return Campaign02PlanCatalog(
         definition_id=definition.content_id,
         attestation_id=attestation.content_id,
-        authorization_id=authorization_id,
         workload_contract_id=workload.content_id,
         domain_manifest_id=domain_manifest.content_id,
         ticket_plan_id=ticket_plan.content_id,
         runtime_lineage_id=runtime_lineage.content_id,
         plans=tuple(plans),
     )
+
+
+def compile_campaign02_execution_set(**_values: object) -> Campaign02PlanCatalog:
+    """Reject the superseded interface that trusted a caller-constructed attestation."""
+    raise _fail("CAMPAIGN02_UNVERIFIED_ATTESTATION_INTERFACE_FORBIDDEN")

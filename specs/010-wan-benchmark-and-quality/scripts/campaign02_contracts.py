@@ -60,6 +60,21 @@ SCHEMAS: Final = {
         "PRIMARY_EXECUTION_PLAN",
         "3.0.0",
     ),
+    "execution-plan-v4": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V4",
+        "PRIMARY_EXECUTION_PLAN",
+        "4.0.0",
+    ),
+    "plan-catalog-v1": (
+        "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V1",
+        "CAMPAIGN02_PLAN_CATALOG",
+        "1.0.0",
+    ),
+    "stage-execution-authorization-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
+        "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION",
+        "1.0.0",
+    ),
     "evaluator-profile-v1": (
         "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
         "EVALUATOR_PROFILE",
@@ -654,6 +669,111 @@ def schema_documents() -> dict[str, dict[str, object]]:
             },
         ],
     )
+    execution_v3 = documents["execution-plan-v3"]
+    execution_v3_properties = execution_v3["properties"]
+    assert isinstance(execution_v3_properties, dict)
+    documents["execution-plan-v4"] = schema(
+        "execution-plan-v4",
+        {
+            **{
+                key: value
+                for key, value in execution_v3_properties.items()
+                if key
+                not in {
+                    "execution_authorization_id",
+                    "formal_semantics_id",
+                    "schema_version",
+                    "type_name",
+                }
+            },
+            "execution_authorized": {"const": False},
+            "gate_stage": {
+                "enum": [
+                    "STAGE_A_EXACTNESS",
+                    "STAGE_B_SCIENTIFIC",
+                    "STAGE_C_EMULATED_WAN",
+                ]
+            },
+        },
+        result_class_union=[
+            {
+                "properties": {
+                    "certified_round_policy": {"type": "null"},
+                    "result_class": {"const": "REFERENCE"},
+                }
+            },
+            {
+                "properties": {
+                    "certified_round_policy": certified_policy,
+                    "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                }
+            },
+        ],
+    )
+    exact_stage_ids = {
+        "items": content_id(),
+        "maxItems": 15,
+        "minItems": 15,
+        "type": "array",
+        "uniqueItems": True,
+    }
+    documents["plan-catalog-v1"] = schema(
+        "plan-catalog-v1",
+        {
+            "base_plan_count": {"const": 15},
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "domain_manifest_id": content_id(),
+            "execution_authorized": {"const": False},
+            "plan_ids": {
+                "items": content_id(),
+                "maxItems": 45,
+                "minItems": 45,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "plan_ids_by_stage": strict(
+                {
+                    "STAGE_A_EXACTNESS": exact_stage_ids,
+                    "STAGE_B_SCIENTIFIC": exact_stage_ids,
+                    "STAGE_C_EMULATED_WAN": exact_stage_ids,
+                }
+            ),
+            "qualified_runtime_lineage_id": content_id(),
+            "status": {"const": "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION"},
+            "ticket_plan_id": content_id(),
+            "workload_contract_id": content_id(),
+        },
+    )
+    documents["stage-execution-authorization-v1"] = schema(
+        "stage-execution-authorization-v1",
+        {
+            "allowed_plan_ids": array(content_id(), unique=True),
+            "authorized_stage": {
+                "enum": [
+                    "STAGE_A_EXACTNESS",
+                    "STAGE_B_SCIENTIFIC",
+                    "STAGE_C_EMULATED_WAN",
+                ]
+            },
+            "authorized_task_ids": array(text(), unique=True),
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "plan_catalog_id": content_id(),
+            "real_wan_authorized": {"const": False},
+            "required_predecessor_receipt_ids": {
+                "items": content_id(),
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "result_qc_authorized": {"const": False},
+            "stage_a_authorized": {"type": "boolean"},
+            "stage_b_authorized": {"type": "boolean"},
+            "stage_c_authorized": {"type": "boolean"},
+        },
+    )
     return documents
 
 
@@ -692,7 +812,7 @@ def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
         "fixtures": fixture_entries(),
         "formal_semantics_id": FORMAL_ID,
         "media_types": media_types,
-        "registry_version": "010.3.0-execution-binding",
+        "registry_version": "010.4.0-stage-authorization",
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,
     }

@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 from typing import Any, Protocol
 
 from deltatorrent.benchmark.campaign02 import (
+    Campaign02PlanCatalogView,
     CampaignExecutionPlan,
     TicketAllocation,
     authorize_execution_class,
@@ -397,8 +398,17 @@ class PrimaryScientificRunner:
         plan: CampaignExecutionPlan,
         authorization: dict[str, Any],
         backend: ScientificArmBackend,
+        *,
+        plan_catalog: Campaign02PlanCatalogView | None = None,
+        predecessor_gate_receipt_ids: tuple[str, ...] = (),
     ) -> ScientificRun:
-        authorize_execution_class(authorization, plan)
+        authorize_execution_class(
+            authorization,
+            plan,
+            plan_catalog=plan_catalog,
+            predecessor_gate_receipt_ids=predecessor_gate_receipt_ids,
+            runner_role="SCIENTIFIC_RUNNER",
+        )
         if (
             plan.runner_id != self.identity.content_id
             or plan.source_commit != self.identity.source_commit
@@ -548,10 +558,19 @@ class PrimaryEvaluationRunner:
         scientific_run: ScientificRun,
         backends: dict[str, ScoringBackend],
         datasets: dict[str, object],
+        *,
+        plan_catalog: Campaign02PlanCatalogView | None = None,
+        predecessor_gate_receipt_ids: tuple[str, ...] = (),
     ) -> tuple[MeasuredEvaluation, ...]:
         from deltatorrent.benchmark.evaluators.common import EvaluationContext
 
-        authorize_execution_class(authorization, plan)
+        authorize_execution_class(
+            authorization,
+            plan,
+            plan_catalog=plan_catalog,
+            predecessor_gate_receipt_ids=predecessor_gate_receipt_ids,
+            runner_role="EVALUATION_RUNNER",
+        )
         if (
             plan.evaluation_runner_id != self.identity.content_id
             or plan.environment_id != self.identity.environment_id
