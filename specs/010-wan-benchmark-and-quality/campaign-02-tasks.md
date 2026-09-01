@@ -53,6 +53,9 @@ Machine-readable evidence:
   fail-closed plan;
 - `evidence/campaign-02-definition-temporal-integrity.json` — Definition/attestation ordering and
   zero pre-authorization observations, receipts, real-WAN evidence and result QC.
+- `evidence/campaign-02-definition-terminal-head-ci-receipt.json` — actual-head verification run
+  and artifact digest; this proves the no-execution boundary only and does not complete C2-014 or
+  C2-015 for the unsigned, superseded attestation.
 
 Completion of `C2-011` does not authorize primary execution.
 

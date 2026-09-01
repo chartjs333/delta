@@ -45,6 +45,8 @@ POST_ATTESTATION_ALLOWED_EXACT: Final = {
     "reports/benchmark/campaigns/campaign-02/definition-readiness.json",
     "reports/benchmark/campaigns/campaign-02/methodology-diff.json",
     "specs/010-wan-benchmark-and-quality/campaign-02-tasks.md",
+    "specs/010-wan-benchmark-and-quality/evidence/"
+    "campaign-02-definition-terminal-head-ci-receipt.json",
     OUTPUT_REPOSITORY_PATH,
     VERIFIER_PATH,
     "specs/010-wan-benchmark-and-quality/tests/test_campaign02_definition_temporal.py",

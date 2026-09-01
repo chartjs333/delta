@@ -105,6 +105,7 @@ jobs:
             reports/benchmark/campaigns/campaign-02/methodology-diff.json
             reports/benchmark/campaigns/campaign-02/definition-readiness.json
             specs/010-wan-benchmark-and-quality/evidence/campaign-02-definition-temporal-integrity.json
+            specs/010-wan-benchmark-and-quality/evidence/campaign-02-definition-terminal-head-ci-receipt.json
             ${{ runner.temp }}/campaign-02-definition-terminal-head.json
             ${{ runner.temp }}/campaign-02-definition.xml
           if-no-files-found: error
