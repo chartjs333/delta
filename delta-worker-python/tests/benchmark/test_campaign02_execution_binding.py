@@ -348,7 +348,7 @@ def test_campaign02_plan_catalog_requires_no_execution_authorization() -> None:
 
 
 def test_campaign02_compiler_rejects_wrong_definition_and_attestation() -> None:
-    definition, attestation_document, *_ = _inputs()
+    definition, attestation_document, validator_set, votes, *_ = _inputs()
     wrong_value = dict(definition.raw)
     wrong_value["workload_contract_id"] = _id("wrong-workload")
     wrong_definition = BenchmarkDefinition.from_dict(wrong_value)
@@ -359,7 +359,11 @@ def test_campaign02_compiler_rejects_wrong_definition_and_attestation() -> None:
     wrong_attestation = dict(attestation_document)
     wrong_attestation["benchmark_definition_id"] = _id("wrong-definition")
     with pytest.raises(Campaign02BindingError, match="CAMPAIGN02_DEFINITION_ATTESTATION_INVALID"):
-        _compile(attestation_document=wrong_attestation)
+        _compile(
+            attestation_document=wrong_attestation,
+            validator_set=validator_set,
+            votes=votes,
+        )
 
 
 def test_campaign02_compiler_rejects_wrong_source_tree() -> None:
