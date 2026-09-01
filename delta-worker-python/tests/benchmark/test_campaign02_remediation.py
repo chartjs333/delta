@@ -32,7 +32,9 @@ from deltatorrent.benchmark.measured_runner import (
     PrimaryEvaluationRunner,
     PrimaryScientificRunner,
     RawArtifact,
-    TicketMeasurement,
+    ReferenceRoundMeasurement,
+    RunHandle,
+    TicketContributionMeasurement,
 )
 from deltatorrent.benchmark.observation_writer import (
     ObservationWriterError,
@@ -91,29 +93,49 @@ class _FixtureScoringBackend:
 
 class _FixtureScientificBackend:
     source_class = "NON_PRIMARY_FIXTURE"
-    certified = False
+    result_class = "REFERENCE"
 
     def __init__(self, environment_id: str, model_id: str) -> None:
         self.environment_id = environment_id
         self.model_id = model_id
 
+    def begin_run(self, plan: CampaignExecutionPlan) -> RunHandle:
+        return RunHandle(_id("reference-run"), plan.content_id)
+
     def execute_ticket(
-        self, plan: CampaignExecutionPlan, ticket: TicketAllocation
-    ) -> TicketMeasurement:
-        return TicketMeasurement(
+        self, _run: RunHandle, ticket: TicketAllocation
+    ) -> TicketContributionMeasurement:
+        return TicketContributionMeasurement(
             ticket_id=ticket.ticket_id,
             domain_id=ticket.domain_id,
             processed_tokens=ticket.tokens_per_ticket,
             optimizer_steps=ticket.optimizer_steps,
-            checkpoint_id=_id(f"checkpoint:{ticket.ordinal}"),
             contribution_id=_id(f"contribution:{ticket.ordinal}"),
-            certificate_ids=(),
+            commitment_id=_id(f"commitment:{ticket.ordinal}"),
+            availability_certificate_id=_id(f"availability:{ticket.ordinal}"),
             artifacts=(
                 RawArtifact(
                     f"ticket-{ticket.ordinal}.bin",
                     "application/octet-stream",
                     f"measured:{ticket.ticket_id}".encode(),
                 ),
+            ),
+        )
+
+    def finalize_run(
+        self,
+        _run: RunHandle,
+        contributions: tuple[TicketContributionMeasurement, ...],
+    ) -> ReferenceRoundMeasurement:
+        return ReferenceRoundMeasurement(
+            round_id="campaign-02-reference-smoke",
+            parent_checkpoint_id=_id("base-model"),
+            ordered_ticket_ids=tuple(item.ticket_id for item in contributions),
+            ordered_data_exposure_ids=tuple(item.contribution_id for item in contributions),
+            processed_tokens=sum(item.processed_tokens for item in contributions),
+            final_checkpoint_id=_id("reference-final-checkpoint"),
+            training_artifacts=(
+                RawArtifact("reference-final.safetensors", "application/octet-stream", b"final"),
             ),
         )
 
@@ -168,11 +190,13 @@ def _smoke_plan(
     profiles = _profiles()
     return CampaignExecutionPlan(
         execution_class="NON_PRIMARY_SMOKE",
+        result_class="REFERENCE",
         campaign_id="campaign-02",
         benchmark_definition_id=_id("non-primary-definition"),
         definition_attestation_id=_id("non-primary-attestation"),
         execution_authorization_id=execution_authorization_id(_remediation_authorization()),
         arm_id=_id("fixture-arm"),
+        round_id="campaign-02-reference-smoke",
         seed=7,
         repetition=1,
         source_commit="a" * 40,
@@ -190,6 +214,7 @@ def _smoke_plan(
         ticket_count=2,
         total_tokens_per_arm_run=8,
         model_id=_id("base-model"),
+        parent_checkpoint_id=_id("base-model"),
         tokenizer_id=profiles[0].tokenizer_id,
         dataset_ids=tuple(item.dataset_id for item in profiles),
         evaluation_profile_ids=tuple(item.content_id for item in profiles),
@@ -428,6 +453,11 @@ def test_production_runners_and_writer_publish_only_typed_smoke(tmp_path: Path) 
     assert repeated.receipt_id == receipt.receipt_id
     assert receipt.observation_path.is_file()
     assert receipt.receipt_path.is_file()
+    observation = json.loads(receipt.observation_path.read_bytes())
+    assert observation["result_class"] == "REFERENCE"
+    assert observation["run_result"]["result_class"] == "REFERENCE"
+    assert "checkpoint_id" not in observation["ticket_results"][0]
+    assert "certificate_ids" not in observation["ticket_results"][0]
     with pytest.raises(ObservationWriterError, match="OBSERVATION_MANUAL_JSON_FORBIDDEN"):
         writer.publish_json({"metric": "manually-edited"})
 

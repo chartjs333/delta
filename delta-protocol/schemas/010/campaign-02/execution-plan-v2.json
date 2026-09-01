@@ -23,6 +23,108 @@
     "campaign_id": {
       "const": "campaign-02"
     },
+    "certified_round_policy": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "accumulator_proof_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "apply_arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "height": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "parameter_schema_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "quorum_threshold": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "required_shards": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "domain_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "shard_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "domain_id",
+                  "shard_id"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "round_config_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "validator_epoch_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "validator_ids": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "view": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "accumulator_proof_id",
+            "apply_arithmetic_profile_id",
+            "arithmetic_profile_id",
+            "height",
+            "parameter_schema_id",
+            "quorum_threshold",
+            "required_shards",
+            "round_config_id",
+            "round_id",
+            "validator_epoch_id",
+            "validator_ids",
+            "view"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "dataset_ids": {
       "items": {
         "pattern": "^sha256:[0-9a-f]{64}$",
@@ -89,6 +191,10 @@
       "minimum": 1,
       "type": "integer"
     },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "processed_tokens": {
       "maximum": 9007199254740991,
       "minimum": 1,
@@ -98,6 +204,16 @@
       "maximum": 9007199254740991,
       "minimum": 1,
       "type": "integer"
+    },
+    "result_class": {
+      "enum": [
+        "REFERENCE",
+        "CERTIFIED_DELTAREDUCE"
+      ]
+    },
+    "round_id": {
+      "minLength": 1,
+      "type": "string"
     },
     "runner_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
@@ -199,6 +315,7 @@
     "arm_id",
     "benchmark_definition_id",
     "campaign_id",
+    "certified_round_policy",
     "dataset_ids",
     "definition_attestation_id",
     "environment_id",
@@ -212,8 +329,11 @@
     "image_id",
     "model_id",
     "optimizer_steps_per_ticket",
+    "parent_checkpoint_id",
     "processed_tokens",
     "repetition",
+    "result_class",
+    "round_id",
     "runner_id",
     "schema_version",
     "seed",
@@ -230,5 +350,119 @@
     "writer_id"
   ],
   "type": "object",
-  "title": "DeltaReduce Feature 010 Campaign 02 execution-plan-v2"
+  "title": "DeltaReduce Feature 010 Campaign 02 execution-plan-v2",
+  "oneOf": [
+    {
+      "properties": {
+        "certified_round_policy": {
+          "type": "null"
+        },
+        "result_class": {
+          "const": "REFERENCE"
+        }
+      }
+    },
+    {
+      "properties": {
+        "certified_round_policy": {
+          "additionalProperties": false,
+          "properties": {
+            "accumulator_proof_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "apply_arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "height": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "parameter_schema_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "quorum_threshold": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "required_shards": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "domain_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "shard_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "domain_id",
+                  "shard_id"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "round_config_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "validator_epoch_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "validator_ids": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "view": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "accumulator_proof_id",
+            "apply_arithmetic_profile_id",
+            "arithmetic_profile_id",
+            "height",
+            "parameter_schema_id",
+            "quorum_threshold",
+            "required_shards",
+            "round_config_id",
+            "round_id",
+            "validator_epoch_id",
+            "validator_ids",
+            "view"
+          ],
+          "type": "object"
+        },
+        "result_class": {
+          "const": "CERTIFIED_DELTAREDUCE"
+        }
+      }
+    }
+  ]
 }

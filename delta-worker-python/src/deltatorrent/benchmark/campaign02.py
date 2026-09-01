@@ -179,6 +179,80 @@ class TicketAllocation:
         }
 
 
+@dataclass(frozen=True, order=True, slots=True)
+class ParameterShardKey:
+    domain_id: str
+    shard_id: str
+
+    def __post_init__(self) -> None:
+        if not self.domain_id or not self.shard_id:
+            raise _fail("CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID")
+
+    @property
+    def document(self) -> dict[str, str]:
+        return {"domain_id": self.domain_id, "shard_id": self.shard_id}
+
+
+@dataclass(frozen=True, slots=True)
+class CertifiedRoundPolicy:
+    round_id: str
+    height: int
+    view: int
+    round_config_id: str
+    validator_epoch_id: str
+    parameter_schema_id: str
+    arithmetic_profile_id: str
+    accumulator_proof_id: str
+    apply_arithmetic_profile_id: str
+    validator_ids: tuple[str, ...]
+    quorum_threshold: int
+    required_shards: tuple[ParameterShardKey, ...]
+
+    def __post_init__(self) -> None:
+        if not self.round_id or self.height < 1 or self.view < 0:
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_COORDINATE_INVALID")
+        identities = (
+            self.round_config_id,
+            self.validator_epoch_id,
+            self.parameter_schema_id,
+            self.arithmetic_profile_id,
+            self.accumulator_proof_id,
+            self.apply_arithmetic_profile_id,
+        )
+        if any(_CONTENT_ID.fullmatch(value) is None for value in identities):
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID")
+        if (
+            not self.validator_ids
+            or self.validator_ids != tuple(sorted(set(self.validator_ids)))
+            or len(self.validator_ids) % 3 != 1
+        ):
+            raise _fail("CAMPAIGN02_CERTIFIED_VALIDATOR_SET_INVALID")
+        fault_tolerance = (len(self.validator_ids) - 1) // 3
+        if self.quorum_threshold != 2 * fault_tolerance + 1:
+            raise _fail("CAMPAIGN02_CERTIFIED_QUORUM_INVALID")
+        if not self.required_shards or self.required_shards != tuple(
+            sorted(set(self.required_shards))
+        ):
+            raise _fail("CAMPAIGN02_REQUIRED_SHARD_MATRIX_INVALID")
+
+    @property
+    def document(self) -> dict[str, object]:
+        return {
+            "accumulator_proof_id": self.accumulator_proof_id,
+            "apply_arithmetic_profile_id": self.apply_arithmetic_profile_id,
+            "arithmetic_profile_id": self.arithmetic_profile_id,
+            "height": self.height,
+            "parameter_schema_id": self.parameter_schema_id,
+            "quorum_threshold": self.quorum_threshold,
+            "required_shards": [item.document for item in self.required_shards],
+            "round_config_id": self.round_config_id,
+            "round_id": self.round_id,
+            "validator_epoch_id": self.validator_epoch_id,
+            "validator_ids": list(self.validator_ids),
+            "view": self.view,
+        }
+
+
 def allocate_tickets(workload: WorkloadContract) -> tuple[TicketAllocation, ...]:
     tickets: list[TicketAllocation] = []
     ordinal = 0
@@ -215,11 +289,13 @@ def allocate_tickets(workload: WorkloadContract) -> tuple[TicketAllocation, ...]
 @dataclass(frozen=True, slots=True)
 class CampaignExecutionPlan:
     execution_class: str
+    result_class: str
     campaign_id: str
     benchmark_definition_id: str
     definition_attestation_id: str
     execution_authorization_id: str
     arm_id: str
+    round_id: str
     seed: int
     repetition: int
     source_commit: str
@@ -237,17 +313,30 @@ class CampaignExecutionPlan:
     ticket_count: int
     total_tokens_per_arm_run: int
     model_id: str
+    parent_checkpoint_id: str
     tokenizer_id: str
     dataset_ids: tuple[str, ...]
     evaluation_profile_ids: tuple[str, ...]
     evaluation_implementation_ids: tuple[str, ...]
     tickets: tuple[TicketAllocation, ...]
+    certified_round_policy: CertifiedRoundPolicy | None = None
 
     def __post_init__(self) -> None:
         if self.execution_class not in {"NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"}:
             raise _fail("CAMPAIGN02_EXECUTION_CLASS_INVALID")
+        if self.result_class not in {"REFERENCE", "CERTIFIED_DELTAREDUCE"}:
+            raise _fail("CAMPAIGN02_RESULT_CLASS_INVALID")
+        if (self.result_class == "CERTIFIED_DELTAREDUCE") != (
+            self.certified_round_policy is not None
+        ):
+            raise _fail("CAMPAIGN02_RESULT_CLASS_POLICY_MISMATCH")
         if self.campaign_id != "campaign-02":
             raise _fail("CAMPAIGN02_PLAN_CAMPAIGN_INVALID")
+        if not self.round_id or (
+            self.certified_round_policy is not None
+            and self.certified_round_policy.round_id != self.round_id
+        ):
+            raise _fail("CAMPAIGN02_PLAN_ROUND_ID_INVALID")
         identities = (
             self.benchmark_definition_id,
             self.definition_attestation_id,
@@ -261,6 +350,7 @@ class CampaignExecutionPlan:
             self.writer_id,
             self.workload_id,
             self.model_id,
+            self.parent_checkpoint_id,
             self.tokenizer_id,
             *self.dataset_ids,
             *self.evaluation_profile_ids,
@@ -320,6 +410,11 @@ class CampaignExecutionPlan:
             "arm_id": self.arm_id,
             "benchmark_definition_id": self.benchmark_definition_id,
             "campaign_id": self.campaign_id,
+            "certified_round_policy": (
+                None
+                if self.certified_round_policy is None
+                else self.certified_round_policy.document
+            ),
             "dataset_ids": list(self.dataset_ids),
             "definition_attestation_id": self.definition_attestation_id,
             "environment_id": self.environment_id,
@@ -333,8 +428,11 @@ class CampaignExecutionPlan:
             "image_id": self.image_id,
             "model_id": self.model_id,
             "optimizer_steps_per_ticket": self.optimizer_steps_per_ticket,
+            "parent_checkpoint_id": self.parent_checkpoint_id,
             "processed_tokens": self.processed_tokens,
             "repetition": self.repetition,
+            "result_class": self.result_class,
+            "round_id": self.round_id,
             "runner_id": self.runner_id,
             "schema_version": "2.0.0",
             "seed": self.seed,

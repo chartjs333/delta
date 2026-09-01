@@ -58,7 +58,7 @@
     {
       "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
       "path": "schemas/010/campaign-02/registry-v1.json",
-      "sha256": "08f01e4b65aaa866b649915f106074bcd392c04f86e7e2c73078d5b8a3e8cd6e"
+      "sha256": "094028453a066cbcff08e4736f0d07f7b65c5754a86722da72c17551a74a6615"
     },
     {
       "id": "REGISTRY-BENCHMARK-010",
@@ -1077,7 +1077,7 @@
     {
       "id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
       "path": "schemas/010/campaign-02/execution-plan-v2.json",
-      "sha256": "38afcba533a1cc42886e6c3dd3d1b77a1abbf084c6148359f6e9cbe55eb95a50"
+      "sha256": "aed5174463d0e2bb9ebf81722f5273be6c7a0cc4044d6e5557d190b2501dbcef"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
@@ -1097,7 +1097,7 @@
     {
       "id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
       "path": "schemas/010/campaign-02/observation-v2.json",
-      "sha256": "75a333b763054f8950b4830016746e8fdfe894f8db7ff696e56a668df5c18cdf"
+      "sha256": "b993d92ac73fab858907ba08de6416aff179e9278a4591a949bb62c6013dc040"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-WORKLOAD-010-V2",

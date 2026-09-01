@@ -25,9 +25,21 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     assert len(module.SCHEMAS) == 8
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.2.0-remediation"
+    assert registry["registry_version"] == "010.2.1-remediation"
     assert len(registry["fixtures"]) == 6
     assert registry["semantic_completeness_claimed"] is False
+    observation = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/observation-v2.json").read_bytes()
+    )
+    assert len(observation["oneOf"]) == 2
+    assert len(observation["properties"]["run_result"]["oneOf"]) == 2
+    ticket = observation["properties"]["ticket_results"]["items"]
+    assert "checkpoint_id" not in ticket["properties"]
+    assert "certificate_ids" not in ticket["properties"]
+    execution_plan = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v2.json").read_bytes()
+    )
+    assert len(execution_plan["oneOf"]) == 2
 
 
 def test_gpu_environment_has_separate_hash_locked_platforms_and_cpu_lock() -> None:

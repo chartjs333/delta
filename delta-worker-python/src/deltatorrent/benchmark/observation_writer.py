@@ -131,6 +131,8 @@ class PrimaryObservationWriter:
             or plan.source_tree != self.identity.source_tree
             or scientific_run.plan_id != plan.content_id
             or scientific_run.runner_id != plan.runner_id
+            or scientific_run.result_class != plan.result_class
+            or scientific_run.round_result.parent_checkpoint_id != plan.parent_checkpoint_id
         ):
             raise _fail("OBSERVATION_WRITER_PLAN_IDENTITY_MISMATCH")
         if len(evaluations) != len(plan.evaluation_profile_ids):
@@ -176,18 +178,7 @@ class PrimaryObservationWriter:
         unique_artifact_ids = tuple(sorted(set(artifact_ids)))
         if not unique_artifact_ids:
             raise _fail("OBSERVATION_RAW_ARTIFACTS_MISSING")
-        ticket_results = [
-            {
-                "certificate_ids": list(item.certificate_ids),
-                "checkpoint_id": item.checkpoint_id,
-                "contribution_id": item.contribution_id,
-                "domain_id": item.domain_id,
-                "optimizer_steps": item.optimizer_steps,
-                "processed_tokens": item.processed_tokens,
-                "ticket_id": item.ticket_id,
-            }
-            for item in scientific_run.ticket_measurements
-        ]
+        ticket_results = [item.document for item in scientific_run.ticket_measurements]
         observation = {
             "arm_id": plan.arm_id,
             "benchmark_definition_id": plan.benchmark_definition_id,
@@ -208,6 +199,8 @@ class PrimaryObservationWriter:
             "processed_tokens": scientific_run.processed_tokens,
             "raw_artifact_ids": list(unique_artifact_ids),
             "repetition": plan.repetition,
+            "result_class": scientific_run.result_class,
+            "run_result": scientific_run.round_result.document,
             "runner_id": plan.runner_id,
             "schema_version": "2.0.0",
             "seed": plan.seed,

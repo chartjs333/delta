@@ -107,6 +107,199 @@
       "minimum": 1,
       "type": "integer"
     },
+    "result_class": {
+      "enum": [
+        "REFERENCE",
+        "CERTIFIED_DELTAREDUCE"
+      ]
+    },
+    "run_result": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "final_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "ordered_data_exposure_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "ordered_ticket_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "parent_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "processed_tokens": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "result_class": {
+              "const": "REFERENCE"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "terminal_outcome": {
+              "const": "COMPLETED"
+            },
+            "training_artifact_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "final_checkpoint_id",
+            "ordered_data_exposure_ids",
+            "ordered_ticket_ids",
+            "parent_checkpoint_id",
+            "processed_tokens",
+            "result_class",
+            "round_id",
+            "terminal_outcome",
+            "training_artifact_ids"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "aggregate_root_qc_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "aggregation_plan_certificate_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "apply_qc_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "checkpoint_wal_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "effect_set_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "eligibility_certificate_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "final_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "input_set_certificate_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "ordered_contribution_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "ordered_ticket_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "parameter_shard_qc_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "parent_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "result_class": {
+              "const": "CERTIFIED_DELTAREDUCE"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "runtime_receipt_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "runtime_state_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "runtime_wal_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "seed_transcript_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "terminal_outcome": {
+              "const": "APPLIED"
+            }
+          },
+          "required": [
+            "aggregate_root_qc_id",
+            "aggregation_plan_certificate_id",
+            "apply_qc_id",
+            "checkpoint_wal_sha256",
+            "effect_set_id",
+            "eligibility_certificate_id",
+            "final_checkpoint_id",
+            "input_set_certificate_id",
+            "ordered_contribution_ids",
+            "ordered_ticket_ids",
+            "parameter_shard_qc_ids",
+            "parent_checkpoint_id",
+            "result_class",
+            "round_id",
+            "runtime_receipt_id",
+            "runtime_state_id",
+            "runtime_wal_sha256",
+            "seed_transcript_id",
+            "terminal_outcome"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "runner_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
@@ -134,16 +327,11 @@
       "items": {
         "additionalProperties": false,
         "properties": {
-          "certificate_ids": {
-            "items": {
-              "pattern": "^sha256:[0-9a-f]{64}$",
-              "type": "string"
-            },
-            "minItems": 0,
-            "type": "array",
-            "uniqueItems": true
+          "availability_certificate_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
           },
-          "checkpoint_id": {
+          "commitment_id": {
             "pattern": "^sha256:[0-9a-f]{64}$",
             "type": "string"
           },
@@ -154,6 +342,15 @@
           "domain_id": {
             "minLength": 1,
             "type": "string"
+          },
+          "local_artifact_ids": {
+            "items": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
           },
           "optimizer_steps": {
             "maximum": 9007199254740991,
@@ -171,10 +368,11 @@
           }
         },
         "required": [
-          "certificate_ids",
-          "checkpoint_id",
+          "availability_certificate_id",
+          "commitment_id",
           "contribution_id",
           "domain_id",
+          "local_artifact_ids",
           "optimizer_steps",
           "processed_tokens",
           "ticket_id"
@@ -217,6 +415,8 @@
     "processed_tokens",
     "raw_artifact_ids",
     "repetition",
+    "result_class",
+    "run_result",
     "runner_id",
     "schema_version",
     "seed",
@@ -230,5 +430,204 @@
     "writer_id"
   ],
   "type": "object",
-  "title": "DeltaReduce Feature 010 Campaign 02 observation-v2"
+  "title": "DeltaReduce Feature 010 Campaign 02 observation-v2",
+  "oneOf": [
+    {
+      "properties": {
+        "result_class": {
+          "const": "REFERENCE"
+        },
+        "run_result": {
+          "additionalProperties": false,
+          "properties": {
+            "final_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "ordered_data_exposure_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "ordered_ticket_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "parent_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "processed_tokens": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "result_class": {
+              "const": "REFERENCE"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "terminal_outcome": {
+              "const": "COMPLETED"
+            },
+            "training_artifact_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "final_checkpoint_id",
+            "ordered_data_exposure_ids",
+            "ordered_ticket_ids",
+            "parent_checkpoint_id",
+            "processed_tokens",
+            "result_class",
+            "round_id",
+            "terminal_outcome",
+            "training_artifact_ids"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "properties": {
+        "result_class": {
+          "const": "CERTIFIED_DELTAREDUCE"
+        },
+        "run_result": {
+          "additionalProperties": false,
+          "properties": {
+            "aggregate_root_qc_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "aggregation_plan_certificate_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "apply_qc_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "checkpoint_wal_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "effect_set_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "eligibility_certificate_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "final_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "input_set_certificate_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "ordered_contribution_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "ordered_ticket_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "parameter_shard_qc_ids": {
+              "items": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "parent_checkpoint_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "result_class": {
+              "const": "CERTIFIED_DELTAREDUCE"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "runtime_receipt_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "runtime_state_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "runtime_wal_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "seed_transcript_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "terminal_outcome": {
+              "const": "APPLIED"
+            }
+          },
+          "required": [
+            "aggregate_root_qc_id",
+            "aggregation_plan_certificate_id",
+            "apply_qc_id",
+            "checkpoint_wal_sha256",
+            "effect_set_id",
+            "eligibility_certificate_id",
+            "final_checkpoint_id",
+            "input_set_certificate_id",
+            "ordered_contribution_ids",
+            "ordered_ticket_ids",
+            "parameter_shard_qc_ids",
+            "parent_checkpoint_id",
+            "result_class",
+            "round_id",
+            "runtime_receipt_id",
+            "runtime_state_id",
+            "runtime_wal_sha256",
+            "seed_transcript_id",
+            "terminal_outcome"
+          ],
+          "type": "object"
+        }
+      }
+    }
+  ]
 }

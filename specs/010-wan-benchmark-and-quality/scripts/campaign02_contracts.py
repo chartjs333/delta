@@ -101,7 +101,12 @@ def strict(properties: dict[str, object]) -> dict[str, object]:
     }
 
 
-def schema(name: str, properties: dict[str, object]) -> dict[str, object]:
+def schema(
+    name: str,
+    properties: dict[str, object],
+    *,
+    result_class_union: list[dict[str, object]] | None = None,
+) -> dict[str, object]:
     _, type_name, version = SCHEMAS[name]
     all_properties = {
         "formal_semantics_id": {"const": FORMAL_ID},
@@ -109,12 +114,15 @@ def schema(name: str, properties: dict[str, object]) -> dict[str, object]:
         "type_name": {"const": type_name},
         **properties,
     }
-    return {
+    document: dict[str, object] = {
         "$id": f"urn:deltareduce:schema:010:campaign-02:{name}",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         **strict(all_properties),
         "title": f"DeltaReduce Feature 010 Campaign 02 {name}",
     }
+    if result_class_union is not None:
+        document["oneOf"] = result_class_union
+    return document
 
 
 def schema_documents() -> dict[str, dict[str, object]]:
@@ -133,13 +141,67 @@ def schema_documents() -> dict[str, dict[str, object]]:
     executable = strict({"content_id": content_id(), "path": text()})
     ticket_result = strict(
         {
-            "certificate_ids": array(content_id(), minimum=0, unique=True),
-            "checkpoint_id": content_id(),
+            "availability_certificate_id": content_id(),
+            "commitment_id": content_id(),
             "contribution_id": content_id(),
             "domain_id": text(),
+            "local_artifact_ids": array(content_id(), unique=True),
             "optimizer_steps": uint(1),
             "processed_tokens": uint(1),
             "ticket_id": content_id(),
+        }
+    )
+    shard_key = strict({"domain_id": text(), "shard_id": text()})
+    certified_policy = strict(
+        {
+            "accumulator_proof_id": content_id(),
+            "apply_arithmetic_profile_id": content_id(),
+            "arithmetic_profile_id": content_id(),
+            "height": uint(1),
+            "parameter_schema_id": content_id(),
+            "quorum_threshold": uint(1),
+            "required_shards": array(shard_key, unique=True),
+            "round_config_id": content_id(),
+            "round_id": text(),
+            "validator_epoch_id": content_id(),
+            "validator_ids": array(text(), unique=True),
+            "view": uint(),
+        }
+    )
+    reference_result = strict(
+        {
+            "final_checkpoint_id": content_id(),
+            "ordered_data_exposure_ids": array(content_id(), unique=True),
+            "ordered_ticket_ids": array(content_id(), unique=True),
+            "parent_checkpoint_id": content_id(),
+            "processed_tokens": uint(1),
+            "result_class": {"const": "REFERENCE"},
+            "round_id": text(),
+            "terminal_outcome": {"const": "COMPLETED"},
+            "training_artifact_ids": array(content_id(), unique=True),
+        }
+    )
+    certified_result = strict(
+        {
+            "aggregate_root_qc_id": content_id(),
+            "aggregation_plan_certificate_id": content_id(),
+            "apply_qc_id": content_id(),
+            "checkpoint_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+            "effect_set_id": content_id(),
+            "eligibility_certificate_id": content_id(),
+            "final_checkpoint_id": content_id(),
+            "input_set_certificate_id": content_id(),
+            "ordered_contribution_ids": array(content_id(), unique=True),
+            "ordered_ticket_ids": array(content_id(), unique=True),
+            "parameter_shard_qc_ids": array(content_id(), unique=True),
+            "parent_checkpoint_id": content_id(),
+            "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+            "round_id": text(),
+            "runtime_receipt_id": content_id(),
+            "runtime_state_id": content_id(),
+            "runtime_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+            "seed_transcript_id": content_id(),
+            "terminal_outcome": {"const": "APPLIED"},
         }
     )
     lock_ref = strict({"path": text(), "sha256": content_id(), "target": text()})
@@ -163,6 +225,7 @@ def schema_documents() -> dict[str, dict[str, object]]:
                 "arm_id": content_id(),
                 "benchmark_definition_id": content_id(),
                 "campaign_id": {"const": "campaign-02"},
+                "certified_round_policy": {"oneOf": [{"type": "null"}, certified_policy]},
                 "dataset_ids": array(content_id(), unique=True),
                 "definition_attestation_id": content_id(),
                 "environment_id": content_id(),
@@ -175,8 +238,11 @@ def schema_documents() -> dict[str, dict[str, object]]:
                 "image_id": content_id(),
                 "model_id": content_id(),
                 "optimizer_steps_per_ticket": uint(1),
+                "parent_checkpoint_id": content_id(),
                 "processed_tokens": uint(1),
                 "repetition": uint(1),
+                "result_class": {"enum": ["REFERENCE", "CERTIFIED_DELTAREDUCE"]},
+                "round_id": text(),
                 "runner_id": content_id(),
                 "seed": uint(),
                 "source_commit": commit_id(),
@@ -190,6 +256,20 @@ def schema_documents() -> dict[str, dict[str, object]]:
                 "workload_id": content_id(),
                 "writer_id": content_id(),
             },
+            result_class_union=[
+                {
+                    "properties": {
+                        "certified_round_policy": {"type": "null"},
+                        "result_class": {"const": "REFERENCE"},
+                    }
+                },
+                {
+                    "properties": {
+                        "certified_round_policy": certified_policy,
+                        "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                    }
+                },
+            ],
         ),
         "evaluator-profile-v1": schema(
             "evaluator-profile-v1",
@@ -263,6 +343,8 @@ def schema_documents() -> dict[str, dict[str, object]]:
                 "processed_tokens": uint(1),
                 "raw_artifact_ids": array(content_id(), unique=True),
                 "repetition": uint(1),
+                "result_class": {"enum": ["REFERENCE", "CERTIFIED_DELTAREDUCE"]},
+                "run_result": {"oneOf": [reference_result, certified_result]},
                 "runner_id": content_id(),
                 "seed": uint(),
                 "source_class": {"enum": ["MEASURED_HARDWARE", "NON_PRIMARY_SMOKE"]},
@@ -273,6 +355,20 @@ def schema_documents() -> dict[str, dict[str, object]]:
                 "workload_id": content_id(),
                 "writer_id": content_id(),
             },
+            result_class_union=[
+                {
+                    "properties": {
+                        "result_class": {"const": "REFERENCE"},
+                        "run_result": reference_result,
+                    }
+                },
+                {
+                    "properties": {
+                        "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                        "run_result": certified_result,
+                    }
+                },
+            ],
         ),
         "observation-receipt-v1": schema(
             "observation-receipt-v1",
@@ -340,7 +436,7 @@ def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
         "fixtures": fixture_entries(),
         "formal_semantics_id": FORMAL_ID,
         "media_types": media_types,
-        "registry_version": "010.2.0-remediation",
+        "registry_version": "010.2.1-remediation",
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,
     }

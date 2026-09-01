@@ -77,7 +77,9 @@ jobs:
         run: |
           uv run ruff check \
             delta-worker-python/src/deltatorrent/benchmark \
+            delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
+            delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
             specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
@@ -86,7 +88,9 @@ jobs:
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py
           uv run ruff format --check \
             delta-worker-python/src/deltatorrent/benchmark \
+            delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
+            delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
             specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
@@ -96,6 +100,7 @@ jobs:
           uv run mypy delta-worker-python/src/deltatorrent/benchmark
           uv run pytest \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
+            delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
             specs/010-wan-benchmark-and-quality/tests/test_benchmark_contracts.py \
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py \
             --junitxml="$RUNNER_TEMP/campaign-02-portable.xml"

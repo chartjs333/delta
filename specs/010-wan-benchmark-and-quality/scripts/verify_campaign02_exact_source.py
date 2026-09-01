@@ -130,6 +130,10 @@ def verify_governance() -> dict[str, object]:
         ROOT / "reports/benchmark/campaigns/campaign-02/remediation-authorization.json",
         "CAMPAIGN02_REMEDIATION_AUTHORIZATION_INVALID",
     )
+    supersession = canonical_file(
+        ROOT / "reports/benchmark/campaigns/campaign-02/qualification-supersession.json",
+        "CAMPAIGN02_OLD_QUALIFICATION_SUPERSESSION_INVALID",
+    )
     require(
         closure.get("benchmark_definition_id") == OLD_DEFINITION
         and closure.get("status") == "TERMINATED_NO_GO_AFTER_STAGE_A_BEFORE_SCIENTIFIC_EXECUTION"
@@ -151,8 +155,19 @@ def verify_governance() -> dict[str, object]:
         and all(authorization.get(field) is False for field in required_false),
         "CAMPAIGN02_REMEDIATION_AUTHORIZATION_INVALID",
     )
+    require(
+        supersession.get("status") == "SUPERSEDED_BEFORE_CAMPAIGN02_DEFINITION"
+        and supersession.get("reason") == "RUN_LEVEL_CERTIFIED_FINALIZATION_CONTRACT_INCOMPLETE"
+        and supersession.get("source_commit") == "6c68dc6c7360ef8a85efdf59f6b232be6c52a849"
+        and supersession.get("source_tree") == "8bba1e1a12a94bcfd176ccfc307b9425851092ea"
+        and supersession.get("evidence_head") == "2157d81abd3543a3b3c4ba8655797c1a363c036f"
+        and supersession.get("primary_scientific_execution_count") == 0
+        and supersession.get("scientific_observations_created") is False,
+        "CAMPAIGN02_OLD_QUALIFICATION_SUPERSESSION_INVALID",
+    )
     return {
         "campaign01_closure_id": sha256_content_id(canonical_json_bytes(closure)),
+        "old_qualification_supersession_id": sha256_content_id(canonical_json_bytes(supersession)),
         "remediation_authorization_id": sha256_content_id(canonical_json_bytes(authorization)),
         "status": "PASS",
     }
@@ -330,9 +345,16 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
         "PRIMARY_SCIENTIFIC_RUNNER",
         (
             "delta-worker-python/src/deltatorrent/benchmark/campaign02.py",
+            "delta-worker-python/src/deltatorrent/benchmark/feature008_admission.py",
             "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
             "delta-worker-python/src/deltatorrent/qlora/backend.py",
             "delta-worker-python/src/deltatorrent/qlora/trainer.py",
+            "delta-core-cpp/include/delta/certificates/contracts.hpp",
+            "delta-core-cpp/include/delta/certificates/verifier.hpp",
+            "delta-core-cpp/src/certificates/contracts.cpp",
+            "delta-core-cpp/src/certificates/verifier.cpp",
+            "delta-ffi/include/delta_abi.h",
+            "delta-ffi/src/certificates_abi.cpp",
         ),
         **common,
     )
@@ -342,6 +364,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             sorted(
                 {
                     "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+                    "delta-worker-python/src/deltatorrent/benchmark/feature008_admission.py",
                     *(path for paths in EVALUATOR_SOURCES.values() for path in paths),
                 }
             )
@@ -353,6 +376,8 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
         (
             "delta-worker-python/src/deltatorrent/benchmark/campaign02.py",
             "delta-worker-python/src/deltatorrent/benchmark/evaluators/common.py",
+            "delta-worker-python/src/deltatorrent/benchmark/feature008_admission.py",
+            "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
             "delta-worker-python/src/deltatorrent/benchmark/observation_writer.py",
         ),
         **common,
@@ -384,6 +409,8 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "PINNED_OCI_CUDA_IMAGE_AND_SBOM_PASS",
             "THREE_PREREGISTERED_MEASURED_EVALUATORS_AND_GOLDENS_PASS",
             "SOURCE_BOUND_SCIENTIFIC_EVALUATION_RUNNERS_PASS",
+            "RUN_LEVEL_FEATURE008_CERTIFICATE_CHAIN_ADMISSION_PASS",
+            "FINAL_CHECKPOINT_APPLY_QC_RUNTIME_WAL_BINDING_PASS",
             "CREATE_ONLY_TYPED_OBSERVATION_WRITER_PASS",
             "PORTABLE_EXACT_SOURCE_TESTS_PASS",
             "DESIGNATED_GPU_HARDWARE_QUALIFICATION_PASS",
