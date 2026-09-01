@@ -175,6 +175,7 @@ delta_target_defaults(delta_runtime)
 
 add_library(delta_ffi SHARED
   delta-ffi/src/benchmark_abi.cpp
+  delta-ffi/src/certificate_chain_abi.cpp
   delta-ffi/src/certificates_abi.cpp
   delta-ffi/src/delta_abi.cpp
   delta-ffi/src/distribution_abi.cpp
@@ -773,6 +774,42 @@ if(BUILD_TESTING)
     PRIVATE DELTA_CERTIFICATE_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/008/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_certificates_test)
   add_test(NAME delta_ffi.certificates COMMAND delta_ffi_certificates_test)
+
+  add_executable(
+    delta_ffi_certificate_chain_test
+    delta-ffi/tests/certificate_chain_abi_test.cpp)
+  target_link_libraries(delta_ffi_certificate_chain_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_certificate_chain_test
+    PRIVATE DELTA_CERTIFICATE_CHAIN_CORPUS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/010/campaign-02/native-chain-conformance-v1.json")
+  delta_target_defaults(delta_ffi_certificate_chain_test)
+  add_test(NAME delta_ffi.certificate_chain COMMAND delta_ffi_certificate_chain_test)
+
+  foreach(mutant IN ITEMS SEED_PARENT OBSERVED_COVERAGE)
+    string(TOLOWER "${mutant}" mutant_lower)
+    set(mutant_test "delta_ffi_certificate_chain_${mutant_lower}_mutant_test")
+    add_executable(
+      ${mutant_test}
+      delta-ffi/src/certificate_chain_abi.cpp
+      delta-ffi/tests/certificate_chain_abi_test.cpp)
+    target_include_directories(
+      ${mutant_test}
+      PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include)
+    target_link_libraries(
+      ${mutant_test}
+      PRIVATE delta_certificates_${mutant_lower}_mutant delta::core)
+    target_compile_definitions(
+      ${mutant_test}
+      PRIVATE DELTA_FFI_BUILD
+              DELTA_CERTIFICATE_CHAIN_CORPUS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/010/campaign-02/native-chain-conformance-v1.json")
+    delta_target_defaults(${mutant_test})
+    add_test(
+      NAME "delta_ffi.certificate_chain_mutant_${mutant_lower}"
+      COMMAND ${mutant_test})
+    set_tests_properties(
+      "delta_ffi.certificate_chain_mutant_${mutant_lower}"
+      PROPERTIES WILL_FAIL TRUE)
+  endforeach()
 
   add_executable(delta_ffi_scheduling_test delta-ffi/tests/scheduling_abi_test.cpp)
   target_link_libraries(delta_ffi_scheduling_test PRIVATE delta::ffi)

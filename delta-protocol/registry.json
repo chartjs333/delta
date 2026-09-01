@@ -56,6 +56,11 @@
       "sha256": "dabe65925d9c6acf5ce7944e0b5707523385323ee81ebd6227679a395c37b5f5"
     },
     {
+      "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
+      "path": "schemas/010/campaign-02/registry-v1.json",
+      "sha256": "56b9dd1c14fc25e5aa31e1946c2281e63edb0ff408d36e884424bfda5a45027c"
+    },
+    {
       "id": "REGISTRY-BENCHMARK-010",
       "path": "schemas/010/registry-v1.json",
       "sha256": "813a2ee0e2cab7db4c9b9b39315bb916a40910dd046b558b362a48ec2059f896"
@@ -191,6 +196,41 @@
       "id": "QLORA009-VALID-CONTRACT-V1",
       "path": "fixtures/009/valid/qlora-contract-v1.json",
       "sha256": "c2982a55e642a1f03ad07d82e9d3d5e1bb9c24f9be6c0d8124e25d819d1abcd9"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-HELLASWAG_NEGATIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/hellaswag-negative-v1.json",
+      "sha256": "62be9fa8b7c7795829f8bef3ad5d418c161e1e23f77244990864a63114424bf0"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-HELLASWAG_POSITIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/hellaswag-positive-v1.json",
+      "sha256": "5c89ddad12cdfeda23efb56a9e1009a18181402eb5304d883d7e2ba6b202c4d8"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-LAMBADA_NEGATIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/lambada-negative-v1.json",
+      "sha256": "e2d168f5955fe638fac2bcb4c4d9371d3a45a0a7d76f046c671fa9b1db424e1b"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-LAMBADA_POSITIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/lambada-positive-v1.json",
+      "sha256": "1d52afea60bef362fd9ae774b10b656d71a8dd579240fba9bf473141e1d2bc15"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-WIKITEXT_NEGATIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/wikitext-negative-v1.json",
+      "sha256": "910965b6e150b16ecf30fc6a2b44a52d7361e9c5765a6bcc9105eabbb15a7fa6"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-WIKITEXT_POSITIVE_V1",
+      "path": "fixtures/010/campaign-02/evaluators/wikitext-positive-v1.json",
+      "sha256": "d21f12390300b3f85eec819d67947c4bfb589eab9cb5caa20b086cb321fe8feb"
+    },
+    {
+      "id": "BENCHMARK010-CAMPAIGN02-NATIVE_CHAIN_CONFORMANCE_V1",
+      "path": "fixtures/010/campaign-02/native-chain-conformance-v1.json",
+      "sha256": "9d6cc278220ba797c783ae1dd1846f7a335bcf483932b2e8fc9c7785fe0c6233"
     },
     {
       "id": "BENCHMARK010-CROSS-LANGUAGE-GOLDEN-V1",
@@ -354,6 +394,56 @@
       "id": "MEDIA-BFT-CANONICAL-BINARY-V1",
       "schema_id": "SCHEMA-BFT-PROTOCOL-TYPES-V1",
       "value": "application/vnd.deltareduce.bft-envelope;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-COMPONENT-IDENTITY-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-COMPONENT-IDENTITY-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.component-identity-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-EVALUATOR-PROFILE-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.evaluator-profile-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-EXECUTION-PLAN-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.execution-plan-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.gpu-environment-lock-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-MEASURED-EVALUATION-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-MEASURED-EVALUATION-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.measured-evaluation-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.native-chain-admission-bundle-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.native-chain-admission-receipt-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-OBSERVATION-RECEIPT-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.observation-receipt-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-OBSERVATION-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.observation-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-WORKLOAD-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-WORKLOAD-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.workload-v2+json;version=2"
     },
     {
       "id": "MEDIA-CAPABILITY-PROFILE-V1",
@@ -988,6 +1078,56 @@
       "id": "SCHEMA-BENCHMARK-RESULT-010-V1",
       "path": "schemas/010/benchmark-result-v1.json",
       "sha256": "6a2c97f92a97581250290e103dac36777cebff9fb8c2d350474cae36fa1d7a73"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-COMPONENT-IDENTITY-010-V1",
+      "path": "schemas/010/campaign-02/component-identity-v1.json",
+      "sha256": "2ba1ac988f8e38ac2fa931f0aa19f4525da7437402843c0ccd7b32d817fe7cf5"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
+      "path": "schemas/010/campaign-02/evaluator-profile-v1.json",
+      "sha256": "164f6fbee00c23f7c0dd7f285e5cc4d89811f591146fcbd820bcac8434efc93f"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
+      "path": "schemas/010/campaign-02/execution-plan-v2.json",
+      "sha256": "aed5174463d0e2bb9ebf81722f5273be6c7a0cc4044d6e5557d190b2501dbcef"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
+      "path": "schemas/010/campaign-02/gpu-environment-lock-v1.json",
+      "sha256": "414d0a3f8085b400fd6efd556e56109dfdd8dc93de920282670c43d70bd3e1f2"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-MEASURED-EVALUATION-010-V1",
+      "path": "schemas/010/campaign-02/measured-evaluation-v1.json",
+      "sha256": "34d13279b98cb2d42c5edf27a409a670eea880016c06ad42032e7e1f87e90d02"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-010-V1",
+      "path": "schemas/010/campaign-02/native-chain-admission-bundle-v1.json",
+      "sha256": "e7fe37d3d97fb2e1b0a10a7d358ce28837b2ff22bc1c8cab2ff45264d95e9e51"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-010-V1",
+      "path": "schemas/010/campaign-02/native-chain-admission-receipt-v1.json",
+      "sha256": "e73b2fd9999fa4db0a3ce869121d927e25e45b6cf759de3403e03a6ca726ad1a"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
+      "path": "schemas/010/campaign-02/observation-receipt-v1.json",
+      "sha256": "bbaf01a0f29b0726b34bbe97fa16191787b61a9abcb7f7cd0a4b3670cc4794aa"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
+      "path": "schemas/010/campaign-02/observation-v2.json",
+      "sha256": "9d660393be0b4eb50efa9b5016db3035a88c443c1e98a6612e947710c6075cb8"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-WORKLOAD-010-V2",
+      "path": "schemas/010/campaign-02/workload-v2.json",
+      "sha256": "7d3f30556f97617d59a83f6137fa7e0cd1ae8ce6f61b96ab010cc32580ece492"
     },
     {
       "id": "SCHEMA-EFFICIENCY-EVIDENCE-010-V1",

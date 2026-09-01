@@ -1,0 +1,85 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:workload-v2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN_WORKLOAD"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "domain_ticket_counts": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "domain_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ticket_count": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "domain_id",
+          "ticket_count"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "execution_class": {
+      "const": "DESIGN_ONLY_NO_PRIMARY_EXECUTION"
+    },
+    "optimizer_steps_per_ticket": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "ticket_count": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "tokens_per_optimizer_step": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "tokens_per_ticket": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "total_tokens_per_arm_run": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "domain_ticket_counts",
+    "execution_class",
+    "formal_semantics_id",
+    "optimizer_steps_per_ticket",
+    "schema_version",
+    "ticket_count",
+    "tokens_per_optimizer_step",
+    "tokens_per_ticket",
+    "total_tokens_per_arm_run",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 workload-v2"
+}

@@ -1263,10 +1263,9 @@ def root_registry_bytes(registry: dict[str, Any]) -> bytes:
     root["extensions"] = [
         entry for entry in root["extensions"] if entry.get("id") != "REGISTRY-BENCHMARK-010"
     ]
+    owned_fixture_ids = {entry["id"] for entry in registry["fixtures"]}
     root["fixtures"] = [
-        entry
-        for entry in root["fixtures"]
-        if not str(entry.get("id", "")).startswith("BENCHMARK010-")
+        entry for entry in root["fixtures"] if entry.get("id") not in owned_fixture_ids
     ]
     root["media_types"] = [
         entry for entry in root["media_types"] if entry.get("schema_id") not in schema_ids
