@@ -51,3 +51,19 @@ def test_campaign02_current_tree_has_no_prohibited_execution_artifacts() -> None
     counts = MODULE.prohibited_counts(MODULE.campaign_paths(head))
     assert counts
     assert all(value == 0 for value in counts.values())
+
+
+def test_campaign02_temporal_evidence_is_current_and_fail_closed() -> None:
+    current = MODULE.json.loads(MODULE.OUTPUT_PATH.read_bytes())
+    expected = MODULE.build(current["verified_head"])
+    assert MODULE.OUTPUT_PATH.read_bytes() == MODULE.canonical_json_bytes(expected) + b"\n"
+    assert current["status"] == "PASS_AWAITING_SEPARATE_C2_016_GOVERNANCE"
+    assert current["definition_created_commit"] == ("a2eaf47e17c616e78a4ec4666fcb33c030a765e6")
+    assert current["definition_attestation_finalized_commit"] == (
+        "d2c8576857f684e1eacbc952756fc59f3cfcf40f"
+    )
+    assert current["verifier_commit"] == "d68907453d898161066c472d48527527f9458812"
+    assert all(value == 0 for value in current["observation_counts"].values())
+    assert current["benchmark_result_qc"] == "ABSENT"
+    assert current["execution_authorization"] == "ABSENT"
+    assert all(value is False for value in current["authorization"].values())

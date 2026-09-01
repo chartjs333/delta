@@ -47,6 +47,12 @@ Machine-readable evidence:
   manifest, evaluator implementation IDs and runner/writer IDs.
 - `evidence/campaign-02-exact-source-ci-receipt.json` — passing dedicated workflow run and
   immutable artifact digests.
+- `configs/benchmark/campaign-02/definition-v1.json` — new immutable Campaign 02 Definition;
+- `reports/benchmark/campaigns/campaign-02/methodology-diff.json` and
+  `definition-readiness.json` — attested scientific-methodology preservation and executable
+  fail-closed plan;
+- `evidence/campaign-02-definition-temporal-integrity.json` — Definition/attestation ordering and
+  zero pre-authorization observations, receipts, real-WAN evidence and result QC.
 
 Completion of `C2-011` does not authorize primary execution.
 
@@ -68,7 +74,7 @@ The remaining tasks begin only after remediation is merged into
 
 - [x] **C2-013** Create a new immutable `BenchmarkDefinition`; never edit or reuse Campaign 01.
 - [x] **C2-014** Create the methodology diff, definition attestation and readiness record.
-- [ ] **C2-015** Verify no scientific observation predates the new attestation.
+- [x] **C2-015** Verify no scientific observation predates the new attestation.
 - [ ] **C2-016** Obtain a separate governance authorization before any new Stage A execution.
 
 ## Unconditional STOP conditions
