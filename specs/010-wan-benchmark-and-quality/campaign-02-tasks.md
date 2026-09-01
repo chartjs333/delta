@@ -28,10 +28,10 @@ satisfy any Campaign 02 gate. No task in this file authorizes primary execution.
   checkpoint.
 - [x] **C2-009** Run the remediation portable positive/negative test suite, including the
   run-level finalization rejection matrix.
-- [ ] **C2-010** Reissue exact GPU environment and designated-hardware qualification for the new
+- [x] **C2-010** Reissue exact GPU environment and designated-hardware qualification for the new
   source commit/tree.
 - [ ] **C2-011** Run exact-source remediation CI for the replacement source seal.
-- [ ] **C2-012** Freeze the replacement Campaign 02 remediation source commit/tree and derived
+- [x] **C2-012** Freeze the replacement Campaign 02 remediation source commit/tree and derived
   component IDs.
 
 Machine-readable evidence:
