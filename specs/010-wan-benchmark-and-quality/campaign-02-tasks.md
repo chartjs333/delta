@@ -1,9 +1,14 @@
 # Campaign 02 remediation and staged execution tasks
 
-**Authority**: `APPROVED_FOR_NEW_CAMPAIGN_REMEDIATION_ONLY`
+**Remediation authority**: `APPROVED_FOR_NEW_CAMPAIGN_REMEDIATION_ONLY`
+
+**Definition authority**: `APPROVED_FOR_MERGE_AND_DEFINITION_CONSTRUCTION_ONLY`
 
 **Source branch**: `010e-primary-campaign-remediation` from
 `661494c84cfcdb365c21542b46a5ebfe3a91cd8d`
+
+**Definition branch**: `010f-primary-campaign-definition` from remediation merge
+`8e945ac9713de5898d3abdb10ad2474079a87260`
 
 **Formal impact**: `REGRESSION_ONLY` against
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
@@ -61,7 +66,7 @@ the complete bundle.
 The remaining tasks begin only after remediation is merged into
 `010-wan-benchmark-and-quality` and branch `010f-primary-campaign-definition` is created.
 
-- [ ] **C2-013** Create a new immutable `BenchmarkDefinition`; never edit or reuse Campaign 01.
+- [x] **C2-013** Create a new immutable `BenchmarkDefinition`; never edit or reuse Campaign 01.
 - [ ] **C2-014** Create the methodology diff, definition attestation and readiness record.
 - [ ] **C2-015** Verify no scientific observation predates the new attestation.
 - [ ] **C2-016** Obtain a separate governance authorization before any new Stage A execution.
