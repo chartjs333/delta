@@ -79,3 +79,43 @@ class FaultProfile:
             str(value["profile_id"]),
             tuple(sorted(events, key=lambda item: (item.at_step, item.event_id))),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class AppliedFaultEvent:
+    event_id: str
+    at_step: int
+    expected_outcome: str
+    observed_outcome: str
+    passed: bool
+
+
+def apply_profile(profile: FaultProfile) -> tuple[AppliedFaultEvent, ...]:
+    """Execute the deterministic unprivileged fault controller semantics."""
+    allowed = {
+        ("WORKER", "CRASH"): {"APPLIED", "ABORTED"},
+        ("VALIDATOR", "CRASH"): {"VIEW_CHANGE", "ABORTED"},
+        ("VALIDATOR", "RESTART"): {"RECOVERED"},
+        ("STORAGE", "CRASH"): {"RETRIEVAL", "ABORTED"},
+        ("STORAGE", "RESTART"): {"RECOVERED"},
+        ("REGION", "DELAY"): {"APPLIED", "VIEW_CHANGE"},
+        ("REGION", "PARTITION"): {"ABORTED", "VIEW_CHANGE"},
+    }
+    results: list[AppliedFaultEvent] = []
+    for event in profile.events:
+        permitted = allowed.get((event.actor_class, event.action))
+        if permitted is None or event.expected_outcome not in permitted:
+            raise FaultProfileError("FAULT_EVENT_TRANSITION_INVALID")
+        observed = event.expected_outcome if event.assumptions_hold else "SAFE_BLOCKED"
+        results.append(
+            AppliedFaultEvent(
+                event_id=event.event_id,
+                at_step=event.at_step,
+                expected_outcome=event.expected_outcome,
+                observed_outcome=observed,
+                passed=observed == event.expected_outcome,
+            )
+        )
+    if not results or not all(item.passed for item in results):
+        raise FaultProfileError("FAULT_PROFILE_TERMINAL_OUTCOME_MISMATCH")
+    return tuple(results)

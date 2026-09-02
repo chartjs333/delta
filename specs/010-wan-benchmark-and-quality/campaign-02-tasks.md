@@ -4,11 +4,20 @@
 
 **Execution-binding remediation authority**: PR #16 governance review `CHANGES_REQUIRED`
 
+**Definition construction authority**: post-merge governance decision
+`APPROVED_FOR_MERGE_AND_C2_022_ONLY`
+
 **Source branch**: `010e-primary-campaign-remediation` from
 `661494c84cfcdb365c21542b46a5ebfe3a91cd8d`
 
 **Execution-binding branch**: `010g-campaign02-execution-binding` from remediation merge
 `8e945ac9713de5898d3abdb10ad2474079a87260`
+
+**Definition branch**: `010h-campaign02-immutable-definition` from PR #17 merge
+`881301d8443c667a478617cc663d1450aee9777a`
+
+**Stage-runner remediation branch**: `010i-campaign02-runner-remediation` from the immutable
+PR #18 construction head `9a4d0d8062ac432d7104284c75dc4b24773dadb0`
 
 **Formal impact**: `REGRESSION_ONLY` against
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
@@ -75,7 +84,7 @@ The remaining tasks begin only after remediation is merged into
 
 The Definition `sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af`
 and its quorum-shaped unsigned record are superseded before execution. They remain immutable audit
-history and cannot satisfy the tasks below.
+history in closed PR #16 and cannot satisfy the tasks below.
 
 - [x] **C2-017** Publish the pre-execution supersession record with zero observations and no
   execution authorization.
@@ -94,8 +103,12 @@ history and cannot satisfy the tasks below.
   source `f323ae1...` / tree `6cb86a3...`, evidence overlay `8936015...`, designated-GPU report,
   96-case portable corpus and workflow `33620734265` passed; current-head control recorded 48
   successful checks, four policy skips and no failures or pending checks.
-- [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
-  workload/domain/ticket IDs and qualified runtime lineage.
+- [x] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
+  workload/domain/ticket IDs, the qualified runtime lineage and content-addressed exactness,
+  scientific, evaluation, observation, network/fault, gate-analyzer, stage-authorization,
+  typed-receipt and native Feature 008 implementation identities. The Definition is
+  `sha256:b263e77766599426dbf13574b05f2104ace1acf2d866e6ca5d9a3abef66f5dd5`;
+  it creates no validator set, vote, attestation, plan catalog or execution authority.
 - [ ] **C2-023** Obtain independent detached signatures and verify temporal closure at the actual
   terminal reviewed HEAD.
 - [ ] **C2-024** Obtain a new separate governance decision before any Stage A execution. This task
@@ -133,6 +146,115 @@ Execution-binding qualification evidence:
   overlay; source `90f4b46...` and evidence overlay `67d0383...` are also historical after the
   terminal receipt-head TSan failure. The replacement chain retains zero primary observations and
   no execution authorization.
+- `configs/benchmark/campaign-02/definition-v2.json` and
+  `qualified-runtime-lineage-v2.json` — the new immutable C2-022 Definition and its 36 independent
+  certified stage contexts, bound to qualified source `f323ae1...` / tree `6cb86a3...`;
+- `configs/benchmark/campaign-02/stage-execution-identities-v1.json` — content-addressed bindings
+  for every Stage A/B/C runner/verifier role; every execution flag remains false;
+- `reports/benchmark/campaigns/campaign-02/definition-readiness-v2.json` — records zero independent
+  votes, absent attestation/catalog/execution authorization and C2-023 as the only next gate.
+
+## Stage-runner remediation after PR #18 review
+
+Definition `sha256:b263e77766599426dbf13574b05f2104ace1acf2d866e6ca5d9a3abef66f5dd5`
+is immutable audit history with status `SUPERSEDED_BEFORE_ATTESTATION`, zero votes, absent
+attestation and zero observations. It must not be signed, used to compile an executable catalog or
+edited in place. PR #18 remains Draft and is not authorized for merge.
+
+- [x] **C2-028** Replace the composite plan runner binding with exact stage-specific exactness,
+  scientific and network/fault runner IDs, and recursively verify the complete stage identity
+  manifest directly bound by runtime lineage and Definition.
+- [x] **C2-029** Implement the source-bound Campaign 02 Stage A executor and manual-only workflow;
+  require a verified Definition attestation, authoritative catalog, detached signed Stage A
+  authorization, exact runtime lineage and exact identity manifest, then close exactly 15 plans.
+- [x] **C2-030** Emit a canonical create-only typed Stage A receipt only after the complete native,
+  JDK 25/JDK 26 and cross-component exactness matrix passes; bind its exact plan set, evidence root,
+  runner, source, authorization attestation and gate result/QC identities.
+- [x] **C2-031** Implement the Campaign 02 Stage C executor with the network/fault runner identity,
+  exact 15-plan closure and exact Stage A plus Stage B predecessor receipt verification.
+- [x] **C2-032** Run the cross-component positive/negative regression matrix for stage-specific
+  runner IDs, actual `PrimaryScientificRunner` compatibility, non-executable composite metadata,
+  Campaign 01 rejection, signed authorization, exact plan cardinality and complete evidence.
+- [x] **C2-033** Reissue the immutable source commit/tree, designated-GPU report, portable corpus,
+  TSan qualification and terminal-head CI receipt; only then construct new stage identities,
+  runtime lineage and a replacement immutable Definition with a new content ID.
+
+Completion of C2-028 through C2-032 is source remediation only. It does not create Definition
+votes, attestation, stage authorization, gate receipt, primary observation or execution authority.
+
+Machine-readable source qualification evidence:
+
+- `evidence/campaign-02-runner-remediation-hardware-qualification.json` — designated GPU,
+  pinned CUDA 12.4/PyTorch/bitsandbytes environment and non-primary QLoRA/NF4 probe for source
+  `287a1ce...` / tree `aa1ecb4...`;
+- `evidence/campaign-02-runner-remediation-exact-source-qualification.json` — 116-case portable
+  corpus, recursive source/component identities and C2-028 through C2-032 checks for that exact
+  source, with zero primary scientific executions and observations.
+
+The source/evidence chain `287a1ce...` / `aa1ecb4...`, overlay `b4bbb08...` and workflow
+`33650130142` passed, but is retained as historical audit evidence only. During replacement
+manifest construction it exposed that typed gate receipts still used a legacy global gate-analyzer
+ID instead of the recursively verified manifest identity. The chain is superseded before any new
+Definition by `reports/benchmark/campaigns/campaign-02/qualification-supersession-runner-gate-analyzer.json`.
+
+The replacement source is `7caad473501a31d95e24408901a6a2236ec03ce6` / tree
+`515d65fbf5a18ab872c8f31187b7a0788a33badc`. Its current machine-readable evidence is:
+
+- `evidence/campaign-02-runner-gate-analyzer-hardware-qualification.json` — passing designated-GPU
+  probe for the replacement source;
+- `evidence/campaign-02-runner-gate-analyzer-exact-source-qualification.json` — passing 116-case
+  portable corpus and recursively bound stage-runner/gate-analyzer source identities.
+
+Both records retain zero primary scientific executions and observations. The closing TSan,
+dedicated exact-source CI, terminal current-head control and Definition package are recorded below.
+
+C2-033 replacement construction is now closed by dedicated workflow `33651585075`, exact TSan,
+terminal overlay `5192b38...` with 49 successful checks, seven policy skips and no failures or
+pending checks, and `evidence/campaign-02-runner-gate-analyzer-exact-source-ci-receipt.json`.
+The replacement stage identity manifest is
+`sha256:59d7345a158086e20574eec0a1c3b095f3e8557c1147e422eab71f5ddcd4a56d`, runtime lineage is
+`sha256:159db3bc3214bb6039fc5ceaf7770caffbdd261f6b3dd6b178da486e955a8b76`, and immutable Definition is
+`sha256:3844edbdcfc402ca3fbd54f9a2e4dfab965a8a7280a6ccd3dad70611e88ee803`.
+It has zero votes, absent attestation, no authoritative catalog, no execution authorization and
+zero observations. Governance review of this replacement package is required before C2-023.
+
+## Executable-provenance remediation after PR #19 review
+
+Definition `sha256:3844edbdcfc402ca3fbd54f9a2e4dfab965a8a7280a6ccd3dad70611e88ee803`
+is immutable audit history with status `SUPERSEDED_BEFORE_ATTESTATION`, zero votes, absent
+attestation and zero observations. It must not be signed or edited in place. PR #19 remains Draft;
+merge, C2-023, C2-024 and all Stage A/B/C execution remain unauthorized.
+
+- [x] **C2-034** Bind the actual production Stage A/C runner object and gate finalizer to the exact
+  manifest identity, role, source commit/tree, environment, source class, implementation ID and
+  recursively verified executable bytes before the first plan; reject dry, fixture, synthetic and
+  caller-supplied primary runners. Keep admission-only tests unable to create a gate receipt.
+- [x] **C2-035** Implement a concrete `Campaign02NetworkFaultRunner` that loads and re-hashes every
+  Definition network/fault profile, executes each emulated profile and fault trace for all 15 plans,
+  checks expected outcomes and emits typed per-plan counters and resilience evidence.
+- [x] **C2-036** Parse the seven retained Stage A native/JDK/Python artifacts, require the exact
+  expected test/version/marker sets with zero failures/errors/skips, and bind their raw digests to
+  canonical verified summaries before receipt emission.
+- [x] **C2-037** Bind Stage A to actual GitHub workflow/dispatch SHA, repository/ref, workflow blob,
+  run ID/attempt, authority digest and all retained input/output digests; reject mismatched SHA/ref,
+  reruns and fabricated same-named evidence. Registering the immutable workflow on `main` remains a
+  separate pre-C2-024 governance/merge operation and is not authorized by this remediation.
+
+Completion requires a new immutable source seal, designated-GPU report, portable corpus, TSan and
+terminal-head CI receipt. Only then may a create-only Definition v4 be constructed for another
+governance review. These tasks never authorize a benchmark stage or create a primary observation.
+
+C2-034 through C2-037 are closed by source `b97fd541a7ef7f100b8ff1ccf4ced61aa2880de2`
+/ tree `354bd4cae74e568b8489b667aeb4e88f36de57e0`, the designated-GPU and exact-source
+`campaign-02-runner-provenance-*` evidence records, and dedicated workflow `33662489371` with
+portable, TSan and exact-source join jobs all passing. The recursively verified stage identity
+manifest is `sha256:e318e753fc1317257973850cb60b6483a768fde66c819c6cfcaf8d136ca87c1b`,
+runtime lineage v4 is `sha256:6f45bad28e192b2210854dd6038e81445bb79ccb93d8b21a126838b146ada670`,
+and create-only Definition v4 is
+`sha256:26830d3199482873832f4030641c20a0758c4f474abebacbc668de35d56dfdf9`.
+Definition v4 has zero votes, absent attestation, no authoritative catalog, no execution authority
+and zero observations. A new governance review is required before C2-023. Registration of the
+immutable Stage A workflow on `main` remains a separate pre-C2-024 operation.
 
 ## Unconditional STOP conditions
 

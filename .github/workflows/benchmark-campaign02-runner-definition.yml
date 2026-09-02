@@ -1,0 +1,99 @@
+name: Campaign 02 runner-remediation Definition construction
+
+on:
+  pull_request:
+    branches: [010-wan-benchmark-and-quality]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: campaign-02-runner-definition-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  immutable-replacement-definition:
+    name: Replacement Definition and governance STOP gates
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          github.head_ref == '010i-campaign02-runner-remediation' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact reviewed head
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Materialize locked construction environment
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.6.14
+          uv sync --frozen
+      - name: Verify generated replacement package and predecessor immutability
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_definition.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_runner_definition.py
+          git diff --exit-code 9a4d0d8062ac432d7104284c75dc4b24773dadb0 -- \
+            configs/benchmark/campaign-02/definition-v2.json \
+            configs/benchmark/campaign-02/qualified-runtime-lineage-v2.json \
+            configs/benchmark/campaign-02/stage-execution-identities-v1.json \
+            reports/benchmark/campaigns/campaign-02/definition-readiness-v2.json
+          git diff --exit-code
+      - name: Run replacement Definition and execution-compatibility regression
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run pytest \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_runner_definition.py \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py
+      - name: Verify no authority or observation was constructed
+        run: |
+          test ! -f configs/benchmark/campaign-02/definition-v3-attestation.json
+          test ! -f configs/benchmark/campaign-02/definition-v3-votes.json
+          test ! -f reports/benchmark/campaigns/campaign-02/stage-a-gate-receipt.json
+          test ! -f reports/benchmark/campaigns/campaign-02/benchmark-result-qc.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.')
+          ready = json.loads((root / 'reports/benchmark/campaigns/campaign-02/definition-readiness-v3.json').read_bytes())
+          supersession = json.loads((root / 'reports/benchmark/campaigns/campaign-02/definition-supersession-runner-binding.json').read_bytes())
+          assert ready['execution_authorization'] == 'ABSENT'
+          assert ready['primary_observations_created'] == 0
+          assert ready['c2_023']['independent_votes_present'] == 0
+          assert not ready['plan_catalog']['authoritative_catalog_created']
+          assert all(value is False for value in ready['authorization'].values())
+          assert supersession['status'] == 'SUPERSEDED_BEFORE_ATTESTATION'
+          assert supersession['votes'] == supersession['observations'] == 0
+          assert supersession['attestation'] == 'ABSENT'
+          PY
+      - name: Retain immutable replacement review package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign-02-runner-definition-${{ github.run_id }}
+          path: |
+            configs/benchmark/campaign-02/definition-v3.json
+            configs/benchmark/campaign-02/qualified-runtime-lineage-v3.json
+            configs/benchmark/campaign-02/stage-execution-identities-v2.json
+            reports/benchmark/campaigns/campaign-02/definition-readiness-v3.json
+            reports/benchmark/campaigns/campaign-02/definition-supersession-runner-binding.json
+            reports/benchmark/campaigns/campaign-02/methodology-diff-v3.json
+            specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-gate-analyzer-exact-source-ci-receipt.json
+          if-no-files-found: error
+          retention-days: 30
