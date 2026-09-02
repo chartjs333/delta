@@ -225,17 +225,17 @@ is immutable audit history with status `SUPERSEDED_BEFORE_ATTESTATION`, zero vot
 attestation and zero observations. It must not be signed or edited in place. PR #19 remains Draft;
 merge, C2-023, C2-024 and all Stage A/B/C execution remain unauthorized.
 
-- [ ] **C2-034** Bind the actual production Stage A/C runner object and gate finalizer to the exact
+- [x] **C2-034** Bind the actual production Stage A/C runner object and gate finalizer to the exact
   manifest identity, role, source commit/tree, environment, source class, implementation ID and
   recursively verified executable bytes before the first plan; reject dry, fixture, synthetic and
   caller-supplied primary runners. Keep admission-only tests unable to create a gate receipt.
-- [ ] **C2-035** Implement a concrete `Campaign02NetworkFaultRunner` that loads and re-hashes every
+- [x] **C2-035** Implement a concrete `Campaign02NetworkFaultRunner` that loads and re-hashes every
   Definition network/fault profile, executes each emulated profile and fault trace for all 15 plans,
   checks expected outcomes and emits typed per-plan counters and resilience evidence.
-- [ ] **C2-036** Parse the seven retained Stage A native/JDK/Python artifacts, require the exact
+- [x] **C2-036** Parse the seven retained Stage A native/JDK/Python artifacts, require the exact
   expected test/version/marker sets with zero failures/errors/skips, and bind their raw digests to
   canonical verified summaries before receipt emission.
-- [ ] **C2-037** Bind Stage A to actual GitHub workflow/dispatch SHA, repository/ref, workflow blob,
+- [x] **C2-037** Bind Stage A to actual GitHub workflow/dispatch SHA, repository/ref, workflow blob,
   run ID/attempt, authority digest and all retained input/output digests; reject mismatched SHA/ref,
   reruns and fabricated same-named evidence. Registering the immutable workflow on `main` remains a
   separate pre-C2-024 governance/merge operation and is not authorized by this remediation.
@@ -243,6 +243,18 @@ merge, C2-023, C2-024 and all Stage A/B/C execution remain unauthorized.
 Completion requires a new immutable source seal, designated-GPU report, portable corpus, TSan and
 terminal-head CI receipt. Only then may a create-only Definition v4 be constructed for another
 governance review. These tasks never authorize a benchmark stage or create a primary observation.
+
+C2-034 through C2-037 are closed by source `b97fd541a7ef7f100b8ff1ccf4ced61aa2880de2`
+/ tree `354bd4cae74e568b8489b667aeb4e88f36de57e0`, the designated-GPU and exact-source
+`campaign-02-runner-provenance-*` evidence records, and dedicated workflow `33662489371` with
+portable, TSan and exact-source join jobs all passing. The recursively verified stage identity
+manifest is `sha256:e318e753fc1317257973850cb60b6483a768fde66c819c6cfcaf8d136ca87c1b`,
+runtime lineage v4 is `sha256:6f45bad28e192b2210854dd6038e81445bb79ccb93d8b21a126838b146ada670`,
+and create-only Definition v4 is
+`sha256:26830d3199482873832f4030641c20a0758c4f474abebacbc668de35d56dfdf9`.
+Definition v4 has zero votes, absent attestation, no authoritative catalog, no execution authority
+and zero observations. A new governance review is required before C2-023. Registration of the
+immutable Stage A workflow on `main` remains a separate pre-C2-024 operation.
 
 ## Unconditional STOP conditions
 
