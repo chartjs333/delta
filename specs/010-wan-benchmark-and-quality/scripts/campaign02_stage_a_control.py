@@ -17,7 +17,6 @@ sys.path.insert(0, str(ROOT / "delta-worker-python/src"))
 
 from deltatorrent.benchmark.arms import ArmSpec  # noqa: E402
 from deltatorrent.benchmark.campaign02 import (  # noqa: E402
-    CampaignExecutionPlan,
     load_domain_manifest,
     load_ticket_plan,
     load_workload_contract,
@@ -27,14 +26,22 @@ from deltatorrent.benchmark.campaign02_binding import (  # noqa: E402
     QualifiedRuntimeLineage,
     compile_campaign02_plan_catalog,
 )
-from deltatorrent.benchmark.campaign02_exactness import run_stage_a  # noqa: E402
+from deltatorrent.benchmark.campaign02_exactness import (  # noqa: E402
+    Campaign02ExactnessEvidenceRunner,
+    run_stage_a,
+)
 from deltatorrent.benchmark.campaign02_execution_identities import (  # noqa: E402
     StageExecutionIdentityManifest,
 )
+from deltatorrent.benchmark.campaign02_stage_a_evidence import (  # noqa: E402
+    EXPECTED_FILENAMES,
+    verify_stage_a_artifacts,
+)
 from deltatorrent.benchmark.campaign02_stage_execution import (  # noqa: E402
-    StageExecutionSummary,
-    StageGateFinalization,
+    Campaign02StageGateFinalizer,
     StagePlanEvidence,
+    verify_bound_stage_gate_finalizer,
+    verify_bound_stage_runner,
     write_receipt_create_only,
 )
 from deltatorrent.benchmark.definition import BenchmarkDefinition  # noqa: E402
@@ -67,15 +74,7 @@ BUNDLE_FIELDS: Final = {
     "stage_execution_identities",
     "type_name",
 }
-STAGE_A_EVIDENCE_FILENAMES: Final = {
-    "java-jdk25.log",
-    "java-jdk26.log",
-    "native-clang-cpp20.xml",
-    "native-clang-cpp23.xml",
-    "native-gcc-cpp20.xml",
-    "native-gcc-cpp23.xml",
-    "python-cross-component.xml",
-}
+STAGE_A_EVIDENCE_FILENAMES: Final = EXPECTED_FILENAMES
 
 
 class StageAControlError(ValueError):
@@ -212,54 +211,6 @@ def _dict(value: object, code: str) -> dict[str, object]:
     return value
 
 
-class EvidenceReplayRunner:
-    def __init__(self, evidence: tuple[StagePlanEvidence, ...]) -> None:
-        self._evidence = {item.plan_id: item for item in evidence}
-        require(len(self._evidence) == len(evidence), "CAMPAIGN02_STAGE_A_EVIDENCE_DUPLICATE")
-
-    def execute(self, plan: CampaignExecutionPlan) -> StagePlanEvidence:
-        try:
-            return self._evidence[plan.content_id]
-        except KeyError as exc:
-            raise StageAControlError("CAMPAIGN02_STAGE_A_EVIDENCE_MISSING") from exc
-
-
-class WorkflowGateFinalizer:
-    def __init__(self, workflow_run_id: int, workflow_head: str, finalized_at: datetime) -> None:
-        require(workflow_run_id > 0, "CAMPAIGN02_STAGE_A_WORKFLOW_RUN_INVALID")
-        self.workflow_run_id = workflow_run_id
-        self.workflow_head = workflow_head
-        self.finalized_at = finalized_at
-        self.document: dict[str, object] | None = None
-
-    def finalize(self, summary: StageExecutionSummary) -> StageGateFinalization:
-        require(
-            self.workflow_head == summary.source_commit,
-            "CAMPAIGN02_STAGE_A_WORKFLOW_HEAD_MISMATCH",
-        )
-        self.document = {
-            "decision": "PASS",
-            "gate_result_id": summary.content_id,
-            "gate_analyzer_id": summary.gate_analyzer_id,
-            "plan_evidence_ids": list(summary.plan_evidence_ids),
-            "runner_id": summary.runner_id,
-            "schema_version": "1.0.0",
-            "source_commit": summary.source_commit,
-            "source_tree": summary.source_tree,
-            "type_name": "CAMPAIGN02_STAGE_A_WORKFLOW_GATE_QC",
-            "workflow_head": self.workflow_head,
-            "workflow_run_id": self.workflow_run_id,
-        }
-        return StageGateFinalization(
-            gate_result_id=summary.content_id,
-            gate_qc_id=sha256_content_id(
-                b"deltareduce.010.campaign02-stage-a-workflow-gate-qc.v1\0"
-                + canonical_json_bytes(self.document)
-            ),
-            finalized_at=self.finalized_at,
-        )
-
-
 def write_create_only(path: Path, value: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -326,12 +277,24 @@ def emit_plan_evidence(arguments: argparse.Namespace) -> dict[str, object]:
         and len(evidence_files) == len(STAGE_A_EVIDENCE_FILENAMES),
         "CAMPAIGN02_STAGE_A_EXACTNESS_MATRIX_INCOMPLETE",
     )
+    semantic_summary = verify_stage_a_artifacts(
+        evidence_files,
+        source_root=arguments.source_root,
+    )
+    identity = bundle.stage_identities.identity("exactness_runner")
     evidence = StagePlanEvidence(
         plan_id=plan.content_id,
         runner_id=plan.runner_id,
         source_commit=plan.source_commit,
         source_tree=plan.source_tree,
-        evidence_ids=tuple(sha256_content_id(path.read_bytes()) for path in evidence_files),
+        evidence_ids=tuple(item.raw_digest for item in semantic_summary.artifacts),
+        environment_id=str(identity.value["environment_id"]),
+        evidence_kind="SEMANTIC_EXACTNESS_MATRIX",
+        implementation_id=str(identity.value["implementation_id"]),
+        runner_identity_id=identity.content_id,
+        runner_role=str(identity.value["role"]),
+        source_class=str(identity.value["source_class"]),
+        verified_summary_ids=(semantic_summary.content_id,),
     )
     write_create_only(arguments.output, evidence.document)
     return {"evidence_id": evidence.content_id, "plan_id": plan.content_id, "status": "PASS"}
@@ -343,9 +306,50 @@ def finalize(arguments: argparse.Namespace) -> dict[str, object]:
     paths = tuple(sorted(arguments.evidence_dir.rglob("*.json")))
     evidence = tuple(StagePlanEvidence.from_dict(load_canonical(path)) for path in paths)
     require(len(evidence) == 15, "CAMPAIGN02_STAGE_A_EVIDENCE_SET_INCOMPLETE")
+    raw_paths = tuple(
+        sorted(path for path in arguments.raw_evidence_dir.rglob("*") if path.is_file())
+    )
+    semantic_summary = verify_stage_a_artifacts(
+        raw_paths,
+        source_root=arguments.source_root,
+    )
     finalized_at = datetime.fromisoformat(arguments.finalized_at.replace("Z", "+00:00"))
-    finalizer = WorkflowGateFinalizer(
-        arguments.workflow_run_id, arguments.workflow_head, finalized_at
+    runner = Campaign02ExactnessEvidenceRunner(
+        evidence=evidence,
+        semantic_summary=semantic_summary,
+        stage_identities=bundle.stage_identities,
+    )
+    bound_runner = verify_bound_stage_runner(
+        runner,
+        identity_name="exactness_runner",
+        stage_identities=bundle.stage_identities,
+        source_root=arguments.source_root,
+    )
+    workflow_path = ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml"
+    input_digests = {f"raw/{path.name}": sha256_content_id(path.read_bytes()) for path in raw_paths}
+    input_digests["authority/campaign02-stage-a-authority-bundle.json"] = sha256_content_id(
+        arguments.bundle.read_bytes()
+    )
+    output_digests = {f"plans/{path.name}": sha256_content_id(path.read_bytes()) for path in paths}
+    finalizer = Campaign02StageGateFinalizer(
+        stage_identities=bundle.stage_identities,
+        finalized_at=finalized_at,
+        workflow_repository=arguments.workflow_repository,
+        workflow_sha=arguments.workflow_sha,
+        dispatch_sha=arguments.dispatch_sha,
+        workflow_ref=arguments.workflow_ref,
+        dispatch_ref=arguments.dispatch_ref,
+        workflow_file_content_id=sha256_content_id(workflow_path.read_bytes()),
+        workflow_run_id=arguments.workflow_run_id,
+        workflow_run_attempt=arguments.workflow_run_attempt,
+        authority_artifact_digest=sha256_content_id(arguments.bundle.read_bytes()),
+        input_artifact_digests=input_digests,
+        output_artifact_digests=output_digests,
+    )
+    bound_finalizer = verify_bound_stage_gate_finalizer(
+        finalizer,
+        stage_identities=bundle.stage_identities,
+        source_root=arguments.source_root,
     )
     receipt = run_stage_a(
         definition=bundle.definition,
@@ -353,8 +357,8 @@ def finalize(arguments: argparse.Namespace) -> dict[str, object]:
         authorization_proof=bundle.stage_authorization_proof,
         runtime_lineage=bundle.runtime_lineage,
         stage_identities=bundle.stage_identities,
-        plan_runner=EvidenceReplayRunner(evidence),
-        gate_finalizer=finalizer,
+        plan_runner=bound_runner,
+        gate_finalizer=bound_finalizer,
     )
     require(finalizer.document is not None, "CAMPAIGN02_STAGE_A_GATE_QC_MISSING")
     write_create_only(arguments.output_gate_qc, finalizer.document)
@@ -381,8 +385,14 @@ def parser() -> argparse.ArgumentParser:
     emit.add_argument("--output", type=Path, required=True)
     close = commands.add_parser("finalize", parents=[common])
     close.add_argument("--evidence-dir", type=Path, required=True)
+    close.add_argument("--raw-evidence-dir", type=Path, required=True)
     close.add_argument("--workflow-run-id", type=int, required=True)
-    close.add_argument("--workflow-head", required=True)
+    close.add_argument("--workflow-run-attempt", type=int, required=True)
+    close.add_argument("--workflow-repository", required=True)
+    close.add_argument("--workflow-sha", required=True)
+    close.add_argument("--dispatch-sha", required=True)
+    close.add_argument("--workflow-ref", required=True)
+    close.add_argument("--dispatch-ref", required=True)
     close.add_argument("--finalized-at", required=True)
     close.add_argument("--output-gate-qc", type=Path, required=True)
     close.add_argument("--output-receipt", type=Path, required=True)

@@ -1,0 +1,99 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-a-semantic-evidence-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_STAGE_A_SEMANTIC_EVIDENCE_SUMMARY"
+    },
+    "artifact_summaries": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_type": {
+            "enum": [
+              "JAVA_CONFORMANCE_LOG",
+              "NATIVE_CTEST_JUNIT",
+              "PYTHON_JUNIT"
+            ]
+          },
+          "filename": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "formal_semantics_id": {
+            "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+          },
+          "raw_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0"
+          },
+          "test_count": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "type_name": {
+            "const": "CAMPAIGN02_STAGE_A_VERIFIED_ARTIFACT_SUMMARY"
+          },
+          "verified_items": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "evidence_type",
+          "filename",
+          "formal_semantics_id",
+          "raw_digest",
+          "schema_version",
+          "test_count",
+          "type_name",
+          "verified_items"
+        ],
+        "type": "object"
+      },
+      "maxItems": 7,
+      "minItems": 7,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "artifact_summary_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 7,
+      "minItems": 7,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "decision": {
+      "const": "PASS"
+    }
+  },
+  "required": [
+    "artifact_summaries",
+    "artifact_summary_ids",
+    "decision",
+    "formal_semantics_id",
+    "schema_version",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-a-semantic-evidence-v1"
+}

@@ -80,11 +80,13 @@ class NetworkEvent:
     reordered: bool
 
 
-def simulate(profile: NetworkProfile, packet_count: int) -> tuple[NetworkEvent, ...]:
-    if packet_count < 0:
+def simulate(
+    profile: NetworkProfile, packet_count: int, *, start_packet_index: int = 0
+) -> tuple[NetworkEvent, ...]:
+    if packet_count < 0 or start_packet_index < 0:
         raise NetworkProfileError("PACKET_COUNT_INVALID")
     events: list[NetworkEvent] = []
-    for packet_index in range(packet_count):
+    for packet_index in range(start_packet_index, start_packet_index + packet_count):
         digest = hashlib.sha256(f"{profile.seed}:{packet_index}".encode()).digest()
         loss_draw = int.from_bytes(digest[0:4], "big") % 1_000_000
         duplicate_draw = int.from_bytes(digest[4:8], "big") % 1_000_000

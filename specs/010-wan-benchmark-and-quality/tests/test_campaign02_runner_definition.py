@@ -6,16 +6,17 @@ import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from deltatorrent.benchmark.arms import ArmSpec
 from deltatorrent.benchmark.campaign02 import (
-    CAMPAIGN02_GATE_STAGES,
     load_domain_manifest,
     load_ticket_plan,
     load_workload_contract,
 )
 from deltatorrent.benchmark.campaign02_binding import (
+    Campaign02BindingError,
     QualifiedRuntimeLineage,
     compile_campaign02_plan_catalog,
 )
@@ -98,7 +99,7 @@ def test_replacement_definition_binds_exact_stage_identities_and_source() -> Non
     )
 
 
-def test_replacement_definition_compiles_one_exact_runner_per_stage() -> None:
+def test_definition_v3_is_parseable_but_cannot_compile_after_supersession() -> None:
     definition = BenchmarkDefinition.from_dict(load(CONFIG / "definition-v3.json"))
     lineage = QualifiedRuntimeLineage.from_dict(load(CONFIG / "qualified-runtime-lineage-v3.json"))
     identities = StageExecutionIdentityManifest.from_dict(
@@ -174,30 +175,22 @@ def test_replacement_definition_compiles_one_exact_runner_per_stage() -> None:
         votes=votes,
         verified_at=NOW,
     )
-    catalog = compile_campaign02_plan_catalog(
-        definition=definition,
-        attestation_document=attestation.document,
-        validator_set=validator_set,
-        votes=votes,
-        workload=workload,
-        domain_manifest=domain,
-        ticket_plan=ticket_plan,
-        arms=arms,
-        runtime_lineage=lineage,
-        stage_identities=identities,
-    )
-    expected = {
-        "STAGE_A_EXACTNESS": identities.identity_id("exactness_runner"),
-        "STAGE_B_SCIENTIFIC": identities.identity_id("scientific_runner"),
-        "STAGE_C_EMULATED_WAN": identities.identity_id("network_fault_runner"),
-    }
-    assert len(catalog.plans) == 45
-    assert catalog.gate_analyzer_id == identities.identity_id("stage_gate_analyzer")
-    for stage in CAMPAIGN02_GATE_STAGES:
-        assert len(catalog.plan_ids_for_stage(stage)) == 15
-        assert {plan.runner_id for plan in catalog.plans if plan.gate_stage == stage} == {
-            expected[stage]
-        }
+    with pytest.raises(
+        Campaign02BindingError,
+        match="CAMPAIGN02_DEFINITION_SUPERSEDED_BEFORE_ATTESTATION",
+    ):
+        compile_campaign02_plan_catalog(
+            definition=definition,
+            attestation_document=attestation.document,
+            validator_set=validator_set,
+            votes=votes,
+            workload=workload,
+            domain_manifest=domain,
+            ticket_plan=ticket_plan,
+            arms=arms,
+            runtime_lineage=lineage,
+            stage_identities=identities,
+        )
 
 
 def test_supersession_and_readiness_preserve_governance_stop() -> None:
@@ -217,6 +210,12 @@ def test_supersession_and_readiness_preserve_governance_stop() -> None:
     authorization = readiness["authorization"]
     assert isinstance(authorization, dict)
     assert authorization and all(value is False for value in authorization.values())
+    executable_supersession = load(REPORTS / "definition-supersession-executable-provenance.json")
+    assert executable_supersession["superseded_definition_id"] == REPLACEMENT
+    assert executable_supersession["replacement_definition_id"] is None
+    assert executable_supersession["status"] == "SUPERSEDED_BEFORE_ATTESTATION"
+    assert executable_supersession["votes"] == executable_supersession["observations"] == 0
+    assert executable_supersession["attestation"] == "ABSENT"
 
 
 def test_construction_creates_no_persisted_votes_attestation_or_execution() -> None:

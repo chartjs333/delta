@@ -32,6 +32,16 @@ jobs:
     outputs:
       matrix: ${{ steps.verify.outputs.matrix }}
     steps:
+      - name: Reject non-default or non-source-bound workflow provenance
+        env:
+          QUALIFIED_SOURCE_COMMIT: ${{ inputs.qualified_source_commit }}
+        run: |
+          test "$GITHUB_WORKFLOW_SHA" = "$QUALIFIED_SOURCE_COMMIT"
+          test "$GITHUB_SHA" = "$QUALIFIED_SOURCE_COMMIT"
+          test "$GITHUB_REPOSITORY" = 'chartjs333/delta'
+          test "$GITHUB_REF" = 'refs/heads/main'
+          test "$GITHUB_WORKFLOW_REF" = 'chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/main'
+          test "$GITHUB_RUN_ATTEMPT" = '1'
       - name: Check out immutable qualified source
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
@@ -375,6 +385,23 @@ jobs:
           merge-multiple: true
           path: ${{ runner.temp }}/stage-a-plans
           pattern: campaign02-stage-a-plan-*-${{ github.run_id }}
+      - name: Download native exactness lane evidence for semantic re-verification
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          merge-multiple: true
+          path: ${{ runner.temp }}/exactness
+          pattern: campaign02-stage-a-native-*-${{ github.run_id }}
+      - name: Download Java exactness lane evidence for semantic re-verification
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          merge-multiple: true
+          path: ${{ runner.temp }}/exactness
+          pattern: campaign02-stage-a-java-*-${{ github.run_id }}
+      - name: Download cross-component evidence for semantic re-verification
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: campaign02-stage-a-cross-component-${{ github.run_id }}
+          path: ${{ runner.temp }}/exactness
       - name: Materialize locked verifier environment
         working-directory: qualified-source
         run: |
@@ -390,8 +417,14 @@ jobs:
             --bundle "$RUNNER_TEMP/authority/campaign02-stage-a-authority-bundle.json" \
             --source-root . \
             --evidence-dir "$RUNNER_TEMP/stage-a-plans" \
+            --raw-evidence-dir "$RUNNER_TEMP/exactness" \
             --workflow-run-id '${{ github.run_id }}' \
-            --workflow-head '${{ inputs.qualified_source_commit }}' \
+            --workflow-run-attempt '${{ github.run_attempt }}' \
+            --workflow-repository '${{ github.repository }}' \
+            --workflow-sha '${{ github.workflow_sha }}' \
+            --dispatch-sha '${{ github.sha }}' \
+            --workflow-ref '${{ github.workflow_ref }}' \
+            --dispatch-ref '${{ github.ref }}' \
             --finalized-at "$finalized_at" \
             --output-gate-qc "$RUNNER_TEMP/stage-a-workflow-gate-qc.json" \
             --output-receipt "$RUNNER_TEMP/stage-a-gate-receipt.json"

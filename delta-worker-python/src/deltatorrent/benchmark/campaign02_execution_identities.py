@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Final
 
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
@@ -11,8 +12,11 @@ from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content
 
 _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
 _COMMIT_ID: Final = re.compile(r"^[0-9a-f]{40}$")
-_MANIFEST_DOMAIN: Final = b"deltareduce.010.campaign02-stage-execution-identities.v2\0"
-_IDENTITY_DOMAINS: Final = {
+_MANIFEST_DOMAINS: Final = {
+    "2.0.0": b"deltareduce.010.campaign02-stage-execution-identities.v2\0",
+    "3.0.0": b"deltareduce.010.campaign02-stage-execution-identities.v3\0",
+}
+_IDENTITY_DOMAINS_V2: Final = {
     "evaluation_runner": "deltareduce.010.primary-component.v1",
     "exactness_runner": "deltareduce.010.campaign02-stage-role-identity.v2",
     "multi_role_runner": "deltareduce.010.campaign02-multi-role-runner.v2",
@@ -27,6 +31,17 @@ _IDENTITY_DOMAINS: Final = {
     "typed_gate_receipt_verifier": (
         "deltareduce.010.campaign02-typed-stage-gate-receipt-verifier.v2"
     ),
+}
+_IDENTITY_DOMAINS_V3: Final = {
+    **_IDENTITY_DOMAINS_V2,
+    "exactness_runner": "deltareduce.010.campaign02-stage-role-identity.v3",
+    "multi_role_runner": "deltareduce.010.campaign02-multi-role-runner.v3",
+    "network_fault_runner": "deltareduce.010.campaign02-stage-role-identity.v3",
+    "stage_gate_analyzer": "deltareduce.010.campaign02-stage-gate-analyzer.v3",
+}
+_PRODUCTION_SOURCE_CLASSES: Final = {
+    "EXACTNESS_RUNNER": "MEASURED_CI_WORKFLOW",
+    "NETWORK_FAULT_RUNNER": "MEASURED_HARDWARE",
 }
 
 
@@ -63,6 +78,7 @@ class StageExecutionIdentity:
 
 @dataclass(frozen=True, slots=True)
 class StageExecutionIdentityManifest:
+    schema_version: str
     source_commit: str
     source_tree: str
     identities: tuple[StageExecutionIdentity, ...]
@@ -86,7 +102,7 @@ class StageExecutionIdentityManifest:
         source_tree = value["source_tree"]
         if (
             value["type_name"] != "CAMPAIGN02_STAGE_EXECUTION_IDENTITIES"
-            or value["schema_version"] != "2.0.0"
+            or value["schema_version"] not in _MANIFEST_DOMAINS
             or value["campaign_id"] != "campaign-02"
             or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
             or value["execution_authorized"] is not False
@@ -96,11 +112,15 @@ class StageExecutionIdentityManifest:
             or _COMMIT_ID.fullmatch(source_tree) is None
         ):
             raise _fail("CAMPAIGN02_STAGE_IDENTITY_MANIFEST_HEADER_INVALID")
+        schema_version = str(value["schema_version"])
+        identity_domains = (
+            _IDENTITY_DOMAINS_V3 if schema_version == "3.0.0" else _IDENTITY_DOMAINS_V2
+        )
         raw_identities = value["identities"]
-        if not isinstance(raw_identities, dict) or set(raw_identities) != set(_IDENTITY_DOMAINS):
+        if not isinstance(raw_identities, dict) or set(raw_identities) != set(identity_domains):
             raise _fail("CAMPAIGN02_STAGE_IDENTITY_SET_INVALID")
         identities: list[StageExecutionIdentity] = []
-        for name in sorted(_IDENTITY_DOMAINS):
+        for name in sorted(identity_domains):
             raw_identity = raw_identities[name]
             if not isinstance(raw_identity, dict) or set(raw_identity) != {
                 "content_id",
@@ -112,7 +132,7 @@ class StageExecutionIdentityManifest:
             identity_value = raw_identity["value"]
             content_id = raw_identity["content_id"]
             if (
-                identity_domain != _IDENTITY_DOMAINS[name]
+                identity_domain != identity_domains[name]
                 or not isinstance(identity_value, dict)
                 or not isinstance(content_id, str)
                 or _CONTENT_ID.fullmatch(content_id) is None
@@ -126,7 +146,7 @@ class StageExecutionIdentityManifest:
             identities.append(
                 StageExecutionIdentity(name, str(identity_domain), content_id, identity_value)
             )
-        result = cls(source_commit, source_tree, tuple(identities), dict(value))
+        result = cls(schema_version, source_commit, source_tree, tuple(identities), dict(value))
         result._verify_roles()
         return result
 
@@ -170,6 +190,55 @@ class StageExecutionIdentityManifest:
             raise _fail("CAMPAIGN02_MULTI_ROLE_METADATA_INVALID")
         if "entrypoints" in multi_role:
             raise _fail("CAMPAIGN02_MULTI_ROLE_METADATA_MUST_NOT_BE_EXECUTABLE")
+        if self.schema_version == "3.0.0":
+            self._verify_production_identity(exactness, "EXACTNESS_RUNNER")
+            self._verify_production_identity(network, "NETWORK_FAULT_RUNNER")
+            self._verify_gate_analyzer_identity(analyzer)
+            if (
+                exactness.get("workflow_repository") != "chartjs333/delta"
+                or exactness.get("workflow_path")
+                != ".github/workflows/benchmark-campaign02-stage-a.yml"
+                or exactness.get("workflow_default_ref") != "refs/heads/main"
+            ):
+                raise _fail("CAMPAIGN02_EXACTNESS_WORKFLOW_PROVENANCE_POLICY_INVALID")
+
+    @staticmethod
+    def _verify_production_identity(value: dict[str, object], role: str) -> None:
+        implementation = {
+            "entrypoints": value.get("entrypoints"),
+            "executable_hashes": value.get("executable_hashes"),
+            "workflow_hashes": value.get("workflow_hashes"),
+        }
+        expected_implementation_id = sha256_content_id(
+            b"deltareduce.010.campaign02-stage-implementation.v1\0"
+            + canonical_json_bytes(implementation)
+        )
+        if (
+            value.get("role") != role
+            or value.get("allowed_role") != role
+            or value.get("source_class") != _PRODUCTION_SOURCE_CLASSES[role]
+            or value.get("implementation_id") != expected_implementation_id
+        ):
+            raise _fail("CAMPAIGN02_STAGE_PRODUCTION_IDENTITY_INVALID")
+
+    @staticmethod
+    def _verify_gate_analyzer_identity(value: dict[str, object]) -> None:
+        implementation = {
+            "entrypoints": value.get("entrypoints"),
+            "executable_hashes": value.get("executable_hashes"),
+            "workflow_hashes": value.get("workflow_hashes"),
+        }
+        expected_implementation_id = sha256_content_id(
+            b"deltareduce.010.campaign02-stage-implementation.v1\0"
+            + canonical_json_bytes(implementation)
+        )
+        if (
+            value.get("source_class") != "MEASURED_CONTROL_PLANE"
+            or value.get("implementation_id") != expected_implementation_id
+            or value.get("implementation_class")
+            != ("deltatorrent.benchmark.campaign02_stage_execution.Campaign02StageGateFinalizer")
+        ):
+            raise _fail("CAMPAIGN02_STAGE_GATE_ANALYZER_PRODUCTION_IDENTITY_INVALID")
 
     def identity(self, name: str) -> StageExecutionIdentity:
         matches = tuple(item for item in self.identities if item.name == name)
@@ -180,6 +249,36 @@ class StageExecutionIdentityManifest:
     def identity_id(self, name: str) -> str:
         return self.identity(name).content_id
 
+    def verify_files(self, name: str, source_root: Path) -> None:
+        """Verify all executable and workflow bytes named by an identity."""
+        identity = self.identity(name)
+        root = source_root.resolve()
+        entries: list[object] = []
+        for field in ("executable_hashes", "workflow_hashes"):
+            value = identity.value.get(field, [])
+            if not isinstance(value, list):
+                raise _fail("CAMPAIGN02_STAGE_IDENTITY_HASH_SET_INVALID")
+            entries.extend(value)
+        if not entries:
+            raise _fail("CAMPAIGN02_STAGE_IDENTITY_HASH_SET_INVALID")
+        for item in entries:
+            if not isinstance(item, dict) or set(item) != {"content_id", "path"}:
+                raise _fail("CAMPAIGN02_STAGE_IDENTITY_HASH_ENTRY_INVALID")
+            relative = item["path"]
+            expected = item["content_id"]
+            if not isinstance(relative, str) or not isinstance(expected, str):
+                raise _fail("CAMPAIGN02_STAGE_IDENTITY_HASH_ENTRY_INVALID")
+            path = (root / relative).resolve()
+            try:
+                path.relative_to(root)
+                actual = sha256_content_id(path.read_bytes())
+            except (OSError, ValueError) as exc:
+                raise _fail("CAMPAIGN02_STAGE_IDENTITY_FILE_INVALID") from exc
+            if actual != expected:
+                raise _fail("CAMPAIGN02_STAGE_IDENTITY_FILE_HASH_MISMATCH")
+
     @property
     def content_id(self) -> str:
-        return sha256_content_id(_MANIFEST_DOMAIN + canonical_json_bytes(self.raw))
+        return sha256_content_id(
+            _MANIFEST_DOMAINS[self.schema_version] + canonical_json_bytes(self.raw)
+        )

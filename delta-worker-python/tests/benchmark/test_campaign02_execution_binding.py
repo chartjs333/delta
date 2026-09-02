@@ -38,11 +38,19 @@ from deltatorrent.benchmark.campaign02_exactness import run_stage_a
 from deltatorrent.benchmark.campaign02_execution_identities import (
     StageExecutionIdentityManifest,
 )
-from deltatorrent.benchmark.campaign02_network_fault import run_stage_c
+from deltatorrent.benchmark.campaign02_network_fault import Campaign02NetworkFaultRunner
+from deltatorrent.benchmark.campaign02_stage_a_evidence import (
+    JAVA_MARKERS,
+    NATIVE_TESTS,
+    StageAEvidenceError,
+    verify_stage_a_artifacts,
+)
 from deltatorrent.benchmark.campaign02_stage_execution import (
-    StageExecutionSummary,
-    StageGateFinalization,
+    Campaign02StageGateFinalizer,
     StagePlanEvidence,
+    validate_stage_admission_for_test,
+    verify_bound_stage_gate_finalizer,
+    verify_bound_stage_runner,
 )
 from deltatorrent.benchmark.definition import BenchmarkDefinition, load_definition
 from deltatorrent.benchmark.governance import (
@@ -164,32 +172,75 @@ def _stage_identity_manifest() -> StageExecutionIdentityManifest:
     scientific = _component_identity("PRIMARY_SCIENTIFIC_RUNNER")
     evaluation = _component_identity("PRIMARY_EVALUATION_RUNNER")
     writer = _component_identity("PRIMARY_OBSERVATION_WRITER")
-    exactness = {
+
+    def hashes(*paths: str) -> list[dict[str, str]]:
+        return [
+            {"content_id": sha256_content_id((ROOT / path).read_bytes()), "path": path}
+            for path in paths
+        ]
+
+    def implementation_id(value: dict[str, object]) -> str:
+        implementation = {
+            "entrypoints": value.get("entrypoints"),
+            "executable_hashes": value.get("executable_hashes"),
+            "workflow_hashes": value.get("workflow_hashes"),
+        }
+        return sha256_content_id(
+            b"deltareduce.010.campaign02-stage-implementation.v1\0"
+            + canonical_json_bytes(implementation)
+        )
+
+    exactness: dict[str, object] = {
         "allowed_role": "EXACTNESS_RUNNER",
         "entrypoints": ["deltatorrent.benchmark.campaign02_exactness.run_stage_a"],
+        "environment_id": _id("environment"),
+        "executable_hashes": hashes(
+            "delta-worker-python/src/deltatorrent/benchmark/campaign02_exactness.py"
+        ),
         "execution_authorized": False,
+        "implementation_class": (
+            "deltatorrent.benchmark.campaign02_exactness.Campaign02ExactnessEvidenceRunner"
+        ),
+        "role": "EXACTNESS_RUNNER",
+        "source_class": "MEASURED_CI_WORKFLOW",
         "source_commit": "a" * 40,
         "source_tree": "b" * 40,
+        "workflow_default_ref": "refs/heads/main",
+        "workflow_hashes": hashes(".github/workflows/benchmark-campaign02-stage-a.yml"),
+        "workflow_path": ".github/workflows/benchmark-campaign02-stage-a.yml",
+        "workflow_repository": "chartjs333/delta",
     }
-    network = {
+    exactness["implementation_id"] = implementation_id(exactness)
+    network: dict[str, object] = {
         "allowed_role": "NETWORK_FAULT_RUNNER",
         "entrypoints": ["deltatorrent.benchmark.campaign02_network_fault.run_stage_c"],
+        "environment_id": _id("environment"),
+        "executable_hashes": hashes(
+            "delta-worker-python/src/deltatorrent/benchmark/campaign02_network_fault.py"
+        ),
         "execution_authorized": False,
+        "implementation_class": (
+            "deltatorrent.benchmark.campaign02_network_fault.Campaign02NetworkFaultRunner"
+        ),
+        "role": "NETWORK_FAULT_RUNNER",
+        "source_class": "MEASURED_HARDWARE",
         "source_commit": "a" * 40,
         "source_tree": "b" * 40,
+        "workflow_hashes": [],
     }
+    network["implementation_id"] = implementation_id(network)
     domains = {
         "evaluation_runner": "deltareduce.010.primary-component.v1",
-        "exactness_runner": "deltareduce.010.campaign02-stage-role-identity.v2",
-        "multi_role_runner": "deltareduce.010.campaign02-multi-role-runner.v2",
+        "exactness_runner": "deltareduce.010.campaign02-stage-role-identity.v3",
+        "multi_role_runner": "deltareduce.010.campaign02-multi-role-runner.v3",
         "native_feature008_verifier": ("deltareduce.010.campaign02-native-feature008-verifier.v2"),
-        "network_fault_runner": "deltareduce.010.campaign02-stage-role-identity.v2",
+        "network_fault_runner": "deltareduce.010.campaign02-stage-role-identity.v3",
         "observation_writer": "deltareduce.010.primary-component.v1",
         "scientific_runner": "deltareduce.010.primary-component.v1",
         "signed_stage_authorization_verifier": (
             "deltareduce.010.campaign02-signed-stage-authorization-verifier.v2"
         ),
-        "stage_gate_analyzer": "deltareduce.010.campaign02-stage-gate-analyzer.v2",
+        "stage_gate_analyzer": "deltareduce.010.campaign02-stage-gate-analyzer.v3",
         "typed_gate_receipt_verifier": (
             "deltareduce.010.campaign02-typed-stage-gate-receipt-verifier.v2"
         ),
@@ -240,12 +291,30 @@ def _stage_identity_manifest() -> StageExecutionIdentityManifest:
             identity_value.update(
                 {
                     "component": "CAMPAIGN02_STAGE_GATE_ANALYZER",
+                    "environment_id": _id("environment"),
                     "entrypoint": (
                         "deltatorrent.benchmark.campaign02_stage_execution.execute_stage"
                     ),
+                    "entrypoints": [
+                        "deltatorrent.benchmark.campaign02_stage_execution.execute_stage"
+                    ],
+                    "executable_hashes": hashes(
+                        "delta-worker-python/src/deltatorrent/benchmark/"
+                        "campaign02_stage_execution.py"
+                    ),
                     "execution_authorized": False,
+                    "implementation_class": (
+                        "deltatorrent.benchmark.campaign02_stage_execution."
+                        "Campaign02StageGateFinalizer"
+                    ),
+                    "source_class": "MEASURED_CONTROL_PLANE",
+                    "workflow_default_ref": "refs/heads/main",
+                    "workflow_hashes": hashes(".github/workflows/benchmark-campaign02-stage-a.yml"),
+                    "workflow_path": ".github/workflows/benchmark-campaign02-stage-a.yml",
+                    "workflow_repository": "chartjs333/delta",
                 }
             )
+            identity_value["implementation_id"] = implementation_id(identity_value)
         values[name] = item(
             name,
             identity_value,
@@ -258,7 +327,7 @@ def _stage_identity_manifest() -> StageExecutionIdentityManifest:
                 "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
             ),
             "identities": values,
-            "schema_version": "2.0.0",
+            "schema_version": "3.0.0",
             "source_commit": "a" * 40,
             "source_tree": "b" * 40,
             "type_name": "CAMPAIGN02_STAGE_EXECUTION_IDENTITIES",
@@ -417,7 +486,7 @@ def _inputs() -> tuple[
             "primary": True,
             "qualified_runtime_lineage_id": runtime.content_id,
             "repetitions": 3,
-            "schema_version": "3.0.0",
+            "schema_version": "4.0.0",
             "seeds": list(seeds),
             "source_commit": runtime.source_commit,
             "source_tree": runtime.source_tree,
@@ -589,15 +658,6 @@ class _DryStagePlanRunner:
         )
 
 
-class _DryStageGateFinalizer:
-    def finalize(self, summary: StageExecutionSummary) -> StageGateFinalization:
-        return StageGateFinalization(
-            gate_result_id=summary.content_id,
-            gate_qc_id=_id(f"dry-gate-qc:{summary.content_id}"),
-            finalized_at=NOW,
-        )
-
-
 class _PrimaryReferenceBackend:
     source_class = "MEASURED_HARDWARE"
     result_class = "REFERENCE"
@@ -730,68 +790,62 @@ def test_authorization_verifier_cannot_be_presented_as_exactness_executor() -> N
         StageExecutionIdentityManifest.from_dict(value)
 
 
-def test_valid_campaign02_stage_a_dry_execution_emits_bound_v2_receipt() -> None:
-    definition, *_rest, runtime, stage_identities = _inputs()
+def test_stage_a_admission_test_api_cannot_emit_a_gate_receipt() -> None:
     catalog = _compile()
-    receipt = run_stage_a(
-        definition=definition,
+    result = validate_stage_admission_for_test(
+        completed_stage="STAGE_A_EXACTNESS",
+        runner_role="EXACTNESS_RUNNER",
         plan_catalog=catalog,
         authorization_proof=_stage_authorization(catalog, "STAGE_A_EXACTNESS"),
-        runtime_lineage=runtime,
-        stage_identities=stage_identities,
-        plan_runner=_DryStagePlanRunner(),
-        gate_finalizer=_DryStageGateFinalizer(),
+        predecessor_gate_receipts={},
     )
     expected = catalog.plan_ids_for_stage("STAGE_A_EXACTNESS")
-    assert receipt.decision == "PASS"
-    assert receipt.required_plan_ids == expected
-    assert receipt.accepted_plan_ids == expected
-    assert receipt.runner_id == runtime.exactness_runner_id
-    assert receipt.gate_analyzer_id == stage_identities.identity_id("stage_gate_analyzer")
-    assert receipt.document["schema_version"] == "2.0.0"
-    assert receipt.evidence_root.startswith("sha256:")
+    assert result.accepted_plan_ids == expected
+    assert not hasattr(result, "canonical_bytes")
 
 
-def test_stage_a_requires_exact_15_plans_and_signed_authorization() -> None:
+def test_stage_a_rejects_caller_supplied_dry_runner_before_execution() -> None:
     definition, *_rest, runtime, stage_identities = _inputs()
     catalog = _compile()
-    with pytest.raises(Campaign02BindingError, match="CAMPAIGN02_PLAN_CATALOG_INCOMPLETE"):
-        replace(catalog, plans=catalog.plans[:-1])
-    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_PROOF_REQUIRED"):
-        run_stage_a(
-            definition=definition,
-            plan_catalog=catalog,
-            authorization_proof={},
-            runtime_lineage=runtime,
-            stage_identities=stage_identities,
-            plan_runner=_DryStagePlanRunner(),
-            gate_finalizer=_DryStageGateFinalizer(),
-        )
-
-
-def test_stage_a_rejects_incomplete_evidence_root_and_campaign01_bindings() -> None:
-    definition, *_rest, runtime, stage_identities = _inputs()
-    catalog = _compile()
-
-    class IncompleteEvidenceRunner:
-        def execute(self, plan: CampaignExecutionPlan) -> StagePlanEvidence:
-            return StagePlanEvidence(
-                plan_id=plan.content_id,
-                runner_id=plan.runner_id,
-                source_commit=plan.source_commit,
-                source_tree=plan.source_tree,
-                evidence_ids=(),
-            )
-
-    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_PLAN_EVIDENCE_INVALID"):
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTOR_IDENTITY_MISMATCH"):
         run_stage_a(
             definition=definition,
             plan_catalog=catalog,
             authorization_proof=_stage_authorization(catalog, "STAGE_A_EXACTNESS"),
             runtime_lineage=runtime,
             stage_identities=stage_identities,
-            plan_runner=IncompleteEvidenceRunner(),
-            gate_finalizer=_DryStageGateFinalizer(),
+            plan_runner=_DryStagePlanRunner(),  # type: ignore[arg-type]
+            gate_finalizer=object(),  # type: ignore[arg-type]
+        )
+
+
+def test_stage_a_requires_exact_15_plans_and_signed_authorization() -> None:
+    catalog = _compile()
+    with pytest.raises(Campaign02BindingError, match="CAMPAIGN02_PLAN_CATALOG_INCOMPLETE"):
+        replace(catalog, plans=catalog.plans[:-1])
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_PROOF_REQUIRED"):
+        validate_stage_admission_for_test(
+            completed_stage="STAGE_A_EXACTNESS",
+            runner_role="EXACTNESS_RUNNER",
+            plan_catalog=catalog,
+            authorization_proof={},
+            predecessor_gate_receipts={},
+        )
+
+
+def test_stage_a_rejects_unverified_runner_and_campaign01_bindings() -> None:
+    definition, *_rest, runtime, stage_identities = _inputs()
+    catalog = _compile()
+
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTOR_IDENTITY_MISMATCH"):
+        run_stage_a(
+            definition=definition,
+            plan_catalog=catalog,
+            authorization_proof=_stage_authorization(catalog, "STAGE_A_EXACTNESS"),
+            runtime_lineage=runtime,
+            stage_identities=stage_identities,
+            plan_runner=_DryStagePlanRunner(),  # type: ignore[arg-type]
+            gate_finalizer=object(),  # type: ignore[arg-type]
         )
     campaign01_source = dict(definition.raw)
     campaign01_source["source_commit"] = "c460f3003277bb81db86f9afc1d7211e27870001"
@@ -802,8 +856,8 @@ def test_stage_a_rejects_incomplete_evidence_root_and_campaign01_bindings() -> N
             authorization_proof=_stage_authorization(catalog, "STAGE_A_EXACTNESS"),
             runtime_lineage=runtime,
             stage_identities=stage_identities,
-            plan_runner=_DryStagePlanRunner(),
-            gate_finalizer=_DryStageGateFinalizer(),
+            plan_runner=_DryStagePlanRunner(),  # type: ignore[arg-type]
+            gate_finalizer=object(),  # type: ignore[arg-type]
         )
     campaign01_definition = load_definition(CONFIG.parent / "primary.yaml")
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_PACKAGE_MISMATCH"):
@@ -813,8 +867,8 @@ def test_stage_a_rejects_incomplete_evidence_root_and_campaign01_bindings() -> N
             authorization_proof=_stage_authorization(catalog, "STAGE_A_EXACTNESS"),
             runtime_lineage=runtime,
             stage_identities=stage_identities,
-            plan_runner=_DryStagePlanRunner(),
-            gate_finalizer=_DryStageGateFinalizer(),
+            plan_runner=_DryStagePlanRunner(),  # type: ignore[arg-type]
+            gate_finalizer=object(),  # type: ignore[arg-type]
         )
 
 
@@ -837,8 +891,7 @@ def test_generated_stage_b_reference_plan_runs_through_primary_scientific_runner
     assert run.runner_id == plan.runner_id
 
 
-def test_valid_stage_c_dry_execution_requires_exact_stage_a_and_b_receipts() -> None:
-    definition, *_rest, runtime, stage_identities = _inputs()
+def test_stage_c_admission_requires_exact_stage_a_and_b_receipts_without_execution() -> None:
     catalog = _compile()
     stage_a = _gate_receipt(catalog, "STAGE_A_EXACTNESS")
     stage_b = _gate_receipt(catalog, "STAGE_B_SCIENTIFIC")
@@ -847,29 +900,175 @@ def test_valid_stage_c_dry_execution_requires_exact_stage_a_and_b_receipts() -> 
         stage_a.content_id: stage_a.canonical_bytes,
         stage_b.content_id: stage_b.canonical_bytes,
     }
-    receipt = run_stage_c(
-        definition=definition,
+    result = validate_stage_admission_for_test(
+        completed_stage="STAGE_C_EMULATED_WAN",
+        runner_role="NETWORK_FAULT_RUNNER",
         plan_catalog=catalog,
         authorization_proof=proof,
         predecessor_gate_receipts=receipts,
-        runtime_lineage=runtime,
-        stage_identities=stage_identities,
-        plan_runner=_DryStagePlanRunner(),
-        gate_finalizer=_DryStageGateFinalizer(),
     )
-    assert receipt.runner_id == runtime.network_fault_runner_id
-    assert receipt.accepted_plan_ids == catalog.plan_ids_for_stage("STAGE_C_EMULATED_WAN")
+    assert result.accepted_plan_ids == catalog.plan_ids_for_stage("STAGE_C_EMULATED_WAN")
+    assert not hasattr(result, "canonical_bytes")
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_PREDECESSOR_INVALID"):
-        run_stage_c(
-            definition=definition,
+        validate_stage_admission_for_test(
+            completed_stage="STAGE_C_EMULATED_WAN",
+            runner_role="NETWORK_FAULT_RUNNER",
             plan_catalog=catalog,
             authorization_proof=proof,
             predecessor_gate_receipts={stage_a.content_id: stage_a.canonical_bytes},
-            runtime_lineage=runtime,
-            stage_identities=stage_identities,
-            plan_runner=_DryStagePlanRunner(),
-            gate_finalizer=_DryStageGateFinalizer(),
         )
+
+
+def test_concrete_stage_c_runner_executes_all_15_plans_and_profiles(tmp_path: Path) -> None:
+    definition, *_rest, stage_identities = _inputs()
+    catalog = _compile()
+    runner = Campaign02NetworkFaultRunner(
+        definition=definition,
+        stage_identities=stage_identities,
+        network_profiles_path=ROOT / "configs/benchmark/networks-v1.json",
+        fault_profiles_path=ROOT / "configs/benchmark/faults-v1.json",
+        evidence_root=tmp_path,
+    )
+    bound = verify_bound_stage_runner(
+        runner,
+        identity_name="network_fault_runner",
+        stage_identities=stage_identities,
+        source_root=ROOT,
+    )
+    plans = tuple(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
+    evidence = tuple(bound.execute(plan) for plan in plans)
+    assert len(evidence) == 15
+    assert len({item.content_id for item in evidence}) == 15
+    assert all(item.evidence_kind == "NETWORK_FAULT_EXECUTION" for item in evidence)
+    documents = [json.loads(path.read_bytes()) for path in sorted(tmp_path.glob("*.json"))]
+    assert len(documents) == 15
+    assert all(len(item["network_counters"]) == 3 for item in documents)
+    assert all(len(item["fault_results"]) == 7 for item in documents)
+    assert all(item["resilience_result"] == "PASS" for item in documents)
+
+
+def _write_stage_a_evidence_set(root: Path) -> tuple[tuple[str, str], ...]:
+    native_cases = "".join(f'<testcase classname="ctest" name="{name}" />' for name in NATIVE_TESTS)
+    native = (
+        f'<testsuites><testsuite name="ctest" tests="{len(NATIVE_TESTS)}" '
+        f'failures="0" errors="0" skipped="0">{native_cases}</testsuite></testsuites>'
+    )
+    for compiler in ("clang", "gcc"):
+        for standard in (20, 23):
+            (root / f"native-{compiler}-cpp{standard}.xml").write_text(native, encoding="utf-8")
+    python_cases = (("tests.test_exact", "test_exact_case"),)
+    (root / "python-cross-component.xml").write_text(
+        '<testsuites><testsuite name="pytest" tests="1" failures="0" errors="0" '
+        'skipped="0"><testcase classname="tests.test_exact" '
+        'name="test_exact_case" /></testsuite></testsuites>',
+        encoding="utf-8",
+    )
+    for feature, version in ((25, "25.0.4.1"), (26, "26.0.2")):
+        markers = "\n".join(item.format(feature=feature) for item in JAVA_MARKERS)
+        (root / f"java-jdk{feature}.log").write_text(
+            f'openjdk version "{version}" 2026-07-21\n{markers}\n',
+            encoding="utf-8",
+        )
+    return python_cases
+
+
+def test_stage_a_semantic_verifier_rejects_same_named_fabricated_artifacts(
+    tmp_path: Path,
+) -> None:
+    python_cases = _write_stage_a_evidence_set(tmp_path)
+    paths = tuple(sorted(tmp_path.iterdir()))
+    summary = verify_stage_a_artifacts(
+        paths,
+        source_root=ROOT,
+        expected_python_cases=python_cases,
+    )
+    assert len(summary.artifacts) == 7
+    assert summary.content_id.startswith("sha256:")
+    native = tmp_path / "native-gcc-cpp20.xml"
+    native.write_text(
+        '<testsuites><testsuite name="ctest" tests="1" failures="0" errors="0" '
+        'skipped="0"><testcase classname="ctest" name="invented" />'
+        "</testsuite></testsuites>",
+        encoding="utf-8",
+    )
+    with pytest.raises(StageAEvidenceError, match="JUNIT_TEST_SET_MISMATCH"):
+        verify_stage_a_artifacts(
+            paths,
+            source_root=ROOT,
+            expected_python_cases=python_cases,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("workflow_sha", "c" * 40),
+        ("dispatch_sha", "c" * 40),
+        (
+            "workflow_ref",
+            "chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/dev",
+        ),
+        ("dispatch_ref", "refs/heads/dev"),
+        ("workflow_repository", "attacker/fork"),
+        ("workflow_run_attempt", 2),
+    ),
+)
+def test_stage_a_workflow_provenance_rejects_wrong_github_context(
+    field: str,
+    value: object,
+) -> None:
+    stage_identities = _stage_identity_manifest()
+    arguments: dict[str, object] = {
+        "stage_identities": stage_identities,
+        "finalized_at": NOW,
+        "workflow_repository": "chartjs333/delta",
+        "workflow_sha": "a" * 40,
+        "dispatch_sha": "a" * 40,
+        "workflow_ref": (
+            "chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/main"
+        ),
+        "dispatch_ref": "refs/heads/main",
+        "workflow_file_content_id": sha256_content_id(
+            (ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml").read_bytes()
+        ),
+        "workflow_run_id": 42,
+        "workflow_run_attempt": 1,
+        "authority_artifact_digest": _id("authority"),
+        "input_artifact_digests": {"authority": _id("authority")},
+        "output_artifact_digests": {"plan": _id("plan")},
+    }
+    arguments[field] = value
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_WORKFLOW_PROVENANCE_INVALID"):
+        Campaign02StageGateFinalizer(**arguments)  # type: ignore[arg-type]
+
+
+def test_stage_a_workflow_finalizer_binds_to_exact_analyzer_bytes() -> None:
+    stage_identities = _stage_identity_manifest()
+    finalizer = Campaign02StageGateFinalizer(
+        stage_identities=stage_identities,
+        finalized_at=NOW,
+        workflow_repository="chartjs333/delta",
+        workflow_sha="a" * 40,
+        dispatch_sha="a" * 40,
+        workflow_ref=(
+            "chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/main"
+        ),
+        dispatch_ref="refs/heads/main",
+        workflow_file_content_id=sha256_content_id(
+            (ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml").read_bytes()
+        ),
+        workflow_run_id=42,
+        workflow_run_attempt=1,
+        authority_artifact_digest=_id("authority"),
+        input_artifact_digests={"authority": _id("authority")},
+        output_artifact_digests={"plan": _id("plan")},
+    )
+    bound = verify_bound_stage_gate_finalizer(
+        finalizer,
+        stage_identities=stage_identities,
+        source_root=ROOT,
+    )
+    assert bound.identity_id == stage_identities.identity_id("stage_gate_analyzer")
 
 
 def test_stage_a_control_bundle_recompiles_exact_authoritative_catalog(

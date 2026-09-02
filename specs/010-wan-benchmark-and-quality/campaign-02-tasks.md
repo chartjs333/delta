@@ -218,6 +218,32 @@ The replacement stage identity manifest is
 It has zero votes, absent attestation, no authoritative catalog, no execution authorization and
 zero observations. Governance review of this replacement package is required before C2-023.
 
+## Executable-provenance remediation after PR #19 review
+
+Definition `sha256:3844edbdcfc402ca3fbd54f9a2e4dfab965a8a7280a6ccd3dad70611e88ee803`
+is immutable audit history with status `SUPERSEDED_BEFORE_ATTESTATION`, zero votes, absent
+attestation and zero observations. It must not be signed or edited in place. PR #19 remains Draft;
+merge, C2-023, C2-024 and all Stage A/B/C execution remain unauthorized.
+
+- [ ] **C2-034** Bind the actual production Stage A/C runner object and gate finalizer to the exact
+  manifest identity, role, source commit/tree, environment, source class, implementation ID and
+  recursively verified executable bytes before the first plan; reject dry, fixture, synthetic and
+  caller-supplied primary runners. Keep admission-only tests unable to create a gate receipt.
+- [ ] **C2-035** Implement a concrete `Campaign02NetworkFaultRunner` that loads and re-hashes every
+  Definition network/fault profile, executes each emulated profile and fault trace for all 15 plans,
+  checks expected outcomes and emits typed per-plan counters and resilience evidence.
+- [ ] **C2-036** Parse the seven retained Stage A native/JDK/Python artifacts, require the exact
+  expected test/version/marker sets with zero failures/errors/skips, and bind their raw digests to
+  canonical verified summaries before receipt emission.
+- [ ] **C2-037** Bind Stage A to actual GitHub workflow/dispatch SHA, repository/ref, workflow blob,
+  run ID/attempt, authority digest and all retained input/output digests; reject mismatched SHA/ref,
+  reruns and fabricated same-named evidence. Registering the immutable workflow on `main` remains a
+  separate pre-C2-024 governance/merge operation and is not authorized by this remediation.
+
+Completion requires a new immutable source seal, designated-GPU report, portable corpus, TSan and
+terminal-head CI receipt. Only then may a create-only Definition v4 be constructed for another
+governance review. These tasks never authorize a benchmark stage or create a primary observation.
+
 ## Unconditional STOP conditions
 
 - No old Definition or Stage A artifact may be edited, overwritten or linked as a new gate result.

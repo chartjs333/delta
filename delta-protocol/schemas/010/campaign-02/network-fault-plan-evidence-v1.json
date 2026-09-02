@@ -1,0 +1,227 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:network-fault-plan-evidence-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE"
+    },
+    "applied_network_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "decision": {
+      "const": "PASS"
+    },
+    "definition_network_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "excluded_real_wan_profile": {
+      "additionalProperties": false,
+      "properties": {
+        "profile_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reason": {
+          "const": "STAGE_C_EMULATED_ONLY_REAL_WAN_NOT_AUTHORIZED"
+        }
+      },
+      "required": [
+        "profile_id",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "fault_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "fault_results": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "at_step": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "event_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "expected_outcome": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "observed_outcome": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "passed": {
+            "const": true
+          }
+        },
+        "required": [
+          "at_step",
+          "event_id",
+          "expected_outcome",
+          "observed_outcome",
+          "passed"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "implementation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "network_counters": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes_per_token": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "cumulative_delay_ms": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "delivered_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "dropped_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "duplicated_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "network_share_ppm": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "packet_count": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "payload_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "profile_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "reordered_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "wire_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bytes_per_token",
+          "cumulative_delay_ms",
+          "delivered_packets",
+          "dropped_packets",
+          "duplicated_packets",
+          "network_share_ppm",
+          "packet_count",
+          "payload_bytes",
+          "profile_id",
+          "reordered_packets",
+          "wire_bytes"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "resilience_result": {
+      "const": "PASS"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "applied_network_profile_ids",
+    "decision",
+    "definition_network_profile_ids",
+    "environment_id",
+    "excluded_real_wan_profile",
+    "fault_profile_ids",
+    "fault_results",
+    "formal_semantics_id",
+    "implementation_id",
+    "network_counters",
+    "plan_id",
+    "resilience_result",
+    "runner_id",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 network-fault-plan-evidence-v1"
+}

@@ -49,6 +49,7 @@ _EXPECTED_ARMS: Final = (
 _SUPERSEDED_DEFINITION_IDS: Final = frozenset(
     {
         "sha256:b263e77766599426dbf13574b05f2104ace1acf2d866e6ca5d9a3abef66f5dd5",
+        "sha256:3844edbdcfc402ca3fbd54f9a2e4dfab965a8a7280a6ccd3dad70611e88ee803",
     }
 )
 
@@ -148,6 +149,7 @@ class QualifiedRuntimeLineage:
     exactness_runner_id: str | None = None
     scientific_runner_id: str | None = None
     network_fault_runner_id: str | None = None
+    schema_version: str = "3.0.0"
 
     def __post_init__(self) -> None:
         if (
@@ -190,6 +192,10 @@ class QualifiedRuntimeLineage:
         )
         if not (legacy or stage_specific):
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_RUNNER_SCHEMA_INVALID")
+        if legacy and self.schema_version != "3.0.0":
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_VERSION_INVALID")
+        if stage_specific and self.schema_version not in {"3.0.0", "4.0.0"}:
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_VERSION_INVALID")
         runner_ids = (
             (self.runner_id,)
             if legacy
@@ -282,7 +288,7 @@ class QualifiedRuntimeLineage:
             not isinstance(value, dict)
             or set(value) != fields
             or value["campaign_id"] != "campaign-02"
-            or value["schema_version"] != "3.0.0"
+            or value["schema_version"] not in {"3.0.0", "4.0.0"}
             or value["type_name"] != "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE"
             or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
             or value["stage_execution_model"] != "INDEPENDENT_BFT_RUNS"
@@ -320,9 +326,10 @@ class QualifiedRuntimeLineage:
             exactness_runner_id=str(value["exactness_runner_id"]),
             scientific_runner_id=str(value["scientific_runner_id"]),
             network_fault_runner_id=str(value["network_fault_runner_id"]),
+            schema_version=str(value["schema_version"]),
         )
         if result.document != value:
-            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_V3_DOCUMENT_MISMATCH")
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_DOCUMENT_MISMATCH")
         return result
 
     @property
@@ -354,7 +361,7 @@ class QualifiedRuntimeLineage:
                 {
                     "exactness_runner_id": self.exactness_runner_id,
                     "network_fault_runner_id": self.network_fault_runner_id,
-                    "schema_version": "3.0.0",
+                    "schema_version": self.schema_version,
                     "scientific_runner_id": self.scientific_runner_id,
                     "stage_execution_identities_id": self.stage_execution_identities_id,
                 }
@@ -363,7 +370,11 @@ class QualifiedRuntimeLineage:
 
     @property
     def content_id(self) -> str:
-        version = b"v2" if self.runner_id is not None else b"v3"
+        version = (
+            b"v2"
+            if self.runner_id is not None
+            else b"v" + self.schema_version.split(".", maxsplit=1)[0].encode("ascii")
+        )
         return sha256_content_id(
             b"deltareduce.010.campaign02-qualified-runtime-lineage."
             + version
@@ -496,11 +507,11 @@ def _validate_definition_bindings(
     if definition.content_id in _SUPERSEDED_DEFINITION_IDS:
         raise _fail("CAMPAIGN02_DEFINITION_SUPERSEDED_BEFORE_ATTESTATION")
     if (
-        definition.raw.get("schema_version") != "3.0.0"
+        definition.raw.get("schema_version") not in {"3.0.0", "4.0.0"}
         or definition.campaign_id != "campaign-02"
         or not definition.primary
     ):
-        raise _fail("CAMPAIGN02_DEFINITION_V3_REQUIRED")
+        raise _fail("CAMPAIGN02_DEFINITION_V3_OR_V4_REQUIRED")
     if runtime_lineage.runner_id is not None:
         raise _fail("CAMPAIGN02_STAGE_SPECIFIC_RUNTIME_LINEAGE_REQUIRED")
     if (

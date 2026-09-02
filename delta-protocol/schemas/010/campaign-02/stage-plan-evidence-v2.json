@@ -1,0 +1,103 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-plan-evidence-v2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_STAGE_PLAN_EVIDENCE"
+    },
+    "decision": {
+      "const": "PASS"
+    },
+    "environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evidence_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evidence_kind": {
+      "enum": [
+        "NETWORK_FAULT_EXECUTION",
+        "SEMANTIC_EXACTNESS_MATRIX"
+      ]
+    },
+    "implementation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runner_identity_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runner_role": {
+      "enum": [
+        "EXACTNESS_RUNNER",
+        "NETWORK_FAULT_RUNNER"
+      ]
+    },
+    "source_class": {
+      "enum": [
+        "MEASURED_CI_WORKFLOW",
+        "MEASURED_HARDWARE"
+      ]
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "verified_summary_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "decision",
+    "environment_id",
+    "evidence_ids",
+    "evidence_kind",
+    "formal_semantics_id",
+    "implementation_id",
+    "plan_id",
+    "runner_id",
+    "runner_identity_id",
+    "runner_role",
+    "schema_version",
+    "source_class",
+    "source_commit",
+    "source_tree",
+    "type_name",
+    "verified_summary_ids"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-plan-evidence-v2"
+}
