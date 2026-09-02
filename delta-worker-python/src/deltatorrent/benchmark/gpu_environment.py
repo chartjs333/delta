@@ -16,6 +16,7 @@ _CONTENT_ID = re.compile(r"^sha256:[0-9a-f]{64}$")
 _REQUIRED: Final = {
     "accelerate": "1.14.0",
     "bitsandbytes": "0.50.2",
+    "cryptography": "46.0.7",
     "huggingface-hub": "1.29.0",
     "peft": "0.20.0",
     "torch": "2.6.0+cu124",
@@ -116,6 +117,7 @@ def build_gpu_environment_lock(root: Path) -> GpuEnvironmentLock:
         != {
             "accelerate": "1.14.0",
             "bitsandbytes": "0.50.2",
+            "cryptography": "46.0.7",
             "huggingface_hub": "1.29.0",
             "peft": "0.20.0",
             "torch": "2.6.0+cu124",

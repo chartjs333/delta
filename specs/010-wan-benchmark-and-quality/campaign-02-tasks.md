@@ -1,9 +1,14 @@
 # Campaign 02 remediation and staged execution tasks
 
-**Authority**: `APPROVED_FOR_NEW_CAMPAIGN_REMEDIATION_ONLY`
+**Remediation authority**: `APPROVED_FOR_NEW_CAMPAIGN_REMEDIATION_ONLY`
+
+**Execution-binding remediation authority**: PR #16 governance review `CHANGES_REQUIRED`
 
 **Source branch**: `010e-primary-campaign-remediation` from
 `661494c84cfcdb365c21542b46a5ebfe3a91cd8d`
+
+**Execution-binding branch**: `010g-campaign02-execution-binding` from remediation merge
+`8e945ac9713de5898d3abdb10ad2474079a87260`
 
 **Formal impact**: `REGRESSION_ONLY` against
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
@@ -65,6 +70,69 @@ The remaining tasks begin only after remediation is merged into
 - [ ] **C2-014** Create the methodology diff, definition attestation and readiness record.
 - [ ] **C2-015** Verify no scientific observation predates the new attestation.
 - [ ] **C2-016** Obtain a separate governance authorization before any new Stage A execution.
+
+## Execution-binding remediation after PR #16 review
+
+The Definition `sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af`
+and its quorum-shaped unsigned record are superseded before execution. They remain immutable audit
+history and cannot satisfy the tasks below.
+
+- [x] **C2-017** Publish the pre-execution supersession record with zero observations and no
+  execution authorization.
+- [x] **C2-018** Source-seal distinct workload-contract, domain-manifest and exact ordered
+  ticket-plan identities.
+- [x] **C2-019** Implement the only Campaign 02 Definition-to-plan-catalog compiler, centrally
+  reject every superseded primary Definition, and enforce exact Stage A/B/C authorization scope.
+- [x] **C2-020** Bind the compiler to detached Ed25519 quorum verification and sign every
+  security-relevant vote field, including signer/key identity and `submitted_at`.
+- [x] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
+  corrected execution-binding and signed stage-governance source. The earlier `d9b8230...` and
+  `b870c8a...` source qualifications are superseded and cannot complete this task. Replacement
+  source `90f4b46...` / tree `e188e33...`, evidence overlay `67d0383...` and workflow
+  `33617322382` passed their exact-source chain, but receipt-head workflow `33618187137` exposed a
+  required TSan lifetime race. They are superseded and cannot complete this task. Final replacement
+  source `f323ae1...` / tree `6cb86a3...`, evidence overlay `8936015...`, designated-GPU report,
+  96-case portable corpus and workflow `33620734265` passed; current-head control recorded 48
+  successful checks, four policy skips and no failures or pending checks.
+- [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
+  workload/domain/ticket IDs and qualified runtime lineage.
+- [ ] **C2-023** Obtain independent detached signatures and verify temporal closure at the actual
+  terminal reviewed HEAD.
+- [ ] **C2-024** Obtain a new separate governance decision before any Stage A execution. This task
+  replaces, but does not retroactively complete, C2-016 for the superseded Definition.
+- [x] **C2-025** Require a detached Ed25519 quorum proof for every stage authorization; reject raw,
+  unsigned, forged, wrong-validator-set and caller-constructed authorization documents.
+- [x] **C2-026** Verify canonical typed predecessor gate receipts with exact PASS, Definition,
+  catalog, source, analyzer, temporal and complete plan-set lineage; require `runner_role`.
+- [x] **C2-027** Declare independent Stage A/B/C BFT runs, bind `gate_stage` into every round ID,
+  source-seal 36 unique certified contexts and scope ticket templates by round ID.
+
+Execution-binding qualification evidence:
+
+- `reports/benchmark/campaigns/campaign-02/qualification-supersession-stage-authorization.json`
+  — records that the prior `d9b8230...` source/evidence chain is historical only;
+- `reports/benchmark/campaigns/campaign-02/qualification-supersession-signed-stage-governance.json`
+  — records that the `b870c8a...` source/evidence chain is historical only;
+- `reports/benchmark/campaigns/campaign-02/qualification-supersession-tsan-exception-lifetime.json`
+  — records the required TSan failure on receipt-head `1620d6b...` and supersedes source
+  `90f4b46...` before execution;
+- `specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-governance-hardware-qualification.json`,
+  `campaign-02-signed-stage-governance-exact-source-qualification.json` and
+  `campaign-02-signed-stage-governance-exact-source-ci-receipt.json` — preserve the superseded
+  pre-TSan source, designated-GPU, portable and CI chain for audit;
+- `specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json`,
+  `campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json` and
+  `campaign-02-signed-stage-tsan-lifetime-exact-source-ci-receipt.json` — bind the final corrected
+  source, designated GPU, 96-case portable corpus, reproducible join and terminal current-head CI;
+- `evidence/campaign-02-stage-authorization-hardware-qualification.json` — passing designated-GPU
+  qualification for the corrected immutable source;
+- `evidence/campaign-02-stage-authorization-exact-source-qualification.json` — passing portable
+  exact-source qualification for the corrected immutable source;
+- `evidence/campaign-02-stage-authorization-exact-source-ci-receipt.json` — passing dedicated
+  workflow artifacts and terminal current-head control for the now-superseded qualification
+  overlay; source `90f4b46...` and evidence overlay `67d0383...` are also historical after the
+  terminal receipt-head TSan failure. The replacement chain retains zero primary observations and
+  no execution authorization.
 
 ## Unconditional STOP conditions
 

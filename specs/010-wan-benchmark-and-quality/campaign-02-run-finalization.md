@@ -35,6 +35,38 @@ global checkpoint or global certificate list.
 The execution plan binds the result class. Certified plans additionally bind the Feature 008
 context, validator/quorum policy, accumulator/apply profiles and required shard matrix.
 
+## Stage and BFT context model
+
+Campaign 02 uses three independent benchmark executions for each arm/seed/repetition coordinate,
+not three analyses of one underlying run. `gate_stage` is therefore part of the source-generated
+`round_id`, and certified runtime lineage contains exactly:
+
+```text
+3 stages × 4 certified arms × 3 seeds = 36 unique certified round contexts
+```
+
+No two independent stage plans may share `(round_id, height, view, validator_epoch_id)`. The 32
+IDs in `CampaignTicketPlan` are immutable ticket templates. Their protocol instance identity is
+the pair `(round_id, ticket_template_id)`; a template ID alone is never a cross-round vote,
+commitment or replay key. This is an instantiation of the accepted formal `round_contract`, not a
+new action, certificate edge or failure outcome.
+
+Stage execution authority is a separate detached Ed25519 quorum proof over the exact stage,
+catalog, plan IDs, predecessor receipt IDs, source commit/tree and issue time. Stage B consumes
+exactly one typed Stage A PASS receipt; Stage C consumes exactly one Stage A and one Stage B PASS
+receipt. Receipt bytes are canonical and content-addressed, and their complete Definition,
+catalog, source, analyzer and plan-set lineage is reverified before runner admission.
+
+Primary publication uses observation schema v3. The create-only store persists the canonical
+authorization, validator set, quorum attestation and every detached vote (including signature
+bytes) as separate raw artifacts. The observation binds their artifact IDs, semantic content IDs,
+quorum threshold and signature-set root; an attestation hash alone is not execution evidence.
+
+The synchronous native runtime wrappers retain their `std::future` shared state while copying a
+reactor-provided `RuntimeError` into caller-owned exception storage. This closes a TSan-detected
+exception-lifetime race only; it does not change command validation, WAL/durability order, state,
+effect identity, terminal outcome or any formal transition.
+
 Python structural checks are preflight only. Every certified result that may enter an observation
 must carry a content-addressed native admission receipt produced by the versioned C ABI after the
 authoritative C++ `delta::certificates::ChainVerifier` accepts the complete typed bundle. A missing
@@ -42,7 +74,10 @@ native verifier or receipt is a fail-closed admission error; there is no Python-
 
 ## Governance
 
-Both earlier source/evidence chains remain immutable audit history and are marked
+All earlier source/evidence chains remain immutable audit history. The latest supersession records
+the unsigned StageAuthorization, untyped predecessor IDs, optional runner role and cross-stage BFT
+context reuse found at `04aad0c530aa8c83a76315f737e5caa36fe9b14e`; it authorizes no execution.
+The first two chains remain marked
 `SUPERSEDED_BEFORE_CAMPAIGN02_DEFINITION`: the first had an incomplete run-level finalization
 contract; the second ended at `55187704e7310edb71e53f4114726b25cd659dc8` and lacked the
 authoritative native complete-chain verifier in its admission path. No Campaign 02 Definition,

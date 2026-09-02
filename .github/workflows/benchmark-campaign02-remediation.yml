@@ -1,4 +1,4 @@
-name: Campaign 02 exact-source remediation qualification
+name: Campaign 02 signed-stage-tsan-lifetime exact-source qualification
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: campaign-02-remediation-${{ github.workflow }}-${{ github.ref }}
+  group: campaign-02-signed-stage-tsan-lifetime-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     name: Portable exact-source contract and evaluator gates
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
-          github.head_ref == '010e-primary-campaign-remediation' }}
+          github.head_ref == '010g-campaign02-execution-binding' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -32,9 +32,9 @@ jobs:
         id: source
         shell: bash
         run: |
-          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
+          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
           git -C control cat-file -e "${source_commit}^{commit}"
-          git -C control merge-base --is-ancestor 661494c84cfcdb365c21542b46a5ebfe3a91cd8d "${source_commit}"
+          git -C control merge-base --is-ancestor 8e945ac9713de5898d3abdb10ad2474079a87260 "${source_commit}"
           printf 'commit=%s\n' "${source_commit}" >> "$GITHUB_OUTPUT"
 
       - name: Check out immutable remediation source
@@ -63,6 +63,7 @@ jobs:
         run: |
           uv run python specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py
           uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_execution_binding.py
           uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py
           git diff --exit-code
 
@@ -88,10 +89,13 @@ jobs:
             delta-worker-python/src/deltatorrent/benchmark \
             delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
             delta-worker-python/tests/benchmark/generate_native_chain_corpus.py \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
+            delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
             delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_execution_binding.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
             specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
             specs/010-wan-benchmark-and-quality/scripts/qualify_campaign02_hardware.py \
@@ -101,10 +105,13 @@ jobs:
             delta-worker-python/src/deltatorrent/benchmark \
             delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
             delta-worker-python/tests/benchmark/generate_native_chain_corpus.py \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
+            delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
             delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_execution_binding.py \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
             specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
             specs/010-wan-benchmark-and-quality/scripts/qualify_campaign02_hardware.py \
@@ -112,6 +119,8 @@ jobs:
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py
           uv run mypy delta-worker-python/src/deltatorrent/benchmark
           uv run pytest \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
+            delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
             delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
@@ -144,7 +153,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
+          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
           git -C control cat-file -e "${source_commit}^{commit}"
           printf 'commit=%s\n' "${source_commit}" >> "$GITHUB_OUTPUT"
 
@@ -182,16 +191,16 @@ jobs:
           uv run python specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_exact_source.py \
             --source-commit '${{ steps.source.outputs.commit }}' \
             --portable-junit "$RUNNER_TEMP/campaign-02-portable/campaign-02-portable.xml" \
-            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-hardware-qualification.json" \
-            --output "$RUNNER_TEMP/campaign-02-exact-source-qualification.json"
+            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json" \
+            --output "$RUNNER_TEMP/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json"
           cmp \
-            "$RUNNER_TEMP/campaign-02-exact-source-qualification.json" \
-            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-exact-source-qualification.json"
+            "$RUNNER_TEMP/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json" \
+            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json"
 
       - name: Retain immutable exact-source admission artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign-02-exact-source-${{ github.run_id }}
-          path: ${{ runner.temp }}/campaign-02-exact-source-qualification.json
+          name: campaign-02-signed-stage-tsan-lifetime-exact-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json
           if-no-files-found: error
           retention-days: 30

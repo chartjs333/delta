@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from typing import Any, Protocol
 
 from deltatorrent.benchmark.campaign02 import (
+    Campaign02PlanCatalogView,
     CampaignExecutionPlan,
     TicketAllocation,
     authorize_execution_class,
+    authorize_non_primary_execution_class,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.evaluators.common import (
@@ -21,6 +24,7 @@ from deltatorrent.benchmark.feature008_admission import (
     Feature008CertificateBundle,
     Feature008ChainVerifier,
 )
+from deltatorrent.benchmark.stage_authorization import StageAuthorizationProof
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
 _CONTENT_ID = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -395,10 +399,26 @@ class PrimaryScientificRunner:
     def run(
         self,
         plan: CampaignExecutionPlan,
-        authorization: dict[str, Any],
+        authorization: dict[str, Any] | StageAuthorizationProof,
         backend: ScientificArmBackend,
+        *,
+        plan_catalog: Campaign02PlanCatalogView | None = None,
+        predecessor_gate_receipts: Mapping[str, bytes] | None = None,
     ) -> ScientificRun:
-        authorize_execution_class(authorization, plan)
+        if plan.execution_class == "PRIMARY_MEASURED":
+            if not isinstance(authorization, StageAuthorizationProof):
+                raise _fail("SCIENTIFIC_RUNNER_STAGE_AUTHORIZATION_PROOF_REQUIRED")
+            authorize_execution_class(
+                authorization,
+                plan,
+                plan_catalog=plan_catalog,
+                predecessor_gate_receipts=predecessor_gate_receipts or {},
+                runner_role="SCIENTIFIC_RUNNER",
+            )
+        else:
+            if not isinstance(authorization, dict):
+                raise _fail("SCIENTIFIC_RUNNER_NON_PRIMARY_AUTHORIZATION_INVALID")
+            authorize_non_primary_execution_class(authorization, plan)
         if (
             plan.runner_id != self.identity.content_id
             or plan.source_commit != self.identity.source_commit
@@ -544,14 +564,30 @@ class PrimaryEvaluationRunner:
     def run(
         self,
         plan: CampaignExecutionPlan,
-        authorization: dict[str, Any],
+        authorization: dict[str, Any] | StageAuthorizationProof,
         scientific_run: ScientificRun,
         backends: dict[str, ScoringBackend],
         datasets: dict[str, object],
+        *,
+        plan_catalog: Campaign02PlanCatalogView | None = None,
+        predecessor_gate_receipts: Mapping[str, bytes] | None = None,
     ) -> tuple[MeasuredEvaluation, ...]:
         from deltatorrent.benchmark.evaluators.common import EvaluationContext
 
-        authorize_execution_class(authorization, plan)
+        if plan.execution_class == "PRIMARY_MEASURED":
+            if not isinstance(authorization, StageAuthorizationProof):
+                raise _fail("EVALUATION_RUNNER_STAGE_AUTHORIZATION_PROOF_REQUIRED")
+            authorize_execution_class(
+                authorization,
+                plan,
+                plan_catalog=plan_catalog,
+                predecessor_gate_receipts=predecessor_gate_receipts or {},
+                runner_role="EVALUATION_RUNNER",
+            )
+        else:
+            if not isinstance(authorization, dict):
+                raise _fail("EVALUATION_RUNNER_NON_PRIMARY_AUTHORIZATION_INVALID")
+            authorize_non_primary_execution_class(authorization, plan)
         if (
             plan.evaluation_runner_id != self.identity.content_id
             or plan.environment_id != self.identity.environment_id

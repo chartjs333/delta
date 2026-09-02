@@ -13,7 +13,7 @@ from deltatorrent.benchmark.campaign02 import (
     CampaignExecutionPlan,
     TicketAllocation,
     allocate_tickets,
-    authorize_execution_class,
+    authorize_non_primary_execution_class,
     execution_authorization_id,
     load_workload_contract,
 )
@@ -277,9 +277,9 @@ def test_remediation_authorization_cannot_start_primary_execution() -> None:
     )
     authorization = _remediation_authorization()
     with pytest.raises(
-        Campaign02ContractError, match="CAMPAIGN02_PRIMARY_EXECUTION_NOT_AUTHORIZED"
+        Campaign02ContractError, match="CAMPAIGN02_STAGE_AUTHORIZATION_PROOF_REQUIRED"
     ):
-        authorize_execution_class(authorization, primary)
+        authorize_non_primary_execution_class(authorization, primary)
 
 
 def test_non_primary_execution_rejects_unbound_authorization() -> None:
@@ -291,7 +291,7 @@ def test_non_primary_execution_rejects_unbound_authorization() -> None:
     with pytest.raises(
         Campaign02ContractError, match="CAMPAIGN02_EXECUTION_AUTHORIZATION_ID_MISMATCH"
     ):
-        authorize_execution_class(authorization, plan)
+        authorize_non_primary_execution_class(authorization, plan)
 
 
 def test_wikitext_positive_negative_and_overlap_golden() -> None:
