@@ -178,6 +178,12 @@ def verify_governance() -> dict[str, object]:
         / "qualification-supersession-signed-stage-governance.json",
         "CAMPAIGN02_SIGNED_STAGE_GOVERNANCE_SUPERSESSION_INVALID",
     )
+    tsan_exception_lifetime_supersession = canonical_file(
+        ROOT
+        / "reports/benchmark/campaigns/campaign-02"
+        / "qualification-supersession-tsan-exception-lifetime.json",
+        "CAMPAIGN02_TSAN_EXCEPTION_LIFETIME_SUPERSESSION_INVALID",
+    )
     readiness = canonical_file(
         ROOT
         / "reports/benchmark/campaigns/campaign-02"
@@ -287,6 +293,29 @@ def verify_governance() -> dict[str, object]:
         },
         "CAMPAIGN02_SIGNED_STAGE_GOVERNANCE_SUPERSESSION_INVALID",
     )
+    require(
+        tsan_exception_lifetime_supersession.get("status")
+        == "SUPERSEDED_AFTER_TSAN_FAILURE_BEFORE_EXECUTION"
+        and tsan_exception_lifetime_supersession.get("replacement_qualification_required") is True
+        and tsan_exception_lifetime_supersession.get("primary_observations_created") == 0
+        and tsan_exception_lifetime_supersession.get("failed_gate")
+        == {
+            "check_name": "GCC TSan WAL and sidecar replay",
+            "job_id": 100208818052,
+            "summary": "RUNTIME_ERROR_FUTURE_SHARED_STATE_RELEASE_DATA_RACE",
+            "workflow_run_id": 33618187137,
+        }
+        and tsan_exception_lifetime_supersession.get("superseded_evidence")
+        == {
+            "ci_receipt_head": "1620d6b8e66abab338cd4c056b17d3a5662bd544",
+            "ci_receipt_tree": "e9fe4f3a209b8898d96528255d6b90e7be3d415d",
+            "evidence_overlay": "67d038375c172e0a14d7271d2bc0f82ea22e0458",
+            "evidence_overlay_tree": "fbfdebe500d00bed39f9881614ea0d990e53fa8e",
+            "source_commit": "90f4b46a81f6a9ba05e0e5f3c757d008b4bdfcd9",
+            "source_tree": "e188e339ec6073dc9b431658fca95627e526a7bd",
+        },
+        "CAMPAIGN02_TSAN_EXCEPTION_LIFETIME_SUPERSESSION_INVALID",
+    )
     readiness_flags = readiness.get("authorization")
     cryptographic_governance = readiness.get("cryptographic_governance")
     require(
@@ -295,7 +324,7 @@ def verify_governance() -> dict[str, object]:
         and readiness.get("execution_authorization") == "ABSENT"
         and readiness.get("legacy_primary_path")
         == "FORBIDDEN_BY_CAMPAIGN_AND_DEFINITION_ID_REGISTRY"
-        and readiness.get("next_required_gate") == "C2_021_SIGNED_STAGE_GOVERNANCE_REQUALIFICATION"
+        and readiness.get("next_required_gate") == "C2_021_TSAN_EXCEPTION_LIFETIME_REQUALIFICATION"
         and isinstance(readiness_flags, dict)
         and readiness_flags
         and all(value is False for value in readiness_flags.values())
@@ -327,6 +356,9 @@ def verify_governance() -> dict[str, object]:
         ),
         "signed_stage_governance_supersession_id": sha256_content_id(
             canonical_json_bytes(signed_stage_governance_supersession)
+        ),
+        "tsan_exception_lifetime_supersession_id": sha256_content_id(
+            canonical_json_bytes(tsan_exception_lifetime_supersession)
         ),
         "remediation_authorization_id": sha256_content_id(canonical_json_bytes(authorization)),
         "status": "PASS",
@@ -690,6 +722,11 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "delta-ffi/include/delta_abi.h",
             "delta-ffi/src/certificate_chain_abi.cpp",
             "delta-ffi/src/certificates_abi.cpp",
+            "delta-runtime-cpp/include/delta/runtime/bounded_mpsc.hpp",
+            "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+            "delta-runtime-cpp/src/runtime.cpp",
+            "delta-runtime-cpp/src/wal.cpp",
+            "delta-runtime-cpp/src/wal.hpp",
         ),
         **common,
     )

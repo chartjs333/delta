@@ -548,13 +548,15 @@ void test_vote_and_pointer_recovery() {
     (void)runtime.submit(delta::core::protocol::encode(command));
     const auto accepted_state = runtime.state_bytes();
     command.body_hash = id('9');
-    bool rejected = false;
-    try {
-      (void)runtime.submit(delta::core::protocol::encode(command));
-    } catch (const delta::runtime::RuntimeError& error) {
-      rejected = error.code() == delta::runtime::ErrorCode::request_conflict;
+    for (std::size_t attempt = 0U; attempt < 128U; ++attempt) {
+      bool rejected = false;
+      try {
+        (void)runtime.submit(delta::core::protocol::encode(command));
+      } catch (const delta::runtime::RuntimeError& error) {
+        rejected = error.code() == delta::runtime::ErrorCode::request_conflict;
+      }
+      expect(rejected, "conflicting commitment request was accepted");
     }
-    expect(rejected, "conflicting commitment request was accepted");
     expect(runtime.state_bytes() == accepted_state, "conflicting commitment changed state");
     record_attack(
         "commitment-equivocation",

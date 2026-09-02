@@ -62,6 +62,11 @@ authorization, validator set, quorum attestation and every detached vote (includ
 bytes) as separate raw artifacts. The observation binds their artifact IDs, semantic content IDs,
 quorum threshold and signature-set root; an attestation hash alone is not execution evidence.
 
+The synchronous native runtime wrappers retain their `std::future` shared state while copying a
+reactor-provided `RuntimeError` into caller-owned exception storage. This closes a TSan-detected
+exception-lifetime race only; it does not change command validation, WAL/durability order, state,
+effect identity, terminal outcome or any formal transition.
+
 Python structural checks are preflight only. Every certified result that may enter an observation
 must carry a content-addressed native admission receipt produced by the versioned C ABI after the
 authoritative C++ `delta::certificates::ChainVerifier` accepts the complete typed bundle. A missing

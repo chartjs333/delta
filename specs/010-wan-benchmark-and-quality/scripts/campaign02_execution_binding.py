@@ -30,6 +30,9 @@ STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_PATH: Final = (
 SIGNED_STAGE_GOVERNANCE_QUALIFICATION_SUPERSESSION_PATH: Final = (
     REPORTS / "qualification-supersession-signed-stage-governance.json"
 )
+TSAN_EXCEPTION_LIFETIME_QUALIFICATION_SUPERSESSION_PATH: Final = (
+    REPORTS / "qualification-supersession-tsan-exception-lifetime.json"
+)
 READINESS_PATH: Final = REPORTS / "execution-binding-remediation-readiness.json"
 SUPERSEDED_DEFINITION_ID: Final = (
     "sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af"
@@ -152,6 +155,32 @@ def expected_outputs() -> dict[Path, bytes]:
         },
         "type_name": "CAMPAIGN02_SOURCE_QUALIFICATION_SUPERSESSION",
     }
+    tsan_exception_lifetime_qualification_supersession = {
+        "failed_gate": {
+            "check_name": "GCC TSan WAL and sidecar replay",
+            "job_id": 100208818052,
+            "summary": "RUNTIME_ERROR_FUTURE_SHARED_STATE_RELEASE_DATA_RACE",
+            "workflow_run_id": 33618187137,
+        },
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "primary_observations_created": 0,
+        "reason_codes": [
+            "RUNTIME_ERROR_EXCEPTION_LIFETIME_NOT_RETAINED_ACROSS_SYNCHRONOUS_FUTURE_GET",
+            "REQUIRED_TSAN_GATE_FAILED",
+        ],
+        "replacement_qualification_required": True,
+        "schema_version": "1.0.0",
+        "status": "SUPERSEDED_AFTER_TSAN_FAILURE_BEFORE_EXECUTION",
+        "superseded_evidence": {
+            "ci_receipt_head": "1620d6b8e66abab338cd4c056b17d3a5662bd544",
+            "ci_receipt_tree": "e9fe4f3a209b8898d96528255d6b90e7be3d415d",
+            "evidence_overlay": "67d038375c172e0a14d7271d2bc0f82ea22e0458",
+            "evidence_overlay_tree": "fbfdebe500d00bed39f9881614ea0d990e53fa8e",
+            "source_commit": "90f4b46a81f6a9ba05e0e5f3c757d008b4bdfcd9",
+            "source_tree": "e188e339ec6073dc9b431658fca95627e526a7bd",
+        },
+        "type_name": "CAMPAIGN02_SOURCE_QUALIFICATION_SUPERSESSION",
+    }
     readiness = {
         "authorization": {
             "feature_011_authorized": False,
@@ -182,9 +211,9 @@ def expected_outputs() -> dict[Path, bytes]:
             "workload_contract_id": workload.content_id,
         },
         "legacy_primary_path": "FORBIDDEN_BY_CAMPAIGN_AND_DEFINITION_ID_REGISTRY",
-        "next_required_gate": "C2_022_NEW_IMMUTABLE_DEFINITION",
+        "next_required_gate": "C2_021_TSAN_EXCEPTION_LIFETIME_REQUALIFICATION",
         "schema_version": "1.0.0",
-        "status": "SOURCE_REMEDIATION_QUALIFIED_AWAITING_C2_022",
+        "status": "SOURCE_REMEDIATION_IN_PROGRESS_NO_EXECUTION",
         "type_name": "CAMPAIGN02_EXECUTION_BINDING_REMEDIATION_READINESS",
     }
     return {
@@ -198,6 +227,10 @@ def expected_outputs() -> dict[Path, bytes]:
         + b"\n",
         SIGNED_STAGE_GOVERNANCE_QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(
             signed_stage_governance_qualification_supersession
+        )
+        + b"\n",
+        TSAN_EXCEPTION_LIFETIME_QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(
+            tsan_exception_lifetime_qualification_supersession
         )
         + b"\n",
         READINESS_PATH: canonical_json_bytes(readiness) + b"\n",
