@@ -175,7 +175,7 @@ edited in place. PR #18 remains Draft and is not authorized for merge.
 - [x] **C2-032** Run the cross-component positive/negative regression matrix for stage-specific
   runner IDs, actual `PrimaryScientificRunner` compatibility, non-executable composite metadata,
   Campaign 01 rejection, signed authorization, exact plan cardinality and complete evidence.
-- [ ] **C2-033** Reissue the immutable source commit/tree, designated-GPU report, portable corpus,
+- [x] **C2-033** Reissue the immutable source commit/tree, designated-GPU report, portable corpus,
   TSan qualification and terminal-head CI receipt; only then construct new stage identities,
   runtime lineage and a replacement immutable Definition with a new content ID.
 
@@ -205,9 +205,18 @@ The replacement source is `7caad473501a31d95e24408901a6a2236ec03ce6` / tree
 - `evidence/campaign-02-runner-gate-analyzer-exact-source-qualification.json` — passing 116-case
   portable corpus and recursively bound stage-runner/gate-analyzer source identities.
 
-Both records retain zero primary scientific executions and observations. C2-033 remains open until
-the replacement TSan, dedicated exact-source CI, terminal current-head control and new Definition
-package are recorded.
+Both records retain zero primary scientific executions and observations. The closing TSan,
+dedicated exact-source CI, terminal current-head control and Definition package are recorded below.
+
+C2-033 replacement construction is now closed by dedicated workflow `33651585075`, exact TSan,
+terminal overlay `5192b38...` with 49 successful checks, seven policy skips and no failures or
+pending checks, and `evidence/campaign-02-runner-gate-analyzer-exact-source-ci-receipt.json`.
+The replacement stage identity manifest is
+`sha256:59d7345a158086e20574eec0a1c3b095f3e8557c1147e422eab71f5ddcd4a56d`, runtime lineage is
+`sha256:159db3bc3214bb6039fc5ceaf7770caffbdd261f6b3dd6b178da486e955a8b76`, and immutable Definition is
+`sha256:3844edbdcfc402ca3fbd54f9a2e4dfab965a8a7280a6ccd3dad70611e88ee803`.
+It has zero votes, absent attestation, no authoritative catalog, no execution authorization and
+zero observations. Governance review of this replacement package is required before C2-023.
 
 ## Unconditional STOP conditions
 
