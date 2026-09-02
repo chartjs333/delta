@@ -211,9 +211,9 @@ def expected_outputs() -> dict[Path, bytes]:
             "workload_contract_id": workload.content_id,
         },
         "legacy_primary_path": "FORBIDDEN_BY_CAMPAIGN_AND_DEFINITION_ID_REGISTRY",
-        "next_required_gate": "C2_021_TSAN_EXCEPTION_LIFETIME_REQUALIFICATION",
+        "next_required_gate": "C2_022_NEW_IMMUTABLE_DEFINITION",
         "schema_version": "1.0.0",
-        "status": "SOURCE_REMEDIATION_IN_PROGRESS_NO_EXECUTION",
+        "status": "SOURCE_REMEDIATION_QUALIFIED_AWAITING_C2_022",
         "type_name": "CAMPAIGN02_EXECUTION_BINDING_REMEDIATION_READINESS",
     }
     return {

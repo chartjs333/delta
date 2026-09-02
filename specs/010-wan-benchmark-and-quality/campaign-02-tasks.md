@@ -85,12 +85,15 @@ history and cannot satisfy the tasks below.
   reject every superseded primary Definition, and enforce exact Stage A/B/C authorization scope.
 - [x] **C2-020** Bind the compiler to detached Ed25519 quorum verification and sign every
   security-relevant vote field, including signer/key identity and `submitted_at`.
-- [ ] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
+- [x] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
   corrected execution-binding and signed stage-governance source. The earlier `d9b8230...` and
   `b870c8a...` source qualifications are superseded and cannot complete this task. Replacement
   source `90f4b46...` / tree `e188e33...`, evidence overlay `67d0383...` and workflow
   `33617322382` passed their exact-source chain, but receipt-head workflow `33618187137` exposed a
-  required TSan lifetime race. They are superseded and cannot complete this task.
+  required TSan lifetime race. They are superseded and cannot complete this task. Final replacement
+  source `f323ae1...` / tree `6cb86a3...`, evidence overlay `8936015...`, designated-GPU report,
+  96-case portable corpus and workflow `33620734265` passed; current-head control recorded 48
+  successful checks, four policy skips and no failures or pending checks.
 - [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
   workload/domain/ticket IDs and qualified runtime lineage.
 - [ ] **C2-023** Obtain independent detached signatures and verify temporal closure at the actual
@@ -115,8 +118,12 @@ Execution-binding qualification evidence:
   `90f4b46...` before execution;
 - `specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-governance-hardware-qualification.json`,
   `campaign-02-signed-stage-governance-exact-source-qualification.json` and
-  `campaign-02-signed-stage-governance-exact-source-ci-receipt.json` — bind the corrected source,
-  designated GPU, 96-case portable corpus, reproducible join and terminal current-head CI;
+  `campaign-02-signed-stage-governance-exact-source-ci-receipt.json` — preserve the superseded
+  pre-TSan source, designated-GPU, portable and CI chain for audit;
+- `specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json`,
+  `campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json` and
+  `campaign-02-signed-stage-tsan-lifetime-exact-source-ci-receipt.json` — bind the final corrected
+  source, designated GPU, 96-case portable corpus, reproducible join and terminal current-head CI;
 - `evidence/campaign-02-stage-authorization-hardware-qualification.json` — passing designated-GPU
   qualification for the corrected immutable source;
 - `evidence/campaign-02-stage-authorization-exact-source-qualification.json` — passing portable
@@ -124,8 +131,8 @@ Execution-binding qualification evidence:
 - `evidence/campaign-02-stage-authorization-exact-source-ci-receipt.json` — passing dedicated
   workflow artifacts and terminal current-head control for the now-superseded qualification
   overlay; source `90f4b46...` and evidence overlay `67d0383...` are also historical after the
-  terminal receipt-head TSan failure. Replacement evidence remains absent, with zero primary
-  observations and no execution authorization.
+  terminal receipt-head TSan failure. The replacement chain retains zero primary observations and
+  no execution authorization.
 
 ## Unconditional STOP conditions
 
