@@ -93,7 +93,7 @@
     {
       "id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V3",
       "path": "schemas/010/campaign-02/plan-catalog-v3.json",
-      "sha256": "45b89d87d0742a5a9646c82dae63becf5ea8a70f8a79c0397792db59ee226734"
+      "sha256": "7a2abae2136cada173bbb1f8edac414ead585bcb3eac7724ce10502d30a732fa"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
@@ -138,7 +138,7 @@
     {
       "id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RESULT-010-V1",
       "path": "schemas/010/campaign-02/stage-gate-result-v1.json",
-      "sha256": "3ede9370b731bc28890d5bd5a357f119c32b18665cf44cbe5d73f1cf06adc9b8"
+      "sha256": "bcc413189a60b57c992dfd3def8a6cb3a330fa9fe28511e8847de1246d7301bd"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",

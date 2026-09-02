@@ -191,6 +191,12 @@ Machine-readable source qualification evidence:
   corpus, recursive source/component identities and C2-028 through C2-032 checks for that exact
   source, with zero primary scientific executions and observations.
 
+The source/evidence chain `287a1ce...` / `aa1ecb4...`, overlay `b4bbb08...` and workflow
+`33650130142` passed, but is retained as historical audit evidence only. During replacement
+manifest construction it exposed that typed gate receipts still used a legacy global gate-analyzer
+ID instead of the recursively verified manifest identity. The chain is superseded before any new
+Definition by `reports/benchmark/campaigns/campaign-02/qualification-supersession-runner-gate-analyzer.json`.
+
 ## Unconditional STOP conditions
 
 - No old Definition or Stage A artifact may be edited, overwritten or linked as a new gate result.

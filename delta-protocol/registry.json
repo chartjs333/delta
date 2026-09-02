@@ -58,7 +58,7 @@
     {
       "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
       "path": "schemas/010/campaign-02/registry-v1.json",
-      "sha256": "11d476a58893c3762963f8df16615822c19689ae752e4a5c60650d322c612e42"
+      "sha256": "7b2b1873c2a6e0b6599bc817f72b8e922f162a229053c653d08ade49215887c4"
     },
     {
       "id": "REGISTRY-BENCHMARK-010",
@@ -1322,7 +1322,7 @@
     {
       "id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V3",
       "path": "schemas/010/campaign-02/plan-catalog-v3.json",
-      "sha256": "45b89d87d0742a5a9646c82dae63becf5ea8a70f8a79c0397792db59ee226734"
+      "sha256": "7a2abae2136cada173bbb1f8edac414ead585bcb3eac7724ce10502d30a732fa"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V1",
@@ -1382,7 +1382,7 @@
     {
       "id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RESULT-010-V1",
       "path": "schemas/010/campaign-02/stage-gate-result-v1.json",
-      "sha256": "3ede9370b731bc28890d5bd5a357f119c32b18665cf44cbe5d73f1cf06adc9b8"
+      "sha256": "bcc413189a60b57c992dfd3def8a6cb3a330fa9fe28511e8847de1246d7301bd"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-STAGE-PLAN-EVIDENCE-010-V1",

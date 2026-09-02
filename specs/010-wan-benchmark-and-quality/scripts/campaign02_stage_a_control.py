@@ -240,6 +240,7 @@ class WorkflowGateFinalizer:
         self.document = {
             "decision": "PASS",
             "gate_result_id": summary.content_id,
+            "gate_analyzer_id": summary.gate_analyzer_id,
             "plan_evidence_ids": list(summary.plan_evidence_ids),
             "runner_id": summary.runner_id,
             "schema_version": "1.0.0",

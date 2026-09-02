@@ -17,7 +17,6 @@ from typing import Any, Final, Protocol
 
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.stage_authorization import (
-    CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
     StageAuthorizationProof,
     StageGateReceipt,
     VerifiedStageAuthorization,
@@ -871,6 +870,7 @@ class Campaign02PlanCatalogView(Protocol):
     definition_attestation_verified_at: datetime
     runtime_lineage_id: str
     stage_execution_identities_id: str
+    gate_analyzer_id: str
     plans: tuple[CampaignExecutionPlan, ...]
 
     @property
@@ -969,7 +969,7 @@ def authorize_execution_class(
             or receipt.qualified_runtime_lineage_id != plan_catalog.runtime_lineage_id
             or receipt.required_plan_ids != expected_receipt_plans
             or receipt.accepted_plan_ids != expected_receipt_plans
-            or receipt.gate_analyzer_id != CAMPAIGN02_STAGE_GATE_ANALYZER_ID
+            or receipt.gate_analyzer_id != plan_catalog.gate_analyzer_id
             or receipt.source_commit != plan.source_commit
             or receipt.source_tree != plan.source_tree
             or receipt.finalized_at < plan_catalog.definition_attestation_verified_at

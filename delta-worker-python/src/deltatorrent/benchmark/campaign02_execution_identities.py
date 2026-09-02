@@ -134,6 +134,7 @@ class StageExecutionIdentityManifest:
         exactness = self.identity("exactness_runner").value
         scientific = self.identity("scientific_runner").value
         network = self.identity("network_fault_runner").value
+        analyzer = self.identity("stage_gate_analyzer").value
         multi_role = self.identity("multi_role_runner").value
         exactness_entrypoints = exactness.get("entrypoints")
         network_entrypoints = network.get("entrypoints")
@@ -153,6 +154,13 @@ class StageExecutionIdentityManifest:
             not in network_entrypoints
         ):
             raise _fail("CAMPAIGN02_NETWORK_FAULT_EXECUTOR_IDENTITY_INVALID")
+        if (
+            analyzer.get("component") != "CAMPAIGN02_STAGE_GATE_ANALYZER"
+            or analyzer.get("entrypoint")
+            != "deltatorrent.benchmark.campaign02_stage_execution.execute_stage"
+            or analyzer.get("execution_authorized") is not False
+        ):
+            raise _fail("CAMPAIGN02_STAGE_GATE_ANALYZER_IDENTITY_INVALID")
         role_ids = multi_role.get("role_identity_ids")
         if not isinstance(role_ids, dict) or role_ids != {
             "EXACTNESS_RUNNER": self.identity_id("exactness_runner"),

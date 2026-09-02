@@ -24,7 +24,6 @@ from deltatorrent.benchmark.campaign02_execution_identities import (
 )
 from deltatorrent.benchmark.definition import BenchmarkDefinition
 from deltatorrent.benchmark.stage_authorization import (
-    CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
     StageAuthorizationProof,
     StageGateReceipt,
 )
@@ -132,6 +131,7 @@ class StageExecutionSummary:
     plan_catalog_id: str
     qualified_runtime_lineage_id: str
     stage_execution_identities_id: str
+    gate_analyzer_id: str
     stage_authorization_attestation_id: str
     runner_id: str
     source_commit: str
@@ -155,6 +155,7 @@ class StageExecutionSummary:
             "completed_stage": self.completed_stage,
             "definition_attestation_id": self.definition_attestation_id,
             "evidence_root": self.evidence_root,
+            "gate_analyzer_id": self.gate_analyzer_id,
             "plan_catalog_id": self.plan_catalog_id,
             "plan_evidence_ids": list(self.plan_evidence_ids),
             "qualified_runtime_lineage_id": self.qualified_runtime_lineage_id,
@@ -224,6 +225,7 @@ def execute_stage(
         or runtime_lineage.stage_execution_identities_id != stage_identities.content_id
         or plan_catalog.runtime_lineage_id != runtime_lineage.content_id
         or plan_catalog.stage_execution_identities_id != stage_identities.content_id
+        or plan_catalog.gate_analyzer_id != stage_identities.identity_id("stage_gate_analyzer")
         or definition.source_commit != runtime_lineage.source_commit
         or definition.source_tree != runtime_lineage.source_tree
         or stage_identities.source_commit != runtime_lineage.source_commit
@@ -274,6 +276,7 @@ def execute_stage(
         plan_catalog_id=plan_catalog.content_id,
         qualified_runtime_lineage_id=runtime_lineage.content_id,
         stage_execution_identities_id=stage_identities.content_id,
+        gate_analyzer_id=plan_catalog.gate_analyzer_id,
         stage_authorization_attestation_id=verified.content_id,
         runner_id=runner_id,
         source_commit=runtime_lineage.source_commit,
@@ -295,7 +298,7 @@ def execute_stage(
         definition_attestation_id=summary.definition_attestation_id,
         evidence_root=summary.evidence_root,
         finalized_at=finalization.finalized_at,
-        gate_analyzer_id=CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
+        gate_analyzer_id=summary.gate_analyzer_id,
         gate_qc_id=_id(finalization.gate_qc_id, "CAMPAIGN02_STAGE_GATE_QC_ID_INVALID"),
         gate_result_id=summary.content_id,
         plan_catalog_id=summary.plan_catalog_id,

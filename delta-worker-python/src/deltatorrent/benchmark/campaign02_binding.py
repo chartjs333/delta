@@ -410,13 +410,17 @@ class Campaign02PlanCatalog:
     ticket_plan_id: str
     runtime_lineage_id: str
     stage_execution_identities_id: str
+    gate_analyzer_id: str
     definition_attestation_verified_at: datetime
     plans: tuple[CampaignExecutionPlan, ...]
 
     def __post_init__(self) -> None:
         expected_count = 15 * len(CAMPAIGN02_GATE_STAGES)
         if (
-            len(self.plans) != expected_count
+            _CONTENT_ID.fullmatch(self.gate_analyzer_id) is None
+            or _CONTENT_ID.fullmatch(self.stage_execution_identities_id) is None
+            or _CONTENT_ID.fullmatch(self.runtime_lineage_id) is None
+            or len(self.plans) != expected_count
             or len({item.content_id for item in self.plans}) != expected_count
             or any(len(self.plan_ids_for_stage(stage)) != 15 for stage in CAMPAIGN02_GATE_STAGES)
         ):
@@ -452,6 +456,7 @@ class Campaign02PlanCatalog:
             "domain_manifest_id": self.domain_manifest_id,
             "execution_authorized": False,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "gate_analyzer_id": self.gate_analyzer_id,
             "plan_ids": [item.content_id for item in self.plans],
             "plan_ids_by_stage": {
                 stage: list(self.plan_ids_for_stage(stage)) for stage in CAMPAIGN02_GATE_STAGES
@@ -470,7 +475,7 @@ class Campaign02PlanCatalog:
     @property
     def content_id(self) -> str:
         return sha256_content_id(
-            b"deltareduce.010.campaign02-plan-catalog.v2\0" + canonical_json_bytes(self.document)
+            b"deltareduce.010.campaign02-plan-catalog.v3\0" + canonical_json_bytes(self.document)
         )
 
 
@@ -663,6 +668,7 @@ def compile_campaign02_plan_catalog(
         ticket_plan_id=ticket_plan.content_id,
         runtime_lineage_id=runtime_lineage.content_id,
         stage_execution_identities_id=str(runtime_lineage.stage_execution_identities_id),
+        gate_analyzer_id=stage_identities.identity_id("stage_gate_analyzer"),
         definition_attestation_verified_at=attestation.verified_at,
         plans=tuple(plans),
     )

@@ -1027,6 +1027,7 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "definition_attestation_verified_at": timestamp,
             "domain_manifest_id": content_id(),
             "execution_authorized": {"const": False},
+            "gate_analyzer_id": content_id(),
             "plan_ids": {
                 "items": content_id(),
                 "maxItems": 45,
@@ -1226,6 +1227,7 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "completed_stage": {"enum": stages},
             "definition_attestation_id": content_id(),
             "evidence_root": content_id(),
+            "gate_analyzer_id": content_id(),
             "plan_catalog_id": content_id(),
             "plan_evidence_ids": exact_stage_ids,
             "qualified_runtime_lineage_id": content_id(),

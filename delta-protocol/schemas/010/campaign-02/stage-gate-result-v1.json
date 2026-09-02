@@ -41,6 +41,10 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
+    "gate_analyzer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "plan_catalog_id": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
@@ -97,6 +101,7 @@
     "definition_attestation_id",
     "evidence_root",
     "formal_semantics_id",
+    "gate_analyzer_id",
     "plan_catalog_id",
     "plan_evidence_ids",
     "qualified_runtime_lineage_id",

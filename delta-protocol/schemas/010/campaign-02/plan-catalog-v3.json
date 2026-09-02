@@ -37,6 +37,10 @@
     "execution_authorized": {
       "const": false
     },
+    "gate_analyzer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
     "plan_ids": {
       "items": {
         "pattern": "^sha256:[0-9a-f]{64}$",
@@ -123,6 +127,7 @@
     "domain_manifest_id",
     "execution_authorized",
     "formal_semantics_id",
+    "gate_analyzer_id",
     "plan_ids",
     "plan_ids_by_stage",
     "qualified_runtime_lineage_id",

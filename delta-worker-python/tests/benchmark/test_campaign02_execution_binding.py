@@ -62,7 +62,6 @@ from deltatorrent.benchmark.measured_runner import (
 )
 from deltatorrent.benchmark.primary import ExecutionPlan, PrimaryRunError, adapter_for
 from deltatorrent.benchmark.stage_authorization import (
-    CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
     SignedStageAuthorizationVote,
     StageAuthorizationDocument,
     StageAuthorizationProof,
@@ -232,13 +231,24 @@ def _stage_identity_manifest() -> StageExecutionIdentityManifest:
         "stage_gate_analyzer",
         "typed_gate_receipt_verifier",
     ):
+        identity_value: dict[str, object] = {
+            "purpose": name.upper(),
+            "source_commit": "a" * 40,
+            "source_tree": "b" * 40,
+        }
+        if name == "stage_gate_analyzer":
+            identity_value.update(
+                {
+                    "component": "CAMPAIGN02_STAGE_GATE_ANALYZER",
+                    "entrypoint": (
+                        "deltatorrent.benchmark.campaign02_stage_execution.execute_stage"
+                    ),
+                    "execution_authorized": False,
+                }
+            )
         values[name] = item(
             name,
-            {
-                "purpose": name.upper(),
-                "source_commit": "a" * 40,
-                "source_tree": "b" * 40,
-            },
+            identity_value,
         )
     return StageExecutionIdentityManifest.from_dict(
         {
@@ -491,7 +501,7 @@ def _gate_receipt(
         "formal_semantics_id": (
             "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
         ),
-        "gate_analyzer_id": CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
+        "gate_analyzer_id": catalog.gate_analyzer_id,
         "gate_qc_id": _id(f"{completed_stage}:gate-qc"),
         "gate_result_id": _id(f"{completed_stage}:gate-result"),
         "plan_catalog_id": catalog.content_id,
@@ -681,6 +691,7 @@ def test_generated_catalog_uses_one_exact_stage_specific_runner() -> None:
     for stage, runner_id in expected.items():
         assert {item.runner_id for item in catalog.plans if item.gate_stage == stage} == {runner_id}
     assert catalog.stage_execution_identities_id == stage_identities.content_id
+    assert catalog.gate_analyzer_id == stage_identities.identity_id("stage_gate_analyzer")
     assert set(expected.values()).isdisjoint({stage_identities.identity_id("multi_role_runner")})
 
 
@@ -736,6 +747,7 @@ def test_valid_campaign02_stage_a_dry_execution_emits_bound_v2_receipt() -> None
     assert receipt.required_plan_ids == expected
     assert receipt.accepted_plan_ids == expected
     assert receipt.runner_id == runtime.exactness_runner_id
+    assert receipt.gate_analyzer_id == stage_identities.identity_id("stage_gate_analyzer")
     assert receipt.document["schema_version"] == "2.0.0"
     assert receipt.evidence_root.startswith("sha256:")
 
@@ -1371,6 +1383,11 @@ def test_stage_b_rejects_random_fail_and_other_definition_predecessors() -> None
             catalog,
             "STAGE_A_EXACTNESS",
             benchmark_definition_id=_id("another-definition"),
+        ),
+        _gate_receipt(
+            catalog,
+            "STAGE_A_EXACTNESS",
+            gate_analyzer_id=_id("another-gate-analyzer"),
         ),
     ):
         proof = _stage_authorization(catalog, "STAGE_B_SCIENTIFIC", (receipt,))
