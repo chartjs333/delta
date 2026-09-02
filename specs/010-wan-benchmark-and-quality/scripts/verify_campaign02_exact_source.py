@@ -62,6 +62,7 @@ EXECUTION_BINDING_SOURCES: Final = (
     "delta-worker-python/src/deltatorrent/benchmark/governance.py",
     "delta-worker-python/src/deltatorrent/benchmark/primary.py",
     "delta-worker-python/src/deltatorrent/benchmark/primary_executor.py",
+    "delta-worker-python/src/deltatorrent/benchmark/stage_authorization.py",
     "delta-worker-python/src/deltatorrent/cli/benchmark.py",
 )
 
@@ -171,6 +172,12 @@ def verify_governance() -> dict[str, object]:
         / "qualification-supersession-stage-authorization.json",
         "CAMPAIGN02_STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    signed_stage_governance_supersession = canonical_file(
+        ROOT
+        / "reports/benchmark/campaigns/campaign-02"
+        / "qualification-supersession-signed-stage-governance.json",
+        "CAMPAIGN02_SIGNED_STAGE_GOVERNANCE_SUPERSESSION_INVALID",
+    )
     readiness = canonical_file(
         ROOT
         / "reports/benchmark/campaigns/campaign-02"
@@ -266,6 +273,20 @@ def verify_governance() -> dict[str, object]:
         },
         "CAMPAIGN02_STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_INVALID",
     )
+    require(
+        signed_stage_governance_supersession.get("status")
+        == "SUPERSEDED_AFTER_GOVERNANCE_REVIEW_BEFORE_EXECUTION"
+        and signed_stage_governance_supersession.get("replacement_qualification_required") is True
+        and signed_stage_governance_supersession.get("primary_observations_created") == 0
+        and signed_stage_governance_supersession.get("superseded_evidence")
+        == {
+            "ci_receipt_head": "04aad0c530aa8c83a76315f737e5caa36fe9b14e",
+            "evidence_overlay": "68d2ddfed472e76197e0fcdfd29ee2a9ad601584",
+            "source_commit": "b870c8a83ab89c694d1f3467804bafe5e08aac59",
+            "source_tree": "1651bc3fd810ba7f47b32e1058f9c0e5d4e4cf92",
+        },
+        "CAMPAIGN02_SIGNED_STAGE_GOVERNANCE_SUPERSESSION_INVALID",
+    )
     readiness_flags = readiness.get("authorization")
     cryptographic_governance = readiness.get("cryptographic_governance")
     require(
@@ -274,15 +295,16 @@ def verify_governance() -> dict[str, object]:
         and readiness.get("execution_authorization") == "ABSENT"
         and readiness.get("legacy_primary_path")
         == "FORBIDDEN_BY_CAMPAIGN_AND_DEFINITION_ID_REGISTRY"
-        and readiness.get("next_required_gate")
-        == "C2_021_SOURCE_AND_DESIGNATED_GPU_REQUALIFICATION"
+        and readiness.get("next_required_gate") == "C2_021_SIGNED_STAGE_GOVERNANCE_REQUALIFICATION"
         and isinstance(readiness_flags, dict)
         and readiness_flags
         and all(value is False for value in readiness_flags.values())
         and cryptographic_governance
         == {
+            "definition_verifier_implemented": True,
             "independent_votes_present": 0,
             "private_keys_committed": False,
+            "stage_authorization_verifier_implemented": True,
             "status": "IMPLEMENTED_AWAITING_EXTERNAL_VALIDATOR_ACTIONS",
         },
         "CAMPAIGN02_EXECUTION_BINDING_READINESS_INVALID",
@@ -302,6 +324,9 @@ def verify_governance() -> dict[str, object]:
         ),
         "stage_authorization_qualification_supersession_id": sha256_content_id(
             canonical_json_bytes(stage_authorization_supersession)
+        ),
+        "signed_stage_governance_supersession_id": sha256_content_id(
+            canonical_json_bytes(signed_stage_governance_supersession)
         ),
         "remediation_authorization_id": sha256_content_id(canonical_json_bytes(authorization)),
         "status": "PASS",
@@ -342,6 +367,16 @@ def verify_junit(path: Path) -> dict[str, object]:
         "test_stage_a_authorizes_only_exact_stage_a_catalog_plans",
         "test_stage_authorization_rejects_generic_extra_and_inexact_plan_sets",
         "test_stage_b_and_c_require_exact_predecessor_gate_receipts",
+        "test_unsigned_and_self_created_stage_authorization_are_rejected",
+        "test_stage_authorization_vote_artifacts_are_strictly_typed_and_round_trip",
+        "test_changed_signed_stage_authorization_issued_at_is_rejected",
+        "test_forged_stage_authorization_signature_is_rejected",
+        "test_wrong_stage_authorization_validator_set_is_rejected",
+        "test_stage_b_rejects_random_fail_and_other_definition_predecessors",
+        "test_stage_c_requires_exact_stage_a_and_stage_b_receipt_set",
+        "test_missing_runner_role_and_cross_stage_roles_are_rejected",
+        "test_independent_stages_have_unique_bft_round_contexts",
+        "test_duplicate_bft_round_context_across_independent_stages_is_rejected",
     }
     require(
         required_cases <= case_names
@@ -486,6 +521,11 @@ def verify_execution_binding(
         "legacy_campaign02_primary_path": "FAIL_CLOSED",
         "plan_catalog_execution_authorized": False,
         "plans_per_stage": 15,
+        "certified_round_context_count": 36,
+        "stage_authorization_authority": "DETACHED_ED25519_QUORUM_PROOF",
+        "stage_execution_model": "INDEPENDENT_BFT_RUNS",
+        "ticket_identity_scope": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID",
+        "typed_predecessor_receipts_required": True,
         "optimizer_steps_per_ticket": 32,
         "reference_result_arms": ["scientific-reference"],
         "status": "PASS",
@@ -640,6 +680,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "delta-worker-python/src/deltatorrent/benchmark/campaign02.py",
             "delta-worker-python/src/deltatorrent/benchmark/feature008_admission.py",
             "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+            "delta-worker-python/src/deltatorrent/benchmark/stage_authorization.py",
             "delta-worker-python/src/deltatorrent/qlora/backend.py",
             "delta-worker-python/src/deltatorrent/qlora/trainer.py",
             "delta-core-cpp/include/delta/certificates/contracts.hpp",
@@ -658,6 +699,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             sorted(
                 {
                     "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+                    "delta-worker-python/src/deltatorrent/benchmark/stage_authorization.py",
                     "delta-worker-python/src/deltatorrent/benchmark/feature008_admission.py",
                     *(path for paths in EVALUATOR_SOURCES.values() for path in paths),
                 }
@@ -673,6 +715,7 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "delta-worker-python/src/deltatorrent/benchmark/feature008_admission.py",
             "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
             "delta-worker-python/src/deltatorrent/benchmark/observation_writer.py",
+            "delta-worker-python/src/deltatorrent/benchmark/stage_authorization.py",
         ),
         **common,
     )
@@ -716,6 +759,11 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "EXACT_15_PLAN_PER_STAGE_CAMPAIGN02_CATALOG_PASS",
             "PLAN_CATALOG_COMPILES_WITHOUT_EXECUTION_AUTHORIZATION_PASS",
             "EXACT_STAGE_AUTHORIZATION_AND_PREDECESSOR_ENFORCEMENT_PASS",
+            "SIGNED_STAGE_AUTHORIZATION_QUORUM_PROOF_PASS",
+            "TYPED_STAGE_GATE_RECEIPT_LINEAGE_PASS",
+            "MANDATORY_STAGE_RUNNER_ROLE_PASS",
+            "UNIQUE_STAGE_BFT_ROUND_CONTEXT_PASS",
+            "ROUND_SCOPED_TICKET_TEMPLATE_IDENTITY_PASS",
             "LEGACY_PRIMARY_PATH_FAIL_CLOSED_BY_DEFINITION_ID_REGISTRY_PASS",
             "ED25519_DETACHED_GOVERNANCE_VERIFIER_BOUND_TO_BINDER_PASS",
             "VOTE_SIGNER_KEY_AND_SUBMITTED_AT_SIGNATURE_BINDING_PASS",
@@ -780,6 +828,9 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "C2-018",
             "C2-019",
             "C2-020",
+            "C2-025",
+            "C2-026",
+            "C2-027",
         ],
         "type_name": "CAMPAIGN02_EXACT_SOURCE_QUALIFICATION",
         "workload": {

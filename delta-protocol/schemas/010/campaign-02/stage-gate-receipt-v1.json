@@ -1,0 +1,124 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-gate-receipt-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_STAGE_GATE_RECEIPT"
+    },
+    "accepted_plan_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 15,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "completed_stage": {
+      "enum": [
+        "STAGE_A_EXACTNESS",
+        "STAGE_B_SCIENTIFIC",
+        "STAGE_C_EMULATED_WAN"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "FAIL",
+        "PASS"
+      ]
+    },
+    "definition_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evidence_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "finalized_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$",
+      "type": "string"
+    },
+    "gate_analyzer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "gate_qc_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "gate_result_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_catalog_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "qualified_runtime_lineage_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "required_plan_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 15,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "stage_authorization_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "accepted_plan_ids",
+    "benchmark_definition_id",
+    "campaign_id",
+    "completed_stage",
+    "decision",
+    "definition_attestation_id",
+    "evidence_root",
+    "finalized_at",
+    "formal_semantics_id",
+    "gate_analyzer_id",
+    "gate_qc_id",
+    "gate_result_id",
+    "plan_catalog_id",
+    "qualified_runtime_lineage_id",
+    "required_plan_ids",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "stage_authorization_attestation_id",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-gate-receipt-v1"
+}

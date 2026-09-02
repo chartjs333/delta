@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Final
 
 from deltatorrent.benchmark.arms import ArmSpec
@@ -60,6 +61,7 @@ def _content_id(value: str, code: str) -> str:
 
 @dataclass(frozen=True, slots=True)
 class CertifiedPlanBinding:
+    gate_stage: str
     arm_id: str
     arm_name: str
     seed: int
@@ -67,10 +69,14 @@ class CertifiedPlanBinding:
     policy: CertifiedRoundPolicy
 
     def __post_init__(self) -> None:
+        if self.gate_stage not in CAMPAIGN02_GATE_STAGES:
+            raise _fail("CAMPAIGN02_POLICY_GATE_STAGE_INVALID")
         _content_id(self.arm_id, "CAMPAIGN02_POLICY_ARM_ID_INVALID")
         if not self.arm_name or self.seed < 0 or self.repetition < 1:
             raise _fail("CAMPAIGN02_POLICY_COORDINATE_INVALID")
-        if self.policy.round_id != expected_round_id(self.arm_name, self.seed, self.repetition):
+        if self.policy.round_id != expected_round_id(
+            self.gate_stage, self.arm_name, self.seed, self.repetition
+        ):
             raise _fail("CAMPAIGN02_POLICY_ROUND_ID_MISMATCH")
 
     @property
@@ -78,6 +84,7 @@ class CertifiedPlanBinding:
         return {
             "arm_id": self.arm_id,
             "arm_name": self.arm_name,
+            "gate_stage": self.gate_stage,
             "policy": self.policy.document,
             "repetition": self.repetition,
             "seed": self.seed,
@@ -140,14 +147,20 @@ class QualifiedRuntimeLineage:
         ):
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_IDENTITY_DUPLICATE")
         coordinates = tuple(
-            (item.arm_id, item.seed, item.repetition) for item in self.certified_plan_bindings
+            (item.gate_stage, item.arm_id, item.seed, item.repetition)
+            for item in self.certified_plan_bindings
         )
         if len(set(coordinates)) != len(coordinates):
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_POLICY_DUPLICATE")
         if self.certified_plan_bindings != tuple(
             sorted(
                 self.certified_plan_bindings,
-                key=lambda item: (item.arm_name, item.repetition, item.seed),
+                key=lambda item: (
+                    item.gate_stage,
+                    item.arm_name,
+                    item.repetition,
+                    item.seed,
+                ),
             )
         ):
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_POLICY_ORDER_INVALID")
@@ -168,7 +181,8 @@ class QualifiedRuntimeLineage:
             "model_id": self.model_id,
             "parent_checkpoint_id": self.parent_checkpoint_id,
             "runner_id": self.runner_id,
-            "schema_version": "1.0.0",
+            "schema_version": "2.0.0",
+            "stage_execution_model": "INDEPENDENT_BFT_RUNS",
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
             "tokenizer_id": self.tokenizer_id,
@@ -179,15 +193,18 @@ class QualifiedRuntimeLineage:
     @property
     def content_id(self) -> str:
         return sha256_content_id(
-            b"deltareduce.010.campaign02-qualified-runtime-lineage.v1\0"
+            b"deltareduce.010.campaign02-qualified-runtime-lineage.v2\0"
             + canonical_json_bytes(self.document)
         )
 
-    def policy_for(self, arm: ArmSpec, seed: int, repetition: int) -> CertifiedRoundPolicy:
+    def policy_for(
+        self, gate_stage: str, arm: ArmSpec, seed: int, repetition: int
+    ) -> CertifiedRoundPolicy:
         matches = tuple(
             item
             for item in self.certified_plan_bindings
-            if item.arm_id == arm.content_id
+            if item.gate_stage == gate_stage
+            and item.arm_id == arm.content_id
             and item.arm_name == arm.arm_id
             and item.seed == seed
             and item.repetition == repetition
@@ -205,6 +222,7 @@ class Campaign02PlanCatalog:
     domain_manifest_id: str
     ticket_plan_id: str
     runtime_lineage_id: str
+    definition_attestation_verified_at: datetime
     plans: tuple[CampaignExecutionPlan, ...]
 
     def __post_init__(self) -> None:
@@ -215,6 +233,18 @@ class Campaign02PlanCatalog:
             or any(len(self.plan_ids_for_stage(stage)) != 15 for stage in CAMPAIGN02_GATE_STAGES)
         ):
             raise _fail("CAMPAIGN02_PLAN_CATALOG_INCOMPLETE")
+        certified_contexts = tuple(
+            (
+                item.round_id,
+                item.certified_round_policy.height,
+                item.certified_round_policy.view,
+                item.certified_round_policy.validator_epoch_id,
+            )
+            for item in self.plans
+            if item.certified_round_policy is not None
+        )
+        if len(certified_contexts) != 36 or len(set(certified_contexts)) != 36:
+            raise _fail("CAMPAIGN02_DUPLICATE_BFT_ROUND_CONTEXT")
 
     def plan_ids_for_stage(self, stage: str) -> tuple[str, ...]:
         if stage not in CAMPAIGN02_GATE_STAGES:
@@ -228,6 +258,9 @@ class Campaign02PlanCatalog:
             "benchmark_definition_id": self.definition_id,
             "campaign_id": "campaign-02",
             "definition_attestation_id": self.attestation_id,
+            "definition_attestation_verified_at": (
+                self.definition_attestation_verified_at.isoformat().replace("+00:00", "Z")
+            ),
             "domain_manifest_id": self.domain_manifest_id,
             "execution_authorized": False,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
@@ -236,9 +269,11 @@ class Campaign02PlanCatalog:
                 stage: list(self.plan_ids_for_stage(stage)) for stage in CAMPAIGN02_GATE_STAGES
             },
             "qualified_runtime_lineage_id": self.runtime_lineage_id,
-            "schema_version": "1.0.0",
+            "schema_version": "2.0.0",
+            "stage_execution_model": "INDEPENDENT_BFT_RUNS",
             "status": "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION",
             "ticket_plan_id": self.ticket_plan_id,
+            "ticket_identity_scope": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID",
             "type_name": "CAMPAIGN02_PLAN_CATALOG",
             "workload_contract_id": self.workload_contract_id,
         }
@@ -246,12 +281,14 @@ class Campaign02PlanCatalog:
     @property
     def content_id(self) -> str:
         return sha256_content_id(
-            b"deltareduce.010.campaign02-plan-catalog.v1\0" + canonical_json_bytes(self.document)
+            b"deltareduce.010.campaign02-plan-catalog.v2\0" + canonical_json_bytes(self.document)
         )
 
 
-def expected_round_id(arm_name: str, seed: int, repetition: int) -> str:
-    return f"campaign-02:{arm_name}:{repetition}:{seed}"
+def expected_round_id(gate_stage: str, arm_name: str, seed: int, repetition: int) -> str:
+    if gate_stage not in CAMPAIGN02_GATE_STAGES:
+        raise _fail("CAMPAIGN02_PLAN_GATE_STAGE_INVALID")
+    return f"campaign-02:{gate_stage}:{arm_name}:{repetition}:{seed}"
 
 
 def _validate_definition_bindings(
@@ -357,7 +394,7 @@ def compile_campaign02_plan_catalog(
                 policy = (
                     None
                     if result_class == "REFERENCE"
-                    else runtime_lineage.policy_for(arm, seed, repetition)
+                    else runtime_lineage.policy_for(gate_stage, arm, seed, repetition)
                 )
                 plan = CampaignExecutionPlan(
                     execution_class="PRIMARY_MEASURED",
@@ -367,7 +404,7 @@ def compile_campaign02_plan_catalog(
                     definition_attestation_id=attestation.content_id,
                     execution_authorization_id=None,
                     arm_id=arm.content_id,
-                    round_id=expected_round_id(arm.arm_id, seed, repetition),
+                    round_id=expected_round_id(gate_stage, arm.arm_id, seed, repetition),
                     seed=seed,
                     repetition=repetition,
                     source_commit=runtime_lineage.source_commit,
@@ -398,7 +435,7 @@ def compile_campaign02_plan_catalog(
                     gate_stage=gate_stage,
                 )
                 plans.append(plan)
-    expected_policy_count = 4 * len(definition.seeds)
+    expected_policy_count = len(CAMPAIGN02_GATE_STAGES) * 4 * len(definition.seeds)
     if (
         len(plans) != 45
         or len({item.content_id for item in plans}) != 45
@@ -412,6 +449,7 @@ def compile_campaign02_plan_catalog(
         domain_manifest_id=domain_manifest.content_id,
         ticket_plan_id=ticket_plan.content_id,
         runtime_lineage_id=runtime_lineage.content_id,
+        definition_attestation_verified_at=attestation.verified_at,
         plans=tuple(plans),
     )
 

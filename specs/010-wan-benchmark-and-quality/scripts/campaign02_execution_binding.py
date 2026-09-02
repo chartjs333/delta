@@ -27,6 +27,9 @@ QUALIFICATION_SUPERSESSION_PATH: Final = (
 STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_PATH: Final = (
     REPORTS / "qualification-supersession-stage-authorization.json"
 )
+SIGNED_STAGE_GOVERNANCE_QUALIFICATION_SUPERSESSION_PATH: Final = (
+    REPORTS / "qualification-supersession-signed-stage-governance.json"
+)
 READINESS_PATH: Final = REPORTS / "execution-binding-remediation-readiness.json"
 SUPERSEDED_DEFINITION_ID: Final = (
     "sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af"
@@ -129,6 +132,26 @@ def expected_outputs() -> dict[Path, bytes]:
         },
         "type_name": "CAMPAIGN02_SOURCE_QUALIFICATION_SUPERSESSION",
     }
+    signed_stage_governance_qualification_supersession = {
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "primary_observations_created": 0,
+        "reason_codes": [
+            "STAGE_AUTHORIZATION_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED",
+            "PREDECESSOR_GATE_RECEIPTS_NOT_TYPED_OR_LINEAGE_VERIFIED",
+            "RUNNER_ROLE_OPTIONAL",
+            "STAGE_SPECIFIC_PLANS_REUSED_BFT_ROUND_CONTEXT",
+        ],
+        "replacement_qualification_required": True,
+        "schema_version": "1.0.0",
+        "status": "SUPERSEDED_AFTER_GOVERNANCE_REVIEW_BEFORE_EXECUTION",
+        "superseded_evidence": {
+            "ci_receipt_head": "04aad0c530aa8c83a76315f737e5caa36fe9b14e",
+            "evidence_overlay": "68d2ddfed472e76197e0fcdfd29ee2a9ad601584",
+            "source_commit": "b870c8a83ab89c694d1f3467804bafe5e08aac59",
+            "source_tree": "1651bc3fd810ba7f47b32e1058f9c0e5d4e4cf92",
+        },
+        "type_name": "CAMPAIGN02_SOURCE_QUALIFICATION_SUPERSESSION",
+    }
     readiness = {
         "authorization": {
             "feature_011_authorized": False,
@@ -140,8 +163,10 @@ def expected_outputs() -> dict[Path, bytes]:
             "stage_c_authorized": False,
         },
         "cryptographic_governance": {
+            "definition_verifier_implemented": True,
             "independent_votes_present": 0,
             "private_keys_committed": False,
+            "stage_authorization_verifier_implemented": True,
             "status": "IMPLEMENTED_AWAITING_EXTERNAL_VALIDATOR_ACTIONS",
         },
         "definition_created": False,
@@ -157,7 +182,7 @@ def expected_outputs() -> dict[Path, bytes]:
             "workload_contract_id": workload.content_id,
         },
         "legacy_primary_path": "FORBIDDEN_BY_CAMPAIGN_AND_DEFINITION_ID_REGISTRY",
-        "next_required_gate": "C2_021_SOURCE_AND_DESIGNATED_GPU_REQUALIFICATION",
+        "next_required_gate": "C2_021_SIGNED_STAGE_GOVERNANCE_REQUALIFICATION",
         "schema_version": "1.0.0",
         "status": "SOURCE_REMEDIATION_IN_PROGRESS_NO_EXECUTION",
         "type_name": "CAMPAIGN02_EXECUTION_BINDING_REMEDIATION_READINESS",
@@ -169,6 +194,10 @@ def expected_outputs() -> dict[Path, bytes]:
         QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(qualification_supersession) + b"\n",
         STAGE_AUTHORIZATION_QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(
             stage_authorization_qualification_supersession
+        )
+        + b"\n",
+        SIGNED_STAGE_GOVERNANCE_QUALIFICATION_SUPERSESSION_PATH: canonical_json_bytes(
+            signed_stage_governance_qualification_supersession
         )
         + b"\n",
         READINESS_PATH: canonical_json_bytes(readiness) + b"\n",

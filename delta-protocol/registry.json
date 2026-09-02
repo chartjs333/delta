@@ -58,7 +58,7 @@
     {
       "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
       "path": "schemas/010/campaign-02/registry-v1.json",
-      "sha256": "8ce4aeda0ebc0d0f9fd5ed1ade773741cbba58990738405d2392fe272f863270"
+      "sha256": "8a015e544c7dfe947d280df107339ba6f281a80854ade84e18435f91b3a598df"
     },
     {
       "id": "REGISTRY-BENCHMARK-010",
@@ -446,6 +446,11 @@
       "value": "application/vnd.deltareduce.campaign-02.execution-plan-v4+json;version=4"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-EXECUTION-PLAN-V5",
+      "schema_id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V5",
+      "value": "application/vnd.deltareduce.campaign-02.execution-plan-v5+json;version=5"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.gpu-environment-lock-v1+json;version=1"
@@ -476,9 +481,19 @@
       "value": "application/vnd.deltareduce.campaign-02.observation-v2+json;version=2"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-OBSERVATION-V3",
+      "schema_id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V3",
+      "value": "application/vnd.deltareduce.campaign-02.observation-v3+json;version=3"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-PLAN-CATALOG-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.plan-catalog-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-PLAN-CATALOG-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.plan-catalog-v2+json;version=2"
     },
     {
       "id": "MEDIA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-V1",
@@ -486,9 +501,39 @@
       "value": "application/vnd.deltareduce.campaign-02.qualified-runtime-lineage-v1+json;version=1"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.qualified-runtime-lineage-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-AUTHORIZATION-ATTESTATION-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-ATTESTATION-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.stage-authorization-attestation-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-AUTHORIZATION-VALIDATOR-SET-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VALIDATOR-SET-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.stage-authorization-validator-set-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-AUTHORIZATION-VOTE-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VOTE-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.stage-authorization-vote-v1+json;version=1"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.stage-execution-authorization-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.stage-execution-authorization-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-GATE-RECEIPT-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.stage-gate-receipt-v1+json;version=1"
     },
     {
       "id": "MEDIA-CAMPAIGN02-TICKET-PLAN-V1",
@@ -1185,6 +1230,11 @@
       "sha256": "d181b2c8f53057e58547386d377273711c083d59f5f7bf8e691dddc336ef316b"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V5",
+      "path": "schemas/010/campaign-02/execution-plan-v5.json",
+      "sha256": "8d6bbc4da14a4a85cbf5156781d2fa33d80ae60589b955c523324cb4bce6a990"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
       "path": "schemas/010/campaign-02/gpu-environment-lock-v1.json",
       "sha256": "414d0a3f8085b400fd6efd556e56109dfdd8dc93de920282670c43d70bd3e1f2"
@@ -1215,9 +1265,19 @@
       "sha256": "9d660393be0b4eb50efa9b5016db3035a88c443c1e98a6612e947710c6075cb8"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-OBSERVATION-010-V3",
+      "path": "schemas/010/campaign-02/observation-v3.json",
+      "sha256": "56fd5f16c15b5c4c2b3cde01324dc4a1d9c46c0796512202934d1fa7ee4f9df8"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V1",
       "path": "schemas/010/campaign-02/plan-catalog-v1.json",
       "sha256": "db3fd2ea8da74472502976ed7e5cf673acd8a059c9aa7fd0ccb5238ee0ddf5ff"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V2",
+      "path": "schemas/010/campaign-02/plan-catalog-v2.json",
+      "sha256": "aedbbf240d2a9a38b178c2a8caba837aa0f5bf2a1302b5b76a450988e8d47ca5"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V1",
@@ -1225,9 +1285,39 @@
       "sha256": "173bb0bd59eca8cdc44812b859f59c75955bd797928951d7f4fbecc742dc6d34"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V2",
+      "path": "schemas/010/campaign-02/qualified-runtime-lineage-v2.json",
+      "sha256": "521b0b31ba0623e6053b6d6692cba929743a17fa7dc14e6b8ef48762f2ee62e0"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-ATTESTATION-010-V1",
+      "path": "schemas/010/campaign-02/stage-authorization-attestation-v1.json",
+      "sha256": "f4c15e0bf226b77a05a5131a0bc64b13432a3203e613f864aca4cebeecf01cf3"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VALIDATOR-SET-010-V1",
+      "path": "schemas/010/campaign-02/stage-authorization-validator-set-v1.json",
+      "sha256": "990a571bbb13cfc8331749c816ce07265071ea069a1ccb678b966d2550841172"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VOTE-010-V1",
+      "path": "schemas/010/campaign-02/stage-authorization-vote-v1.json",
+      "sha256": "d487308f2bea0d668580835af3e12176aeb562937560650601b4ae47346564a4"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
       "path": "schemas/010/campaign-02/stage-execution-authorization-v1.json",
       "sha256": "d5c2f2f2ed3a604a03d76501bf5db055daed385e8a983d07d178837cb97a464b"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V2",
+      "path": "schemas/010/campaign-02/stage-execution-authorization-v2.json",
+      "sha256": "bda30ea3fb7d45c3b367c43ca87ee3274d0e6ab030f244dc7d26b5a5ca65af14"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V1",
+      "path": "schemas/010/campaign-02/stage-gate-receipt-v1.json",
+      "sha256": "11c20146ec98a070c09725d30793d8ef93dbf04bfef33ad65b65702755e44b2e"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-TICKET-PLAN-010-V1",

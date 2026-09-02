@@ -49,6 +49,11 @@ SCHEMAS: Final = {
         "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE",
         "1.0.0",
     ),
+    "qualified-runtime-lineage-v2": (
+        "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V2",
+        "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE",
+        "2.0.0",
+    ),
     "workload-v2": ("SCHEMA-CAMPAIGN02-WORKLOAD-010-V2", "CAMPAIGN_WORKLOAD", "2.0.0"),
     "execution-plan-v2": (
         "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
@@ -65,14 +70,49 @@ SCHEMAS: Final = {
         "PRIMARY_EXECUTION_PLAN",
         "4.0.0",
     ),
+    "execution-plan-v5": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V5",
+        "PRIMARY_EXECUTION_PLAN",
+        "5.0.0",
+    ),
     "plan-catalog-v1": (
         "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V1",
         "CAMPAIGN02_PLAN_CATALOG",
         "1.0.0",
     ),
+    "plan-catalog-v2": (
+        "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V2",
+        "CAMPAIGN02_PLAN_CATALOG",
+        "2.0.0",
+    ),
     "stage-execution-authorization-v1": (
         "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
         "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION",
+        "1.0.0",
+    ),
+    "stage-execution-authorization-v2": (
+        "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V2",
+        "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION",
+        "2.0.0",
+    ),
+    "stage-authorization-validator-set-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VALIDATOR-SET-010-V1",
+        "BENCHMARK_STAGE_AUTHORIZATION_VALIDATOR_SET",
+        "1.0.0",
+    ),
+    "stage-authorization-vote-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VOTE-010-V1",
+        "BENCHMARK_STAGE_AUTHORIZATION_VOTE",
+        "1.0.0",
+    ),
+    "stage-authorization-attestation-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-ATTESTATION-010-V1",
+        "BENCHMARK_STAGE_AUTHORIZATION_ATTESTATION",
+        "1.0.0",
+    ),
+    "stage-gate-receipt-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V1",
+        "BENCHMARK_STAGE_GATE_RECEIPT",
         "1.0.0",
     ),
     "evaluator-profile-v1": (
@@ -94,6 +134,11 @@ SCHEMAS: Final = {
         "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
         "PRIMARY_RUN_OBSERVATION",
         "2.0.0",
+    ),
+    "observation-v3": (
+        "SCHEMA-CAMPAIGN02-OBSERVATION-010-V3",
+        "PRIMARY_RUN_OBSERVATION",
+        "3.0.0",
     ),
     "observation-receipt-v1": (
         "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
@@ -315,6 +360,78 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "seed": uint(),
         }
     )
+    stages = [
+        "STAGE_A_EXACTNESS",
+        "STAGE_B_SCIENTIFIC",
+        "STAGE_C_EMULATED_WAN",
+    ]
+    policy_binding_v2 = strict(
+        {
+            "arm_id": content_id(),
+            "arm_name": text(),
+            "gate_stage": {"enum": stages},
+            "policy": certified_policy,
+            "repetition": uint(1),
+            "seed": uint(),
+        }
+    )
+    observation_properties = {
+        "arm_id": content_id(),
+        "benchmark_definition_id": content_id(),
+        "campaign_id": {"const": "campaign-02"},
+        "dataset_ids": array(content_id(), unique=True),
+        "definition_attestation_id": content_id(),
+        "environment_id": content_id(),
+        "evaluation_ids": array(content_id(), unique=True),
+        "evaluation_implementation_ids": array(content_id(), unique=True),
+        "evaluation_runner_id": content_id(),
+        "execution_authorization_id": content_id(),
+        "execution_class": {"enum": ["NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"]},
+        "execution_plan_id": content_id(),
+        "hardware_id": content_id(),
+        "image_id": content_id(),
+        "model_artifact_id": content_id(),
+        "processed_tokens": uint(1),
+        "raw_artifact_ids": array(content_id(), unique=True),
+        "repetition": uint(1),
+        "result_class": {"enum": ["REFERENCE", "CERTIFIED_DELTAREDUCE"]},
+        "run_result": {"oneOf": [reference_result, certified_result]},
+        "runner_id": content_id(),
+        "seed": uint(),
+        "source_class": {"enum": ["MEASURED_HARDWARE", "NON_PRIMARY_SMOKE"]},
+        "source_commit": commit_id(),
+        "source_tree": commit_id(),
+        "ticket_results": array(ticket_result),
+        "tokenizer_id": content_id(),
+        "workload_id": content_id(),
+        "writer_id": content_id(),
+    }
+    observation_result_union = [
+        {
+            "properties": {
+                "result_class": {"const": "REFERENCE"},
+                "run_result": reference_result,
+            }
+        },
+        {
+            "properties": {
+                "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                "run_result": certified_result,
+            }
+        },
+    ]
+    observation_v3_properties = {
+        **observation_properties,
+        "execution_class": {"const": "PRIMARY_MEASURED"},
+        "source_class": {"const": "MEASURED_HARDWARE"},
+        "stage_authorization_attestation_id": content_id(),
+        "stage_authorization_id": content_id(),
+        "stage_authorization_proof_artifact_ids": array(content_id(), unique=True),
+        "stage_authorization_quorum_threshold": uint(1),
+        "stage_authorization_signature_set_root": content_id(),
+        "stage_authorization_validator_set_id": content_id(),
+        "stage_authorization_vote_ids": array(content_id(), unique=True),
+    }
     documents = {
         "benchmark-definition-v2": schema("benchmark-definition-v2", definition_v2_properties),
         "benchmark-review-validator-set-v1": schema(
@@ -385,6 +502,34 @@ def schema_documents() -> dict[str, dict[str, object]]:
                 "runner_id": content_id(),
                 "source_commit": commit_id(),
                 "source_tree": commit_id(),
+                "tokenizer_id": content_id(),
+                "writer_id": content_id(),
+            },
+        ),
+        "qualified-runtime-lineage-v2": schema(
+            "qualified-runtime-lineage-v2",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "certified_plan_bindings": {
+                    "items": policy_binding_v2,
+                    "maxItems": 36,
+                    "minItems": 36,
+                    "type": "array",
+                    "uniqueItems": True,
+                },
+                "dataset_ids": array(content_id(), unique=True),
+                "environment_id": content_id(),
+                "evaluation_implementation_ids": array(content_id(), unique=True),
+                "evaluation_profile_ids": array(content_id(), unique=True),
+                "evaluation_runner_id": content_id(),
+                "hardware_id": content_id(),
+                "image_id": content_id(),
+                "model_id": content_id(),
+                "parent_checkpoint_id": content_id(),
+                "runner_id": content_id(),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "stage_execution_model": {"const": "INDEPENDENT_BFT_RUNS"},
                 "tokenizer_id": content_id(),
                 "writer_id": content_id(),
             },
@@ -507,51 +652,13 @@ def schema_documents() -> dict[str, dict[str, object]]:
         ),
         "observation-v2": schema(
             "observation-v2",
-            {
-                "arm_id": content_id(),
-                "benchmark_definition_id": content_id(),
-                "campaign_id": {"const": "campaign-02"},
-                "dataset_ids": array(content_id(), unique=True),
-                "definition_attestation_id": content_id(),
-                "environment_id": content_id(),
-                "evaluation_ids": array(content_id(), unique=True),
-                "evaluation_implementation_ids": array(content_id(), unique=True),
-                "evaluation_runner_id": content_id(),
-                "execution_authorization_id": content_id(),
-                "execution_class": {"enum": ["NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"]},
-                "execution_plan_id": content_id(),
-                "hardware_id": content_id(),
-                "image_id": content_id(),
-                "model_artifact_id": content_id(),
-                "processed_tokens": uint(1),
-                "raw_artifact_ids": array(content_id(), unique=True),
-                "repetition": uint(1),
-                "result_class": {"enum": ["REFERENCE", "CERTIFIED_DELTAREDUCE"]},
-                "run_result": {"oneOf": [reference_result, certified_result]},
-                "runner_id": content_id(),
-                "seed": uint(),
-                "source_class": {"enum": ["MEASURED_HARDWARE", "NON_PRIMARY_SMOKE"]},
-                "source_commit": commit_id(),
-                "source_tree": commit_id(),
-                "ticket_results": array(ticket_result),
-                "tokenizer_id": content_id(),
-                "workload_id": content_id(),
-                "writer_id": content_id(),
-            },
-            result_class_union=[
-                {
-                    "properties": {
-                        "result_class": {"const": "REFERENCE"},
-                        "run_result": reference_result,
-                    }
-                },
-                {
-                    "properties": {
-                        "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
-                        "run_result": certified_result,
-                    }
-                },
-            ],
+            observation_properties,
+            result_class_union=observation_result_union,
+        ),
+        "observation-v3": schema(
+            "observation-v3",
+            observation_v3_properties,
+            result_class_union=observation_result_union,
         ),
         "observation-receipt-v1": schema(
             "observation-receipt-v1",
@@ -710,6 +817,34 @@ def schema_documents() -> dict[str, dict[str, object]]:
             },
         ],
     )
+    execution_v4 = documents["execution-plan-v4"]
+    execution_v4_properties = execution_v4["properties"]
+    assert isinstance(execution_v4_properties, dict)
+    documents["execution-plan-v5"] = schema(
+        "execution-plan-v5",
+        {
+            **{
+                key: value
+                for key, value in execution_v4_properties.items()
+                if key not in {"formal_semantics_id", "schema_version", "type_name"}
+            },
+            "ticket_identity_scope": {"const": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID"},
+        },
+        result_class_union=[
+            {
+                "properties": {
+                    "certified_round_policy": {"type": "null"},
+                    "result_class": {"const": "REFERENCE"},
+                }
+            },
+            {
+                "properties": {
+                    "certified_round_policy": certified_policy,
+                    "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                }
+            },
+        ],
+    )
     exact_stage_ids = {
         "items": content_id(),
         "maxItems": 15,
@@ -746,6 +881,38 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "workload_contract_id": content_id(),
         },
     )
+    documents["plan-catalog-v2"] = schema(
+        "plan-catalog-v2",
+        {
+            "base_plan_count": {"const": 15},
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "definition_attestation_verified_at": timestamp,
+            "domain_manifest_id": content_id(),
+            "execution_authorized": {"const": False},
+            "plan_ids": {
+                "items": content_id(),
+                "maxItems": 45,
+                "minItems": 45,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "plan_ids_by_stage": strict(
+                {
+                    "STAGE_A_EXACTNESS": exact_stage_ids,
+                    "STAGE_B_SCIENTIFIC": exact_stage_ids,
+                    "STAGE_C_EMULATED_WAN": exact_stage_ids,
+                }
+            ),
+            "qualified_runtime_lineage_id": content_id(),
+            "stage_execution_model": {"const": "INDEPENDENT_BFT_RUNS"},
+            "status": {"const": "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION"},
+            "ticket_identity_scope": {"const": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID"},
+            "ticket_plan_id": content_id(),
+            "workload_contract_id": content_id(),
+        },
+    )
     documents["stage-execution-authorization-v1"] = schema(
         "stage-execution-authorization-v1",
         {
@@ -772,6 +939,112 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "stage_a_authorized": {"type": "boolean"},
             "stage_b_authorized": {"type": "boolean"},
             "stage_c_authorized": {"type": "boolean"},
+        },
+    )
+    documents["stage-execution-authorization-v2"] = schema(
+        "stage-execution-authorization-v2",
+        {
+            "allowed_plan_ids": {
+                "items": content_id(),
+                "maxItems": 15,
+                "minItems": 15,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "authorized_stage": {"enum": stages},
+            "authorized_task_ids": array(text(), unique=True),
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "issued_at": timestamp,
+            "plan_catalog_id": content_id(),
+            "real_wan_authorized": {"const": False},
+            "required_predecessor_receipt_ids": {
+                "items": content_id(),
+                "maxItems": 2,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "result_qc_authorized": {"const": False},
+            "source_commit": commit_id(),
+            "source_tree": commit_id(),
+            "stage_a_authorized": {"type": "boolean"},
+            "stage_b_authorized": {"type": "boolean"},
+            "stage_c_authorized": {"type": "boolean"},
+            "validator_set_id": content_id(),
+        },
+    )
+    documents["stage-authorization-validator-set-v1"] = schema(
+        "stage-authorization-validator-set-v1",
+        {
+            "campaign_id": {"const": "campaign-02"},
+            "f_b": uint(),
+            "purpose": {"const": "BENCHMARK_STAGE_AUTHORIZATION_REVIEW"},
+            "validators": array(validator, unique=True),
+        },
+    )
+    documents["stage-authorization-vote-v1"] = schema(
+        "stage-authorization-vote-v1",
+        {
+            "public_key_id": content_id(),
+            "purpose": {"const": "BENCHMARK_STAGE_AUTHORIZATION_REVIEW"},
+            "signature": {"pattern": "^[A-Za-z0-9+/]{86}==$", "type": "string"},
+            "signature_algorithm": {"const": "ED25519"},
+            "signed_message_sha256": content_id(),
+            "signer_id": text(),
+            "stage_authorization_id": content_id(),
+            "submitted_at": timestamp,
+            "validator_set_id": content_id(),
+        },
+    )
+    documents["stage-authorization-attestation-v1"] = schema(
+        "stage-authorization-attestation-v1",
+        {
+            "f_b": uint(),
+            "governance_only": {"const": True},
+            "independent_approval": {"const": True},
+            "ordered_public_key_ids": array(content_id(), unique=True),
+            "ordered_signers": array(text(), unique=True),
+            "ordered_vote_ids": array(content_id(), unique=True),
+            "quorum_threshold": uint(1),
+            "signature_set_root": content_id(),
+            "stage_authorization_id": content_id(),
+            "validator_set_id": content_id(),
+            "verified_at": timestamp,
+        },
+    )
+    documents["stage-gate-receipt-v1"] = schema(
+        "stage-gate-receipt-v1",
+        {
+            "accepted_plan_ids": {
+                "items": content_id(),
+                "maxItems": 15,
+                "minItems": 15,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "completed_stage": {"enum": stages},
+            "decision": {"enum": ["FAIL", "PASS"]},
+            "definition_attestation_id": content_id(),
+            "evidence_root": content_id(),
+            "finalized_at": timestamp,
+            "gate_analyzer_id": content_id(),
+            "gate_qc_id": content_id(),
+            "gate_result_id": content_id(),
+            "plan_catalog_id": content_id(),
+            "qualified_runtime_lineage_id": content_id(),
+            "required_plan_ids": {
+                "items": content_id(),
+                "maxItems": 15,
+                "minItems": 15,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "source_commit": commit_id(),
+            "source_tree": commit_id(),
+            "stage_authorization_attestation_id": content_id(),
         },
     )
     return documents
@@ -812,7 +1085,7 @@ def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
         "fixtures": fixture_entries(),
         "formal_semantics_id": FORMAL_ID,
         "media_types": media_types,
-        "registry_version": "010.4.0-stage-authorization",
+        "registry_version": "010.5.0-signed-stage-governance",
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,
     }

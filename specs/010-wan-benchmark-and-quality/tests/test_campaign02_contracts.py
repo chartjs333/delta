@@ -22,10 +22,10 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 21
+    assert len(module.SCHEMAS) == 30
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.4.0-stage-authorization"
+    assert registry["registry_version"] == "010.5.0-signed-stage-governance"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
     observation = json.loads(
@@ -39,6 +39,19 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     certified_result = observation["properties"]["run_result"]["oneOf"][1]
     assert "native_chain_admission_receipt_id" in certified_result["properties"]
     assert "native_chain_verifier_id" in certified_result["properties"]
+    primary_observation = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/observation-v3.json").read_bytes()
+    )
+    assert primary_observation["properties"]["execution_class"] == {"const": "PRIMARY_MEASURED"}
+    assert {
+        "stage_authorization_attestation_id",
+        "stage_authorization_id",
+        "stage_authorization_proof_artifact_ids",
+        "stage_authorization_quorum_threshold",
+        "stage_authorization_signature_set_root",
+        "stage_authorization_validator_set_id",
+        "stage_authorization_vote_ids",
+    } <= set(primary_observation["required"])
     execution_plan = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v2.json").read_bytes()
     )
@@ -71,6 +84,34 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     assert stage_authorization["additionalProperties"] is False
     assert stage_authorization["properties"]["real_wan_authorized"] == {"const": False}
     assert stage_authorization["properties"]["result_qc_authorized"] == {"const": False}
+    signed_stage_authorization = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/stage-execution-authorization-v2.json"
+        ).read_bytes()
+    )
+    assert {
+        "issued_at",
+        "source_commit",
+        "source_tree",
+        "validator_set_id",
+    } <= set(signed_stage_authorization["required"])
+    stage_vote = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/stage-authorization-vote-v1.json"
+        ).read_bytes()
+    )
+    assert stage_vote["properties"]["signature_algorithm"] == {"const": "ED25519"}
+    gate_receipt = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/stage-gate-receipt-v1.json").read_bytes()
+    )
+    assert gate_receipt["additionalProperties"] is False
+    assert gate_receipt["properties"]["decision"] == {"enum": ["FAIL", "PASS"]}
+    independent_plan = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v5.json").read_bytes()
+    )
+    assert independent_plan["properties"]["ticket_identity_scope"] == {
+        "const": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID"
+    }
 
 
 def test_gpu_environment_has_separate_hash_locked_platforms_and_cpu_lock() -> None:

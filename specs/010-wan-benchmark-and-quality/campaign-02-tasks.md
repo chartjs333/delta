@@ -85,26 +85,35 @@ history and cannot satisfy the tasks below.
   reject every superseded primary Definition, and enforce exact Stage A/B/C authorization scope.
 - [x] **C2-020** Bind the compiler to detached Ed25519 quorum verification and sign every
   security-relevant vote field, including signer/key identity and `submitted_at`.
-- [x] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
-  corrected execution-binding and stage-authorization source. The earlier `d9b8230...` source
-  qualification is superseded and cannot complete this task.
+- [ ] **C2-021** Reissue source, designated-GPU, portable and current-head qualification for the
+  corrected execution-binding and signed stage-governance source. The earlier `d9b8230...` and
+  `b870c8a...` source qualifications are superseded and cannot complete this task.
 - [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
   workload/domain/ticket IDs and qualified runtime lineage.
 - [ ] **C2-023** Obtain independent detached signatures and verify temporal closure at the actual
   terminal reviewed HEAD.
 - [ ] **C2-024** Obtain a new separate governance decision before any Stage A execution. This task
   replaces, but does not retroactively complete, C2-016 for the superseded Definition.
+- [x] **C2-025** Require a detached Ed25519 quorum proof for every stage authorization; reject raw,
+  unsigned, forged, wrong-validator-set and caller-constructed authorization documents.
+- [x] **C2-026** Verify canonical typed predecessor gate receipts with exact PASS, Definition,
+  catalog, source, analyzer, temporal and complete plan-set lineage; require `runner_role`.
+- [x] **C2-027** Declare independent Stage A/B/C BFT runs, bind `gate_stage` into every round ID,
+  source-seal 36 unique certified contexts and scope ticket templates by round ID.
 
 Execution-binding qualification evidence:
 
 - `reports/benchmark/campaigns/campaign-02/qualification-supersession-stage-authorization.json`
   — records that the prior `d9b8230...` source/evidence chain is historical only;
+- `reports/benchmark/campaigns/campaign-02/qualification-supersession-signed-stage-governance.json`
+  — records that the `b870c8a...` source/evidence chain is historical only;
 - `evidence/campaign-02-stage-authorization-hardware-qualification.json` — passing designated-GPU
   qualification for the corrected immutable source;
 - `evidence/campaign-02-stage-authorization-exact-source-qualification.json` — passing portable
   exact-source qualification for the corrected immutable source;
 - `evidence/campaign-02-stage-authorization-exact-source-ci-receipt.json` — passing dedicated
-  workflow artifacts and terminal current-head control for the qualification overlay.
+  workflow artifacts and terminal current-head control for the now-superseded qualification
+  overlay; replacement evidence remains absent until C2-021 is reissued.
 
 ## Unconditional STOP conditions
 

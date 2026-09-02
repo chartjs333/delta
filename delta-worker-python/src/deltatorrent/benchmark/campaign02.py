@@ -9,11 +9,20 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Final, Protocol
 
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
+from deltatorrent.benchmark.stage_authorization import (
+    CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
+    StageAuthorizationProof,
+    StageGateReceipt,
+    VerifiedStageAuthorization,
+    verify_stage_authorization_proof,
+)
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
 _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -63,24 +72,6 @@ CAMPAIGN02_STAGE_TASK_IDS: Final = {
     "STAGE_A_EXACTNESS": ("HR010-006", "HR010-010", "HR010-011", "T028", "T029"),
     "STAGE_B_SCIENTIFIC": ("HR010-016", "T035", "T036", "T039"),
     "STAGE_C_EMULATED_WAN": ("T040", "T041", "T042", "T043", "T044"),
-}
-_STAGE_AUTHORIZATION_FIELDS: Final = {
-    "allowed_plan_ids",
-    "authorized_stage",
-    "authorized_task_ids",
-    "benchmark_definition_id",
-    "campaign_id",
-    "definition_attestation_id",
-    "formal_semantics_id",
-    "plan_catalog_id",
-    "real_wan_authorized",
-    "required_predecessor_receipt_ids",
-    "result_qc_authorized",
-    "schema_version",
-    "stage_a_authorized",
-    "stage_b_authorized",
-    "stage_c_authorized",
-    "type_name",
 }
 
 
@@ -729,7 +720,7 @@ class CampaignExecutionPlan:
             "round_id": self.round_id,
             "runner_id": self.runner_id,
             "schema_version": (
-                "4.0.0"
+                "5.0.0"
                 if self.gate_stage is not None
                 else "3.0.0"
                 if self.ticket_plan_id is not None
@@ -755,6 +746,7 @@ class CampaignExecutionPlan:
                 {
                     "execution_authorized": False,
                     "gate_stage": self.gate_stage,
+                    "ticket_identity_scope": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID",
                 }
             )
         if self.ticket_plan_id is not None:
@@ -770,7 +762,7 @@ class CampaignExecutionPlan:
     @property
     def content_id(self) -> str:
         version = (
-            b"v4"
+            b"v5"
             if self.gate_stage is not None
             else b"v3"
             if self.ticket_plan_id is not None
@@ -789,17 +781,14 @@ def execution_authorization_id(authorization: dict[str, Any]) -> str:
         payload = canonical_json_bytes(authorization)
     except TypeError as exc:
         raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_INVALID") from exc
-    domain = (
-        b"deltareduce.010.benchmark-stage-execution-authorization.v1\0"
-        if authorization.get("type_name") == "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION"
-        else b"deltareduce.010.benchmark-execution-authorization.v1\0"
-    )
-    return sha256_content_id(domain + payload)
+    return sha256_content_id(b"deltareduce.010.benchmark-execution-authorization.v1\0" + payload)
 
 
 class Campaign02PlanCatalogView(Protocol):
     definition_id: str
     attestation_id: str
+    definition_attestation_verified_at: datetime
+    runtime_lineage_id: str
     plans: tuple[CampaignExecutionPlan, ...]
 
     @property
@@ -808,32 +797,46 @@ class Campaign02PlanCatalogView(Protocol):
     def plan_ids_for_stage(self, stage: str) -> tuple[str, ...]: ...
 
 
-def authorize_execution_class(
+def authorize_non_primary_execution_class(
     authorization: dict[str, Any],
     plan: CampaignExecutionPlan,
-    *,
-    plan_catalog: Campaign02PlanCatalogView | None = None,
-    predecessor_gate_receipt_ids: tuple[str, ...] = (),
-    runner_role: str | None = None,
 ) -> None:
-    """Fail closed when remediation-only authorization is used for primary execution."""
-    if plan.execution_class == "NON_PRIMARY_SMOKE":
-        if plan.execution_authorization_id != execution_authorization_id(authorization):
-            raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_ID_MISMATCH")
-        if (
-            authorization.get("type_name") != "BENCHMARK_CAMPAIGN_REMEDIATION_AUTHORIZATION"
-            or authorization.get("status") != "APPROVED_DESIGN_AND_QUALIFICATION_ONLY"
-            or authorization.get("non_primary_smoke_tests_authorized") is not True
-            or authorization.get("primary_execution_authorized") is not False
-        ):
-            raise _fail("CAMPAIGN02_NON_PRIMARY_SMOKE_NOT_AUTHORIZED")
-        return
+    """Authorize only non-primary remediation smoke through its legacy document."""
+    if plan.execution_class != "NON_PRIMARY_SMOKE":
+        raise _fail("CAMPAIGN02_STAGE_AUTHORIZATION_PROOF_REQUIRED")
+    if plan.execution_authorization_id != execution_authorization_id(authorization):
+        raise _fail("CAMPAIGN02_EXECUTION_AUTHORIZATION_ID_MISMATCH")
+    if (
+        authorization.get("type_name") != "BENCHMARK_CAMPAIGN_REMEDIATION_AUTHORIZATION"
+        or authorization.get("status") != "APPROVED_DESIGN_AND_QUALIFICATION_ONLY"
+        or authorization.get("non_primary_smoke_tests_authorized") is not True
+        or authorization.get("primary_execution_authorized") is not False
+    ):
+        raise _fail("CAMPAIGN02_NON_PRIMARY_SMOKE_NOT_AUTHORIZED")
+
+
+def authorize_execution_class(
+    authorization_proof: StageAuthorizationProof,
+    plan: CampaignExecutionPlan,
+    *,
+    plan_catalog: Campaign02PlanCatalogView | None,
+    predecessor_gate_receipts: Mapping[str, bytes],
+    runner_role: str,
+) -> VerifiedStageAuthorization:
+    """Verify signed stage authority and exact typed predecessor receipts fail closed."""
     if plan.execution_class != "PRIMARY_MEASURED":
         raise _fail("CAMPAIGN02_EXECUTION_CLASS_INVALID")
-    if set(authorization) != _STAGE_AUTHORIZATION_FIELDS:
-        raise _fail("CAMPAIGN02_STAGE_AUTHORIZATION_FIELDS_INVALID")
+    if not isinstance(runner_role, str) or not runner_role:
+        raise _fail("CAMPAIGN02_STAGE_RUNNER_ROLE_REQUIRED")
+    if not isinstance(authorization_proof, StageAuthorizationProof):
+        raise _fail("CAMPAIGN02_STAGE_AUTHORIZATION_PROOF_REQUIRED")
     if plan.gate_stage is None or plan_catalog is None:
         raise _fail("CAMPAIGN02_PRIMARY_EXECUTION_NOT_AUTHORIZED")
+    try:
+        verified = verify_stage_authorization_proof(authorization_proof)
+    except ValueError as exc:
+        raise _fail(f"CAMPAIGN02_STAGE_AUTHORIZATION_CRYPTOGRAPHIC_PROOF_INVALID:{exc}") from exc
+    authorization = verified.authorization
     stage = plan.gate_stage
     expected_flags = {
         "stage_a_authorized": stage == "STAGE_A_EXACTNESS",
@@ -841,40 +844,67 @@ def authorize_execution_class(
         "stage_c_authorized": stage == "STAGE_C_EMULATED_WAN",
     }
     expected_plan_ids = plan_catalog.plan_ids_for_stage(stage)
-    allowed_plan_ids = authorization.get("allowed_plan_ids")
-    task_ids = authorization.get("authorized_task_ids")
-    predecessor_ids = authorization.get("required_predecessor_receipt_ids")
+    allowed_plan_ids = authorization.allowed_plan_ids
+    task_ids = authorization.authorized_task_ids
+    predecessor_ids = authorization.required_predecessor_receipt_ids
     if (
-        authorization.get("type_name") != "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION"
-        or authorization.get("schema_version") != "1.0.0"
-        or authorization.get("formal_semantics_id") != FORMAL_SEMANTICS_ID
-        or authorization.get("campaign_id") != "campaign-02"
-        or authorization.get("benchmark_definition_id") != plan.benchmark_definition_id
-        or authorization.get("benchmark_definition_id") != plan_catalog.definition_id
-        or authorization.get("definition_attestation_id") != plan.definition_attestation_id
-        or authorization.get("definition_attestation_id") != plan_catalog.attestation_id
-        or authorization.get("plan_catalog_id") != plan_catalog.content_id
-        or authorization.get("authorized_stage") != stage
-        or task_ids != list(CAMPAIGN02_STAGE_TASK_IDS[stage])
-        or allowed_plan_ids != list(expected_plan_ids)
-        or authorization.get("real_wan_authorized") is not False
-        or authorization.get("result_qc_authorized") is not False
-        or any(authorization.get(key) is not value for key, value in expected_flags.items())
+        authorization.benchmark_definition_id != plan.benchmark_definition_id
+        or authorization.benchmark_definition_id != plan_catalog.definition_id
+        or authorization.definition_attestation_id != plan.definition_attestation_id
+        or authorization.definition_attestation_id != plan_catalog.attestation_id
+        or authorization.plan_catalog_id != plan_catalog.content_id
+        or authorization.authorized_stage != stage
+        or task_ids != CAMPAIGN02_STAGE_TASK_IDS[stage]
+        or allowed_plan_ids != expected_plan_ids
+        or authorization.source_commit != plan.source_commit
+        or authorization.source_tree != plan.source_tree
+        or authorization.issued_at < plan_catalog.definition_attestation_verified_at
+        or any(getattr(authorization, key) is not value for key, value in expected_flags.items())
     ):
         raise _fail("CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED")
-    if not isinstance(predecessor_ids, list) or any(
-        not isinstance(item, str) or _CONTENT_ID.fullmatch(item) is None for item in predecessor_ids
-    ):
-        raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_INVALID")
-    required_predecessors = tuple(predecessor_ids)
+    required_predecessors = predecessor_ids
     if (
-        required_predecessors != tuple(sorted(set(required_predecessors)))
-        or (stage == "STAGE_A_EXACTNESS" and required_predecessors)
-        or (stage == "STAGE_B_SCIENTIFIC" and len(required_predecessors) < 1)
-        or (stage == "STAGE_C_EMULATED_WAN" and len(required_predecessors) < 2)
-        or predecessor_gate_receipt_ids != required_predecessors
+        (stage == "STAGE_A_EXACTNESS" and len(required_predecessors) != 0)
+        or (stage == "STAGE_B_SCIENTIFIC" and len(required_predecessors) != 1)
+        or (stage == "STAGE_C_EMULATED_WAN" and len(required_predecessors) != 2)
+        or set(predecessor_gate_receipts) != set(required_predecessors)
     ):
         raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_INVALID")
+    receipts: list[StageGateReceipt] = []
+    for receipt_id in required_predecessors:
+        try:
+            receipt = StageGateReceipt.from_canonical_bytes(predecessor_gate_receipts[receipt_id])
+        except (KeyError, ValueError) as exc:
+            raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_INVALID") from exc
+        if receipt.content_id != receipt_id:
+            raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_CONTENT_ID_MISMATCH")
+        expected_receipt_plans = plan_catalog.plan_ids_for_stage(receipt.completed_stage)
+        if (
+            receipt.decision != "PASS"
+            or receipt.benchmark_definition_id != plan_catalog.definition_id
+            or receipt.definition_attestation_id != plan_catalog.attestation_id
+            or receipt.plan_catalog_id != plan_catalog.content_id
+            or receipt.qualified_runtime_lineage_id != plan_catalog.runtime_lineage_id
+            or receipt.required_plan_ids != expected_receipt_plans
+            or receipt.accepted_plan_ids != expected_receipt_plans
+            or receipt.gate_analyzer_id != CAMPAIGN02_STAGE_GATE_ANALYZER_ID
+            or receipt.source_commit != plan.source_commit
+            or receipt.source_tree != plan.source_tree
+            or receipt.finalized_at < plan_catalog.definition_attestation_verified_at
+            or receipt.finalized_at > authorization.issued_at
+        ):
+            raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_LINEAGE_INVALID")
+        receipts.append(receipt)
+    predecessor_stages = tuple(sorted(item.completed_stage for item in receipts))
+    if (
+        (stage == "STAGE_A_EXACTNESS" and predecessor_stages != ())
+        or (stage == "STAGE_B_SCIENTIFIC" and predecessor_stages != ("STAGE_A_EXACTNESS",))
+        or (
+            stage == "STAGE_C_EMULATED_WAN"
+            and predecessor_stages != ("STAGE_A_EXACTNESS", "STAGE_B_SCIENTIFIC")
+        )
+    ):
+        raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_STAGE_SET_INVALID")
     if plan.content_id not in expected_plan_ids or plan not in plan_catalog.plans:
         raise _fail("CAMPAIGN02_PLAN_NOT_AUTHORIZED")
     allowed_roles = {
@@ -884,5 +914,6 @@ def authorize_execution_class(
         ),
         "STAGE_C_EMULATED_WAN": frozenset({"NETWORK_FAULT_RUNNER"}),
     }
-    if runner_role is not None and runner_role not in allowed_roles[stage]:
+    if runner_role not in allowed_roles[stage]:
         raise _fail("CAMPAIGN02_STAGE_RUNNER_ROLE_NOT_AUTHORIZED")
+    return verified

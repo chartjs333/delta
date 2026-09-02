@@ -39,6 +39,16 @@ from deltatorrent.benchmark.governance import (
     finalize_definition_attestation,
 )
 from deltatorrent.benchmark.primary import ExecutionPlan, PrimaryRunError, adapter_for
+from deltatorrent.benchmark.stage_authorization import (
+    CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
+    SignedStageAuthorizationVote,
+    StageAuthorizationDocument,
+    StageAuthorizationProof,
+    StageAuthorizationValidatorSet,
+    StageGateReceipt,
+    create_stage_authorization_vote,
+    finalize_stage_authorization_attestation,
+)
 from deltatorrent.cli.main import main
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
@@ -96,12 +106,12 @@ def _arms(workload_id: str) -> tuple[ArmSpec, ...]:
     return tuple(result)
 
 
-def _policy(arm: ArmSpec, seed: int, repetition: int) -> CertifiedRoundPolicy:
+def _policy(gate_stage: str, arm: ArmSpec, seed: int, repetition: int) -> CertifiedRoundPolicy:
     return CertifiedRoundPolicy(
-        round_id=expected_round_id(arm.arm_id, seed, repetition),
+        round_id=expected_round_id(gate_stage, arm.arm_id, seed, repetition),
         height=1,
         view=0,
-        round_config_id=_id(f"round-config:{arm.arm_id}:{seed}"),
+        round_config_id=_id(f"round-config:{gate_stage}:{arm.arm_id}:{seed}"),
         validator_epoch_id=_id("validator-epoch"),
         parameter_schema_id=_id("parameter-schema"),
         arithmetic_profile_id=_id("arithmetic-profile"),
@@ -199,17 +209,24 @@ def _inputs() -> tuple[
         sorted(
             (
                 CertifiedPlanBinding(
+                    gate_stage,
                     arm.content_id,
                     arm.arm_id,
                     seed,
                     repetition,
-                    _policy(arm, seed, repetition),
+                    _policy(gate_stage, arm, seed, repetition),
                 )
+                for gate_stage in CAMPAIGN02_GATE_STAGES
                 for arm in arms
                 if arm.kind == "CERTIFIED_QLORA"
                 for repetition, seed in enumerate(seeds, start=1)
             ),
-            key=lambda item: (item.arm_name, item.repetition, item.seed),
+            key=lambda item: (
+                item.gate_stage,
+                item.arm_name,
+                item.repetition,
+                item.seed,
+            ),
         )
     )
     evaluator_profiles = tuple(
@@ -294,12 +311,71 @@ def _compile(**updates: object):  # type: ignore[no-untyped-def]
     return compile_campaign02_plan_catalog(**values)  # type: ignore[arg-type]
 
 
+def _stage_validator_set() -> tuple[StageAuthorizationValidatorSet, tuple[Ed25519PrivateKey, ...]]:
+    definition_validator_set, private_keys = _validator_set()
+    return (
+        StageAuthorizationValidatorSet.from_dict(
+            {
+                "campaign_id": "campaign-02",
+                "f_b": 1,
+                "formal_semantics_id": (
+                    "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+                ),
+                "purpose": "BENCHMARK_STAGE_AUTHORIZATION_REVIEW",
+                "schema_version": "1.0.0",
+                "type_name": "BENCHMARK_STAGE_AUTHORIZATION_VALIDATOR_SET",
+                "validators": [item.document for item in definition_validator_set.validators],
+            }
+        ),
+        private_keys,
+    )
+
+
+def _gate_receipt(
+    catalog: Campaign02PlanCatalog,
+    completed_stage: str,
+    **updates: object,
+) -> StageGateReceipt:
+    plan = next(item for item in catalog.plans if item.gate_stage == completed_stage)
+    value: dict[str, object] = {
+        "accepted_plan_ids": list(catalog.plan_ids_for_stage(completed_stage)),
+        "benchmark_definition_id": catalog.definition_id,
+        "campaign_id": "campaign-02",
+        "completed_stage": completed_stage,
+        "decision": "PASS",
+        "definition_attestation_id": catalog.attestation_id,
+        "evidence_root": _id(f"{completed_stage}:evidence"),
+        "finalized_at": NOW.isoformat().replace("+00:00", "Z"),
+        "formal_semantics_id": (
+            "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        ),
+        "gate_analyzer_id": CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
+        "gate_qc_id": _id(f"{completed_stage}:gate-qc"),
+        "gate_result_id": _id(f"{completed_stage}:gate-result"),
+        "plan_catalog_id": catalog.content_id,
+        "qualified_runtime_lineage_id": catalog.runtime_lineage_id,
+        "required_plan_ids": list(catalog.plan_ids_for_stage(completed_stage)),
+        "schema_version": "1.0.0",
+        "source_commit": plan.source_commit,
+        "source_tree": plan.source_tree,
+        "stage_authorization_attestation_id": _id(
+            f"{completed_stage}:stage-authorization-attestation"
+        ),
+        "type_name": "BENCHMARK_STAGE_GATE_RECEIPT",
+    }
+    value.update(updates)
+    return StageGateReceipt.from_dict(value)
+
+
 def _stage_authorization(
     catalog: Campaign02PlanCatalog,
     stage: str,
-    predecessors: tuple[str, ...] = (),
-) -> dict[str, object]:
-    return {
+    predecessors: tuple[StageGateReceipt, ...] = (),
+    **updates: object,
+) -> StageAuthorizationProof:
+    validator_set, private_keys = _stage_validator_set()
+    plan = next(item for item in catalog.plans if item.gate_stage == stage)
+    value: dict[str, object] = {
         "allowed_plan_ids": list(catalog.plan_ids_for_stage(stage)),
         "authorized_stage": stage,
         "authorized_task_ids": list(CAMPAIGN02_STAGE_TASK_IDS[stage]),
@@ -309,16 +385,44 @@ def _stage_authorization(
         "formal_semantics_id": (
             "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
         ),
+        "issued_at": NOW.isoformat().replace("+00:00", "Z"),
         "plan_catalog_id": catalog.content_id,
         "real_wan_authorized": False,
-        "required_predecessor_receipt_ids": list(predecessors),
+        "required_predecessor_receipt_ids": sorted(item.content_id for item in predecessors),
         "result_qc_authorized": False,
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
+        "source_commit": plan.source_commit,
+        "source_tree": plan.source_tree,
         "stage_a_authorized": stage == "STAGE_A_EXACTNESS",
         "stage_b_authorized": stage == "STAGE_B_SCIENTIFIC",
         "stage_c_authorized": stage == "STAGE_C_EMULATED_WAN",
         "type_name": "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION",
+        "validator_set_id": validator_set.content_id,
     }
+    value.update(updates)
+    authorization = StageAuthorizationDocument.from_dict(value)
+    votes = tuple(
+        create_stage_authorization_vote(
+            authorization=authorization,
+            validator_set=validator_set,
+            signer_id=f"benchmark-validator-{index}",
+            submitted_at=NOW,
+            private_key=private_keys[index],
+        )
+        for index in range(3)
+    )
+    attestation = finalize_stage_authorization_attestation(
+        authorization=authorization,
+        validator_set=validator_set,
+        votes=votes,
+        verified_at=NOW,
+    )
+    return StageAuthorizationProof(
+        authorization_document=authorization.document,
+        attestation_document=attestation.document,
+        validator_set=validator_set,
+        votes=votes,
+    )
 
 
 def test_campaign02_compiler_creates_exact_15_plan_matrix_per_stage() -> None:
@@ -548,85 +652,338 @@ def test_campaign02_catalog_compiler_reverifies_every_detached_signature() -> No
 def test_stage_a_authorizes_only_exact_stage_a_catalog_plans() -> None:
     catalog = _compile()
     stage_a = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
-    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
-    authorize_execution_class(authorization, stage_a, plan_catalog=catalog)
+    proof = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    authorize_execution_class(
+        proof,
+        stage_a,
+        plan_catalog=catalog,
+        predecessor_gate_receipts={},
+        runner_role="EXACTNESS_RUNNER",
+    )
 
     stage_b = next(item for item in catalog.plans if item.gate_stage == "STAGE_B_SCIENTIFIC")
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
-        authorize_execution_class(authorization, stage_b, plan_catalog=catalog)
+        authorize_execution_class(
+            proof,
+            stage_b,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="SCIENTIFIC_RUNNER",
+        )
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_RUNNER_ROLE_NOT_AUTHORIZED"):
         authorize_execution_class(
-            authorization,
+            proof,
             stage_a,
             plan_catalog=catalog,
+            predecessor_gate_receipts={},
             runner_role="EVALUATION_RUNNER",
         )
     stage_c = next(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
-        authorize_execution_class(authorization, stage_c, plan_catalog=catalog)
+        authorize_execution_class(
+            proof,
+            stage_c,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="NETWORK_FAULT_RUNNER",
+        )
 
 
 def test_stage_authorization_rejects_generic_extra_and_inexact_plan_sets() -> None:
     catalog = _compile()
     plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
-    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_FIELDS_INVALID"):
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_PROOF_REQUIRED"):
         authorize_execution_class(
-            {"primary_execution_authorized": True},
+            {"primary_execution_authorized": True},  # type: ignore[arg-type]
             plan,
             plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
         )
-    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
-    authorization["extra"] = True
+    proof = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    proof = replace(
+        proof,
+        authorization_document={**proof.authorization_document, "extra": True},
+    )
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_FIELDS_INVALID"):
-        authorize_execution_class(authorization, plan, plan_catalog=catalog)
-    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
-    authorization["allowed_plan_ids"] = authorization["allowed_plan_ids"][:-1]  # type: ignore[index]
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
+        )
+    inexact = list(catalog.plan_ids_for_stage("STAGE_A_EXACTNESS"))[:-1]
+    proof = _stage_authorization(catalog, "STAGE_A_EXACTNESS", allowed_plan_ids=inexact)
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
-        authorize_execution_class(authorization, plan, plan_catalog=catalog)
-    authorization = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
-    authorization["benchmark_definition_id"] = _id("wrong-definition")
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
+        )
+    proof = _stage_authorization(
+        catalog, "STAGE_A_EXACTNESS", benchmark_definition_id=_id("wrong-definition")
+    )
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_EXECUTION_NOT_AUTHORIZED"):
-        authorize_execution_class(authorization, plan, plan_catalog=catalog)
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
+        )
 
 
 def test_stage_b_and_c_require_exact_predecessor_gate_receipts() -> None:
     catalog = _compile()
-    stage_a_receipt = _id("accepted-stage-a-gate-receipt")
-    stage_b_receipt = _id("accepted-stage-b-gate-receipt")
+    stage_a_receipt = _gate_receipt(catalog, "STAGE_A_EXACTNESS")
+    stage_b_receipt = _gate_receipt(catalog, "STAGE_B_SCIENTIFIC")
     stage_b = next(item for item in catalog.plans if item.gate_stage == "STAGE_B_SCIENTIFIC")
-    authorization_b = _stage_authorization(
+    proof_b = _stage_authorization(
         catalog,
         "STAGE_B_SCIENTIFIC",
         (stage_a_receipt,),
     )
     authorize_execution_class(
-        authorization_b,
+        proof_b,
         stage_b,
         plan_catalog=catalog,
-        predecessor_gate_receipt_ids=(stage_a_receipt,),
+        predecessor_gate_receipts={stage_a_receipt.content_id: stage_a_receipt.canonical_bytes},
         runner_role="SCIENTIFIC_RUNNER",
     )
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_PREDECESSOR_INVALID"):
         authorize_execution_class(
-            authorization_b,
+            proof_b,
             stage_b,
             plan_catalog=catalog,
-            predecessor_gate_receipt_ids=(_id("wrong-stage-a-receipt"),),
+            predecessor_gate_receipts={},
+            runner_role="SCIENTIFIC_RUNNER",
         )
 
     stage_c = next(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
-    authorization_c = _stage_authorization(
+    proof_c = _stage_authorization(
         catalog,
         "STAGE_C_EMULATED_WAN",
-        tuple(sorted((stage_a_receipt, stage_b_receipt))),
+        (stage_a_receipt, stage_b_receipt),
     )
     authorize_execution_class(
-        authorization_c,
+        proof_c,
         stage_c,
         plan_catalog=catalog,
-        predecessor_gate_receipt_ids=tuple(sorted((stage_a_receipt, stage_b_receipt))),
+        predecessor_gate_receipts={
+            stage_a_receipt.content_id: stage_a_receipt.canonical_bytes,
+            stage_b_receipt.content_id: stage_b_receipt.canonical_bytes,
+        },
         runner_role="NETWORK_FAULT_RUNNER",
     )
+
+
+def test_unsigned_and_self_created_stage_authorization_are_rejected() -> None:
+    catalog = _compile()
+    plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
+    document = _stage_authorization(catalog, "STAGE_A_EXACTNESS").authorization_document
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_PROOF_REQUIRED"):
+        authorize_execution_class(
+            document,  # type: ignore[arg-type]
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
+        )
+
+
+def test_stage_authorization_vote_artifacts_are_strictly_typed_and_round_trip() -> None:
+    proof = _stage_authorization(_compile(), "STAGE_A_EXACTNESS")
+    assert all(
+        SignedStageAuthorizationVote.from_dict(vote.document) == vote for vote in proof.votes
+    )
+
+
+def test_changed_signed_stage_authorization_issued_at_is_rejected() -> None:
+    catalog = _compile()
+    plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
+    proof = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    proof = replace(
+        proof,
+        authorization_document={
+            **proof.authorization_document,
+            "issued_at": "2026-09-01T11:59:59Z",
+        },
+    )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_ATTESTATION_HEADER_INVALID"):
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
+        )
+
+
+def test_forged_stage_authorization_signature_is_rejected() -> None:
+    catalog = _compile()
+    plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
+    proof = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    forged = replace(
+        proof.votes[0],
+        signature=bytes([proof.votes[0].signature[0] ^ 1]) + proof.votes[0].signature[1:],
+    )
+    attestation = dict(proof.attestation_document)
+    vote_ids = list(attestation["ordered_vote_ids"])
+    vote_ids[vote_ids.index(proof.votes[0].content_id)] = forged.content_id
+    attestation["ordered_vote_ids"] = vote_ids
+    proof = replace(proof, attestation_document=attestation, votes=(forged, *proof.votes[1:]))
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_SIGNATURE_INVALID"):
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
+        )
+
+
+def test_wrong_stage_authorization_validator_set_is_rejected() -> None:
+    catalog = _compile()
+    plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
+    proof = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    wrong_set, _ = _stage_validator_set()
+    proof = replace(proof, validator_set=wrong_set)
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_AUTHORIZATION_VALIDATOR_SET_MISMATCH"):
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="EXACTNESS_RUNNER",
+        )
+
+
+def test_stage_b_rejects_random_fail_and_other_definition_predecessors() -> None:
+    catalog = _compile()
+    plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_B_SCIENTIFIC")
+    random_id = _id("random-predecessor")
+    proof = _stage_authorization(
+        catalog,
+        "STAGE_B_SCIENTIFIC",
+        required_predecessor_receipt_ids=[random_id],
+    )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_PREDECESSOR_INVALID"):
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={random_id: b"{}\n"},
+            runner_role="SCIENTIFIC_RUNNER",
+        )
+    for receipt in (
+        _gate_receipt(catalog, "STAGE_A_EXACTNESS", decision="FAIL"),
+        _gate_receipt(
+            catalog,
+            "STAGE_A_EXACTNESS",
+            benchmark_definition_id=_id("another-definition"),
+        ),
+    ):
+        proof = _stage_authorization(catalog, "STAGE_B_SCIENTIFIC", (receipt,))
+        with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_PREDECESSOR_LINEAGE_INVALID"):
+            authorize_execution_class(
+                proof,
+                plan,
+                plan_catalog=catalog,
+                predecessor_gate_receipts={receipt.content_id: receipt.canonical_bytes},
+                runner_role="SCIENTIFIC_RUNNER",
+            )
+
+
+def test_stage_c_requires_exact_stage_a_and_stage_b_receipt_set() -> None:
+    catalog = _compile()
+    plan = next(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
+    first = _gate_receipt(catalog, "STAGE_A_EXACTNESS")
+    second = _gate_receipt(
+        catalog, "STAGE_A_EXACTNESS", evidence_root=_id("second-stage-a-evidence")
+    )
+    proof = _stage_authorization(catalog, "STAGE_C_EMULATED_WAN", (first, second))
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_PREDECESSOR_STAGE_SET_INVALID"):
+        authorize_execution_class(
+            proof,
+            plan,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={
+                first.content_id: first.canonical_bytes,
+                second.content_id: second.canonical_bytes,
+            },
+            runner_role="NETWORK_FAULT_RUNNER",
+        )
+
+
+def test_missing_runner_role_and_cross_stage_roles_are_rejected() -> None:
+    catalog = _compile()
+    stage_a = next(item for item in catalog.plans if item.gate_stage == "STAGE_A_EXACTNESS")
+    proof_a = _stage_authorization(catalog, "STAGE_A_EXACTNESS")
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_RUNNER_ROLE_REQUIRED"):
+        authorize_execution_class(
+            proof_a,
+            stage_a,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role=None,  # type: ignore[arg-type]
+        )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_RUNNER_ROLE_NOT_AUTHORIZED"):
+        authorize_execution_class(
+            proof_a,
+            stage_a,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={},
+            runner_role="SCIENTIFIC_RUNNER",
+        )
+    stage_a_receipt = _gate_receipt(catalog, "STAGE_A_EXACTNESS")
+    stage_b = next(item for item in catalog.plans if item.gate_stage == "STAGE_B_SCIENTIFIC")
+    proof_b = _stage_authorization(catalog, "STAGE_B_SCIENTIFIC", (stage_a_receipt,))
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_RUNNER_ROLE_NOT_AUTHORIZED"):
+        authorize_execution_class(
+            proof_b,
+            stage_b,
+            plan_catalog=catalog,
+            predecessor_gate_receipts={stage_a_receipt.content_id: stage_a_receipt.canonical_bytes},
+            runner_role="NETWORK_FAULT_RUNNER",
+        )
+
+
+def test_independent_stages_have_unique_bft_round_contexts() -> None:
+    catalog = _compile()
+    contexts = {
+        (
+            item.round_id,
+            item.certified_round_policy.height,
+            item.certified_round_policy.view,
+            item.certified_round_policy.validator_epoch_id,
+        )
+        for item in catalog.plans
+        if item.certified_round_policy is not None
+    }
+    assert len(contexts) == 36
+    assert all(
+        item.gate_stage in item.round_id
+        for item in catalog.plans
+        if item.certified_round_policy is not None and item.gate_stage is not None
+    )
+
+
+def test_duplicate_bft_round_context_across_independent_stages_is_rejected() -> None:
+    _, _, _, _, _, _, _, arms, _ = _inputs()
+    arm = next(item for item in arms if item.kind == "CERTIFIED_QLORA")
+    stage_a_policy = _policy("STAGE_A_EXACTNESS", arm, 1, 1)
+    with pytest.raises(Campaign02BindingError, match="CAMPAIGN02_POLICY_ROUND_ID_MISMATCH"):
+        CertifiedPlanBinding(
+            "STAGE_B_SCIENTIFIC",
+            arm.content_id,
+            arm.arm_id,
+            1,
+            1,
+            stage_a_policy,
+        )
 
 
 @pytest.mark.parametrize(

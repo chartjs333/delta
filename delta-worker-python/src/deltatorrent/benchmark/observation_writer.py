@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,7 @@ from deltatorrent.benchmark.campaign02 import (
     Campaign02PlanCatalogView,
     CampaignExecutionPlan,
     authorize_execution_class,
+    authorize_non_primary_execution_class,
     execution_authorization_id,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
@@ -24,6 +26,7 @@ from deltatorrent.benchmark.measured_runner import (
     RawArtifact,
     ScientificRun,
 )
+from deltatorrent.benchmark.stage_authorization import StageAuthorizationProof
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
 
@@ -210,20 +213,78 @@ class PrimaryObservationWriter:
     def publish(
         self,
         plan: CampaignExecutionPlan,
-        authorization: dict[str, Any],
+        authorization: dict[str, Any] | StageAuthorizationProof,
         scientific_run: ScientificRun,
         evaluations: tuple[MeasuredEvaluation, ...],
         *,
         plan_catalog: Campaign02PlanCatalogView | None = None,
-        predecessor_gate_receipt_ids: tuple[str, ...] = (),
+        predecessor_gate_receipts: Mapping[str, bytes] | None = None,
     ) -> PublicationReceipt:
-        authorize_execution_class(
-            authorization,
-            plan,
-            plan_catalog=plan_catalog,
-            predecessor_gate_receipt_ids=predecessor_gate_receipt_ids,
-            runner_role="OBSERVATION_WRITER",
-        )
+        verified_authorization = None
+        governance_artifacts: tuple[RawArtifact, ...] = ()
+        if plan.execution_class == "PRIMARY_MEASURED":
+            if not isinstance(authorization, StageAuthorizationProof):
+                raise _fail("OBSERVATION_STAGE_AUTHORIZATION_PROOF_REQUIRED")
+            verified_authorization = authorize_execution_class(
+                authorization,
+                plan,
+                plan_catalog=plan_catalog,
+                predecessor_gate_receipts=predecessor_gate_receipts or {},
+                runner_role="OBSERVATION_WRITER",
+            )
+            authorization_id = verified_authorization.content_id
+            vote_by_id = {item.content_id: item for item in authorization.votes}
+            ordered_votes = tuple(
+                vote_by_id[item] for item in verified_authorization.attestation.ordered_vote_ids
+            )
+            governance_artifacts = (
+                RawArtifact(
+                    name=(
+                        "stage-authorization-"
+                        f"{verified_authorization.authorization.content_id[7:23]}.json"
+                    ),
+                    media_type=(
+                        "application/vnd.deltareduce.stage-execution-authorization+json;version=2"
+                    ),
+                    data=canonical_json_bytes(verified_authorization.authorization.document),
+                ),
+                RawArtifact(
+                    name=(
+                        "stage-authorization-attestation-"
+                        f"{verified_authorization.attestation.content_id[7:23]}.json"
+                    ),
+                    media_type=(
+                        "application/vnd.deltareduce.stage-authorization-attestation+json;version=1"
+                    ),
+                    data=canonical_json_bytes(verified_authorization.attestation.document),
+                ),
+                RawArtifact(
+                    name=(
+                        "stage-authorization-validator-set-"
+                        f"{authorization.validator_set.content_id[7:23]}.json"
+                    ),
+                    media_type=(
+                        "application/vnd.deltareduce.stage-authorization-validator-set+json;"
+                        "version=1"
+                    ),
+                    data=canonical_json_bytes(authorization.validator_set.document),
+                ),
+                *(
+                    RawArtifact(
+                        name=f"stage-authorization-vote-{vote.content_id[7:23]}.json",
+                        media_type=(
+                            "application/vnd.deltareduce.stage-authorization-vote+json;version=1"
+                        ),
+                        data=canonical_json_bytes(vote.document),
+                    )
+                    for vote in ordered_votes
+                ),
+            )
+        else:
+            if not isinstance(authorization, dict):
+                raise _fail("OBSERVATION_NON_PRIMARY_AUTHORIZATION_INVALID")
+            authorize_non_primary_execution_class(authorization, plan)
+            authorization_id = execution_authorization_id(authorization)
         if (
             plan.writer_id != self.identity.content_id
             or plan.environment_id != self.identity.environment_id
@@ -268,7 +329,7 @@ class PrimaryObservationWriter:
         artifact_ids: list[str] = []
         with tempfile.TemporaryDirectory(prefix="publish-", dir=staging_root) as directory:
             staging = Path(directory)
-            for artifact in scientific_run.raw_artifacts:
+            for artifact in (*scientific_run.raw_artifacts, *governance_artifacts):
                 artifact_ids.append(self._stage_artifact(artifact, staging))
             for evaluation in evaluations:
                 artifact = RawArtifact(
@@ -281,7 +342,7 @@ class PrimaryObservationWriter:
         if not unique_artifact_ids:
             raise _fail("OBSERVATION_RAW_ARTIFACTS_MISSING")
         ticket_results = [item.document for item in scientific_run.ticket_measurements]
-        observation = {
+        observation: dict[str, object] = {
             "arm_id": plan.arm_id,
             "benchmark_definition_id": plan.benchmark_definition_id,
             "campaign_id": plan.campaign_id,
@@ -291,7 +352,7 @@ class PrimaryObservationWriter:
             "evaluation_ids": [item.content_id for item in evaluations],
             "evaluation_implementation_ids": list(plan.evaluation_implementation_ids),
             "evaluation_runner_id": plan.evaluation_runner_id,
-            "execution_authorization_id": execution_authorization_id(authorization),
+            "execution_authorization_id": authorization_id,
             "execution_class": plan.execution_class,
             "execution_plan_id": plan.content_id,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
@@ -304,7 +365,7 @@ class PrimaryObservationWriter:
             "result_class": scientific_run.result_class,
             "run_result": scientific_run.round_result.document,
             "runner_id": plan.runner_id,
-            "schema_version": "2.0.0",
+            "schema_version": ("3.0.0" if plan.execution_class == "PRIMARY_MEASURED" else "2.0.0"),
             "seed": plan.seed,
             "source_class": (
                 "MEASURED_HARDWARE"
@@ -319,12 +380,39 @@ class PrimaryObservationWriter:
             "workload_id": plan.workload_id,
             "writer_id": plan.writer_id,
         }
+        if verified_authorization is not None:
+            observation.update(
+                {
+                    "stage_authorization_attestation_id": (
+                        verified_authorization.attestation.content_id
+                    ),
+                    "stage_authorization_id": verified_authorization.authorization.content_id,
+                    "stage_authorization_proof_artifact_ids": [
+                        item.content_id for item in governance_artifacts
+                    ],
+                    "stage_authorization_quorum_threshold": (
+                        verified_authorization.attestation.quorum_threshold
+                    ),
+                    "stage_authorization_signature_set_root": (
+                        verified_authorization.attestation.signature_set_root
+                    ),
+                    "stage_authorization_validator_set_id": (
+                        verified_authorization.attestation.validator_set_id
+                    ),
+                    "stage_authorization_vote_ids": list(
+                        verified_authorization.attestation.ordered_vote_ids
+                    ),
+                }
+            )
         if observation["processed_tokens"] != plan.processed_tokens:
             raise _fail("OBSERVATION_PROCESSED_TOKENS_MISMATCH")
         observation_bytes = canonical_json_bytes(observation)
-        observation_id = sha256_content_id(
-            b"deltareduce.010.primary-run-observation.v2\0" + observation_bytes
+        observation_domain = (
+            b"deltareduce.010.primary-run-observation.v3\0"
+            if verified_authorization is not None
+            else b"deltareduce.010.primary-run-observation.v2\0"
         )
+        observation_id = sha256_content_id(observation_domain + observation_bytes)
         observation_path = (
             self.root
             / "observations"
