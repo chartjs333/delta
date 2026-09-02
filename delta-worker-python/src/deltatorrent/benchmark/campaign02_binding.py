@@ -16,6 +16,9 @@ from deltatorrent.benchmark.campaign02 import (
     CertifiedRoundPolicy,
     WorkloadContract,
 )
+from deltatorrent.benchmark.campaign02_execution_identities import (
+    StageExecutionIdentityManifest,
+)
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID, BenchmarkDefinition
 from deltatorrent.benchmark.governance import (
     BenchmarkReviewValidatorSet,
@@ -42,6 +45,11 @@ _EXPECTED_ARMS: Final = (
         "ISOLATED_SIDECAR",
         "HIERARCHICAL_BFT",
     ),
+)
+_SUPERSEDED_DEFINITION_IDS: Final = frozenset(
+    {
+        "sha256:b263e77766599426dbf13574b05f2104ace1acf2d866e6ca5d9a3abef66f5dd5",
+    }
 )
 
 
@@ -79,6 +87,34 @@ class CertifiedPlanBinding:
         ):
             raise _fail("CAMPAIGN02_POLICY_ROUND_ID_MISMATCH")
 
+    @classmethod
+    def from_dict(cls, value: object) -> CertifiedPlanBinding:
+        fields = {"arm_id", "arm_name", "gate_stage", "policy", "repetition", "seed"}
+        if not isinstance(value, dict) or set(value) != fields:
+            raise _fail("CAMPAIGN02_POLICY_BINDING_FIELDS_INVALID")
+        seed = value["seed"]
+        repetition = value["repetition"]
+        if (
+            isinstance(seed, bool)
+            or not isinstance(seed, int)
+            or seed < 0
+            or isinstance(repetition, bool)
+            or not isinstance(repetition, int)
+            or repetition < 1
+        ):
+            raise _fail("CAMPAIGN02_POLICY_COORDINATE_INVALID")
+        result = cls(
+            gate_stage=str(value["gate_stage"]),
+            arm_id=str(value["arm_id"]),
+            arm_name=str(value["arm_name"]),
+            seed=seed,
+            repetition=repetition,
+            policy=CertifiedRoundPolicy.from_dict(value["policy"]),
+        )
+        if result.document != value:
+            raise _fail("CAMPAIGN02_POLICY_BINDING_DOCUMENT_MISMATCH")
+        return result
+
     @property
     def document(self) -> dict[str, object]:
         return {
@@ -98,7 +134,7 @@ class QualifiedRuntimeLineage:
     environment_id: str
     image_id: str
     hardware_id: str
-    runner_id: str
+    runner_id: str | None
     evaluation_runner_id: str
     writer_id: str
     model_id: str
@@ -108,6 +144,10 @@ class QualifiedRuntimeLineage:
     evaluation_profile_ids: tuple[str, ...]
     evaluation_implementation_ids: tuple[str, ...]
     certified_plan_bindings: tuple[CertifiedPlanBinding, ...]
+    stage_execution_identities_id: str | None = None
+    exactness_runner_id: str | None = None
+    scientific_runner_id: str | None = None
+    network_fault_runner_id: str | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -119,7 +159,6 @@ class QualifiedRuntimeLineage:
             self.environment_id,
             self.image_id,
             self.hardware_id,
-            self.runner_id,
             self.evaluation_runner_id,
             self.writer_id,
             self.model_id,
@@ -131,6 +170,53 @@ class QualifiedRuntimeLineage:
         )
         if any(_CONTENT_ID.fullmatch(value) is None for value in identities):
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_IDENTITY_INVALID")
+        legacy = self.runner_id is not None and all(
+            value is None
+            for value in (
+                self.stage_execution_identities_id,
+                self.exactness_runner_id,
+                self.scientific_runner_id,
+                self.network_fault_runner_id,
+            )
+        )
+        stage_specific = self.runner_id is None and all(
+            value is not None
+            for value in (
+                self.stage_execution_identities_id,
+                self.exactness_runner_id,
+                self.scientific_runner_id,
+                self.network_fault_runner_id,
+            )
+        )
+        if not (legacy or stage_specific):
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_RUNNER_SCHEMA_INVALID")
+        runner_ids = (
+            (self.runner_id,)
+            if legacy
+            else (
+                self.stage_execution_identities_id,
+                self.exactness_runner_id,
+                self.scientific_runner_id,
+                self.network_fault_runner_id,
+            )
+        )
+        if any(
+            not isinstance(value, str) or _CONTENT_ID.fullmatch(value) is None
+            for value in runner_ids
+        ):
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_IDENTITY_INVALID")
+        if (
+            stage_specific
+            and len(
+                {
+                    self.exactness_runner_id,
+                    self.scientific_runner_id,
+                    self.network_fault_runner_id,
+                }
+            )
+            != 3
+        ):
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_STAGE_RUNNER_ALIAS")
         if not (
             len(self.dataset_ids)
             == len(self.evaluation_profile_ids)
@@ -165,9 +251,83 @@ class QualifiedRuntimeLineage:
         ):
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_POLICY_ORDER_INVALID")
 
+    @classmethod
+    def from_dict(cls, value: object) -> QualifiedRuntimeLineage:
+        fields = {
+            "campaign_id",
+            "certified_plan_bindings",
+            "dataset_ids",
+            "environment_id",
+            "evaluation_implementation_ids",
+            "evaluation_profile_ids",
+            "evaluation_runner_id",
+            "exactness_runner_id",
+            "formal_semantics_id",
+            "hardware_id",
+            "image_id",
+            "model_id",
+            "network_fault_runner_id",
+            "parent_checkpoint_id",
+            "schema_version",
+            "scientific_runner_id",
+            "source_commit",
+            "source_tree",
+            "stage_execution_identities_id",
+            "stage_execution_model",
+            "tokenizer_id",
+            "type_name",
+            "writer_id",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or value["campaign_id"] != "campaign-02"
+            or value["schema_version"] != "3.0.0"
+            or value["type_name"] != "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE"
+            or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
+            or value["stage_execution_model"] != "INDEPENDENT_BFT_RUNS"
+        ):
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_V3_FIELDS_INVALID")
+
+        def strings(name: str) -> tuple[str, ...]:
+            raw = value[name]
+            if not isinstance(raw, list) or any(not isinstance(item, str) for item in raw):
+                raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_IDENTITY_INVALID")
+            return tuple(raw)
+
+        raw_bindings = value["certified_plan_bindings"]
+        if not isinstance(raw_bindings, list):
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_POLICY_INVALID")
+        result = cls(
+            source_commit=str(value["source_commit"]),
+            source_tree=str(value["source_tree"]),
+            environment_id=str(value["environment_id"]),
+            image_id=str(value["image_id"]),
+            hardware_id=str(value["hardware_id"]),
+            runner_id=None,
+            evaluation_runner_id=str(value["evaluation_runner_id"]),
+            writer_id=str(value["writer_id"]),
+            model_id=str(value["model_id"]),
+            parent_checkpoint_id=str(value["parent_checkpoint_id"]),
+            tokenizer_id=str(value["tokenizer_id"]),
+            dataset_ids=strings("dataset_ids"),
+            evaluation_profile_ids=strings("evaluation_profile_ids"),
+            evaluation_implementation_ids=strings("evaluation_implementation_ids"),
+            certified_plan_bindings=tuple(
+                CertifiedPlanBinding.from_dict(item) for item in raw_bindings
+            ),
+            stage_execution_identities_id=str(value["stage_execution_identities_id"]),
+            exactness_runner_id=str(value["exactness_runner_id"]),
+            scientific_runner_id=str(value["scientific_runner_id"]),
+            network_fault_runner_id=str(value["network_fault_runner_id"]),
+        )
+        if result.document != value:
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_V3_DOCUMENT_MISMATCH")
+        return result
+
     @property
     def document(self) -> dict[str, object]:
-        return {
+        document: dict[str, object] = {
             "campaign_id": "campaign-02",
             "certified_plan_bindings": [item.document for item in self.certified_plan_bindings],
             "dataset_ids": list(self.dataset_ids),
@@ -180,8 +340,6 @@ class QualifiedRuntimeLineage:
             "image_id": self.image_id,
             "model_id": self.model_id,
             "parent_checkpoint_id": self.parent_checkpoint_id,
-            "runner_id": self.runner_id,
-            "schema_version": "2.0.0",
             "stage_execution_model": "INDEPENDENT_BFT_RUNS",
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
@@ -189,13 +347,42 @@ class QualifiedRuntimeLineage:
             "type_name": "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE",
             "writer_id": self.writer_id,
         }
+        if self.runner_id is not None:
+            document.update({"runner_id": self.runner_id, "schema_version": "2.0.0"})
+        else:
+            document.update(
+                {
+                    "exactness_runner_id": self.exactness_runner_id,
+                    "network_fault_runner_id": self.network_fault_runner_id,
+                    "schema_version": "3.0.0",
+                    "scientific_runner_id": self.scientific_runner_id,
+                    "stage_execution_identities_id": self.stage_execution_identities_id,
+                }
+            )
+        return document
 
     @property
     def content_id(self) -> str:
+        version = b"v2" if self.runner_id is not None else b"v3"
         return sha256_content_id(
-            b"deltareduce.010.campaign02-qualified-runtime-lineage.v2\0"
+            b"deltareduce.010.campaign02-qualified-runtime-lineage."
+            + version
+            + b"\0"
             + canonical_json_bytes(self.document)
         )
+
+    def runner_id_for_stage(self, gate_stage: str) -> str:
+        if self.runner_id is not None:
+            return self.runner_id
+        mapping = {
+            "STAGE_A_EXACTNESS": self.exactness_runner_id,
+            "STAGE_B_SCIENTIFIC": self.scientific_runner_id,
+            "STAGE_C_EMULATED_WAN": self.network_fault_runner_id,
+        }
+        value = mapping.get(gate_stage)
+        if not isinstance(value, str):
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_STAGE_RUNNER_MISSING")
+        return value
 
     def policy_for(
         self, gate_stage: str, arm: ArmSpec, seed: int, repetition: int
@@ -222,6 +409,7 @@ class Campaign02PlanCatalog:
     domain_manifest_id: str
     ticket_plan_id: str
     runtime_lineage_id: str
+    stage_execution_identities_id: str
     definition_attestation_verified_at: datetime
     plans: tuple[CampaignExecutionPlan, ...]
 
@@ -269,8 +457,9 @@ class Campaign02PlanCatalog:
                 stage: list(self.plan_ids_for_stage(stage)) for stage in CAMPAIGN02_GATE_STAGES
             },
             "qualified_runtime_lineage_id": self.runtime_lineage_id,
-            "schema_version": "2.0.0",
+            "schema_version": "3.0.0",
             "stage_execution_model": "INDEPENDENT_BFT_RUNS",
+            "stage_execution_identities_id": self.stage_execution_identities_id,
             "status": "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION",
             "ticket_plan_id": self.ticket_plan_id,
             "ticket_identity_scope": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID",
@@ -297,13 +486,30 @@ def _validate_definition_bindings(
     domain_manifest: CampaignDomainManifest,
     ticket_plan: CampaignTicketPlan,
     runtime_lineage: QualifiedRuntimeLineage,
+    stage_identities: StageExecutionIdentityManifest,
 ) -> None:
+    if definition.content_id in _SUPERSEDED_DEFINITION_IDS:
+        raise _fail("CAMPAIGN02_DEFINITION_SUPERSEDED_BEFORE_ATTESTATION")
     if (
-        definition.raw.get("schema_version") != "2.0.0"
+        definition.raw.get("schema_version") != "3.0.0"
         or definition.campaign_id != "campaign-02"
         or not definition.primary
     ):
-        raise _fail("CAMPAIGN02_DEFINITION_V2_REQUIRED")
+        raise _fail("CAMPAIGN02_DEFINITION_V3_REQUIRED")
+    if runtime_lineage.runner_id is not None:
+        raise _fail("CAMPAIGN02_STAGE_SPECIFIC_RUNTIME_LINEAGE_REQUIRED")
+    if (
+        stage_identities.content_id != runtime_lineage.stage_execution_identities_id
+        or stage_identities.source_commit != runtime_lineage.source_commit
+        or stage_identities.source_tree != runtime_lineage.source_tree
+        or stage_identities.identity_id("exactness_runner") != runtime_lineage.exactness_runner_id
+        or stage_identities.identity_id("scientific_runner") != runtime_lineage.scientific_runner_id
+        or stage_identities.identity_id("network_fault_runner")
+        != runtime_lineage.network_fault_runner_id
+        or stage_identities.identity_id("evaluation_runner") != runtime_lineage.evaluation_runner_id
+        or stage_identities.identity_id("observation_writer") != runtime_lineage.writer_id
+    ):
+        raise _fail("CAMPAIGN02_STAGE_EXECUTION_IDENTITY_MANIFEST_MISMATCH")
     if (
         definition.B != workload.tokens_per_ticket
         or definition.H != workload.optimizer_steps_per_ticket
@@ -314,6 +520,7 @@ def _validate_definition_bindings(
         or definition.raw["domain_manifest_id"] != domain_manifest.content_id
         or definition.ticket_plan_id != ticket_plan.content_id
         or definition.qualified_runtime_lineage_id != runtime_lineage.content_id
+        or definition.stage_execution_identities_id != runtime_lineage.stage_execution_identities_id
     ):
         raise _fail("CAMPAIGN02_DEFINITION_EXECUTION_BINDING_MISMATCH")
     if len({workload.content_id, domain_manifest.content_id, ticket_plan.content_id}) != 3:
@@ -357,10 +564,16 @@ def compile_campaign02_plan_catalog(
     ticket_plan: CampaignTicketPlan,
     arms: tuple[ArmSpec, ...],
     runtime_lineage: QualifiedRuntimeLineage,
+    stage_identities: StageExecutionIdentityManifest,
 ) -> Campaign02PlanCatalog:
     """Compile deterministic stage templates without granting execution authority."""
     _validate_definition_bindings(
-        definition, workload, domain_manifest, ticket_plan, runtime_lineage
+        definition,
+        workload,
+        domain_manifest,
+        ticket_plan,
+        runtime_lineage,
+        stage_identities,
     )
     _validate_arms(definition, arms, workload)
     vote_map = {item.content_id: item for item in votes}
@@ -412,7 +625,7 @@ def compile_campaign02_plan_catalog(
                     environment_id=runtime_lineage.environment_id,
                     image_id=runtime_lineage.image_id,
                     hardware_id=runtime_lineage.hardware_id,
-                    runner_id=runtime_lineage.runner_id,
+                    runner_id=runtime_lineage.runner_id_for_stage(gate_stage),
                     evaluation_runner_id=runtime_lineage.evaluation_runner_id,
                     writer_id=runtime_lineage.writer_id,
                     workload_id=workload.content_id,
@@ -449,6 +662,7 @@ def compile_campaign02_plan_catalog(
         domain_manifest_id=domain_manifest.content_id,
         ticket_plan_id=ticket_plan.content_id,
         runtime_lineage_id=runtime_lineage.content_id,
+        stage_execution_identities_id=str(runtime_lineage.stage_execution_identities_id),
         definition_attestation_verified_at=attestation.verified_at,
         plans=tuple(plans),
     )

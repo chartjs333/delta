@@ -136,7 +136,7 @@ def test_runtime_lineage_has_36_independent_stage_contexts() -> None:
     )
 
 
-def test_ephemeral_signature_fixture_compiles_exact_non_executable_catalog() -> None:
+def test_ephemeral_signatures_cannot_revive_superseded_definition() -> None:
     definition = MODULE.BenchmarkDefinition.from_dict(load(MODULE.DEFINITION_PATH))
     exact, _ = MODULE.qualification()
     workload = MODULE.load_workload_contract(MODULE.CONFIG / "workload-v2.json")
@@ -194,19 +194,19 @@ def test_ephemeral_signature_fixture_compiles_exact_non_executable_catalog() -> 
         votes=votes,
         verified_at=datetime(2026, 9, 2, 14, 1, tzinfo=UTC),
     )
-    catalog = compile_campaign02_plan_catalog(
-        definition=definition,
-        attestation_document=attestation.document,
-        validator_set=validator_set,
-        votes=votes,
-        workload=workload,
-        domain_manifest=domain_manifest,
-        ticket_plan=ticket_plan,
-        arms=arms,
-        runtime_lineage=lineage,
-    )
-    assert len(catalog.plans) == 45
-    assert catalog.document["execution_authorized"] is False
+    with pytest.raises(ValueError, match="CAMPAIGN02_DEFINITION_SUPERSEDED_BEFORE_ATTESTATION"):
+        compile_campaign02_plan_catalog(
+            definition=definition,
+            attestation_document=attestation.document,
+            validator_set=validator_set,
+            votes=votes,
+            workload=workload,
+            domain_manifest=domain_manifest,
+            ticket_plan=ticket_plan,
+            arms=arms,
+            runtime_lineage=lineage,
+            stage_identities=None,  # type: ignore[arg-type]
+        )
 
 
 def test_definition_package_rejects_source_or_runner_substitution() -> None:

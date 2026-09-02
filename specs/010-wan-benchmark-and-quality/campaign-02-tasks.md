@@ -16,6 +16,9 @@
 **Definition branch**: `010h-campaign02-immutable-definition` from PR #17 merge
 `881301d8443c667a478617cc663d1450aee9777a`
 
+**Stage-runner remediation branch**: `010i-campaign02-runner-remediation` from the immutable
+PR #18 construction head `9a4d0d8062ac432d7104284c75dc4b24773dadb0`
+
 **Formal impact**: `REGRESSION_ONLY` against
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
@@ -150,6 +153,34 @@ Execution-binding qualification evidence:
   for every Stage A/B/C runner/verifier role; every execution flag remains false;
 - `reports/benchmark/campaigns/campaign-02/definition-readiness-v2.json` — records zero independent
   votes, absent attestation/catalog/execution authorization and C2-023 as the only next gate.
+
+## Stage-runner remediation after PR #18 review
+
+Definition `sha256:b263e77766599426dbf13574b05f2104ace1acf2d866e6ca5d9a3abef66f5dd5`
+is immutable audit history with status `SUPERSEDED_BEFORE_ATTESTATION`, zero votes, absent
+attestation and zero observations. It must not be signed, used to compile an executable catalog or
+edited in place. PR #18 remains Draft and is not authorized for merge.
+
+- [ ] **C2-028** Replace the composite plan runner binding with exact stage-specific exactness,
+  scientific and network/fault runner IDs, and recursively verify the complete stage identity
+  manifest directly bound by runtime lineage and Definition.
+- [ ] **C2-029** Implement the source-bound Campaign 02 Stage A executor and manual-only workflow;
+  require a verified Definition attestation, authoritative catalog, detached signed Stage A
+  authorization, exact runtime lineage and exact identity manifest, then close exactly 15 plans.
+- [ ] **C2-030** Emit a canonical create-only typed Stage A receipt only after the complete native,
+  JDK 25/JDK 26 and cross-component exactness matrix passes; bind its exact plan set, evidence root,
+  runner, source, authorization attestation and gate result/QC identities.
+- [ ] **C2-031** Implement the Campaign 02 Stage C executor with the network/fault runner identity,
+  exact 15-plan closure and exact Stage A plus Stage B predecessor receipt verification.
+- [ ] **C2-032** Run the cross-component positive/negative regression matrix for stage-specific
+  runner IDs, actual `PrimaryScientificRunner` compatibility, non-executable composite metadata,
+  Campaign 01 rejection, signed authorization, exact plan cardinality and complete evidence.
+- [ ] **C2-033** Reissue the immutable source commit/tree, designated-GPU report, portable corpus,
+  TSan qualification and terminal-head CI receipt; only then construct new stage identities,
+  runtime lineage and a replacement immutable Definition with a new content ID.
+
+Completion of C2-028 through C2-032 is source remediation only. It does not create Definition
+votes, attestation, stage authorization, gate receipt, primary observation or execution authority.
 
 ## Unconditional STOP conditions
 

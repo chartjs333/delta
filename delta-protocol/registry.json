@@ -58,7 +58,7 @@
     {
       "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
       "path": "schemas/010/campaign-02/registry-v1.json",
-      "sha256": "8a015e544c7dfe947d280df107339ba6f281a80854ade84e18435f91b3a598df"
+      "sha256": "11d476a58893c3762963f8df16615822c19689ae752e4a5c60650d322c612e42"
     },
     {
       "id": "REGISTRY-BENCHMARK-010",
@@ -406,6 +406,11 @@
       "value": "application/vnd.deltareduce.campaign-02.benchmark-definition-v2+json;version=2"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-BENCHMARK-DEFINITION-V3",
+      "schema_id": "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-010-V3",
+      "value": "application/vnd.deltareduce.campaign-02.benchmark-definition-v3+json;version=3"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-BENCHMARK-DEFINITION-VOTE-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-VOTE-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.benchmark-definition-vote-v1+json;version=1"
@@ -496,6 +501,11 @@
       "value": "application/vnd.deltareduce.campaign-02.plan-catalog-v2+json;version=2"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-PLAN-CATALOG-V3",
+      "schema_id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V3",
+      "value": "application/vnd.deltareduce.campaign-02.plan-catalog-v3+json;version=3"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.qualified-runtime-lineage-v1+json;version=1"
@@ -504,6 +514,11 @@
       "id": "MEDIA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-V2",
       "schema_id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V2",
       "value": "application/vnd.deltareduce.campaign-02.qualified-runtime-lineage-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-V3",
+      "schema_id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V3",
+      "value": "application/vnd.deltareduce.campaign-02.qualified-runtime-lineage-v3+json;version=3"
     },
     {
       "id": "MEDIA-CAMPAIGN02-STAGE-AUTHORIZATION-ATTESTATION-V1",
@@ -531,9 +546,29 @@
       "value": "application/vnd.deltareduce.campaign-02.stage-execution-authorization-v2+json;version=2"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-STAGE-EXECUTION-IDENTITIES-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-IDENTITIES-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.stage-execution-identities-v2+json;version=2"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-STAGE-GATE-RECEIPT-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.stage-gate-receipt-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-GATE-RECEIPT-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.stage-gate-receipt-v2+json;version=2"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-GATE-RESULT-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RESULT-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.stage-gate-result-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-PLAN-EVIDENCE-V1",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-PLAN-EVIDENCE-010-V1",
+      "value": "application/vnd.deltareduce.campaign-02.stage-plan-evidence-v1+json;version=1"
     },
     {
       "id": "MEDIA-CAMPAIGN02-TICKET-PLAN-V1",
@@ -1190,6 +1225,11 @@
       "sha256": "31e875ee47e7a4b985f008ee34a3ad73a72e67d39dcebfaaf7cb8bf3e8c3aaa7"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-010-V3",
+      "path": "schemas/010/campaign-02/benchmark-definition-v3.json",
+      "sha256": "7bc3265f84ec3d8da97e1e3ff876168f9aed6910d6c7593da1c1bf4128a5c807"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-VOTE-010-V1",
       "path": "schemas/010/campaign-02/benchmark-definition-vote-v1.json",
       "sha256": "32ffe34f77b284d325d11acc5e7549351fea70a84e654e5d940d799ec0ef61c8"
@@ -1280,6 +1320,11 @@
       "sha256": "aedbbf240d2a9a38b178c2a8caba837aa0f5bf2a1302b5b76a450988e8d47ca5"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V3",
+      "path": "schemas/010/campaign-02/plan-catalog-v3.json",
+      "sha256": "45b89d87d0742a5a9646c82dae63becf5ea8a70f8a79c0397792db59ee226734"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V1",
       "path": "schemas/010/campaign-02/qualified-runtime-lineage-v1.json",
       "sha256": "173bb0bd59eca8cdc44812b859f59c75955bd797928951d7f4fbecc742dc6d34"
@@ -1288,6 +1333,11 @@
       "id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V2",
       "path": "schemas/010/campaign-02/qualified-runtime-lineage-v2.json",
       "sha256": "521b0b31ba0623e6053b6d6692cba929743a17fa7dc14e6b8ef48762f2ee62e0"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V3",
+      "path": "schemas/010/campaign-02/qualified-runtime-lineage-v3.json",
+      "sha256": "bc2412f3a527da682079685c96199c44f387f00b466fe0cd48a97edd3bdf57c6"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-ATTESTATION-010-V1",
@@ -1315,9 +1365,29 @@
       "sha256": "bda30ea3fb7d45c3b367c43ca87ee3274d0e6ab030f244dc7d26b5a5ca65af14"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-IDENTITIES-010-V2",
+      "path": "schemas/010/campaign-02/stage-execution-identities-v2.json",
+      "sha256": "d4df81ae686b37e576ca2a97cc230745355d3155df65447435f69cffce531954"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V1",
       "path": "schemas/010/campaign-02/stage-gate-receipt-v1.json",
       "sha256": "11c20146ec98a070c09725d30793d8ef93dbf04bfef33ad65b65702755e44b2e"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V2",
+      "path": "schemas/010/campaign-02/stage-gate-receipt-v2.json",
+      "sha256": "92f31dfd6a851aa02c42efb9d5702444f9187e78fa616d6b583be52d4d5a5c5e"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-GATE-RESULT-010-V1",
+      "path": "schemas/010/campaign-02/stage-gate-result-v1.json",
+      "sha256": "3ede9370b731bc28890d5bd5a357f119c32b18665cf44cbe5d73f1cf06adc9b8"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-PLAN-EVIDENCE-010-V1",
+      "path": "schemas/010/campaign-02/stage-plan-evidence-v1.json",
+      "sha256": "36361e3559fd765a512919569d4448698afd9cd05b4a630497d32e6937bb8a0e"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-TICKET-PLAN-010-V1",

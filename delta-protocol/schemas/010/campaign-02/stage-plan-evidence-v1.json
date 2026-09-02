@@ -1,0 +1,57 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-plan-evidence-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_STAGE_PLAN_EVIDENCE"
+    },
+    "decision": {
+      "const": "PASS"
+    },
+    "evidence_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision",
+    "evidence_ids",
+    "formal_semantics_id",
+    "plan_id",
+    "runner_id",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-plan-evidence-v1"
+}

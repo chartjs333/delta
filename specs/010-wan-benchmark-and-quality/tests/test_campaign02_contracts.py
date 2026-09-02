@@ -22,7 +22,7 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 30
+    assert len(module.SCHEMAS) == 37
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
     assert registry["registry_version"] == "010.5.0-signed-stage-governance"

@@ -320,6 +320,15 @@ class ParameterShardKey:
         if not self.domain_id or not self.shard_id:
             raise _fail("CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID")
 
+    @classmethod
+    def from_dict(cls, value: object) -> ParameterShardKey:
+        if not isinstance(value, dict) or set(value) != {"domain_id", "shard_id"}:
+            raise _fail("CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID")
+        return cls(
+            _string(value["domain_id"], "CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID"),
+            _string(value["shard_id"], "CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID"),
+        )
+
     @property
     def document(self) -> dict[str, str]:
         return {"domain_id": self.domain_id, "shard_id": self.shard_id}
@@ -366,6 +375,78 @@ class CertifiedRoundPolicy:
             sorted(set(self.required_shards))
         ):
             raise _fail("CAMPAIGN02_REQUIRED_SHARD_MATRIX_INVALID")
+
+    @classmethod
+    def from_dict(cls, value: object) -> CertifiedRoundPolicy:
+        fields = {
+            "accumulator_proof_id",
+            "apply_arithmetic_profile_id",
+            "arithmetic_profile_id",
+            "height",
+            "parameter_schema_id",
+            "quorum_threshold",
+            "required_shards",
+            "round_config_id",
+            "round_id",
+            "validator_epoch_id",
+            "validator_ids",
+            "view",
+        }
+        if not isinstance(value, dict) or set(value) != fields:
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_FIELDS_INVALID")
+        validator_ids = value["validator_ids"]
+        required_shards = value["required_shards"]
+        if (
+            not isinstance(validator_ids, list)
+            or any(not isinstance(item, str) for item in validator_ids)
+            or not isinstance(required_shards, list)
+        ):
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_FIELDS_INVALID")
+        height = value["height"]
+        view = value["view"]
+        quorum_threshold = value["quorum_threshold"]
+        if (
+            isinstance(height, bool)
+            or not isinstance(height, int)
+            or height < 1
+            or isinstance(view, bool)
+            or not isinstance(view, int)
+            or view < 0
+            or isinstance(quorum_threshold, bool)
+            or not isinstance(quorum_threshold, int)
+            or quorum_threshold < 1
+        ):
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_COORDINATE_INVALID")
+        result = cls(
+            round_id=_string(value["round_id"], "CAMPAIGN02_CERTIFIED_ROUND_ID_INVALID"),
+            height=height,
+            view=view,
+            round_config_id=_content_id(
+                value["round_config_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            validator_epoch_id=_content_id(
+                value["validator_epoch_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            parameter_schema_id=_content_id(
+                value["parameter_schema_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            arithmetic_profile_id=_content_id(
+                value["arithmetic_profile_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            accumulator_proof_id=_content_id(
+                value["accumulator_proof_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            apply_arithmetic_profile_id=_content_id(
+                value["apply_arithmetic_profile_id"],
+                "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID",
+            ),
+            validator_ids=tuple(validator_ids),
+            quorum_threshold=quorum_threshold,
+            required_shards=tuple(ParameterShardKey.from_dict(item) for item in required_shards),
+        )
+        if result.document != value:
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_DOCUMENT_MISMATCH")
+        return result
 
     @property
     def document(self) -> dict[str, object]:
@@ -789,6 +870,7 @@ class Campaign02PlanCatalogView(Protocol):
     attestation_id: str
     definition_attestation_verified_at: datetime
     runtime_lineage_id: str
+    stage_execution_identities_id: str
     plans: tuple[CampaignExecutionPlan, ...]
 
     @property
@@ -894,6 +976,13 @@ def authorize_execution_class(
             or receipt.finalized_at > authorization.issued_at
         ):
             raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_LINEAGE_INVALID")
+        expected_runner_ids = {
+            item.runner_id
+            for item in plan_catalog.plans
+            if item.gate_stage == receipt.completed_stage
+        }
+        if len(expected_runner_ids) != 1 or receipt.runner_id not in expected_runner_ids:
+            raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_RUNNER_INVALID")
         receipts.append(receipt)
     predecessor_stages = tuple(sorted(item.completed_stage for item in receipts))
     if (
