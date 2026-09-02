@@ -197,6 +197,18 @@ manifest construction it exposed that typed gate receipts still used a legacy gl
 ID instead of the recursively verified manifest identity. The chain is superseded before any new
 Definition by `reports/benchmark/campaigns/campaign-02/qualification-supersession-runner-gate-analyzer.json`.
 
+The replacement source is `7caad473501a31d95e24408901a6a2236ec03ce6` / tree
+`515d65fbf5a18ab872c8f31187b7a0788a33badc`. Its current machine-readable evidence is:
+
+- `evidence/campaign-02-runner-gate-analyzer-hardware-qualification.json` — passing designated-GPU
+  probe for the replacement source;
+- `evidence/campaign-02-runner-gate-analyzer-exact-source-qualification.json` — passing 116-case
+  portable corpus and recursively bound stage-runner/gate-analyzer source identities.
+
+Both records retain zero primary scientific executions and observations. C2-033 remains open until
+the replacement TSan, dedicated exact-source CI, terminal current-head control and new Definition
+package are recorded.
+
 ## Unconditional STOP conditions
 
 - No old Definition or Stage A artifact may be edited, overwritten or linked as a new gate result.
