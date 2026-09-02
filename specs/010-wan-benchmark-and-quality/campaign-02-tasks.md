@@ -4,11 +4,17 @@
 
 **Execution-binding remediation authority**: PR #16 governance review `CHANGES_REQUIRED`
 
+**Definition construction authority**: post-merge governance decision
+`APPROVED_FOR_MERGE_AND_C2_022_ONLY`
+
 **Source branch**: `010e-primary-campaign-remediation` from
 `661494c84cfcdb365c21542b46a5ebfe3a91cd8d`
 
 **Execution-binding branch**: `010g-campaign02-execution-binding` from remediation merge
 `8e945ac9713de5898d3abdb10ad2474079a87260`
+
+**Definition branch**: `010h-campaign02-immutable-definition` from PR #17 merge
+`881301d8443c667a478617cc663d1450aee9777a`
 
 **Formal impact**: `REGRESSION_ONLY` against
 `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
@@ -75,7 +81,7 @@ The remaining tasks begin only after remediation is merged into
 
 The Definition `sha256:a4160af58ba310135bd86d03b2427c5034ae231f481e6229314e0e61d12b97af`
 and its quorum-shaped unsigned record are superseded before execution. They remain immutable audit
-history and cannot satisfy the tasks below.
+history in closed PR #16 and cannot satisfy the tasks below.
 
 - [x] **C2-017** Publish the pre-execution supersession record with zero observations and no
   execution authorization.
@@ -94,8 +100,12 @@ history and cannot satisfy the tasks below.
   source `f323ae1...` / tree `6cb86a3...`, evidence overlay `8936015...`, designated-GPU report,
   96-case portable corpus and workflow `33620734265` passed; current-head control recorded 48
   successful checks, four policy skips and no failures or pending checks.
-- [ ] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
-  workload/domain/ticket IDs and qualified runtime lineage.
+- [x] **C2-022** Construct a new immutable Definition only after C2-021 passes; bind the distinct
+  workload/domain/ticket IDs, the qualified runtime lineage and content-addressed exactness,
+  scientific, evaluation, observation, network/fault, gate-analyzer, stage-authorization,
+  typed-receipt and native Feature 008 implementation identities. The Definition is
+  `sha256:b263e77766599426dbf13574b05f2104ace1acf2d866e6ca5d9a3abef66f5dd5`;
+  it creates no validator set, vote, attestation, plan catalog or execution authority.
 - [ ] **C2-023** Obtain independent detached signatures and verify temporal closure at the actual
   terminal reviewed HEAD.
 - [ ] **C2-024** Obtain a new separate governance decision before any Stage A execution. This task
@@ -133,6 +143,13 @@ Execution-binding qualification evidence:
   overlay; source `90f4b46...` and evidence overlay `67d0383...` are also historical after the
   terminal receipt-head TSan failure. The replacement chain retains zero primary observations and
   no execution authorization.
+- `configs/benchmark/campaign-02/definition-v2.json` and
+  `qualified-runtime-lineage-v2.json` — the new immutable C2-022 Definition and its 36 independent
+  certified stage contexts, bound to qualified source `f323ae1...` / tree `6cb86a3...`;
+- `configs/benchmark/campaign-02/stage-execution-identities-v1.json` — content-addressed bindings
+  for every Stage A/B/C runner/verifier role; every execution flag remains false;
+- `reports/benchmark/campaigns/campaign-02/definition-readiness-v2.json` — records zero independent
+  votes, absent attestation/catalog/execution authorization and C2-023 as the only next gate.
 
 ## Unconditional STOP conditions
 
