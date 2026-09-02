@@ -1,0 +1,182 @@
+{
+  "artifacts": [
+    {
+      "id": "SCHEMA-BENCHMARK-DEFINITION-010-V1",
+      "path": "schemas/010/benchmark-definition-v1.json",
+      "sha256": "1fcc34052db1e2d899f19718d90541b4edc1630f64b9996fd4959b02414f1557"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-DEFINITION-ATTESTATION-010-V1",
+      "path": "schemas/010/benchmark-definition-attestation-v1.json",
+      "sha256": "a25e4cd208620d78ce59afb9bc2842848345895ddfcad0cd3e4e63734f7bd67e"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-ARM-010-V1",
+      "path": "schemas/010/benchmark-arm-v1.json",
+      "sha256": "826aff18c630981c724cf703dccec793bfc06a16534603a041440016d43e5d98"
+    },
+    {
+      "id": "SCHEMA-NETWORK-PROFILE-010-V1",
+      "path": "schemas/010/network-profile-v1.json",
+      "sha256": "83d66c6411a77d453ca5aa300065860b16bbbc47e7cb18b0bef37718fe796187"
+    },
+    {
+      "id": "SCHEMA-FAULT-PROFILE-010-V1",
+      "path": "schemas/010/fault-profile-v1.json",
+      "sha256": "052fec4cd9a15f42ddb5f60e09a40f5b27410b4208110b11e3bec0f445b23a78"
+    },
+    {
+      "id": "SCHEMA-RUN-MANIFEST-010-V1",
+      "path": "schemas/010/run-manifest-v1.json",
+      "sha256": "83f08067eca056f6960e8f58615b76ca820d729b858b9f00092e871044e3236d"
+    },
+    {
+      "id": "SCHEMA-ENVIRONMENT-MANIFEST-010-V1",
+      "path": "schemas/010/environment-manifest-v1.json",
+      "sha256": "12341bf66f1bc1c61e99f3336db81278a8b0df038d6b5a289fac636e8c713fad"
+    },
+    {
+      "id": "SCHEMA-QUALITY-EVIDENCE-010-V1",
+      "path": "schemas/010/quality-evidence-v1.json",
+      "sha256": "c8c23966042396697e79addcb077650d44b41868c4cccb46eec648cde14ab592"
+    },
+    {
+      "id": "SCHEMA-SAFETY-EVIDENCE-010-V1",
+      "path": "schemas/010/safety-evidence-v1.json",
+      "sha256": "0fb23aab17f22cd9fee2b27394259a5b09f2044e903aa0a9e54ea8445aebe099"
+    },
+    {
+      "id": "SCHEMA-EFFICIENCY-EVIDENCE-010-V1",
+      "path": "schemas/010/efficiency-evidence-v1.json",
+      "sha256": "3d59181b971d577ae5f3c38b6dab55f94e4ca3182bf0f4aabd96eeab27991b1a"
+    },
+    {
+      "id": "SCHEMA-RESILIENCE-EVIDENCE-010-V1",
+      "path": "schemas/010/resilience-evidence-v1.json",
+      "sha256": "b1c9b9a4d5c630f1d860526bf647024ea68e3e3aacd43744b384710ff580d615"
+    },
+    {
+      "id": "SCHEMA-FORMAL-EVIDENCE-010-V1",
+      "path": "schemas/010/formal-evidence-v1.json",
+      "sha256": "0b98306f5358cb692ed14a0079b7518beebbf6614a53d86005240cb570d2b4e1"
+    },
+    {
+      "id": "SCHEMA-EVIDENCE-MANIFEST-010-V1",
+      "path": "schemas/010/evidence-manifest-v1.json",
+      "sha256": "46d1376ef99b19942b989c6c06a857d50ae48d006f1301d71fa47a98f561be75"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-RESULT-010-V1",
+      "path": "schemas/010/benchmark-result-v1.json",
+      "sha256": "6a2c97f92a97581250290e103dac36777cebff9fb8c2d350474cae36fa1d7a73"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-RESULT-QC-010-V1",
+      "path": "schemas/010/benchmark-result-qc-v1.json",
+      "sha256": "08352c0dc51c93e7f01113b5477e4189789a13e603775ecabb4b048ed976adf7"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "BENCHMARK010-VALID-CONTRACT-V1",
+      "path": "fixtures/010/valid/benchmark-contract-v1.json",
+      "sha256": "7f69edbee6c7bc7f23bea3c435350965103b7a9ebe5e4b091c41cc098468b836"
+    },
+    {
+      "id": "BENCHMARK010-CROSS-LANGUAGE-GOLDEN-V1",
+      "path": "fixtures/010/cross-language/golden-v1.json",
+      "sha256": "7f69edbee6c7bc7f23bea3c435350965103b7a9ebe5e4b091c41cc098468b836"
+    },
+    {
+      "id": "BENCHMARK010-NEGATIVE-V1",
+      "path": "fixtures/010/invalid/benchmark-negative-v1.json",
+      "sha256": "d6afeef313b8361c8fed7c9775fade619417eeb8851e129d2d632238ce97658b"
+    },
+    {
+      "id": "BENCHMARK010-SYNTHETIC-V1",
+      "path": "fixtures/010/synthetic/tiny-benchmark-v1.json",
+      "sha256": "50eff8255b22524021e9225f0bcb9b653e56127d535bed4e50e1b6ede4d5bf6f"
+    }
+  ],
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "media_types": [
+    {
+      "id": "MEDIA-BENCHMARK-DEFINITION-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-DEFINITION-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-definition+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-DEFINITION-ATTESTATION-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-DEFINITION-ATTESTATION-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-definition-attestation+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-ARM-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-ARM-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-arm+json;version=1"
+    },
+    {
+      "id": "MEDIA-NETWORK-PROFILE-010-V1",
+      "schema_id": "SCHEMA-NETWORK-PROFILE-010-V1",
+      "value": "application/vnd.deltareduce.network-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-FAULT-PROFILE-010-V1",
+      "schema_id": "SCHEMA-FAULT-PROFILE-010-V1",
+      "value": "application/vnd.deltareduce.fault-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-RUN-MANIFEST-010-V1",
+      "schema_id": "SCHEMA-RUN-MANIFEST-010-V1",
+      "value": "application/vnd.deltareduce.run-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-ENVIRONMENT-MANIFEST-010-V1",
+      "schema_id": "SCHEMA-ENVIRONMENT-MANIFEST-010-V1",
+      "value": "application/vnd.deltareduce.environment-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-QUALITY-EVIDENCE-010-V1",
+      "schema_id": "SCHEMA-QUALITY-EVIDENCE-010-V1",
+      "value": "application/vnd.deltareduce.quality-evidence+json;version=1"
+    },
+    {
+      "id": "MEDIA-SAFETY-EVIDENCE-010-V1",
+      "schema_id": "SCHEMA-SAFETY-EVIDENCE-010-V1",
+      "value": "application/vnd.deltareduce.safety-evidence+json;version=1"
+    },
+    {
+      "id": "MEDIA-EFFICIENCY-EVIDENCE-010-V1",
+      "schema_id": "SCHEMA-EFFICIENCY-EVIDENCE-010-V1",
+      "value": "application/vnd.deltareduce.efficiency-evidence+json;version=1"
+    },
+    {
+      "id": "MEDIA-RESILIENCE-EVIDENCE-010-V1",
+      "schema_id": "SCHEMA-RESILIENCE-EVIDENCE-010-V1",
+      "value": "application/vnd.deltareduce.resilience-evidence+json;version=1"
+    },
+    {
+      "id": "MEDIA-FORMAL-EVIDENCE-010-V1",
+      "schema_id": "SCHEMA-FORMAL-EVIDENCE-010-V1",
+      "value": "application/vnd.deltareduce.formal-evidence+json;version=1"
+    },
+    {
+      "id": "MEDIA-EVIDENCE-MANIFEST-010-V1",
+      "schema_id": "SCHEMA-EVIDENCE-MANIFEST-010-V1",
+      "value": "application/vnd.deltareduce.evidence-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-RESULT-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-RESULT-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-result+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-RESULT-QC-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-RESULT-QC-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-result-qc+json;version=1"
+    }
+  ],
+  "registry_version": "010.1.0",
+  "schema_version": "1.0.0",
+  "semantic_completeness_claimed": false
+}

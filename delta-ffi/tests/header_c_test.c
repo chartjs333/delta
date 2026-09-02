@@ -8,6 +8,9 @@ _Static_assert(sizeof(delta_runtime_descriptor_t) == DELTA_ABI_DESCRIPTOR_SIZE,
                "descriptor layout changed");
 _Static_assert(sizeof(delta_runtime_open_options_t) == DELTA_ABI_OPEN_OPTIONS_SIZE,
                "open options layout changed");
+_Static_assert(sizeof(delta_certificate_chain_context_t) ==
+                   DELTA_CERTIFICATE_CHAIN_CONTEXT_SIZE,
+               "certificate chain context layout changed");
 _Static_assert(DELTA_STATUS_OK == 0, "status taxonomy changed");
 _Static_assert(DELTA_STATUS_INTERNAL_ERROR == 14, "status taxonomy changed");
 

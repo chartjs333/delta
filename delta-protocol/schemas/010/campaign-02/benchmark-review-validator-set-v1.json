@@ -1,0 +1,97 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:benchmark-review-validator-set-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_REVIEW_VALIDATOR_SET"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "f_b": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "purpose": {
+      "const": "BENCHMARK_DEFINITION_REVIEW"
+    },
+    "validators": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "controller_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "key_custody_statement_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "public_key": {
+            "pattern": "^[A-Za-z0-9+/]{43}=$",
+            "type": "string"
+          },
+          "public_key_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "signature_algorithm": {
+            "const": "ED25519"
+          },
+          "valid_from": {
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$",
+            "type": "string"
+          },
+          "valid_until": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$",
+                "type": "string"
+              }
+            ]
+          },
+          "validator_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "controller_id",
+          "key_custody_statement_id",
+          "public_key",
+          "public_key_id",
+          "signature_algorithm",
+          "valid_from",
+          "valid_until",
+          "validator_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "campaign_id",
+    "f_b",
+    "formal_semantics_id",
+    "purpose",
+    "schema_version",
+    "type_name",
+    "validators"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 benchmark-review-validator-set-v1"
+}

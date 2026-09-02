@@ -1,0 +1,1 @@
+{"expected_error":"WIKITEXT_NO_SCORABLE_TOKENS","fixture_class":"NON_PRIMARY_GOLDEN_NEGATIVE","records":[{"domain_id":"wikitext-en","text":"alpha"}],"schema_version":"1.0.0"}

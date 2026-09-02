@@ -57,6 +57,13 @@ CERTIFICATES_NATIVE := specs/008-certificates-and-consensus/scripts/verify_nativ
 CERTIFICATES_REFINEMENT := specs/008-certificates-and-consensus/scripts/verify_certificate_refinement.py
 CERTIFICATES_CI := specs/008-certificates-and-consensus/scripts/capture_certificate_ci.py
 CERTIFICATES_FINAL := specs/008-certificates-and-consensus/scripts/verify_final_compatibility.py
+BENCHMARK_PREFLIGHT := specs/010-wan-benchmark-and-quality/scripts/verify_preflight.py
+BENCHMARK_CONTRACTS := specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py
+BENCHMARK_PRIMARY := specs/010-wan-benchmark-and-quality/scripts/primary_contracts.py
+BENCHMARK_STAGE_B_PRERUN := specs/010-wan-benchmark-and-quality/scripts/verify_stage_b_scientific_prerun.py
+BENCHMARK_RUNTIME := specs/010-wan-benchmark-and-quality/scripts/verify_runtime_adapters.py
+BENCHMARK_ATTACKS := specs/010-wan-benchmark-and-quality/scripts/verify_production_attacks.py
+BENCHMARK_FORMAL := specs/010-wan-benchmark-and-quality/scripts/verify_formal_regression.py
 
 .PHONY: formal-phase0 formal-contracts formal-toolchain formal-parse formal-safety formal-liveness \
 	formal-proofs formal-mutants formal-refinement formal-clean-reproduction formal-report formal-check \
@@ -71,7 +78,7 @@ CERTIFICATES_FINAL := specs/008-certificates-and-consensus/scripts/verify_final_
 	scheduling-native-lifecycle scheduling-boundary scheduling-refinement scheduling-ci \
 	scheduling-final scheduling-check certificates-preflight certificates-contracts \
 	certificates-native certificates-refinement certificates-ci certificates-final \
-	certificates-check
+	certificates-check benchmark-contracts benchmark-runtime benchmark-formal benchmark-attacks benchmark-check
 
 formal-phase0:
 	$(PYTHON) formal/scripts/verify_phase0.py
@@ -316,6 +323,24 @@ certificates-final: certificates-refinement certificates-ci
 	$(UV) run python $(CERTIFICATES_FINAL) --check-only
 
 certificates-check: python-check certificates-final
+
+benchmark-contracts:
+	$(UV) run python $(BENCHMARK_PREFLIGHT) --check-only
+	$(UV) run python $(BENCHMARK_CONTRACTS)
+	$(UV) run python $(BENCHMARK_PRIMARY)
+	$(UV) run python $(BENCHMARK_STAGE_B_PRERUN) --check-only
+	$(UV) run pytest specs/010-wan-benchmark-and-quality/tests
+
+benchmark-runtime: benchmark-contracts
+	$(UV) run python $(BENCHMARK_RUNTIME) --check-only
+
+benchmark-formal: benchmark-runtime
+	$(UV) run python $(BENCHMARK_FORMAL) --check-only
+
+benchmark-attacks: benchmark-formal
+	$(UV) run python $(BENCHMARK_ATTACKS) --check-only
+
+benchmark-check: python-check benchmark-attacks
 
 bft-native: bft-contracts bft-core-architecture
 	cmake --preset cpp20

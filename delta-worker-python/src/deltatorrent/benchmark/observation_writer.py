@@ -1,0 +1,451 @@
+"""Create-only typed observation publication for Campaign 02 measured runs."""
+
+from __future__ import annotations
+
+import json
+import os
+import tempfile
+from collections.abc import Mapping
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from deltatorrent.benchmark.campaign02 import (
+    Campaign02PlanCatalogView,
+    CampaignExecutionPlan,
+    authorize_execution_class,
+    authorize_non_primary_execution_class,
+    execution_authorization_id,
+)
+from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
+from deltatorrent.benchmark.evaluators.common import MeasuredEvaluation
+from deltatorrent.benchmark.feature008_admission import canonical_native_chain_bundle
+from deltatorrent.benchmark.measured_runner import (
+    CertifiedRoundMeasurement,
+    ComponentIdentity,
+    RawArtifact,
+    ScientificRun,
+)
+from deltatorrent.benchmark.stage_authorization import StageAuthorizationProof
+from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
+
+
+class ObservationWriterError(ValueError):
+    """Stable fail-closed observation publication rejection."""
+
+
+def _fail(code: str) -> ObservationWriterError:
+    return ObservationWriterError(code)
+
+
+def _fsync_directory(path: Path) -> None:
+    if os.name != "posix":
+        return
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _safe_target(root: Path, target: Path) -> Path:
+    root = root.resolve()
+    candidate = target.absolute()
+    try:
+        relative = candidate.relative_to(root)
+    except ValueError as exc:
+        raise _fail("OBSERVATION_STORE_PATH_ESCAPE") from exc
+    cursor = root
+    for part in relative.parts:
+        cursor /= part
+        if cursor.is_symlink():
+            raise _fail("OBSERVATION_STORE_SYMLINK_FORBIDDEN")
+    return candidate
+
+
+def _publish_create_only(root: Path, target: Path, payload: bytes) -> None:
+    target = _safe_target(root, target)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    _safe_target(root, target.parent)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=".candidate.", suffix=".tmp", dir=target.parent
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            os.link(temporary, target, follow_symlinks=False)
+        except FileExistsError:
+            if target.is_symlink() or not target.is_file() or target.read_bytes() != payload:
+                raise _fail("OBSERVATION_STORE_IMMUTABLE_CONFLICT") from None
+            return
+        _fsync_directory(target.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicationReceipt:
+    observation_id: str
+    receipt_id: str
+    observation_path: Path
+    receipt_path: Path
+    artifact_ids: tuple[str, ...]
+
+
+class PrimaryObservationWriter:
+    """Accepts typed runner outputs only; raw/manual observation JSON is forbidden."""
+
+    def __init__(self, identity: ComponentIdentity, root: Path) -> None:
+        if identity.component != "PRIMARY_OBSERVATION_WRITER":
+            raise _fail("OBSERVATION_WRITER_IDENTITY_INVALID")
+        self.identity = identity
+        self.root = root.resolve()
+        self.root.mkdir(parents=True, exist_ok=True)
+
+    def publish_json(self, _value: bytes | dict[str, object]) -> None:
+        raise _fail("OBSERVATION_MANUAL_JSON_FORBIDDEN")
+
+    def _stage_artifact(self, artifact: RawArtifact, staging: Path) -> str:
+        path = staging / artifact.name
+        if path.exists():
+            raise _fail("OBSERVATION_STAGING_NAME_DUPLICATE")
+        with path.open("xb") as stream:
+            stream.write(artifact.data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        raw = path.read_bytes()
+        content_id = sha256_content_id(raw)
+        if raw != artifact.data or content_id != artifact.content_id:
+            raise _fail("OBSERVATION_STAGING_HASH_MISMATCH")
+        target = self.root / "artifacts" / content_id.removeprefix("sha256:")
+        _publish_create_only(self.root, target, raw)
+        return content_id
+
+    @staticmethod
+    def _verify_native_chain_receipt(
+        plan: CampaignExecutionPlan, scientific_run: ScientificRun
+    ) -> None:
+        if scientific_run.result_class != "CERTIFIED_DELTAREDUCE":
+            return
+        result = scientific_run.round_result
+        if not isinstance(result, CertifiedRoundMeasurement):
+            raise _fail("OBSERVATION_CERTIFIED_RESULT_TYPE_INVALID")
+        receipt_id = getattr(result, "native_chain_admission_receipt_id", None)
+        verifier_id = getattr(result, "native_chain_verifier_id", None)
+        artifacts = [item for item in scientific_run.raw_artifacts if item.content_id == receipt_id]
+        if receipt_id is None or verifier_id is None or len(artifacts) != 1:
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_MISSING")
+        try:
+            receipt = json.loads(artifacts[0].data)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_INVALID") from exc
+        fields = {
+            "aggregate_root_qc_id",
+            "apply_qc_id",
+            "certificate_bundle_id",
+            "certified_round_policy_id",
+            "checkpoint_wal_sha256",
+            "effect_set_id",
+            "execution_plan_id",
+            "final_checkpoint_id",
+            "formal_semantics_id",
+            "input_set_certificate_id",
+            "native_build_id",
+            "native_chain_verifier_id",
+            "runtime_state_id",
+            "runtime_wal_sha256",
+            "schema_version",
+            "status",
+            "type_name",
+        }
+        policy = plan.certified_round_policy
+        if (
+            not isinstance(receipt, dict)
+            or set(receipt) != fields
+            or canonical_json_bytes(receipt) != artifacts[0].data
+            or policy is None
+        ):
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_INVALID")
+        canonical_bundle = canonical_native_chain_bundle(
+            plan, scientific_run.ticket_measurements, result
+        )
+        bundle_id = sha256_content_id(
+            b"deltareduce.010.native-chain-admission-bundle.v1\0" + canonical_bundle
+        )
+        native_identity = canonical_json_bytes(
+            {
+                "formal_semantics_id": FORMAL_SEMANTICS_ID,
+                "native_build_id": receipt.get("native_build_id"),
+                "type_name": "DELTA_CERTIFICATE_CHAIN_VERIFIER",
+            }
+        )
+        derived_verifier_id = sha256_content_id(
+            b"deltareduce.010.native-chain-verifier.v1\0" + native_identity
+        )
+        expected = {
+            "aggregate_root_qc_id": result.aggregate_root_qc_id,
+            "apply_qc_id": result.apply_qc_id,
+            "certificate_bundle_id": bundle_id,
+            "certified_round_policy_id": policy.content_id,
+            "checkpoint_wal_sha256": result.checkpoint_wal_sha256,
+            "effect_set_id": result.effect_set_id,
+            "execution_plan_id": plan.content_id,
+            "final_checkpoint_id": result.final_checkpoint_id,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "input_set_certificate_id": result.input_set_certificate_id,
+            "native_chain_verifier_id": verifier_id,
+            "runtime_state_id": result.runtime_state_id,
+            "runtime_wal_sha256": result.runtime_wal_sha256,
+            "schema_version": "1.0.0",
+            "status": "ACCEPT",
+            "type_name": "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_RECEIPT",
+        }
+        if (
+            any(receipt.get(key) != value for key, value in expected.items())
+            or derived_verifier_id != verifier_id
+        ):
+            raise _fail("OBSERVATION_NATIVE_CHAIN_RECEIPT_BINDING_MISMATCH")
+
+    def publish(
+        self,
+        plan: CampaignExecutionPlan,
+        authorization: dict[str, Any] | StageAuthorizationProof,
+        scientific_run: ScientificRun,
+        evaluations: tuple[MeasuredEvaluation, ...],
+        *,
+        plan_catalog: Campaign02PlanCatalogView | None = None,
+        predecessor_gate_receipts: Mapping[str, bytes] | None = None,
+    ) -> PublicationReceipt:
+        verified_authorization = None
+        governance_artifacts: tuple[RawArtifact, ...] = ()
+        if plan.execution_class == "PRIMARY_MEASURED":
+            if not isinstance(authorization, StageAuthorizationProof):
+                raise _fail("OBSERVATION_STAGE_AUTHORIZATION_PROOF_REQUIRED")
+            verified_authorization = authorize_execution_class(
+                authorization,
+                plan,
+                plan_catalog=plan_catalog,
+                predecessor_gate_receipts=predecessor_gate_receipts or {},
+                runner_role="OBSERVATION_WRITER",
+            )
+            authorization_id = verified_authorization.content_id
+            vote_by_id = {item.content_id: item for item in authorization.votes}
+            ordered_votes = tuple(
+                vote_by_id[item] for item in verified_authorization.attestation.ordered_vote_ids
+            )
+            governance_artifacts = (
+                RawArtifact(
+                    name=(
+                        "stage-authorization-"
+                        f"{verified_authorization.authorization.content_id[7:23]}.json"
+                    ),
+                    media_type=(
+                        "application/vnd.deltareduce.stage-execution-authorization+json;version=2"
+                    ),
+                    data=canonical_json_bytes(verified_authorization.authorization.document),
+                ),
+                RawArtifact(
+                    name=(
+                        "stage-authorization-attestation-"
+                        f"{verified_authorization.attestation.content_id[7:23]}.json"
+                    ),
+                    media_type=(
+                        "application/vnd.deltareduce.stage-authorization-attestation+json;version=1"
+                    ),
+                    data=canonical_json_bytes(verified_authorization.attestation.document),
+                ),
+                RawArtifact(
+                    name=(
+                        "stage-authorization-validator-set-"
+                        f"{authorization.validator_set.content_id[7:23]}.json"
+                    ),
+                    media_type=(
+                        "application/vnd.deltareduce.stage-authorization-validator-set+json;"
+                        "version=1"
+                    ),
+                    data=canonical_json_bytes(authorization.validator_set.document),
+                ),
+                *(
+                    RawArtifact(
+                        name=f"stage-authorization-vote-{vote.content_id[7:23]}.json",
+                        media_type=(
+                            "application/vnd.deltareduce.stage-authorization-vote+json;version=1"
+                        ),
+                        data=canonical_json_bytes(vote.document),
+                    )
+                    for vote in ordered_votes
+                ),
+            )
+        else:
+            if not isinstance(authorization, dict):
+                raise _fail("OBSERVATION_NON_PRIMARY_AUTHORIZATION_INVALID")
+            authorize_non_primary_execution_class(authorization, plan)
+            authorization_id = execution_authorization_id(authorization)
+        if (
+            plan.writer_id != self.identity.content_id
+            or plan.environment_id != self.identity.environment_id
+            or plan.image_id != self.identity.image_id
+            or plan.source_commit != self.identity.source_commit
+            or plan.source_tree != self.identity.source_tree
+            or scientific_run.plan_id != plan.content_id
+            or scientific_run.runner_id != plan.runner_id
+            or scientific_run.result_class != plan.result_class
+            or scientific_run.round_result.parent_checkpoint_id != plan.parent_checkpoint_id
+        ):
+            raise _fail("OBSERVATION_WRITER_PLAN_IDENTITY_MISMATCH")
+        if len(evaluations) != len(plan.evaluation_profile_ids):
+            raise _fail("OBSERVATION_EVALUATION_SET_INCOMPLETE")
+        self._verify_native_chain_receipt(plan, scientific_run)
+        expected = zip(
+            plan.dataset_ids,
+            plan.evaluation_profile_ids,
+            plan.evaluation_implementation_ids,
+            evaluations,
+            strict=True,
+        )
+        for dataset_id, profile_id, implementation_id, evaluation in expected:
+            context = evaluation.context
+            if (
+                context.execution_plan_id != plan.content_id
+                or context.checkpoint_id != scientific_run.final_checkpoint_id
+                or context.model_id != scientific_run.final_checkpoint_id
+                or context.tokenizer_id != plan.tokenizer_id
+                or context.environment_id != plan.environment_id
+                or context.evaluator_profile_id != profile_id
+                or context.evaluator_implementation_id != implementation_id
+                or context.dataset_id != dataset_id
+            ):
+                raise _fail("OBSERVATION_EVALUATION_IDENTITY_MISMATCH")
+            if canonical_json_bytes(json.loads(evaluation.canonical_bytes)) != (
+                evaluation.canonical_bytes
+            ):
+                raise _fail("OBSERVATION_EVALUATION_NOT_CANONICAL")
+        staging_root = self.root / "staging"
+        staging_root.mkdir(parents=True, exist_ok=True)
+        artifact_ids: list[str] = []
+        with tempfile.TemporaryDirectory(prefix="publish-", dir=staging_root) as directory:
+            staging = Path(directory)
+            for artifact in (*scientific_run.raw_artifacts, *governance_artifacts):
+                artifact_ids.append(self._stage_artifact(artifact, staging))
+            for evaluation in evaluations:
+                artifact = RawArtifact(
+                    name=f"{evaluation.evaluator_id}-{evaluation.content_id[7:23]}.json",
+                    media_type=("application/vnd.deltareduce.measured-evaluation+json;version=1"),
+                    data=evaluation.canonical_bytes,
+                )
+                artifact_ids.append(self._stage_artifact(artifact, staging))
+        unique_artifact_ids = tuple(sorted(set(artifact_ids)))
+        if not unique_artifact_ids:
+            raise _fail("OBSERVATION_RAW_ARTIFACTS_MISSING")
+        ticket_results = [item.document for item in scientific_run.ticket_measurements]
+        observation: dict[str, object] = {
+            "arm_id": plan.arm_id,
+            "benchmark_definition_id": plan.benchmark_definition_id,
+            "campaign_id": plan.campaign_id,
+            "dataset_ids": list(plan.dataset_ids),
+            "definition_attestation_id": plan.definition_attestation_id,
+            "environment_id": plan.environment_id,
+            "evaluation_ids": [item.content_id for item in evaluations],
+            "evaluation_implementation_ids": list(plan.evaluation_implementation_ids),
+            "evaluation_runner_id": plan.evaluation_runner_id,
+            "execution_authorization_id": authorization_id,
+            "execution_class": plan.execution_class,
+            "execution_plan_id": plan.content_id,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "hardware_id": plan.hardware_id,
+            "image_id": plan.image_id,
+            "model_artifact_id": scientific_run.final_checkpoint_id,
+            "processed_tokens": scientific_run.processed_tokens,
+            "raw_artifact_ids": list(unique_artifact_ids),
+            "repetition": plan.repetition,
+            "result_class": scientific_run.result_class,
+            "run_result": scientific_run.round_result.document,
+            "runner_id": plan.runner_id,
+            "schema_version": ("3.0.0" if plan.execution_class == "PRIMARY_MEASURED" else "2.0.0"),
+            "seed": plan.seed,
+            "source_class": (
+                "MEASURED_HARDWARE"
+                if plan.execution_class == "PRIMARY_MEASURED"
+                else "NON_PRIMARY_SMOKE"
+            ),
+            "source_commit": plan.source_commit,
+            "source_tree": plan.source_tree,
+            "ticket_results": ticket_results,
+            "tokenizer_id": plan.tokenizer_id,
+            "type_name": "PRIMARY_RUN_OBSERVATION",
+            "workload_id": plan.workload_id,
+            "writer_id": plan.writer_id,
+        }
+        if verified_authorization is not None:
+            observation.update(
+                {
+                    "stage_authorization_attestation_id": (
+                        verified_authorization.attestation.content_id
+                    ),
+                    "stage_authorization_id": verified_authorization.authorization.content_id,
+                    "stage_authorization_proof_artifact_ids": [
+                        item.content_id for item in governance_artifacts
+                    ],
+                    "stage_authorization_quorum_threshold": (
+                        verified_authorization.attestation.quorum_threshold
+                    ),
+                    "stage_authorization_signature_set_root": (
+                        verified_authorization.attestation.signature_set_root
+                    ),
+                    "stage_authorization_validator_set_id": (
+                        verified_authorization.attestation.validator_set_id
+                    ),
+                    "stage_authorization_vote_ids": list(
+                        verified_authorization.attestation.ordered_vote_ids
+                    ),
+                }
+            )
+        if observation["processed_tokens"] != plan.processed_tokens:
+            raise _fail("OBSERVATION_PROCESSED_TOKENS_MISMATCH")
+        observation_bytes = canonical_json_bytes(observation)
+        observation_domain = (
+            b"deltareduce.010.primary-run-observation.v3\0"
+            if verified_authorization is not None
+            else b"deltareduce.010.primary-run-observation.v2\0"
+        )
+        observation_id = sha256_content_id(observation_domain + observation_bytes)
+        observation_path = (
+            self.root
+            / "observations"
+            / plan.content_id.removeprefix("sha256:")
+            / f"{observation_id.removeprefix('sha256:')}.json"
+        )
+        _publish_create_only(self.root, observation_path, observation_bytes)
+        receipt = {
+            "artifact_ids": list(unique_artifact_ids),
+            "create_only": True,
+            "execution_plan_id": plan.content_id,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "observation_id": observation_id,
+            "schema_version": "1.0.0",
+            "status": "PUBLISHED",
+            "type_name": "PRIMARY_OBSERVATION_RECEIPT",
+            "writer_id": self.identity.content_id,
+        }
+        receipt_bytes = canonical_json_bytes(receipt)
+        receipt_id = sha256_content_id(
+            b"deltareduce.010.primary-observation-receipt.v1\0" + receipt_bytes
+        )
+        receipt_path = (
+            self.root
+            / "receipts"
+            / plan.content_id.removeprefix("sha256:")
+            / f"{receipt_id.removeprefix('sha256:')}.json"
+        )
+        _publish_create_only(self.root, receipt_path, receipt_bytes)
+        return PublicationReceipt(
+            observation_id=observation_id,
+            receipt_id=receipt_id,
+            observation_path=observation_path,
+            receipt_path=receipt_path,
+            artifact_ids=unique_artifact_ids,
+        )

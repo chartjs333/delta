@@ -1,0 +1,46 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:evaluator-profile-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "EVALUATOR_PROFILE"
+    },
+    "dataset_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evaluator_id": {
+      "enum": [
+        "hellaswag",
+        "lambada",
+        "wikitext"
+      ]
+    },
+    "method": {
+      "minProperties": 1,
+      "type": "object"
+    },
+    "tokenizer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dataset_id",
+    "evaluator_id",
+    "formal_semantics_id",
+    "method",
+    "schema_version",
+    "tokenizer_id",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 evaluator-profile-v1"
+}

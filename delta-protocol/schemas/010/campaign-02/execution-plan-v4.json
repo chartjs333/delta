@@ -1,0 +1,490 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:execution-plan-v4",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "4.0.0"
+    },
+    "type_name": {
+      "const": "PRIMARY_EXECUTION_PLAN"
+    },
+    "arm_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "certified_round_policy": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "accumulator_proof_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "apply_arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "height": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "parameter_schema_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "quorum_threshold": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "required_shards": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "domain_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "shard_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "domain_id",
+                  "shard_id"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "round_config_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "validator_epoch_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "validator_ids": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "view": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "accumulator_proof_id",
+            "apply_arithmetic_profile_id",
+            "arithmetic_profile_id",
+            "height",
+            "parameter_schema_id",
+            "quorum_threshold",
+            "required_shards",
+            "round_config_id",
+            "round_id",
+            "validator_epoch_id",
+            "validator_ids",
+            "view"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "dataset_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "definition_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evaluation_implementation_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evaluation_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evaluation_runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "execution_class": {
+      "enum": [
+        "NON_PRIMARY_SMOKE",
+        "PRIMARY_MEASURED"
+      ]
+    },
+    "hardware_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "model_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "optimizer_steps_per_ticket": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "processed_tokens": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "repetition": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "result_class": {
+      "enum": [
+        "REFERENCE",
+        "CERTIFIED_DELTAREDUCE"
+      ]
+    },
+    "round_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "seed": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "ticket_count": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "tickets": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "domain_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "optimizer_steps": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ordinal": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ticket_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "tokens_per_optimizer_step": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "tokens_per_ticket": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "domain_id",
+          "optimizer_steps",
+          "ordinal",
+          "ticket_id",
+          "tokens_per_optimizer_step",
+          "tokens_per_ticket"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "tokenizer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "tokens_per_optimizer_step": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "tokens_per_ticket": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "total_tokens_per_arm_run": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "workload_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "writer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "domain_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "qualified_runtime_lineage_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ticket_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "gate_stage": {
+      "enum": [
+        "STAGE_A_EXACTNESS",
+        "STAGE_B_SCIENTIFIC",
+        "STAGE_C_EMULATED_WAN"
+      ]
+    }
+  },
+  "required": [
+    "arm_id",
+    "benchmark_definition_id",
+    "campaign_id",
+    "certified_round_policy",
+    "dataset_ids",
+    "definition_attestation_id",
+    "domain_manifest_id",
+    "environment_id",
+    "evaluation_implementation_ids",
+    "evaluation_profile_ids",
+    "evaluation_runner_id",
+    "execution_authorized",
+    "execution_class",
+    "formal_semantics_id",
+    "gate_stage",
+    "hardware_id",
+    "image_id",
+    "model_id",
+    "optimizer_steps_per_ticket",
+    "parent_checkpoint_id",
+    "processed_tokens",
+    "qualified_runtime_lineage_id",
+    "repetition",
+    "result_class",
+    "round_id",
+    "runner_id",
+    "schema_version",
+    "seed",
+    "source_commit",
+    "source_tree",
+    "ticket_count",
+    "ticket_plan_id",
+    "tickets",
+    "tokenizer_id",
+    "tokens_per_optimizer_step",
+    "tokens_per_ticket",
+    "total_tokens_per_arm_run",
+    "type_name",
+    "workload_id",
+    "writer_id"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 execution-plan-v4",
+  "oneOf": [
+    {
+      "properties": {
+        "certified_round_policy": {
+          "type": "null"
+        },
+        "result_class": {
+          "const": "REFERENCE"
+        }
+      }
+    },
+    {
+      "properties": {
+        "certified_round_policy": {
+          "additionalProperties": false,
+          "properties": {
+            "accumulator_proof_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "apply_arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "arithmetic_profile_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "height": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "parameter_schema_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "quorum_threshold": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "required_shards": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "domain_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "shard_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "domain_id",
+                  "shard_id"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "round_config_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "round_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "validator_epoch_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "validator_ids": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "view": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "accumulator_proof_id",
+            "apply_arithmetic_profile_id",
+            "arithmetic_profile_id",
+            "height",
+            "parameter_schema_id",
+            "quorum_threshold",
+            "required_shards",
+            "round_config_id",
+            "round_id",
+            "validator_epoch_id",
+            "validator_ids",
+            "view"
+          ],
+          "type": "object"
+        },
+        "result_class": {
+          "const": "CERTIFIED_DELTAREDUCE"
+        }
+      }
+    }
+  ]
+}

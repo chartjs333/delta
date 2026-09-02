@@ -1,0 +1,99 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-execution-authorization-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION"
+    },
+    "allowed_plan_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "authorized_stage": {
+      "enum": [
+        "STAGE_A_EXACTNESS",
+        "STAGE_B_SCIENTIFIC",
+        "STAGE_C_EMULATED_WAN"
+      ]
+    },
+    "authorized_task_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "definition_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_catalog_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "real_wan_authorized": {
+      "const": false
+    },
+    "required_predecessor_receipt_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "result_qc_authorized": {
+      "const": false
+    },
+    "stage_a_authorized": {
+      "type": "boolean"
+    },
+    "stage_b_authorized": {
+      "type": "boolean"
+    },
+    "stage_c_authorized": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "allowed_plan_ids",
+    "authorized_stage",
+    "authorized_task_ids",
+    "benchmark_definition_id",
+    "campaign_id",
+    "definition_attestation_id",
+    "formal_semantics_id",
+    "plan_catalog_id",
+    "real_wan_authorized",
+    "required_predecessor_receipt_ids",
+    "result_qc_authorized",
+    "schema_version",
+    "stage_a_authorized",
+    "stage_b_authorized",
+    "stage_c_authorized",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-execution-authorization-v1"
+}
