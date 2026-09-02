@@ -31,7 +31,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-remediation-hardware-qualification.json'
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-gate-analyzer-hardware-qualification.json'
           source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
           git -C control cat-file -e "${source_commit}^{commit}"
           git -C control merge-base --is-ancestor 9a4d0d8062ac432d7104284c75dc4b24773dadb0 "$source_commit"
@@ -111,7 +111,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-remediation-hardware-qualification.json'
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-gate-analyzer-hardware-qualification.json'
           source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
           git -C control cat-file -e "${source_commit}^{commit}"
           printf 'commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
@@ -165,7 +165,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-remediation-hardware-qualification.json'
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-gate-analyzer-hardware-qualification.json'
           source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
           git -C control cat-file -e "${source_commit}^{commit}"
           printf 'commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
@@ -199,11 +199,11 @@ jobs:
             specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_runner_remediation_source.py \
             --source-commit '${{ steps.source.outputs.commit }}' \
             --portable-junit "$RUNNER_TEMP/portable/campaign-02-runner-portable.xml" \
-            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-remediation-hardware-qualification.json" \
+            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-gate-analyzer-hardware-qualification.json" \
             --output "$RUNNER_TEMP/campaign-02-runner-remediation-exact-source-qualification.json"
           cmp \
             "$RUNNER_TEMP/campaign-02-runner-remediation-exact-source-qualification.json" \
-            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-remediation-exact-source-qualification.json"
+            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-gate-analyzer-exact-source-qualification.json"
       - name: Retain exact-source qualification
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
