@@ -161,18 +161,18 @@ is immutable audit history with status `SUPERSEDED_BEFORE_ATTESTATION`, zero vot
 attestation and zero observations. It must not be signed, used to compile an executable catalog or
 edited in place. PR #18 remains Draft and is not authorized for merge.
 
-- [ ] **C2-028** Replace the composite plan runner binding with exact stage-specific exactness,
+- [x] **C2-028** Replace the composite plan runner binding with exact stage-specific exactness,
   scientific and network/fault runner IDs, and recursively verify the complete stage identity
   manifest directly bound by runtime lineage and Definition.
-- [ ] **C2-029** Implement the source-bound Campaign 02 Stage A executor and manual-only workflow;
+- [x] **C2-029** Implement the source-bound Campaign 02 Stage A executor and manual-only workflow;
   require a verified Definition attestation, authoritative catalog, detached signed Stage A
   authorization, exact runtime lineage and exact identity manifest, then close exactly 15 plans.
-- [ ] **C2-030** Emit a canonical create-only typed Stage A receipt only after the complete native,
+- [x] **C2-030** Emit a canonical create-only typed Stage A receipt only after the complete native,
   JDK 25/JDK 26 and cross-component exactness matrix passes; bind its exact plan set, evidence root,
   runner, source, authorization attestation and gate result/QC identities.
-- [ ] **C2-031** Implement the Campaign 02 Stage C executor with the network/fault runner identity,
+- [x] **C2-031** Implement the Campaign 02 Stage C executor with the network/fault runner identity,
   exact 15-plan closure and exact Stage A plus Stage B predecessor receipt verification.
-- [ ] **C2-032** Run the cross-component positive/negative regression matrix for stage-specific
+- [x] **C2-032** Run the cross-component positive/negative regression matrix for stage-specific
   runner IDs, actual `PrimaryScientificRunner` compatibility, non-executable composite metadata,
   Campaign 01 rejection, signed authorization, exact plan cardinality and complete evidence.
 - [ ] **C2-033** Reissue the immutable source commit/tree, designated-GPU report, portable corpus,
@@ -181,6 +181,15 @@ edited in place. PR #18 remains Draft and is not authorized for merge.
 
 Completion of C2-028 through C2-032 is source remediation only. It does not create Definition
 votes, attestation, stage authorization, gate receipt, primary observation or execution authority.
+
+Machine-readable source qualification evidence:
+
+- `evidence/campaign-02-runner-remediation-hardware-qualification.json` — designated GPU,
+  pinned CUDA 12.4/PyTorch/bitsandbytes environment and non-primary QLoRA/NF4 probe for source
+  `287a1ce...` / tree `aa1ecb4...`;
+- `evidence/campaign-02-runner-remediation-exact-source-qualification.json` — 116-case portable
+  corpus, recursive source/component identities and C2-028 through C2-032 checks for that exact
+  source, with zero primary scientific executions and observations.
 
 ## Unconditional STOP conditions
 
