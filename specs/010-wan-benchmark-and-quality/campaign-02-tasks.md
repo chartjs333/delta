@@ -392,7 +392,7 @@ does not authorize a benchmark stage or alter any governance STOP.
 - [x] **C2-048** Add a full causal projection ID to every candidate plan record and require equal
   causal roots across the two executions in each push and pull-request context. Version the typed
   plan evidence and candidate schemas without rewriting historical schemas.
-- [ ] **C2-049** Seal the replacement source, re-run designated-GPU, portable, sanitizer, TSan,
+- [x] **C2-049** Seal the replacement source, re-run designated-GPU, portable, sanitizer, TSan,
   C++20/C++23 and formal qualification, publish two exact 15-plan/eight-fault executions in both
   push and pull-request contexts, bind the immutable terminal HEAD externally, and update PR #20
   title/body to the exact terminal lineage and governance STOP.
@@ -404,8 +404,8 @@ The replacement executable source is sealed at
 (`sha256:797780a95cb6853db958c630b225cb3cc05ffc9db1a1a1e66ec13fa820cfcb7e`), and its 192-case portable
 source qualification is `evidence/campaign-02-concentrated-loss-exact-source-qualification.json`
 (`sha256:256804475a0b3d25d6e8dd27684af4537f92fb49c6de01ae81631f22b46f971c`). Both retain zero primary
-executions and observations. C2-049 remains open pending remote TSan/sanitizer/formal/C++ lanes,
-the final push and pull-request candidate artifacts and external terminal-lineage binding.
+executions and observations. At that superseded qualification overlay, C2-049 remained open pending
+replacement remote qualification and terminal-lineage binding.
 
 The `188de41c...` / `b020e03...` qualification chain is subsequently classified as
 `SUPERSEDED_BEFORE_PRIMARY_EXECUTION`: remote runs `33765710101` (push) and `33765715774`
@@ -423,12 +423,16 @@ qualification is `evidence/campaign-02-concentrated-loss-candidate-binding-hardw
 46-check portable source qualification is
 `evidence/campaign-02-concentrated-loss-candidate-binding-exact-source-qualification.json`
 (`sha256:209ea733c69497be818e68bea4073ab595a756a68b9306c2f7f49e4830bf4c97`). Both are `PASS`
-and retain zero primary executions and observations. C2-049 remains open pending the replacement
-remote TSan/sanitizer/formal/C++ lanes, final push and pull-request Stage C artifacts, and external
-terminal-lineage binding.
+and retain zero primary executions and observations. Replacement remote TSan, sanitizer,
+GCC/Clang C++20/C++23, JDK 25/26 and Python lanes passed. Exact push and pull-request Stage C
+artifacts each contain two 15-plan executions with eight fault results per plan, including the
+concentrated mandatory-domain AbortQC path. The final immutable HEAD, its terminal runs/artifacts and
+the exact source-to-overlay drift are bound in PR #20's external description after terminal CI, so no
+committed receipt creates a new non-terminal HEAD.
 
-Until C2-049 is closed, PR #20 remains `DRAFT / CHANGES_REQUIRED / DO NOT MERGE / DO NOT MARK
-READY`. C2-023 and C2-024 remain unauthorized, Definition votes remain `0`, attestation and
+C2-049 implementation closure does not authorize merge or a benchmark stage. PR #20 remains
+`DRAFT / CHANGES_REQUIRED / DO NOT MERGE / DO NOT MARK READY` pending independent governance review.
+C2-023 and C2-024 remain unauthorized, Definition votes remain `0`, attestation and
 execution authorization remain absent, authoritative catalog construction has not occurred,
 primary observations remain `0`, `BenchmarkResultQC` remains absent, Feature 010 remains `NO_GO`
 and Feature 011 remains blocked.
