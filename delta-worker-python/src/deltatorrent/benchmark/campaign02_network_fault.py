@@ -13,6 +13,11 @@ from deltatorrent.benchmark.campaign02 import CampaignExecutionPlan
 from deltatorrent.benchmark.campaign02_execution_identities import (
     StageExecutionIdentityManifest,
 )
+from deltatorrent.benchmark.campaign02_stage_c_runtime import (
+    MeasuredNetworkCounters,
+    MeasuredStageCRuntimeBoundary,
+    NativeFaultTransition,
+)
 from deltatorrent.benchmark.campaign02_stage_execution import (
     StagePlanEvidence,
     VerifiedBoundStageGateFinalizer,
@@ -20,8 +25,8 @@ from deltatorrent.benchmark.campaign02_stage_execution import (
     execute_stage,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID, BenchmarkDefinition
-from deltatorrent.benchmark.fault_profiles import FaultProfile, apply_profile
-from deltatorrent.benchmark.network_profiles import NetworkProfile, simulate
+from deltatorrent.benchmark.fault_profiles import FaultProfile
+from deltatorrent.benchmark.network_profiles import NetworkProfile
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
 _EMULATED_PROFILE_KIND: Final = "PRIMARY_NETWORK_PROFILES"
@@ -54,37 +59,6 @@ def _object_id(value: object) -> str:
 
 
 @dataclass(frozen=True, slots=True)
-class NetworkCounters:
-    profile_id: str
-    packet_count: int
-    delivered_packets: int
-    dropped_packets: int
-    duplicated_packets: int
-    reordered_packets: int
-    cumulative_delay_ms: int
-    payload_bytes: int
-    wire_bytes: int
-    bytes_per_token: int
-    network_share_ppm: int
-
-    @property
-    def document(self) -> dict[str, object]:
-        return {
-            "bytes_per_token": self.bytes_per_token,
-            "cumulative_delay_ms": self.cumulative_delay_ms,
-            "delivered_packets": self.delivered_packets,
-            "dropped_packets": self.dropped_packets,
-            "duplicated_packets": self.duplicated_packets,
-            "network_share_ppm": self.network_share_ppm,
-            "packet_count": self.packet_count,
-            "payload_bytes": self.payload_bytes,
-            "profile_id": self.profile_id,
-            "reordered_packets": self.reordered_packets,
-            "wire_bytes": self.wire_bytes,
-        }
-
-
-@dataclass(frozen=True, slots=True)
 class NetworkFaultPlanEvidence:
     plan_id: str
     runner_id: str
@@ -96,8 +70,14 @@ class NetworkFaultPlanEvidence:
     applied_network_profile_ids: tuple[str, ...]
     excluded_real_wan_profile_id: str
     fault_profile_ids: tuple[str, ...]
-    network_counters: tuple[NetworkCounters, ...]
-    fault_results: tuple[dict[str, object], ...]
+    network_counters: tuple[MeasuredNetworkCounters, ...]
+    fault_results: tuple[NativeFaultTransition, ...]
+    native_fault_trace_id: str
+    image_id: str
+    java_executable_id: str
+    native_executable_id: str
+    transport_harness_id: str
+    netty_artifact_ids: tuple[str, ...]
 
     @property
     def document(self) -> dict[str, object]:
@@ -111,29 +91,39 @@ class NetworkFaultPlanEvidence:
                 "reason": "STAGE_C_EMULATED_ONLY_REAL_WAN_NOT_AUTHORIZED",
             },
             "fault_profile_ids": list(self.fault_profile_ids),
-            "fault_results": list(self.fault_results),
+            "fault_results": [item.document for item in self.fault_results],
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "image_id": self.image_id,
             "implementation_id": self.implementation_id,
+            "java_executable_id": self.java_executable_id,
+            "measurement_source": "PYTHON_JAVA_NETTY_CPP_OS",
+            "native_effect_root": self.fault_results[-1].native_effect_root,
+            "native_executable_id": self.native_executable_id,
+            "native_fault_trace_id": self.native_fault_trace_id,
+            "native_state_root": self.fault_results[-1].native_state_root,
+            "native_wal_sha256": self.fault_results[-1].native_wal_sha256,
+            "netty_artifact_ids": list(self.netty_artifact_ids),
             "network_counters": [item.document for item in self.network_counters],
             "plan_id": self.plan_id,
             "resilience_result": "PASS",
             "runner_id": self.runner_id,
-            "schema_version": "1.0.0",
+            "schema_version": "2.0.0",
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
+            "transport_harness_id": self.transport_harness_id,
             "type_name": "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE",
         }
 
     @property
     def content_id(self) -> str:
         return sha256_content_id(
-            b"deltareduce.010.campaign02-network-fault-plan-evidence.v1\0"
+            b"deltareduce.010.campaign02-network-fault-plan-evidence.v2\0"
             + canonical_json_bytes(self.document)
         )
 
 
 class Campaign02NetworkFaultRunner:
-    """Apply every preregistered emulated profile and deterministic fault trace per plan."""
+    """Measure each preregistered profile through the bound Java/native/OS runtime path."""
 
     def __init__(
         self,
@@ -143,6 +133,7 @@ class Campaign02NetworkFaultRunner:
         network_profiles_path: Path,
         fault_profiles_path: Path,
         evidence_root: Path,
+        runtime_boundary: MeasuredStageCRuntimeBoundary,
     ) -> None:
         identity = stage_identities.identity("network_fault_runner")
         self.identity_id = identity.content_id
@@ -152,8 +143,28 @@ class Campaign02NetworkFaultRunner:
         self.environment_id = str(identity.value.get("environment_id", ""))
         self.source_class = str(identity.value.get("source_class", ""))
         self.implementation_id = str(identity.value.get("implementation_id", ""))
+        self.image_id = str(identity.value.get("image_id", ""))
+        self.java_executable_id = str(identity.value.get("java_executable_id", ""))
+        self.native_executable_id = str(identity.value.get("native_executable_id", ""))
+        self.transport_harness_id = str(identity.value.get("transport_harness_id", ""))
+        raw_netty_ids = identity.value.get("netty_artifact_ids")
+        self.netty_artifact_ids = (
+            tuple(str(item) for item in raw_netty_ids) if isinstance(raw_netty_ids, list) else ()
+        )
         self._definition = definition
         self._evidence_root = evidence_root
+        self._runtime_boundary = runtime_boundary
+        if (
+            stage_identities.schema_version != "4.0.0"
+            or self.role != "NETWORK_FAULT_RUNNER"
+            or self.source_class != "MEASURED_RUNTIME"
+            or self.image_id != runtime_boundary.image_id
+            or self.java_executable_id != runtime_boundary.java_executable_id
+            or self.native_executable_id != runtime_boundary.native_executable_id
+            or self.transport_harness_id != runtime_boundary.transport_harness_id
+            or self.netty_artifact_ids != runtime_boundary.netty_artifact_ids
+        ):
+            raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_IDENTITY_MISMATCH")
         network_document = _load_canonical(network_profiles_path)
         fault_document = _load_canonical(fault_profiles_path)
         if (
@@ -190,36 +201,6 @@ class Campaign02NetworkFaultRunner:
         ):
             raise _fail("CAMPAIGN02_STAGE_C_DEFINITION_PROFILE_BINDING_MISMATCH")
 
-    def _network_counters(
-        self, plan: CampaignExecutionPlan, profile: NetworkProfile, profile_id: str
-    ) -> NetworkCounters:
-        packet_count = len(plan.tickets) * 4
-        start_index = int(plan.content_id[7:23], 16)
-        events = simulate(profile, packet_count, start_packet_index=start_index)
-        dropped = sum(item.dropped for item in events)
-        duplicated = sum(item.duplicated and not item.dropped for item in events)
-        delivered = packet_count - dropped
-        reordered = sum(item.reordered and not item.dropped for item in events)
-        payload_per_packet = max(1, plan.processed_tokens // packet_count)
-        payload_bytes = packet_count * payload_per_packet
-        wire_bytes = (delivered + duplicated) * payload_per_packet
-        cumulative_delay = sum(item.delay_ms for item in events if not item.dropped)
-        compute_units = plan.optimizer_steps_per_ticket * plan.ticket_count
-        network_share_ppm = cumulative_delay * 1_000_000 // max(1, cumulative_delay + compute_units)
-        return NetworkCounters(
-            profile_id=profile_id,
-            packet_count=packet_count,
-            delivered_packets=delivered,
-            dropped_packets=dropped,
-            duplicated_packets=duplicated,
-            reordered_packets=reordered,
-            cumulative_delay_ms=cumulative_delay,
-            payload_bytes=payload_bytes,
-            wire_bytes=wire_bytes,
-            bytes_per_token=wire_bytes // max(1, plan.processed_tokens),
-            network_share_ppm=network_share_ppm,
-        )
-
     def execute(self, plan: CampaignExecutionPlan) -> StagePlanEvidence:
         if (
             plan.gate_stage != "STAGE_C_EMULATED_WAN"
@@ -227,25 +208,25 @@ class Campaign02NetworkFaultRunner:
             or plan.source_commit != self.source_commit
             or plan.source_tree != self.source_tree
             or plan.environment_id != self.environment_id
+            or plan.image_id != self.image_id
+            or plan.java_executable_id != self.java_executable_id
+            or plan.native_executable_id != self.native_executable_id
+            or plan.transport_harness_id != self.transport_harness_id
+            or plan.netty_artifact_ids != self.netty_artifact_ids
         ):
             raise _fail("CAMPAIGN02_STAGE_C_PLAN_BINDING_MISMATCH")
-        counters = tuple(
-            self._network_counters(plan, profile, profile_id)
-            for profile, profile_id in zip(
-                self._network_profiles, self._network_profile_ids, strict=True
-            )
+        packet_count = len(plan.tickets) * 4
+        measurement = self._runtime_boundary.execute(
+            plan_id=plan.content_id,
+            packet_count=packet_count,
+            payload_bytes=min(4096, max(64, plan.processed_tokens // packet_count)),
+            network_profiles=tuple(
+                zip(self._network_profile_ids, self._network_profiles, strict=True)
+            ),
+            fault_profile=self._fault_profile,
         )
-        faults = apply_profile(self._fault_profile)
-        fault_results = tuple(
-            {
-                "at_step": item.at_step,
-                "event_id": item.event_id,
-                "expected_outcome": item.expected_outcome,
-                "observed_outcome": item.observed_outcome,
-                "passed": item.passed,
-            }
-            for item in faults
-        )
+        if measurement.plan_id != plan.content_id:
+            raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_PLAN_MISMATCH")
         detail = NetworkFaultPlanEvidence(
             plan_id=plan.content_id,
             runner_id=self.identity_id,
@@ -257,8 +238,14 @@ class Campaign02NetworkFaultRunner:
             applied_network_profile_ids=self._network_profile_ids,
             excluded_real_wan_profile_id=self._real_wan_profile_id,
             fault_profile_ids=self._fault_profile_ids,
-            network_counters=counters,
-            fault_results=fault_results,
+            network_counters=measurement.network_counters,
+            fault_results=measurement.fault_transitions,
+            native_fault_trace_id=measurement.native_fault_trace_id,
+            image_id=self.image_id,
+            java_executable_id=self.java_executable_id,
+            native_executable_id=self.native_executable_id,
+            transport_harness_id=self.transport_harness_id,
+            netty_artifact_ids=self.netty_artifact_ids,
         )
         self._evidence_root.mkdir(parents=True, exist_ok=True)
         output = self._evidence_root / f"network-fault-{plan.content_id[7:]}.json"

@@ -12,9 +12,12 @@ from deltatorrent.benchmark.campaign02_bootstrap import (
     BootstrapValidatorSet,
     Campaign02BootstrapError,
     SignedBootstrapMappingVote,
+    VerifiedBootstrapMapping,
     WorkflowBootstrapMapping,
+    WorkflowRegistrationReceipt,
     verify_bootstrap_mapping,
     verify_bootstrap_runtime,
+    verify_registration_receipt,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 
@@ -29,7 +32,6 @@ def _mapping(**updates: object) -> WorkflowBootstrapMapping:
         "bootstrap_workflow_blob_id": "2" * 40,
         "bootstrap_workflow_content_id": _id("3"),
         "bootstrap_workflow_path": ".github/workflows/campaign02-stage-a-bootstrap.yml",
-        "definition_id": _id("4"),
         "execution_authorized": False,
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
         "qualified_source_commit": "5" * 40,
@@ -46,10 +48,11 @@ def _mapping(**updates: object) -> WorkflowBootstrapMapping:
 
 def _verified_mapping():
     mapping = _mapping()
-    keys = [Ed25519PrivateKey.generate() for _ in range(3)]
+    keys = [Ed25519PrivateKey.generate() for _ in range(4)]
     validator_set = BootstrapValidatorSet.from_dict(
         {
             "execution_authorized": False,
+            "f_b": 1,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "quorum_threshold": 3,
             "schema_version": "1.0.0",
@@ -71,7 +74,7 @@ def _verified_mapping():
     )
     votes = []
     submitted_at = datetime(2026, 9, 3, 10, tzinfo=UTC)
-    for index, key in enumerate(keys):
+    for index, key in enumerate(keys[:3]):
         unsigned = SignedBootstrapMappingVote(
             mapping_id=mapping.content_id,
             validator_set_id=validator_set.content_id,
@@ -113,6 +116,36 @@ def _provenance() -> BootstrapRuntimeProvenance:
     )
 
 
+def _registration(mapping: WorkflowBootstrapMapping, **updates: object):
+    value: dict[str, object] = {
+        "authority_bundle_supplied": False,
+        "bootstrap_commit": mapping.bootstrap_commit,
+        "bootstrap_commit_on_default_branch": True,
+        "bootstrap_mapping_id": mapping.content_id,
+        "bootstrap_workflow_blob_id": mapping.bootstrap_workflow_blob_id,
+        "bootstrap_workflow_content_id": mapping.bootstrap_workflow_content_id,
+        "checked_at": "2026-09-03T10:00:00+00:00",
+        "default_branch_ref": "refs/heads/main",
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "github_api_evidence_digest": _id("9"),
+        "observations": 0,
+        "qualified_source_commit": mapping.qualified_source_commit,
+        "qualified_source_exists": True,
+        "qualified_source_tree": mapping.qualified_source_tree,
+        "repository": mapping.repository,
+        "schema_version": "1.0.0",
+        "stage_a_plans_executed": 0,
+        "stage_gate_receipt_emitted": False,
+        "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
+        "workflow_id": 123,
+        "workflow_path": mapping.bootstrap_workflow_path,
+        "workflow_state": "active",
+        "workflow_visible_on_default_branch": True,
+    }
+    value.update(updates)
+    return WorkflowRegistrationReceipt.from_dict(value)
+
+
 def test_signed_mapping_binds_distinct_bootstrap_dispatch_and_source_commits() -> None:
     mapping, validator_set, votes = _verified_mapping()
     verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=votes)
@@ -120,12 +153,18 @@ def test_signed_mapping_binds_distinct_bootstrap_dispatch_and_source_commits() -
 
     assert provenance.workflow_sha != provenance.github_sha
     assert provenance.workflow_sha != provenance.qualified_source_commit
+    assert "definition_id" not in mapping.document
     verify_bootstrap_runtime(verified, provenance)
 
 
 def test_bootstrap_mapping_never_authorizes_execution() -> None:
     with pytest.raises(Campaign02BootstrapError, match="MAPPING_HEADER_INVALID"):
         _mapping(execution_authorized=True)
+
+
+def test_verified_mapping_cannot_be_caller_constructed() -> None:
+    with pytest.raises(Campaign02BootstrapError, match="CONSTRUCTION_FORBIDDEN"):
+        VerifiedBootstrapMapping(object(), _mapping(), _id("8"), ("validator-0",))
 
 
 def test_wrong_mapping_signature_is_rejected() -> None:
@@ -157,3 +196,27 @@ def test_runtime_provenance_mismatch_is_rejected(field: str, value: object) -> N
     changed = replace(provenance, **{field: value})
     with pytest.raises(Campaign02BootstrapError, match="RUNTIME_PROVENANCE_INVALID"):
         verify_bootstrap_runtime(verified, changed)
+
+
+def test_registration_receipt_proves_zero_execution_only() -> None:
+    mapping, validator_set, votes = _verified_mapping()
+    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=votes)
+    receipt = _registration(mapping)
+    verify_registration_receipt(verified, receipt)
+    assert receipt.document["observations"] == 0
+    assert receipt.document["stage_gate_receipt_emitted"] is False
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("authority_bundle_supplied", True),
+        ("stage_a_plans_executed", 1),
+        ("stage_gate_receipt_emitted", True),
+        ("observations", 1),
+    ],
+)
+def test_registration_receipt_containing_execution_is_rejected(field: str, value: object) -> None:
+    mapping = _mapping()
+    with pytest.raises(Campaign02BootstrapError, match="REGISTRATION_STOP_INVALID"):
+        _registration(mapping, **{field: value})

@@ -1,8 +1,20 @@
 name: Campaign 02 authorized Stage A exactness
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
+      bootstrap_artifact_run_id:
+        description: Run containing the signed mapping and zero-execution registration receipt
+        required: true
+        type: string
+      bootstrap_artifact_name:
+        description: Exact artifact containing the bootstrap registration package
+        required: true
+        type: string
+      bootstrap_artifact_run_attempt:
+        description: Run attempt which emitted the registration package
+        required: true
+        type: number
       authority_run_id:
         description: Workflow run containing the immutable signed Stage A authority bundle
         required: true
@@ -11,17 +23,21 @@ on:
         description: Exact artifact name containing campaign02-stage-a-authority-bundle.json
         required: true
         type: string
-      qualified_source_commit:
-        description: Exact source commit bound by the replacement Definition
+      authority_artifact_id:
+        description: GitHub artifact ID resolved for the authority artifact
         required: true
-        type: string
+        type: number
+      authority_run_attempt:
+        description: Run attempt which emitted the authority artifact
+        required: true
+        type: number
 
 permissions:
   actions: read
   contents: read
 
 concurrency:
-  group: campaign-02-stage-a-${{ inputs.qualified_source_commit }}
+  group: campaign-02-stage-a-${{ github.workflow_sha }}-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -32,23 +48,37 @@ jobs:
     outputs:
       matrix: ${{ steps.verify.outputs.matrix }}
     steps:
-      - name: Reject non-default or non-source-bound workflow provenance
-        env:
-          QUALIFIED_SOURCE_COMMIT: ${{ inputs.qualified_source_commit }}
+      - name: Reject non-default caller or mutable called-workflow provenance
         run: |
-          test "$GITHUB_WORKFLOW_SHA" = "$QUALIFIED_SOURCE_COMMIT"
-          test "$GITHUB_SHA" = "$QUALIFIED_SOURCE_COMMIT"
           test "$GITHUB_REPOSITORY" = 'chartjs333/delta'
           test "$GITHUB_REF" = 'refs/heads/main'
-          test "$GITHUB_WORKFLOW_REF" = 'chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/main'
-          test "$GITHUB_RUN_ATTEMPT" = '1'
+          test "$GITHUB_EVENT_NAME" = 'workflow_dispatch'
+          test '${{ job.workflow_repository }}' = 'chartjs333/delta'
+          test '${{ job.workflow_file_path }}' = '.github/workflows/benchmark-campaign02-stage-a.yml'
+          test '${{ job.workflow_sha }}' != "$GITHUB_WORKFLOW_SHA"
+          [[ '${{ inputs.authority_artifact_name }}' == *'-attempt-${{ inputs.authority_run_attempt }}' ]]
+          [[ '${{ inputs.bootstrap_artifact_name }}' == *'-attempt-${{ inputs.bootstrap_artifact_run_attempt }}' ]]
+      - name: Check out immutable default-branch bootstrap
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: bootstrap-root
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
       - name: Check out immutable qualified source
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
           fetch-depth: 0
           path: qualified-source
           persist-credentials: false
-          ref: ${{ inputs.qualified_source_commit }}
+          ref: ${{ job.workflow_sha }}
+      - name: Download signed bootstrap mapping and registration package
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ${{ inputs.bootstrap_artifact_name }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/bootstrap
+          run-id: ${{ inputs.bootstrap_artifact_run_id }}
       - name: Download signed authority bundle
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
@@ -71,6 +101,29 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
           UV_OFFLINE: "true"
         run: |
+          mapfile -t bootstrap_votes < <(find \
+            "$RUNNER_TEMP/bootstrap/votes" -maxdepth 1 -type f -name '*.json' | sort)
+          test "${#bootstrap_votes[@]}" -gt 0
+          vote_args=()
+          for vote in "${bootstrap_votes[@]}"; do vote_args+=(--vote "$vote"); done
+          bootstrap_result="$(uv run python \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_bootstrap_control.py \
+            --mapping "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-mapping.json" \
+            --validator-set "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-validator-set.json" \
+            "${vote_args[@]}" \
+            --registration "$RUNNER_TEMP/bootstrap/campaign02-workflow-registration-receipt.json" \
+            --bootstrap-root "$GITHUB_WORKSPACE/bootstrap-root" \
+            --qualified-source-root . \
+            --repository "$GITHUB_REPOSITORY" \
+            --workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --event-name "$GITHUB_EVENT_NAME" \
+            --dispatch-ref "$GITHUB_REF" \
+            --github-sha "$GITHUB_SHA")"
+          test "$(jq -r '.status' <<<"$bootstrap_result")" = PASS
+          test "$(jq -r '.execution_authorized' <<<"$bootstrap_result")" = false
           result="$(uv run python \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_stage_a_control.py \
             verify-bundle \
@@ -108,7 +161,7 @@ jobs:
           fetch-depth: 0
           path: qualified-source
           persist-credentials: false
-          ref: ${{ inputs.qualified_source_commit }}
+          ref: ${{ job.workflow_sha }}
       - name: Configure exact native boundary
         run: >-
           cmake -S qualified-source -B out/stage-a-native-${{ matrix.name }}-${{ matrix.standard }}
@@ -132,7 +185,7 @@ jobs:
       - name: Retain exact native lane
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign02-stage-a-native-${{ matrix.name }}-cpp${{ matrix.standard }}-${{ github.run_id }}
+          name: campaign02-stage-a-native-${{ matrix.name }}-cpp${{ matrix.standard }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/native-${{ matrix.name }}-cpp${{ matrix.standard }}.xml
           if-no-files-found: error
           retention-days: 30
@@ -163,7 +216,7 @@ jobs:
           fetch-depth: 0
           path: qualified-source
           persist-credentials: false
-          ref: ${{ inputs.qualified_source_commit }}
+          ref: ${{ job.workflow_sha }}
       - name: Provision and verify exact JDK archive
         env:
           ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
@@ -190,6 +243,9 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
         run: |
           mkdir --parents "$RUNNER_TEMP/java-classes"
+          mapfile -t benchmark_sources < <(find \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/benchmark \
+            -maxdepth 1 -type f -name '*.java' ! -name 'MeasuredStageCTransport.java' | sort)
           "$RUNNER_TEMP/jdk/bin/javac" --release '${{ matrix.feature }}' \
             -Xlint:all,-restricted -Werror \
             -d "$RUNNER_TEMP/java-classes" \
@@ -209,7 +265,7 @@ jobs:
             qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/AdmissionTransport.java \
             qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/LeaseTimerRouter.java \
             qualified-source/delta-node-java/src/test/java/io/deltareduce/node/scheduling/SchedulingConformance.java \
-            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            "${benchmark_sources[@]}" \
             qualified-source/delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java
       - name: Execute exact Java FFM parity and boundary matrix
         run: |
@@ -248,7 +304,7 @@ jobs:
       - name: Retain exact Java lane
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign02-stage-a-java-jdk${{ matrix.feature }}-${{ github.run_id }}
+          name: campaign02-stage-a-java-jdk${{ matrix.feature }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/java-jdk${{ matrix.feature }}.log
           if-no-files-found: error
           retention-days: 30
@@ -265,7 +321,7 @@ jobs:
           fetch-depth: 0
           path: qualified-source
           persist-credentials: false
-          ref: ${{ inputs.qualified_source_commit }}
+          ref: ${{ job.workflow_sha }}
       - name: Materialize locked runtime
         working-directory: qualified-source
         run: |
@@ -287,7 +343,7 @@ jobs:
       - name: Retain exact cross-component lane
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign02-stage-a-cross-component-${{ github.run_id }}
+          name: campaign02-stage-a-cross-component-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/python-cross-component.xml
           if-no-files-found: error
           retention-days: 30
@@ -308,7 +364,7 @@ jobs:
           fetch-depth: 0
           path: qualified-source
           persist-credentials: false
-          ref: ${{ inputs.qualified_source_commit }}
+          ref: ${{ job.workflow_sha }}
       - name: Download signed authority bundle
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
@@ -321,17 +377,17 @@ jobs:
         with:
           merge-multiple: true
           path: ${{ runner.temp }}/exactness
-          pattern: campaign02-stage-a-native-*-${{ github.run_id }}
+          pattern: campaign02-stage-a-native-*-${{ github.run_id }}-attempt-${{ github.run_attempt }}
       - name: Download Java exactness lane evidence
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           merge-multiple: true
           path: ${{ runner.temp }}/exactness
-          pattern: campaign02-stage-a-java-*-${{ github.run_id }}
+          pattern: campaign02-stage-a-java-*-${{ github.run_id }}-attempt-${{ github.run_attempt }}
       - name: Download cross-component exactness lane evidence
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
-          name: campaign02-stage-a-cross-component-${{ github.run_id }}
+          name: campaign02-stage-a-cross-component-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/exactness
       - name: Materialize locked runtime
         working-directory: qualified-source
@@ -354,7 +410,7 @@ jobs:
       - name: Retain immutable plan evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign02-stage-a-plan-${{ matrix.item.ordinal }}-${{ github.run_id }}
+          name: campaign02-stage-a-plan-${{ matrix.item.ordinal }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/stage-a-plan-${{ matrix.item.ordinal }}.json
           if-no-files-found: error
           retention-days: 30
@@ -365,13 +421,27 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
+      - name: Check out immutable default-branch bootstrap
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: bootstrap-root
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
       - name: Check out immutable qualified source
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
           fetch-depth: 0
           path: qualified-source
           persist-credentials: false
-          ref: ${{ inputs.qualified_source_commit }}
+          ref: ${{ job.workflow_sha }}
+      - name: Download signed bootstrap mapping and registration package
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: ${{ inputs.bootstrap_artifact_name }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/bootstrap
+          run-id: ${{ inputs.bootstrap_artifact_run_id }}
       - name: Download signed authority bundle
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
@@ -384,23 +454,23 @@ jobs:
         with:
           merge-multiple: true
           path: ${{ runner.temp }}/stage-a-plans
-          pattern: campaign02-stage-a-plan-*-${{ github.run_id }}
+          pattern: campaign02-stage-a-plan-*-${{ github.run_id }}-attempt-${{ github.run_attempt }}
       - name: Download native exactness lane evidence for semantic re-verification
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           merge-multiple: true
           path: ${{ runner.temp }}/exactness
-          pattern: campaign02-stage-a-native-*-${{ github.run_id }}
+          pattern: campaign02-stage-a-native-*-${{ github.run_id }}-attempt-${{ github.run_attempt }}
       - name: Download Java exactness lane evidence for semantic re-verification
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           merge-multiple: true
           path: ${{ runner.temp }}/exactness
-          pattern: campaign02-stage-a-java-*-${{ github.run_id }}
+          pattern: campaign02-stage-a-java-*-${{ github.run_id }}-attempt-${{ github.run_attempt }}
       - name: Download cross-component evidence for semantic re-verification
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
-          name: campaign02-stage-a-cross-component-${{ github.run_id }}
+          name: campaign02-stage-a-cross-component-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/exactness
       - name: Materialize locked verifier environment
         working-directory: qualified-source
@@ -409,8 +479,109 @@ jobs:
           uv sync --frozen
       - name: Close exact plan set and emit canonical receipt
         working-directory: qualified-source
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           finalized_at="$(date --utc +%Y-%m-%dT%H:%M:%SZ)"
+          current_artifacts="$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100")"
+          authority_artifacts="$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/${{ inputs.authority_run_id }}/artifacts?per_page=100")"
+          bootstrap_artifacts="$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/${{ inputs.bootstrap_artifact_run_id }}/artifacts?per_page=100")"
+          authority_run_attempt="$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/${{ inputs.authority_run_id }}" \
+            --jq '.run_attempt')"
+          bootstrap_run_attempt="$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/${{ inputs.bootstrap_artifact_run_id }}" \
+            --jq '.run_attempt')"
+          test "$authority_run_attempt" = '${{ inputs.authority_run_attempt }}'
+          test "$bootstrap_run_attempt" = '${{ inputs.bootstrap_artifact_run_attempt }}'
+          artifact_id() {
+            local document="$1" name="$2"
+            jq -er --arg name "$name" \
+              '[.artifacts[] | select(.name == $name)] | if length == 1 then .[0].id else error("artifact identity ambiguous") end' \
+              <<<"$document"
+          }
+          artifact_digest() {
+            local document="$1" name="$2"
+            jq -er --arg name "$name" \
+              '[.artifacts[] | select(.name == $name)] | if length == 1 then .[0].digest else error("artifact digest ambiguous") end | select(test("^sha256:[0-9a-f]{64}$"))' \
+              <<<"$document"
+          }
+          authority_id="$(artifact_id "$authority_artifacts" '${{ inputs.authority_artifact_name }}')"
+          test "$authority_id" = '${{ inputs.authority_artifact_id }}'
+          bootstrap_id="$(artifact_id "$bootstrap_artifacts" '${{ inputs.bootstrap_artifact_name }}')"
+          input_id_args=(
+            --input-artifact-id
+            "authority/campaign02-stage-a-authority-bundle.json=$authority_id"
+          )
+          input_digest_args=(
+            --input-artifact-digest
+            "authority/campaign02-stage-a-authority-bundle.json=$(artifact_digest "$authority_artifacts" '${{ inputs.authority_artifact_name }}')"
+          )
+          for path in "$RUNNER_TEMP"/exactness/*; do
+            filename="$(basename "$path")"
+            case "$filename" in
+              native-*-cpp*.xml)
+                stem="${filename#native-}"
+                stem="${stem%.xml}"
+                artifact_name="campaign02-stage-a-native-$stem-$GITHUB_RUN_ID-attempt-$GITHUB_RUN_ATTEMPT"
+                ;;
+              java-jdk*.log)
+                stem="${filename#java-}"
+                stem="${stem%.log}"
+                artifact_name="campaign02-stage-a-java-$stem-$GITHUB_RUN_ID-attempt-$GITHUB_RUN_ATTEMPT"
+                ;;
+              python-cross-component.xml)
+                artifact_name="campaign02-stage-a-cross-component-$GITHUB_RUN_ID-attempt-$GITHUB_RUN_ATTEMPT"
+                ;;
+              *) exit 1 ;;
+            esac
+            input_id_args+=(
+              --input-artifact-id
+              "raw/$filename=$(artifact_id "$current_artifacts" "$artifact_name")"
+            )
+            input_digest_args+=(
+              --input-artifact-digest
+              "raw/$filename=$(artifact_digest "$current_artifacts" "$artifact_name")"
+            )
+          done
+          while IFS= read -r -d '' path; do
+            relative="${path#"$RUNNER_TEMP/bootstrap/"}"
+            input_id_args+=(--input-artifact-id "bootstrap/$relative=$bootstrap_id")
+            input_digest_args+=(
+              --input-artifact-digest
+              "bootstrap/$relative=$(artifact_digest "$bootstrap_artifacts" '${{ inputs.bootstrap_artifact_name }}')"
+            )
+          done < <(find "$RUNNER_TEMP/bootstrap" -type f -print0 | sort -z)
+          output_id_args=()
+          output_digest_args=()
+          for path in "$RUNNER_TEMP"/stage-a-plans/*.json; do
+            filename="$(basename "$path")"
+            ordinal="${filename#stage-a-plan-}"
+            ordinal="${ordinal%.json}"
+            artifact_name="campaign02-stage-a-plan-$ordinal-$GITHUB_RUN_ID-attempt-$GITHUB_RUN_ATTEMPT"
+            output_id_args+=(
+              --output-artifact-id
+              "plans/$filename=$(artifact_id "$current_artifacts" "$artifact_name")"
+            )
+            output_digest_args+=(
+              --output-artifact-digest
+              "plans/$filename=$(artifact_digest "$current_artifacts" "$artifact_name")"
+            )
+          done
+          mapfile -t bootstrap_votes < <(find \
+            "$RUNNER_TEMP/bootstrap/votes" -maxdepth 1 -type f -name '*.json' | sort)
+          vote_args=()
+          for vote in "${bootstrap_votes[@]}"; do vote_args+=(--bootstrap-vote "$vote"); done
+          bootstrap_path="$(jq -r '.bootstrap_workflow_path' \
+            "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-mapping.json")"
+          bootstrap_blob_id="$(git -C "$GITHUB_WORKSPACE/bootstrap-root" rev-parse \
+            "$GITHUB_WORKFLOW_SHA:$bootstrap_path")"
+          bootstrap_content_id="$(python3 -c \
+            'import hashlib,sys; print("sha256:"+hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' \
+            "$GITHUB_WORKSPACE/bootstrap-root/$bootstrap_path")"
           uv run python \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_stage_a_control.py \
             finalize \
@@ -418,20 +589,36 @@ jobs:
             --source-root . \
             --evidence-dir "$RUNNER_TEMP/stage-a-plans" \
             --raw-evidence-dir "$RUNNER_TEMP/exactness" \
+            --bootstrap-root "$RUNNER_TEMP/bootstrap" \
+            --bootstrap-mapping "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-mapping.json" \
+            --bootstrap-validator-set "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-validator-set.json" \
+            "${vote_args[@]}" \
+            --registration-receipt "$RUNNER_TEMP/bootstrap/campaign02-workflow-registration-receipt.json" \
             --workflow-run-id '${{ github.run_id }}' \
             --workflow-run-attempt '${{ github.run_attempt }}' \
             --workflow-repository '${{ github.repository }}' \
             --workflow-sha '${{ github.workflow_sha }}' \
-            --dispatch-sha '${{ github.sha }}' \
+            --workflow-blob-id "$bootstrap_blob_id" \
+            --workflow-content-id "$bootstrap_content_id" \
             --workflow-ref '${{ github.workflow_ref }}' \
             --dispatch-ref '${{ github.ref }}' \
+            --event-name '${{ github.event_name }}' \
+            --github-sha '${{ github.sha }}' \
+            "${input_id_args[@]}" \
+            "${input_digest_args[@]}" \
+            "${output_id_args[@]}" \
+            "${output_digest_args[@]}" \
+            --authority-artifact-run-id '${{ inputs.authority_run_id }}' \
+            --authority-artifact-run-attempt '${{ inputs.authority_run_attempt }}' \
+            --bootstrap-artifact-run-id '${{ inputs.bootstrap_artifact_run_id }}' \
+            --bootstrap-artifact-run-attempt '${{ inputs.bootstrap_artifact_run_attempt }}' \
             --finalized-at "$finalized_at" \
             --output-gate-qc "$RUNNER_TEMP/stage-a-workflow-gate-qc.json" \
             --output-receipt "$RUNNER_TEMP/stage-a-gate-receipt.json"
       - name: Retain typed receipt and gate QC
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign02-stage-a-gate-${{ github.run_id }}
+          name: campaign02-stage-a-gate-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/stage-a-workflow-gate-qc.json
             ${{ runner.temp }}/stage-a-gate-receipt.json

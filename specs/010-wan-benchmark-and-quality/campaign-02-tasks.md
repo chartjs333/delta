@@ -256,6 +256,39 @@ Definition v4 has zero votes, absent attestation, no authoritative catalog, no e
 and zero observations. A new governance review is required before C2-023. Registration of the
 immutable Stage A workflow on `main` remains a separate pre-C2-024 operation.
 
+## Measured Stage C and bootstrap source remediation after authoritative PR #19 verdict
+
+The later governance verdict supersedes the closure claim above: PR #19 remains
+`DRAFT / CHANGES_REQUIRED / DO NOT MERGE`. Definition v4
+`sha256:26830d3199482873832f4030641c20a0758c4f474abebacbc668de35d56dfdf9`
+is `SUPERSEDED_BEFORE_ATTESTATION`, has zero votes, absent attestation, no authoritative catalog,
+no execution authorization and zero observations. It must not be signed. C2-023, C2-024 and every
+Stage A/B/C primary execution remain unauthorized; Feature 010 is `NO_GO` and Feature 011 remains
+blocked.
+
+- [x] **C2-034 regression** Preserve source-bound production runner/finalizer construction and all
+  dry, fixture, synthetic, caller-supplied and simulated-only rejection paths. Requalification is
+  required after the new source seal.
+- [ ] **C2-035 blocking** Replace production Stage C simulation with a measured Python → Java Netty
+  → C++ runtime/WAL → OS-counter path. Bind image, Java executable, native executable, transport
+  harness and Netty artifact IDs through stage identity v4, runtime lineage v5 and execution plan
+  v6 before the first plan. `simulate()` remains only a non-primary test oracle, and the native
+  runtime derives observed outcomes without receiving `expected_outcome`.
+- [x] **C2-036 regression** Preserve exact semantic parsing of the seven Stage A artifacts.
+  Requalification is required after the new source seal.
+- [ ] **C2-037 blocking** Implement the signed immutable default-branch bootstrap mapping,
+  zero-execution registration verifier and reusable source workflow provenance. Bind caller and
+  called workflow SHAs separately, plus workflow ref/blob/content, run attempt, GitHub artifact ID,
+  artifact archive digest and extracted file digest. The routing mapping intentionally excludes a
+  Definition ID so that a future Definition can bind the mapping ID without a cryptographic
+  self-reference; the separate C2-024 authority must bind both objects before execution.
+
+Only source remediation on `010j-campaign02-measured-stagec-bootstrap` is authorized here. A source
+seal and complete requalification come next. The inert bootstrap on `main` requires a separate
+post-freeze review and merge, followed by a zero-execution registration receipt. None of these
+source tasks creates a replacement Definition, votes, attestation, catalog, stage authorization,
+gate receipt, primary observation or `BenchmarkResultQC`.
+
 ## Unconditional STOP conditions
 
 - No old Definition or Stage A artifact may be edited, overwritten or linked as a new gate result.

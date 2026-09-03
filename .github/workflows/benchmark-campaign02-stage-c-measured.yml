@@ -1,0 +1,109 @@
+name: Campaign 02 measured Stage C source conformance
+
+on:
+  pull_request:
+    branches: [010i-campaign02-runner-remediation]
+  push:
+    branches: [010j-campaign02-measured-stagec-bootstrap]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: campaign-02-stage-c-measured-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measured-cross-language:
+    name: Python + Java Netty + C++ sidecar + OS counters (15 plans)
+    if: >-
+      ${{ github.event_name == 'push' ||
+          github.head_ref == '010j-campaign02-measured-stagec-bootstrap' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact remediation source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Provision exact JDK, Netty artifacts and Python lock
+        shell: bash
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.6.14
+          uv sync --frozen
+          mkdir --parents "$RUNNER_TEMP/jdk" "$RUNNER_TEMP/netty"
+          curl --fail --location --retry 3 \
+            --output "$RUNNER_TEMP/jdk.tar.gz" \
+            'https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz'
+          echo 'dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e  '"$RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = 141329719
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" \
+            --directory "$RUNNER_TEMP/jdk" --strip-components=1
+          while read -r name length digest; do
+            curl --fail --location --retry 3 \
+              --output "$RUNNER_TEMP/netty/$name.jar" \
+              "https://repo1.maven.org/maven2/io/netty/$name/4.1.137.Final/$name-4.1.137.Final.jar"
+            echo "$digest  $RUNNER_TEMP/netty/$name.jar" | sha256sum --check --strict
+            test "$(stat --format=%s "$RUNNER_TEMP/netty/$name.jar")" = "$length"
+          done <<'NETTY'
+          netty-buffer 365383 f474b14c7734f15e0540394cb6f39d67777b7581a42919e4ac89d253d4efd929
+          netty-common 740314 d31926b01adcc07af86f5e27b81b6d6c115df17d366e835d1fc3f5a1924e7e52
+          netty-resolver 37907 b4cf2aeedd9fc7c8c439bbfe574f63cfe5b83392e88bbc07ca0e8424b7cff955
+          netty-transport 521982 6251adc2a2921572382732a2db188d4f4f2251fd6ebb49c5d44bbf33d6bfb1a7
+          NETTY
+      - name: Build native fault/WAL sidecar and Java Netty harness
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        shell: bash
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel 2 --target delta_benchmark_sidecar
+          mkdir --parents "$RUNNER_TEMP/classes"
+          NETTY_CP="$(find "$RUNNER_TEMP/netty" -type f -name '*.jar' -print0 | sort -z | tr '\0' ':')"
+          "$RUNNER_TEMP/jdk/bin/javac" --release 25 -Xlint:all -Werror \
+            --class-path "$NETTY_CP" \
+            -d "$RUNNER_TEMP/classes" \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkContracts.java \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/NetworkFaultController.java \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java
+          "$RUNNER_TEMP/jdk/bin/jar" --create \
+            --file "$RUNNER_TEMP/campaign02-stage-c-transport.jar" \
+            -C "$RUNNER_TEMP/classes" .
+      - name: Execute measured 15-plan non-primary conformance
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        shell: bash
+        run: |
+          image_id="sha256:$(sha256sum /etc/os-release | cut --delimiter=' ' --fields=1)"
+          uv run python \
+            specs/010-wan-benchmark-and-quality/scripts/run_campaign02_stage_c_conformance.py \
+            --java-executable "$RUNNER_TEMP/jdk/bin/java" \
+            --native-executable "$GITHUB_WORKSPACE/out/build/cpp20/delta_benchmark_sidecar" \
+            --transport-harness "$RUNNER_TEMP/campaign02-stage-c-transport.jar" \
+            --netty-artifact "$RUNNER_TEMP/netty/netty-buffer.jar" \
+            --netty-artifact "$RUNNER_TEMP/netty/netty-common.jar" \
+            --netty-artifact "$RUNNER_TEMP/netty/netty-resolver.jar" \
+            --netty-artifact "$RUNNER_TEMP/netty/netty-transport.jar" \
+            --os-counter-root /sys/class/net/lo/statistics \
+            --working-root "$RUNNER_TEMP/stage-c" \
+            --image-id "$image_id" \
+            | tee "$RUNNER_TEMP/stage-c-conformance.json"
+          grep -F '"decision":"PASS"' "$RUNNER_TEMP/stage-c-conformance.json"
+          grep -F '"execution_authorized":false' "$RUNNER_TEMP/stage-c-conformance.json"
+          grep -F '"observations":0' "$RUNNER_TEMP/stage-c-conformance.json"
+          grep -F '"plan_count":15' "$RUNNER_TEMP/stage-c-conformance.json"
+      - name: Retain non-primary measurement transcript
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign02-stage-c-measured-conformance-${{ github.sha }}
+          path: ${{ runner.temp }}/stage-c-conformance.json
+          if-no-files-found: error
+          retention-days: 30

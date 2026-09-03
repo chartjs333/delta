@@ -29,6 +29,8 @@ _MAPPING_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-mapping
 _VALIDATOR_SET_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-validator-set.v1\0"
 _SIGNATURE_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-signature.v1\0"
 _ATTESTATION_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-attestation.v1\0"
+_REGISTRATION_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-registration-receipt.v1\0"
+_VERIFIED_MAPPING_TOKEN: Final = object()
 
 
 class Campaign02BootstrapError(ValueError):
@@ -74,7 +76,6 @@ class WorkflowBootstrapMapping:
     qualified_source_tree: str
     source_stage_a_workflow_path: str
     source_stage_a_workflow_content_id: str
-    definition_id: str
 
     @classmethod
     def from_dict(cls, value: object) -> WorkflowBootstrapMapping:
@@ -83,7 +84,6 @@ class WorkflowBootstrapMapping:
             "bootstrap_workflow_blob_id",
             "bootstrap_workflow_content_id",
             "bootstrap_workflow_path",
-            "definition_id",
             "execution_authorized",
             "formal_semantics_id",
             "qualified_source_commit",
@@ -138,9 +138,6 @@ class WorkflowBootstrapMapping:
                 value["source_stage_a_workflow_content_id"],
                 "CAMPAIGN02_BOOTSTRAP_SOURCE_WORKFLOW_ID_INVALID",
             ),
-            definition_id=_content_id(
-                value["definition_id"], "CAMPAIGN02_BOOTSTRAP_DEFINITION_ID_INVALID"
-            ),
         )
 
     @property
@@ -150,7 +147,6 @@ class WorkflowBootstrapMapping:
             "bootstrap_workflow_blob_id": self.bootstrap_workflow_blob_id,
             "bootstrap_workflow_content_id": self.bootstrap_workflow_content_id,
             "bootstrap_workflow_path": self.bootstrap_workflow_path,
-            "definition_id": self.definition_id,
             "execution_authorized": False,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "qualified_source_commit": self.qualified_source_commit,
@@ -177,12 +173,14 @@ class BootstrapValidator:
 @dataclass(frozen=True, slots=True)
 class BootstrapValidatorSet:
     validators: tuple[BootstrapValidator, ...]
+    f_b: int
     quorum_threshold: int
 
     @classmethod
     def from_dict(cls, value: object) -> BootstrapValidatorSet:
         fields = {
             "execution_authorized",
+            "f_b",
             "formal_semantics_id",
             "quorum_threshold",
             "schema_version",
@@ -192,6 +190,7 @@ class BootstrapValidatorSet:
         if not isinstance(value, dict) or set(value) != fields:
             raise _fail("CAMPAIGN02_BOOTSTRAP_VALIDATOR_SET_FIELDS_INVALID")
         raw_validators = value["validators"]
+        f_b = value["f_b"]
         threshold = value["quorum_threshold"]
         if (
             value["type_name"] != "CAMPAIGN02_WORKFLOW_BOOTSTRAP_VALIDATOR_SET"
@@ -200,10 +199,15 @@ class BootstrapValidatorSet:
             or value["execution_authorized"] is not False
             or not isinstance(raw_validators, list)
             or not raw_validators
+            or isinstance(f_b, bool)
+            or not isinstance(f_b, int)
+            or f_b < 1
             or isinstance(threshold, bool)
             or not isinstance(threshold, int)
             or threshold <= 0
             or threshold > len(raw_validators)
+            or len(raw_validators) != 3 * f_b + 1
+            or threshold != 2 * f_b + 1
         ):
             raise _fail("CAMPAIGN02_BOOTSTRAP_VALIDATOR_SET_HEADER_INVALID")
         validators: list[BootstrapValidator] = []
@@ -234,12 +238,13 @@ class BootstrapValidatorSet:
             or len({item.controller_id for item in validators}) != len(validators)
         ):
             raise _fail("CAMPAIGN02_BOOTSTRAP_VALIDATOR_SET_DUPLICATE")
-        return cls(tuple(sorted(validators, key=lambda item: item.signer_id)), threshold)
+        return cls(tuple(sorted(validators, key=lambda item: item.signer_id)), f_b, threshold)
 
     @property
     def document(self) -> dict[str, object]:
         return {
             "execution_authorized": False,
+            "f_b": self.f_b,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "quorum_threshold": self.quorum_threshold,
             "schema_version": "1.0.0",
@@ -276,6 +281,7 @@ class SignedBootstrapMappingVote:
     @classmethod
     def from_dict(cls, value: object) -> SignedBootstrapMappingVote:
         fields = {
+            "formal_semantics_id",
             "mapping_id",
             "schema_version",
             "signature_base64",
@@ -294,6 +300,7 @@ class SignedBootstrapMappingVote:
         if (
             value["type_name"] != "CAMPAIGN02_WORKFLOW_BOOTSTRAP_SIGNATURE"
             or value["schema_version"] != "1.0.0"
+            or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
             or not isinstance(signer_id, str)
             or not signer_id
             or submitted_at.tzinfo is None
@@ -327,11 +334,24 @@ class SignedBootstrapMappingVote:
         )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, init=False)
 class VerifiedBootstrapMapping:
     mapping: WorkflowBootstrapMapping
     validator_set_id: str
     signer_ids: tuple[str, ...]
+
+    def __init__(
+        self,
+        token: object,
+        mapping: WorkflowBootstrapMapping,
+        validator_set_id: str,
+        signer_ids: tuple[str, ...],
+    ) -> None:
+        if token is not _VERIFIED_MAPPING_TOKEN:
+            raise _fail("CAMPAIGN02_BOOTSTRAP_VERIFIED_MAPPING_CONSTRUCTION_FORBIDDEN")
+        object.__setattr__(self, "mapping", mapping)
+        object.__setattr__(self, "validator_set_id", validator_set_id)
+        object.__setattr__(self, "signer_ids", signer_ids)
 
     @property
     def content_id(self) -> str:
@@ -377,9 +397,10 @@ def verify_bootstrap_mapping(
     if len(set(signer_ids)) != len(signer_ids) or len(set(controllers)) != len(controllers):
         raise _fail("CAMPAIGN02_BOOTSTRAP_SIGNATURE_DUPLICATE")
     return VerifiedBootstrapMapping(
-        mapping=mapping,
-        validator_set_id=validator_set.content_id,
-        signer_ids=tuple(sorted(signer_ids)),
+        _VERIFIED_MAPPING_TOKEN,
+        mapping,
+        validator_set.content_id,
+        tuple(sorted(signer_ids)),
     )
 
 
@@ -429,3 +450,169 @@ def verify_bootstrap_runtime(
     )
     if not valid:
         raise _fail("CAMPAIGN02_BOOTSTRAP_RUNTIME_PROVENANCE_INVALID")
+
+
+@dataclass(frozen=True, slots=True)
+class WorkflowRegistrationReceipt:
+    repository: str
+    workflow_id: int
+    workflow_path: str
+    workflow_state: str
+    default_branch_ref: str
+    bootstrap_mapping_id: str
+    bootstrap_commit: str
+    bootstrap_workflow_blob_id: str
+    bootstrap_workflow_content_id: str
+    qualified_source_commit: str
+    qualified_source_tree: str
+    github_api_evidence_digest: str
+    checked_at: datetime
+
+    @classmethod
+    def from_dict(cls, value: object) -> WorkflowRegistrationReceipt:
+        fields = {
+            "authority_bundle_supplied",
+            "bootstrap_commit",
+            "bootstrap_commit_on_default_branch",
+            "bootstrap_mapping_id",
+            "bootstrap_workflow_blob_id",
+            "bootstrap_workflow_content_id",
+            "checked_at",
+            "default_branch_ref",
+            "formal_semantics_id",
+            "github_api_evidence_digest",
+            "observations",
+            "qualified_source_commit",
+            "qualified_source_exists",
+            "qualified_source_tree",
+            "repository",
+            "schema_version",
+            "stage_a_plans_executed",
+            "stage_gate_receipt_emitted",
+            "type_name",
+            "workflow_id",
+            "workflow_path",
+            "workflow_state",
+            "workflow_visible_on_default_branch",
+        }
+        if not isinstance(value, dict) or set(value) != fields:
+            raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_FIELDS_INVALID")
+        try:
+            checked_at = datetime.fromisoformat(str(value["checked_at"]))
+        except ValueError as exc:
+            raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_TIME_INVALID") from exc
+        workflow_id = value["workflow_id"]
+        if (
+            value["type_name"] != "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT"
+            or value["schema_version"] != "1.0.0"
+            or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
+            or value["workflow_visible_on_default_branch"] is not True
+            or value["bootstrap_commit_on_default_branch"] is not True
+            or value["qualified_source_exists"] is not True
+            or value["authority_bundle_supplied"] is not False
+            or value["stage_gate_receipt_emitted"] is not False
+            or value["stage_a_plans_executed"] != 0
+            or value["observations"] != 0
+            or value["workflow_state"] != "active"
+            or value["default_branch_ref"] != "refs/heads/main"
+            or isinstance(workflow_id, bool)
+            or not isinstance(workflow_id, int)
+            or workflow_id <= 0
+            or checked_at.tzinfo is None
+        ):
+            raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_STOP_INVALID")
+        repository = value["repository"]
+        workflow_path = value["workflow_path"]
+        if (
+            not isinstance(repository, str)
+            or _REPOSITORY.fullmatch(repository) is None
+            or not isinstance(workflow_path, str)
+            or _WORKFLOW_PATH.fullmatch(workflow_path) is None
+        ):
+            raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_HEADER_INVALID")
+        return cls(
+            repository=repository,
+            workflow_id=workflow_id,
+            workflow_path=workflow_path,
+            workflow_state="active",
+            default_branch_ref="refs/heads/main",
+            bootstrap_mapping_id=_content_id(
+                value["bootstrap_mapping_id"],
+                "CAMPAIGN02_WORKFLOW_REGISTRATION_MAPPING_ID_INVALID",
+            ),
+            bootstrap_commit=_git_id(
+                value["bootstrap_commit"],
+                "CAMPAIGN02_WORKFLOW_REGISTRATION_COMMIT_INVALID",
+            ),
+            bootstrap_workflow_blob_id=_git_id(
+                value["bootstrap_workflow_blob_id"],
+                "CAMPAIGN02_WORKFLOW_REGISTRATION_BLOB_INVALID",
+            ),
+            bootstrap_workflow_content_id=_content_id(
+                value["bootstrap_workflow_content_id"],
+                "CAMPAIGN02_WORKFLOW_REGISTRATION_WORKFLOW_ID_INVALID",
+            ),
+            qualified_source_commit=_git_id(
+                value["qualified_source_commit"],
+                "CAMPAIGN02_WORKFLOW_REGISTRATION_SOURCE_COMMIT_INVALID",
+            ),
+            qualified_source_tree=_git_id(
+                value["qualified_source_tree"],
+                "CAMPAIGN02_WORKFLOW_REGISTRATION_SOURCE_TREE_INVALID",
+            ),
+            github_api_evidence_digest=_content_id(
+                value["github_api_evidence_digest"],
+                "CAMPAIGN02_WORKFLOW_REGISTRATION_API_DIGEST_INVALID",
+            ),
+            checked_at=checked_at,
+        )
+
+    @property
+    def document(self) -> dict[str, object]:
+        return {
+            "authority_bundle_supplied": False,
+            "bootstrap_commit": self.bootstrap_commit,
+            "bootstrap_commit_on_default_branch": True,
+            "bootstrap_mapping_id": self.bootstrap_mapping_id,
+            "bootstrap_workflow_blob_id": self.bootstrap_workflow_blob_id,
+            "bootstrap_workflow_content_id": self.bootstrap_workflow_content_id,
+            "checked_at": self.checked_at.isoformat(),
+            "default_branch_ref": self.default_branch_ref,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "github_api_evidence_digest": self.github_api_evidence_digest,
+            "observations": 0,
+            "qualified_source_commit": self.qualified_source_commit,
+            "qualified_source_exists": True,
+            "qualified_source_tree": self.qualified_source_tree,
+            "repository": self.repository,
+            "schema_version": "1.0.0",
+            "stage_a_plans_executed": 0,
+            "stage_gate_receipt_emitted": False,
+            "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
+            "workflow_id": self.workflow_id,
+            "workflow_path": self.workflow_path,
+            "workflow_state": self.workflow_state,
+            "workflow_visible_on_default_branch": True,
+        }
+
+    @property
+    def content_id(self) -> str:
+        return sha256_content_id(_REGISTRATION_DOMAIN + canonical_json_bytes(self.document))
+
+
+def verify_registration_receipt(
+    verified: VerifiedBootstrapMapping,
+    receipt: WorkflowRegistrationReceipt,
+) -> None:
+    mapping = verified.mapping
+    if (
+        receipt.bootstrap_mapping_id != mapping.content_id
+        or receipt.repository != mapping.repository
+        or receipt.workflow_path != mapping.bootstrap_workflow_path
+        or receipt.bootstrap_commit != mapping.bootstrap_commit
+        or receipt.bootstrap_workflow_blob_id != mapping.bootstrap_workflow_blob_id
+        or receipt.bootstrap_workflow_content_id != mapping.bootstrap_workflow_content_id
+        or receipt.qualified_source_commit != mapping.qualified_source_commit
+        or receipt.qualified_source_tree != mapping.qualified_source_tree
+    ):
+        raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_BINDING_MISMATCH")

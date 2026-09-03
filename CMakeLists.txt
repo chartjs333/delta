@@ -195,6 +195,7 @@ delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
   add_executable(delta_benchmark_sidecar delta-runtime-cpp/src/benchmark/sidecar_main.cpp)
+  target_link_libraries(delta_benchmark_sidecar PRIVATE delta::runtime)
   delta_target_defaults(delta_benchmark_sidecar)
 
   add_executable(delta_runtime_benchmark_test delta-runtime-cpp/tests/benchmark_test.cpp)

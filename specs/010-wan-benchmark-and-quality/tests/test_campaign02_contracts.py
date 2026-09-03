@@ -22,12 +22,59 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 46
+    assert len(module.SCHEMAS) == 56
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.5.0-signed-stage-governance"
+    assert registry["registry_version"] == "010.8.0-measured-stagec-bootstrap-binding"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
+    measured_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v2.json"
+        ).read_bytes()
+    )
+    assert measured_stage_c["properties"]["measurement_source"] == {
+        "const": "PYTHON_JAVA_NETTY_CPP_OS"
+    }
+    assert measured_stage_c["properties"]["network_counters"]["minItems"] == 3
+    runtime_lineage = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v5.json"
+        ).read_bytes()
+    )
+    assert {
+        "java_executable_id",
+        "native_executable_id",
+        "netty_artifact_ids",
+        "transport_harness_id",
+    } <= set(runtime_lineage["required"])
+    stage_c_plan = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v6.json").read_bytes()
+    )
+    assert {
+        "java_executable_id",
+        "native_executable_id",
+        "netty_artifact_ids",
+        "transport_harness_id",
+    } <= set(stage_c_plan["required"])
+    bootstrap_mapping = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-mapping-v1.json"
+        ).read_bytes()
+    )
+    assert bootstrap_mapping["properties"]["execution_authorized"] == {"const": False}
+    assert "definition_id" not in bootstrap_mapping["properties"]
+    replacement_definition = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json").read_bytes()
+    )
+    assert "bootstrap_mapping_id" in replacement_definition["required"]
+    stage_a_workflow = (ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "workflow_call:" in stage_a_workflow
+    assert "job.workflow_sha" in stage_a_workflow
+    assert ".run_attempt" in stage_a_workflow
+    assert ".digest" in stage_a_workflow
     observation = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/observation-v2.json").read_bytes()
     )

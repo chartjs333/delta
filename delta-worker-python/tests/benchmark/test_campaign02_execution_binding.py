@@ -34,6 +34,14 @@ from deltatorrent.benchmark.campaign02_binding import (
     compile_campaign02_plan_catalog,
     expected_round_id,
 )
+from deltatorrent.benchmark.campaign02_bootstrap import (
+    BootstrapRuntimeProvenance,
+    BootstrapValidatorSet,
+    SignedBootstrapMappingVote,
+    WorkflowBootstrapMapping,
+    WorkflowRegistrationReceipt,
+    verify_bootstrap_mapping,
+)
 from deltatorrent.benchmark.campaign02_exactness import run_stage_a
 from deltatorrent.benchmark.campaign02_execution_identities import (
     StageExecutionIdentityManifest,
@@ -45,12 +53,15 @@ from deltatorrent.benchmark.campaign02_stage_a_evidence import (
     StageAEvidenceError,
     verify_stage_a_artifacts,
 )
+from deltatorrent.benchmark.campaign02_stage_c_runtime import (
+    MeasuredStageCRuntimeBoundary,
+    RuntimeArtifact,
+)
 from deltatorrent.benchmark.campaign02_stage_execution import (
     Campaign02StageGateFinalizer,
     StagePlanEvidence,
     validate_stage_admission_for_test,
     verify_bound_stage_gate_finalizer,
-    verify_bound_stage_runner,
 )
 from deltatorrent.benchmark.definition import BenchmarkDefinition, load_definition
 from deltatorrent.benchmark.governance import (
@@ -333,6 +344,152 @@ def _stage_identity_manifest() -> StageExecutionIdentityManifest:
             "type_name": "CAMPAIGN02_STAGE_EXECUTION_IDENTITIES",
         }
     )
+
+
+def _stage_identity_manifest_v4() -> StageExecutionIdentityManifest:
+    raw = copy.deepcopy(_stage_identity_manifest().raw)
+
+    def hashes(paths: set[str]) -> list[dict[str, str]]:
+        return [
+            {"content_id": sha256_content_id((ROOT / path).read_bytes()), "path": path}
+            for path in sorted(paths)
+        ]
+
+    def implementation_id(value: dict[str, object]) -> str:
+        implementation = {
+            "entrypoints": value.get("entrypoints"),
+            "executable_hashes": value.get("executable_hashes"),
+            "workflow_hashes": value.get("workflow_hashes"),
+        }
+        return sha256_content_id(
+            b"deltareduce.010.campaign02-stage-implementation.v1\0"
+            + canonical_json_bytes(implementation)
+        )
+
+    def rewrap(name: str, domain: str, value: dict[str, object]) -> dict[str, object]:
+        return {
+            "content_id": sha256_content_id(domain.encode() + b"\0" + canonical_json_bytes(value)),
+            "identity_domain": domain,
+            "value": value,
+        }
+
+    identities = raw["identities"]
+    assert isinstance(identities, dict)
+    exactness = copy.deepcopy(identities["exactness_runner"]["value"])
+    network = copy.deepcopy(identities["network_fault_runner"]["value"])
+    analyzer = copy.deepcopy(identities["stage_gate_analyzer"]["value"])
+    assert isinstance(exactness, dict) and isinstance(network, dict) and isinstance(analyzer, dict)
+    exactness_item = rewrap(
+        "exactness_runner", "deltareduce.010.campaign02-stage-role-identity.v4", exactness
+    )
+    stage_c_paths = {
+        ".github/workflows/benchmark-campaign02-stage-c-measured.yml",
+        "CMakeLists.txt",
+        "configs/benchmark/faults-v1.json",
+        "configs/benchmark/networks-v1.json",
+        "delta-node-java/distribution-dependencies.lock.json",
+        "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkContracts.java",
+        "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java",
+        "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java",
+        "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NetworkFaultController.java",
+        "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json",
+        "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v2.json",
+        "delta-protocol/schemas/010/campaign-02/execution-plan-v6.json",
+        "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v5.json",
+        "delta-protocol/schemas/010/campaign-02/stage-execution-identities-v4.json",
+        "delta-protocol/schemas/010/fault-profile-v1.json",
+        "delta-protocol/schemas/010/network-profile-v1.json",
+        "delta-runtime-cpp/include/delta/runtime/benchmark.hpp",
+        "delta-runtime-cpp/src/benchmark/fault_control.cpp",
+        "delta-runtime-cpp/src/benchmark/sidecar_main.cpp",
+        "delta-runtime-cpp/src/benchmark/trace_export.cpp",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_binding.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_execution_identities.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_network_fault.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_c_runtime.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_execution.py",
+        "delta-worker-python/src/deltatorrent/benchmark/definition.py",
+        "delta-worker-python/src/deltatorrent/benchmark/fault_profiles.py",
+        "delta-worker-python/src/deltatorrent/benchmark/network_profiles.py",
+        "specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py",
+        "specs/010-wan-benchmark-and-quality/scripts/run_campaign02_stage_c_conformance.py",
+    }
+    network.update(
+        {
+            "executable_hashes": hashes(
+                {path for path in stage_c_paths if not path.startswith(".github/")}
+            ),
+            "image_id": _id("stage-c-image"),
+            "java_executable_id": _id("stage-c-java"),
+            "native_executable_id": _id("stage-c-native"),
+            "netty_artifact_ids": [_id("netty-buffer"), _id("netty-transport")],
+            "source_class": "MEASURED_RUNTIME",
+            "transport_harness_id": _id("stage-c-harness"),
+            "workflow_hashes": hashes(
+                {path for path in stage_c_paths if path.startswith(".github/")}
+            ),
+        }
+    )
+    network["implementation_id"] = implementation_id(network)
+    network_item = rewrap(
+        "network_fault_runner",
+        "deltareduce.010.campaign02-stage-role-identity.v4",
+        network,
+    )
+    bootstrap_paths = {
+        ".github/workflows/benchmark-campaign02-stage-a.yml",
+        "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_bootstrap.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_execution_identities.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_execution.py",
+        "delta-worker-python/src/deltatorrent/benchmark/definition.py",
+        "delta-protocol/schemas/010/campaign-02/stage-workflow-gate-qc-v3.json",
+        "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-mapping-v1.json",
+        "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-signature-v1.json",
+        "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-validator-set-v1.json",
+        "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v1.json",
+        "specs/010-wan-benchmark-and-quality/scripts/campaign02_bootstrap_control.py",
+        "specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py",
+        "specs/010-wan-benchmark-and-quality/scripts/campaign02_stage_a_control.py",
+    }
+    analyzer.update(
+        {
+            "executable_hashes": hashes(
+                {path for path in bootstrap_paths if not path.startswith(".github/")}
+            ),
+            "workflow_hashes": hashes(
+                {path for path in bootstrap_paths if path.startswith(".github/")}
+            ),
+        }
+    )
+    analyzer["implementation_id"] = implementation_id(analyzer)
+    analyzer_item = rewrap(
+        "stage_gate_analyzer",
+        "deltareduce.010.campaign02-stage-gate-analyzer.v4",
+        analyzer,
+    )
+    scientific_item = identities["scientific_runner"]
+    multi = copy.deepcopy(identities["multi_role_runner"]["value"])
+    multi["role_identity_ids"] = {
+        "EXACTNESS_RUNNER": exactness_item["content_id"],
+        "NETWORK_FAULT_RUNNER": network_item["content_id"],
+        "SCIENTIFIC_RUNNER": scientific_item["content_id"],
+    }
+    identities.update(
+        {
+            "exactness_runner": exactness_item,
+            "multi_role_runner": rewrap(
+                "multi_role_runner",
+                "deltareduce.010.campaign02-multi-role-runner.v4",
+                multi,
+            ),
+            "network_fault_runner": network_item,
+            "stage_gate_analyzer": analyzer_item,
+        }
+    )
+    raw["schema_version"] = "4.0.0"
+    return StageExecutionIdentityManifest.from_dict(raw)
 
 
 def _validator_set() -> tuple[BenchmarkReviewValidatorSet, tuple[Ed25519PrivateKey, ...]]:
@@ -919,32 +1076,69 @@ def test_stage_c_admission_requires_exact_stage_a_and_b_receipts_without_executi
         )
 
 
-def test_concrete_stage_c_runner_executes_all_15_plans_and_profiles(tmp_path: Path) -> None:
+def test_superseded_v4_stage_c_identity_cannot_claim_measured_runtime(tmp_path: Path) -> None:
     definition, *_rest, stage_identities = _inputs()
-    catalog = _compile()
-    runner = Campaign02NetworkFaultRunner(
-        definition=definition,
-        stage_identities=stage_identities,
-        network_profiles_path=ROOT / "configs/benchmark/networks-v1.json",
-        fault_profiles_path=ROOT / "configs/benchmark/faults-v1.json",
-        evidence_root=tmp_path,
+    missing = RuntimeArtifact(tmp_path / "missing", _id("missing"))
+    boundary = MeasuredStageCRuntimeBoundary(
+        image_id=_id("image"),
+        java_executable=missing,
+        native_executable=missing,
+        transport_harness=missing,
+        netty_artifacts=(missing,),
+        os_interface_counter_root=tmp_path,
+        working_root=tmp_path / "work",
     )
-    bound = verify_bound_stage_runner(
-        runner,
-        identity_name="network_fault_runner",
-        stage_identities=stage_identities,
-        source_root=ROOT,
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_C_RUNTIME_IDENTITY_MISMATCH"):
+        Campaign02NetworkFaultRunner(
+            definition=definition,
+            stage_identities=stage_identities,
+            network_profiles_path=ROOT / "configs/benchmark/networks-v1.json",
+            fault_profiles_path=ROOT / "configs/benchmark/faults-v1.json",
+            evidence_root=tmp_path,
+            runtime_boundary=boundary,
+        )
+
+
+def test_stage_c_v4_identity_rejects_missing_transitive_runtime_source() -> None:
+    raw = copy.deepcopy(_stage_identity_manifest_v4().raw)
+    identities = raw["identities"]
+    assert isinstance(identities, dict)
+    network_wrapper = identities["network_fault_runner"]
+    assert isinstance(network_wrapper, dict)
+    network = network_wrapper["value"]
+    assert isinstance(network, dict)
+    executable_hashes = network["executable_hashes"]
+    assert isinstance(executable_hashes, list)
+    network["executable_hashes"] = [
+        item
+        for item in executable_hashes
+        if item["path"]
+        != "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java"
+    ]
+    implementation = {
+        "entrypoints": network["entrypoints"],
+        "executable_hashes": network["executable_hashes"],
+        "workflow_hashes": network["workflow_hashes"],
+    }
+    network["implementation_id"] = sha256_content_id(
+        b"deltareduce.010.campaign02-stage-implementation.v1\0"
+        + canonical_json_bytes(implementation)
     )
-    plans = tuple(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
-    evidence = tuple(bound.execute(plan) for plan in plans)
-    assert len(evidence) == 15
-    assert len({item.content_id for item in evidence}) == 15
-    assert all(item.evidence_kind == "NETWORK_FAULT_EXECUTION" for item in evidence)
-    documents = [json.loads(path.read_bytes()) for path in sorted(tmp_path.glob("*.json"))]
-    assert len(documents) == 15
-    assert all(len(item["network_counters"]) == 3 for item in documents)
-    assert all(len(item["fault_results"]) == 7 for item in documents)
-    assert all(item["resilience_result"] == "PASS" for item in documents)
+    network_wrapper["content_id"] = sha256_content_id(
+        b"deltareduce.010.campaign02-stage-role-identity.v4\0" + canonical_json_bytes(network)
+    )
+    multi_wrapper = identities["multi_role_runner"]
+    assert isinstance(multi_wrapper, dict)
+    multi = multi_wrapper["value"]
+    assert isinstance(multi, dict)
+    role_ids = multi["role_identity_ids"]
+    assert isinstance(role_ids, dict)
+    role_ids["NETWORK_FAULT_RUNNER"] = network_wrapper["content_id"]
+    multi_wrapper["content_id"] = sha256_content_id(
+        b"deltareduce.010.campaign02-multi-role-runner.v4\0" + canonical_json_bytes(multi)
+    )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_C_RECURSIVE_IDENTITY_INCOMPLETE"):
+        StageExecutionIdentityManifest.from_dict(raw)
 
 
 def _write_stage_a_evidence_set(root: Path) -> tuple[tuple[str, str], ...]:
@@ -999,76 +1193,190 @@ def test_stage_a_semantic_verifier_rejects_same_named_fabricated_artifacts(
         )
 
 
+def _bootstrap_finalizer_arguments() -> dict[str, object]:
+    stage_identities = _stage_identity_manifest_v4()
+    mapping = WorkflowBootstrapMapping.from_dict(
+        {
+            "bootstrap_commit": "c" * 40,
+            "bootstrap_workflow_blob_id": "d" * 40,
+            "bootstrap_workflow_content_id": _id("bootstrap-workflow"),
+            "bootstrap_workflow_path": ".github/workflows/campaign02-stage-a-bootstrap.yml",
+            "execution_authorized": False,
+            "formal_semantics_id": (
+                "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+            ),
+            "qualified_source_commit": "a" * 40,
+            "qualified_source_tree": "b" * 40,
+            "repository": "chartjs333/delta",
+            "schema_version": "1.0.0",
+            "source_stage_a_workflow_content_id": sha256_content_id(
+                (ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml").read_bytes()
+            ),
+            "source_stage_a_workflow_path": (".github/workflows/benchmark-campaign02-stage-a.yml"),
+            "type_name": "CAMPAIGN02_WORKFLOW_BOOTSTRAP_MAPPING",
+        }
+    )
+    private_keys = [Ed25519PrivateKey.generate() for _ in range(4)]
+    validator_set = BootstrapValidatorSet.from_dict(
+        {
+            "execution_authorized": False,
+            "f_b": 1,
+            "formal_semantics_id": (
+                "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+            ),
+            "quorum_threshold": 3,
+            "schema_version": "1.0.0",
+            "type_name": "CAMPAIGN02_WORKFLOW_BOOTSTRAP_VALIDATOR_SET",
+            "validators": [
+                {
+                    "controller_id": f"controller-{index}",
+                    "public_key_base64": base64.b64encode(
+                        key.public_key().public_bytes(
+                            serialization.Encoding.Raw,
+                            serialization.PublicFormat.Raw,
+                        )
+                    ).decode("ascii"),
+                    "signer_id": f"validator-{index}",
+                }
+                for index, key in enumerate(private_keys)
+            ],
+        }
+    )
+    votes = []
+    for index, private_key in enumerate(private_keys[:3]):
+        unsigned = SignedBootstrapMappingVote(
+            mapping.content_id,
+            validator_set.content_id,
+            f"validator-{index}",
+            NOW,
+            b"\0" * 64,
+        )
+        votes.append(replace(unsigned, signature=private_key.sign(unsigned.message)))
+    verified_mapping = verify_bootstrap_mapping(
+        mapping, validator_set=validator_set, votes=tuple(votes)
+    )
+    registration = WorkflowRegistrationReceipt.from_dict(
+        {
+            "authority_bundle_supplied": False,
+            "bootstrap_commit": mapping.bootstrap_commit,
+            "bootstrap_commit_on_default_branch": True,
+            "bootstrap_mapping_id": mapping.content_id,
+            "bootstrap_workflow_blob_id": mapping.bootstrap_workflow_blob_id,
+            "bootstrap_workflow_content_id": mapping.bootstrap_workflow_content_id,
+            "checked_at": NOW.isoformat(),
+            "default_branch_ref": "refs/heads/main",
+            "formal_semantics_id": (
+                "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+            ),
+            "github_api_evidence_digest": _id("github-api"),
+            "observations": 0,
+            "qualified_source_commit": mapping.qualified_source_commit,
+            "qualified_source_exists": True,
+            "qualified_source_tree": mapping.qualified_source_tree,
+            "repository": mapping.repository,
+            "schema_version": "1.0.0",
+            "stage_a_plans_executed": 0,
+            "stage_gate_receipt_emitted": False,
+            "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
+            "workflow_id": 17,
+            "workflow_path": mapping.bootstrap_workflow_path,
+            "workflow_state": "active",
+            "workflow_visible_on_default_branch": True,
+        }
+    )
+    provenance = BootstrapRuntimeProvenance(
+        repository=mapping.repository,
+        workflow_id=17,
+        workflow_path=mapping.bootstrap_workflow_path,
+        workflow_ref=(
+            "chartjs333/delta/.github/workflows/campaign02-stage-a-bootstrap.yml@refs/heads/main"
+        ),
+        workflow_sha=mapping.bootstrap_commit,
+        workflow_blob_id=mapping.bootstrap_workflow_blob_id,
+        workflow_content_id=mapping.bootstrap_workflow_content_id,
+        run_id=42,
+        run_attempt=2,
+        event_name="workflow_dispatch",
+        dispatch_ref="refs/heads/main",
+        github_sha="e" * 40,
+        qualified_source_commit=mapping.qualified_source_commit,
+        qualified_source_tree=mapping.qualified_source_tree,
+        source_stage_a_workflow_content_id=mapping.source_stage_a_workflow_content_id,
+    )
+    authority = Campaign02StageGateFinalizer.Artifact(
+        "authority", 1001, _id("authority"), _id("authority-content"), 41, 1, "AUTHORITY_RUN"
+    )
+    bootstrap = Campaign02StageGateFinalizer.Artifact(
+        "bootstrap/mapping",
+        1002,
+        _id("mapping"),
+        _id("mapping-content"),
+        40,
+        1,
+        "BOOTSTRAP_REGISTRATION_RUN",
+    )
+    raw = Campaign02StageGateFinalizer.Artifact(
+        "raw", 1003, _id("raw"), _id("raw-content"), 42, 2, "CURRENT_STAGE_RUN"
+    )
+    output = Campaign02StageGateFinalizer.Artifact(
+        "plan", 1004, _id("plan"), _id("plan-content"), 42, 2, "CURRENT_STAGE_RUN"
+    )
+    return {
+        "authority_artifact": authority,
+        "bootstrap_mapping": verified_mapping,
+        "finalized_at": NOW,
+        "input_artifacts": (authority, bootstrap, raw),
+        "output_artifacts": (output,),
+        "provenance": provenance,
+        "registration_receipt": registration,
+        "stage_identities": stage_identities,
+    }
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     (
-        ("workflow_sha", "c" * 40),
-        ("dispatch_sha", "c" * 40),
-        (
-            "workflow_ref",
-            "chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/dev",
-        ),
+        ("repository", "attacker/fork"),
+        ("workflow_sha", "f" * 40),
+        ("workflow_blob_id", "f" * 40),
         ("dispatch_ref", "refs/heads/dev"),
-        ("workflow_repository", "attacker/fork"),
-        ("workflow_run_attempt", 2),
+        ("qualified_source_commit", "f" * 40),
+        ("run_attempt", 0),
     ),
 )
 def test_stage_a_workflow_provenance_rejects_wrong_github_context(
-    field: str,
-    value: object,
+    field: str, value: object
 ) -> None:
-    stage_identities = _stage_identity_manifest()
-    arguments: dict[str, object] = {
-        "stage_identities": stage_identities,
-        "finalized_at": NOW,
-        "workflow_repository": "chartjs333/delta",
-        "workflow_sha": "a" * 40,
-        "dispatch_sha": "a" * 40,
-        "workflow_ref": (
-            "chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/main"
-        ),
-        "dispatch_ref": "refs/heads/main",
-        "workflow_file_content_id": sha256_content_id(
-            (ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml").read_bytes()
-        ),
-        "workflow_run_id": 42,
-        "workflow_run_attempt": 1,
-        "authority_artifact_digest": _id("authority"),
-        "input_artifact_digests": {"authority": _id("authority")},
-        "output_artifact_digests": {"plan": _id("plan")},
-    }
-    arguments[field] = value
-    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_WORKFLOW_PROVENANCE_INVALID"):
+    arguments = _bootstrap_finalizer_arguments()
+    provenance = arguments["provenance"]
+    assert isinstance(provenance, BootstrapRuntimeProvenance)
+    arguments["provenance"] = replace(provenance, **{field: value})
+    with pytest.raises(ValueError, match="CAMPAIGN02_BOOTSTRAP_RUNTIME_PROVENANCE_INVALID"):
         Campaign02StageGateFinalizer(**arguments)  # type: ignore[arg-type]
 
 
 def test_stage_a_workflow_finalizer_binds_to_exact_analyzer_bytes() -> None:
-    stage_identities = _stage_identity_manifest()
-    finalizer = Campaign02StageGateFinalizer(
-        stage_identities=stage_identities,
-        finalized_at=NOW,
-        workflow_repository="chartjs333/delta",
-        workflow_sha="a" * 40,
-        dispatch_sha="a" * 40,
-        workflow_ref=(
-            "chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@refs/heads/main"
-        ),
-        dispatch_ref="refs/heads/main",
-        workflow_file_content_id=sha256_content_id(
-            (ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml").read_bytes()
-        ),
-        workflow_run_id=42,
-        workflow_run_attempt=1,
-        authority_artifact_digest=_id("authority"),
-        input_artifact_digests={"authority": _id("authority")},
-        output_artifact_digests={"plan": _id("plan")},
-    )
+    arguments = _bootstrap_finalizer_arguments()
+    stage_identities = arguments["stage_identities"]
+    assert isinstance(stage_identities, StageExecutionIdentityManifest)
+    finalizer = Campaign02StageGateFinalizer(**arguments)  # type: ignore[arg-type]
     bound = verify_bound_stage_gate_finalizer(
         finalizer,
         stage_identities=stage_identities,
         source_root=ROOT,
     )
     assert bound.identity_id == stage_identities.identity_id("stage_gate_analyzer")
+
+
+def test_stage_a_workflow_finalizer_rejects_artifact_from_other_run_or_attempt() -> None:
+    arguments = _bootstrap_finalizer_arguments()
+    artifacts = arguments["input_artifacts"]
+    assert isinstance(artifacts, tuple)
+    arguments["input_artifacts"] = tuple(
+        replace(item, workflow_run_attempt=3) if item.name == "raw" else item for item in artifacts
+    )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_WORKFLOW_PROVENANCE_INVALID"):
+        Campaign02StageGateFinalizer(**arguments)  # type: ignore[arg-type]
 
 
 def test_stage_a_control_bundle_recompiles_exact_authoritative_catalog(
@@ -1310,6 +1618,101 @@ def test_campaign02_plan_requires_exact_ticket_table() -> None:
 
 def test_campaign02_execution_plan_type_is_strict_runner_contract() -> None:
     assert all(isinstance(item, CampaignExecutionPlan) for item in _compile().plans)
+
+
+def test_measured_stage_c_binary_boundary_is_versioned_in_lineage_and_plan() -> None:
+    *_, runtime, _stage_identities = _inputs()
+    boundary = {
+        "java_executable_id": _id("stage-c-java"),
+        "native_executable_id": _id("stage-c-native"),
+        "transport_harness_id": _id("stage-c-harness"),
+        "netty_artifact_ids": (_id("netty-buffer"), _id("netty-transport")),
+    }
+    with pytest.raises(
+        Campaign02BindingError,
+        match="CAMPAIGN02_RUNTIME_LINEAGE_STAGE_C_BOUNDARY_VERSION_INVALID",
+    ):
+        replace(runtime, **boundary)
+    measured_lineage = replace(runtime, schema_version="5.0.0", **boundary)
+    assert QualifiedRuntimeLineage.from_dict(measured_lineage.document) == measured_lineage
+
+    plan = next(item for item in _compile().plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
+    with pytest.raises(ValueError, match="CAMPAIGN02_PLAN_STAGE_C_BOUNDARY_INVALID"):
+        replace(plan, java_executable_id=str(boundary["java_executable_id"]))
+    measured_plan = replace(plan, **boundary)
+    assert measured_plan.document["schema_version"] == "6.0.0"
+    assert measured_plan.java_executable_id == measured_lineage.java_executable_id
+    with pytest.raises(ValueError, match="CAMPAIGN02_PLAN_STAGE_C_BOUNDARY_INVALID"):
+        replace(measured_plan, gate_stage="STAGE_A_EXACTNESS")
+
+    with pytest.raises(
+        Campaign02BindingError,
+        match="CAMPAIGN02_STAGE_C_RUNTIME_LINEAGE_MISMATCH",
+    ):
+        _compile(runtime_lineage=measured_lineage)
+
+
+def test_definition_v5_compiles_only_with_bootstrap_and_measured_stage_c_bindings() -> None:
+    (
+        legacy_definition,
+        _legacy_attestation,
+        _legacy_validators,
+        _legacy_votes,
+        workload,
+        domain_manifest,
+        ticket_plan,
+        arms,
+        legacy_runtime,
+        _legacy_identities,
+    ) = _inputs()
+    identities = _stage_identity_manifest_v4()
+    network = identities.identity("network_fault_runner").value
+    netty_ids = network["netty_artifact_ids"]
+    assert isinstance(netty_ids, list)
+    runtime = replace(
+        legacy_runtime,
+        schema_version="5.0.0",
+        image_id=str(network["image_id"]),
+        stage_execution_identities_id=identities.content_id,
+        exactness_runner_id=identities.identity_id("exactness_runner"),
+        scientific_runner_id=identities.identity_id("scientific_runner"),
+        network_fault_runner_id=identities.identity_id("network_fault_runner"),
+        java_executable_id=str(network["java_executable_id"]),
+        native_executable_id=str(network["native_executable_id"]),
+        transport_harness_id=str(network["transport_harness_id"]),
+        netty_artifact_ids=tuple(str(item) for item in netty_ids),
+    )
+    definition_value = dict(legacy_definition.raw)
+    definition_value.update(
+        {
+            "bootstrap_mapping_id": _id("bootstrap-mapping"),
+            "image_id": runtime.image_id,
+            "qualified_runtime_lineage_id": runtime.content_id,
+            "schema_version": "5.0.0",
+            "stage_execution_identities_id": identities.content_id,
+        }
+    )
+    definition = BenchmarkDefinition.from_dict(definition_value)
+    attestation, validator_set, votes = _attestation(definition.content_id)
+    catalog = compile_campaign02_plan_catalog(
+        definition=definition,
+        attestation_document=attestation.document,
+        validator_set=validator_set,
+        votes=votes,
+        workload=workload,
+        domain_manifest=domain_manifest,
+        ticket_plan=ticket_plan,
+        arms=arms,
+        runtime_lineage=runtime,
+        stage_identities=identities,
+    )
+    stage_c = tuple(item for item in catalog.plans if item.gate_stage == "STAGE_C_EMULATED_WAN")
+    assert len(stage_c) == 15
+    assert {item.document["schema_version"] for item in stage_c} == {"6.0.0"}
+    assert {item.java_executable_id for item in stage_c} == {runtime.java_executable_id}
+    assert {item.native_executable_id for item in stage_c} == {runtime.native_executable_id}
+    assert {item.transport_harness_id for item in stage_c} == {runtime.transport_harness_id}
+    assert {item.netty_artifact_ids for item in stage_c} == {runtime.netty_artifact_ids}
 
 
 def test_caller_constructed_verified_attestation_cannot_enter_binder() -> None:

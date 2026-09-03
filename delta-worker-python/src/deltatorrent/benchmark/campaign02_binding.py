@@ -149,6 +149,10 @@ class QualifiedRuntimeLineage:
     exactness_runner_id: str | None = None
     scientific_runner_id: str | None = None
     network_fault_runner_id: str | None = None
+    java_executable_id: str | None = None
+    native_executable_id: str | None = None
+    transport_harness_id: str | None = None
+    netty_artifact_ids: tuple[str, ...] = ()
     schema_version: str = "3.0.0"
 
     def __post_init__(self) -> None:
@@ -194,7 +198,7 @@ class QualifiedRuntimeLineage:
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_RUNNER_SCHEMA_INVALID")
         if legacy and self.schema_version != "3.0.0":
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_VERSION_INVALID")
-        if stage_specific and self.schema_version not in {"3.0.0", "4.0.0"}:
+        if stage_specific and self.schema_version not in {"3.0.0", "4.0.0", "5.0.0"}:
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_VERSION_INVALID")
         runner_ids = (
             (self.runner_id,)
@@ -223,6 +227,25 @@ class QualifiedRuntimeLineage:
             != 3
         ):
             raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_STAGE_RUNNER_ALIAS")
+        measured_boundary_ids = (
+            self.java_executable_id,
+            self.native_executable_id,
+            self.transport_harness_id,
+        )
+        if self.schema_version == "5.0.0":
+            if (
+                not stage_specific
+                or any(
+                    not isinstance(value, str) or _CONTENT_ID.fullmatch(value) is None
+                    for value in measured_boundary_ids
+                )
+                or not self.netty_artifact_ids
+                or len(set(self.netty_artifact_ids)) != len(self.netty_artifact_ids)
+                or any(_CONTENT_ID.fullmatch(value) is None for value in self.netty_artifact_ids)
+            ):
+                raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_STAGE_C_BOUNDARY_INVALID")
+        elif any(value is not None for value in measured_boundary_ids) or self.netty_artifact_ids:
+            raise _fail("CAMPAIGN02_RUNTIME_LINEAGE_STAGE_C_BOUNDARY_VERSION_INVALID")
         if not (
             len(self.dataset_ids)
             == len(self.evaluation_profile_ids)
@@ -284,11 +307,21 @@ class QualifiedRuntimeLineage:
             "type_name",
             "writer_id",
         }
+        schema_version = value.get("schema_version") if isinstance(value, dict) else None
+        if schema_version == "5.0.0":
+            fields.update(
+                {
+                    "java_executable_id",
+                    "native_executable_id",
+                    "netty_artifact_ids",
+                    "transport_harness_id",
+                }
+            )
         if (
             not isinstance(value, dict)
             or set(value) != fields
             or value["campaign_id"] != "campaign-02"
-            or value["schema_version"] not in {"3.0.0", "4.0.0"}
+            or value["schema_version"] not in {"3.0.0", "4.0.0", "5.0.0"}
             or value["type_name"] != "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE"
             or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
             or value["stage_execution_model"] != "INDEPENDENT_BFT_RUNS"
@@ -326,6 +359,18 @@ class QualifiedRuntimeLineage:
             exactness_runner_id=str(value["exactness_runner_id"]),
             scientific_runner_id=str(value["scientific_runner_id"]),
             network_fault_runner_id=str(value["network_fault_runner_id"]),
+            java_executable_id=(
+                str(value["java_executable_id"]) if value["schema_version"] == "5.0.0" else None
+            ),
+            native_executable_id=(
+                str(value["native_executable_id"]) if value["schema_version"] == "5.0.0" else None
+            ),
+            transport_harness_id=(
+                str(value["transport_harness_id"]) if value["schema_version"] == "5.0.0" else None
+            ),
+            netty_artifact_ids=(
+                strings("netty_artifact_ids") if value["schema_version"] == "5.0.0" else ()
+            ),
             schema_version=str(value["schema_version"]),
         )
         if result.document != value:
@@ -366,6 +411,15 @@ class QualifiedRuntimeLineage:
                     "stage_execution_identities_id": self.stage_execution_identities_id,
                 }
             )
+            if self.schema_version == "5.0.0":
+                document.update(
+                    {
+                        "java_executable_id": self.java_executable_id,
+                        "native_executable_id": self.native_executable_id,
+                        "netty_artifact_ids": list(self.netty_artifact_ids),
+                        "transport_harness_id": self.transport_harness_id,
+                    }
+                )
         return document
 
     @property
@@ -507,11 +561,11 @@ def _validate_definition_bindings(
     if definition.content_id in _SUPERSEDED_DEFINITION_IDS:
         raise _fail("CAMPAIGN02_DEFINITION_SUPERSEDED_BEFORE_ATTESTATION")
     if (
-        definition.raw.get("schema_version") not in {"3.0.0", "4.0.0"}
+        definition.raw.get("schema_version") not in {"3.0.0", "4.0.0", "5.0.0"}
         or definition.campaign_id != "campaign-02"
         or not definition.primary
     ):
-        raise _fail("CAMPAIGN02_DEFINITION_V3_OR_V4_REQUIRED")
+        raise _fail("CAMPAIGN02_DEFINITION_V3_V4_OR_V5_REQUIRED")
     if runtime_lineage.runner_id is not None:
         raise _fail("CAMPAIGN02_STAGE_SPECIFIC_RUNTIME_LINEAGE_REQUIRED")
     if (
@@ -526,6 +580,30 @@ def _validate_definition_bindings(
         or stage_identities.identity_id("observation_writer") != runtime_lineage.writer_id
     ):
         raise _fail("CAMPAIGN02_STAGE_EXECUTION_IDENTITY_MANIFEST_MISMATCH")
+    network_identity = stage_identities.identity("network_fault_runner").value
+    raw_netty_ids = network_identity.get("netty_artifact_ids")
+    network_identity_netty_ids = (
+        tuple(item for item in raw_netty_ids if isinstance(item, str))
+        if isinstance(raw_netty_ids, list)
+        else ()
+    )
+    if (stage_identities.schema_version == "4.0.0") != (
+        runtime_lineage.schema_version == "5.0.0"
+    ) or (
+        runtime_lineage.schema_version == "5.0.0"
+        and (
+            runtime_lineage.image_id != network_identity.get("image_id")
+            or runtime_lineage.java_executable_id != network_identity.get("java_executable_id")
+            or runtime_lineage.native_executable_id != network_identity.get("native_executable_id")
+            or runtime_lineage.transport_harness_id != network_identity.get("transport_harness_id")
+            or runtime_lineage.netty_artifact_ids != network_identity_netty_ids
+        )
+    ):
+        raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_LINEAGE_MISMATCH")
+    if (definition.raw.get("schema_version") == "5.0.0") != (
+        runtime_lineage.schema_version == "5.0.0"
+    ):
+        raise _fail("CAMPAIGN02_DEFINITION_BOOTSTRAP_VERSION_MISMATCH")
     if (
         definition.B != workload.tokens_per_ticket
         or definition.H != workload.optimizer_steps_per_ticket
@@ -662,6 +740,26 @@ def compile_campaign02_plan_catalog(
                     ticket_plan_id=ticket_plan.content_id,
                     qualified_runtime_lineage_id=runtime_lineage.content_id,
                     gate_stage=gate_stage,
+                    java_executable_id=(
+                        runtime_lineage.java_executable_id
+                        if gate_stage == "STAGE_C_EMULATED_WAN"
+                        else None
+                    ),
+                    native_executable_id=(
+                        runtime_lineage.native_executable_id
+                        if gate_stage == "STAGE_C_EMULATED_WAN"
+                        else None
+                    ),
+                    transport_harness_id=(
+                        runtime_lineage.transport_harness_id
+                        if gate_stage == "STAGE_C_EMULATED_WAN"
+                        else None
+                    ),
+                    netty_artifact_ids=(
+                        runtime_lineage.netty_artifact_ids
+                        if gate_stage == "STAGE_C_EMULATED_WAN"
+                        else ()
+                    ),
                 )
                 plans.append(plan)
     expected_policy_count = len(CAMPAIGN02_GATE_STAGES) * 4 * len(definition.seeds)

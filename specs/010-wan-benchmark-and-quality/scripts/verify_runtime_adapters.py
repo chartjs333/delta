@@ -123,8 +123,9 @@ def exercise_native() -> list[dict[str, str]]:
 def java_sources() -> list[str]:
     main = ROOT / "delta-node-java/src/main/java/io/deltareduce/node/benchmark"
     test = ROOT / "delta-node-java/src/test/java/io/deltareduce/node/benchmark"
+    sources = (path for path in main.glob("*.java") if path.name != "MeasuredStageCTransport.java")
     return [
-        str(path) for path in sorted((*main.glob("*.java"), test / "BenchmarkConformance.java"))
+        str(path) for path in sorted((*sources, test / "BenchmarkConformance.java"))
     ]
 
 
