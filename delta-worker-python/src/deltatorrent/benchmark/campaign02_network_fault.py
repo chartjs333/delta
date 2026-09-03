@@ -111,7 +111,7 @@ class NetworkFaultPlanEvidence:
             "plan_id": self.plan_id,
             "resilience_result": "PASS",
             "runner_id": self.runner_id,
-            "schema_version": "4.0.0",
+            "schema_version": "5.0.0",
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
             "transport_harness_id": self.transport_harness_id,
@@ -121,7 +121,7 @@ class NetworkFaultPlanEvidence:
     @property
     def content_id(self) -> str:
         return sha256_content_id(
-            b"deltareduce.010.campaign02-network-fault-plan-evidence.v4\0"
+            b"deltareduce.010.campaign02-network-fault-plan-evidence.v5\0"
             + canonical_json_bytes(self.document)
         )
 

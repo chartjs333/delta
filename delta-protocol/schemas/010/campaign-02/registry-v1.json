@@ -211,14 +211,29 @@
       "sha256": "3b373525863f67fea26441c1f49ec505c135954c42fbb5d983c9a86d3dfe6d00"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-010-V5",
+      "path": "schemas/010/campaign-02/network-fault-plan-evidence-v5.json",
+      "sha256": "c1e17e112ff89671f8637e973bb575b9ce480b53d19ab64d27d4eac6e162e6a5"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V1",
       "path": "schemas/010/campaign-02/stage-c-candidate-run-v1.json",
       "sha256": "a25b0a9be64a63f58389abb7ac70259af0e42849f65f908d2926be5d2ac61624"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V2",
+      "path": "schemas/010/campaign-02/stage-c-candidate-run-v2.json",
+      "sha256": "3cd5abf6e161f28c52ef8129f9ec7d17cf6f09af7e8c42637f0b8ef2910fa65a"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-010-V1",
       "path": "schemas/010/campaign-02/stage-c-candidate-summary-v1.json",
       "sha256": "a7f9db97390c420f6ea38fc15089d9db105b72667e38fb9c9c044f4aef527d3c"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-010-V2",
+      "path": "schemas/010/campaign-02/stage-c-candidate-summary-v2.json",
+      "sha256": "f768659ed62b56e073c97e8d549ecd8b3138c85674a940aedc93665cb40a250a"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-STAGE-A-SEMANTIC-EVIDENCE-010-V1",
@@ -581,14 +596,29 @@
       "value": "application/vnd.deltareduce.campaign-02.network-fault-plan-evidence-v4+json;version=4"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-V5",
+      "schema_id": "SCHEMA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-010-V5",
+      "value": "application/vnd.deltareduce.campaign-02.network-fault-plan-evidence-v5+json;version=5"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.stage-c-candidate-run-v1+json;version=1"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.stage-c-candidate-run-v2+json;version=2"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.stage-c-candidate-summary-v1+json;version=1"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.stage-c-candidate-summary-v2+json;version=2"
     },
     {
       "id": "MEDIA-CAMPAIGN02-STAGE-A-SEMANTIC-EVIDENCE-V1",
@@ -701,7 +731,7 @@
       "value": "application/vnd.deltareduce.campaign-02.native-chain-admission-receipt-v1+json;version=1"
     }
   ],
-  "registry_version": "010.10.0-causal-stagec-terminal-registration",
+  "registry_version": "010.11.0-concentrated-loss-causal-projection",
   "schema_version": "1.0.0",
   "semantic_completeness_claimed": false
 }

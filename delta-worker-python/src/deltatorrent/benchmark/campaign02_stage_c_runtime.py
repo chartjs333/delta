@@ -298,10 +298,13 @@ class NativeFaultCausalEvidence:
                 or self.quorum_capacity_before != 10
                 or len(self.lost_worker_ids) != self.worker_count_lost
                 or len(self.lost_ticket_ids) != self.worker_count_lost
+                or transition.observed_outcome not in {"ABORTED", "APPLIED"}
             )
             successful_loss_invalid = transition.observed_outcome == "APPLIED" and (
                 self.worker_count_lost != 1
                 or self.loss_fraction != (1, 10)
+                or self.lost_worker_ids != ("worker-009",)
+                or self.lost_ticket_ids != ("ticket-009",)
                 or len(self.isc_ticket_set) != 9
                 or any(remaining.get(domain, 0) < count for domain, count in required.items())
                 or self.quorum_capacity_after != 9
@@ -317,15 +320,48 @@ class NativeFaultCausalEvidence:
             concentrated_abort_invalid = transition.observed_outcome == "ABORTED" and (
                 self.worker_count_lost != 2
                 or self.loss_fraction != (2, 10)
+                or self.lost_worker_ids != ("worker-000", "worker-001")
+                or self.lost_ticket_ids != ("ticket-000", "ticket-001")
+                or set(self.dropped_message_ids) != {"worker-ticket-000", "worker-ticket-001"}
                 or self.isc_ticket_set
                 or remaining != {"code": 3, "text": 5}
                 or self.quorum_capacity_after != 8
                 or self.missing_work_policy_result != "MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT"
+                or self.aggregate_root_qc_id is not None
+                or self.apply_work_item_id is not None
+                or self.apply_qc_id is not None
                 or self.abort_qc_id is None
+                or self.next_checkpoint_id is not None
+                or self.parent_optimizer_state_id is not None
+                or self.next_optimizer_state_id is not None
+                or self.apply_validator_set_id is not None
+                or self.apply_quorum_threshold != 0
+                or self.aggregate_root_qc_tick != 0
+                or self.apply_qc_tick != 0
+                or self.quorum_formation_tick != 0
                 or self.certified_abort_tick != self.hard_deadline_tick
                 or self.failed_quorum_reason != "MANDATORY_DOMAIN_CODE_3_OF_4_AT_HARD_DEADLINE"
                 or self.current_pointer_before != self.parent_checkpoint_id
                 or self.current_pointer_after != self.parent_checkpoint_id
+                or self.unavailable_ids != ("worker-000", "worker-001")
+                or {
+                    message_id
+                    for message_id, _ in self.message_delivery_ticks
+                    if message_id.startswith("worker-ticket-")
+                }
+                != {f"worker-ticket-{index:03d}" for index in range(2, 10)}
+                or {
+                    message_id
+                    for message_id, _ in self.message_delivery_ticks
+                    if message_id.startswith("aggregate-vote-")
+                    or message_id.startswith("apply-vote-")
+                }
+                or {
+                    message_id
+                    for message_id, tick in self.message_delivery_ticks
+                    if message_id.startswith("abort-vote-") and tick == self.hard_deadline_tick
+                }
+                != {f"abort-vote-{index}" for index in range(3)}
             )
             if common_invalid or successful_loss_invalid or concentrated_abort_invalid:
                 raise _fail("CAMPAIGN02_STAGE_C_WORKER_LOSS_CAUSAL_EVIDENCE_INVALID")

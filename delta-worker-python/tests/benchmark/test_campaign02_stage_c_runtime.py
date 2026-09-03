@@ -11,6 +11,7 @@ from deltatorrent.benchmark.campaign02_stage_c_runtime import (
     MeasuredStageCRuntimeError,
     RuntimeArtifact,
     _parse_receipt,
+    _request_bytes,
 )
 from deltatorrent.benchmark.fault_profiles import FaultProfile
 from deltatorrent.benchmark.network_profiles import NetworkProfile
@@ -34,6 +35,7 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
     applied = observed == "APPLIED"
     partition = event.actor_class == "REGION" and event.action == "PARTITION"
     worker = event.actor_class == "WORKER" and event.action == "CRASH"
+    concentrated = event.event_id == "worker-loss-concentrated"
     profile = (
         "wan-regional"
         if event.actor_class == "REGION" and event.action == "DELAY"
@@ -45,7 +47,12 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
     parent = "sha256:" + "c" * 64
     next_checkpoint = "sha256:" + "d" * 64
     hard_deadline = event.at_step + 60
-    if worker:
+    if concentrated:
+        deliveries = [
+            *(f"worker-ticket-{index:03d}:{event.at_step + index}" for index in range(2, 10)),
+            *(f"abort-vote-{index}:{hard_deadline}" for index in range(3)),
+        ]
+    elif worker:
         deliveries = [
             *(f"worker-ticket-{index:03d}:{event.at_step + index}" for index in range(9)),
             *(f"aggregate-vote-{index}:{event.at_step + 20 + index}" for index in range(3)),
@@ -66,7 +73,7 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
     else:
         deliveries = [f"message-0:{event.at_step + 1}"]
     fields = {
-        "abort_qc_id": "sha256:" + "a" * 64 if partition else none,
+        "abort_qc_id": "sha256:" + "a" * 64 if partition or concentrated else none,
         "aggregate_root_qc_id": "sha256:" + "1" * 64 if applied else none,
         "aggregate_root_qc_tick": str(event.at_step + 22 if applied else 0),
         "apply_qc_id": "sha256:" + "3" * 64 if applied else none,
@@ -75,53 +82,79 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
         "apply_validator_set_id": "sha256:" + "4" * 64 if applied else none,
         "apply_work_item_id": "sha256:" + "2" * 64 if applied else none,
         "causal_transport_receipt_id": "sha256:" + "5" * 64,
-        "certified_abort_tick": str(hard_deadline if partition else 0),
+        "certified_abort_tick": str(hard_deadline if partition or concentrated else 0),
         "current_checkpoint_advanced": "true" if current_advanced else "false",
-        "current_pointer_after": (next_checkpoint if applied else parent if partition else none),
-        "current_pointer_before": parent if applied or partition else none,
+        "current_pointer_after": (
+            next_checkpoint if applied else parent if partition or concentrated else none
+        ),
+        "current_pointer_before": parent if applied or partition or concentrated else none,
         "dropped_message_ids": (
             "partition-aggregate-2,partition-aggregate-3"
             if partition
+            else "worker-ticket-000,worker-ticket-001"
+            if concentrated
             else "worker-ticket-009"
             if worker
             else none
         ),
         "event_id": event.event_id,
         "failed_quorum_reason": (
-            "AGGREGATE_ROOT_QC_2_OF_3_AT_HARD_DEADLINE" if partition else none
+            "AGGREGATE_ROOT_QC_2_OF_3_AT_HARD_DEADLINE"
+            if partition
+            else "MANDATORY_DOMAIN_CODE_3_OF_4_AT_HARD_DEADLINE"
+            if concentrated
+            else none
         ),
         "gst_tick": str(event.at_step),
         "hard_deadline_tick": str(hard_deadline),
         "isc_ticket_set": (
             ",".join(f"ticket-{index:03d}" for index in range(9))
-            if worker
+            if worker and not concentrated
             else ",".join(f"ticket-{index:03d}" for index in range(4))
             if applied
             else none
         ),
-        "loss_fraction": "1/10" if worker else "0/1",
-        "lost_ticket_ids": "ticket-009" if worker else none,
-        "lost_worker_ids": "worker-009" if worker else none,
+        "loss_fraction": "2/10" if concentrated else "1/10" if worker else "0/1",
+        "lost_ticket_ids": (
+            "ticket-000,ticket-001" if concentrated else "ticket-009" if worker else none
+        ),
+        "lost_worker_ids": (
+            "worker-000,worker-001" if concentrated else "worker-009" if worker else none
+        ),
         "message_delivery_ticks": ",".join(deliveries),
         "missing_work_policy_result": (
-            "OMIT_PRE_FREEZE_LOST_TICKET_EXACT_ISC" if worker else "NOT_APPLICABLE"
+            "MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT"
+            if concentrated
+            else "OMIT_PRE_FREEZE_LOST_TICKET_EXACT_ISC"
+            if worker
+            else "NOT_APPLICABLE"
         ),
         "network_profile_id": profile,
         "next_checkpoint_id": next_checkpoint if applied else none,
         "next_optimizer_state_id": "sha256:" + "f" * 64 if applied else none,
-        "parent_checkpoint_id": parent if applied or partition else none,
+        "parent_checkpoint_id": parent if applied or partition or concentrated else none,
         "parent_optimizer_state_id": "sha256:" + "e" * 64 if applied else none,
         "partition_start_tick": str(event.at_step if partition else 0),
-        "per_domain_remaining_tickets": "code:5,text:4" if worker else none,
+        "per_domain_remaining_tickets": (
+            "code:3,text:5" if concentrated else "code:5,text:4" if worker else none
+        ),
         "per_domain_required_tickets": "code:4,text:4" if worker else none,
         "pi_d_renormalized": "false",
-        "quorum_capacity_after": "9" if worker else "2" if partition else "0",
+        "quorum_capacity_after": (
+            "8" if concentrated else "9" if worker else "2" if partition else "0"
+        ),
         "quorum_capacity_before": "10" if worker else "4" if partition else "0",
         "quorum_formation_tick": str(event.at_step + 22 if applied else 0),
         "schema_version": "1.0.0",
-        "unavailable_ids": "validator-2,validator-3" if partition else none,
+        "unavailable_ids": (
+            "validator-2,validator-3"
+            if partition
+            else "worker-000,worker-001"
+            if concentrated
+            else none
+        ),
         "worker_count_before": "10" if worker else "0",
-        "worker_count_lost": "1" if worker else "0",
+        "worker_count_lost": "2" if concentrated else "1" if worker else "0",
     }
     return "".join(f"{key}={value}\n" for key, value in sorted(fields.items())).encode("ascii")
 
@@ -129,6 +162,7 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
 def _receipt(
     *,
     observed_override: str | None = None,
+    observed_override_event_id: str | None = None,
     source_override: str | None = None,
     operation_count_override: int | None = None,
     wal_replayed_override: bool | None = None,
@@ -167,7 +201,13 @@ def _receipt(
         )
         lines.append(line + " " + sha256_content_id(PROFILE_DOMAIN + line.encode("ascii")))
     for index, fault in enumerate(faults.events):
-        observed = observed_override if index == 0 and observed_override else fault.expected_outcome
+        override_observed = observed_override is not None and (
+            fault.event_id == observed_override_event_id
+            if observed_override_event_id is not None
+            else index == 0
+        )
+        observed = observed_override if override_observed else fault.expected_outcome
+        assert observed is not None
         native_trace = f"1|ACT-{fault.event_id}|state|effect|{observed}\n".encode("ascii")
         ids = [
             sha256_content_id(native_trace),
@@ -176,7 +216,10 @@ def _receipt(
         wal_replayed = fault.action == "RESTART"
         view_change = fault.actor_class == "VALIDATOR" and fault.action == "CRASH"
         current_advanced = observed == "APPLIED"
-        availability = not (fault.actor_class == "STORAGE" and fault.action == "CRASH")
+        availability = not (
+            (fault.actor_class == "STORAGE" and fault.action == "CRASH")
+            or fault.event_id == "worker-loss-concentrated"
+        )
         if index == 0:
             wal_replayed = wal_replayed if wal_replayed_override is None else wal_replayed_override
             view_change = view_change if view_change_override is None else view_change_override
@@ -252,13 +295,34 @@ def _rewrite_causal(
 def test_measured_receipt_reconciles_java_native_and_os_layers() -> None:
     receipt = _parse(_receipt())
     assert len(receipt.network_counters) == 3
-    assert len(receipt.fault_transitions) == 7
+    assert len(receipt.fault_transitions) == 8
     assert all(item.passed for item in receipt.fault_transitions)
+
+
+def test_executable_profile_binds_concentrated_loss_to_cross_language_request() -> None:
+    profiles, faults = _inputs()
+    concentrated = next(
+        item for item in faults.events if item.event_id == "worker-loss-concentrated"
+    )
+    request = _request_bytes("sha256:" + "a" * 64, 40, 64, profiles, faults).decode("ascii")
+
+    assert faults.profile_id == "primary-crash-restart-partition-v2"
+    assert len(faults.events) == 8
+    assert concentrated.actor_class == "WORKER"
+    assert concentrated.action == "CRASH"
+    assert concentrated.expected_outcome == "ABORTED"
+    assert "fault_count=8\n" in request
+    assert "fault.1.id=worker-loss-concentrated\n" in request
 
 
 def test_expected_outcome_is_only_an_assertion() -> None:
     with pytest.raises(MeasuredStageCRuntimeError, match="RUNTIME_TERMINAL_MISMATCH"):
-        _parse(_receipt(observed_override="SAFE_ABORT"))
+        _parse(
+            _receipt(
+                observed_override="SAFE_ABORT",
+                observed_override_event_id="validator-restart",
+            )
+        )
 
 
 def test_applied_without_apply_qc_is_rejected() -> None:
@@ -340,54 +404,24 @@ def test_regional_delay_reaching_aggregate_only_is_rejected() -> None:
 
 
 def test_concentrated_mandatory_domain_loss_has_certified_abort_semantics() -> None:
-    worker = _parse(_receipt()).fault_transitions[0]
+    worker = next(
+        item
+        for item in _parse(_receipt()).fault_transitions
+        if item.event_id == "worker-loss-concentrated"
+    )
     parent = worker.causal_evidence.parent_checkpoint_id
     assert parent is not None
-    deadline = worker.causal_evidence.hard_deadline_tick
-    deliveries = (
-        *((f"worker-ticket-{index:03d}", worker.at_step + index) for index in range(2, 10)),
-        *((f"abort-vote-{index}", deadline) for index in range(3)),
-    )
-    causal = replace(
-        worker.causal_evidence,
-        message_delivery_ticks=deliveries,
-        dropped_message_ids=("worker-ticket-000", "worker-ticket-001"),
-        aggregate_root_qc_id=None,
-        apply_work_item_id=None,
-        apply_qc_id=None,
-        abort_qc_id="sha256:" + "9" * 64,
-        next_checkpoint_id=None,
-        parent_optimizer_state_id=None,
-        next_optimizer_state_id=None,
-        current_pointer_before=parent,
-        current_pointer_after=parent,
-        apply_validator_set_id=None,
-        apply_quorum_threshold=0,
-        worker_count_lost=2,
-        loss_fraction=(2, 10),
-        lost_worker_ids=("worker-000", "worker-001"),
-        lost_ticket_ids=("ticket-000", "ticket-001"),
-        per_domain_remaining_tickets=(("code", 3), ("text", 5)),
-        isc_ticket_set=(),
-        quorum_capacity_after=8,
-        missing_work_policy_result="MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT",
-        quorum_formation_tick=0,
-        aggregate_root_qc_tick=0,
-        apply_qc_tick=0,
-        unavailable_ids=("worker-000", "worker-001"),
-        failed_quorum_reason="MANDATORY_DOMAIN_CODE_3_OF_4_AT_HARD_DEADLINE",
-        certified_abort_tick=deadline,
-    )
-    aborted = replace(
-        worker,
-        expected_outcome="ABORTED",
-        observed_outcome="ABORTED",
-        current_checkpoint_advanced=False,
-        availability_success=False,
-        causal_evidence=causal,
-    )
-    assert aborted.passed
-    assert not aborted.current_checkpoint_advanced
+    assert worker.passed and worker.observed_outcome == "ABORTED"
+    assert worker.causal_evidence.lost_worker_ids == ("worker-000", "worker-001")
+    assert worker.causal_evidence.lost_ticket_ids == ("ticket-000", "ticket-001")
+    assert dict(worker.causal_evidence.per_domain_remaining_tickets) == {"code": 3, "text": 5}
+    assert worker.causal_evidence.aggregate_root_qc_id is None
+    assert worker.causal_evidence.apply_qc_id is None
+    assert worker.causal_evidence.abort_qc_id is not None
+    assert worker.causal_evidence.certified_abort_tick == worker.causal_evidence.hard_deadline_tick
+    assert worker.causal_evidence.current_pointer_before == parent
+    assert worker.causal_evidence.current_pointer_after == parent
+    assert not worker.current_checkpoint_advanced
 
 
 def test_hardcoded_outcome_without_actual_runtime_source_is_rejected() -> None:
@@ -559,3 +593,14 @@ def test_primary_runner_source_has_no_simulation_or_expected_outcome_assignment(
     assert "simulate(" not in source
     assert "apply_profile(" not in source
     assert "observed_outcome = event.expected_outcome" not in source
+    sidecar = (ROOT / "delta-runtime-cpp/src/benchmark/sidecar_main.cpp").read_text(
+        encoding="utf-8"
+    )
+    java = (
+        ROOT
+        / "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java"
+    ).read_text(encoding="utf-8")
+    assert "fault_outcome(" not in sidecar
+    assert "expected_outcome" not in sidecar
+    assert 'fault.id().equals("worker-loss-concentrated")' in java
+    assert '"ABORT_VOTE", hardDeadlineTick, true' in java

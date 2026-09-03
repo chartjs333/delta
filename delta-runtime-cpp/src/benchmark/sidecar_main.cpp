@@ -129,21 +129,6 @@ void append_journal(
   return output;
 }
 
-[[nodiscard]] std::string fault_outcome(
-    std::string_view actor,
-    std::string_view action,
-    bool assumptions_hold) {
-  if (!assumptions_hold) return "SAFE_BLOCKED";
-  if (actor == "WORKER" && action == "CRASH") return "APPLIED";
-  if (actor == "VALIDATOR" && action == "CRASH") return "VIEW_CHANGE";
-  if (actor == "VALIDATOR" && action == "RESTART") return "RECOVERED";
-  if (actor == "STORAGE" && action == "CRASH") return "RETRIEVAL";
-  if (actor == "STORAGE" && action == "RESTART") return "RECOVERED";
-  if (actor == "REGION" && action == "DELAY") return "APPLIED";
-  if (actor == "REGION" && action == "PARTITION") return "ABORTED";
-  throw std::runtime_error("unsupported fault transition");
-}
-
 [[nodiscard]] delta::runtime::benchmark::FaultAction fault_action(std::string_view action) {
   using delta::runtime::benchmark::FaultAction;
   if (action == "CRASH") return FaultAction::crash;
@@ -187,7 +172,6 @@ void execute_fault(
   }
   const auto step = parse_step(fields[4]);
   const auto assumptions_hold = fields[5] == "1";
-  const auto expected_outcome = fault_outcome(fields[2], fields[3], assumptions_hold);
   const auto causal_schedule = hex_decode(fields[6], maximum_bytes);
   const auto event = delta::runtime::benchmark::FaultEvent{
       fields[1],
@@ -195,7 +179,6 @@ void execute_fault(
       fault_action(fields[3]),
       step,
       assumptions_hold,
-      expected_outcome,
       causal_schedule};
   const auto controller = delta::runtime::benchmark::FaultController({event});
   if (controller.events_at(step) != std::vector{event}) {
@@ -218,9 +201,6 @@ void execute_fault(
   }
   const auto execution = delta::runtime::benchmark::execute_fault_scenario(
       event, journal.parent_path() / ("runtime-" + fields[0]), fields[0]);
-  if (execution.observed_outcome != expected_outcome) {
-    throw std::runtime_error("actual runtime fault outcome differs from oracle");
-  }
   std::cout << "FAULT_OK " << sequence << ' ' << (replay ? 1 : 0) << ' '
             << execution.observed_outcome << " ACTUAL_RUNTIME_TRANSITION "
             << execution.native_trace_id << ' '

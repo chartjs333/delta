@@ -220,15 +220,30 @@ SCHEMAS: Final = {
         "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE",
         "4.0.0",
     ),
+    "network-fault-plan-evidence-v5": (
+        "SCHEMA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-010-V5",
+        "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE",
+        "5.0.0",
+    ),
     "stage-c-candidate-run-v1": (
         "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V1",
         "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_RUN",
         "1.0.0",
     ),
+    "stage-c-candidate-run-v2": (
+        "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V2",
+        "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_RUN",
+        "2.0.0",
+    ),
     "stage-c-candidate-summary-v1": (
         "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-010-V1",
         "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_SUMMARY",
         "1.0.0",
+    ),
+    "stage-c-candidate-summary-v2": (
+        "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-010-V2",
+        "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_SUMMARY",
+        "2.0.0",
     ),
     "stage-a-semantic-evidence-v1": (
         "SCHEMA-CAMPAIGN02-STAGE-A-SEMANTIC-EVIDENCE-010-V1",
@@ -1893,6 +1908,17 @@ def schema_documents() -> dict[str, dict[str, object]]:
     documents["network-fault-plan-evidence-v4"] = schema(
         "network-fault-plan-evidence-v4", network_fault_v4
     )
+    network_fault_v5 = {key: value for key, value in network_fault_v4.items()}
+    network_fault_v5["fault_results"] = {
+        "items": strict(causal_fault_result),
+        "maxItems": 8,
+        "minItems": 8,
+        "type": "array",
+        "uniqueItems": True,
+    }
+    documents["network-fault-plan-evidence-v5"] = schema(
+        "network-fault-plan-evidence-v5", network_fault_v5
+    )
     candidate_plan_record = strict(
         {
             "applied_network_profile_ids": {
@@ -1957,6 +1983,26 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "stage_gate_receipt_emitted": {"const": False},
         },
     )
+    candidate_plan_record_v2 = strict(
+        {
+            **candidate_plan_record["properties"],
+            "causal_projection_id": content_id(),
+        }
+    )
+    candidate_run_v2 = {
+        key: value
+        for key, value in documents["stage-c-candidate-run-v1"]["properties"].items()
+        if key not in {"formal_semantics_id", "schema_version", "type_name"}
+    }
+    candidate_run_v2["causal_root"] = content_id()
+    candidate_run_v2["plan_records"] = {
+        "items": candidate_plan_record_v2,
+        "maxItems": 15,
+        "minItems": 15,
+        "type": "array",
+        "uniqueItems": True,
+    }
+    documents["stage-c-candidate-run-v2"] = schema("stage-c-candidate-run-v2", candidate_run_v2)
     exact_candidate_ids = {
         "items": content_id(),
         "maxItems": 15,
@@ -1996,6 +2042,16 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "source_tree": commit_id(),
             "stage_gate_receipt_emitted": {"const": False},
         },
+    )
+    candidate_summary_v2 = {
+        key: value
+        for key, value in documents["stage-c-candidate-summary-v1"]["properties"].items()
+        if key not in {"formal_semantics_id", "schema_version", "type_name"}
+    }
+    candidate_summary_v2["causal_root"] = content_id()
+    candidate_summary_v2["repeat_causal_match"] = {"const": True}
+    documents["stage-c-candidate-summary-v2"] = schema(
+        "stage-c-candidate-summary-v2", candidate_summary_v2
     )
     artifact_summary = strict(
         {
@@ -2370,7 +2426,7 @@ def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
         "fixtures": fixture_entries(),
         "formal_semantics_id": FORMAL_ID,
         "media_types": media_types,
-        "registry_version": "010.10.0-causal-stagec-terminal-registration",
+        "registry_version": "010.11.0-concentrated-loss-causal-projection",
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,
     }

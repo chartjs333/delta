@@ -350,14 +350,24 @@ public final class MeasuredStageCTransport {
       Fault fault, Profile profile, long hardDeadlineTick) {
     var messages = new ArrayList<CausalMessage>();
     if (fault.actor().equals("WORKER") && fault.action().equals("CRASH")) {
+      boolean concentrated = fault.id().equals("worker-loss-concentrated");
+      BenchmarkContracts.require(concentrated || fault.id().equals("worker-loss-10pct"),
+          "unknown worker-loss causal schedule");
       for (int index = 0; index < 10; index++) {
         String ordinal = paddedOrdinal(index);
         messages.add(new CausalMessage("worker-ticket-" + ordinal, "worker-" + ordinal,
             index < 5 ? "code" : "text", "ticket-" + ordinal, "WORK_TICKET",
-            fault.step() + index, index != 9));
+            fault.step() + index, concentrated ? index >= 2 : index != 9));
       }
-      addQuorumMessages(messages, "aggregate", "AGGREGATE_VOTE", fault.step() + 20);
-      addQuorumMessages(messages, "apply", "APPLY_VOTE", fault.step() + 30);
+      if (concentrated) {
+        for (int index = 0; index < 3; index++) {
+          messages.add(new CausalMessage("abort-vote-" + index, "validator-" + index,
+              "NONE", "NONE", "ABORT_VOTE", hardDeadlineTick, true));
+        }
+      } else {
+        addQuorumMessages(messages, "aggregate", "AGGREGATE_VOTE", fault.step() + 20);
+        addQuorumMessages(messages, "apply", "APPLY_VOTE", fault.step() + 30);
+      }
     } else if (fault.actor().equals("REGION") && fault.action().equals("DELAY")) {
       long ticketTick = Math.addExact(fault.step(), Math.max(1, profile.jitterMillis()));
       long aggregateTick = Math.addExact(fault.step(), Math.max(1, profile.rttMillis() / 2));

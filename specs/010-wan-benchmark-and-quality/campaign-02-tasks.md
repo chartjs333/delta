@@ -374,6 +374,35 @@ next separate governance operation. Definition votes remain `0`, attestation and
 authorization remain absent, authoritative catalog construction has not occurred, primary
 observations remain `0`, Feature 010 remains `NO_GO`, and Feature 011 remains blocked.
 
+## Concentrated-loss production projection after repeated PR #20 review
+
+The repeated independent review found that the `afdf1a23...` source and `034e37a...` terminal
+candidate executed only seven fault events per plan. That lineage is retained as historical
+qualification evidence but cannot close C2-043 or C2-045. The following corrective generation
+does not authorize a benchmark stage or alter any governance STOP.
+
+- [x] **C2-046** Version the source-bound executable fault trace and execute concentrated mandatory
+  `code`-domain worker loss through Python → Java Netty → native sidecar → native AbortQC → typed
+  Python evidence. Require loss of workers/tickets `000` and `001`, remaining capacity
+  `code=3,text=5`, no aggregate/apply votes, three abort votes at the exact hard deadline and an
+  unchanged current pointer.
+- [x] **C2-047** Remove the actor/action-only sidecar outcome oracle. Native code derives the
+  observed terminal only from the delivered causal schedule, runtime state, quorum and domain
+  capacity; the immutable profile expectation remains an external Python assertion.
+- [x] **C2-048** Add a full causal projection ID to every candidate plan record and require equal
+  causal roots across the two executions in each push and pull-request context. Version the typed
+  plan evidence and candidate schemas without rewriting historical schemas.
+- [ ] **C2-049** Seal the replacement source, re-run designated-GPU, portable, sanitizer, TSan,
+  C++20/C++23 and formal qualification, publish two exact 15-plan/eight-fault executions in both
+  push and pull-request contexts, bind the immutable terminal HEAD externally, and update PR #20
+  title/body to the exact terminal lineage and governance STOP.
+
+Until C2-049 is closed, PR #20 remains `DRAFT / CHANGES_REQUIRED / DO NOT MERGE / DO NOT MARK
+READY`. C2-023 and C2-024 remain unauthorized, Definition votes remain `0`, attestation and
+execution authorization remain absent, authoritative catalog construction has not occurred,
+primary observations remain `0`, `BenchmarkResultQC` remains absent, Feature 010 remains `NO_GO`
+and Feature 011 remains blocked.
+
 ## Unconditional STOP conditions
 
 - No old Definition or Stage A artifact may be edited, overwritten or linked as a new gate result.

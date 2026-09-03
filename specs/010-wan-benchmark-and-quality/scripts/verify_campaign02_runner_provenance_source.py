@@ -1,4 +1,4 @@
-"""Qualify C2-034..C2-044 remediation source without executing a primary stage."""
+"""Qualify C2-034..C2-048 remediation source without executing a primary stage."""
 
 from __future__ import annotations
 
@@ -41,9 +41,12 @@ NEW_SOURCES: Final = (
     "delta-protocol/schemas/010/campaign-02/registry-v1.json",
     "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v1.json",
     "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v4.json",
+    "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v5.json",
     "delta-protocol/schemas/010/campaign-02/benchmark-definition-v4.json",
     "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v4.json",
     "delta-protocol/schemas/010/campaign-02/stage-execution-identities-v3.json",
+    "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v2.json",
+    "delta-protocol/schemas/010/campaign-02/stage-c-candidate-summary-v2.json",
     "delta-protocol/schemas/010/campaign-02/stage-a-semantic-evidence-v1.json",
     "delta-protocol/schemas/010/campaign-02/stage-gate-receipt-v3.json",
     "delta-protocol/schemas/010/campaign-02/stage-gate-result-v2.json",
@@ -200,6 +203,7 @@ def verify_junit(path: Path) -> dict[str, object]:
         "test_applied_without_apply_qc_is_rejected",
         "test_applied_with_unchanged_current_pointer_is_rejected",
         "test_concentrated_mandatory_domain_loss_has_certified_abort_semantics",
+        "test_executable_profile_binds_concentrated_loss_to_cross_language_request",
         "test_non_successful_registration_run_is_rejected",
         "test_partition_abort_before_exact_deadline_is_rejected",
         "test_partition_with_current_advance_is_rejected",
@@ -250,7 +254,20 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
         and isinstance(execution_binding, dict),
         "CAMPAIGN02_RUNNER_PROVENANCE_REPORT_INVALID",
     )
-    task_ids.extend(["C2-034", "C2-035", "C2-036", "C2-037", "C2-042", "C2-043", "C2-044"])
+    task_ids.extend(
+        [
+            "C2-034",
+            "C2-035",
+            "C2-036",
+            "C2-037",
+            "C2-042",
+            "C2-043",
+            "C2-044",
+            "C2-046",
+            "C2-047",
+            "C2-048",
+        ]
+    )
     checks.extend(
         [
             "IDENTITY_BEARING_PRODUCTION_RUNNER_PASS",
@@ -262,21 +279,26 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
             "AGGREGATE_ROOT_QC_TO_APPLY_QC_CURRENT_POINTER_PASS",
             "CAUSAL_WORKER_NETWORK_DEADLINE_EXECUTION_PASS",
             "REGISTRATION_TERMINAL_RESULT_QUORUM_BINDING_PASS",
+            "CONCENTRATED_WORKER_LOSS_PRODUCTION_PROJECTION_PASS",
+            "NATIVE_OUTCOME_ORACLE_REMOVED_PASS",
+            "CROSS_RUN_CAUSAL_PROJECTION_MATCH_PASS",
         ]
     )
     execution_binding.update(
         {
-            "production_receipt_schema": "4.0.0",
+            "production_receipt_schema": "5.0.0",
             "registration_receipt_schema": "3.0.0",
             "registration_signature_schema": "2.0.0",
             "runner_object_identity_verified_before_first_plan": True,
             "stage_a_semantic_artifact_count": 7,
             "stage_c_concrete_plan_count": 15,
+            "stage_c_fault_result_count_per_plan": 8,
+            "stage_c_repeat_causal_projection_required": True,
             "workflow_sha_from_github_context": True,
         }
     )
-    report["qualification_generation"] = "C2_042_C2_044_SOURCE_PENDING_TERMINAL_CI_RECEIPT"
-    report["schema_version"] = "4.0.0"
+    report["qualification_generation"] = "C2_046_C2_048_SOURCE_PENDING_TERMINAL_CI_RECEIPT"
+    report["schema_version"] = "5.0.0"
     return report
 
 

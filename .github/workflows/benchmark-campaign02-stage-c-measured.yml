@@ -108,6 +108,7 @@ jobs:
           grep -F '"execution_authorized":false' "$summary"
           grep -F '"observation_count":0' "$summary"
           grep -F '"plan_count":15' "$summary"
+          grep -F '"repeat_causal_match":true' "$summary"
           grep -F '"repeat_semantic_match":true' "$summary"
           test "$(find "$RUNNER_TEMP/stage-c-candidate" -name 'network-fault-*.json' | wc -l)" = 30
       - name: Retain full non-primary candidate evidence package

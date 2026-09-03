@@ -58,7 +58,7 @@ void expect(bool condition, const char* message) {
           "ticket-" + ordinal,
           "WORK_TICKET",
           event.logical_step + index,
-          event.actor_class == "WORKER" && event.expected_outcome == "ABORTED"
+          event.event_id == "worker-loss-concentrated"
               ? index >= 2U
               : index != lost,
       });
@@ -67,7 +67,7 @@ void expect(bool condition, const char* message) {
   std::string profile = "lan-control";
   if (event.actor_class == "WORKER") {
     tickets(10U, 9U);
-    if (event.expected_outcome == "ABORTED") {
+    if (event.event_id == "worker-loss-concentrated") {
       for (std::size_t index = 0U; index < 3U; ++index) {
         messages.push_back(Message{
             "abort-" + std::to_string(index),
@@ -174,8 +174,8 @@ void test_fault_order_and_sidecar_replay() {
   using delta::runtime::benchmark::FaultController;
   using delta::runtime::benchmark::FaultEvent;
   FaultController controller(std::vector<FaultEvent>{
-      {"restart", "VALIDATOR", FaultAction::restart, 3U, true, "RECOVERED", {}},
-      {"worker-loss", "WORKER", FaultAction::crash, 2U, true, "APPLIED", {}},
+      {"restart", "VALIDATOR", FaultAction::restart, 3U, true, {}},
+      {"worker-loss", "WORKER", FaultAction::crash, 2U, true, {}},
   });
   expect(controller.events().front().event_id == "worker-loss", "fault events not sorted");
   expect(controller.events_at(3U).size() == 1U, "fault event lookup failed");
@@ -202,23 +202,27 @@ void test_faults_are_observed_from_actual_runtime_state() {
   using delta::runtime::benchmark::FaultEvent;
   using delta::runtime::benchmark::execute_fault_scenario;
   std::vector<FaultEvent> events{
-      {"worker-loss", "WORKER", FaultAction::crash, 100U, true, "APPLIED", {}},
-      {"worker-domain-loss", "WORKER", FaultAction::crash, 110U, true, "ABORTED", {}},
-      {"validator-crash", "VALIDATOR", FaultAction::crash, 120U, true, "VIEW_CHANGE", {}},
-      {"validator-restart", "VALIDATOR", FaultAction::restart, 140U, true, "RECOVERED", {}},
-      {"storage-crash", "STORAGE", FaultAction::crash, 160U, true, "RETRIEVAL", {}},
-      {"storage-restart", "STORAGE", FaultAction::restart, 180U, true, "RECOVERED", {}},
-      {"regional-delay", "REGION", FaultAction::delay, 200U, true, "APPLIED", {}},
-      {"regional-partition", "REGION", FaultAction::partition, 240U, true, "ABORTED", {}},
+      {"worker-loss-10pct", "WORKER", FaultAction::crash, 100U, true, {}},
+      {"worker-loss-concentrated", "WORKER", FaultAction::crash, 110U, true, {}},
+      {"validator-crash", "VALIDATOR", FaultAction::crash, 120U, true, {}},
+      {"validator-restart", "VALIDATOR", FaultAction::restart, 140U, true, {}},
+      {"storage-crash", "STORAGE", FaultAction::crash, 160U, true, {}},
+      {"storage-restart", "STORAGE", FaultAction::restart, 180U, true, {}},
+      {"regional-delay", "REGION", FaultAction::delay, 200U, true, {}},
+      {"regional-partition", "REGION", FaultAction::partition, 240U, true, {}},
   };
+  const std::array<std::string_view, 8U> expected_outcomes{
+      "APPLIED", "ABORTED", "VIEW_CHANGE", "RECOVERED",
+      "RETRIEVAL", "RECOVERED", "APPLIED", "ABORTED"};
   for (auto& event : events) event.causal_schedule = causal_schedule(event);
   auto root = std::filesystem::temp_directory_path() / "delta-stagec-actual-fault-test";
   std::error_code error;
   std::filesystem::remove_all(root, error);
   expect(!error, "cannot clean actual fault test root");
-  for (const auto& event : events) {
+  for (std::size_t index = 0U; index < events.size(); ++index) {
+    const auto& event = events[index];
     const auto result = execute_fault_scenario(event, root / event.event_id, event.event_id);
-    expect(result.observed_outcome == event.expected_outcome, "actual fault outcome drifted");
+    expect(result.observed_outcome == expected_outcomes[index], "actual fault outcome drifted");
     expect(result.runtime_operation_count > 0U, "actual runtime operation is absent");
     expect(!result.canonical_trace.empty(), "actual native trace is absent");
     if (event.action == FaultAction::restart) {
@@ -245,7 +249,7 @@ void test_faults_are_observed_from_actual_runtime_state() {
                   std::string::npos,
           "APPLIED lacks AggregateRootQC or ApplyQC evidence");
     }
-    if (event.event_id == "worker-domain-loss") {
+    if (event.event_id == "worker-loss-concentrated") {
       expect(!result.current_checkpoint_advanced, "mandatory-domain abort advanced current");
       expect(
           result.canonical_causal_evidence.find(

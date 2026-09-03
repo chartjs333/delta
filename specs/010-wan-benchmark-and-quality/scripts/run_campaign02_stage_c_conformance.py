@@ -109,6 +109,63 @@ def _semantic_projection(document: dict[str, object]) -> dict[str, object]:
     }
 
 
+def _causal_projection(document: dict[str, object]) -> dict[str, object]:
+    faults = document.get("fault_results")
+    if not isinstance(faults, list):
+        raise SystemExit("candidate evidence lacks typed causal fault rows")
+    fields = (
+        "abort_qc_id",
+        "aggregate_root_qc_id",
+        "aggregate_root_qc_tick",
+        "apply_qc_id",
+        "apply_qc_tick",
+        "apply_quorum_threshold",
+        "apply_validator_set_id",
+        "apply_work_item_id",
+        "causal_transport_receipt_id",
+        "certified_abort_tick",
+        "current_checkpoint_advanced",
+        "current_pointer_after",
+        "current_pointer_before",
+        "dropped_message_ids",
+        "event_id",
+        "failed_quorum_reason",
+        "gst_tick",
+        "hard_deadline_tick",
+        "isc_ticket_set",
+        "loss_fraction",
+        "lost_ticket_ids",
+        "lost_worker_ids",
+        "message_delivery_ticks",
+        "missing_work_policy_result",
+        "network_profile_id",
+        "next_checkpoint_id",
+        "next_optimizer_state_id",
+        "parent_checkpoint_id",
+        "parent_optimizer_state_id",
+        "partition_start_tick",
+        "per_domain_remaining_tickets",
+        "per_domain_required_tickets",
+        "pi_d_renormalized",
+        "quorum_capacity_after",
+        "quorum_capacity_before",
+        "quorum_formation_tick",
+        "unavailable_ids",
+        "worker_count_before",
+        "worker_count_lost",
+    )
+    projection = []
+    for fault in faults:
+        if not isinstance(fault, dict) or any(field not in fault for field in fields):
+            raise SystemExit("candidate causal fault row is malformed")
+        projection.append({field: fault[field] for field in fields})
+    return {
+        "fault_profile_ids": document["fault_profile_ids"],
+        "fault_results": projection,
+        "plan_id": document["plan_id"],
+    }
+
+
 def _root(domain: bytes, values: object) -> str:
     return sha256_content_id(domain + canonical_json_bytes(values))
 
@@ -134,6 +191,7 @@ def _execute_once(
     )
     plan_records: list[dict[str, object]] = []
     semantic_records: list[dict[str, object]] = []
+    causal_records: list[dict[str, object]] = []
     raw_file_ids: list[str] = []
     for plan in stage_c_plans:
         evidence = runner.execute(plan)
@@ -144,11 +202,17 @@ def _execute_once(
             raise SystemExit("candidate evidence is not bound to the exact catalog plan")
         raw_file_id = sha256_content_id(raw)
         semantic = _semantic_projection(document)
+        causal = _causal_projection(document)
         raw_file_ids.append(raw_file_id)
         semantic_records.append(semantic)
+        causal_records.append(causal)
         plan_records.append(
             {
                 "applied_network_profile_ids": document["applied_network_profile_ids"],
+                "causal_projection_id": _root(
+                    b"deltareduce.010.campaign02-stage-c-causal-projection.v1\0",
+                    causal,
+                ),
                 "fault_profile_ids": document["fault_profile_ids"],
                 "plan_id": plan.content_id,
                 "raw_evidence_file_id": raw_file_id,
@@ -171,6 +235,7 @@ def _execute_once(
         "candidate_compiler_signature_ids": list(candidate.compiler_signature_ids),
         "candidate_definition_id": candidate.definition.content_id,
         "candidate_run_ordinal": ordinal,
+        "causal_root": _root(b"deltareduce.010.campaign02-stage-c-causal-set.v1\0", causal_records),
         "decision": "PASS",
         "execution_authorized": False,
         "formal_semantics_id": candidate.definition.raw["formal_semantics_id"],
@@ -182,7 +247,7 @@ def _execute_once(
         "raw_evidence_root": _root(
             b"deltareduce.010.campaign02-stage-c-raw-evidence-set.v1\0", raw_file_ids
         ),
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "semantic_root": _root(
             b"deltareduce.010.campaign02-stage-c-semantic-set.v1\0", semantic_records
         ),
@@ -222,12 +287,15 @@ def main() -> None:
     second_records = second["plan_records"]
     if (
         first["semantic_root"] != second["semantic_root"]
+        or first["causal_root"] != second["causal_root"]
         or not isinstance(first_records, list)
         or not isinstance(second_records, list)
         or [item["plan_id"] for item in first_records]
         != [item["plan_id"] for item in second_records]
         or [item["semantic_projection_id"] for item in first_records]
         != [item["semantic_projection_id"] for item in second_records]
+        or [item["causal_projection_id"] for item in first_records]
+        != [item["causal_projection_id"] for item in second_records]
     ):
         raise SystemExit("second candidate run changed Stage C semantic evidence")
     summary = {
@@ -238,6 +306,7 @@ def main() -> None:
         "candidate_definition_id": candidate.definition.content_id,
         "candidate_plan_catalog_id": candidate.catalog.content_id,
         "candidate_run_package_ids": [first_id, second_id],
+        "causal_root": first["causal_root"],
         "decision": "PASS",
         "execution_authorized": False,
         "formal_semantics_id": candidate.definition.raw["formal_semantics_id"],
@@ -246,7 +315,8 @@ def main() -> None:
         "plan_ids": [item["plan_id"] for item in first_records],
         "raw_evidence_roots": [first["raw_evidence_root"], second["raw_evidence_root"]],
         "repeat_semantic_match": True,
-        "schema_version": "1.0.0",
+        "repeat_causal_match": True,
+        "schema_version": "2.0.0",
         "semantic_root": first["semantic_root"],
         "source_commit": arguments.source_commit,
         "source_tree": arguments.source_tree,

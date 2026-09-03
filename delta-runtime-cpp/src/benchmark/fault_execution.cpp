@@ -784,8 +784,13 @@ struct ApplyObservation {
         remaining.at("code") >= 4U && remaining.at("text") >= 4U;
     if (!domain_capacity_sufficient) {
       const auto abort_votes = exact_delivered_votes(schedule, "ABORT_VOTE");
+      const auto planned_aggregate_votes = messages_of_kind(schedule, "AGGREGATE_VOTE", false);
+      const auto planned_apply_votes = messages_of_kind(schedule, "APPLY_VOTE", false);
       if (lost_workers.size() != 2U || tickets.size() != 8U || remaining.at("code") != 3U ||
           remaining.at("text") != 5U ||
+          lost_workers != std::vector<std::string>{"worker-000", "worker-001"} ||
+          lost_tickets != std::vector<std::string>{"ticket-000", "ticket-001"} ||
+          !planned_aggregate_votes.empty() || !planned_apply_votes.empty() ||
           abort_votes.front()->delivered_tick != schedule.hard_deadline_tick ||
           abort_votes.back()->delivered_tick != schedule.hard_deadline_tick) {
         throw BenchmarkError("concentrated worker loss lacks exact mandatory-domain evidence");

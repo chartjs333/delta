@@ -10,8 +10,7 @@ namespace delta::runtime::benchmark {
 FaultController::FaultController(std::vector<FaultEvent> events) : events_(std::move(events)) {
   std::set<std::string, std::less<>> ids;
   for (const auto& event : events_) {
-    if (event.event_id.empty() || event.actor_class.empty() || event.expected_outcome.empty() ||
-        !ids.insert(event.event_id).second) {
+    if (event.event_id.empty() || event.actor_class.empty() || !ids.insert(event.event_id).second) {
       throw BenchmarkError("invalid or duplicate fault event");
     }
   }

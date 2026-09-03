@@ -22,10 +22,10 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 66
+    assert len(module.SCHEMAS) == 69
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.10.0-causal-stagec-terminal-registration"
+    assert registry["registry_version"] == "010.11.0-concentrated-loss-causal-projection"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
     measured_stage_c = json.loads(
@@ -67,11 +67,25 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
         "message_delivery_ticks",
         "per_domain_remaining_tickets",
     } <= set(causal_fault["required"])
+    concentrated_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v5.json"
+        ).read_bytes()
+    )
+    assert concentrated_stage_c["properties"]["fault_results"]["minItems"] == 8
     candidate = json.loads(
-        (ROOT / "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v1.json").read_bytes()
+        (ROOT / "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v2.json").read_bytes()
     )
     assert candidate["properties"]["plan_count"] == {"const": 15}
     assert candidate["properties"]["execution_authorized"] == {"const": False}
+    assert "causal_projection_id" in candidate["properties"]["plan_records"]["items"]["required"]
+    assert "causal_root" in candidate["required"]
+    candidate_summary = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/stage-c-candidate-summary-v2.json"
+        ).read_bytes()
+    )
+    assert candidate_summary["properties"]["repeat_causal_match"] == {"const": True}
     runtime_lineage = json.loads(
         (
             ROOT / "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v5.json"
