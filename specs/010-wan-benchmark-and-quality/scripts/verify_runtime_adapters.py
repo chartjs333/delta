@@ -124,9 +124,7 @@ def java_sources() -> list[str]:
     main = ROOT / "delta-node-java/src/main/java/io/deltareduce/node/benchmark"
     test = ROOT / "delta-node-java/src/test/java/io/deltareduce/node/benchmark"
     sources = (path for path in main.glob("*.java") if path.name != "MeasuredStageCTransport.java")
-    return [
-        str(path) for path in sorted((*sources, test / "BenchmarkConformance.java"))
-    ]
+    return [str(path) for path in sorted((*sources, test / "BenchmarkConformance.java"))]
 
 
 def exercise_java(expected_count: int, expected_hash: str) -> list[dict[str, str]]:
