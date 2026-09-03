@@ -1,4 +1,3 @@
-#include <delta/core/canonical.hpp>
 #include <delta/runtime/benchmark.hpp>
 
 #include <cerrno>
@@ -110,27 +109,6 @@ void append_journal(
     output.push_back(digits[character & 0x0fU]);
   }
   return output;
-}
-
-[[nodiscard]] std::vector<std::byte> bytes(std::string_view value) {
-  std::vector<std::byte> output;
-  output.reserve(value.size());
-  for (const unsigned char character : value) output.push_back(static_cast<std::byte>(character));
-  return output;
-}
-
-[[nodiscard]] std::vector<std::byte> file_bytes(const std::filesystem::path& path) {
-  std::ifstream input(path, std::ios::binary);
-  if (!input) throw std::runtime_error("journal read failed");
-  std::vector<std::byte> output;
-  char character{};
-  while (input.get(character)) output.push_back(static_cast<std::byte>(character));
-  if (!input.eof()) throw std::runtime_error("journal read failed");
-  return output;
-}
-
-[[nodiscard]] std::string content_id(std::string_view value) {
-  return "sha256:" + delta::core::canonical::sha256_hex(bytes(value));
 }
 
 [[nodiscard]] std::string fault_outcome(
