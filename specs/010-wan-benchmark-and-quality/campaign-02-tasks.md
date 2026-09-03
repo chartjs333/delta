@@ -289,6 +289,14 @@ post-freeze review and merge, followed by a zero-execution registration receipt.
 source tasks creates a replacement Definition, votes, attestation, catalog, stage authorization,
 gate receipt, primary observation or `BenchmarkResultQC`.
 
+Source seal `29e0c942ec36102e9e464d10f31a677327cce412` / tree
+`3a7a8ba63335f0f3861dcfda524091dda8b5900a` passed the non-primary designated-GPU qualification
+recorded in `evidence/campaign-02-measured-stagec-bootstrap-hardware-qualification.json` with the
+same pinned environment ID, zero primary executions and zero observations. Terminal portable,
+TSan, sanitizer, C++20/C++23 and two independent measured 15-plan Stage C CI runs are required on
+the evidence overlay before governance review. This qualification does not close C2-035 or C2-037
+and does not authorize the default-branch bootstrap or any benchmark stage.
+
 ## Unconditional STOP conditions
 
 - No old Definition or Stage A artifact may be edited, overwritten or linked as a new gate result.
