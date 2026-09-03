@@ -73,6 +73,7 @@ jobs:
             delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java
           "$RUNNER_TEMP/jdk/bin/jar" --create \
             --file "$RUNNER_TEMP/campaign02-stage-c-transport.jar" \
+            --date="$(git show -s --format=%cI HEAD)" \
             -C "$RUNNER_TEMP/classes" .
       - name: Execute the exact 15-plan non-primary candidate catalog twice
         env:
