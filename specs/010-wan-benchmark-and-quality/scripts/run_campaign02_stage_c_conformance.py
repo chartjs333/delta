@@ -55,7 +55,6 @@ def _semantic_projection(document: dict[str, object]) -> dict[str, object]:
                     "attempted_packets",
                     "attempted_payload_bytes",
                     "disconnect_count",
-                    "disconnect_duration_ms",
                     "dropped_packets",
                     "dropped_payload_bytes",
                     "duplicate_packets",
@@ -67,6 +66,9 @@ def _semantic_projection(document: dict[str, object]) -> dict[str, object]:
                     "unique_delivered_packets",
                     "unique_delivered_payload_bytes",
                 )
+            }
+            | {
+                "disconnect_duration_observed": int(counter["disconnect_duration_ms"]) > 0,
             }
         )
     stable_faults = []
