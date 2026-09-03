@@ -422,6 +422,10 @@ def build_candidate_catalog(
         schema_version="5.0.0",
     )
     definition_value = copy.deepcopy(_load(config / "definition-v4.json"))
+    fault_document = _load(source_root / "configs/benchmark/faults-v1.json")
+    fault_trace = fault_document.get("trace_profile")
+    if not isinstance(fault_trace, dict):
+        raise Campaign02StageCCandidateError("CAMPAIGN02_STAGE_C_CANDIDATE_FAULT_PROFILE_INVALID")
     definition_value.update(
         {
             "bootstrap_mapping_id": sha256_content_id(
@@ -435,6 +439,7 @@ def build_candidate_catalog(
                 )
             ),
             "image_id": runtime.image_id,
+            "fault_profile_ids": [sha256_content_id(canonical_json_bytes(fault_trace))],
             "native_build_id": boundary.native_executable_id,
             "qualified_runtime_lineage_id": runtime.content_id,
             "schema_version": "5.0.0",

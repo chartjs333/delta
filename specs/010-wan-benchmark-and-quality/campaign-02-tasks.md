@@ -407,6 +407,14 @@ source qualification is `evidence/campaign-02-concentrated-loss-exact-source-qua
 executions and observations. C2-049 remains open pending remote TSan/sanitizer/formal/C++ lanes,
 the final push and pull-request candidate artifacts and external terminal-lineage binding.
 
+The `188de41c...` / `b020e03...` qualification chain is subsequently classified as
+`SUPERSEDED_BEFORE_PRIMARY_EXECUTION`: remote runs `33765710101` (push) and `33765715774`
+(pull request) failed closed because the candidate compiler retained the superseded Definition v4
+fault-profile binding while loading the versioned eight-event trace. The manually dispatched
+exact-source run `33765722009` was cancelled. Historical evidence files are immutable; the corrected
+candidate-binding source must receive new designated-GPU and exact-source evidence before C2-049 can
+close.
+
 Until C2-049 is closed, PR #20 remains `DRAFT / CHANGES_REQUIRED / DO NOT MERGE / DO NOT MARK
 READY`. C2-023 and C2-024 remain unauthorized, Definition votes remain `0`, attestation and
 execution authorization remain absent, authoritative catalog construction has not occurred,

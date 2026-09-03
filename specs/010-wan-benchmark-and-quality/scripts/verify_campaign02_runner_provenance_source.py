@@ -74,6 +74,7 @@ NEW_SOURCES: Final = (
     "delta-worker-python/tests/benchmark/test_campaign02_stage_c_candidate.py",
     "delta-worker-python/tests/benchmark/test_campaign02_stage_c_runtime.py",
     "reports/benchmark/campaigns/campaign-02/definition-supersession-executable-provenance.json",
+    "reports/benchmark/campaigns/campaign-02/qualification-supersession-concentrated-loss-candidate-binding.json",
     "specs/010-wan-benchmark-and-quality/scripts/campaign02_stage_a_control.py",
     "specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py",
     "specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_runner_provenance_source.py",

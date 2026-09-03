@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -8,7 +9,7 @@ from deltatorrent.benchmark.campaign02_stage_c_runtime import (
     MeasuredStageCRuntimeBoundary,
     RuntimeArtifact,
 )
-from deltatorrent.protocol.canonical import sha256_content_id
+from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -54,3 +55,7 @@ def test_candidate_compiles_exact_stage_c_catalog_without_execution_authority(
     )
     assert all(plan.execution_authorization_id is None for plan in plans)
     assert len(candidate.compiler_signature_ids) == 3
+    faults = json.loads((ROOT / "configs/benchmark/faults-v1.json").read_bytes())
+    assert candidate.definition.fault_profile_ids == (
+        sha256_content_id(canonical_json_bytes(faults["trace_profile"])),
+    )
