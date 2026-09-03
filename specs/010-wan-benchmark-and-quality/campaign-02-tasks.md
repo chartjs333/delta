@@ -347,9 +347,27 @@ generation is tracked separately so those immutable receipts are not rewritten.
   to raw GitHub API bytes and each detached Ed25519 vote. The artifact name also binds the exact
   `run_attempt`; failed, cancelled, timed-out, in-progress, stale, future or prior-attempt artifact
   registrations are rejected.
-- [ ] **C2-045** Seal this corrective executable source and supersede C2-041 with exact-source,
+- [x] **C2-045** Seal this corrective executable source and supersede C2-041 with exact-source,
   repeated 15-plan candidate, designated-GPU, sanitizer, TSan, C++20/C++23, formal regression and
   terminal CI receipts from the same immutable commit/tree.
+
+The corrective executable source is sealed at `afdf1a23bff428a07961beb21132f89fd4e1af76` / tree
+`051f7ec7087ae08a8371c7830b827c944b9c58a7`. Evidence overlay `5126517fbabdfb9155693f9f91851370c2618924`
+changed only the two then-current qualification files and passed 48 mandatory checks with four
+governance-policy skips, zero failures and zero pending checks. Exact 15-plan candidate runs
+`33757104390` (`push`) and `33757109568` (`pull_request`) agree on catalog
+`sha256:f1253fc8b4a65d6cb706f7a7000cc7a3d6716fafdb211b2505b111bce19c58f4` and semantic root
+`sha256:6b2c6f3cd4d58e7e2a050258f177a12c6ec8a28c60251f5fa39792183c7acd01`; each retained 30 raw
+evidence files. Workflow `33757123617` binds the 191-case portable corpus, exact-source TSan and
+designated-GPU evidence. The separate corrective chain preserves the historical Definition v4
+inputs byte-for-byte:
+
+- `evidence/campaign-02-causal-stagec-terminal-registration-hardware-qualification.json`
+  (`sha256:7c96c1c5636ff47e76a31eddf184834aee2157d2638c042cd94e1f6061dbbddf`);
+- `evidence/campaign-02-causal-stagec-terminal-registration-exact-source-qualification.json`
+  (`sha256:639c0bf9180c170c722b1d959c4ac4b2ec244aafc42b4dafe466b53b88088dc6`);
+- `evidence/campaign-02-causal-stagec-terminal-registration-exact-source-ci-receipt.json`
+  (`sha256:92befa257356504ef00e9549036769d9631db2a442685bf4c72bf2d42972eca1`).
 
 The source-side C2-037 work is complete, but operational default-branch registration remains the
 next separate governance operation. Definition votes remain `0`, attestation and execution
