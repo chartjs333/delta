@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -118,6 +119,8 @@ public final class MeasuredStageCTransport {
 
   record ServerSnapshot(long uniquePackets, long uniqueBytes, long duplicatePackets,
       long duplicateBytes, long reorderedPackets, long receivedBytes) {}
+
+  record Transmission(long packetId, long scheduledMillis, int copyOrdinal) {}
 
   @ChannelHandler.Sharable
   private static final class ReceiptHandler extends ChannelInboundHandlerAdapter {
@@ -370,6 +373,7 @@ public final class MeasuredStageCTransport {
         disconnectCount = 1;
       }
       long maximumDelay = profile.rttMillis() / 2 + profile.jitterMillis();
+      var transmissions = new ArrayList<Transmission>();
       for (int index = 0; index < decisions.size(); index++) {
         var decision = decisions.get(index);
         if (decision.dropped()) continue;
@@ -377,16 +381,21 @@ public final class MeasuredStageCTransport {
             (long) (index + 1) * request.payloadBytes() * 8L, profile.bandwidthKbps());
         long reorderDelay = decision.reordered() ? maximumDelay + 1 : 0;
         long delay = decision.delayMillis() + serializationDelay + reorderDelay;
-        Channel sendChannel = client;
         long packetId = index;
-        sendChannel.eventLoop().schedule(
-            () -> sendChannel.writeAndFlush(frame(packetId, request.payloadBytes())), delay,
-            TimeUnit.MILLISECONDS);
+        transmissions.add(new Transmission(packetId, delay, 0));
         if (decision.duplicated()) {
-          sendChannel.eventLoop().schedule(
-              () -> sendChannel.writeAndFlush(frame(packetId, request.payloadBytes())), delay + 1,
-              TimeUnit.MILLISECONDS);
+          transmissions.add(new Transmission(packetId, delay + 1, 1));
         }
+      }
+      transmissions.sort(Comparator.comparingLong(Transmission::scheduledMillis)
+          .thenComparingLong(Transmission::packetId)
+          .thenComparingInt(Transmission::copyOrdinal));
+      long previousDelay = 0;
+      for (Transmission transmission : transmissions) {
+        sleep(transmission.scheduledMillis() - previousDelay);
+        client.writeAndFlush(frame(transmission.packetId(), request.payloadBytes()))
+            .syncUninterruptibly();
+        previousDelay = transmission.scheduledMillis();
       }
       try {
         if (!complete.await(COMPLETION_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
