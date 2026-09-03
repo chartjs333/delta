@@ -397,6 +397,16 @@ does not authorize a benchmark stage or alter any governance STOP.
   push and pull-request contexts, bind the immutable terminal HEAD externally, and update PR #20
   title/body to the exact terminal lineage and governance STOP.
 
+The replacement executable source is sealed at
+`188de41c66d4db6335ae9e9145de91f58f1863b4` / tree
+`06f3297157f64f7dee63f3420be3475cae705030`. Its non-primary designated-GPU qualification is
+`evidence/campaign-02-concentrated-loss-hardware-qualification.json`
+(`sha256:797780a95cb6853db958c630b225cb3cc05ffc9db1a1a1e66ec13fa820cfcb7e`), and its 192-case portable
+source qualification is `evidence/campaign-02-concentrated-loss-exact-source-qualification.json`
+(`sha256:256804475a0b3d25d6e8dd27684af4537f92fb49c6de01ae81631f22b46f971c`). Both retain zero primary
+executions and observations. C2-049 remains open pending remote TSan/sanitizer/formal/C++ lanes,
+the final push and pull-request candidate artifacts and external terminal-lineage binding.
+
 Until C2-049 is closed, PR #20 remains `DRAFT / CHANGES_REQUIRED / DO NOT MERGE / DO NOT MARK
 READY`. C2-023 and C2-024 remain unauthorized, Definition votes remain `0`, attestation and
 execution authorization remain absent, authoritative catalog construction has not occurred,
