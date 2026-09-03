@@ -269,14 +269,14 @@ blocked.
 - [x] **C2-034 regression** Preserve source-bound production runner/finalizer construction and all
   dry, fixture, synthetic, caller-supplied and simulated-only rejection paths. Requalification is
   required after the new source seal.
-- [ ] **C2-035 blocking** Replace production Stage C simulation with a measured Python → Java Netty
+- [x] **C2-035 blocking** Replace production Stage C simulation with a measured Python → Java Netty
   → C++ runtime/WAL → OS-counter path. Bind image, Java executable, native executable, transport
   harness and Netty artifact IDs through stage identity v4, runtime lineage v5 and execution plan
   v6 before the first plan. `simulate()` remains only a non-primary test oracle, and the native
   runtime derives observed outcomes without receiving `expected_outcome`.
 - [x] **C2-036 regression** Preserve exact semantic parsing of the seven Stage A artifacts.
   Requalification is required after the new source seal.
-- [ ] **C2-037 blocking** Implement the signed immutable default-branch bootstrap mapping,
+- [x] **C2-037 source blocking** Implement the signed immutable default-branch bootstrap mapping,
   zero-execution registration verifier and reusable source workflow provenance. Bind caller and
   called workflow SHAs separately, plus workflow ref/blob/content, run attempt, GitHub artifact ID,
   artifact archive digest and extracted file digest. The routing mapping intentionally excludes a
@@ -296,6 +296,43 @@ same pinned environment ID, zero primary executions and zero observations. Termi
 TSan, sanitizer, C++20/C++23 and two independent measured 15-plan Stage C CI runs are required on
 the evidence overlay before governance review. This qualification does not close C2-035 or C2-037
 and does not authorize the default-branch bootstrap or any benchmark stage.
+
+## Actual-runtime and registration-quorum remediation evidence
+
+The executable source is sealed at `ef502cda94e4e6ccfc7d2266da5600b452a89a84` / tree
+`790542c0b496df709553e23a0376edb750fec73d`. The evidence files below are a non-executable overlay;
+they do not change that qualified source.
+
+- [x] **C2-038** Replace declarative fault outcomes with actual native runtime transitions, WAL
+  durability/recovery, state/effect roots and full canonical traces for worker, validator, storage
+  and region failures.
+- [x] **C2-039** Compile one exact 15-plan non-primary candidate catalog and execute it twice in both
+  push and PR contexts through Python, Java Netty, the native runtime and OS counters. Runs
+  `33743852344` and `33743857202` agree on candidate Definition
+  `sha256:3d9b4144436c6c91e4bccfa41dbb3b340238c6bef7a86113388f7dbc6dd8d247`, catalog
+  `sha256:f7e1128958a8e20bc54456fe3258c910e4470fdb99710fdb20c1547a81a42ded`, all 15 plan IDs,
+  stage identities `sha256:381424850a1108a50bcffc5c127d89147581a9e84d733d9970d0784d4c50ce92`
+  and semantic root `sha256:f01ce975a044ab596f970f32263ebbeb67a6ba5d65b79889635e81ab401b6df4`.
+  Each context retains 30 full raw evidence files. This candidate is explicitly
+  `TEST_ONLY_DETERMINISTIC_EPHEMERAL`; it is not an authoritative Definition or catalog.
+- [x] **C2-040 source contract** Require raw GitHub API snapshots, artifact archive digests and a
+  detached three-controller Ed25519 quorum before constructing a verified zero-execution workflow
+  registration object. The actual registration receipt remains absent until the separately reviewed
+  inert bootstrap exists on `main`; no source artifact here asserts otherwise.
+- [x] **C2-041** Requalify the sealed source with architecture/formal regression, exact-tree GCC
+  TSan job `100611747966`, 48 successful current-head checks, two exact-catalog Stage C runs and the
+  designated RTX 3070 QLoRA/NF4 probe. The machine-readable chain is:
+  `evidence/campaign-02-actual-stagec-registration-hardware-qualification.json`
+  (`sha256:0f6bf901e513e87da6d74d23b53210be89b99d23eb60d68f0af05a3246ce8c82`),
+  `evidence/campaign-02-actual-stagec-registration-exact-source-qualification.json`
+  (`sha256:4039dd555bb2122188e7b9d43ae99aaa28a5283d6d525d3d728f5f82766260b7`) and
+  `evidence/campaign-02-actual-stagec-registration-exact-source-ci-receipt.json`
+  (`sha256:3abd74b25d04e98687a413cc5a889ade79f4dc67f211c7ef6f1636e06c6bf7e7`).
+
+The source-side C2-037 work is complete, but operational default-branch registration remains the
+next separate governance operation. Definition votes remain `0`, attestation and execution
+authorization remain absent, authoritative catalog construction has not occurred, primary
+observations remain `0`, Feature 010 remains `NO_GO`, and Feature 011 remains blocked.
 
 ## Unconditional STOP conditions
 
