@@ -144,6 +144,272 @@ class MeasuredNetworkCounters:
 
 
 @dataclass(frozen=True, slots=True)
+class NativeFaultCausalEvidence:
+    causal_transport_receipt_id: str
+    network_profile_id: str
+    message_delivery_ticks: tuple[tuple[str, int], ...]
+    dropped_message_ids: tuple[str, ...]
+    aggregate_root_qc_id: str | None
+    apply_work_item_id: str | None
+    apply_qc_id: str | None
+    abort_qc_id: str | None
+    parent_checkpoint_id: str | None
+    next_checkpoint_id: str | None
+    parent_optimizer_state_id: str | None
+    next_optimizer_state_id: str | None
+    current_pointer_before: str | None
+    current_pointer_after: str | None
+    apply_validator_set_id: str | None
+    apply_quorum_threshold: int
+    worker_count_before: int
+    worker_count_lost: int
+    loss_fraction: tuple[int, int]
+    lost_worker_ids: tuple[str, ...]
+    lost_ticket_ids: tuple[str, ...]
+    per_domain_required_tickets: tuple[tuple[str, int], ...]
+    per_domain_remaining_tickets: tuple[tuple[str, int], ...]
+    isc_ticket_set: tuple[str, ...]
+    quorum_capacity_before: int
+    quorum_capacity_after: int
+    missing_work_policy_result: str
+    pi_d_renormalized: bool
+    gst_tick: int
+    hard_deadline_tick: int
+    quorum_formation_tick: int
+    aggregate_root_qc_tick: int
+    apply_qc_tick: int
+    partition_start_tick: int
+    unavailable_ids: tuple[str, ...]
+    failed_quorum_reason: str | None
+    certified_abort_tick: int
+
+    def validate_for(self, transition: NativeFaultTransition) -> None:
+        _id(
+            self.causal_transport_receipt_id,
+            "CAMPAIGN02_STAGE_C_CAUSAL_TRANSPORT_RECEIPT_INVALID",
+        )
+        if self.network_profile_id not in {
+            "lan-control",
+            "wan-regional",
+            "wan-intercontinental",
+        }:
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_NETWORK_PROFILE_INVALID")
+        optional_ids = (
+            self.aggregate_root_qc_id,
+            self.apply_work_item_id,
+            self.apply_qc_id,
+            self.abort_qc_id,
+            self.parent_checkpoint_id,
+            self.next_checkpoint_id,
+            self.parent_optimizer_state_id,
+            self.next_optimizer_state_id,
+            self.current_pointer_before,
+            self.current_pointer_after,
+            self.apply_validator_set_id,
+        )
+        for value in optional_ids:
+            if value is not None:
+                _id(value, "CAMPAIGN02_STAGE_C_CAUSAL_CONTENT_ID_INVALID")
+        integers = (
+            self.apply_quorum_threshold,
+            self.worker_count_before,
+            self.worker_count_lost,
+            *self.loss_fraction,
+            self.quorum_capacity_before,
+            self.quorum_capacity_after,
+            self.gst_tick,
+            self.hard_deadline_tick,
+            self.quorum_formation_tick,
+            self.aggregate_root_qc_tick,
+            self.apply_qc_tick,
+            self.partition_start_tick,
+            self.certified_abort_tick,
+        )
+        if any(isinstance(value, bool) or value < 0 for value in integers):
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID")
+        if (
+            self.loss_fraction[1] <= 0
+            or self.gst_tick != transition.at_step
+            or self.hard_deadline_tick < self.gst_tick
+            or any(
+                tick < self.gst_tick or tick > self.hard_deadline_tick
+                for _, tick in self.message_delivery_ticks
+            )
+            or len({name for name, _ in self.message_delivery_ticks})
+            != len(self.message_delivery_ticks)
+            or self.pi_d_renormalized
+        ):
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_SCHEDULE_INVALID")
+        if transition.observed_outcome == "APPLIED":
+            deliveries = dict(self.message_delivery_ticks)
+            aggregate_ticks = [
+                tick
+                for message_id, tick in deliveries.items()
+                if message_id.startswith("aggregate-vote-")
+            ]
+            apply_ticks = [
+                tick
+                for message_id, tick in deliveries.items()
+                if message_id.startswith("apply-vote-")
+            ]
+            if (
+                any(
+                    value is None
+                    for value in (
+                        self.aggregate_root_qc_id,
+                        self.apply_work_item_id,
+                        self.apply_qc_id,
+                        self.parent_checkpoint_id,
+                        self.next_checkpoint_id,
+                        self.parent_optimizer_state_id,
+                        self.next_optimizer_state_id,
+                        self.current_pointer_before,
+                        self.current_pointer_after,
+                        self.apply_validator_set_id,
+                    )
+                )
+                or self.abort_qc_id is not None
+                or self.apply_quorum_threshold != 3
+                or not transition.current_checkpoint_advanced
+                or self.current_pointer_before != self.parent_checkpoint_id
+                or self.current_pointer_after != self.next_checkpoint_id
+                or self.current_pointer_before == self.current_pointer_after
+                or len(aggregate_ticks) != 3
+                or len(apply_ticks) != 3
+                or max(aggregate_ticks, default=0) != self.aggregate_root_qc_tick
+                or max(apply_ticks, default=0) != self.apply_qc_tick
+                or self.quorum_formation_tick != self.aggregate_root_qc_tick
+                or not (
+                    self.gst_tick
+                    < self.aggregate_root_qc_tick
+                    < self.apply_qc_tick
+                    < self.hard_deadline_tick
+                )
+            ):
+                raise _fail("CAMPAIGN02_STAGE_C_APPLIED_WITHOUT_EXACT_APPLY_QC")
+        elif transition.current_checkpoint_advanced:
+            raise _fail("CAMPAIGN02_STAGE_C_NON_APPLIED_POINTER_ADVANCE")
+        if transition.actor_class == "WORKER" and transition.action == "CRASH":
+            required = dict(self.per_domain_required_tickets)
+            remaining = dict(self.per_domain_remaining_tickets)
+            common_invalid = (
+                self.worker_count_before != 10
+                or required != {"code": 4, "text": 4}
+                or self.quorum_capacity_before != 10
+                or len(self.lost_worker_ids) != self.worker_count_lost
+                or len(self.lost_ticket_ids) != self.worker_count_lost
+            )
+            successful_loss_invalid = transition.observed_outcome == "APPLIED" and (
+                self.worker_count_lost != 1
+                or self.loss_fraction != (1, 10)
+                or len(self.isc_ticket_set) != 9
+                or any(remaining.get(domain, 0) < count for domain, count in required.items())
+                or self.quorum_capacity_after != 9
+                or self.missing_work_policy_result != "OMIT_PRE_FREEZE_LOST_TICKET_EXACT_ISC"
+                or {
+                    message_id
+                    for message_id, _ in self.message_delivery_ticks
+                    if message_id.startswith("worker-ticket-")
+                }
+                != {f"worker-ticket-{index:03d}" for index in range(9)}
+                or set(self.dropped_message_ids) != {"worker-ticket-009"}
+            )
+            concentrated_abort_invalid = transition.observed_outcome == "ABORTED" and (
+                self.worker_count_lost != 2
+                or self.loss_fraction != (2, 10)
+                or self.isc_ticket_set
+                or remaining != {"code": 3, "text": 5}
+                or self.quorum_capacity_after != 8
+                or self.missing_work_policy_result != "MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT"
+                or self.abort_qc_id is None
+                or self.certified_abort_tick != self.hard_deadline_tick
+                or self.failed_quorum_reason != "MANDATORY_DOMAIN_CODE_3_OF_4_AT_HARD_DEADLINE"
+                or self.current_pointer_before != self.parent_checkpoint_id
+                or self.current_pointer_after != self.parent_checkpoint_id
+            )
+            if common_invalid or successful_loss_invalid or concentrated_abort_invalid:
+                raise _fail("CAMPAIGN02_STAGE_C_WORKER_LOSS_CAUSAL_EVIDENCE_INVALID")
+        if transition.actor_class == "REGION" and transition.action == "DELAY":
+            delivery_ids = {message_id for message_id, _ in self.message_delivery_ticks}
+            if (
+                self.network_profile_id != "wan-regional"
+                or {name for name in delivery_ids if name.startswith("worker-ticket-")}
+                != {f"worker-ticket-{index:03d}" for index in range(4)}
+                or {name for name in delivery_ids if name.startswith("aggregate-vote-")}
+                != {f"aggregate-vote-{index}" for index in range(3)}
+                or {name for name in delivery_ids if name.startswith("apply-vote-")}
+                != {f"apply-vote-{index}" for index in range(3)}
+            ):
+                raise _fail("CAMPAIGN02_STAGE_C_REGIONAL_DELAY_CAUSAL_EVIDENCE_INVALID")
+        if transition.actor_class == "REGION" and transition.action == "PARTITION":
+            if (
+                self.network_profile_id != "wan-intercontinental"
+                or self.abort_qc_id is None
+                or self.certified_abort_tick != self.hard_deadline_tick
+                or self.partition_start_tick != transition.at_step
+                or not self.unavailable_ids
+                or {
+                    message_id
+                    for message_id, tick in self.message_delivery_ticks
+                    if message_id.startswith("abort-vote-") and tick == self.hard_deadline_tick
+                }
+                != {f"abort-vote-{index}" for index in range(3)}
+                or self.failed_quorum_reason != "AGGREGATE_ROOT_QC_2_OF_3_AT_HARD_DEADLINE"
+                or self.current_pointer_before != self.current_pointer_after
+                or self.current_pointer_before != self.parent_checkpoint_id
+            ):
+                raise _fail("CAMPAIGN02_STAGE_C_PARTITION_CAUSAL_EVIDENCE_INVALID")
+
+    @property
+    def document(self) -> dict[str, object]:
+        return {
+            "abort_qc_id": self.abort_qc_id,
+            "aggregate_root_qc_id": self.aggregate_root_qc_id,
+            "aggregate_root_qc_tick": self.aggregate_root_qc_tick,
+            "apply_qc_id": self.apply_qc_id,
+            "apply_qc_tick": self.apply_qc_tick,
+            "apply_quorum_threshold": self.apply_quorum_threshold,
+            "apply_validator_set_id": self.apply_validator_set_id,
+            "apply_work_item_id": self.apply_work_item_id,
+            "causal_transport_receipt_id": self.causal_transport_receipt_id,
+            "certified_abort_tick": self.certified_abort_tick,
+            "current_pointer_after": self.current_pointer_after,
+            "current_pointer_before": self.current_pointer_before,
+            "dropped_message_ids": list(self.dropped_message_ids),
+            "failed_quorum_reason": self.failed_quorum_reason,
+            "gst_tick": self.gst_tick,
+            "hard_deadline_tick": self.hard_deadline_tick,
+            "isc_ticket_set": list(self.isc_ticket_set),
+            "loss_fraction": {
+                "denominator": self.loss_fraction[1],
+                "numerator": self.loss_fraction[0],
+            },
+            "lost_ticket_ids": list(self.lost_ticket_ids),
+            "lost_worker_ids": list(self.lost_worker_ids),
+            "message_delivery_ticks": [
+                {"logical_tick": tick, "message_id": message_id}
+                for message_id, tick in self.message_delivery_ticks
+            ],
+            "missing_work_policy_result": self.missing_work_policy_result,
+            "network_profile_id": self.network_profile_id,
+            "next_checkpoint_id": self.next_checkpoint_id,
+            "next_optimizer_state_id": self.next_optimizer_state_id,
+            "parent_checkpoint_id": self.parent_checkpoint_id,
+            "parent_optimizer_state_id": self.parent_optimizer_state_id,
+            "partition_start_tick": self.partition_start_tick,
+            "per_domain_remaining_tickets": dict(self.per_domain_remaining_tickets),
+            "per_domain_required_tickets": dict(self.per_domain_required_tickets),
+            "pi_d_renormalized": self.pi_d_renormalized,
+            "quorum_capacity_after": self.quorum_capacity_after,
+            "quorum_capacity_before": self.quorum_capacity_before,
+            "quorum_formation_tick": self.quorum_formation_tick,
+            "unavailable_ids": list(self.unavailable_ids),
+            "worker_count_before": self.worker_count_before,
+            "worker_count_lost": self.worker_count_lost,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class NativeFaultTransition:
     event_id: str
     at_step: int
@@ -162,6 +428,7 @@ class NativeFaultTransition:
     current_checkpoint_advanced: bool
     availability_success: bool
     native_trace: bytes
+    causal_evidence: NativeFaultCausalEvidence
 
     def __post_init__(self) -> None:
         if (
@@ -201,6 +468,7 @@ class NativeFaultTransition:
             raise _fail("CAMPAIGN02_STAGE_C_PARTITION_ADVANCED_CURRENT")
         if self.actor_class == "STORAGE" and self.action == "CRASH" and self.availability_success:
             raise _fail("CAMPAIGN02_STAGE_C_STORAGE_CRASH_FALSE_AVAILABILITY")
+        self.causal_evidence.validate_for(self)
 
     @property
     def passed(self) -> bool:
@@ -213,6 +481,7 @@ class NativeFaultTransition:
             "action": self.action,
             "actor_class": self.actor_class,
             "availability_success": self.availability_success,
+            **self.causal_evidence.document,
             "current_checkpoint_advanced": self.current_checkpoint_advanced,
             "event_id": self.event_id,
             "expected_outcome": self.expected_outcome,
@@ -440,6 +709,186 @@ def _request_bytes(
     return "".join(f"{key}={value}\n" for key, value in sorted(fields.items())).encode("ascii")
 
 
+_CAUSAL_FIELDS: Final = {
+    "abort_qc_id",
+    "aggregate_root_qc_id",
+    "aggregate_root_qc_tick",
+    "apply_qc_id",
+    "apply_qc_tick",
+    "apply_quorum_threshold",
+    "apply_validator_set_id",
+    "apply_work_item_id",
+    "causal_transport_receipt_id",
+    "certified_abort_tick",
+    "current_checkpoint_advanced",
+    "current_pointer_after",
+    "current_pointer_before",
+    "dropped_message_ids",
+    "event_id",
+    "failed_quorum_reason",
+    "gst_tick",
+    "hard_deadline_tick",
+    "isc_ticket_set",
+    "loss_fraction",
+    "lost_ticket_ids",
+    "lost_worker_ids",
+    "message_delivery_ticks",
+    "missing_work_policy_result",
+    "network_profile_id",
+    "next_checkpoint_id",
+    "next_optimizer_state_id",
+    "parent_checkpoint_id",
+    "parent_optimizer_state_id",
+    "partition_start_tick",
+    "per_domain_remaining_tickets",
+    "per_domain_required_tickets",
+    "pi_d_renormalized",
+    "quorum_capacity_after",
+    "quorum_capacity_before",
+    "quorum_formation_tick",
+    "schema_version",
+    "unavailable_ids",
+    "worker_count_before",
+    "worker_count_lost",
+}
+
+
+def _parse_causal_evidence(
+    raw: bytes,
+    *,
+    event_id: str,
+    current_checkpoint_advanced: bool,
+) -> NativeFaultCausalEvidence:
+    try:
+        text = raw.decode("ascii")
+    except UnicodeDecodeError as exc:
+        raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_EVIDENCE_INVALID") from exc
+    if not text.endswith("\n"):
+        raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_EVIDENCE_INVALID")
+    fields: dict[str, str] = {}
+    for line in text.splitlines():
+        name, separator, value = line.partition("=")
+        if not separator or not name or not value or name in fields:
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_EVIDENCE_INVALID")
+        fields[name] = value
+    if (
+        set(fields) != _CAUSAL_FIELDS
+        or fields["schema_version"] != "1.0.0"
+        or fields["event_id"] != event_id
+        or fields["current_checkpoint_advanced"]
+        != ("true" if current_checkpoint_advanced else "false")
+        or text != "".join(f"{name}={value}\n" for name, value in sorted(fields.items()))
+    ):
+        raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_EVIDENCE_INVALID")
+
+    def optional(name: str) -> str | None:
+        value = fields[name]
+        if value == "NONE":
+            return None
+        return _id(value, "CAMPAIGN02_STAGE_C_CAUSAL_CONTENT_ID_INVALID")
+
+    def tokens(name: str) -> tuple[str, ...]:
+        value = fields[name]
+        if value == "NONE":
+            return ()
+        items = tuple(value.split(","))
+        if len(set(items)) != len(items) or any(_TOKEN.fullmatch(item) is None for item in items):
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_TOKEN_SET_INVALID")
+        return items
+
+    def pairs(name: str) -> tuple[tuple[str, int], ...]:
+        value = fields[name]
+        if value == "NONE":
+            return ()
+        result: list[tuple[str, int]] = []
+        for item in value.split(","):
+            key, separator, raw_value = item.partition(":")
+            if not separator or _TOKEN.fullmatch(key) is None:
+                raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_PAIR_SET_INVALID")
+            result.append(
+                (key, _nonnegative(raw_value, "CAMPAIGN02_STAGE_C_CAUSAL_PAIR_SET_INVALID"))
+            )
+        if len({key for key, _ in result}) != len(result):
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_PAIR_SET_INVALID")
+        return tuple(result)
+
+    numerator, separator, denominator = fields["loss_fraction"].partition("/")
+    if not separator:
+        raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_LOSS_FRACTION_INVALID")
+    fraction = (
+        _nonnegative(numerator, "CAMPAIGN02_STAGE_C_CAUSAL_LOSS_FRACTION_INVALID"),
+        _nonnegative(denominator, "CAMPAIGN02_STAGE_C_CAUSAL_LOSS_FRACTION_INVALID"),
+    )
+    if fields["pi_d_renormalized"] not in {"true", "false"}:
+        raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_PI_D_INVALID")
+    return NativeFaultCausalEvidence(
+        causal_transport_receipt_id=_id(
+            fields["causal_transport_receipt_id"],
+            "CAMPAIGN02_STAGE_C_CAUSAL_TRANSPORT_RECEIPT_INVALID",
+        ),
+        network_profile_id=fields["network_profile_id"],
+        message_delivery_ticks=pairs("message_delivery_ticks"),
+        dropped_message_ids=tokens("dropped_message_ids"),
+        aggregate_root_qc_id=optional("aggregate_root_qc_id"),
+        apply_work_item_id=optional("apply_work_item_id"),
+        apply_qc_id=optional("apply_qc_id"),
+        abort_qc_id=optional("abort_qc_id"),
+        parent_checkpoint_id=optional("parent_checkpoint_id"),
+        next_checkpoint_id=optional("next_checkpoint_id"),
+        parent_optimizer_state_id=optional("parent_optimizer_state_id"),
+        next_optimizer_state_id=optional("next_optimizer_state_id"),
+        current_pointer_before=optional("current_pointer_before"),
+        current_pointer_after=optional("current_pointer_after"),
+        apply_validator_set_id=optional("apply_validator_set_id"),
+        apply_quorum_threshold=_nonnegative(
+            fields["apply_quorum_threshold"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        worker_count_before=_nonnegative(
+            fields["worker_count_before"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        worker_count_lost=_nonnegative(
+            fields["worker_count_lost"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        loss_fraction=fraction,
+        lost_worker_ids=tokens("lost_worker_ids"),
+        lost_ticket_ids=tokens("lost_ticket_ids"),
+        per_domain_required_tickets=pairs("per_domain_required_tickets"),
+        per_domain_remaining_tickets=pairs("per_domain_remaining_tickets"),
+        isc_ticket_set=tokens("isc_ticket_set"),
+        quorum_capacity_before=_nonnegative(
+            fields["quorum_capacity_before"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        quorum_capacity_after=_nonnegative(
+            fields["quorum_capacity_after"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        missing_work_policy_result=fields["missing_work_policy_result"],
+        pi_d_renormalized=fields["pi_d_renormalized"] == "true",
+        gst_tick=_nonnegative(fields["gst_tick"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"),
+        hard_deadline_tick=_nonnegative(
+            fields["hard_deadline_tick"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        quorum_formation_tick=_nonnegative(
+            fields["quorum_formation_tick"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        aggregate_root_qc_tick=_nonnegative(
+            fields["aggregate_root_qc_tick"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        apply_qc_tick=_nonnegative(
+            fields["apply_qc_tick"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        partition_start_tick=_nonnegative(
+            fields["partition_start_tick"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+        unavailable_ids=tokens("unavailable_ids"),
+        failed_quorum_reason=(
+            None if fields["failed_quorum_reason"] == "NONE" else fields["failed_quorum_reason"]
+        ),
+        certified_abort_tick=_nonnegative(
+            fields["certified_abort_tick"], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        ),
+    )
+
+
 def _parse_receipt(
     raw: bytes,
     *,
@@ -472,6 +921,7 @@ def _parse_receipt(
             bool,
             bool,
             bool,
+            bytes,
             bytes,
         ]
     ] = []
@@ -514,10 +964,11 @@ def _parse_receipt(
                 )
             )
         elif fields[0] == "FAULT":
-            if len(fields) != 17:
+            if len(fields) != 18:
                 raise _fail("CAMPAIGN02_STAGE_C_NATIVE_TRACE_INVALID")
             try:
                 native_trace = bytes.fromhex(fields[16])
+                causal_evidence = bytes.fromhex(fields[17])
             except ValueError as exc:
                 raise _fail("CAMPAIGN02_STAGE_C_NATIVE_TRACE_INVALID") from exc
             flags = fields[12:16]
@@ -541,6 +992,7 @@ def _parse_receipt(
                     fields[14] == "1",
                     fields[15] == "1",
                     native_trace,
+                    causal_evidence,
                 )
             )
         else:
@@ -573,6 +1025,9 @@ def _parse_receipt(
             current_checkpoint_advanced=item[13],
             availability_success=item[14],
             native_trace=item[15],
+            causal_evidence=_parse_causal_evidence(
+                item[16], event_id=item[0], current_checkpoint_advanced=item[13]
+            ),
         )
         for item in fault_rows
     )

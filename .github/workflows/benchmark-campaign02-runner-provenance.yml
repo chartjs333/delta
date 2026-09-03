@@ -45,7 +45,7 @@ jobs:
         run: |
           python3 -m pip install --disable-pip-version-check uv==0.6.14
           uv sync --frozen
-      - name: Run C2-034 through C2-037 portable corpus
+      - name: Run C2-034 through C2-044 portable corpus
         working-directory: qualified-source
         env:
           ALL_PROXY: http://127.0.0.1:9
@@ -58,10 +58,13 @@ jobs:
           uv run ruff format --check .
           uv run mypy delta-worker-python/src
           uv run pytest \
+            delta-worker-python/tests/benchmark/test_campaign02_bootstrap.py \
             delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
             delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_campaign02_stage_c_candidate.py \
+            delta-worker-python/tests/benchmark/test_campaign02_stage_c_runtime.py \
             delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py \
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_runner_definition.py \

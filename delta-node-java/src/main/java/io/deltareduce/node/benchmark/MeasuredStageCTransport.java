@@ -118,9 +118,36 @@ public final class MeasuredStageCTransport {
   }
 
   record ServerSnapshot(long uniquePackets, long uniqueBytes, long duplicatePackets,
-      long duplicateBytes, long reorderedPackets, long receivedBytes) {}
+      long duplicateBytes, long reorderedPackets, long receivedBytes, Set<Long> packetIds) {}
 
   record Transmission(long packetId, long scheduledMillis, int copyOrdinal) {}
+
+  record CausalMessage(String messageId, String actorId, String domainId, String ticketId,
+      String kind, long scheduledTick, boolean transmit) {}
+
+  record FaultSchedule(String eventId, String networkProfileId, long gstTick,
+      long hardDeadlineTick, List<CausalMessage> messages, Set<Long> deliveredOrdinals) {
+    String canonicalText() {
+      var output = new StringBuilder();
+      output.append("schema_version=1.0.0\n");
+      output.append("event_id=").append(eventId).append('\n');
+      output.append("network_profile_id=").append(networkProfileId).append('\n');
+      output.append("gst_tick=").append(gstTick).append('\n');
+      output.append("hard_deadline_tick=").append(hardDeadlineTick).append('\n');
+      output.append("message_count=").append(messages.size()).append('\n');
+      for (int index = 0; index < messages.size(); index++) {
+        CausalMessage message = messages.get(index);
+        boolean delivered = deliveredOrdinals.contains((long) index);
+        output.append("message.").append(index).append('=').append(message.messageId()).append(',')
+            .append(message.actorId()).append(',').append(message.domainId()).append(',')
+            .append(message.ticketId()).append(',').append(message.kind()).append(',')
+            .append(message.scheduledTick()).append(',')
+            .append(delivered ? message.scheduledTick() : 0).append(',')
+            .append(delivered ? 1 : 0).append('\n');
+      }
+      return output.toString();
+    }
+  }
 
   @ChannelHandler.Sharable
   private static final class ReceiptHandler extends ChannelInboundHandlerAdapter {
@@ -210,7 +237,7 @@ public final class MeasuredStageCTransport {
           "incomplete Netty receipt");
       return new ServerSnapshot(
           packetIds.size(), uniqueBytes, duplicatePackets, duplicateBytes, reorderedPackets,
-          receivedBytes);
+          receivedBytes, Set.copyOf(packetIds));
     }
   }
 
@@ -234,11 +261,12 @@ public final class MeasuredStageCTransport {
       }
     }
 
-    String execute(String planId, Fault fault, int index) {
+    String execute(String planId, Fault fault, FaultSchedule schedule, int index) {
       String requestId = "stagec-" + planId.substring(7, 23) + "-" + index;
       try {
         writer.write(String.join(" ", "FAULT", requestId, fault.id(), fault.actor(),
-            fault.action(), Long.toString(fault.step()), fault.assumptionsHold() ? "1" : "0"));
+            fault.action(), Long.toString(fault.step()), fault.assumptionsHold() ? "1" : "0",
+            hex(schedule.canonicalText().getBytes(StandardCharsets.US_ASCII))));
         writer.newLine();
         writer.flush();
         String response = reader.readLine();
@@ -246,7 +274,7 @@ public final class MeasuredStageCTransport {
           throw new IllegalStateException("native fault response invalid: " + response);
         }
         String[] fields = response.split(" ", -1);
-        if (fields.length != 15 || !fields[2].equals("0")
+        if (fields.length != 16 || !fields[2].equals("0")
             || !fields[4].equals("ACTUAL_RUNTIME_TRANSITION")) {
           throw new IllegalStateException("native fault response malformed or replayed");
         }
@@ -256,11 +284,12 @@ public final class MeasuredStageCTransport {
         BenchmarkContracts.require(fields[9].matches("[0-9]+")
                 && fields[10].matches("[01]") && fields[11].matches("[01]")
                 && fields[12].matches("[01]") && fields[13].matches("[01]")
-                && fields[14].matches("(?:[0-9a-f]{2})*"),
+                && fields[14].matches("(?:[0-9a-f]{2})*")
+                && fields[15].matches("(?:[0-9a-f]{2})*"),
             "native fault execution proof invalid");
         return String.join(" ", "FAULT", fault.id(), Long.toString(fault.step()), fault.actor(),
             fault.action(), fields[3], fields[4], fields[5], fields[6], fields[7], fields[8],
-            fields[9], fields[10], fields[11], fields[12], fields[13], fields[14]);
+            fields[9], fields[10], fields[11], fields[12], fields[13], fields[14], fields[15]);
       } catch (IOException error) {
         throw new IllegalStateException("native fault sidecar I/O failed", error);
       }
@@ -299,10 +328,173 @@ public final class MeasuredStageCTransport {
     }
     try (var nativeProcess = new NativeFaultProcess(sidecar, journal)) {
       for (int index = 0; index < request.faults().size(); index++) {
-        System.out.println(nativeProcess.execute(request.planId(), request.faults().get(index), index));
+        Fault fault = request.faults().get(index);
+        FaultSchedule schedule = measureFaultSchedule(fault, profileForFault(request, fault));
+        System.out.println(nativeProcess.execute(request.planId(), fault, schedule, index));
       }
     }
     System.out.println("END_STAGEC_V1");
+  }
+
+  private static Profile profileForFault(Request request, Fault fault) {
+    String expected = switch (fault.actor() + ":" + fault.action()) {
+      case "REGION:DELAY" -> "wan-regional";
+      case "REGION:PARTITION" -> "wan-intercontinental";
+      default -> "lan-control";
+    };
+    return request.profiles().stream().filter(profile -> profile.id().equals(expected)).findFirst()
+        .orElseThrow(() -> new IllegalStateException("causal fault network profile missing"));
+  }
+
+  private static List<CausalMessage> causalMessages(
+      Fault fault, Profile profile, long hardDeadlineTick) {
+    var messages = new ArrayList<CausalMessage>();
+    if (fault.actor().equals("WORKER") && fault.action().equals("CRASH")) {
+      for (int index = 0; index < 10; index++) {
+        String ordinal = paddedOrdinal(index);
+        messages.add(new CausalMessage("worker-ticket-" + ordinal, "worker-" + ordinal,
+            index < 5 ? "code" : "text", "ticket-" + ordinal, "WORK_TICKET",
+            fault.step() + index, index != 9));
+      }
+      addQuorumMessages(messages, "aggregate", "AGGREGATE_VOTE", fault.step() + 20);
+      addQuorumMessages(messages, "apply", "APPLY_VOTE", fault.step() + 30);
+    } else if (fault.actor().equals("REGION") && fault.action().equals("DELAY")) {
+      long ticketTick = Math.addExact(fault.step(), Math.max(1, profile.jitterMillis()));
+      long aggregateTick = Math.addExact(fault.step(), Math.max(1, profile.rttMillis() / 2));
+      long applyTick = Math.addExact(
+          aggregateTick, Math.max(1, Math.multiplyExact(profile.jitterMillis(), 2)));
+      addFourTickets(messages, ticketTick);
+      addQuorumMessages(messages, "aggregate", "AGGREGATE_VOTE", aggregateTick);
+      addQuorumMessages(messages, "apply", "APPLY_VOTE", applyTick);
+    } else if (fault.actor().equals("REGION") && fault.action().equals("PARTITION")) {
+      addFourTickets(messages, fault.step());
+      long partitionAttemptTick = Math.addExact(
+          fault.step(), Math.max(1, profile.rttMillis() / 16));
+      for (int index = 0; index < 4; index++) {
+        messages.add(new CausalMessage("partition-aggregate-" + index, "validator-" + index,
+            "NONE", "NONE", "AGGREGATE_VOTE", partitionAttemptTick + index, index < 2));
+      }
+      for (int index = 0; index < 3; index++) {
+        messages.add(new CausalMessage("abort-vote-" + index, "validator-" + index,
+            "NONE", "NONE", "ABORT_VOTE", hardDeadlineTick, true));
+      }
+    } else if (fault.actor().equals("VALIDATOR") && fault.action().equals("CRASH")) {
+      addQuorumMessages(messages, "view-change", "VIEW_CHANGE_VOTE", fault.step() + 1);
+    } else if (fault.actor().equals("VALIDATOR") && fault.action().equals("RESTART")) {
+      messages.add(new CausalMessage("validator-recovery", "validator-0", "NONE", "NONE",
+          "RECOVERY_SIGNAL", fault.step(), true));
+    } else if (fault.actor().equals("STORAGE") && fault.action().equals("CRASH")) {
+      messages.add(new CausalMessage("storage-availability", "storage-0", "NONE", "NONE",
+          "STORAGE_SIGNAL", fault.step(), false));
+    } else if (fault.actor().equals("STORAGE") && fault.action().equals("RESTART")) {
+      messages.add(new CausalMessage("storage-repair", "storage-0", "NONE", "NONE",
+          "STORAGE_SIGNAL", fault.step(), true));
+    } else {
+      throw new IllegalArgumentException("fault has no causal message schedule");
+    }
+    return List.copyOf(messages);
+  }
+
+  private static void addFourTickets(List<CausalMessage> messages, long firstTick) {
+    for (int index = 0; index < 4; index++) {
+      String ordinal = paddedOrdinal(index);
+      messages.add(new CausalMessage("worker-ticket-" + ordinal, "worker-" + ordinal,
+          index < 2 ? "code" : "text", "ticket-" + ordinal, "WORK_TICKET",
+          firstTick + index, true));
+    }
+  }
+
+  private static void addQuorumMessages(List<CausalMessage> messages, String prefix, String kind,
+      long firstTick) {
+    for (int index = 0; index < 3; index++) {
+      messages.add(new CausalMessage(prefix + "-vote-" + index, "validator-" + index,
+          "NONE", "NONE", kind, firstTick + index, true));
+    }
+  }
+
+  private static String paddedOrdinal(int value) {
+    BenchmarkContracts.require(value >= 0 && value < 1000, "causal ordinal out of range");
+    String digits = Integer.toString(value);
+    return "0".repeat(3 - digits.length()) + digits;
+  }
+
+  private static FaultSchedule measureFaultSchedule(Fault fault, Profile profile) {
+    long profileDeadlineSpan = Math.addExact(profile.rttMillis() / 4, profile.jitterMillis());
+    long hardDeadlineTick = Math.addExact(fault.step(), Math.max(60, profileDeadlineSpan));
+    List<CausalMessage> messages = causalMessages(fault, profile, hardDeadlineTick);
+    int transmitted = (int) messages.stream().filter(CausalMessage::transmit).count();
+    var complete = new CountDownLatch(transmitted);
+    var handler = new ReceiptHandler(transmitted, 32, complete);
+    EventLoopGroup boss = new NioEventLoopGroup(1);
+    EventLoopGroup serverWorkers = new NioEventLoopGroup(1);
+    EventLoopGroup clientWorkers = new NioEventLoopGroup(1);
+    Channel server = null;
+    Channel client = null;
+    try {
+      server = new ServerBootstrap()
+          .group(boss, serverWorkers)
+          .channel(NioServerSocketChannel.class)
+          .childOption(ChannelOption.TCP_NODELAY, true)
+          .childHandler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel channel) {
+              channel.pipeline().addLast(handler);
+            }
+          })
+          .bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0)).syncUninterruptibly()
+          .channel();
+      int port = ((InetSocketAddress) server.localAddress()).getPort();
+      client = new Bootstrap()
+          .group(clientWorkers)
+          .channel(NioSocketChannel.class)
+          .option(ChannelOption.TCP_NODELAY, true)
+          .handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel channel) {
+              // Causal benchmark frames remain opaque to the Java transport.
+            }
+          })
+          .connect(InetAddress.getLoopbackAddress(), port).syncUninterruptibly().channel();
+      long previousTick = fault.step();
+      for (int index = 0; index < messages.size(); index++) {
+        CausalMessage message = messages.get(index);
+        if (!message.transmit()) continue;
+        sleep(message.scheduledTick() - previousTick);
+        client.writeAndFlush(frame(index, 32)).syncUninterruptibly();
+        previousTick = message.scheduledTick();
+      }
+      try {
+        if (!complete.await(COMPLETION_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
+          throw new IllegalStateException("causal Netty schedule timed out");
+        }
+      } catch (InterruptedException error) {
+        Thread.currentThread().interrupt();
+        throw new IllegalStateException("causal Netty schedule interrupted", error);
+      }
+      client.eventLoop().submit(() -> {}).syncUninterruptibly();
+      ServerSnapshot snapshot = handler.snapshot();
+      BenchmarkContracts.require(snapshot.packetIds().size() == transmitted,
+          "causal Netty delivery set mismatch");
+      return new FaultSchedule(fault.id(), profile.id(), fault.step(), hardDeadlineTick,
+          messages, snapshot.packetIds());
+    } finally {
+      if (client != null) client.close().syncUninterruptibly();
+      if (server != null) server.close().syncUninterruptibly();
+      clientWorkers.shutdownGracefully(0, 5, TimeUnit.SECONDS).syncUninterruptibly();
+      serverWorkers.shutdownGracefully(0, 5, TimeUnit.SECONDS).syncUninterruptibly();
+      boss.shutdownGracefully(0, 5, TimeUnit.SECONDS).syncUninterruptibly();
+    }
+  }
+
+  private static String hex(byte[] value) {
+    char[] digits = "0123456789abcdef".toCharArray();
+    char[] encoded = new char[value.length * 2];
+    for (int index = 0; index < value.length; index++) {
+      int item = Byte.toUnsignedInt(value[index]);
+      encoded[index * 2] = digits[item >>> 4];
+      encoded[index * 2 + 1] = digits[item & 0x0f];
+    }
+    return new String(encoded);
   }
 
   private static Measurement measure(Request request, Profile profile, Path counterRoot) {

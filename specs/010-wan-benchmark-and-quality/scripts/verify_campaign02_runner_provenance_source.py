@@ -1,4 +1,4 @@
-"""Qualify C2-034..C2-037 source without executing a benchmark stage."""
+"""Qualify C2-034..C2-044 remediation source without executing a primary stage."""
 
 from __future__ import annotations
 
@@ -35,7 +35,12 @@ IMMUTABLE_DEFINITION_PATHS: Final = (
 NEW_SOURCES: Final = (
     ".github/workflows/benchmark-campaign02-runner-provenance.yml",
     ".github/workflows/benchmark-campaign02-stage-a.yml",
+    "CMakeLists.txt",
+    "delta-core-cpp/tests/certificates_test.cpp",
+    "delta-protocol/registry.json",
+    "delta-protocol/schemas/010/campaign-02/registry-v1.json",
     "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v1.json",
+    "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v4.json",
     "delta-protocol/schemas/010/campaign-02/benchmark-definition-v4.json",
     "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v4.json",
     "delta-protocol/schemas/010/campaign-02/stage-execution-identities-v3.json",
@@ -44,17 +49,55 @@ NEW_SOURCES: Final = (
     "delta-protocol/schemas/010/campaign-02/stage-gate-result-v2.json",
     "delta-protocol/schemas/010/campaign-02/stage-plan-evidence-v2.json",
     "delta-protocol/schemas/010/campaign-02/stage-workflow-gate-qc-v2.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v3.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-registration-signature-v2.json",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java",
+    "delta-runtime-cpp/include/delta/runtime/benchmark.hpp",
+    "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+    "delta-runtime-cpp/src/benchmark/sidecar_main.cpp",
+    "delta-runtime-cpp/tests/benchmark_test.cpp",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_bootstrap.py",
     "delta-worker-python/src/deltatorrent/benchmark/campaign02_exactness.py",
     "delta-worker-python/src/deltatorrent/benchmark/campaign02_execution_identities.py",
     "delta-worker-python/src/deltatorrent/benchmark/campaign02_network_fault.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_c_candidate.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_c_runtime.py",
     "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_a_evidence.py",
     "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_execution.py",
     "delta-worker-python/src/deltatorrent/benchmark/fault_profiles.py",
     "delta-worker-python/src/deltatorrent/benchmark/network_profiles.py",
+    "delta-worker-python/tests/benchmark/test_campaign02_bootstrap.py",
+    "delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py",
+    "delta-worker-python/tests/benchmark/test_campaign02_stage_c_candidate.py",
+    "delta-worker-python/tests/benchmark/test_campaign02_stage_c_runtime.py",
     "reports/benchmark/campaigns/campaign-02/definition-supersession-executable-provenance.json",
     "specs/010-wan-benchmark-and-quality/scripts/campaign02_stage_a_control.py",
     "specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py",
     "specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_runner_provenance_source.py",
+    "specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py",
+)
+TRANSITIVE_STAGE_C_SOURCES: Final = (
+    "delta-core-cpp/include/delta/apply/engine.hpp",
+    "delta-core-cpp/include/delta/certificates/contracts.hpp",
+    "delta-core-cpp/include/delta/certificates/verifier.hpp",
+    "delta-core-cpp/include/delta/core/canonical.hpp",
+    "delta-core-cpp/include/delta/core/protocol.hpp",
+    "delta-core-cpp/include/delta/core/transition.hpp",
+    "delta-core-cpp/include/delta/robust/plan.hpp",
+    "delta-core-cpp/src/apply/engine.cpp",
+    "delta-core-cpp/src/canonical.cpp",
+    "delta-core-cpp/src/certificates/contracts.cpp",
+    "delta-core-cpp/src/certificates/verifier.cpp",
+    "delta-core-cpp/src/protocol.cpp",
+    "delta-core-cpp/src/robust/plan.cpp",
+    "delta-core-cpp/src/transition.cpp",
+    "delta-runtime-cpp/include/delta/runtime/bounded_mpsc.hpp",
+    "delta-runtime-cpp/include/delta/runtime/certificate_runtime.hpp",
+    "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+    "delta-runtime-cpp/src/certificate_runtime.cpp",
+    "delta-runtime-cpp/src/runtime.cpp",
+    "delta-runtime-cpp/src/wal.cpp",
+    "delta-runtime-cpp/src/wal.hpp",
 )
 
 
@@ -152,13 +195,28 @@ def verify_junit(path: Path) -> dict[str, object]:
         for case in suite.iter("testcase")
     }
     required = {
-        "test_concrete_stage_c_runner_executes_all_15_plans_and_profiles",
+        "test_candidate_compiles_exact_stage_c_catalog_without_execution_authority",
+        "test_aggregated_only_state_reported_as_applied_is_rejected",
+        "test_applied_without_apply_qc_is_rejected",
+        "test_applied_with_unchanged_current_pointer_is_rejected",
+        "test_concentrated_mandatory_domain_loss_has_certified_abort_semantics",
+        "test_non_successful_registration_run_is_rejected",
+        "test_partition_abort_before_exact_deadline_is_rejected",
+        "test_partition_with_current_advance_is_rejected",
+        "test_registration_api_semantic_fabrications_are_rejected",
+        "test_registration_artifact_created_after_receipt_check_is_rejected",
+        "test_registration_artifact_from_prior_failed_attempt_is_rejected",
+        "test_registration_receipt_before_run_completion_is_rejected",
+        "test_regional_delay_without_delayed_runtime_messages_is_rejected",
+        "test_regional_delay_reaching_aggregate_only_is_rejected",
+        "test_silent_domain_weight_renormalization_is_rejected",
         "test_stage_a_admission_test_api_cannot_emit_a_gate_receipt",
         "test_stage_a_rejects_caller_supplied_dry_runner_before_execution",
         "test_stage_a_semantic_verifier_rejects_same_named_fabricated_artifacts",
         "test_stage_a_workflow_finalizer_binds_to_exact_analyzer_bytes",
         "test_stage_a_workflow_provenance_rejects_wrong_github_context",
         "test_stage_c_admission_requires_exact_stage_a_and_b_receipts_without_execution",
+        "test_worker_loss_requires_exact_identity_and_domain_capacity_evidence",
     }
     require(required <= cases, "CAMPAIGN02_RUNNER_PROVENANCE_CASES_MISSING")
     result["runner_provenance_required_cases"] = sorted(required)
@@ -170,7 +228,15 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
     legacy.IMMUTABLE_AUDIT_PATHS = tuple(
         sorted({*legacy.IMMUTABLE_AUDIT_PATHS, *IMMUTABLE_DEFINITION_PATHS})
     )
-    legacy.NEW_EXECUTION_SOURCES = tuple(sorted({*legacy.NEW_EXECUTION_SOURCES, *NEW_SOURCES}))
+    legacy.NEW_EXECUTION_SOURCES = tuple(
+        sorted(
+            {
+                *legacy.NEW_EXECUTION_SOURCES,
+                *NEW_SOURCES,
+                *TRANSITIVE_STAGE_C_SOURCES,
+            }
+        )
+    )
     legacy.verify_source_boundary = verify_source_boundary
     legacy.verify_governance = verify_governance
     legacy.verify_junit = verify_junit
@@ -184,28 +250,33 @@ def build(source_commit: str, portable_junit: Path, hardware_evidence: Path) -> 
         and isinstance(execution_binding, dict),
         "CAMPAIGN02_RUNNER_PROVENANCE_REPORT_INVALID",
     )
-    task_ids.extend(["C2-034", "C2-035", "C2-036", "C2-037"])
+    task_ids.extend(["C2-034", "C2-035", "C2-036", "C2-037", "C2-042", "C2-043", "C2-044"])
     checks.extend(
         [
             "IDENTITY_BEARING_PRODUCTION_RUNNER_PASS",
             "CALLER_SUPPLIED_DRY_FIXTURE_SYNTHETIC_FAIL_CLOSED_PASS",
-            "CONCRETE_STAGE_C_15_PLAN_PROFILE_EXECUTION_PASS",
+            "EXACT_STAGE_C_CANDIDATE_CATALOG_CONSTRUCTION_PASS",
             "STAGE_A_SEMANTIC_EVIDENCE_CONTENT_VERIFICATION_PASS",
             "ACTUAL_GITHUB_WORKFLOW_PROVENANCE_CLOSURE_PASS",
             "DEFINITION_V3_SUPERSEDED_BEFORE_ATTESTATION_PASS",
+            "AGGREGATE_ROOT_QC_TO_APPLY_QC_CURRENT_POINTER_PASS",
+            "CAUSAL_WORKER_NETWORK_DEADLINE_EXECUTION_PASS",
+            "REGISTRATION_TERMINAL_RESULT_QUORUM_BINDING_PASS",
         ]
     )
     execution_binding.update(
         {
-            "production_receipt_schema": "3.0.0",
+            "production_receipt_schema": "4.0.0",
+            "registration_receipt_schema": "3.0.0",
+            "registration_signature_schema": "2.0.0",
             "runner_object_identity_verified_before_first_plan": True,
             "stage_a_semantic_artifact_count": 7,
             "stage_c_concrete_plan_count": 15,
             "workflow_sha_from_github_context": True,
         }
     )
-    report["qualification_generation"] = "C2_034_C2_037_SOURCE_PENDING_TERMINAL_CI_RECEIPT"
-    report["schema_version"] = "3.0.0"
+    report["qualification_generation"] = "C2_042_C2_044_SOURCE_PENDING_TERMINAL_CI_RECEIPT"
+    report["schema_version"] = "4.0.0"
     return report
 
 

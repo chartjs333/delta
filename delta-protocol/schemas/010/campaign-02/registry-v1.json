@@ -206,6 +206,11 @@
       "sha256": "c3f83280ab76ca2f193afee95a4e6fd315c549edfa93b0aa944481ad817abc56"
     },
     {
+      "id": "SCHEMA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-010-V4",
+      "path": "schemas/010/campaign-02/network-fault-plan-evidence-v4.json",
+      "sha256": "3b373525863f67fea26441c1f49ec505c135954c42fbb5d983c9a86d3dfe6d00"
+    },
+    {
       "id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V1",
       "path": "schemas/010/campaign-02/stage-c-candidate-run-v1.json",
       "sha256": "a25b0a9be64a63f58389abb7ac70259af0e42849f65f908d2926be5d2ac61624"
@@ -269,6 +274,16 @@
       "id": "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-010-V2",
       "path": "schemas/010/campaign-02/workflow-registration-receipt-v2.json",
       "sha256": "c5a978e4bc519777715c2c698b2f150f0d21eeb897e0c712c215b2038d4736cd"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-010-V3",
+      "path": "schemas/010/campaign-02/workflow-registration-receipt-v3.json",
+      "sha256": "bab3f68131b396a878c7fad67feeebcd4f181d6cc562005ba8e34d86b132193a"
+    },
+    {
+      "id": "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-SIGNATURE-010-V2",
+      "path": "schemas/010/campaign-02/workflow-registration-signature-v2.json",
+      "sha256": "5e3ee50fad0008eb83f851a8a2e9bd8cfff0e43bdb26a50c0e59b86e834022be"
     },
     {
       "id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
@@ -561,6 +576,11 @@
       "value": "application/vnd.deltareduce.campaign-02.network-fault-plan-evidence-v3+json;version=3"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-V4",
+      "schema_id": "SCHEMA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-010-V4",
+      "value": "application/vnd.deltareduce.campaign-02.network-fault-plan-evidence-v4+json;version=4"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.stage-c-candidate-run-v1+json;version=1"
@@ -626,6 +646,16 @@
       "value": "application/vnd.deltareduce.campaign-02.workflow-registration-receipt-v2+json;version=2"
     },
     {
+      "id": "MEDIA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-V3",
+      "schema_id": "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-010-V3",
+      "value": "application/vnd.deltareduce.campaign-02.workflow-registration-receipt-v3+json;version=3"
+    },
+    {
+      "id": "MEDIA-CAMPAIGN02-WORKFLOW-REGISTRATION-SIGNATURE-V2",
+      "schema_id": "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-SIGNATURE-010-V2",
+      "value": "application/vnd.deltareduce.campaign-02.workflow-registration-signature-v2+json;version=2"
+    },
+    {
       "id": "MEDIA-CAMPAIGN02-EVALUATOR-PROFILE-V1",
       "schema_id": "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
       "value": "application/vnd.deltareduce.campaign-02.evaluator-profile-v1+json;version=1"
@@ -671,7 +701,7 @@
       "value": "application/vnd.deltareduce.campaign-02.native-chain-admission-receipt-v1+json;version=1"
     }
   ],
-  "registry_version": "010.9.0-actual-stagec-registration-quorum",
+  "registry_version": "010.10.0-causal-stagec-terminal-registration",
   "schema_version": "1.0.0",
   "semantic_completeness_claimed": false
 }

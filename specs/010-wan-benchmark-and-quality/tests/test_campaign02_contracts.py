@@ -22,10 +22,10 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 63
+    assert len(module.SCHEMAS) == 66
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.9.0-actual-stagec-registration-quorum"
+    assert registry["registry_version"] == "010.10.0-causal-stagec-terminal-registration"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
     measured_stage_c = json.loads(
@@ -52,6 +52,21 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     assert actual_stage_c["properties"]["fault_results"]["items"]["properties"][
         "observation_source"
     ] == {"const": "ACTUAL_RUNTIME_TRANSITION"}
+    causal_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v4.json"
+        ).read_bytes()
+    )
+    causal_fault = causal_stage_c["properties"]["fault_results"]["items"]
+    assert {
+        "aggregate_root_qc_id",
+        "apply_work_item_id",
+        "apply_qc_id",
+        "current_pointer_before",
+        "current_pointer_after",
+        "message_delivery_ticks",
+        "per_domain_remaining_tickets",
+    } <= set(causal_fault["required"])
     candidate = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v1.json").read_bytes()
     )
@@ -86,25 +101,39 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     assert "definition_id" not in bootstrap_mapping["properties"]
     registration = json.loads(
         (
-            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v2.json"
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v3.json"
         ).read_bytes()
     )
     assert {
         "api_evidence_root",
         "registration_artifact_archive_digest",
         "registration_artifact_id",
+        "registration_artifact_name",
         "registration_run_attempt",
+        "registration_run_completed_at",
+        "registration_run_conclusion",
+        "registration_run_created_at",
         "registration_run_id",
+        "registration_run_status",
+        "registration_run_updated_at",
         "registration_workflow_id",
     } <= set(registration["required"])
     registration_signature = json.loads(
         (
-            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-signature-v1.json"
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-signature-v2.json"
         ).read_bytes()
     )
-    assert {"api_evidence_root", "registration_receipt_id", "signature_base64"} <= set(
-        registration_signature["required"]
-    )
+    assert {
+        "api_evidence_root",
+        "registration_receipt_id",
+        "registration_run_status",
+        "registration_run_conclusion",
+        "registration_run_completed_at",
+        "registration_artifact_created_at",
+        "registration_artifact_expires_at",
+        "registration_artifact_name",
+        "signature_base64",
+    } <= set(registration_signature["required"])
     replacement_definition = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json").read_bytes()
     )

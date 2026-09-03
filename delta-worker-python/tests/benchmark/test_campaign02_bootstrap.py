@@ -162,6 +162,8 @@ def _api_evidence(
         "sha": mapping.bootstrap_workflow_blob_id,
     }
     run: dict[str, object] = {
+        "conclusion": "success",
+        "created_at": "2026-09-03T09:55:00+00:00",
         "event": "workflow_dispatch",
         "head_branch": "main",
         "head_sha": mapping.bootstrap_commit,
@@ -169,12 +171,17 @@ def _api_evidence(
         "path": mapping.bootstrap_workflow_path,
         "repository": {"full_name": mapping.repository},
         "run_attempt": 2,
+        "status": "completed",
+        "updated_at": "2026-09-03T09:58:00+00:00",
         "workflow_id": 123,
     }
     artifact: dict[str, object] = {
+        "created_at": "2026-09-03T09:57:00+00:00",
         "digest": _id("9"),
         "expired": False,
+        "expires_at": "2026-12-03T09:57:00+00:00",
         "id": 789,
+        "name": "campaign02-bootstrap-registration-456-attempt-2",
         "workflow_run": {
             "head_branch": "main",
             "head_sha": mapping.bootstrap_commit,
@@ -239,14 +246,22 @@ def _registration(
         "qualified_source_tree": mapping.qualified_source_tree,
         "repository": mapping.repository,
         "registration_artifact_archive_digest": _id("9"),
+        "registration_artifact_created_at": "2026-09-03T09:57:00+00:00",
+        "registration_artifact_expires_at": "2026-12-03T09:57:00+00:00",
         "registration_artifact_id": 789,
+        "registration_artifact_name": "campaign02-bootstrap-registration-456-attempt-2",
         "registration_run_attempt": 2,
+        "registration_run_completed_at": "2026-09-03T09:58:00+00:00",
+        "registration_run_conclusion": "success",
+        "registration_run_created_at": "2026-09-03T09:55:00+00:00",
         "registration_run_event": "workflow_dispatch",
         "registration_run_head_sha": mapping.bootstrap_commit,
         "registration_run_id": 456,
         "registration_run_ref": "refs/heads/main",
+        "registration_run_status": "completed",
+        "registration_run_updated_at": "2026-09-03T09:58:00+00:00",
         "registration_workflow_id": 123,
-        "schema_version": "2.0.0",
+        "schema_version": "3.0.0",
         "stage_a_plans_executed": 0,
         "stage_gate_receipt_emitted": False,
         "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
@@ -274,6 +289,14 @@ def _registration_votes(
             api_evidence_root=evidence.content_id,
             mapping_id=mapping.content_id,
             validator_set_id=validator_set.content_id,
+            registration_run_status=receipt.registration_run_status,
+            registration_run_conclusion=receipt.registration_run_conclusion,
+            registration_run_created_at=receipt.registration_run_created_at,
+            registration_run_updated_at=receipt.registration_run_updated_at,
+            registration_run_completed_at=receipt.registration_run_completed_at,
+            registration_artifact_name=receipt.registration_artifact_name,
+            registration_artifact_created_at=receipt.registration_artifact_created_at,
+            registration_artifact_expires_at=receipt.registration_artifact_expires_at,
             signer_id=f"validator-{index}",
             submitted_at=submitted_at,
             signature=b"\0" * 64,
@@ -350,6 +373,76 @@ def test_registration_receipt_proves_zero_execution_only() -> None:
     assert receipt.document["observation_count"] == 0
     assert receipt.document["stage_gate_receipt_emitted"] is False
     assert attestation.signer_ids == ("validator-0", "validator-1", "validator-2")
+    assert receipt.registration_run_status == "completed"
+    assert receipt.registration_run_conclusion == "success"
+
+
+@pytest.mark.parametrize(
+    ("run_updates", "receipt_updates"),
+    [
+        ({"conclusion": "failure"}, {}),
+        ({"conclusion": "cancelled"}, {}),
+        ({"conclusion": "timed_out"}, {}),
+        ({"status": "in_progress", "conclusion": None}, {}),
+        (
+            {"conclusion": "failure"},
+            {"registration_run_conclusion": "success"},
+        ),
+    ],
+)
+def test_non_successful_registration_run_is_rejected(
+    run_updates: dict[str, object], receipt_updates: dict[str, object]
+) -> None:
+    mapping, validator_set, mapping_votes, keys = _verified_mapping()
+    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=mapping_votes)
+    evidence = _api_evidence(mapping, run_updates=run_updates)
+    receipt = _registration(mapping, evidence, **receipt_updates)
+    votes = _registration_votes(mapping, validator_set, keys, receipt, evidence)
+    with pytest.raises(Campaign02BootstrapError, match="API_SEMANTICS_INVALID"):
+        verify_registration_receipt(
+            verified,
+            receipt,
+            api_evidence=evidence,
+            validator_set=validator_set,
+            votes=votes,
+        )
+
+
+def test_registration_receipt_before_run_completion_is_rejected() -> None:
+    mapping = _mapping()
+    evidence = _api_evidence(mapping)
+    with pytest.raises(Campaign02BootstrapError, match="REGISTRATION_STOP_INVALID"):
+        _registration(mapping, evidence, checked_at="2026-09-03T09:57:59+00:00")
+
+
+def test_registration_artifact_created_after_receipt_check_is_rejected() -> None:
+    mapping = _mapping()
+    evidence = _api_evidence(mapping)
+    with pytest.raises(Campaign02BootstrapError, match="REGISTRATION_STOP_INVALID"):
+        _registration(
+            mapping,
+            evidence,
+            registration_artifact_created_at="2026-09-03T10:00:01+00:00",
+        )
+
+
+def test_registration_artifact_from_prior_failed_attempt_is_rejected() -> None:
+    mapping, validator_set, mapping_votes, keys = _verified_mapping()
+    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=mapping_votes)
+    evidence = _api_evidence(
+        mapping,
+        artifact_updates={"name": "campaign02-bootstrap-registration-456-attempt-1"},
+    )
+    receipt = _registration(mapping, evidence)
+    votes = _registration_votes(mapping, validator_set, keys, receipt, evidence)
+    with pytest.raises(Campaign02BootstrapError, match="API_SEMANTICS_INVALID"):
+        verify_registration_receipt(
+            verified,
+            receipt,
+            api_evidence=evidence,
+            validator_set=validator_set,
+            votes=votes,
+        )
 
 
 @pytest.mark.parametrize(

@@ -215,6 +215,11 @@ SCHEMAS: Final = {
         "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE",
         "3.0.0",
     ),
+    "network-fault-plan-evidence-v4": (
+        "SCHEMA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-010-V4",
+        "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE",
+        "4.0.0",
+    ),
     "stage-c-candidate-run-v1": (
         "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V1",
         "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_RUN",
@@ -278,6 +283,16 @@ SCHEMAS: Final = {
     "workflow-registration-receipt-v2": (
         "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-010-V2",
         "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
+        "2.0.0",
+    ),
+    "workflow-registration-receipt-v3": (
+        "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-010-V3",
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
+        "3.0.0",
+    ),
+    "workflow-registration-signature-v2": (
+        "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-SIGNATURE-010-V2",
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE",
         "2.0.0",
     ),
     "evaluator-profile-v1": (
@@ -1815,6 +1830,69 @@ def schema_documents() -> dict[str, dict[str, object]]:
     documents["network-fault-plan-evidence-v3"] = schema(
         "network-fault-plan-evidence-v3", network_fault_v3
     )
+    nullable_content_id = {"anyOf": [content_id(), {"type": "null"}]}
+    causal_message_tick = strict({"logical_tick": uint(), "message_id": text()})
+    causal_fault_result = {
+        key: value for key, value in native_fault_result_v3["properties"].items()
+    }
+    causal_fault_result.update(
+        {
+            "abort_qc_id": nullable_content_id,
+            "aggregate_root_qc_id": nullable_content_id,
+            "aggregate_root_qc_tick": uint(),
+            "apply_qc_id": nullable_content_id,
+            "apply_qc_tick": uint(),
+            "apply_quorum_threshold": uint(),
+            "apply_validator_set_id": nullable_content_id,
+            "apply_work_item_id": nullable_content_id,
+            "causal_transport_receipt_id": content_id(),
+            "certified_abort_tick": uint(),
+            "current_pointer_after": nullable_content_id,
+            "current_pointer_before": nullable_content_id,
+            "dropped_message_ids": array(text(), minimum=0, unique=True),
+            "failed_quorum_reason": {"type": ["string", "null"]},
+            "gst_tick": uint(),
+            "hard_deadline_tick": uint(),
+            "isc_ticket_set": array(text(), minimum=0, unique=True),
+            "loss_fraction": strict({"denominator": uint(1), "numerator": uint()}),
+            "lost_ticket_ids": array(text(), minimum=0, unique=True),
+            "lost_worker_ids": array(text(), minimum=0, unique=True),
+            "message_delivery_ticks": array(causal_message_tick, minimum=0, unique=True),
+            "missing_work_policy_result": text(),
+            "network_profile_id": text(),
+            "next_checkpoint_id": nullable_content_id,
+            "next_optimizer_state_id": nullable_content_id,
+            "parent_checkpoint_id": nullable_content_id,
+            "parent_optimizer_state_id": nullable_content_id,
+            "partition_start_tick": uint(),
+            "per_domain_remaining_tickets": {
+                "additionalProperties": uint(),
+                "type": "object",
+            },
+            "per_domain_required_tickets": {
+                "additionalProperties": uint(),
+                "type": "object",
+            },
+            "pi_d_renormalized": {"const": False},
+            "quorum_capacity_after": uint(),
+            "quorum_capacity_before": uint(),
+            "quorum_formation_tick": uint(),
+            "unavailable_ids": array(text(), minimum=0, unique=True),
+            "worker_count_before": uint(),
+            "worker_count_lost": uint(),
+        }
+    )
+    network_fault_v4 = {key: value for key, value in network_fault_v3.items()}
+    network_fault_v4["fault_results"] = {
+        "items": strict(causal_fault_result),
+        "maxItems": 7,
+        "minItems": 7,
+        "type": "array",
+        "uniqueItems": True,
+    }
+    documents["network-fault-plan-evidence-v4"] = schema(
+        "network-fault-plan-evidence-v4", network_fault_v4
+    )
     candidate_plan_record = strict(
         {
             "applied_network_profile_ids": {
@@ -2222,6 +2300,38 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "workflow_visible_on_default_branch": {"const": True},
         },
     )
+    terminal_registration_fields = {
+        "registration_artifact_created_at": {"format": "date-time", "type": "string"},
+        "registration_artifact_expires_at": {"format": "date-time", "type": "string"},
+        "registration_artifact_name": {
+            "minLength": 1,
+            "pattern": "^.+-attempt-[1-9][0-9]*$",
+            "type": "string",
+        },
+        "registration_run_completed_at": {"format": "date-time", "type": "string"},
+        "registration_run_conclusion": {"const": "success"},
+        "registration_run_created_at": {"format": "date-time", "type": "string"},
+        "registration_run_status": {"const": "completed"},
+        "registration_run_updated_at": {"format": "date-time", "type": "string"},
+    }
+    registration_receipt_v3 = {
+        key: value
+        for key, value in documents["workflow-registration-receipt-v2"]["properties"].items()
+        if key not in {"formal_semantics_id", "schema_version", "type_name"}
+    }
+    registration_receipt_v3.update(terminal_registration_fields)
+    documents["workflow-registration-receipt-v3"] = schema(
+        "workflow-registration-receipt-v3", registration_receipt_v3
+    )
+    registration_signature_v2 = {
+        key: value
+        for key, value in documents["workflow-registration-signature-v1"]["properties"].items()
+        if key not in {"formal_semantics_id", "schema_version", "type_name"}
+    }
+    registration_signature_v2.update(terminal_registration_fields)
+    documents["workflow-registration-signature-v2"] = schema(
+        "workflow-registration-signature-v2", registration_signature_v2
+    )
     return documents
 
 
@@ -2260,7 +2370,7 @@ def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
         "fixtures": fixture_entries(),
         "formal_semantics_id": FORMAL_ID,
         "media_types": media_types,
-        "registry_version": "010.9.0-actual-stagec-registration-quorum",
+        "registry_version": "010.10.0-causal-stagec-terminal-registration",
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,
     }

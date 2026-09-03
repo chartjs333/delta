@@ -27,15 +27,16 @@ _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
 _GIT_ID: Final = re.compile(r"^[0-9a-f]{40}$")
 _REPOSITORY: Final = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _WORKFLOW_PATH: Final = re.compile(r"^\.github/workflows/[A-Za-z0-9_.-]+\.ya?ml$")
+_ARTIFACT_NAME: Final = re.compile(r"^.+-attempt-[1-9][0-9]*$")
 _MAPPING_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-mapping.v1\0"
 _VALIDATOR_SET_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-validator-set.v1\0"
 _SIGNATURE_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-signature.v1\0"
 _ATTESTATION_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-bootstrap-attestation.v1\0"
-_REGISTRATION_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-registration-receipt.v2\0"
+_REGISTRATION_DOMAIN: Final = b"deltareduce.010.campaign02-workflow-registration-receipt.v3\0"
 _API_SNAPSHOT_DOMAIN: Final = b"deltareduce.010.campaign02-github-api-snapshot.v1\0"
 _API_EVIDENCE_DOMAIN: Final = b"deltareduce.010.campaign02-registration-api-evidence.v1\0"
 _REGISTRATION_SIGNATURE_DOMAIN: Final = (
-    b"deltareduce.010.campaign02-workflow-registration-signature.v1\0"
+    b"deltareduce.010.campaign02-workflow-registration-signature.v2\0"
 )
 _REGISTRATION_ATTESTATION_DOMAIN: Final = (
     b"deltareduce.010.campaign02-workflow-registration-attestation.v1\0"
@@ -80,6 +81,16 @@ def _positive_int(value: object, code: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         raise _fail(code)
     return value
+
+
+def _timestamp(value: object, code: str) -> datetime:
+    try:
+        result = datetime.fromisoformat(str(value))
+    except ValueError as exc:
+        raise _fail(code) from exc
+    if result.tzinfo is None or result.utcoffset() is None:
+        raise _fail(code)
+    return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -629,8 +640,16 @@ class WorkflowRegistrationReceipt:
     registration_run_event: str
     registration_run_head_sha: str
     registration_run_ref: str
+    registration_run_status: str
+    registration_run_conclusion: str
+    registration_run_created_at: datetime
+    registration_run_updated_at: datetime
+    registration_run_completed_at: datetime
     registration_artifact_id: int
+    registration_artifact_name: str
     registration_artifact_archive_digest: str
+    registration_artifact_created_at: datetime
+    registration_artifact_expires_at: datetime
     checked_at: datetime
 
     @classmethod
@@ -654,12 +673,20 @@ class WorkflowRegistrationReceipt:
             "qualified_source_tree",
             "repository",
             "registration_artifact_archive_digest",
+            "registration_artifact_created_at",
+            "registration_artifact_expires_at",
             "registration_artifact_id",
+            "registration_artifact_name",
             "registration_run_attempt",
+            "registration_run_completed_at",
+            "registration_run_conclusion",
+            "registration_run_created_at",
             "registration_run_event",
             "registration_run_head_sha",
             "registration_run_id",
             "registration_run_ref",
+            "registration_run_status",
+            "registration_run_updated_at",
             "registration_workflow_id",
             "schema_version",
             "stage_a_plans_executed",
@@ -672,11 +699,35 @@ class WorkflowRegistrationReceipt:
         }
         if not isinstance(value, dict) or set(value) != fields:
             raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_FIELDS_INVALID")
-        try:
-            checked_at = datetime.fromisoformat(str(value["checked_at"]))
-        except ValueError as exc:
-            raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_TIME_INVALID") from exc
+        checked_at = _timestamp(
+            value["checked_at"], "CAMPAIGN02_WORKFLOW_REGISTRATION_TIME_INVALID"
+        )
+        run_created_at = _timestamp(
+            value["registration_run_created_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_RUN_TIME_INVALID",
+        )
+        run_updated_at = _timestamp(
+            value["registration_run_updated_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_RUN_TIME_INVALID",
+        )
+        run_completed_at = _timestamp(
+            value["registration_run_completed_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_RUN_TIME_INVALID",
+        )
+        artifact_created_at = _timestamp(
+            value["registration_artifact_created_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_ARTIFACT_TIME_INVALID",
+        )
+        artifact_expires_at = _timestamp(
+            value["registration_artifact_expires_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_ARTIFACT_TIME_INVALID",
+        )
         workflow_id = value["workflow_id"]
+        registration_run_attempt = _positive_int(
+            value["registration_run_attempt"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_RUN_ATTEMPT_INVALID",
+        )
+        registration_artifact_name = value["registration_artifact_name"]
         stop_counts = (
             value["execution_artifact_count"],
             value["execution_count"],
@@ -685,7 +736,7 @@ class WorkflowRegistrationReceipt:
         )
         if (
             value["type_name"] != "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT"
-            or value["schema_version"] != "2.0.0"
+            or value["schema_version"] != "3.0.0"
             or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
             or value["workflow_visible_on_default_branch"] is not True
             or value["bootstrap_commit_on_default_branch"] is not True
@@ -701,7 +752,14 @@ class WorkflowRegistrationReceipt:
             or isinstance(workflow_id, bool)
             or not isinstance(workflow_id, int)
             or workflow_id <= 0
-            or checked_at.tzinfo is None
+            or value["registration_run_status"] != "completed"
+            or value["registration_run_conclusion"] != "success"
+            or not isinstance(registration_artifact_name, str)
+            or _ARTIFACT_NAME.fullmatch(registration_artifact_name) is None
+            or not registration_artifact_name.endswith(f"-attempt-{registration_run_attempt}")
+            or not (run_created_at <= run_updated_at <= run_completed_at <= checked_at)
+            or artifact_created_at > checked_at
+            or artifact_expires_at <= checked_at
         ):
             raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_STOP_INVALID")
         repository = value["repository"]
@@ -757,24 +815,29 @@ class WorkflowRegistrationReceipt:
                 value["registration_run_id"],
                 "CAMPAIGN02_WORKFLOW_REGISTRATION_RUN_ID_INVALID",
             ),
-            registration_run_attempt=_positive_int(
-                value["registration_run_attempt"],
-                "CAMPAIGN02_WORKFLOW_REGISTRATION_RUN_ATTEMPT_INVALID",
-            ),
+            registration_run_attempt=registration_run_attempt,
             registration_run_event=str(value["registration_run_event"]),
             registration_run_head_sha=_git_id(
                 value["registration_run_head_sha"],
                 "CAMPAIGN02_WORKFLOW_REGISTRATION_RUN_HEAD_INVALID",
             ),
             registration_run_ref=str(value["registration_run_ref"]),
+            registration_run_status="completed",
+            registration_run_conclusion="success",
+            registration_run_created_at=run_created_at,
+            registration_run_updated_at=run_updated_at,
+            registration_run_completed_at=run_completed_at,
             registration_artifact_id=_positive_int(
                 value["registration_artifact_id"],
                 "CAMPAIGN02_WORKFLOW_REGISTRATION_ARTIFACT_ID_INVALID",
             ),
+            registration_artifact_name=registration_artifact_name,
             registration_artifact_archive_digest=_content_id(
                 value["registration_artifact_archive_digest"],
                 "CAMPAIGN02_WORKFLOW_REGISTRATION_ARTIFACT_DIGEST_INVALID",
             ),
+            registration_artifact_created_at=artifact_created_at,
+            registration_artifact_expires_at=artifact_expires_at,
             checked_at=checked_at,
         )
 
@@ -799,14 +862,22 @@ class WorkflowRegistrationReceipt:
             "qualified_source_tree": self.qualified_source_tree,
             "repository": self.repository,
             "registration_artifact_archive_digest": self.registration_artifact_archive_digest,
+            "registration_artifact_created_at": self.registration_artifact_created_at.isoformat(),
+            "registration_artifact_expires_at": self.registration_artifact_expires_at.isoformat(),
             "registration_artifact_id": self.registration_artifact_id,
+            "registration_artifact_name": self.registration_artifact_name,
             "registration_run_attempt": self.registration_run_attempt,
+            "registration_run_completed_at": self.registration_run_completed_at.isoformat(),
+            "registration_run_conclusion": self.registration_run_conclusion,
+            "registration_run_created_at": self.registration_run_created_at.isoformat(),
             "registration_run_event": self.registration_run_event,
             "registration_run_head_sha": self.registration_run_head_sha,
             "registration_run_id": self.registration_run_id,
             "registration_run_ref": self.registration_run_ref,
+            "registration_run_status": self.registration_run_status,
+            "registration_run_updated_at": self.registration_run_updated_at.isoformat(),
             "registration_workflow_id": self.registration_workflow_id,
-            "schema_version": "2.0.0",
+            "schema_version": "3.0.0",
             "stage_a_plans_executed": 0,
             "stage_gate_receipt_emitted": False,
             "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
@@ -827,6 +898,14 @@ class SignedWorkflowRegistrationVote:
     api_evidence_root: str
     mapping_id: str
     validator_set_id: str
+    registration_run_status: str
+    registration_run_conclusion: str
+    registration_run_created_at: datetime
+    registration_run_updated_at: datetime
+    registration_run_completed_at: datetime
+    registration_artifact_name: str
+    registration_artifact_created_at: datetime
+    registration_artifact_expires_at: datetime
     signer_id: str
     submitted_at: datetime
     signature: bytes
@@ -838,6 +917,14 @@ class SignedWorkflowRegistrationVote:
             "formal_semantics_id",
             "mapping_id",
             "registration_receipt_id",
+            "registration_run_completed_at",
+            "registration_run_conclusion",
+            "registration_run_created_at",
+            "registration_run_status",
+            "registration_run_updated_at",
+            "registration_artifact_name",
+            "registration_artifact_created_at",
+            "registration_artifact_expires_at",
             "schema_version",
             "signature_base64",
             "signer_id",
@@ -848,17 +935,43 @@ class SignedWorkflowRegistrationVote:
         if not isinstance(value, dict) or set(value) != fields:
             raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_FIELDS_INVALID")
         signer_id = value["signer_id"]
-        try:
-            submitted_at = datetime.fromisoformat(str(value["submitted_at"]))
-        except ValueError as exc:
-            raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_TIME_INVALID") from exc
+        submitted_at = _timestamp(
+            value["submitted_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_TIME_INVALID",
+        )
+        run_created_at = _timestamp(
+            value["registration_run_created_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_TIME_INVALID",
+        )
+        run_updated_at = _timestamp(
+            value["registration_run_updated_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_TIME_INVALID",
+        )
+        run_completed_at = _timestamp(
+            value["registration_run_completed_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_TIME_INVALID",
+        )
+        artifact_created_at = _timestamp(
+            value["registration_artifact_created_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_TIME_INVALID",
+        )
+        artifact_expires_at = _timestamp(
+            value["registration_artifact_expires_at"],
+            "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_TIME_INVALID",
+        )
         if (
             value["type_name"] != "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE"
-            or value["schema_version"] != "1.0.0"
+            or value["schema_version"] != "2.0.0"
             or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
             or not isinstance(signer_id, str)
             or not signer_id
-            or submitted_at.tzinfo is None
+            or value["registration_run_status"] != "completed"
+            or value["registration_run_conclusion"] != "success"
+            or not isinstance(value["registration_artifact_name"], str)
+            or _ARTIFACT_NAME.fullmatch(value["registration_artifact_name"]) is None
+            or not (run_created_at <= run_updated_at <= run_completed_at <= submitted_at)
+            or artifact_created_at > submitted_at
+            or artifact_expires_at <= submitted_at
         ):
             raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_HEADER_INVALID")
         signature = _canonical_base64(
@@ -883,6 +996,14 @@ class SignedWorkflowRegistrationVote:
                 value["validator_set_id"],
                 "CAMPAIGN02_WORKFLOW_REGISTRATION_VALIDATOR_SET_ID_INVALID",
             ),
+            registration_run_status="completed",
+            registration_run_conclusion="success",
+            registration_run_created_at=run_created_at,
+            registration_run_updated_at=run_updated_at,
+            registration_run_completed_at=run_completed_at,
+            registration_artifact_name=value["registration_artifact_name"],
+            registration_artifact_created_at=artifact_created_at,
+            registration_artifact_expires_at=artifact_expires_at,
             signer_id=signer_id,
             submitted_at=submitted_at,
             signature=signature,
@@ -890,11 +1011,21 @@ class SignedWorkflowRegistrationVote:
 
     @property
     def message(self) -> bytes:
+        artifact_created_at = self.registration_artifact_created_at.isoformat()
+        artifact_expires_at = self.registration_artifact_expires_at.isoformat()
         return _REGISTRATION_SIGNATURE_DOMAIN + canonical_json_bytes(
             {
                 "api_evidence_root": self.api_evidence_root,
                 "mapping_id": self.mapping_id,
                 "registration_receipt_id": self.registration_receipt_id,
+                "registration_run_status": self.registration_run_status,
+                "registration_run_conclusion": self.registration_run_conclusion,
+                "registration_run_created_at": self.registration_run_created_at.isoformat(),
+                "registration_run_updated_at": self.registration_run_updated_at.isoformat(),
+                "registration_run_completed_at": self.registration_run_completed_at.isoformat(),
+                "registration_artifact_name": self.registration_artifact_name,
+                "registration_artifact_created_at": artifact_created_at,
+                "registration_artifact_expires_at": artifact_expires_at,
                 "signer_id": self.signer_id,
                 "submitted_at": self.submitted_at.isoformat(),
                 "validator_set_id": self.validator_set_id,
@@ -908,7 +1039,15 @@ class SignedWorkflowRegistrationVote:
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "mapping_id": self.mapping_id,
             "registration_receipt_id": self.registration_receipt_id,
-            "schema_version": "1.0.0",
+            "registration_run_status": self.registration_run_status,
+            "registration_run_conclusion": self.registration_run_conclusion,
+            "registration_run_created_at": self.registration_run_created_at.isoformat(),
+            "registration_run_updated_at": self.registration_run_updated_at.isoformat(),
+            "registration_run_completed_at": self.registration_run_completed_at.isoformat(),
+            "registration_artifact_name": self.registration_artifact_name,
+            "registration_artifact_created_at": self.registration_artifact_created_at.isoformat(),
+            "registration_artifact_expires_at": self.registration_artifact_expires_at.isoformat(),
+            "schema_version": "2.0.0",
             "signature_base64": base64.b64encode(self.signature).decode("ascii"),
             "signer_id": self.signer_id,
             "submitted_at": self.submitted_at.isoformat(),
@@ -1024,6 +1163,27 @@ def _verify_registration_api_evidence(
         artifact.get("workflow_run"), "CAMPAIGN02_WORKFLOW_REGISTRATION_API_ARTIFACT_INVALID"
     )
     workflow_bytes = _api_file_bytes(workflow_file.get("content"))
+    run_created_at = _timestamp(
+        run.get("created_at"), "CAMPAIGN02_WORKFLOW_REGISTRATION_API_RUN_TIME_INVALID"
+    )
+    run_updated_at = _timestamp(
+        run.get("updated_at"), "CAMPAIGN02_WORKFLOW_REGISTRATION_API_RUN_TIME_INVALID"
+    )
+    # GitHub's workflow-run response exposes the terminal transition through
+    # ``updated_at`` today.  Preserve an explicit completed-at security field,
+    # and bind a future native ``completed_at`` field when the API supplies it.
+    run_completed_at = _timestamp(
+        run.get("completed_at", run.get("updated_at")),
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_API_RUN_TIME_INVALID",
+    )
+    artifact_created_at = _timestamp(
+        artifact.get("created_at"),
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_API_ARTIFACT_TIME_INVALID",
+    )
+    artifact_expires_at = _timestamp(
+        artifact.get("expires_at"),
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_API_ARTIFACT_TIME_INVALID",
+    )
     valid = (
         workflow.get("id") == receipt.workflow_id
         and workflow.get("path") == mapping.bootstrap_workflow_path
@@ -1040,11 +1200,14 @@ def _verify_registration_api_evidence(
         and run.get("workflow_id") == receipt.registration_workflow_id
         and run.get("workflow_id") == receipt.workflow_id
         and run.get("event") == "workflow_dispatch"
+        and run.get("status") == "completed"
+        and run.get("conclusion") == "success"
         and run.get("head_sha") == mapping.bootstrap_commit
         and run.get("head_branch") == "main"
         and run.get("path") == mapping.bootstrap_workflow_path
         and run_repository.get("full_name") == mapping.repository
         and artifact.get("id") == receipt.registration_artifact_id
+        and artifact.get("name") == receipt.registration_artifact_name
         and artifact.get("expired") is False
         and artifact.get("digest") == receipt.registration_artifact_archive_digest
         and artifact_run.get("id") == receipt.registration_run_id
@@ -1053,6 +1216,16 @@ def _verify_registration_api_evidence(
         and receipt.registration_run_event == "workflow_dispatch"
         and receipt.registration_run_head_sha == mapping.bootstrap_commit
         and receipt.registration_run_ref == "refs/heads/main"
+        and receipt.registration_run_status == "completed"
+        and receipt.registration_run_conclusion == "success"
+        and receipt.registration_run_created_at == run_created_at
+        and receipt.registration_run_updated_at == run_updated_at
+        and receipt.registration_run_completed_at == run_completed_at
+        and receipt.registration_artifact_created_at == artifact_created_at
+        and receipt.registration_artifact_expires_at == artifact_expires_at
+        and run_completed_at <= receipt.checked_at
+        and artifact_created_at <= receipt.checked_at
+        and receipt.checked_at < artifact_expires_at
     )
     if not valid:
         raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_API_SEMANTICS_INVALID")
@@ -1097,6 +1270,14 @@ def verify_registration_receipt(
             or vote.api_evidence_root != api_evidence.content_id
             or vote.mapping_id != mapping.content_id
             or vote.validator_set_id != validator_set.content_id
+            or vote.registration_run_status != receipt.registration_run_status
+            or vote.registration_run_conclusion != receipt.registration_run_conclusion
+            or vote.registration_run_created_at != receipt.registration_run_created_at
+            or vote.registration_run_updated_at != receipt.registration_run_updated_at
+            or vote.registration_run_completed_at != receipt.registration_run_completed_at
+            or vote.registration_artifact_name != receipt.registration_artifact_name
+            or vote.registration_artifact_created_at != receipt.registration_artifact_created_at
+            or vote.registration_artifact_expires_at != receipt.registration_artifact_expires_at
             or vote.submitted_at < receipt.checked_at
         ):
             raise _fail("CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE_BINDING_MISMATCH")

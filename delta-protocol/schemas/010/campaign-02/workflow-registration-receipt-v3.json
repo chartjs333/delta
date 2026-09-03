@@ -1,0 +1,202 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:workflow-registration-receipt-v3",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "3.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT"
+    },
+    "api_evidence_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "authority_bundle_supplied": {
+      "const": false
+    },
+    "bootstrap_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "bootstrap_commit_on_default_branch": {
+      "const": true
+    },
+    "bootstrap_mapping_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "bootstrap_workflow_blob_id": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "bootstrap_workflow_content_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "checked_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "default_branch_ref": {
+      "const": "refs/heads/main"
+    },
+    "execution_artifact_count": {
+      "const": 0
+    },
+    "execution_count": {
+      "const": 0
+    },
+    "observation_count": {
+      "const": 0
+    },
+    "qualified_source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "qualified_source_exists": {
+      "const": true
+    },
+    "qualified_source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "registration_artifact_archive_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "registration_artifact_id": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "registration_run_attempt": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "registration_run_event": {
+      "const": "workflow_dispatch"
+    },
+    "registration_run_head_sha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "registration_run_id": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "registration_run_ref": {
+      "const": "refs/heads/main"
+    },
+    "registration_workflow_id": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "repository": {
+      "const": "chartjs333/delta"
+    },
+    "stage_a_plans_executed": {
+      "const": 0
+    },
+    "stage_gate_receipt_emitted": {
+      "const": false
+    },
+    "workflow_id": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "workflow_path": {
+      "const": ".github/workflows/campaign02-stage-a-bootstrap.yml"
+    },
+    "workflow_state": {
+      "const": "active"
+    },
+    "workflow_visible_on_default_branch": {
+      "const": true
+    },
+    "registration_artifact_created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "registration_artifact_expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "registration_artifact_name": {
+      "minLength": 1,
+      "pattern": "^.+-attempt-[1-9][0-9]*$",
+      "type": "string"
+    },
+    "registration_run_completed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "registration_run_conclusion": {
+      "const": "success"
+    },
+    "registration_run_created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "registration_run_status": {
+      "const": "completed"
+    },
+    "registration_run_updated_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "api_evidence_root",
+    "authority_bundle_supplied",
+    "bootstrap_commit",
+    "bootstrap_commit_on_default_branch",
+    "bootstrap_mapping_id",
+    "bootstrap_workflow_blob_id",
+    "bootstrap_workflow_content_id",
+    "checked_at",
+    "default_branch_ref",
+    "execution_artifact_count",
+    "execution_count",
+    "formal_semantics_id",
+    "observation_count",
+    "qualified_source_commit",
+    "qualified_source_exists",
+    "qualified_source_tree",
+    "registration_artifact_archive_digest",
+    "registration_artifact_created_at",
+    "registration_artifact_expires_at",
+    "registration_artifact_id",
+    "registration_artifact_name",
+    "registration_run_attempt",
+    "registration_run_completed_at",
+    "registration_run_conclusion",
+    "registration_run_created_at",
+    "registration_run_event",
+    "registration_run_head_sha",
+    "registration_run_id",
+    "registration_run_ref",
+    "registration_run_status",
+    "registration_run_updated_at",
+    "registration_workflow_id",
+    "repository",
+    "schema_version",
+    "stage_a_plans_executed",
+    "stage_gate_receipt_emitted",
+    "type_name",
+    "workflow_id",
+    "workflow_path",
+    "workflow_state",
+    "workflow_visible_on_default_branch"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 workflow-registration-receipt-v3"
+}

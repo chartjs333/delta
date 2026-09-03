@@ -167,7 +167,8 @@ set_target_properties(delta_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(
   delta_runtime
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
-target_link_libraries(delta_runtime PUBLIC delta::core delta::certificates)
+target_link_libraries(
+  delta_runtime PUBLIC delta::core delta::certificates delta::robust delta::apply)
 if(NOT WIN32)
   target_compile_options(delta_runtime PRIVATE -pthread)
   target_link_options(delta_runtime PUBLIC -pthread)

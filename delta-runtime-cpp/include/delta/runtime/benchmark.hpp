@@ -55,6 +55,10 @@ struct FaultEvent {
   std::uint64_t logical_step{};
   bool assumptions_hold{};
   std::string expected_outcome;
+  // Canonical source-bound schedule produced from messages that traversed the
+  // Java/Netty fault path. The native harness refuses causal scenarios without
+  // this schedule; it never derives delivery from expected_outcome.
+  std::string causal_schedule;
 
   bool operator==(const FaultEvent&) const = default;
 };
@@ -81,6 +85,7 @@ struct FaultExecutionResult {
   bool view_change_observed{};
   bool current_checkpoint_advanced{};
   bool availability_success{};
+  std::string canonical_causal_evidence;
 
   bool operator==(const FaultExecutionResult&) const = default;
 };

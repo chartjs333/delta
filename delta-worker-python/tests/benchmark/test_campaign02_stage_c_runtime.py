@@ -30,6 +30,102 @@ def _inputs() -> tuple[tuple[tuple[str, NetworkProfile], ...], FaultProfile]:
     return profiles, FaultProfile.from_dict(faults["trace_profile"])
 
 
+def _causal(event, observed: str, current_advanced: bool) -> bytes:
+    applied = observed == "APPLIED"
+    partition = event.actor_class == "REGION" and event.action == "PARTITION"
+    worker = event.actor_class == "WORKER" and event.action == "CRASH"
+    profile = (
+        "wan-regional"
+        if event.actor_class == "REGION" and event.action == "DELAY"
+        else "wan-intercontinental"
+        if partition
+        else "lan-control"
+    )
+    none = "NONE"
+    parent = "sha256:" + "c" * 64
+    next_checkpoint = "sha256:" + "d" * 64
+    hard_deadline = event.at_step + 60
+    if worker:
+        deliveries = [
+            *(f"worker-ticket-{index:03d}:{event.at_step + index}" for index in range(9)),
+            *(f"aggregate-vote-{index}:{event.at_step + 20 + index}" for index in range(3)),
+            *(f"apply-vote-{index}:{event.at_step + 30 + index}" for index in range(3)),
+        ]
+    elif event.actor_class == "REGION" and event.action == "DELAY":
+        deliveries = [
+            *(f"worker-ticket-{index:03d}:{event.at_step + 1 + index}" for index in range(4)),
+            *(f"aggregate-vote-{index}:{event.at_step + 20 + index}" for index in range(3)),
+            *(f"apply-vote-{index}:{event.at_step + 30 + index}" for index in range(3)),
+        ]
+    elif partition:
+        deliveries = [
+            *(f"worker-ticket-{index:03d}:{event.at_step + index}" for index in range(4)),
+            *(f"partition-aggregate-{index}:{event.at_step + 10 + index}" for index in range(2)),
+            *(f"abort-vote-{index}:{hard_deadline}" for index in range(3)),
+        ]
+    else:
+        deliveries = [f"message-0:{event.at_step + 1}"]
+    fields = {
+        "abort_qc_id": "sha256:" + "a" * 64 if partition else none,
+        "aggregate_root_qc_id": "sha256:" + "1" * 64 if applied else none,
+        "aggregate_root_qc_tick": str(event.at_step + 22 if applied else 0),
+        "apply_qc_id": "sha256:" + "3" * 64 if applied else none,
+        "apply_qc_tick": str(event.at_step + 32 if applied else 0),
+        "apply_quorum_threshold": "3" if applied else "0",
+        "apply_validator_set_id": "sha256:" + "4" * 64 if applied else none,
+        "apply_work_item_id": "sha256:" + "2" * 64 if applied else none,
+        "causal_transport_receipt_id": "sha256:" + "5" * 64,
+        "certified_abort_tick": str(hard_deadline if partition else 0),
+        "current_checkpoint_advanced": "true" if current_advanced else "false",
+        "current_pointer_after": (next_checkpoint if applied else parent if partition else none),
+        "current_pointer_before": parent if applied or partition else none,
+        "dropped_message_ids": (
+            "partition-aggregate-2,partition-aggregate-3"
+            if partition
+            else "worker-ticket-009"
+            if worker
+            else none
+        ),
+        "event_id": event.event_id,
+        "failed_quorum_reason": (
+            "AGGREGATE_ROOT_QC_2_OF_3_AT_HARD_DEADLINE" if partition else none
+        ),
+        "gst_tick": str(event.at_step),
+        "hard_deadline_tick": str(hard_deadline),
+        "isc_ticket_set": (
+            ",".join(f"ticket-{index:03d}" for index in range(9))
+            if worker
+            else ",".join(f"ticket-{index:03d}" for index in range(4))
+            if applied
+            else none
+        ),
+        "loss_fraction": "1/10" if worker else "0/1",
+        "lost_ticket_ids": "ticket-009" if worker else none,
+        "lost_worker_ids": "worker-009" if worker else none,
+        "message_delivery_ticks": ",".join(deliveries),
+        "missing_work_policy_result": (
+            "OMIT_PRE_FREEZE_LOST_TICKET_EXACT_ISC" if worker else "NOT_APPLICABLE"
+        ),
+        "network_profile_id": profile,
+        "next_checkpoint_id": next_checkpoint if applied else none,
+        "next_optimizer_state_id": "sha256:" + "f" * 64 if applied else none,
+        "parent_checkpoint_id": parent if applied or partition else none,
+        "parent_optimizer_state_id": "sha256:" + "e" * 64 if applied else none,
+        "partition_start_tick": str(event.at_step if partition else 0),
+        "per_domain_remaining_tickets": "code:5,text:4" if worker else none,
+        "per_domain_required_tickets": "code:4,text:4" if worker else none,
+        "pi_d_renormalized": "false",
+        "quorum_capacity_after": "9" if worker else "2" if partition else "0",
+        "quorum_capacity_before": "10" if worker else "4" if partition else "0",
+        "quorum_formation_tick": str(event.at_step + 22 if applied else 0),
+        "schema_version": "1.0.0",
+        "unavailable_ids": "validator-2,validator-3" if partition else none,
+        "worker_count_before": "10" if worker else "0",
+        "worker_count_lost": "1" if worker else "0",
+    }
+    return "".join(f"{key}={value}\n" for key, value in sorted(fields.items())).encode("ascii")
+
+
 def _receipt(
     *,
     observed_override: str | None = None,
@@ -79,7 +175,7 @@ def _receipt(
         ]
         wal_replayed = fault.action == "RESTART"
         view_change = fault.actor_class == "VALIDATOR" and fault.action == "CRASH"
-        current_advanced = False
+        current_advanced = observed == "APPLIED"
         availability = not (fault.actor_class == "STORAGE" and fault.action == "CRASH")
         if index == 0:
             wal_replayed = wal_replayed if wal_replayed_override is None else wal_replayed_override
@@ -109,6 +205,7 @@ def _receipt(
                     "1" if current_advanced else "0",
                     "1" if availability else "0",
                     native_trace.hex(),
+                    _causal(fault, observed, current_advanced).hex(),
                 )
             )
         )
@@ -126,6 +223,32 @@ def _parse(raw: bytes):
     )
 
 
+def _rewrite_causal(
+    raw: bytes,
+    event_id: str,
+    updates: dict[str, str],
+    *,
+    current_advanced: bool | None = None,
+) -> bytes:
+    lines = raw.decode("ascii").splitlines()
+    index = next(i for i, line in enumerate(lines) if line.startswith(f"FAULT {event_id} "))
+    outer = lines[index].split(" ")
+    fields: dict[str, str] = {}
+    for line in bytes.fromhex(outer[17]).decode("ascii").splitlines():
+        name, separator, value = line.partition("=")
+        assert separator
+        fields[name] = value
+    fields.update(updates)
+    if current_advanced is not None:
+        outer[14] = "1" if current_advanced else "0"
+        fields["current_checkpoint_advanced"] = "true" if current_advanced else "false"
+    outer[17] = (
+        "".join(f"{name}={value}\n" for name, value in sorted(fields.items())).encode("ascii").hex()
+    )
+    lines[index] = " ".join(outer)
+    return ("\n".join(lines) + "\n").encode("ascii")
+
+
 def test_measured_receipt_reconciles_java_native_and_os_layers() -> None:
     receipt = _parse(_receipt())
     assert len(receipt.network_counters) == 3
@@ -136,6 +259,135 @@ def test_measured_receipt_reconciles_java_native_and_os_layers() -> None:
 def test_expected_outcome_is_only_an_assertion() -> None:
     with pytest.raises(MeasuredStageCRuntimeError, match="RUNTIME_TERMINAL_MISMATCH"):
         _parse(_receipt(observed_override="SAFE_ABORT"))
+
+
+def test_applied_without_apply_qc_is_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="APPLIED_WITHOUT_EXACT_APPLY_QC"):
+        _parse(_rewrite_causal(_receipt(), "worker-loss-10pct", {"apply_qc_id": "NONE"}))
+
+
+def test_aggregated_only_state_reported_as_applied_is_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="APPLIED_WITHOUT_EXACT_APPLY_QC"):
+        _parse(
+            _rewrite_causal(
+                _receipt(),
+                "worker-loss-10pct",
+                {
+                    "apply_qc_id": "NONE",
+                    "apply_work_item_id": "NONE",
+                    "next_checkpoint_id": "NONE",
+                    "next_optimizer_state_id": "NONE",
+                },
+                current_advanced=False,
+            )
+        )
+
+
+def test_applied_with_unchanged_current_pointer_is_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="APPLIED_WITHOUT_EXACT_APPLY_QC"):
+        _parse(_rewrite_causal(_receipt(), "worker-loss-10pct", {}, current_advanced=False))
+
+
+def test_silent_domain_weight_renormalization_is_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="CAUSAL_SCHEDULE_INVALID"):
+        _parse(_rewrite_causal(_receipt(), "worker-loss-10pct", {"pi_d_renormalized": "true"}))
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("lost_worker_ids", "NONE"),
+        ("lost_ticket_ids", "NONE"),
+        ("per_domain_required_tickets", "NONE"),
+        ("per_domain_remaining_tickets", "NONE"),
+    ],
+)
+def test_worker_loss_requires_exact_identity_and_domain_capacity_evidence(
+    field: str, value: str
+) -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="WORKER_LOSS_CAUSAL_EVIDENCE_INVALID"):
+        _parse(_rewrite_causal(_receipt(), "worker-loss-10pct", {field: value}))
+
+
+def test_regional_delay_without_delayed_runtime_messages_is_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="REGIONAL_DELAY_CAUSAL_EVIDENCE_INVALID"):
+        _parse(
+            _rewrite_causal(
+                _receipt(),
+                "regional-delay",
+                {
+                    "message_delivery_ticks": ",".join(
+                        [
+                            *(f"aggregate-vote-{index}:{220 + index}" for index in range(3)),
+                            *(f"apply-vote-{index}:{230 + index}" for index in range(3)),
+                        ]
+                    )
+                },
+            )
+        )
+
+
+def test_regional_delay_reaching_aggregate_only_is_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="APPLIED_WITHOUT_EXACT_APPLY_QC"):
+        _parse(
+            _rewrite_causal(
+                _receipt(),
+                "regional-delay",
+                {"apply_qc_id": "NONE", "apply_work_item_id": "NONE"},
+                current_advanced=False,
+            )
+        )
+
+
+def test_concentrated_mandatory_domain_loss_has_certified_abort_semantics() -> None:
+    worker = _parse(_receipt()).fault_transitions[0]
+    parent = worker.causal_evidence.parent_checkpoint_id
+    assert parent is not None
+    deadline = worker.causal_evidence.hard_deadline_tick
+    deliveries = (
+        *((f"worker-ticket-{index:03d}", worker.at_step + index) for index in range(2, 10)),
+        *((f"abort-vote-{index}", deadline) for index in range(3)),
+    )
+    causal = replace(
+        worker.causal_evidence,
+        message_delivery_ticks=deliveries,
+        dropped_message_ids=("worker-ticket-000", "worker-ticket-001"),
+        aggregate_root_qc_id=None,
+        apply_work_item_id=None,
+        apply_qc_id=None,
+        abort_qc_id="sha256:" + "9" * 64,
+        next_checkpoint_id=None,
+        parent_optimizer_state_id=None,
+        next_optimizer_state_id=None,
+        current_pointer_before=parent,
+        current_pointer_after=parent,
+        apply_validator_set_id=None,
+        apply_quorum_threshold=0,
+        worker_count_lost=2,
+        loss_fraction=(2, 10),
+        lost_worker_ids=("worker-000", "worker-001"),
+        lost_ticket_ids=("ticket-000", "ticket-001"),
+        per_domain_remaining_tickets=(("code", 3), ("text", 5)),
+        isc_ticket_set=(),
+        quorum_capacity_after=8,
+        missing_work_policy_result="MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT",
+        quorum_formation_tick=0,
+        aggregate_root_qc_tick=0,
+        apply_qc_tick=0,
+        unavailable_ids=("worker-000", "worker-001"),
+        failed_quorum_reason="MANDATORY_DOMAIN_CODE_3_OF_4_AT_HARD_DEADLINE",
+        certified_abort_tick=deadline,
+    )
+    aborted = replace(
+        worker,
+        expected_outcome="ABORTED",
+        observed_outcome="ABORTED",
+        current_checkpoint_advanced=False,
+        availability_success=False,
+        causal_evidence=causal,
+    )
+    assert aborted.passed
+    assert not aborted.current_checkpoint_advanced
 
 
 def test_hardcoded_outcome_without_actual_runtime_source_is_rejected() -> None:
@@ -176,9 +428,28 @@ def test_partition_with_current_advance_is_rejected() -> None:
     index = next(i for i, line in enumerate(lines) if line.startswith("FAULT regional-partition "))
     fields = lines[index].split(" ")
     fields[14] = "1"
+    causal = bytes.fromhex(fields[17]).decode("ascii")
+    fields[17] = (
+        causal.replace("current_checkpoint_advanced=false\n", "current_checkpoint_advanced=true\n")
+        .encode("ascii")
+        .hex()
+    )
     lines[index] = " ".join(fields)
     with pytest.raises(MeasuredStageCRuntimeError, match="PARTITION_ADVANCED_CURRENT"):
         _parse(("\n".join(lines) + "\n").encode("ascii"))
+
+
+def test_partition_abort_before_exact_deadline_is_rejected() -> None:
+    _profiles, faults = _inputs()
+    partition = next(event for event in faults.events if event.event_id == "regional-partition")
+    with pytest.raises(MeasuredStageCRuntimeError, match="PARTITION_CAUSAL_EVIDENCE_INVALID"):
+        _parse(
+            _rewrite_causal(
+                _receipt(),
+                "regional-partition",
+                {"certified_abort_tick": str(partition.at_step + 59)},
+            )
+        )
 
 
 def test_storage_crash_with_false_availability_success_is_rejected() -> None:

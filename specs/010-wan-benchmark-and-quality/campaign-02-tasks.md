@@ -329,6 +329,28 @@ they do not change that qualified source.
   `evidence/campaign-02-actual-stagec-registration-exact-source-ci-receipt.json`
   (`sha256:3abd74b25d04e98687a413cc5a889ade79f4dc67f211c7ef6f1636e06c6bf7e7`).
 
+The independent review of PR #20 reopened the checked C2-038 and C2-040 entries above: they record
+the historical `ef502cda...` qualification, not acceptance of the terminal semantics. The corrective
+generation is tracked separately so those immutable receipts are not rewritten.
+
+- [x] **C2-042** Complete every successful worker-loss and eventual-synchrony path through an exact
+  Feature 003 `AggregateRootQC`, deterministic Feature 008 apply work, persisted 2f+1 apply votes,
+  verified `ApplyQC` and durable current-pointer compare-and-set. `APPLIED` is emitted iff the new
+  checkpoint is current; missing, foreign or conflicting ApplyQC evidence fails closed.
+- [x] **C2-043** Drive native ticket/vote/deadline admission from the measured Netty causal schedule.
+  Evidence binds lost workers and tickets, exact ISC membership, per-domain capacity, message ticks,
+  GST, quorum ticks and hard-deadline AbortQC. Distributed 10% loss applies without `pi_d`
+  renormalization; concentrated mandatory `code`-domain loss certifies abort with the parent pointer
+  unchanged.
+- [x] **C2-044** Version the workflow registration receipt/signature contract so `completed` status,
+  `success` conclusion and run/artifact creation, update, completion and expiry timestamps are bound
+  to raw GitHub API bytes and each detached Ed25519 vote. The artifact name also binds the exact
+  `run_attempt`; failed, cancelled, timed-out, in-progress, stale, future or prior-attempt artifact
+  registrations are rejected.
+- [ ] **C2-045** Seal this corrective executable source and supersede C2-041 with exact-source,
+  repeated 15-plan candidate, designated-GPU, sanitizer, TSan, C++20/C++23, formal regression and
+  terminal CI receipts from the same immutable commit/tree.
+
 The source-side C2-037 work is complete, but operational default-branch registration remains the
 next separate governance operation. Definition votes remain `0`, attestation and execution
 authorization remain absent, authoritative catalog construction has not occurred, primary

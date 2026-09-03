@@ -111,6 +111,24 @@ void append_journal(
   return output;
 }
 
+[[nodiscard]] std::string hex_decode(std::string_view value, std::size_t maximum_bytes) {
+  if (!valid_hex(value, maximum_bytes) || value.empty()) {
+    throw std::runtime_error("invalid causal schedule");
+  }
+  const auto nibble = [](char character) -> unsigned char {
+    if (character >= '0' && character <= '9') {
+      return static_cast<unsigned char>(character - '0');
+    }
+    return static_cast<unsigned char>(10 + character - 'a');
+  };
+  std::string output;
+  output.reserve(value.size() / 2U);
+  for (std::size_t index = 0U; index < value.size(); index += 2U) {
+    output.push_back(static_cast<char>((nibble(value[index]) << 4U) | nibble(value[index + 1U])));
+  }
+  return output;
+}
+
 [[nodiscard]] std::string fault_outcome(
     std::string_view actor,
     std::string_view action,
@@ -162,22 +180,29 @@ void execute_fault(
     if (end == std::string::npos) break;
     start = end + 1U;
   }
-  if (fields.size() != 6U || !valid_request_id(fields[0]) || !valid_request_id(fields[1]) ||
+  if (fields.size() != 7U || !valid_request_id(fields[0]) || !valid_request_id(fields[1]) ||
       !valid_request_id(fields[2]) || !valid_request_id(fields[3]) ||
-      (fields[5] != "0" && fields[5] != "1")) {
+      (fields[5] != "0" && fields[5] != "1") || !valid_hex(fields[6], maximum_bytes)) {
     throw std::runtime_error("invalid fault command");
   }
   const auto step = parse_step(fields[4]);
   const auto assumptions_hold = fields[5] == "1";
   const auto expected_outcome = fault_outcome(fields[2], fields[3], assumptions_hold);
+  const auto causal_schedule = hex_decode(fields[6], maximum_bytes);
   const auto event = delta::runtime::benchmark::FaultEvent{
-      fields[1], fields[2], fault_action(fields[3]), step, assumptions_hold, expected_outcome};
+      fields[1],
+      fields[2],
+      fault_action(fields[3]),
+      step,
+      assumptions_hold,
+      expected_outcome,
+      causal_schedule};
   const auto controller = delta::runtime::benchmark::FaultController({event});
   if (controller.events_at(step) != std::vector{event}) {
     throw std::runtime_error("native fault controller rejected transition");
   }
   const auto canonical = fields[1] + '|' + fields[2] + '|' + fields[3] + '|' +
-                         std::to_string(step) + '|' + fields[5];
+                         std::to_string(step) + '|' + fields[5] + '|' + fields[6];
   const auto payload = hex_encode(canonical);
   if (!valid_hex(payload, maximum_bytes)) throw std::runtime_error("fault payload too large");
   bool replay = false;
@@ -205,7 +230,8 @@ void execute_fault(
             << (execution.view_change_observed ? 1 : 0) << ' '
             << (execution.current_checkpoint_advanced ? 1 : 0) << ' '
             << (execution.availability_success ? 1 : 0) << ' '
-            << hex_encode(execution.canonical_trace) << '\n'
+            << hex_encode(execution.canonical_trace) << ' '
+            << hex_encode(execution.canonical_causal_evidence) << '\n'
             << std::flush;
 }
 

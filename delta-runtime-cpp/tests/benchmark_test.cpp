@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace {
@@ -14,6 +15,137 @@ namespace {
 
 void expect(bool condition, const char* message) {
   if (!condition) fail(message);
+}
+
+[[nodiscard]] std::string padded(std::size_t value) {
+  auto digits = std::to_string(value);
+  return std::string(3U - digits.size(), '0') + digits;
+}
+
+[[nodiscard]] std::string causal_schedule(
+    const delta::runtime::benchmark::FaultEvent& event,
+    bool omit_apply_vote = false) {
+  struct Message {
+    std::string id;
+    std::string actor;
+    std::string domain;
+    std::string ticket;
+    std::string kind;
+    std::uint64_t tick;
+    bool delivered;
+  };
+  std::vector<Message> messages;
+  const auto quorum = [&](std::string_view prefix, std::string_view kind, std::uint64_t tick) {
+    for (std::size_t index = 0U; index < 3U; ++index) {
+      messages.push_back(Message{
+          std::string(prefix) + "-" + std::to_string(index),
+          "validator-" + std::to_string(index),
+          "NONE",
+          "NONE",
+          std::string(kind),
+          tick + index,
+          !(omit_apply_vote && kind == "APPLY_VOTE" && index == 2U),
+      });
+    }
+  };
+  const auto tickets = [&](std::size_t count, std::size_t lost) {
+    for (std::size_t index = 0U; index < count; ++index) {
+      const auto ordinal = padded(index);
+      messages.push_back(Message{
+          "worker-ticket-" + ordinal,
+          "worker-" + ordinal,
+          index < count / 2U ? "code" : "text",
+          "ticket-" + ordinal,
+          "WORK_TICKET",
+          event.logical_step + index,
+          event.actor_class == "WORKER" && event.expected_outcome == "ABORTED"
+              ? index >= 2U
+              : index != lost,
+      });
+    }
+  };
+  std::string profile = "lan-control";
+  if (event.actor_class == "WORKER") {
+    tickets(10U, 9U);
+    if (event.expected_outcome == "ABORTED") {
+      for (std::size_t index = 0U; index < 3U; ++index) {
+        messages.push_back(Message{
+            "abort-" + std::to_string(index),
+            "validator-" + std::to_string(index),
+            "NONE",
+            "NONE",
+            "ABORT_VOTE",
+            event.logical_step + 60U,
+            true,
+        });
+      }
+    } else {
+      quorum("aggregate", "AGGREGATE_VOTE", event.logical_step + 20U);
+      quorum("apply", "APPLY_VOTE", event.logical_step + 30U);
+    }
+  } else if (event.actor_class == "REGION" &&
+             event.action == delta::runtime::benchmark::FaultAction::delay) {
+    profile = "wan-regional";
+    tickets(4U, 4U);
+    quorum("aggregate", "AGGREGATE_VOTE", event.logical_step + 20U);
+    quorum("apply", "APPLY_VOTE", event.logical_step + 30U);
+  } else if (event.actor_class == "REGION") {
+    profile = "wan-intercontinental";
+    tickets(4U, 4U);
+    for (std::size_t index = 0U; index < 4U; ++index) {
+      messages.push_back(Message{
+          "partition-aggregate-" + std::to_string(index),
+          "validator-" + std::to_string(index),
+          "NONE",
+          "NONE",
+          "AGGREGATE_VOTE",
+          event.logical_step + 10U + index,
+          index < 2U,
+      });
+    }
+    for (std::size_t index = 0U; index < 3U; ++index) {
+      messages.push_back(Message{
+          "abort-" + std::to_string(index),
+          "validator-" + std::to_string(index),
+          "NONE",
+          "NONE",
+          "ABORT_VOTE",
+          event.logical_step + 60U,
+          true,
+      });
+    }
+  } else if (event.actor_class == "VALIDATOR" &&
+             event.action == delta::runtime::benchmark::FaultAction::crash) {
+    quorum("view-change", "VIEW_CHANGE_VOTE", event.logical_step + 1U);
+  } else if (event.actor_class == "VALIDATOR") {
+    messages.push_back(
+        Message{"recovery", "validator-0", "NONE", "NONE", "RECOVERY_SIGNAL",
+                event.logical_step, true});
+  } else if (event.actor_class == "STORAGE") {
+    messages.push_back(Message{
+        "storage",
+        "storage-0",
+        "NONE",
+        "NONE",
+        "STORAGE_SIGNAL",
+        event.logical_step,
+        event.action == delta::runtime::benchmark::FaultAction::restart,
+    });
+  }
+  std::string result = "schema_version=1.0.0\nevent_id=" + event.event_id +
+                       "\nnetwork_profile_id=" + profile + "\ngst_tick=" +
+                       std::to_string(event.logical_step) + "\nhard_deadline_tick=" +
+                       std::to_string(event.logical_step + 60U) + "\nmessage_count=" +
+                       std::to_string(messages.size()) + "\n";
+  for (std::size_t index = 0U; index < messages.size(); ++index) {
+    const auto& message = messages[index];
+    result += "message." + std::to_string(index) + "=" + message.id + "," + message.actor +
+              "," + message.domain + "," + message.ticket + "," + message.kind + "," +
+              std::to_string(message.tick) + "," +
+              std::to_string(message.delivered ? message.tick : 0U) + "," +
+              (message.delivered ? "1\n" : "0\n");
+  }
+  return result;
 }
 
 void test_metrics_and_trace() {
@@ -69,8 +201,9 @@ void test_faults_are_observed_from_actual_runtime_state() {
   using delta::runtime::benchmark::FaultAction;
   using delta::runtime::benchmark::FaultEvent;
   using delta::runtime::benchmark::execute_fault_scenario;
-  const std::vector<FaultEvent> events{
+  std::vector<FaultEvent> events{
       {"worker-loss", "WORKER", FaultAction::crash, 100U, true, "APPLIED"},
+      {"worker-domain-loss", "WORKER", FaultAction::crash, 110U, true, "ABORTED"},
       {"validator-crash", "VALIDATOR", FaultAction::crash, 120U, true, "VIEW_CHANGE"},
       {"validator-restart", "VALIDATOR", FaultAction::restart, 140U, true, "RECOVERED"},
       {"storage-crash", "STORAGE", FaultAction::crash, 160U, true, "RETRIEVAL"},
@@ -78,6 +211,7 @@ void test_faults_are_observed_from_actual_runtime_state() {
       {"regional-delay", "REGION", FaultAction::delay, 200U, true, "APPLIED"},
       {"regional-partition", "REGION", FaultAction::partition, 240U, true, "ABORTED"},
   };
+  for (auto& event : events) event.causal_schedule = causal_schedule(event);
   auto root = std::filesystem::temp_directory_path() / "delta-stagec-actual-fault-test";
   std::error_code error;
   std::filesystem::remove_all(root, error);
@@ -95,10 +229,41 @@ void test_faults_are_observed_from_actual_runtime_state() {
     }
     if (event.actor_class == "REGION" && event.action == FaultAction::partition) {
       expect(!result.current_checkpoint_advanced, "partition advanced current checkpoint");
+      expect(
+          result.canonical_causal_evidence.find("certified_abort_tick=300\n") !=
+              std::string::npos,
+          "partition abort did not wait for exact hard deadline");
     }
     if (event.actor_class == "STORAGE" && event.action == FaultAction::crash) {
       expect(!result.availability_success, "storage crash fabricated availability");
     }
+    if (result.observed_outcome == "APPLIED") {
+      expect(result.current_checkpoint_advanced, "APPLIED lacks current-pointer advance");
+      expect(
+          result.canonical_causal_evidence.find("apply_qc_id=sha256:") != std::string::npos &&
+              result.canonical_causal_evidence.find("aggregate_root_qc_id=sha256:") !=
+                  std::string::npos,
+          "APPLIED lacks AggregateRootQC or ApplyQC evidence");
+    }
+    if (event.event_id == "worker-domain-loss") {
+      expect(!result.current_checkpoint_advanced, "mandatory-domain abort advanced current");
+      expect(
+          result.canonical_causal_evidence.find(
+              "missing_work_policy_result=MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT\n") !=
+              std::string::npos &&
+              result.canonical_causal_evidence.find("per_domain_remaining_tickets=code:3,text:5\n") !=
+                  std::string::npos,
+          "concentrated worker loss lacks causal capacity evidence");
+    }
+  }
+
+  auto missing_apply = events.front();
+  missing_apply.causal_schedule = causal_schedule(missing_apply, true);
+  try {
+    static_cast<void>(execute_fault_scenario(
+        missing_apply, root / "missing-apply-quorum", "missing-apply-quorum"));
+    fail("APPLIED without exact ApplyQC quorum was accepted");
+  } catch (const delta::runtime::benchmark::BenchmarkError&) {
   }
 }
 
