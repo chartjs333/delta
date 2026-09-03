@@ -1304,6 +1304,7 @@ struct ApplyObservation {
         .view_change_observed = false,
         .current_checkpoint_advanced = false,
         .availability_success = false,
+        .causal_evidence = {},
     };
   }
   if ((event.actor_class == "WORKER" && event.action == FaultAction::crash) ||
