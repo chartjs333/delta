@@ -174,8 +174,8 @@ void test_fault_order_and_sidecar_replay() {
   using delta::runtime::benchmark::FaultController;
   using delta::runtime::benchmark::FaultEvent;
   FaultController controller(std::vector<FaultEvent>{
-      {"restart", "VALIDATOR", FaultAction::restart, 3U, true, "RECOVERED"},
-      {"worker-loss", "WORKER", FaultAction::crash, 2U, true, "APPLIED"},
+      {"restart", "VALIDATOR", FaultAction::restart, 3U, true, "RECOVERED", {}},
+      {"worker-loss", "WORKER", FaultAction::crash, 2U, true, "APPLIED", {}},
   });
   expect(controller.events().front().event_id == "worker-loss", "fault events not sorted");
   expect(controller.events_at(3U).size() == 1U, "fault event lookup failed");
@@ -202,14 +202,14 @@ void test_faults_are_observed_from_actual_runtime_state() {
   using delta::runtime::benchmark::FaultEvent;
   using delta::runtime::benchmark::execute_fault_scenario;
   std::vector<FaultEvent> events{
-      {"worker-loss", "WORKER", FaultAction::crash, 100U, true, "APPLIED"},
-      {"worker-domain-loss", "WORKER", FaultAction::crash, 110U, true, "ABORTED"},
-      {"validator-crash", "VALIDATOR", FaultAction::crash, 120U, true, "VIEW_CHANGE"},
-      {"validator-restart", "VALIDATOR", FaultAction::restart, 140U, true, "RECOVERED"},
-      {"storage-crash", "STORAGE", FaultAction::crash, 160U, true, "RETRIEVAL"},
-      {"storage-restart", "STORAGE", FaultAction::restart, 180U, true, "RECOVERED"},
-      {"regional-delay", "REGION", FaultAction::delay, 200U, true, "APPLIED"},
-      {"regional-partition", "REGION", FaultAction::partition, 240U, true, "ABORTED"},
+      {"worker-loss", "WORKER", FaultAction::crash, 100U, true, "APPLIED", {}},
+      {"worker-domain-loss", "WORKER", FaultAction::crash, 110U, true, "ABORTED", {}},
+      {"validator-crash", "VALIDATOR", FaultAction::crash, 120U, true, "VIEW_CHANGE", {}},
+      {"validator-restart", "VALIDATOR", FaultAction::restart, 140U, true, "RECOVERED", {}},
+      {"storage-crash", "STORAGE", FaultAction::crash, 160U, true, "RETRIEVAL", {}},
+      {"storage-restart", "STORAGE", FaultAction::restart, 180U, true, "RECOVERED", {}},
+      {"regional-delay", "REGION", FaultAction::delay, 200U, true, "APPLIED", {}},
+      {"regional-partition", "REGION", FaultAction::partition, 240U, true, "ABORTED", {}},
   };
   for (auto& event : events) event.causal_schedule = causal_schedule(event);
   auto root = std::filesystem::temp_directory_path() / "delta-stagec-actual-fault-test";
