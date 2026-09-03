@@ -419,6 +419,12 @@ struct ScenarioObservation {
         .outcome = "SAFE_BLOCKED",
         .state_bytes = initial,
         .effect_root = raw_id(ascii_bytes("NO_EXTERNALLY_SENDABLE_EFFECT")),
+        .trace = {},
+        .operation_count = 0U,
+        .wal_replayed = false,
+        .view_change_observed = false,
+        .current_checkpoint_advanced = false,
+        .availability_success = false,
     };
   }
   if ((event.actor_class == "WORKER" && event.action == FaultAction::crash) ||
