@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 from collections.abc import Mapping
@@ -73,6 +74,7 @@ class NetworkFaultPlanEvidence:
     network_counters: tuple[MeasuredNetworkCounters, ...]
     fault_results: tuple[NativeFaultTransition, ...]
     native_fault_trace_id: str
+    raw_java_receipt: bytes
     image_id: str
     java_executable_id: str
     native_executable_id: str
@@ -100,6 +102,8 @@ class NetworkFaultPlanEvidence:
             "native_effect_root": self.fault_results[-1].native_effect_root,
             "native_executable_id": self.native_executable_id,
             "native_fault_trace_id": self.native_fault_trace_id,
+            "raw_java_receipt_base64": base64.b64encode(self.raw_java_receipt).decode("ascii"),
+            "raw_java_receipt_id": sha256_content_id(self.raw_java_receipt),
             "native_state_root": self.fault_results[-1].native_state_root,
             "native_wal_sha256": self.fault_results[-1].native_wal_sha256,
             "netty_artifact_ids": list(self.netty_artifact_ids),
@@ -107,7 +111,7 @@ class NetworkFaultPlanEvidence:
             "plan_id": self.plan_id,
             "resilience_result": "PASS",
             "runner_id": self.runner_id,
-            "schema_version": "2.0.0",
+            "schema_version": "3.0.0",
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
             "transport_harness_id": self.transport_harness_id,
@@ -117,7 +121,7 @@ class NetworkFaultPlanEvidence:
     @property
     def content_id(self) -> str:
         return sha256_content_id(
-            b"deltareduce.010.campaign02-network-fault-plan-evidence.v2\0"
+            b"deltareduce.010.campaign02-network-fault-plan-evidence.v3\0"
             + canonical_json_bytes(self.document)
         )
 
@@ -241,6 +245,7 @@ class Campaign02NetworkFaultRunner:
             network_counters=measurement.network_counters,
             fault_results=measurement.fault_transitions,
             native_fault_trace_id=measurement.native_fault_trace_id,
+            raw_java_receipt=measurement.raw_java_receipt,
             image_id=self.image_id,
             java_executable_id=self.java_executable_id,
             native_executable_id=self.native_executable_id,

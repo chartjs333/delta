@@ -210,6 +210,21 @@ SCHEMAS: Final = {
         "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE",
         "2.0.0",
     ),
+    "network-fault-plan-evidence-v3": (
+        "SCHEMA-CAMPAIGN02-NETWORK-FAULT-PLAN-EVIDENCE-010-V3",
+        "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE",
+        "3.0.0",
+    ),
+    "stage-c-candidate-run-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-RUN-010-V1",
+        "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_RUN",
+        "1.0.0",
+    ),
+    "stage-c-candidate-summary-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-C-CANDIDATE-SUMMARY-010-V1",
+        "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_SUMMARY",
+        "1.0.0",
+    ),
     "stage-a-semantic-evidence-v1": (
         "SCHEMA-CAMPAIGN02-STAGE-A-SEMANTIC-EVIDENCE-010-V1",
         "CAMPAIGN02_STAGE_A_SEMANTIC_EVIDENCE_SUMMARY",
@@ -224,6 +239,11 @@ SCHEMAS: Final = {
         "SCHEMA-CAMPAIGN02-STAGE-WORKFLOW-GATE-QC-010-V3",
         "CAMPAIGN02_STAGE_WORKFLOW_GATE_QC",
         "3.0.0",
+    ),
+    "stage-workflow-gate-qc-v4": (
+        "SCHEMA-CAMPAIGN02-STAGE-WORKFLOW-GATE-QC-010-V4",
+        "CAMPAIGN02_STAGE_WORKFLOW_GATE_QC",
+        "4.0.0",
     ),
     "workflow-bootstrap-mapping-v1": (
         "SCHEMA-CAMPAIGN02-WORKFLOW-BOOTSTRAP-MAPPING-010-V1",
@@ -244,6 +264,21 @@ SCHEMAS: Final = {
         "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-010-V1",
         "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
         "1.0.0",
+    ),
+    "workflow-registration-api-evidence-v1": (
+        "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-API-EVIDENCE-010-V1",
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_API_EVIDENCE",
+        "1.0.0",
+    ),
+    "workflow-registration-signature-v1": (
+        "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-SIGNATURE-010-V1",
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE",
+        "1.0.0",
+    ),
+    "workflow-registration-receipt-v2": (
+        "SCHEMA-CAMPAIGN02-WORKFLOW-REGISTRATION-RECEIPT-010-V2",
+        "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
+        "2.0.0",
     ),
     "evaluator-profile-v1": (
         "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
@@ -1705,6 +1740,185 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "transport_harness_id": content_id(),
         },
     )
+    measured_network_counters_v3 = strict(
+        {
+            "attempted_packets": uint(1),
+            "attempted_payload_bytes": uint(1),
+            "disconnect_count": uint(),
+            "disconnect_duration_ms": uint(),
+            "dropped_packets": uint(),
+            "dropped_payload_bytes": uint(),
+            "duplicate_packets": uint(),
+            "duplicate_payload_bytes": uint(),
+            "java_rx_payload_bytes": uint(1),
+            "java_transport_receipt_id": content_id(),
+            "java_tx_payload_bytes": uint(1),
+            "network_profile_id": content_id(),
+            "os_rx_bytes": uint(1),
+            "os_rx_bytes_after": uint(1),
+            "os_rx_bytes_before": uint(),
+            "os_tx_bytes": uint(1),
+            "os_tx_bytes_after": uint(1),
+            "os_tx_bytes_before": uint(),
+            "reordered_packets": uint(),
+            "unique_delivered_packets": uint(1),
+            "unique_delivered_payload_bytes": uint(1),
+        }
+    )
+    native_fault_result_v3 = strict(
+        {
+            "action": text(),
+            "actor_class": text(),
+            "at_step": uint(),
+            "availability_success": {"type": "boolean"},
+            "current_checkpoint_advanced": {"type": "boolean"},
+            "event_id": text(),
+            "expected_outcome": text(),
+            "native_effect_root": content_id(),
+            "native_state_root": content_id(),
+            "native_trace_base64": {"minLength": 1, "type": "string"},
+            "native_trace_id": content_id(),
+            "native_wal_sha256": content_id(),
+            "observation_source": {"const": "ACTUAL_RUNTIME_TRANSITION"},
+            "observed_outcome": text(),
+            "passed": {"const": True},
+            "runtime_operation_count": uint(1),
+            "view_change_observed": {"type": "boolean"},
+            "wal_replayed": {"type": "boolean"},
+        }
+    )
+    network_fault_v3 = {
+        key: value
+        for key, value in documents["network-fault-plan-evidence-v2"]["properties"].items()
+        if key not in {"formal_semantics_id", "schema_version", "type_name"}
+    }
+    network_fault_v3.update(
+        {
+            "fault_results": {
+                "items": native_fault_result_v3,
+                "maxItems": 7,
+                "minItems": 7,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "network_counters": {
+                "items": measured_network_counters_v3,
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "raw_java_receipt_base64": {"minLength": 1, "type": "string"},
+            "raw_java_receipt_id": content_id(),
+        }
+    )
+    documents["network-fault-plan-evidence-v3"] = schema(
+        "network-fault-plan-evidence-v3", network_fault_v3
+    )
+    candidate_plan_record = strict(
+        {
+            "applied_network_profile_ids": {
+                "items": content_id(),
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "fault_profile_ids": {
+                "items": content_id(),
+                "maxItems": 1,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "plan_id": content_id(),
+            "raw_evidence_file_id": content_id(),
+            "raw_evidence_path": {
+                "pattern": "^raw-evidence/network-fault-[0-9a-f]{64}\\.json$",
+                "type": "string",
+            },
+            "raw_java_receipt_id": content_id(),
+            "semantic_projection_id": content_id(),
+            "typed_evidence_id": content_id(),
+        }
+    )
+    documents["stage-c-candidate-run-v1"] = schema(
+        "stage-c-candidate-run-v1",
+        {
+            "authoritative_definition_vote_count": {"const": 0},
+            "authoritative_definition_attestation_present": {"const": False},
+            "benchmark_result_qc_emitted": {"const": False},
+            "candidate_compiler_attestation_class": {"const": "TEST_ONLY_DETERMINISTIC_EPHEMERAL"},
+            "candidate_compiler_signature_ids": {
+                "items": content_id(),
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "candidate_definition_id": content_id(),
+            "candidate_run_ordinal": {"maximum": 2, "minimum": 1, "type": "integer"},
+            "decision": {"const": "PASS"},
+            "execution_authorized": {"const": False},
+            "observation_count": {"const": 0},
+            "plan_catalog_id": content_id(),
+            "plan_count": {"const": 15},
+            "plan_records": {
+                "items": candidate_plan_record,
+                "maxItems": 15,
+                "minItems": 15,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "qualified_runtime_lineage_id": content_id(),
+            "raw_evidence_root": content_id(),
+            "semantic_root": content_id(),
+            "source_commit": commit_id(),
+            "source_tree": commit_id(),
+            "stage_execution_identities_id": content_id(),
+            "stage_gate_receipt_emitted": {"const": False},
+        },
+    )
+    exact_candidate_ids = {
+        "items": content_id(),
+        "maxItems": 15,
+        "minItems": 15,
+        "type": "array",
+        "uniqueItems": True,
+    }
+    documents["stage-c-candidate-summary-v1"] = schema(
+        "stage-c-candidate-summary-v1",
+        {
+            "authoritative_catalog_constructed": {"const": False},
+            "authoritative_definition_attestation_present": {"const": False},
+            "authoritative_definition_vote_count": {"const": 0},
+            "benchmark_result_qc_emitted": {"const": False},
+            "candidate_definition_id": content_id(),
+            "candidate_plan_catalog_id": content_id(),
+            "candidate_run_package_ids": {
+                "items": content_id(),
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array",
+            },
+            "decision": {"const": "PASS"},
+            "execution_authorized": {"const": False},
+            "observation_count": {"const": 0},
+            "plan_count": {"const": 15},
+            "plan_ids": exact_candidate_ids,
+            "raw_evidence_roots": {
+                "items": content_id(),
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array",
+            },
+            "repeat_semantic_match": {"const": True},
+            "semantic_root": content_id(),
+            "source_commit": commit_id(),
+            "source_tree": commit_id(),
+            "stage_gate_receipt_emitted": {"const": False},
+        },
+    )
     artifact_summary = strict(
         {
             "evidence_type": {
@@ -1837,6 +2051,22 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "workflow_sha": commit_id(),
         },
     )
+    stage_workflow_v4 = {
+        key: value
+        for key, value in documents["stage-workflow-gate-qc-v3"]["properties"].items()
+        if key not in {"formal_semantics_id", "schema_version", "type_name"}
+    }
+    stage_workflow_v4.update(
+        {
+            "registration_api_evidence_root": content_id(),
+            "registration_artifact_archive_digest": content_id(),
+            "registration_artifact_id": uint(1),
+            "registration_attestation_id": content_id(),
+            "registration_run_attempt": uint(1),
+            "registration_run_id": uint(1),
+        }
+    )
+    documents["stage-workflow-gate-qc-v4"] = schema("stage-workflow-gate-qc-v4", stage_workflow_v4)
     documents["workflow-bootstrap-mapping-v1"] = schema(
         "workflow-bootstrap-mapping-v1",
         {
@@ -1913,6 +2143,85 @@ def schema_documents() -> dict[str, dict[str, object]]:
             "workflow_visible_on_default_branch": {"const": True},
         },
     )
+    raw_api_snapshot = strict(
+        {
+            "endpoint": {
+                "format": "uri",
+                "pattern": "^https://api\\.github\\.com/",
+                "type": "string",
+            },
+            "response_base64": {"minLength": 1, "type": "string"},
+            "response_sha256": content_id(),
+            "status_code": {"const": 200},
+        }
+    )
+    documents["workflow-registration-api-evidence-v1"] = schema(
+        "workflow-registration-api-evidence-v1",
+        {
+            "collected_at": {"format": "date-time", "type": "string"},
+            "execution_authorized": {"const": False},
+            "repository": {"const": "chartjs333/delta"},
+            "snapshots": strict(
+                {
+                    "bootstrap_workflow_file": raw_api_snapshot,
+                    "default_branch_ref": raw_api_snapshot,
+                    "registration_artifact_metadata": raw_api_snapshot,
+                    "registration_workflow_run": raw_api_snapshot,
+                    "workflow_metadata": raw_api_snapshot,
+                }
+            ),
+        },
+    )
+    documents["workflow-registration-signature-v1"] = schema(
+        "workflow-registration-signature-v1",
+        {
+            "api_evidence_root": content_id(),
+            "mapping_id": content_id(),
+            "registration_receipt_id": content_id(),
+            "signature_base64": {
+                "pattern": "^[A-Za-z0-9+/]{86}==$",
+                "type": "string",
+            },
+            "signer_id": text(),
+            "submitted_at": {"format": "date-time", "type": "string"},
+            "validator_set_id": content_id(),
+        },
+    )
+    documents["workflow-registration-receipt-v2"] = schema(
+        "workflow-registration-receipt-v2",
+        {
+            "api_evidence_root": content_id(),
+            "authority_bundle_supplied": {"const": False},
+            "bootstrap_commit": commit_id(),
+            "bootstrap_commit_on_default_branch": {"const": True},
+            "bootstrap_mapping_id": content_id(),
+            "bootstrap_workflow_blob_id": commit_id(),
+            "bootstrap_workflow_content_id": content_id(),
+            "checked_at": {"format": "date-time", "type": "string"},
+            "default_branch_ref": {"const": "refs/heads/main"},
+            "execution_artifact_count": {"const": 0},
+            "execution_count": {"const": 0},
+            "observation_count": {"const": 0},
+            "qualified_source_commit": commit_id(),
+            "qualified_source_exists": {"const": True},
+            "qualified_source_tree": commit_id(),
+            "registration_artifact_archive_digest": content_id(),
+            "registration_artifact_id": uint(1),
+            "registration_run_attempt": uint(1),
+            "registration_run_event": {"const": "workflow_dispatch"},
+            "registration_run_head_sha": commit_id(),
+            "registration_run_id": uint(1),
+            "registration_run_ref": {"const": "refs/heads/main"},
+            "registration_workflow_id": uint(1),
+            "repository": {"const": "chartjs333/delta"},
+            "stage_a_plans_executed": {"const": 0},
+            "stage_gate_receipt_emitted": {"const": False},
+            "workflow_id": uint(1),
+            "workflow_path": {"const": ".github/workflows/campaign02-stage-a-bootstrap.yml"},
+            "workflow_state": {"const": "active"},
+            "workflow_visible_on_default_branch": {"const": True},
+        },
+    )
     return documents
 
 
@@ -1951,7 +2260,7 @@ def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
         "fixtures": fixture_entries(),
         "formal_semantics_id": FORMAL_ID,
         "media_types": media_types,
-        "registry_version": "010.8.0-measured-stagec-bootstrap-binding",
+        "registry_version": "010.9.0-actual-stagec-registration-quorum",
         "schema_version": "1.0.0",
         "semantic_completeness_claimed": False,
     }

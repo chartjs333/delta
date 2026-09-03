@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -64,12 +65,50 @@ void test_fault_order_and_sidecar_replay() {
   }
 }
 
+void test_faults_are_observed_from_actual_runtime_state() {
+  using delta::runtime::benchmark::FaultAction;
+  using delta::runtime::benchmark::FaultEvent;
+  using delta::runtime::benchmark::execute_fault_scenario;
+  const std::vector<FaultEvent> events{
+      {"worker-loss", "WORKER", FaultAction::crash, 100U, true, "APPLIED"},
+      {"validator-crash", "VALIDATOR", FaultAction::crash, 120U, true, "VIEW_CHANGE"},
+      {"validator-restart", "VALIDATOR", FaultAction::restart, 140U, true, "RECOVERED"},
+      {"storage-crash", "STORAGE", FaultAction::crash, 160U, true, "RETRIEVAL"},
+      {"storage-restart", "STORAGE", FaultAction::restart, 180U, true, "RECOVERED"},
+      {"regional-delay", "REGION", FaultAction::delay, 200U, true, "APPLIED"},
+      {"regional-partition", "REGION", FaultAction::partition, 240U, true, "ABORTED"},
+  };
+  auto root = std::filesystem::temp_directory_path() / "delta-stagec-actual-fault-test";
+  std::error_code error;
+  std::filesystem::remove_all(root, error);
+  expect(!error, "cannot clean actual fault test root");
+  for (const auto& event : events) {
+    const auto result = execute_fault_scenario(event, root / event.event_id, event.event_id);
+    expect(result.observed_outcome == event.expected_outcome, "actual fault outcome drifted");
+    expect(result.runtime_operation_count > 0U, "actual runtime operation is absent");
+    expect(!result.canonical_trace.empty(), "actual native trace is absent");
+    if (event.action == FaultAction::restart) {
+      expect(result.wal_replayed, "restart did not prove WAL replay");
+    }
+    if (event.actor_class == "VALIDATOR" && event.action == FaultAction::crash) {
+      expect(result.view_change_observed, "validator crash did not prove view change");
+    }
+    if (event.actor_class == "REGION" && event.action == FaultAction::partition) {
+      expect(!result.current_checkpoint_advanced, "partition advanced current checkpoint");
+    }
+    if (event.actor_class == "STORAGE" && event.action == FaultAction::crash) {
+      expect(!result.availability_success, "storage crash fabricated availability");
+    }
+  }
+}
+
 }  // namespace
 
 int main() {
   try {
     test_metrics_and_trace();
     test_fault_order_and_sidecar_replay();
+    test_faults_are_observed_from_actual_runtime_state();
   } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';
     return 1;

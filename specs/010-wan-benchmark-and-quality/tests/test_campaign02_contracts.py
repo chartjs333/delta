@@ -22,10 +22,10 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 56
+    assert len(module.SCHEMAS) == 63
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.8.0-measured-stagec-bootstrap-binding"
+    assert registry["registry_version"] == "010.9.0-actual-stagec-registration-quorum"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
     measured_stage_c = json.loads(
@@ -37,6 +37,26 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
         "const": "PYTHON_JAVA_NETTY_CPP_OS"
     }
     assert measured_stage_c["properties"]["network_counters"]["minItems"] == 3
+    actual_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v3.json"
+        ).read_bytes()
+    )
+    assert {"raw_java_receipt_base64", "raw_java_receipt_id"} <= set(actual_stage_c["required"])
+    assert {
+        "os_rx_bytes_before",
+        "os_rx_bytes_after",
+        "os_tx_bytes_before",
+        "os_tx_bytes_after",
+    } <= set(actual_stage_c["properties"]["network_counters"]["items"]["required"])
+    assert actual_stage_c["properties"]["fault_results"]["items"]["properties"][
+        "observation_source"
+    ] == {"const": "ACTUAL_RUNTIME_TRANSITION"}
+    candidate = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v1.json").read_bytes()
+    )
+    assert candidate["properties"]["plan_count"] == {"const": 15}
+    assert candidate["properties"]["execution_authorized"] == {"const": False}
     runtime_lineage = json.loads(
         (
             ROOT / "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v5.json"
@@ -64,6 +84,27 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     )
     assert bootstrap_mapping["properties"]["execution_authorized"] == {"const": False}
     assert "definition_id" not in bootstrap_mapping["properties"]
+    registration = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v2.json"
+        ).read_bytes()
+    )
+    assert {
+        "api_evidence_root",
+        "registration_artifact_archive_digest",
+        "registration_artifact_id",
+        "registration_run_attempt",
+        "registration_run_id",
+        "registration_workflow_id",
+    } <= set(registration["required"])
+    registration_signature = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-signature-v1.json"
+        ).read_bytes()
+    )
+    assert {"api_evidence_root", "registration_receipt_id", "signature_base64"} <= set(
+        registration_signature["required"]
+    )
     replacement_definition = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json").read_bytes()
     )
@@ -75,6 +116,8 @@ def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     assert "job.workflow_sha" in stage_a_workflow
     assert ".run_attempt" in stage_a_workflow
     assert ".digest" in stage_a_workflow
+    assert "--registration-api-evidence" in stage_a_workflow
+    assert "--registration-vote" in stage_a_workflow
     observation = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/observation-v2.json").read_bytes()
     )

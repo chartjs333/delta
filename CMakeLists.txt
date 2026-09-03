@@ -154,6 +154,7 @@ target_link_libraries(delta_qlora PUBLIC delta::apply delta::certificates)
 delta_target_defaults(delta_qlora)
 
 add_library(delta_runtime STATIC
+  delta-runtime-cpp/src/benchmark/fault_execution.cpp
   delta-runtime-cpp/src/benchmark/fault_control.cpp
   delta-runtime-cpp/src/benchmark/metrics.cpp
   delta-runtime-cpp/src/benchmark/sidecar_server.cpp

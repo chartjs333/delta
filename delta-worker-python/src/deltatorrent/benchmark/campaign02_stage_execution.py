@@ -22,9 +22,8 @@ from deltatorrent.benchmark.campaign02_binding import (
 from deltatorrent.benchmark.campaign02_bootstrap import (
     BootstrapRuntimeProvenance,
     VerifiedBootstrapMapping,
-    WorkflowRegistrationReceipt,
+    VerifiedWorkflowRegistration,
     verify_bootstrap_runtime,
-    verify_registration_receipt,
 )
 from deltatorrent.benchmark.campaign02_execution_identities import (
     StageExecutionIdentityManifest,
@@ -439,7 +438,7 @@ class Campaign02StageGateFinalizer:
         stage_identities: StageExecutionIdentityManifest,
         finalized_at: datetime,
         bootstrap_mapping: VerifiedBootstrapMapping,
-        registration_receipt: WorkflowRegistrationReceipt,
+        registration: VerifiedWorkflowRegistration,
         provenance: BootstrapRuntimeProvenance,
         authority_artifact: Artifact,
         input_artifacts: tuple[Artifact, ...],
@@ -456,7 +455,8 @@ class Campaign02StageGateFinalizer:
         self.finalized_at = finalized_at
         self.bootstrap_mapping = bootstrap_mapping
         self.bootstrap_mapping_id = bootstrap_mapping.mapping.content_id
-        self.registration_receipt = registration_receipt
+        self.registration = registration
+        self.registration_receipt = registration.receipt
         self.provenance = provenance
         self.authority_artifact = authority_artifact
         self.input_artifacts = tuple(sorted(input_artifacts, key=lambda item: item.name))
@@ -474,7 +474,6 @@ class Campaign02StageGateFinalizer:
             else set()
         )
         verify_bootstrap_runtime(bootstrap_mapping, provenance)
-        verify_registration_receipt(bootstrap_mapping, registration_receipt)
         artifacts = (*self.input_artifacts, *self.output_artifacts)
         artifact_coordinates: dict[int, tuple[str, int, int, str]] = {}
         artifact_coordinate_conflict = False
@@ -494,7 +493,9 @@ class Campaign02StageGateFinalizer:
             or bootstrap_mapping.mapping.qualified_source_tree != self.source_tree
             or bootstrap_mapping.mapping.source_stage_a_workflow_content_id
             not in source_workflow_ids
-            or provenance.workflow_id != registration_receipt.workflow_id
+            or registration.receipt.bootstrap_mapping_id != bootstrap_mapping.mapping.content_id
+            or registration.api_evidence.content_id != registration.receipt.api_evidence_root
+            or provenance.workflow_id != registration.receipt.workflow_id
             or not self.input_artifacts
             or not self.output_artifacts
             or authority_artifact not in self.input_artifacts
@@ -502,6 +503,14 @@ class Campaign02StageGateFinalizer:
             or sum(item.origin_class == "AUTHORITY_RUN" for item in self.input_artifacts) != 1
             or not any(
                 item.origin_class == "BOOTSTRAP_REGISTRATION_RUN" for item in self.input_artifacts
+            )
+            or any(
+                item.artifact_id != registration.receipt.registration_artifact_id
+                or item.digest != registration.receipt.registration_artifact_archive_digest
+                or item.workflow_run_id != registration.receipt.registration_run_id
+                or item.workflow_run_attempt != registration.receipt.registration_run_attempt
+                for item in self.input_artifacts
+                if item.origin_class == "BOOTSTRAP_REGISTRATION_RUN"
             )
             or not any(item.origin_class == "CURRENT_STAGE_RUN" for item in self.input_artifacts)
             or any(item.origin_class != "CURRENT_STAGE_RUN" for item in self.output_artifacts)
@@ -569,11 +578,19 @@ class Campaign02StageGateFinalizer:
             "qualified_source_commit": self.bootstrap_mapping.mapping.qualified_source_commit,
             "qualified_source_tree": self.bootstrap_mapping.mapping.qualified_source_tree,
             "registration_receipt_id": self.registration_receipt.content_id,
+            "registration_attestation_id": self.registration.content_id,
+            "registration_api_evidence_root": self.registration.api_evidence.content_id,
+            "registration_artifact_archive_digest": (
+                self.registration_receipt.registration_artifact_archive_digest
+            ),
+            "registration_artifact_id": self.registration_receipt.registration_artifact_id,
+            "registration_run_attempt": self.registration_receipt.registration_run_attempt,
+            "registration_run_id": self.registration_receipt.registration_run_id,
             "repository": self.provenance.repository,
             "runner_id": summary.runner_id,
             "run_attempt": self.provenance.run_attempt,
             "run_id": self.provenance.run_id,
-            "schema_version": "3.0.0",
+            "schema_version": "4.0.0",
             "source_commit": summary.source_commit,
             "source_stage_a_workflow_content_id": (
                 self.bootstrap_mapping.mapping.source_stage_a_workflow_content_id
@@ -590,7 +607,7 @@ class Campaign02StageGateFinalizer:
         return StageGateFinalization(
             gate_result_id=summary.content_id,
             gate_qc_id=sha256_content_id(
-                b"deltareduce.010.campaign02-stage-workflow-gate-qc.v3\0"
+                b"deltareduce.010.campaign02-stage-workflow-gate-qc.v4\0"
                 + canonical_json_bytes(self.document)
             ),
             finalized_at=self.finalized_at,

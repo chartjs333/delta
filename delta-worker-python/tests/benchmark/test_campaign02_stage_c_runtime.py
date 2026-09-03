@@ -30,7 +30,16 @@ def _inputs() -> tuple[tuple[tuple[str, NetworkProfile], ...], FaultProfile]:
     return profiles, FaultProfile.from_dict(faults["trace_profile"])
 
 
-def _receipt(*, observed_override: str | None = None) -> bytes:
+def _receipt(
+    *,
+    observed_override: str | None = None,
+    source_override: str | None = None,
+    operation_count_override: int | None = None,
+    wal_replayed_override: bool | None = None,
+    view_change_override: bool | None = None,
+    current_advanced_override: bool | None = None,
+    availability_override: bool | None = None,
+) -> bytes:
     profiles, faults = _inputs()
     plan_id = "sha256:" + "a" * 64
     lines = [f"STAGEC_V1 {plan_id}"]
@@ -52,22 +61,54 @@ def _receipt(*, observed_override: str | None = None) -> bytes:
                 "10",
                 "256",
                 "256",
+                "1000",
+                "1300",
                 "300",
+                "2000",
+                "2300",
                 "300",
             )
         )
         lines.append(line + " " + sha256_content_id(PROFILE_DOMAIN + line.encode("ascii")))
     for index, fault in enumerate(faults.events):
         observed = observed_override if index == 0 and observed_override else fault.expected_outcome
-        ids = ["sha256:" + character * 64 for character in ("b", "c", "d", "e")]
+        native_trace = f"1|ACT-{fault.event_id}|state|effect|{observed}\n".encode("ascii")
+        ids = [
+            sha256_content_id(native_trace),
+            *["sha256:" + character * 64 for character in ("c", "d", "e")],
+        ]
+        wal_replayed = fault.action == "RESTART"
+        view_change = fault.actor_class == "VALIDATOR" and fault.action == "CRASH"
+        current_advanced = False
+        availability = not (fault.actor_class == "STORAGE" and fault.action == "CRASH")
+        if index == 0:
+            wal_replayed = wal_replayed if wal_replayed_override is None else wal_replayed_override
+            view_change = view_change if view_change_override is None else view_change_override
+            current_advanced = (
+                current_advanced if current_advanced_override is None else current_advanced_override
+            )
+            availability = availability if availability_override is None else availability_override
         lines.append(
             " ".join(
                 (
                     "FAULT",
                     fault.event_id,
                     str(fault.at_step),
+                    fault.actor_class,
+                    fault.action,
                     observed,
+                    source_override or "ACTUAL_RUNTIME_TRANSITION",
                     *ids,
+                    str(
+                        operation_count_override
+                        if index == 0 and operation_count_override is not None
+                        else 1
+                    ),
+                    "1" if wal_replayed else "0",
+                    "1" if view_change else "0",
+                    "1" if current_advanced else "0",
+                    "1" if availability else "0",
+                    native_trace.hex(),
                 )
             )
         )
@@ -95,6 +136,60 @@ def test_measured_receipt_reconciles_java_native_and_os_layers() -> None:
 def test_expected_outcome_is_only_an_assertion() -> None:
     with pytest.raises(MeasuredStageCRuntimeError, match="RUNTIME_TERMINAL_MISMATCH"):
         _parse(_receipt(observed_override="SAFE_ABORT"))
+
+
+def test_hardcoded_outcome_without_actual_runtime_source_is_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="NATIVE_EXECUTION_PROOF_INVALID"):
+        _parse(_receipt(source_override="HARDCODED_OUTCOME_TABLE"))
+
+
+def test_state_and_effect_roots_without_actual_operation_are_rejected() -> None:
+    with pytest.raises(MeasuredStageCRuntimeError, match="NATIVE_EXECUTION_PROOF_INVALID"):
+        _parse(_receipt(operation_count_override=0))
+
+
+def test_restart_without_wal_replay_is_rejected() -> None:
+    raw = _receipt()
+    lines = raw.decode("ascii").splitlines()
+    index = next(i for i, line in enumerate(lines) if line.startswith("FAULT validator-restart "))
+    fields = lines[index].split(" ")
+    fields[12] = "0"
+    lines[index] = " ".join(fields)
+    with pytest.raises(MeasuredStageCRuntimeError, match="RESTART_WITHOUT_WAL_REPLAY"):
+        _parse(("\n".join(lines) + "\n").encode("ascii"))
+
+
+def test_validator_crash_without_view_change_is_rejected() -> None:
+    raw = _receipt()
+    lines = raw.decode("ascii").splitlines()
+    index = next(i for i, line in enumerate(lines) if line.startswith("FAULT validator-crash "))
+    fields = lines[index].split(" ")
+    fields[13] = "0"
+    lines[index] = " ".join(fields)
+    with pytest.raises(MeasuredStageCRuntimeError, match="CRASH_WITHOUT_VIEW_CHANGE"):
+        _parse(("\n".join(lines) + "\n").encode("ascii"))
+
+
+def test_partition_with_current_advance_is_rejected() -> None:
+    raw = _receipt()
+    lines = raw.decode("ascii").splitlines()
+    index = next(i for i, line in enumerate(lines) if line.startswith("FAULT regional-partition "))
+    fields = lines[index].split(" ")
+    fields[14] = "1"
+    lines[index] = " ".join(fields)
+    with pytest.raises(MeasuredStageCRuntimeError, match="PARTITION_ADVANCED_CURRENT"):
+        _parse(("\n".join(lines) + "\n").encode("ascii"))
+
+
+def test_storage_crash_with_false_availability_success_is_rejected() -> None:
+    raw = _receipt()
+    lines = raw.decode("ascii").splitlines()
+    index = next(i for i, line in enumerate(lines) if line.startswith("FAULT storage-crash "))
+    fields = lines[index].split(" ")
+    fields[15] = "1"
+    lines[index] = " ".join(fields)
+    with pytest.raises(MeasuredStageCRuntimeError, match="STORAGE_CRASH_FALSE_AVAILABILITY"):
+        _parse(("\n".join(lines) + "\n").encode("ascii"))
 
 
 def test_missing_java_transport_receipt_is_rejected() -> None:
@@ -128,7 +223,11 @@ def test_missing_os_measurement_is_rejected() -> None:
             disconnect_duration_ms=0,
             java_tx_payload_bytes=64,
             java_rx_payload_bytes=64,
+            os_tx_bytes_before=100,
+            os_tx_bytes_after=100,
             os_tx_bytes=0,
+            os_rx_bytes_before=200,
+            os_rx_bytes_after=200,
             os_rx_bytes=0,
         )
 

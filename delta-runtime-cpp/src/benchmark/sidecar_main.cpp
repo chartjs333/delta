@@ -191,9 +191,9 @@ void execute_fault(
   }
   const auto step = parse_step(fields[4]);
   const auto assumptions_hold = fields[5] == "1";
-  const auto outcome = fault_outcome(fields[2], fields[3], assumptions_hold);
+  const auto expected_outcome = fault_outcome(fields[2], fields[3], assumptions_hold);
   const auto event = delta::runtime::benchmark::FaultEvent{
-      fields[1], fields[2], fault_action(fields[3]), step, assumptions_hold, outcome};
+      fields[1], fields[2], fault_action(fields[3]), step, assumptions_hold, expected_outcome};
   const auto controller = delta::runtime::benchmark::FaultController({event});
   if (controller.events_at(step) != std::vector{event}) {
     throw std::runtime_error("native fault controller rejected transition");
@@ -213,16 +213,21 @@ void execute_fault(
     sequence = records.size() + 1U;
     records.emplace(fields[0], Record{sequence, payload});
   }
-  const auto state = "STATE|" + std::to_string(sequence) + '|' + fields[2] + '|' + outcome;
-  const auto effect = "EFFECT|" + fields[1] + '|' + fields[3] + '|' + outcome;
-  const auto state_id = content_id(state);
-  const auto effect_id = content_id(effect);
-  auto exporter = delta::runtime::benchmark::TraceExporter{};
-  exporter.append({1U, fields[1], state_id, effect_id, outcome});
-  const auto wal_id = "sha256:" + delta::core::canonical::sha256_hex(file_bytes(journal));
-  std::cout << "FAULT_OK " << sequence << ' ' << (replay ? 1 : 0) << ' ' << outcome << ' '
-            << content_id(exporter.canonical_text()) << ' ' << state_id << ' ' << effect_id << ' '
-            << wal_id << '\n'
+  const auto execution = delta::runtime::benchmark::execute_fault_scenario(
+      event, journal.parent_path() / ("runtime-" + fields[0]), fields[0]);
+  if (execution.observed_outcome != expected_outcome) {
+    throw std::runtime_error("actual runtime fault outcome differs from oracle");
+  }
+  std::cout << "FAULT_OK " << sequence << ' ' << (replay ? 1 : 0) << ' '
+            << execution.observed_outcome << " ACTUAL_RUNTIME_TRANSITION "
+            << execution.native_trace_id << ' '
+            << execution.native_state_root << ' ' << execution.native_effect_root << ' '
+            << execution.native_wal_sha256 << ' ' << execution.runtime_operation_count << ' '
+            << (execution.wal_replayed ? 1 : 0) << ' '
+            << (execution.view_change_observed ? 1 : 0) << ' '
+            << (execution.current_checkpoint_advanced ? 1 : 0) << ' '
+            << (execution.availability_success ? 1 : 0) << ' '
+            << hex_encode(execution.canonical_trace) << '\n'
             << std::flush;
 }
 

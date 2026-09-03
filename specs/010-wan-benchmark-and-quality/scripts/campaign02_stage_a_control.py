@@ -30,9 +30,12 @@ from deltatorrent.benchmark.campaign02_bootstrap import (  # noqa: E402
     BootstrapRuntimeProvenance,
     BootstrapValidatorSet,
     SignedBootstrapMappingVote,
+    SignedWorkflowRegistrationVote,
     WorkflowBootstrapMapping,
+    WorkflowRegistrationApiEvidence,
     WorkflowRegistrationReceipt,
     verify_bootstrap_mapping,
+    verify_registration_receipt,
 )
 from deltatorrent.benchmark.campaign02_exactness import (  # noqa: E402
     Campaign02ExactnessEvidenceRunner,
@@ -359,6 +362,19 @@ def finalize(arguments: argparse.Namespace) -> dict[str, object]:
     registration = WorkflowRegistrationReceipt.from_dict(
         load_canonical(arguments.registration_receipt)
     )
+    registration_api_evidence = WorkflowRegistrationApiEvidence.from_dict(
+        load_canonical(arguments.registration_api_evidence)
+    )
+    verified_registration = verify_registration_receipt(
+        verified_mapping,
+        registration,
+        api_evidence=registration_api_evidence,
+        validator_set=bootstrap_validator_set,
+        votes=tuple(
+            SignedWorkflowRegistrationVote.from_dict(load_canonical(path))
+            for path in arguments.registration_vote
+        ),
+    )
     provenance = BootstrapRuntimeProvenance(
         repository=arguments.workflow_repository,
         workflow_id=registration.workflow_id,
@@ -463,7 +479,7 @@ def finalize(arguments: argparse.Namespace) -> dict[str, object]:
         stage_identities=bundle.stage_identities,
         finalized_at=finalized_at,
         bootstrap_mapping=verified_mapping,
-        registration_receipt=registration,
+        registration=verified_registration,
         provenance=provenance,
         authority_artifact=next(item for item in input_artifacts if item.name == authority_name),
         input_artifacts=input_artifacts,
@@ -523,6 +539,8 @@ def parser() -> argparse.ArgumentParser:
     close.add_argument("--bootstrap-validator-set", type=Path, required=True)
     close.add_argument("--bootstrap-vote", type=Path, action="append", required=True)
     close.add_argument("--registration-receipt", type=Path, required=True)
+    close.add_argument("--registration-api-evidence", type=Path, required=True)
+    close.add_argument("--registration-vote", type=Path, action="append", required=True)
     close.add_argument("--bootstrap-root", type=Path, required=True)
     close.add_argument("--input-artifact-id", action="append", required=True)
     close.add_argument("--output-artifact-id", action="append", required=True)

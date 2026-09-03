@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import os
 import re
 import subprocess
@@ -60,7 +61,11 @@ class MeasuredNetworkCounters:
     disconnect_duration_ms: int
     java_tx_payload_bytes: int
     java_rx_payload_bytes: int
+    os_tx_bytes_before: int
+    os_tx_bytes_after: int
     os_tx_bytes: int
+    os_rx_bytes_before: int
+    os_rx_bytes_after: int
     os_rx_bytes: int
 
     def __post_init__(self) -> None:
@@ -80,7 +85,11 @@ class MeasuredNetworkCounters:
             self.disconnect_duration_ms,
             self.java_tx_payload_bytes,
             self.java_rx_payload_bytes,
+            self.os_tx_bytes_before,
+            self.os_tx_bytes_after,
             self.os_tx_bytes,
+            self.os_rx_bytes_before,
+            self.os_rx_bytes_after,
             self.os_rx_bytes,
         )
         if any(isinstance(value, bool) or value < 0 for value in counters):
@@ -93,6 +102,8 @@ class MeasuredNetworkCounters:
             != self.unique_delivered_payload_bytes + self.duplicate_payload_bytes
             or self.java_rx_payload_bytes
             != self.unique_delivered_payload_bytes + self.duplicate_payload_bytes
+            or self.os_tx_bytes_after - self.os_tx_bytes_before != self.os_tx_bytes
+            or self.os_rx_bytes_after - self.os_rx_bytes_before != self.os_rx_bytes
         ):
             raise _fail("CAMPAIGN02_STAGE_C_APPLICATION_COUNTERS_UNRECONCILED")
         if (
@@ -120,7 +131,11 @@ class MeasuredNetworkCounters:
             "java_transport_receipt_id": self.java_transport_receipt_id,
             "java_tx_payload_bytes": self.java_tx_payload_bytes,
             "network_profile_id": self.network_profile_id,
+            "os_rx_bytes_after": self.os_rx_bytes_after,
+            "os_rx_bytes_before": self.os_rx_bytes_before,
             "os_rx_bytes": self.os_rx_bytes,
+            "os_tx_bytes_after": self.os_tx_bytes_after,
+            "os_tx_bytes_before": self.os_tx_bytes_before,
             "os_tx_bytes": self.os_tx_bytes,
             "reordered_packets": self.reordered_packets,
             "unique_delivered_packets": self.unique_delivered_packets,
@@ -132,15 +147,29 @@ class MeasuredNetworkCounters:
 class NativeFaultTransition:
     event_id: str
     at_step: int
+    actor_class: str
+    action: str
     expected_outcome: str
     observed_outcome: str
+    observation_source: str
     native_trace_id: str
     native_state_root: str
     native_effect_root: str
     native_wal_sha256: str
+    runtime_operation_count: int
+    wal_replayed: bool
+    view_change_observed: bool
+    current_checkpoint_advanced: bool
+    availability_success: bool
+    native_trace: bytes
 
     def __post_init__(self) -> None:
-        if _TOKEN.fullmatch(self.event_id) is None or self.at_step < 0:
+        if (
+            _TOKEN.fullmatch(self.event_id) is None
+            or _TOKEN.fullmatch(self.actor_class) is None
+            or _TOKEN.fullmatch(self.action) is None
+            or self.at_step < 0
+        ):
             raise _fail("CAMPAIGN02_STAGE_C_NATIVE_FAULT_EVENT_INVALID")
         for value in (
             self.native_trace_id,
@@ -149,6 +178,29 @@ class NativeFaultTransition:
             self.native_wal_sha256,
         ):
             _id(value, "CAMPAIGN02_STAGE_C_NATIVE_TRACE_ID_INVALID")
+        if (
+            self.observation_source != "ACTUAL_RUNTIME_TRANSITION"
+            or self.runtime_operation_count <= 0
+            or not self.native_trace
+            or sha256_content_id(self.native_trace) != self.native_trace_id
+        ):
+            raise _fail("CAMPAIGN02_STAGE_C_NATIVE_EXECUTION_PROOF_INVALID")
+        if self.action == "RESTART" and not self.wal_replayed:
+            raise _fail("CAMPAIGN02_STAGE_C_RESTART_WITHOUT_WAL_REPLAY")
+        if (
+            self.actor_class == "VALIDATOR"
+            and self.action == "CRASH"
+            and not self.view_change_observed
+        ):
+            raise _fail("CAMPAIGN02_STAGE_C_VALIDATOR_CRASH_WITHOUT_VIEW_CHANGE")
+        if (
+            self.actor_class == "REGION"
+            and self.action == "PARTITION"
+            and self.current_checkpoint_advanced
+        ):
+            raise _fail("CAMPAIGN02_STAGE_C_PARTITION_ADVANCED_CURRENT")
+        if self.actor_class == "STORAGE" and self.action == "CRASH" and self.availability_success:
+            raise _fail("CAMPAIGN02_STAGE_C_STORAGE_CRASH_FALSE_AVAILABILITY")
 
     @property
     def passed(self) -> bool:
@@ -158,14 +210,23 @@ class NativeFaultTransition:
     def document(self) -> dict[str, object]:
         return {
             "at_step": self.at_step,
+            "action": self.action,
+            "actor_class": self.actor_class,
+            "availability_success": self.availability_success,
+            "current_checkpoint_advanced": self.current_checkpoint_advanced,
             "event_id": self.event_id,
             "expected_outcome": self.expected_outcome,
             "native_effect_root": self.native_effect_root,
             "native_state_root": self.native_state_root,
             "native_trace_id": self.native_trace_id,
             "native_wal_sha256": self.native_wal_sha256,
+            "native_trace_base64": base64.b64encode(self.native_trace).decode("ascii"),
+            "observation_source": self.observation_source,
             "observed_outcome": self.observed_outcome,
             "passed": self.passed,
+            "runtime_operation_count": self.runtime_operation_count,
+            "view_change_observed": self.view_change_observed,
+            "wal_replayed": self.wal_replayed,
         }
 
 
@@ -175,6 +236,7 @@ class MeasuredStageCReceipt:
     network_counters: tuple[MeasuredNetworkCounters, ...]
     fault_transitions: tuple[NativeFaultTransition, ...]
     native_fault_trace_id: str
+    raw_java_receipt: bytes
 
     def __post_init__(self) -> None:
         _id(self.plan_id, "CAMPAIGN02_STAGE_C_PLAN_ID_INVALID")
@@ -183,6 +245,12 @@ class MeasuredStageCReceipt:
             raise _fail("CAMPAIGN02_STAGE_C_MEASUREMENT_INCOMPLETE")
         if not all(item.passed for item in self.fault_transitions):
             raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_TERMINAL_MISMATCH")
+        if not self.raw_java_receipt:
+            raise _fail("CAMPAIGN02_STAGE_C_RAW_JAVA_RECEIPT_MISSING")
+
+    @property
+    def raw_java_receipt_id(self) -> str:
+        return sha256_content_id(self.raw_java_receipt)
 
 
 @dataclass(frozen=True, slots=True)
@@ -387,11 +455,30 @@ def _parse_receipt(
         raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_RECEIPT_INVALID")
     profile_ids = {profile.profile_id: content_id for content_id, profile in network_profiles}
     counters: list[MeasuredNetworkCounters] = []
-    fault_rows: list[tuple[str, int, str, str, str, str, str]] = []
+    fault_rows: list[
+        tuple[
+            str,
+            int,
+            str,
+            str,
+            str,
+            str,
+            str,
+            str,
+            str,
+            str,
+            int,
+            bool,
+            bool,
+            bool,
+            bool,
+            bytes,
+        ]
+    ] = []
     for line in lines[1:-1]:
         fields = line.split(" ")
         if fields[0] == "PROFILE":
-            if len(fields) != 18 or fields[1] not in profile_ids:
+            if len(fields) != 22 or fields[1] not in profile_ids:
                 raise _fail("CAMPAIGN02_STAGE_C_JAVA_RECEIPT_INVALID")
             expected_receipt = sha256_content_id(
                 _PROFILE_RECEIPT_DOMAIN + " ".join(fields[:-1]).encode("ascii")
@@ -418,12 +505,23 @@ def _parse_receipt(
                     disconnect_duration_ms=values[10],
                     java_tx_payload_bytes=values[11],
                     java_rx_payload_bytes=values[12],
-                    os_tx_bytes=values[13],
-                    os_rx_bytes=values[14],
+                    os_tx_bytes_before=values[13],
+                    os_tx_bytes_after=values[14],
+                    os_tx_bytes=values[15],
+                    os_rx_bytes_before=values[16],
+                    os_rx_bytes_after=values[17],
+                    os_rx_bytes=values[18],
                 )
             )
         elif fields[0] == "FAULT":
-            if len(fields) != 8:
+            if len(fields) != 17:
+                raise _fail("CAMPAIGN02_STAGE_C_NATIVE_TRACE_INVALID")
+            try:
+                native_trace = bytes.fromhex(fields[16])
+            except ValueError as exc:
+                raise _fail("CAMPAIGN02_STAGE_C_NATIVE_TRACE_INVALID") from exc
+            flags = fields[12:16]
+            if any(value not in {"0", "1"} for value in flags):
                 raise _fail("CAMPAIGN02_STAGE_C_NATIVE_TRACE_INVALID")
             fault_rows.append(
                 (
@@ -434,6 +532,15 @@ def _parse_receipt(
                     fields[5],
                     fields[6],
                     fields[7],
+                    fields[8],
+                    fields[9],
+                    fields[10],
+                    _nonnegative(fields[11], "CAMPAIGN02_STAGE_C_NATIVE_TRACE_INVALID"),
+                    fields[12] == "1",
+                    fields[13] == "1",
+                    fields[14] == "1",
+                    fields[15] == "1",
+                    native_trace,
                 )
             )
         else:
@@ -451,16 +558,25 @@ def _parse_receipt(
         NativeFaultTransition(
             event_id=item[0],
             at_step=item[1],
+            actor_class=item[2],
+            action=item[3],
             expected_outcome=expected_by_id[item[0]],
-            observed_outcome=item[2],
-            native_trace_id=item[3],
-            native_state_root=item[4],
-            native_effect_root=item[5],
-            native_wal_sha256=item[6],
+            observed_outcome=item[4],
+            observation_source=item[5],
+            native_trace_id=item[6],
+            native_state_root=item[7],
+            native_effect_root=item[8],
+            native_wal_sha256=item[9],
+            runtime_operation_count=item[10],
+            wal_replayed=item[11],
+            view_change_observed=item[12],
+            current_checkpoint_advanced=item[13],
+            availability_success=item[14],
+            native_trace=item[15],
         )
         for item in fault_rows
     )
     trace_set_id = sha256_content_id(
-        _NATIVE_TRACE_SET_DOMAIN + "\n".join(item[3] for item in fault_rows).encode("ascii")
+        _NATIVE_TRACE_SET_DOMAIN + "\n".join(item[6] for item in fault_rows).encode("ascii")
     )
-    return MeasuredStageCReceipt(plan_id, tuple(counters), transitions, trace_set_id)
+    return MeasuredStageCReceipt(plan_id, tuple(counters), transitions, trace_set_id, raw)

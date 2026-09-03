@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 from dataclasses import replace
 from datetime import UTC, datetime
 
@@ -12,14 +13,23 @@ from deltatorrent.benchmark.campaign02_bootstrap import (
     BootstrapValidatorSet,
     Campaign02BootstrapError,
     SignedBootstrapMappingVote,
+    SignedWorkflowRegistrationVote,
     VerifiedBootstrapMapping,
     WorkflowBootstrapMapping,
+    WorkflowRegistrationApiEvidence,
     WorkflowRegistrationReceipt,
     verify_bootstrap_mapping,
     verify_bootstrap_runtime,
     verify_registration_receipt,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
+from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
+
+BOOTSTRAP_WORKFLOW = b"name: inert campaign 02 bootstrap\n"
+
+
+def _blob_id(value: bytes) -> str:
+    return hashlib.sha1(b"blob " + str(len(value)).encode() + b"\0" + value).hexdigest()
 
 
 def _id(character: str) -> str:
@@ -29,8 +39,8 @@ def _id(character: str) -> str:
 def _mapping(**updates: object) -> WorkflowBootstrapMapping:
     value: dict[str, object] = {
         "bootstrap_commit": "1" * 40,
-        "bootstrap_workflow_blob_id": "2" * 40,
-        "bootstrap_workflow_content_id": _id("3"),
+        "bootstrap_workflow_blob_id": _blob_id(BOOTSTRAP_WORKFLOW),
+        "bootstrap_workflow_content_id": sha256_content_id(BOOTSTRAP_WORKFLOW),
         "bootstrap_workflow_path": ".github/workflows/campaign02-stage-a-bootstrap.yml",
         "execution_authorized": False,
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
@@ -91,7 +101,7 @@ def _verified_mapping():
                 signature=key.sign(unsigned.message),
             )
         )
-    return mapping, validator_set, tuple(votes)
+    return mapping, validator_set, tuple(votes), tuple(keys)
 
 
 def _provenance() -> BootstrapRuntimeProvenance:
@@ -103,8 +113,8 @@ def _provenance() -> BootstrapRuntimeProvenance:
             "chartjs333/delta/.github/workflows/campaign02-stage-a-bootstrap.yml@refs/heads/main"
         ),
         workflow_sha="1" * 40,
-        workflow_blob_id="2" * 40,
-        workflow_content_id=_id("3"),
+        workflow_blob_id=_blob_id(BOOTSTRAP_WORKFLOW),
+        workflow_content_id=sha256_content_id(BOOTSTRAP_WORKFLOW),
         run_id=456,
         run_attempt=2,
         event_name="workflow_dispatch",
@@ -116,7 +126,100 @@ def _provenance() -> BootstrapRuntimeProvenance:
     )
 
 
-def _registration(mapping: WorkflowBootstrapMapping, **updates: object):
+def _snapshot(endpoint: str, value: dict[str, object]) -> dict[str, object]:
+    raw = canonical_json_bytes(value)
+    return {
+        "endpoint": endpoint,
+        "response_base64": base64.b64encode(raw).decode("ascii"),
+        "response_sha256": sha256_content_id(raw),
+        "status_code": 200,
+    }
+
+
+def _api_evidence(
+    mapping: WorkflowBootstrapMapping,
+    *,
+    workflow_updates: dict[str, object] | None = None,
+    ref_updates: dict[str, object] | None = None,
+    file_updates: dict[str, object] | None = None,
+    run_updates: dict[str, object] | None = None,
+    artifact_updates: dict[str, object] | None = None,
+) -> WorkflowRegistrationApiEvidence:
+    prefix = f"https://api.github.com/repos/{mapping.repository}"
+    workflow: dict[str, object] = {
+        "id": 123,
+        "path": mapping.bootstrap_workflow_path,
+        "state": "active",
+    }
+    default_ref: dict[str, object] = {
+        "object": {"sha": mapping.bootstrap_commit},
+        "ref": "refs/heads/main",
+    }
+    workflow_file: dict[str, object] = {
+        "content": base64.b64encode(BOOTSTRAP_WORKFLOW).decode("ascii"),
+        "encoding": "base64",
+        "path": mapping.bootstrap_workflow_path,
+        "sha": mapping.bootstrap_workflow_blob_id,
+    }
+    run: dict[str, object] = {
+        "event": "workflow_dispatch",
+        "head_branch": "main",
+        "head_sha": mapping.bootstrap_commit,
+        "id": 456,
+        "path": mapping.bootstrap_workflow_path,
+        "repository": {"full_name": mapping.repository},
+        "run_attempt": 2,
+        "workflow_id": 123,
+    }
+    artifact: dict[str, object] = {
+        "digest": _id("9"),
+        "expired": False,
+        "id": 789,
+        "workflow_run": {
+            "head_branch": "main",
+            "head_sha": mapping.bootstrap_commit,
+            "id": 456,
+        },
+    }
+    for target, updates in (
+        (workflow, workflow_updates),
+        (default_ref, ref_updates),
+        (workflow_file, file_updates),
+        (run, run_updates),
+        (artifact, artifact_updates),
+    ):
+        if updates:
+            target.update(updates)
+    return WorkflowRegistrationApiEvidence.from_dict(
+        {
+            "collected_at": "2026-09-03T09:59:00+00:00",
+            "execution_authorized": False,
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "repository": mapping.repository,
+            "schema_version": "1.0.0",
+            "snapshots": {
+                "bootstrap_workflow_file": _snapshot(
+                    f"{prefix}/contents/{mapping.bootstrap_workflow_path}"
+                    f"?ref={mapping.bootstrap_commit}",
+                    workflow_file,
+                ),
+                "default_branch_ref": _snapshot(f"{prefix}/git/ref/heads/main", default_ref),
+                "registration_artifact_metadata": _snapshot(
+                    f"{prefix}/actions/artifacts/789", artifact
+                ),
+                "registration_workflow_run": _snapshot(f"{prefix}/actions/runs/456", run),
+                "workflow_metadata": _snapshot(f"{prefix}/actions/workflows/123", workflow),
+            },
+            "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_API_EVIDENCE",
+        }
+    )
+
+
+def _registration(
+    mapping: WorkflowBootstrapMapping,
+    api_evidence: WorkflowRegistrationApiEvidence,
+    **updates: object,
+):
     value: dict[str, object] = {
         "authority_bundle_supplied": False,
         "bootstrap_commit": mapping.bootstrap_commit,
@@ -127,13 +230,23 @@ def _registration(mapping: WorkflowBootstrapMapping, **updates: object):
         "checked_at": "2026-09-03T10:00:00+00:00",
         "default_branch_ref": "refs/heads/main",
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
-        "github_api_evidence_digest": _id("9"),
-        "observations": 0,
+        "api_evidence_root": api_evidence.content_id,
+        "execution_artifact_count": 0,
+        "execution_count": 0,
+        "observation_count": 0,
         "qualified_source_commit": mapping.qualified_source_commit,
         "qualified_source_exists": True,
         "qualified_source_tree": mapping.qualified_source_tree,
         "repository": mapping.repository,
-        "schema_version": "1.0.0",
+        "registration_artifact_archive_digest": _id("9"),
+        "registration_artifact_id": 789,
+        "registration_run_attempt": 2,
+        "registration_run_event": "workflow_dispatch",
+        "registration_run_head_sha": mapping.bootstrap_commit,
+        "registration_run_id": 456,
+        "registration_run_ref": "refs/heads/main",
+        "registration_workflow_id": 123,
+        "schema_version": "2.0.0",
         "stage_a_plans_executed": 0,
         "stage_gate_receipt_emitted": False,
         "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
@@ -146,8 +259,31 @@ def _registration(mapping: WorkflowBootstrapMapping, **updates: object):
     return WorkflowRegistrationReceipt.from_dict(value)
 
 
+def _registration_votes(
+    mapping: WorkflowBootstrapMapping,
+    validator_set: BootstrapValidatorSet,
+    keys: tuple[Ed25519PrivateKey, ...],
+    receipt: WorkflowRegistrationReceipt,
+    evidence: WorkflowRegistrationApiEvidence,
+) -> tuple[SignedWorkflowRegistrationVote, ...]:
+    submitted_at = datetime(2026, 9, 3, 10, tzinfo=UTC)
+    votes = []
+    for index, key in enumerate(keys[:3]):
+        unsigned = SignedWorkflowRegistrationVote(
+            registration_receipt_id=receipt.content_id,
+            api_evidence_root=evidence.content_id,
+            mapping_id=mapping.content_id,
+            validator_set_id=validator_set.content_id,
+            signer_id=f"validator-{index}",
+            submitted_at=submitted_at,
+            signature=b"\0" * 64,
+        )
+        votes.append(replace(unsigned, signature=key.sign(unsigned.message)))
+    return tuple(votes)
+
+
 def test_signed_mapping_binds_distinct_bootstrap_dispatch_and_source_commits() -> None:
-    mapping, validator_set, votes = _verified_mapping()
+    mapping, validator_set, votes, _keys = _verified_mapping()
     verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=votes)
     provenance = _provenance()
 
@@ -168,7 +304,7 @@ def test_verified_mapping_cannot_be_caller_constructed() -> None:
 
 
 def test_wrong_mapping_signature_is_rejected() -> None:
-    mapping, validator_set, votes = _verified_mapping()
+    mapping, validator_set, votes, _keys = _verified_mapping()
     forged = (*votes[:-1], replace(votes[-1], signature=b"x" * 64))
     with pytest.raises(Campaign02BootstrapError, match="SIGNATURE_INVALID"):
         verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=forged)
@@ -190,7 +326,7 @@ def test_wrong_mapping_signature_is_rejected() -> None:
     ],
 )
 def test_runtime_provenance_mismatch_is_rejected(field: str, value: object) -> None:
-    mapping, validator_set, votes = _verified_mapping()
+    mapping, validator_set, votes, _keys = _verified_mapping()
     verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=votes)
     provenance = _provenance()
     changed = replace(provenance, **{field: value})
@@ -199,12 +335,21 @@ def test_runtime_provenance_mismatch_is_rejected(field: str, value: object) -> N
 
 
 def test_registration_receipt_proves_zero_execution_only() -> None:
-    mapping, validator_set, votes = _verified_mapping()
-    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=votes)
-    receipt = _registration(mapping)
-    verify_registration_receipt(verified, receipt)
-    assert receipt.document["observations"] == 0
+    mapping, validator_set, mapping_votes, keys = _verified_mapping()
+    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=mapping_votes)
+    evidence = _api_evidence(mapping)
+    receipt = _registration(mapping, evidence)
+    registration_votes = _registration_votes(mapping, validator_set, keys, receipt, evidence)
+    attestation = verify_registration_receipt(
+        verified,
+        receipt,
+        api_evidence=evidence,
+        validator_set=validator_set,
+        votes=registration_votes,
+    )
+    assert receipt.document["observation_count"] == 0
     assert receipt.document["stage_gate_receipt_emitted"] is False
+    assert attestation.signer_ids == ("validator-0", "validator-1", "validator-2")
 
 
 @pytest.mark.parametrize(
@@ -213,10 +358,115 @@ def test_registration_receipt_proves_zero_execution_only() -> None:
         ("authority_bundle_supplied", True),
         ("stage_a_plans_executed", 1),
         ("stage_gate_receipt_emitted", True),
-        ("observations", 1),
+        ("execution_artifact_count", 1),
+        ("execution_count", 1),
+        ("observation_count", 1),
     ],
 )
 def test_registration_receipt_containing_execution_is_rejected(field: str, value: object) -> None:
     mapping = _mapping()
+    evidence = _api_evidence(mapping)
     with pytest.raises(Campaign02BootstrapError, match="REGISTRATION_STOP_INVALID"):
-        _registration(mapping, **{field: value})
+        _registration(mapping, evidence, **{field: value})
+
+
+@pytest.mark.parametrize(
+    ("evidence", "error"),
+    [
+        (lambda mapping: _api_evidence(mapping, workflow_updates={"id": 999}), "SEMANTICS"),
+        (
+            lambda mapping: _api_evidence(
+                mapping, workflow_updates={"path": ".github/workflows/other.yml"}
+            ),
+            "SEMANTICS",
+        ),
+        (
+            lambda mapping: _api_evidence(mapping, workflow_updates={"state": "disabled_manually"}),
+            "SEMANTICS",
+        ),
+        (
+            lambda mapping: _api_evidence(mapping, ref_updates={"ref": "refs/heads/dev"}),
+            "SEMANTICS",
+        ),
+        (lambda mapping: _api_evidence(mapping, run_updates={"workflow_id": 999}), "SEMANTICS"),
+        (
+            lambda mapping: _api_evidence(
+                mapping,
+                artifact_updates={
+                    "workflow_run": {
+                        "id": 999,
+                        "head_branch": "main",
+                        "head_sha": mapping.bootstrap_commit,
+                    }
+                },
+            ),
+            "SEMANTICS",
+        ),
+    ],
+)
+def test_registration_api_semantic_fabrications_are_rejected(evidence, error: str) -> None:  # type: ignore[no-untyped-def]
+    mapping, validator_set, mapping_votes, keys = _verified_mapping()
+    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=mapping_votes)
+    api_evidence = evidence(mapping)
+    receipt = _registration(mapping, api_evidence)
+    registration_votes = _registration_votes(mapping, validator_set, keys, receipt, api_evidence)
+    with pytest.raises(Campaign02BootstrapError, match=error):
+        verify_registration_receipt(
+            verified,
+            receipt,
+            api_evidence=api_evidence,
+            validator_set=validator_set,
+            votes=registration_votes,
+        )
+
+
+def test_registration_digest_without_raw_api_bytes_is_rejected() -> None:
+    mapping = _mapping()
+    evidence = _api_evidence(mapping)
+    raw = evidence.document
+    snapshots = raw["snapshots"]
+    assert isinstance(snapshots, dict)
+    workflow = snapshots["workflow_metadata"]
+    assert isinstance(workflow, dict)
+    workflow["response_base64"] = ""
+    with pytest.raises(Campaign02BootstrapError, match="DIGEST_MISMATCH"):
+        WorkflowRegistrationApiEvidence.from_dict(raw)
+
+
+def test_caller_constructed_api_snapshot_cannot_bypass_digest_validation() -> None:
+    mapping, validator_set, mapping_votes, keys = _verified_mapping()
+    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=mapping_votes)
+    evidence = _api_evidence(mapping)
+    receipt = _registration(mapping, evidence)
+    forged = replace(
+        evidence,
+        workflow_metadata=replace(
+            evidence.workflow_metadata,
+            response_sha256="sha256:" + "f" * 64,
+        ),
+    )
+    with pytest.raises(Campaign02BootstrapError, match="SNAPSHOT_DIGEST_MISMATCH"):
+        verify_registration_receipt(
+            verified,
+            receipt,
+            api_evidence=forged,
+            validator_set=validator_set,
+            votes=_registration_votes(mapping, validator_set, keys, receipt, evidence),
+        )
+
+
+def test_registration_attestation_signature_is_required_and_verified() -> None:
+    mapping, validator_set, mapping_votes, keys = _verified_mapping()
+    verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=mapping_votes)
+    evidence = _api_evidence(mapping)
+    receipt = _registration(mapping, evidence)
+    votes = _registration_votes(mapping, validator_set, keys, receipt, evidence)
+    forged = (*votes[:-1], replace(votes[-1], signature=b"x" * 64))
+    with pytest.raises(Campaign02BootstrapError, match="SIGNATURE_INVALID"):
+        verify_registration_receipt(
+            verified,
+            receipt,
+            api_evidence=evidence,
+            validator_set=validator_set,
+            votes=forged,
+        )

@@ -11,7 +11,9 @@ from deltatorrent.benchmark.campaign02_bootstrap import (
     BootstrapRuntimeProvenance,
     BootstrapValidatorSet,
     SignedBootstrapMappingVote,
+    SignedWorkflowRegistrationVote,
     WorkflowBootstrapMapping,
+    WorkflowRegistrationApiEvidence,
     WorkflowRegistrationReceipt,
     verify_bootstrap_mapping,
     verify_bootstrap_runtime,
@@ -49,7 +51,19 @@ def verify(arguments: argparse.Namespace) -> dict[str, object]:
     )
     verified = verify_bootstrap_mapping(mapping, validator_set=validator_set, votes=votes)
     registration = WorkflowRegistrationReceipt.from_dict(load_canonical(arguments.registration))
-    verify_registration_receipt(verified, registration)
+    api_evidence = WorkflowRegistrationApiEvidence.from_dict(
+        load_canonical(arguments.registration_api_evidence)
+    )
+    registration_attestation = verify_registration_receipt(
+        verified,
+        registration,
+        api_evidence=api_evidence,
+        validator_set=validator_set,
+        votes=tuple(
+            SignedWorkflowRegistrationVote.from_dict(load_canonical(path))
+            for path in arguments.registration_vote
+        ),
+    )
     source_head = git(arguments.qualified_source_root, "rev-parse", "HEAD")
     source_tree = git(arguments.qualified_source_root, "show", "-s", "--format=%T", "HEAD")
     bootstrap_head = git(arguments.bootstrap_root, "rev-parse", "HEAD")
@@ -94,6 +108,8 @@ def verify(arguments: argparse.Namespace) -> dict[str, object]:
         "bootstrap_mapping_id": mapping.content_id,
         "execution_authorized": False,
         "observations": 0,
+        "registration_api_evidence_root": api_evidence.content_id,
+        "registration_attestation_id": registration_attestation.content_id,
         "registration_receipt_id": registration.content_id,
         "status": "PASS",
     }
@@ -105,6 +121,8 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--validator-set", type=Path, required=True)
     result.add_argument("--vote", type=Path, action="append", required=True)
     result.add_argument("--registration", type=Path, required=True)
+    result.add_argument("--registration-api-evidence", type=Path, required=True)
+    result.add_argument("--registration-vote", type=Path, action="append", required=True)
     result.add_argument("--bootstrap-root", type=Path, required=True)
     result.add_argument("--qualified-source-root", type=Path, required=True)
     result.add_argument("--repository", required=True)

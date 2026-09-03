@@ -15,17 +15,18 @@ concurrency:
 
 jobs:
   measured-cross-language:
-    name: Python + Java Netty + C++ sidecar + OS counters (15 plans)
+    name: Exact 15-plan candidate through Python + Java Netty + C++ runtime + OS
     if: >-
       ${{ github.event_name == 'push' ||
           github.head_ref == '010j-campaign02-measured-stagec-bootstrap' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Check out exact remediation source
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Provision exact JDK, Netty artifacts and Python lock
         shell: bash
         run: |
@@ -73,7 +74,7 @@ jobs:
           "$RUNNER_TEMP/jdk/bin/jar" --create \
             --file "$RUNNER_TEMP/campaign02-stage-c-transport.jar" \
             -C "$RUNNER_TEMP/classes" .
-      - name: Execute measured 15-plan non-primary conformance
+      - name: Execute the exact 15-plan non-primary candidate catalog twice
         env:
           ALL_PROXY: http://127.0.0.1:9
           HTTPS_PROXY: http://127.0.0.1:9
@@ -83,6 +84,9 @@ jobs:
         shell: bash
         run: |
           image_id="sha256:$(sha256sum /etc/os-release | cut --delimiter=' ' --fields=1)"
+          source_commit="$(git rev-parse HEAD)"
+          source_tree="$(git rev-parse 'HEAD^{tree}')"
+          test "$source_commit" = '${{ github.event.pull_request.head.sha || github.sha }}'
           uv run python \
             specs/010-wan-benchmark-and-quality/scripts/run_campaign02_stage_c_conformance.py \
             --java-executable "$RUNNER_TEMP/jdk/bin/java" \
@@ -93,17 +97,22 @@ jobs:
             --netty-artifact "$RUNNER_TEMP/netty/netty-resolver.jar" \
             --netty-artifact "$RUNNER_TEMP/netty/netty-transport.jar" \
             --os-counter-root /sys/class/net/lo/statistics \
-            --working-root "$RUNNER_TEMP/stage-c" \
+            --output-root "$RUNNER_TEMP/stage-c-candidate" \
             --image-id "$image_id" \
-            | tee "$RUNNER_TEMP/stage-c-conformance.json"
-          grep -F '"decision":"PASS"' "$RUNNER_TEMP/stage-c-conformance.json"
-          grep -F '"execution_authorized":false' "$RUNNER_TEMP/stage-c-conformance.json"
-          grep -F '"observations":0' "$RUNNER_TEMP/stage-c-conformance.json"
-          grep -F '"plan_count":15' "$RUNNER_TEMP/stage-c-conformance.json"
-      - name: Retain non-primary measurement transcript
+            --source-commit "$source_commit" \
+            --source-tree "$source_tree" \
+            | tee "$RUNNER_TEMP/stage-c-candidate-stdout.json"
+          summary="$RUNNER_TEMP/stage-c-candidate/campaign02-stage-c-candidate-summary.json"
+          grep -F '"decision":"PASS"' "$summary"
+          grep -F '"execution_authorized":false' "$summary"
+          grep -F '"observation_count":0' "$summary"
+          grep -F '"plan_count":15' "$summary"
+          grep -F '"repeat_semantic_match":true' "$summary"
+          test "$(find "$RUNNER_TEMP/stage-c-candidate" -name 'network-fault-*.json' | wc -l)" = 30
+      - name: Retain full non-primary candidate evidence package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign02-stage-c-measured-conformance-${{ github.sha }}
-          path: ${{ runner.temp }}/stage-c-conformance.json
+          name: campaign02-stage-c-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/stage-c-candidate
           if-no-files-found: error
           retention-days: 30

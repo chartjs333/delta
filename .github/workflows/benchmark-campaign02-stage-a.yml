@@ -106,12 +106,21 @@ jobs:
           test "${#bootstrap_votes[@]}" -gt 0
           vote_args=()
           for vote in "${bootstrap_votes[@]}"; do vote_args+=(--vote "$vote"); done
+          mapfile -t registration_votes < <(find \
+            "$RUNNER_TEMP/bootstrap/registration-votes" -maxdepth 1 -type f -name '*.json' | sort)
+          test "${#registration_votes[@]}" -eq 3
+          registration_vote_args=()
+          for vote in "${registration_votes[@]}"; do
+            registration_vote_args+=(--registration-vote "$vote")
+          done
           bootstrap_result="$(uv run python \
             specs/010-wan-benchmark-and-quality/scripts/campaign02_bootstrap_control.py \
             --mapping "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-mapping.json" \
             --validator-set "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-validator-set.json" \
             "${vote_args[@]}" \
             --registration "$RUNNER_TEMP/bootstrap/campaign02-workflow-registration-receipt.json" \
+            --registration-api-evidence "$RUNNER_TEMP/bootstrap/campaign02-workflow-registration-api-evidence.json" \
+            "${registration_vote_args[@]}" \
             --bootstrap-root "$GITHUB_WORKSPACE/bootstrap-root" \
             --qualified-source-root . \
             --repository "$GITHUB_REPOSITORY" \
@@ -575,6 +584,13 @@ jobs:
             "$RUNNER_TEMP/bootstrap/votes" -maxdepth 1 -type f -name '*.json' | sort)
           vote_args=()
           for vote in "${bootstrap_votes[@]}"; do vote_args+=(--bootstrap-vote "$vote"); done
+          mapfile -t registration_votes < <(find \
+            "$RUNNER_TEMP/bootstrap/registration-votes" -maxdepth 1 -type f -name '*.json' | sort)
+          test "${#registration_votes[@]}" -eq 3
+          registration_vote_args=()
+          for vote in "${registration_votes[@]}"; do
+            registration_vote_args+=(--registration-vote "$vote")
+          done
           bootstrap_path="$(jq -r '.bootstrap_workflow_path' \
             "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-mapping.json")"
           bootstrap_blob_id="$(git -C "$GITHUB_WORKSPACE/bootstrap-root" rev-parse \
@@ -594,6 +610,8 @@ jobs:
             --bootstrap-validator-set "$RUNNER_TEMP/bootstrap/campaign02-workflow-bootstrap-validator-set.json" \
             "${vote_args[@]}" \
             --registration-receipt "$RUNNER_TEMP/bootstrap/campaign02-workflow-registration-receipt.json" \
+            --registration-api-evidence "$RUNNER_TEMP/bootstrap/campaign02-workflow-registration-api-evidence.json" \
+            "${registration_vote_args[@]}" \
             --workflow-run-id '${{ github.run_id }}' \
             --workflow-run-attempt '${{ github.run_attempt }}' \
             --workflow-repository '${{ github.repository }}' \

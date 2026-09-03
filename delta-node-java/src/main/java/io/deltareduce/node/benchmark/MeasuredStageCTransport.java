@@ -83,7 +83,11 @@ public final class MeasuredStageCTransport {
       long disconnectDurationMillis,
       long javaTxPayloadBytes,
       long javaRxPayloadBytes,
+      long osTxBytesBefore,
+      long osTxBytesAfter,
       long osTxBytes,
+      long osRxBytesBefore,
+      long osRxBytesAfter,
       long osRxBytes) {
     String receiptLine() {
       return String.join(
@@ -103,7 +107,11 @@ public final class MeasuredStageCTransport {
           Long.toString(disconnectDurationMillis),
           Long.toString(javaTxPayloadBytes),
           Long.toString(javaRxPayloadBytes),
+          Long.toString(osTxBytesBefore),
+          Long.toString(osTxBytesAfter),
           Long.toString(osTxBytes),
+          Long.toString(osRxBytesBefore),
+          Long.toString(osRxBytesAfter),
           Long.toString(osRxBytes));
     }
   }
@@ -235,14 +243,21 @@ public final class MeasuredStageCTransport {
           throw new IllegalStateException("native fault response invalid: " + response);
         }
         String[] fields = response.split(" ", -1);
-        if (fields.length != 8 || !fields[2].equals("0")) {
+        if (fields.length != 15 || !fields[2].equals("0")
+            || !fields[4].equals("ACTUAL_RUNTIME_TRANSITION")) {
           throw new IllegalStateException("native fault response malformed or replayed");
         }
-        for (int item = 4; item < fields.length; item++) {
+        for (int item = 5; item <= 8; item++) {
           BenchmarkContracts.requireContentId(fields[item], "native fault evidence ID");
         }
-        return String.join(" ", "FAULT", fault.id(), Long.toString(fault.step()), fields[3],
-            fields[4], fields[5], fields[6], fields[7]);
+        BenchmarkContracts.require(fields[9].matches("[0-9]+")
+                && fields[10].matches("[01]") && fields[11].matches("[01]")
+                && fields[12].matches("[01]") && fields[13].matches("[01]")
+                && fields[14].matches("(?:[0-9a-f]{2})*"),
+            "native fault execution proof invalid");
+        return String.join(" ", "FAULT", fault.id(), Long.toString(fault.step()), fault.actor(),
+            fault.action(), fields[3], fields[4], fields[5], fields[6], fields[7], fields[8],
+            fields[9], fields[10], fields[11], fields[12], fields[13], fields[14]);
       } catch (IOException error) {
         throw new IllegalStateException("native fault sidecar I/O failed", error);
       }
@@ -389,8 +404,10 @@ public final class MeasuredStageCTransport {
       serverWorkers.shutdownGracefully(0, 5, TimeUnit.SECONDS).syncUninterruptibly();
       boss.shutdownGracefully(0, 5, TimeUnit.SECONDS).syncUninterruptibly();
     }
-    long osTxBytes = subtractCounter(readCounter(counterRoot.resolve("tx_bytes")), osTxBefore);
-    long osRxBytes = subtractCounter(readCounter(counterRoot.resolve("rx_bytes")), osRxBefore);
+    long osTxAfter = readCounter(counterRoot.resolve("tx_bytes"));
+    long osRxAfter = readCounter(counterRoot.resolve("rx_bytes"));
+    long osTxBytes = subtractCounter(osTxAfter, osTxBefore);
+    long osRxBytes = subtractCounter(osRxAfter, osRxBefore);
     ServerSnapshot serverReceipt = handler.snapshot();
     long uniquePackets = request.packetCount() - droppedPackets;
     long uniqueBytes = uniquePackets * request.payloadBytes();
@@ -428,7 +445,8 @@ public final class MeasuredStageCTransport {
         (long) request.packetCount() * request.payloadBytes(), uniquePackets, uniqueBytes,
         droppedPackets, droppedBytes, controllerDuplicatePackets, duplicateBytes,
         serverReceipt.reorderedPackets(), disconnectCount, disconnectDuration,
-        uniqueBytes + duplicateBytes, serverReceipt.receivedBytes(), osTxBytes, osRxBytes);
+        uniqueBytes + duplicateBytes, serverReceipt.receivedBytes(), osTxBefore, osTxAfter,
+        osTxBytes, osRxBefore, osRxAfter, osRxBytes);
   }
 
   private static Request readRequest(Path path) {

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import copy
+import hashlib
 import importlib.util
 import json
 import sys
@@ -37,10 +38,14 @@ from deltatorrent.benchmark.campaign02_binding import (
 from deltatorrent.benchmark.campaign02_bootstrap import (
     BootstrapRuntimeProvenance,
     BootstrapValidatorSet,
+    RawGitHubApiSnapshot,
     SignedBootstrapMappingVote,
+    SignedWorkflowRegistrationVote,
     WorkflowBootstrapMapping,
+    WorkflowRegistrationApiEvidence,
     WorkflowRegistrationReceipt,
     verify_bootstrap_mapping,
+    verify_registration_receipt,
 )
 from deltatorrent.benchmark.campaign02_exactness import run_stage_a
 from deltatorrent.benchmark.campaign02_execution_identities import (
@@ -393,20 +398,24 @@ def _stage_identity_manifest_v4() -> StageExecutionIdentityManifest:
         "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java",
         "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NetworkFaultController.java",
         "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json",
-        "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v2.json",
+        "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v3.json",
         "delta-protocol/schemas/010/campaign-02/execution-plan-v6.json",
         "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v5.json",
+        "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v1.json",
+        "delta-protocol/schemas/010/campaign-02/stage-c-candidate-summary-v1.json",
         "delta-protocol/schemas/010/campaign-02/stage-execution-identities-v4.json",
         "delta-protocol/schemas/010/fault-profile-v1.json",
         "delta-protocol/schemas/010/network-profile-v1.json",
         "delta-runtime-cpp/include/delta/runtime/benchmark.hpp",
         "delta-runtime-cpp/src/benchmark/fault_control.cpp",
+        "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
         "delta-runtime-cpp/src/benchmark/sidecar_main.cpp",
         "delta-runtime-cpp/src/benchmark/trace_export.cpp",
         "delta-worker-python/src/deltatorrent/benchmark/campaign02.py",
         "delta-worker-python/src/deltatorrent/benchmark/campaign02_binding.py",
         "delta-worker-python/src/deltatorrent/benchmark/campaign02_execution_identities.py",
         "delta-worker-python/src/deltatorrent/benchmark/campaign02_network_fault.py",
+        "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_c_candidate.py",
         "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_c_runtime.py",
         "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_execution.py",
         "delta-worker-python/src/deltatorrent/benchmark/definition.py",
@@ -444,11 +453,13 @@ def _stage_identity_manifest_v4() -> StageExecutionIdentityManifest:
         "delta-worker-python/src/deltatorrent/benchmark/campaign02_execution_identities.py",
         "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_execution.py",
         "delta-worker-python/src/deltatorrent/benchmark/definition.py",
-        "delta-protocol/schemas/010/campaign-02/stage-workflow-gate-qc-v3.json",
+        "delta-protocol/schemas/010/campaign-02/stage-workflow-gate-qc-v4.json",
         "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-mapping-v1.json",
         "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-signature-v1.json",
         "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-validator-set-v1.json",
-        "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v1.json",
+        "delta-protocol/schemas/010/campaign-02/workflow-registration-api-evidence-v1.json",
+        "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v2.json",
+        "delta-protocol/schemas/010/campaign-02/workflow-registration-signature-v1.json",
         "specs/010-wan-benchmark-and-quality/scripts/campaign02_bootstrap_control.py",
         "specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py",
         "specs/010-wan-benchmark-and-quality/scripts/campaign02_stage_a_control.py",
@@ -1195,11 +1206,15 @@ def test_stage_a_semantic_verifier_rejects_same_named_fabricated_artifacts(
 
 def _bootstrap_finalizer_arguments() -> dict[str, object]:
     stage_identities = _stage_identity_manifest_v4()
+    bootstrap_workflow = b"name: campaign02 bootstrap\n"
+    bootstrap_blob_id = hashlib.sha1(
+        b"blob " + str(len(bootstrap_workflow)).encode("ascii") + b"\0" + bootstrap_workflow
+    ).hexdigest()
     mapping = WorkflowBootstrapMapping.from_dict(
         {
             "bootstrap_commit": "c" * 40,
-            "bootstrap_workflow_blob_id": "d" * 40,
-            "bootstrap_workflow_content_id": _id("bootstrap-workflow"),
+            "bootstrap_workflow_blob_id": bootstrap_blob_id,
+            "bootstrap_workflow_content_id": sha256_content_id(bootstrap_workflow),
             "bootstrap_workflow_path": ".github/workflows/campaign02-stage-a-bootstrap.yml",
             "execution_authorized": False,
             "formal_semantics_id": (
@@ -1255,8 +1270,70 @@ def _bootstrap_finalizer_arguments() -> dict[str, object]:
     verified_mapping = verify_bootstrap_mapping(
         mapping, validator_set=validator_set, votes=tuple(votes)
     )
-    registration = WorkflowRegistrationReceipt.from_dict(
+
+    def snapshot(endpoint: str, document: dict[str, object]) -> RawGitHubApiSnapshot:
+        raw = canonical_json_bytes(document)
+        return RawGitHubApiSnapshot.from_dict(
+            {
+                "endpoint": endpoint,
+                "response_base64": base64.b64encode(raw).decode("ascii"),
+                "response_sha256": sha256_content_id(raw),
+                "status_code": 200,
+            }
+        )
+
+    api_prefix = f"https://api.github.com/repos/{mapping.repository}"
+    api_evidence = WorkflowRegistrationApiEvidence(
+        repository=mapping.repository,
+        collected_at=NOW,
+        workflow_metadata=snapshot(
+            f"{api_prefix}/actions/workflows/17",
+            {"id": 17, "path": mapping.bootstrap_workflow_path, "state": "active"},
+        ),
+        default_branch_ref=snapshot(
+            f"{api_prefix}/git/ref/heads/main",
+            {"object": {"sha": mapping.bootstrap_commit}, "ref": "refs/heads/main"},
+        ),
+        bootstrap_workflow_file=snapshot(
+            f"{api_prefix}/contents/{mapping.bootstrap_workflow_path}"
+            f"?ref={mapping.bootstrap_commit}",
+            {
+                "content": base64.b64encode(bootstrap_workflow).decode("ascii"),
+                "encoding": "base64",
+                "path": mapping.bootstrap_workflow_path,
+                "sha": mapping.bootstrap_workflow_blob_id,
+            },
+        ),
+        registration_workflow_run=snapshot(
+            f"{api_prefix}/actions/runs/40",
+            {
+                "event": "workflow_dispatch",
+                "head_branch": "main",
+                "head_sha": mapping.bootstrap_commit,
+                "id": 40,
+                "path": mapping.bootstrap_workflow_path,
+                "repository": {"full_name": mapping.repository},
+                "run_attempt": 1,
+                "workflow_id": 17,
+            },
+        ),
+        registration_artifact_metadata=snapshot(
+            f"{api_prefix}/actions/artifacts/1002",
+            {
+                "digest": _id("registration-archive"),
+                "expired": False,
+                "id": 1002,
+                "workflow_run": {
+                    "head_branch": "main",
+                    "head_sha": mapping.bootstrap_commit,
+                    "id": 40,
+                },
+            },
+        ),
+    )
+    registration_receipt = WorkflowRegistrationReceipt.from_dict(
         {
+            "api_evidence_root": api_evidence.content_id,
             "authority_bundle_supplied": False,
             "bootstrap_commit": mapping.bootstrap_commit,
             "bootstrap_commit_on_default_branch": True,
@@ -1268,13 +1345,22 @@ def _bootstrap_finalizer_arguments() -> dict[str, object]:
             "formal_semantics_id": (
                 "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
             ),
-            "github_api_evidence_digest": _id("github-api"),
-            "observations": 0,
+            "execution_artifact_count": 0,
+            "execution_count": 0,
+            "observation_count": 0,
             "qualified_source_commit": mapping.qualified_source_commit,
             "qualified_source_exists": True,
             "qualified_source_tree": mapping.qualified_source_tree,
             "repository": mapping.repository,
-            "schema_version": "1.0.0",
+            "registration_artifact_archive_digest": _id("registration-archive"),
+            "registration_artifact_id": 1002,
+            "registration_run_attempt": 1,
+            "registration_run_event": "workflow_dispatch",
+            "registration_run_head_sha": mapping.bootstrap_commit,
+            "registration_run_id": 40,
+            "registration_run_ref": "refs/heads/main",
+            "registration_workflow_id": 17,
+            "schema_version": "2.0.0",
             "stage_a_plans_executed": 0,
             "stage_gate_receipt_emitted": False,
             "type_name": "CAMPAIGN02_WORKFLOW_REGISTRATION_RECEIPT",
@@ -1283,6 +1369,25 @@ def _bootstrap_finalizer_arguments() -> dict[str, object]:
             "workflow_state": "active",
             "workflow_visible_on_default_branch": True,
         }
+    )
+    registration_votes = []
+    for index, private_key in enumerate(private_keys[:3]):
+        unsigned = SignedWorkflowRegistrationVote(
+            registration_receipt_id=registration_receipt.content_id,
+            api_evidence_root=api_evidence.content_id,
+            mapping_id=mapping.content_id,
+            validator_set_id=validator_set.content_id,
+            signer_id=f"validator-{index}",
+            submitted_at=NOW,
+            signature=b"\0" * 64,
+        )
+        registration_votes.append(replace(unsigned, signature=private_key.sign(unsigned.message)))
+    registration = verify_registration_receipt(
+        verified_mapping,
+        registration_receipt,
+        api_evidence=api_evidence,
+        validator_set=validator_set,
+        votes=tuple(registration_votes),
     )
     provenance = BootstrapRuntimeProvenance(
         repository=mapping.repository,
@@ -1309,7 +1414,7 @@ def _bootstrap_finalizer_arguments() -> dict[str, object]:
     bootstrap = Campaign02StageGateFinalizer.Artifact(
         "bootstrap/mapping",
         1002,
-        _id("mapping"),
+        _id("registration-archive"),
         _id("mapping-content"),
         40,
         1,
@@ -1328,7 +1433,7 @@ def _bootstrap_finalizer_arguments() -> dict[str, object]:
         "input_artifacts": (authority, bootstrap, raw),
         "output_artifacts": (output,),
         "provenance": provenance,
-        "registration_receipt": registration,
+        "registration": registration,
         "stage_identities": stage_identities,
     }
 
@@ -1374,6 +1479,20 @@ def test_stage_a_workflow_finalizer_rejects_artifact_from_other_run_or_attempt()
     assert isinstance(artifacts, tuple)
     arguments["input_artifacts"] = tuple(
         replace(item, workflow_run_attempt=3) if item.name == "raw" else item for item in artifacts
+    )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_WORKFLOW_PROVENANCE_INVALID"):
+        Campaign02StageGateFinalizer(**arguments)  # type: ignore[arg-type]
+
+
+def test_stage_a_workflow_finalizer_rejects_bootstrap_artifact_from_other_run() -> None:
+    arguments = _bootstrap_finalizer_arguments()
+    artifacts = arguments["input_artifacts"]
+    assert isinstance(artifacts, tuple)
+    arguments["input_artifacts"] = tuple(
+        replace(item, workflow_run_id=41)
+        if item.origin_class == "BOOTSTRAP_REGISTRATION_RUN"
+        else item
+        for item in artifacts
     )
     with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_WORKFLOW_PROVENANCE_INVALID"):
         Campaign02StageGateFinalizer(**arguments)  # type: ignore[arg-type]
