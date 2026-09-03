@@ -415,6 +415,18 @@ exact-source run `33765722009` was cancelled. Historical evidence files are immu
 candidate-binding source must receive new designated-GPU and exact-source evidence before C2-049 can
 close.
 
+The corrected candidate-binding source is sealed at
+`300ad8415862f82eeb9e0fd9c34c01620dfab399` / tree
+`e3fe90b6eb90924c41b11cc9379e4752c99ffe74`. Its replacement non-primary designated-GPU
+qualification is `evidence/campaign-02-concentrated-loss-candidate-binding-hardware-qualification.json`
+(`sha256:c6482b810b22cb8fd992e55ab10b49d1ddeefe7b1cc76d87b5d8bb8fb62cb3a4`), and its 192-case,
+46-check portable source qualification is
+`evidence/campaign-02-concentrated-loss-candidate-binding-exact-source-qualification.json`
+(`sha256:209ea733c69497be818e68bea4073ab595a756a68b9306c2f7f49e4830bf4c97`). Both are `PASS`
+and retain zero primary executions and observations. C2-049 remains open pending the replacement
+remote TSan/sanitizer/formal/C++ lanes, final push and pull-request Stage C artifacts, and external
+terminal-lineage binding.
+
 Until C2-049 is closed, PR #20 remains `DRAFT / CHANGES_REQUIRED / DO NOT MERGE / DO NOT MARK
 READY`. C2-023 and C2-024 remain unauthorized, Definition votes remain `0`, attestation and
 execution authorization remain absent, authoritative catalog construction has not occurred,
