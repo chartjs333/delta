@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Final
@@ -86,6 +87,40 @@ def load_document(path: Path) -> dict[str, object]:
 
 def raw_id(path: Path) -> str:
     return sha256_content_id(path.read_bytes())
+
+
+def tracked_bytes(commit: str, path: str) -> bytes:
+    return subprocess.run(
+        ("git", "show", f"{commit}:{path}"),
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    ).stdout
+
+
+def verify_historical_identity_files(
+    identities: StageExecutionIdentityManifest, identity_name: str
+) -> None:
+    identity = identities.identity(identity_name)
+    entries: list[object] = []
+    for field in ("executable_hashes", "workflow_hashes"):
+        value = identity.value.get(field)
+        require(isinstance(value, list), "DEFINITION_V4_IDENTITY_HASH_SET_INVALID")
+        entries.extend(value)
+    require(bool(entries), "DEFINITION_V4_IDENTITY_HASH_SET_INVALID")
+    for item in entries:
+        require(
+            isinstance(item, dict)
+            and isinstance(item.get("path"), str)
+            and isinstance(item.get("content_id"), str),
+            "DEFINITION_V4_IDENTITY_HASH_ENTRY_INVALID",
+        )
+        assert isinstance(item, dict)
+        path = str(item["path"])
+        require(
+            sha256_content_id(tracked_bytes(QUALIFIED_SOURCE, path)) == item["content_id"],
+            f"DEFINITION_V4_HISTORICAL_SOURCE_DRIFT:{path}",
+        )
 
 
 def object_id(value: object, domain: str) -> str:
@@ -497,9 +532,9 @@ def validate_package(
         and len(lineage.certified_plan_bindings) == 36,
         "DEFINITION_V4_RUNTIME_LINEAGE_INVALID",
     )
-    identities.verify_files("exactness_runner", ROOT)
-    identities.verify_files("network_fault_runner", ROOT)
-    identities.verify_files("stage_gate_analyzer", ROOT)
+    verify_historical_identity_files(identities, "exactness_runner")
+    verify_historical_identity_files(identities, "network_fault_runner")
+    verify_historical_identity_files(identities, "stage_gate_analyzer")
 
 
 def documents() -> dict[Path, dict[str, object]]:

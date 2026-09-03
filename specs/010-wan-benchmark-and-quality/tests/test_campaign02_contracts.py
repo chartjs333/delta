@@ -22,12 +22,145 @@ def load_script() -> ModuleType:
 def test_campaign02_schema_and_registry_outputs_are_exact() -> None:
     module = load_script()
     outputs = module.expected_outputs()
-    assert len(module.SCHEMAS) == 46
+    assert len(module.SCHEMAS) == 69
     assert all(path.read_bytes() == expected for path, expected in outputs.items())
     registry = json.loads(module.REGISTRY_PATH.read_bytes())
-    assert registry["registry_version"] == "010.5.0-signed-stage-governance"
+    assert registry["registry_version"] == "010.11.0-concentrated-loss-causal-projection"
     assert len(registry["fixtures"]) == 7
     assert registry["semantic_completeness_claimed"] is False
+    measured_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v2.json"
+        ).read_bytes()
+    )
+    assert measured_stage_c["properties"]["measurement_source"] == {
+        "const": "PYTHON_JAVA_NETTY_CPP_OS"
+    }
+    assert measured_stage_c["properties"]["network_counters"]["minItems"] == 3
+    actual_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v3.json"
+        ).read_bytes()
+    )
+    assert {"raw_java_receipt_base64", "raw_java_receipt_id"} <= set(actual_stage_c["required"])
+    assert {
+        "os_rx_bytes_before",
+        "os_rx_bytes_after",
+        "os_tx_bytes_before",
+        "os_tx_bytes_after",
+    } <= set(actual_stage_c["properties"]["network_counters"]["items"]["required"])
+    assert actual_stage_c["properties"]["fault_results"]["items"]["properties"][
+        "observation_source"
+    ] == {"const": "ACTUAL_RUNTIME_TRANSITION"}
+    causal_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v4.json"
+        ).read_bytes()
+    )
+    causal_fault = causal_stage_c["properties"]["fault_results"]["items"]
+    assert {
+        "aggregate_root_qc_id",
+        "apply_work_item_id",
+        "apply_qc_id",
+        "current_pointer_before",
+        "current_pointer_after",
+        "message_delivery_ticks",
+        "per_domain_remaining_tickets",
+    } <= set(causal_fault["required"])
+    concentrated_stage_c = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v5.json"
+        ).read_bytes()
+    )
+    assert concentrated_stage_c["properties"]["fault_results"]["minItems"] == 8
+    candidate = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v2.json").read_bytes()
+    )
+    assert candidate["properties"]["plan_count"] == {"const": 15}
+    assert candidate["properties"]["execution_authorized"] == {"const": False}
+    assert "causal_projection_id" in candidate["properties"]["plan_records"]["items"]["required"]
+    assert "causal_root" in candidate["required"]
+    candidate_summary = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/stage-c-candidate-summary-v2.json"
+        ).read_bytes()
+    )
+    assert candidate_summary["properties"]["repeat_causal_match"] == {"const": True}
+    runtime_lineage = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v5.json"
+        ).read_bytes()
+    )
+    assert {
+        "java_executable_id",
+        "native_executable_id",
+        "netty_artifact_ids",
+        "transport_harness_id",
+    } <= set(runtime_lineage["required"])
+    stage_c_plan = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/execution-plan-v6.json").read_bytes()
+    )
+    assert {
+        "java_executable_id",
+        "native_executable_id",
+        "netty_artifact_ids",
+        "transport_harness_id",
+    } <= set(stage_c_plan["required"])
+    bootstrap_mapping = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-mapping-v1.json"
+        ).read_bytes()
+    )
+    assert bootstrap_mapping["properties"]["execution_authorized"] == {"const": False}
+    assert "definition_id" not in bootstrap_mapping["properties"]
+    registration = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v3.json"
+        ).read_bytes()
+    )
+    assert {
+        "api_evidence_root",
+        "registration_artifact_archive_digest",
+        "registration_artifact_id",
+        "registration_artifact_name",
+        "registration_run_attempt",
+        "registration_run_completed_at",
+        "registration_run_conclusion",
+        "registration_run_created_at",
+        "registration_run_id",
+        "registration_run_status",
+        "registration_run_updated_at",
+        "registration_workflow_id",
+    } <= set(registration["required"])
+    registration_signature = json.loads(
+        (
+            ROOT / "delta-protocol/schemas/010/campaign-02/workflow-registration-signature-v2.json"
+        ).read_bytes()
+    )
+    assert {
+        "api_evidence_root",
+        "registration_receipt_id",
+        "registration_run_status",
+        "registration_run_conclusion",
+        "registration_run_completed_at",
+        "registration_artifact_created_at",
+        "registration_artifact_expires_at",
+        "registration_artifact_name",
+        "signature_base64",
+    } <= set(registration_signature["required"])
+    replacement_definition = json.loads(
+        (ROOT / "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json").read_bytes()
+    )
+    assert "bootstrap_mapping_id" in replacement_definition["required"]
+    stage_a_workflow = (ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "workflow_call:" in stage_a_workflow
+    assert "job.workflow_sha" in stage_a_workflow
+    assert ".run_attempt" in stage_a_workflow
+    assert ".digest" in stage_a_workflow
+    assert "--registration-api-evidence" in stage_a_workflow
+    assert "--registration-vote" in stage_a_workflow
     observation = json.loads(
         (ROOT / "delta-protocol/schemas/010/campaign-02/observation-v2.json").read_bytes()
     )

@@ -26,6 +26,17 @@ from deltatorrent.benchmark.campaign02_binding import (  # noqa: E402
     QualifiedRuntimeLineage,
     compile_campaign02_plan_catalog,
 )
+from deltatorrent.benchmark.campaign02_bootstrap import (  # noqa: E402
+    BootstrapRuntimeProvenance,
+    BootstrapValidatorSet,
+    SignedBootstrapMappingVote,
+    SignedWorkflowRegistrationVote,
+    WorkflowBootstrapMapping,
+    WorkflowRegistrationApiEvidence,
+    WorkflowRegistrationReceipt,
+    verify_bootstrap_mapping,
+    verify_registration_receipt,
+)
 from deltatorrent.benchmark.campaign02_exactness import (  # noqa: E402
     Campaign02ExactnessEvidenceRunner,
     run_stage_a,
@@ -325,26 +336,154 @@ def finalize(arguments: argparse.Namespace) -> dict[str, object]:
         stage_identities=bundle.stage_identities,
         source_root=arguments.source_root,
     )
-    workflow_path = ROOT / ".github/workflows/benchmark-campaign02-stage-a.yml"
-    input_digests = {f"raw/{path.name}": sha256_content_id(path.read_bytes()) for path in raw_paths}
-    input_digests["authority/campaign02-stage-a-authority-bundle.json"] = sha256_content_id(
-        arguments.bundle.read_bytes()
+    input_content_digests = {
+        f"raw/{path.name}": sha256_content_id(path.read_bytes()) for path in raw_paths
+    }
+    authority_name = "authority/campaign02-stage-a-authority-bundle.json"
+    input_content_digests[authority_name] = sha256_content_id(arguments.bundle.read_bytes())
+    for path in sorted(item for item in arguments.bootstrap_root.rglob("*") if item.is_file()):
+        name = "bootstrap/" + path.relative_to(arguments.bootstrap_root).as_posix()
+        input_content_digests[name] = sha256_content_id(path.read_bytes())
+    output_content_digests = {
+        f"plans/{path.name}": sha256_content_id(path.read_bytes()) for path in paths
+    }
+    mapping = WorkflowBootstrapMapping.from_dict(load_canonical(arguments.bootstrap_mapping))
+    bootstrap_validator_set = BootstrapValidatorSet.from_dict(
+        load_canonical(arguments.bootstrap_validator_set)
     )
-    output_digests = {f"plans/{path.name}": sha256_content_id(path.read_bytes()) for path in paths}
+    verified_mapping = verify_bootstrap_mapping(
+        mapping,
+        validator_set=bootstrap_validator_set,
+        votes=tuple(
+            SignedBootstrapMappingVote.from_dict(load_canonical(path))
+            for path in arguments.bootstrap_vote
+        ),
+    )
+    registration = WorkflowRegistrationReceipt.from_dict(
+        load_canonical(arguments.registration_receipt)
+    )
+    registration_api_evidence = WorkflowRegistrationApiEvidence.from_dict(
+        load_canonical(arguments.registration_api_evidence)
+    )
+    verified_registration = verify_registration_receipt(
+        verified_mapping,
+        registration,
+        api_evidence=registration_api_evidence,
+        validator_set=bootstrap_validator_set,
+        votes=tuple(
+            SignedWorkflowRegistrationVote.from_dict(load_canonical(path))
+            for path in arguments.registration_vote
+        ),
+    )
+    provenance = BootstrapRuntimeProvenance(
+        repository=arguments.workflow_repository,
+        workflow_id=registration.workflow_id,
+        workflow_path=mapping.bootstrap_workflow_path,
+        workflow_ref=arguments.workflow_ref,
+        workflow_sha=arguments.workflow_sha,
+        workflow_blob_id=arguments.workflow_blob_id,
+        workflow_content_id=arguments.workflow_content_id,
+        run_id=arguments.workflow_run_id,
+        run_attempt=arguments.workflow_run_attempt,
+        event_name=arguments.event_name,
+        dispatch_ref=arguments.dispatch_ref,
+        github_sha=arguments.github_sha,
+        qualified_source_commit=bundle.runtime_lineage.source_commit,
+        qualified_source_tree=bundle.runtime_lineage.source_tree,
+        source_stage_a_workflow_content_id=mapping.source_stage_a_workflow_content_id,
+    )
+
+    def artifact_ids(values: list[str]) -> dict[str, int]:
+        result: dict[str, int] = {}
+        for value in values:
+            name, separator, artifact_id = value.partition("=")
+            require(
+                bool(separator) and name not in result,
+                "CAMPAIGN02_STAGE_A_ARTIFACT_ID_INVALID",
+            )
+            try:
+                result[name] = int(artifact_id)
+            except ValueError as exc:
+                raise StageAControlError("CAMPAIGN02_STAGE_A_ARTIFACT_ID_INVALID") from exc
+        return result
+
+    def artifact_values(values: list[str]) -> dict[str, str]:
+        result: dict[str, str] = {}
+        for value in values:
+            name, separator, artifact_value = value.partition("=")
+            require(
+                bool(separator) and bool(artifact_value) and name not in result,
+                "CAMPAIGN02_STAGE_A_ARTIFACT_DIGEST_INVALID",
+            )
+            result[name] = artifact_value
+        return result
+
+    input_ids = artifact_ids(arguments.input_artifact_id)
+    output_ids = artifact_ids(arguments.output_artifact_id)
+    input_archive_digests = artifact_values(arguments.input_artifact_digest)
+    output_archive_digests = artifact_values(arguments.output_artifact_digest)
+    require(
+        set(input_ids) == set(input_content_digests) == set(input_archive_digests)
+        and set(output_ids) == set(output_content_digests) == set(output_archive_digests),
+        "CAMPAIGN02_STAGE_A_ARTIFACT_ID_SET_MISMATCH",
+    )
+    input_artifacts = tuple(
+        Campaign02StageGateFinalizer.Artifact(
+            name=name,
+            artifact_id=input_ids[name],
+            digest=input_archive_digests[name],
+            content_digest=content_digest,
+            workflow_run_id=(
+                arguments.authority_artifact_run_id
+                if name == authority_name
+                else (
+                    arguments.bootstrap_artifact_run_id
+                    if name.startswith("bootstrap/")
+                    else arguments.workflow_run_id
+                )
+            ),
+            workflow_run_attempt=(
+                arguments.authority_artifact_run_attempt
+                if name == authority_name
+                else (
+                    arguments.bootstrap_artifact_run_attempt
+                    if name.startswith("bootstrap/")
+                    else arguments.workflow_run_attempt
+                )
+            ),
+            origin_class=(
+                "AUTHORITY_RUN"
+                if name == authority_name
+                else (
+                    "BOOTSTRAP_REGISTRATION_RUN"
+                    if name.startswith("bootstrap/")
+                    else "CURRENT_STAGE_RUN"
+                )
+            ),
+        )
+        for name, content_digest in sorted(input_content_digests.items())
+    )
+    output_artifacts = tuple(
+        Campaign02StageGateFinalizer.Artifact(
+            name=name,
+            artifact_id=output_ids[name],
+            digest=output_archive_digests[name],
+            content_digest=content_digest,
+            workflow_run_id=arguments.workflow_run_id,
+            workflow_run_attempt=arguments.workflow_run_attempt,
+            origin_class="CURRENT_STAGE_RUN",
+        )
+        for name, content_digest in sorted(output_content_digests.items())
+    )
     finalizer = Campaign02StageGateFinalizer(
         stage_identities=bundle.stage_identities,
         finalized_at=finalized_at,
-        workflow_repository=arguments.workflow_repository,
-        workflow_sha=arguments.workflow_sha,
-        dispatch_sha=arguments.dispatch_sha,
-        workflow_ref=arguments.workflow_ref,
-        dispatch_ref=arguments.dispatch_ref,
-        workflow_file_content_id=sha256_content_id(workflow_path.read_bytes()),
-        workflow_run_id=arguments.workflow_run_id,
-        workflow_run_attempt=arguments.workflow_run_attempt,
-        authority_artifact_digest=sha256_content_id(arguments.bundle.read_bytes()),
-        input_artifact_digests=input_digests,
-        output_artifact_digests=output_digests,
+        bootstrap_mapping=verified_mapping,
+        registration=verified_registration,
+        provenance=provenance,
+        authority_artifact=next(item for item in input_artifacts if item.name == authority_name),
+        input_artifacts=input_artifacts,
+        output_artifacts=output_artifacts,
     )
     bound_finalizer = verify_bound_stage_gate_finalizer(
         finalizer,
@@ -390,9 +529,27 @@ def parser() -> argparse.ArgumentParser:
     close.add_argument("--workflow-run-attempt", type=int, required=True)
     close.add_argument("--workflow-repository", required=True)
     close.add_argument("--workflow-sha", required=True)
-    close.add_argument("--dispatch-sha", required=True)
+    close.add_argument("--workflow-blob-id", required=True)
+    close.add_argument("--workflow-content-id", required=True)
     close.add_argument("--workflow-ref", required=True)
     close.add_argument("--dispatch-ref", required=True)
+    close.add_argument("--event-name", required=True)
+    close.add_argument("--github-sha", required=True)
+    close.add_argument("--bootstrap-mapping", type=Path, required=True)
+    close.add_argument("--bootstrap-validator-set", type=Path, required=True)
+    close.add_argument("--bootstrap-vote", type=Path, action="append", required=True)
+    close.add_argument("--registration-receipt", type=Path, required=True)
+    close.add_argument("--registration-api-evidence", type=Path, required=True)
+    close.add_argument("--registration-vote", type=Path, action="append", required=True)
+    close.add_argument("--bootstrap-root", type=Path, required=True)
+    close.add_argument("--input-artifact-id", action="append", required=True)
+    close.add_argument("--output-artifact-id", action="append", required=True)
+    close.add_argument("--input-artifact-digest", action="append", required=True)
+    close.add_argument("--output-artifact-digest", action="append", required=True)
+    close.add_argument("--authority-artifact-run-id", type=int, required=True)
+    close.add_argument("--authority-artifact-run-attempt", type=int, required=True)
+    close.add_argument("--bootstrap-artifact-run-id", type=int, required=True)
+    close.add_argument("--bootstrap-artifact-run-attempt", type=int, required=True)
     close.add_argument("--finalized-at", required=True)
     close.add_argument("--output-gate-qc", type=Path, required=True)
     close.add_argument("--output-receipt", type=Path, required=True)

@@ -644,6 +644,20 @@ void test_vote_and_pointer_recovery() {
         "current-without-applyqc",
         "delta::certificates::ChainVerifier::verify_apply",
         "QUORUM_INVALID");
+    auto wrong_root = chain.apply_qc;
+    wrong_root.aggregate_root_qc_id = id('f');
+    bool wrong_root_rejected = false;
+    try {
+      (void)verifier.verify_apply(
+          wrong_root,
+          chain.candidate,
+          delta::certificates::content_id(chain.root),
+          delta::certificates::content_id(chain.profile));
+    } catch (const delta::certificates::CertificateError& error) {
+      wrong_root_rejected =
+          error.code() == delta::certificates::ErrorCode::parent_mismatch;
+    }
+    expect(wrong_root_rejected, "ApplyQC from another AggregateRootQC was accepted");
   }
   {
     delta::runtime::CurrentPointerStore store(directory / "pointer-conflict", initial);

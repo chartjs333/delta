@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <filesystem>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -53,7 +54,10 @@ struct FaultEvent {
   FaultAction action{};
   std::uint64_t logical_step{};
   bool assumptions_hold{};
-  std::string expected_outcome;
+  // Canonical source-bound schedule produced from messages that traversed the
+  // Java/Netty fault path. The native harness refuses causal scenarios without
+  // this schedule; the native terminal outcome follows only delivered causal state.
+  std::string causal_schedule;
 
   bool operator==(const FaultEvent&) const = default;
 };
@@ -67,6 +71,28 @@ class FaultController {
  private:
   std::vector<FaultEvent> events_;
 };
+
+struct FaultExecutionResult {
+  std::string observed_outcome;
+  std::string native_trace_id;
+  std::string native_state_root;
+  std::string native_effect_root;
+  std::string native_wal_sha256;
+  std::string canonical_trace;
+  std::uint64_t runtime_operation_count{};
+  bool wal_replayed{};
+  bool view_change_observed{};
+  bool current_checkpoint_advanced{};
+  bool availability_success{};
+  std::string canonical_causal_evidence;
+
+  bool operator==(const FaultExecutionResult&) const = default;
+};
+
+[[nodiscard]] FaultExecutionResult execute_fault_scenario(
+    const FaultEvent& event,
+    const std::filesystem::path& directory,
+    std::string_view request_id);
 
 struct TraceEntry {
   std::uint64_t sequence{};

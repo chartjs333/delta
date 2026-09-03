@@ -154,6 +154,7 @@ target_link_libraries(delta_qlora PUBLIC delta::apply delta::certificates)
 delta_target_defaults(delta_qlora)
 
 add_library(delta_runtime STATIC
+  delta-runtime-cpp/src/benchmark/fault_execution.cpp
   delta-runtime-cpp/src/benchmark/fault_control.cpp
   delta-runtime-cpp/src/benchmark/metrics.cpp
   delta-runtime-cpp/src/benchmark/sidecar_server.cpp
@@ -166,7 +167,8 @@ set_target_properties(delta_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(
   delta_runtime
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
-target_link_libraries(delta_runtime PUBLIC delta::core delta::certificates)
+target_link_libraries(
+  delta_runtime PUBLIC delta::core delta::certificates delta::robust delta::apply)
 if(NOT WIN32)
   target_compile_options(delta_runtime PRIVATE -pthread)
   target_link_options(delta_runtime PUBLIC -pthread)
@@ -195,6 +197,7 @@ delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
   add_executable(delta_benchmark_sidecar delta-runtime-cpp/src/benchmark/sidecar_main.cpp)
+  target_link_libraries(delta_benchmark_sidecar PRIVATE delta::runtime)
   delta_target_defaults(delta_benchmark_sidecar)
 
   add_executable(delta_runtime_benchmark_test delta-runtime-cpp/tests/benchmark_test.cpp)

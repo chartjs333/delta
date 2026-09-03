@@ -1,0 +1,58 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:workflow-registration-signature-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_WORKFLOW_REGISTRATION_SIGNATURE"
+    },
+    "api_evidence_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "mapping_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "registration_receipt_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "signature_base64": {
+      "pattern": "^[A-Za-z0-9+/]{86}==$",
+      "type": "string"
+    },
+    "signer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "submitted_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "validator_set_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "api_evidence_root",
+    "formal_semantics_id",
+    "mapping_id",
+    "registration_receipt_id",
+    "schema_version",
+    "signature_base64",
+    "signer_id",
+    "submitted_at",
+    "type_name",
+    "validator_set_id"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 workflow-registration-signature-v1"
+}

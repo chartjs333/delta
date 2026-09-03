@@ -4,6 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
 from deltatorrent.benchmark.campaign02_binding import QualifiedRuntimeLineage
 from deltatorrent.benchmark.campaign02_execution_identities import (
     StageExecutionIdentityManifest,
@@ -74,7 +75,19 @@ def test_definition_v4_binds_verified_executable_identities_and_lineage() -> Non
     assert lineage.schema_version == "4.0.0"
     assert identities.schema_version == "3.0.0"
     for name in ("exactness_runner", "network_fault_runner", "stage_gate_analyzer"):
-        identities.verify_files(name, ROOT)
+        identity = identities.identity(name)
+        entries = [
+            item
+            for field in ("executable_hashes", "workflow_hashes")
+            for item in identity.value[field]  # type: ignore[union-attr]
+        ]
+        assert entries
+        assert all(
+            sha256_content_id(tracked_bytes(SOURCE, str(item["path"]))) == item["content_id"]
+            for item in entries
+        )
+    with pytest.raises(ValueError, match="CAMPAIGN02_STAGE_IDENTITY_FILE_HASH_MISMATCH"):
+        identities.verify_files("exactness_runner", ROOT)
 
 
 def test_definition_v4_production_identities_are_role_and_class_bound() -> None:
