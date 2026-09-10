@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent
 DEPLOY_DIR = ROOT_DIR / "cds_server_deploy"
 ZIP_PATH = ROOT_DIR / "cds_server_deploy.zip"
+SANITIZED_LOCAL_ENV_TEMPLATE = "LLM_API_KEY=\n"
 
 REQUIRED_FILES = (
     "server.py",
