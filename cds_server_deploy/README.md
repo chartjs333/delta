@@ -10,15 +10,19 @@
    - Работает через API Uni Lübeck (`https://llm-api.ai-lab.uni-luebeck.de/v1`).
    - Ключ и эндпоинт настраиваются в файле `.env`.
    - Включает отказоустойчивый парсер, лимит токенов (6144) против зацикливания и восстановление черновиков из `reasoning_content`.
-2. **Нейросетевая модель фенотипического ранжирования (MoFE 10-Gene)**:
-   - Замороженные веса `model_10genes_mixed_nodes.json` (3.8 МБ).
-   - Чистый дифференциал симптомов без эвристик и без генотипических бонусов.
+2. **Нейросетевая модель фенотипического ранжирования (10-Gene Phenotype Classifier)**:
+   - Замороженный artifact `model_10genes_phenotype_classifier.json`.
+   - Чистый phenotype-to-gene ranking без генотипических бонусов.
 3. **Детерминированное ядро Revision 6.2**:
    - Каталог транскриптов `CANONICAL_CATALOG`, нормализация HGVS, проверка зиготности/фазирования и выявление дискордантности.
 4. **Формальный верификатор и шлюз полноты**:
    - `FormalGateValidator` и `ExtractionCompletenessGate`.
 5. **Интерактивный веб-интерфейс врача**:
    - Динамическое подтверждение/отклонение симптомов врачом и моментальный перерасчет (`POST /api/recalculate`) без повторного вызова LLM.
+6. **Safety v2 для фенотипического классификатора**:
+   - Цепочка `classifier -> probability abstention -> support/OOD guard -> API response -> Web UI`.
+   - Ranking классификатора не изменяется; safety-слой может только понизить `DEFINITIVE_GENE` до `AMBIGUOUS_GENE_CLUSTER`.
+   - API возвращает `status` и `reason_codes`; UI показывает status, top candidate и classifier score.
 
 ---
 
@@ -113,7 +117,17 @@ sudo systemctl reload nginx
 ```bash
 python3 test_demo_pipeline.py
 ```
-Тест проверит все 5 сценариев, корректность загрузки замороженных весов MoFE, работу детерминированного ядра и API перерасчета.
+Тест проверит все 5 сценариев, корректность загрузки замороженного phenotype classifier,
+работу детерминированного ядра и API перерасчета.
+
+Offline smoke без LLM/API-ключа:
+
+```bash
+python3 test_safety_v2_pipeline.py
+```
+
+Этот тест mock-ит Schema 1.1 extraction, прогоняет 5 packaged demo cases, проверяет `status`,
+`reason_codes`, неизменность ranking после safety-слоя и fail-closed поведение support guard.
 
 ---
 
@@ -127,3 +141,26 @@ PORT=8005
 HOST=0.0.0.0
 ```
 Вы можете изменить порт (например, на `80` или `8080`) или указать другой ключ/эндпоинт при необходимости.
+
+---
+
+## Замороженные deployment artifacts
+
+Рядом с моделью должны оставаться:
+
+```text
+model_10genes_phenotype_classifier.json
+clinical_ontology_v1.json
+input_schema_v1.json
+safety_thresholds_v2.json
+support_index_v2.json
+compatibility_manifest_v2.json
+```
+
+`compatibility_manifest_v2.json` содержит SHA-256 для модели, ontology, input schema,
+thresholds, support index, backend и UI-компонентов. При изменении deploy-кода или артефактов
+запустите:
+
+```bash
+python3 freeze_safety_artifacts.py
+```

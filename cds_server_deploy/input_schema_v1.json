@@ -1,0 +1,104 @@
+{
+  "categorical_fields": {
+    "aao_group": [
+      "AAO_MISSING",
+      "JUVENILE_ONSET",
+      "EARLY_ONSET",
+      "LATE_ONSET"
+    ],
+    "family_history": [
+      "unknown",
+      "positive",
+      "negative"
+    ],
+    "inheritance": [
+      "unknown",
+      "autosomal_dominant",
+      "autosomal_recessive",
+      "x_linked",
+      "mitochondrial",
+      "de_novo"
+    ],
+    "sex": [
+      "unknown",
+      "female",
+      "male",
+      "other"
+    ],
+    "zygosity": [
+      "unknown",
+      "heterozygous",
+      "homozygous",
+      "compound_heterozygous",
+      "hemizygous"
+    ]
+  },
+  "forbidden_input_roles": [
+    "diagnosis",
+    "target_gene",
+    "gene_name",
+    "variant_gene"
+  ],
+  "input_schema_version": "clinical-phenotype-vector-v1",
+  "numeric_fields": {
+    "aao_missing": {
+      "values": [
+        0.0,
+        1.0
+      ]
+    },
+    "aao_years_normalized": {
+      "mean_train_only": 41.37041928029053,
+      "std_train_only": 18.797366841857404
+    }
+  },
+  "pedigree_feature_order": [
+    "AUTOSOMAL_DOMINANT_PEDIGREE",
+    "AUTOSOMAL_RECESSIVE_PEDIGREE",
+    "CONSANGUINITY",
+    "MATERNAL_INHERITANCE",
+    "PATERNAL_INHERITANCE"
+  ],
+  "phenotype_feature_order": [
+    "PARKINSONISM",
+    "BRADYKINESIA",
+    "RIGIDITY",
+    "TREMOR_REST",
+    "TREMOR_OTHER",
+    "POSTURAL_INSTABILITY",
+    "GAIT_DIFFICULTIES_FALLS",
+    "ASYMMETRIC_ONSET",
+    "DYSTONIA",
+    "LOWER_LIMB_DYSTONIA",
+    "UPPER_LIMB_DYSTONIA",
+    "FACIAL_DYSTONIA",
+    "BLEPHAROSPASM",
+    "DIURNAL_FLUCTUATION",
+    "SLEEP_BENEFIT",
+    "LEVODOPA_RESPONSE",
+    "MOTOR_FLUCTUATIONS",
+    "DYSKINESIA",
+    "HYPOSMIA",
+    "COGNITIVE_DECLINE",
+    "HALLUCINATIONS",
+    "AUTONOMIC_DYSFUNCTION",
+    "DEPRESSION",
+    "ANXIETY",
+    "SLEEP_DISORDER",
+    "RBD",
+    "ATYPICAL_PARKINSONISM",
+    "VERTICAL_GAZE_PALSY",
+    "SPASTICITY_PYRAMIDAL_SIGNS",
+    "ATAXIA",
+    "CEREBELLAR_SIGNS",
+    "CHOREA",
+    "MYOCLONUS",
+    "SEIZURES",
+    "DEVELOPMENTAL_DELAY",
+    "INTELLECTUAL_DISABILITY",
+    "DYSPHAGIA",
+    "DYSARTHRIA",
+    "HYPOPHONIA_OR_HYPOMIMIA",
+    "GLUCOCEREBROSIDASE_SYSTEMIC_FEATURES"
+  ]
+}

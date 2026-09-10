@@ -1,0 +1,71 @@
+{
+  "compatibility": {
+    "llm_calls_must_be_mocked_or_disabled_in_tests": true,
+    "ranking_mutation_allowed": false,
+    "requires_status_and_reason_codes": true,
+    "supports_no_api_key_startup": true
+  },
+  "component_hashes": {
+    "artifact_freezer": {
+      "path": "freeze_safety_artifacts.py",
+      "sha256": "f30ba9158e950f6d2c9facfcb2e0917d8c776046c711ef9d5b5060b305cee038"
+    },
+    "env_example": {
+      "path": ".env.example",
+      "sha256": "e6845aa00c3a3bf5b505e9b073ec9dfdc1910c9fd16376e1094a50c62b0e9df2"
+    },
+    "input_schema": {
+      "path": "input_schema_v1.json",
+      "sha256": "77165993d96591b9249543eef237831f6bc9e85666ddea58d3cf4b7d225fb906"
+    },
+    "model_artifact": {
+      "path": "model_10genes_phenotype_classifier.json",
+      "sha256": "f448422001981cfda58329808990f23288fa27a5658e5e8ea1446ee56dbc4d3c"
+    },
+    "ontology": {
+      "path": "clinical_ontology_v1.json",
+      "sha256": "b0b725f30d2090d456b946dd2a3dcba6f679c8174bfa7462ef0674e11b5b7f0c"
+    },
+    "pipeline_service": {
+      "path": "pipeline_service.py",
+      "sha256": "5ee0630396ed18c2474b5729920ca5977b0e8156effa9b2ed24b8b26b9884e81"
+    },
+    "readme": {
+      "path": "README.md",
+      "sha256": "f05977e721197cc7e67035ada688d7a14b90efb096ff9d666dc351b0d0e18456"
+    },
+    "safety_thresholds_v2": {
+      "path": "safety_thresholds_v2.json",
+      "sha256": "4f8279de11c7e6f3656312fafee27c0f93b900f70f33656c4eff521854e02a43"
+    },
+    "server": {
+      "path": "server.py",
+      "sha256": "1a276fc328919c867eeed92517f34c66049450b7dffce12b610c577dc42a5674"
+    },
+    "support_index_v2": {
+      "path": "support_index_v2.json",
+      "sha256": "8092d88a7670b399bbd2b21765058911811a467993a63936ecac2ca2001b22c9"
+    },
+    "ui_app": {
+      "path": "static/app.js",
+      "sha256": "b84737bf418bfa35d5fbcaa9f276254333abecda2efa8476ede819b82cd5e075"
+    },
+    "ui_index": {
+      "path": "static/index.html",
+      "sha256": "614ccc4d12553d735806609d779f444824ed75d14bae0ededd37967a12b03945"
+    },
+    "ui_style": {
+      "path": "static/style.css",
+      "sha256": "51b63f5c43019fda0d6b36cbe9d1ac164a9bcf4e160efb5469334f060a4824ff"
+    }
+  },
+  "deployment_profile": "cds_server_deploy",
+  "git_commit_at_model_export": "9e03b2c21a48729fbdd394c8628ea960a77d1c2f",
+  "input_schema_version": "clinical-phenotype-vector-v1",
+  "model_artifact": "model_10genes_phenotype_classifier.json",
+  "model_version": "10gene-phenotype-classifier-v1",
+  "ontology_version": "10gene-parkinsonism-v1",
+  "safety_thresholds_version": "clinical-safety-thresholds-v2",
+  "schema_version": "clinical-deployment-compatibility-manifest-v2",
+  "support_index_version": "clinical-support-index-v2"
+}

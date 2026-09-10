@@ -1,0 +1,15 @@
+[Unit]
+Description=DeltaReduce Clinical Decision Support Prototype (Demo v1.0)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/deltareduce-cds
+EnvironmentFile=/opt/deltareduce-cds/.env
+ExecStart=/usr/bin/python3 -u /opt/deltareduce-cds/server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

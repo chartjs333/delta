@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeltaReduce Clinical Decision Support Prototype (Demo v1.0)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 11. PERMANENT DISCLAIMER BANNER -->
+  <aside class="disclaimer-banner" role="alert" aria-label="Clinical Disclaimer">
+    <div class="disclaimer-content">
+      <span class="disclaimer-badge">Research Use Only</span>
+      <strong>Clinical Decision Support Prototype:</strong>
+      <span>This system does not establish a diagnosis and does not replace clinical or molecular genetic review. All extracted findings and interpretations require clinician verification.</span>
+    </div>
+  </aside>
+
+  <!-- APP CONTAINER -->
+  <div class="app-wrapper">
+
+    <!-- HEADER & SYSTEM METRICS -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <span class="logo-symbol">Δ</span>
+        </div>
+        <div class="brand-titles">
+          <h1>DeltaReduce Decision Support <span class="version-tag">Demo v1.0</span></h1>
+          <p class="brand-subtitle">AI proposes &bull; Formal gate verifies &bull; Doctor confirms &bull; Deterministic core interprets</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="meta-pill"><span class="dot green"></span> Core: <strong>Revision 6.2</strong></div>
+        <div class="meta-pill"><span class="dot green"></span> Contract: <strong>Schema 1.1</strong></div>
+        <div class="meta-pill"><span class="dot cyan"></span> Model: <strong id="headerModelName">deepseek-v4-flash</strong></div>
+        <div class="meta-pill"><span class="dot emerald"></span> Formal Gate: <strong>Active</strong></div>
+      </div>
+    </header>
+
+    <!-- MAIN GRID -->
+    <main class="main-layout">
+
+      <!-- LEFT COLUMN: INPUT, PRESETS & STEPPER -->
+      <section class="panel input-panel">
+        
+        <!-- 10. DEMO CASES ("LOAD EXAMPLE") -->
+        <div class="panel-section">
+          <div class="section-label-row">
+            <span class="section-number">01</span>
+            <h2>Load Demonstration Case</h2>
+          </div>
+          <p class="section-desc">Select a validated scenario to demonstrate normal execution, phenotypic reasoning, or safety boundary halts.</p>
+          <div class="presets-grid" id="presetsContainer">
+            <!-- Populated dynamically by app.js -->
+            <button class="preset-card active" data-id="case_1_prkn">
+              <div class="preset-head">
+                <span class="preset-tag green">Early-Onset Recessive</span>
+                <span class="preset-gene">PRKN</span>
+              </div>
+              <div class="preset-desc">32yo early-onset parkinsonism, tremor, foot dystonia, marked sleep benefit.</div>
+            </button>
+            <button class="preset-card" data-id="case_2_gch1">
+              <div class="preset-head">
+                <span class="preset-tag amber">Diurnal Fluctuation</span>
+                <span class="preset-gene">GCH1</span>
+              </div>
+              <div class="preset-desc">14yo lower limb dystonia, evening worsening, dramatic sustained L-dopa relief.</div>
+            </button>
+            <button class="preset-card" data-id="case_3_atp13a2">
+              <div class="preset-head">
+                <span class="preset-tag purple">Kufor-Rakeb Atypical</span>
+                <span class="preset-gene">ATP13A2</span>
+              </div>
+              <div class="preset-desc">19yo juvenile atypical parkinsonism, gaze palsy, spasticity, c.3057delC.</div>
+            </button>
+            <button class="preset-card" data-id="case_4_gba1">
+              <div class="preset-head">
+                <span class="preset-tag red">Cognitive-Hallucination</span>
+                <span class="preset-gene">GBA1</span>
+              </div>
+              <div class="preset-desc">62yo late-onset tremor-rigidity, rapid progressive dementia & hallucinations.</div>
+            </button>
+            <button class="preset-card alert-card" data-id="case_5_conflict">
+              <div class="preset-head">
+                <span class="preset-tag rose">Safety Conflict Case</span>
+                <span class="preset-gene">VPS35 Conflict</span>
+              </div>
+              <div class="preset-desc">Juvenile dystonia with sleep benefit vs. VPS35 late-onset mismatch / annotation clash.</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. CLINICAL CASE INPUT -->
+        <div class="panel-section">
+          <div class="section-label-row">
+            <span class="section-number">02</span>
+            <h2>Clinical Case Narrative</h2>
+          </div>
+          <label for="clinicalText" class="sr-only">Clinical case text</label>
+          <textarea id="clinicalText" class="clinical-textarea" rows="6" placeholder="Paste free clinical narrative, onset history, symptoms, family history, and molecular findings..."></textarea>
+          
+          <div class="action-row">
+            <button id="btnAnalyze" class="btn-primary">
+              <span class="btn-icon">⚡</span>
+              <span class="btn-label">Analyze Case</span>
+            </button>
+            <button id="btnClear" class="btn-secondary">Clear</button>
+          </div>
+        </div>
+
+        <!-- 1. PROCESSING STAGES INDICATOR -->
+        <div class="panel-section" id="stagesCard">
+          <div class="section-label-row">
+            <span class="section-number">03</span>
+            <h2>Pipeline Execution Stages</h2>
+          </div>
+          <div class="pipeline-stepper">
+            <div class="step-item" id="step1">
+              <div class="step-indicator"><span class="step-num">1</span></div>
+              <div class="step-body">
+                <strong>Extracting clinical information</strong>
+                <span id="stage1Model">deepseek-v4-flash (Schema 1.1)</span>
+              </div>
+            </div>
+            <div class="step-item" id="step2">
+              <div class="step-indicator"><span class="step-num">2</span></div>
+              <div class="step-body">
+                <strong>Verifying extracted facts</strong>
+                <span>Extraction Completeness & Formal Gate</span>
+              </div>
+            </div>
+            <div class="step-item" id="step3">
+              <div class="step-indicator"><span class="step-num">3</span></div>
+              <div class="step-body">
+                <strong>Molecular evidence analysis</strong>
+                <span>Revision 6.2 Deterministic Normalizer</span>
+              </div>
+            </div>
+            <div class="step-item" id="step4">
+              <div class="step-indicator"><span class="step-num">4</span></div>
+              <div class="step-body">
+                <strong>Genotype–phenotype consistency</strong>
+                <span>Decoupled clinical concordance matrix</span>
+              </div>
+            </div>
+            <div class="step-item" id="step5">
+              <div class="step-indicator"><span class="step-num">5</span></div>
+              <div class="step-body">
+                <strong>Generating decision-support report</strong>
+                <span>Clinician review & verified evidence</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: RESULTS, CLINICIAN REVIEW & AUDIT -->
+      <section class="panel results-panel" id="resultsSection">
+
+        <!-- 4. SAFETY / DATA QUALITY STATUS -->
+        <div class="card safety-card" id="safetyCard">
+          <div class="card-header">
+            <h3>Data Quality & Safety Checks</h3>
+            <span id="safetyBadge" class="status-pill green">Evaluating...</span>
+          </div>
+          <div id="safetyAlertsList" class="safety-alerts-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- 7. ABSTENTION CARD (CONDITIONAL) -->
+        <div class="card abstention-card" id="abstentionCard" style="display: none;">
+          <div class="abstention-head">
+            <span class="abstention-icon">🛑</span>
+            <div class="abstention-titles">
+              <h3>Interpretation Withheld</h3>
+              <p class="abstention-reason" id="abstentionReason">Available information is insufficient or internally inconsistent.</p>
+            </div>
+          </div>
+          <div class="abstention-note">
+            This is a normal and expected safety containment boundary of the system. Clinician review of ambiguous findings or laboratory consultation is required.
+          </div>
+        </div>
+
+        <!-- 8. & 2. EXTRACTED CLINICAL FEATURES + CLINICIAN REVIEW -->
+        <div class="card review-card" id="clinicalFeaturesCard">
+          <div class="card-header space-between">
+            <div>
+              <h3>Extracted Clinical Features</h3>
+              <p class="card-subhead">Verify extracted findings and patient attribution. Original AI extraction is preserved in audit trail.</p>
+            </div>
+            <button id="btnRecalculate" class="btn-outline-primary" title="Re-run deterministic core with doctor modifications">
+              🔄 Recompute Analysis
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="features-table" id="featuresTable">
+              <thead>
+                <tr>
+                  <th style="width: 28%;">Feature</th>
+                  <th style="width: 20%;">Status</th>
+                  <th style="width: 18%;">Subject</th>
+                  <th style="width: 24%;">Source Text</th>
+                  <th style="width: 10%; text-align: center;">Review</th>
+                </tr>
+              </thead>
+              <tbody id="featuresTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. MOLECULAR FINDINGS -->
+        <div class="card molecular-card" id="molecularFindingsCard">
+          <div class="card-header">
+            <h3>Molecular Findings</h3>
+            <span class="header-note">Revision 6.2 Deterministic Normalization</span>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="molecular-table" id="molecularTable">
+              <thead>
+                <tr>
+                  <th>Gene</th>
+                  <th>Raw Input</th>
+                  <th>Normalized HGVS</th>
+                  <th>Transcript</th>
+                  <th>Classification</th>
+                  <th>Zygosity</th>
+                  <th>Parental Origin</th>
+                  <th>Phase</th>
+                  <th>Source Span</th>
+                </tr>
+              </thead>
+              <tbody id="molecularTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5. & 6. DECISION SUPPORT: PHENOTYPE MODEL & MOLECULAR EVIDENCE -->
+        <div class="decision-support-grid">
+          
+          <!-- 5. PHENOTYPE MODEL (DIFFERENTIAL DIAGNOSIS) -->
+          <div class="card differential-card">
+            <div class="card-header">
+              <h3>Phenotype Model</h3>
+              <span class="model-tag">10-Gene Clinical Spectra</span>
+            </div>
+            <div class="warning-callout">
+              <strong>Phenotype-based ranking — not a diagnostic probability.</strong>
+              <div class="callout-sub">Model ranking score / Relative model confidence based strictly on clinical presentation.</div>
+            </div>
+            <div class="classifier-safety-summary" id="classifierSafetySummary">
+              <div class="classifier-safety-status">
+                <span class="summary-label">Status</span>
+                <strong id="classifierSafetyStatus">Pending</strong>
+              </div>
+              <div class="classifier-safety-primary">
+                <span class="summary-label">Top candidate</span>
+                <strong id="classifierTopCandidate">N/A</strong>
+              </div>
+              <div class="classifier-safety-score">
+                <span class="summary-label">Classifier score</span>
+                <strong id="classifierScore">N/A</strong>
+              </div>
+              <div class="classifier-safety-reasons" id="classifierReasonCodes"></div>
+            </div>
+            
+            <div class="ranking-list" id="phenotypeRankingList">
+              <!-- Top-5 bars populated dynamically -->
+            </div>
+          </div>
+
+          <!-- 6. MOLECULAR EVIDENCE & CONCORDANCE -->
+          <div class="card concordance-card">
+            <div class="card-header">
+              <h3>Molecular Evidence & Concordance</h3>
+              <span id="concordanceBadge" class="status-pill gray">Pending</span>
+            </div>
+
+            <div class="evidence-details" id="molecularEvidenceDetails">
+              <!-- Molecular evidence facts -->
+            </div>
+
+            <div class="concordance-status-box" id="concordanceBox">
+              <!-- Concordance explanation or discordance alert -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 9. TECHNICAL AUDIT TRAIL (EXPANDABLE) -->
+        <details class="card audit-card" id="auditCard">
+          <summary class="audit-summary">
+            <div class="summary-left">
+              <span class="audit-icon">🔍</span>
+              <span class="audit-title">Technical Audit Trail</span>
+              <span class="audit-badge" id="auditBadge">5 Facts Audited</span>
+            </div>
+            <span class="summary-toggle">Click to expand</span>
+          </summary>
+
+          <div class="audit-content">
+            <div class="audit-specs-grid">
+              <div class="spec-box">
+                <span class="spec-label">Extraction Model</span>
+                <strong id="auditModel">deepseek-v4-flash</strong>
+              </div>
+              <div class="spec-box">
+                <span class="spec-label">Schema Version</span>
+                <strong id="auditSchema">1.1 (Typed Contract)</strong>
+              </div>
+              <div class="spec-box">
+                <span class="spec-label">Completeness Gate</span>
+                <strong id="auditCompleteness" class="text-green">PASS</strong>
+              </div>
+              <div class="spec-box">
+                <span class="spec-label">Formal Gate</span>
+                <strong id="auditFormalGate" class="text-green">PASS</strong>
+              </div>
+              <div class="spec-box">
+                <span class="spec-label">Deterministic Core</span>
+                <strong id="auditCore">Revision 6.2</strong>
+              </div>
+            </div>
+
+            <h4 class="audit-subhead">Fact Lineage Trace: Raw Text &rarr; Extracted Observation &rarr; Formal Verification &rarr; Normalized Fact</h4>
+            <div class="table-responsive">
+              <table class="audit-table" id="auditTable">
+                <thead>
+                  <tr>
+                    <th>Observation ID</th>
+                    <th>Verbatim Text Span</th>
+                    <th>Predicate / Concept</th>
+                    <th>Subject</th>
+                    <th>Gate Status</th>
+                    <th>Gate Diagnostics</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="audit-footer-note">
+              <strong>Security Invariant Guarantee:</strong> API keys, raw authorization headers, and internal LLM reasoning chains are strictly isolated from client-facing logs and payloads.
+            </div>
+          </div>
+        </details>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

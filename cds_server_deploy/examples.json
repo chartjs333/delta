@@ -1,0 +1,37 @@
+[
+  {
+    "id": "case_1_prkn",
+    "title": "Case 1: PRKN / Early-Onset Parkinsonism",
+    "badge": "Early Onset & Recessive",
+    "description": "32-year-old male with early-onset tremor, foot dystonia, marked sleep benefit, and confirmed homozygous PRKN c.1072delT.",
+    "text": "Male, 32 years old, early-onset parkinsonism with resting tremor, foot dystonia and marked benefit after sleep. Family history is negative for parkinsonism. Molecular testing confirms homozygous PRKN c.1072delT (p.Cys358fs) classified as Pathogenic."
+  },
+  {
+    "id": "case_2_gch1",
+    "title": "Case 2: GCH1 / Dopa-Responsive Dystonia",
+    "badge": "Diurnal Fluctuation",
+    "description": "14-year-old female with lower limb dystonia, marked diurnal fluctuation, and dramatic sustained levodopa response.",
+    "text": "Female, 14 years old, juvenile onset lower limb dystonia with marked diurnal fluctuation, worsening in the evening and prominent sleep benefit. Dramatic sustained relief with low-dose levodopa. No cognitive decline, no resting tremor. Father reported mild focal dystonia. Heterozygous GCH1 variant reported."
+  },
+  {
+    "id": "case_3_atp13a2",
+    "title": "Case 3: ATP13A2 / Juvenile Atypical Parkinsonism",
+    "badge": "Kufor-Rakeb Syndrome",
+    "description": "19-year-old with vertical supranuclear gaze palsy, spasticity, cognitive decline, and homozygous ATP13A2 c.3057delC.",
+    "text": "Patient 19 years old with juvenile atypical parkinsonism, supranuclear vertical gaze palsy, spasticity and bilateral pyramidal signs, cogwheel rigidity and early cognitive decline. Parental consanguinity noted. Genetic sequencing identified homozygous ATP13A2 c.3057delC mutation classified as Pathogenic."
+  },
+  {
+    "id": "case_4_gba1",
+    "title": "Case 4: GBA1 / Cognitive & Hallucination Phenotype",
+    "badge": "Late Onset & Dementia",
+    "description": "62-year-old male with parkinsonism, rapid progression to cognitive impairment, visual hallucinations, and GBA1 p.Asn409Ser.",
+    "text": "Male, 62 years old, late-onset parkinsonism presenting with asymmetric resting tremor, bradykinesia and rigidity. Developed progressive cognitive decline and recurrent visual hallucinations. Molecular analysis revealed heterozygous GBA1 p.Asn409Ser (c.1226A>G) reported as Pathogenic."
+  },
+  {
+    "id": "case_5_conflict",
+    "title": "Case 5: Conflict & Discordance Safety Case",
+    "badge": "Safety Stop / Gate Trigger",
+    "description": "Juvenile dystonia with marked sleep benefit, but lab report gives VPS35 p.Asp620Asn with contradictory gene annotation and severe genotype-phenotype discordance.",
+    "text": "Female, 22 years old, juvenile onset foot dystonia with marked sleep benefit and dramatic levodopa response. Molecular report identifies VPS35 p.Asp620Asn, but text annotates it as LRRK2. ClinVar lists Pathogenic for VPS35 whereas lab calls it VUS."
+  }
+]

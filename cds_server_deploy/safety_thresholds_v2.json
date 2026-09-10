@@ -1,0 +1,38 @@
+{
+  "policy": {
+    "allowed_transition": "DEFINITIVE_GENE_TO_AMBIGUOUS_GENE_CLUSTER_ONLY",
+    "already_ambiguous_may_be_promoted": false,
+    "guard_failure_allows_definitive": false,
+    "ranking_mutation_allowed": false
+  },
+  "reason_codes": [
+    "LOW_CLASSIFIER_CONFIDENCE",
+    "LOW_LOCAL_TRAIN_SUPPORT",
+    "LOW_PUBLICATION_DIVERSITY",
+    "LOW_FAMILY_DIVERSITY",
+    "DOMINANT_CLUSTER_OOD",
+    "SAFETY_GUARD_UNAVAILABLE",
+    "NLP_EXTRACTION_UNAVAILABLE"
+  ],
+  "schema_version": "clinical-safety-thresholds-v2",
+  "status_values": [
+    "DEFINITIVE_GENE",
+    "AMBIGUOUS_GENE_CLUSTER",
+    "ABSTAIN"
+  ],
+  "support_guard": {
+    "k_neighbors": 8,
+    "max_publication_concentration": 0.75,
+    "min_effective_neighbor_count": 3,
+    "min_nearest_neighbor_similarity": 0.3,
+    "min_top1_gene_neighbor_share": 0.25,
+    "min_unique_families": 2,
+    "min_unique_publications": 2,
+    "neighbor_similarity_floor": 0.15
+  },
+  "uncertainty": {
+    "max_probability": 0.5,
+    "normalized_entropy": 0.75,
+    "top1_top2_margin": 0.1
+  }
+}

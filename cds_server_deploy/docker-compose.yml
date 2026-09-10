@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  deltareduce-cds:
+    build: .
+    container_name: deltareduce-cds-demo
+    restart: always
+    ports:
+      - "8005:8005"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/api/status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
