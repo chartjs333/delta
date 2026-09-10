@@ -27,10 +27,36 @@ runs/
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+credentials/
+.credentials/
+credentials.json
+*_credentials.json
 *.sqlite3
 *.db
 certs/
 keys/
+
+# Local experiment/deployment outputs
+**/.pipeline_cache.json
+.h1_llm_cache.json
+last_msg.txt
+last_msg_content.txt
+*_terminal_out.txt
+*_full_log.json
+/*_results.txt
+/*_results.json
+/h1_llm_blind_100_v1_manifest.json
+/model_identity_audit_5_manifest.json
+/h1_llm_blind_100_v1_scorecard.json
+/*_audit_log.json
+/*_report.md
+bench_out.txt
+*.zip
+/*.pptx
 
 # CMake / C++
 CMakeFiles/
