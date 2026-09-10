@@ -208,9 +208,7 @@ class DominantClusterSupportIndex:
             nearest_neighbor_similarity=window.similarities[0] if window.similarities else 0.0,
             effective_neighbor_count=effective_neighbor_count,
             gene_distribution=dict(sorted(gene_counts.items())),
-            gene_similarity_mass={
-                gene: float(value) for gene, value in sorted(gene_mass.items())
-            },
+            gene_similarity_mass={gene: float(value) for gene, value in sorted(gene_mass.items())},
             unique_publications=len(publication_counts),
             unique_families=len(families),
             local_publication_concentration=(
@@ -247,8 +245,7 @@ def support_guard_reasons(
         reasons.append(LOW_LOCAL_TRAIN_SUPPORT)
     if (
         stats.unique_publications < thresholds.min_unique_publications
-        or stats.local_publication_concentration
-        > thresholds.max_publication_concentration
+        or stats.local_publication_concentration > thresholds.max_publication_concentration
     ):
         reasons.append(LOW_PUBLICATION_DIVERSITY)
     if stats.unique_families < thresholds.min_unique_families:

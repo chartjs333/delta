@@ -7,18 +7,17 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from pipeline_service import (  # noqa: E402
+from pipeline_service import (
     AMBIGUOUS_GENE_CLUSTER,
     DEFINITIVE_GENE,
     DOMINANT_CLUSTER_GENES,
+    DOMINANT_CLUSTER_OOD,
+    LOW_FAMILY_DIVERSITY,
     LOW_LOCAL_TRAIN_SUPPORT,
     LOW_PUBLICATION_DIVERSITY,
-    LOW_FAMILY_DIVERSITY,
-    DOMINANT_CLUSTER_OOD,
     SAFETY_GUARD_UNAVAILABLE,
     ClinicalDecisionSupportPipeline,
 )
-
 
 SYMPTOM_PATTERNS = (
     ("parkinsonism", r"\bparkinsonism\b"),
@@ -26,7 +25,10 @@ SYMPTOM_PATTERNS = (
     ("dystonia", r"\b(?:foot dystonia|lower limb dystonia|dystonia)\b"),
     ("sleep_benefit", r"\b(?:sleep benefit|benefit after sleep)\b"),
     ("diurnal_fluctuation", r"\b(?:diurnal fluctuation|worsening in the evening)\b"),
-    ("levodopa_response", r"\b(?:levodopa response|relief with low-dose levodopa|dramatic levodopa response)\b"),
+    (
+        "levodopa_response",
+        r"\b(?:levodopa response|relief with low-dose levodopa|dramatic levodopa response)\b",
+    ),
     ("vertical_gaze_palsy", r"\b(?:supranuclear vertical gaze palsy|vertical gaze palsy)\b"),
     ("spasticity_pyramidal_signs", r"\b(?:spasticity|pyramidal signs)\b"),
     ("rigidity", r"\b(?:rigidity|cogwheel rigidity)\b"),
@@ -103,7 +105,9 @@ def _mock_schema_extraction(text: str) -> dict[str, Any]:
             }
         )
 
-    class_match = re.search(r"\b(Pathogenic|VUS|uncertain significance|benign)\b", text, re.IGNORECASE)
+    class_match = re.search(
+        r"\b(Pathogenic|VUS|uncertain significance|benign)\b", text, re.IGNORECASE
+    )
     if class_match:
         observations.append(
             {
@@ -141,7 +145,9 @@ def main() -> None:
     assert not pipeline.api_key
     assert pipeline.safety_artifacts_loaded, pipeline.safety_artifact_error
 
-    thresholds = json.loads((Path(__file__).resolve().parent / "safety_thresholds_v2.json").read_text())
+    thresholds = json.loads(
+        (Path(__file__).resolve().parent / "safety_thresholds_v2.json").read_text()
+    )
     required_reasons = {
         LOW_LOCAL_TRAIN_SUPPORT,
         LOW_PUBLICATION_DIVERSITY,
@@ -150,7 +156,9 @@ def main() -> None:
     }
     assert required_reasons.issubset(set(thresholds["reason_codes"]))
 
-    examples = json.loads((Path(__file__).resolve().parent / "examples.json").read_text(encoding="utf-8"))
+    examples = json.loads(
+        (Path(__file__).resolve().parent / "examples.json").read_text(encoding="utf-8")
+    )
     pipeline._call_nlp_model = _mock_schema_extraction  # type: ignore[method-assign]
     for example in examples:
         result = pipeline.analyze_case(example["text"])
@@ -175,7 +183,9 @@ def main() -> None:
     ranking_after = pipeline.compute_phenotype_ranking(cluster_features, 46, "dominant familial")
     assert ranking_before and ranking_after
     assert [row["gene"] for row in ranking_before] == [row["gene"] for row in ranking_after]
-    assert [row["score_pct"] for row in ranking_before] == [row["score_pct"] for row in ranking_after]
+    assert [row["score_pct"] for row in ranking_before] == [
+        row["score_pct"] for row in ranking_after
+    ]
     assert safety["top_candidate"] in DOMINANT_CLUSTER_GENES
 
     pipeline.safety_artifacts_loaded = False

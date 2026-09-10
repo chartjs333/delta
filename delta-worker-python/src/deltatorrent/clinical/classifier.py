@@ -323,9 +323,7 @@ class TrainingConfig:
     focal_gamma: float = 2.0
     hard_negative_weight: float = 0.0
     hard_negative_margin: float = 0.25
-    hard_negative_pairs: tuple[tuple[str, tuple[str, ...]], ...] = (
-        DEFAULT_HARD_NEGATIVE_PAIRS
-    )
+    hard_negative_pairs: tuple[tuple[str, tuple[str, ...]], ...] = DEFAULT_HARD_NEGATIVE_PAIRS
 
 
 @dataclass(frozen=True, slots=True)
@@ -448,9 +446,7 @@ def _hard_negative_penalty(
         target_idx = gene_index.get(target_gene)
         if target_idx is None:
             continue
-        competitor_indices = [
-            gene_index[gene] for gene in competitor_genes if gene in gene_index
-        ]
+        competitor_indices = [gene_index[gene] for gene in competitor_genes if gene in gene_index]
         if not competitor_indices:
             continue
         mask = labels == target_idx
