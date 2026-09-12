@@ -1,0 +1,128 @@
+name: Campaign 02 Stage A bootstrap
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Registration is inert; execution additionally requires separate signed authority
+        required: true
+        type: choice
+        default: REGISTER_ONLY
+        options:
+          - REGISTER_ONLY
+          - EXECUTE_STAGE_A
+      bootstrap_artifact_run_id:
+        description: Signed bootstrap package run ID; required only for EXECUTE_STAGE_A
+        required: false
+        type: string
+      bootstrap_artifact_name:
+        description: Signed bootstrap package artifact; required only for EXECUTE_STAGE_A
+        required: false
+        type: string
+      bootstrap_artifact_run_attempt:
+        description: Signed bootstrap package run attempt; required only for EXECUTE_STAGE_A
+        required: false
+        type: number
+        default: 0
+      authority_run_id:
+        description: Separately authorized Stage A authority run ID; required only for execution
+        required: false
+        type: string
+      authority_artifact_name:
+        description: Separately authorized Stage A authority artifact; required only for execution
+        required: false
+        type: string
+      authority_artifact_id:
+        description: Stage A authority artifact ID; required only for execution
+        required: false
+        type: number
+        default: 0
+      authority_run_attempt:
+        description: Stage A authority run attempt; required only for execution
+        required: false
+        type: number
+        default: 0
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: campaign-02-stage-a-bootstrap-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  register-only:
+    name: Register immutable Stage A caller without execution
+    if: ${{ inputs.operation == 'REGISTER_ONLY' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Verify default-branch zero-execution context
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = 'chartjs333/delta'
+          test "$GITHUB_REF" = 'refs/heads/main'
+          test "$GITHUB_EVENT_NAME" = 'workflow_dispatch'
+          test '${{ inputs.bootstrap_artifact_run_id }}' = ''
+          test '${{ inputs.bootstrap_artifact_name }}' = ''
+          test '${{ inputs.bootstrap_artifact_run_attempt }}' = '0'
+          test '${{ inputs.authority_run_id }}' = ''
+          test '${{ inputs.authority_artifact_name }}' = ''
+          test '${{ inputs.authority_artifact_id }}' = '0'
+          test '${{ inputs.authority_run_attempt }}' = '0'
+      - name: Emit non-authoritative zero-execution marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/campaign02-bootstrap-registration"
+          jq -cn \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg workflow_ref "$GITHUB_WORKFLOW_REF" \
+            --arg workflow_sha "$GITHUB_WORKFLOW_SHA" \
+            --arg run_id "$GITHUB_RUN_ID" \
+            --arg run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg qualified_source_commit '300ad8415862f82eeb9e0fd9c34c01620dfab399' \
+            --arg qualified_source_tree 'e3fe90b6eb90924c41b11cc9379e4752c99ffe74' \
+            --arg source_stage_a_workflow_content_id \
+              'sha256:05da996e4d8f67ad7b11d2c5bfc152a804201936de63ed13441817b576d8396f' \
+            '{
+              authority_bundle_supplied: false,
+              execution_artifact_count: 0,
+              execution_authorized: false,
+              execution_count: 0,
+              observation_count: 0,
+              qualified_source_commit: $qualified_source_commit,
+              qualified_source_tree: $qualified_source_tree,
+              repository: $repository,
+              run_attempt: ($run_attempt | tonumber),
+              run_id: ($run_id | tonumber),
+              schema_version: "1.0.0",
+              source_stage_a_workflow_content_id: $source_stage_a_workflow_content_id,
+              stage_a_plans_executed: 0,
+              stage_gate_receipt_emitted: false,
+              type_name: "CAMPAIGN02_ZERO_EXECUTION_REGISTRATION_MARKER",
+              workflow_ref: $workflow_ref,
+              workflow_sha: $workflow_sha
+            }' > "$RUNNER_TEMP/campaign02-bootstrap-registration/zero-execution-marker.json"
+      - name: Retain zero-execution registration marker
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign02-bootstrap-registration-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/campaign02-bootstrap-registration/zero-execution-marker.json
+          if-no-files-found: error
+          retention-days: 90
+
+  execute-stage-a:
+    name: Invoke immutable qualified Stage A workflow
+    if: ${{ inputs.operation == 'EXECUTE_STAGE_A' }}
+    uses: chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@300ad8415862f82eeb9e0fd9c34c01620dfab399
+    with:
+      bootstrap_artifact_run_id: ${{ inputs.bootstrap_artifact_run_id }}
+      bootstrap_artifact_name: ${{ inputs.bootstrap_artifact_name }}
+      bootstrap_artifact_run_attempt: ${{ inputs.bootstrap_artifact_run_attempt }}
+      authority_run_id: ${{ inputs.authority_run_id }}
+      authority_artifact_name: ${{ inputs.authority_artifact_name }}
+      authority_artifact_id: ${{ inputs.authority_artifact_id }}
+      authority_run_attempt: ${{ inputs.authority_run_attempt }}
