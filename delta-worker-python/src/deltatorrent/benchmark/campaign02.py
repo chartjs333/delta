@@ -661,6 +661,10 @@ class CampaignExecutionPlan:
     ticket_plan_id: str | None = None
     qualified_runtime_lineage_id: str | None = None
     gate_stage: str | None = None
+    java_executable_id: str | None = None
+    native_executable_id: str | None = None
+    transport_harness_id: str | None = None
+    netty_artifact_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.execution_class not in {"NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"}:
@@ -710,6 +714,26 @@ class CampaignExecutionPlan:
             or self.execution_authorization_id is not None
         ):
             raise _fail("CAMPAIGN02_PLAN_GATE_STAGE_INVALID")
+        stage_c_boundary_ids = (
+            self.java_executable_id,
+            self.native_executable_id,
+            self.transport_harness_id,
+        )
+        has_stage_c_boundary = any(value is not None for value in stage_c_boundary_ids) or bool(
+            self.netty_artifact_ids
+        )
+        if has_stage_c_boundary:
+            if (
+                self.gate_stage != "STAGE_C_EMULATED_WAN"
+                or any(
+                    not isinstance(value, str) or _CONTENT_ID.fullmatch(value) is None
+                    for value in stage_c_boundary_ids
+                )
+                or not self.netty_artifact_ids
+                or len(set(self.netty_artifact_ids)) != len(self.netty_artifact_ids)
+                or any(_CONTENT_ID.fullmatch(value) is None for value in self.netty_artifact_ids)
+            ):
+                raise _fail("CAMPAIGN02_PLAN_STAGE_C_BOUNDARY_INVALID")
         execution_binding_ids = (
             self.domain_manifest_id,
             self.ticket_plan_id,
@@ -800,7 +824,9 @@ class CampaignExecutionPlan:
             "round_id": self.round_id,
             "runner_id": self.runner_id,
             "schema_version": (
-                "5.0.0"
+                "6.0.0"
+                if self.java_executable_id is not None
+                else "5.0.0"
                 if self.gate_stage is not None
                 else "3.0.0"
                 if self.ticket_plan_id is not None
@@ -829,6 +855,15 @@ class CampaignExecutionPlan:
                     "ticket_identity_scope": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID",
                 }
             )
+            if self.java_executable_id is not None:
+                document.update(
+                    {
+                        "java_executable_id": self.java_executable_id,
+                        "native_executable_id": self.native_executable_id,
+                        "netty_artifact_ids": list(self.netty_artifact_ids),
+                        "transport_harness_id": self.transport_harness_id,
+                    }
+                )
         if self.ticket_plan_id is not None:
             document.update(
                 {
@@ -842,7 +877,9 @@ class CampaignExecutionPlan:
     @property
     def content_id(self) -> str:
         version = (
-            b"v5"
+            b"v6"
+            if self.java_executable_id is not None
+            else b"v5"
             if self.gate_stage is not None
             else b"v3"
             if self.ticket_plan_id is not None

@@ -19,6 +19,12 @@ from deltatorrent.benchmark.campaign02_binding import (
     Campaign02PlanCatalog,
     QualifiedRuntimeLineage,
 )
+from deltatorrent.benchmark.campaign02_bootstrap import (
+    BootstrapRuntimeProvenance,
+    VerifiedBootstrapMapping,
+    VerifiedWorkflowRegistration,
+    verify_bootstrap_runtime,
+)
 from deltatorrent.benchmark.campaign02_execution_identities import (
     StageExecutionIdentityManifest,
 )
@@ -306,6 +312,7 @@ class IdentityBearingStageGateFinalizer(Protocol):
     environment_id: str
     source_class: str
     implementation_id: str
+    bootstrap_mapping_id: str
 
     def finalize(self, summary: StageExecutionSummary) -> StageGateFinalization: ...
 
@@ -313,7 +320,7 @@ class IdentityBearingStageGateFinalizer(Protocol):
 _BOUND_RUNNER_TOKEN: Final = object()
 _BOUND_FINALIZER_TOKEN: Final = object()
 _FORBIDDEN_PRIMARY_SOURCE_CLASSES: Final = frozenset(
-    {"CALLER_SUPPLIED", "DRY", "FIXTURE", "NON_PRIMARY_FIXTURE", "SYNTHETIC"}
+    {"CALLER_SUPPLIED", "DRY", "FIXTURE", "NON_PRIMARY_FIXTURE", "SIMULATED_ONLY", "SYNTHETIC"}
 )
 
 
@@ -324,11 +331,16 @@ class VerifiedBoundStageRunner:
         "_runner",
         "environment_id",
         "identity_id",
+        "image_id",
         "implementation_id",
+        "java_executable_id",
+        "native_executable_id",
+        "netty_artifact_ids",
         "role",
         "source_class",
         "source_commit",
         "source_tree",
+        "transport_harness_id",
     )
 
     def __init__(
@@ -346,6 +358,11 @@ class VerifiedBoundStageRunner:
         self.environment_id = runner.environment_id
         self.source_class = runner.source_class
         self.implementation_id = runner.implementation_id
+        self.image_id = getattr(runner, "image_id", None)
+        self.java_executable_id = getattr(runner, "java_executable_id", None)
+        self.native_executable_id = getattr(runner, "native_executable_id", None)
+        self.transport_harness_id = getattr(runner, "transport_harness_id", None)
+        self.netty_artifact_ids = tuple(getattr(runner, "netty_artifact_ids", ()))
 
     def execute(self, plan: CampaignExecutionPlan) -> StagePlanEvidence:
         return self._runner.execute(plan)
@@ -356,6 +373,7 @@ class VerifiedBoundStageGateFinalizer:
 
     __slots__ = (
         "_finalizer",
+        "bootstrap_mapping_id",
         "environment_id",
         "identity_id",
         "implementation_id",
@@ -373,6 +391,7 @@ class VerifiedBoundStageGateFinalizer:
         if token is not _BOUND_FINALIZER_TOKEN:
             raise _fail("CAMPAIGN02_STAGE_FINALIZER_DIRECT_CONSTRUCTION_FORBIDDEN")
         self._finalizer = finalizer
+        self.bootstrap_mapping_id = getattr(finalizer, "bootstrap_mapping_id", None)
         self.identity_id = finalizer.identity_id
         self.role = finalizer.role
         self.source_commit = finalizer.source_commit
@@ -386,24 +405,44 @@ class VerifiedBoundStageGateFinalizer:
 
 
 class Campaign02StageGateFinalizer:
-    """Source-bound finalizer that closes actual GitHub workflow and artifact provenance."""
+    """Source-bound finalizer for mapped bootstrap, checkout and artifact provenance."""
+
+    @dataclass(frozen=True, slots=True)
+    class Artifact:
+        name: str
+        artifact_id: int
+        digest: str
+        content_digest: str
+        workflow_run_id: int
+        workflow_run_attempt: int
+        origin_class: str
+
+        def __post_init__(self) -> None:
+            if (
+                not self.name
+                or isinstance(self.artifact_id, bool)
+                or not isinstance(self.artifact_id, int)
+                or self.artifact_id <= 0
+                or _CONTENT_ID.fullmatch(self.digest) is None
+                or _CONTENT_ID.fullmatch(self.content_digest) is None
+                or self.workflow_run_id <= 0
+                or self.workflow_run_attempt <= 0
+                or self.origin_class
+                not in {"AUTHORITY_RUN", "BOOTSTRAP_REGISTRATION_RUN", "CURRENT_STAGE_RUN"}
+            ):
+                raise _fail("CAMPAIGN02_STAGE_WORKFLOW_ARTIFACT_INVALID")
 
     def __init__(
         self,
         *,
         stage_identities: StageExecutionIdentityManifest,
         finalized_at: datetime,
-        workflow_repository: str,
-        workflow_sha: str,
-        dispatch_sha: str,
-        workflow_ref: str,
-        dispatch_ref: str,
-        workflow_file_content_id: str,
-        workflow_run_id: int,
-        workflow_run_attempt: int,
-        authority_artifact_digest: str,
-        input_artifact_digests: Mapping[str, str],
-        output_artifact_digests: Mapping[str, str],
+        bootstrap_mapping: VerifiedBootstrapMapping,
+        registration: VerifiedWorkflowRegistration,
+        provenance: BootstrapRuntimeProvenance,
+        authority_artifact: Artifact,
+        input_artifacts: tuple[Artifact, ...],
+        output_artifacts: tuple[Artifact, ...],
     ) -> None:
         identity = stage_identities.identity("stage_gate_analyzer")
         self.identity_id = identity.content_id
@@ -414,87 +453,161 @@ class Campaign02StageGateFinalizer:
         self.source_class = "MEASURED_CONTROL_PLANE"
         self.implementation_id = str(identity.value.get("implementation_id", ""))
         self.finalized_at = finalized_at
-        self.workflow_repository = workflow_repository
-        self.workflow_sha = workflow_sha
-        self.dispatch_sha = dispatch_sha
-        self.workflow_ref = workflow_ref
-        self.dispatch_ref = dispatch_ref
-        self.workflow_file_content_id = workflow_file_content_id
-        self.workflow_run_id = workflow_run_id
-        self.workflow_run_attempt = workflow_run_attempt
-        self.authority_artifact_digest = authority_artifact_digest
-        self.input_artifact_digests = tuple(sorted(input_artifact_digests.items()))
-        self.output_artifact_digests = tuple(sorted(output_artifact_digests.items()))
+        self.bootstrap_mapping = bootstrap_mapping
+        self.bootstrap_mapping_id = bootstrap_mapping.mapping.content_id
+        self.registration = registration
+        self.registration_receipt = registration.receipt
+        self.provenance = provenance
+        self.authority_artifact = authority_artifact
+        self.input_artifacts = tuple(sorted(input_artifacts, key=lambda item: item.name))
+        self.output_artifacts = tuple(sorted(output_artifacts, key=lambda item: item.name))
         self.document: dict[str, object] | None = None
-        workflow_path = str(identity.value.get("workflow_path", ""))
-        expected_ref = str(identity.value.get("workflow_default_ref", ""))
-        expected_repository = str(identity.value.get("workflow_repository", ""))
-        expected_workflow_ref = f"{expected_repository}/{workflow_path}@{expected_ref}"
         workflow_hashes = identity.value.get("workflow_hashes")
-        expected_file_ids = (
+        source_workflow_ids = (
             {
                 item.get("content_id")
                 for item in workflow_hashes
-                if isinstance(item, dict) and item.get("path") == workflow_path
+                if isinstance(item, dict)
+                and item.get("path") == bootstrap_mapping.mapping.source_stage_a_workflow_path
             }
             if isinstance(workflow_hashes, list)
             else set()
         )
-        digest_values = (
-            authority_artifact_digest,
-            *(value for _name, value in self.input_artifact_digests),
-            *(value for _name, value in self.output_artifact_digests),
-        )
+        verify_bootstrap_runtime(bootstrap_mapping, provenance)
+        artifacts = (*self.input_artifacts, *self.output_artifacts)
+        artifact_coordinates: dict[int, tuple[str, int, int, str]] = {}
+        artifact_coordinate_conflict = False
+        for item in artifacts:
+            coordinate = (
+                item.digest,
+                item.workflow_run_id,
+                item.workflow_run_attempt,
+                item.origin_class,
+            )
+            previous = artifact_coordinates.setdefault(item.artifact_id, coordinate)
+            artifact_coordinate_conflict |= previous != coordinate
         if (
-            finalized_at.tzinfo is None
-            or workflow_repository != expected_repository
-            or workflow_sha != self.source_commit
-            or dispatch_sha != self.source_commit
-            or workflow_ref != expected_workflow_ref
-            or dispatch_ref != expected_ref
-            or workflow_file_content_id not in expected_file_ids
-            or workflow_run_id <= 0
-            or workflow_run_attempt != 1
-            or not self.input_artifact_digests
-            or not self.output_artifact_digests
-            or any(_CONTENT_ID.fullmatch(item) is None for item in digest_values)
+            stage_identities.schema_version != "4.0.0"
+            or finalized_at.tzinfo is None
+            or bootstrap_mapping.mapping.qualified_source_commit != self.source_commit
+            or bootstrap_mapping.mapping.qualified_source_tree != self.source_tree
+            or bootstrap_mapping.mapping.source_stage_a_workflow_content_id
+            not in source_workflow_ids
+            or registration.receipt.bootstrap_mapping_id != bootstrap_mapping.mapping.content_id
+            or registration.api_evidence.content_id != registration.receipt.api_evidence_root
+            or provenance.workflow_id != registration.receipt.workflow_id
+            or not self.input_artifacts
+            or not self.output_artifacts
+            or authority_artifact not in self.input_artifacts
+            or authority_artifact.origin_class != "AUTHORITY_RUN"
+            or sum(item.origin_class == "AUTHORITY_RUN" for item in self.input_artifacts) != 1
+            or not any(
+                item.origin_class == "BOOTSTRAP_REGISTRATION_RUN" for item in self.input_artifacts
+            )
+            or any(
+                item.artifact_id != registration.receipt.registration_artifact_id
+                or item.digest != registration.receipt.registration_artifact_archive_digest
+                or item.workflow_run_id != registration.receipt.registration_run_id
+                or item.workflow_run_attempt != registration.receipt.registration_run_attempt
+                for item in self.input_artifacts
+                if item.origin_class == "BOOTSTRAP_REGISTRATION_RUN"
+            )
+            or not any(item.origin_class == "CURRENT_STAGE_RUN" for item in self.input_artifacts)
+            or any(item.origin_class != "CURRENT_STAGE_RUN" for item in self.output_artifacts)
+            or len({item.name for item in artifacts}) != len(artifacts)
+            or artifact_coordinate_conflict
+            or any(
+                item.workflow_run_id != provenance.run_id
+                or item.workflow_run_attempt != provenance.run_attempt
+                for item in artifacts
+                if item.origin_class == "CURRENT_STAGE_RUN"
+            )
         ):
             raise _fail("CAMPAIGN02_STAGE_WORKFLOW_PROVENANCE_INVALID")
 
     def finalize(self, summary: StageExecutionSummary) -> StageGateFinalization:
         if (
             summary.gate_analyzer_id != self.identity_id
-            or summary.source_commit != self.workflow_sha
+            or summary.source_commit != self.bootstrap_mapping.mapping.qualified_source_commit
+            or summary.source_tree != self.bootstrap_mapping.mapping.qualified_source_tree
             or summary.runner_environment_id != self.environment_id
         ):
             raise _fail("CAMPAIGN02_STAGE_GATE_FINALIZER_SUMMARY_MISMATCH")
         self.document = {
-            "authority_artifact_digest": self.authority_artifact_digest,
+            "authority_artifact_digest": self.authority_artifact.digest,
+            "authority_artifact_content_digest": self.authority_artifact.content_digest,
+            "authority_artifact_id": self.authority_artifact.artifact_id,
+            "bootstrap_mapping_attestation_id": self.bootstrap_mapping.content_id,
+            "bootstrap_mapping_id": self.bootstrap_mapping.mapping.content_id,
             "decision": "PASS",
-            "dispatch_ref": self.dispatch_ref,
-            "dispatch_sha": self.dispatch_sha,
+            "dispatch_ref": self.provenance.dispatch_ref,
+            "event_name": self.provenance.event_name,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "gate_analyzer_id": summary.gate_analyzer_id,
             "gate_result_id": summary.content_id,
-            "input_artifact_digests": dict(self.input_artifact_digests),
-            "output_artifact_digests": dict(self.output_artifact_digests),
+            "github_sha": self.provenance.github_sha,
+            "input_artifact_digests": {item.name: item.digest for item in self.input_artifacts},
+            "input_artifact_content_digests": {
+                item.name: item.content_digest for item in self.input_artifacts
+            },
+            "input_artifact_ids": {item.name: item.artifact_id for item in self.input_artifacts},
+            "input_artifact_origins": {
+                item.name: item.origin_class for item in self.input_artifacts
+            },
+            "input_artifact_run_attempts": {
+                item.name: item.workflow_run_attempt for item in self.input_artifacts
+            },
+            "input_artifact_run_ids": {
+                item.name: item.workflow_run_id for item in self.input_artifacts
+            },
+            "output_artifact_digests": {item.name: item.digest for item in self.output_artifacts},
+            "output_artifact_content_digests": {
+                item.name: item.content_digest for item in self.output_artifacts
+            },
+            "output_artifact_ids": {item.name: item.artifact_id for item in self.output_artifacts},
+            "output_artifact_origins": {
+                item.name: item.origin_class for item in self.output_artifacts
+            },
+            "output_artifact_run_attempts": {
+                item.name: item.workflow_run_attempt for item in self.output_artifacts
+            },
+            "output_artifact_run_ids": {
+                item.name: item.workflow_run_id for item in self.output_artifacts
+            },
             "plan_evidence_ids": list(summary.plan_evidence_ids),
+            "qualified_source_commit": self.bootstrap_mapping.mapping.qualified_source_commit,
+            "qualified_source_tree": self.bootstrap_mapping.mapping.qualified_source_tree,
+            "registration_receipt_id": self.registration_receipt.content_id,
+            "registration_attestation_id": self.registration.content_id,
+            "registration_api_evidence_root": self.registration.api_evidence.content_id,
+            "registration_artifact_archive_digest": (
+                self.registration_receipt.registration_artifact_archive_digest
+            ),
+            "registration_artifact_id": self.registration_receipt.registration_artifact_id,
+            "registration_run_attempt": self.registration_receipt.registration_run_attempt,
+            "registration_run_id": self.registration_receipt.registration_run_id,
+            "repository": self.provenance.repository,
             "runner_id": summary.runner_id,
-            "schema_version": "2.0.0",
+            "run_attempt": self.provenance.run_attempt,
+            "run_id": self.provenance.run_id,
+            "schema_version": "4.0.0",
             "source_commit": summary.source_commit,
+            "source_stage_a_workflow_content_id": (
+                self.bootstrap_mapping.mapping.source_stage_a_workflow_content_id
+            ),
             "source_tree": summary.source_tree,
             "type_name": "CAMPAIGN02_STAGE_WORKFLOW_GATE_QC",
-            "workflow_file_content_id": self.workflow_file_content_id,
-            "workflow_ref": self.workflow_ref,
-            "workflow_repository": self.workflow_repository,
-            "workflow_run_attempt": self.workflow_run_attempt,
-            "workflow_run_id": self.workflow_run_id,
-            "workflow_sha": self.workflow_sha,
+            "workflow_blob_id": self.provenance.workflow_blob_id,
+            "workflow_content_id": self.provenance.workflow_content_id,
+            "workflow_id": self.provenance.workflow_id,
+            "workflow_path": self.provenance.workflow_path,
+            "workflow_ref": self.provenance.workflow_ref,
+            "workflow_sha": self.provenance.workflow_sha,
         }
         return StageGateFinalization(
             gate_result_id=summary.content_id,
             gate_qc_id=sha256_content_id(
-                b"deltareduce.010.campaign02-stage-workflow-gate-qc.v2\0"
+                b"deltareduce.010.campaign02-stage-workflow-gate-qc.v4\0"
                 + canonical_json_bytes(self.document)
             ),
             finalized_at=self.finalized_at,
@@ -510,6 +623,12 @@ def _identity_binding(value: object, field: str, code: str) -> str:
     return item
 
 
+def _identity_string_list(value: object) -> tuple[str, ...]:
+    if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+        return ()
+    return tuple(value)
+
+
 def verify_bound_stage_runner(
     runner: IdentityBearingStagePlanRunner,
     *,
@@ -518,7 +637,7 @@ def verify_bound_stage_runner(
     source_root: Path,
 ) -> VerifiedBoundStageRunner:
     """Bind a concrete production runner to immutable manifest bytes before execution."""
-    if stage_identities.schema_version != "3.0.0":
+    if stage_identities.schema_version not in {"3.0.0", "4.0.0"}:
         raise _fail("CAMPAIGN02_STAGE_RUNNER_IDENTITY_VERSION_INVALID")
     identity = stage_identities.identity(identity_name)
     expected = {
@@ -542,10 +661,24 @@ def verify_bound_stage_runner(
         "CAMPAIGN02_STAGE_RUNNER_IMPLEMENTATION_CLASS_INVALID",
     )
     actual_class = f"{runner.__class__.__module__}.{runner.__class__.__qualname__}"
+    measured_boundary_mismatch = False
+    if identity_name == "network_fault_runner" and stage_identities.schema_version == "4.0.0":
+        measured_boundary_mismatch = any(
+            getattr(runner, field, None) != identity.value.get(field)
+            for field in (
+                "image_id",
+                "java_executable_id",
+                "native_executable_id",
+                "transport_harness_id",
+            )
+        ) or tuple(getattr(runner, "netty_artifact_ids", ())) != _identity_string_list(
+            identity.value.get("netty_artifact_ids")
+        )
     if (
         expected["source_class"] in _FORBIDDEN_PRIMARY_SOURCE_CLASSES
         or any(getattr(runner, name, None) != value for name, value in expected.items())
         or actual_class != implementation_class
+        or measured_boundary_mismatch
     ):
         raise _fail("CAMPAIGN02_STAGE_RUNNER_OBJECT_BINDING_MISMATCH")
     stage_identities.verify_files(identity_name, source_root)
@@ -603,7 +736,7 @@ def execute_stage(
     if completed_stage not in {"STAGE_A_EXACTNESS", "STAGE_C_EMULATED_WAN"}:
         raise _fail("CAMPAIGN02_EXECUTOR_STAGE_INVALID")
     if (
-        definition.raw.get("schema_version") != "4.0.0"
+        definition.raw.get("schema_version") not in {"4.0.0", "5.0.0"}
         or definition.content_id != plan_catalog.definition_id
         or definition.qualified_runtime_lineage_id != runtime_lineage.content_id
         or definition.stage_execution_identities_id != stage_identities.content_id
@@ -615,6 +748,10 @@ def execute_stage(
         or definition.source_tree != runtime_lineage.source_tree
         or stage_identities.source_commit != runtime_lineage.source_commit
         or stage_identities.source_tree != runtime_lineage.source_tree
+        or (
+            definition.raw.get("schema_version") == "5.0.0"
+            and definition.bootstrap_mapping_id != gate_finalizer.bootstrap_mapping_id
+        )
     ):
         raise _fail("CAMPAIGN02_STAGE_EXECUTION_PACKAGE_MISMATCH")
     identity_name = {
@@ -643,11 +780,39 @@ def execute_stage(
         raise _fail("CAMPAIGN02_STAGE_EXECUTOR_IDENTITY_MISMATCH")
     required_plan_ids = plan_catalog.plan_ids_for_stage(completed_stage)
     plans = tuple(item for item in plan_catalog.plans if item.gate_stage == completed_stage)
+    stage_c_boundary_mismatch = False
+    if completed_stage == "STAGE_C_EMULATED_WAN":
+        network_identity = stage_identities.identity("network_fault_runner").value
+        stage_c_boundary_mismatch = (
+            definition.raw.get("schema_version") != "5.0.0"
+            or stage_identities.schema_version != "4.0.0"
+            or runtime_lineage.schema_version != "5.0.0"
+            or runtime_lineage.image_id != network_identity.get("image_id")
+            or runtime_lineage.java_executable_id != network_identity.get("java_executable_id")
+            or runtime_lineage.native_executable_id != network_identity.get("native_executable_id")
+            or runtime_lineage.transport_harness_id != network_identity.get("transport_harness_id")
+            or runtime_lineage.netty_artifact_ids
+            != _identity_string_list(network_identity.get("netty_artifact_ids"))
+            or plan_runner.image_id != runtime_lineage.image_id
+            or plan_runner.java_executable_id != runtime_lineage.java_executable_id
+            or plan_runner.native_executable_id != runtime_lineage.native_executable_id
+            or plan_runner.transport_harness_id != runtime_lineage.transport_harness_id
+            or plan_runner.netty_artifact_ids != runtime_lineage.netty_artifact_ids
+            or any(
+                item.image_id != runtime_lineage.image_id
+                or item.java_executable_id != runtime_lineage.java_executable_id
+                or item.native_executable_id != runtime_lineage.native_executable_id
+                or item.transport_harness_id != runtime_lineage.transport_harness_id
+                or item.netty_artifact_ids != runtime_lineage.netty_artifact_ids
+                for item in plans
+            )
+        )
     if (
         len(plans) != 15
         or len(required_plan_ids) != 15
         or tuple(item.content_id for item in plans) != required_plan_ids
         or any(item.runner_id != runner_id for item in plans)
+        or stage_c_boundary_mismatch
     ):
         raise _fail("CAMPAIGN02_STAGE_EXACT_PLAN_SET_REQUIRED")
     verified = None

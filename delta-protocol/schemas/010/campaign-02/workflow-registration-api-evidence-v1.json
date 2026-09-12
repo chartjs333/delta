@@ -1,0 +1,190 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:workflow-registration-api-evidence-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_WORKFLOW_REGISTRATION_API_EVIDENCE"
+    },
+    "collected_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "repository": {
+      "const": "chartjs333/delta"
+    },
+    "snapshots": {
+      "additionalProperties": false,
+      "properties": {
+        "bootstrap_workflow_file": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "format": "uri",
+              "pattern": "^https://api\\.github\\.com/",
+              "type": "string"
+            },
+            "response_base64": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "response_sha256": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "status_code": {
+              "const": 200
+            }
+          },
+          "required": [
+            "endpoint",
+            "response_base64",
+            "response_sha256",
+            "status_code"
+          ],
+          "type": "object"
+        },
+        "default_branch_ref": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "format": "uri",
+              "pattern": "^https://api\\.github\\.com/",
+              "type": "string"
+            },
+            "response_base64": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "response_sha256": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "status_code": {
+              "const": 200
+            }
+          },
+          "required": [
+            "endpoint",
+            "response_base64",
+            "response_sha256",
+            "status_code"
+          ],
+          "type": "object"
+        },
+        "registration_artifact_metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "format": "uri",
+              "pattern": "^https://api\\.github\\.com/",
+              "type": "string"
+            },
+            "response_base64": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "response_sha256": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "status_code": {
+              "const": 200
+            }
+          },
+          "required": [
+            "endpoint",
+            "response_base64",
+            "response_sha256",
+            "status_code"
+          ],
+          "type": "object"
+        },
+        "registration_workflow_run": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "format": "uri",
+              "pattern": "^https://api\\.github\\.com/",
+              "type": "string"
+            },
+            "response_base64": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "response_sha256": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "status_code": {
+              "const": 200
+            }
+          },
+          "required": [
+            "endpoint",
+            "response_base64",
+            "response_sha256",
+            "status_code"
+          ],
+          "type": "object"
+        },
+        "workflow_metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "endpoint": {
+              "format": "uri",
+              "pattern": "^https://api\\.github\\.com/",
+              "type": "string"
+            },
+            "response_base64": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "response_sha256": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "status_code": {
+              "const": 200
+            }
+          },
+          "required": [
+            "endpoint",
+            "response_base64",
+            "response_sha256",
+            "status_code"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "bootstrap_workflow_file",
+        "default_branch_ref",
+        "registration_artifact_metadata",
+        "registration_workflow_run",
+        "workflow_metadata"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "collected_at",
+    "execution_authorized",
+    "formal_semantics_id",
+    "repository",
+    "schema_version",
+    "snapshots",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 workflow-registration-api-evidence-v1"
+}

@@ -1,0 +1,431 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:benchmark-definition-v5",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "5.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_DEFINITION"
+    },
+    "B": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "H": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "abi_descriptor_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "apply_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "arm_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 2,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "base_model_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "compiler_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "compatibility_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "dataset_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "decision_function": {
+      "const": "ALL_MANDATORY"
+    },
+    "dependency_lock_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "deployment_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "domain_manifest_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evaluation_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "exclusions": {
+      "items": {
+        "maxLength": 180,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "fault_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "fixedpoint_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_report_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_trace_schema_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "isolation_policy": {
+      "const": "COMPARE_BOTH"
+    },
+    "jdk_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "license_policy_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "metric_definitions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregation": {
+            "enum": [
+              "ALL",
+              "MEAN",
+              "MEDIAN",
+              "P95",
+              "P99"
+            ]
+          },
+          "direction": {
+            "enum": [
+              "EXACT",
+              "HIGHER",
+              "LOWER"
+            ]
+          },
+          "implementation_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "metric_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "missing_run_rule": {
+            "enum": [
+              "FAIL",
+              "REQUIRE_ALL"
+            ]
+          },
+          "outlier_rule": {
+            "enum": [
+              "NONE",
+              "PREDECLARED_IQR"
+            ]
+          },
+          "pass_threshold": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "repetitions": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "statistical_method": {
+            "enum": [
+              "EXACT",
+              "FIXED_SEED_MEAN",
+              "NON_INFERIORITY"
+            ]
+          },
+          "unit": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "aggregation",
+          "direction",
+          "implementation_id",
+          "mandatory",
+          "metric_id",
+          "missing_run_rule",
+          "outlier_rule",
+          "pass_threshold",
+          "repetitions",
+          "statistical_method",
+          "unit"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "missing_run_policy": {
+      "const": "FAIL_CLOSED"
+    },
+    "model_mode": {
+      "enum": [
+        "FULL_MODEL",
+        "QLORA_ADAPTER"
+      ]
+    },
+    "native_build_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "netty_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "network_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "optimizer_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "pi_d": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "denominator": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "domain_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "numerator": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "denominator",
+          "domain_id",
+          "numerator"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "physical_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "primary": {
+      "type": "boolean"
+    },
+    "protocol_registry_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "python_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "qlora_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "refinement_evidence_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "repetitions": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "robust_profile_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sbom_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "seeds": {
+      "items": {
+        "maximum": 2147483647,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "ticket_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "theorem_build_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "tokenizer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "qualified_runtime_lineage_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "workload_contract_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "stage_execution_identities_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "bootstrap_mapping_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "B",
+    "H",
+    "abi_descriptor_id",
+    "apply_profile_id",
+    "arm_ids",
+    "base_model_id",
+    "bootstrap_mapping_id",
+    "campaign_id",
+    "compatibility_policy_id",
+    "compiler_profile_id",
+    "dataset_manifest_id",
+    "decision_function",
+    "dependency_lock_ids",
+    "deployment_policy_id",
+    "domain_manifest_id",
+    "evaluation_ids",
+    "exclusions",
+    "fault_profile_ids",
+    "fixedpoint_profile_id",
+    "formal_report_id",
+    "formal_semantics_id",
+    "formal_trace_schema_id",
+    "image_id",
+    "isolation_policy",
+    "jdk_profile_id",
+    "license_policy_id",
+    "metric_definitions",
+    "missing_run_policy",
+    "model_mode",
+    "native_build_id",
+    "netty_profile_id",
+    "network_profile_ids",
+    "optimizer_profile_id",
+    "physical_profile_id",
+    "pi_d",
+    "primary",
+    "protocol_registry_id",
+    "python_profile_id",
+    "qlora_profile_id",
+    "qualified_runtime_lineage_id",
+    "refinement_evidence_ids",
+    "repetitions",
+    "robust_profile_id",
+    "sbom_id",
+    "schema_version",
+    "seeds",
+    "source_commit",
+    "source_tree",
+    "stage_execution_identities_id",
+    "theorem_build_id",
+    "ticket_plan_id",
+    "tokenizer_id",
+    "type_name",
+    "workload_contract_id"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 benchmark-definition-v5"
+}

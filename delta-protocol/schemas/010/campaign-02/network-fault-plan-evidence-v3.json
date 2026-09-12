@@ -1,0 +1,416 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:network-fault-plan-evidence-v3",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "3.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_NETWORK_FAULT_PLAN_EVIDENCE"
+    },
+    "applied_network_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "decision": {
+      "const": "PASS"
+    },
+    "definition_network_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "excluded_real_wan_profile": {
+      "additionalProperties": false,
+      "properties": {
+        "profile_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reason": {
+          "const": "STAGE_C_EMULATED_ONLY_REAL_WAN_NOT_AUTHORIZED"
+        }
+      },
+      "required": [
+        "profile_id",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "fault_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "fault_results": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "actor_class": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "at_step": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "availability_success": {
+            "type": "boolean"
+          },
+          "current_checkpoint_advanced": {
+            "type": "boolean"
+          },
+          "event_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "expected_outcome": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "native_effect_root": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "native_state_root": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "native_trace_base64": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "native_trace_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "native_wal_sha256": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "observation_source": {
+            "const": "ACTUAL_RUNTIME_TRANSITION"
+          },
+          "observed_outcome": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "passed": {
+            "const": true
+          },
+          "runtime_operation_count": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "view_change_observed": {
+            "type": "boolean"
+          },
+          "wal_replayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action",
+          "actor_class",
+          "at_step",
+          "availability_success",
+          "current_checkpoint_advanced",
+          "event_id",
+          "expected_outcome",
+          "native_effect_root",
+          "native_state_root",
+          "native_trace_base64",
+          "native_trace_id",
+          "native_wal_sha256",
+          "observation_source",
+          "observed_outcome",
+          "passed",
+          "runtime_operation_count",
+          "view_change_observed",
+          "wal_replayed"
+        ],
+        "type": "object"
+      },
+      "maxItems": 7,
+      "minItems": 7,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "implementation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "java_executable_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "measurement_source": {
+      "const": "PYTHON_JAVA_NETTY_CPP_OS"
+    },
+    "native_effect_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "native_executable_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "native_fault_trace_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "native_state_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "native_wal_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "netty_artifact_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "network_counters": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "attempted_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "attempted_payload_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "disconnect_count": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "disconnect_duration_ms": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "dropped_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "dropped_payload_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "duplicate_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "duplicate_payload_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "java_rx_payload_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "java_transport_receipt_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "java_tx_payload_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "network_profile_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "os_rx_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "os_rx_bytes_after": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "os_rx_bytes_before": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "os_tx_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "os_tx_bytes_after": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "os_tx_bytes_before": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reordered_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "unique_delivered_packets": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "unique_delivered_payload_bytes": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "attempted_packets",
+          "attempted_payload_bytes",
+          "disconnect_count",
+          "disconnect_duration_ms",
+          "dropped_packets",
+          "dropped_payload_bytes",
+          "duplicate_packets",
+          "duplicate_payload_bytes",
+          "java_rx_payload_bytes",
+          "java_transport_receipt_id",
+          "java_tx_payload_bytes",
+          "network_profile_id",
+          "os_rx_bytes",
+          "os_rx_bytes_after",
+          "os_rx_bytes_before",
+          "os_tx_bytes",
+          "os_tx_bytes_after",
+          "os_tx_bytes_before",
+          "reordered_packets",
+          "unique_delivered_packets",
+          "unique_delivered_payload_bytes"
+        ],
+        "type": "object"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "resilience_result": {
+      "const": "PASS"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "transport_harness_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "raw_java_receipt_base64": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "raw_java_receipt_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "applied_network_profile_ids",
+    "decision",
+    "definition_network_profile_ids",
+    "environment_id",
+    "excluded_real_wan_profile",
+    "fault_profile_ids",
+    "fault_results",
+    "formal_semantics_id",
+    "image_id",
+    "implementation_id",
+    "java_executable_id",
+    "measurement_source",
+    "native_effect_root",
+    "native_executable_id",
+    "native_fault_trace_id",
+    "native_state_root",
+    "native_wal_sha256",
+    "netty_artifact_ids",
+    "network_counters",
+    "plan_id",
+    "raw_java_receipt_base64",
+    "raw_java_receipt_id",
+    "resilience_result",
+    "runner_id",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "transport_harness_id",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 network-fault-plan-evidence-v3"
+}

@@ -15,6 +15,7 @@ _COMMIT_ID: Final = re.compile(r"^[0-9a-f]{40}$")
 _MANIFEST_DOMAINS: Final = {
     "2.0.0": b"deltareduce.010.campaign02-stage-execution-identities.v2\0",
     "3.0.0": b"deltareduce.010.campaign02-stage-execution-identities.v3\0",
+    "4.0.0": b"deltareduce.010.campaign02-stage-execution-identities.v4\0",
 }
 _IDENTITY_DOMAINS_V2: Final = {
     "evaluation_runner": "deltareduce.010.primary-component.v1",
@@ -39,9 +40,88 @@ _IDENTITY_DOMAINS_V3: Final = {
     "network_fault_runner": "deltareduce.010.campaign02-stage-role-identity.v3",
     "stage_gate_analyzer": "deltareduce.010.campaign02-stage-gate-analyzer.v3",
 }
-_PRODUCTION_SOURCE_CLASSES: Final = {
-    "EXACTNESS_RUNNER": "MEASURED_CI_WORKFLOW",
-    "NETWORK_FAULT_RUNNER": "MEASURED_HARDWARE",
+_IDENTITY_DOMAINS_V4: Final = {
+    **_IDENTITY_DOMAINS_V3,
+    "exactness_runner": "deltareduce.010.campaign02-stage-role-identity.v4",
+    "multi_role_runner": "deltareduce.010.campaign02-multi-role-runner.v4",
+    "network_fault_runner": "deltareduce.010.campaign02-stage-role-identity.v4",
+    "stage_gate_analyzer": "deltareduce.010.campaign02-stage-gate-analyzer.v4",
+}
+_STAGE_C_REQUIRED_PATHS: Final = {
+    ".github/workflows/benchmark-campaign02-stage-c-measured.yml",
+    "CMakeLists.txt",
+    "configs/benchmark/faults-v1.json",
+    "configs/benchmark/networks-v1.json",
+    "delta-node-java/distribution-dependencies.lock.json",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkContracts.java",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NetworkFaultController.java",
+    "delta-core-cpp/include/delta/apply/engine.hpp",
+    "delta-core-cpp/include/delta/certificates/contracts.hpp",
+    "delta-core-cpp/include/delta/certificates/verifier.hpp",
+    "delta-core-cpp/include/delta/core/canonical.hpp",
+    "delta-core-cpp/include/delta/core/protocol.hpp",
+    "delta-core-cpp/include/delta/core/transition.hpp",
+    "delta-core-cpp/include/delta/robust/plan.hpp",
+    "delta-core-cpp/src/apply/engine.cpp",
+    "delta-core-cpp/src/canonical.cpp",
+    "delta-core-cpp/src/certificates/contracts.cpp",
+    "delta-core-cpp/src/certificates/verifier.cpp",
+    "delta-core-cpp/src/protocol.cpp",
+    "delta-core-cpp/src/robust/plan.cpp",
+    "delta-core-cpp/src/transition.cpp",
+    "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json",
+    "delta-protocol/schemas/010/campaign-02/network-fault-plan-evidence-v5.json",
+    "delta-protocol/schemas/010/campaign-02/execution-plan-v6.json",
+    "delta-protocol/schemas/010/campaign-02/qualified-runtime-lineage-v5.json",
+    "delta-protocol/schemas/010/campaign-02/stage-c-candidate-run-v2.json",
+    "delta-protocol/schemas/010/campaign-02/stage-c-candidate-summary-v2.json",
+    "delta-protocol/schemas/010/campaign-02/stage-execution-identities-v4.json",
+    "delta-protocol/schemas/010/fault-profile-v1.json",
+    "delta-protocol/schemas/010/network-profile-v1.json",
+    "delta-runtime-cpp/include/delta/runtime/benchmark.hpp",
+    "delta-runtime-cpp/include/delta/runtime/bounded_mpsc.hpp",
+    "delta-runtime-cpp/include/delta/runtime/certificate_runtime.hpp",
+    "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+    "delta-runtime-cpp/src/benchmark/fault_control.cpp",
+    "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+    "delta-runtime-cpp/src/benchmark/sidecar_main.cpp",
+    "delta-runtime-cpp/src/benchmark/trace_export.cpp",
+    "delta-runtime-cpp/src/certificate_runtime.cpp",
+    "delta-runtime-cpp/src/runtime.cpp",
+    "delta-runtime-cpp/src/wal.cpp",
+    "delta-runtime-cpp/src/wal.hpp",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_binding.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_execution_identities.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_network_fault.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_c_candidate.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_c_runtime.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_execution.py",
+    "delta-worker-python/src/deltatorrent/benchmark/definition.py",
+    "delta-worker-python/src/deltatorrent/benchmark/fault_profiles.py",
+    "delta-worker-python/src/deltatorrent/benchmark/network_profiles.py",
+    "specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py",
+    "specs/010-wan-benchmark-and-quality/scripts/run_campaign02_stage_c_conformance.py",
+}
+_BOOTSTRAP_REQUIRED_PATHS: Final = {
+    ".github/workflows/benchmark-campaign02-stage-a.yml",
+    "delta-protocol/schemas/010/campaign-02/benchmark-definition-v5.json",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_bootstrap.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_execution_identities.py",
+    "delta-worker-python/src/deltatorrent/benchmark/campaign02_stage_execution.py",
+    "delta-worker-python/src/deltatorrent/benchmark/definition.py",
+    "delta-protocol/schemas/010/campaign-02/stage-workflow-gate-qc-v4.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-mapping-v1.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-signature-v1.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-validator-set-v1.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-registration-api-evidence-v1.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-registration-receipt-v3.json",
+    "delta-protocol/schemas/010/campaign-02/workflow-registration-signature-v2.json",
+    "specs/010-wan-benchmark-and-quality/scripts/campaign02_bootstrap_control.py",
+    "specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py",
+    "specs/010-wan-benchmark-and-quality/scripts/campaign02_stage_a_control.py",
 }
 
 
@@ -113,9 +193,11 @@ class StageExecutionIdentityManifest:
         ):
             raise _fail("CAMPAIGN02_STAGE_IDENTITY_MANIFEST_HEADER_INVALID")
         schema_version = str(value["schema_version"])
-        identity_domains = (
-            _IDENTITY_DOMAINS_V3 if schema_version == "3.0.0" else _IDENTITY_DOMAINS_V2
-        )
+        identity_domains = {
+            "2.0.0": _IDENTITY_DOMAINS_V2,
+            "3.0.0": _IDENTITY_DOMAINS_V3,
+            "4.0.0": _IDENTITY_DOMAINS_V4,
+        }[schema_version]
         raw_identities = value["identities"]
         if not isinstance(raw_identities, dict) or set(raw_identities) != set(identity_domains):
             raise _fail("CAMPAIGN02_STAGE_IDENTITY_SET_INVALID")
@@ -190,9 +272,17 @@ class StageExecutionIdentityManifest:
             raise _fail("CAMPAIGN02_MULTI_ROLE_METADATA_INVALID")
         if "entrypoints" in multi_role:
             raise _fail("CAMPAIGN02_MULTI_ROLE_METADATA_MUST_NOT_BE_EXECUTABLE")
-        if self.schema_version == "3.0.0":
-            self._verify_production_identity(exactness, "EXACTNESS_RUNNER")
-            self._verify_production_identity(network, "NETWORK_FAULT_RUNNER")
+        if self.schema_version in {"3.0.0", "4.0.0"}:
+            self._verify_production_identity(
+                exactness, "EXACTNESS_RUNNER", source_class="MEASURED_CI_WORKFLOW"
+            )
+            self._verify_production_identity(
+                network,
+                "NETWORK_FAULT_RUNNER",
+                source_class=(
+                    "MEASURED_RUNTIME" if self.schema_version == "4.0.0" else "MEASURED_HARDWARE"
+                ),
+            )
             self._verify_gate_analyzer_identity(analyzer)
             if (
                 exactness.get("workflow_repository") != "chartjs333/delta"
@@ -201,9 +291,50 @@ class StageExecutionIdentityManifest:
                 or exactness.get("workflow_default_ref") != "refs/heads/main"
             ):
                 raise _fail("CAMPAIGN02_EXACTNESS_WORKFLOW_PROVENANCE_POLICY_INVALID")
+        if self.schema_version == "4.0.0":
+            boundary_ids = (
+                network.get("image_id"),
+                network.get("java_executable_id"),
+                network.get("native_executable_id"),
+                network.get("transport_harness_id"),
+            )
+            netty_ids = network.get("netty_artifact_ids")
+            if (
+                any(
+                    not isinstance(item, str) or _CONTENT_ID.fullmatch(item) is None
+                    for item in boundary_ids
+                )
+                or not isinstance(netty_ids, list)
+                or not netty_ids
+                or any(
+                    not isinstance(item, str) or _CONTENT_ID.fullmatch(item) is None
+                    for item in netty_ids
+                )
+                or len(set(netty_ids)) != len(netty_ids)
+            ):
+                raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_BOUNDARY_IDENTITY_INVALID")
+            if not _STAGE_C_REQUIRED_PATHS <= self._identity_paths(network):
+                raise _fail("CAMPAIGN02_STAGE_C_RECURSIVE_IDENTITY_INCOMPLETE")
+            if not _BOOTSTRAP_REQUIRED_PATHS <= self._identity_paths(analyzer):
+                raise _fail("CAMPAIGN02_BOOTSTRAP_RECURSIVE_IDENTITY_INCOMPLETE")
 
     @staticmethod
-    def _verify_production_identity(value: dict[str, object], role: str) -> None:
+    def _identity_paths(value: dict[str, object]) -> set[str]:
+        result: set[str] = set()
+        for field in ("executable_hashes", "workflow_hashes"):
+            entries = value.get(field)
+            if isinstance(entries, list):
+                result.update(
+                    str(item["path"])
+                    for item in entries
+                    if isinstance(item, dict) and isinstance(item.get("path"), str)
+                )
+        return result
+
+    @staticmethod
+    def _verify_production_identity(
+        value: dict[str, object], role: str, *, source_class: str
+    ) -> None:
         implementation = {
             "entrypoints": value.get("entrypoints"),
             "executable_hashes": value.get("executable_hashes"),
@@ -216,7 +347,7 @@ class StageExecutionIdentityManifest:
         if (
             value.get("role") != role
             or value.get("allowed_role") != role
-            or value.get("source_class") != _PRODUCTION_SOURCE_CLASSES[role]
+            or value.get("source_class") != source_class
             or value.get("implementation_id") != expected_implementation_id
         ):
             raise _fail("CAMPAIGN02_STAGE_PRODUCTION_IDENTITY_INVALID")

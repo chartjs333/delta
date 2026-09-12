@@ -1,0 +1,68 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:workflow-bootstrap-validator-set-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_WORKFLOW_BOOTSTRAP_VALIDATOR_SET"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "f_b": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "quorum_threshold": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "validators": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "controller_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "public_key_base64": {
+            "pattern": "^[A-Za-z0-9+/]{43}=$",
+            "type": "string"
+          },
+          "signer_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "controller_id",
+          "public_key_base64",
+          "signer_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "execution_authorized",
+    "f_b",
+    "formal_semantics_id",
+    "quorum_threshold",
+    "schema_version",
+    "type_name",
+    "validators"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 workflow-bootstrap-validator-set-v1"
+}

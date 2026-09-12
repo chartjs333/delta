@@ -1,4 +1,4 @@
-name: Campaign 02 executable-provenance remediation qualification
+name: Campaign 02 concentrated-loss candidate-binding qualification
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: campaign-02-runner-provenance-${{ github.workflow }}-${{ github.ref }}
+  group: campaign-02-concentrated-loss-candidate-binding-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-provenance-hardware-qualification.json'
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-concentrated-loss-candidate-binding-hardware-qualification.json'
           source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
           git -C control cat-file -e "${source_commit}^{commit}"
           git -C control merge-base --is-ancestor c9a2da487eb6637200e45dbbd56d84b30704d38e "$source_commit"
@@ -45,7 +45,7 @@ jobs:
         run: |
           python3 -m pip install --disable-pip-version-check uv==0.6.14
           uv sync --frozen
-      - name: Run C2-034 through C2-037 portable corpus
+      - name: Run C2-034 through C2-048 portable corpus
         working-directory: qualified-source
         env:
           ALL_PROXY: http://127.0.0.1:9
@@ -58,19 +58,22 @@ jobs:
           uv run ruff format --check .
           uv run mypy delta-worker-python/src
           uv run pytest \
+            delta-worker-python/tests/benchmark/test_campaign02_bootstrap.py \
             delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
             delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
             delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
             delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_campaign02_stage_c_candidate.py \
+            delta-worker-python/tests/benchmark/test_campaign02_stage_c_runtime.py \
             delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py \
             specs/010-wan-benchmark-and-quality/tests/test_campaign02_runner_definition.py \
-            --junitxml="$RUNNER_TEMP/campaign-02-runner-provenance-portable.xml"
+            --junitxml="$RUNNER_TEMP/campaign-02-concentrated-loss-candidate-binding-portable.xml"
       - name: Retain portable corpus
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign-02-runner-provenance-portable-${{ github.run_id }}
-          path: ${{ runner.temp }}/campaign-02-runner-provenance-portable.xml
+          name: campaign-02-concentrated-loss-candidate-binding-portable-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-concentrated-loss-candidate-binding-portable.xml
           if-no-files-found: error
           retention-days: 30
 
@@ -88,7 +91,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-provenance-hardware-qualification.json'
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-concentrated-loss-candidate-binding-hardware-qualification.json'
           source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
           printf 'commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
       - name: Check out immutable remediation source
@@ -116,7 +119,7 @@ jobs:
       - name: Retain TSan result
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign-02-runner-provenance-tsan-${{ github.run_id }}
+          name: campaign-02-concentrated-loss-candidate-binding-tsan-${{ github.run_id }}
           path: ${{ runner.temp }}/campaign-02-runner-provenance-tsan.log
           if-no-files-found: error
           retention-days: 30
@@ -137,7 +140,7 @@ jobs:
         id: source
         shell: bash
         run: |
-          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-provenance-hardware-qualification.json'
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-concentrated-loss-candidate-binding-hardware-qualification.json'
           source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
           printf 'commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
       - name: Check out immutable remediation source
@@ -150,7 +153,7 @@ jobs:
       - name: Download exact-source portable corpus
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
-          name: campaign-02-runner-provenance-portable-${{ github.run_id }}
+          name: campaign-02-concentrated-loss-candidate-binding-portable-${{ github.run_id }}
           path: ${{ runner.temp }}/portable
       - name: Install locked verifier environment
         working-directory: qualified-source
@@ -169,16 +172,16 @@ jobs:
           uv run python \
             specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_runner_provenance_source.py \
             --source-commit '${{ steps.source.outputs.commit }}' \
-            --portable-junit "$RUNNER_TEMP/portable/campaign-02-runner-provenance-portable.xml" \
-            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-provenance-hardware-qualification.json" \
-            --output "$RUNNER_TEMP/campaign-02-runner-provenance-exact-source-qualification.json"
+            --portable-junit "$RUNNER_TEMP/portable/campaign-02-concentrated-loss-candidate-binding-portable.xml" \
+            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-concentrated-loss-candidate-binding-hardware-qualification.json" \
+            --output "$RUNNER_TEMP/campaign-02-concentrated-loss-candidate-binding-exact-source-qualification.json"
           cmp \
-            "$RUNNER_TEMP/campaign-02-runner-provenance-exact-source-qualification.json" \
-            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-runner-provenance-exact-source-qualification.json"
+            "$RUNNER_TEMP/campaign-02-concentrated-loss-candidate-binding-exact-source-qualification.json" \
+            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-concentrated-loss-candidate-binding-exact-source-qualification.json"
       - name: Retain exact-source qualification
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: campaign-02-runner-provenance-source-${{ github.run_id }}
-          path: ${{ runner.temp }}/campaign-02-runner-provenance-exact-source-qualification.json
+          name: campaign-02-concentrated-loss-candidate-binding-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-concentrated-loss-candidate-binding-exact-source-qualification.json
           if-no-files-found: error
           retention-days: 30

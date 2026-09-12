@@ -1,0 +1,297 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:qualified-runtime-lineage-v5",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "5.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "certified_plan_bindings": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "arm_id": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "arm_name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "gate_stage": {
+            "enum": [
+              "STAGE_A_EXACTNESS",
+              "STAGE_B_SCIENTIFIC",
+              "STAGE_C_EMULATED_WAN"
+            ]
+          },
+          "policy": {
+            "additionalProperties": false,
+            "properties": {
+              "accumulator_proof_id": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "apply_arithmetic_profile_id": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "arithmetic_profile_id": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "height": {
+                "maximum": 9007199254740991,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "parameter_schema_id": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "quorum_threshold": {
+                "maximum": 9007199254740991,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "required_shards": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "domain_id": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "shard_id": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "domain_id",
+                    "shard_id"
+                  ],
+                  "type": "object"
+                },
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "round_config_id": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "round_id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "validator_epoch_id": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "validator_ids": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "view": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "accumulator_proof_id",
+              "apply_arithmetic_profile_id",
+              "arithmetic_profile_id",
+              "height",
+              "parameter_schema_id",
+              "quorum_threshold",
+              "required_shards",
+              "round_config_id",
+              "round_id",
+              "validator_epoch_id",
+              "validator_ids",
+              "view"
+            ],
+            "type": "object"
+          },
+          "repetition": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "seed": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "arm_id",
+          "arm_name",
+          "gate_stage",
+          "policy",
+          "repetition",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "maxItems": 36,
+      "minItems": 36,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "dataset_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evaluation_implementation_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evaluation_profile_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evaluation_runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "exactness_runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "hardware_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "java_executable_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "model_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "native_executable_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "network_fault_runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "netty_artifact_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "parent_checkpoint_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scientific_runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "stage_execution_identities_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "stage_execution_model": {
+      "const": "INDEPENDENT_BFT_RUNS"
+    },
+    "tokenizer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "transport_harness_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "writer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "certified_plan_bindings",
+    "dataset_ids",
+    "environment_id",
+    "evaluation_implementation_ids",
+    "evaluation_profile_ids",
+    "evaluation_runner_id",
+    "exactness_runner_id",
+    "formal_semantics_id",
+    "hardware_id",
+    "image_id",
+    "java_executable_id",
+    "model_id",
+    "native_executable_id",
+    "netty_artifact_ids",
+    "network_fault_runner_id",
+    "parent_checkpoint_id",
+    "schema_version",
+    "scientific_runner_id",
+    "source_commit",
+    "source_tree",
+    "stage_execution_identities_id",
+    "stage_execution_model",
+    "tokenizer_id",
+    "transport_harness_id",
+    "type_name",
+    "writer_id"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 qualified-runtime-lineage-v5"
+}

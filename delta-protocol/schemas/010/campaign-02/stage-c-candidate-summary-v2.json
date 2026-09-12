@@ -1,0 +1,128 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-c-candidate-summary-v2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_STAGE_C_NON_PRIMARY_CANDIDATE_SUMMARY"
+    },
+    "authoritative_catalog_constructed": {
+      "const": false
+    },
+    "authoritative_definition_attestation_present": {
+      "const": false
+    },
+    "authoritative_definition_vote_count": {
+      "const": 0
+    },
+    "benchmark_result_qc_emitted": {
+      "const": false
+    },
+    "candidate_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "candidate_plan_catalog_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "candidate_run_package_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+    },
+    "decision": {
+      "const": "PASS"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "observation_count": {
+      "const": 0
+    },
+    "plan_count": {
+      "const": 15
+    },
+    "plan_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 15,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "raw_evidence_roots": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+    },
+    "repeat_semantic_match": {
+      "const": true
+    },
+    "semantic_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "stage_gate_receipt_emitted": {
+      "const": false
+    },
+    "causal_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "repeat_causal_match": {
+      "const": true
+    }
+  },
+  "required": [
+    "authoritative_catalog_constructed",
+    "authoritative_definition_attestation_present",
+    "authoritative_definition_vote_count",
+    "benchmark_result_qc_emitted",
+    "candidate_definition_id",
+    "candidate_plan_catalog_id",
+    "candidate_run_package_ids",
+    "causal_root",
+    "decision",
+    "execution_authorized",
+    "formal_semantics_id",
+    "observation_count",
+    "plan_count",
+    "plan_ids",
+    "raw_evidence_roots",
+    "repeat_causal_match",
+    "repeat_semantic_match",
+    "schema_version",
+    "semantic_root",
+    "source_commit",
+    "source_tree",
+    "stage_gate_receipt_emitted",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-c-candidate-summary-v2"
+}
