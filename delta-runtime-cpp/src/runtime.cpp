@@ -68,6 +68,23 @@ void set_exception(Promise& promise, std::exception_ptr exception) noexcept {
   }
 }
 
+template <typename Result>
+Result await_reactor_result(std::future<Result> future) {
+  auto shared = future.share();
+  try {
+    if constexpr (std::is_void_v<Result>) {
+      shared.get();
+    } else {
+      return shared.get();
+    }
+  } catch (const RuntimeError& error) {
+    // Retain the consumer's shared-state reference through this handler.  The
+    // reactor can release its promise without destroying the exception while
+    // the caller copies it into caller-owned storage.
+    throw RuntimeError(error.code(), error.what());
+  }
+}
+
 }  // namespace
 
 RuntimeError::RuntimeError(ErrorCode code, std::string message)
@@ -131,11 +148,7 @@ class Runtime::Impl {
     if (!queue_.try_push(Work{std::move(work)})) {
       reject(ErrorCode::queue_full, "runtime submission queue is full or closed");
     }
-    try {
-      future.get();
-    } catch (const RuntimeError& error) {
-      throw RuntimeError(error.code(), error.what());
-    }
+    await_reactor_result(std::move(future));
   }
 
   void close() noexcept {
@@ -447,15 +460,7 @@ std::future<SubmitReceipt> Runtime::submit_async(
 }
 
 SubmitReceipt Runtime::submit(core::canonical::Bytes command_bytes, CrashPoint crash_point) {
-  auto future = submit_async(std::move(command_bytes), crash_point).share();
-  try {
-    return future.get();
-  } catch (const RuntimeError& error) {
-    // shared_future retains the consumer's shared-state reference through this
-    // handler.  The reactor can therefore release the producer promise without
-    // destroying the exception while the caller copies it.
-    throw RuntimeError(error.code(), error.what());
-  }
+  return await_reactor_result(submit_async(std::move(command_bytes), crash_point));
 }
 
 std::future<VoteReceipt> Runtime::record_vote_async(
@@ -465,12 +470,7 @@ std::future<VoteReceipt> Runtime::record_vote_async(
 }
 
 VoteReceipt Runtime::record_vote(core::canonical::Bytes vote_bytes, CrashPoint crash_point) {
-  auto future = record_vote_async(std::move(vote_bytes), crash_point).share();
-  try {
-    return future.get();
-  } catch (const RuntimeError& error) {
-    throw RuntimeError(error.code(), error.what());
-  }
+  return await_reactor_result(record_vote_async(std::move(vote_bytes), crash_point));
 }
 
 void Runtime::snapshot() { impl_->snapshot(); }
