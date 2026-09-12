@@ -437,6 +437,22 @@ execution authorization remain absent, authoritative catalog construction has no
 primary observations remain `0`, `BenchmarkResultQC` remains absent, Feature 010 remains `NO_GO`
 and Feature 011 remains blocked.
 
+After PR #25 received independent human approval at exact head
+`bd961b1cc308a5e2320cae7e6e4b4e0416c1c994`, it was merged without squashing into the integrated
+runner branch as `95b287168ad02bbe585fbb05a7b27bbd951713f3`. The merge has parents
+`ed72726d455e6b51dc3a424b13903b60ca346c9d` and the exact reviewed head, and its tree is
+`814afa83551bab2312f99e68b9f66ac48dc7158c`. The corrected tree has a fresh non-primary physical
+qualification in `evidence/campaign-02-reactor-lifetime-hardware-qualification.json` and a fresh
+192-case portable exact-source qualification in
+`evidence/campaign-02-reactor-lifetime-exact-source-qualification.json`. The dedicated evidence
+workflow replays the portable corpus and the affected runtime/benchmark/certificate TSan targets
+against that immutable merge commit before accepting the committed report.
+
+This requalification supersedes `300ad841...` only as the source selected by a future replacement
+default-branch caller. It does not make the closed PR #24 registration mapping or receipt reusable,
+does not authorize `EXECUTE_STAGE_A`, C2-023 or C2-024, and creates no Definition, attestation,
+execution, observation, `StageGateReceipt` or `BenchmarkResultQC`.
+
 ## Unconditional STOP conditions
 
 - No old Definition or Stage A artifact may be edited, overwritten or linked as a new gate result.
