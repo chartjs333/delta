@@ -447,13 +447,13 @@ std::future<SubmitReceipt> Runtime::submit_async(
 }
 
 SubmitReceipt Runtime::submit(core::canonical::Bytes command_bytes, CrashPoint crash_point) {
-  auto future = submit_async(std::move(command_bytes), crash_point);
+  auto future = submit_async(std::move(command_bytes), crash_point).share();
   try {
     return future.get();
   } catch (const RuntimeError& error) {
-    // Keep the consumer's shared state alive while copying the reactor-owned
-    // exception.  Otherwise its final producer reference can be released while
-    // the caller is inspecting the exception rethrown by future::get().
+    // shared_future retains the consumer's shared-state reference through this
+    // handler.  The reactor can therefore release the producer promise without
+    // destroying the exception while the caller copies it.
     throw RuntimeError(error.code(), error.what());
   }
 }
@@ -465,7 +465,7 @@ std::future<VoteReceipt> Runtime::record_vote_async(
 }
 
 VoteReceipt Runtime::record_vote(core::canonical::Bytes vote_bytes, CrashPoint crash_point) {
-  auto future = record_vote_async(std::move(vote_bytes), crash_point);
+  auto future = record_vote_async(std::move(vote_bytes), crash_point).share();
   try {
     return future.get();
   } catch (const RuntimeError& error) {
