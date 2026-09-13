@@ -1,0 +1,244 @@
+{
+  "document_type": "CAMPAIGN02_CONTROLLER_APPOINTMENT_WORKSHEET",
+  "document_version": "1.0.0",
+  "template": true,
+  "status": "BLOCKED_PENDING_APPOINTMENT",
+  "note": "Governance worksheet only. Null means unknown/unverified. This is not a protocol validator set, signed attestation or execution authority.",
+  "policy_path": "docs/campaign02-controller-custody-policy.md",
+  "policy_version": "1.0.0",
+  "policy_revision": null,
+  "repository": "chartjs333/delta",
+  "campaign_id": "campaign-02",
+  "allowed_scope": [
+    "bootstrap_mapping",
+    "zero_execution_registration"
+  ],
+  "execution_authorized": false,
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "f_b": 1,
+  "quorum_threshold": 3,
+  "reference_package": {
+    "pull_request_url": "https://github.com/chartjs333/delta/pull/28",
+    "unsigned_evidence_head": "84b337892cb70d0ce9823ef2d64fab572752b145",
+    "mapping_id": "sha256:7c03edabceabf86575f87b69e7ccc089d01eb57e0e06a3cbeeffffadadec3583",
+    "api_evidence_root": "sha256:9375a72a5d7cc09800a6d031e5d9efe7335df4a59cc034f826437ba9708c9717",
+    "registration_receipt_id": "sha256:fabdccc49a19b8558003b163e6f59979229de561ce0fa86d3807f5ffea5fb84e",
+    "registration_signature_after": "2026-09-13T11:12:47.874641Z",
+    "registration_signature_before": "2026-12-12T11:07:55Z",
+    "supersession_and_current_availability_review_ref": null
+  },
+  "governance_authority": {
+    "identity": null,
+    "authority_basis_ref": null
+  },
+  "independent_custody_reviewer": {
+    "identity": null,
+    "independence_evidence_ref": null
+  },
+  "validator_set_id": null,
+  "appointment_valid_from": null,
+  "appointment_valid_until": null,
+  "controllers": [
+    {
+      "slot": 1,
+      "status": "UNASSIGNED",
+      "controller_id": null,
+      "signer_id": null,
+      "identity_type": null,
+      "accountable_owner_id": null,
+      "owner_identity_verification_ref": null,
+      "owner_acceptance_ref": null,
+      "administrative_domain_id": null,
+      "custody_boundary_id": null,
+      "custody_kind": null,
+      "public_key_base64": null,
+      "public_key_raw_sha256": null,
+      "public_key_binding_evidence_ref": null,
+      "independent_key_generation_evidence_ref": null,
+      "signing_roles_evidence_ref": null,
+      "deployment_administrators_evidence_ref": null,
+      "identity_and_recovery_administrators_evidence_ref": null,
+      "export_and_backup_policy_evidence_ref": null,
+      "access_control_review_evidence_ref": null,
+      "signing_and_evidence_verification_procedure_ref": null,
+      "signing_audit_location_ref": null,
+      "incident_and_revocation_procedure_ref": null,
+      "owner_confirmed_at": null
+    },
+    {
+      "slot": 2,
+      "status": "UNASSIGNED",
+      "controller_id": null,
+      "signer_id": null,
+      "identity_type": null,
+      "accountable_owner_id": null,
+      "owner_identity_verification_ref": null,
+      "owner_acceptance_ref": null,
+      "administrative_domain_id": null,
+      "custody_boundary_id": null,
+      "custody_kind": null,
+      "public_key_base64": null,
+      "public_key_raw_sha256": null,
+      "public_key_binding_evidence_ref": null,
+      "independent_key_generation_evidence_ref": null,
+      "signing_roles_evidence_ref": null,
+      "deployment_administrators_evidence_ref": null,
+      "identity_and_recovery_administrators_evidence_ref": null,
+      "export_and_backup_policy_evidence_ref": null,
+      "access_control_review_evidence_ref": null,
+      "signing_and_evidence_verification_procedure_ref": null,
+      "signing_audit_location_ref": null,
+      "incident_and_revocation_procedure_ref": null,
+      "owner_confirmed_at": null
+    },
+    {
+      "slot": 3,
+      "status": "UNASSIGNED",
+      "controller_id": null,
+      "signer_id": null,
+      "identity_type": null,
+      "accountable_owner_id": null,
+      "owner_identity_verification_ref": null,
+      "owner_acceptance_ref": null,
+      "administrative_domain_id": null,
+      "custody_boundary_id": null,
+      "custody_kind": null,
+      "public_key_base64": null,
+      "public_key_raw_sha256": null,
+      "public_key_binding_evidence_ref": null,
+      "independent_key_generation_evidence_ref": null,
+      "signing_roles_evidence_ref": null,
+      "deployment_administrators_evidence_ref": null,
+      "identity_and_recovery_administrators_evidence_ref": null,
+      "export_and_backup_policy_evidence_ref": null,
+      "access_control_review_evidence_ref": null,
+      "signing_and_evidence_verification_procedure_ref": null,
+      "signing_audit_location_ref": null,
+      "incident_and_revocation_procedure_ref": null,
+      "owner_confirmed_at": null
+    },
+    {
+      "slot": 4,
+      "status": "UNASSIGNED",
+      "controller_id": null,
+      "signer_id": null,
+      "identity_type": null,
+      "accountable_owner_id": null,
+      "owner_identity_verification_ref": null,
+      "owner_acceptance_ref": null,
+      "administrative_domain_id": null,
+      "custody_boundary_id": null,
+      "custody_kind": null,
+      "public_key_base64": null,
+      "public_key_raw_sha256": null,
+      "public_key_binding_evidence_ref": null,
+      "independent_key_generation_evidence_ref": null,
+      "signing_roles_evidence_ref": null,
+      "deployment_administrators_evidence_ref": null,
+      "identity_and_recovery_administrators_evidence_ref": null,
+      "export_and_backup_policy_evidence_ref": null,
+      "access_control_review_evidence_ref": null,
+      "signing_and_evidence_verification_procedure_ref": null,
+      "signing_audit_location_ref": null,
+      "incident_and_revocation_procedure_ref": null,
+      "owner_confirmed_at": null
+    }
+  ],
+  "pairwise_independence_reviews": [
+    {
+      "slots": [
+        1,
+        2
+      ],
+      "shared_signing_authority": null,
+      "shared_administrative_or_deployment_control": null,
+      "shared_recovery_or_backup_control": null,
+      "evidence_ref": null,
+      "evidence_sha256": null,
+      "reviewer_id": null,
+      "reviewed_at": null,
+      "decision": "PENDING"
+    },
+    {
+      "slots": [
+        1,
+        3
+      ],
+      "shared_signing_authority": null,
+      "shared_administrative_or_deployment_control": null,
+      "shared_recovery_or_backup_control": null,
+      "evidence_ref": null,
+      "evidence_sha256": null,
+      "reviewer_id": null,
+      "reviewed_at": null,
+      "decision": "PENDING"
+    },
+    {
+      "slots": [
+        1,
+        4
+      ],
+      "shared_signing_authority": null,
+      "shared_administrative_or_deployment_control": null,
+      "shared_recovery_or_backup_control": null,
+      "evidence_ref": null,
+      "evidence_sha256": null,
+      "reviewer_id": null,
+      "reviewed_at": null,
+      "decision": "PENDING"
+    },
+    {
+      "slots": [
+        2,
+        3
+      ],
+      "shared_signing_authority": null,
+      "shared_administrative_or_deployment_control": null,
+      "shared_recovery_or_backup_control": null,
+      "evidence_ref": null,
+      "evidence_sha256": null,
+      "reviewer_id": null,
+      "reviewed_at": null,
+      "decision": "PENDING"
+    },
+    {
+      "slots": [
+        2,
+        4
+      ],
+      "shared_signing_authority": null,
+      "shared_administrative_or_deployment_control": null,
+      "shared_recovery_or_backup_control": null,
+      "evidence_ref": null,
+      "evidence_sha256": null,
+      "reviewer_id": null,
+      "reviewed_at": null,
+      "decision": "PENDING"
+    },
+    {
+      "slots": [
+        3,
+        4
+      ],
+      "shared_signing_authority": null,
+      "shared_administrative_or_deployment_control": null,
+      "shared_recovery_or_backup_control": null,
+      "evidence_ref": null,
+      "evidence_sha256": null,
+      "reviewer_id": null,
+      "reviewed_at": null,
+      "decision": "PENDING"
+    }
+  ],
+  "approval_record_instructions": "Keep the decision outside the frozen register. It must reference exact policy/register revisions or file-byte digests, validator_set_id, package IDs, owner acceptances, reviewer findings, validity window and explicit bootstrap-signing permission. Do not insert a self-referential register hash.",
+  "unresolved_requirements": [
+    "Exact policy revision adopted by explicitly identified governance authority",
+    "Four real controller identities, owners and independently generated public keys",
+    "Authenticated owner acceptance and key binding for every controller",
+    "Independent custody, signing, deployment and recovery evidence for every controller",
+    "Independent review of all six controller pairs",
+    "Canonical validated validator set with matching ID and four register entries",
+    "Bounded appointment and signing validity window",
+    "External exact-revision governance approval explicitly permitting bootstrap signing"
+  ]
+}
