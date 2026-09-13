@@ -83,8 +83,8 @@ jobs:
             --arg workflow_sha "$GITHUB_WORKFLOW_SHA" \
             --arg run_id "$GITHUB_RUN_ID" \
             --arg run_attempt "$GITHUB_RUN_ATTEMPT" \
-            --arg qualified_source_commit '300ad8415862f82eeb9e0fd9c34c01620dfab399' \
-            --arg qualified_source_tree 'e3fe90b6eb90924c41b11cc9379e4752c99ffe74' \
+            --arg qualified_source_commit '95b287168ad02bbe585fbb05a7b27bbd951713f3' \
+            --arg qualified_source_tree '814afa83551bab2312f99e68b9f66ac48dc7158c' \
             --arg source_stage_a_workflow_content_id \
               'sha256:05da996e4d8f67ad7b11d2c5bfc152a804201936de63ed13441817b576d8396f' \
             '{
@@ -117,7 +117,7 @@ jobs:
   execute-stage-a:
     name: Invoke immutable qualified Stage A workflow
     if: ${{ inputs.operation == 'EXECUTE_STAGE_A' }}
-    uses: chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@300ad8415862f82eeb9e0fd9c34c01620dfab399
+    uses: chartjs333/delta/.github/workflows/benchmark-campaign02-stage-a.yml@95b287168ad02bbe585fbb05a7b27bbd951713f3
     with:
       bootstrap_artifact_run_id: ${{ inputs.bootstrap_artifact_run_id }}
       bootstrap_artifact_name: ${{ inputs.bootstrap_artifact_name }}
