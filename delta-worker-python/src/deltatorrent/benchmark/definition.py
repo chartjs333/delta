@@ -72,6 +72,11 @@ _DEFINITION_FIELDS_V2: Final = _DEFINITION_FIELDS_V1 | {
     "qualified_runtime_lineage_id",
     "workload_contract_id",
 }
+_DEFINITION_FIELDS_V3: Final = _DEFINITION_FIELDS_V2 | {
+    "stage_execution_identities_id",
+}
+_DEFINITION_FIELDS_V4: Final = _DEFINITION_FIELDS_V3
+_DEFINITION_FIELDS_V5: Final = _DEFINITION_FIELDS_V4 | {"bootstrap_mapping_id"}
 _METRIC_FIELDS: Final = {
     "aggregation",
     "direction",
@@ -225,6 +230,8 @@ class BenchmarkDefinition:
     campaign_id: str | None
     workload_contract_id: str | None
     qualified_runtime_lineage_id: str | None
+    stage_execution_identities_id: str | None
+    bootstrap_mapping_id: str | None
     raw: dict[str, Any]
 
     @classmethod
@@ -238,6 +245,9 @@ class BenchmarkDefinition:
         expected_fields = {
             "1.0.0": _DEFINITION_FIELDS_V1,
             "2.0.0": _DEFINITION_FIELDS_V2,
+            "3.0.0": _DEFINITION_FIELDS_V3,
+            "4.0.0": _DEFINITION_FIELDS_V4,
+            "5.0.0": _DEFINITION_FIELDS_V5,
         }.get(version)
         if expected_fields is None or set(value) != expected_fields:
             raise _fail("BENCHMARK_DEFINITION_FIELDS_INVALID")
@@ -327,7 +337,9 @@ class BenchmarkDefinition:
         campaign_id: str | None = None
         workload_contract_id: str | None = None
         qualified_runtime_lineage_id: str | None = None
-        if version == "2.0.0":
+        stage_execution_identities_id: str | None = None
+        bootstrap_mapping_id: str | None = None
+        if version in {"2.0.0", "3.0.0", "4.0.0", "5.0.0"}:
             campaign_id = _string(value["campaign_id"], "CAMPAIGN_ID_INVALID")
             workload_contract_id = _content_id(
                 value["workload_contract_id"], "WORKLOAD_CONTRACT_ID_INVALID"
@@ -335,6 +347,16 @@ class BenchmarkDefinition:
             qualified_runtime_lineage_id = _content_id(
                 value["qualified_runtime_lineage_id"],
                 "QUALIFIED_RUNTIME_LINEAGE_ID_INVALID",
+            )
+        if version in {"3.0.0", "4.0.0", "5.0.0"}:
+            stage_execution_identities_id = _content_id(
+                value["stage_execution_identities_id"],
+                "STAGE_EXECUTION_IDENTITIES_ID_INVALID",
+            )
+        if version == "5.0.0":
+            bootstrap_mapping_id = _content_id(
+                value["bootstrap_mapping_id"],
+                "BOOTSTRAP_MAPPING_ID_INVALID",
             )
         return cls(
             B=_integer(value["B"], "B_INVALID", minimum=1),
@@ -361,6 +383,8 @@ class BenchmarkDefinition:
             campaign_id=campaign_id,
             workload_contract_id=workload_contract_id,
             qualified_runtime_lineage_id=qualified_runtime_lineage_id,
+            stage_execution_identities_id=stage_execution_identities_id,
+            bootstrap_mapping_id=bootstrap_mapping_id,
             raw=dict(value),
         )
 
@@ -373,6 +397,9 @@ class BenchmarkDefinition:
         domain = {
             "1.0.0": b"deltareduce.010.benchmark-definition.v1\0",
             "2.0.0": b"deltareduce.010.benchmark-definition.v2\0",
+            "3.0.0": b"deltareduce.010.benchmark-definition.v3\0",
+            "4.0.0": b"deltareduce.010.benchmark-definition.v4\0",
+            "5.0.0": b"deltareduce.010.benchmark-definition.v5\0",
         }[self.raw["schema_version"]]
         return "sha256:" + hashlib.sha256(domain + self.canonical_bytes).hexdigest()
 

@@ -17,7 +17,6 @@ from typing import Any, Final, Protocol
 
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.stage_authorization import (
-    CAMPAIGN02_STAGE_GATE_ANALYZER_ID,
     StageAuthorizationProof,
     StageGateReceipt,
     VerifiedStageAuthorization,
@@ -320,6 +319,15 @@ class ParameterShardKey:
         if not self.domain_id or not self.shard_id:
             raise _fail("CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID")
 
+    @classmethod
+    def from_dict(cls, value: object) -> ParameterShardKey:
+        if not isinstance(value, dict) or set(value) != {"domain_id", "shard_id"}:
+            raise _fail("CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID")
+        return cls(
+            _string(value["domain_id"], "CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID"),
+            _string(value["shard_id"], "CAMPAIGN02_PARAMETER_SHARD_KEY_INVALID"),
+        )
+
     @property
     def document(self) -> dict[str, str]:
         return {"domain_id": self.domain_id, "shard_id": self.shard_id}
@@ -366,6 +374,78 @@ class CertifiedRoundPolicy:
             sorted(set(self.required_shards))
         ):
             raise _fail("CAMPAIGN02_REQUIRED_SHARD_MATRIX_INVALID")
+
+    @classmethod
+    def from_dict(cls, value: object) -> CertifiedRoundPolicy:
+        fields = {
+            "accumulator_proof_id",
+            "apply_arithmetic_profile_id",
+            "arithmetic_profile_id",
+            "height",
+            "parameter_schema_id",
+            "quorum_threshold",
+            "required_shards",
+            "round_config_id",
+            "round_id",
+            "validator_epoch_id",
+            "validator_ids",
+            "view",
+        }
+        if not isinstance(value, dict) or set(value) != fields:
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_FIELDS_INVALID")
+        validator_ids = value["validator_ids"]
+        required_shards = value["required_shards"]
+        if (
+            not isinstance(validator_ids, list)
+            or any(not isinstance(item, str) for item in validator_ids)
+            or not isinstance(required_shards, list)
+        ):
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_FIELDS_INVALID")
+        height = value["height"]
+        view = value["view"]
+        quorum_threshold = value["quorum_threshold"]
+        if (
+            isinstance(height, bool)
+            or not isinstance(height, int)
+            or height < 1
+            or isinstance(view, bool)
+            or not isinstance(view, int)
+            or view < 0
+            or isinstance(quorum_threshold, bool)
+            or not isinstance(quorum_threshold, int)
+            or quorum_threshold < 1
+        ):
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_COORDINATE_INVALID")
+        result = cls(
+            round_id=_string(value["round_id"], "CAMPAIGN02_CERTIFIED_ROUND_ID_INVALID"),
+            height=height,
+            view=view,
+            round_config_id=_content_id(
+                value["round_config_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            validator_epoch_id=_content_id(
+                value["validator_epoch_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            parameter_schema_id=_content_id(
+                value["parameter_schema_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            arithmetic_profile_id=_content_id(
+                value["arithmetic_profile_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            accumulator_proof_id=_content_id(
+                value["accumulator_proof_id"], "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID"
+            ),
+            apply_arithmetic_profile_id=_content_id(
+                value["apply_arithmetic_profile_id"],
+                "CAMPAIGN02_CERTIFIED_ROUND_IDENTITY_INVALID",
+            ),
+            validator_ids=tuple(validator_ids),
+            quorum_threshold=quorum_threshold,
+            required_shards=tuple(ParameterShardKey.from_dict(item) for item in required_shards),
+        )
+        if result.document != value:
+            raise _fail("CAMPAIGN02_CERTIFIED_ROUND_DOCUMENT_MISMATCH")
+        return result
 
     @property
     def document(self) -> dict[str, object]:
@@ -581,6 +661,10 @@ class CampaignExecutionPlan:
     ticket_plan_id: str | None = None
     qualified_runtime_lineage_id: str | None = None
     gate_stage: str | None = None
+    java_executable_id: str | None = None
+    native_executable_id: str | None = None
+    transport_harness_id: str | None = None
+    netty_artifact_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.execution_class not in {"NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"}:
@@ -630,6 +714,26 @@ class CampaignExecutionPlan:
             or self.execution_authorization_id is not None
         ):
             raise _fail("CAMPAIGN02_PLAN_GATE_STAGE_INVALID")
+        stage_c_boundary_ids = (
+            self.java_executable_id,
+            self.native_executable_id,
+            self.transport_harness_id,
+        )
+        has_stage_c_boundary = any(value is not None for value in stage_c_boundary_ids) or bool(
+            self.netty_artifact_ids
+        )
+        if has_stage_c_boundary:
+            if (
+                self.gate_stage != "STAGE_C_EMULATED_WAN"
+                or any(
+                    not isinstance(value, str) or _CONTENT_ID.fullmatch(value) is None
+                    for value in stage_c_boundary_ids
+                )
+                or not self.netty_artifact_ids
+                or len(set(self.netty_artifact_ids)) != len(self.netty_artifact_ids)
+                or any(_CONTENT_ID.fullmatch(value) is None for value in self.netty_artifact_ids)
+            ):
+                raise _fail("CAMPAIGN02_PLAN_STAGE_C_BOUNDARY_INVALID")
         execution_binding_ids = (
             self.domain_manifest_id,
             self.ticket_plan_id,
@@ -720,7 +824,9 @@ class CampaignExecutionPlan:
             "round_id": self.round_id,
             "runner_id": self.runner_id,
             "schema_version": (
-                "5.0.0"
+                "6.0.0"
+                if self.java_executable_id is not None
+                else "5.0.0"
                 if self.gate_stage is not None
                 else "3.0.0"
                 if self.ticket_plan_id is not None
@@ -749,6 +855,15 @@ class CampaignExecutionPlan:
                     "ticket_identity_scope": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID",
                 }
             )
+            if self.java_executable_id is not None:
+                document.update(
+                    {
+                        "java_executable_id": self.java_executable_id,
+                        "native_executable_id": self.native_executable_id,
+                        "netty_artifact_ids": list(self.netty_artifact_ids),
+                        "transport_harness_id": self.transport_harness_id,
+                    }
+                )
         if self.ticket_plan_id is not None:
             document.update(
                 {
@@ -762,7 +877,9 @@ class CampaignExecutionPlan:
     @property
     def content_id(self) -> str:
         version = (
-            b"v5"
+            b"v6"
+            if self.java_executable_id is not None
+            else b"v5"
             if self.gate_stage is not None
             else b"v3"
             if self.ticket_plan_id is not None
@@ -789,6 +906,8 @@ class Campaign02PlanCatalogView(Protocol):
     attestation_id: str
     definition_attestation_verified_at: datetime
     runtime_lineage_id: str
+    stage_execution_identities_id: str
+    gate_analyzer_id: str
     plans: tuple[CampaignExecutionPlan, ...]
 
     @property
@@ -887,13 +1006,20 @@ def authorize_execution_class(
             or receipt.qualified_runtime_lineage_id != plan_catalog.runtime_lineage_id
             or receipt.required_plan_ids != expected_receipt_plans
             or receipt.accepted_plan_ids != expected_receipt_plans
-            or receipt.gate_analyzer_id != CAMPAIGN02_STAGE_GATE_ANALYZER_ID
+            or receipt.gate_analyzer_id != plan_catalog.gate_analyzer_id
             or receipt.source_commit != plan.source_commit
             or receipt.source_tree != plan.source_tree
             or receipt.finalized_at < plan_catalog.definition_attestation_verified_at
             or receipt.finalized_at > authorization.issued_at
         ):
             raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_LINEAGE_INVALID")
+        expected_runner_ids = {
+            item.runner_id
+            for item in plan_catalog.plans
+            if item.gate_stage == receipt.completed_stage
+        }
+        if len(expected_runner_ids) != 1 or receipt.runner_id not in expected_runner_ids:
+            raise _fail("CAMPAIGN02_STAGE_PREDECESSOR_RUNNER_INVALID")
         receipts.append(receipt)
     predecessor_stages = tuple(sorted(item.completed_stage for item in receipts))
     if (

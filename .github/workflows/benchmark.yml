@@ -124,8 +124,11 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
         run: |
           mkdir --parents "$RUNNER_TEMP/classes" "$RUNNER_TEMP/run"
+          mapfile -t benchmark_sources < <(find \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark \
+            -maxdepth 1 -type f -name '*.java' ! -name 'MeasuredStageCTransport.java' | sort)
           javac --release 17 -Xlint:all -Werror -d "$RUNNER_TEMP/classes" \
-            delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            "${benchmark_sources[@]}" \
             delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java
       - name: Verify boundary negatives and crash-contained exact replay
         env:
@@ -187,9 +190,12 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
         run: |
           mkdir --parents "$RUNNER_TEMP/classes"
+          mapfile -t benchmark_sources < <(find \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark \
+            -maxdepth 1 -type f -name '*.java' ! -name 'MeasuredStageCTransport.java' | sort)
           "$RUNNER_TEMP/jdk/bin/javac" --release "${{ matrix.feature }}" -Xlint:all -Werror \
             -d "$RUNNER_TEMP/classes" \
-            delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            "${benchmark_sources[@]}" \
             delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java \
             delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkFfmConformance.java
       - name: Compare actual embedded FFM and isolated sidecar paths
@@ -460,6 +466,9 @@ jobs:
           NO_PROXY: localhost,127.0.0.1,::1
         run: |
           mkdir --parents "$RUNNER_TEMP/java-classes"
+          mapfile -t benchmark_sources < <(find \
+            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/benchmark \
+            -maxdepth 1 -type f -name '*.java' ! -name 'MeasuredStageCTransport.java' | sort)
           "$RUNNER_TEMP/jdk/bin/javac" --release '${{ matrix.feature }}' \
             -Xlint:all,-restricted -Werror \
             -d "$RUNNER_TEMP/java-classes" \
@@ -479,7 +488,7 @@ jobs:
             qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/AdmissionTransport.java \
             qualified-source/delta-node-java/src/main/java/io/deltareduce/node/scheduling/LeaseTimerRouter.java \
             qualified-source/delta-node-java/src/test/java/io/deltareduce/node/scheduling/SchedulingConformance.java \
-            qualified-source/delta-node-java/src/main/java/io/deltareduce/node/benchmark/*.java \
+            "${benchmark_sources[@]}" \
             qualified-source/delta-node-java/src/test/java/io/deltareduce/node/benchmark/BenchmarkConformance.java
       - name: Execute exact FFM parity and boundary negative matrix
         env:

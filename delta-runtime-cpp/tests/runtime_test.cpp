@@ -287,6 +287,35 @@ void test_corruption_fails_closed() {
   });
 }
 
+void test_snapshot_io_error_lifetime() {
+  const auto directory = case_directory("snapshot-io-error-lifetime");
+  const auto blocked_temporary = directory / "runtime.snapshot.tmp";
+  std::error_code error;
+  std::filesystem::create_directories(blocked_temporary, error);
+  expect(!error, "cannot create blocked snapshot temporary directory");
+  {
+    std::ofstream sentinel(blocked_temporary / "retain-directory", std::ios::binary);
+    sentinel << "snapshot temporary path must remain a directory";
+    sentinel.close();
+    expect(sentinel.good(), "cannot populate blocked snapshot temporary directory");
+  }
+
+  runtime::Runtime instance(config(directory));
+  for (std::size_t attempt = 0U; attempt < 128U; ++attempt) {
+    try {
+      instance.snapshot();
+    } catch (const runtime::RuntimeError& failure) {
+      expect(failure.code() == runtime::ErrorCode::io_error, "snapshot failure code changed");
+      expect(
+          std::string_view(failure.what()) == "cannot open snapshot temporary file",
+          "snapshot failure message changed");
+      continue;
+    }
+    fail("blocked snapshot temporary path did not fail closed");
+  }
+  expect(instance.accepting(), "snapshot I/O failure stopped the reactor");
+}
+
 void test_concurrent_producers_have_one_serial_state() {
   const auto directory = case_directory("mpsc-producers");
   runtime::Runtime instance(config(directory));
@@ -377,6 +406,7 @@ int main() {
     test_vote_journal_recovers_before_admission();
     test_crash_matrix_and_torn_tail_recovery();
     test_corruption_fails_closed();
+    test_snapshot_io_error_lifetime();
     test_concurrent_producers_have_one_serial_state();
     test_stale_command_rejected_without_append();
     test_uninterrupted_and_replayed_execution_are_identical();

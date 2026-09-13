@@ -1,0 +1,335 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-workflow-gate-qc-v3",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "3.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_STAGE_WORKFLOW_GATE_QC"
+    },
+    "authority_artifact_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "authority_artifact_content_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "authority_artifact_id": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "bootstrap_mapping_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "bootstrap_mapping_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "decision": {
+      "const": "PASS"
+    },
+    "dispatch_ref": {
+      "const": "refs/heads/main"
+    },
+    "event_name": {
+      "const": "workflow_dispatch"
+    },
+    "gate_analyzer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "gate_result_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "github_sha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "input_artifact_digests": {
+      "additionalProperties": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "input_artifact_content_digests": {
+      "additionalProperties": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "input_artifact_ids": {
+      "additionalProperties": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "input_artifact_origins": {
+      "additionalProperties": {
+        "enum": [
+          "AUTHORITY_RUN",
+          "BOOTSTRAP_REGISTRATION_RUN",
+          "CURRENT_STAGE_RUN"
+        ]
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "input_artifact_run_attempts": {
+      "additionalProperties": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "input_artifact_run_ids": {
+      "additionalProperties": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "output_artifact_digests": {
+      "additionalProperties": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "output_artifact_content_digests": {
+      "additionalProperties": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "output_artifact_ids": {
+      "additionalProperties": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "output_artifact_origins": {
+      "additionalProperties": {
+        "enum": [
+          "AUTHORITY_RUN",
+          "BOOTSTRAP_REGISTRATION_RUN",
+          "CURRENT_STAGE_RUN"
+        ]
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "output_artifact_run_attempts": {
+      "additionalProperties": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "output_artifact_run_ids": {
+      "additionalProperties": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minProperties": 1,
+      "propertyNames": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "plan_evidence_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 15,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "qualified_source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "qualified_source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "registration_receipt_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "repository": {
+      "const": "chartjs333/delta"
+    },
+    "run_attempt": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "run_id": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_stage_a_workflow_content_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "workflow_blob_id": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "workflow_content_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "workflow_id": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "workflow_path": {
+      "const": ".github/workflows/campaign02-stage-a-bootstrap.yml"
+    },
+    "workflow_ref": {
+      "const": "chartjs333/delta/.github/workflows/campaign02-stage-a-bootstrap.yml@refs/heads/main"
+    },
+    "workflow_sha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "authority_artifact_content_digest",
+    "authority_artifact_digest",
+    "authority_artifact_id",
+    "bootstrap_mapping_attestation_id",
+    "bootstrap_mapping_id",
+    "decision",
+    "dispatch_ref",
+    "event_name",
+    "formal_semantics_id",
+    "gate_analyzer_id",
+    "gate_result_id",
+    "github_sha",
+    "input_artifact_content_digests",
+    "input_artifact_digests",
+    "input_artifact_ids",
+    "input_artifact_origins",
+    "input_artifact_run_attempts",
+    "input_artifact_run_ids",
+    "output_artifact_content_digests",
+    "output_artifact_digests",
+    "output_artifact_ids",
+    "output_artifact_origins",
+    "output_artifact_run_attempts",
+    "output_artifact_run_ids",
+    "plan_evidence_ids",
+    "qualified_source_commit",
+    "qualified_source_tree",
+    "registration_receipt_id",
+    "repository",
+    "run_attempt",
+    "run_id",
+    "runner_id",
+    "schema_version",
+    "source_commit",
+    "source_stage_a_workflow_content_id",
+    "source_tree",
+    "type_name",
+    "workflow_blob_id",
+    "workflow_content_id",
+    "workflow_id",
+    "workflow_path",
+    "workflow_ref",
+    "workflow_sha"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-workflow-gate-qc-v3"
+}

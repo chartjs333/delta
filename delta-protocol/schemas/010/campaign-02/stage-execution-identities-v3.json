@@ -1,0 +1,280 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-execution-identities-v3",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "3.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_STAGE_EXECUTION_IDENTITIES"
+    },
+    "campaign_id": {
+      "const": "campaign-02"
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "identities": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluation_runner": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "exactness_runner": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "multi_role_runner": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "native_feature008_verifier": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "network_fault_runner": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "observation_writer": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "scientific_runner": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "signed_stage_authorization_verifier": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "stage_gate_analyzer": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        },
+        "typed_gate_receipt_verifier": {
+          "additionalProperties": false,
+          "properties": {
+            "content_id": {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "identity_domain": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "content_id",
+            "identity_domain",
+            "value"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "evaluation_runner",
+        "exactness_runner",
+        "multi_role_runner",
+        "native_feature008_verifier",
+        "network_fault_runner",
+        "observation_writer",
+        "scientific_runner",
+        "signed_stage_authorization_verifier",
+        "stage_gate_analyzer",
+        "typed_gate_receipt_verifier"
+      ],
+      "type": "object"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "execution_authorized",
+    "formal_semantics_id",
+    "identities",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-execution-identities-v3"
+}

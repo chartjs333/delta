@@ -702,10 +702,15 @@ class StageGateReceipt:
     source_tree: str
     stage_authorization_attestation_id: str
     decision: str
+    runner_id: str | None = None
+    runner_environment_id: str | None = None
+    runner_implementation_id: str | None = None
+    runner_role: str | None = None
+    runner_source_class: str | None = None
 
     @classmethod
     def from_dict(cls, value: object) -> StageGateReceipt:
-        fields = {
+        common_fields = {
             "accepted_plan_ids",
             "benchmark_definition_id",
             "campaign_id",
@@ -727,11 +732,25 @@ class StageGateReceipt:
             "stage_authorization_attestation_id",
             "type_name",
         }
-        if not isinstance(value, dict) or set(value) != fields:
+        if not isinstance(value, dict):
+            raise _fail("CAMPAIGN02_STAGE_GATE_RECEIPT_FIELDS_INVALID")
+        version = value.get("schema_version")
+        version_fields = {
+            "1.0.0": set(),
+            "2.0.0": {"runner_id"},
+            "3.0.0": {
+                "runner_environment_id",
+                "runner_id",
+                "runner_implementation_id",
+                "runner_role",
+                "runner_source_class",
+            },
+        }
+        fields = common_fields | version_fields.get(str(version), set())
+        if version not in version_fields or set(value) != fields:
             raise _fail("CAMPAIGN02_STAGE_GATE_RECEIPT_FIELDS_INVALID")
         if (
             value["type_name"] != "BENCHMARK_STAGE_GATE_RECEIPT"
-            or value["schema_version"] != "1.0.0"
             or value["formal_semantics_id"] != FORMAL_SEMANTICS_ID
             or value["campaign_id"] != "campaign-02"
             or value["decision"] not in {"PASS", "FAIL"}
@@ -778,6 +797,40 @@ class StageGateReceipt:
                 "CAMPAIGN02_GATE_STAGE_ATTESTATION_ID_INVALID",
             ),
             decision=str(value["decision"]),
+            runner_id=(
+                _content_id(value["runner_id"], "CAMPAIGN02_GATE_RUNNER_ID_INVALID")
+                if version in {"2.0.0", "3.0.0"}
+                else None
+            ),
+            runner_environment_id=(
+                _content_id(
+                    value["runner_environment_id"],
+                    "CAMPAIGN02_GATE_RUNNER_ENVIRONMENT_ID_INVALID",
+                )
+                if version == "3.0.0"
+                else None
+            ),
+            runner_implementation_id=(
+                _content_id(
+                    value["runner_implementation_id"],
+                    "CAMPAIGN02_GATE_RUNNER_IMPLEMENTATION_ID_INVALID",
+                )
+                if version == "3.0.0"
+                else None
+            ),
+            runner_role=(
+                _text(value["runner_role"], "CAMPAIGN02_GATE_RUNNER_ROLE_INVALID")
+                if version == "3.0.0"
+                else None
+            ),
+            runner_source_class=(
+                _text(
+                    value["runner_source_class"],
+                    "CAMPAIGN02_GATE_RUNNER_SOURCE_CLASS_INVALID",
+                )
+                if version == "3.0.0"
+                else None
+            ),
         )
 
     @classmethod
@@ -792,7 +845,7 @@ class StageGateReceipt:
 
     @property
     def document(self) -> dict[str, object]:
-        return {
+        document: dict[str, object] = {
             "accepted_plan_ids": list(self.accepted_plan_ids),
             "benchmark_definition_id": self.benchmark_definition_id,
             "campaign_id": "campaign-02",
@@ -808,16 +861,50 @@ class StageGateReceipt:
             "plan_catalog_id": self.plan_catalog_id,
             "qualified_runtime_lineage_id": self.qualified_runtime_lineage_id,
             "required_plan_ids": list(self.required_plan_ids),
-            "schema_version": "1.0.0",
+            "schema_version": (
+                "3.0.0"
+                if self.runner_implementation_id is not None
+                else "2.0.0"
+                if self.runner_id is not None
+                else "1.0.0"
+            ),
             "source_commit": self.source_commit,
             "source_tree": self.source_tree,
             "stage_authorization_attestation_id": self.stage_authorization_attestation_id,
             "type_name": "BENCHMARK_STAGE_GATE_RECEIPT",
         }
+        if self.runner_id is not None:
+            document["runner_id"] = self.runner_id
+        if self.runner_implementation_id is not None:
+            if not all(
+                isinstance(item, str) and item
+                for item in (
+                    self.runner_environment_id,
+                    self.runner_role,
+                    self.runner_source_class,
+                )
+            ):
+                raise _fail("CAMPAIGN02_GATE_RUNNER_BINDING_INCOMPLETE")
+            document.update(
+                {
+                    "runner_environment_id": self.runner_environment_id,
+                    "runner_implementation_id": self.runner_implementation_id,
+                    "runner_role": self.runner_role,
+                    "runner_source_class": self.runner_source_class,
+                }
+            )
+        return document
 
     @property
     def content_id(self) -> str:
-        return sha256_content_id(_GATE_RECEIPT_DOMAIN + canonical_json_bytes(self.document))
+        domain = (
+            b"deltareduce.010.campaign02-stage-gate-receipt.v3\0"
+            if self.runner_implementation_id is not None
+            else b"deltareduce.010.campaign02-stage-gate-receipt.v2\0"
+            if self.runner_id is not None
+            else _GATE_RECEIPT_DOMAIN
+        )
+        return sha256_content_id(domain + canonical_json_bytes(self.document))
 
     @property
     def canonical_bytes(self) -> bytes:

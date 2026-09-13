@@ -1,0 +1,141 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:stage-gate-result-v2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "type_name": {
+      "const": "CAMPAIGN02_STAGE_GATE_RESULT"
+    },
+    "accepted_plan_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 15,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "completed_stage": {
+      "enum": [
+        "STAGE_A_EXACTNESS",
+        "STAGE_B_SCIENTIFIC",
+        "STAGE_C_EMULATED_WAN"
+      ]
+    },
+    "definition_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "evidence_root": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "gate_analyzer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_catalog_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_evidence_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 15,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "qualified_runtime_lineage_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "required_plan_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 15,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "runner_environment_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runner_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runner_implementation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "runner_role": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "runner_source_class": {
+      "enum": [
+        "MEASURED_CI_WORKFLOW",
+        "MEASURED_HARDWARE"
+      ]
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "stage_authorization_attestation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "stage_execution_identities_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "accepted_plan_ids",
+    "benchmark_definition_id",
+    "completed_stage",
+    "definition_attestation_id",
+    "evidence_root",
+    "formal_semantics_id",
+    "gate_analyzer_id",
+    "plan_catalog_id",
+    "plan_evidence_ids",
+    "qualified_runtime_lineage_id",
+    "required_plan_ids",
+    "runner_environment_id",
+    "runner_id",
+    "runner_implementation_id",
+    "runner_role",
+    "runner_source_class",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "stage_authorization_attestation_id",
+    "stage_execution_identities_id",
+    "type_name"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 stage-gate-result-v2"
+}

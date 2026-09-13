@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import subprocess
 from pathlib import Path
 from types import ModuleType
 
@@ -23,13 +22,7 @@ def load_script() -> ModuleType:
 
 def test_primary_definition_is_complete_before_execution() -> None:
     module = load_script()
-    commit = subprocess.run(
-        ("git", "rev-parse", "HEAD"),
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+    commit = module.source_commit_from_output()
     outputs = module.expected_outputs(commit)
     definition = json.loads(outputs[module.OUTPUT_ROOT / "primary.yaml"])
     assert definition["primary"] is True
