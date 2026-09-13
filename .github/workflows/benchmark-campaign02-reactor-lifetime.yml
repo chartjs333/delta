@@ -1,0 +1,194 @@
+name: Campaign 02 reactor-lifetime exact-source qualification
+
+on:
+  pull_request:
+    branches: [010i-campaign02-runner-remediation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: campaign-02-reactor-lifetime-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable-source:
+    name: Reactor-lifetime portable exact-source corpus
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out qualification overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: control
+          persist-credentials: false
+      - name: Resolve immutable corrected source
+        id: source
+        shell: bash
+        run: |
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-reactor-lifetime-hardware-qualification.json'
+          source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
+          source_tree="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["tree"])' "$evidence")"
+          test "$source_commit" = '95b287168ad02bbe585fbb05a7b27bbd951713f3'
+          test "$source_tree" = '814afa83551bab2312f99e68b9f66ac48dc7158c'
+          git -C control cat-file -e "${source_commit}^{commit}"
+          test "$(git -C control show -s --format=%T "$source_commit")" = "$source_tree"
+          git -C control merge-base --is-ancestor \
+            bd961b1cc308a5e2320cae7e6e4b4e0416c1c994 "$source_commit"
+          printf 'commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
+      - name: Check out immutable corrected source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: qualified-source
+          persist-credentials: false
+          ref: ${{ steps.source.outputs.commit }}
+      - name: Materialize locked portable environment
+        working-directory: qualified-source
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.6.14
+          uv sync --frozen
+      - name: Run exact portable corpus without execution authority
+        working-directory: qualified-source
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy delta-worker-python/src
+          uv run pytest \
+            delta-worker-python/tests/benchmark/test_campaign02_bootstrap.py \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
+            delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
+            delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
+            delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_campaign02_stage_c_candidate.py \
+            delta-worker-python/tests/benchmark/test_campaign02_stage_c_runtime.py \
+            delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_runner_definition.py \
+            --junitxml="$RUNNER_TEMP/campaign-02-reactor-lifetime-portable.xml"
+      - name: Retain portable corpus
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign-02-reactor-lifetime-portable-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-reactor-lifetime-portable.xml
+          if-no-files-found: error
+          retention-days: 30
+
+  tsan-source:
+    name: Reactor-lifetime exact-source TSan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out qualification overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          path: control
+          persist-credentials: false
+      - name: Resolve immutable corrected source
+        id: source
+        shell: bash
+        run: |
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-reactor-lifetime-hardware-qualification.json'
+          source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
+          test "$source_commit" = '95b287168ad02bbe585fbb05a7b27bbd951713f3'
+          printf 'commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
+      - name: Check out immutable corrected source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          path: qualified-source
+          persist-credentials: false
+          ref: ${{ steps.source.outputs.commit }}
+      - name: Configure dedicated GCC TSan build
+        working-directory: qualified-source
+        run: >-
+          cmake -S . -B out/build/campaign02-reactor-lifetime-tsan
+          -DBUILD_TESTING=ON -DDELTA_CXX_STANDARD=20 -DDELTA_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer -fno-sanitize-recover=all"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread -fno-sanitize-recover=all"
+      - name: Execute all affected concurrent boundaries
+        working-directory: qualified-source
+        run: |
+          cmake --build out/build/campaign02-reactor-lifetime-tsan --parallel 2 \
+            --target delta_runtime_benchmark_test delta_runtime_test delta_certificates_test
+          ctest --test-dir out/build/campaign02-reactor-lifetime-tsan \
+            -R 'delta_(runtime\.benchmark|runtime\.behavior|core\.certificates)' \
+            --output-on-failure 2>&1 | tee "$RUNNER_TEMP/campaign-02-reactor-lifetime-tsan.log"
+      - name: Retain TSan result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign-02-reactor-lifetime-tsan-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-reactor-lifetime-tsan.log
+          if-no-files-found: error
+          retention-days: 30
+
+  exact-source-admission:
+    name: Join portable, TSan and designated-GPU lifetime evidence
+    needs: [portable-source, tsan-source]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out qualification overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: control
+          persist-credentials: false
+      - name: Resolve immutable corrected source
+        id: source
+        shell: bash
+        run: |
+          evidence='control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-reactor-lifetime-hardware-qualification.json'
+          source_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["source"]["commit"])' "$evidence")"
+          test "$source_commit" = '95b287168ad02bbe585fbb05a7b27bbd951713f3'
+          printf 'commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
+      - name: Check out immutable corrected source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: qualified-source
+          persist-credentials: false
+          ref: ${{ steps.source.outputs.commit }}
+      - name: Download exact-source portable corpus
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: campaign-02-reactor-lifetime-portable-${{ github.run_id }}
+          path: ${{ runner.temp }}/portable
+      - name: Install locked verifier environment
+        working-directory: qualified-source
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.6.14
+          uv sync --frozen
+      - name: Reproduce exact-source report
+        working-directory: qualified-source
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python \
+            specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_runner_provenance_source.py \
+            --source-commit '${{ steps.source.outputs.commit }}' \
+            --portable-junit "$RUNNER_TEMP/portable/campaign-02-reactor-lifetime-portable.xml" \
+            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-reactor-lifetime-hardware-qualification.json" \
+            --output "$RUNNER_TEMP/campaign-02-reactor-lifetime-exact-source-qualification.json"
+          cmp \
+            "$RUNNER_TEMP/campaign-02-reactor-lifetime-exact-source-qualification.json" \
+            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-reactor-lifetime-exact-source-qualification.json"
+      - name: Retain exact-source qualification
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign-02-reactor-lifetime-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-reactor-lifetime-exact-source-qualification.json
+          if-no-files-found: error
+          retention-days: 30
