@@ -3,6 +3,17 @@
 Feature 010 is fail-closed. A successful synthetic run or an individual runtime check is not a
 primary benchmark result and cannot unblock Feature 011.
 
+## Campaign 02 bootstrap governance
+
+Before collecting replacement bootstrap mapping or registration signatures, use
+the [controller trust and custody policy](campaign02-controller-custody-policy.md)
+and [appointment/signing procedure](campaign02-controller-onboarding.md). The
+[four-slot appointment template](templates/campaign02-controller-register.template.json)
+records owners, public keys, custody evidence and pairwise independence for explicit
+governance review. It contains no appointed controllers or signing authorization.
+These documents concern bootstrap registration; Definition and stage authorizations
+remain separate gates.
+
 ## Frozen inputs
 
 The primary definition is `configs/benchmark/primary.yaml`. Although the extension is YAML, the
