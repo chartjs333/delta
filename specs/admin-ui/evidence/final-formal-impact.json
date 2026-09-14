@@ -1,6 +1,6 @@
 {
   "document_type": "ADMIN_UI_FINAL_FORMAL_IMPACT_REVIEW",
-  "document_version": "1.1.0",
+  "document_version": "1.2.0",
   "recorded_on": "2026-09-14",
   "implementation_branch": "feature/admin-ui-ux-mvp",
   "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
@@ -12,7 +12,7 @@
       "tools/admin-ui/",
       "specs/admin-ui/"
     ],
-    "code_complete_through": "T039",
+    "code_complete_through": "T040",
     "remaining_after_review": "NONE",
     "changed_files_reviewed": 32
   },
@@ -86,7 +86,7 @@
       "status": "INHERITED_PASS",
       "evidence_task": "T023",
       "predecessor_mvp_commit": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca",
-      "note": "T032-T039 change only the isolated Admin UI presentation layer and its evidence; repository audit confirms no reverse dependency."
+      "note": "T032-T040 change only the isolated Admin UI presentation layer and its evidence; repository audit confirms no reverse dependency."
     },
     "final_admin_ui_gate": {
       "command": "npm run check:substitution --prefix tools/admin-ui",
@@ -98,7 +98,7 @@
         "substitute_status": "PASS"
       },
       "test_files": 29,
-      "tests": 101,
+      "tests": 103,
       "production_build": "PASS",
       "production_modules": 45,
       "offline_product_files": 36,
@@ -121,8 +121,22 @@
       ],
       "network_requests_outside_local_preview": 0
     },
+    "safe_controller_autofill": {
+      "status": "PASS",
+      "trigger": "EXPLICIT_USER_ACTION",
+      "allowed_fields": [
+        "controller_id",
+        "signer_id",
+        "status"
+      ],
+      "overwrites_nonblank_values": false,
+      "generated_values_editable": true,
+      "authoritative_or_governance_fields_autofilled": 0,
+      "canonical_schema_or_runtime_support_required": false
+    },
     "independent_web_qa": {
       "status": "PASS",
+      "scope": "T032-T039",
       "evidence": "specs/admin-ui/evidence/web-qa.json",
       "blocking_defects": 0,
       "functional_defects": 0
@@ -143,5 +157,5 @@
     }
   },
   "stop_rule_triggered": false,
-  "conclusion": "T032-T039 change only the isolated Admin UI presentation and interaction layer. DataSourcePort, canonical schemas, Delta runtime state, protocol behavior, verifier behavior, offline operation, structural-validation boundary, and explicit-export boundary are unchanged."
+  "conclusion": "T032-T040 change only the isolated Admin UI presentation and interaction layer. Safe controller autofill is explicit, editable, and restricted to blank technical draft fields. DataSourcePort, canonical schemas, Delta runtime state, protocol behavior, verifier behavior, offline operation, structural-validation boundary, and explicit-export boundary are unchanged."
 }

@@ -66,6 +66,7 @@ and PR #29 as a non-normative MVP input.
 - [x] T037 [US1] Add production-browser coverage under `tools/admin-ui/tests/browser/` and non-technical form-to-export coverage in `tools/admin-ui/src/app/form-first-usability.test.tsx`. Evidence: `evidence/implementation-tasks.json`.
 - [x] T038 [US1] Prove unknown-field preservation and explicit-new-file behavior in `tools/admin-ui/src/editor/document-draft.form-roundtrip.test.ts`. Evidence: `evidence/implementation-tasks.json`.
 - [x] T039 [US5] Test stable pair keys and `STALE`/`ORPHANED` lifecycle in `tools/admin-ui/src/modules/controllers/pairwise-review-draft.test.ts` without evidence retargeting. Evidence: `evidence/implementation-tasks.json`.
+- [x] T040 [US1] Add an explicit safe-autofill action in `tools/admin-ui/src/modules/controllers/ControllerRegistryForm.tsx` for blank non-authoritative technical fields only: stable draft `controller_id`/`signer_id` values and `DRAFT` status. Report exactly which fields changed, keep generated values editable, and prove owner identity, custody evidence, public keys, independence answers, governance approval, signing readiness, and protocol results are never populated automatically. Evidence: `evidence/implementation-tasks.json`.
 
 ## Dependencies
 
@@ -76,13 +77,14 @@ and PR #29 as a non-normative MVP input.
 - T023–T027 precede promotion.
 - The Web QA CSP/AJV and mobile-navigation fix precedes T032–T039 implementation.
 - T032–T036 and the pairwise draft contract precede T037–T039 acceptance.
+- T032 and its stable session-local controller keys precede T040.
 - Any required canonical schema, validator, protocol, or runtime change triggers STOP.
 
 ## Implementation Strategy
 
 Deliver the local/offline workflow first. Do not mock a future Delta API into the
 product contract and do not implement protocol/governance verdicts in the UI.
-Implement T032–T039 only in the presentation layer over `DocumentDraft`; preserve
+Implement T032–T040 only in the presentation layer over `DocumentDraft`; preserve
 `DataSourcePort`, offline mode, structural validation, and explicit export.
 
 ## Exit Gate

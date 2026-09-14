@@ -177,6 +177,8 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 .controller-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem 1rem; }
 .form-field { display: grid; gap: 0.35rem; color: #59635f; font-size: 0.8rem; font-weight: 750; }
 .form-field input { min-width: 0; border: 1px solid #cbc7bc; border-radius: 9px; padding: 0.7rem; color: #17201d; background: #fff; }
+.safe-autofill-actions { display: grid; justify-items: start; margin-top: 1rem; border-left: 3px solid #86a898; padding-left: 0.8rem; }
+.autofill-notice { margin: 0.65rem 0 0; color: #2e654e; font-size: 0.82rem; font-weight: 750; }
 .danger-secondary { margin-top: 1rem; color: #8f2f25; border-color: #d1aaa4; }
 .add-controller { margin-top: 1rem; }
 .workspace-grid dl { display: grid; gap: 0.7rem; margin: 0; }

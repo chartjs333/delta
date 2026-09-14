@@ -15,7 +15,7 @@ function captureBoundaryFailures(page: Page) {
   return { consoleErrors, externalRequests };
 }
 
-test("non-technical form creates four controllers, fills six records, validates, and exports", async ({
+test("non-technical form safe-autofills four controllers, fills six records, validates, and exports", async ({
   page,
 }) => {
   const boundary = captureBoundaryFailures(page);
@@ -25,8 +25,22 @@ test("non-technical form creates four controllers, fills six records, validates,
   for (let index = 1; index <= 4; index += 1) {
     await page.getByRole("button", { name: "Add controller" }).click();
     await page
-      .getByLabel(`Controller ${index} Controller ID`)
-      .fill(`controller-${index}`);
+      .getByRole("button", {
+        name: `Autofill safe fields for controller ${index}`,
+      })
+      .click();
+    await expect(page.getByLabel(`Controller ${index} Controller ID`)).toHaveValue(
+      `draft-controller:controller-draft-${index}`,
+    );
+    await expect(page.getByLabel(`Controller ${index} Signer ID`)).toHaveValue(
+      `draft-signer:controller-draft-${index}`,
+    );
+    await expect(page.getByLabel(`Controller ${index} Status`)).toHaveValue(
+      "DRAFT",
+    );
+    await expect(page.getByLabel(`Controller ${index} Accountable owner ID`)).toHaveValue(
+      "",
+    );
   }
 
   const pairwise = page.getByRole("region", { name: "Pairwise records" });

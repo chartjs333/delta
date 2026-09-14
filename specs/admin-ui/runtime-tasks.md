@@ -10,7 +10,7 @@
 - [x] HR008 Re-run formal-impact review before adding any live command or state-changing endpoint. Evidence: `evidence/final-formal-impact.json`.
 - [x] HR009 Verify the MVP performs no automatic network requests and has no backend or login dependency. Evidence: `evidence/final-formal-impact.json`.
 - [x] HR010 Verify hostile local input limits and inert string/URL rendering from `threat-model.md`. Evidence: `evidence/final-formal-impact.json`.
-- [x] HR011 Verify T032–T039 change presentation only and preserve `DataSourcePort`, offline, validation, and export boundaries. Evidence: `evidence/final-formal-impact.json`.
+- [x] HR011 Verify T032–T040 change presentation only and preserve `DataSourcePort`, offline, validation, and export boundaries. Evidence: `evidence/final-formal-impact.json`.
 - [x] HR012 Verify no pairwise answer, evidence reference, completion count, or historical fixture is presented as an independence verdict. Evidence: `evidence/final-formal-impact.json`, `evidence/web-qa.json`.
 - [x] HR013 STOP if dynamic-pair implementation requires a canonical schema, protocol validator, or runtime change. Evidence: `evidence/final-formal-impact.json` (`stop_rule_triggered=false`).
 

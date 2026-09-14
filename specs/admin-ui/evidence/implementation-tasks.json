@@ -1,6 +1,6 @@
 {
   "document_type": "ADMIN_UI_IMPLEMENTATION_TASK_EVIDENCE",
-  "document_version": "1.0.0",
+  "document_version": "1.1.0",
   "recorded_on": "2026-09-14",
   "implementation_branch": "feature/admin-ui-ux-mvp",
   "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
@@ -1169,6 +1169,103 @@
           "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
         }
       ]
+    },
+    "T040": {
+      "status": "COMPLETE",
+      "summary": "Added an explicit per-controller safe-autofill action backed by a three-field whitelist. It fills only blank stable draft controller_id, blank stable draft signer_id, and blank status with DRAFT; reports the exact changed fields and leaves every generated value editable.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ControllerRegistryForm.tsx",
+          "sha256": "93809f603b1fc5d28e9ecdbcc262fa2b29c8af5ad755da736e791c6ee0f7cb95"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ControllerRegistryForm.test.tsx",
+          "sha256": "3a1070ff4e4d6ee1dc1888b03b0c87bfa7e141db82327c1755bbafec86f7452f"
+        },
+        {
+          "path": "tools/admin-ui/src/app/form-first-usability.test.tsx",
+          "sha256": "401d350c8e7b45ad5205203e2b41aa07c611a30c7efcf47d083a6a8905a980bb"
+        },
+        {
+          "path": "tools/admin-ui/tests/browser/form-first.spec.ts",
+          "sha256": "7683f93d60e167f1db0f3eb26e91f8ff9f3f9bf461d0386d5cbf622b4518218b"
+        },
+        {
+          "path": "tools/admin-ui/src/styles.css",
+          "sha256": "d8d395a932557e22d43d710f2c763fdf061dabf2f12ae783f54ba90372e7427f"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/modules/controllers/ControllerRegistryForm.test.tsx src/app/form-first-usability.test.tsx",
+          "status": "PASS",
+          "test_files": 2,
+          "tests": 5,
+          "explicit_user_actions": 1,
+          "generated_fields_editable": 3,
+          "authoritative_or_governance_fields_autofilled": 0
+        },
+        {
+          "command": "npm run check:substitution",
+          "status": "PASS",
+          "test_files": 29,
+          "tests": 103,
+          "production_build": "PASS",
+          "offline_violations": 0,
+          "classification": "TYPESCRIPT_5_9_3_SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        },
+        {
+          "command": "npm run test:browser",
+          "status": "PASS",
+          "passed": 3,
+          "skipped": 1,
+          "projects": [
+            "desktop-chrome",
+            "mobile-chrome"
+          ],
+          "external_requests": 0
+        },
+        {
+          "command": "npm run audit:repository",
+          "status": "PASS",
+          "protected_worktree_entries": 0,
+          "reverse_dependency_hits": 0
+        },
+        {
+          "command": "npm audit --audit-level=high",
+          "status": "PASS",
+          "vulnerabilities": 0
+        }
+      ],
+      "autofill_contract": {
+        "trigger": "EXPLICIT_PER_CONTROLLER_BUTTON",
+        "overwrite_nonblank_values": false,
+        "allowed_fields": [
+          "controller_id",
+          "signer_id",
+          "status"
+        ],
+        "status_value": "DRAFT",
+        "identifier_basis": "SESSION_LOCAL_STABLE_DRAFT_CONTROLLER_KEY",
+        "generated_values_editable": true,
+        "changed_fields_reported": true,
+        "prohibited_fields_tested": [
+          "identity_type",
+          "accountable_owner_id",
+          "administrative_domain_id",
+          "custody_boundary_id",
+          "custody_kind",
+          "custody_evidence_refs",
+          "public_keys",
+          "independence_answers",
+          "governance_approval",
+          "signing_readiness",
+          "protocol_results"
+        ],
+        "authoritative_or_governance_fields_autofilled": 0,
+        "data_source_port_changed": false,
+        "canonical_or_local_schema_changed": false
+      }
     }
   },
   "mvp_integration": {
@@ -1259,7 +1356,7 @@
   },
   "ux_integration": {
     "status": "PASS",
-    "scope": "T032-T039,HR011-HR013",
+    "scope": "T032-T040,HR011-HR013",
     "implementation_branch": "feature/admin-ui-ux-mvp",
     "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
     "artifacts": [
@@ -1281,7 +1378,11 @@
       },
       {
         "path": "tools/admin-ui/tests/browser/form-first.spec.ts",
-        "sha256": "3748c314166854305c6f661fabaa08c397a6732aaa577212047323406300e0d7"
+        "sha256": "7683f93d60e167f1db0f3eb26e91f8ff9f3f9bf461d0386d5cbf622b4518218b"
+      },
+      {
+        "path": "tools/admin-ui/src/modules/controllers/ControllerRegistryForm.tsx",
+        "sha256": "93809f603b1fc5d28e9ecdbcc262fa2b29c8af5ad755da736e791c6ee0f7cb95"
       },
       {
         "path": "specs/admin-ui/evidence/web-qa.json"
@@ -1300,7 +1401,7 @@
         "command": "npm run check:substitution --prefix tools/admin-ui",
         "status": "PASS",
         "test_files": 29,
-        "tests": 101,
+        "tests": 103,
         "production_build": "PASS",
         "offline_violations": 0
       },

@@ -23,9 +23,10 @@ describe("non-technical form-first usability path", () => {
     await user.click(screen.getByRole("button", { name: "New document" }));
     for (let index = 1; index <= 4; index += 1) {
       await user.click(screen.getByRole("button", { name: "Add controller" }));
-      await user.type(
-        screen.getByLabelText(`Controller ${index} Controller ID`),
-        `controller-${index}`,
+      await user.click(
+        screen.getByRole("button", {
+          name: `Autofill safe fields for controller ${index}`,
+        }),
       );
     }
 
@@ -62,10 +63,17 @@ describe("non-technical form-first usability path", () => {
     expect(downloads).toHaveLength(1);
     expect(downloads[0].name).toBe("controller-register.new.export.json");
     const exported = JSON.parse(new TextDecoder().decode(downloads[0].bytes)) as {
-      controllers: unknown[];
+      controllers: readonly Readonly<Record<string, unknown>>[];
       pairwise_independence_reviews?: unknown;
     };
     expect(exported.controllers).toHaveLength(4);
+    for (const controller of exported.controllers) {
+      expect(Object.keys(controller).sort()).toEqual([
+        "controller_id",
+        "signer_id",
+        "status",
+      ]);
+    }
     expect(exported.pairwise_independence_reviews).toBeUndefined();
   }, 15_000);
 });
