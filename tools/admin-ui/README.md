@@ -4,6 +4,12 @@ Delta Admin UI is an optional, browser-local static tool. It opens user-selected
 JSON, performs structural JSON Schema validation, keeps edits in memory, and creates
 a new file only after an explicit **Download new file** action.
 
+The primary workflow is a guided controller form over one `DocumentDraft`. The form
+patches known paths without rebuilding the JSON, so schema-allowed unknown values
+remain intact. Pairwise answers and evidence are session-local presentation data and
+are not added to the exported document without a reviewed mapping supported by the
+selected schema. **Advanced JSON** is hidden by default and read-only.
+
 It is not part of Delta core/runtime. It has no backend, login, credential flow,
 analytics, automatic network requests, live Delta API, state-changing operation,
 or authority to compute governance or protocol outcomes.
@@ -53,10 +59,17 @@ Run the complete UI gate from this directory:
 npm run check
 npm run audit:repository
 npm audit --audit-level=high
+npm run test:browser
 ```
 
 `audit:repository` verifies that protected Delta components are unchanged and have
 no reverse dependency on this package. The offline audit is part of `npm run check`.
+`test:browser` builds production assets and exercises desktop/mobile installed Chrome.
+
+The pinned native typecheck uses TypeScript 7.0.2. In a managed runner where that
+executable cannot access `/proc/self/exe`, use `npm run check:substitution`, which
+runs TypeScript 5.9.3 instead. That result is evidence for a substitution only and
+must not be reported as a passed native TypeScript 7 gate.
 
 ## Disablement
 

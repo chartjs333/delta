@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -21,14 +21,11 @@ describe("integrated browser-local MVP", () => {
     render(<App adapter={new LocalJsonAdapter(memoryFiles)} />);
 
     await user.click(screen.getByRole("button", { name: "New document" }));
-    const editor = screen.getByRole("textbox", { name: "JSON document text" });
-    const editedText = JSON.stringify({
-        document_type: "CONTROLLER_GOVERNANCE_REGISTER",
-        document_version: "1.0.0",
-        controllers: [{ controller_id: "controller-local", status: "DRAFT" }],
-        future_field: "preserved",
-      });
-    fireEvent.change(editor, { target: { value: editedText } });
+    await user.click(screen.getByRole("button", { name: "Add controller" }));
+    await user.type(
+      screen.getByLabelText("Controller 1 Controller ID"),
+      "controller-local",
+    );
 
     await user.click(screen.getByRole("button", { name: "Validate structure" }));
     expect(await screen.findByRole("heading", { name: "VALID" })).toBeTruthy();
@@ -42,23 +39,19 @@ describe("integrated browser-local MVP", () => {
     expect((results as HTMLElement).textContent).not.toMatch(/\b(?:PASS|FAIL)\b/u);
   });
 
-  it("keeps malformed draft text editable and disables validate/export", async () => {
+  it("keeps a structurally invalid form draft editable and reports the schema issue", async () => {
     const user = userEvent.setup();
     render(<App adapter={new LocalJsonAdapter(memoryFiles)} />);
     await user.click(screen.getByRole("button", { name: "New document" }));
-    const editor = screen.getByRole("textbox", { name: "JSON document text" });
-    fireEvent.change(editor, { target: { value: "{ malformed" } });
+    await user.clear(screen.getByLabelText("Document version"));
+    await user.click(screen.getByRole("button", { name: "Validate structure" }));
 
-    expect(editor.getAttribute("aria-invalid")).toBe("true");
-    expect(
-      (screen.getByRole("button", { name: "Validate structure" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
+    expect(await screen.findByRole("heading", { name: "INVALID" })).toBeTruthy();
+    expect((screen.getByLabelText("Document version") as HTMLInputElement).value).toBe("");
     expect(
       (screen.getByRole("button", { name: "Download new file" }) as HTMLButtonElement)
         .disabled,
-    ).toBe(true);
-    expect((editor as HTMLTextAreaElement).value).toBe("{ malformed");
+    ).toBe(false);
   });
 
   it("opens the registered campaign placeholder without a runtime fallback", async () => {

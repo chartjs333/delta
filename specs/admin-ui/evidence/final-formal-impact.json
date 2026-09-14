@@ -1,9 +1,10 @@
 {
   "document_type": "ADMIN_UI_FINAL_FORMAL_IMPACT_REVIEW",
-  "document_version": "1.0.0",
+  "document_version": "1.1.0",
   "recorded_on": "2026-09-14",
-  "implementation_branch": "feature/admin-ui-mvp",
-  "specification_base_commit": "9a65c1225d32af351fef91e2a1ef7a9b675aaef0",
+  "implementation_branch": "feature/admin-ui-ux-mvp",
+  "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+  "predecessor_mvp_commit": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca",
   "status": "PASS",
   "classification": "NONE",
   "review_scope": {
@@ -11,9 +12,9 @@
       "tools/admin-ui/",
       "specs/admin-ui/"
     ],
-    "code_complete_through": "T027",
+    "code_complete_through": "T039",
     "remaining_after_review": "NONE",
-    "changed_files_reviewed": 67
+    "changed_files_reviewed": 32
   },
   "formal_prerequisite": {
     "command": "python specs/001-reproducible-training-baseline/scripts/verify_formal_prerequisite.py --check-only",
@@ -40,11 +41,34 @@
     "live_or_state_changing_endpoint_added": false
   },
   "boundary_verification": {
+    "exact_diff": {
+      "base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+      "allowed_roots": [
+        "tools/admin-ui/",
+        "specs/admin-ui/"
+      ],
+      "outside_allowed_roots": 0
+    },
     "repository_audit": {
       "command": "npm run audit:repository --prefix tools/admin-ui",
       "status": "PASS",
       "protected_worktree_entries": 0,
       "reverse_dependency_hits": 0
+    },
+    "data_source_port": {
+      "status": "UNCHANGED",
+      "path": "tools/admin-ui/src/data/data-source-port.ts",
+      "base_blob_sha": "76ca86c136601f38fe6c547043cfd2f639b7c353",
+      "worktree_blob_sha": "76ca86c136601f38fe6c547043cfd2f639b7c353"
+    },
+    "canonical_and_local_schema_diff": {
+      "status": "PASS",
+      "delta_protocol_changes": 0,
+      "admin_ui_schema_changes": 0
+    },
+    "frozen_fixture_diff": {
+      "status": "UNCHANGED",
+      "changed_files": 0
     },
     "c_abi_ffm_import_search": {
       "status": "PASS",
@@ -59,68 +83,65 @@
       "hits": 0
     },
     "ui_free_core_runtime_gate": {
-      "status": "PASS",
-      "base_commit": "9a65c1225d32af351fef91e2a1ef7a9b675aaef0",
-      "admin_ui_present": false,
-      "cmake_configure": "PASS",
-      "cmake_build": "PASS",
-      "ctest_passed": 57,
-      "ctest_failed": 0
+      "status": "INHERITED_PASS",
+      "evidence_task": "T023",
+      "predecessor_mvp_commit": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca",
+      "note": "T032-T039 change only the isolated Admin UI presentation layer and its evidence; repository audit confirms no reverse dependency."
     },
     "final_admin_ui_gate": {
-      "command": "npm run check",
+      "command": "npm run check:substitution --prefix tools/admin-ui",
       "status": "PASS",
-      "typecheck": "PASS",
-      "test_files": 21,
-      "tests": 82,
+      "typescript_gate": {
+        "native_typescript_7": "NOT_CLAIMED_AS_PASSED",
+        "classification": "SUBSTITUTION",
+        "substitute_command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+        "substitute_status": "PASS"
+      },
+      "test_files": 29,
+      "tests": 101,
       "production_build": "PASS",
-      "offline_product_files": 29,
+      "production_modules": 45,
+      "offline_product_files": 36,
       "offline_bundle_files": 1,
       "offline_violations": 0
+    },
+    "dependency_audit": {
+      "command": "npm audit --audit-level=high --prefix tools/admin-ui",
+      "status": "PASS",
+      "vulnerabilities": 0
+    },
+    "browser_gate": {
+      "command": "npm run test:browser --prefix tools/admin-ui",
+      "status": "PASS",
+      "passed": 3,
+      "skipped": 1,
+      "projects": [
+        "desktop-chrome",
+        "mobile-chrome"
+      ],
+      "network_requests_outside_local_preview": 0
+    },
+    "independent_web_qa": {
+      "status": "PASS",
+      "evidence": "specs/admin-ui/evidence/web-qa.json",
+      "blocking_defects": 0,
+      "functional_defects": 0
     }
   },
   "supplemental_runtime_tasks": {
-    "HR001": {
+    "HR011": {
       "status": "PASS",
-      "evidence": "Admin UI code-bearing diff classification is NONE."
+      "evidence": "The form-first UI mutates one DocumentDraft through known paths and preserves unknown allowed fields."
     },
-    "HR002": {
+    "HR012": {
       "status": "PASS",
-      "evidence": "T023 UI-free build/test and T024 reverse-dependency audit passed."
+      "evidence": "Pairwise answers remain non-authoritative presentation data; no governance, independence, signing-readiness, or protocol verdict is derived."
     },
-    "HR003": {
+    "HR013": {
       "status": "PASS",
-      "evidence": "No C ABI, FFM, native-runtime import, or transition entry-point hit exists in Admin UI source."
-    },
-    "HR004": {
-      "status": "PASS",
-      "evidence": "The MVP defines no contribution or aggregate presentation/interpreter contract and does not inspect such payloads."
-    },
-    "HR005": {
-      "status": "PASS",
-      "evidence": "The UI has no reverse/runtime dependency, and adapter failures remain browser-local typed presentation failures."
-    },
-    "HR006": {
-      "status": "PASS",
-      "evidence": "Schema descriptor fields are displayed and T011/T031 reject authority, type, source, and external-reference mismatch."
-    },
-    "HR007": {
-      "status": "PASS",
-      "evidence": "The no-backend MVP receives no service payloads, bundles no secrets or restricted evidence, and emits no telemetry."
-    },
-    "HR008": {
-      "status": "PASS",
-      "evidence": "The final review found no live command or state-changing endpoint; adding one remains an explicit STOP boundary."
-    },
-    "HR009": {
-      "status": "PASS",
-      "evidence": "T030 offline audit proves no automatic network request, backend, login, credential flow, or analytics payload."
-    },
-    "HR010": {
-      "status": "PASS",
-      "evidence": "T029/T031 tests cover all mandatory hostile-input limits, inert rendering, safe URLs, and external schema references."
+      "evidence": "Production-browser and non-technical usability gates passed with explicit export, offline operation, and read-only Advanced JSON."
     }
   },
   "stop_rule_triggered": false,
-  "conclusion": "The optional browser-local Admin UI changes presentation tooling only and do not change canonical schema, Delta runtime state, protocol behavior, verifier behavior, or any state-changing API."
+  "conclusion": "T032-T039 change only the isolated Admin UI presentation and interaction layer. DataSourcePort, canonical schemas, Delta runtime state, protocol behavior, verifier behavior, offline operation, structural-validation boundary, and explicit-export boundary are unchanged."
 }

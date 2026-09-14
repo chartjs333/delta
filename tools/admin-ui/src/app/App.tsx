@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { JsonEditor } from "../components/JsonEditor";
 import { SchemaSelector } from "../components/SchemaSelector";
 import { SourceSummary } from "../components/CapabilityStateView";
-import { ValidationPanel } from "../components/ValidationPanel";
+import { FriendlyValidationPanel } from "../components/FriendlyValidationPanel";
+import { AdvancedJsonView } from "../components/AdvancedJsonView";
 import type {
   DocumentEnvelope,
   SchemaDescriptor,
@@ -14,8 +14,18 @@ import type {
 import { asAdminUiError } from "../core/errors";
 import { BrowserFileGateway } from "../data/browser-file-gateway";
 import { LocalJsonAdapter } from "../data/local-json-adapter";
+import {
+  controllerFormStates,
+  ControllerRegistryForm,
+} from "../modules/controllers/ControllerRegistryForm";
 import { ControllerExplorer } from "../modules/controllers/ControllerExplorer";
 import { controllersFromDocument } from "../modules/controllers/controller-model";
+import { PairwiseReviewStep } from "../modules/controllers/PairwiseReviewStep";
+import { ReadinessSummary } from "../modules/controllers/ReadinessSummary";
+import {
+  syncPairwiseReviewDrafts,
+  type PairwiseReviewDraft,
+} from "../modules/controllers/pairwise-review-draft";
 import { querySourcedResults, type ResultQuery } from "../results/result-loader";
 import { SourcedResultsPanel } from "../results/SourcedResultsPanel";
 import { extensionRegistry } from "./registry";
@@ -41,16 +51,23 @@ export function App({ adapter = defaultAdapter }: AppProps) {
   const [source, setSource] = useState<SourceDescriptor>();
   const [schemas, setSchemas] = useState<readonly SchemaDescriptor[]>([]);
   const [selectedSchema, setSelectedSchema] = useState<SchemaDescriptor>();
-  const [baseDocument, setBaseDocument] = useState<DocumentEnvelope>();
   const [document, setDocument] = useState<DocumentEnvelope>();
-  const [draftText, setDraftText] = useState("");
-  const [draftError, setDraftError] = useState<string>();
+  const [controllerKeys, setControllerKeys] = useState<readonly string[]>([]);
+  const [pairwiseRecords, setPairwiseRecords] = useState<
+    readonly PairwiseReviewDraft[]
+  >([]);
   const [validation, setValidation] = useState<StructuralValidationResult>();
   const [resultQuery, setResultQuery] = useState<ResultQuery>({
     state: "LOADING",
     results: [],
   });
   const [notice, setNotice] = useState<string>();
+  const nextControllerKey = useRef(0);
+
+  function createControllerKey(): string {
+    nextControllerKey.current += 1;
+    return `controller-draft-${nextControllerKey.current}`;
+  }
 
   useEffect(() => {
     const selectLocationRoute = () => {
@@ -102,10 +119,11 @@ export function App({ adapter = defaultAdapter }: AppProps) {
   }, [adapter, resultSubject]);
 
   function activateDocument(next: DocumentEnvelope): void {
-    setBaseDocument(next);
     setDocument(next);
-    setDraftText(next.text);
-    setDraftError(undefined);
+    setControllerKeys(
+      controllersFromDocument(next.value).map(() => createControllerKey()),
+    );
+    setPairwiseRecords([]);
     setValidation(undefined);
     setNotice(undefined);
   }
@@ -123,18 +141,14 @@ export function App({ adapter = defaultAdapter }: AppProps) {
     activateDocument(adapter.createDocument());
   }
 
-  function changeDraft(text: string): void {
-    setDraftText(text);
+  function changeDraft(
+    next: DocumentEnvelope,
+    nextControllerKeys: readonly string[],
+  ): void {
+    setDocument(adapter.updateDocumentText(next, next.text));
+    setControllerKeys(nextControllerKeys);
     setValidation(undefined);
     setNotice(undefined);
-    if (!baseDocument) return;
-    try {
-      setDocument(adapter.updateDocumentText(baseDocument, text));
-      setDraftError(undefined);
-    } catch (error) {
-      setDocument(undefined);
-      setDraftError(asAdminUiError(error).message);
-    }
     void adapter.describeSource().then(setSource);
   }
 
@@ -167,6 +181,23 @@ export function App({ adapter = defaultAdapter }: AppProps) {
     validation?.status === "VALID" && document
       ? controllersFromDocument(document.value)
       : [];
+  const controllerDrafts = document
+    ? controllerFormStates(document, controllerKeys)
+    : [];
+  const controllerIdentitySignature = JSON.stringify(
+    controllerDrafts.map((controller) => [
+      controller.draftControllerKey,
+      controller.controllerId ?? null,
+    ]),
+  );
+
+  useEffect(() => {
+    setPairwiseRecords((current) =>
+      syncPairwiseReviewDrafts(controllerDrafts, current),
+    );
+    // The signature intentionally tracks only stable keys and editable IDs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controllerIdentitySignature]);
   const activeDomainRoute = extensionRegistry.domainModules
     .flatMap((module) => module.routes)
     .find((route) => route.path === activeRoute);
@@ -240,7 +271,7 @@ export function App({ adapter = defaultAdapter }: AppProps) {
 
           {notice ? <div className="notice" role="status">{notice}</div> : null}
 
-          {!baseDocument ? (
+          {!document ? (
             <section className="welcome-card">
               <p className="eyebrow">No document selected</p>
               <h2>Start with a local file or a clean register.</h2>
@@ -254,7 +285,7 @@ export function App({ adapter = defaultAdapter }: AppProps) {
               <section className="document-bar" aria-label="Open document">
                 <div>
                   <span>Local draft</span>
-                  <strong>{baseDocument.origin.displayName}</strong>
+                  <strong>{document.origin.displayName}</strong>
                 </div>
                 <div className="document-actions">
                   <button
@@ -276,11 +307,14 @@ export function App({ adapter = defaultAdapter }: AppProps) {
               </section>
 
               <div className="workspace-grid">
-                <JsonEditor
-                  value={draftText}
-                  invalidMessage={draftError}
-                  onChange={changeDraft}
-                />
+                {document ? (
+                  <ControllerRegistryForm
+                    draft={document}
+                    controllerKeys={controllerKeys}
+                    createControllerKey={createControllerKey}
+                    onChange={changeDraft}
+                  />
+                ) : null}
                 <SchemaSelector
                   schemas={schemas}
                   selected={selectedSchema}
@@ -291,7 +325,22 @@ export function App({ adapter = defaultAdapter }: AppProps) {
                 />
               </div>
 
-              {validation ? <ValidationPanel result={validation} /> : null}
+              {document ? <AdvancedJsonView draft={document} /> : null}
+
+              <ReadinessSummary
+                controllers={controllerDrafts}
+                records={pairwiseRecords}
+                validation={validation}
+                resultQuery={resultQuery}
+              />
+
+              <PairwiseReviewStep
+                controllers={controllerDrafts}
+                records={pairwiseRecords}
+                onChange={setPairwiseRecords}
+              />
+
+              {validation ? <FriendlyValidationPanel result={validation} /> : null}
               {validation?.status === "VALID" ? (
                 <ControllerExplorer controllers={controllers} />
               ) : null}

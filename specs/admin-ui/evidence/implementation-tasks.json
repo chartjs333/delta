@@ -2,8 +2,9 @@
   "document_type": "ADMIN_UI_IMPLEMENTATION_TASK_EVIDENCE",
   "document_version": "1.0.0",
   "recorded_on": "2026-09-14",
-  "implementation_branch": "feature/admin-ui-mvp",
-  "specification_base_commit": "9a65c1225d32af351fef91e2a1ef7a9b675aaef0",
+  "implementation_branch": "feature/admin-ui-ux-mvp",
+  "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+  "predecessor_implementation_commit": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca",
   "formal_prerequisite": {
     "status": "PASS",
     "decision": "GO",
@@ -846,6 +847,328 @@
           ]
         }
       ]
+    },
+    "T032": {
+      "status": "COMPLETE",
+      "summary": "Replaced the raw-JSON-first controller workflow with a guided dynamic form that patches known paths on the single DocumentDraft while retaining unknown values and session-local stable controller keys; DataSourcePort is unchanged.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/editor/document-draft.ts",
+          "sha256": "3e2d9d2fb6a0b50c95faf1cdfc562cb92225d6df730c8fe39dacad7029bed2df"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ControllerRegistryForm.tsx",
+          "sha256": "1311d09b93020024bb785619d30412bbd038acac95a113205d4bc278a95a6003"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ControllerRegistryForm.test.tsx",
+          "sha256": "b89302dcbc2c833deef7c699de8fcaac4c42fa94587ad1875666fb0289bb7852"
+        },
+        {
+          "path": "tools/admin-ui/src/app/App.tsx",
+          "sha256": "da877ed484bead1eed185f7d7ce46ab70999a87e64e79a9e1d757bfdd34d53c7"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/modules/controllers/ControllerRegistryForm.test.tsx src/app/App.test.tsx",
+          "status": "PASS",
+          "test_files": 2,
+          "tests": 6
+        },
+        {
+          "command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+          "status": "PASS",
+          "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        }
+      ],
+      "boundary_assertions": {
+        "document_state": "SINGLE_DOCUMENT_DRAFT",
+        "mutation": "KNOWN_PATH_PATCH",
+        "unknown_fields_rebuilt_or_dropped": false,
+        "draft_keys_exported": false,
+        "data_source_port_changed": false
+      }
+    },
+    "T033": {
+      "status": "COMPLETE",
+      "summary": "Implemented a presentation-only wizard over dynamically derived unordered stable draft-key pairs with YES, NO, UNKNOWN, and UNANSWERED responses, inert evidence references, and explicit ACTIVE, STALE, and ORPHANED states; it creates no independence or governance verdict.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/modules/controllers/pairwise-review-draft.ts",
+          "sha256": "ae9dc9187a064d683bf20f38ec3e5af54c967beecaddef6fab51d9dbcf074af7"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/PairwiseReviewStep.tsx",
+          "sha256": "b0d74e592f878290a50ed7bc8ef3455f94bb2dab26fe051855a482c3f9476e88"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/PairwiseReviewStep.test.tsx",
+          "sha256": "6aace078b41e1c3a85b917d30c74dbbbd32881f0ad30c67dd3a25b10ee8e8057"
+        },
+        {
+          "path": "tools/admin-ui/src/app/App.tsx",
+          "sha256": "da877ed484bead1eed185f7d7ce46ab70999a87e64e79a9e1d757bfdd34d53c7"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/modules/controllers/PairwiseReviewStep.test.tsx src/modules/controllers/ControllerRegistryForm.test.tsx src/app/App.test.tsx",
+          "status": "PASS",
+          "test_files": 3,
+          "tests": 6
+        },
+        {
+          "command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+          "status": "PASS",
+          "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        }
+      ],
+      "boundary_assertions": {
+        "pair_cardinality": "n*(n-1)/2",
+        "identity_basis": "SESSION_LOCAL_STABLE_DRAFT_KEYS",
+        "local_verdicts_created": 0,
+        "pairwise_projection_to_export": false,
+        "data_source_port_changed": false
+      }
+    },
+    "T034": {
+      "status": "COMPLETE",
+      "summary": "Added a structural-only worksheet summary for controller count, current pairwise records filled, attention items, JSON Schema status, and separately sourced external-result availability; local completion never becomes an authority verdict.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ReadinessSummary.tsx",
+          "sha256": "a30c5e086dae9270c653766c33af5d0f88991ec1920b7a66f862bf511a8d64c3"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ReadinessSummary.test.tsx",
+          "sha256": "e51fed89ab37759be23e51ceade71e1e085150e68d8113c264368d469008dd28"
+        },
+        {
+          "path": "tools/admin-ui/src/app/App.tsx",
+          "sha256": "da877ed484bead1eed185f7d7ce46ab70999a87e64e79a9e1d757bfdd34d53c7"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/modules/controllers/ReadinessSummary.test.tsx src/app/App.test.tsx",
+          "status": "PASS",
+          "test_files": 2,
+          "tests": 5,
+          "four_controller_phrase": "6 of 6 pairwise records filled",
+          "local_verdict_terms": 0
+        },
+        {
+          "command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+          "status": "PASS",
+          "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        }
+      ],
+      "boundary_assertions": {
+        "summary_authority": "PRESENTATION_DERIVED_STRUCTURAL_ONLY",
+        "external_results_source": "SOURCED_RESULT_ENVELOPE_ONLY",
+        "completion_term": "FILLED",
+        "local_governance_or_protocol_verdicts": 0
+      }
+    },
+    "T035": {
+      "status": "COMPLETE",
+      "summary": "Added friendly field-oriented structural validation messages while retaining the validator's exact instance path, schema path, and constraint in keyboard-accessible disclosure details.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/components/FriendlyValidationPanel.tsx",
+          "sha256": "081bf9d7de0589c383c6e7415e0ec51738ac67b9abf1ac27c2d13993df7f0513"
+        },
+        {
+          "path": "tools/admin-ui/src/components/FriendlyValidationPanel.test.tsx",
+          "sha256": "36d5690e1389cba7c1ee7b801f66055239dcb1c2edcee3549e38ddaaeb7c6193"
+        },
+        {
+          "path": "tools/admin-ui/src/app/App.tsx",
+          "sha256": "da877ed484bead1eed185f7d7ce46ab70999a87e64e79a9e1d757bfdd34d53c7"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/components/FriendlyValidationPanel.test.tsx src/app/App.test.tsx src/data/local-json-adapter.validation.test.tsx",
+          "status": "PASS",
+          "test_files": 3,
+          "tests": 9,
+          "machine_fields_retained": [
+            "instancePath",
+            "schemaPath",
+            "constraint"
+          ]
+        },
+        {
+          "command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+          "status": "PASS",
+          "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        }
+      ]
+    },
+    "T036": {
+      "status": "COMPLETE",
+      "summary": "Added a closed-by-default Advanced JSON disclosure containing a read-only projection of the same DocumentDraft used by the guided form, structural validation, and explicit export; no second editor or synchronization path exists.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/components/AdvancedJsonView.tsx",
+          "sha256": "aae81463f1816021305189f361599ba974a11dcbdeda738b8acb81163a93e5b1"
+        },
+        {
+          "path": "tools/admin-ui/src/components/AdvancedJsonView.test.tsx",
+          "sha256": "350b148a324517200eddc86b5d6f3d5ebe60b29f3911442453d550bf0e586c34"
+        },
+        {
+          "path": "tools/admin-ui/src/app/App.tsx",
+          "sha256": "da877ed484bead1eed185f7d7ce46ab70999a87e64e79a9e1d757bfdd34d53c7"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/components/AdvancedJsonView.test.tsx src/app/App.test.tsx src/modules/controllers/ControllerRegistryForm.test.tsx",
+          "status": "PASS",
+          "test_files": 3,
+          "tests": 6,
+          "hidden_by_default": true,
+          "read_only": true
+        },
+        {
+          "command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+          "status": "PASS",
+          "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        }
+      ],
+      "boundary_assertions": {
+        "document_draft_instances": 1,
+        "raw_json_edit_actions": 0,
+        "projection_source": "DOCUMENT_DRAFT"
+      }
+    },
+    "T037": {
+      "status": "COMPLETE",
+      "summary": "Added production Chrome coverage at desktop and mobile widths plus a non-technical form-to-export integration test that creates four controllers, fills six pairwise records, validates structurally, and explicitly downloads without opening raw JSON.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/tests/browser/playwright.config.ts",
+          "sha256": "4eeb0123478d2e184d5c6d9a2daa9a22566eededf4ba3074ad5cdd997780b039"
+        },
+        {
+          "path": "tools/admin-ui/tests/browser/form-first.spec.ts",
+          "sha256": "3748c314166854305c6f661fabaa08c397a6732aaa577212047323406300e0d7"
+        },
+        {
+          "path": "tools/admin-ui/src/app/form-first-usability.test.tsx",
+          "sha256": "c3ad5b5cdfc44ea47b498f853babe8ab499340254ac190f62f89f889f6855c80"
+        },
+        {
+          "path": "tools/admin-ui/package.json",
+          "sha256": "154ec7ce0d5a97a53a08413b07a7a197287a0477b8013895fa25b39515e06629"
+        },
+        {
+          "path": "tools/admin-ui/package-lock.json",
+          "sha256": "c743dc773b565dc7e6ce7bb86788efdbbd95303c86b749bdd9067a4a381772d8"
+        },
+        {
+          "path": "tools/admin-ui/index.html",
+          "sha256": "290478e8b58c43650f1243b2a7f92ee2989cb142fe06a4f219ac38fe528bf399"
+        },
+        {
+          "path": "tools/admin-ui/vite.config.ts",
+          "sha256": "7ad917c34027862b24f136d793218a5a995394935ac8741a100e63423070e761"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/app/form-first-usability.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 1,
+          "raw_json_opened": false,
+          "controllers_created": 4,
+          "pairwise_records_filled": 6,
+          "downloads": 1
+        },
+        {
+          "command": "npm run test:browser",
+          "status": "PASS",
+          "browser": "INSTALLED_GOOGLE_CHROME",
+          "projects": [
+            "desktop-chrome",
+            "mobile-chrome"
+          ],
+          "tests_passed": 3,
+          "tests_skipped": 1,
+          "skip_reason": "mobile-only navigation case excluded from desktop project",
+          "external_requests": 0,
+          "console_errors": 0,
+          "csp_unsafe_eval_required": false,
+          "build_typecheck_classification": "TYPESCRIPT_5_9_3_SUBSTITUTION"
+        }
+      ],
+      "runner_limitation": {
+        "native_gate": "typescript@7.0.2",
+        "status": "NOT_CLAIMED_AS_PASSED",
+        "classification": "SUBSTITUTED",
+        "replacement": "typescript@5.9.3 --noEmit"
+      }
+    },
+    "T038": {
+      "status": "COMPLETE",
+      "summary": "Proved that a known controller-field patch retains nested schema-allowed unknown root and controller values, leaves the original DocumentDraft bytes unchanged, triggers no automatic download, and exports only through a distinct explicit new-file action.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/editor/document-draft.form-roundtrip.test.ts",
+          "sha256": "85e2a2ddbff402d083daaf0160b73fe47b89912cbd9df583d3fd4ddf46f9bd67"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/editor/document-draft.form-roundtrip.test.ts src/data/local-json-adapter.export.test.ts",
+          "status": "PASS",
+          "test_files": 2,
+          "tests": 3,
+          "downloads_before_explicit_export": 0,
+          "source_overwrites": 0,
+          "unknown_value_round_trip": "DEEP_EQUIVALENT"
+        },
+        {
+          "command": "npm run typecheck:substitution",
+          "status": "PASS",
+          "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        }
+      ]
+    },
+    "T039": {
+      "status": "COMPLETE",
+      "summary": "Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/modules/controllers/pairwise-review-draft.test.ts",
+          "sha256": "ff2fded120cb9cde74451e23f806c3756d7d89512b3a8a8cdce8b6821d4d7708"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/modules/controllers/pairwise-review-draft.test.ts src/modules/controllers/PairwiseReviewStep.test.tsx",
+          "status": "PASS",
+          "test_files": 2,
+          "tests": 10,
+          "cardinality_matrix": {
+            "0": 0,
+            "1": 0,
+            "2": 1,
+            "4": 6,
+            "100": 4950
+          },
+          "silent_evidence_retargets": 0
+        },
+        {
+          "command": "npm run typecheck:substitution",
+          "status": "PASS",
+          "classification": "SUBSTITUTION_NOT_NATIVE_TYPESCRIPT_7_GATE"
+        }
+      ]
     }
   },
   "mvp_integration": {
@@ -932,6 +1255,100 @@
       "source_overwrite": false,
       "autosave": false,
       "semantic_delta_validation": false
+    }
+  },
+  "ux_integration": {
+    "status": "PASS",
+    "scope": "T032-T039,HR011-HR013",
+    "implementation_branch": "feature/admin-ui-ux-mvp",
+    "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+    "artifacts": [
+      {
+        "path": "tools/admin-ui/src/app/App.tsx",
+        "sha256": "da877ed484bead1eed185f7d7ce46ab70999a87e64e79a9e1d757bfdd34d53c7"
+      },
+      {
+        "path": "tools/admin-ui/src/app/App.test.tsx",
+        "sha256": "c66f49cf93784029f19940c3996bdf5958f204d9a7bfc3686b0df52b45fd3b89"
+      },
+      {
+        "path": "tools/admin-ui/src/editor/document-draft.ts",
+        "sha256": "3e2d9d2fb6a0b50c95faf1cdfc562cb92225d6df730c8fe39dacad7029bed2df"
+      },
+      {
+        "path": "tools/admin-ui/src/modules/controllers/pairwise-review-draft.ts",
+        "sha256": "ae9dc9187a064d683bf20f38ec3e5af54c967beecaddef6fab51d9dbcf074af7"
+      },
+      {
+        "path": "tools/admin-ui/tests/browser/form-first.spec.ts",
+        "sha256": "3748c314166854305c6f661fabaa08c397a6732aaa577212047323406300e0d7"
+      },
+      {
+        "path": "specs/admin-ui/evidence/web-qa.json"
+      },
+      {
+        "path": "specs/admin-ui/evidence/final-formal-impact.json"
+      }
+    ],
+    "verification": {
+      "formal_prerequisite": {
+        "status": "PASS",
+        "decision": "GO",
+        "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+      },
+      "admin_ui_gate": {
+        "command": "npm run check:substitution --prefix tools/admin-ui",
+        "status": "PASS",
+        "test_files": 29,
+        "tests": 101,
+        "production_build": "PASS",
+        "offline_violations": 0
+      },
+      "typescript": {
+        "native_typescript_7": "NOT_CLAIMED_AS_PASSED",
+        "classification": "SUBSTITUTION",
+        "substitute_version": "5.9.3",
+        "substitute_status": "PASS"
+      },
+      "browser_gate": {
+        "command": "npm run test:browser --prefix tools/admin-ui",
+        "status": "PASS",
+        "passed": 3,
+        "skipped": 1,
+        "external_requests": 0
+      },
+      "independent_web_qa": {
+        "status": "PASS",
+        "blocking_defects": 0,
+        "functional_defects": 0
+      },
+      "repository_boundary": {
+        "command": "npm run audit:repository --prefix tools/admin-ui",
+        "status": "PASS",
+        "protected_worktree_entries": 0,
+        "reverse_dependency_hits": 0
+      },
+      "dependency_audit": {
+        "command": "npm audit --audit-level=high --prefix tools/admin-ui",
+        "status": "PASS",
+        "vulnerabilities": 0
+      }
+    },
+    "boundary_assertions": {
+      "formal_impact": "NONE",
+      "outside_admin_ui_files_modified": 0,
+      "runtime_or_protocol_files_modified": 0,
+      "canonical_or_local_schema_files_modified": 0,
+      "data_source_port_changed": false,
+      "frozen_fixture_changed": false,
+      "backend": false,
+      "login": false,
+      "analytics": false,
+      "automatic_network_requests": false,
+      "source_overwrite": false,
+      "autosave": false,
+      "semantic_delta_validation": false,
+      "local_governance_or_protocol_verdicts": 0
     }
   }
 }

@@ -58,14 +58,14 @@ and PR #29 as a non-normative MVP input.
 
 ## UX Amendment 001: Form-first controller registry
 
-- [ ] T032 [US1] Add the guided editor in `tools/admin-ui/src/modules/controllers/ControllerRegistryForm.tsx` and patch helpers in `tools/admin-ui/src/editor/document-draft.ts`; do not change `DataSourcePort`.
-- [ ] T033 [US5] Implement non-verdict answer/evidence entry in `tools/admin-ui/src/modules/controllers/PairwiseReviewStep.tsx` and `tools/admin-ui/src/modules/controllers/pairwise-review-draft.ts` from `contracts/pairwise-review-draft.md`.
-- [ ] T034 [US5] Add `tools/admin-ui/src/modules/controllers/ReadinessSummary.tsx` using wording such as "6 of 6 pairwise records filled"; reserve verified/confirmed/approved/pass/fail for matching sourced results.
-- [ ] T035 [US1] Add friendly field mapping in `tools/admin-ui/src/components/FriendlyValidationPanel.tsx` while retaining machine JSON path, schema path, and constraint in accessible details.
-- [ ] T036 [US1] Add a hidden-by-default, read-only projection at `tools/admin-ui/src/components/AdvancedJsonView.tsx` over the same `DocumentDraft`.
-- [ ] T037 [US1] Add production-browser coverage under `tools/admin-ui/tests/browser/` and non-technical form-to-export coverage in `tools/admin-ui/src/app/form-first-usability.test.tsx`.
-- [ ] T038 [US1] Prove unknown-field preservation and explicit-new-file behavior in `tools/admin-ui/src/editor/document-draft.form-roundtrip.test.ts`.
-- [ ] T039 [US5] Test stable pair keys and `STALE`/`ORPHANED` lifecycle in `tools/admin-ui/src/modules/controllers/pairwise-review-draft.test.ts` without evidence retargeting.
+- [x] T032 [US1] Add the guided editor in `tools/admin-ui/src/modules/controllers/ControllerRegistryForm.tsx` and patch helpers in `tools/admin-ui/src/editor/document-draft.ts`; do not change `DataSourcePort`. Evidence: `evidence/implementation-tasks.json`.
+- [x] T033 [US5] Implement non-verdict answer/evidence entry in `tools/admin-ui/src/modules/controllers/PairwiseReviewStep.tsx` and `tools/admin-ui/src/modules/controllers/pairwise-review-draft.ts` from `contracts/pairwise-review-draft.md`. Evidence: `evidence/implementation-tasks.json`.
+- [x] T034 [US5] Add `tools/admin-ui/src/modules/controllers/ReadinessSummary.tsx` using wording such as "6 of 6 pairwise records filled"; reserve verified/confirmed/approved/pass/fail for matching sourced results. Evidence: `evidence/implementation-tasks.json`.
+- [x] T035 [US1] Add friendly field mapping in `tools/admin-ui/src/components/FriendlyValidationPanel.tsx` while retaining machine JSON path, schema path, and constraint in accessible details. Evidence: `evidence/implementation-tasks.json`.
+- [x] T036 [US1] Add a hidden-by-default, read-only projection at `tools/admin-ui/src/components/AdvancedJsonView.tsx` over the same `DocumentDraft`. Evidence: `evidence/implementation-tasks.json`.
+- [x] T037 [US1] Add production-browser coverage under `tools/admin-ui/tests/browser/` and non-technical form-to-export coverage in `tools/admin-ui/src/app/form-first-usability.test.tsx`. Evidence: `evidence/implementation-tasks.json`.
+- [x] T038 [US1] Prove unknown-field preservation and explicit-new-file behavior in `tools/admin-ui/src/editor/document-draft.form-roundtrip.test.ts`. Evidence: `evidence/implementation-tasks.json`.
+- [x] T039 [US5] Test stable pair keys and `STALE`/`ORPHANED` lifecycle in `tools/admin-ui/src/modules/controllers/pairwise-review-draft.test.ts` without evidence retargeting. Evidence: `evidence/implementation-tasks.json`.
 
 ## Dependencies
 
