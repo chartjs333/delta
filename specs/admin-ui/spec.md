@@ -18,13 +18,19 @@ viewing, and export. Controller-independence, governance readiness, signing
 readiness, and other semantic outcomes are not computed by the UI. They appear
 only when a declared source supplies an attributable result.
 
+The controller governance register and the canonical bootstrap validator set are
+different documents. A governance workflow may explicitly relate exact revisions,
+but the UI never converts one into the other or treats register review as protocol
+authorization.
+
 ## User Scenarios & Testing
 
 ### US1 — Edit a controller register safely (Priority: P1)
 
 An operator opens or creates a controller-register JSON document, selects its
-canonical schema, edits a dynamic controller list, sees structural errors, and
-exports the document without changing protocol or governance state.
+matching authority-classed schema descriptor, edits a dynamic controller list,
+sees structural errors, and explicitly downloads a new document without changing
+the original file, protocol state, or governance state.
 
 **Independent Test**: Run with only the local JSON adapter and no Delta runtime,
 network service, validator, key, or credential.
@@ -39,6 +45,11 @@ network service, validator, key, or credential.
    the violated schema rule and machine-readable document path.
 4. **Given** valid unknown fields allowed by the schema, **When** the document is
    exported, **Then** those fields survive the round trip.
+5. **Given** the PR #29 governance worksheet and the canonical bootstrap validator-set
+   schema, **When** validation is requested, **Then** the UI rejects the document-type
+   mismatch rather than treating the worksheet as a protocol document.
+6. **Given** a downloaded export, **When** the workflow completes, **Then** the
+   originally selected file has not been overwritten by the UI.
 
 ### US2 — Distinguish unavailable outcomes from failed outcomes (Priority: P1)
 
@@ -101,6 +112,8 @@ different capabilities and equivalent controller documents.
 - Conflicting governance and protocol results from different authorities.
 - Offline, stale, partial, or access-denied sources.
 - Routes or widgets that require capabilities unavailable from the active adapter.
+- Oversized, deeply nested, high-node-count, or giant-string JSON documents.
+- HTML/script/template text, suspicious URLs, huge Base64-like strings, and external `$ref` values.
 
 ## Requirements
 
@@ -108,7 +121,8 @@ different capabilities and equivalent controller documents.
 
 - **FR-001**: The MVP MUST open, create, edit, structurally validate, view, and
   export local JSON documents.
-- **FR-002**: The MVP MUST identify the selected schema by canonical ID and version.
+- **FR-002**: Every selectable schema MUST use a `SchemaDescriptor` containing
+  `schemaId`, `version`, `authorityClass`, `documentType`, and immutable/digested `source`.
 - **FR-003**: Structural errors MUST include a machine-readable document path and
   the violated schema constraint.
 - **FR-004**: Controller collections MUST be dynamic; the UI MUST NOT encode four
@@ -137,6 +151,22 @@ different capabilities and equivalent controller documents.
   access-denied states MUST be distinguishable.
 - **FR-016**: PR #29 artifacts MAY be used as fixtures only when their status and
   provenance are preserved; the four-slot worksheet MUST NOT become the generic model.
+- **FR-017**: The UI MUST keep `CONTROLLER_GOVERNANCE_REGISTER` and
+  `CAMPAIGN02_WORKFLOW_BOOTSTRAP_VALIDATOR_SET` as distinct document types and MUST
+  reject schema/document authority or type mismatches.
+- **FR-018**: Schema authority classes MUST include `GOVERNANCE_DOCUMENT`,
+  `DELTA_CANONICAL`, and `LOCAL_FIXTURE`; validation MUST NOT promote document authority.
+- **FR-019**: The UI MUST NOT derive a bootstrap validator set, governance approval,
+  signing eligibility, or execution authorization from a governance register.
+- **FR-020**: The MVP MUST persist changes only through an explicit new-file
+  download/export and MUST NOT silently or automatically overwrite the input file.
+- **FR-021**: The implementation MUST freeze the exact PR #29 fixture revision and
+  SHA-256 in its own test data; it MUST NOT read the live PR as a contract or source of truth.
+- **FR-022**: The MVP MUST treat all imported JSON and schema bytes as untrusted,
+  enforce `threat-model.md` limits, and render input strings only as inert text.
+- **FR-023**: The MVP MUST NOT automatically fetch URLs or external schema references.
+- **FR-024**: The MVP MUST operate without a backend, login, authorization flow,
+  network service, runtime, key, or credential.
 
 ### Non-Functional Requirements
 
@@ -151,6 +181,8 @@ different capabilities and equivalent controller documents.
   HSM/KMS credentials, recovery material, and service credentials.
 - **NFR-008**: Technology selection MUST be recorded separately and MUST satisfy
   this specification rather than narrowing it.
+- **NFR-009**: Rejecting hostile or over-limit input MUST not crash the shell or
+  expose document contents through analytics, telemetry, or exception reporting.
 
 ### Key Entities
 
@@ -161,6 +193,8 @@ different capabilities and equivalent controller documents.
 - **AuditEvent**: An immutable event view with actor, action, target, outcome, and correlation.
 - **SourceDescriptor**: Adapter identity, connection status, authority, freshness,
   supported entity types, and capabilities.
+- **SchemaDescriptor**: Exact schema ID, version, authority class, document type,
+  and source binding.
 - **SourcedResult**: An attributable result bound to an exact subject and authority class.
 
 ## Success Criteria
@@ -179,10 +213,15 @@ different capabilities and equivalent controller documents.
 
 - Existing canonical schemas remain owned by `delta-protocol` or another explicit
   project authority; the UI does not fork them.
+- The canonical bootstrap validator-set schema is
+  `urn:deltareduce:schema:010:campaign-02:workflow-bootstrap-validator-set-v1`,
+  version `1.0.0`; it is not the schema of the PR #29 governance worksheet.
+- Until an identified governance authority owns a controller-register schema, the
+  MVP companion schema is `LOCAL_FIXTURE`, not `GOVERNANCE_DOCUMENT` or `DELTA_CANONICAL`.
 - PR #29 remains governance documentation with formal impact `NONE`; it does not
   itself create appointments, signatures, or execution authority.
 - Public Delta APIs needed for later phases may not exist yet.
-- A later implementation ADR will choose UI and server technologies.
+- The accepted MVP technology ADR does not constrain later adapter or visualization ADRs.
 
 ## Out of Scope
 
@@ -191,4 +230,6 @@ different capabilities and equivalent controller documents.
 - Signing, key generation, appointment, rotation, revocation, or HSM/KMS operations.
 - Direct FFM/native-runtime access from the UI.
 - Live runtime control, state-changing administrative commands, or campaign execution.
-- Selecting a UI framework, form library, visualization library, or packaging model.
+- Adding a canonical schema to `delta-protocol` solely for the UI.
+- Authentication, authorization, remote persistence, backend services, and API integration.
+- Selecting a form or visualization library; those require separate implementation decisions.

@@ -12,20 +12,24 @@ and PR #29 as a non-normative MVP input.
 - [x] T001 Add the reviewed Spec Kit under `specs/admin-ui/` only. Evidence: `evidence/spec-kit-manifest.json`.
 - [x] T002 Record the exact main commit and accepted formal semantics ID reviewed. Evidence: `evidence/spec-baseline.json`.
 - [x] T003 Link the exact PR #29 revision used as the non-normative controller fixture. Evidence: `evidence/spec-baseline.json`.
-- [ ] T004 Resolve the canonical schema ID/version used for MVP structural validation.
+- [x] T004 Replace the invalid single-canonical-schema assumption with authority-classed `SchemaDescriptor` and distinct governance/protocol document types. Evidence: `evidence/spec-decisions.json`.
 
 ## Phase 2: Foundational decisions
 
-- [ ] T005 Write a technology ADR without weakening `spec.md` requirements.
+- [x] T005 Write and accept the browser-local TypeScript/React/Vite MVP ADR without weakening `spec.md`. Evidence: `adr/0001-browser-local-react-vite.md`, `evidence/spec-decisions.json`.
 - [ ] T006 Define the extension composition root inside the future `tools/admin-ui/`.
 - [ ] T007 Define the implementation-level `DataSourcePort` from `contracts/data-source-port.md`.
 - [ ] T008 Define typed errors, authority classes, source descriptors, and sourced-result envelopes.
-- [ ] T009 Decide whether local save overwrites a selected file or always creates an export.
+- [x] T009 Require explicit export/download of a new file and prohibit automatic source overwrite. Evidence: `evidence/spec-decisions.json`.
+- [ ] T028 Freeze the exact PR #29 worksheet bytes under future `tools/admin-ui/` test data with source commit, path, Git blob SHA, and SHA-256 metadata; never read the live PR at runtime.
+- [ ] T029 Add hostile-input guards and tests for every mandatory limit in `threat-model.md`.
+- [ ] T030 Prove the browser-local MVP has no backend, login, credential flow, analytics payload, or automatic network request.
+- [ ] T031 Add contract tests that reject schema authority/document-type mismatch and external `$ref` resolution.
 
 ## Phase 3: Local document workflow
 
 - [ ] T010 [US1] Implement local JSON open/create under `tools/admin-ui/`.
-- [ ] T011 [US1] Implement canonical schema selection and structural validation.
+- [ ] T011 [US1] Implement authority-classed schema selection and structural validation.
 - [ ] T012 [US1] Implement lossless editing/export for allowed unknown fields.
 - [ ] T013 [US1] Add dynamic controller list/detail views with no slot-count assumption.
 - [ ] T014 [US1] Test 0, 1, 4, 100+, invalid, and forward-compatible controller documents.
@@ -55,7 +59,7 @@ and PR #29 as a non-normative MVP input.
 ## Dependencies
 
 - T001–T004 precede implementation.
-- T005–T009 precede T010–T022.
+- T005–T009 and T028–T031 precede T010–T022 acceptance.
 - T010–T014 precede controller-specific MVP acceptance.
 - T015–T018 precede display of any sourced assessment/result.
 - T023–T027 precede promotion.

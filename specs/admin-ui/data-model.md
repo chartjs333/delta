@@ -37,6 +37,22 @@ target, outcome, correlation ID, and evidence/artifact references when supplied.
 Identifies an adapter instance and its authority class, capabilities, connection
 state, supported schemas/entity types, freshness, and retrieval metadata.
 
+## SchemaDescriptor
+
+Identifies a schema without collapsing governance and protocol authority:
+
+| Field | Meaning |
+| --- | --- |
+| `schemaId` | Stable schema identifier within its declared authority |
+| `version` | Exact schema version |
+| `authorityClass` | `GOVERNANCE_DOCUMENT`, `DELTA_CANONICAL`, or `LOCAL_FIXTURE` |
+| `documentType` | Exact type of document the schema validates |
+| `source` | Immutable or version-bound provenance for the schema bytes |
+
+For the first MVP, `CONTROLLER_GOVERNANCE_REGISTER` and
+`CAMPAIGN02_WORKFLOW_BOOTSTRAP_VALIDATOR_SET` are different document types. The
+latter's canonical schema cannot be reused for the former.
+
 ## SourcedResult
 
 Contains result type, outcome, exact subject reference, authority class, source

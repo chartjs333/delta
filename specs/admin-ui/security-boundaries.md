@@ -13,9 +13,10 @@ recovery material, service credentials, or restricted evidence outside the user'
 
 ## MVP actions
 
-Local import, editing, structural validation, save, and export do not appoint a
+Local import, editing, structural validation, and explicit export do not appoint a
 controller, authorize execution, create a signature, or record governance approval.
-The UI must not label those actions as such.
+The UI must not label those actions as such. The MVP does not silently overwrite
+the selected input file; every persisted result is a user-initiated new download.
 
 ## Validation boundary
 
@@ -24,6 +25,19 @@ The UI must not label those actions as such.
 - Structural schema success does not imply protocol validity or governance readiness.
 - Semantic protocol validation remains in the canonical Delta owner.
 - Governance assessments remain attributable to their governance authority.
+- Governance-register validation and bootstrap-validator-set validation use
+  different `SchemaDescriptor.documentType` and authority classes.
+- The UI never converts, promotes, or infers authorization from one to the other.
+
+## Browser-local MVP
+
+- The MVP has no backend, login, authorization flow, or credential storage.
+- It performs no automatic network requests, including external JSON Schema `$ref`
+  resolution, URL previews, analytics, or live PR/branch reads.
+- Input strings are inert text: never raw HTML, script, template source, or executable code.
+- URLs are text by default and may open only after an explicit user action and
+  allowlisted-scheme check.
+- Exact hostile-input limits and validation behavior are defined in `threat-model.md`.
 
 ## Provenance
 
@@ -37,5 +51,5 @@ Insufficient provenance is displayed as unverified/insufficient, never as canoni
 
 Missing API, validator, authority, or partial data produces degraded/read-only
 behavior. UI failure never changes Delta runtime state. State-changing operations
-require a later threat model, authorization design, formal-impact review, and
-separate scope approval.
+require a later integration threat model, authorization design, formal-impact
+review, and separate scope approval.

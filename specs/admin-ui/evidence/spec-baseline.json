@@ -15,7 +15,9 @@
     "url": "https://github.com/chartjs333/delta/pull/29",
     "head_commit": "de3348fdcbd527046d5b66bc6d8c90df098d5aa8",
     "state_at_review": "OPEN_DRAFT",
-    "authority": "NON_NORMATIVE_FIXTURE_INPUT"
+    "authority": "NON_NORMATIVE_FIXTURE_INPUT",
+    "fixture_path": "docs/templates/campaign02-controller-register.template.json",
+    "fixture_git_blob_sha": "496ea3a9b081040e2670c7d027a63069516496f6"
   },
   "assertions": [
     "The specification changes no protocol or runtime artifact.",

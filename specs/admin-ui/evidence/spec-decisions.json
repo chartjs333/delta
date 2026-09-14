@@ -1,0 +1,64 @@
+{
+  "document_type": "ADMIN_UI_SPEC_DECISIONS",
+  "document_version": "1.0.0",
+  "recorded_on": "2026-09-14",
+  "formal_impact": "NONE",
+  "tasks": {
+    "T004": {
+      "status": "COMPLETE",
+      "decision": "SCHEMA_AUTHORITY_AND_DOCUMENT_TYPE_SPLIT",
+      "required_descriptor_fields": [
+        "schemaId",
+        "version",
+        "authorityClass",
+        "documentType",
+        "source"
+      ],
+      "authority_classes": [
+        "GOVERNANCE_DOCUMENT",
+        "DELTA_CANONICAL",
+        "LOCAL_FIXTURE"
+      ],
+      "governance_document_type": "CONTROLLER_GOVERNANCE_REGISTER",
+      "protocol_document_type": "CAMPAIGN02_WORKFLOW_BOOTSTRAP_VALIDATOR_SET",
+      "protocol_schema": {
+        "schema_id": "urn:deltareduce:schema:010:campaign-02:workflow-bootstrap-validator-set-v1",
+        "version": "1.0.0",
+        "authority_class": "DELTA_CANONICAL",
+        "reviewed_source": {
+          "repository": "chartjs333/delta",
+          "revision": "de3348fdcbd527046d5b66bc6d8c90df098d5aa8",
+          "path": "delta-protocol/schemas/010/campaign-02/workflow-bootstrap-validator-set-v1.json",
+          "git_blob_sha": "9127a7b00a338d8b5218a66c1e0c90da4f7b98f2"
+        }
+      },
+      "assertions": [
+        "The PR 29 worksheet is not a protocol validator set.",
+        "The bootstrap validator-set schema must not validate the governance register.",
+        "The UI cannot derive, approve, authorize, or promote one document from the other.",
+        "No canonical delta-protocol schema is added solely for the UI."
+      ]
+    },
+    "T005": {
+      "status": "COMPLETE",
+      "adr": "adr/0001-browser-local-react-vite.md",
+      "stack": ["TypeScript", "React", "Vite", "JSON Schema Draft 2020-12"],
+      "execution": "BROWSER_LOCAL",
+      "backend": false,
+      "login": false,
+      "automatic_network": false
+    },
+    "T009": {
+      "status": "COMPLETE",
+      "persistence": "EXPLICIT_NEW_FILE_DOWNLOAD_ONLY",
+      "automatic_overwrite": false,
+      "autosave": false
+    }
+  },
+  "implementation_gate": {
+    "frozen_pr29_fixture_required": true,
+    "fixture_sha256_required": true,
+    "live_pr_access_allowed": false,
+    "threat_model": "threat-model.md"
+  }
+}

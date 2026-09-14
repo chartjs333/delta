@@ -1,60 +1,72 @@
 {
   "document_type": "ADMIN_UI_SPEC_KIT_MANIFEST",
-  "document_version": "1.0.0",
+  "document_version": "1.1.0",
   "hash_algorithm": "SHA-256",
   "manifest_scope": "All files in specs/admin-ui except this manifest",
   "files": [
     {
       "path": "README.md",
-      "sha256": "9d52ecbebea300b9d1509583e804adf950b7940cca138e597e106aa46c7beba8"
+      "sha256": "3713d05ff771a95bdc364f7687a1e50811aadd711d17ad85281b92792df66bc1"
+    },
+    {
+      "path": "adr/0001-browser-local-react-vite.md",
+      "sha256": "d9d03a10ac5efccfdda3e29242e83885523c2875ab4bcbdb77468777c4020d2b"
     },
     {
       "path": "architecture.md",
-      "sha256": "f6eee24a62d7570e1c347982b7ed4192aa94ff63c6d77b0534d8dbbffbe86edd"
+      "sha256": "5d1f63ac5acbf8b53f594f6b9bee7b116cd63fefe9d7307813e871c98d861c20"
     },
     {
       "path": "checklists/hybrid-runtime.md",
-      "sha256": "4de70279f33173ab017a6619b957a7a402ce8f8bd2de9e4fe31b85181988c004"
+      "sha256": "629495d5714d921919b9dfa90e149e143e910e00df1dd3154ba45acdc0feabad"
     },
     {
       "path": "checklists/requirements.md",
-      "sha256": "0d58d9ffedc97e242c450f023cf5edfc226500e5562cd337a42f3a994ee64c93"
+      "sha256": "b5a82e391a94d872a3e236282e7c3a3507393ae68c416edf733d7fe21531841b"
     },
     {
       "path": "contracts/data-source-port.md",
-      "sha256": "c357a655a51f6b82387ab3c93ff6f069d8c43089fcbffa38f799aaa19b266ad7"
+      "sha256": "be746df90deb423e85a70d8792a9da8652f15e88bbf30ce633a69f8b050a52fc"
     },
     {
       "path": "data-model.md",
-      "sha256": "64302265675cf462c01f4ebcaf04f659591320a6235b17a6a56a90e3a38826bc"
+      "sha256": "79274622a7d84e9de07cb664e917669108b52caa0c21487a75f5333ea7b82d58"
     },
     {
       "path": "evidence/spec-baseline.json",
-      "sha256": "1867b3b10d1a98231dd0151b7e8fb52f6643df2eebf303def5f392447db6dddf"
+      "sha256": "565fd28712c6e6a47844b9f24aca46cc79294821ee5497b5cd62419454937796"
+    },
+    {
+      "path": "evidence/spec-decisions.json",
+      "sha256": "b1fbd8cd0fdd7836bf1ea1c828baf9ece81e4794c3bcf91e48ad219c28a7572a"
     },
     {
       "path": "plan.md",
-      "sha256": "671a17679e7289ad437dbfb3cccea627417efcbd43fcc5736c0847131eba2a16"
+      "sha256": "d0ce1f3d61b68e6d3f8b5ec3990095248349503ce5ade72014cae3dc2e158f3e"
     },
     {
       "path": "runtime-profile.md",
-      "sha256": "a53868f226b150d75418ab523c5b35bd0320f57ffa76ec64c81af07fd72a4f2f"
+      "sha256": "e468297e9ddcdfc231204e8939e1bccbd3a2f6060be70a16d9472887f4894364"
     },
     {
       "path": "runtime-tasks.md",
-      "sha256": "139f1319c417ad88a2cb0adfc1b83acea3f89e0389330d5074f498f96a43176b"
+      "sha256": "1af155fcecb6ed798c94e1521e3c8e09d7bec46ee15bcd1522e3644a0ebf18f1"
     },
     {
       "path": "security-boundaries.md",
-      "sha256": "cbe04d6f0e8177b4ca227953afbb63044c63b31b2a2aad9f08b95267c4d8651a"
+      "sha256": "4e823a0a48658602b8d47489419be882263ca988077c7679be5c6b0e3f061587"
     },
     {
       "path": "spec.md",
-      "sha256": "e3d387bafb33af91d5d400dc764252e68758d035b087ac11e72852d43cee3673"
+      "sha256": "1a38b02e02d361a4f40e6605a95cde6c24f8263b0c6762abd0d540a495a4d12f"
     },
     {
       "path": "tasks.md",
-      "sha256": "2dbba812fe56530b6dee1e19d322fcc40521fd7c0dd1ee2b6d31a73a835bcae1"
+      "sha256": "5ba618e42fdd6c7d35317825a3fd8eb0b15eecd3d5f11e9eea10eb9c17ffd183"
+    },
+    {
+      "path": "threat-model.md",
+      "sha256": "0ff2e4bc7441cf67825d04b0837169375cb6de905ac11b8b93944b42ca34e86a"
     }
   ]
 }

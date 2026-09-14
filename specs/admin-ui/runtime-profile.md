@@ -14,6 +14,8 @@ specification and the local/offline MVP have formal impact `NONE`.
 - `delta-protocol` remains the owner of runtime-neutral canonical schemas/fixtures.
 - Admin UI owns presentation, local draft-document workflow, source adaptation,
   and visualization only.
+- The MVP is a browser-local static application with no backend, login, credential
+  flow, automatic network request, or runtime service dependency.
 
 ## Forbidden runtime coupling
 
@@ -25,6 +27,8 @@ The UI must not:
 - reinterpret opaque contribution or aggregate bytes;
 - make Java node, C++ core/runtime, or Python worker depend on UI code;
 - become mandatory for node startup, worker execution, or conformance tests.
+- treat a governance document as a Delta-canonical protocol document or derive one
+  from the other.
 
 ## Future API boundary
 

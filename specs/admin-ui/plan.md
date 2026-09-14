@@ -15,8 +15,11 @@ public Delta APIs and visualize campaigns, nodes, artifacts, and audit events.
 - Accepted formal semantics ID: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
 - Reviewed PR #29 head: `de3348fdcbd527046d5b66bc6d8c90df098d5aa8` (draft, non-normative input).
 - Canonical schemas are owned by `delta-protocol`.
-- UI technology and packaging: unresolved; separate ADR required.
-- MVP data source: local JSON plus explicitly selected canonical schemas.
+- MVP technology and packaging: TypeScript + React + Vite under `tools/admin-ui/`,
+  accepted in `adr/0001-browser-local-react-vite.md`.
+- MVP execution: browser-local, no backend, login, credentials, or network dependency.
+- MVP validation: JSON Schema Draft 2020-12 using authority-classed schema descriptors.
+- MVP data source: user-selected local JSON plus bundled/frozen or user-selected schemas.
 - Future data source: stable public Delta API; not assumed to exist.
 - Initial implementation root: `tools/admin-ui/`, isolated from mandatory core builds.
 
@@ -62,20 +65,22 @@ No implementation directory is added by the specification branch.
 ## Implementation Sequence
 
 1. Review and merge the spec-only branch.
-2. Resolve schema location/selection and local save semantics.
-3. Record technology choice in a separate ADR.
-4. Create isolated shell and extension composition root.
-5. Implement the data-source port and local JSON adapter.
-6. Implement controller list/detail and schema-valid editing.
-7. Add capability/provenance presentation and contract tests.
-8. Prove core/runtime build independence.
-9. Defer API, live visualization, and commands to later scopes.
+2. Freeze the exact PR #29 fixture and its companion local schema with SHA-256 metadata.
+3. Create the isolated browser shell and extension composition root.
+4. Implement the data-source port and local JSON adapter with export-only persistence.
+5. Implement controller list/detail and schema-valid editing.
+6. Add untrusted-input limits, capability/provenance presentation, and contract tests.
+7. Prove core/runtime build independence.
+8. Defer API, authentication, live visualization, and commands to later scopes.
 
 ## Test Strategy
 
 - Contract tests shared by adapter implementations.
 - Round-trip tests for valid unknown fields.
 - Negative schema and malformed-document tests.
+- Adversarial size, depth, node-count, string, URL, and content-rendering tests.
+- Tests proving no external schema references or URLs are fetched.
+- Export-only tests proving the selected source file is never overwritten automatically.
 - Capability matrix tests distinguishing unavailable, failed, stale, and unsupported.
 - Provenance/subject mismatch tests.
 - Extension registration tests.
@@ -100,6 +105,8 @@ degrade safely when unavailable.
 | --- | --- |
 | Four-slot PR #29 worksheet becomes the product model | Dynamic collections and non-normative fixture status |
 | Structural validity is mistaken for approval | Authority classes and explicit UI language |
+| Governance worksheet is validated as a protocol document | Mandatory schema authority and document-type match |
+| Untrusted JSON exhausts or executes in the browser | Hard input limits, inert text rendering, no external references |
 | Frontend duplicates protocol logic | Data-source port plus sourced-result-only rules |
 | Future API requires view rewrites | Adapter contract and shared contract tests |
 | Extension claims are unrealistic | Localized composition root, not zero-file-change promise |
