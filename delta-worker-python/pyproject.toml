@@ -17,6 +17,8 @@ dependencies = [
 
 [project.scripts]
 delta = "deltatorrent.cli:main"
+delta-demo-controllers = "deltatorrent.benchmark.campaign02_demo_controllers:main"
+delta-commission-demo = "deltatorrent.benchmark.commission_demo:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/deltatorrent"]
