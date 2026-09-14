@@ -1,18 +1,28 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import struct
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import pytest
 from deltatorrent.benchmark import mnist_demo
+from deltatorrent.benchmark.mnist_delta_nodes import (
+    MODEL_MAGIC,
+    VECTOR_WIDTH,
+    AppliedModel,
+    DeltaExecutionResult,
+    contribution_from_summary,
+    expected_central_model,
+)
 from deltatorrent.benchmark.mnist_demo import (
     MNIST_FILES,
     MnistDataset,
     MnistDemoError,
-    aggregate_summaries,
+    NodeSummary,
     compute_summary,
-    evaluate_centroid_model,
     materialize_node_shards,
     prepare_mnist_cache,
     run_mnist_demo,
@@ -64,6 +74,63 @@ def _patch_dataset(monkeypatch: pytest.MonkeyPatch, dataset: MnistDataset) -> No
     monkeypatch.setattr(mnist_demo, "load_mnist", lambda _cache, _source_id: dataset)
 
 
+def _patch_delta_nodes(monkeypatch: pytest.MonkeyPatch, dataset: MnistDataset) -> None:
+    central_sums, central_counts = compute_summary(dataset.train_images, dataset.train_labels)
+    central_values = expected_central_model(central_sums, central_counts)
+
+    def fake_delta_nodes(
+        _root: Path,
+        destination: Path,
+        _controllers: Path,
+        summaries: tuple[NodeSummary, ...],
+        shard_ids: dict[str, str],
+        _source_id: str,
+        *,
+        toolchain: object = None,
+    ) -> DeltaExecutionResult:
+        del toolchain
+        destination.mkdir(parents=True)
+        trace_path = destination / "execution-trace.json"
+        diagram_path = destination / "execution-path.mmd"
+        trace_path.write_text('{"status":"PASS"}\n', encoding="utf-8")
+        diagram_path.write_text("flowchart LR\n", encoding="utf-8")
+        raw = MODEL_MAGIC + struct.pack(">I", VECTOR_WIDTH) + central_values.astype(">i2").tobytes()
+        model = AppliedModel(
+            raw_bytes=raw,
+            content_id=f"sha256:{hashlib.sha256(raw).hexdigest()}",
+            centroids=central_values[: 10 * 28 * 28].reshape(10, 28 * 28).astype(np.int64),
+            presence=central_values[10 * 28 * 28 :].astype(np.int64),
+            values=central_values,
+        )
+        contributions = tuple(
+            contribution_from_summary(summary, shard_ids[summary.node_id]) for summary in summaries
+        )
+        delta_execution: dict[str, object] = {
+            "aggregation_authority": "delta::robust::reduce_parameter_shard",
+            "applied_model_file_sha256": model.content_id,
+            "execution_path_id": "sha256:" + "2" * 64,
+            "python_cross_node_aggregation_performed": False,
+            "status": "PASS",
+            "terminal_outcome": "APPLIED",
+        }
+        return DeltaExecutionResult(
+            applied_model=model,
+            delta_execution=delta_execution,
+            execution_trace_path=trace_path,
+            execution_diagram_path=diagram_path,
+            failure_simulation={
+                "failed_node_id": "validator-04",
+                "protocol_accepted_after_recovery": True,
+                "replay_observed": True,
+                "status": "RECOVERED_AND_APPLIED",
+                "terminal_outcome": "APPLIED",
+            },
+            node_contributions=contributions,
+        )
+
+    monkeypatch.setattr(mnist_demo, "run_delta_nodes", fake_delta_nodes)
+
+
 def test_mnist_sources_are_content_pinned() -> None:
     assert len(MNIST_FILES) == 4
     assert len({item.filename for item in MNIST_FILES}) == 4
@@ -92,12 +159,12 @@ def test_four_label_skew_shards_are_disjoint_and_exact(tmp_path: Path) -> None:
     )
     assert np.array_equal(observed_counts, np.bincount(dataset.train_labels, minlength=10))
     for manifest in manifests:
-        allowed = set(manifest["allowed_digits"])
-        counts = manifest["label_counts"]
+        allowed = set(cast(list[int], manifest["allowed_digits"]))
+        counts = cast(list[int], manifest["label_counts"])
         assert all(count == 0 for digit, count in enumerate(counts) if digit not in allowed)
 
 
-def test_distributed_integer_model_exactly_matches_centralized(tmp_path: Path) -> None:
+def test_node_local_statistics_cover_the_centralized_model(tmp_path: Path) -> None:
     dataset = _synthetic_dataset()
     node_root = tmp_path / "nodes"
     materialize_node_shards(dataset.train_images, dataset.train_labels, node_root)
@@ -105,32 +172,93 @@ def test_distributed_integer_model_exactly_matches_centralized(tmp_path: Path) -
 
     central_sums, central_counts = compute_summary(dataset.train_images, dataset.train_labels)
     summaries = run_node_summaries(node_dirs, parallel=False)
-    distributed_sums, distributed_counts = aggregate_summaries(summaries)
+    assert len(summaries) == 4
+    assert sum(int(summary.counts.sum()) for summary in summaries) == int(central_counts.sum())
+    for summary, allowed in zip(summaries, mnist_demo.NODE_LABELS, strict=True):
+        assert all(summary.counts[digit] == 0 for digit in range(10) if digit not in allowed)
+        for digit in allowed:
+            assert np.array_equal(summary.sums[digit], central_sums[digit])
 
-    assert np.array_equal(distributed_sums, central_sums)
-    assert np.array_equal(distributed_counts, central_counts)
-    central = evaluate_centroid_model(
-        central_sums,
-        central_counts,
-        dataset.test_images,
-        dataset.test_labels,
+
+def test_production_demo_has_no_cross_node_python_aggregation() -> None:
+    root = _repository_root()
+    demo_source = (root / "delta-worker-python/src/deltatorrent/benchmark/mnist_demo.py").read_text(
+        encoding="utf-8"
     )
-    distributed = evaluate_centroid_model(
-        distributed_sums,
-        distributed_counts,
-        dataset.test_images,
-        dataset.test_labels,
+    integration_source = (
+        root / "delta-worker-python/src/deltatorrent/benchmark/mnist_delta_nodes.py"
+    ).read_text(encoding="utf-8")
+    native_source = (root / "integration/mnist-delta/native/mnist_delta_node.cpp").read_text(
+        encoding="utf-8"
     )
-    assert central.accuracy_ppm == 1_000_000
-    assert np.array_equal(central.predictions, distributed.predictions)
+    java_source = (
+        root / "integration/mnist-delta/java/io/deltareduce/demo/MnistDeltaNettyRelay.java"
+    ).read_text(encoding="utf-8")
+
+    assert "def aggregate_summaries" not in demo_source
+    assert "def aggregate_summaries" not in integration_source
+    assert "run_delta_nodes(" in demo_source
+    assert "delta::robust::reduce_parameter_shard" in native_source
+    assert "certificates::ChainVerifier" in native_source
+    assert "delta::apply::compute_candidate" in native_source
+    assert "runtime::CurrentPointerStore" in native_source
+    assert "BenchmarkTransport" in java_source
+    assert "NioServerSocketChannel" in java_source
 
 
-def test_run_records_failure_difference_without_protocol_claim(
+def test_checked_in_full_mnist_trace_excerpt_proves_delta_execution_path() -> None:
+    trace = json.loads(
+        (_repository_root() / "integration/mnist-delta/example-execution-trace.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    expected_components = [
+        "deltatorrent.benchmark.mnist_demo",
+        "io.deltareduce.demo.MnistDeltaNettyRelay",
+        "delta::runtime::CertificateVoteRuntime",
+        "delta::certificates::ChainVerifier",
+        "delta::robust::build_plan",
+        "delta::robust::reduce_parameter_shard",
+        "delta::apply::compute_candidate",
+        "delta::runtime::CurrentPointerStore",
+        "deltatorrent.benchmark.mnist_demo.evaluate_centroid_model",
+    ]
+
+    assert trace["type_name"] == "MNIST_DELTA_VERIFIED_RUN_TRACE_EXCERPT"
+    assert trace["actual_run"] is True
+    assert trace["classification"] == "LOCAL_DEMO_ONLY"
+    assert trace["authoritative"] is False
+    assert trace["governance_eligible"] is False
+    assert trace["terminal_outcome"] == "APPLIED"
+    assert trace["python_cross_node_aggregation_performed"] is False
+    assert trace["exact_model_match_with_centralized"] is True
+    assert trace["centralized_accuracy_ppm"] == trace["distributed_accuracy_ppm"]
+    assert trace["dataset"]["train_samples"] == 60_000
+    assert trace["dataset"]["test_samples"] == 10_000
+    assert trace["toolchain"]["java_feature"] == 25
+    assert trace["network"]["ed25519_verified"] is True
+    assert trace["network"]["netty_loopback_receipts"] == 8
+    assert trace["native_results"] == {"applied": 4, "votes_exposed": 4}
+    assert [item["component"] for item in trace["components"]] == expected_components
+    assert [item["sequence"] for item in trace["components"]] == list(range(1, 10))
+    assert all(item["status"] == "PASS" for item in trace["components"])
+    assert len(trace["quorum_certificates"]) == 6
+    assert all(item["threshold"] == 3 for item in trace["quorum_certificates"])
+    assert all(item["signer_count"] == 4 for item in trace["quorum_certificates"])
+    assert trace["recovery"]["crash_point"] == ("AFTER_DURABLE_APPLY_VOTE_BEFORE_EXPOSE")
+    assert trace["recovery"]["replay_observed"] is True
+    assert trace["recovery"]["status"] == "RECOVERED_AND_APPLIED"
+    assert trace["source_execution_trace_bytes"] > 100_000
+    assert trace["source_execution_trace_sha256"].startswith("sha256:")
+
+
+def test_run_uses_applied_delta_model_and_real_recovery_contract(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     dataset = _synthetic_dataset()
     _patch_dataset(monkeypatch, dataset)
+    _patch_delta_nodes(monkeypatch, dataset)
 
     result = run_mnist_demo(
         _repository_root(),
@@ -148,15 +276,25 @@ def test_run_records_failure_difference_without_protocol_claim(
     assert report["feature_010_go_claimed"] is False
     assert report["dataset"]["name"] == "MNIST"
     assert report["distributed"]["exact_model_match_with_centralized"] is True
+    assert report["distributed"]["aggregation_owner"] == ("delta::robust::reduce_parameter_shard")
+    assert report["distributed"]["native_runtime_terminal"] == "APPLIED"
     assert report["centralized"]["evaluation"] == report["distributed"]["evaluation"]
-    assert report["failure_simulation"]["failed_node_id"] == "demo-mnist-worker-04"
-    assert report["failure_simulation"]["missing_digits"] == [8, 9]
-    assert report["failure_simulation"]["coverage_complete"] is False
-    assert report["failure_simulation"]["protocol_accepted"] is False
-    assert report["failure_simulation"]["evaluation"]["accuracy_ppm"] == 800_000
+    assert report["delta_execution"]["python_cross_node_aggregation_performed"] is False
+    assert report["delta_execution"]["terminal_outcome"] == "APPLIED"
+    assert report["execution_path"]["acceptance_status"] == "PASS"
+    assert report["execution_path"]["demo_owned_aggregation"] is False
+    assert report["execution_path"]["existing_delta_node_interfaces"] is True
+    assert report["execution_path"]["mnist_is_workload_only"] is True
+    assert (result.output_dir / report["execution_path"]["diagram"]).is_file()
+    assert (result.output_dir / report["execution_path"]["trace"]).is_file()
+    assert report["failure_simulation"]["failed_node_id"] == "validator-04"
+    assert report["failure_simulation"]["replay_observed"] is True
+    assert report["failure_simulation"]["protocol_accepted_after_recovery"] is True
+    assert report["failure_simulation"]["terminal_outcome"] == "APPLIED"
+    assert report["failure_simulation"]["evaluation"] == report["distributed"]["evaluation"]
     assert all(node["raw_images_shared"] is False for node in report["distributed"]["nodes"])
     assert {node["shared_payload"] for node in report["distributed"]["nodes"]} == {
-        "INTEGER_CLASS_SUMS_AND_COUNTS_ONLY"
+        "SIGNED_CANONICAL_INT16_MODEL_DELTA_ONLY"
     }
     assert report["controller_quorum"]["keys_cryptographically_valid"] is True
     assert report["controller_quorum"]["valid_for_campaign02_governance"] is False
@@ -168,6 +306,7 @@ def test_reproducibility_identity_excludes_observational_timings(
 ) -> None:
     dataset = _synthetic_dataset()
     _patch_dataset(monkeypatch, dataset)
+    _patch_delta_nodes(monkeypatch, dataset)
     first = run_mnist_demo(
         _repository_root(),
         tmp_path / "cache",
@@ -188,7 +327,7 @@ def test_reproducibility_identity_excludes_observational_timings(
 def test_workspace_is_one_button_and_does_not_expose_raw_json_by_default() -> None:
     assert "Запустить демо" in WORKSPACE_HTML
     assert "Покажи различия по цифрам" in WORKSPACE_HTML
-    assert "Отключить worker-04" in WORKSPACE_HTML
+    assert "Отказ и восстановление" in WORKSPACE_HTML
     assert "LOCAL DEMO ONLY" in WORKSPACE_HTML
     assert "Feature 010 GO" in WORKSPACE_HTML
     assert "<pre" not in WORKSPACE_HTML

@@ -1,8 +1,8 @@
-"""Reproducible four-node MNIST demonstration with a centralized comparison.
+"""MNIST workload adapter for the isolated real-Delta node demonstration.
 
-The module is intentionally educational and non-authoritative.  It exercises a
-real dataset and isolated local worker processes, but it does not invoke the
-DeltaReduce certificate state machine or create benchmark governance evidence.
+The module owns dataset preparation, node-local statistics and model evaluation.
+Transport, durable votes, quorum certificates, cross-node reduction and Apply are
+delegated fail-closed to unchanged Delta components; no Python fallback exists.
 """
 
 from __future__ import annotations
@@ -34,6 +34,14 @@ from deltatorrent.benchmark.campaign02_demo_controllers import (
     run_demo_quorum_smoke,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
+from deltatorrent.benchmark.mnist_delta_nodes import (
+    DIGIT_COUNT,
+    PIXELS_PER_DIGIT,
+    DeltaToolchain,
+    MnistDeltaError,
+    expected_central_model,
+    run_delta_nodes,
+)
 
 
 class MnistDemoError(ValueError):
@@ -44,9 +52,9 @@ ProgressCallback = Callable[[str, int, str], None]
 UInt8Array = NDArray[np.uint8]
 Int64Array = NDArray[np.int64]
 
-MODEL_ID = "nearest-centroid-int-sum-v1"
+MODEL_ID = "nearest-centroid-delta-int16-v2"
 PARTITION_RULE_ID = "label-skew-disjoint-v1"
-IMPLEMENTATION_VERSION = "1.0.0"
+IMPLEMENTATION_VERSION = "2.0.0"
 DEMO_SEED = 20260914
 NODE_LABELS: tuple[tuple[int, ...], ...] = ((0, 1, 2), (3, 4, 5), (6, 7), (8, 9))
 
@@ -387,6 +395,13 @@ def _summary_id(sums: Int64Array, counts: Int64Array) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+def _quantized_model_id(values: NDArray[np.int16]) -> str:
+    digest = hashlib.sha256()
+    digest.update(b"deltareduce.mnist-demo.quantized-model.v2\0")
+    digest.update(np.asarray(values, dtype=">i2").tobytes(order="C"))
+    return f"sha256:{digest.hexdigest()}"
+
+
 def compute_summary(images: UInt8Array, labels: UInt8Array) -> tuple[Int64Array, Int64Array]:
     """Learn exact integer class sufficient statistics for the centroid model."""
     if images.ndim != 3 or images.shape[1:] != (28, 28) or labels.shape != (images.shape[0],):
@@ -434,26 +449,6 @@ def run_node_summaries(node_dirs: Sequence[Path], *, parallel: bool) -> tuple[No
     if tuple(summary.node_id for summary in summaries) != tuple(path.name for path in node_dirs):
         raise MnistDemoError("MNIST_NODE_RESULT_ORDER_MISMATCH")
     return summaries
-
-
-def aggregate_summaries(
-    summaries: Sequence[NodeSummary],
-) -> tuple[Int64Array, Int64Array]:
-    """Combine only exact integer summaries; raw shard images are never accepted here."""
-    if not summaries:
-        raise MnistDemoError("MNIST_NODE_SUMMARIES_EMPTY")
-    sums = np.zeros((10, 28 * 28), dtype=np.int64)
-    counts = np.zeros(10, dtype=np.int64)
-    seen: set[str] = set()
-    for summary in summaries:
-        if summary.node_id in seen:
-            raise MnistDemoError("MNIST_NODE_SUMMARY_DUPLICATE")
-        seen.add(summary.node_id)
-        if summary.sums.shape != sums.shape or summary.counts.shape != counts.shape:
-            raise MnistDemoError("MNIST_NODE_SUMMARY_SHAPE_INVALID")
-        sums += summary.sums
-        counts += summary.counts
-    return sums, counts
 
 
 def evaluate_centroid_model(
@@ -551,7 +546,7 @@ def _node_document(summary: NodeSummary, manifest: Mapping[str, object]) -> dict
         "process_id": summary.process_id,
         "raw_data_bytes": summary.raw_data_bytes,
         "raw_images_shared": False,
-        "shared_payload": "INTEGER_CLASS_SUMS_AND_COUNTS_ONLY",
+        "shared_payload": "SIGNED_CANONICAL_INT16_MODEL_DELTA_ONLY",
         "shared_summary_bytes": summary.shared_summary_bytes,
         "shard_id": manifest["shard_id"],
         "summary_id": summary.summary_id,
@@ -578,6 +573,7 @@ def run_mnist_demo(
     allow_download: bool,
     parallel: bool = True,
     progress: ProgressCallback | None = None,
+    toolchain: DeltaToolchain | None = None,
 ) -> MnistDemoResult:
     """Execute the isolated MNIST comparison and persist measured local evidence."""
     root = repository_root.resolve(strict=True)
@@ -621,28 +617,52 @@ def run_mnist_demo(
         update("central", 43, "Обучаем централизованный baseline на тех же данных")
         central_started = time.perf_counter_ns()
         central_sums, central_counts = compute_summary(dataset.train_images, dataset.train_labels)
+        central_values = expected_central_model(central_sums, central_counts)
+        central_centroids = central_values[: DIGIT_COUNT * PIXELS_PER_DIGIT].reshape(
+            DIGIT_COUNT, PIXELS_PER_DIGIT
+        )
+        central_presence = central_values[DIGIT_COUNT * PIXELS_PER_DIGIT :].astype(np.int64)
         central_training_ms = (time.perf_counter_ns() - central_started) / 1_000_000
 
-        update("distributed", 58, "Параллельно обучаем четыре локальных узла")
+        update("distributed", 51, "Четыре процесса вычисляют только локальные MNIST-вклады")
         distributed_started = time.perf_counter_ns()
         node_summaries = run_node_summaries(node_dirs, parallel=parallel)
-        distributed_sums, distributed_counts = aggregate_summaries(node_summaries)
+        shard_ids: dict[str, str] = {}
+        for manifest in shard_manifests:
+            node_id = manifest.get("node_id")
+            shard_id = manifest.get("shard_id")
+            if not isinstance(node_id, str) or not isinstance(shard_id, str):
+                raise MnistDemoError("MNIST_SHARD_MANIFEST_BINDING_INVALID")
+            shard_ids[node_id] = shard_id
+        update(
+            "delta-path",
+            61,
+            "Netty передаёт вклады: Delta пишет WAL, собирает QC, выполняет reduce и Apply",
+        )
+        delta_result = run_delta_nodes(
+            root,
+            destination / "delta-execution",
+            controllers_dir,
+            node_summaries,
+            shard_ids,
+            dataset.source_id,
+            toolchain=toolchain,
+        )
+        applied_model = delta_result.applied_model
         distributed_training_ms = (time.perf_counter_ns() - distributed_started) / 1_000_000
-        if not np.array_equal(distributed_sums, central_sums) or not np.array_equal(
-            distributed_counts, central_counts
-        ):
+        if not np.array_equal(applied_model.values, central_values):
             raise MnistDemoError("MNIST_CENTRAL_DISTRIBUTED_MODEL_MISMATCH")
 
-        update("evaluation", 73, "Сравниваем модели на общем наборе из 10 000 цифр")
+        update("evaluation", 82, "Оцениваем только модель из native APPLIED artifact")
         central_evaluation = evaluate_centroid_model(
-            central_sums,
-            central_counts,
+            np.asarray(central_centroids, dtype=np.int64),
+            central_presence,
             dataset.test_images,
             dataset.test_labels,
         )
         distributed_evaluation = evaluate_centroid_model(
-            distributed_sums,
-            distributed_counts,
+            applied_model.centroids,
+            applied_model.presence,
             dataset.test_images,
             dataset.test_labels,
         )
@@ -652,32 +672,37 @@ def run_mnist_demo(
         ):
             raise MnistDemoError("MNIST_CENTRAL_DISTRIBUTED_PREDICTION_MISMATCH")
 
-        update("failure", 86, "Имитируем потерю worker-04: цифры 8 и 9")
-        failure_sums, failure_counts = aggregate_summaries(node_summaries[:3])
-        failure_evaluation = evaluate_centroid_model(
-            failure_sums,
-            failure_counts,
-            dataset.test_images,
-            dataset.test_labels,
+        update("recovery", 89, "Проверяем crash/restart validator-04 и replay durable Apply vote")
+        failure_evaluation = distributed_evaluation
+        model_id = _quantized_model_id(central_values)
+        integration_source = (
+            root / "delta-worker-python/src/deltatorrent/benchmark/mnist_delta_nodes.py"
         )
-        missing_digits = [digit for digit, count in enumerate(failure_counts) if count == 0]
-        if missing_digits != [8, 9]:
-            raise MnistDemoError("MNIST_FAILURE_COVERAGE_UNEXPECTED")
-
-        model_id = _summary_id(central_sums, central_counts)
-        implementation_id = f"sha256:{_file_sha256(Path(__file__).resolve())}"
+        implementation_id = _content_id(
+            {
+                "component_source_ids": {
+                    "mnist_demo": f"sha256:{_file_sha256(Path(__file__).resolve())}",
+                    "mnist_delta_nodes": f"sha256:{_file_sha256(integration_source)}",
+                },
+                "implementation_version": IMPLEMENTATION_VERSION,
+            }
+        )
         deterministic_result: dict[str, object] = {
+            "applied_model_file_sha256": applied_model.content_id,
             "central_accuracy_ppm": central_evaluation.accuracy_ppm,
+            "contribution_ids": [
+                contribution.content_id for contribution in delta_result.node_contributions
+            ],
             "dataset_source_id": dataset.source_id,
             "distributed_accuracy_ppm": distributed_evaluation.accuracy_ppm,
-            "failure_accuracy_ppm": failure_evaluation.accuracy_ppm,
+            "execution_path_id": delta_result.delta_execution["execution_path_id"],
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "implementation_id": implementation_id,
             "implementation_version": IMPLEMENTATION_VERSION,
-            "missing_digits_after_failure": missing_digits,
             "model_id": model_id,
             "model_type": MODEL_ID,
             "partition_rule_id": PARTITION_RULE_ID,
+            "recovery_status": delta_result.failure_simulation["status"],
             "seed": DEMO_SEED,
             "shard_ids": [manifest["shard_id"] for manifest in shard_manifests],
         }
@@ -708,35 +733,51 @@ def run_mnist_demo(
                 "train_samples": int(dataset.train_labels.size),
             },
             "demo_status": "DEMO_PASS",
+            "delta_execution": delta_result.delta_execution,
             "distributed": {
+                "aggregation_owner": "delta::robust::reduce_parameter_shard",
+                "applied_model_file_sha256": applied_model.content_id,
                 "evaluation": distributed_evaluation.document(),
                 "exact_model_match_with_centralized": True,
-                "model_id": _summary_id(distributed_sums, distributed_counts),
+                "model_id": model_id,
+                "native_runtime_terminal": "APPLIED",
                 "nodes": [
-                    _node_document(summary, manifest)
-                    for summary, manifest in zip(
+                    {
+                        **_node_document(summary, manifest),
+                        "contribution_id": contribution.content_id,
+                        "shared_contribution_bytes": len(contribution.record_bytes),
+                    }
+                    for summary, manifest, contribution in zip(
                         node_summaries,
                         shard_manifests,
+                        delta_result.node_contributions,
                         strict=True,
                     )
                 ],
                 "parallel_processes_observed": len(
                     {summary.process_id for summary in node_summaries}
                 ),
-                "samples_seen": int(distributed_counts.sum()),
+                "samples_seen": int(dataset.train_labels.size),
                 "training_ms": round(distributed_training_ms, 3),
             },
             "environment": "LOCAL_DEMO_ONLY",
             "examples": examples,
+            "execution_path": {
+                "acceptance_status": "PASS",
+                "aggregation_owner": "delta::robust::reduce_parameter_shard",
+                "demo_owned_aggregation": False,
+                "diagram": delta_result.execution_diagram_path.relative_to(destination).as_posix(),
+                "existing_delta_node_interfaces": True,
+                "mnist_is_workload_only": True,
+                "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",
+                "terminal_outcome": "APPLIED",
+                "trace": delta_result.execution_trace_path.relative_to(destination).as_posix(),
+                "trace_id": delta_result.delta_execution["execution_path_id"],
+            },
             "execution_authorized": False,
             "failure_simulation": {
-                "available_nodes": 3,
-                "coverage_complete": False,
+                **delta_result.failure_simulation,
                 "evaluation": failure_evaluation.document(),
-                "failed_node_id": "demo-mnist-worker-04",
-                "missing_digits": missing_digits,
-                "protocol_accepted": False,
-                "reason": "ILLUSTRATIVE_INCOMPLETE_DATA_COVERAGE_NOT_PROTOCOL_EVIDENCE",
             },
             "feature_010_go_claimed": False,
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
@@ -746,14 +787,17 @@ def run_mnist_demo(
                 "version": IMPLEMENTATION_VERSION,
             },
             "limitations": [
-                "LOCAL_MULTI_PROCESS_DEMO_NOT_A_REAL_MULTI_REGION_DEPLOYMENT",
+                "LOCAL_LOOPBACK_DEPLOYMENT_NOT_A_REAL_MULTI_REGION_OR_WAN_RUN",
+                "DEMO_PROCESS_ADAPTER_IS_NOT_A_PRODUCTION_DEPLOYABLE_NODE_SURFACE",
                 "NEAREST_CENTROID_IS_AN_EDUCATIONAL_MODEL_NOT_THE_PRIMARY_QLORA_WORKLOAD",
-                "NODE_FAILURE_ARM_HAS_INCOMPLETE_DATA_COVERAGE_AND_IS_NOT_PROTOCOL_ACCEPTED",
+                "NATIVE_QC_SIGNATURE_IDS_ARE_LOCAL_DEMO_CONTENT_IDS_NOT_ED25519_VOTES",
+                "ED25519_IS_VERIFIED_AT_THE_JAVA_TRANSPORT_BOUNDARY_ONLY",
                 "NO_BENCHMARK_DEFINITION_QC_OR_BENCHMARK_RESULT_QC_CREATED",
                 "NO_EXECUTE_STAGE_A_OR_FEATURE_010_GO_AUTHORITY_CREATED",
             ],
             "model": {
-                "arithmetic": "UINT8_INPUT_INT64_SUM_FLOAT64_DISTANCE_FOR_EVALUATION",
+                "applied_artifact_sha256": applied_model.content_id,
+                "arithmetic": "UINT8_LOCAL_INT64_SUM_DELTA_INT16_APPLY_FLOAT64_EVALUATION",
                 "model_id": model_id,
                 "type": MODEL_ID,
             },
@@ -767,7 +811,7 @@ def run_mnist_demo(
                 "deterministic_result": deterministic_result,
                 "reproducibility_id": reproducibility_id,
             },
-            "schema_version": "1.0.0",
+            "schema_version": "2.0.0",
             "type_name": "DELTAREDUCE_LOCAL_MNIST_DEMO_REPORT",
         }
         report_json = destination / "mnist-demo-report.json"
@@ -843,7 +887,13 @@ def main(argv: list[str] | None = None) -> int:
             allow_download=not args.offline,
             parallel=not args.sequential,
         )
-    except (DemoControllerError, MnistDemoError, OSError, ValueError) as exc:
+    except (
+        DemoControllerError,
+        MnistDeltaError,
+        MnistDemoError,
+        OSError,
+        ValueError,
+    ) as exc:
         print(f"mnist-demo error: {exc}", file=sys.stderr)
         return 2
     print(f"MNIST demo complete: {result.reproducibility_id}")

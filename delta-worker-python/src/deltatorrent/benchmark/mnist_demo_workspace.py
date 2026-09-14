@@ -72,11 +72,16 @@ WORKSPACE_HTML = r"""<!doctype html>
     .warn { color: var(--amber); }
     .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .node { position: relative; padding: 17px; border: 1px solid #2b4f66; border-radius: 14px; background: var(--panel-2); }
-    .node::after { content: "↓ only sums + counts"; position: absolute; left: 0; right: 0; bottom: -27px; color: var(--cyan); text-align: center; font-size: 10px; }
+    .node::after { content: "↓ signed canonical int16 delta"; position: absolute; left: 0; right: 0; bottom: -27px; color: var(--cyan); text-align: center; font-size: 10px; }
     .node-digits { display: flex; gap: 5px; flex-wrap: wrap; margin: 12px 0; }
     .digit-pill { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; color: #062634; background: var(--cyan); font-weight: 900; }
     .node-meta { color: var(--muted); font-size: 12px; }
     .aggregate { width: min(480px, 100%); margin: 46px auto 0; padding: 17px; border: 1px solid #2c7557; border-radius: 14px; text-align: center; background: #0d2c25; }
+    .execution-path { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .execution-step { position: relative; min-height: 92px; padding: 14px; border: 1px solid #2b4f66; border-radius: 12px; background: var(--panel-2); }
+    .execution-step::after { content: "→"; position: absolute; right: -10px; top: 35%; z-index: 2; color: var(--green); font-weight: 900; }
+    .execution-step:nth-child(3n)::after, .execution-step:last-child::after { content: ""; }
+    .execution-kind { margin-top: 7px; color: var(--muted); font-size: 11px; }
     .switches { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 20px; }
     .switches button { padding: 10px 14px; color: var(--muted); background: #142536; }
     .switches button.active { color: #06251c; background: var(--green); }
@@ -108,11 +113,11 @@ WORKSPACE_HTML = r"""<!doctype html>
     footer { margin-top: 24px; color: #71869a; font-size: 12px; text-align: center; }
     @media (max-width: 820px) {
       .hero { grid-template-columns: 1fr; }
-      .kpis, .flow { grid-template-columns: repeat(2, 1fr); }
+      .kpis, .flow, .execution-path { grid-template-columns: repeat(2, 1fr); }
       .gallery { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 520px) {
-      .kpis, .flow { grid-template-columns: 1fr; }
+      .kpis, .flow, .execution-path { grid-template-columns: 1fr; }
       .gallery { grid-template-columns: 1fr 1fr; }
     }
   </style>
@@ -127,8 +132,8 @@ WORKSPACE_HTML = r"""<!doctype html>
     <div>
       <div>Распределённое обучение, которое можно увидеть</div>
       <h1>Четыре узла.<br>Десять цифр.<br>Один результат.</h1>
-      <p>Настоящий MNIST, непересекающиеся локальные шарды и общий тестовый набор.
-         Централизованный baseline и распределённая модель считаются на одинаковых данных.</p>
+      <p>Настоящий MNIST, непересекающиеся локальные шарды и общий test set. Вклады
+         проходят через Netty, durable Delta WAL, шесть QC, native reduce и Apply.</p>
     </div>
     <div>
       <button id="run">Запустить демо</button>
@@ -149,22 +154,29 @@ WORKSPACE_HTML = r"""<!doctype html>
       <div class="kpi"><div class="kpi-label">Централизованная точность</div><div id="central-accuracy" class="kpi-value"></div></div>
       <div class="kpi"><div class="kpi-label">Распределённая точность</div><div id="distributed-accuracy" class="kpi-value ok"></div></div>
       <div class="kpi"><div class="kpi-label">Совпадение модели</div><div id="model-match" class="kpi-value ok"></div></div>
-      <div class="kpi"><div class="kpi-label">Ed25519 ключи</div><div class="kpi-value ok">4 / 4</div></div>
+      <div class="kpi"><div class="kpi-label">Delta terminal</div><div id="delta-terminal" class="kpi-value ok"></div></div>
     </div>
 
     <section class="panel">
       <h2>Данные остаются на четырёх узлах</h2>
-      <p>Каждый процесс читает только собственный шард. Для объединения он возвращает
-        целочисленные суммы пикселей по классам и счётчики — не изображения.</p>
+      <p>Каждый Python worker читает только собственный шард и формирует локальный
+        квантованный вклад. Необработанные изображения между узлами не передаются.</p>
       <div id="nodes" class="flow"></div>
       <div class="aggregate"><strong>Детерминированное объединение</strong><br><span id="aggregate-copy"></span></div>
+    </section>
+
+    <section class="panel">
+      <h2>Фактический execution path</h2>
+      <p>Карточки ниже строятся из проверенного trace текущего запуска. Только зелёная
+         цепочка до <strong>APPLIED</strong> допускает показ результата.</p>
+      <div id="execution-steps" class="execution-path"></div>
     </section>
 
     <section class="panel">
       <h2>Покажи различия по цифрам</h2>
       <div class="switches">
         <button id="healthy-view" class="active">Все 4 узла</button>
-        <button id="failure-view">Отключить worker-04</button>
+        <button id="failure-view">Отказ и восстановление</button>
       </div>
       <div class="legend"><span>Централизованно</span><span id="selected-legend" class="candidate">Распределённо, 4/4</span></div>
       <div id="digit-chart" class="chart"></div>
@@ -185,10 +197,10 @@ WORKSPACE_HTML = r"""<!doctype html>
 
     <section class="panel boundary">
       <strong>Честная граница демонстрации.</strong>
-      <p>Это локальная многопроцессная учебная модель, а не реальный multi-region запуск.
-         Сценарий потери worker-04 намеренно имеет неполное покрытие и не считается
-         допустимым результатом протокола. Демо не создаёт DefinitionQC, ResultQC,
-         Feature 010 GO или полномочий Campaign 02.</p>
+       <p>Это локальный loopback deployment adapter поверх неизменённых библиотек Delta,
+          а не готовый production node, TLS/WAN или multi-region запуск. Ed25519 защищает
+          demo-транспорт; native vote signatures остаются локальными content-ID placeholders.
+          Демо не создаёт DefinitionQC, ResultQC, Feature 010 GO или полномочий Campaign 02.</p>
     </section>
   </section>
   <footer>MNIST: LeCun, Cortes, Burges · исходные gzip-файлы проверяются по SHA-256</footer>
@@ -234,6 +246,22 @@ WORKSPACE_HTML = r"""<!doctype html>
     });
   }
 
+  function renderExecutionPath(report) {
+    const target = document.getElementById('execution-steps');
+    target.replaceChildren();
+    report.delta_execution.components.forEach(step => {
+      const card = document.createElement('article');
+      card.className = 'execution-step';
+      const title = document.createElement('strong');
+      title.textContent = `${step.sequence}. ${step.component}`;
+      const kind = document.createElement('div');
+      kind.className = 'execution-kind';
+      kind.textContent = `${step.implementation_class} · ${step.status}`;
+      card.append(title, kind);
+      target.appendChild(card);
+    });
+  }
+
   function renderChart(report, failure) {
     const central = report.centralized.evaluation.per_digit;
     const candidate = failure
@@ -265,10 +293,10 @@ WORKSPACE_HTML = r"""<!doctype html>
     const note = document.getElementById('failure-note');
     const selectedLegend = document.getElementById('selected-legend');
     selectedLegend.classList.toggle('failure', failure);
-    selectedLegend.textContent = failure ? 'Worker-04 отключён' : 'Распределённо, 4/4';
+    selectedLegend.textContent = failure ? 'validator-04: crash → replay → APPLIED' : 'Распределённо, 4/4';
     note.hidden = !failure;
     note.textContent = failure
-      ? `worker-04 недоступен: цифры ${report.failure_simulation.missing_digits.join(' и ')} потеряли обучающие данные. Покрытие неполное; protocol_accepted = false.`
+      ? `validator-04 остановлен после durable Apply vote, затем восстановил journal и переиграл тот же vote. Итог: ${report.failure_simulation.status}; модель после recovery совпадает.`
       : '';
   }
 
@@ -298,7 +326,7 @@ WORKSPACE_HTML = r"""<!doctype html>
       canvas.height = 28;
       const label = document.createElement('div');
       label.className = 'sample-label';
-      label.textContent = `истина ${example.digit} · ${failure ? 'после отказа' : 'модель'} ${prediction}`;
+      label.textContent = `истина ${example.digit} · ${failure ? 'после recovery' : 'модель'} ${prediction}`;
       card.append(canvas, label);
       gallery.appendChild(card);
       drawDigit(canvas, example.pixels);
@@ -308,11 +336,13 @@ WORKSPACE_HTML = r"""<!doctype html>
   function renderMeasurements(report) {
     const body = document.getElementById('measurements');
     body.replaceChildren();
-    const totalPayload = report.distributed.nodes.reduce((sum, node) => sum + node.shared_summary_bytes, 0);
+    const totalPayload = report.distributed.nodes.reduce((sum, node) => sum + node.shared_contribution_bytes, 0);
     const rows = [
       ['Централизованный baseline', report.centralized.samples_seen, report.centralized.training_ms, 'локальная память'],
-      ['4 распределённых процесса', report.distributed.samples_seen, report.distributed.training_ms, formatBytes(totalPayload)],
-      ['Отказ worker-04', report.distributed.samples_seen - report.distributed.nodes[3].label_counts.reduce((a, b) => a + b, 0), 'из того же прогона', 'результат не принят'],
+      ['4 MNIST worker-процесса', report.distributed.samples_seen, report.distributed.training_ms, formatBytes(totalPayload)],
+      ['Java Netty loopback', 4, 'в составе прогона', 'payload byte-identical'],
+      ['Native Delta nodes', 4, 'в составе прогона', '6 QC → APPLIED'],
+      ['Crash/restart validator-04', 1, 'в составе прогона', report.failure_simulation.status],
     ];
     rows.forEach(values => {
       const row = document.createElement('tr');
@@ -332,8 +362,10 @@ WORKSPACE_HTML = r"""<!doctype html>
     document.getElementById('central-accuracy').textContent = formatAccuracy(report.centralized.evaluation.accuracy_ppm);
     document.getElementById('distributed-accuracy').textContent = formatAccuracy(report.distributed.evaluation.accuracy_ppm);
     document.getElementById('model-match').textContent = report.distributed.exact_model_match_with_centralized ? 'ПОБАЙТНО' : 'НЕТ';
-    document.getElementById('aggregate-copy').textContent = `${report.distributed.nodes.length} локальных summary → model ${report.model.model_id.slice(0, 20)}…`;
+    document.getElementById('delta-terminal').textContent = report.delta_execution.terminal_outcome;
+    document.getElementById('aggregate-copy').textContent = `Netty → 6 QC → delta::robust::reduce_parameter_shard → Apply → ${report.delta_execution.terminal_outcome}`;
     renderNodes(report);
+    renderExecutionPath(report);
     renderChart(report, false);
     renderGallery(report, false);
     renderMeasurements(report);
@@ -412,6 +444,70 @@ WORKSPACE_HTML = r"""<!doctype html>
 """
 
 
+def _validate_workspace_report(value: object) -> dict[str, object]:
+    """Reject any report that cannot prove the displayed real-Delta path."""
+    if not isinstance(value, dict):
+        raise MnistDemoError("MNIST_WORKSPACE_REPORT_INVALID")
+    delta = value.get("delta_execution")
+    distributed = value.get("distributed")
+    execution_path = value.get("execution_path")
+    failure = value.get("failure_simulation")
+    if (
+        value.get("type_name") != "DELTAREDUCE_LOCAL_MNIST_DEMO_REPORT"
+        or value.get("schema_version") != "2.0.0"
+        or value.get("demo_status") != "DEMO_PASS"
+        or value.get("environment") != "LOCAL_DEMO_ONLY"
+        or value.get("authoritative") is not False
+        or value.get("governance_eligible") is not False
+        or value.get("execution_authorized") is not False
+        or value.get("feature_010_go_claimed") is not False
+        or not isinstance(delta, dict)
+        or not isinstance(distributed, dict)
+        or not isinstance(execution_path, dict)
+        or not isinstance(failure, dict)
+    ):
+        raise MnistDemoError("MNIST_WORKSPACE_REPORT_INVALID")
+    components = delta.get("components")
+    required_components = {
+        "io.deltareduce.demo.MnistDeltaNettyRelay",
+        "delta::runtime::CertificateVoteRuntime",
+        "delta::certificates::ChainVerifier",
+        "delta::robust::reduce_parameter_shard",
+        "delta::apply::compute_candidate",
+        "delta::runtime::CurrentPointerStore",
+    }
+    if (
+        delta.get("status") != "PASS"
+        or delta.get("terminal_outcome") != "APPLIED"
+        or delta.get("python_cross_node_aggregation_performed") is not False
+        or delta.get("aggregation_authority") != "delta::robust::reduce_parameter_shard"
+        or distributed.get("native_runtime_terminal") != "APPLIED"
+        or distributed.get("exact_model_match_with_centralized") is not True
+        or distributed.get("applied_model_file_sha256") != delta.get("applied_model_file_sha256")
+        or execution_path.get("trace_id") != delta.get("execution_path_id")
+        or execution_path.get("terminal_outcome") != "APPLIED"
+        or failure.get("status") != "RECOVERED_AND_APPLIED"
+        or failure.get("replay_observed") is not True
+        or failure.get("terminal_outcome") != "APPLIED"
+        or not isinstance(components, list)
+        or len(components) < len(required_components)
+    ):
+        raise MnistDemoError("MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID")
+    observed_components: set[str] = set()
+    for expected_sequence, component in enumerate(components, start=1):
+        if (
+            not isinstance(component, dict)
+            or component.get("sequence") != expected_sequence
+            or component.get("status") != "PASS"
+            or not isinstance(component.get("component"), str)
+        ):
+            raise MnistDemoError("MNIST_WORKSPACE_DELTA_COMPONENT_INVALID")
+        observed_components.add(str(component["component"]))
+    if not required_components.issubset(observed_components):
+        raise MnistDemoError("MNIST_WORKSPACE_DELTA_COMPONENT_MISSING")
+    return value
+
+
 class WorkspaceState:
     """Thread-safe state shared by the local HTTP handler and one demo worker."""
 
@@ -472,9 +568,9 @@ class WorkspaceState:
                 allow_download=self._allow_download,
                 progress=self._progress,
             )
-            report = json.loads(result.report_json.read_text(encoding="utf-8"))
-            if not isinstance(report, dict):
-                raise MnistDemoError("MNIST_WORKSPACE_REPORT_INVALID")
+            report = _validate_workspace_report(
+                json.loads(result.report_json.read_text(encoding="utf-8"))
+            )
             with self._lock:
                 self._result = report
                 self._last_output_dir = str(result.output_dir)

@@ -6,8 +6,10 @@ existing repository interfaces instead of replacing their safety checks.
 
 For a commission-facing visual demonstration, prefer the distributed MNIST
 workspace documented in `docs/mnist-demo.md`. It shows real handwritten digits,
-four isolated data shards, centralized-versus-distributed quality and a controlled
-node-loss view behind one **Запустить демо** button. The lower-level walkthrough in
+four isolated data shards, a real Netty/native Delta path through six QC phases to
+`APPLIED`, centralized-versus-distributed quality, and durable crash/recovery behind
+one **Запустить демо** button. Its execution diagram and source-bound trace make the
+participating production components inspectable. The lower-level walkthrough in
 this document remains useful for protocol, artifact and WAN smoke evidence.
 
 ## What the commission can see

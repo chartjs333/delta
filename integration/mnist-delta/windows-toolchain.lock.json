@@ -1,0 +1,13 @@
+{
+  "archive_sha256": "00c847d804f4a78e9f04f2683faf14fed898535b177b7fc704486cb0284e9283",
+  "archive_size_bytes": 141167264,
+  "archive_url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_windows_hotspot_25.0.4.1_1.zip",
+  "architecture": "x64",
+  "feature": 25,
+  "license": "GPL-2.0-only WITH Classpath-exception-2.0",
+  "os": "windows",
+  "schema_version": "1.0.0",
+  "type_name": "MNIST_DELTA_DEMO_WINDOWS_TOOLCHAIN_LOCK",
+  "vendor": "Eclipse Temurin",
+  "version": "25.0.4.1+1"
+}
