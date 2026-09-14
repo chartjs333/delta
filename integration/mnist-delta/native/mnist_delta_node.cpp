@@ -359,6 +359,7 @@ struct Workload {
   std::string source_id;
   std::string workload_id;
   std::array<WorkloadRecord, validator_count> records;
+  std::array<std::string, validator_count> contribution_ids;
 };
 
 [[nodiscard]] Workload parse_workload(const std::filesystem::path& path) {
@@ -418,7 +419,69 @@ struct Workload {
   }
   require(reader.remaining() == 0U, "canonical workload has trailing bytes");
   const auto workload_id = hash_bytes(bytes);
-  return Workload{std::move(bytes), std::move(source_id), workload_id, std::move(records)};
+  std::array<std::string, validator_count> contribution_ids;
+  for (std::size_t index = 0U; index < validator_count; ++index) {
+    const auto offset = workload_header_bytes + index * workload_record_bytes;
+    contribution_ids[index] = hash_bytes(
+        std::span<const std::byte>(bytes).subspan(offset, workload_record_bytes));
+  }
+  return Workload{
+      std::move(bytes),
+      std::move(source_id),
+      workload_id,
+      std::move(records),
+      std::move(contribution_ids)};
+}
+
+void verify_relayed_contributions(
+    const Workload& workload,
+    const std::filesystem::path& contributions_root) {
+  std::error_code error;
+  const auto root_status = std::filesystem::symlink_status(contributions_root, error);
+  require(
+      !error && std::filesystem::is_directory(root_status) &&
+          !std::filesystem::is_symlink(root_status),
+      "relayed contributions root must be a regular directory");
+
+  std::array<bool, validator_count> observed{};
+  std::size_t file_count = 0U;
+  for (const auto& entry : std::filesystem::directory_iterator(contributions_root)) {
+    const auto status = entry.symlink_status(error);
+    require(
+        !error && std::filesystem::is_regular_file(status) &&
+            !std::filesystem::is_symlink(status),
+        "relayed contributions root contains a non-regular entry");
+    const auto filename = entry.path().filename().string();
+    bool matched = false;
+    for (std::size_t index = 0U; index < validator_count; ++index) {
+      const auto expected = "worker-0" + std::to_string(index + 1U) + ".bin";
+      if (filename == expected) {
+        require(!observed[index], "relayed contribution filename is duplicated");
+        observed[index] = true;
+        const auto bytes = read_file(entry.path(), workload_record_bytes);
+        require(
+            bytes.size() == workload_record_bytes,
+            "relayed contribution has a non-canonical byte length");
+        const auto offset = workload_header_bytes + index * workload_record_bytes;
+        const auto embedded =
+            std::span<const std::byte>(workload.bytes).subspan(offset, workload_record_bytes);
+        require(
+            std::equal(bytes.begin(), bytes.end(), embedded.begin(), embedded.end()),
+            "relayed contribution differs from its canonical workload record");
+        require(
+            hash_bytes(bytes) == workload.contribution_ids[index],
+            "relayed contribution content identity mismatch");
+        matched = true;
+        break;
+      }
+    }
+    require(matched, "relayed contributions root contains an unexpected file");
+    ++file_count;
+  }
+  require(
+      file_count == validator_count &&
+          std::all_of(observed.begin(), observed.end(), [](bool value) { return value; }),
+      "relayed contributions root must contain exactly worker-01..worker-04");
 }
 
 struct Chain {
@@ -754,6 +817,7 @@ class TraceWriter final {
 struct CliOptions {
   std::string mode;
   std::filesystem::path workload;
+  std::filesystem::path contributions_root;
   std::filesystem::path node_directory;
   std::string validator_id;
   std::filesystem::path result;
@@ -788,6 +852,7 @@ struct CliOptions {
     return value;
   };
   options.workload = take("--workload", true);
+  options.contributions_root = take("--contributions-root", true);
   options.node_directory = take("--node-dir", true);
   options.validator_id = take("--validator-id", true);
   options.result = take("--result", true);
@@ -948,10 +1013,16 @@ struct VoteFrameResult {
     const CliOptions& options,
     std::string type_name,
     std::string status) {
+  std::vector<std::string> contribution_ids;
+  contribution_ids.reserve(workload.contribution_ids.size());
+  for (const auto& content_id : workload.contribution_ids) {
+    contribution_ids.push_back(json_string(content_id));
+  }
   return {
       {"authoritative", "false"},
       {"body_ids", body_ids_json(chain)},
       {"classification", json_string("LOCAL_DEMO_ONLY")},
+      {"contribution_ids", json_array(contribution_ids)},
       {"cryptographic_signatures_verified", "false"},
       {"formal_semantics_id", json_string(protocol::formal_semantics_id)},
       {"governance_eligible", "false"},
@@ -979,6 +1050,7 @@ struct VoteFrameResult {
       fail("allocation failure while parsing the bounded workload");
     }
   }();
+  verify_relayed_contributions(workload, options.contributions_root);
   const auto chain = [&]() {
     try {
       return build_chain(workload);
@@ -1209,6 +1281,7 @@ struct QuorumResult {
       fail("allocation failure while parsing the bounded workload");
     }
   }();
+  verify_relayed_contributions(workload, options.contributions_root);
   const auto chain = [&]() {
     try {
       return build_chain(workload);

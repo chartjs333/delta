@@ -933,6 +933,7 @@ def _native_command(
     mode: str,
     *,
     workload: Path,
+    contributions_root: Path,
     node_dir: Path,
     validator_id: str,
     result_path: Path,
@@ -945,6 +946,8 @@ def _native_command(
         mode,
         "--workload",
         str(workload),
+        "--contributions-root",
+        str(contributions_root),
         "--node-dir",
         str(node_dir),
         "--validator-id",
@@ -962,7 +965,10 @@ def _native_command(
 
 
 def _validate_common_native_result(
-    value: Mapping[str, object], validator_id: str, workload_id: str
+    value: Mapping[str, object],
+    validator_id: str,
+    workload_id: str,
+    contribution_ids: Sequence[str],
 ) -> None:
     expected_round_id = f"mnist-demo-{workload_id[7:27]}"
     if (
@@ -980,6 +986,7 @@ def _validate_common_native_result(
         or value.get("height") != 1
         or value.get("view") != 0
         or value.get("round_id") != expected_round_id
+        or value.get("contribution_ids") != list(contribution_ids)
     ):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_RESULT_INVALID")
     result_id = _require_content_id(value.get("result_id"), "MNIST_DELTA_NATIVE_RESULT_ID_INVALID")
@@ -1043,12 +1050,13 @@ def _validate_prepare_result(
     value: Mapping[str, object],
     validator_id: str,
     workload_id: str,
+    contribution_ids: Sequence[str],
     node_dir: Path,
     result_path: Path,
     *,
     crash: bool,
 ) -> None:
-    _validate_common_native_result(value, validator_id, workload_id)
+    _validate_common_native_result(value, validator_id, workload_id, contribution_ids)
     _validate_native_result_file(result_path, value, "MNIST_DELTA_PREPARE_RESULT_INVALID")
     expected_status = "SIMULATED_CRASH" if crash else "VOTES_EXPOSED"
     if (
@@ -1112,11 +1120,12 @@ def _validate_finalize_result(
     value: Mapping[str, object],
     validator_id: str,
     workload_id: str,
+    contribution_ids: Sequence[str],
     model: AppliedModel,
     node_dir: Path,
     result_path: Path,
 ) -> None:
-    _validate_common_native_result(value, validator_id, workload_id)
+    _validate_common_native_result(value, validator_id, workload_id, contribution_ids)
     _validate_native_result_file(result_path, value, "MNIST_DELTA_FINALIZE_RESULT_INVALID")
     model_artifact = value.get("model_artifact")
     pointer = value.get("current_pointer")
@@ -1491,9 +1500,11 @@ def run_delta_nodes(
     workload_root.mkdir()
     workload_path = workload_root / "mnist-workload.bin"
     contributions, workload_id = write_workload(summaries, shard_ids, source_id, workload_path)
+    contribution_ids = tuple(item.content_id for item in contributions)
 
     transport_receipts: list[dict[str, object]] = []
     relayed_workloads: dict[str, Path] = {}
+    relayed_contribution_roots: dict[str, Path] = {}
     for validator_index in range(1, NODE_COUNT + 1):
         validator_id = f"validator-{validator_index:02d}"
         destination_root = output / "network" / "workloads" / validator_id
@@ -1518,6 +1529,7 @@ def run_delta_nodes(
         )
         transport_receipts.append(receipt)
         relayed_workloads[validator_id] = destination_root / "workload.bin"
+        relayed_contribution_roots[validator_id] = destination_root / "contributions"
 
     runtime_root = output / "native-nodes"
     prepare_results: list[dict[str, object]] = []
@@ -1533,6 +1545,7 @@ def run_delta_nodes(
                     selected_toolchain,
                     "prepare-votes",
                     workload=relayed_workloads[validator_id],
+                    contributions_root=relayed_contribution_roots[validator_id],
                     node_dir=node_dir,
                     validator_id=validator_id,
                     result_path=crash_result_path,
@@ -1545,6 +1558,7 @@ def run_delta_nodes(
                 crash_result,
                 validator_id,
                 workload_id,
+                contribution_ids,
                 node_dir,
                 crash_result_path,
                 crash=True,
@@ -1554,6 +1568,7 @@ def run_delta_nodes(
                 selected_toolchain,
                 "prepare-votes",
                 workload=relayed_workloads[validator_id],
+                contributions_root=relayed_contribution_roots[validator_id],
                 node_dir=node_dir,
                 validator_id=validator_id,
                 result_path=result_path,
@@ -1565,6 +1580,7 @@ def run_delta_nodes(
             result,
             validator_id,
             workload_id,
+            contribution_ids,
             node_dir,
             result_path,
             crash=False,
@@ -1609,6 +1625,7 @@ def run_delta_nodes(
                 selected_toolchain,
                 "finalize",
                 workload=relayed_workloads[validator_id],
+                contributions_root=relayed_contribution_roots[validator_id],
                 node_dir=runtime_root / validator_id,
                 validator_id=validator_id,
                 result_path=result_path,
@@ -1623,6 +1640,7 @@ def run_delta_nodes(
             result,
             validator_id,
             workload_id,
+            contribution_ids,
             model,
             runtime_root / validator_id,
             result_path,
