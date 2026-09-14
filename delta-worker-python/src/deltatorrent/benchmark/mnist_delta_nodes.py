@@ -982,9 +982,7 @@ def _validate_common_native_result(
         or value.get("round_id") != expected_round_id
     ):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_RESULT_INVALID")
-    result_id = _require_content_id(
-        value.get("result_id"), "MNIST_DELTA_NATIVE_RESULT_ID_INVALID"
-    )
+    result_id = _require_content_id(value.get("result_id"), "MNIST_DELTA_NATIVE_RESULT_ID_INVALID")
     body = {key: item for key, item in value.items() if key != "result_id"}
     if result_id != _derived_content_id(
         "deltareduce.demo.mnist.result.v1",
@@ -1187,25 +1185,143 @@ def _validate_finalize_result(
         raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
 
 
-def _collect_native_trace(path: Path, validator_id: str) -> list[dict[str, object]]:
+def _collect_native_trace(
+    path: Path,
+    validator_id: str,
+    prepare_result: Mapping[str, object],
+    finalize_result: Mapping[str, object],
+    *,
+    expect_crash: bool,
+) -> list[dict[str, object]]:
     try:
-        values = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+        raw = path.read_bytes()
+        if not raw.endswith(b"\n") or b"\r" in raw:
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        lines = raw.decode("utf-8").splitlines()
+        values = [json.loads(line) for line in lines]
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID") from exc
     rows: list[dict[str, object]] = []
-    for value in values:
+    workload_id = str(prepare_result.get("workload_id"))
+    round_id = str(prepare_result.get("round_id"))
+    for line, value in zip(lines, values, strict=True):
         if (
             not isinstance(value, dict)
+            or set(value) != NATIVE_TRACE_FIELDS
+            or line.encode("utf-8") != _canonical_bytes(value)
             or value.get("type_name") != "MNIST_DELTA_DEMO_TRACE"
+            or value.get("schema_version") != "1.0.0"
             or value.get("classification") != "LOCAL_DEMO_ONLY"
             or value.get("authoritative") is not False
             or value.get("governance_eligible") is not False
             or value.get("formal_semantics_id") != FORMAL_SEMANTICS_ID
             or value.get("validator_id") != validator_id
+            or value.get("round_id") != round_id
+            or value.get("height") != 1
+            or value.get("view") != 0
+            or value.get("mode") not in ("prepare-votes", "finalize")
+            or not isinstance(value.get("action_id"), str)
+            or not isinstance(value.get("event"), str)
+            or not isinstance(value.get("outcome"), str)
+            or not isinstance(value.get("durable_sequence"), int)
+            or not isinstance(value.get("replay"), bool)
         ):
             raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        for content_field in ("body_hash", "result_hash"):
+            content_value = value.get(content_field)
+            if content_value is not None:
+                _require_content_id(content_value, "MNIST_DELTA_NATIVE_TRACE_INVALID")
         rows.append(cast(dict[str, object], value))
     if not rows:
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
+    body_ids = cast(Mapping[str, object], prepare_result["body_ids"])
+    certificates = finalize_result.get("quorum_certificates")
+    if not isinstance(certificates, list):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+    certificate_by_kind = {
+        str(item.get("kind")): item for item in certificates if isinstance(item, dict)
+    }
+    for phase, trace_kind, vote_action, finalize_action in TRACE_PHASES:
+        vote_rows = [
+            row
+            for row in rows
+            if row.get("event") == "vote_durable_and_exposed" and row.get("vote_kind") == trace_kind
+        ]
+        expected_vote_count = 2 if expect_crash and phase != "apply" else 1
+        if len(vote_rows) != expected_vote_count:
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        final_vote = vote_rows[-1]
+        expected_sequence = REQUIRED_VOTE_KINDS.index(phase) + 1
+        if (
+            final_vote.get("action_id") != vote_action
+            or final_vote.get("body_hash") != body_ids[phase]
+            or final_vote.get("durable_sequence") != expected_sequence
+            or final_vote.get("replay") is not expect_crash
+            or final_vote.get("outcome") != ("NO_OP" if expect_crash else "ACCEPTED")
+        ):
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        certificate = certificate_by_kind.get(phase)
+        quorum_rows = [
+            row
+            for row in rows
+            if row.get("event") == "quorum_validated" and row.get("vote_kind") == trace_kind
+        ]
+        if (
+            not isinstance(certificate, dict)
+            or len(quorum_rows) != 1
+            or quorum_rows[0].get("action_id") != finalize_action
+            or quorum_rows[0].get("body_hash") != certificate.get("body_hash")
+            or quorum_rows[0].get("result_hash") != certificate.get("qc_id")
+            or quorum_rows[0].get("vote_context_id") != certificate.get("context_id")
+            or quorum_rows[0].get("outcome") != "FINALIZED"
+        ):
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
+    apply_rows = [row for row in rows if row.get("event") == "apply_computed"]
+    pointer_rows = [row for row in rows if row.get("event") == "current_pointer_applied"]
+    terminal_rows = [
+        row
+        for row in rows
+        if row.get("event") == "mode_complete"
+        and row.get("mode") == "finalize"
+        and row.get("outcome") == "APPLIED"
+    ]
+    if (
+        len(apply_rows) != 1
+        or apply_rows[0].get("action_id") != "ACT-APPLY-COMPUTE"
+        or apply_rows[0].get("body_hash") != finalize_result.get("aggregate_root_qc_id")
+        or apply_rows[0].get("result_hash") != finalize_result.get("apply_candidate_id")
+        or len(pointer_rows) != 1
+        or pointer_rows[0].get("action_id") != "ACT-CURRENT-ADVANCE"
+        or pointer_rows[0].get("body_hash") != finalize_result.get("apply_qc_id")
+        or pointer_rows[0].get("result_hash") != finalize_result.get("model_hash")
+        or len(terminal_rows) != 1
+        or terminal_rows[0] is not rows[-1]
+        or terminal_rows[0].get("result_hash") != finalize_result.get("model_hash")
+    ):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
+    crash_rows = [row for row in rows if row.get("event") == "simulated_crash"]
+    recovery_rows = [row for row in rows if row.get("event") == "journal_recovery_verified"]
+    journal_rows = [row for row in rows if row.get("event") == "journal_recovered"]
+    if expect_crash:
+        if (
+            len(crash_rows) != 1
+            or crash_rows[0].get("action_id") != "ACT-CRASH"
+            or crash_rows[0].get("body_hash") != body_ids["apply"]
+            or crash_rows[0].get("error_code") != "SIMULATED_CRASH_AFTER_DURABILITY"
+            or crash_rows[0].get("outcome") != "DURABLE_NOT_EXPOSED"
+            or len(recovery_rows) != 1
+            or recovery_rows[0].get("replay") is not True
+            or len(journal_rows) != 1
+            or journal_rows[0].get("replay") is not True
+        ):
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+    elif crash_rows or recovery_rows or journal_rows:
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
+    if workload_id != str(finalize_result.get("workload_id")):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
     return rows
 
@@ -1532,6 +1648,9 @@ def run_delta_nodes(
         f"validator-{index:02d}": _collect_native_trace(
             runtime_root / f"validator-{index:02d}" / "trace.jsonl",
             f"validator-{index:02d}",
+            prepare_results[index - 1],
+            finalize_results[index - 1],
+            expect_crash=index == NODE_COUNT,
         )
         for index in range(1, NODE_COUNT + 1)
     }
