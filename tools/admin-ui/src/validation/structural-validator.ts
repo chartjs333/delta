@@ -1,8 +1,4 @@
-import Ajv2020, {
-  type AnySchemaObject,
-  type ErrorObject,
-  type ValidateFunction,
-} from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv";
 
 import type {
   DocumentEnvelope,
@@ -14,6 +10,8 @@ import type {
   StructuralValidationResult,
 } from "../core/contracts";
 import { AdminUiError } from "../core/errors";
+import { CONTROLLER_REGISTER_SCHEMA } from "../schemas/controller-register";
+import { validateControllerRegister } from "./generated/controller-register-validator.mjs";
 
 const GOVERNANCE_REGISTER = "CONTROLLER_GOVERNANCE_REGISTER";
 const BOOTSTRAP_VALIDATOR_SET =
@@ -113,40 +111,20 @@ function issueFromAjv(error: ErrorObject): StructuralValidationIssue {
 }
 
 export class StructuralValidator {
-  private readonly compiled = new Map<string, ValidateFunction>();
-
   validate(
     document: DocumentEnvelope,
     schema: SchemaEnvelope,
   ): StructuralValidationResult {
     assertSchemaDocumentMatch(document, schema.descriptor);
     assertNoExternalSchemaReferences(schema.value);
-    const schemaObject = objectRecord(schema.value);
-    if (!schemaObject) {
+    if (!objectRecord(schema.value)) {
       throw new AdminUiError(
         "CAPABILITY_CONTRACT_VIOLATED",
         "The selected schema root must be a JSON object.",
       );
     }
 
-    const cacheKey = `${schema.descriptor.schemaId}@${schema.descriptor.version}:${schema.descriptor.source.sha256}`;
-    let validate = this.compiled.get(cacheKey);
-    if (!validate) {
-      try {
-        const ajv = new Ajv2020({
-          allErrors: true,
-          strict: true,
-          validateFormats: false,
-        });
-        validate = ajv.compile(schemaObject as AnySchemaObject);
-      } catch {
-        throw new AdminUiError(
-          "CAPABILITY_CONTRACT_VIOLATED",
-          "The selected schema could not be compiled safely.",
-        );
-      }
-      this.compiled.set(cacheKey, validate);
-    }
+    const validate = standaloneValidatorFor(schema.descriptor);
 
     const valid = validate(document.value);
     return {
@@ -156,4 +134,20 @@ export class StructuralValidator {
       issues: valid ? [] : (validate.errors ?? []).map(issueFromAjv),
     };
   }
+}
+
+function standaloneValidatorFor(descriptor: SchemaDescriptor): ValidateFunction {
+  if (
+    descriptor.schemaId === CONTROLLER_REGISTER_SCHEMA.schemaId &&
+    descriptor.version === CONTROLLER_REGISTER_SCHEMA.version &&
+    descriptor.authorityClass === CONTROLLER_REGISTER_SCHEMA.authorityClass &&
+    descriptor.documentType === CONTROLLER_REGISTER_SCHEMA.documentType &&
+    descriptor.source.sha256 === CONTROLLER_REGISTER_SCHEMA.source.sha256
+  ) {
+    return validateControllerRegister;
+  }
+  throw new AdminUiError(
+    "CAPABILITY_CONTRACT_VIOLATED",
+    "No CSP-safe standalone validator is bundled for the selected schema.",
+  );
 }

@@ -74,6 +74,15 @@ button.primary:hover:not(:disabled) { background: #163a2d; }
   letter-spacing: 0.04em;
 }
 .boundary-pill { color: #d9e7df; border: 1px solid #507365; }
+.topbar-actions { display: flex; gap: 0.75rem; align-items: center; }
+.nav-toggle {
+  display: none;
+  min-height: 40px;
+  color: #f8f5ec;
+  border-color: #507365;
+  background: #1b3028;
+}
+.nav-toggle:hover:not(:disabled) { border-color: #d8a06d; background: #29483b; }
 .shell-grid { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: calc(100vh - 68px); }
 .sidebar {
   padding: 1.6rem 1.2rem;
@@ -206,6 +215,8 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 @media (max-width: 900px) {
   .shell-grid { grid-template-columns: 1fr; }
   .sidebar { display: none; }
+  .sidebar.sidebar-open { display: block; }
+  .nav-toggle { display: inline-flex; gap: 0.45rem; align-items: center; }
   .hero { align-items: start; flex-direction: column; }
   .workspace-grid, .controller-layout { grid-template-columns: 1fr; }
   main { padding-top: 1.5rem; }

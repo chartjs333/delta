@@ -72,4 +72,22 @@ describe("integrated browser-local MVP", () => {
     expect(screen.getByRole("status").textContent).toMatch(/Unavailable:/u);
     expect(window.location.hash).toBe("#/campaigns");
   });
+
+  it("keeps primary navigation reachable through the mobile menu", async () => {
+    const user = userEvent.setup();
+    render(<App adapter={new LocalJsonAdapter(memoryFiles)} />);
+
+    const toggle = screen.getByRole("button", { name: "Menu" });
+    const sidebar = document.getElementById("primary-sidebar");
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(sidebar?.classList.contains("sidebar-open")).toBe(false);
+
+    await user.click(toggle);
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
+    expect(sidebar?.classList.contains("sidebar-open")).toBe(true);
+
+    await user.click(screen.getByRole("link", { name: /Campaigns/u }));
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(sidebar?.classList.contains("sidebar-open")).toBe(false);
+  });
 });

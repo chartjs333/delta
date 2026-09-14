@@ -36,6 +36,15 @@ The output is `tools/admin-ui/dist/`. Its relative Vite base permits serving the
 files from an explicitly chosen static location. Loading the built application does
 not contact Delta, GitHub, schema URLs, analytics, or any other network service.
 
+JSON Schema validation uses AJV standalone code generated at build time. The
+production browser bundle does not call `eval` or the `Function` constructor and
+does not require CSP `unsafe-eval`. After changing a bundled schema, run
+`npm run generate:validators` and commit the regenerated validator; `npm run check`
+rejects stale generated code.
+
+At viewport widths up to 900 px, primary navigation is available from the keyboard-
+accessible **Menu** control in the top bar rather than being removed with the sidebar.
+
 ## Verification
 
 Run the complete UI gate from this directory:

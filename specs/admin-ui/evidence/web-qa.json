@@ -1,0 +1,79 @@
+{
+  "document_type": "ADMIN_UI_WEB_QA_EVIDENCE",
+  "document_version": "1.0.0",
+  "recorded_on": "2026-09-14",
+  "implementation_branch": "feature/admin-ui-mvp",
+  "base_commit": "0c42598635939bd99be8105cb2dd0e4d8a5c17ab",
+  "formal_impact": "NONE",
+  "status": "PASS_WITH_RUNNER_LIMITATION",
+  "fixes": {
+    "csp_ajv": {
+      "status": "PASS",
+      "strategy": "AJV_STANDALONE_ESM",
+      "runtime_schema_compilation": false,
+      "csp_unsafe_eval": false,
+      "production_dynamic_code_hits": 0,
+      "regression_test": "validates with the Function constructor blocked by CSP"
+    },
+    "mobile_navigation": {
+      "status": "PASS",
+      "max_width_pixels": 900,
+      "control_name": "Menu",
+      "aria_expanded": true,
+      "navigation_removed_at_mobile_width": false,
+      "regression_test": "keeps primary navigation reachable through the mobile menu"
+    },
+    "source_tree_integrity": {
+      "status": "PASS",
+      "restored_paths": [
+        "tools/admin-ui/src/core/contracts.ts",
+        "tools/admin-ui/src/core/errors.ts",
+        "tools/admin-ui/src/core/contracts.test.ts"
+      ],
+      "reason": "The implementation evidence referenced these files, but commit 0c42598635939bd99be8105cb2dd0e4d8a5c17ab did not contain them."
+    }
+  },
+  "verification": [
+    {
+      "command": "npm test",
+      "status": "PASS",
+      "test_files": 21,
+      "tests": 84
+    },
+    {
+      "command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+      "status": "PASS"
+    },
+    {
+      "command": "npx vite build",
+      "status": "PASS",
+      "modules_transformed": 41
+    },
+    {
+      "command": "npm run audit:offline",
+      "status": "PASS",
+      "scanned_product_files": 30,
+      "scanned_bundle_files": 1,
+      "violations": 0
+    },
+    {
+      "command": "npm audit --audit-level=high",
+      "status": "PASS",
+      "vulnerabilities": 0
+    }
+  ],
+  "runner_limitation": {
+    "command": "npm run typecheck",
+    "package": "typescript@7.0.2",
+    "status": "BLOCKED_BY_SANDBOX",
+    "reason": "The native TypeScript executable cannot read /proc/self/exe in this managed runner.",
+    "replacement_verification": "npx --yes --package typescript@5.9.3 tsc --noEmit"
+  },
+  "unchanged_boundaries": {
+    "data_source_port": true,
+    "offline_mode": true,
+    "schema_validation_boundary": true,
+    "explicit_new_file_export": true,
+    "protocol_or_runtime_change": false
+  }
+}

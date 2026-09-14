@@ -12,10 +12,13 @@ import type {
 } from "../core/contracts";
 import { AdminUiError } from "../core/errors";
 import { editDocumentText } from "../editor/document-draft";
+import {
+  CONTROLLER_REGISTER_SCHEMA,
+  controllerRegisterSchemaText,
+} from "../schemas/controller-register";
 import { parseUntrustedJson } from "../security/input-guards";
 import type { LocalFileGateway } from "./browser-file-gateway";
 import type { DataSourcePort } from "./data-source-port";
-import controllerRegisterSchemaText from "../schemas/controller-register.schema.json?raw";
 import {
   inferDocumentType,
   StructuralValidator,
@@ -28,18 +31,7 @@ const INITIAL_CAPABILITIES: readonly Capability[] = [
   "schema.validate.structure",
 ];
 
-export const CONTROLLER_REGISTER_SCHEMA = Object.freeze({
-  schemaId: "urn:deltareduce:admin-ui:local:controller-governance-register-v1",
-  version: "1.0.0",
-  authorityClass: "LOCAL_FIXTURE",
-  documentType: "CONTROLLER_GOVERNANCE_REGISTER",
-  source: {
-    kind: "BUNDLED_FIXTURE",
-    repository: "chartjs333/delta",
-    path: "tools/admin-ui/src/schemas/controller-register.schema.json",
-    sha256: "d464909ccc7735307d0e715ac4ee54b31a84b0c6b70d737410aa152885acc28c",
-  },
-} satisfies SchemaDescriptor);
+export { CONTROLLER_REGISTER_SCHEMA };
 
 export class LocalJsonAdapter implements DataSourcePort {
   private readonly structuralValidator = new StructuralValidator();

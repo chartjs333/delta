@@ -37,6 +37,7 @@ export interface AppProps {
 
 export function App({ adapter = defaultAdapter }: AppProps) {
   const [activeRoute, setActiveRoute] = useState(routeFromLocation);
+  const [navigationOpen, setNavigationOpen] = useState(false);
   const [source, setSource] = useState<SourceDescriptor>();
   const [schemas, setSchemas] = useState<readonly SchemaDescriptor[]>([]);
   const [selectedSchema, setSelectedSchema] = useState<SchemaDescriptor>();
@@ -52,7 +53,10 @@ export function App({ adapter = defaultAdapter }: AppProps) {
   const [notice, setNotice] = useState<string>();
 
   useEffect(() => {
-    const selectLocationRoute = () => setActiveRoute(routeFromLocation());
+    const selectLocationRoute = () => {
+      setActiveRoute(routeFromLocation());
+      setNavigationOpen(false);
+    };
     window.addEventListener("hashchange", selectLocationRoute);
     return () => window.removeEventListener("hashchange", selectLocationRoute);
   }, []);
@@ -175,11 +179,26 @@ export function App({ adapter = defaultAdapter }: AppProps) {
           <span className="brand-mark" aria-hidden="true">Δ</span>
           <span>Delta <strong>Admin</strong></span>
         </a>
-        <div className="boundary-pill">Browser-local · offline</div>
+        <div className="topbar-actions">
+          <button
+            aria-controls="primary-sidebar"
+            aria-expanded={navigationOpen}
+            className="nav-toggle"
+            type="button"
+            onClick={() => setNavigationOpen((open) => !open)}
+          >
+            <span aria-hidden="true">☰</span>
+            <span>Menu</span>
+          </button>
+          <div className="boundary-pill">Browser-local · offline</div>
+        </div>
       </header>
 
       <div className="shell-grid">
-        <aside className="sidebar">
+        <aside
+          className={`sidebar${navigationOpen ? " sidebar-open" : ""}`}
+          id="primary-sidebar"
+        >
           <nav aria-label="Primary navigation">
             <p className="nav-label">Workspace</p>
             {extensionRegistry.navigation.map((item) => (
@@ -187,7 +206,10 @@ export function App({ adapter = defaultAdapter }: AppProps) {
                 aria-current={activeRoute === item.route ? "page" : undefined}
                 href={`#${item.route}`}
                 key={item.id}
-                onClick={() => setActiveRoute(item.route)}
+                onClick={() => {
+                  setActiveRoute(item.route);
+                  setNavigationOpen(false);
+                }}
               >
                 <span aria-hidden="true">◫</span> {item.label}
               </a>

@@ -7,6 +7,10 @@ import type {
   SchemaEnvelope,
 } from "../core/contracts";
 import { AdminUiError } from "../core/errors";
+import {
+  CONTROLLER_REGISTER_SCHEMA,
+  controllerRegisterSchemaText,
+} from "../schemas/controller-register";
 import { StructuralValidator } from "./structural-validator";
 
 const sha256 = "0".repeat(64);
@@ -126,17 +130,45 @@ describe("local-only schema references", () => {
     vi.stubGlobal("fetch", fetchSpy);
     const validator = new StructuralValidator();
     const register = document(
-      { document_type: "CONTROLLER_GOVERNANCE_REGISTER", controllers: [] },
+      {
+        document_type: "CONTROLLER_GOVERNANCE_REGISTER",
+        document_version: "1.0.0",
+        controllers: [],
+      },
       "CONTROLLER_GOVERNANCE_REGISTER",
     );
-    const local = schema("CONTROLLER_GOVERNANCE_REGISTER", "LOCAL_FIXTURE", {
-      $schema: "https://json-schema.org/draft/2020-12/schema",
-      $defs: { controllerArray: { type: "array" } },
-      type: "object",
-      properties: { controllers: { $ref: "#/$defs/controllerArray" } },
-    });
+    const local: SchemaEnvelope = {
+      descriptor: CONTROLLER_REGISTER_SCHEMA,
+      text: controllerRegisterSchemaText,
+      value: JSON.parse(controllerRegisterSchemaText) as JsonValue,
+    };
 
     expect(validator.validate(register, local).status).toBe("VALID");
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("validates with the Function constructor blocked by CSP", () => {
+    vi.stubGlobal(
+      "Function",
+      function blockedFunctionConstructor() {
+        throw new Error("unsafe-eval blocked");
+      },
+    );
+    const validator = new StructuralValidator();
+    const register = document(
+      {
+        document_type: "CONTROLLER_GOVERNANCE_REGISTER",
+        document_version: "1.0.0",
+        controllers: [],
+      },
+      "CONTROLLER_GOVERNANCE_REGISTER",
+    );
+    const local: SchemaEnvelope = {
+      descriptor: CONTROLLER_REGISTER_SCHEMA,
+      text: controllerRegisterSchemaText,
+      value: JSON.parse(controllerRegisterSchemaText) as JsonValue,
+    };
+
+    expect(validator.validate(register, local).status).toBe("VALID");
   });
 });

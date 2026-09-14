@@ -27,6 +27,7 @@ const forbiddenSourcePatterns = [
 const allowedRuntimeDependencies = new Set(["ajv", "react", "react-dom"]);
 const backendOrTelemetryPackages = /(?:express|fastify|koa|nestjs|next|socket\.io|axios|sentry|segment|posthog|analytics)/iu;
 const forbiddenBundlePattern = /\b(?:fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon)\b/u;
+const dynamicCodePattern = /\b(?:eval\s*\(|new\s+Function\s*\(|Function\s*\(\s*["'`])/u;
 
 async function sourceFiles(
   directory,
@@ -75,6 +76,9 @@ const indexHtml = await readFile(join(projectRoot, "index.html"), "utf8");
 if (!indexHtml.includes("connect-src 'none'")) {
   violations.push({ id: "csp-allows-network-connections", path: "index.html" });
 }
+if (indexHtml.includes("'unsafe-eval'")) {
+  violations.push({ id: "csp-allows-dynamic-code", path: "index.html" });
+}
 if (/<(?:script|link|img)\b[^>]*(?:src|href)=["']https?:/iu.test(indexHtml)) {
   violations.push({ id: "external-index-resource", path: "index.html" });
 }
@@ -84,9 +88,16 @@ try {
   const distributionFiles = await sourceFiles(distributionRoot, new Set([".js"]));
   for (const path of distributionFiles) {
     bundleFilesScanned += 1;
-    if (forbiddenBundlePattern.test(await readFile(path, "utf8"))) {
+    const bundle = await readFile(path, "utf8");
+    if (forbiddenBundlePattern.test(bundle)) {
       violations.push({
         id: "automatic-network-api-in-production-bundle",
+        path: relative(projectRoot, path).replaceAll("\\", "/"),
+      });
+    }
+    if (dynamicCodePattern.test(bundle)) {
+      violations.push({
+        id: "dynamic-code-in-production-bundle",
         path: relative(projectRoot, path).replaceAll("\\", "/"),
       });
     }

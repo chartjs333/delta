@@ -7,13 +7,14 @@
     "audit:offline": "node scripts/check-offline-boundary.mjs",
     "audit:repository": "node scripts/check-repository-boundary.mjs",
     "dev": "vite",
+    "generate:validators": "node scripts/generate-standalone-validator.mjs",
+    "check:validators": "node scripts/generate-standalone-validator.mjs --check",
     "build": "tsc --noEmit && vite build",
-    "check": "npm run typecheck && npm test && npm run build && npm run audit:offline",
+    "check": "npm run check:validators && npm run typecheck && npm test && npm run build && npm run audit:offline",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "ajv": "8.20.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -24,6 +25,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.1",
+    "ajv": "8.20.0",
     "axe-core": "^4.13.0",
     "jsdom": "29.0.0",
     "typescript": "7.0.2",
