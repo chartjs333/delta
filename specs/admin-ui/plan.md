@@ -1,12 +1,15 @@
 # Implementation Plan: Extensible Delta Admin UI
 
-**Branch**: `feature/admin-ui-spec` | **Date**: 2026-09-14 | **Spec**: `spec.md`
+**Branch**: `feature/admin-ui-ux-spec` | **Date**: 2026-09-14 | **Spec**: `spec.md`
 
 ## Summary
 
 Define and later implement an optional administrative shell whose offline MVP
 supports local JSON controller documents and whose architecture can later consume
 public Delta APIs and visualize campaigns, nodes, artifacts, and audit events.
+
+UX Amendment 001 replaces raw-JSON-first interaction with guided form-first
+controller and pairwise-record workflows over the existing `DocumentDraft`.
 
 ## Technical Context
 
@@ -73,6 +76,20 @@ No implementation directory is added by the specification branch.
 7. Prove core/runtime build independence.
 8. Defer API, authentication, live visualization, and commands to later scopes.
 
+### UX Amendment 001 sequence
+
+1. Keep the Web QA CSP/AJV and mobile-navigation fixes as the implementation base.
+2. Review T032–T039 and `contracts/pairwise-review-draft.md` before UX code changes.
+3. Implement form projections and patch operations over the existing `DocumentDraft`.
+4. Add guided controller and pairwise-record steps without changing `DataSourcePort`.
+5. Add structural-completeness summary and friendly schema-error mapping.
+6. Keep raw JSON advanced and read-only; preserve lossless explicit export.
+7. Run production-browser and non-technical usability tests.
+
+If step 3–6 requires a canonical schema, validator, protocol, or runtime change,
+stop and re-enter formal-first review. A versioned UI-owned `LOCAL_FIXTURE` mapping
+may be proposed separately but must not claim governance or Delta authority.
+
 ## Test Strategy
 
 - Contract tests shared by adapter implementations.
@@ -85,6 +102,9 @@ No implementation directory is added by the specification branch.
 - Provenance/subject mismatch tests.
 - Extension registration tests.
 - Accessibility checks for primary workflows.
+- Non-technical tests that complete the workflow without viewing or editing JSON.
+- Pair lifecycle tests for controller add, ID change, removal, and re-addition.
+- Assertions that summary language says records are filled, never independently verified.
 - Dependency checks proving no core/runtime-to-UI edge.
 
 ## Observability

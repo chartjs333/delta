@@ -35,6 +35,21 @@ Adapt source documents for display. Any derived value is presentation-only,
 traceable to its inputs, and never exported as canonical data unless the governing
 schema explicitly defines it.
 
+The form-first controller workflow uses a single `DocumentDraft` source of truth:
+
+```mermaid
+flowchart LR
+    F["Guided form"] --> P["Presentation model"]
+    P --> D["DocumentDraft"]
+    D --> V["Structural validation"]
+    V --> E["Explicit JSON export"]
+```
+
+Form controls patch known document paths through the presentation model. They do
+not maintain a second JSON object or recreate the document from recognized fields;
+schema-allowed unknown fields therefore survive form edits and export. Raw JSON is
+an advanced, read-only projection of the same draft in this increment.
+
 ### DataSourcePort
 
 The only domain-facing data boundary. It exposes source descriptors, schema
@@ -49,6 +64,22 @@ complete, or semantically reinterpret source data.
 The MVP is browser-local and has no backend. It reads files selected by the user
 and creates explicit downloads; it does not fetch live GitHub content, call Delta,
 or silently overwrite the selected input file.
+
+## Pairwise draft boundary
+
+The guided independence step records answers and evidence references only. It does
+not calculate or display an independence verdict. Unordered pairs are derived from
+the current dynamic controller draft set, never from a four-slot fixture. Stable
+presentation keys prevent editable controller IDs from silently retargeting evidence.
+
+The detailed `ACTIVE`, `STALE`, and `ORPHANED` lifecycle is defined in
+`contracts/pairwise-review-draft.md`. A readiness summary may count entries whose
+questions are filled, including explicit `UNKNOWN` answers. It may use words such
+as "verified", "confirmed", or "approved" only for an external `SourcedResult`
+with matching subject and provenance.
+
+`DataSourcePort`, the schema-validation boundary, offline behavior, and explicit
+new-file export remain unchanged by this amendment.
 
 ## Extension points
 

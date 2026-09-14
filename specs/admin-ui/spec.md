@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feature/admin-ui-spec`  
 **Created**: 2026-09-14  
-**Status**: Draft  
+**Status**: MVP implemented; UX Amendment 001 reviewed  
 **Depends on**: `main`; PR #29 is a non-normative MVP input
 
 ## Summary
@@ -13,8 +13,9 @@ campaigns, nodes, artifacts, audit events, and system visualizations. The UI is
 a one-way consumer of public contracts and sourced results. It never becomes a
 protocol authority or a dependency of Delta core/runtime.
 
-The MVP deliberately stops at local JSON import, editing, structural validation,
-viewing, and export. Controller-independence, governance readiness, signing
+JSON remains the internal/import/export representation. The default non-technical
+workflow is a guided form over a single document draft; raw JSON is advanced and
+read-only. Controller-independence, governance readiness, signing
 readiness, and other semantic outcomes are not computed by the UI. They appear
 only when a declared source supplies an attributable result.
 
@@ -25,12 +26,12 @@ authorization.
 
 ## User Scenarios & Testing
 
-### US1 — Edit a controller register safely (Priority: P1)
+### US1 — Create a controller register without editing JSON (Priority: P1)
 
-An operator opens or creates a controller-register JSON document, selects its
-matching authority-classed schema descriptor, edits a dynamic controller list,
-sees structural errors, and explicitly downloads a new document without changing
-the original file, protocol state, or governance state.
+An operator opens or creates a controller register, completes understandable guided
+fields for a dynamic controller list, receives field-level structural feedback, and
+explicitly downloads a new JSON document without needing to view or edit JSON and
+without changing the original file, protocol state, or governance state.
 
 **Independent Test**: Run with only the local JSON adapter and no Delta runtime,
 network service, validator, key, or credential.
@@ -50,6 +51,35 @@ network service, validator, key, or credential.
    mismatch rather than treating the worksheet as a protocol document.
 6. **Given** a downloaded export, **When** the workflow completes, **Then** the
    originally selected file has not been overwritten by the UI.
+7. **Given** schema-allowed fields unknown to the form, **When** known fields are
+   changed and exported, **Then** the unknown fields remain byte-value equivalent.
+8. **Given** the default controller workflow, **When** a non-technical user completes
+   it, **Then** no raw JSON editing action is required or presented as primary.
+
+### US5 — Record pairwise answers without creating a verdict (Priority: P1)
+
+An operator answers three understandable questions for each dynamically derived
+unordered controller pair, attaches evidence references, and sees structural
+completion without the UI deciding whether the controllers are independent.
+
+**Independent Test**: Use 0, 1, 2, 4, and 100 controller drafts with no sourced
+governance results and verify pair counts, language, and lifecycle behavior.
+
+**Acceptance Scenarios**:
+
+1. **Given** four current controller drafts, **When** the pairwise step opens,
+   **Then** six unordered pairwise records are offered without a hard-coded slot model.
+2. **Given** `YES`, `NO`, or `UNKNOWN` for every question in a pair record, **When**
+   summary is shown, **Then** it says the pairwise record is filled and does not say
+   the pair is verified, confirmed, independent, passed, or failed.
+3. **Given** an editable controller ID changes, **When** an existing record references
+   that controller's stable draft key, **Then** the record becomes `STALE` and evidence
+   is not silently retargeted.
+4. **Given** a controller is removed, **When** its pair records remain in draft state,
+   **Then** they become `ORPHANED` and cannot be silently exported as active records.
+5. **Given** an external independence result with matching subject and provenance,
+   **When** it is displayed, **Then** its supplied verdict is visually separate from
+   locally entered answers and completion counts.
 
 ### US2 — Distinguish unavailable outcomes from failed outcomes (Priority: P1)
 
@@ -114,6 +144,10 @@ different capabilities and equivalent controller documents.
 - Routes or widgets that require capabilities unavailable from the active adapter.
 - Oversized, deeply nested, high-node-count, or giant-string JSON documents.
 - HTML/script/template text, suspicious URLs, huge Base64-like strings, and external `$ref` values.
+- Controller IDs that are blank, duplicated, edited after pair entry, or deleted.
+- Pair records whose members are stale, orphaned, reordered, or re-added with a new draft key.
+- Explicit `UNKNOWN` answers versus questions that have not been answered.
+- Historical PR #29 slot pairs whose shape cannot define the dynamic product model.
 
 ## Requirements
 
@@ -167,6 +201,31 @@ different capabilities and equivalent controller documents.
 - **FR-023**: The MVP MUST NOT automatically fetch URLs or external schema references.
 - **FR-024**: The MVP MUST operate without a backend, login, authorization flow,
   network service, runtime, key, or credential.
+- **FR-025**: The default controller workflow MUST be guided and form-first; users
+  MUST NOT need to read or edit JSON to complete it.
+- **FR-026**: Raw JSON MUST be hidden by default and read-only in this increment,
+  and MUST project the same `DocumentDraft` used by forms, validation, and export.
+- **FR-027**: Known-field form changes MUST patch `DocumentDraft` without rebuilding
+  it from recognized fields or dropping schema-allowed unknown fields.
+- **FR-028**: Pairwise records MUST be derived from unordered pairs of the dynamic
+  controller draft set and MUST NOT assume four slots or six pairs.
+- **FR-029**: A pairwise record MUST store answers and evidence references but MUST
+  NOT contain, compute, or imply an independence verdict.
+- **FR-030**: `YES`, `NO`, and `UNKNOWN` are completed answers; absence of an answer
+  is incomplete. Summary language MUST say records are "filled" or "not filled".
+- **FR-031**: "Verified", "confirmed", "approved", "pass", "fail", and equivalent
+  verdict language MUST appear only for a matching external `SourcedResult` with provenance.
+- **FR-032**: Controller identity edits and removal MUST produce explicit `STALE`
+  or `ORPHANED` pair records; the UI MUST NOT silently retarget or delete evidence.
+- **FR-033**: Friendly field errors MUST retain the original JSON path, schema path,
+  and constraint in an accessible details view.
+- **FR-034**: T032–T039 MUST NOT modify `DataSourcePort`, offline behavior, schema-
+  validation authority, or explicit new-file export behavior.
+- **FR-035**: The frozen PR #29 fixture MUST remain historical test input and MUST
+  NOT become the normative structural model for dynamic controller pairs.
+- **FR-036**: Active pairwise records MAY enter exported JSON only through an
+  explicitly reviewed, versioned structural mapping supported by the selected schema.
+  `STALE` and `ORPHANED` records MUST never be silently exported as active records.
 
 ### Non-Functional Requirements
 
@@ -183,6 +242,9 @@ different capabilities and equivalent controller documents.
   this specification rather than narrowing it.
 - **NFR-009**: Rejecting hostile or over-limit input MUST not crash the shell or
   expose document contents through analytics, telemetry, or exception reporting.
+- **NFR-010**: A non-technical usability test participant MUST be able to add
+  controllers, complete pairwise records, understand attention items, and export a
+  structurally valid file without opening the advanced JSON view.
 
 ### Key Entities
 
@@ -196,6 +258,10 @@ different capabilities and equivalent controller documents.
 - **SchemaDescriptor**: Exact schema ID, version, authority class, document type,
   and source binding.
 - **SourcedResult**: An attributable result bound to an exact subject and authority class.
+- **DocumentDraft**: The single in-memory source for form projection, validation,
+  advanced preview, and export.
+- **PairwiseReviewDraft**: A non-authoritative answer/evidence record with explicit
+  active, stale, or orphaned lifecycle state and no verdict.
 
 ## Success Criteria
 
@@ -208,6 +274,13 @@ different capabilities and equivalent controller documents.
   without a sourced result envelope and matching capability.
 - **SC-006**: A placeholder module and alternate entity view are registered through
   documented extension points without controller-module edits.
+- **SC-007**: Tests cover dynamic pair counts for 0, 1, 2, 4, and 100 controllers.
+- **SC-008**: No locally derived summary uses verdict language; with four controllers
+  and six filled records it states "6 of 6 pairwise records filled".
+- **SC-009**: Production-browser tests cover supported desktop/mobile widths and CSP
+  with no `unsafe-eval` requirement.
+- **SC-010**: At least one non-technical usability path completes form-to-export
+  without opening or editing raw JSON.
 
 ## Assumptions
 
@@ -233,3 +306,6 @@ different capabilities and equivalent controller documents.
 - Adding a canonical schema to `delta-protocol` solely for the UI.
 - Authentication, authorization, remote persistence, backend services, and API integration.
 - Selecting a form or visualization library; those require separate implementation decisions.
+- Editing raw JSON in UX Amendment 001.
+- Defining governance meaning for pairwise answers or evidence references.
+- Treating completion counts as independence, readiness, approval, pass, or fail.

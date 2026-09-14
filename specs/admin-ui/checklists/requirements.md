@@ -18,3 +18,13 @@
 - [x] Security exclusions and provenance requirements are explicit.
 - [x] Edge cases and measurable success criteria are present.
 - [x] Out-of-scope state-changing operations are explicit.
+- [x] Form-first UX makes JSON an internal/export representation rather than required input.
+- [x] Pairwise answers and evidence are explicitly non-verdict local draft data.
+- [x] Dynamic unordered-pair structure and `STALE`/`ORPHANED` lifecycle are defined.
+- [x] Completion summary uses "filled" and reserves verdict language for sourced results.
+- [x] Advanced JSON is hidden by default, read-only, and shares one `DocumentDraft`.
+- [x] Unknown-field preservation remains required through form edits and export.
+- [x] `DataSourcePort`, offline, schema-validation, and export boundaries remain unchanged.
+- [x] Canonical schema/protocol/runtime requirements are explicit STOP conditions.
+- [x] Frozen PR #29 fixture is not the normative dynamic-pair model.
+- [x] Production-browser and non-technical usability gates are measurable.

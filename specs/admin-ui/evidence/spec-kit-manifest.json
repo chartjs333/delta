@@ -1,20 +1,24 @@
 {
   "document_type": "ADMIN_UI_SPEC_KIT_MANIFEST",
-  "document_version": "1.4.0",
+  "document_version": "1.5.0",
   "hash_algorithm": "SHA-256",
   "manifest_scope": "All files in specs/admin-ui except this manifest",
   "files": [
     {
       "path": "README.md",
-      "sha256": "3713d05ff771a95bdc364f7687a1e50811aadd711d17ad85281b92792df66bc1"
+      "sha256": "f69d9f1e1dcdacfe429c69cd425e2e52a4bdc2f00a9d1f1f17717620e3c395dc"
     },
     {
       "path": "adr/0001-browser-local-react-vite.md",
       "sha256": "d9d03a10ac5efccfdda3e29242e83885523c2875ab4bcbdb77468777c4020d2b"
     },
     {
+      "path": "amendments/0001-form-first-controller-registry.md",
+      "sha256": "a336a676e6a076d5fc3ec758d2b1775e37f0bce376a9d12c1c9693baa8332906"
+    },
+    {
       "path": "architecture.md",
-      "sha256": "5d1f63ac5acbf8b53f594f6b9bee7b116cd63fefe9d7307813e871c98d861c20"
+      "sha256": "45478f4fca62e427ee3ba80a126c62aaa8d4aaae3815d230b9f7fd0ff0dbb5f1"
     },
     {
       "path": "checklists/hybrid-runtime.md",
@@ -22,15 +26,19 @@
     },
     {
       "path": "checklists/requirements.md",
-      "sha256": "b5a82e391a94d872a3e236282e7c3a3507393ae68c416edf733d7fe21531841b"
+      "sha256": "e32b4446db0829ddeaf7a91411ee8eb815f8a1d4498f12241a125bb0a08739da"
     },
     {
       "path": "contracts/data-source-port.md",
       "sha256": "be746df90deb423e85a70d8792a9da8652f15e88bbf30ce633a69f8b050a52fc"
     },
     {
+      "path": "contracts/pairwise-review-draft.md",
+      "sha256": "11cc91a963427587432bd970af8ee10de8baad05c70bc6f40005d8fe42605a1b"
+    },
+    {
       "path": "data-model.md",
-      "sha256": "79274622a7d84e9de07cb664e917669108b52caa0c21487a75f5333ea7b82d58"
+      "sha256": "d1eac0c95c3bc438937fa70722973ec8a0e4c503d459be843f0cf34b36590669"
     },
     {
       "path": "evidence/final-formal-impact.json",
@@ -49,12 +57,16 @@
       "sha256": "b1fbd8cd0fdd7836bf1ea1c828baf9ece81e4794c3bcf91e48ad219c28a7572a"
     },
     {
+      "path": "evidence/ux-amendment.json",
+      "sha256": "33a0f097269e84d26556211fbf322f31dea17756c227c9f6dbad30cb5dc0a618"
+    },
+    {
       "path": "evidence/web-qa.json",
       "sha256": "3b776af3cb3151fd3f9230d1752363b4b964df80bc481098bf8af9b9bfd23ab7"
     },
     {
       "path": "plan.md",
-      "sha256": "d0ce1f3d61b68e6d3f8b5ec3990095248349503ce5ade72014cae3dc2e158f3e"
+      "sha256": "a9ebd9fc429c6be1751b991922cb70fb0e0999bc98c4e99f2cfb8647d9d5fa11"
     },
     {
       "path": "runtime-profile.md",
@@ -62,19 +74,19 @@
     },
     {
       "path": "runtime-tasks.md",
-      "sha256": "fd941b85d5a0c177e53f3b3c82d96d330444f0d980951189611012aeaeaa25b8"
+      "sha256": "7d66c27f9719474f10147244da268e404fea69fddd9cc63f63b6ef1a8386465d"
     },
     {
       "path": "security-boundaries.md",
-      "sha256": "4e823a0a48658602b8d47489419be882263ca988077c7679be5c6b0e3f061587"
+      "sha256": "831c60d94da6e54f7245d2de68b0121d6a6b457f347d60c990520fdf8c2969b0"
     },
     {
       "path": "spec.md",
-      "sha256": "1a38b02e02d361a4f40e6605a95cde6c24f8263b0c6762abd0d540a495a4d12f"
+      "sha256": "838bf893263d3aeb51f32b563abff150b843343c65053e28e77e2bbb7159e845"
     },
     {
       "path": "tasks.md",
-      "sha256": "b9d0a09a7171b3310c7a203114d6aef0630de121bd84b31bb6702c0f77977d6b"
+      "sha256": "b0d07be1ceba3da479dbf20c9a22b5f60e8f86880cad6871430ef43d896a2872"
     },
     {
       "path": "threat-model.md",

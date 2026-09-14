@@ -28,6 +28,10 @@ the selected input file; every persisted result is a user-initiated new download
 - Governance-register validation and bootstrap-validator-set validation use
   different `SchemaDescriptor.documentType` and authority classes.
 - The UI never converts, promotes, or infers authorization from one to the other.
+- Pairwise form answers and evidence references are local draft data. Their presence,
+  completeness, or values never constitute an independence assessment or verdict.
+- "Verified", "confirmed", "approved", and equivalent status language requires an
+  external sourced result bound to the displayed subject and provenance.
 
 ## Browser-local MVP
 
@@ -38,6 +42,8 @@ the selected input file; every persisted result is a user-initiated new download
 - URLs are text by default and may open only after an explicit user action and
   allowlisted-scheme check.
 - Exact hostile-input limits and validation behavior are defined in `threat-model.md`.
+- The advanced JSON representation is read-only in UX Amendment 001, preventing a
+  second unsynchronized editing path around guided controls.
 
 ## Provenance
 

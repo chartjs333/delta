@@ -1,6 +1,6 @@
 # Delta Admin UI Spec Kit
 
-Status: Draft specification for an optional administrative tool.
+Status: MVP implemented; form-first UX Amendment 001 reviewed.
 
 This directory defines an extensible visual shell over public Delta contracts,
 documents, observations, and sourced assessments. It does not add a protocol
@@ -9,8 +9,9 @@ transition, alter DeltaReduce semantics, or make the UI a runtime dependency.
 ## Scope at a glance
 
 - PR #29 is a non-normative MVP input, not the product architecture.
-- The first MVP opens, edits, structurally validates, views, and exports local
-  JSON documents.
+- JSON is an internal/import/export representation. The next UX increment makes
+  the guided controller form the default interaction and keeps raw JSON advanced
+  and read-only.
 - Governance documents and Delta-canonical protocol documents use different
   schema descriptors and are never treated as interchangeable.
 - Governance assessments and protocol results are displayed only when a source
@@ -29,6 +30,8 @@ transition, alter DeltaReduce semantics, or make the UI a runtime dependency.
 - [Architecture](architecture.md)
 - [Logical data model](data-model.md)
 - [Data-source port](contracts/data-source-port.md)
+- [Pairwise review draft contract](contracts/pairwise-review-draft.md)
+- [Form-first UX amendment](amendments/0001-form-first-controller-registry.md)
 - [Security boundaries](security-boundaries.md)
 - [Threat model](threat-model.md)
 - [MVP technology ADR](adr/0001-browser-local-react-vite.md)
@@ -38,9 +41,12 @@ transition, alter DeltaReduce semantics, or make the UI a runtime dependency.
 - [Hybrid-runtime checklist](checklists/hybrid-runtime.md)
 - [Reviewed baseline](evidence/spec-baseline.json)
 - [Reviewed decisions](evidence/spec-decisions.json)
+- [UX amendment evidence](evidence/ux-amendment.json)
 - [Spec Kit manifest](evidence/spec-kit-manifest.json)
 
 ## Branching
 
-The specification is intended for `feature/admin-ui-spec`, based directly on
-`main`. Implementation belongs in a later branch after specification review.
+The base specification was reviewed in `feature/admin-ui-spec`. The implemented
+MVP lives in `feature/admin-ui-mvp`. UX Amendment 001 lives in the spec-only
+`feature/admin-ui-ux-spec`, based on the Web-QA-fixed MVP head. Its implementation
+belongs in a later code-bearing branch after amendment review.

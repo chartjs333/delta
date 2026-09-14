@@ -56,6 +56,17 @@ and PR #29 as a non-normative MVP input.
 - [x] T026 Record final formal-impact review and machine-readable evidence. Evidence: `evidence/final-formal-impact.json`, `evidence/implementation-tasks.json`.
 - [x] T027 Document opt-in startup, disablement, and rollback. Evidence: `evidence/implementation-tasks.json`, `../../tools/admin-ui/README.md`.
 
+## UX Amendment 001: Form-first controller registry
+
+- [ ] T032 [US1] Add the guided editor in `tools/admin-ui/src/modules/controllers/ControllerRegistryForm.tsx` and patch helpers in `tools/admin-ui/src/editor/document-draft.ts`; do not change `DataSourcePort`.
+- [ ] T033 [US5] Implement non-verdict answer/evidence entry in `tools/admin-ui/src/modules/controllers/PairwiseReviewStep.tsx` and `tools/admin-ui/src/modules/controllers/pairwise-review-draft.ts` from `contracts/pairwise-review-draft.md`.
+- [ ] T034 [US5] Add `tools/admin-ui/src/modules/controllers/ReadinessSummary.tsx` using wording such as "6 of 6 pairwise records filled"; reserve verified/confirmed/approved/pass/fail for matching sourced results.
+- [ ] T035 [US1] Add friendly field mapping in `tools/admin-ui/src/components/FriendlyValidationPanel.tsx` while retaining machine JSON path, schema path, and constraint in accessible details.
+- [ ] T036 [US1] Add a hidden-by-default, read-only projection at `tools/admin-ui/src/components/AdvancedJsonView.tsx` over the same `DocumentDraft`.
+- [ ] T037 [US1] Add production-browser coverage under `tools/admin-ui/tests/browser/` and non-technical form-to-export coverage in `tools/admin-ui/src/app/form-first-usability.test.tsx`.
+- [ ] T038 [US1] Prove unknown-field preservation and explicit-new-file behavior in `tools/admin-ui/src/editor/document-draft.form-roundtrip.test.ts`.
+- [ ] T039 [US5] Test stable pair keys and `STALE`/`ORPHANED` lifecycle in `tools/admin-ui/src/modules/controllers/pairwise-review-draft.test.ts` without evidence retargeting.
+
 ## Dependencies
 
 - T001–T004 precede implementation.
@@ -63,11 +74,16 @@ and PR #29 as a non-normative MVP input.
 - T010–T014 precede controller-specific MVP acceptance.
 - T015–T018 precede display of any sourced assessment/result.
 - T023–T027 precede promotion.
+- The Web QA CSP/AJV and mobile-navigation fix precedes T032–T039 implementation.
+- T032–T036 and the pairwise draft contract precede T037–T039 acceptance.
+- Any required canonical schema, validator, protocol, or runtime change triggers STOP.
 
 ## Implementation Strategy
 
 Deliver the local/offline workflow first. Do not mock a future Delta API into the
 product contract and do not implement protocol/governance verdicts in the UI.
+Implement T032–T039 only in the presentation layer over `DocumentDraft`; preserve
+`DataSourcePort`, offline mode, structural validation, and explicit export.
 
 ## Exit Gate
 

@@ -12,6 +12,26 @@ statuses, timestamps, and document version. Exact fields come from the selected 
 The collection is unbounded by the UI. A four-controller `f_b=1` worksheet from
 PR #29 is one fixture, not the generic cardinality.
 
+## DocumentDraft
+
+The sole in-memory document state used by guided forms, structural validation,
+advanced JSON preview, and export. Known-field edits patch this draft while retaining
+schema-allowed unknown fields. The advanced JSON projection is not a second editor.
+
+## ControllerFormState
+
+A presentation projection with a stable, session-local `draftControllerKey` plus
+labels and field paths for one controller. The stable key is not protocol identity
+and is not exported unless an explicitly selected document schema defines it.
+
+## PairwiseReviewDraft
+
+A presentation-only record for one unordered pair of stable controller draft keys.
+It contains three independently entered `YES`, `NO`, or `UNKNOWN` answers, zero or
+more evidence references, controller-ID snapshots, and lifecycle state `ACTIVE`,
+`STALE`, or `ORPHANED`. It contains no independence verdict. See
+`contracts/pairwise-review-draft.md`.
+
 ## Campaign
 
 A source-defined view of a coordinated process or round. Relationships may include
