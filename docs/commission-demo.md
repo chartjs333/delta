@@ -4,6 +4,12 @@ This bounded local walkthrough presents a functioning end-to-end product path
 without waiting for the separate human governance process in PR #29. It composes
 existing repository interfaces instead of replacing their safety checks.
 
+For a commission-facing visual demonstration, prefer the distributed MNIST
+workspace documented in `docs/mnist-demo.md`. It shows real handwritten digits,
+four isolated data shards, centralized-versus-distributed quality and a controlled
+node-loss view behind one **Запустить демо** button. The lower-level walkthrough in
+this document remains useful for protocol, artifact and WAN smoke evidence.
+
 ## What the commission can see
 
 One command demonstrates:

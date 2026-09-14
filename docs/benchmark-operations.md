@@ -128,6 +128,16 @@ result attestations test the control plane only; they are never primary evidence
 
 ## Local commission demonstration
 
+For the visual four-node MNIST workspace, run:
+
+```text
+powershell -ExecutionPolicy Bypass -File tools/run-mnist-demo.ps1
+```
+
+It presents the actual centralized/distributed measurements without exposing JSON
+by default. See `docs/mnist-demo.md` for cache preparation, reproducibility and the
+explicit non-governance boundary.
+
 For an offline product walkthrough that also performs real tiny-corpus CPU training, verifies
 the resulting immutable artifact graph, generates four disposable Ed25519 demo controllers,
 exercises the production `3-of-4` bootstrap signature verifier and renders a static HTML report:
