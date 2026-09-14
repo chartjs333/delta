@@ -1,0 +1,75 @@
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it } from "vitest";
+
+import type { LocalFileGateway } from "../data/browser-file-gateway";
+import { LocalJsonAdapter } from "../data/local-json-adapter";
+import { App } from "./App";
+
+const memoryFiles: LocalFileGateway = {
+  selectJsonFile: async () => {
+    throw new Error("not used");
+  },
+  downloadNewFile: async () => {
+    throw new Error("not used");
+  },
+};
+
+describe("integrated browser-local MVP", () => {
+  it("creates, edits, structurally validates, and presents a dynamic local register", async () => {
+    const user = userEvent.setup();
+    render(<App adapter={new LocalJsonAdapter(memoryFiles)} />);
+
+    await user.click(screen.getByRole("button", { name: "New document" }));
+    const editor = screen.getByRole("textbox", { name: "JSON document text" });
+    const editedText = JSON.stringify({
+        document_type: "CONTROLLER_GOVERNANCE_REGISTER",
+        document_version: "1.0.0",
+        controllers: [{ controller_id: "controller-local", status: "DRAFT" }],
+        future_field: "preserved",
+      });
+    fireEvent.change(editor, { target: { value: editedText } });
+
+    await user.click(screen.getByRole("button", { name: "Validate structure" }));
+    expect(await screen.findByRole("heading", { name: "VALID" })).toBeTruthy();
+    expect(screen.getByText("controller-local")).toBeTruthy();
+
+    const results = screen
+      .getByRole("heading", { name: "Independence assessment" })
+      .closest("section");
+    expect(results).toBeTruthy();
+    expect(within(results as HTMLElement).getByText(/Unavailable:/u)).toBeTruthy();
+    expect((results as HTMLElement).textContent).not.toMatch(/\b(?:PASS|FAIL)\b/u);
+  });
+
+  it("keeps malformed draft text editable and disables validate/export", async () => {
+    const user = userEvent.setup();
+    render(<App adapter={new LocalJsonAdapter(memoryFiles)} />);
+    await user.click(screen.getByRole("button", { name: "New document" }));
+    const editor = screen.getByRole("textbox", { name: "JSON document text" });
+    fireEvent.change(editor, { target: { value: "{ malformed" } });
+
+    expect(editor.getAttribute("aria-invalid")).toBe("true");
+    expect(
+      (screen.getByRole("button", { name: "Validate structure" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(
+      (screen.getByRole("button", { name: "Download new file" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect((editor as HTMLTextAreaElement).value).toBe("{ malformed");
+  });
+
+  it("opens the registered campaign placeholder without a runtime fallback", async () => {
+    const user = userEvent.setup();
+    render(<App adapter={new LocalJsonAdapter(memoryFiles)} />);
+
+    await user.click(screen.getByRole("link", { name: /Campaigns/u }));
+    expect(
+      screen.getByRole("heading", { name: "Campaigns" }),
+    ).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toMatch(/Unavailable:/u);
+    expect(window.location.hash).toBe("#/campaigns");
+  });
+});

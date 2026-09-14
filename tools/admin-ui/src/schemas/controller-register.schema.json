@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:deltareduce:admin-ui:local:controller-governance-register-v1",
+  "title": "Local controller governance register fixture",
+  "description": "Structural-only local fixture. Validation does not imply governance or protocol authority.",
+  "type": "object",
+  "required": [
+    "document_type",
+    "document_version",
+    "controllers"
+  ],
+  "properties": {
+    "document_type": {
+      "enum": [
+        "CONTROLLER_GOVERNANCE_REGISTER",
+        "CAMPAIGN02_CONTROLLER_APPOINTMENT_WORKSHEET"
+      ]
+    },
+    "document_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "controllers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/controller"
+      }
+    }
+  },
+  "$defs": {
+    "nullableString": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "controller": {
+      "type": "object",
+      "properties": {
+        "slot": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        },
+        "controller_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "signer_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "identity_type": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "accountable_owner_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "administrative_domain_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "custody_boundary_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "custody_kind": {
+          "$ref": "#/$defs/nullableString"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,20 @@
+{
+  "document_type": "ADMIN_UI_FROZEN_FIXTURE_PROVENANCE",
+  "document_version": "1.0.0",
+  "authority": "NON_NORMATIVE_FIXTURE_INPUT",
+  "pull_request": 29,
+  "source": {
+    "repository": "chartjs333/delta",
+    "commit": "de3348fdcbd527046d5b66bc6d8c90df098d5aa8",
+    "path": "docs/templates/campaign02-controller-register.template.json",
+    "git_blob_sha": "496ea3a9b081040e2670c7d027a63069516496f6",
+    "byte_length": 8820,
+    "sha256": "38e20beb03824abe8f5dafe43c2a8139a685ce9ecf19f0afbbd8a5b93fc676b8"
+  },
+  "frozen_path": "tools/admin-ui/test-data/pr29/campaign02-controller-register.template.json",
+  "runtime_policy": {
+    "live_pull_request_access": false,
+    "network_fetch": false,
+    "test_data_only": true
+  }
+}

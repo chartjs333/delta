@@ -1,0 +1,937 @@
+{
+  "document_type": "ADMIN_UI_IMPLEMENTATION_TASK_EVIDENCE",
+  "document_version": "1.0.0",
+  "recorded_on": "2026-09-14",
+  "implementation_branch": "feature/admin-ui-mvp",
+  "specification_base_commit": "9a65c1225d32af351fef91e2a1ef7a9b675aaef0",
+  "formal_prerequisite": {
+    "status": "PASS",
+    "decision": "GO",
+    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+    "report_sha256": "b31c54c3372e36baf1f049b2e45326222b8834362d8fdfbac1e323532986dcab",
+    "command": "python specs/001-reproducible-training-baseline/scripts/verify_formal_prerequisite.py --check-only"
+  },
+  "tasks": {
+    "T006": {
+      "status": "COMPLETE",
+      "summary": "Defined the isolated React/Vite shell and the single composition root for navigation, domain modules, entity views, dashboard widgets, data adapters, and visualizations.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/app/extensions.ts",
+          "sha256": "e9037e937a42bfd1f29c6a51552da6320009d90c395ad0f32ab46f30f22a5b09"
+        },
+        {
+          "path": "tools/admin-ui/src/app/composition-root.ts",
+          "sha256": "312448258c7593888720c2e486fab08a3e8b27c1146cd05ecbd8bc49dde31844"
+        },
+        {
+          "path": "tools/admin-ui/src/app/composition-root.test.tsx",
+          "sha256": "5d19ad2cdc3adcc7a245243a55ed6fcbdf4e219b4bd6a09b4f5c7edcfcf95a97"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/app/composition-root.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 2
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T007": {
+      "status": "COMPLETE",
+      "summary": "Defined the implementation-level DataSourcePort with the seven required source, schema, document, validation, export, and sourced-result operations.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/data/data-source-port.ts",
+          "sha256": "246aca4470fe6cb3db7d1193ffa8073d3fed10eb8a52728e9f5b6f88ff12e800"
+        },
+        {
+          "path": "tools/admin-ui/src/data/data-source-port.test.ts",
+          "sha256": "8c86660ab25d9d88f010e9370a8f69fcc7f922b8326371bbcd6a12da40402c75"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/data/data-source-port.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 1
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T008": {
+      "status": "COMPLETE",
+      "summary": "Defined typed UI failures, distinct schema and result authority classes, source descriptors, immutable source references, and provenance-bound sourced-result envelopes.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/core/contracts.ts",
+          "sha256": "de1e5398a48205c0b9cfbf155847fa993a75a4e648935b2fef41d2110760252d"
+        },
+        {
+          "path": "tools/admin-ui/src/core/errors.ts",
+          "sha256": "5301b432f1e6efd7bfed4e58d5a1bd9e035cb545aaf1be4dd46bc435e9dd6bae"
+        },
+        {
+          "path": "tools/admin-ui/src/core/contracts.test.ts",
+          "sha256": "8ab82b037fede3c4806ec7573c46742be28e720bd3a13b3b22564b2324e0735b"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/core/contracts.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 5
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T028": {
+      "status": "COMPLETE",
+      "summary": "Frozen the exact PR #29 worksheet Git blob as test-only bytes with immutable source provenance; no runtime path reads the pull request.",
+      "source": {
+        "commit": "de3348fdcbd527046d5b66bc6d8c90df098d5aa8",
+        "path": "docs/templates/campaign02-controller-register.template.json",
+        "git_blob_sha": "496ea3a9b081040e2670c7d027a63069516496f6",
+        "byte_length": 8820,
+        "sha256": "38e20beb03824abe8f5dafe43c2a8139a685ce9ecf19f0afbbd8a5b93fc676b8"
+      },
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/test-data/pr29/campaign02-controller-register.template.json",
+          "sha256": "38e20beb03824abe8f5dafe43c2a8139a685ce9ecf19f0afbbd8a5b93fc676b8"
+        },
+        {
+          "path": "tools/admin-ui/test-data/pr29/provenance.json",
+          "sha256": "386b277a1fc91317e466832fbc6c0a7c9d08da22be00e66df30ea7dab6a49521"
+        },
+        {
+          "path": "tools/admin-ui/src/test/frozen-fixture.test.ts",
+          "sha256": "ad5e4c175fa87baec31d6661125ed9c2dc9ecfddbab3e670abf407ecc9701b56"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/test/frozen-fixture.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 2
+        },
+        {
+          "command": "git hash-object tools/admin-ui/test-data/pr29/campaign02-controller-register.template.json",
+          "status": "PASS",
+          "output": "496ea3a9b081040e2670c7d027a63069516496f6"
+        }
+      ]
+    },
+    "T029": {
+      "status": "COMPLETE",
+      "summary": "Added fail-closed untrusted JSON guards and tests for file size, depth, node count, string bytes, URL length, archives, malformed UTF-8, cancellation, inert rendering, Base64, and explicit HTTPS actions.",
+      "limits": {
+        "file_bytes": 5242880,
+        "nesting_depth": 64,
+        "nodes": 100000,
+        "string_bytes": 1048576,
+        "url_characters": 2048
+      },
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/security/input-guards.ts",
+          "sha256": "b536edcfb69e24e6d49556f7e6cbf45ec5317049c1a780da8fcd2147e4088e30"
+        },
+        {
+          "path": "tools/admin-ui/src/security/safe-url.ts",
+          "sha256": "2c06cf39c66236f9f10f10ec7f66b7601256f2bafd00bc3c4859288d78bc6d5b"
+        },
+        {
+          "path": "tools/admin-ui/src/components/InertText.tsx",
+          "sha256": "b2b304b0f180d0c9873c3de5d6b90d2e9786ad8a6b53f1fb193ec77c5204e624"
+        },
+        {
+          "path": "tools/admin-ui/src/security/input-guards.test.tsx",
+          "sha256": "5523d21e9a83ee7dd14d731828cd486cd72b11ea7c681337fd65cfe9067f16fc"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/security/input-guards.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 10
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T030": {
+      "status": "COMPLETE",
+      "summary": "Added an executable production-source audit, strict connect-src CSP, dependency allowlist, and static build proof for the browser-local MVP boundary.",
+      "assertions": {
+        "backend": false,
+        "login": false,
+        "credential_flow": false,
+        "analytics_payload": false,
+        "automatic_network_request": false,
+        "live_pr_read": false
+      },
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/scripts/check-offline-boundary.mjs",
+          "sha256": "bae9350e2c880ef22f250caf7ea8f2f1931b374f39b2aba8ffa4e2b3e857a88d"
+        },
+        {
+          "path": "tools/admin-ui/src/security/offline-boundary.test.ts",
+          "sha256": "fb9009c3bb81b93b67c9961ae54097fafc93497273b7769ce873cb0ece5d72a3"
+        },
+        {
+          "path": "tools/admin-ui/index.html",
+          "sha256": "95d6fc6175bc72041b2ff69c6b1632fe80e693587b00de9658826f81257794be"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm run build",
+          "status": "PASS",
+          "output_kind": "STATIC_BROWSER_ASSETS"
+        },
+        {
+          "command": "npm run audit:offline",
+          "status": "PASS",
+          "scanned_bundle_files": 1,
+          "violations": 0
+        },
+        {
+          "command": "npm test -- --run src/security/offline-boundary.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 1
+        }
+      ]
+    },
+    "T031": {
+      "status": "COMPLETE",
+      "summary": "Added fail-closed schema document-type and authority checks plus local-fragment-only $ref enforcement before schema compilation.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/validation/structural-validator.ts",
+          "sha256": "e2ab04fcee5bd92231b1761354577ab0d8a5428986cfbed8d845d083d4552e5b"
+        },
+        {
+          "path": "tools/admin-ui/src/validation/structural-validator.test.ts",
+          "sha256": "f4dba0681db7416a3ad5796549b477e9683b7a6f7cfb13e74d6dc0b049fe2781"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/validation/structural-validator.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 5,
+          "network_calls": 0
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        },
+        {
+          "command": "npm run audit:offline",
+          "status": "PASS",
+          "violations": 0
+        }
+      ]
+    },
+    "T010": {
+      "status": "COMPLETE",
+      "summary": "Implemented explicit browser-local JSON selection and creation of a new empty controller-register draft without a backend or runtime dependency.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/data/browser-file-gateway.ts",
+          "sha256": "0590813ccb652ae6a1b2375848a96118d9981c4e66cc6f36b12537de21ffa069"
+        },
+        {
+          "path": "tools/admin-ui/src/data/local-json-adapter.ts",
+          "sha256": "3a6ce1f415c4ed4be136465fce1f1c0974c89279d7a823bdcfe64b056b4e5d1e"
+        },
+        {
+          "path": "tools/admin-ui/src/data/local-json-adapter.open.test.ts",
+          "sha256": "a8c033301bf9f78400b1b5bffc2bcf438a4283eecd7d8edd791880bf2612416b"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/data/local-json-adapter.open.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 2
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        },
+        {
+          "command": "npm run audit:offline",
+          "status": "PASS",
+          "violations": 0
+        }
+      ]
+    },
+    "T011": {
+      "status": "COMPLETE",
+      "summary": "Implemented digest-bound LOCAL_FIXTURE schema enumeration/selection and Draft 2020-12 structural validation with machine-readable instance paths and constraints.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/schemas/controller-register.schema.json",
+          "sha256": "d464909ccc7735307d0e715ac4ee54b31a84b0c6b70d737410aa152885acc28c"
+        },
+        {
+          "path": "tools/admin-ui/src/components/SchemaSelector.tsx",
+          "sha256": "b26c89c0f5fbcf06b579304a30b8217fa6b2994d32e61ad5aaf614c1325abe6c"
+        },
+        {
+          "path": "tools/admin-ui/src/data/local-json-adapter.validation.test.tsx",
+          "sha256": "5c257fdb285e1f2564882c22e3db186e68a81e19989c9eeeda4337de6434cd14"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/data/local-json-adapter.validation.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 4
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        },
+        {
+          "command": "npm run audit:offline",
+          "status": "PASS",
+          "violations": 0
+        }
+      ]
+    },
+    "T012": {
+      "status": "COMPLETE",
+      "summary": "Implemented in-memory JSON editing and exact-text explicit export to a distinct new download, preserving schema-allowed unknown fields and leaving source bytes unchanged.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/editor/document-draft.ts",
+          "sha256": "8395e8cd4a70fcc81561e0eae3a1bf2676f5d98a73a598cfc9da568dbd1e48a0"
+        },
+        {
+          "path": "tools/admin-ui/src/components/JsonEditor.tsx",
+          "sha256": "6c19aed27b61269b68f8c0cc43967e2d866aad5aca172d0294a09e251cb2c79b"
+        },
+        {
+          "path": "tools/admin-ui/src/data/local-json-adapter.export.test.ts",
+          "sha256": "638ebaf98434305b964eb0d260f888ddd5102cf9fcd4cfc2e9358b8801b24a8c"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/data/local-json-adapter.export.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 2,
+          "automatic_downloads_before_explicit_export": 0,
+          "source_overwrites": 0
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        },
+        {
+          "command": "npm run audit:offline",
+          "status": "PASS",
+          "violations": 0
+        }
+      ]
+    },
+    "T013": {
+      "status": "COMPLETE",
+      "summary": "Implemented registered, paginated controller list/detail views over dynamic arrays with no slot-count requirement and inert display of unknown fields.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/modules/controllers/controller-model.ts",
+          "sha256": "5ca1b59f293137ad8b67f223323c45b9a5e178857f5f9d50b03d2582721cd6ed"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ControllerExplorer.tsx",
+          "sha256": "d413077f8838a8e74cf930083558f5cccc4ef5adb80061f4927f1abebe17cdcf"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/registration.tsx",
+          "sha256": "79d72856e0aa7d14e97930ffcfc72b1c43cbc5ff89c08032180f96b34167298e"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/ControllerExplorer.test.tsx",
+          "sha256": "c063dc09ff4f505c082b5ec79e3111a61f700eea11a7ae1cc6c46a93442e584b"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/modules/controllers/ControllerExplorer.test.tsx src/app/composition-root.test.tsx",
+          "status": "PASS",
+          "test_files": 2,
+          "tests": 3,
+          "largest_rendered_page": 25,
+          "tested_collection_size": 31
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T014": {
+      "status": "COMPLETE",
+      "summary": "Added the controller-document acceptance matrix for 0, 1, 4, and 101 entries, invalid paths, forward-compatible fields, bounded rendering, and the frozen PR #29 fixture.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/modules/controllers/controller-documents.test.tsx",
+          "sha256": "799633bbb81cd6e20ee4c37e3f3e5893b1116f9875eb8d31dff324afc8bd9ae5"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/modules/controllers/controller-documents.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 8,
+          "cardinalities": [0, 1, 4, 101],
+          "rendered_page_limit": 25
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T015": {
+      "status": "COMPLETE",
+      "summary": "Implemented capability discovery and explicit available, unavailable, loading, degraded, stale, and access-denied presentation states.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/sources/capability-state.ts",
+          "sha256": "b845fd14ac52c216ef2be7593331c75873861f24b54bee86b35e2c26451ccdd9"
+        },
+        {
+          "path": "tools/admin-ui/src/components/CapabilityStateView.tsx",
+          "sha256": "9753e97da9997e9f135fef9d0f51417d50b1fd80a8687961d5efc050184a72cd"
+        },
+        {
+          "path": "tools/admin-ui/src/sources/capability-state.test.tsx",
+          "sha256": "eb9f341936e3f3b12dfad500607072ff3fb644f223e35037421d92f6f65bf2e4"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/sources/capability-state.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 7,
+          "missing_capability_label": "UNAVAILABLE",
+          "manufactured_verdicts": 0
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T016": {
+      "status": "COMPLETE",
+      "summary": "Implemented provenance-first sourced-result presentation with authority, exact subject, immutable source, issued/retrieved times, verifier/policy revisions, and inert evidence/signature references.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/results/SourcedResultCard.tsx",
+          "sha256": "b55e7df7e9f2d5e96ab8cf224a887defa9e705b357490b9adb04af0c55f3530f"
+        },
+        {
+          "path": "tools/admin-ui/src/results/SourcedResultCard.test.tsx",
+          "sha256": "61463701f7fd73ffdae6ea3e97e7f3153a734d0027381c6afa3963234bc612b4"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/results/SourcedResultCard.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 1,
+          "actionable_untrusted_links": 0
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T017": {
+      "status": "COMPLETE",
+      "summary": "Gated sourced-result loading on an explicitly declared result capability and source operation, so arbitrary result-looking local fields cannot enter the trusted result pipeline.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/results/result-loader.ts",
+          "sha256": "be9dabf6141fd2e44e7787fa01bcbef7bbd24b51bdac82f8a369437b49be9c9d"
+        },
+        {
+          "path": "tools/admin-ui/src/results/local-result-promotion.test.ts",
+          "sha256": "cbee487093c6e7d66438c23ecb69730a0cd866c562f015821ac6ae6b3c555de6"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/results/local-result-promotion.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 1,
+          "local_pass_strings": 3,
+          "sourced_result_calls": 0,
+          "promoted_verdicts": 0
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T018": {
+      "status": "COMPLETE",
+      "summary": "Added the sourced-result state contract matrix covering unavailable, unsupported, stale, malformed, and subject/provenance-mismatch responses.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/results/result-loader.test.ts",
+          "sha256": "677ee89654931ca5bfa6796d72bc73178e84545626e630d6e9172367ba553fda"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/results/result-loader.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 5,
+          "states": [
+            "UNAVAILABLE",
+            "UNSUPPORTED",
+            "STALE",
+            "ERROR_MALFORMED",
+            "INVALID_SUBJECT_MISMATCH"
+          ]
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        },
+        {
+          "command": "npm run audit:offline",
+          "status": "PASS",
+          "violations": 0
+        }
+      ]
+    },
+    "T019": {
+      "status": "COMPLETE",
+      "summary": "Registered a browser-local Campaigns placeholder domain, hash route, and navigation entry through the composition root; opening the route renders an explicit unavailable state without runtime or network fallback.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/modules/campaigns/registration.tsx",
+          "sha256": "cf6a866ab5c01d4040de97cf3b335ed60bc4140b4963c1a332d8ed5dcf43f0dd"
+        },
+        {
+          "path": "tools/admin-ui/src/app/registry.ts",
+          "sha256": "b53fc5c0d6b9249e02fbd3a8acbd08392ac7234be30e4e6858771a2e264a2016"
+        },
+        {
+          "path": "tools/admin-ui/src/app/registry.test.tsx",
+          "sha256": "0ddb99507def46ed3eecd933ccc3f1b965c601505923acb7d36086fb4402f69b"
+        },
+        {
+          "path": "tools/admin-ui/src/app/App.tsx",
+          "sha256": "0aa34cf7a547e1f447ee140b033adeab61b846c52db24b45edf35df704fd3377"
+        },
+        {
+          "path": "tools/admin-ui/src/app/App.test.tsx",
+          "sha256": "d5dbfe19ffb58d003fa1ff6db71f59e976f489e65de33fa5e09d449412ae793d"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/app/App.test.tsx src/app/registry.test.tsx",
+          "status": "PASS",
+          "test_files": 2,
+          "tests": 5,
+          "runtime_fallbacks": 0,
+          "network_fallbacks": 0
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T020": {
+      "status": "COMPLETE",
+      "summary": "Registered an alternate controller summary entity view from an isolated extension package through the composition root without modifying the controller module.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/extensions/controller-summary/registration.tsx",
+          "sha256": "ab0790b1b55099c355c650724886010a6d1e143649cd5a903061060d16598792"
+        },
+        {
+          "path": "tools/admin-ui/src/app/registry.ts",
+          "sha256": "b53fc5c0d6b9249e02fbd3a8acbd08392ac7234be30e4e6858771a2e264a2016"
+        },
+        {
+          "path": "tools/admin-ui/src/app/registry.test.tsx",
+          "sha256": "0ddb99507def46ed3eecd933ccc3f1b965c601505923acb7d36086fb4402f69b"
+        },
+        {
+          "path": "tools/admin-ui/src/modules/controllers/registration.tsx",
+          "sha256": "79d72856e0aa7d14e97930ffcfc72b1c43cbc5ff89c08032180f96b34167298e",
+          "assertion": "UNCHANGED_FROM_T013"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/app/registry.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 2
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T021": {
+      "status": "COMPLETE",
+      "summary": "Added a test-only in-memory implementation of every DataSourcePort operation with structural validation, typed capability failure, and captured explicit exports but no browser, network, or Delta runtime dependency.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/test/in-memory-data-source-adapter.ts",
+          "sha256": "6c43abc2ad762f7446c5d33e864b4b8c75e16f53acceaca0e5ea8a45c70f3829"
+        },
+        {
+          "path": "tools/admin-ui/src/test/in-memory-data-source-adapter.test.ts",
+          "sha256": "6d4ebb8bd18aa7b736ac1ba02e6f7abea4279125d81e9e7f972aff13629c9434"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/test/in-memory-data-source-adapter.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 2,
+          "data_source_port_operations": 7,
+          "browser_dependencies": 0,
+          "network_dependencies": 0,
+          "delta_runtime_dependencies": 0
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T022": {
+      "status": "COMPLETE",
+      "summary": "Defined one transport-agnostic DataSourcePort behavioral suite and ran it unchanged against LocalJsonAdapter and InMemoryDataSourceAdapter with equivalent controller documents.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/test/data-source-port.contract.ts",
+          "sha256": "29a98cd1f1190a1ce670797154735e40dfaa896c5e18a99bcee2852009472dc2"
+        },
+        {
+          "path": "tools/admin-ui/src/test/data-source-port.contract.test.ts",
+          "sha256": "c0010e9df9bdb487811f3bac67711dd29b32b04c13c0db98808c0f4c31b21844"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/test/data-source-port.contract.test.ts",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 8,
+          "shared_contract_cases": 4,
+          "adapter_implementations": [
+            "LocalJsonAdapter",
+            "InMemoryDataSourceAdapter"
+          ]
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        }
+      ]
+    },
+    "T023": {
+      "status": "COMPLETE",
+      "summary": "Configured, built, and tested the complete C++ core/runtime/FFI target graph in a detached worktree at the exact specification base where tools/admin-ui was physically absent.",
+      "isolated_worktree": {
+        "commit": "9a65c1225d32af351fef91e2a1ef7a9b675aaef0",
+        "admin_ui_present": false,
+        "removed_after_verification": true
+      },
+      "verification": [
+        {
+          "command": "cmake --preset cpp20",
+          "status": "PASS",
+          "compiler": "MSVC 19.29.30146.0"
+        },
+        {
+          "command": "cmake --build --preset cpp20 --config Debug --parallel 4",
+          "status": "PASS",
+          "note": "Completed by an incremental retry after the execution wrapper's first 60-second timeout; no compiler error occurred."
+        },
+        {
+          "command": "ctest --preset cpp20 -C Debug --output-on-failure",
+          "status": "PASS",
+          "tests": 57,
+          "failures": 0,
+          "includes": [
+            "delta_core",
+            "delta_runtime",
+            "delta_ffi"
+          ]
+        }
+      ]
+    },
+    "T024": {
+      "status": "COMPLETE",
+      "summary": "Added and passed a repository-boundary audit covering protected Delta components, root build entry points, working-tree isolation, and reverse references to tools/admin-ui or its package name.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/scripts/check-repository-boundary.mjs",
+          "sha256": "c7e8a704a861e04e01deb4ae53674b408e524511510021178207dd93db215edf"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm run audit:repository",
+          "status": "PASS",
+          "protected_worktree_entries": 0,
+          "reverse_dependency_hits": 0,
+          "protected_components": [
+            "delta-core-cpp",
+            "delta-runtime-cpp",
+            "delta-protocol",
+            "delta-ffi",
+            "delta-node-java",
+            "delta-worker-python",
+            "formal"
+          ]
+        }
+      ]
+    },
+    "T025": {
+      "status": "COMPLETE",
+      "summary": "Added automated DOM accessibility checks, deterministic keyboard reachability checks for primary navigation/actions, and semantic role/message coverage for every required primary state.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/src/app/accessibility-and-states.test.tsx",
+          "sha256": "a3f8c03c7218bf2a7840daac598902f12882aee3173cda2c43b44f0aed42cdf0"
+        },
+        {
+          "path": "tools/admin-ui/package.json",
+          "sha256": "bd4519994daf9e195919759dd750939f73a30ca2e19fa09be040280520f7cf6a"
+        },
+        {
+          "path": "tools/admin-ui/package-lock.json",
+          "sha256": "d507e0a131a757fd3d37ff04088a49eabc6074fa11ff12f233e9ece614ff58bd"
+        }
+      ],
+      "verification": [
+        {
+          "command": "npm test -- --run src/app/accessibility-and-states.test.tsx",
+          "status": "PASS",
+          "test_files": 1,
+          "tests": 10,
+          "axe_dom_violations": 0,
+          "keyboard_controls_checked": 5,
+          "primary_states": [
+            "LOADING",
+            "EMPTY",
+            "INVALID",
+            "ERROR",
+            "DEGRADED",
+            "STALE",
+            "UNSUPPORTED",
+            "ACCESS_DENIED"
+          ],
+          "note": "Color contrast is excluded from jsdom automation because jsdom has no layout/canvas implementation; focus visibility and palette remain explicitly defined in CSS."
+        },
+        {
+          "command": "npm run typecheck",
+          "status": "PASS"
+        },
+        {
+          "command": "npm audit --audit-level=high",
+          "status": "PASS",
+          "vulnerabilities": 0
+        }
+      ]
+    },
+    "T026": {
+      "status": "COMPLETE",
+      "summary": "Recorded the final code-bearing formal-impact classification as NONE and completed the ten supplemental runtime-boundary reviews with machine-readable evidence.",
+      "artifacts": [
+        {
+          "path": "specs/admin-ui/evidence/final-formal-impact.json",
+          "sha256": "6e7526c0822b427f5eebddcb33d7ff44eb63722fb055cb7330fe17f0be749380"
+        },
+        {
+          "path": "specs/admin-ui/runtime-tasks.md",
+          "sha256": "fd941b85d5a0c177e53f3b3c82d96d330444f0d980951189611012aeaeaa25b8"
+        }
+      ],
+      "verification": [
+        {
+          "command": "python specs/001-reproducible-training-baseline/scripts/verify_formal_prerequisite.py --check-only",
+          "status": "PASS",
+          "decision": "GO",
+          "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+          "report_sha256": "b31c54c3372e36baf1f049b2e45326222b8834362d8fdfbac1e323532986dcab"
+        },
+        {
+          "command": "npm run audit:repository --prefix tools/admin-ui",
+          "status": "PASS",
+          "protected_worktree_entries": 0,
+          "reverse_dependency_hits": 0
+        },
+        {
+          "command": "static C ABI/FFM, bundled-secret, and live-endpoint searches",
+          "status": "PASS",
+          "c_abi_ffm_import_hits": 0,
+          "bundled_secret_or_restricted_hits": 0,
+          "live_or_state_changing_endpoint_hits": 0
+        }
+      ],
+      "formal_impact": "NONE",
+      "stop_rule_triggered": false
+    },
+    "T027": {
+      "status": "COMPLETE",
+      "summary": "Documented explicit opt-in localhost/static startup, default disablement, verification commands, and source-only rollback with no Delta migration, restart, state repair, or source-file overwrite.",
+      "artifacts": [
+        {
+          "path": "tools/admin-ui/README.md",
+          "sha256": "8627354c701454f16c2e10996ade7c175594acafe0f522505c272f7d5fd93b28"
+        }
+      ],
+      "verification": [
+        {
+          "command": "README operational-section assertions",
+          "status": "PASS",
+          "required_assertions": 7,
+          "sections": [
+            "Opt-in local startup",
+            "Verification",
+            "Disablement",
+            "Rollback"
+          ]
+        }
+      ]
+    }
+  },
+  "mvp_integration": {
+    "status": "PASS",
+    "scope": "T006-T008,T028-T031,T010-T027,HR001-HR010",
+    "artifacts": [
+      {
+        "path": "tools/admin-ui/src/app/App.tsx",
+        "sha256": "0aa34cf7a547e1f447ee140b033adeab61b846c52db24b45edf35df704fd3377"
+      },
+      {
+        "path": "tools/admin-ui/src/app/App.test.tsx",
+        "sha256": "d5dbfe19ffb58d003fa1ff6db71f59e976f489e65de33fa5e09d449412ae793d"
+      },
+      {
+        "path": "tools/admin-ui/src/styles.css",
+        "sha256": "0b7bffc9d73620b4c4480e942f2dcd5df724ac17734bef37525ced0483389536"
+      },
+      {
+        "path": "tools/admin-ui/package.json",
+        "sha256": "bd4519994daf9e195919759dd750939f73a30ca2e19fa09be040280520f7cf6a"
+      },
+      {
+        "path": "tools/admin-ui/package-lock.json",
+        "sha256": "d507e0a131a757fd3d37ff04088a49eabc6074fa11ff12f233e9ece614ff58bd"
+      },
+      {
+        "path": "tools/admin-ui/vite.config.ts",
+        "sha256": "64d9a00eab356ace4173c228cec4f3da402f5bb825b66fa5dd89930458bd6bbc"
+      }
+    ],
+    "verification": {
+      "command": "npm run check",
+      "status": "PASS",
+      "typecheck": "PASS",
+      "test_files": 21,
+      "tests": 82,
+      "production_build": "PASS",
+      "production_modules_transformed": 126,
+      "offline_audit": "PASS",
+      "offline_audit_scanned_product_files": 29,
+      "offline_audit_scanned_bundle_files": 1,
+      "offline_audit_violations": 0,
+      "dependency_audit": {
+        "command": "npm audit --audit-level=high",
+        "status": "PASS",
+        "vulnerabilities": 0
+      },
+      "frozen_fixture": {
+        "byte_length": 8820,
+        "git_blob_sha": "496ea3a9b081040e2670c7d027a63069516496f6",
+        "sha256": "38e20beb03824abe8f5dafe43c2a8139a685ce9ecf19f0afbbd8a5b93fc676b8",
+        "status": "PASS"
+      },
+      "accessibility": {
+        "axe_dom_violations": 0,
+        "keyboard_controls_checked": 5,
+        "primary_states_checked": 8,
+        "status": "PASS"
+      },
+      "repository_boundary": {
+        "command": "npm run audit:repository",
+        "protected_worktree_entries": 0,
+        "reverse_dependency_hits": 0,
+        "status": "PASS"
+      },
+      "ui_free_core_runtime": {
+        "cmake_configure": "PASS",
+        "cmake_build": "PASS",
+        "ctest_passed": 57,
+        "ctest_failed": 0,
+        "status": "PASS"
+      }
+    },
+    "boundary_assertions": {
+      "formal_impact": "NONE",
+      "runtime_or_protocol_files_modified": 0,
+      "protected_component_files_modified": 0,
+      "changed_files_reviewed": 67,
+      "backend": false,
+      "login": false,
+      "analytics": false,
+      "automatic_network_requests": false,
+      "source_overwrite": false,
+      "autosave": false,
+      "semantic_delta_validation": false
+    }
+  }
+}

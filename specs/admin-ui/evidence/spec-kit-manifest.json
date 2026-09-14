@@ -1,6 +1,6 @@
 {
   "document_type": "ADMIN_UI_SPEC_KIT_MANIFEST",
-  "document_version": "1.1.0",
+  "document_version": "1.3.0",
   "hash_algorithm": "SHA-256",
   "manifest_scope": "All files in specs/admin-ui except this manifest",
   "files": [
@@ -33,6 +33,14 @@
       "sha256": "79274622a7d84e9de07cb664e917669108b52caa0c21487a75f5333ea7b82d58"
     },
     {
+      "path": "evidence/final-formal-impact.json",
+      "sha256": "6e7526c0822b427f5eebddcb33d7ff44eb63722fb055cb7330fe17f0be749380"
+    },
+    {
+      "path": "evidence/implementation-tasks.json",
+      "sha256": "f44d828896b9d8bda8f2cd950843bc76426a8240035ee6d69b06389cbaed2bf9"
+    },
+    {
       "path": "evidence/spec-baseline.json",
       "sha256": "565fd28712c6e6a47844b9f24aca46cc79294821ee5497b5cd62419454937796"
     },
@@ -50,7 +58,7 @@
     },
     {
       "path": "runtime-tasks.md",
-      "sha256": "1af155fcecb6ed798c94e1521e3c8e09d7bec46ee15bcd1522e3644a0ebf18f1"
+      "sha256": "fd941b85d5a0c177e53f3b3c82d96d330444f0d980951189611012aeaeaa25b8"
     },
     {
       "path": "security-boundaries.md",
@@ -62,7 +70,7 @@
     },
     {
       "path": "tasks.md",
-      "sha256": "5ba618e42fdd6c7d35317825a3fd8eb0b15eecd3d5f11e9eea10eb9c17ffd183"
+      "sha256": "b9d0a09a7171b3310c7a203114d6aef0630de121bd84b31bb6702c0f77977d6b"
     },
     {
       "path": "threat-model.md",
