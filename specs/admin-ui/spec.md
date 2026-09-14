@@ -1,0 +1,194 @@
+# Feature Specification: Extensible Delta Admin UI
+
+**Feature Branch**: `feature/admin-ui-spec`  
+**Created**: 2026-09-14  
+**Status**: Draft  
+**Depends on**: `main`; PR #29 is a non-normative MVP input
+
+## Summary
+
+Delta needs an optional administrative interface that can grow from a local
+schema-valid document editor into a coherent console for controllers,
+campaigns, nodes, artifacts, audit events, and system visualizations. The UI is
+a one-way consumer of public contracts and sourced results. It never becomes a
+protocol authority or a dependency of Delta core/runtime.
+
+The MVP deliberately stops at local JSON import, editing, structural validation,
+viewing, and export. Controller-independence, governance readiness, signing
+readiness, and other semantic outcomes are not computed by the UI. They appear
+only when a declared source supplies an attributable result.
+
+## User Scenarios & Testing
+
+### US1 — Edit a controller register safely (Priority: P1)
+
+An operator opens or creates a controller-register JSON document, selects its
+canonical schema, edits a dynamic controller list, sees structural errors, and
+exports the document without changing protocol or governance state.
+
+**Independent Test**: Run with only the local JSON adapter and no Delta runtime,
+network service, validator, key, or credential.
+
+**Acceptance Scenarios**:
+
+1. **Given** a valid document and matching schema, **When** it is opened, **Then**
+   all controller entries are shown and the document is reported structurally valid.
+2. **Given** a document with zero, one, four, or more controllers, **When** it is
+   edited, **Then** no fixed four-slot assumption affects behavior or layout.
+3. **Given** an invalid field, **When** validation runs, **Then** the error names
+   the violated schema rule and machine-readable document path.
+4. **Given** valid unknown fields allowed by the schema, **When** the document is
+   exported, **Then** those fields survive the round trip.
+
+### US2 — Distinguish unavailable outcomes from failed outcomes (Priority: P1)
+
+An operator can tell whether a check failed, has not run, is unsupported by the
+current source, or is merely present as untrusted local data.
+
+**Independent Test**: Supply adapters with different capability sets and verify
+that the UI does not manufacture or upgrade results.
+
+**Acceptance Scenarios**:
+
+1. **Given** a source without an independence-assessment capability, **When** the
+   controller view opens, **Then** the UI reports the assessment as unavailable,
+   not failed or passed.
+2. **Given** a sourced governance assessment, **When** it is displayed, **Then**
+   its authority class, subject, timestamp, and provenance reference are visible.
+3. **Given** arbitrary JSON containing a `PASS` string, **When** no trusted result
+   envelope or capability exists, **Then** the UI does not present it as a
+   canonical governance or protocol verdict.
+
+### US3 — Add a domain view through defined extension points (Priority: P2)
+
+A developer adds a future campaign, node, artifact, audit, topology, timeline, or
+diagnostic view through a documented composition point without changing Delta
+core or rewriting the controller module.
+
+**Independent Test**: Register a placeholder domain module and one alternate
+entity view using only the documented extension contracts.
+
+**Acceptance Scenarios**:
+
+1. **Given** a new module descriptor, **When** it is registered at the composition
+   root, **Then** its route and navigation entry appear without controller-module changes.
+2. **Given** a visualization whose data capability is absent, **When** its page is
+   opened, **Then** an explicit unavailable state is shown without application failure.
+
+### US4 — Replace local files with a future API source (Priority: P2)
+
+An operator can select a future public Delta API adapter without requiring domain
+views to understand transport, credentials, or runtime-internal types.
+
+**Independent Test**: Run contract tests against two in-memory adapters with
+different capabilities and equivalent controller documents.
+
+**Acceptance Scenarios**:
+
+1. **Given** equivalent local and API documents, **When** adapters are switched,
+   **Then** the controller list/detail views retain the same presentation behavior.
+2. **Given** an unavailable API, **When** data is requested, **Then** the UI enters
+   a degraded or stale state and Delta runtime remains unaffected.
+
+## Edge Cases
+
+- Empty documents, empty controller arrays, and very large controller arrays.
+- Missing, unknown, incompatible, or superseded schema versions.
+- Structurally invalid JSON that must remain editable without data loss.
+- Unknown fields permitted by the selected schema.
+- An adapter that advertises a capability but returns a malformed response.
+- A result whose subject does not match the displayed document revision.
+- Conflicting governance and protocol results from different authorities.
+- Offline, stale, partial, or access-denied sources.
+- Routes or widgets that require capabilities unavailable from the active adapter.
+
+## Requirements
+
+### Functional Requirements
+
+- **FR-001**: The MVP MUST open, create, edit, structurally validate, view, and
+  export local JSON documents.
+- **FR-002**: The MVP MUST identify the selected schema by canonical ID and version.
+- **FR-003**: Structural errors MUST include a machine-readable document path and
+  the violated schema constraint.
+- **FR-004**: Controller collections MUST be dynamic; the UI MUST NOT encode four
+  slots or six pair checks as a general product rule.
+- **FR-005**: A valid import/export round trip MUST preserve fields that the schema
+  permits even when the current UI has no specialized control for them.
+- **FR-006**: Domain modules MUST obtain data and capabilities through the
+  `DataSourcePort`, not from Delta runtime internals.
+- **FR-007**: The active adapter MUST declare supported capabilities.
+- **FR-008**: A capability-dependent function MUST be unavailable or hidden when
+  the active adapter does not declare its capability.
+- **FR-009**: The UI MUST distinguish structural validation, governance assessment,
+  protocol result, observation, and local draft data.
+- **FR-010**: A sourced assessment/result MUST retain authority class, subject
+  reference, source reference, retrieval time, and available verification metadata.
+- **FR-011**: The UI and any administrative backend MUST NOT compute quorum,
+  controller independence, signing eligibility/readiness, custody compliance,
+  campaign transitions, aggregation, contribution meaning, or other Delta semantics.
+- **FR-012**: The UI MAY sort, filter, group, and visualize data, but MUST identify
+  derived presentation data and MUST NOT alter the canonical document silently.
+- **FR-013**: The shell MUST define localized registration points for navigation,
+  domain modules, entity views, dashboard widgets, data adapters, and visualizations.
+- **FR-014**: Registering an extension MAY update the composition root; it MUST NOT
+  require rewriting unrelated domain modules or modifying Delta core.
+- **FR-015**: Loading, empty, invalid, error, degraded, stale, unsupported, and
+  access-denied states MUST be distinguishable.
+- **FR-016**: PR #29 artifacts MAY be used as fixtures only when their status and
+  provenance are preserved; the four-slot worksheet MUST NOT become the generic model.
+
+### Non-Functional Requirements
+
+- **NFR-001**: Delta core/runtime MUST build, test, start, and operate without the UI.
+- **NFR-002**: Removing the UI module MUST NOT change Delta protocol behavior.
+- **NFR-003**: The specification and MVP MUST have formal impact `NONE`.
+- **NFR-004**: The interface MUST remain usable with keyboard navigation and
+  expose semantic labels for primary controls and statuses.
+- **NFR-005**: Large collections MUST not require rendering every item at once.
+- **NFR-006**: A failure in one adapter or extension MUST not crash the entire shell.
+- **NFR-007**: Client-visible data MUST exclude private keys, signing secrets,
+  HSM/KMS credentials, recovery material, and service credentials.
+- **NFR-008**: Technology selection MUST be recorded separately and MUST satisfy
+  this specification rather than narrowing it.
+
+### Key Entities
+
+- **Controller**: An administrative view of a controller identity and public metadata.
+- **Campaign**: A view of a coordinated process or round as exposed by a source.
+- **Node**: A view of a participating runtime identity and observable status.
+- **Artifact**: Content-addressed metadata, provenance, and verification references.
+- **AuditEvent**: An immutable event view with actor, action, target, outcome, and correlation.
+- **SourceDescriptor**: Adapter identity, connection status, authority, freshness,
+  supported entity types, and capabilities.
+- **SourcedResult**: An attributable result bound to an exact subject and authority class.
+
+## Success Criteria
+
+- **SC-001**: The MVP completes US1 and US2 while Delta runtime is absent.
+- **SC-002**: Tests cover controller lists of 0, 1, 4, and at least 100 entries.
+- **SC-003**: Contract tests run unchanged against at least two adapter implementations.
+- **SC-004**: No code search hit outside the admin UI points from Delta core/runtime
+  to the UI module.
+- **SC-005**: No UI test claims an independence, governance, or signing verdict
+  without a sourced result envelope and matching capability.
+- **SC-006**: A placeholder module and alternate entity view are registered through
+  documented extension points without controller-module edits.
+
+## Assumptions
+
+- Existing canonical schemas remain owned by `delta-protocol` or another explicit
+  project authority; the UI does not fork them.
+- PR #29 remains governance documentation with formal impact `NONE`; it does not
+  itself create appointments, signatures, or execution authority.
+- Public Delta APIs needed for later phases may not exist yet.
+- A later implementation ADR will choose UI and server technologies.
+
+## Out of Scope
+
+- Modifying protocol schemas, formal models, validators, or signed artifacts.
+- Computing or authoring governance/protocol verdicts.
+- Signing, key generation, appointment, rotation, revocation, or HSM/KMS operations.
+- Direct FFM/native-runtime access from the UI.
+- Live runtime control, state-changing administrative commands, or campaign execution.
+- Selecting a UI framework, form library, visualization library, or packaging model.

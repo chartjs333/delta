@@ -1,0 +1,60 @@
+{
+  "document_type": "ADMIN_UI_SPEC_KIT_MANIFEST",
+  "document_version": "1.0.0",
+  "hash_algorithm": "SHA-256",
+  "manifest_scope": "All files in specs/admin-ui except this manifest",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "9d52ecbebea300b9d1509583e804adf950b7940cca138e597e106aa46c7beba8"
+    },
+    {
+      "path": "architecture.md",
+      "sha256": "f6eee24a62d7570e1c347982b7ed4192aa94ff63c6d77b0534d8dbbffbe86edd"
+    },
+    {
+      "path": "checklists/hybrid-runtime.md",
+      "sha256": "4de70279f33173ab017a6619b957a7a402ce8f8bd2de9e4fe31b85181988c004"
+    },
+    {
+      "path": "checklists/requirements.md",
+      "sha256": "0d58d9ffedc97e242c450f023cf5edfc226500e5562cd337a42f3a994ee64c93"
+    },
+    {
+      "path": "contracts/data-source-port.md",
+      "sha256": "c357a655a51f6b82387ab3c93ff6f069d8c43089fcbffa38f799aaa19b266ad7"
+    },
+    {
+      "path": "data-model.md",
+      "sha256": "64302265675cf462c01f4ebcaf04f659591320a6235b17a6a56a90e3a38826bc"
+    },
+    {
+      "path": "evidence/spec-baseline.json",
+      "sha256": "1867b3b10d1a98231dd0151b7e8fb52f6643df2eebf303def5f392447db6dddf"
+    },
+    {
+      "path": "plan.md",
+      "sha256": "671a17679e7289ad437dbfb3cccea627417efcbd43fcc5736c0847131eba2a16"
+    },
+    {
+      "path": "runtime-profile.md",
+      "sha256": "a53868f226b150d75418ab523c5b35bd0320f57ffa76ec64c81af07fd72a4f2f"
+    },
+    {
+      "path": "runtime-tasks.md",
+      "sha256": "139f1319c417ad88a2cb0adfc1b83acea3f89e0389330d5074f498f96a43176b"
+    },
+    {
+      "path": "security-boundaries.md",
+      "sha256": "cbe04d6f0e8177b4ca227953afbb63044c63b31b2a2aad9f08b95267c4d8651a"
+    },
+    {
+      "path": "spec.md",
+      "sha256": "e3d387bafb33af91d5d400dc764252e68758d035b087ac11e72852d43cee3673"
+    },
+    {
+      "path": "tasks.md",
+      "sha256": "2dbba812fe56530b6dee1e19d322fcc40521fd7c0dd1ee2b6d31a73a835bcae1"
+    }
+  ]
+}
