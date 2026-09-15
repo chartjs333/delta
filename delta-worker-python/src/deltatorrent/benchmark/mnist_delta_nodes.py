@@ -16,6 +16,7 @@ import re
 import shutil
 import struct
 import subprocess
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -31,17 +32,42 @@ from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 Int64Array = npt.NDArray[np.int64]
 Int16Array = npt.NDArray[np.int16]
 
-WORKLOAD_MAGIC = b"DMNIST1\0"
+WORKLOAD_MAGIC = b"DMNIST2\0"
 MODEL_MAGIC = b"DMODEL1\0"
-WORKLOAD_VERSION = 1
+WORKLOAD_VERSION = 2
 MODEL_FORMAT = "DMODEL1_INT16_BE_V1"
 NODE_COUNT = 4
 DIGIT_COUNT = 10
 PIXELS_PER_DIGIT = 28 * 28
 VECTOR_WIDTH = DIGIT_COUNT * PIXELS_PER_DIGIT + DIGIT_COUNT
 CONTENT_ID_TEXT_BYTES = 71
+CONTRIBUTION_RECORD_BYTES = 4 + 8 + CONTENT_ID_TEXT_BYTES * 2 + VECTOR_WIDTH * 2
+EXACT_WORKLOAD_BYTES = 8 + 16 + CONTENT_ID_TEXT_BYTES + NODE_COUNT * CONTRIBUTION_RECORD_BYTES
 TRANSPORT_SIGNATURE_DOMAIN = b"deltareduce.mnist-demo.transport.v1\0"
 RELAY_MAIN_CLASS = "io.deltareduce.demo.MnistDeltaNettyRelay"
+REQUIRED_RELAY_CLASS_FILES = (
+    "io/deltareduce/demo/MnistDeltaNettyRelay.class",
+    "io/deltareduce/node/benchmark/BenchmarkContracts.class",
+    "io/deltareduce/node/benchmark/BenchmarkTransport.class",
+    "io/deltareduce/node/benchmark/NettyMetricsCollector.class",
+)
+SOURCE_SNAPSHOT_FILES = (
+    "delta-worker-python/src/deltatorrent/benchmark/mnist_demo.py",
+    "delta-worker-python/src/deltatorrent/benchmark/mnist_delta_nodes.py",
+    "delta-worker-python/src/deltatorrent/benchmark/mnist_demo_workspace.py",
+    "integration/mnist-delta/CMakeLists.txt",
+    "integration/mnist-delta/native/mnist_delta_node.cpp",
+    "integration/mnist-delta/java/io/deltareduce/demo/MnistDeltaNettyRelay.java",
+    "integration/mnist-delta/windows-toolchain.lock.json",
+    "delta-node-java/distribution-dependencies.lock.json",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkContracts.java",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkTransport.java",
+    "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java",
+    "delta-core-cpp/src/certificates/verifier.cpp",
+    "delta-core-cpp/src/robust/plan.cpp",
+    "delta-core-cpp/src/apply/engine.cpp",
+    "delta-runtime-cpp/src/certificate_runtime.cpp",
+)
 REQUIRED_VOTE_KINDS = (
     "input_set",
     "eligibility",
@@ -93,6 +119,51 @@ NATIVE_TRACE_FIELDS = frozenset(
         "vote_kind",
     }
 )
+COMMON_NATIVE_RESULT_FIELDS = frozenset(
+    {
+        "authoritative",
+        "body_ids",
+        "classification",
+        "contribution_ids",
+        "cryptographic_signatures_verified",
+        "formal_semantics_id",
+        "governance_eligible",
+        "height",
+        "mode",
+        "node_count",
+        "result_id",
+        "round_id",
+        "schema_version",
+        "signature_semantics",
+        "source_id",
+        "status",
+        "type_name",
+        "validator_id",
+        "vector_width",
+        "view",
+        "workload_id",
+    }
+)
+PREPARE_RESULT_FIELDS = COMMON_NATIVE_RESULT_FIELDS | {
+    "recovered_vote_count",
+    "recovery_required",
+    "runtime_wal",
+    "vote_frames",
+    "vote_wal",
+}
+FINALIZE_RESULT_FIELDS = COMMON_NATIVE_RESULT_FIELDS | {
+    "aggregate_root_qc_id",
+    "apply_candidate_id",
+    "apply_qc_id",
+    "current_pointer",
+    "current_pointer_wal",
+    "model_artifact",
+    "model_hash",
+    "optimizer_hash",
+    "quorum_certificates",
+    "runtime_wal",
+    "vote_wal",
+}
 MAXIMUM_RELAY_ENTRIES = 128
 MAXIMUM_MANIFEST_BYTES = 1 << 20
 MAXIMUM_MANIFEST_LINE_CHARS = 16 << 10
@@ -184,15 +255,15 @@ class DeltaToolchain:
 
 @dataclass(frozen=True, slots=True)
 class NodeContribution:
-    """One node-local quantized model delta; never a cross-node aggregate."""
+    """Opaque file emitted by one worker; never a cross-node aggregate."""
 
     node_index: int
     node_id: str
     sample_count: int
     shard_id: str
     summary_id: str
-    values: Int16Array
-    record_bytes: bytes
+    record_path: Path
+    size_bytes: int
     content_id: str
 
     def document(self) -> dict[str, object]:
@@ -203,7 +274,8 @@ class NodeContribution:
             "sample_count": self.sample_count,
             "shard_id": self.shard_id,
             "summary_id": self.summary_id,
-            "vector_width": int(self.values.size),
+            "size_bytes": self.size_bytes,
+            "vector_width": VECTOR_WIDTH,
         }
 
 
@@ -292,10 +364,79 @@ def _classpath_directory_document(path: Path) -> dict[str, object]:
         digest_input.extend(encoded)
         digest_input.extend(bytes.fromhex(_content_id(value)[7:]))
     return {
-        "class_files": [relative for relative, _value in files],
+        "class_files": [
+            {"content_id": _content_id(value), "path": relative} for relative, value in files
+        ],
         "content_id": _content_id(bytes(digest_input)),
         "kind": "CLASS_DIRECTORY",
     }
+
+
+def _source_snapshot(repository_root: Path) -> dict[str, object]:
+    required_markers = {
+        "integration/mnist-delta/CMakeLists.txt": (
+            "delta::runtime",
+            "delta::certificates",
+            "delta::robust",
+            "delta::apply",
+        ),
+        "integration/mnist-delta/native/mnist_delta_node.cpp": (
+            "runtime::CertificateVoteRuntime",
+            "certificates::ChainVerifier",
+            "delta::robust::build_plan",
+            "delta::robust::reduce_parameter_shard",
+            "delta::apply::compute_candidate",
+            "runtime::CurrentPointerStore",
+            "verify_relayed_contributions",
+        ),
+        "integration/mnist-delta/java/io/deltareduce/demo/MnistDeltaNettyRelay.java": (
+            "new BenchmarkTransport",
+            "new NettyMetricsCollector",
+            "Ed25519",
+        ),
+    }
+    forbidden_orchestrator_marker_parts = (
+        ("aggregate_", "summaries"),
+        ("np.", "concatenate("),
+        ("np.", "mean("),
+        ("np.", "stack("),
+        ("np.", "sum("),
+    )
+    files: list[dict[str, object]] = []
+    for relative in SOURCE_SNAPSHOT_FILES:
+        candidate = repository_root / relative
+        if candidate.is_symlink():
+            raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+        path = candidate.resolve(strict=True)
+        if not path.is_relative_to(repository_root):
+            raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+        raw = _regular_file_bytes(path, "MNIST_DELTA_SOURCE_SNAPSHOT_INVALID", maximum=4 << 20)
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeError as exc:
+            raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID") from exc
+        if any(marker not in text for marker in required_markers.get(relative, ())):
+            raise MnistDeltaError("MNIST_DELTA_SOURCE_MARKER_MISSING")
+        if relative.endswith("/mnist_delta_nodes.py") and any(
+            "".join(parts) in text for parts in forbidden_orchestrator_marker_parts
+        ):
+            raise MnistDeltaError("MNIST_DELTA_HIDDEN_AGGREGATION_SOURCE_REJECTED")
+        files.append(
+            {
+                "bytes": len(raw),
+                "content_id": _content_id(raw),
+                "path": relative,
+            }
+        )
+    document: dict[str, object] = {
+        "binary_source_build_attestation_claimed": False,
+        "files": files,
+        "no_hidden_aggregation_static_gate": "PASS",
+        "review_scope": "LOCAL_DEMO_EXECUTION_PATH",
+        "semantic_completeness_claimed": False,
+    }
+    document["content_id"] = _content_id(_canonical_bytes(document))
+    return document
 
 
 def _validate_toolchain(toolchain: DeltaToolchain, repository_root: Path) -> dict[str, object]:
@@ -323,6 +464,41 @@ def _validate_toolchain(toolchain: DeltaToolchain, repository_root: Path) -> dic
         or re.search(r'(?:version\s+")?25(?:[.\s"]|$)', version_text) is None
     ):
         raise MnistDeltaError("MNIST_DELTA_REQUIRES_JDK25")
+
+    try:
+        described = subprocess.run(
+            (str(native), "--describe"),
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        native_descriptor = json.loads(described.stdout)
+    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as exc:
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_DESCRIPTOR_INVALID") from exc
+    expected_descriptor: dict[str, object] = {
+        "applied_model_format": MODEL_FORMAT,
+        "authoritative": False,
+        "classification": "LOCAL_DEMO_ONLY",
+        "crash_exit_code": 75,
+        "executable": "delta_mnist_native_node",
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "governance_eligible": False,
+        "modes": ["prepare-votes", "finalize"],
+        "node_count": NODE_COUNT,
+        "schema_version": "1.0.0",
+        "type_name": "MNIST_DELTA_NATIVE_NODE_DESCRIPTOR",
+        "vector_width": VECTOR_WIDTH,
+        "workload_bytes": EXACT_WORKLOAD_BYTES,
+        "workload_format": "DMNIST2_NODE_SUMMARY_INT16_BE_V1",
+    }
+    if (
+        described.returncode != 0
+        or described.stderr
+        or native_descriptor != expected_descriptor
+        or described.stdout.encode("utf-8") != _canonical_bytes(expected_descriptor) + b"\n"
+    ):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_DESCRIPTOR_INVALID")
 
     raw_entries = toolchain.relay_classpath.split(os.pathsep)
     if not raw_entries or len(raw_entries) > 16 or any(not entry for entry in raw_entries):
@@ -370,7 +546,21 @@ def _validate_toolchain(toolchain: DeltaToolchain, repository_root: Path) -> dic
         if entry.is_dir():
             document = _classpath_directory_document(entry)
             class_documents.append(document)
-            for filename in cast(list[str], document["class_files"]):
+            class_files = document.get("class_files")
+            if not isinstance(class_files, list):
+                raise MnistDeltaError("MNIST_DELTA_RELAY_CLASSPATH_INVALID")
+            for class_file in class_files:
+                if not isinstance(class_file, dict) or set(class_file) != {
+                    "content_id",
+                    "path",
+                }:
+                    raise MnistDeltaError("MNIST_DELTA_RELAY_CLASSPATH_INVALID")
+                filename = class_file.get("path")
+                if not isinstance(filename, str) or filename in observed_classes:
+                    raise MnistDeltaError("MNIST_DELTA_RELAY_CLASSPATH_SHADOWED")
+                _require_content_id(
+                    class_file.get("content_id"), "MNIST_DELTA_RELAY_CLASSPATH_INVALID"
+                )
                 observed_classes.add(filename)
             continue
         value = _regular_file_bytes(entry, "MNIST_DELTA_CLASSPATH_JAR_INVALID")
@@ -383,15 +573,8 @@ def _validate_toolchain(toolchain: DeltaToolchain, repository_root: Path) -> dic
         jar_documents.append(
             {"bytes": len(value), "content_id": content_id, "kind": "PINNED_NETTY_JAR"}
         )
-    required_class_prefixes = (
-        "io/deltareduce/demo/MnistDeltaNettyRelay",
-        "io/deltareduce/node/benchmark/BenchmarkContracts",
-        "io/deltareduce/node/benchmark/BenchmarkTransport",
-        "io/deltareduce/node/benchmark/NettyMetricsCollector",
-    )
     if observed_jars != set(expected_jars) or any(
-        not any(filename.startswith(prefix) for filename in observed_classes)
-        for prefix in required_class_prefixes
+        required not in observed_classes for required in REQUIRED_RELAY_CLASS_FILES
     ):
         raise MnistDeltaError("MNIST_DELTA_RELAY_CLASSPATH_INCOMPLETE")
     classpath_document: dict[str, object] = {
@@ -404,6 +587,8 @@ def _validate_toolchain(toolchain: DeltaToolchain, repository_root: Path) -> dic
         "java_executable_sha256": _content_id(java_bytes),
         "java_feature": 25,
         "native_executable_sha256": _content_id(native_bytes),
+        "native_descriptor": native_descriptor,
+        "source_snapshot": _source_snapshot(repository_root),
     }
 
 
@@ -460,8 +645,10 @@ def _round_nonnegative_half_toward_positive(values: Int64Array, count: int) -> I
     return np.ascontiguousarray(rounded, dtype=np.int64)
 
 
-def contribution_from_summary(summary: NodeSummaryLike, shard_id: str) -> NodeContribution:
-    """Quantize exactly one worker summary without inspecting another worker."""
+def write_node_contribution(
+    summary: NodeSummaryLike, shard_id: str, destination: Path
+) -> NodeContribution:
+    """Quantize and seal exactly one worker summary inside that worker process."""
     node_index = _node_index(summary.node_id)
     shard = _require_content_id(shard_id, "MNIST_DELTA_SHARD_ID_INVALID")
     _require_content_id(summary.summary_id, "MNIST_DELTA_SUMMARY_ID_INVALID")
@@ -496,63 +683,85 @@ def contribution_from_summary(summary: NodeSummaryLike, shard_id: str) -> NodeCo
     record = bytearray()
     record.extend(struct.pack(">IQ", node_index, sample_count))
     record.extend(shard.encode("ascii"))
+    record.extend(summary.summary_id.encode("ascii"))
     record.extend(values.astype(">i2", copy=False).tobytes(order="C"))
     record_bytes = bytes(record)
+    if len(record_bytes) != CONTRIBUTION_RECORD_BYTES:
+        raise MnistDeltaError("MNIST_DELTA_CONTRIBUTION_SIZE_INVALID")
+    if not destination.is_absolute() or destination.is_symlink() or destination.exists():
+        raise MnistDeltaError("MNIST_DELTA_CONTRIBUTION_DESTINATION_INVALID")
+    _write_new(destination, record_bytes)
     return NodeContribution(
         node_index=node_index,
         node_id=summary.node_id,
         sample_count=sample_count,
         shard_id=shard,
         summary_id=summary.summary_id,
-        values=values,
-        record_bytes=record_bytes,
+        record_path=destination.resolve(strict=True),
+        size_bytes=len(record_bytes),
         content_id=_content_id(record_bytes),
     )
 
 
 def write_workload(
-    summaries: Sequence[NodeSummaryLike],
-    shard_ids: Mapping[str, str],
+    contributions: Sequence[NodeContribution],
     source_id: str,
     destination: Path,
 ) -> tuple[tuple[NodeContribution, ...], str]:
-    """Concatenate four independently computed records; perform no numeric reduce."""
+    """Concatenate four opaque worker records; perform no numeric operation on them."""
     source = _require_content_id(source_id, "MNIST_DELTA_SOURCE_ID_INVALID")
-    if len(summaries) != NODE_COUNT:
+    if len(contributions) != NODE_COUNT:
         raise MnistDeltaError("MNIST_DELTA_NODE_COUNT_INVALID")
-    contributions = tuple(
-        sorted(
-            (
-                contribution_from_summary(summary, shard_ids.get(summary.node_id, ""))
-                for summary in summaries
-            ),
-            key=lambda item: item.node_index,
-        )
-    )
-    if tuple(item.node_index for item in contributions) != tuple(range(1, NODE_COUNT + 1)):
+    ordered = tuple(sorted(contributions, key=lambda item: item.node_index))
+    if tuple(item.node_index for item in ordered) != tuple(range(1, NODE_COUNT + 1)):
         raise MnistDeltaError("MNIST_DELTA_NODE_SET_INVALID")
-    if len({item.node_id for item in contributions}) != NODE_COUNT:
+    if (
+        len({item.node_id for item in ordered}) != NODE_COUNT
+        or len({item.shard_id for item in ordered}) != NODE_COUNT
+        or len({item.summary_id for item in ordered}) != NODE_COUNT
+        or len({item.record_path for item in ordered}) != NODE_COUNT
+    ):
         raise MnistDeltaError("MNIST_DELTA_NODE_SET_DUPLICATE")
+
+    opaque_records: list[bytes] = []
+    for item in ordered:
+        _require_content_id(item.shard_id, "MNIST_DELTA_SHARD_ID_INVALID")
+        _require_content_id(item.summary_id, "MNIST_DELTA_SUMMARY_ID_INVALID")
+        raw = _regular_file_bytes(
+            item.record_path,
+            "MNIST_DELTA_CONTRIBUTION_FILE_INVALID",
+            maximum=CONTRIBUTION_RECORD_BYTES,
+        )
+        expected_prefix = (
+            struct.pack(">IQ", item.node_index, item.sample_count)
+            + item.shard_id.encode("ascii")
+            + item.summary_id.encode("ascii")
+        )
+        if (
+            item.node_id != f"demo-mnist-worker-{item.node_index:02d}"
+            or item.sample_count <= 0
+            or item.sample_count > 60_000
+            or item.size_bytes != CONTRIBUTION_RECORD_BYTES
+            or len(raw) != CONTRIBUTION_RECORD_BYTES
+            or not raw.startswith(expected_prefix)
+            or _content_id(raw) != item.content_id
+        ):
+            raise MnistDeltaError("MNIST_DELTA_CONTRIBUTION_FILE_INVALID")
+        opaque_records.append(raw)
 
     header = bytearray(WORKLOAD_MAGIC)
     header.extend(struct.pack(">IIII", WORKLOAD_VERSION, NODE_COUNT, VECTOR_WIDTH, NODE_COUNT))
     header.extend(source.encode("ascii"))
-    payload = bytes(header) + b"".join(item.record_bytes for item in contributions)
-    expected_size = (
-        8
-        + 16
-        + CONTENT_ID_TEXT_BYTES
-        + NODE_COUNT * (4 + 8 + CONTENT_ID_TEXT_BYTES + VECTOR_WIDTH * 2)
-    )
-    if len(payload) != expected_size:
+    payload = bytes(header) + b"".join(opaque_records)
+    if len(payload) != EXACT_WORKLOAD_BYTES:
         raise MnistDeltaError("MNIST_DELTA_WORKLOAD_SIZE_INVALID")
     _write_new(destination, payload)
-    for contribution in contributions:
+    for contribution, record in zip(ordered, opaque_records, strict=True):
         _write_new(
             destination.parent / f"contribution-{contribution.node_index:02d}.bin",
-            contribution.record_bytes,
+            record,
         )
-    return contributions, _content_id(payload)
+    return ordered, _content_id(payload)
 
 
 def decode_applied_model(path: Path) -> AppliedModel:
@@ -968,6 +1177,7 @@ def _validate_common_native_result(
     value: Mapping[str, object],
     validator_id: str,
     workload_id: str,
+    source_id: str,
     contribution_ids: Sequence[str],
 ) -> None:
     expected_round_id = f"mnist-demo-{workload_id[7:27]}"
@@ -986,6 +1196,7 @@ def _validate_common_native_result(
         or value.get("height") != 1
         or value.get("view") != 0
         or value.get("round_id") != expected_round_id
+        or value.get("source_id") != source_id
         or value.get("contribution_ids") != list(contribution_ids)
     ):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_RESULT_INVALID")
@@ -996,7 +1207,6 @@ def _validate_common_native_result(
         (_canonical_bytes(body).decode("utf-8"),),
     ):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_RESULT_ID_INVALID")
-    _require_content_id(value.get("source_id"), "MNIST_DELTA_NATIVE_SOURCE_ID_INVALID")
     body_ids = value.get("body_ids")
     if not isinstance(body_ids, dict) or tuple(sorted(body_ids)) != tuple(
         sorted(REQUIRED_VOTE_KINDS)
@@ -1019,12 +1229,14 @@ def _validate_native_result_file(path: Path, value: Mapping[str, object], code: 
         raise MnistDeltaError(code)
 
 
-def _validate_native_file_reference(value: object, node_dir: Path, code: str) -> None:
+def _validate_native_file_reference(
+    value: object, node_dir: Path, expected_file: str, code: str
+) -> None:
     if not isinstance(value, dict) or set(value) != {"file", "sha256"}:
         raise MnistDeltaError(code)
     filename = value.get("file")
     digest = value.get("sha256")
-    if not isinstance(filename, str) or not isinstance(digest, str):
+    if filename != expected_file or not isinstance(digest, str):
         raise MnistDeltaError(code)
     relative = PurePosixPath(filename)
     if (
@@ -1050,13 +1262,17 @@ def _validate_prepare_result(
     value: Mapping[str, object],
     validator_id: str,
     workload_id: str,
+    source_id: str,
     contribution_ids: Sequence[str],
     node_dir: Path,
     result_path: Path,
     *,
     crash: bool,
 ) -> None:
-    _validate_common_native_result(value, validator_id, workload_id, contribution_ids)
+    expected_fields = PREPARE_RESULT_FIELDS | ({"crashed_vote"} if crash else set())
+    if set(value) != expected_fields:
+        raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
+    _validate_common_native_result(value, validator_id, workload_id, source_id, contribution_ids)
     _validate_native_result_file(result_path, value, "MNIST_DELTA_PREPARE_RESULT_INVALID")
     expected_status = "SIMULATED_CRASH" if crash else "VOTES_EXPOSED"
     if (
@@ -1072,9 +1288,12 @@ def _validate_prepare_result(
     if len(frames) != expected_frame_count:
         raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
     body_ids = cast(dict[str, object], value["body_ids"])
+    expected_replay = validator_id == "validator-04" and not crash
     for expected_sequence, (kind, frame) in enumerate(
         zip(REQUIRED_VOTE_KINDS, frames, strict=False), start=1
     ):
+        trace_kind = TRACE_PHASES[expected_sequence - 1][1]
+        expected_context = f"{trace_kind}:{value['round_id']}:1:0"
         if (
             not isinstance(frame, dict)
             or set(frame)
@@ -1082,36 +1301,45 @@ def _validate_prepare_result(
             or frame.get("kind") != kind
             or frame.get("body_hash") != body_ids[kind]
             or frame.get("durable_sequence") != expected_sequence
-            or not isinstance(frame.get("context_id"), str)
+            or frame.get("context_id") != expected_context
             or frame.get("file") != f"vote-frames/{kind}.vote"
-            or not isinstance(frame.get("replay"), bool)
+            or frame.get("replay") is not expected_replay
         ):
             raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
         _validate_native_file_reference(
             {"file": frame["file"], "sha256": frame.get("sha256")},
             node_dir,
+            f"vote-frames/{kind}.vote",
             "MNIST_DELTA_VOTE_FRAME_INVALID",
         )
     _validate_native_file_reference(
-        value.get("runtime_wal"), node_dir, "MNIST_DELTA_RUNTIME_WAL_INVALID"
+        value.get("runtime_wal"),
+        node_dir,
+        "runtime/runtime.wal",
+        "MNIST_DELTA_RUNTIME_WAL_INVALID",
     )
-    _validate_native_file_reference(value.get("vote_wal"), node_dir, "MNIST_DELTA_VOTE_WAL_INVALID")
+    _validate_native_file_reference(
+        value.get("vote_wal"),
+        node_dir,
+        "votes/runtime.wal",
+        "MNIST_DELTA_VOTE_WAL_INVALID",
+    )
     if crash:
         crashed_vote = value.get("crashed_vote")
         if (
             value.get("recovery_required") is not True
             or value.get("recovered_vote_count") != len(REQUIRED_VOTE_KINDS)
             or not isinstance(crashed_vote, dict)
+            or set(crashed_vote) != {"body_hash", "context_id", "durable_sequence", "kind"}
             or crashed_vote.get("kind") != "apply"
             or crashed_vote.get("body_hash") != body_ids["apply"]
+            or crashed_vote.get("context_id") != f"APPLY_QC:{value['round_id']}:1:0"
             or crashed_vote.get("durable_sequence") != len(REQUIRED_VOTE_KINDS)
         ):
             raise MnistDeltaError("MNIST_DELTA_CRASH_NOT_DURABLE")
         return
-    if (
-        value.get("recovery_required") is not False
-        or not isinstance(value.get("recovered_vote_count"), int)
-        or value.get("recovered_vote_count") not in (0, len(REQUIRED_VOTE_KINDS))
+    if value.get("recovery_required") is not False or value.get("recovered_vote_count") != (
+        len(REQUIRED_VOTE_KINDS) if validator_id == "validator-04" else 0
     ):
         raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
 
@@ -1120,12 +1348,15 @@ def _validate_finalize_result(
     value: Mapping[str, object],
     validator_id: str,
     workload_id: str,
+    source_id: str,
     contribution_ids: Sequence[str],
     model: AppliedModel,
     node_dir: Path,
     result_path: Path,
 ) -> None:
-    _validate_common_native_result(value, validator_id, workload_id, contribution_ids)
+    if set(value) != FINALIZE_RESULT_FIELDS:
+        raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
+    _validate_common_native_result(value, validator_id, workload_id, source_id, contribution_ids)
     _validate_native_result_file(result_path, value, "MNIST_DELTA_FINALIZE_RESULT_INVALID")
     model_artifact = value.get("model_artifact")
     pointer = value.get("current_pointer")
@@ -1141,7 +1372,7 @@ def _validate_finalize_result(
         or model_artifact.get("width") != VECTOR_WIDTH
         or model_artifact.get("file") != "applied-model.bin"
         or not isinstance(pointer, dict)
-        or pointer.get("disposition") not in ("ADVANCED", "REPLAY")
+        or pointer.get("disposition") != "ADVANCED"
         or not isinstance(certificates, list)
         or len(certificates) != len(REQUIRED_VOTE_KINDS)
     ):
@@ -1150,7 +1381,15 @@ def _validate_finalize_result(
     if kinds != REQUIRED_VOTE_KINDS:
         raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
     body_ids = cast(dict[str, object], value["body_ids"])
+    if (
+        value.get("aggregate_root_qc_id") != body_ids["aggregate_root"]
+        or value.get("apply_qc_id") != body_ids["apply"]
+        or set(model_artifact) != {"bytes", "file", "format", "sha256", "width"}
+    ):
+        raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
+    qc_ids: list[str] = []
     for kind, certificate in zip(REQUIRED_VOTE_KINDS, certificates, strict=True):
+        trace_kind = TRACE_PHASES[REQUIRED_VOTE_KINDS.index(kind)][1]
         if (
             not isinstance(certificate, dict)
             or set(certificate)
@@ -1159,10 +1398,14 @@ def _validate_finalize_result(
             or certificate.get("body_hash") != body_ids[kind]
             or certificate.get("signer_count") != NODE_COUNT
             or certificate.get("threshold") != 3
-            or not isinstance(certificate.get("context_id"), str)
+            or certificate.get("context_id") != f"{trace_kind}:{value['round_id']}:1:0"
         ):
             raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
-        _require_content_id(certificate.get("qc_id"), "MNIST_DELTA_FINALIZE_QC_ID_INVALID")
+        qc_ids.append(
+            _require_content_id(certificate.get("qc_id"), "MNIST_DELTA_FINALIZE_QC_ID_INVALID")
+        )
+    if len(set(qc_ids)) != len(REQUIRED_VOTE_KINDS):
+        raise MnistDeltaError("MNIST_DELTA_FINALIZE_QC_ID_INVALID")
     for field in (
         "aggregate_root_qc_id",
         "apply_candidate_id",
@@ -1171,12 +1414,16 @@ def _validate_finalize_result(
         "optimizer_hash",
     ):
         _require_content_id(value.get(field), "MNIST_DELTA_FINALIZE_ID_INVALID")
-    for field, code in (
-        ("runtime_wal", "MNIST_DELTA_RUNTIME_WAL_INVALID"),
-        ("vote_wal", "MNIST_DELTA_VOTE_WAL_INVALID"),
-        ("current_pointer_wal", "MNIST_DELTA_POINTER_WAL_INVALID"),
+    for field, expected_file, code in (
+        ("runtime_wal", "runtime/runtime.wal", "MNIST_DELTA_RUNTIME_WAL_INVALID"),
+        ("vote_wal", "votes/runtime.wal", "MNIST_DELTA_VOTE_WAL_INVALID"),
+        (
+            "current_pointer_wal",
+            "current/current-pointer.wal",
+            "MNIST_DELTA_POINTER_WAL_INVALID",
+        ),
     ):
-        _validate_native_file_reference(value.get(field), node_dir, code)
+        _validate_native_file_reference(value.get(field), node_dir, expected_file, code)
     if not isinstance(pointer, dict) or set(pointer) != {
         "apply_qc_id",
         "checkpoint_id",
@@ -1244,6 +1491,60 @@ def _collect_native_trace(
     if not rows:
         raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
 
+    expected_event_counts = {
+        "apply_computed": 1,
+        "current_pointer_applied": 1,
+        "mode_complete": 2,
+        "mode_started": 3 if expect_crash else 2,
+        "quorum_validated": len(REQUIRED_VOTE_KINDS),
+        "runtime_transition": 10,
+        "vote_durable_and_exposed": 11 if expect_crash else len(REQUIRED_VOTE_KINDS),
+    }
+    if expect_crash:
+        expected_event_counts.update(
+            {
+                "journal_recovered": 1,
+                "journal_recovery_verified": 1,
+                "simulated_crash": 1,
+            }
+        )
+    if Counter(str(row["event"]) for row in rows) != expected_event_counts:
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+    if any(
+        row.get("error_code") is not None and row.get("event") != "simulated_crash" for row in rows
+    ):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
+    started_rows = [row for row in rows if row.get("event") == "mode_started"]
+    prepare_complete_rows = [
+        row
+        for row in rows
+        if row.get("event") == "mode_complete" and row.get("mode") == "prepare-votes"
+    ]
+    if (
+        [row.get("mode") for row in started_rows]
+        != (
+            ["prepare-votes", "prepare-votes", "finalize"]
+            if expect_crash
+            else ["prepare-votes", "finalize"]
+        )
+        or any(row.get("outcome") != "ACCEPTED" for row in started_rows)
+        or len(prepare_complete_rows) != 1
+        or prepare_complete_rows[0].get("outcome") != "VOTES_EXPOSED"
+        or prepare_complete_rows[0].get("replay") is not expect_crash
+        or prepare_complete_rows[0].get("body_hash")
+        != cast(Mapping[str, object], prepare_result["body_ids"])["apply"]
+    ):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+    runtime_rows = [row for row in rows if row.get("event") == "runtime_transition"]
+    if any(
+        row.get("mode") not in ("prepare-votes", "finalize")
+        or row.get("outcome") != "ACCEPTED"
+        or row.get("replay") is not False
+        for row in runtime_rows
+    ):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
     body_ids = cast(Mapping[str, object], prepare_result["body_ids"])
     certificates = finalize_result.get("quorum_certificates")
     if not isinstance(certificates, list):
@@ -1270,6 +1571,16 @@ def _collect_native_trace(
             or final_vote.get("outcome") != ("NO_OP" if expect_crash else "ACCEPTED")
         ):
             raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        if expect_crash and phase != "apply":
+            first_vote = vote_rows[0]
+            if (
+                first_vote.get("action_id") != vote_action
+                or first_vote.get("body_hash") != body_ids[phase]
+                or first_vote.get("durable_sequence") != expected_sequence
+                or first_vote.get("replay") is not False
+                or first_vote.get("outcome") != "ACCEPTED"
+            ):
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
         certificate = certificate_by_kind.get(phase)
         quorum_rows = [
             row
@@ -1311,6 +1622,37 @@ def _collect_native_trace(
     ):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
 
+    row_positions = {id(row): index for index, row in enumerate(rows)}
+    final_vote_rows = [
+        next(
+            row
+            for row in reversed(rows)
+            if row.get("event") == "vote_durable_and_exposed" and row.get("vote_kind") == trace_kind
+        )
+        for _phase, trace_kind, _vote_action, _finalize_action in TRACE_PHASES
+    ]
+    quorum_rows_in_phase_order = [
+        next(
+            row
+            for row in rows
+            if row.get("event") == "quorum_validated" and row.get("vote_kind") == trace_kind
+        )
+        for _phase, trace_kind, _vote_action, _finalize_action in TRACE_PHASES
+    ]
+    critical_positions = [
+        *(row_positions[id(row)] for row in final_vote_rows),
+        row_positions[id(prepare_complete_rows[0])],
+        row_positions[id(started_rows[-1])],
+        *(row_positions[id(row)] for row in quorum_rows_in_phase_order),
+        row_positions[id(apply_rows[0])],
+        row_positions[id(pointer_rows[0])],
+        row_positions[id(terminal_rows[0])],
+    ]
+    if critical_positions != sorted(critical_positions) or len(set(critical_positions)) != len(
+        critical_positions
+    ):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
     crash_rows = [row for row in rows if row.get("event") == "simulated_crash"]
     recovery_rows = [row for row in rows if row.get("event") == "journal_recovery_verified"]
     journal_rows = [row for row in rows if row.get("event") == "journal_recovered"]
@@ -1325,6 +1667,17 @@ def _collect_native_trace(
             or recovery_rows[0].get("replay") is not True
             or len(journal_rows) != 1
             or journal_rows[0].get("replay") is not True
+        ):
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        crash_positions = [
+            row_positions[id(crash_rows[0])],
+            row_positions[id(recovery_rows[0])],
+            row_positions[id(started_rows[1])],
+            row_positions[id(journal_rows[0])],
+            row_positions[id(final_vote_rows[0])],
+        ]
+        if crash_positions != sorted(crash_positions) or len(set(crash_positions)) != len(
+            crash_positions
         ):
             raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
     elif crash_rows or recovery_rows or journal_rows:
@@ -1352,60 +1705,181 @@ def _write_execution_evidence(
     toolchain_document: Mapping[str, object],
     model: AppliedModel,
 ) -> tuple[dict[str, object], Path, Path]:
+    source_snapshot = toolchain_document.get("source_snapshot")
+    if not isinstance(source_snapshot, dict):
+        raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+    raw_source_files = source_snapshot.get("files")
+    if not isinstance(raw_source_files, list):
+        raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+    source_ids: dict[str, str] = {}
+    for item in raw_source_files:
+        if not isinstance(item, dict):
+            raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+        path = item.get("path")
+        content_id = item.get("content_id")
+        if not isinstance(path, str) or not isinstance(content_id, str):
+            raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+        source_ids[path] = _require_content_id(content_id, "MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+    if set(source_ids) != set(SOURCE_SNAPSHOT_FILES):
+        raise MnistDeltaError("MNIST_DELTA_SOURCE_SNAPSHOT_INVALID")
+
+    transport_receipt_ids = [
+        _content_id(_canonical_bytes(_logical_result(receipt))) for receipt in transport_receipts
+    ]
+    native_trace_ids = {
+        validator_id: _content_id(b"".join(_canonical_bytes(row) + b"\n" for row in rows))
+        for validator_id, rows in native_traces.items()
+    }
+    observed_vote_events = sum(
+        row.get("event") == "vote_durable_and_exposed"
+        for rows in native_traces.values()
+        for row in rows
+    )
+    observed_quorum_events = sum(
+        row.get("event") == "quorum_validated" for rows in native_traces.values() for row in rows
+    )
+
+    def source(path: str) -> str:
+        return source_ids[path]
+
+    def observed(condition: bool, code: str) -> str:
+        if not condition:
+            raise MnistDeltaError(code)
+        return "PASS"
+
+    def nested(item: Mapping[str, object], field: str, nested_field: str) -> object:
+        value = item.get(field)
+        return value.get(nested_field) if isinstance(value, dict) else None
+
     components: list[dict[str, object]] = [
         {
             "component": "deltatorrent.benchmark.mnist_demo",
+            "evidence": {
+                "contribution_ids": [item.content_id for item in contributions],
+                "source_ids": [
+                    source("delta-worker-python/src/deltatorrent/benchmark/mnist_demo.py"),
+                    source("delta-worker-python/src/deltatorrent/benchmark/mnist_delta_nodes.py"),
+                ],
+            },
             "implementation_class": "DEMO_WORKLOAD_ADAPTER",
             "sequence": 1,
-            "status": "PASS",
+            "status": observed(
+                len(contributions) == NODE_COUNT,
+                "MNIST_DELTA_WORKLOAD_COMPONENT_NOT_OBSERVED",
+            ),
         },
         {
             "component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+            "evidence": {
+                "receipt_ids": transport_receipt_ids,
+                "source_ids": [
+                    source(
+                        "integration/mnist-delta/java/io/deltareduce/demo/MnistDeltaNettyRelay.java"
+                    ),
+                    source(
+                        "delta-node-java/src/main/java/io/deltareduce/node/benchmark/"
+                        "BenchmarkTransport.java"
+                    ),
+                    source(
+                        "delta-node-java/src/main/java/io/deltareduce/node/benchmark/"
+                        "NettyMetricsCollector.java"
+                    ),
+                ],
+            },
             "implementation_class": "DEMO_ADAPTER_USING_PRODUCTION_NETTY_TRANSPORT",
             "sequence": 2,
-            "status": "PASS",
+            "status": observed(
+                len(transport_receipts) == NODE_COUNT * 2
+                and all(receipt.get("status") == "PASS" for receipt in transport_receipts),
+                "MNIST_DELTA_NETTY_COMPONENT_NOT_OBSERVED",
+            ),
         },
         {
             "component": "delta::runtime::CertificateVoteRuntime",
+            "evidence": {
+                "durable_vote_events": observed_vote_events,
+                "native_trace_ids": native_trace_ids,
+                "source_id": source("delta-runtime-cpp/src/certificate_runtime.cpp"),
+            },
             "implementation_class": "PRODUCTION_DELTA",
             "sequence": 3,
-            "status": "PASS",
+            "status": observed(
+                observed_vote_events == NODE_COUNT * len(REQUIRED_VOTE_KINDS) + 5,
+                "MNIST_DELTA_VOTE_RUNTIME_NOT_OBSERVED",
+            ),
         },
         {
             "component": "delta::certificates::ChainVerifier",
+            "evidence": {
+                "quorum_validation_events": observed_quorum_events,
+                "source_id": source("delta-core-cpp/src/certificates/verifier.cpp"),
+            },
             "implementation_class": "PRODUCTION_DELTA",
             "sequence": 4,
-            "status": "PASS",
+            "status": observed(
+                observed_quorum_events == NODE_COUNT * len(REQUIRED_VOTE_KINDS),
+                "MNIST_DELTA_CHAIN_VERIFIER_NOT_OBSERVED",
+            ),
         },
         {
             "component": "delta::robust::build_plan",
+            "evidence": {
+                "aggregate_root_ids": [item["aggregate_root_qc_id"] for item in finalize_results],
+                "source_id": source("delta-core-cpp/src/robust/plan.cpp"),
+            },
             "implementation_class": "PRODUCTION_DELTA",
             "sequence": 5,
-            "status": "PASS",
+            "status": observed(
+                len({item["aggregate_root_qc_id"] for item in finalize_results}) == 1,
+                "MNIST_DELTA_ROBUST_PLAN_NOT_OBSERVED",
+            ),
         },
         {
             "component": "delta::robust::reduce_parameter_shard",
+            "evidence": {
+                "applied_model_file_sha256": model.content_id,
+                "source_id": source("delta-core-cpp/src/robust/plan.cpp"),
+            },
             "implementation_class": "PRODUCTION_DELTA_AGGREGATION_AUTHORITY",
             "sequence": 6,
-            "status": "PASS",
+            "status": observed(
+                all(
+                    nested(item, "model_artifact", "sha256") == model.content_id
+                    for item in finalize_results
+                ),
+                "MNIST_DELTA_ROBUST_REDUCE_NOT_OBSERVED",
+            ),
         },
         {
             "component": "delta::apply::compute_candidate",
+            "evidence": {
+                "candidate_ids": [item["apply_candidate_id"] for item in finalize_results],
+                "source_id": source("delta-core-cpp/src/apply/engine.cpp"),
+            },
             "implementation_class": "PRODUCTION_DELTA",
             "sequence": 7,
-            "status": "PASS",
+            "status": observed(
+                len({item["apply_candidate_id"] for item in finalize_results}) == 1,
+                "MNIST_DELTA_APPLY_NOT_OBSERVED",
+            ),
         },
         {
             "component": "delta::runtime::CurrentPointerStore",
+            "evidence": {
+                "model_state_hash": finalize_results[0]["model_hash"],
+                "pointer_count": len(finalize_results),
+                "source_id": source("delta-runtime-cpp/src/certificate_runtime.cpp"),
+            },
             "implementation_class": "PRODUCTION_DELTA",
             "sequence": 8,
-            "status": "PASS",
-        },
-        {
-            "component": "deltatorrent.benchmark.mnist_demo.evaluate_centroid_model",
-            "implementation_class": "DEMO_EVALUATION_ONLY",
-            "sequence": 9,
-            "status": "PASS",
+            "status": observed(
+                len(finalize_results) == NODE_COUNT
+                and all(
+                    nested(item, "current_pointer", "disposition") == "ADVANCED"
+                    for item in finalize_results
+                ),
+                "MNIST_DELTA_CURRENT_POINTER_NOT_OBSERVED",
+            ),
         },
     ]
     deterministic_trace: dict[str, object] = {
@@ -1414,16 +1888,21 @@ def _write_execution_evidence(
         "classification": "LOCAL_DEMO_ONLY",
         "components": components,
         "contribution_ids": [item.content_id for item in contributions],
+        "contributions_bound_netty_to_native": True,
         "execution_authorized": False,
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
         "governance_eligible": False,
         "applied_model_file_sha256": model.content_id,
         "native_results": [_logical_result(item) for item in (*prepare_results, *finalize_results)],
+        "native_trace_ids": native_trace_ids,
+        "distributed_orchestrator_received_node_local_numeric_arrays": False,
         "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",
         "python_cross_node_aggregation_performed": False,
         "schema_version": "1.0.0",
         "terminal_outcome": "APPLIED",
         "transport_receipts": [_logical_result(item) for item in transport_receipts],
+        "transport_receipt_ids": transport_receipt_ids,
+        "toolchain": dict(toolchain_document),
         "type_name": "DELTAREDUCE_MNIST_EXECUTION_TRACE",
         "workload_id": workload_id,
     }
@@ -1433,21 +1912,22 @@ def _write_execution_evidence(
         {
             "execution_path_id": execution_path_id,
             "native_trace": native_traces,
-            "toolchain": dict(toolchain_document),
         }
     )
     trace_path = destination / "execution-trace.json"
     _write_json_new(trace_path, trace_document)
     diagram_path = destination / "execution-path.mmd"
     diagram = """flowchart LR
-    A[4 Python MNIST workers] -->|signed canonical workload| B[Java Netty loopback]
-    B --> C[demo-only native process adapter]
+    A[4 Python MNIST workers] -->|worker-local computation| W[seal 4 opaque contribution files]
+    W -->|Ed25519-verified exact bytes| B[Java Netty loopback]
+    B --> C[demo-only native process adapter: bind all 4 records]
     C --> D[CertificateVoteRuntime + durable WAL]
     D --> E[ChainVerifier: ISC / EC / APC / ParameterShardQC / AggregateRootQC / ApplyQC]
     E --> F[robust::reduce_parameter_shard]
     F --> G[apply::compute_candidate]
     G --> H[CurrentPointerStore: APPLIED]
     H -->|native model bytes| I[Python evaluation + UI]
+    Z[centralized baseline] -. comparison only; never a Delta input .-> I
 """
     _write_new(diagram_path, diagram.encode("utf-8"))
     delta_execution: dict[str, object] = {
@@ -1456,6 +1936,7 @@ def _write_execution_evidence(
         "authoritative": False,
         "certificate_signature_semantics": "CONTENT_ID_PLACEHOLDER_LOCAL_DEMO_ONLY",
         "components": components,
+        "contributions_bound_netty_to_native": True,
         "current_pointer": finalize_results[0].get("current_pointer"),
         "execution_path_id": execution_path_id,
         "execution_trace_sha256": _content_id(trace_path.read_bytes()),
@@ -1464,6 +1945,7 @@ def _write_execution_evidence(
         "model_state_hash": finalize_results[0].get("model_hash"),
         "native_cryptographic_signatures_verified": False,
         "node_count": NODE_COUNT,
+        "distributed_orchestrator_received_node_local_numeric_arrays": False,
         "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",
         "python_cross_node_aggregation_performed": False,
         "quorum_certificates": finalize_results[0].get("quorum_certificates"),
@@ -1480,8 +1962,7 @@ def run_delta_nodes(
     repository_root: Path,
     destination: Path,
     controllers_dir: Path,
-    summaries: Sequence[NodeSummaryLike],
-    shard_ids: Mapping[str, str],
+    node_contributions: Sequence[NodeContribution],
     source_id: str,
     *,
     toolchain: DeltaToolchain | None = None,
@@ -1499,7 +1980,7 @@ def run_delta_nodes(
     workload_root = output / "workload"
     workload_root.mkdir()
     workload_path = workload_root / "mnist-workload.bin"
-    contributions, workload_id = write_workload(summaries, shard_ids, source_id, workload_path)
+    contributions, workload_id = write_workload(node_contributions, source_id, workload_path)
     contribution_ids = tuple(item.content_id for item in contributions)
 
     transport_receipts: list[dict[str, object]] = []
@@ -1530,6 +2011,13 @@ def run_delta_nodes(
         transport_receipts.append(receipt)
         relayed_workloads[validator_id] = destination_root / "workload.bin"
         relayed_contribution_roots[validator_id] = destination_root / "contributions"
+    expected_workload_transport_ids = [workload_id, *contribution_ids]
+    if any(
+        receipt.get("input_content_ids") != expected_workload_transport_ids
+        or receipt.get("output_content_ids") != expected_workload_transport_ids
+        for receipt in transport_receipts
+    ):
+        raise MnistDeltaError("MNIST_DELTA_CONTRIBUTION_TRANSPORT_BINDING_INVALID")
 
     runtime_root = output / "native-nodes"
     prepare_results: list[dict[str, object]] = []
@@ -1558,6 +2046,7 @@ def run_delta_nodes(
                 crash_result,
                 validator_id,
                 workload_id,
+                source_id,
                 contribution_ids,
                 node_dir,
                 crash_result_path,
@@ -1580,6 +2069,7 @@ def run_delta_nodes(
             result,
             validator_id,
             workload_id,
+            source_id,
             contribution_ids,
             node_dir,
             result_path,
@@ -1640,6 +2130,7 @@ def run_delta_nodes(
             result,
             validator_id,
             workload_id,
+            source_id,
             contribution_ids,
             model,
             runtime_root / validator_id,
@@ -1654,12 +2145,18 @@ def run_delta_nodes(
         "aggregate_root_qc_id",
         "apply_candidate_id",
         "apply_qc_id",
+        "body_ids",
+        "current_pointer",
         "model_hash",
+        "quorum_certificates",
         "optimizer_hash",
     )
     if any(
-        len({str(result.get(key)) for result in finalize_results}) != 1 for key in semantic_keys
+        len({_canonical_bytes(result.get(key)) for result in finalize_results}) != 1
+        for key in semantic_keys
     ):
+        raise MnistDeltaError("MNIST_DELTA_NODE_RECEIPTS_DIVERGED")
+    if len({_canonical_bytes(result.get("body_ids")) for result in prepare_results}) != 1:
         raise MnistDeltaError("MNIST_DELTA_NODE_RECEIPTS_DIVERGED")
 
     native_traces = {

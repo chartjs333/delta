@@ -40,7 +40,7 @@ namespace protocol = delta::core::protocol;
 namespace certificates = delta::certificates;
 namespace runtime = delta::runtime;
 
-constexpr std::uint32_t workload_version = 1U;
+constexpr std::uint32_t workload_version = 2U;
 constexpr std::uint32_t validator_count = 4U;
 constexpr std::uint32_t quorum_threshold = 3U;
 constexpr std::uint32_t pixel_coordinate_count = 10U * 28U * 28U;
@@ -49,7 +49,7 @@ constexpr std::uint32_t vector_width = pixel_coordinate_count + presence_coordin
 constexpr std::size_t content_id_bytes = 71U;
 constexpr std::size_t workload_header_bytes = 8U + 4U * sizeof(std::uint32_t) + content_id_bytes;
 constexpr std::size_t workload_record_bytes =
-    sizeof(std::uint32_t) + sizeof(std::uint64_t) + content_id_bytes +
+    sizeof(std::uint32_t) + sizeof(std::uint64_t) + 2U * content_id_bytes +
     vector_width * sizeof(std::int16_t);
 constexpr std::size_t exact_workload_bytes =
     workload_header_bytes + validator_count * workload_record_bytes;
@@ -64,7 +64,7 @@ constexpr std::array<std::byte, 8U> workload_magic{
     std::byte{'I'},
     std::byte{'S'},
     std::byte{'T'},
-    std::byte{'1'},
+    std::byte{'2'},
     std::byte{0},
 };
 
@@ -351,6 +351,7 @@ struct WorkloadRecord {
   std::uint32_t node_index;
   std::uint64_t sample_count;
   std::string shard_id;
+  std::string summary_id;
   std::vector<std::int64_t> q_values;
 };
 
@@ -377,7 +378,9 @@ struct Workload {
 
   std::array<WorkloadRecord, validator_count> records;
   std::vector<std::string> shard_ids;
+  std::vector<std::string> summary_ids;
   shard_ids.reserve(validator_count);
+  summary_ids.reserve(validator_count);
   for (std::uint32_t record_index = 0U; record_index < validator_count; ++record_index) {
     const auto node_index = reader.u32();
     require(node_index == record_index + 1U, "canonical workload records are not ordered 1..4");
@@ -391,6 +394,12 @@ struct Workload {
         std::find(shard_ids.begin(), shard_ids.end(), shard_id) == shard_ids.end(),
         "canonical workload shard_id is duplicated");
     shard_ids.push_back(shard_id);
+    auto summary_id = reader.ascii(content_id_bytes);
+    require(certificates::is_content_id(summary_id), "canonical workload summary_id is invalid");
+    require(
+        std::find(summary_ids.begin(), summary_ids.end(), summary_id) == summary_ids.end(),
+        "canonical workload summary_id is duplicated");
+    summary_ids.push_back(summary_id);
     std::vector<std::int64_t> q_values;
     q_values.reserve(vector_width);
     bool any_presence = false;
@@ -414,6 +423,7 @@ struct Workload {
         node_index,
         sample_count,
         std::move(shard_id),
+        std::move(summary_id),
         std::move(q_values),
     };
   }
@@ -554,7 +564,7 @@ struct Chain {
     const auto ticket = ticket_id(record.node_index);
     const auto commitment_id = derived_id(
         "deltareduce.demo.mnist.commitment.v1",
-        {workload.source_id, record.shard_id, ticket});
+        {workload.source_id, record.shard_id, record.summary_id, ticket});
     const auto availability_id = derived_id(
         "deltareduce.demo.mnist.availability.v1", {commitment_id, record.shard_id});
     tuples.push_back(certificates::InputTuple{
@@ -1554,7 +1564,7 @@ struct QuorumResult {
              {"type_name", json_string("MNIST_DELTA_NATIVE_NODE_DESCRIPTOR")},
              {"vector_width", std::to_string(vector_width)},
              {"workload_bytes", std::to_string(exact_workload_bytes)},
-             {"workload_format", json_string("DMNIST1_INT16_BE_V1")},
+             {"workload_format", json_string("DMNIST2_NODE_SUMMARY_INT16_BE_V1")},
          })
       << '\n';
   return 0;

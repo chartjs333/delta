@@ -108,11 +108,17 @@ jobs:
             delta-worker-python/tests/benchmark/test_mnist_delta_nodes.py \
             delta-worker-python/tests/benchmark/test_mnist_delta_e2e.py \
             --basetemp "$RUNNER_TEMP/mnist-delta-e2e"
-          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/execution-trace.json"
-          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/execution-path.mmd"
-          test "$(find "$RUNNER_TEMP/mnist-delta-public-evidence" -type f | wc -l)" = 2
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/direct-delta-path/execution-trace.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/execution-trace.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/execution-path.mmd"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/mnist-demo-report.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/evidence-scope.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/native-nodes/validator-04/trace.jsonl"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/native-nodes/validator-04/votes/runtime.wal"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/network/votes/validator-04/relay-evidence/receipt.json"
+          test -z "$(find "$RUNNER_TEMP/mnist-delta-public-evidence" -type f -name '*.pem' -print -quit)"
 
-      - name: Retain public execution trace and diagram
+      - name: Retain sanitized raw execution evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

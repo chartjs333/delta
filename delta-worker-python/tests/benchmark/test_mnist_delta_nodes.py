@@ -21,9 +21,9 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     PIXELS_PER_DIGIT,
     VECTOR_WIDTH,
     MnistDeltaError,
-    contribution_from_summary,
     decode_applied_model,
     expected_central_model,
+    write_node_contribution,
     write_workload,
 )
 
@@ -63,42 +63,63 @@ def _shard_ids() -> dict[str, str]:
     }
 
 
+def _contributions(
+    tmp_path: Path, summaries: tuple[_Summary, ...] | None = None
+) -> tuple[mnist_delta_nodes.NodeContribution, ...]:
+    selected = summaries or _summaries()
+    return tuple(
+        write_node_contribution(
+            summary,
+            _shard_ids()[summary.node_id],
+            (tmp_path / f"worker-{index:02d}.bin").resolve(),
+        )
+        for index, summary in enumerate(selected, start=1)
+    )
+
+
+def _values(path: Path) -> np.ndarray:
+    offset = 4 + 8 + CONTENT_ID_TEXT_BYTES * 2
+    return np.frombuffer(path.read_bytes(), dtype=">i2", offset=offset).astype(np.int16)
+
+
 def test_workload_contains_four_independent_negative_model_deltas(tmp_path: Path) -> None:
     summaries = _summaries()
     destination = tmp_path / "workload.bin"
     contributions, workload_id = write_workload(
-        summaries,
-        _shard_ids(),
-        "sha256:" + "a" * 64,
-        destination,
+        _contributions(tmp_path, summaries), "sha256:" + "a" * 64, destination
     )
 
     raw = destination.read_bytes()
     assert workload_id == "sha256:" + hashlib.sha256(raw).hexdigest()
-    assert raw[:8] == b"DMNIST1\0"
-    assert struct.unpack_from(">IIII", raw, 8) == (1, 4, VECTOR_WIDTH, 4)
+    assert raw[:8] == b"DMNIST2\0"
+    assert struct.unpack_from(">IIII", raw, 8) == (2, 4, VECTOR_WIDTH, 4)
     assert len(raw) == 8 + 16 + CONTENT_ID_TEXT_BYTES + NODE_COUNT * (
-        4 + 8 + CONTENT_ID_TEXT_BYTES + VECTOR_WIDTH * 2
+        4 + 8 + CONTENT_ID_TEXT_BYTES * 2 + VECTOR_WIDTH * 2
     )
     assert [item.node_index for item in contributions] == [1, 2, 3, 4]
     for item, digits in zip(contributions, ((0, 1, 2), (3, 4, 5), (6, 7), (8, 9)), strict=True):
+        values = _values(item.record_path)
         for digit in range(DIGIT_COUNT):
             start = digit * PIXELS_PER_DIGIT
             expected = -NODE_COUNT * (digit + 1) if digit in digits else 0
-            assert np.all(item.values[start : start + PIXELS_PER_DIGIT] == expected)
+            assert np.all(values[start : start + PIXELS_PER_DIGIT] == expected)
             expected_presence = -NODE_COUNT if digit in digits else 0
-            assert item.values[DIGIT_COUNT * PIXELS_PER_DIGIT + digit] == expected_presence
+            assert values[DIGIT_COUNT * PIXELS_PER_DIGIT + digit] == expected_presence
 
 
-def test_local_quantization_uses_integer_half_toward_positive() -> None:
+def test_local_quantization_uses_integer_half_toward_positive(tmp_path: Path) -> None:
     summary = _summaries()[0]
     sums = summary.sums.copy()
     counts = summary.counts.copy()
     counts[0] = 2
     sums[0] = 3
     changed = _Summary(summary.node_id, counts, sums, summary.summary_id)
-    contribution = contribution_from_summary(changed, _shard_ids()[summary.node_id])
-    assert np.all(contribution.values[:PIXELS_PER_DIGIT] == -2 * NODE_COUNT)
+    contribution = write_node_contribution(
+        changed,
+        _shard_ids()[summary.node_id],
+        (tmp_path / "contribution.bin").resolve(),
+    )
+    assert np.all(_values(contribution.record_path)[:PIXELS_PER_DIGIT] == -2 * NODE_COUNT)
 
 
 def test_expected_central_model_is_independent_positive_reference() -> None:
@@ -150,10 +171,10 @@ def test_applied_model_decoder_rejects_mutated_native_bytes(
 
 
 def test_missing_node_is_rejected_before_any_native_execution(tmp_path: Path) -> None:
+    contributions = _contributions(tmp_path)
     with pytest.raises(MnistDeltaError, match="NODE_COUNT_INVALID"):
         write_workload(
-            _summaries()[:3],
-            _shard_ids(),
+            contributions[:3],
             "sha256:" + "a" * 64,
             tmp_path / "workload.bin",
         )

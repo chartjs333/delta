@@ -6,9 +6,10 @@ protocol. The adapter supplies an MNIST workload to the existing Java transport
 and native Delta libraries and fails closed if any required production component
 is absent.
 
-Every generated report and receipt is classified `LOCAL_DEMO_ONLY`,
-non-authoritative and ineligible for Campaign 02 governance. A successful demo is
-not Feature 010 GO, an execution authorization, a `BenchmarkDefinitionQC` or a
+The run-level and native evidence is classified `LOCAL_DEMO_ONLY`,
+non-authoritative and ineligible for Campaign 02 governance. Java relay receipts
+are byte-preservation observations only and confer no authority. A successful demo
+is not Feature 010 GO, an execution authorization, a `BenchmarkDefinitionQC` or a
 `BenchmarkResultQC`.
 
 ## Executed path
@@ -19,12 +20,16 @@ flowchart LR
     DS --> W2[Python worker 02]
     DS --> W3[Python worker 03]
     DS --> W4[Python worker 04]
-    W1 --> O[one-summary-at-a-time workload adapter]
-    W2 --> O
-    W3 --> O
-    W4 --> O
-    O -->|signed canonical contributions| N[Java Netty loopback transport]
-    N --> A[demo-only native process adapter]
+    W1 --> O1[worker 01 local seal]
+    W2 --> O2[worker 02 local seal]
+    W3 --> O3[worker 03 local seal]
+    W4 --> O4[worker 04 local seal]
+    O1 --> F[non-numeric framing: workload.bin + 4 files]
+    O2 --> F
+    O3 --> F
+    O4 --> F
+    F -->|relay signs; Java verifies 5 exact entries| N[Java Netty loopback transport]
+    N --> A[demo-only native adapter: bind all 4 files to workload]
     A --> V[CertificateVoteRuntime / durable vote WAL]
     V --> Q[ChainVerifier / six QC phases]
     Q --> R[robust::build_plan and reduce_parameter_shard]
@@ -36,18 +41,19 @@ flowchart LR
     classDef workload fill:#493813,stroke:#f7c948,color:#fff;
     classDef adapter fill:#32254f,stroke:#ba9cff,color:#fff;
     classDef delta fill:#102844,stroke:#57e39a,color:#fff;
-    class DS,W1,W2,W3,W4,O,E,UI workload;
+    class DS,W1,W2,W3,W4,O1,O2,O3,O4,F,E,UI workload;
     class N,A adapter;
     class V,Q,R,P,C delta;
 ```
 
-The Python worker processes own only node-local workload computation. The Python
-orchestrator also admits the dataset, prepares disjoint shards, converts each
-worker summary independently into a canonical contribution, and evaluates the
-model emitted by the native process. It never numerically combines contributions
-into the distributed model. A separately labelled centralized baseline exists for
-comparison, but its model and sufficient statistics never enter the distributed
-path.
+The Python worker processes own node-local workload computation and seal their own
+canonical contributions before returning. The distributed orchestrator receives
+no node-local pixel sums or model-coordinate arrays; it only validates opaque file
+metadata, builds a framing envelope without numeric arithmetic, and later evaluates
+the model emitted by native Apply. The local account can read those opaque files,
+so this is a verified execution data-flow property rather than OS-level capability
+isolation. A separately labelled centralized baseline exists for comparison, but
+its model and sufficient statistics never enter the distributed path.
 
 The Java side verifies the demo Ed25519 transport signature and moves the exact
 payload bytes through Netty; it does not inspect model coordinates or assemble a
@@ -70,16 +76,18 @@ TLS, peer routing, concurrent multi-host scheduling, or real-WAN behavior.
 A run is accepted only when all of these statements are true:
 
 1. every node-local contribution has a content ID before it enters transport;
-2. the contribution bytes received by Netty are byte-identical to the signed
-   bytes sent by the worker;
-3. all quorum-forming votes are persisted before their frames are exposed;
-4. every certificate phase is parsed and validated by `ChainVerifier`;
-5. the only cross-node numeric reduction event identifies
+2. the relay signs each sealed file and the contribution bytes received by Netty
+   are byte-identical to those signed bytes;
+3. the native adapter sees exactly four relayed files and byte-compares each one
+   with its independently identified record inside the workload before voting;
+4. all quorum-forming votes are persisted before their frames are exposed;
+5. every certificate phase is parsed and validated by `ChainVerifier`;
+6. the only cross-node numeric reduction event identifies
    `delta::robust::reduce_parameter_shard` as its component;
-6. the evaluated distributed model is loaded from the native `APPLIED` model
+7. the evaluated distributed model is loaded from the native `APPLIED` model
    file and its SHA-256 matches the final native receipt and every node receipt;
-7. the machine-readable trace contains the required ordered component events;
-8. the repository tests reject a Python `aggregate_summaries` fallback and bind
+8. the machine-readable trace contains the required ordered component events;
+9. the repository tests reject a Python `aggregate_summaries` fallback and bind
    the adapter to the expected production call sites.
 
 Failure of any item terminates the demo. There is no Python fallback and no
@@ -115,8 +123,10 @@ The demo retains, below its ignored local output directory:
 Process IDs and timings remain observations and are excluded from deterministic
 content identities.
 
-`example-execution-trace.json` is a portable exact excerpt from a successful
+`example-execution-trace.json` is a portable human-readable excerpt from a successful
 60,000-train / 10,000-test MNIST run. It records the ordered production
 components, all six QC identities, the APPLIED model hash, recovery evidence and
 the SHA-256/byte length of the complete generated trace. It remains explicitly
-non-authoritative; every live run writes its own complete trace.
+non-authoritative and is not standalone proof. Every full-MNIST run writes its own
+complete local trace. CI retains a complete synthetic-workload trace generated by
+the same execution path, not the 60,000-image local trace summarized here.

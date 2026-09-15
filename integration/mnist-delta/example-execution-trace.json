@@ -44,15 +44,16 @@
       "component": "delta::runtime::CurrentPointerStore",
       "sequence": 8,
       "status": "PASS"
-    },
-    {
-      "component": "deltatorrent.benchmark.mnist_demo.evaluate_centroid_model",
-      "sequence": 9,
-      "status": "PASS"
     }
   ],
+  "contribution_ids": [
+    "sha256:17deabb9d10368b2fdb3db23b87f022230e0467a3f078b8f7e5195b310fcde05",
+    "sha256:5cfb7f60a637fc1efa18aadaecc7d1cd37ddb7d8d4f5b5bb03b072fb5229a78c",
+    "sha256:5f73ab8aded2671c7a1cc2f729149e43c50d7a4a6bdbeba585228afb0d30e696",
+    "sha256:feade355da2a6ea9b128e89151e973bf6d8796c7851cc22475d5bc9e86e1fac9"
+  ],
   "current_pointer": {
-    "apply_qc_id": "sha256:a802f9544adad2b1aee80ad3f0062439073cc9804789df3ae74805ac971f8276",
+    "apply_qc_id": "sha256:36838bb4b0eb31372dc4ac9c7fa4f4e3953ad50f1e9d1e26cd05320d88f32d1d",
     "checkpoint_id": "sha256:a6d7388031b879ede9f2828c2b8978897b8421f289236061537cb42eb5a57b6e",
     "disposition": "ADVANCED",
     "height": 1,
@@ -66,7 +67,7 @@
   },
   "distributed_accuracy_ppm": 820500,
   "exact_model_match_with_centralized": true,
-  "execution_path_id": "sha256:5001a6687851caa6ec8c49a5e080433e5ed6a409cf807f8cdf037857057065f0",
+  "execution_path_id": "sha256:94c5183f8439587469922b6a8080fbc9b4e99053ec55fb4b0f3a4c60fc3c33af",
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
   "governance_eligible": false,
   "native_results": {
@@ -75,6 +76,7 @@
   },
   "network": {
     "ed25519_verified": true,
+    "native_receipts_bound_contribution_ids": true,
     "netty_loopback_receipts": 8,
     "receipt_status": "PASS",
     "vote_frames_per_receiver": 24,
@@ -85,44 +87,44 @@
   "python_cross_node_aggregation_performed": false,
   "quorum_certificates": [
     {
-      "context_id": "ISC:mnist-demo-4e0e12e09f1d8c834034:1:0",
+      "context_id": "ISC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "input_set",
-      "qc_id": "sha256:2acbb8e3b7476c14b9916628050db9892ecb911b0b699ddba594f17f06657fe7",
+      "qc_id": "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1",
       "signer_count": 4,
       "threshold": 3
     },
     {
-      "context_id": "EC:mnist-demo-4e0e12e09f1d8c834034:1:0",
+      "context_id": "EC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "eligibility",
-      "qc_id": "sha256:bbda008912d382dcb8655361f082749475e11e044a9fb20f9801d0e914e33f8a",
+      "qc_id": "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442",
       "signer_count": 4,
       "threshold": 3
     },
     {
-      "context_id": "APC:mnist-demo-4e0e12e09f1d8c834034:1:0",
+      "context_id": "APC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "aggregation_plan",
-      "qc_id": "sha256:4b32082b6aa24e57d1352ea5c5e5b520cc7d8da6cd4bfeed40ce94d141924671",
+      "qc_id": "sha256:79726e37aa2b67570a14233a2541d399d3a30bd2795c266d3640d5b28116aa25",
       "signer_count": 4,
       "threshold": 3
     },
     {
-      "context_id": "PARAMETER_SHARD_QC:mnist-demo-4e0e12e09f1d8c834034:1:0",
+      "context_id": "PARAMETER_SHARD_QC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "parameter_shard",
-      "qc_id": "sha256:d6cf862955d8279add5d80faf15ceccb3c96ab5841f672de680a1faacc665333",
+      "qc_id": "sha256:2d85b3de5abbd9c0fadb70d35a719d40e41a5cc49ea7510497a4b636efd113a6",
       "signer_count": 4,
       "threshold": 3
     },
     {
-      "context_id": "AGGREGATE_ROOT_QC:mnist-demo-4e0e12e09f1d8c834034:1:0",
+      "context_id": "AGGREGATE_ROOT_QC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "aggregate_root",
-      "qc_id": "sha256:1a5a913ae5833856ddd31247cdc56ad40d4e93d5d32dfcda8a44db4a2b9178b0",
+      "qc_id": "sha256:467124a58671530fd7ef988b9fee44d9b84982131212434e4fe3830aedc50c28",
       "signer_count": 4,
       "threshold": 3
     },
     {
-      "context_id": "APPLY_QC:mnist-demo-4e0e12e09f1d8c834034:1:0",
+      "context_id": "APPLY_QC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "apply",
-      "qc_id": "sha256:92b5ff8e3d3e079628b96142c1d8c25ef68fcd3d1a048e6e811d276e69658cb8",
+      "qc_id": "sha256:4148b547914bc3f59e118f8fbad35d529ce2d0a847b749131d8e5b216ba8971d",
       "signer_count": 4,
       "threshold": 3
     }
@@ -135,18 +137,19 @@
     "replay_observed": true,
     "status": "RECOVERED_AND_APPLIED"
   },
-  "reproducibility_id": "sha256:48ab26ad19ef3bcbcbadc68491c94974681e01b7e1457586dd6c1d81e56d4dcc",
+  "reproducibility_id": "sha256:b4975321e107c9f593494a8cfbb4d7a05ad9d964e0b4c72ce6f266f8847a0e7d",
   "run_date": "2026-09-14",
   "schema_version": "1.0.0",
-  "source_execution_trace_bytes": 162809,
-  "source_execution_trace_sha256": "sha256:efb96f9981d5218f99594ee1e5dcad5127e89129235feffb906f05ddc49f4388",
+  "source_execution_trace_bytes": 173765,
+  "source_execution_trace_sha256": "sha256:62767aeb9a0ebe83b77de85bb9750870717d8b23831eddf03d084e2286f2fba8",
   "terminal_outcome": "APPLIED",
   "toolchain": {
-    "classpath_content_id": "sha256:cd84488e9a7efb266f2e05754d4f3e155320b680d3175701553b567463ecb4e5",
+    "classpath_content_id": "sha256:50728538a75e8ad4fced90bf926e3ec2392441fd39b6a218d15d4698de593cf4",
     "java_executable_sha256": "sha256:5808527e3dfc4eb285c7664ba356bc267055ef906e83ed4660d9f7976da7349b",
     "java_feature": 25,
-    "native_executable_sha256": "sha256:b000a242b51ca6d8b8ab9cd030f2d23382b082b5a837747788128a26b481aba2"
+    "native_executable_sha256": "sha256:e060dd96a8e0816b9559bac22d71914a0e372767f63bd15e73a8751d5b1a81b9",
+    "source_snapshot_content_id": "sha256:c213a5c18681bbcd078b14660e390d2e76bb717c505e13f34dbfba2ad4c27d50"
   },
   "type_name": "MNIST_DELTA_VERIFIED_RUN_TRACE_EXCERPT",
-  "workload_id": "sha256:4e0e12e09f1d8c834034599a034f3fb285cfc87beb3f084fb642b42e6eae5eae"
+  "workload_id": "sha256:83a57a3ab80203a1b94b4d718c98f75676e68e3536e6d9a88bf2b73b342dcbd5"
 }

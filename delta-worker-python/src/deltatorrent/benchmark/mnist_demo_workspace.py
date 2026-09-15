@@ -468,6 +468,8 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
     ):
         raise MnistDemoError("MNIST_WORKSPACE_REPORT_INVALID")
     components = delta.get("components")
+    toolchain = delta.get("toolchain")
+    source_snapshot = toolchain.get("source_snapshot") if isinstance(toolchain, dict) else None
     required_components = {
         "io.deltareduce.demo.MnistDeltaNettyRelay",
         "delta::runtime::CertificateVoteRuntime",
@@ -480,17 +482,29 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         delta.get("status") != "PASS"
         or delta.get("terminal_outcome") != "APPLIED"
         or delta.get("python_cross_node_aggregation_performed") is not False
+        or delta.get("distributed_orchestrator_received_node_local_numeric_arrays") is not False
+        or delta.get("contributions_bound_netty_to_native") is not True
         or delta.get("aggregation_authority") != "delta::robust::reduce_parameter_shard"
         or distributed.get("native_runtime_terminal") != "APPLIED"
+        or distributed.get("parallel_processes_observed") != 4
+        or distributed.get("worker_processes_required") != 4
         or distributed.get("exact_model_match_with_centralized") is not True
         or distributed.get("applied_model_file_sha256") != delta.get("applied_model_file_sha256")
         or execution_path.get("trace_id") != delta.get("execution_path_id")
         or execution_path.get("terminal_outcome") != "APPLIED"
+        or execution_path.get("centralized_baseline_isolated_from_delta_inputs") is not True
+        or execution_path.get("demo_owned_aggregation") is not False
+        or execution_path.get("distributed_orchestrator_received_node_local_numeric_arrays")
+        is not False
+        or execution_path.get("four_distinct_worker_processes_observed") is not True
         or failure.get("status") != "RECOVERED_AND_APPLIED"
         or failure.get("replay_observed") is not True
         or failure.get("terminal_outcome") != "APPLIED"
         or not isinstance(components, list)
         or len(components) < len(required_components)
+        or not isinstance(source_snapshot, dict)
+        or source_snapshot.get("no_hidden_aggregation_static_gate") != "PASS"
+        or source_snapshot.get("semantic_completeness_claimed") is not False
     ):
         raise MnistDemoError("MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID")
     observed_components: set[str] = set()
@@ -500,6 +514,7 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
             or component.get("sequence") != expected_sequence
             or component.get("status") != "PASS"
             or not isinstance(component.get("component"), str)
+            or not isinstance(component.get("evidence"), dict)
         ):
             raise MnistDemoError("MNIST_WORKSPACE_DELTA_COMPONENT_INVALID")
         observed_components.add(str(component["component"]))

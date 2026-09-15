@@ -2,9 +2,11 @@
 
 This loopback-only browser workspace demonstrates MNIST passing through existing
 Delta component interfaces without changing Campaign 02 governance. MNIST is only
-the workload: four Python workers produce independent node-local statistics, the
-demo adapter converts each statistic set into its own canonical contribution, and
-existing Java and C++ Delta components perform transport validation, durability,
+the workload: each of four distinct Python worker processes produces and seals
+one independent canonical contribution before returning, while the parent sees
+only display metadata and opaque files from the distributed arm. Existing Java
+and C++ Delta components perform
+transport validation, durability,
 certificate validation, aggregation, Apply, and the current-state transition.
 
 ## Start the presentation
@@ -51,11 +53,16 @@ fallback.
 `DEMO_PASS` is emitted only when all of the following are true:
 
 1. MNIST admission and the four disjoint shards are content-bound.
-2. Each Python worker computes only its own class statistics. The workload adapter
-   converts one worker summary at a time into one canonical `int16` model delta;
-   the conversion function never receives another worker's summary.
-3. Java verifies the demo Ed25519 signature and moves the exact opaque bytes over
-   a real Netty loopback TCP connection without numeric arithmetic.
+2. Four distinct worker processes each compute only their own class statistics and
+   seal one canonical `int16` contribution before returning. The distributed
+   orchestrator receives no node-local numeric arrays—only process/display metadata,
+   a path, byte length, and content ID.
+3. The relay orchestrator signs five opaque transport entries per receiver (one
+   framing workload plus four independently sealed contribution files). Java
+   verifies each demo Ed25519 signature and moves the exact bytes over real Netty
+   loopback TCP without numeric arithmetic. Before any vote, the native adapter
+   requires exactly four relayed contribution files and byte-compares them with
+   the four records embedded in the signed workload.
 4. `CertificateVoteRuntime` persists every phase vote before exposing its frame.
 5. `ChainVerifier` validates ISC, EC, APC, ParameterShardQC, AggregateRootQC, and
    ApplyQC under the existing Delta certificate interfaces.
@@ -66,26 +73,38 @@ fallback.
 8. The distributed result is evaluated only from native `applied-model.bin`; its
    bytes must equal the separately computed centralized baseline under the same
    integer profile.
-9. The machine-readable execution trace contains the ordered component chain and
-   records `python_cross_node_aggregation_performed=false`.
+9. The machine-readable execution trace contains the ordered component chain,
+   source/toolchain identities, and records both
+   `python_cross_node_aggregation_performed=false` and
+   `distributed_orchestrator_received_node_local_numeric_arrays=false`.
 
 The demo integration module has no `aggregate_summaries` function and Java has no
 model-coordinate or aggregation API. Python does compute the explicitly labelled
 centralized comparison arm, but neither that model nor its sufficient statistics
-enter the distributed execution path. The demo-only native executable orchestrates
-production libraries; it contains no alternate reduction algorithm.
+enter the distributed execution path. The opaque contribution files are readable
+by the local parent account; this is a verified data-flow boundary, not OS-level
+capability isolation. The demo-only native executable orchestrates production
+libraries; it contains no alternate reduction algorithm.
 
 ## Executed path
 
 ```mermaid
 flowchart LR
     A[MNIST dataset] --> B[4 isolated Python workers]
-    B --> C[one-summary-at-a-time workload adapter]
-    C -->|signed canonical contributions| D[Java Netty loopback]
-    D --> E[demo-only native process adapter]
-    E --> F[CertificateVoteRuntime + durable WAL]
-    F --> G[ChainVerifier: six QC phases]
-    G --> H[robust::reduce_parameter_shard]
+    B --> C1[worker 01 local seal]
+    B --> C2[worker 02 local seal]
+    B --> C3[worker 03 local seal]
+    B --> C4[worker 04 local seal]
+    C1 --> F[non-numeric framing: workload.bin + 4 files]
+    C2 --> F
+    C3 --> F
+    C4 --> F
+    F -->|relay signs; Java verifies exact bytes| D[Java Netty loopback]
+    D --> E[demo-only native adapter: bind all 4 files to workload]
+    E --> V[CertificateVoteRuntime + durable WAL]
+    V --> G[ChainVerifier: six QC phases]
+    G --> P[robust::build_plan]
+    P --> H[robust::reduce_parameter_shard]
     H --> I[apply::compute_candidate]
     I --> J[CurrentPointerStore: APPLIED]
     J -->|native model bytes| K[MNIST evaluation + UI]
@@ -117,10 +136,15 @@ delta-execution/models/validator-*/applied-model.bin
 ```
 
 `execution-trace.json` binds the contribution IDs, transport receipts, six
-certificate identities, model SHA-256, exact toolchain executables, ordered real
-Delta components, terminal `APPLIED`, and the crash/recovery observations.
-The repository also includes the portable trace excerpt from a successful full
-MNIST run at `integration/mnist-delta/example-execution-trace.json`.
+certificate identities, model SHA-256, exact executable/classpath hashes, source
+snapshot, ordered real Delta components, terminal `APPLIED`, and crash/recovery
+observations. These inputs participate in `execution_path_id`.
+The repository also includes a human-readable excerpt from one successful full
+MNIST run at `integration/mnist-delta/example-execution-trace.json`. The excerpt is
+for inspection, not standalone proof. Every live full-MNIST run writes its own
+complete local trace. CI separately retains a complete synthetic-workload trace
+from the same Delta execution path; it does not claim to retain this 60,000-image
+local run.
 
 ## Fault demonstration
 

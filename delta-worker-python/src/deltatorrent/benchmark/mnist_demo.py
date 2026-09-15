@@ -39,8 +39,10 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     PIXELS_PER_DIGIT,
     DeltaToolchain,
     MnistDeltaError,
+    NodeContribution,
     expected_central_model,
     run_delta_nodes,
+    write_node_contribution,
 )
 
 
@@ -110,14 +112,23 @@ class MnistDataset:
 
 @dataclass(frozen=True, slots=True)
 class NodeSummary:
-    """Sufficient statistics emitted by one isolated demo worker."""
+    """Non-numeric metadata and an opaque contribution emitted by one worker."""
 
-    counts: Int64Array
+    contribution: NodeContribution
     duration_ms: float
     node_id: str
     process_id: int
     raw_data_bytes: int
-    shared_summary_bytes: int
+    local_summary_bytes: int
+    summary_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class _LocalStatistics:
+    """Process-local numeric state that is never returned to the orchestrator."""
+
+    counts: Int64Array
+    node_id: str
     summary_id: str
     sums: Int64Array
 
@@ -415,39 +426,54 @@ def compute_summary(images: UInt8Array, labels: UInt8Array) -> tuple[Int64Array,
     return np.asarray(sums, dtype=np.int64), counts
 
 
-def _node_summary_worker(node_dir_text: str) -> NodeSummary:
+def _node_summary_worker(node_dir_text: str, shard_id: str) -> NodeSummary:
     node_dir = Path(node_dir_text)
     started = time.perf_counter_ns()
     images = np.load(node_dir / "train-images.npy", mmap_mode="r", allow_pickle=False)
     labels = np.load(node_dir / "train-labels.npy", mmap_mode="r", allow_pickle=False)
     sums, counts = compute_summary(images, labels)
+    summary_id = _summary_id(sums, counts)
+    contribution = write_node_contribution(
+        _LocalStatistics(
+            counts=counts,
+            node_id=node_dir.name,
+            summary_id=summary_id,
+            sums=sums,
+        ),
+        shard_id,
+        (node_dir / "canonical-contribution.bin").resolve(),
+    )
     duration_ms = (time.perf_counter_ns() - started) / 1_000_000
     raw_data_bytes = (node_dir / "train-images.npy").stat().st_size + (
         node_dir / "train-labels.npy"
     ).stat().st_size
     return NodeSummary(
-        counts=counts,
+        contribution=contribution,
         duration_ms=duration_ms,
         node_id=node_dir.name,
         process_id=os.getpid(),
         raw_data_bytes=raw_data_bytes,
-        shared_summary_bytes=sums.nbytes + counts.nbytes,
-        summary_id=_summary_id(sums, counts),
-        sums=sums,
+        local_summary_bytes=sums.nbytes + counts.nbytes,
+        summary_id=summary_id,
     )
 
 
-def run_node_summaries(node_dirs: Sequence[Path], *, parallel: bool) -> tuple[NodeSummary, ...]:
-    """Run each shard consumer separately; use four OS processes in presentation mode."""
-    if len(node_dirs) != 4:
+def run_node_summaries(
+    node_dirs: Sequence[Path], shard_ids: Mapping[str, str]
+) -> tuple[NodeSummary, ...]:
+    """Return opaque contributions produced by four distinct worker processes."""
+    if len(node_dirs) != 4 or set(shard_ids) != {path.name for path in node_dirs}:
         raise MnistDemoError("MNIST_DEMO_REQUIRES_EXACTLY_FOUR_NODES")
-    if parallel:
-        with ProcessPoolExecutor(max_workers=4) as executor:
-            summaries = tuple(executor.map(_node_summary_worker, map(str, node_dirs)))
-    else:
-        summaries = tuple(_node_summary_worker(str(path)) for path in node_dirs)
+    ordered_shard_ids = tuple(shard_ids[path.name] for path in node_dirs)
+    with ProcessPoolExecutor(max_workers=4) as executor:
+        summaries = tuple(
+            executor.map(_node_summary_worker, map(str, node_dirs), ordered_shard_ids)
+        )
     if tuple(summary.node_id for summary in summaries) != tuple(path.name for path in node_dirs):
         raise MnistDemoError("MNIST_NODE_RESULT_ORDER_MISMATCH")
+    worker_process_ids = {summary.process_id for summary in summaries}
+    if len(worker_process_ids) != 4 or os.getpid() in worker_process_ids:
+        raise MnistDemoError("MNIST_DEMO_REQUIRES_FOUR_DISTINCT_WORKER_PROCESSES")
     return summaries
 
 
@@ -541,13 +567,14 @@ def _node_document(summary: NodeSummary, manifest: Mapping[str, object]) -> dict
     return {
         "allowed_digits": manifest["allowed_digits"],
         "duration_ms": round(summary.duration_ms, 3),
-        "label_counts": [int(value) for value in summary.counts],
+        "label_counts": manifest["label_counts"],
         "node_id": summary.node_id,
         "process_id": summary.process_id,
         "raw_data_bytes": summary.raw_data_bytes,
         "raw_images_shared": False,
         "shared_payload": "SIGNED_CANONICAL_INT16_MODEL_DELTA_ONLY",
-        "shared_summary_bytes": summary.shared_summary_bytes,
+        "local_summary_bytes": summary.local_summary_bytes,
+        "numeric_model_summary_returned_to_orchestrator": False,
         "shard_id": manifest["shard_id"],
         "summary_id": summary.summary_id,
     }
@@ -571,7 +598,6 @@ def run_mnist_demo(
     output_dir: Path,
     *,
     allow_download: bool,
-    parallel: bool = True,
     progress: ProgressCallback | None = None,
     toolchain: DeltaToolchain | None = None,
 ) -> MnistDemoResult:
@@ -626,7 +652,6 @@ def run_mnist_demo(
 
         update("distributed", 51, "Четыре процесса вычисляют только локальные MNIST-вклады")
         distributed_started = time.perf_counter_ns()
-        node_summaries = run_node_summaries(node_dirs, parallel=parallel)
         shard_ids: dict[str, str] = {}
         for manifest in shard_manifests:
             node_id = manifest.get("node_id")
@@ -634,6 +659,8 @@ def run_mnist_demo(
             if not isinstance(node_id, str) or not isinstance(shard_id, str):
                 raise MnistDemoError("MNIST_SHARD_MANIFEST_BINDING_INVALID")
             shard_ids[node_id] = shard_id
+        node_summaries = run_node_summaries(node_dirs, shard_ids)
+        worker_process_ids = {summary.process_id for summary in node_summaries}
         update(
             "delta-path",
             61,
@@ -643,8 +670,7 @@ def run_mnist_demo(
             root,
             destination / "delta-execution",
             controllers_dir,
-            node_summaries,
-            shard_ids,
+            tuple(summary.contribution for summary in node_summaries),
             dataset.source_id,
             toolchain=toolchain,
         )
@@ -684,6 +710,9 @@ def run_mnist_demo(
                     "mnist_demo": f"sha256:{_file_sha256(Path(__file__).resolve())}",
                     "mnist_delta_nodes": f"sha256:{_file_sha256(integration_source)}",
                 },
+                "execution_source_and_toolchain_id": delta_result.delta_execution[
+                    "execution_path_id"
+                ],
                 "implementation_version": IMPLEMENTATION_VERSION,
             }
         )
@@ -745,7 +774,7 @@ def run_mnist_demo(
                     {
                         **_node_document(summary, manifest),
                         "contribution_id": contribution.content_id,
-                        "shared_contribution_bytes": len(contribution.record_bytes),
+                        "shared_contribution_bytes": contribution.size_bytes,
                     }
                     for summary, manifest, contribution in zip(
                         node_summaries,
@@ -754,9 +783,8 @@ def run_mnist_demo(
                         strict=True,
                     )
                 ],
-                "parallel_processes_observed": len(
-                    {summary.process_id for summary in node_summaries}
-                ),
+                "parallel_processes_observed": len(worker_process_ids),
+                "worker_processes_required": 4,
                 "samples_seen": int(dataset.train_labels.size),
                 "training_ms": round(distributed_training_ms, 3),
             },
@@ -765,10 +793,13 @@ def run_mnist_demo(
             "execution_path": {
                 "acceptance_status": "PASS",
                 "aggregation_owner": "delta::robust::reduce_parameter_shard",
+                "centralized_baseline_isolated_from_delta_inputs": True,
                 "demo_owned_aggregation": False,
                 "diagram": delta_result.execution_diagram_path.relative_to(destination).as_posix(),
                 "existing_delta_node_interfaces": True,
                 "mnist_is_workload_only": True,
+                "distributed_orchestrator_received_node_local_numeric_arrays": False,
+                "four_distinct_worker_processes_observed": len(worker_process_ids) == 4,
                 "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",
                 "terminal_outcome": "APPLIED",
                 "trace": delta_result.execution_trace_path.relative_to(destination).as_posix(),
@@ -792,6 +823,7 @@ def run_mnist_demo(
                 "NEAREST_CENTROID_IS_AN_EDUCATIONAL_MODEL_NOT_THE_PRIMARY_QLORA_WORKLOAD",
                 "NATIVE_QC_SIGNATURE_IDS_ARE_LOCAL_DEMO_CONTENT_IDS_NOT_ED25519_VOTES",
                 "ED25519_IS_VERIFIED_AT_THE_JAVA_TRANSPORT_BOUNDARY_ONLY",
+                "OPAQUE_CONTRIBUTION_FILES_ARE_PARENT_READABLE_WITHOUT_OS_CAPABILITY_ISOLATION",
                 "NO_BENCHMARK_DEFINITION_QC_OR_BENCHMARK_RESULT_QC_CREATED",
                 "NO_EXECUTE_STAGE_A_OR_FEATURE_010_GO_AUTHORITY_CREATED",
             ],
@@ -848,7 +880,6 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--output-dir", type=Path, required=True)
     run.add_argument("--repository-root", type=Path, default=Path.cwd())
     run.add_argument("--offline", action="store_true")
-    run.add_argument("--sequential", action="store_true", help="disable worker processes")
 
     serve = commands.add_parser("serve", help="open the one-button local browser workspace")
     serve.add_argument("--cache-dir", type=Path, required=True)
@@ -885,7 +916,6 @@ def main(argv: list[str] | None = None) -> int:
             args.cache_dir,
             args.output_dir,
             allow_download=not args.offline,
-            parallel=not args.sequential,
         )
     except (
         DemoControllerError,
