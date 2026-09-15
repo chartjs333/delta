@@ -12,6 +12,10 @@ from deltatorrent.model_plugins.registry import (
     build_default_registry,
     get_default_registry,
 )
+from deltatorrent.model_plugins.runner import (
+    ModelDatasetBinding,
+    bind_model_and_dataset,
+)
 
 __all__ = [
     "MNIST_CENTROID_DESCRIPTOR",
@@ -19,10 +23,12 @@ __all__ = [
     "LocalTrainingResult",
     "MnistCentroidModel",
     "MnistCentroidPlugin",
+    "ModelDatasetBinding",
     "ModelPlugin",
     "ModelPluginRegistry",
     "PluginDescriptor",
     "PluginRegistryError",
+    "bind_model_and_dataset",
     "build_default_registry",
     "get_default_registry",
 ]
