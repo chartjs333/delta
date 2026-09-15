@@ -1,0 +1,128 @@
+name: MNIST real Delta execution path
+
+on:
+  pull_request:
+    branches: [010i-campaign02-runner-remediation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mnist-delta-execution-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-node-path:
+    name: Netty + native QC/reduce/apply to APPLIED
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact demo source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Provision pinned Python, JDK 25 and Netty toolchains
+        shell: bash
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.6.14
+          uv sync --frozen
+          mkdir --parents "$RUNNER_TEMP/jdk" "$RUNNER_TEMP/netty"
+          curl --fail --location --retry 3 \
+            --output "$RUNNER_TEMP/jdk.tar.gz" \
+            'https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz'
+          echo 'dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e  '"$RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = 141329719
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" \
+            --directory "$RUNNER_TEMP/jdk" --strip-components=1
+          while read -r name length digest; do
+            curl --fail --location --retry 3 \
+              --output "$RUNNER_TEMP/netty/$name.jar" \
+              "https://repo1.maven.org/maven2/io/netty/$name/4.1.137.Final/$name-4.1.137.Final.jar"
+            echo "$digest  $RUNNER_TEMP/netty/$name.jar" | sha256sum --check --strict
+            test "$(stat --format=%s "$RUNNER_TEMP/netty/$name.jar")" = "$length"
+          done <<'NETTY'
+          netty-buffer 365383 f474b14c7734f15e0540394cb6f39d67777b7581a42919e4ac89d253d4efd929
+          netty-common 740314 d31926b01adcc07af86f5e27b81b6d6c115df17d366e835d1fc3f5a1924e7e52
+          netty-resolver 37907 b4cf2aeedd9fc7c8c439bbfe574f63cfe5b83392e88bbc07ca0e8424b7cff955
+          netty-transport 521982 6251adc2a2921572382732a2db188d4f4f2251fd6ebb49c5d44bbf33d6bfb1a7
+          NETTY
+
+      - name: Build native Delta path and Java Netty relay
+        shell: bash
+        run: |
+          cmake -S integration/mnist-delta -B out/build/mnist-delta \
+            -DDELTA_SOURCE_ROOT="$GITHUB_WORKSPACE" \
+            -DDELTA_WARNINGS_AS_ERRORS=ON
+          cmake --build out/build/mnist-delta --parallel 2 \
+            --target delta_mnist_native_node
+          mkdir --parents out/build/mnist-delta/java-classes
+          mapfile -d '' -t NETTY_JARS < <(
+            find "$RUNNER_TEMP/netty" -type f -name '*.jar' -print0 | sort -z
+          )
+          NETTY_CP="$(IFS=:; echo "${NETTY_JARS[*]}")"
+          "$RUNNER_TEMP/jdk/bin/javac" --release 25 -Xlint:all -Werror \
+            --class-path "$NETTY_CP" \
+            -d out/build/mnist-delta/java-classes \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkContracts.java \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkTransport.java \
+            delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java \
+            integration/mnist-delta/java/io/deltareduce/demo/MnistDeltaNettyRelay.java
+          {
+            printf 'DELTA_MNIST_NATIVE_NODE=%s\n' \
+              "$GITHUB_WORKSPACE/out/build/mnist-delta/delta_mnist_native_node"
+            printf 'DELTA_MNIST_JAVA=%s\n' "$RUNNER_TEMP/jdk/bin/java"
+            printf 'DELTA_MNIST_RELAY_CLASSPATH=%s\n' \
+              "$GITHUB_WORKSPACE/out/build/mnist-delta/java-classes:$NETTY_CP"
+          } >> "$GITHUB_ENV"
+
+      - name: Enforce no-hidden-aggregation acceptance contract
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          DELTA_MNIST_E2E: "1"
+          DELTA_MNIST_E2E_EVIDENCE_DIR: ${{ runner.temp }}/mnist-delta-public-evidence
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        shell: bash
+        run: |
+          uv run ruff check \
+            delta-worker-python/src/deltatorrent/benchmark/mnist_demo.py \
+            delta-worker-python/src/deltatorrent/benchmark/mnist_delta_nodes.py \
+            delta-worker-python/src/deltatorrent/benchmark/mnist_demo_workspace.py \
+            delta-worker-python/tests/benchmark/test_mnist_demo.py \
+            delta-worker-python/tests/benchmark/test_mnist_delta_nodes.py \
+            delta-worker-python/tests/benchmark/test_mnist_delta_e2e.py
+          uv run ruff format --check \
+            delta-worker-python/src/deltatorrent/benchmark/mnist_demo.py \
+            delta-worker-python/src/deltatorrent/benchmark/mnist_delta_nodes.py \
+            delta-worker-python/src/deltatorrent/benchmark/mnist_demo_workspace.py \
+            delta-worker-python/tests/benchmark/test_mnist_demo.py \
+            delta-worker-python/tests/benchmark/test_mnist_delta_nodes.py \
+            delta-worker-python/tests/benchmark/test_mnist_delta_e2e.py
+          uv run mypy delta-worker-python/src/deltatorrent/benchmark
+          uv run pytest \
+            delta-worker-python/tests/benchmark/test_mnist_demo.py \
+            delta-worker-python/tests/benchmark/test_mnist_delta_nodes.py \
+            delta-worker-python/tests/benchmark/test_mnist_delta_e2e.py \
+            --basetemp "$RUNNER_TEMP/mnist-delta-e2e"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/direct-delta-path/execution-trace.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/execution-trace.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/execution-path.mmd"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/mnist-demo-report.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/evidence-scope.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/native-nodes/validator-04/trace.jsonl"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/native-nodes/validator-04/votes/runtime.wal"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/network/votes/apply/validator-04/relay-evidence/receipt.json"
+          test -z "$(find "$RUNNER_TEMP/mnist-delta-public-evidence" -type f -name '*.pem' -print -quit)"
+
+      - name: Retain sanitized raw execution evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mnist-delta-execution-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/mnist-delta-public-evidence
+          if-no-files-found: error
+          retention-days: 30

@@ -3,10 +3,13 @@
 #include <delta/core/canonical.hpp>
 #include <delta/core/protocol.hpp>
 #include <delta/core/transition.hpp>
+#include <delta/fixedpoint/profile.hpp>
 #include <delta/robust/plan.hpp>
 #include <delta/runtime/benchmark.hpp>
 #include <delta/runtime/certificate_runtime.hpp>
 #include <delta/runtime/runtime.hpp>
+#include <delta/shards/envelope.hpp>
+#include <delta/shards/reader.hpp>
 
 #include <algorithm>
 #include <charconv>
@@ -69,6 +72,207 @@ namespace protocol = core::protocol;
     throw BenchmarkError("causal schedule integer is invalid");
   }
   return result;
+}
+
+void append_u32(canonical::Bytes& output, std::size_t value) {
+  const auto bounded = static_cast<std::uint32_t>(value);
+  output.push_back(static_cast<std::byte>((bounded >> 24U) & 0xffU));
+  output.push_back(static_cast<std::byte>((bounded >> 16U) & 0xffU));
+  output.push_back(static_cast<std::byte>((bounded >> 8U) & 0xffU));
+  output.push_back(static_cast<std::byte>(bounded & 0xffU));
+}
+
+void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
+  append_u32(output, value.size());
+  output.insert(output.end(), value.begin(), value.end());
+}
+
+[[nodiscard]] std::optional<std::string> json_extract_string(
+    std::string_view json,
+    std::string_view key) {
+  const std::string needle = "\"" + std::string(key) + "\":";
+  const auto pos = json.find(needle);
+  if (pos == std::string_view::npos) return std::nullopt;
+  auto start = pos + needle.size();
+  while (start < json.size() && (json[start] == ' ' || json[start] == '\t' || json[start] == '\r' || json[start] == '\n')) ++start;
+  if (start >= json.size() || json[start] != '"') return std::nullopt;
+  ++start;
+  const auto end = json.find('"', start);
+  if (end == std::string_view::npos) return std::nullopt;
+  return std::string(json.substr(start, end - start));
+}
+
+[[nodiscard]] std::optional<std::uint64_t> json_extract_u64(
+    std::string_view json,
+    std::string_view key) {
+  const std::string needle = "\"" + std::string(key) + "\":";
+  const auto pos = json.find(needle);
+  if (pos == std::string_view::npos) return std::nullopt;
+  auto start = pos + needle.size();
+  while (start < json.size() && (json[start] == ' ' || json[start] == '\t' || json[start] == '\r' || json[start] == '\n')) ++start;
+  std::size_t end = start;
+  while (end < json.size() && json[end] >= '0' && json[end] <= '9') ++end;
+  if (end == start) return std::nullopt;
+  return parse_u64(json.substr(start, end - start));
+}
+
+struct ShardManifest {
+  std::string formal_semantics_id;
+  std::string parameter_schema_id;
+  std::string profile_id;
+  std::string proof_instance_id;
+  std::string round_config_id;
+  std::string scale_table_id;
+  std::string shard_plan_id;
+  std::string segment_id;
+  std::uint32_t element_count{};
+  std::uint64_t element_start{};
+  std::uint32_t ordinal{};
+  std::uint64_t segment_offset{};
+};
+
+[[nodiscard]] std::string require_manifest_string(
+    std::string_view json,
+    std::string_view key) {
+  const auto val = json_extract_string(json, key);
+  if (!val || val->empty()) {
+    throw BenchmarkError(
+        "REAL_DRQ1 mode: manifest missing or empty required string field: " + std::string(key));
+  }
+  return *val;
+}
+
+[[nodiscard]] std::uint64_t require_manifest_u64(
+    std::string_view json,
+    std::string_view key) {
+  const auto val = json_extract_u64(json, key);
+  if (!val) {
+    throw BenchmarkError(
+        "REAL_DRQ1 mode: manifest missing required integer field: " + std::string(key));
+  }
+  return *val;
+}
+
+void require_safe_ticket_id(std::string_view ticket_id) {
+  if (ticket_id.empty() || ticket_id.size() > 64U) {
+    throw BenchmarkError("REAL_DRQ1 mode: ticket_id is empty or too long: " + std::string(ticket_id));
+  }
+  for (char c : ticket_id) {
+    const bool valid = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                       (c >= '0' && c <= '9') || c == '-' || c == '_';
+    if (!valid) {
+      throw BenchmarkError(
+          "REAL_DRQ1 mode: unsafe characters in ticket_id: " + std::string(ticket_id));
+    }
+  }
+}
+
+[[nodiscard]] std::filesystem::path get_shards_directory(const std::filesystem::path& directory) {
+  if (std::filesystem::exists(directory / "shards")) {
+    return directory / "shards";
+  }
+  if (std::filesystem::exists(directory.parent_path() / "shards")) {
+    return directory.parent_path() / "shards";
+  }
+  return directory.parent_path() / "shards";
+}
+
+[[nodiscard]] bool is_real_drq1_mode(const std::filesystem::path& directory) {
+#if defined(_WIN32)
+  char* env_buf = nullptr;
+  std::size_t env_len = 0U;
+  if (_dupenv_s(&env_buf, &env_len, "DELTA_STAGE_C_REAL_DRQ1") == 0 && env_buf != nullptr) {
+    const bool active = (std::string_view(env_buf) == "1");
+    std::free(env_buf);
+    if (active) return true;
+  }
+#else
+  const char* env = std::getenv("DELTA_STAGE_C_REAL_DRQ1");
+  if (env != nullptr && std::string_view(env) == "1") return true;
+#endif
+  const auto shards_dir = get_shards_directory(directory);
+  return std::filesystem::exists(shards_dir / "manifest.json");
+}
+
+[[nodiscard]] std::optional<ShardManifest> load_shard_manifest(const std::filesystem::path& shards_dir) {
+  const auto manifest_path = shards_dir / "manifest.json";
+  std::ifstream input(manifest_path);
+  if (!input) return std::nullopt;
+  const std::string content{
+      std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+  ShardManifest manifest;
+  manifest.formal_semantics_id = require_manifest_string(content, "formal_semantics_id");
+  if (manifest.formal_semantics_id != protocol::formal_semantics_id) {
+    throw BenchmarkError(
+        "REAL_DRQ1 mode: incompatible formal_semantics_id in manifest: " +
+        manifest.formal_semantics_id);
+  }
+  manifest.parameter_schema_id = require_manifest_string(content, "parameter_schema_id");
+  manifest.profile_id = require_manifest_string(content, "profile_id");
+  manifest.proof_instance_id = require_manifest_string(content, "proof_instance_id");
+  manifest.round_config_id = require_manifest_string(content, "round_config_id");
+  manifest.scale_table_id = require_manifest_string(content, "scale_table_id");
+  manifest.shard_plan_id = require_manifest_string(content, "shard_plan_id");
+  manifest.segment_id = require_manifest_string(content, "segment_id");
+  const auto count = require_manifest_u64(content, "element_count");
+  if (count == 0U || count > delta::fixedpoint::max_payload_bytes / 2U) {
+    throw BenchmarkError("REAL_DRQ1 mode: element_count is zero or exceeds limit");
+  }
+  manifest.element_count = static_cast<std::uint32_t>(count);
+  manifest.element_start = require_manifest_u64(content, "element_start");
+  const auto ord = require_manifest_u64(content, "ordinal");
+  if (ord != 0U) {
+    throw BenchmarkError(
+        "REAL_DRQ1 mode: only single-shard scope (ordinal == 0) is supported in Stage C benchmark");
+  }
+  manifest.ordinal = static_cast<std::uint32_t>(ord);
+  manifest.segment_offset = require_manifest_u64(content, "segment_offset");
+  return manifest;
+}
+
+[[nodiscard]] delta::shards::VerifiedShard load_and_verify_staged_shard(
+    const std::filesystem::path& shard_path,
+    std::string_view ticket_id,
+    const ShardManifest& manifest) {
+  std::ifstream input(shard_path, std::ios::binary | std::ios::ate);
+  if (!input) {
+    throw BenchmarkError("REAL_DRQ1 mode: cannot open shard file: " + shard_path.string());
+  }
+  const auto file_size = input.tellg();
+  if (file_size <= 0) {
+    throw BenchmarkError("REAL_DRQ1 mode: shard file is empty: " + shard_path.string());
+  }
+  input.seekg(0, std::ios::beg);
+  std::vector<std::byte> envelope(static_cast<std::size_t>(file_size));
+  input.read(reinterpret_cast<char*>(envelope.data()), file_size);
+  if (!input.good() && !input.eof()) {
+    throw BenchmarkError("REAL_DRQ1 mode: read failure on shard file: " + shard_path.string());
+  }
+
+  delta::shards::ShardHeader expected_header{
+      .ordinal = manifest.ordinal,
+      .segment_id = manifest.segment_id,
+      .segment_offset = manifest.segment_offset,
+      .element_start = manifest.element_start,
+      .element_count = manifest.element_count,
+      .formal_semantics_id = manifest.formal_semantics_id,
+      .parameter_schema_id = manifest.parameter_schema_id,
+      .profile_id = manifest.profile_id,
+      .proof_instance_id = manifest.proof_instance_id,
+      .round_config_id = manifest.round_config_id,
+      .scale_table_id = manifest.scale_table_id,
+      .shard_plan_id = manifest.shard_plan_id,
+      .ticket_id = std::string(ticket_id),
+      .payload_sha256 = "",
+  };
+
+  try {
+    return delta::shards::read_shard(envelope, expected_header);
+  } catch (const delta::shards::ShardError& exc) {
+    throw BenchmarkError(
+        "REAL_DRQ1 mode: strict DRQ1 validation failed for ticket " + std::string(ticket_id) +
+        ": " + exc.what());
+  }
 }
 
 void require_schedule_token(std::string_view value) {
@@ -496,6 +700,15 @@ struct ApplyObservation {
       ordered_ticket_ids.end()) {
     throw BenchmarkError("causal ISC has duplicate tickets");
   }
+  const bool real_drq1_mode = is_real_drq1_mode(directory);
+  const auto shards_dir = get_shards_directory(directory);
+  std::optional<ShardManifest> manifest;
+  if (real_drq1_mode) {
+    manifest = load_shard_manifest(shards_dir);
+  }
+
+  std::map<std::string, std::string> ticket_to_leaf;
+
   for (const auto& ticket_id : ordered_ticket_ids) {
     const auto found = std::find_if(tickets.begin(), tickets.end(), [&ticket_id](const auto* item) {
       return item->ticket_id == ticket_id;
@@ -504,27 +717,76 @@ struct ApplyObservation {
       throw BenchmarkError("causal ISC ticket domain is invalid");
     }
     const auto& ticket = **found;
-    tuples.push_back(certificates::InputTuple{
-        .availability_certificate_id =
-            derived_id("stagec-availability:", event.event_id + ":" + ticket_id),
-        .commitment_id = derived_id("stagec-commitment:", event.event_id + ":" + ticket_id),
-        .domain_id = ticket.domain_id,
-        .ticket_id = ticket_id,
-    });
-    const auto ordinal = parse_u64(ticket_id.substr(ticket_id.rfind('-') + 1U));
-    contributions.push_back(robust::Contribution{
-        .domain_id = ticket.domain_id,
-        .q_values = {
-            static_cast<std::int64_t>(ordinal % 7U + 1U),
-            static_cast<std::int64_t>(ordinal % 5U + 2U),
-        },
-        .ticket_id = ticket_id,
-    });
+
+    if (real_drq1_mode) {
+      require_safe_ticket_id(ticket_id);
+      if (!manifest.has_value()) {
+        throw BenchmarkError("REAL_DRQ1 mode: shards manifest is missing in " + shards_dir.string());
+      }
+      const auto shard_file = shards_dir / (ticket_id + ".drq1");
+      if (!std::filesystem::exists(shard_file)) {
+        throw BenchmarkError("REAL_DRQ1 mode: missing staged shard file: " + shard_file.string());
+      }
+      auto verified = load_and_verify_staged_shard(shard_file, ticket_id, *manifest);
+      const auto leaf_id = verified.leaf_id;
+      ticket_to_leaf[ticket_id] = leaf_id;
+
+      tuples.push_back(certificates::InputTuple{
+          .availability_certificate_id =
+              derived_id("stagec-availability:", ticket_id + ":" + leaf_id),
+          .commitment_id = leaf_id,
+          .domain_id = ticket.domain_id,
+          .ticket_id = ticket_id,
+      });
+
+      std::vector<std::int64_t> q_values;
+      q_values.reserve(verified.values.size());
+      for (const auto v : verified.values) {
+        q_values.push_back(static_cast<std::int64_t>(v));
+      }
+
+      contributions.push_back(robust::Contribution{
+          .domain_id = ticket.domain_id,
+          .q_values = std::move(q_values),
+          .ticket_id = ticket_id,
+      });
+    } else {
+      tuples.push_back(certificates::InputTuple{
+          .availability_certificate_id =
+              derived_id("stagec-availability:", event.event_id + ":" + ticket_id),
+          .commitment_id = derived_id("stagec-commitment:", event.event_id + ":" + ticket_id),
+          .domain_id = ticket.domain_id,
+          .ticket_id = ticket_id,
+      });
+      const auto ordinal = parse_u64(ticket_id.substr(ticket_id.rfind('-') + 1U));
+      contributions.push_back(robust::Contribution{
+          .domain_id = ticket.domain_id,
+          .q_values = {
+              static_cast<std::int64_t>(ordinal % 7U + 1U),
+              static_cast<std::int64_t>(ordinal % 5U + 2U),
+          },
+          .ticket_id = ticket_id,
+      });
+    }
   }
-  const auto ticket_transcript = join_strings(ordered_ticket_ids);
+
+  std::string input_root;
+  if (real_drq1_mode) {
+    canonical::Bytes transcript;
+    for (const auto& tuple : tuples) {
+      append_framed(transcript, ascii_bytes(tuple.ticket_id));
+      append_framed(transcript, ascii_bytes(tuple.commitment_id));
+      append_framed(transcript, ascii_bytes(tuple.availability_certificate_id));
+    }
+    input_root = "sha256:" + canonical::sha256_hex(transcript);
+  } else {
+    const auto ticket_transcript = join_strings(ordered_ticket_ids);
+    input_root = derived_id("stagec-input-root:", event.event_id + ":" + ticket_transcript);
+  }
+
   certificates::InputSetCertificate isc{
       .context = context,
-      .input_root = derived_id("stagec-input-root:", event.event_id + ":" + ticket_transcript),
+      .input_root = std::move(input_root),
       .quorum_threshold = 3U,
       .signer_ids = signers,
       .tuples = std::move(tuples),
@@ -557,7 +819,7 @@ struct ApplyObservation {
           2U,
           0U,
           static_cast<std::uint64_t>(contributions.size()),
-          100,
+          real_drq1_mode ? 32767 : 100,
           static_cast<std::uint64_t>(contributions.size()),
       },
       signers,
@@ -576,8 +838,12 @@ struct ApplyObservation {
     for (const auto& contribution : contributions) {
       if (contribution.domain_id == domain) {
         domain_contributions.push_back(contribution);
-        leaves.push_back(derived_id(
-            "stagec-input-leaf:", event.event_id + ":" + contribution.ticket_id));
+        if (real_drq1_mode) {
+          leaves.push_back(ticket_to_leaf.at(contribution.ticket_id));
+        } else {
+          leaves.push_back(derived_id(
+              "stagec-input-leaf:", event.event_id + ":" + contribution.ticket_id));
+        }
       }
     }
     if (domain_contributions.empty()) throw BenchmarkError("causal ISC lost a mandatory domain");
@@ -657,8 +923,15 @@ struct ApplyObservation {
       .weight_decay = {1, 100U},
   };
   const auto parent_optimizer_id = derived_id("stagec-parent-optimizer:", event.event_id);
+  const auto dimension = aggregates[0].values.size();
+  std::vector<std::int64_t> parent_model(dimension, 100);
+  std::vector<std::int64_t> parent_momentum(dimension, 10);
+  if (dimension >= 2U) {
+    parent_model[1] = -50;
+    parent_momentum[1] = -5;
+  }
   const apply::State parent{
-      {100, -50}, {10, -5}, aggregated.parent_checkpoint_id, parent_optimizer_id};
+      std::move(parent_model), std::move(parent_momentum), aggregated.parent_checkpoint_id, parent_optimizer_id};
   auto candidate = apply::compute_candidate(context, root_id, profile, parent, aggregates);
   const auto work_item_id = certificates::content_id(candidate);
   const auto apply_votes = exact_delivered_votes(schedule, "APPLY_VOTE");
@@ -755,21 +1028,42 @@ struct ApplyObservation {
   }
   auto fields = base_causal_fields(event, schedule);
   if (event.actor_class == "WORKER") {
-    if (planned_tickets.size() != 10U) {
-      throw BenchmarkError("worker-loss schedule does not bind the exact worker set");
-    }
-    std::vector<std::string> lost_workers;
-    std::vector<std::string> lost_tickets;
-    std::map<std::string, std::size_t, std::less<>> remaining{{"code", 0U}, {"text", 0U}};
-    for (const auto* ticket : planned_tickets) {
-      if (ticket->delivered) {
+    if (planned_tickets.size() == 4U && tickets.size() == 4U) {
+      std::map<std::string, std::size_t, std::less<>> remaining{{"code", 0U}, {"text", 0U}};
+      for (const auto* ticket : planned_tickets) {
+        if (!remaining.contains(ticket->domain_id)) {
+          throw BenchmarkError("4-worker ticket domain is invalid");
+        }
         ++remaining.at(ticket->domain_id);
-      } else {
-        lost_workers.push_back(ticket->actor_id);
-        lost_tickets.push_back(ticket->ticket_id);
       }
-    }
-    fields["worker_count_before"] = "10";
+      if (remaining.at("code") != 2U || remaining.at("text") != 2U) {
+        throw BenchmarkError("4-worker schedule requires exactly 2 code and 2 text tickets");
+      }
+      fields["worker_count_before"] = "4";
+      fields["worker_count_lost"] = "0";
+      fields["loss_fraction"] = "0/4";
+      fields["lost_worker_ids"] = "NONE";
+      fields["lost_ticket_ids"] = "NONE";
+      fields["per_domain_required_tickets"] = "code:2,text:2";
+      fields["per_domain_remaining_tickets"] = "code:2,text:2";
+      fields["quorum_capacity_before"] = "4";
+      fields["quorum_capacity_after"] = "4";
+      fields["missing_work_policy_result"] = "FULL_QUORUM_DELIVERED_EXACT_ISC";
+    } else if (planned_tickets.size() != 10U) {
+      throw BenchmarkError("worker-loss schedule does not bind the exact worker set");
+    } else {
+      std::vector<std::string> lost_workers;
+      std::vector<std::string> lost_tickets;
+      std::map<std::string, std::size_t, std::less<>> remaining{{"code", 0U}, {"text", 0U}};
+      for (const auto* ticket : planned_tickets) {
+        if (ticket->delivered) {
+          ++remaining.at(ticket->domain_id);
+        } else {
+          lost_workers.push_back(ticket->actor_id);
+          lost_tickets.push_back(ticket->ticket_id);
+        }
+      }
+      fields["worker_count_before"] = "10";
     fields["worker_count_lost"] = std::to_string(lost_workers.size());
     fields["loss_fraction"] = std::to_string(lost_workers.size()) + "/10";
     fields["lost_worker_ids"] = join_strings(lost_workers);
@@ -886,6 +1180,7 @@ struct ApplyObservation {
       throw BenchmarkError("successful worker loss is not the exact 10 percent scenario");
     }
     fields["missing_work_policy_result"] = "OMIT_PRE_FREEZE_LOST_TICKET_EXACT_ISC";
+    }
   }
   std::vector<std::string> ticket_ids;
   for (const auto* ticket : tickets) ticket_ids.push_back(ticket->ticket_id);

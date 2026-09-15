@@ -126,6 +126,30 @@ uv run delta benchmark synthetic \
 Its output must retain `SYNTHETIC_NOT_PRIMARY_EVIDENCE`. Synthetic quality, WAN, resilience and
 result attestations test the control plane only; they are never primary evidence.
 
+## Local commission demonstration
+
+For the visual four-node MNIST workspace, run:
+
+```text
+powershell -ExecutionPolicy Bypass -File tools/run-mnist-demo.ps1
+```
+
+It presents the actual centralized/distributed measurements without exposing JSON
+by default. See `docs/mnist-demo.md` for cache preparation, reproducibility and the
+explicit non-governance boundary.
+
+For an offline product walkthrough that also performs real tiny-corpus CPU training, verifies
+the resulting immutable artifact graph, generates four disposable Ed25519 demo controllers,
+exercises the production `3-of-4` bootstrap signature verifier and renders a static HTML report:
+
+```text
+uv run delta-commission-demo --output-dir artifacts/local/commission-demo/run-01 --open-browser
+```
+
+See `docs/commission-demo.md` for the exact presentation boundary. This command is a local demo;
+it does not run Campaign 02, authorize Stage A, satisfy controller governance, or produce primary
+benchmark evidence.
+
 ## Required execution order
 
 1. Verify the exact Feature 009 predecessor and inherited Formal GO.

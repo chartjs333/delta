@@ -31,6 +31,7 @@ runs/
 *.db
 certs/
 keys/
+*.demo-controller-private.pem
 
 # CMake / C++
 CMakeFiles/
