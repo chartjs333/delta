@@ -11,6 +11,7 @@ from deltatorrent.data import (
     DatasetProvider,
     DatasetRegistry,
     DatasetRegistryError,
+    EegWindowDatasetProvider,
     MnistDatasetProvider,
     get_default_dataset_registry,
 )
@@ -159,3 +160,19 @@ def test_default_dataset_registry_contains_mnist_provider() -> None:
     provider = registry.get("mnist-v1")
     assert isinstance(provider, MnistDatasetProvider)
     assert provider.dataset_id == "mnist-v1"
+
+
+def test_default_dataset_registry_contains_eeg_provider() -> None:
+    registry = get_default_dataset_registry()
+    assert registry.has_dataset("eeg-synthetic-bci-v1") is True
+
+    descriptor = registry.get_descriptor("eeg-synthetic-bci-v1")
+    assert descriptor.dataset_id == "eeg-synthetic-bci-v1"
+    assert descriptor.sample_kind == "eeg/bandpower-4ch-4band"
+    assert descriptor.target_kind == "class-id/0-1"
+    assert descriptor.deterministic is True
+    assert descriptor.supports_offline_cache is True
+
+    provider = registry.get("eeg-synthetic-bci-v1")
+    assert isinstance(provider, EegWindowDatasetProvider)
+    assert provider.dataset_id == "eeg-synthetic-bci-v1"

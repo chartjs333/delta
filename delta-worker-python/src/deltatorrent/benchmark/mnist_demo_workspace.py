@@ -111,6 +111,30 @@ WORKSPACE_HTML = r"""<!doctype html>
     canvas { width: 100%; max-width: 132px; aspect-ratio: 1; image-rendering: pixelated; border-radius: 10px; background: #02070c; }
     .sample-label { margin-top: 8px; font-size: 12px; color: var(--muted); }
     .table-wrap { overflow-x: auto; }
+    .binding-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .binding-item { padding: 15px; border: 1px solid #2b4f66; border-radius: 12px; background: var(--panel-2); }
+    .binding-label { color: var(--muted); font-size: 12px; }
+    .binding-value { margin-top: 6px; font-size: 18px; font-weight: 850; }
+    .binding-code { margin-top: 6px; color: var(--cyan); font-size: 12px; overflow-wrap: anywhere; }
+    .temporal-chain { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0; }
+    .temporal-step { min-height: 94px; padding: 14px; border: 1px solid #2b4f66; border-radius: 12px; background: var(--panel-2); }
+    .temporal-step strong { display: block; margin-bottom: 8px; }
+    .temporal-step span { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .observation-layout { display: grid; grid-template-columns: .82fr 1.28fr; gap: 12px; }
+    .observation-card { padding: 16px; border: 1px solid #33485c; border-radius: 12px; background: #151e27; }
+    .observation-card h3 { margin-bottom: 14px; }
+    .observation-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 10px; color: var(--muted); font-size: 13px; }
+    .observation-row strong { color: var(--text); text-align: right; }
+    .eeg-card { min-height: 198px; }
+    .eeg-title { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: 13px; }
+    .eeg-title span { color: var(--muted); }
+    .eeg-svg { width: 100%; height: 132px; display: block; }
+    .model-observations { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .model-observation { padding: 13px; border: 1px solid #33485c; border-radius: 10px; background: #111b25; }
+    .model-observation-title { color: var(--muted); font-size: 12px; }
+    .model-observation-finding { margin-top: 8px; font-weight: 850; }
+    .model-observation-confidence { margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .observation-note { margin-top: 16px; padding: 14px; border-radius: 10px; background: #202326; color: #dbe5ee; font-size: 13px; line-height: 1.45; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; }
     th { color: var(--muted); }
@@ -120,11 +144,12 @@ WORKSPACE_HTML = r"""<!doctype html>
     footer { margin-top: 24px; color: #71869a; font-size: 12px; text-align: center; }
     @media (max-width: 820px) {
       .hero { grid-template-columns: 1fr; }
-      .kpis, .flow, .execution-path { grid-template-columns: repeat(2, 1fr); }
+      .kpis, .flow, .execution-path, .binding-grid, .temporal-chain, .model-observations { grid-template-columns: repeat(2, 1fr); }
+      .observation-layout { grid-template-columns: 1fr; }
       .gallery { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 520px) {
-      .kpis, .flow, .execution-path { grid-template-columns: 1fr; }
+      .kpis, .flow, .execution-path, .binding-grid, .temporal-chain, .model-observations { grid-template-columns: 1fr; }
       .gallery { grid-template-columns: 1fr 1fr; }
     }
   </style>
@@ -163,6 +188,128 @@ WORKSPACE_HTML = r"""<!doctype html>
       <div class="kpi"><div class="kpi-label">Совпадение модели</div><div id="model-match" class="kpi-value ok"></div></div>
       <div class="kpi"><div class="kpi-label">Delta terminal</div><div id="delta-terminal" class="kpi-value ok"></div></div>
     </div>
+
+    <section class="panel">
+      <h2>ModelPlugin ↔ DatasetProvider</h2>
+      <p>Модель и данные выбираются как независимые registry-записи. Перед запуском
+         worker-ов runner проверяет совпадение sample/target contract.</p>
+      <div class="binding-grid">
+        <div class="binding-item">
+          <div class="binding-label">ModelPlugin</div>
+          <div id="model-plugin-name" class="binding-value"></div>
+          <div id="model-plugin-id" class="binding-code"></div>
+        </div>
+        <div class="binding-item">
+          <div class="binding-label">DatasetProvider</div>
+          <div id="dataset-provider-name" class="binding-value"></div>
+          <div id="dataset-provider-id" class="binding-code"></div>
+        </div>
+        <div class="binding-item">
+          <div class="binding-label">Contract</div>
+          <div id="binding-contract" class="binding-value ok"></div>
+          <div id="binding-kinds" class="binding-code"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Мульти-доменная структура</h2>
+      <p>Демо теперь строит один registry-backed multi-domain contract. MNIST является
+         единственным Stage C REAL_DRQ1 доменом; EEG проверяет расширяемость model/data
+         boundary без отдельного consensus claim.</p>
+      <div id="multi-domain-grid" class="binding-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>EEG плагин подключён к той же границе</h2>
+      <p>В этом же запуске проверяется второй домен: синтетические EEG-окна проходят через
+         DatasetProvider и ModelPlugin. Каждое окно привязано к конкретному InterventionEvent
+         через immutable ID/hash context. Это registry/worker smoke, не Stage C claim.</p>
+      <div class="binding-grid">
+        <div class="binding-item">
+          <div class="binding-label">EEG ModelPlugin</div>
+          <div id="eeg-plugin-name" class="binding-value"></div>
+          <div id="eeg-plugin-id" class="binding-code"></div>
+        </div>
+        <div class="binding-item">
+          <div class="binding-label">Smoke evaluation</div>
+          <div id="eeg-plugin-accuracy" class="binding-value ok"></div>
+          <div id="eeg-plugin-workers" class="binding-code"></div>
+        </div>
+        <div class="binding-item">
+          <div class="binding-label">Boundary</div>
+          <div id="eeg-plugin-boundary" class="binding-value warn"></div>
+          <div id="eeg-plugin-kinds" class="binding-code"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Observation view</h2>
+      <div class="observation-layout">
+        <article class="observation-card">
+          <h3>Intervention event</h3>
+          <div class="observation-row"><span>Point</span><strong id="obs-point"></strong></div>
+          <div class="observation-row"><span>Side</span><strong id="obs-side"></strong></div>
+          <div class="observation-row"><span>Event</span><strong id="obs-event"></strong></div>
+          <div class="observation-row"><span>Binding</span><strong id="obs-binding"></strong></div>
+          <div class="observation-row"><span>Source</span><strong id="obs-source"></strong></div>
+        </article>
+        <article class="observation-card eeg-card">
+          <div class="eeg-title"><strong>EEG around event</strong><span>baseline → t=0 → post-event</span></div>
+          <svg class="eeg-svg" viewBox="0 0 560 140" role="img" aria-label="EEG window around intervention event">
+            <path d="M32 74 L56 54 L80 88 L104 56 L128 82 L152 58 L176 78 L200 56 L224 92 L248 66 L272 78 L296 62 L320 72 L344 48 L368 88 L392 54 L416 84 L440 58 L464 82 L488 62 L512 86 L536 70" fill="none" stroke="#4e9b21" stroke-width="3" />
+            <line x1="312" y1="26" x2="312" y2="116" stroke="#ffd45e" stroke-width="2" stroke-dasharray="5 6" />
+            <text x="288" y="22" fill="#f4f8fc" font-size="11">event t=0</text>
+            <text x="42" y="126" fill="#dbe5ee" font-size="11">baseline</text>
+            <text x="488" y="126" fill="#dbe5ee" font-size="11">post</text>
+          </svg>
+        </article>
+      </div>
+      <h3>Model observations</h3>
+      <div id="observation-models" class="model-observations"></div>
+      <div class="observation-note">
+        This view records an observed association between a clinician/protocol-defined intervention
+        event and EEG windows. It does not select a treatment point or prescribe an intervention.
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Intervention ↔ EEG binding</h2>
+      <p>Физиологическое окно связано не с именем точки напрямую, а с конкретным
+         InterventionEvent. DatasetProvider фиксирует это как content-addressed BindingAssertion
+         до запуска ModelPlugin.</p>
+      <div class="temporal-chain">
+        <div class="temporal-step"><strong>InterventionEvent</strong><span id="temporal-event-id"></span></div>
+        <div class="temporal-step"><strong>ObservationSession</strong><span id="temporal-session-id"></span></div>
+        <div class="temporal-step"><strong>EegWindow</strong><span id="temporal-window-id"></span></div>
+        <div class="temporal-step"><strong>BindingAssertion</strong><span id="temporal-assertion-id"></span></div>
+        <div class="temporal-step"><strong>DataPartition</strong><span id="temporal-ticket-context"></span></div>
+      </div>
+      <div class="binding-grid">
+        <div class="binding-item">
+          <div class="binding-label">Assertions</div>
+          <div id="temporal-binding-count" class="binding-value ok"></div>
+          <div id="temporal-window-count" class="binding-code"></div>
+        </div>
+        <div class="binding-item">
+          <div class="binding-label">Contract</div>
+          <div id="temporal-binding-contract" class="binding-value"></div>
+          <div id="temporal-binding-schema" class="binding-code"></div>
+        </div>
+        <div class="binding-item">
+          <div class="binding-label">Delta boundary</div>
+          <div id="temporal-binding-boundary" class="binding-value warn"></div>
+          <div id="temporal-binding-safety" class="binding-code"></div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Worker</th><th>Event / point</th><th>Window</th><th>Offsets</th><th>Assertion</th></tr></thead>
+          <tbody id="temporal-binding-rows"></tbody>
+        </table>
+      </div>
+    </section>
 
     <section class="panel">
       <h2>Данные остаются на четырёх узлах</h2>
@@ -278,6 +425,129 @@ WORKSPACE_HTML = r"""<!doctype html>
     target.appendChild(stageC);
   }
 
+  function renderBinding(report) {
+    document.getElementById('model-plugin-name').textContent = report.model.display_name;
+    document.getElementById('model-plugin-id').textContent = report.model.plugin_id;
+    document.getElementById('dataset-provider-name').textContent = report.dataset.display_name;
+    document.getElementById('dataset-provider-id').textContent = report.dataset.dataset_id;
+    document.getElementById('binding-contract').textContent = report.model_dataset_binding.contract_compatibility;
+    document.getElementById('binding-kinds').textContent = `${report.model_dataset_binding.sample_kind} → ${report.model_dataset_binding.target_kind}`;
+  }
+
+  function renderEegShowcase(report) {
+    const eeg = report.plugin_showcase.eeg_bandpower;
+    const firstContext = eeg.workers[0].first_ticket_context;
+    document.getElementById('eeg-plugin-name').textContent = eeg.display_name;
+    document.getElementById('eeg-plugin-id').textContent = `${eeg.model_plugin_id} + ${eeg.dataset_id}`;
+    document.getElementById('eeg-plugin-accuracy').textContent = formatAccuracy(eeg.mean_local_accuracy_ppm);
+    document.getElementById('eeg-plugin-workers').textContent = `${eeg.worker_count} EEG partitions · ${eeg.total_elements} checkpoint coords`;
+    document.getElementById('eeg-plugin-boundary').textContent = eeg.plugin_scope;
+    document.getElementById('eeg-plugin-kinds').textContent = `${eeg.sample_kind} → ${eeg.target_kind}; event ${firstContext.intervention_event_id}; window ${firstContext.data_window_id}; binding ${firstContext.binding_assertion_id.slice(0, 19)}…; Stage C claim: ${eeg.delta_stage_c_execution_claimed}`;
+  }
+
+  function renderTemporalBinding(report) {
+    const binding = report.plugin_showcase.eeg_bandpower.temporal_binding;
+    const first = binding.examples[0];
+    document.getElementById('temporal-event-id').textContent = `${first.intervention_event_id} · ${first.point_id}`;
+    document.getElementById('temporal-session-id').textContent = first.session_id;
+    document.getElementById('temporal-window-id').textContent = `${first.data_window_id} · ${first.relation}`;
+    document.getElementById('temporal-assertion-id').textContent = first.binding_assertion_id;
+    document.getElementById('temporal-ticket-context').textContent = 'IDs/hashes only';
+    document.getElementById('temporal-binding-count').textContent = `${binding.assertion_count}`;
+    document.getElementById('temporal-window-count').textContent = `${binding.window_count} windows · ${binding.event_count} events`;
+    document.getElementById('temporal-binding-contract').textContent = 'event_id equality';
+    document.getElementById('temporal-binding-schema').textContent = `${binding.binding_layer} · schema ${binding.assertion_schema_version}`;
+    document.getElementById('temporal-binding-boundary').textContent = binding.delta_spine_knows_medical_semantics ? 'LEAK' : 'NO MEDICAL SEMANTICS';
+    document.getElementById('temporal-binding-safety').textContent = `point in ticket: ${binding.point_id_exposed_to_ticket_context}; plugin creates event: ${binding.model_plugin_creates_intervention_event}`;
+
+    const rows = document.getElementById('temporal-binding-rows');
+    rows.replaceChildren();
+    binding.examples.forEach(example => {
+      const row = document.createElement('tr');
+      const worker = document.createElement('td');
+      worker.textContent = example.partition_id;
+      const event = document.createElement('td');
+      event.textContent = `${example.intervention_event_id} / ${example.point_id}`;
+      const windowCell = document.createElement('td');
+      windowCell.textContent = `${example.data_window_id} · ${example.relation}`;
+      const offsets = document.createElement('td');
+      offsets.textContent = `${example.start_offset_ms} → ${example.end_offset_ms} ms`;
+      const assertion = document.createElement('td');
+      assertion.textContent = `${example.binding_assertion_id.slice(0, 19)}…`;
+      row.append(worker, event, windowCell, offsets, assertion);
+      rows.appendChild(row);
+    });
+  }
+
+  function renderObservationView(report) {
+    const eeg = report.plugin_showcase.eeg_bandpower;
+    const binding = eeg.temporal_binding;
+    const first = binding.examples[0];
+    document.getElementById('obs-point').textContent = first.point_id;
+    document.getElementById('obs-side').textContent = first.laterality.toUpperCase();
+    document.getElementById('obs-event').textContent = first.intervention_event_id;
+    document.getElementById('obs-binding').textContent = 'ACCEPTED';
+    document.getElementById('obs-source').textContent = 'DATA LAYER';
+
+    const models = [
+      {
+        title: eeg.display_name,
+        finding: `${formatAccuracy(eeg.mean_local_accuracy_ppm)} local smoke`,
+        confidence: `actual plugin · ${eeg.model_plugin_id}`,
+      },
+      {
+        title: 'Temporal binding validator',
+        finding: `${binding.assertion_count} accepted assertions`,
+        confidence: `schema ${binding.assertion_schema_version}`,
+      },
+      {
+        title: 'Future model slots',
+        finding: 'not executed in this run',
+        confidence: 'no CNN/Transformer claim',
+      },
+    ];
+    const target = document.getElementById('observation-models');
+    target.replaceChildren();
+    models.forEach(item => {
+      const card = document.createElement('article');
+      card.className = 'model-observation';
+      const title = document.createElement('div');
+      title.className = 'model-observation-title';
+      title.textContent = item.title;
+      const finding = document.createElement('div');
+      finding.className = 'model-observation-finding';
+      finding.textContent = item.finding;
+      const confidence = document.createElement('div');
+      confidence.className = 'model-observation-confidence';
+      confidence.textContent = item.confidence;
+      card.append(title, finding, confidence);
+      target.appendChild(card);
+    });
+  }
+
+  function renderMultiDomain(report) {
+    const target = document.getElementById('multi-domain-grid');
+    target.replaceChildren();
+    report.multi_domain.domains.forEach(domain => {
+      const card = document.createElement('article');
+      card.className = 'binding-item';
+      const label = document.createElement('div');
+      label.className = 'binding-label';
+      label.textContent = domain.role;
+      const value = document.createElement('div');
+      value.className = `binding-value${domain.delta_stage_c_execution_claimed ? ' ok' : ' warn'}`;
+      value.textContent = domain.domain_id;
+      const code = document.createElement('div');
+      code.className = 'binding-code';
+      const stage = domain.delta_stage_c_execution_claimed
+        ? `${domain.stage_c_execution_mode} → ${domain.stage_c_outcome}`
+        : domain.execution_scope;
+      code.textContent = `${domain.model_plugin_id} + ${domain.dataset_id}; ${stage}; ${domain.sample_kind} → ${domain.target_kind}`;
+      card.append(label, value, code);
+      target.appendChild(card);
+    });
+  }
+
   function renderChart(report, failure) {
     const central = report.centralized.evaluation.per_digit;
     const candidate = failure
@@ -381,6 +651,11 @@ WORKSPACE_HTML = r"""<!doctype html>
     document.getElementById('model-match').textContent = report.distributed.exact_model_match_with_centralized ? 'ПОБАЙТНО' : 'НЕТ';
     document.getElementById('delta-terminal').textContent = `${report.delta_execution.terminal_outcome} · ${report.stage_c_execution.execution_mode}`;
     document.getElementById('aggregate-copy').textContent = `Model artifact path: 24 durable votes → 24 Netty-fed QC results → Apply. Stage C evidence: ${report.stage_c_execution.worker_count} DRQ1 contributions → exact ISC ${report.stage_c_execution.isc_ticket_count}/4 → ${report.stage_c_execution.outcome}; checkpoint advanced.`;
+    renderBinding(report);
+    renderMultiDomain(report);
+    renderEegShowcase(report);
+    renderObservationView(report);
+    renderTemporalBinding(report);
     renderNodes(report);
     renderExecutionPath(report);
     renderChart(report, false);
@@ -469,7 +744,15 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
     distributed = value.get("distributed")
     execution_path = value.get("execution_path")
     failure = value.get("failure_simulation")
+    model = value.get("model")
+    dataset = value.get("dataset")
+    binding = value.get("model_dataset_binding")
+    multi_domain = value.get("multi_domain")
+    registry = value.get("registry")
+    showcase = value.get("plugin_showcase")
+    eeg_showcase = showcase.get("eeg_bandpower") if isinstance(showcase, dict) else None
     stage_c = value.get("stage_c_execution")
+    multi_domain_domains = multi_domain.get("domains") if isinstance(multi_domain, dict) else None
     if (
         value.get("type_name") != "DELTAREDUCE_LOCAL_MNIST_DEMO_REPORT"
         or value.get("schema_version") != "2.0.0"
@@ -483,9 +766,57 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or not isinstance(distributed, dict)
         or not isinstance(execution_path, dict)
         or not isinstance(failure, dict)
+        or not isinstance(model, dict)
+        or not isinstance(dataset, dict)
+        or not isinstance(binding, dict)
+        or not isinstance(multi_domain, dict)
+        or not isinstance(multi_domain_domains, list)
+        or not isinstance(registry, dict)
+        or not isinstance(showcase, dict)
+        or not isinstance(eeg_showcase, dict)
         or not isinstance(stage_c, dict)
     ):
         raise MnistDemoError("MNIST_WORKSPACE_REPORT_INVALID")
+    mnist_domain = next(
+        (
+            item
+            for item in multi_domain_domains
+            if isinstance(item, dict) and item.get("domain_id") == "mnist-image"
+        ),
+        None,
+    )
+    eeg_domain = next(
+        (
+            item
+            for item in multi_domain_domains
+            if isinstance(item, dict) and item.get("domain_id") == "eeg-bandpower"
+        ),
+        None,
+    )
+    model_catalog = registry.get("model_plugins")
+    dataset_catalog = registry.get("datasets")
+    eeg_workers = eeg_showcase.get("workers")
+    first_eeg_worker = (
+        eeg_workers[0]
+        if isinstance(eeg_workers, list) and eeg_workers and isinstance(eeg_workers[0], dict)
+        else None
+    )
+    first_eeg_context = (
+        first_eeg_worker.get("first_ticket_context") if isinstance(first_eeg_worker, dict) else None
+    )
+    temporal_binding = (
+        eeg_showcase.get("temporal_binding") if isinstance(eeg_showcase, dict) else None
+    )
+    temporal_examples = (
+        temporal_binding.get("examples") if isinstance(temporal_binding, dict) else None
+    )
+    first_temporal_example = (
+        temporal_examples[0]
+        if isinstance(temporal_examples, list)
+        and temporal_examples
+        and isinstance(temporal_examples[0], dict)
+        else None
+    )
     components = delta.get("components")
     toolchain = delta.get("toolchain")
     source_snapshot = toolchain.get("source_snapshot") if isinstance(toolchain, dict) else None
@@ -560,6 +891,135 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or stage_c.get("java_ml_arithmetic_performed") is not False
         or stage_c.get("stage_c_checkpoint_accuracy_claimed") is not False
         or stage_c.get("demo_domains_are_protocol_qualification_only") is not True
+        or model.get("plugin_id") != "mnist-centroid-v1"
+        or model.get("sample_kind") != "image/grayscale-28x28"
+        or model.get("target_kind") != "class-id/0-9"
+        or dataset.get("dataset_id") != "mnist-v1"
+        or dataset.get("sample_kind") != "image/grayscale-28x28"
+        or dataset.get("target_kind") != "class-id/0-9"
+        or binding.get("type_name") != "DELTAREDUCE_MODEL_DATASET_BINDING_EVIDENCE"
+        or binding.get("model_plugin_id") != model.get("plugin_id")
+        or binding.get("dataset_id") != dataset.get("dataset_id")
+        or binding.get("sample_kind") != model.get("sample_kind")
+        or binding.get("sample_kind") != dataset.get("sample_kind")
+        or binding.get("target_kind") != model.get("target_kind")
+        or binding.get("target_kind") != dataset.get("target_kind")
+        or binding.get("contract_compatibility") != "PASS"
+        or binding.get("runner_boundary") != "ModelDatasetBinding"
+        or multi_domain.get("type_name") != "DELTAREDUCE_MULTI_DOMAIN_DEMO_STRUCTURE"
+        or multi_domain.get("model_dataset_runner") != "MultiDomainBinding"
+        or multi_domain.get("domain_count") != 2
+        or multi_domain.get("delta_stage_c_domain_count") != 1
+        or multi_domain.get("active_stage_c_domain_id") != "mnist-image"
+        or multi_domain.get("cross_domain_aggregation_performed") is not False
+        or multi_domain.get("registry_backed") is not True
+        or multi_domain.get("stage_c_support_scope") != "MNIST_ONLY_REAL_DRQ1_IN_THIS_DEMO"
+        or multi_domain.get("protocol_scope")
+        != "MULTI_DOMAIN_PLUGIN_STRUCTURE_WITH_SINGLE_DOMAIN_STAGE_C_DEMO"
+        or len(multi_domain_domains) != 2
+        or not isinstance(mnist_domain, dict)
+        or not isinstance(eeg_domain, dict)
+        or mnist_domain.get("model_plugin_id") != "mnist-centroid-v1"
+        or mnist_domain.get("dataset_id") != "mnist-v1"
+        or mnist_domain.get("role") != "PRIMARY_DELTA_EXECUTION"
+        or mnist_domain.get("execution_scope") != "STAGE_C_REAL_DRQ1"
+        or mnist_domain.get("delta_stage_c_execution_claimed") is not True
+        or mnist_domain.get("checkpoint_accuracy_claimed_from_stage_c") is not False
+        or mnist_domain.get("python_cross_node_aggregation_performed") is not False
+        or mnist_domain.get("raw_samples_shared_outside_provider") is not False
+        or mnist_domain.get("stage_c_execution_mode") != "REAL_DRQ1"
+        or mnist_domain.get("stage_c_outcome") != "APPLIED"
+        or mnist_domain.get("worker_count") != 4
+        or eeg_domain.get("model_plugin_id") != "eeg-bandpower-centroid-v1"
+        or eeg_domain.get("dataset_id") != "eeg-synthetic-bci-v1"
+        or eeg_domain.get("role") != "PLUGIN_BINDING_SMOKE"
+        or eeg_domain.get("execution_scope") != "MODEL_DATASET_BINDING_ONLY"
+        or eeg_domain.get("delta_stage_c_execution_claimed") is not False
+        or eeg_domain.get("checkpoint_accuracy_claimed_from_stage_c") is not False
+        or eeg_domain.get("python_cross_node_aggregation_performed") is not False
+        or eeg_domain.get("raw_samples_shared_outside_provider") is not False
+        or eeg_domain.get("stage_c_execution_mode") is not None
+        or eeg_domain.get("stage_c_outcome") is not None
+        or eeg_domain.get("worker_count") != 4
+        or eeg_domain.get("total_elements") != 34
+        or not isinstance(model_catalog, list)
+        or not isinstance(dataset_catalog, list)
+        or not any(
+            isinstance(item, dict) and item.get("plugin_id") == "eeg-bandpower-centroid-v1"
+            for item in model_catalog
+        )
+        or not any(
+            isinstance(item, dict) and item.get("dataset_id") == "eeg-synthetic-bci-v1"
+            for item in dataset_catalog
+        )
+        or eeg_showcase.get("type_name") != "DELTAREDUCE_EEG_PLUGIN_SHOWCASE"
+        or eeg_showcase.get("model_plugin_id") != "eeg-bandpower-centroid-v1"
+        or eeg_showcase.get("dataset_id") != "eeg-synthetic-bci-v1"
+        or eeg_showcase.get("sample_kind") != "eeg/bandpower-4ch-4band"
+        or eeg_showcase.get("target_kind") != "class-id/0-1"
+        or eeg_showcase.get("runner_boundary") != "ModelDatasetBinding"
+        or eeg_showcase.get("contract_compatibility") != "PASS"
+        or eeg_showcase.get("worker_count") != 4
+        or eeg_showcase.get("total_elements") != 34
+        or eeg_showcase.get("delta_stage_c_execution_claimed") is not False
+        or eeg_showcase.get("python_cross_node_aggregation_performed") is not False
+        or eeg_showcase.get("raw_eeg_shared_outside_provider") is not False
+        or not isinstance(eeg_workers, list)
+        or len(eeg_workers) != 4
+        or not isinstance(first_eeg_worker, dict)
+        or first_eeg_worker.get("ticket_context_count") != 40
+        or first_eeg_worker.get("point_semantics_in_ticket_context") is not False
+        or not isinstance(first_eeg_context, dict)
+        or not isinstance(temporal_binding, dict)
+        or not isinstance(temporal_examples, list)
+        or len(temporal_examples) != 4
+        or not isinstance(first_temporal_example, dict)
+        or temporal_binding.get("type_name") != "DELTAREDUCE_TEMPORAL_EVENT_BINDING_EVIDENCE"
+        or temporal_binding.get("binding_layer") != "deltatorrent.data.binding.BindingAssertion"
+        or temporal_binding.get("assertion_schema_version") != "1.0.0"
+        or temporal_binding.get("assertion_count") != 160
+        or temporal_binding.get("window_count") != 160
+        or temporal_binding.get("event_count") != 4
+        or temporal_binding.get("relation_contract")
+        != "EegWindow.intervention_event_id == InterventionEvent.intervention_event_id"
+        or temporal_binding.get("point_id_exposed_to_ticket_context") is not False
+        or temporal_binding.get("model_plugin_creates_intervention_event") is not False
+        or temporal_binding.get("delta_spine_knows_medical_semantics") is not False
+        or temporal_binding.get("ticket_context_contains_ids_hashes_only") is not True
+        or first_temporal_example.get("binding_assertion_id")
+        != first_eeg_context.get("binding_assertion_id")
+        or first_temporal_example.get("data_window_id") != first_eeg_context.get("data_window_id")
+        or first_temporal_example.get("intervention_event_id")
+        != first_eeg_context.get("intervention_event_id")
+        or first_temporal_example.get("session_id") != first_eeg_context.get("session_id")
+        or first_temporal_example.get("raw_data_hash") != first_eeg_context.get("raw_data_hash")
+        or first_temporal_example.get("point_id") != "TCM-ST36"
+        or first_temporal_example.get("point_source") != "InterventionEvent.point_id"
+        or first_temporal_example.get("laterality") != "left"
+        or first_temporal_example.get("intervention_type") != "acupuncture_injection"
+        or first_temporal_example.get("protocol_id") != "protocol-demo-eeg-st36-v1"
+        or not str(first_temporal_example.get("ticket_id", "")).startswith("eeg-ticket-")
+        or not str(first_temporal_example.get("partition_id", "")).startswith("demo-eeg-worker-")
+        or set(first_eeg_context)
+        != {
+            "acquisition_profile_id",
+            "binding_assertion_id",
+            "binding_schema_version",
+            "data_window_id",
+            "end_offset_ms",
+            "intervention_event_id",
+            "preprocessing_profile_id",
+            "raw_data_hash",
+            "relation",
+            "session_id",
+            "start_offset_ms",
+        }
+        or not str(first_eeg_context.get("binding_assertion_id", "")).startswith("sha256:")
+        or first_eeg_context.get("binding_schema_version") != "1.0.0"
+        or not str(first_eeg_context.get("session_id", "")).startswith("obs-demo-eeg-")
+        or not str(first_eeg_context.get("intervention_event_id", "")).startswith("evt-demo-eeg-")
+        or not str(first_eeg_context.get("data_window_id", "")).startswith("eegwin-demo-")
+        or not str(first_eeg_context.get("raw_data_hash", "")).startswith("sha256:")
         or failure.get("status") != "RECOVERED_AND_APPLIED"
         or failure.get("replay_observed") is not True
         or failure.get("terminal_outcome") != "APPLIED"

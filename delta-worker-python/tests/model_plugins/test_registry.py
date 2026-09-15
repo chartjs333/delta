@@ -15,6 +15,7 @@ from deltatorrent.domain.parameters import (
 )
 from deltatorrent.domain.updates import NormalizedContributionCandidate
 from deltatorrent.model_plugins import (
+    EegBandpowerCentroidPlugin,
     EvaluationResult,
     LocalTrainingResult,
     MnistCentroidPlugin,
@@ -213,6 +214,27 @@ def test_default_registry_contains_mnist_centroid() -> None:
     assert isinstance(plugin, MnistCentroidPlugin)
     assert plugin.plugin_id == "mnist-centroid-v1"
     assert plugin.total_elements == 7850
+
+
+def test_default_registry_contains_eeg_bandpower_centroid() -> None:
+    registry = get_default_registry()
+    assert registry.has_plugin("eeg-bandpower-centroid-v1") is True
+
+    desc = registry.get_descriptor("eeg-bandpower-centroid-v1")
+    assert desc.plugin_id == "eeg-bandpower-centroid-v1"
+    assert desc.display_name == "EEG Bandpower Centroid Classifier"
+    assert desc.model_family == "centroid"
+    assert desc.task_type == "classification"
+    assert desc.sample_kind == "eeg/bandpower-4ch-4band"
+    assert desc.target_kind == "class-id/0-1"
+    assert desc.deterministic is True
+    assert desc.supports_stage_c_real_drq1 is False
+    assert desc.parameter_schema_id is None
+
+    plugin = registry.get("eeg-bandpower-centroid-v1")
+    assert isinstance(plugin, EegBandpowerCentroidPlugin)
+    assert plugin.plugin_id == "eeg-bandpower-centroid-v1"
+    assert plugin.total_elements == 34
 
 
 def test_extensibility_architectural_proof_dummy_plugin() -> None:

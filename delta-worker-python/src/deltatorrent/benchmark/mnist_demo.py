@@ -51,9 +51,30 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     run_stage_c_real_drq1_nodes,
     write_node_contribution,
 )
+from deltatorrent.data.binding import BINDING_ASSERTION_SCHEMA_VERSION
+from deltatorrent.data.eeg import (
+    DEMO_EEG_PARTITIONS,
+    EEG_DATASET_DESCRIPTOR,
+    EegWindowDatasetProvider,
+)
+from deltatorrent.data.mnist import MNIST_DESCRIPTOR
+from deltatorrent.data.registry import get_default_dataset_registry
 from deltatorrent.model_plugins.mnist_centroid import (
     MnistCentroidPlugin,
     compute_mnist_summary,
+)
+from deltatorrent.model_plugins.registry import (
+    EEG_BANDPOWER_DESCRIPTOR,
+    MNIST_CENTROID_DESCRIPTOR,
+)
+from deltatorrent.model_plugins.registry import (
+    get_default_registry as get_default_model_registry,
+)
+from deltatorrent.model_plugins.runner import (
+    DomainBindingSpec,
+    ModelDatasetBinding,
+    MultiDomainBinding,
+    bind_model_dataset_domains,
 )
 
 
@@ -506,6 +527,205 @@ def evaluate_centroid_model(
     )
 
 
+def _model_plugin_catalog() -> list[dict[str, object]]:
+    registry = get_default_model_registry()
+    return [
+        {
+            "deterministic": descriptor.deterministic,
+            "display_name": descriptor.display_name,
+            "model_family": descriptor.model_family,
+            "parameter_schema_id": descriptor.parameter_schema_id,
+            "plugin_id": descriptor.plugin_id,
+            "sample_kind": descriptor.sample_kind,
+            "supports_stage_c_real_drq1": descriptor.supports_stage_c_real_drq1,
+            "target_kind": descriptor.target_kind,
+            "task_type": descriptor.task_type,
+        }
+        for descriptor in registry.list_descriptors()
+    ]
+
+
+def _dataset_catalog() -> list[dict[str, object]]:
+    registry = get_default_dataset_registry()
+    return [
+        {
+            "dataset_id": descriptor.dataset_id,
+            "description": descriptor.description,
+            "deterministic": descriptor.deterministic,
+            "display_name": descriptor.display_name,
+            "sample_kind": descriptor.sample_kind,
+            "supports_offline_cache": descriptor.supports_offline_cache,
+            "target_kind": descriptor.target_kind,
+            "version": descriptor.version,
+        }
+        for descriptor in registry.list_descriptors()
+    ]
+
+
+def _run_eeg_plugin_showcase(
+    cache_dir: Path,
+    binding: ModelDatasetBinding,
+) -> dict[str, object]:
+    """Exercise the EEG plugin through the generic model/dataset binding only.
+
+    This deliberately does not claim Stage C or Delta consensus execution for EEG.
+    It proves the plugin architecture accepts a non-image, windowed physiological domain
+    without touching the existing MNIST REAL_DRQ1 execution path.
+    """
+    materialization = binding.materialize_dataset(cache_dir=cache_dir, allow_download=False)
+    if not isinstance(binding.dataset_provider, EegWindowDatasetProvider):
+        raise MnistDemoError("EEG_SHOWCASE_PROVIDER_TYPE_INVALID")
+    eeg_provider = binding.dataset_provider
+
+    temporal_examples: list[dict[str, object]] = []
+    worker_documents: list[dict[str, object]] = []
+    accuracies: list[int] = []
+    for ordinal, partition_id in enumerate(DEMO_EEG_PARTITIONS):
+        ticket_id = f"eeg-ticket-{ordinal:03d}"
+        local_result = binding.train_ticket(ticket_id=ticket_id, partition_id=partition_id)
+        tensor = local_result.tensors["eeg.centroid"]
+        evaluation = binding.evaluate_checkpoint(tensor.astype(np.int64))
+        partition_metadata = cast(
+            Mapping[str, object],
+            local_result.metadata["data_partition_metadata"],
+        )
+        ticket_context = cast(list[dict[str, object]], partition_metadata["ticket_context"])
+        first_context = ticket_context[0]
+        event = eeg_provider.intervention_event(str(first_context["intervention_event_id"]))
+        assertion = eeg_provider.binding_assertion(str(first_context["data_window_id"]))
+        if assertion.binding_assertion_id != first_context["binding_assertion_id"]:
+            raise MnistDemoError("EEG_BINDING_ASSERTION_CONTEXT_MISMATCH")
+        temporal_examples.append(
+            {
+                "binding_assertion_id": assertion.binding_assertion_id,
+                "data_window_id": assertion.data_window_id,
+                "end_offset_ms": assertion.end_offset_ms,
+                "intervention_type": event.intervention_type,
+                "intervention_event_id": assertion.intervention_event_id,
+                "laterality": event.laterality,
+                "partition_id": partition_id,
+                "point_id": event.point_id,
+                "point_source": "InterventionEvent.point_id",
+                "protocol_id": event.protocol_id,
+                "raw_data_hash": assertion.raw_data_hash,
+                "relation": assertion.relation,
+                "session_id": assertion.session_id,
+                "start_offset_ms": assertion.start_offset_ms,
+                "ticket_id": ticket_id,
+            }
+        )
+        accuracies.append(evaluation.accuracy_ppm)
+        worker_documents.append(
+            {
+                "accuracy_ppm": evaluation.accuracy_ppm,
+                "class_counts": local_result.metadata["class_counts"],
+                "first_ticket_context": first_context,
+                "intervention_event_ids": partition_metadata["intervention_event_ids"],
+                "partition_id": partition_id,
+                "point_semantics_in_ticket_context": False,
+                "sample_count": local_result.metadata["sample_count"],
+                "tensor_shape": list(tensor.shape),
+                "ticket_context_count": len(ticket_context),
+                "ticket_id": ticket_id,
+            }
+        )
+
+    return {
+        "contract_compatibility": "PASS",
+        "dataset_id": binding.dataset_descriptor.dataset_id,
+        "delta_stage_c_execution_claimed": False,
+        "display_name": binding.model_descriptor.display_name,
+        "materialization": materialization,
+        "mean_local_accuracy_ppm": sum(accuracies) // len(accuracies),
+        "model_plugin_id": binding.model_descriptor.plugin_id,
+        "plugin_scope": "MODEL_DATASET_BINDING_SMOKE_ONLY",
+        "python_cross_node_aggregation_performed": False,
+        "raw_eeg_shared_outside_provider": False,
+        "runner_boundary": "ModelDatasetBinding",
+        "sample_kind": binding.model_descriptor.sample_kind,
+        "target_kind": binding.model_descriptor.target_kind,
+        "temporal_binding": {
+            "assertion_count": materialization["binding_assertion_count"],
+            "assertion_schema_version": BINDING_ASSERTION_SCHEMA_VERSION,
+            "binding_layer": "deltatorrent.data.binding.BindingAssertion",
+            "delta_spine_knows_medical_semantics": False,
+            "event_count": materialization["intervention_event_count"],
+            "examples": temporal_examples,
+            "model_plugin_creates_intervention_event": False,
+            "point_id_exposed_to_ticket_context": False,
+            "relation_contract": (
+                "EegWindow.intervention_event_id == InterventionEvent.intervention_event_id"
+            ),
+            "ticket_context_contains_ids_hashes_only": True,
+            "type_name": "DELTAREDUCE_TEMPORAL_EVENT_BINDING_EVIDENCE",
+            "window_count": materialization["physiological_window_count"],
+        },
+        "total_elements": binding.model_plugin.total_elements,
+        "type_name": "DELTAREDUCE_EEG_PLUGIN_SHOWCASE",
+        "worker_count": len(worker_documents),
+        "workers": worker_documents,
+    }
+
+
+def _build_multi_domain_structure(
+    *,
+    multi_domain_binding: MultiDomainBinding,
+    mnist_accuracy_ppm: int,
+    mnist_worker_count: int,
+    stage_c_execution: Mapping[str, object],
+    eeg_showcase: Mapping[str, object],
+) -> dict[str, object]:
+    """Build the report/UI evidence for all demo domains without mixing their claims."""
+    domain_documents: list[dict[str, object]] = []
+    for descriptor in multi_domain_binding.describe():
+        domain_id = str(descriptor["domain_id"])
+        if domain_id == "mnist-image":
+            domain_documents.append(
+                {
+                    **descriptor,
+                    "accuracy_ppm": mnist_accuracy_ppm,
+                    "checkpoint_accuracy_claimed_from_stage_c": False,
+                    "delta_stage_c_execution_claimed": True,
+                    "metric_scope": "APPLIED_MNIST_MODEL_ARTIFACT",
+                    "python_cross_node_aggregation_performed": False,
+                    "raw_samples_shared_outside_provider": False,
+                    "stage_c_execution_mode": stage_c_execution["execution_mode"],
+                    "stage_c_outcome": stage_c_execution["outcome"],
+                    "worker_count": mnist_worker_count,
+                }
+            )
+        elif domain_id == "eeg-bandpower":
+            domain_documents.append(
+                {
+                    **descriptor,
+                    "accuracy_ppm": eeg_showcase["mean_local_accuracy_ppm"],
+                    "checkpoint_accuracy_claimed_from_stage_c": False,
+                    "delta_stage_c_execution_claimed": False,
+                    "metric_scope": "LOCAL_PLUGIN_WORKER_SMOKE",
+                    "python_cross_node_aggregation_performed": False,
+                    "raw_samples_shared_outside_provider": False,
+                    "stage_c_execution_mode": None,
+                    "stage_c_outcome": None,
+                    "worker_count": eeg_showcase["worker_count"],
+                }
+            )
+        else:
+            raise MnistDemoError(f"UNKNOWN_MULTI_DOMAIN_DEMO_DOMAIN:{domain_id}")
+
+    return {
+        "active_stage_c_domain_id": "mnist-image",
+        "cross_domain_aggregation_performed": False,
+        "delta_stage_c_domain_count": 1,
+        "domain_count": len(domain_documents),
+        "domains": domain_documents,
+        "model_dataset_runner": "MultiDomainBinding",
+        "protocol_scope": "MULTI_DOMAIN_PLUGIN_STRUCTURE_WITH_SINGLE_DOMAIN_STAGE_C_DEMO",
+        "registry_backed": True,
+        "stage_c_support_scope": "MNIST_ONLY_REAL_DRQ1_IN_THIS_DEMO",
+        "type_name": "DELTAREDUCE_MULTI_DOMAIN_DEMO_STRUCTURE",
+    }
+
+
 def _sample_gallery(
     dataset: MnistDataset,
     central: Evaluation,
@@ -697,6 +917,28 @@ def run_mnist_demo(
     stage_c_boundary: MeasuredStageCRuntimeBoundary | None = None,
 ) -> MnistDemoResult:
     """Execute the isolated MNIST comparison and persist measured local evidence."""
+    multi_domain_binding = bind_model_dataset_domains(
+        (
+            DomainBindingSpec(
+                domain_id="mnist-image",
+                model_plugin_id=MNIST_CENTROID_DESCRIPTOR.plugin_id,
+                dataset_id=MNIST_DESCRIPTOR.dataset_id,
+                role="PRIMARY_DELTA_EXECUTION",
+                execution_scope="STAGE_C_REAL_DRQ1",
+            ),
+            DomainBindingSpec(
+                domain_id="eeg-bandpower",
+                model_plugin_id=EEG_BANDPOWER_DESCRIPTOR.plugin_id,
+                dataset_id=EEG_DATASET_DESCRIPTOR.dataset_id,
+                role="PLUGIN_BINDING_SMOKE",
+                execution_scope="MODEL_DATASET_BINDING_ONLY",
+            ),
+        )
+    )
+    model_dataset_binding = multi_domain_binding.get("mnist-image")
+    eeg_binding = multi_domain_binding.get("eeg-bandpower")
+    model_descriptor = model_dataset_binding.model_descriptor
+    dataset_descriptor = model_dataset_binding.dataset_descriptor
     root = repository_root.resolve(strict=True)
     cache = cache_dir if cache_dir.is_absolute() else root / cache_dir
     destination = output_dir if output_dir.is_absolute() else root / output_dir
@@ -863,6 +1105,19 @@ def run_mnist_demo(
                 "implementation_version": IMPLEMENTATION_VERSION,
             }
         )
+        model_plugin_catalog = _model_plugin_catalog()
+        dataset_catalog = _dataset_catalog()
+        eeg_plugin_showcase = _run_eeg_plugin_showcase(
+            destination / "eeg-plugin-showcase",
+            eeg_binding,
+        )
+        multi_domain_structure = _build_multi_domain_structure(
+            multi_domain_binding=multi_domain_binding,
+            mnist_accuracy_ppm=distributed_evaluation.accuracy_ppm,
+            mnist_worker_count=len(worker_process_ids),
+            stage_c_execution=stage_c_execution,
+            eeg_showcase=eeg_plugin_showcase,
+        )
         deterministic_result: dict[str, object] = {
             "applied_model_file_sha256": applied_model.content_id,
             "central_accuracy_ppm": central_evaluation.accuracy_ppm,
@@ -871,12 +1126,16 @@ def run_mnist_demo(
             ],
             "dataset_source_id": dataset.source_id,
             "distributed_accuracy_ppm": distributed_evaluation.accuracy_ppm,
+            "eeg_plugin_showcase": eeg_plugin_showcase,
             "execution_path_id": delta_result.delta_execution["execution_path_id"],
             "formal_semantics_id": FORMAL_SEMANTICS_ID,
             "implementation_id": implementation_id,
             "implementation_version": IMPLEMENTATION_VERSION,
+            "dataset_id": dataset_descriptor.dataset_id,
             "model_id": model_id,
+            "model_plugin_id": model_descriptor.plugin_id,
             "model_type": MODEL_ID,
+            "multi_domain_structure": multi_domain_structure,
             "partition_rule_id": PARTITION_RULE_ID,
             "recovery_status": delta_result.failure_simulation["status"],
             "seed": DEMO_SEED,
@@ -905,9 +1164,13 @@ def run_mnist_demo(
             },
             "controller_quorum": controller_smoke.document,
             "dataset": {
+                "dataset_id": dataset_descriptor.dataset_id,
+                "display_name": dataset_descriptor.display_name,
                 "image_shape": [28, 28],
                 "name": "MNIST",
+                "sample_kind": dataset_descriptor.sample_kind,
                 "source_id": dataset.source_id,
+                "target_kind": dataset_descriptor.target_kind,
                 "test_samples": int(dataset.test_labels.size),
                 "train_samples": int(dataset.train_labels.size),
             },
@@ -989,10 +1252,27 @@ def run_mnist_demo(
             "model": {
                 "applied_artifact_sha256": applied_model.content_id,
                 "arithmetic": "UINT8_LOCAL_INT64_SUM_DELTA_INT16_APPLY_FLOAT64_EVALUATION",
+                "display_name": model_descriptor.display_name,
+                "plugin_id": model_descriptor.plugin_id,
+                "sample_kind": model_descriptor.sample_kind,
                 "stage_c_checkpoint_accuracy_claimed": False,
                 "stage_c_model_reconstructed_for_accuracy": False,
+                "target_kind": model_descriptor.target_kind,
                 "model_id": model_id,
                 "type": MODEL_ID,
+            },
+            "model_dataset_binding": {
+                "contract_compatibility": "PASS",
+                "dataset_id": dataset_descriptor.dataset_id,
+                "model_plugin_id": model_descriptor.plugin_id,
+                "runner_boundary": "ModelDatasetBinding",
+                "sample_kind": dataset_descriptor.sample_kind,
+                "target_kind": dataset_descriptor.target_kind,
+                "type_name": "DELTAREDUCE_MODEL_DATASET_BINDING_EVIDENCE",
+            },
+            "multi_domain": multi_domain_structure,
+            "plugin_showcase": {
+                "eeg_bandpower": eeg_plugin_showcase,
             },
             "partition": {
                 "disjoint": True,
@@ -1003,6 +1283,10 @@ def run_mnist_demo(
             "reproducibility": {
                 "deterministic_result": deterministic_result,
                 "reproducibility_id": reproducibility_id,
+            },
+            "registry": {
+                "datasets": dataset_catalog,
+                "model_plugins": model_plugin_catalog,
             },
             "schema_version": "2.0.0",
             "stage_c_execution": stage_c_execution,

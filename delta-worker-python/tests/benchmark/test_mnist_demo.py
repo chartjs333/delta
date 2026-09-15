@@ -598,6 +598,116 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     assert report["execution_authorized"] is False
     assert report["feature_010_go_claimed"] is False
     assert report["dataset"]["name"] == "MNIST"
+    assert report["dataset"]["dataset_id"] == "mnist-v1"
+    assert report["dataset"]["sample_kind"] == "image/grayscale-28x28"
+    assert report["dataset"]["target_kind"] == "class-id/0-9"
+    assert report["model"]["plugin_id"] == "mnist-centroid-v1"
+    assert report["model"]["sample_kind"] == "image/grayscale-28x28"
+    assert report["model"]["target_kind"] == "class-id/0-9"
+    assert report["model_dataset_binding"] == {
+        "contract_compatibility": "PASS",
+        "dataset_id": "mnist-v1",
+        "model_plugin_id": "mnist-centroid-v1",
+        "runner_boundary": "ModelDatasetBinding",
+        "sample_kind": "image/grayscale-28x28",
+        "target_kind": "class-id/0-9",
+        "type_name": "DELTAREDUCE_MODEL_DATASET_BINDING_EVIDENCE",
+    }
+    multi_domain = report["multi_domain"]
+    assert multi_domain["type_name"] == "DELTAREDUCE_MULTI_DOMAIN_DEMO_STRUCTURE"
+    assert multi_domain["model_dataset_runner"] == "MultiDomainBinding"
+    assert multi_domain["domain_count"] == 2
+    assert multi_domain["delta_stage_c_domain_count"] == 1
+    assert multi_domain["active_stage_c_domain_id"] == "mnist-image"
+    assert multi_domain["cross_domain_aggregation_performed"] is False
+    assert multi_domain["registry_backed"] is True
+    domains = {item["domain_id"]: item for item in multi_domain["domains"]}
+    assert set(domains) == {"mnist-image", "eeg-bandpower"}
+    assert domains["mnist-image"]["execution_scope"] == "STAGE_C_REAL_DRQ1"
+    assert domains["mnist-image"]["delta_stage_c_execution_claimed"] is True
+    assert domains["mnist-image"]["checkpoint_accuracy_claimed_from_stage_c"] is False
+    assert domains["mnist-image"]["python_cross_node_aggregation_performed"] is False
+    assert domains["mnist-image"]["raw_samples_shared_outside_provider"] is False
+    assert domains["eeg-bandpower"]["execution_scope"] == "MODEL_DATASET_BINDING_ONLY"
+    assert domains["eeg-bandpower"]["delta_stage_c_execution_claimed"] is False
+    assert domains["eeg-bandpower"]["checkpoint_accuracy_claimed_from_stage_c"] is False
+    assert domains["eeg-bandpower"]["python_cross_node_aggregation_performed"] is False
+    assert domains["eeg-bandpower"]["raw_samples_shared_outside_provider"] is False
+    assert domains["eeg-bandpower"]["stage_c_execution_mode"] is None
+    assert domains["eeg-bandpower"]["total_elements"] == 34
+    assert any(
+        item["plugin_id"] == "eeg-bandpower-centroid-v1"
+        for item in report["registry"]["model_plugins"]
+    )
+    assert any(
+        item["dataset_id"] == "eeg-synthetic-bci-v1" for item in report["registry"]["datasets"]
+    )
+    eeg_showcase = report["plugin_showcase"]["eeg_bandpower"]
+    assert eeg_showcase["type_name"] == "DELTAREDUCE_EEG_PLUGIN_SHOWCASE"
+    assert eeg_showcase["model_plugin_id"] == "eeg-bandpower-centroid-v1"
+    assert eeg_showcase["dataset_id"] == "eeg-synthetic-bci-v1"
+    assert eeg_showcase["runner_boundary"] == "ModelDatasetBinding"
+    assert eeg_showcase["contract_compatibility"] == "PASS"
+    assert eeg_showcase["sample_kind"] == "eeg/bandpower-4ch-4band"
+    assert eeg_showcase["target_kind"] == "class-id/0-1"
+    assert eeg_showcase["worker_count"] == 4
+    assert eeg_showcase["total_elements"] == 34
+    assert eeg_showcase["delta_stage_c_execution_claimed"] is False
+    assert eeg_showcase["python_cross_node_aggregation_performed"] is False
+    assert eeg_showcase["raw_eeg_shared_outside_provider"] is False
+    first_eeg_worker = eeg_showcase["workers"][0]
+    first_ticket_context = first_eeg_worker["first_ticket_context"]
+    assert first_eeg_worker["ticket_context_count"] == 40
+    assert first_eeg_worker["point_semantics_in_ticket_context"] is False
+    assert set(first_ticket_context) == {
+        "acquisition_profile_id",
+        "binding_assertion_id",
+        "binding_schema_version",
+        "data_window_id",
+        "end_offset_ms",
+        "intervention_event_id",
+        "preprocessing_profile_id",
+        "raw_data_hash",
+        "relation",
+        "session_id",
+        "start_offset_ms",
+    }
+    assert first_ticket_context["binding_schema_version"] == "1.0.0"
+    assert first_ticket_context["binding_assertion_id"].startswith("sha256:")
+    assert first_ticket_context["intervention_event_id"].startswith("evt-demo-eeg-")
+    assert first_ticket_context["data_window_id"].startswith("eegwin-demo-")
+    assert first_ticket_context["raw_data_hash"].startswith("sha256:")
+    temporal_binding = eeg_showcase["temporal_binding"]
+    assert temporal_binding["type_name"] == "DELTAREDUCE_TEMPORAL_EVENT_BINDING_EVIDENCE"
+    assert temporal_binding["binding_layer"] == "deltatorrent.data.binding.BindingAssertion"
+    assert temporal_binding["assertion_schema_version"] == "1.0.0"
+    assert temporal_binding["assertion_count"] == 160
+    assert temporal_binding["window_count"] == 160
+    assert temporal_binding["event_count"] == 4
+    assert (
+        temporal_binding["relation_contract"]
+        == "EegWindow.intervention_event_id == InterventionEvent.intervention_event_id"
+    )
+    assert temporal_binding["point_id_exposed_to_ticket_context"] is False
+    assert temporal_binding["model_plugin_creates_intervention_event"] is False
+    assert temporal_binding["delta_spine_knows_medical_semantics"] is False
+    assert temporal_binding["ticket_context_contains_ids_hashes_only"] is True
+    assert len(temporal_binding["examples"]) == 4
+    first_binding = temporal_binding["examples"][0]
+    assert first_binding["binding_assertion_id"] == first_ticket_context["binding_assertion_id"]
+    assert first_binding["intervention_event_id"] == first_ticket_context["intervention_event_id"]
+    assert first_binding["data_window_id"] == first_ticket_context["data_window_id"]
+    assert first_binding["session_id"] == first_ticket_context["session_id"]
+    assert first_binding["raw_data_hash"] == first_ticket_context["raw_data_hash"]
+    assert first_binding["point_id"] == "TCM-ST36"
+    assert first_binding["point_source"] == "InterventionEvent.point_id"
+    assert first_binding["laterality"] == "left"
+    assert first_binding["intervention_type"] == "acupuncture_injection"
+    assert first_binding["protocol_id"] == "protocol-demo-eeg-st36-v1"
+    assert "point_id" not in first_ticket_context
+    assert "laterality" not in first_ticket_context
+    assert "intervention_type" not in first_ticket_context
+    assert "protocol_id" not in first_ticket_context
     assert report["distributed"]["exact_model_match_with_centralized"] is True
     assert report["distributed"]["aggregation_owner"] == ("delta::robust::reduce_parameter_shard")
     assert report["distributed"]["native_runtime_terminal"] == "APPLIED"
@@ -664,6 +774,29 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_PHASE_INVALID"):
         _validate_workspace_report(wrong_parent)
 
+    wrong_binding = json.loads(json.dumps(report))
+    wrong_binding["model_dataset_binding"]["dataset_id"] = "fashion-mnist-v1"
+    with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
+        _validate_workspace_report(wrong_binding)
+
+    wrong_eeg_claim = json.loads(json.dumps(report))
+    wrong_eeg_claim["plugin_showcase"]["eeg_bandpower"]["delta_stage_c_execution_claimed"] = True
+    with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
+        _validate_workspace_report(wrong_eeg_claim)
+
+    wrong_temporal_binding = json.loads(json.dumps(report))
+    wrong_temporal_binding["plugin_showcase"]["eeg_bandpower"]["temporal_binding"]["examples"][0][
+        "binding_assertion_id"
+    ] = "sha256:" + "0" * 64
+    with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
+        _validate_workspace_report(wrong_temporal_binding)
+
+    wrong_multi_domain = json.loads(json.dumps(report))
+    wrong_multi_domain["multi_domain"]["delta_stage_c_domain_count"] = 2
+    wrong_multi_domain["multi_domain"]["domains"][1]["delta_stage_c_execution_claimed"] = True
+    with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
+        _validate_workspace_report(wrong_multi_domain)
+
 
 def test_reproducibility_identity_excludes_observational_timings(
     tmp_path: Path,
@@ -694,6 +827,22 @@ def test_workspace_is_one_button_and_does_not_expose_raw_json_by_default() -> No
     assert "Отказ и восстановление" in WORKSPACE_HTML
     assert "LOCAL DEMO ONLY" in WORKSPACE_HTML
     assert "Feature 010 GO" in WORKSPACE_HTML
+    assert "ModelPlugin ↔ DatasetProvider" in WORKSPACE_HTML
+    assert "model-plugin-id" in WORKSPACE_HTML
+    assert "dataset-provider-id" in WORKSPACE_HTML
+    assert "Мульти-доменная структура" in WORKSPACE_HTML
+    assert "multi-domain-grid" in WORKSPACE_HTML
+    assert "EEG плагин подключён" in WORKSPACE_HTML
+    assert "Observation view" in WORKSPACE_HTML
+    assert "Model observations" in WORKSPACE_HTML
+    assert "observed association" in WORKSPACE_HTML
+    assert "no CNN/Transformer claim" in WORKSPACE_HTML
+    assert "InterventionEvent" in WORKSPACE_HTML
+    assert "Intervention ↔ EEG binding" in WORKSPACE_HTML
+    assert "temporal-binding-rows" in WORKSPACE_HTML
+    assert "BindingAssertion" in WORKSPACE_HTML
+    assert "eeg-plugin-id" in WORKSPACE_HTML
+    assert "registry/worker smoke" in WORKSPACE_HTML
     assert "<pre" not in WORKSPACE_HTML
     assert "mnist-demo-report.json" not in WORKSPACE_HTML
 

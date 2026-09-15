@@ -19,6 +19,21 @@ from deltatorrent.domain.parameters import ParameterSchema
 
 
 @dataclass(frozen=True, slots=True)
+class PluginDescriptor:
+    """Immutable metadata descriptor for a model plugin, safe for UI/CLI exposure."""
+
+    plugin_id: str
+    display_name: str
+    model_family: str
+    task_type: str
+    sample_kind: str
+    target_kind: str
+    deterministic: bool
+    supports_stage_c_real_drq1: bool
+    parameter_schema_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class LocalTrainingResult:
     """Output of local worker training or sufficient statistics computation for one ticket.
 

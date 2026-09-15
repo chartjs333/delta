@@ -6,6 +6,7 @@ from collections.abc import Callable
 from typing import Final
 
 from deltatorrent.data.base import DatasetDescriptor, DatasetProvider
+from deltatorrent.data.eeg import EEG_DATASET_DESCRIPTOR, EegWindowDatasetProvider
 from deltatorrent.data.mnist import MNIST_DESCRIPTOR, MnistDatasetProvider
 
 
@@ -88,6 +89,10 @@ def build_default_dataset_registry() -> DatasetRegistry:
     registry.register(
         descriptor=MNIST_DESCRIPTOR,
         factory=MnistDatasetProvider,
+    )
+    registry.register(
+        descriptor=EEG_DATASET_DESCRIPTOR,
+        factory=EegWindowDatasetProvider,
     )
     return registry
 

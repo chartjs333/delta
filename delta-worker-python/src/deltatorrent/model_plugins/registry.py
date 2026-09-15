@@ -3,34 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from typing import Final
 
-from deltatorrent.model_plugins.base import ModelPlugin
+from deltatorrent.model_plugins.base import ModelPlugin, PluginDescriptor
+from deltatorrent.model_plugins.eeg_bandpower import EegBandpowerCentroidPlugin
 from deltatorrent.model_plugins.mnist_centroid import MnistCentroidPlugin
 
 
 class PluginRegistryError(ValueError):
     """Stable error raised when a model plugin registry operation fails."""
-
-
-@dataclass(frozen=True, slots=True)
-class PluginDescriptor:
-    """Immutable metadata descriptor for a model plugin, safe for UI/CLI exposure.
-
-    Contains structural classification metadata describing the model family, task type,
-    determinism, and execution capabilities without executing model computation.
-    """
-
-    plugin_id: str
-    display_name: str
-    model_family: str
-    task_type: str
-    sample_kind: str
-    target_kind: str
-    deterministic: bool
-    supports_stage_c_real_drq1: bool
-    parameter_schema_id: str | None = None
 
 
 class ModelPluginRegistry:
@@ -108,6 +89,18 @@ MNIST_CENTROID_DESCRIPTOR: Final[PluginDescriptor] = PluginDescriptor(
     parameter_schema_id=None,
 )
 
+EEG_BANDPOWER_DESCRIPTOR: Final[PluginDescriptor] = PluginDescriptor(
+    plugin_id="eeg-bandpower-centroid-v1",
+    display_name="EEG Bandpower Centroid Classifier",
+    model_family="centroid",
+    task_type="classification",
+    deterministic=True,
+    supports_stage_c_real_drq1=False,
+    sample_kind="eeg/bandpower-4ch-4band",
+    target_kind="class-id/0-1",
+    parameter_schema_id=None,
+)
+
 
 def build_default_registry() -> ModelPluginRegistry:
     """Construct a new ModelPluginRegistry pre-populated with baseline plugins."""
@@ -115,6 +108,10 @@ def build_default_registry() -> ModelPluginRegistry:
     registry.register(
         descriptor=MNIST_CENTROID_DESCRIPTOR,
         factory=MnistCentroidPlugin,
+    )
+    registry.register(
+        descriptor=EEG_BANDPOWER_DESCRIPTOR,
+        factory=EegBandpowerCentroidPlugin,
     )
     return registry
 
