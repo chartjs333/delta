@@ -3,10 +3,12 @@ from __future__ import annotations
 import base64
 import hashlib
 import inspect
+import json
 import struct
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from typing import cast
 
 import numpy as np
 import pytest
@@ -19,10 +21,13 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     MODEL_MAGIC,
     NODE_COUNT,
     PIXELS_PER_DIGIT,
+    STAGE_C_MNIST_EVENT_ID,
+    STAGE_C_MNIST_SEGMENT_ID,
     VECTOR_WIDTH,
     MnistDeltaError,
     decode_applied_model,
     expected_central_model,
+    run_stage_c_real_drq1_nodes,
     write_node_contribution,
     write_workload,
 )
@@ -82,6 +87,64 @@ def _values(path: Path) -> np.ndarray:
     return np.frombuffer(path.read_bytes(), dtype=">i2", offset=offset).astype(np.int16)
 
 
+@dataclass(frozen=True, slots=True)
+class _FakeCausalEvidence:
+    next_checkpoint_id: str
+    current_pointer_after: str
+    current_pointer_before: str
+    missing_work_policy_result: str
+    isc_ticket_set: tuple[str, ...]
+    worker_count_before: int
+    worker_count_lost: int
+
+
+@dataclass(frozen=True, slots=True)
+class _FakeTransition:
+    event_id: str
+    observed_outcome: str
+    current_checkpoint_advanced: bool
+    causal_evidence: _FakeCausalEvidence
+
+
+@dataclass(frozen=True, slots=True)
+class _FakeReceipt:
+    plan_id: str
+    fault_transitions: tuple[_FakeTransition, ...]
+    native_fault_trace_id: str
+
+    @property
+    def raw_java_receipt_id(self) -> str:
+        return "sha256:" + "d" * 64
+
+
+class _FakeStageCBoundary:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def execute(self, **kwargs: object) -> _FakeReceipt:
+        self.calls.append(kwargs)
+        return _FakeReceipt(
+            plan_id=str(kwargs["plan_id"]),
+            fault_transitions=(
+                _FakeTransition(
+                    event_id=STAGE_C_MNIST_EVENT_ID,
+                    observed_outcome="APPLIED",
+                    current_checkpoint_advanced=True,
+                    causal_evidence=_FakeCausalEvidence(
+                        next_checkpoint_id="sha256:" + "b" * 64,
+                        current_pointer_after="sha256:" + "b" * 64,
+                        current_pointer_before="sha256:" + "a" * 64,
+                        missing_work_policy_result="FULL_QUORUM_DELIVERED_EXACT_ISC",
+                        isc_ticket_set=tuple(f"ticket-{index:03d}" for index in range(4)),
+                        worker_count_before=4,
+                        worker_count_lost=0,
+                    ),
+                ),
+            ),
+            native_fault_trace_id="sha256:" + "c" * 64,
+        )
+
+
 def test_workload_contains_four_independent_negative_model_deltas(tmp_path: Path) -> None:
     summaries = _summaries()
     destination = tmp_path / "workload.bin"
@@ -105,6 +168,50 @@ def test_workload_contains_four_independent_negative_model_deltas(tmp_path: Path
             assert np.all(values[start : start + PIXELS_PER_DIGIT] == expected)
             expected_presence = -NODE_COUNT if digit in digits else 0
             assert values[DIGIT_COUNT * PIXELS_PER_DIGIT + digit] == expected_presence
+
+
+def test_stage_c_real_drq1_runner_stages_four_worker_shards(tmp_path: Path) -> None:
+    boundary = _FakeStageCBoundary()
+    contributions = _contributions(tmp_path / "workers")
+
+    result = run_stage_c_real_drq1_nodes(
+        Path(__file__).resolve().parents[3],
+        tmp_path / "stagec",
+        contributions,
+        "sha256:" + "a" * 64,
+        boundary=boundary,  # type: ignore[arg-type]
+    )
+
+    assert len(boundary.calls) == 1
+    call = boundary.calls[0]
+    worker_shards = cast(dict[str, bytes], call["worker_shards"])
+    manifest = cast(dict[str, object], call["shards_manifest"])
+    fault_profile = call["fault_profile"]
+    assert sorted(worker_shards) == [f"ticket-{index:03d}" for index in range(4)]
+    assert all(payload.startswith(b"DRQ1") for payload in worker_shards.values())
+    assert manifest == {
+        "element_count": VECTOR_WIDTH,
+        "element_start": 0,
+        "formal_semantics_id": mnist_delta_nodes.FORMAL_SEMANTICS_ID,
+        "ordinal": 0,
+        "parameter_schema_id": mnist_delta_nodes.STAGE_C_MNIST_PARAMETER_SCHEMA_ID,
+        "profile_id": mnist_delta_nodes.STAGE_C_MNIST_ARITHMETIC_PROFILE_ID,
+        "proof_instance_id": mnist_delta_nodes.STAGE_C_MNIST_PROOF_INSTANCE_ID,
+        "round_config_id": mnist_delta_nodes.STAGE_C_MNIST_ROUND_CONFIG_ID,
+        "scale_table_id": mnist_delta_nodes.STAGE_C_MNIST_SCALE_TABLE_ID,
+        "segment_id": STAGE_C_MNIST_SEGMENT_ID,
+        "segment_offset": 0,
+        "shard_plan_id": mnist_delta_nodes.STAGE_C_MNIST_SHARD_PLAN_ID,
+    }
+    assert fault_profile.events[0].event_id == STAGE_C_MNIST_EVENT_ID
+    assert result.final_checkpoint_id == result.evaluation_checkpoint_id
+    assert result.ticket_ids == tuple(f"ticket-{index:03d}" for index in range(4))
+    assert len(result.worker_shard_leaf_ids) == 4
+    assert result.evidence["python_cross_node_aggregation_performed"] is False
+    assert result.evidence["synthetic_contribution_fallback_allowed"] is False
+    assert result.evidence["single_shard_scope"] is True
+    loaded = json.loads(result.evidence_path.read_text(encoding="utf-8"))
+    assert loaded == result.evidence
 
 
 def test_local_quantization_uses_integer_half_toward_positive(tmp_path: Path) -> None:

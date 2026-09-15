@@ -3,8 +3,10 @@ from __future__ import annotations
 import hashlib
 import json
 import struct
+import threading
 from dataclasses import fields
 from pathlib import Path
+from types import SimpleNamespace
 from typing import cast
 
 import numpy as np
@@ -70,6 +72,35 @@ def _synthetic_dataset() -> MnistDataset:
         test_images=np.asarray(test_images, dtype=np.uint8),
         test_labels=test_labels,
     )
+
+
+def test_stage_c_counter_write_is_atomic_for_concurrent_reader(tmp_path: Path) -> None:
+    counter = tmp_path / "tx_bytes"
+    mnist_demo._write_stage_c_counter(counter, 0)
+    stop = threading.Event()
+    observed_invalid: list[str] = []
+
+    def read_counter() -> None:
+        while not stop.is_set():
+            try:
+                text = counter.read_text(encoding="ascii").strip()
+            except OSError:
+                continue
+            if not text.isdigit():
+                observed_invalid.append(text)
+                stop.set()
+
+    reader = threading.Thread(target=read_counter)
+    reader.start()
+    try:
+        for value in range(1, 1_000):
+            mnist_demo._write_stage_c_counter(counter, value)
+    finally:
+        stop.set()
+        reader.join(timeout=5.0)
+
+    assert observed_invalid == []
+    assert counter.read_text(encoding="ascii").strip() == "999"
 
 
 def _patch_dataset(monkeypatch: pytest.MonkeyPatch, dataset: MnistDataset) -> None:
@@ -256,6 +287,61 @@ def _patch_delta_nodes(monkeypatch: pytest.MonkeyPatch, dataset: MnistDataset) -
         )
 
     monkeypatch.setattr(mnist_demo, "run_delta_nodes", fake_delta_nodes)
+
+
+def _patch_stage_c(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_stage_c(
+        _root: Path,
+        destination: Path,
+        node_contributions: tuple[NodeContribution, ...],
+        _source_id: str,
+        *,
+        boundary: object,
+    ) -> object:
+        del boundary
+        destination.mkdir(parents=True)
+        evidence_path = destination / "stagec-real-drq1-evidence.json"
+        evidence = {
+            "python_cross_node_aggregation_performed": False,
+            "single_shard_scope": True,
+            "synthetic_contribution_fallback_allowed": False,
+        }
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        causal = SimpleNamespace(
+            current_pointer_after="sha256:" + "b" * 64,
+            current_pointer_before="sha256:" + "a" * 64,
+            isc_ticket_set=tuple(f"ticket-{index:03d}" for index in range(4)),
+            missing_work_policy_result="FULL_QUORUM_DELIVERED_EXACT_ISC",
+        )
+        transition = SimpleNamespace(
+            causal_evidence=causal,
+            current_checkpoint_advanced=True,
+            native_wal_sha256="sha256:" + "c" * 64,
+            observed_outcome="APPLIED",
+        )
+        receipt = SimpleNamespace(
+            fault_transitions=(transition,),
+            native_fault_trace_id="sha256:" + "d" * 64,
+            raw_java_receipt_id="sha256:" + "e" * 64,
+        )
+        return SimpleNamespace(
+            evaluation_checkpoint_id="sha256:" + "b" * 64,
+            evidence=evidence,
+            evidence_path=evidence_path,
+            final_checkpoint_id="sha256:" + "b" * 64,
+            receipt=receipt,
+            ticket_ids=tuple(f"ticket-{index:03d}" for index in range(4)),
+            worker_shard_leaf_ids=tuple(
+                (f"ticket-{index:03d}", f"sha256:{index + 40:064x}") for index in range(4)
+            ),
+        )
+
+    monkeypatch.setattr(
+        mnist_demo,
+        "_resolve_stage_c_boundary_from_environment",
+        lambda _destination: (object(), False),
+    )
+    monkeypatch.setattr(mnist_demo, "run_stage_c_real_drq1_nodes", fake_stage_c)
 
 
 def test_mnist_sources_are_content_pinned() -> None:
@@ -496,6 +582,7 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     dataset = _synthetic_dataset()
     _patch_dataset(monkeypatch, dataset)
     _patch_delta_nodes(monkeypatch, dataset)
+    _patch_stage_c(monkeypatch)
 
     result = run_mnist_demo(
         _repository_root(),
@@ -516,9 +603,19 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     assert report["distributed"]["native_runtime_terminal"] == "APPLIED"
     assert report["distributed"]["parallel_processes_observed"] == 4
     assert report["distributed"]["worker_processes_required"] == 4
+    assert report["distributed"]["stage_c_execution_mode"] == "REAL_DRQ1"
+    assert report["distributed"]["stage_c_checkpoint_advanced"] is True
     assert report["centralized"]["evaluation"] == report["distributed"]["evaluation"]
     assert report["delta_execution"]["python_cross_node_aggregation_performed"] is False
     assert report["delta_execution"]["terminal_outcome"] == "APPLIED"
+    assert report["stage_c_execution"]["execution_mode"] == "REAL_DRQ1"
+    assert report["stage_c_execution"]["worker_count"] == 4
+    assert report["stage_c_execution"]["isc_ticket_count"] == 4
+    assert report["stage_c_execution"]["outcome"] == "APPLIED"
+    assert report["stage_c_execution"]["checkpoint_advanced"] is True
+    assert report["stage_c_execution"]["synthetic_fallback"] is False
+    assert report["stage_c_execution"]["stage_c_checkpoint_accuracy_claimed"] is False
+    assert report["model"]["stage_c_checkpoint_accuracy_claimed"] is False
     assert report["execution_path"]["acceptance_status"] == "PASS"
     assert report["execution_path"]["demo_owned_aggregation"] is False
     assert report["execution_path"]["existing_delta_node_interfaces"] is True
@@ -575,6 +672,7 @@ def test_reproducibility_identity_excludes_observational_timings(
     dataset = _synthetic_dataset()
     _patch_dataset(monkeypatch, dataset)
     _patch_delta_nodes(monkeypatch, dataset)
+    _patch_stage_c(monkeypatch)
     first = run_mnist_demo(
         _repository_root(),
         tmp_path / "cache",

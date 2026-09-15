@@ -56,9 +56,10 @@ function Test-LockedJdkInstallation {
 
     $java = Join-Path $InstallHome "bin/java.exe"
     $javac = Join-Path $InstallHome "bin/javac.exe"
+    $jar = Join-Path $InstallHome "bin/jar.exe"
     $release = Join-Path $InstallHome "release"
     $markerPath = Join-Path $InstallHome ".delta-mnist-toolchain.json"
-    foreach ($requiredFile in @($java, $javac, $release, $markerPath)) {
+    foreach ($requiredFile in @($java, $javac, $jar, $release, $markerPath)) {
         if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
             return $false
         }
@@ -236,8 +237,9 @@ function Resolve-JavaToolchain {
         $extractedHome = $extractedHomes[0].FullName
         $javaCandidate = Join-Path $extractedHome "bin/java.exe"
         $javacCandidate = Join-Path $extractedHome "bin/javac.exe"
+        $jarCandidate = Join-Path $extractedHome "bin/jar.exe"
         $releaseCandidate = Join-Path $extractedHome "release"
-        foreach ($requiredFile in @($javaCandidate, $javacCandidate, $releaseCandidate)) {
+        foreach ($requiredFile in @($javaCandidate, $javacCandidate, $jarCandidate, $releaseCandidate)) {
             if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
                 throw "Pinned JDK archive is missing a required file: $requiredFile"
             }
@@ -270,6 +272,7 @@ function Resolve-JavaToolchain {
 
     $javaCandidate = Join-Path $lockedHome "bin/java.exe"
     $javacCandidate = Join-Path $lockedHome "bin/javac.exe"
+    $jarCandidate = Join-Path $lockedHome "bin/jar.exe"
     $priorPreference = $ErrorActionPreference
     try {
         $ErrorActionPreference = "Continue"
@@ -286,6 +289,8 @@ function Resolve-JavaToolchain {
         Home = (Resolve-Path -LiteralPath $lockedHome).Path
         Java = (Resolve-Path -LiteralPath $javaCandidate).Path
         JavaSha256 = Get-Sha256 -Path $javaCandidate
+        Jar = (Resolve-Path -LiteralPath $jarCandidate).Path
+        JarSha256 = Get-Sha256 -Path $jarCandidate
         Javac = (Resolve-Path -LiteralPath $javacCandidate).Path
         JavacSha256 = Get-Sha256 -Path $javacCandidate
         Major = 25
@@ -388,6 +393,7 @@ function Get-LockedNettyClasspath {
 
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $buildRoot = Join-Path $repoRoot "out/build/mnist-delta"
+$stageCBuildRoot = Join-Path $repoRoot "out/build/cpp20"
 $nativeSource = Join-Path $repoRoot "integration/mnist-delta"
 $javaClassesRoot = Join-Path $buildRoot "java-classes"
 $javaDependencies = Join-Path $repoRoot "artifacts/local/mnist-delta-toolchain/netty"
@@ -398,7 +404,7 @@ Push-Location $repoRoot
 try {
     Assert-NoInjectedJavaOptions
 
-    Write-Host "[1/4] Building the Delta native MNIST node adapter..."
+    Write-Host "[1/5] Building the Delta native MNIST node adapter..."
     & cmake -S $nativeSource -B $buildRoot "-DDELTA_SOURCE_ROOT=$repoRoot" "-DDELTA_WARNINGS_AS_ERRORS=ON"
     Assert-ExitCode "CMake configure"
     & cmake --build $buildRoot --config Release --target delta_mnist_native_node --parallel 2
@@ -416,7 +422,25 @@ try {
         throw "CMake did not produce delta_mnist_native_node"
     }
 
-    Write-Host "[2/4] Resolving the Java toolchain and locked Netty runtime..."
+    Write-Host "[2/5] Building the Stage C REAL_DRQ1 native sidecar..."
+    & cmake --preset cpp20
+    Assert-ExitCode "Stage C CMake configure"
+    & cmake --build --preset cpp20 --target delta_benchmark_sidecar --parallel 2
+    Assert-ExitCode "Stage C sidecar build"
+    $stageCSidecarCandidates = @(
+        (Join-Path $stageCBuildRoot "Debug/delta_benchmark_sidecar.exe"),
+        (Join-Path $stageCBuildRoot "Release/delta_benchmark_sidecar.exe"),
+        (Join-Path $stageCBuildRoot "delta_benchmark_sidecar.exe"),
+        (Join-Path $stageCBuildRoot "delta_benchmark_sidecar")
+    )
+    $stageCSidecar = $stageCSidecarCandidates |
+        Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+        Select-Object -First 1
+    if (-not $stageCSidecar) {
+        throw "CMake did not produce delta_benchmark_sidecar"
+    }
+
+    Write-Host "[3/5] Resolving the Java toolchain and locked Netty runtime..."
     $javaToolchain = Resolve-JavaToolchain `
         -RepositoryRoot $repoRoot `
         -NetworkDisabled ([bool]$Offline)
@@ -425,18 +449,20 @@ try {
         -DependencyDirectory $javaDependencies `
         -NetworkDisabled ([bool]$Offline)
 
-    Write-Host "[3/4] Compiling the real Netty relay and production transport helpers..."
+    Write-Host "[4/5] Compiling the real Netty relay and Stage C transport helpers..."
     New-Item -ItemType Directory -Force -Path $javaClassesRoot | Out-Null
     $javaClasses = Join-Path $javaClassesRoot (
         "compile-$PID-$([guid]::NewGuid().ToString('N'))"
     )
     New-Item -ItemType Directory -Path $javaClasses | Out-Null
-    $javaSources = @(
-        (Join-Path $repoRoot "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkContracts.java"),
-        (Join-Path $repoRoot "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkTransport.java"),
-        (Join-Path $repoRoot "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java"),
-        (Join-Path $repoRoot "integration/mnist-delta/java/io/deltareduce/demo/MnistDeltaNettyRelay.java")
-    )
+    $benchmarkSources = Get-ChildItem `
+        -LiteralPath (Join-Path $repoRoot "delta-node-java/src/main/java/io/deltareduce/node/benchmark") `
+        -Filter "*.java" |
+        Sort-Object FullName |
+        ForEach-Object { $_.FullName }
+    $javaSources = @()
+    $javaSources += $benchmarkSources
+    $javaSources += (Join-Path $repoRoot "integration/mnist-delta/java/io/deltareduce/demo/MnistDeltaNettyRelay.java")
     $javacArguments = @(
         "--release", "$($javaToolchain.Major)",
         "-Xlint:all", "-Werror",
@@ -445,6 +471,11 @@ try {
     ) + $javaSources
     & $javaToolchain.Javac @javacArguments
     Assert-ExitCode "Java relay compilation"
+    $stageCHarness = Join-Path $javaClassesRoot (
+        "stagec-transport-$PID-$([guid]::NewGuid().ToString('N')).jar"
+    )
+    & $javaToolchain.Jar "--create" "--file" $stageCHarness "-C" $javaClasses "."
+    Assert-ExitCode "Stage C transport jar creation"
 
     $env:DELTA_MNIST_NATIVE_NODE = (Resolve-Path -LiteralPath $nativeExecutable).Path
     $env:DELTA_MNIST_JAVA = $javaToolchain.Java
@@ -453,18 +484,25 @@ try {
         [System.IO.Path]::PathSeparator,
         @((Resolve-Path -LiteralPath $javaClasses).Path, $nettyClasspath)
     )
+    $env:DELTA_STAGEC_JAVA = $javaToolchain.Java
+    $env:DELTA_STAGEC_NATIVE_SIDECAR = (Resolve-Path -LiteralPath $stageCSidecar).Path
+    $env:DELTA_STAGEC_TRANSPORT_HARNESS = (Resolve-Path -LiteralPath $stageCHarness).Path
+    $env:DELTA_STAGEC_NETTY_CLASSPATH = $nettyClasspath
 
     if ($PrepareOnly) {
         Write-Host "MNIST Delta native/Java toolchain is ready in this process."
         Write-Host "JDK archive SHA-256: $($javaToolchain.ArchiveSha256)"
         Write-Host "java.exe SHA-256: $($javaToolchain.JavaSha256)"
         Write-Host "javac.exe SHA-256: $($javaToolchain.JavacSha256)"
+        Write-Host "jar.exe SHA-256: $($javaToolchain.JarSha256)"
         Write-Host "Native adapter: $env:DELTA_MNIST_NATIVE_NODE"
         Write-Host "Relay classpath: $env:DELTA_MNIST_RELAY_CLASSPATH"
+        Write-Host "Stage C sidecar: $env:DELTA_STAGEC_NATIVE_SIDECAR"
+        Write-Host "Stage C transport harness: $env:DELTA_STAGEC_TRANSPORT_HARNESS"
         return
     }
 
-    Write-Host "[4/4] Starting the loopback-only commission workspace..."
+    Write-Host "[5/5] Starting the loopback-only commission workspace..."
     $arguments = @(
         "run",
         "--offline",

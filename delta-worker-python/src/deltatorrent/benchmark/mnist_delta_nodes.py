@@ -26,8 +26,22 @@ import numpy as np
 import numpy.typing as npt
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from safetensors.numpy import save_file as save_safetensors_np
 
+from deltatorrent.benchmark.campaign02_stage_c_runtime import (
+    MeasuredStageCReceipt,
+    MeasuredStageCRuntimeBoundary,
+)
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
+from deltatorrent.benchmark.fault_profiles import FaultProfile
+from deltatorrent.benchmark.network_profiles import NetworkProfile
+from deltatorrent.domain.manifests import ArtifactRef
+from deltatorrent.domain.updates import NormalizedContributionCandidate
+from deltatorrent.worker.drq1_producer import (
+    DEFAULT_PROFILE_ID,
+    ProducedShardSet,
+    produce_drq1_shards,
+)
 
 Int64Array = npt.NDArray[np.int64]
 Int16Array = npt.NDArray[np.int16]
@@ -40,6 +54,24 @@ NODE_COUNT = 4
 DIGIT_COUNT = 10
 PIXELS_PER_DIGIT = 28 * 28
 VECTOR_WIDTH = DIGIT_COUNT * PIXELS_PER_DIGIT + DIGIT_COUNT
+STAGE_C_MNIST_EVENT_ID = "mnist-4-workers"
+STAGE_C_MNIST_SEGMENT_ID = "mnist.linear"
+STAGE_C_MNIST_PARAMETER_SCHEMA_ID = (
+    "sha256:f43c0259749b15ae0d0154a6e9094774c7ea65e55adefbaea400a6201acb6239"
+)
+STAGE_C_MNIST_PROOF_INSTANCE_ID = (
+    "sha256:993b4d5104810dd26a3159b60cf8fe9afe6154cdcca90d22b577ae1b6d1ac076"
+)
+STAGE_C_MNIST_ROUND_CONFIG_ID = (
+    "sha256:34bc08c316dfe22efe155ed11b866bcc0daf7ef8c3c7389c56b2f2c707443629"
+)
+STAGE_C_MNIST_SCALE_TABLE_ID = (
+    "sha256:434092f82188337d0a273cd13c93e06dec55ae842df0498e4d52caa1d1844205"
+)
+STAGE_C_MNIST_SHARD_PLAN_ID = (
+    "sha256:4c644a3254edb3d7bff009bbe91ee99df6051516362fa1a1eac6f0a803a9c7a1"
+)
+STAGE_C_MNIST_ARITHMETIC_PROFILE_ID = DEFAULT_PROFILE_ID
 CONTENT_ID_TEXT_BYTES = 71
 CONTRIBUTION_RECORD_BYTES = 4 + 8 + CONTENT_ID_TEXT_BYTES * 2 + VECTOR_WIDTH * 2
 EXACT_WORKLOAD_BYTES = 8 + 16 + CONTENT_ID_TEXT_BYTES + NODE_COUNT * CONTRIBUTION_RECORD_BYTES
@@ -309,6 +341,19 @@ class DeltaExecutionResult:
     execution_diagram_path: Path
     failure_simulation: dict[str, object]
     node_contributions: tuple[NodeContribution, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class StageCMnistDrq1Result:
+    """Stage C receipt proving worker DRQ1 artifacts entered Feature008."""
+
+    receipt: MeasuredStageCReceipt
+    evidence_path: Path
+    evidence: dict[str, object]
+    final_checkpoint_id: str
+    evaluation_checkpoint_id: str
+    ticket_ids: tuple[str, ...]
+    worker_shard_leaf_ids: tuple[tuple[str, str], ...]
 
 
 def _content_id(value: bytes) -> str:
@@ -772,6 +817,318 @@ def write_workload(
             record,
         )
     return ordered, _content_id(payload)
+
+
+def _stage_c_mnist_network_profiles() -> tuple[tuple[str, NetworkProfile], ...]:
+    value: dict[str, object] = {
+        "bandwidth_kbps": 1_000_000,
+        "disconnect_ms": 0,
+        "duplication_ppm": 0,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "jitter_ms": 0,
+        "loss_ppm": 0,
+        "profile_id": "lan-control",
+        "reordering_ppm": 0,
+        "rtt_ms": 1,
+        "schema_version": "1.0.0",
+        "seed": 10001,
+        "type_name": "NETWORK_PROFILE",
+    }
+    return ((_content_id(_canonical_bytes(value)), NetworkProfile.from_dict(value)),)
+
+
+def _stage_c_mnist_fault_profile() -> FaultProfile:
+    return FaultProfile.from_dict(
+        {
+            "events": [
+                {
+                    "action": "CRASH",
+                    "actor_class": "WORKER",
+                    "assumptions_hold": True,
+                    "at_step": 100,
+                    "event_id": STAGE_C_MNIST_EVENT_ID,
+                    "expected_outcome": "APPLIED",
+                }
+            ],
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "profile_id": "mnist-real-drq1-stagec-v1",
+            "schema_version": "1.0.0",
+            "type_name": "FAULT_PROFILE",
+        }
+    )
+
+
+def _stage_c_mnist_scale_table() -> dict[str, object]:
+    return {
+        "content_id": STAGE_C_MNIST_SCALE_TABLE_ID,
+        "segments": [
+            {
+                "element_count": VECTOR_WIDTH,
+                "element_start": 0,
+                "quantum": {"denominator": 1, "numerator": "1"},
+                "segment_id": STAGE_C_MNIST_SEGMENT_ID,
+                "segment_ordinal": 0,
+            }
+        ],
+        "total_elements": VECTOR_WIDTH,
+    }
+
+
+def _stage_c_mnist_shard_plan() -> dict[str, object]:
+    return {
+        "content_id": STAGE_C_MNIST_SHARD_PLAN_ID,
+        "entries": [
+            {
+                "element_count": VECTOR_WIDTH,
+                "element_start": 0,
+                "ordinal": 0,
+                "payload_bytes": VECTOR_WIDTH * 2,
+                "segment_id": STAGE_C_MNIST_SEGMENT_ID,
+                "segment_offset": 0,
+            }
+        ],
+        "total_elements": VECTOR_WIDTH,
+    }
+
+
+def _stage_c_mnist_shards_manifest() -> dict[str, object]:
+    return {
+        "element_count": VECTOR_WIDTH,
+        "element_start": 0,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "ordinal": 0,
+        "parameter_schema_id": STAGE_C_MNIST_PARAMETER_SCHEMA_ID,
+        "profile_id": STAGE_C_MNIST_ARITHMETIC_PROFILE_ID,
+        "proof_instance_id": STAGE_C_MNIST_PROOF_INSTANCE_ID,
+        "round_config_id": STAGE_C_MNIST_ROUND_CONFIG_ID,
+        "scale_table_id": STAGE_C_MNIST_SCALE_TABLE_ID,
+        "segment_id": STAGE_C_MNIST_SEGMENT_ID,
+        "segment_offset": 0,
+        "shard_plan_id": STAGE_C_MNIST_SHARD_PLAN_ID,
+    }
+
+
+def _read_verified_node_q_values(contribution: NodeContribution) -> Int16Array:
+    _require_content_id(contribution.shard_id, "MNIST_DELTA_SHARD_ID_INVALID")
+    _require_content_id(contribution.summary_id, "MNIST_DELTA_SUMMARY_ID_INVALID")
+    raw = _regular_file_bytes(
+        contribution.record_path,
+        "MNIST_DELTA_CONTRIBUTION_FILE_INVALID",
+        maximum=CONTRIBUTION_RECORD_BYTES,
+    )
+    expected_prefix = (
+        struct.pack(">IQ", contribution.node_index, contribution.sample_count)
+        + contribution.shard_id.encode("ascii")
+        + contribution.summary_id.encode("ascii")
+    )
+    if (
+        contribution.node_id != f"demo-mnist-worker-{contribution.node_index:02d}"
+        or contribution.sample_count <= 0
+        or contribution.sample_count > 60_000
+        or contribution.size_bytes != CONTRIBUTION_RECORD_BYTES
+        or len(raw) != CONTRIBUTION_RECORD_BYTES
+        or not raw.startswith(expected_prefix)
+        or _content_id(raw) != contribution.content_id
+    ):
+        raise MnistDeltaError("MNIST_DELTA_CONTRIBUTION_FILE_INVALID")
+    offset = 4 + 8 + CONTENT_ID_TEXT_BYTES * 2
+    values = np.frombuffer(raw, dtype=">i2", offset=offset).astype(np.int16)
+    if values.shape != (VECTOR_WIDTH,):
+        raise MnistDeltaError("MNIST_DELTA_CONTRIBUTION_FILE_INVALID")
+    return np.ascontiguousarray(values, dtype=np.int16)
+
+
+def _stage_c_ticket_id(contribution: NodeContribution) -> str:
+    if contribution.node_index not in range(1, NODE_COUNT + 1):
+        raise MnistDeltaError("MNIST_DELTA_NODE_SET_INVALID")
+    return f"ticket-{contribution.node_index - 1:03d}"
+
+
+def _stage_c_domain_id(contribution: NodeContribution) -> str:
+    if contribution.node_index not in range(1, NODE_COUNT + 1):
+        raise MnistDeltaError("MNIST_DELTA_NODE_SET_INVALID")
+    return "code" if contribution.node_index <= NODE_COUNT // 2 else "text"
+
+
+def _write_stage_c_candidate_artifact(q_values: Int16Array, destination: Path) -> ArtifactRef:
+    tensor = np.ascontiguousarray(q_values.astype(np.float32), dtype=np.float32)
+    if destination.exists() or destination.is_symlink():
+        raise MnistDeltaError("MNIST_DELTA_STAGEC_ARTIFACT_DESTINATION_INVALID")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        save_safetensors_np({STAGE_C_MNIST_SEGMENT_ID: tensor}, str(destination))
+    except Exception as exc:
+        raise MnistDeltaError("MNIST_DELTA_STAGEC_SAFETENSORS_WRITE_FAILED") from exc
+    raw = _regular_file_bytes(
+        destination.resolve(strict=True),
+        "MNIST_DELTA_STAGEC_SAFETENSORS_WRITE_FAILED",
+        maximum=1 << 20,
+    )
+    return ArtifactRef(
+        byte_length=len(raw),
+        content_id=_content_id(raw),
+        locator=f"stagec-normalized/{destination.name}",
+        media_type="application/vnd.safetensors",
+        schema_id="SCHEMA-SAFETENSORS-V1",
+        schema_version="1.0.0",
+    )
+
+
+def _produce_stage_c_mnist_shard_set(
+    contribution: NodeContribution,
+    destination: Path,
+) -> ProducedShardSet:
+    q_values = _read_verified_node_q_values(contribution)
+    ticket_id = _stage_c_ticket_id(contribution)
+    artifact = _write_stage_c_candidate_artifact(
+        q_values,
+        destination / "stagec-normalized" / f"{ticket_id}.safetensors",
+    )
+    candidate = NormalizedContributionCandidate(
+        arithmetic_profile_id=STAGE_C_MNIST_ARITHMETIC_PROFILE_ID,
+        completion_id=contribution.content_id,
+        domain_id=_stage_c_domain_id(contribution),
+        effective_steps=1,
+        normalized_delta=artifact,
+        normalization_denominator=1,
+        optimizer_profile_id=_derived_content_id(
+            "deltareduce.demo.mnist.optimizer-profile.v1",
+            [STAGE_C_MNIST_EVENT_ID],
+        ),
+        parameter_schema_id=STAGE_C_MNIST_PARAMETER_SCHEMA_ID,
+        parent_model_id=_derived_content_id(
+            "deltareduce.demo.mnist.parent-model.v1",
+            [STAGE_C_MNIST_EVENT_ID],
+        ),
+        step_budget=1,
+        tensor_order=(STAGE_C_MNIST_SEGMENT_ID,),
+        ticket_fingerprint=contribution.shard_id,
+        ticket_id=ticket_id,
+    )
+    produced = produce_drq1_shards(
+        candidate=candidate,
+        safetensors_path=destination / "stagec-normalized" / f"{ticket_id}.safetensors",
+        scale_table=_stage_c_mnist_scale_table(),
+        shard_plan=_stage_c_mnist_shard_plan(),
+        proof_instance_id=STAGE_C_MNIST_PROOF_INSTANCE_ID,
+        round_config_id=STAGE_C_MNIST_ROUND_CONFIG_ID,
+        profile_id=STAGE_C_MNIST_ARITHMETIC_PROFILE_ID,
+        formal_semantics_id=FORMAL_SEMANTICS_ID,
+    )
+    if len(produced.shards) != 1 or produced.shards[0].ordinal != 0:
+        raise MnistDeltaError("MNIST_DELTA_STAGEC_REQUIRES_SINGLE_SHARD")
+    if produced.commitment_root != produced.shards[0].leaf_id:
+        raise MnistDeltaError("MNIST_DELTA_STAGEC_SINGLE_SHARD_ROOT_INVALID")
+    return produced
+
+
+def _assert_stage_c_mnist_receipt(receipt: MeasuredStageCReceipt) -> tuple[str, str]:
+    if len(receipt.fault_transitions) != 1:
+        raise MnistDeltaError("MNIST_DELTA_STAGEC_RECEIPT_INVALID")
+    transition = receipt.fault_transitions[0]
+    evidence = transition.causal_evidence
+    final_checkpoint_id = evidence.next_checkpoint_id
+    evaluation_checkpoint_id = evidence.current_pointer_after
+    if (
+        transition.event_id != STAGE_C_MNIST_EVENT_ID
+        or transition.observed_outcome != "APPLIED"
+        or not transition.current_checkpoint_advanced
+        or final_checkpoint_id is None
+        or evaluation_checkpoint_id is None
+        or final_checkpoint_id != evaluation_checkpoint_id
+        or evidence.current_pointer_before == evidence.current_pointer_after
+        or evidence.missing_work_policy_result != "FULL_QUORUM_DELIVERED_EXACT_ISC"
+        or evidence.isc_ticket_set != tuple(f"ticket-{index:03d}" for index in range(NODE_COUNT))
+        or evidence.worker_count_before != NODE_COUNT
+        or evidence.worker_count_lost != 0
+    ):
+        raise MnistDeltaError("MNIST_DELTA_STAGEC_RECEIPT_INVALID")
+    return final_checkpoint_id, evaluation_checkpoint_id
+
+
+def run_stage_c_real_drq1_nodes(
+    repository_root: Path,
+    destination: Path,
+    node_contributions: Sequence[NodeContribution],
+    source_id: str,
+    *,
+    boundary: MeasuredStageCRuntimeBoundary,
+    network_profiles: tuple[tuple[str, NetworkProfile], ...] | None = None,
+    fault_profile: FaultProfile | None = None,
+    packet_count: int = 10,
+    payload_bytes: int = 1000,
+) -> StageCMnistDrq1Result:
+    """Run the four MNIST worker DRQ1 shards through existing Stage C Feature008."""
+    repository_root.resolve(strict=True)
+    source = _require_content_id(source_id, "MNIST_DELTA_SOURCE_ID_INVALID")
+    output = destination.resolve(strict=False)
+    if output.exists():
+        raise MnistDeltaError("MNIST_DELTA_STAGEC_OUTPUT_ALREADY_EXISTS")
+    output.mkdir(parents=True)
+    if len(node_contributions) != NODE_COUNT:
+        raise MnistDeltaError("MNIST_DELTA_NODE_COUNT_INVALID")
+    ordered = tuple(sorted(node_contributions, key=lambda item: item.node_index))
+    if tuple(item.node_index for item in ordered) != tuple(range(1, NODE_COUNT + 1)):
+        raise MnistDeltaError("MNIST_DELTA_NODE_SET_INVALID")
+
+    worker_shards: dict[str, bytes] = {}
+    leaf_ids: list[tuple[str, str]] = []
+    for contribution in ordered:
+        produced = _produce_stage_c_mnist_shard_set(contribution, output)
+        ticket_id = _stage_c_ticket_id(contribution)
+        shard = produced.shards[0]
+        worker_shards[ticket_id] = shard.envelope
+        leaf_ids.append((ticket_id, shard.leaf_id))
+
+    plan_document = {
+        "event_id": STAGE_C_MNIST_EVENT_ID,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "profile": "REAL_DRQ1_SINGLE_SHARD_MNIST_DEMO",
+        "source_id": source,
+        "ticket_ids": sorted(worker_shards),
+        "worker_contribution_ids": [item.content_id for item in ordered],
+    }
+    plan_id = _content_id(_canonical_bytes(plan_document))
+    receipt = boundary.execute(
+        plan_id=plan_id,
+        packet_count=packet_count,
+        payload_bytes=payload_bytes,
+        network_profiles=network_profiles or _stage_c_mnist_network_profiles(),
+        fault_profile=fault_profile or _stage_c_mnist_fault_profile(),
+        worker_shards=worker_shards,
+        shards_manifest=_stage_c_mnist_shards_manifest(),
+    )
+    final_checkpoint_id, evaluation_checkpoint_id = _assert_stage_c_mnist_receipt(receipt)
+    evidence: dict[str, object] = {
+        "commitment_scope": "SINGLE_DRQ1_SHARD_PER_WORKER_LEAF_ID",
+        "event_id": STAGE_C_MNIST_EVENT_ID,
+        "final_checkpoint_id": final_checkpoint_id,
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "mnist_source_id": source,
+        "native_fault_trace_id": receipt.native_fault_trace_id,
+        "python_cross_node_aggregation_performed": False,
+        "real_drq1_required": True,
+        "receipt_id": receipt.raw_java_receipt_id,
+        "schema_version": "1.0.0",
+        "single_shard_scope": True,
+        "synthetic_contribution_fallback_allowed": False,
+        "ticket_ids": sorted(worker_shards),
+        "type_name": "MNIST_STAGEC_REAL_DRQ1_ACCEPTANCE",
+        "worker_shard_leaf_ids": [
+            {"leaf_id": leaf_id, "ticket_id": ticket_id} for ticket_id, leaf_id in leaf_ids
+        ],
+    }
+    evidence_path = output / "stagec-real-drq1-evidence.json"
+    _write_json_new(evidence_path, evidence)
+    return StageCMnistDrq1Result(
+        receipt=receipt,
+        evidence_path=evidence_path,
+        evidence=evidence,
+        final_checkpoint_id=final_checkpoint_id,
+        evaluation_checkpoint_id=evaluation_checkpoint_id,
+        ticket_ids=tuple(sorted(worker_shards)),
+        worker_shard_leaf_ids=tuple(leaf_ids),
+    )
 
 
 def decode_applied_model(path: Path) -> AppliedModel:

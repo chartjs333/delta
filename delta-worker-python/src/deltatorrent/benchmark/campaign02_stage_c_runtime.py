@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import base64
+import json
 import os
 import re
 import subprocess
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
@@ -16,6 +18,7 @@ from deltatorrent.protocol.canonical import sha256_content_id
 
 _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
 _TOKEN: Final = re.compile(r"^[A-Za-z0-9_.-]{1,128}$")
+_SAFE_TICKET_ID: Final = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _PROFILE_RECEIPT_DOMAIN: Final = b"deltareduce.010.stagec-java-transport-receipt.v1\0"
 _NATIVE_TRACE_SET_DOMAIN: Final = b"deltareduce.010.stagec-native-fault-trace-set.v1\0"
 _FORBIDDEN_MODES: Final = {"DRY", "FIXTURE", "SYNTHETIC", "CALLER_SUPPLIED", "SIMULATED_ONLY"}
@@ -292,6 +295,34 @@ class NativeFaultCausalEvidence:
         if transition.actor_class == "WORKER" and transition.action == "CRASH":
             required = dict(self.per_domain_required_tickets)
             remaining = dict(self.per_domain_remaining_tickets)
+            if transition.event_id == "mnist-4-workers":
+                delivery_ids = {message_id for message_id, _ in self.message_delivery_ticks}
+                mnist_invalid = (
+                    transition.observed_outcome != "APPLIED"
+                    or self.worker_count_before != 4
+                    or self.worker_count_lost != 0
+                    or self.loss_fraction != (0, 4)
+                    or self.lost_worker_ids
+                    or self.lost_ticket_ids
+                    or required != {"code": 2, "text": 2}
+                    or remaining != {"code": 2, "text": 2}
+                    or self.quorum_capacity_before != 4
+                    or self.quorum_capacity_after != 4
+                    or self.missing_work_policy_result != "FULL_QUORUM_DELIVERED_EXACT_ISC"
+                    or self.unavailable_ids
+                    or self.failed_quorum_reason is not None
+                    or self.dropped_message_ids
+                    or self.isc_ticket_set != tuple(f"ticket-{index:03d}" for index in range(4))
+                    or {name for name in delivery_ids if name.startswith("worker-ticket-")}
+                    != {f"worker-ticket-{index:03d}" for index in range(4)}
+                    or {name for name in delivery_ids if name.startswith("aggregate-vote-")}
+                    != {f"aggregate-vote-{index}" for index in range(3)}
+                    or {name for name in delivery_ids if name.startswith("apply-vote-")}
+                    != {f"apply-vote-{index}" for index in range(3)}
+                )
+                if mnist_invalid:
+                    raise _fail("CAMPAIGN02_STAGE_C_WORKER_LOSS_CAUSAL_EVIDENCE_INVALID")
+                return
             common_invalid = (
                 self.worker_count_before != 10
                 or required != {"code": 4, "text": 4}
@@ -634,6 +665,8 @@ class MeasuredStageCRuntimeBoundary:
         payload_bytes: int,
         network_profiles: tuple[tuple[str, NetworkProfile], ...],
         fault_profile: FaultProfile,
+        worker_shards: Mapping[str, bytes] | None = None,
+        shards_manifest: Mapping[str, object] | None = None,
     ) -> MeasuredStageCReceipt:
         self.verify_artifacts()
         _id(plan_id, "CAMPAIGN02_STAGE_C_PLAN_ID_INVALID")
@@ -653,6 +686,18 @@ class MeasuredStageCRuntimeBoundary:
                     fault_profile,
                 )
             )
+            if worker_shards is not None:
+                shards_dir = plan_root / "shards"
+                shards_dir.mkdir(parents=True, exist_ok=True)
+                for ticket_id, shard_bytes in worker_shards.items():
+                    if _SAFE_TICKET_ID.fullmatch(ticket_id) is None:
+                        raise _fail("CAMPAIGN02_STAGE_C_TICKET_ID_UNSAFE")
+                    (shards_dir / f"{ticket_id}.drq1").write_bytes(shard_bytes)
+                if shards_manifest is not None:
+                    (shards_dir / "manifest.json").write_text(
+                        json.dumps(dict(shards_manifest), indent=2, sort_keys=True),
+                        encoding="utf-8",
+                    )
         except FileExistsError as exc:
             raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_OUTPUT_ALREADY_EXISTS") from exc
         classpath = os.pathsep.join(
@@ -681,6 +726,8 @@ class MeasuredStageCRuntimeBoundary:
                 "NO_PROXY": "localhost,127.0.0.1,::1",
             }
         )
+        if worker_shards is not None or shards_manifest is not None:
+            environment["DELTA_STAGE_C_REAL_DRQ1"] = "1"
         try:
             completed = subprocess.run(
                 command,

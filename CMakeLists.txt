@@ -168,7 +168,7 @@ target_include_directories(
   delta_runtime
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
 target_link_libraries(
-  delta_runtime PUBLIC delta::core delta::certificates delta::robust delta::apply)
+  delta_runtime PUBLIC delta::core delta::certificates delta::robust delta::apply delta::shards)
 if(NOT WIN32)
   target_compile_options(delta_runtime PRIVATE -pthread)
   target_link_options(delta_runtime PUBLIC -pthread)

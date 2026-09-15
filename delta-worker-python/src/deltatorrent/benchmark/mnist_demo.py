@@ -11,19 +11,21 @@ import argparse
 import gzip
 import hashlib
 import json
-import math
 import os
 import shutil
 import struct
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from concurrent.futures import ProcessPoolExecutor
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -32,6 +34,10 @@ from deltatorrent.benchmark.campaign02_demo_controllers import (
     DemoControllerError,
     generate_demo_controller_bundle,
     run_demo_quorum_smoke,
+)
+from deltatorrent.benchmark.campaign02_stage_c_runtime import (
+    MeasuredStageCRuntimeBoundary,
+    RuntimeArtifact,
 )
 from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.mnist_delta_nodes import (
@@ -42,7 +48,12 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     NodeContribution,
     expected_central_model,
     run_delta_nodes,
+    run_stage_c_real_drq1_nodes,
     write_node_contribution,
+)
+from deltatorrent.model_plugins.mnist_centroid import (
+    MnistCentroidPlugin,
+    compute_mnist_summary,
 )
 
 
@@ -415,15 +426,10 @@ def _quantized_model_id(values: NDArray[np.int16]) -> str:
 
 def compute_summary(images: UInt8Array, labels: UInt8Array) -> tuple[Int64Array, Int64Array]:
     """Learn exact integer class sufficient statistics for the centroid model."""
-    if images.ndim != 3 or images.shape[1:] != (28, 28) or labels.shape != (images.shape[0],):
-        raise MnistDemoError("MNIST_SUMMARY_ARRAY_SHAPE_INVALID")
-    flat = images.reshape(images.shape[0], 28 * 28)
-    counts = np.bincount(labels, minlength=10).astype(np.int64)
-    sums = np.stack(
-        [flat[labels == digit].sum(axis=0, dtype=np.int64) for digit in range(10)],
-        axis=0,
-    )
-    return np.asarray(sums, dtype=np.int64), counts
+    try:
+        return compute_mnist_summary(images, labels)
+    except Exception as exc:
+        raise MnistDemoError(str(exc)) from exc
 
 
 def _node_summary_worker(node_dir_text: str, shard_id: str) -> NodeSummary:
@@ -484,56 +490,19 @@ def evaluate_centroid_model(
     labels: UInt8Array,
 ) -> Evaluation:
     """Measure a nearest-centroid classifier against the shared test set."""
-    if sums.shape != (10, 28 * 28) or counts.shape != (10,):
-        raise MnistDemoError("MNIST_MODEL_SHAPE_INVALID")
-    if images.ndim != 3 or images.shape[1:] != (28, 28) or labels.shape != (images.shape[0],):
-        raise MnistDemoError("MNIST_TEST_ARRAY_SHAPE_INVALID")
-    valid_classes = counts > 0
-    if not bool(np.any(valid_classes)):
-        raise MnistDemoError("MNIST_MODEL_HAS_NO_CLASSES")
-    centroids = np.divide(
-        sums,
-        counts[:, None],
-        out=np.zeros_like(sums, dtype=np.float64),
-        where=counts[:, None] != 0,
-    )
-    centroid_norm = np.square(centroids).sum(axis=1)
-    predictions: list[UInt8Array] = []
-    flat_images = images.reshape(images.shape[0], 28 * 28)
-    for start in range(0, flat_images.shape[0], 512):
-        batch = flat_images[start : start + 512].astype(np.float64)
-        distances = (
-            np.square(batch).sum(axis=1)[:, None]
-            - 2.0 * batch @ centroids.T
-            + centroid_norm[None, :]
-        )
-        distances[:, ~valid_classes] = math.inf
-        predictions.append(distances.argmin(axis=1).astype(np.uint8))
-    predicted = np.concatenate(predictions)
-    correct = int(np.count_nonzero(predicted == labels))
-    total = int(labels.size)
-    confusion = np.zeros((10, 10), dtype=np.int64)
-    np.add.at(confusion, (labels, predicted), 1)
-    per_digit: list[dict[str, int]] = []
-    for digit in range(10):
-        mask = labels == digit
-        digit_total = int(np.count_nonzero(mask))
-        digit_correct = int(np.count_nonzero(predicted[mask] == digit))
-        per_digit.append(
-            {
-                "accuracy_ppm": digit_correct * 1_000_000 // digit_total,
-                "correct": digit_correct,
-                "digit": digit,
-                "total": digit_total,
-            }
-        )
+    plugin = MnistCentroidPlugin()
+    try:
+        model = plugin.create_model((sums, counts))
+        res = plugin.evaluate(model, (images, labels))
+    except Exception as exc:
+        raise MnistDemoError(str(exc)) from exc
     return Evaluation(
-        accuracy_ppm=correct * 1_000_000 // total,
-        confusion_matrix=[[int(value) for value in row] for row in confusion],
-        correct=correct,
-        per_digit=per_digit,
-        predictions=predicted,
-        total=total,
+        accuracy_ppm=res.accuracy_ppm,
+        confusion_matrix=cast(list[list[int]], res.metrics["confusion_matrix"]),
+        correct=cast(int, res.metrics["correct"]),
+        per_digit=cast(list[dict[str, int]], res.metrics["per_digit"]),
+        predictions=cast(UInt8Array, res.metrics["predictions"]),
+        total=cast(int, res.metrics["total"]),
     )
 
 
@@ -592,6 +561,131 @@ def _load_formal_go(repository_root: Path) -> None:
         raise MnistDemoError("MNIST_DEMO_FORMAL_GO_MISMATCH")
 
 
+def _runtime_artifact(path: Path, code: str, *, executable: bool = False) -> RuntimeArtifact:
+    if not path.is_absolute() or path.is_symlink() or not path.is_file():
+        raise MnistDemoError(code)
+    try:
+        resolved = path.resolve(strict=True)
+        if executable and not os.access(resolved, os.X_OK):
+            raise MnistDemoError(code)
+        raw = resolved.read_bytes()
+    except OSError as exc:
+        raise MnistDemoError(code) from exc
+    return RuntimeArtifact(resolved, f"sha256:{hashlib.sha256(raw).hexdigest()}")
+
+
+def _classpath_entries(value: str, code: str) -> tuple[Path, ...]:
+    raw_entries = value.split(os.pathsep)
+    if not raw_entries or any(not item for item in raw_entries):
+        raise MnistDemoError(code)
+    entries = tuple(Path(item) for item in raw_entries)
+    if any(not item.is_absolute() or item.is_symlink() or not item.is_file() for item in entries):
+        raise MnistDemoError(code)
+    return tuple(item.resolve(strict=True) for item in entries)
+
+
+def _resolve_stage_c_boundary_from_environment(
+    destination: Path,
+) -> tuple[MeasuredStageCRuntimeBoundary, bool]:
+    java = os.environ.get("DELTA_STAGEC_JAVA") or os.environ.get("DELTA_MNIST_JAVA")
+    native = os.environ.get("DELTA_STAGEC_NATIVE_SIDECAR")
+    harness = os.environ.get("DELTA_STAGEC_TRANSPORT_HARNESS")
+    netty_classpath = os.environ.get("DELTA_STAGEC_NETTY_CLASSPATH")
+    if not java or not native or not harness or not netty_classpath:
+        raise MnistDemoError("MNIST_STAGEC_RUNTIME_BOUNDARY_MISSING")
+
+    counter_root = destination / "stagec-counters"
+    counter_root.mkdir(parents=True, exist_ok=True)
+    for name in ("tx_bytes", "rx_bytes"):
+        _write_stage_c_counter(counter_root / name, 0)
+
+    java_artifact = _runtime_artifact(
+        Path(java), "MNIST_STAGEC_JAVA_EXECUTABLE_INVALID", executable=True
+    )
+    native_artifact = _runtime_artifact(
+        Path(native), "MNIST_STAGEC_NATIVE_SIDECAR_INVALID", executable=True
+    )
+    harness_artifact = _runtime_artifact(Path(harness), "MNIST_STAGEC_TRANSPORT_HARNESS_INVALID")
+    netty_artifacts = tuple(
+        _runtime_artifact(path, "MNIST_STAGEC_NETTY_CLASSPATH_INVALID")
+        for path in _classpath_entries(netty_classpath, "MNIST_STAGEC_NETTY_CLASSPATH_INVALID")
+    )
+    image_id = _content_id(
+        {
+            "java": java_artifact.content_id,
+            "native": native_artifact.content_id,
+            "netty": [item.content_id for item in netty_artifacts],
+            "transport_harness": harness_artifact.content_id,
+            "type_name": "MNIST_STAGEC_RUNTIME_IMAGE",
+        }
+    )
+    return (
+        MeasuredStageCRuntimeBoundary(
+            image_id=image_id,
+            java_executable=java_artifact,
+            native_executable=native_artifact,
+            transport_harness=harness_artifact,
+            netty_artifacts=netty_artifacts,
+            os_interface_counter_root=counter_root,
+            working_root=destination / "stagec-work",
+            timeout_seconds=180,
+        ),
+        True,
+    )
+
+
+def _write_stage_c_counter(path: Path, value: int) -> None:
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+    try:
+        temporary.write_text(f"{value}\n", encoding="ascii", newline="\n")
+        for attempt in range(200):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError:
+                if attempt == 199:
+                    raise
+                time.sleep(0.001)
+    finally:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+@contextmanager
+def _stage_c_local_counter_source(
+    boundary: MeasuredStageCRuntimeBoundary,
+    *,
+    enabled: bool,
+) -> Iterator[None]:
+    if not enabled:
+        yield
+        return
+
+    stop = threading.Event()
+    counter_root = boundary.os_interface_counter_root
+
+    def pump() -> None:
+        value = 0
+        while not stop.is_set():
+            value += 1_000_000
+            for name in ("tx_bytes", "rx_bytes"):
+                try:
+                    _write_stage_c_counter(counter_root / name, value)
+                except OSError:
+                    return
+            stop.wait(0.01)
+
+    thread = threading.Thread(target=pump, name="mnist-stagec-counter-source", daemon=True)
+    thread.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        thread.join(timeout=1.0)
+
+
 def run_mnist_demo(
     repository_root: Path,
     cache_dir: Path,
@@ -600,6 +694,7 @@ def run_mnist_demo(
     allow_download: bool,
     progress: ProgressCallback | None = None,
     toolchain: DeltaToolchain | None = None,
+    stage_c_boundary: MeasuredStageCRuntimeBoundary | None = None,
 ) -> MnistDemoResult:
     """Execute the isolated MNIST comparison and persist measured local evidence."""
     root = repository_root.resolve(strict=True)
@@ -618,6 +713,11 @@ def run_mnist_demo(
     try:
         update("formal", 4, "Проверяем принятый Formal GO")
         _load_formal_go(root)
+        selected_stage_c_boundary, owns_stage_c_counter_source = (
+            (stage_c_boundary, False)
+            if stage_c_boundary is not None
+            else _resolve_stage_c_boundary_from_environment(destination)
+        )
 
         update("controllers", 10, "Создаём четыре одноразовых Ed25519 контроллера")
         controllers_dir = destination / "controllers"
@@ -679,7 +779,53 @@ def run_mnist_demo(
         if not np.array_equal(applied_model.values, central_values):
             raise MnistDemoError("MNIST_CENTRAL_DISTRIBUTED_MODEL_MISMATCH")
 
-        update("evaluation", 82, "Оцениваем только модель из native APPLIED artifact")
+        update("stage-c", 76, "Проводим 4 DRQ1 worker-вклада через Stage C REAL_DRQ1")
+        with _stage_c_local_counter_source(
+            selected_stage_c_boundary,
+            enabled=owns_stage_c_counter_source,
+        ):
+            stage_c_result = run_stage_c_real_drq1_nodes(
+                root,
+                destination / "stage-c-real-drq1",
+                tuple(summary.contribution for summary in node_summaries),
+                dataset.source_id,
+                boundary=selected_stage_c_boundary,
+            )
+        stage_c_transition = stage_c_result.receipt.fault_transitions[0]
+        stage_c_evidence = stage_c_transition.causal_evidence
+        stage_c_execution: dict[str, object] = {
+            "checkpoint_advanced": stage_c_transition.current_checkpoint_advanced,
+            "demo_domain_mapping": {
+                "ticket-000": "code",
+                "ticket-001": "code",
+                "ticket-002": "text",
+                "ticket-003": "text",
+            },
+            "demo_domains_are_protocol_qualification_only": True,
+            "evaluation_checkpoint_id": stage_c_result.evaluation_checkpoint_id,
+            "execution_mode": "REAL_DRQ1",
+            "final_checkpoint_id": stage_c_result.final_checkpoint_id,
+            "isc_ticket_count": len(stage_c_evidence.isc_ticket_set),
+            "java_ml_arithmetic_performed": False,
+            "missing_work_policy_result": stage_c_evidence.missing_work_policy_result,
+            "native_fault_trace_id": stage_c_result.receipt.native_fault_trace_id,
+            "outcome": stage_c_transition.observed_outcome,
+            "python_cross_node_aggregation_performed": False,
+            "receipt_id": stage_c_result.receipt.raw_java_receipt_id,
+            "runtime_wal_sha256": stage_c_transition.native_wal_sha256,
+            "stage_c_checkpoint_accuracy_claimed": False,
+            "stage_c_evidence": stage_c_result.evidence_path.relative_to(destination).as_posix(),
+            "synthetic_fallback": False,
+            "ticket_ids": list(stage_c_result.ticket_ids),
+            "type_name": "MNIST_STAGEC_REAL_DRQ1_EXECUTION_EVIDENCE",
+            "worker_count": len(stage_c_result.ticket_ids),
+            "worker_shard_leaf_ids": [
+                {"leaf_id": leaf_id, "ticket_id": ticket_id}
+                for ticket_id, leaf_id in stage_c_result.worker_shard_leaf_ids
+            ],
+        }
+
+        update("evaluation", 84, "Оцениваем только модель из native APPLIED artifact")
         central_evaluation = evaluate_centroid_model(
             np.asarray(central_centroids, dtype=np.int64),
             central_presence,
@@ -698,7 +844,7 @@ def run_mnist_demo(
         ):
             raise MnistDemoError("MNIST_CENTRAL_DISTRIBUTED_PREDICTION_MISMATCH")
 
-        update("recovery", 89, "Проверяем crash/restart validator-04 и replay durable Apply vote")
+        update("recovery", 90, "Проверяем crash/restart validator-04 и replay durable Apply vote")
         failure_evaluation = distributed_evaluation
         model_id = _quantized_model_id(central_values)
         integration_source = (
@@ -713,6 +859,7 @@ def run_mnist_demo(
                 "execution_source_and_toolchain_id": delta_result.delta_execution[
                     "execution_path_id"
                 ],
+                "stage_c_real_drq1_final_checkpoint_id": stage_c_result.final_checkpoint_id,
                 "implementation_version": IMPLEMENTATION_VERSION,
             }
         )
@@ -734,6 +881,9 @@ def run_mnist_demo(
             "recovery_status": delta_result.failure_simulation["status"],
             "seed": DEMO_SEED,
             "shard_ids": [manifest["shard_id"] for manifest in shard_manifests],
+            "stage_c_execution_mode": "REAL_DRQ1",
+            "stage_c_final_checkpoint_id": stage_c_result.final_checkpoint_id,
+            "stage_c_ticket_ids": list(stage_c_result.ticket_ids),
         }
         reproducibility_id = _content_id(deterministic_result)
         examples = _sample_gallery(
@@ -786,6 +936,9 @@ def run_mnist_demo(
                 "parallel_processes_observed": len(worker_process_ids),
                 "worker_processes_required": 4,
                 "samples_seen": int(dataset.train_labels.size),
+                "stage_c_checkpoint_advanced": stage_c_transition.current_checkpoint_advanced,
+                "stage_c_execution_mode": "REAL_DRQ1",
+                "stage_c_final_checkpoint_id": stage_c_result.final_checkpoint_id,
                 "training_ms": round(distributed_training_ms, 3),
             },
             "environment": "LOCAL_DEMO_ONLY",
@@ -802,6 +955,9 @@ def run_mnist_demo(
                 "distributed_orchestrator_received_node_local_numeric_arrays": False,
                 "four_distinct_worker_processes_observed": len(worker_process_ids) == 4,
                 "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",
+                "stage_c_checkpoint_advanced": stage_c_transition.current_checkpoint_advanced,
+                "stage_c_execution_mode": "REAL_DRQ1",
+                "stage_c_synthetic_fallback": False,
                 "terminal_outcome": "APPLIED",
                 "trace": delta_result.execution_trace_path.relative_to(destination).as_posix(),
                 "trace_id": delta_result.delta_execution["execution_path_id"],
@@ -827,10 +983,14 @@ def run_mnist_demo(
                 "OPAQUE_CONTRIBUTION_FILES_ARE_PARENT_READABLE_WITHOUT_OS_CAPABILITY_ISOLATION",
                 "NO_BENCHMARK_DEFINITION_QC_OR_BENCHMARK_RESULT_QC_CREATED",
                 "NO_EXECUTE_STAGE_A_OR_FEATURE_010_GO_AUTHORITY_CREATED",
+                "MNIST_ACCURACY_IS_EVALUATED_FROM_THE_DEMO_APPLIED_MODEL_ARTIFACT_NOT_FROM_STAGE_C_CHECKPOINT_BYTES",
+                "STAGE_C_CODE_TEXT_DOMAINS_ARE_DEMO_PROTOCOL_QUALIFICATION_BUCKETS_NOT_MNIST_LABEL_SEMANTICS",
             ],
             "model": {
                 "applied_artifact_sha256": applied_model.content_id,
                 "arithmetic": "UINT8_LOCAL_INT64_SUM_DELTA_INT16_APPLY_FLOAT64_EVALUATION",
+                "stage_c_checkpoint_accuracy_claimed": False,
+                "stage_c_model_reconstructed_for_accuracy": False,
                 "model_id": model_id,
                 "type": MODEL_ID,
             },
@@ -845,6 +1005,7 @@ def run_mnist_demo(
                 "reproducibility_id": reproducibility_id,
             },
             "schema_version": "2.0.0",
+            "stage_c_execution": stage_c_execution,
             "type_name": "DELTAREDUCE_LOCAL_MNIST_DEMO_REPORT",
         }
         report_json = destination / "mnist-demo-report.json"

@@ -140,7 +140,7 @@ WORKSPACE_HTML = r"""<!doctype html>
       <div>Распределённое обучение, которое можно увидеть</div>
       <h1>Четыре узла.<br>Десять цифр.<br>Один результат.</h1>
       <p>Настоящий MNIST, непересекающиеся локальные шарды и общий test set. Вклады
-         проходят через шесть реальных циклов Delta vote → Netty → QC, native reduce и Apply.</p>
+         проходят через Delta vote/QC и отдельный Stage C REAL_DRQ1 путь до Apply/WAL.</p>
     </div>
     <div>
       <button id="run">Запустить демо</button>
@@ -267,6 +267,15 @@ WORKSPACE_HTML = r"""<!doctype html>
       card.append(title, kind);
       target.appendChild(card);
     });
+    const stageC = document.createElement('article');
+    stageC.className = 'execution-step';
+    const title = document.createElement('strong');
+    title.textContent = 'REAL_DRQ1 Stage C / Feature008';
+    const kind = document.createElement('div');
+    kind.className = 'execution-kind';
+    kind.textContent = `${report.stage_c_execution.worker_count} worker DRQ1 → ${report.stage_c_execution.missing_work_policy_result} → ${report.stage_c_execution.outcome}`;
+    stageC.append(title, kind);
+    target.appendChild(stageC);
   }
 
   function renderChart(report, failure) {
@@ -349,6 +358,7 @@ WORKSPACE_HTML = r"""<!doctype html>
       ['4 MNIST worker-процесса', report.distributed.samples_seen, report.distributed.training_ms, formatBytes(totalPayload)],
       ['Java Netty loopback', 28, 'в составе прогона', '28 signed relay receipts'],
       ['Native Delta nodes', 4, 'в составе прогона', '24 votes → 24 QC results → APPLIED'],
+      ['Stage C REAL_DRQ1', report.stage_c_execution.worker_count, 'checkpoint advanced', report.stage_c_execution.missing_work_policy_result],
       ['Crash/restart validator-04', 1, 'в составе прогона', report.failure_simulation.status],
     ];
     rows.forEach(values => {
@@ -369,8 +379,8 @@ WORKSPACE_HTML = r"""<!doctype html>
     document.getElementById('central-accuracy').textContent = formatAccuracy(report.centralized.evaluation.accuracy_ppm);
     document.getElementById('distributed-accuracy').textContent = formatAccuracy(report.distributed.evaluation.accuracy_ppm);
     document.getElementById('model-match').textContent = report.distributed.exact_model_match_with_centralized ? 'ПОБАЙТНО' : 'НЕТ';
-    document.getElementById('delta-terminal').textContent = report.delta_execution.terminal_outcome;
-    document.getElementById('aggregate-copy').textContent = `24 durable votes → 24 Netty-fed QC results → delta::robust::reduce_parameter_shard → Apply → ${report.delta_execution.terminal_outcome}`;
+    document.getElementById('delta-terminal').textContent = `${report.delta_execution.terminal_outcome} · ${report.stage_c_execution.execution_mode}`;
+    document.getElementById('aggregate-copy').textContent = `Model artifact path: 24 durable votes → 24 Netty-fed QC results → Apply. Stage C evidence: ${report.stage_c_execution.worker_count} DRQ1 contributions → exact ISC ${report.stage_c_execution.isc_ticket_count}/4 → ${report.stage_c_execution.outcome}; checkpoint advanced.`;
     renderNodes(report);
     renderExecutionPath(report);
     renderChart(report, false);
@@ -459,6 +469,7 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
     distributed = value.get("distributed")
     execution_path = value.get("execution_path")
     failure = value.get("failure_simulation")
+    stage_c = value.get("stage_c_execution")
     if (
         value.get("type_name") != "DELTAREDUCE_LOCAL_MNIST_DEMO_REPORT"
         or value.get("schema_version") != "2.0.0"
@@ -472,6 +483,7 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or not isinstance(distributed, dict)
         or not isinstance(execution_path, dict)
         or not isinstance(failure, dict)
+        or not isinstance(stage_c, dict)
     ):
         raise MnistDemoError("MNIST_WORKSPACE_REPORT_INVALID")
     components = delta.get("components")
@@ -518,6 +530,8 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or distributed.get("worker_processes_required") != 4
         or distributed.get("exact_model_match_with_centralized") is not True
         or distributed.get("applied_model_file_sha256") != delta.get("applied_model_file_sha256")
+        or distributed.get("stage_c_execution_mode") != "REAL_DRQ1"
+        or distributed.get("stage_c_checkpoint_advanced") is not True
         or execution_path.get("trace_id") != delta.get("execution_path_id")
         or execution_path.get("acceptance_status") != "PASS"
         or execution_path.get("aggregation_owner") != "delta::robust::reduce_parameter_shard"
@@ -531,6 +545,21 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or execution_path.get("distributed_orchestrator_received_node_local_numeric_arrays")
         is not False
         or execution_path.get("four_distinct_worker_processes_observed") is not True
+        or execution_path.get("stage_c_execution_mode") != "REAL_DRQ1"
+        or execution_path.get("stage_c_checkpoint_advanced") is not True
+        or execution_path.get("stage_c_synthetic_fallback") is not False
+        or stage_c.get("type_name") != "MNIST_STAGEC_REAL_DRQ1_EXECUTION_EVIDENCE"
+        or stage_c.get("execution_mode") != "REAL_DRQ1"
+        or stage_c.get("worker_count") != 4
+        or stage_c.get("isc_ticket_count") != 4
+        or stage_c.get("outcome") != "APPLIED"
+        or stage_c.get("missing_work_policy_result") != "FULL_QUORUM_DELIVERED_EXACT_ISC"
+        or stage_c.get("checkpoint_advanced") is not True
+        or stage_c.get("synthetic_fallback") is not False
+        or stage_c.get("python_cross_node_aggregation_performed") is not False
+        or stage_c.get("java_ml_arithmetic_performed") is not False
+        or stage_c.get("stage_c_checkpoint_accuracy_claimed") is not False
+        or stage_c.get("demo_domains_are_protocol_qualification_only") is not True
         or failure.get("status") != "RECOVERED_AND_APPLIED"
         or failure.get("replay_observed") is not True
         or failure.get("terminal_outcome") != "APPLIED"
