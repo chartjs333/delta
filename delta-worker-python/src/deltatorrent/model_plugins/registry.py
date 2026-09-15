@@ -26,6 +26,8 @@ class PluginDescriptor:
     display_name: str
     model_family: str
     task_type: str
+    sample_kind: str
+    target_kind: str
     deterministic: bool
     supports_stage_c_real_drq1: bool
     parameter_schema_id: str | None = None
@@ -99,6 +101,8 @@ MNIST_CENTROID_DESCRIPTOR: Final[PluginDescriptor] = PluginDescriptor(
     display_name="MNIST Nearest Centroid",
     model_family="centroid",
     task_type="cv_classification",
+    sample_kind="image/grayscale-28x28",
+    target_kind="class-id/0-9",
     deterministic=True,
     supports_stage_c_real_drq1=True,
     parameter_schema_id=None,

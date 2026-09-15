@@ -100,6 +100,8 @@ def _dummy_descriptor(plugin_id: str = "dummy-linear-v1") -> PluginDescriptor:
         display_name="Dummy Linear Model",
         model_family="linear",
         task_type="synthetic_regression",
+        sample_kind="vector/fp32-10",
+        target_kind="scalar/fp32",
         deterministic=True,
         supports_stage_c_real_drq1=True,
     )
@@ -201,6 +203,8 @@ def test_default_registry_contains_mnist_centroid() -> None:
     assert desc.display_name == "MNIST Nearest Centroid"
     assert desc.model_family == "centroid"
     assert desc.task_type == "cv_classification"
+    assert desc.sample_kind == "image/grayscale-28x28"
+    assert desc.target_kind == "class-id/0-9"
     assert desc.deterministic is True
     assert desc.supports_stage_c_real_drq1 is True
     assert desc.parameter_schema_id is None
