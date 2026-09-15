@@ -63,6 +63,7 @@ SOURCE_SNAPSHOT_FILES = (
     "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkContracts.java",
     "delta-node-java/src/main/java/io/deltareduce/node/benchmark/BenchmarkTransport.java",
     "delta-node-java/src/main/java/io/deltareduce/node/benchmark/NettyMetricsCollector.java",
+    "delta-core-cpp/src/consensus.cpp",
     "delta-core-cpp/src/certificates/verifier.cpp",
     "delta-core-cpp/src/robust/plan.cpp",
     "delta-core-cpp/src/apply/engine.cpp",
@@ -76,23 +77,24 @@ REQUIRED_VOTE_KINDS = (
     "aggregate_root",
     "apply",
 )
+TRACE_SCOPE = "POST_CONFIG_POST_AVAILABILITY_DEMO_SUBTRACE"
+VOTE_QUORUM_COMPONENT = "delta::core::consensus::validate_quorum"
+TYPED_CERTIFICATE_VERIFIER = "delta::certificates::ChainVerifier"
 TRACE_PHASES = (
-    ("input_set", "ISC", "ACT-ISC-VOTE", "ACT-ISC-FINALIZE"),
-    ("eligibility", "EC", "ACT-EC-VOTE", "ACT-EC-FINALIZE"),
-    ("aggregation_plan", "APC", "ACT-APC-VOTE", "ACT-APC-FINALIZE"),
+    ("input_set", "ISC", "ACT-ISC-VOTE"),
+    ("eligibility", "EC", "ACT-EC-VOTE"),
+    ("aggregation_plan", "APC", "ACT-APC-VOTE"),
     (
         "parameter_shard",
         "PARAMETER_SHARD_QC",
         "ACT-PARAM-VOTE",
-        "ACT-PARAM-FINALIZE",
     ),
     (
         "aggregate_root",
         "AGGREGATE_ROOT_QC",
         "ACT-ROOT-VOTE",
-        "ACT-ROOT-FINALIZE",
     ),
-    ("apply", "APPLY_QC", "ACT-APPLY-VOTE", "ACT-APPLY-FINALIZE"),
+    ("apply", "APPLY_QC", "ACT-APPLY-VOTE"),
 )
 NATIVE_TRACE_FIELDS = frozenset(
     {
@@ -122,7 +124,6 @@ NATIVE_TRACE_FIELDS = frozenset(
 COMMON_NATIVE_RESULT_FIELDS = frozenset(
     {
         "authoritative",
-        "body_ids",
         "classification",
         "contribution_ids",
         "cryptographic_signatures_verified",
@@ -144,17 +145,25 @@ COMMON_NATIVE_RESULT_FIELDS = frozenset(
         "workload_id",
     }
 )
-PREPARE_RESULT_FIELDS = COMMON_NATIVE_RESULT_FIELDS | {
+VOTE_PHASE_RESULT_FIELDS = COMMON_NATIVE_RESULT_FIELDS | {
+    "phase",
     "recovered_vote_count",
     "recovery_required",
     "runtime_wal",
-    "vote_frames",
+    "validated_parent_qc_ids",
     "vote_wal",
+}
+CERTIFY_PHASE_RESULT_FIELDS = COMMON_NATIVE_RESULT_FIELDS | {
+    "phase",
+    "qc_artifact",
+    "quorum_certificate",
+    "validated_parent_qc_ids",
 }
 FINALIZE_RESULT_FIELDS = COMMON_NATIVE_RESULT_FIELDS | {
     "aggregate_root_qc_id",
     "apply_candidate_id",
     "apply_qc_id",
+    "body_ids",
     "current_pointer",
     "current_pointer_wal",
     "model_artifact",
@@ -382,6 +391,7 @@ def _source_snapshot(repository_root: Path) -> dict[str, object]:
         ),
         "integration/mnist-delta/native/mnist_delta_node.cpp": (
             "runtime::CertificateVoteRuntime",
+            "consensus::validate_quorum",
             "certificates::ChainVerifier",
             "delta::robust::build_plan",
             "delta::robust::reduce_parameter_shard",
@@ -484,7 +494,7 @@ def _validate_toolchain(toolchain: DeltaToolchain, repository_root: Path) -> dic
         "executable": "delta_mnist_native_node",
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
         "governance_eligible": False,
-        "modes": ["prepare-votes", "finalize"],
+        "modes": ["vote-phase", "certify-phase", "finalize"],
         "node_count": NODE_COUNT,
         "schema_version": "1.0.0",
         "type_name": "MNIST_DELTA_NATIVE_NODE_DESCRIPTOR",
@@ -1146,7 +1156,10 @@ def _native_command(
     node_dir: Path,
     validator_id: str,
     result_path: Path,
+    phase: str | None = None,
     votes_root: Path | None = None,
+    qcs_root: Path | None = None,
+    qc_output: Path | None = None,
     applied_model: Path | None = None,
     crash: bool = False,
 ) -> tuple[str, ...]:
@@ -1164,8 +1177,14 @@ def _native_command(
         "--result",
         str(result_path),
     ]
+    if phase is not None:
+        command.extend(("--phase", phase))
     if votes_root is not None:
         command.extend(("--votes-root", str(votes_root)))
+    if qcs_root is not None:
+        command.extend(("--qcs-root", str(qcs_root)))
+    if qc_output is not None:
+        command.extend(("--qc-output", str(qc_output)))
     if applied_model is not None:
         command.extend(("--applied-model", str(applied_model)))
     if crash:
@@ -1207,6 +1226,9 @@ def _validate_common_native_result(
         (_canonical_bytes(body).decode("utf-8"),),
     ):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_RESULT_ID_INVALID")
+
+
+def _validate_body_ids(value: Mapping[str, object]) -> dict[str, object]:
     body_ids = value.get("body_ids")
     if not isinstance(body_ids, dict) or tuple(sorted(body_ids)) != tuple(
         sorted(REQUIRED_VOTE_KINDS)
@@ -1218,6 +1240,7 @@ def _validate_common_native_result(
     ]
     if len(set(checked_body_ids)) != len(REQUIRED_VOTE_KINDS):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_BODY_ID_INVALID")
+    return cast(dict[str, object], body_ids)
 
 
 def _validate_native_result_file(path: Path, value: Mapping[str, object], code: str) -> None:
@@ -1258,7 +1281,7 @@ def _validate_native_file_reference(
         raise MnistDeltaError(code)
 
 
-def _validate_prepare_result(
+def _validate_vote_phase_result(
     value: Mapping[str, object],
     validator_id: str,
     workload_id: str,
@@ -1266,52 +1289,34 @@ def _validate_prepare_result(
     contribution_ids: Sequence[str],
     node_dir: Path,
     result_path: Path,
+    phase_index: int,
+    expected_parent_qc_ids: Sequence[str],
     *,
     crash: bool,
 ) -> None:
-    expected_fields = PREPARE_RESULT_FIELDS | ({"crashed_vote"} if crash else set())
+    phase, trace_kind, _vote_action = TRACE_PHASES[phase_index]
+    expected_fields = VOTE_PHASE_RESULT_FIELDS | ({"crashed_vote"} if crash else {"vote_frame"})
     if set(value) != expected_fields:
-        raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
+        raise MnistDeltaError("MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
     _validate_common_native_result(value, validator_id, workload_id, source_id, contribution_ids)
-    _validate_native_result_file(result_path, value, "MNIST_DELTA_PREPARE_RESULT_INVALID")
-    expected_status = "SIMULATED_CRASH" if crash else "VOTES_EXPOSED"
+    _validate_native_result_file(result_path, value, "MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
+    expected_status = "SIMULATED_CRASH" if crash else "VOTE_EXPOSED"
     if (
-        value.get("type_name") != "MNIST_DELTA_PREPARE_RESULT"
+        value.get("type_name") != "MNIST_DELTA_VOTE_PHASE_RESULT"
         or value.get("status") != expected_status
-        or value.get("mode") != "prepare-votes"
+        or value.get("mode") != "vote-phase"
+        or value.get("phase") != phase
     ):
-        raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
-    frames = value.get("vote_frames")
-    if not isinstance(frames, list):
-        raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
-    expected_frame_count = len(REQUIRED_VOTE_KINDS) - 1 if crash else len(REQUIRED_VOTE_KINDS)
-    if len(frames) != expected_frame_count:
-        raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
-    body_ids = cast(dict[str, object], value["body_ids"])
-    expected_replay = validator_id == "validator-04" and not crash
-    for expected_sequence, (kind, frame) in enumerate(
-        zip(REQUIRED_VOTE_KINDS, frames, strict=False), start=1
+        raise MnistDeltaError("MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
+    parent_ids = value.get("validated_parent_qc_ids")
+    if (
+        not isinstance(parent_ids, list)
+        or parent_ids != list(expected_parent_qc_ids)
+        or len(parent_ids) != phase_index
     ):
-        trace_kind = TRACE_PHASES[expected_sequence - 1][1]
-        expected_context = f"{trace_kind}:{value['round_id']}:1:0"
-        if (
-            not isinstance(frame, dict)
-            or set(frame)
-            != {"body_hash", "context_id", "durable_sequence", "file", "kind", "replay", "sha256"}
-            or frame.get("kind") != kind
-            or frame.get("body_hash") != body_ids[kind]
-            or frame.get("durable_sequence") != expected_sequence
-            or frame.get("context_id") != expected_context
-            or frame.get("file") != f"vote-frames/{kind}.vote"
-            or frame.get("replay") is not expected_replay
-        ):
-            raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
-        _validate_native_file_reference(
-            {"file": frame["file"], "sha256": frame.get("sha256")},
-            node_dir,
-            f"vote-frames/{kind}.vote",
-            "MNIST_DELTA_VOTE_FRAME_INVALID",
-        )
+        raise MnistDeltaError("MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
+    for parent_id in parent_ids:
+        _require_content_id(parent_id, "MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
     _validate_native_file_reference(
         value.get("runtime_wal"),
         node_dir,
@@ -1328,20 +1333,92 @@ def _validate_prepare_result(
         crashed_vote = value.get("crashed_vote")
         if (
             value.get("recovery_required") is not True
-            or value.get("recovered_vote_count") != len(REQUIRED_VOTE_KINDS)
+            or value.get("recovered_vote_count") != phase_index + 1
             or not isinstance(crashed_vote, dict)
             or set(crashed_vote) != {"body_hash", "context_id", "durable_sequence", "kind"}
-            or crashed_vote.get("kind") != "apply"
-            or crashed_vote.get("body_hash") != body_ids["apply"]
-            or crashed_vote.get("context_id") != f"APPLY_QC:{value['round_id']}:1:0"
-            or crashed_vote.get("durable_sequence") != len(REQUIRED_VOTE_KINDS)
+            or crashed_vote.get("kind") != phase
+            or crashed_vote.get("context_id") != f"{trace_kind}:{value['round_id']}:1:0"
+            or crashed_vote.get("durable_sequence") != phase_index + 1
         ):
             raise MnistDeltaError("MNIST_DELTA_CRASH_NOT_DURABLE")
+        _require_content_id(crashed_vote.get("body_hash"), "MNIST_DELTA_CRASH_NOT_DURABLE")
         return
-    if value.get("recovery_required") is not False or value.get("recovered_vote_count") != (
-        len(REQUIRED_VOTE_KINDS) if validator_id == "validator-04" else 0
+    expected_replay = validator_id == "validator-04" and phase == "apply"
+    expected_recovered = phase_index + 1 if expected_replay else phase_index
+    frame = value.get("vote_frame")
+    if (
+        value.get("recovery_required") is not False
+        or value.get("recovered_vote_count") != expected_recovered
+        or not isinstance(frame, dict)
+        or set(frame)
+        != {"body_hash", "context_id", "durable_sequence", "file", "kind", "replay", "sha256"}
+        or frame.get("kind") != phase
+        or frame.get("durable_sequence") != phase_index + 1
+        or frame.get("context_id") != f"{trace_kind}:{value['round_id']}:1:0"
+        or frame.get("file") != f"vote-frames/{phase}.vote"
+        or frame.get("replay") is not expected_replay
     ):
-        raise MnistDeltaError("MNIST_DELTA_PREPARE_RESULT_INVALID")
+        raise MnistDeltaError("MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
+    _require_content_id(frame.get("body_hash"), "MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
+    _validate_native_file_reference(
+        {"file": frame["file"], "sha256": frame.get("sha256")},
+        node_dir,
+        f"vote-frames/{phase}.vote",
+        "MNIST_DELTA_VOTE_FRAME_INVALID",
+    )
+
+
+def _validate_certify_phase_result(
+    value: Mapping[str, object],
+    validator_id: str,
+    workload_id: str,
+    source_id: str,
+    contribution_ids: Sequence[str],
+    qcs_root: Path,
+    result_path: Path,
+    phase_index: int,
+    expected_parent_qc_ids: Sequence[str],
+) -> None:
+    phase, trace_kind, _vote_action = TRACE_PHASES[phase_index]
+    if set(value) != CERTIFY_PHASE_RESULT_FIELDS:
+        raise MnistDeltaError("MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID")
+    _validate_common_native_result(value, validator_id, workload_id, source_id, contribution_ids)
+    _validate_native_result_file(result_path, value, "MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID")
+    parent_ids = value.get("validated_parent_qc_ids")
+    certificate = value.get("quorum_certificate")
+    if (
+        value.get("type_name") != "MNIST_DELTA_CERTIFY_PHASE_RESULT"
+        or value.get("status") != "QC_FINALIZED"
+        or value.get("mode") != "certify-phase"
+        or value.get("phase") != phase
+        or not isinstance(parent_ids, list)
+        or parent_ids != list(expected_parent_qc_ids)
+        or len(parent_ids) != phase_index
+        or not isinstance(certificate, dict)
+        or set(certificate)
+        != {"body_hash", "context_id", "kind", "qc_id", "signer_count", "threshold"}
+        or certificate.get("kind") != phase
+        or certificate.get("context_id") != f"{trace_kind}:{value['round_id']}:1:0"
+        or certificate.get("signer_count") != NODE_COUNT
+        or certificate.get("threshold") != 3
+    ):
+        raise MnistDeltaError("MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID")
+    for parent_id in parent_ids:
+        _require_content_id(parent_id, "MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID")
+    typed_certificate_id = _require_content_id(
+        certificate.get("body_hash"), "MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID"
+    )
+    vote_quorum_id = _require_content_id(
+        certificate.get("qc_id"), "MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID"
+    )
+    if typed_certificate_id == vote_quorum_id:
+        raise MnistDeltaError("MNIST_DELTA_TYPED_CERTIFICATE_QUORUM_ID_CONFLATED")
+    _validate_native_file_reference(
+        value.get("qc_artifact"),
+        qcs_root,
+        f"{phase}.qc",
+        "MNIST_DELTA_QC_ARTIFACT_INVALID",
+    )
 
 
 def _validate_finalize_result(
@@ -1357,6 +1434,7 @@ def _validate_finalize_result(
     if set(value) != FINALIZE_RESULT_FIELDS:
         raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
     _validate_common_native_result(value, validator_id, workload_id, source_id, contribution_ids)
+    body_ids = _validate_body_ids(value)
     _validate_native_result_file(result_path, value, "MNIST_DELTA_FINALIZE_RESULT_INVALID")
     model_artifact = value.get("model_artifact")
     pointer = value.get("current_pointer")
@@ -1380,7 +1458,6 @@ def _validate_finalize_result(
     kinds = tuple(item.get("kind") for item in certificates if isinstance(item, dict))
     if kinds != REQUIRED_VOTE_KINDS:
         raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
-    body_ids = cast(dict[str, object], value["body_ids"])
     if (
         value.get("aggregate_root_qc_id") != body_ids["aggregate_root"]
         or value.get("apply_qc_id") != body_ids["apply"]
@@ -1401,9 +1478,15 @@ def _validate_finalize_result(
             or certificate.get("context_id") != f"{trace_kind}:{value['round_id']}:1:0"
         ):
             raise MnistDeltaError("MNIST_DELTA_FINALIZE_RESULT_INVALID")
-        qc_ids.append(
-            _require_content_id(certificate.get("qc_id"), "MNIST_DELTA_FINALIZE_QC_ID_INVALID")
+        typed_certificate_id = _require_content_id(
+            certificate.get("body_hash"), "MNIST_DELTA_FINALIZE_TYPED_CERTIFICATE_ID_INVALID"
         )
+        vote_quorum_id = _require_content_id(
+            certificate.get("qc_id"), "MNIST_DELTA_FINALIZE_QC_ID_INVALID"
+        )
+        if typed_certificate_id == vote_quorum_id:
+            raise MnistDeltaError("MNIST_DELTA_TYPED_CERTIFICATE_QUORUM_ID_CONFLATED")
+        qc_ids.append(vote_quorum_id)
     if len(set(qc_ids)) != len(REQUIRED_VOTE_KINDS):
         raise MnistDeltaError("MNIST_DELTA_FINALIZE_QC_ID_INVALID")
     for field in (
@@ -1444,23 +1527,56 @@ def _validate_finalize_result(
 def _collect_native_trace(
     path: Path,
     validator_id: str,
-    prepare_result: Mapping[str, object],
+    vote_results: Sequence[Mapping[str, object]],
+    certify_results: Sequence[Mapping[str, object]],
     finalize_result: Mapping[str, object],
     *,
     expect_crash: bool,
 ) -> list[dict[str, object]]:
+    """Validate the exact compute/vote, transport-fed QC, and successor order."""
+    if len(vote_results) != len(TRACE_PHASES) or len(certify_results) != len(TRACE_PHASES):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+    body_ids = _validate_body_ids(finalize_result)
+    qc_ids: list[str] = []
+    for index, (vote_result, certify_result) in enumerate(
+        zip(vote_results, certify_results, strict=True)
+    ):
+        phase = TRACE_PHASES[index][0]
+        frame = vote_result.get("vote_frame")
+        certificate = certify_result.get("quorum_certificate")
+        if (
+            not isinstance(frame, dict)
+            or not isinstance(certificate, dict)
+            or frame.get("body_hash") != body_ids[phase]
+            or certificate.get("body_hash") != body_ids[phase]
+            or vote_result.get("validated_parent_qc_ids") != qc_ids
+            or certify_result.get("validated_parent_qc_ids") != qc_ids
+        ):
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        vote_quorum_id = _require_content_id(
+            certificate.get("qc_id"), "MNIST_DELTA_NATIVE_TRACE_INVALID"
+        )
+        if vote_quorum_id == body_ids[phase]:
+            raise MnistDeltaError("MNIST_DELTA_TYPED_CERTIFICATE_QUORUM_ID_CONFLATED")
+        qc_ids.append(vote_quorum_id)
+    final_certificates = finalize_result.get("quorum_certificates")
+    if (
+        not isinstance(final_certificates, list)
+        or [item.get("qc_id") for item in final_certificates if isinstance(item, dict)] != qc_ids
+    ):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
     try:
         raw = path.read_bytes()
         if not raw.endswith(b"\n") or b"\r" in raw:
             raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
         lines = raw.decode("utf-8").splitlines()
-        values = [json.loads(line) for line in lines]
+        parsed = [json.loads(line) for line in lines]
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID") from exc
     rows: list[dict[str, object]] = []
-    workload_id = str(prepare_result.get("workload_id"))
-    round_id = str(prepare_result.get("round_id"))
-    for line, value in zip(lines, values, strict=True):
+    round_id = str(finalize_result.get("round_id"))
+    for line, value in zip(lines, parsed, strict=True):
         if (
             not isinstance(value, dict)
             or set(value) != NATIVE_TRACE_FIELDS
@@ -1475,7 +1591,7 @@ def _collect_native_trace(
             or value.get("round_id") != round_id
             or value.get("height") != 1
             or value.get("view") != 0
-            or value.get("mode") not in ("prepare-votes", "finalize")
+            or value.get("mode") not in ("vote-phase", "certify-phase", "finalize")
             or not isinstance(value.get("action_id"), str)
             or not isinstance(value.get("event"), str)
             or not isinstance(value.get("outcome"), str)
@@ -1487,203 +1603,286 @@ def _collect_native_trace(
             content_value = value.get(content_field)
             if content_value is not None:
                 _require_content_id(content_value, "MNIST_DELTA_NATIVE_TRACE_INVALID")
+        if value.get("error_code") is not None and value.get("event") != "simulated_crash":
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
         rows.append(cast(dict[str, object], value))
     if not rows:
         raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
 
+    starts = [index for index, row in enumerate(rows) if row.get("event") == "mode_started"]
+    segments = [
+        rows[start : starts[index + 1] if index + 1 < len(starts) else len(rows)]
+        for index, start in enumerate(starts)
+    ]
+    expected_calls: list[tuple[str, int, bool]] = []
+    for phase_index in range(len(TRACE_PHASES)):
+        if expect_crash and phase_index == len(TRACE_PHASES) - 1:
+            expected_calls.append(("vote-phase", phase_index, True))
+        expected_calls.append(("vote-phase", phase_index, False))
+        expected_calls.append(("certify-phase", phase_index, False))
+    expected_calls.append(("finalize", len(TRACE_PHASES), False))
+    if len(segments) != len(expected_calls):
+        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
+    durable_vote_ids: list[str] = []
+    crashed_apply_vote_id: str | None = None
+    proposal_event_names = frozenset(
+        {
+            "aggregate_root_assembled",
+            "apply_computed",
+            "input_set_closed",
+            "parameter_shard_reduced",
+            "seed_generated",
+            "typed_certificate_materialized",
+        }
+    )
+    for segment, (mode, phase_index, crash_segment) in zip(segments, expected_calls, strict=True):
+        started = segment[0]
+        if (
+            started.get("mode") != mode
+            or started.get("action_id") != "OBS-POST-CONFIG-SUBTRACE-START"
+            or started.get("outcome") != "ACCEPTED"
+            or any(row.get("mode") != mode for row in segment)
+        ):
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        completions = [row for row in segment if row.get("event") == "mode_complete"]
+        parent_count = len(TRACE_PHASES) if mode == "finalize" else phase_index
+        expected_quorum_ids = qc_ids[:parent_count]
+        if mode == "certify-phase":
+            expected_quorum_ids = [*expected_quorum_ids, qc_ids[phase_index]]
+        quorum_rows = [row for row in segment if row.get("event") == "quorum_validated"]
+        vote_quorum_rows = [row for row in segment if row.get("event") == "vote_quorum_validated"]
+        verifier_rows = [row for row in segment if row.get("event") == "chain_verifier_verified"]
+        if [row.get("result_hash") for row in quorum_rows] != expected_quorum_ids or len(
+            verifier_rows
+        ) != len(expected_quorum_ids):
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        for parent_index in range(parent_count):
+            quorum_row = quorum_rows[parent_index]
+            verifier_row = verifier_rows[parent_index]
+            parent_phase, parent_kind, _vote_action = TRACE_PHASES[parent_index]
+            if (
+                quorum_row.get("action_id") != "OBS-PARENT-QC-VALIDATED"
+                or quorum_row.get("vote_kind") != parent_kind
+                or quorum_row.get("body_hash") != body_ids[parent_phase]
+                or quorum_row.get("result_hash") != qc_ids[parent_index]
+                or quorum_row.get("outcome") != "VALIDATED_PARENT"
+                or quorum_row.get("replay") is not False
+                or verifier_row.get("action_id") != "OBS-TYPED-CERT-VERIFIED-AFTER-QC"
+                or verifier_row.get("vote_kind") != parent_kind
+                or verifier_row.get("body_hash") != body_ids[parent_phase]
+                or verifier_row.get("result_hash") != body_ids[parent_phase]
+                or verifier_row.get("outcome") != "ACCEPTED"
+                or verifier_row.get("replay") is not False
+                or segment.index(quorum_row) >= segment.index(verifier_row)
+            ):
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
+        if mode == "finalize":
+            pointer_rows = [row for row in segment if row.get("event") == "current_pointer_applied"]
+            if (
+                vote_quorum_rows
+                or len(completions) != 1
+                or completions[0] is not segment[-1]
+                or completions[0].get("action_id") != "OBS-POST-CONFIG-SUBTRACE-COMPLETE"
+                or completions[0].get("outcome") != "APPLIED"
+                or completions[0].get("result_hash") != finalize_result.get("model_hash")
+                or len(pointer_rows) != 1
+                or pointer_rows[0].get("action_id") != "ACT-CURRENT-ADVANCE"
+                or pointer_rows[0].get("body_hash") != finalize_result.get("apply_qc_id")
+                or pointer_rows[0].get("result_hash") != finalize_result.get("model_hash")
+            ):
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+            continue
+
+        phase, trace_kind, vote_action = TRACE_PHASES[phase_index]
+        if started.get("vote_kind") != trace_kind:
+            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+        proposal_rows = [row for row in segment if row.get("event") in proposal_event_names]
+        if mode == "vote-phase":
+            replayed_current_vote = expect_crash and phase == "apply" and not crash_segment
+            expected_proposals = {
+                "input_set": (("input_set_closed", "ACT-INPUT-CLOSE"),),
+                "eligibility": (
+                    ("seed_generated", "ACT-SEED-GENERATE"),
+                    ("typed_certificate_materialized", "OBS-EC-BODY-MATERIALIZED"),
+                ),
+                "aggregation_plan": (
+                    (
+                        "typed_certificate_materialized",
+                        "OBS-AGGREGATION-PLAN-COMPUTED",
+                    ),
+                ),
+                "parameter_shard": (("parameter_shard_reduced", "ACT-PARAM-PROPOSE"),),
+                "aggregate_root": (("aggregate_root_assembled", "ACT-ROOT-ASSEMBLE"),),
+                "apply": (
+                    (
+                        "apply_computed",
+                        (
+                            "OBS-APPLY-CANDIDATE-RECONSTRUCTED"
+                            if replayed_current_vote
+                            else "ACT-APPLY-COMPUTE"
+                        ),
+                    ),
+                    (
+                        "typed_certificate_materialized",
+                        (
+                            "OBS-APPLY-BODY-RECONSTRUCTED"
+                            if replayed_current_vote
+                            else "OBS-APPLY-BODY-MATERIALIZED"
+                        ),
+                    ),
+                ),
+            }[phase]
+            if (
+                vote_quorum_rows
+                or tuple((row.get("event"), row.get("action_id")) for row in proposal_rows)
+                != expected_proposals
+                or any(row.get("replay") is not replayed_current_vote for row in proposal_rows)
+                or any(
+                    row.get("outcome") != ("NO_OP" if replayed_current_vote else "ACCEPTED")
+                    for row in proposal_rows
+                )
+            ):
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+            if proposal_rows[-1].get("result_hash") != body_ids[phase]:
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+            if phase == "apply" and (
+                proposal_rows[0].get("result_hash") != finalize_result.get("apply_candidate_id")
+                or proposal_rows[1].get("body_hash") != finalize_result.get("apply_candidate_id")
+            ):
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+            if quorum_rows and segment.index(quorum_rows[-1]) >= segment.index(proposal_rows[0]):
+                raise MnistDeltaError("MNIST_DELTA_PHASE_ORDER_INVALID")
+
+            replay_rows = [
+                row for row in segment if row.get("event") == "predecessor_vote_replay_verified"
+            ]
+            journal_rows = [row for row in segment if row.get("event") == "journal_recovered"]
+            durable_rows = [
+                row for row in segment if row.get("event") == "vote_durable_and_exposed"
+            ]
+            if crash_segment:
+                crash_rows = [row for row in segment if row.get("event") == "simulated_crash"]
+                restart_rows = [row for row in segment if row.get("event") == "runtime_restarted"]
+                recovery_rows = [
+                    row for row in segment if row.get("event") == "journal_recovery_verified"
+                ]
+                if (
+                    completions
+                    or durable_rows
+                    or len(journal_rows) != 1
+                    or len(replay_rows) != phase_index * 2 + 1
+                    or [row.get("result_hash") for row in replay_rows[:phase_index]]
+                    != durable_vote_ids
+                    or [row.get("result_hash") for row in replay_rows[phase_index:-1]]
+                    != durable_vote_ids
+                    or len(crash_rows) != 1
+                    or len(restart_rows) != 1
+                    or len(recovery_rows) != 1
+                    or crash_rows[0].get("body_hash") != body_ids[phase]
+                    or crash_rows[0].get("error_code") != "SIMULATED_CRASH_AFTER_DURABILITY"
+                    or crash_rows[0].get("outcome") != "DURABLE_NOT_EXPOSED"
+                    or recovery_rows[0].get("replay") is not True
+                    or not (
+                        segment.index(proposal_rows[-1])
+                        < segment.index(crash_rows[0])
+                        < segment.index(restart_rows[0])
+                        < segment.index(recovery_rows[0])
+                    )
+                ):
+                    raise MnistDeltaError("MNIST_DELTA_CRASH_RECOVERY_TRACE_INVALID")
+                crashed_apply_vote_id = _require_content_id(
+                    replay_rows[-1].get("result_hash"),
+                    "MNIST_DELTA_CRASH_RECOVERY_TRACE_INVALID",
+                )
+                continue
+            expected_replay = replayed_current_vote
+            if (
+                len(completions) != 1
+                or completions[0] is not segment[-1]
+                or completions[0].get("action_id") != "OBS-POST-CONFIG-SUBTRACE-COMPLETE"
+                or completions[0].get("outcome") != "VOTE_EXPOSED"
+                or completions[0].get("replay") is not expected_replay
+                or len(replay_rows) != phase_index
+                or [row.get("result_hash") for row in replay_rows] != durable_vote_ids
+                or len(journal_rows) != (1 if phase_index > 0 else 0)
+                or len(durable_rows) != 1
+                or durable_rows[0].get("action_id") != vote_action
+                or durable_rows[0].get("body_hash") != body_ids[phase]
+                or durable_rows[0].get("durable_sequence") != phase_index + 1
+                or durable_rows[0].get("replay") is not expected_replay
+                or durable_rows[0].get("outcome") != ("NO_OP" if expected_replay else "ACCEPTED")
+                or segment.index(proposal_rows[-1]) >= segment.index(durable_rows[0])
+            ):
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+            current_vote_id = _require_content_id(
+                durable_rows[0].get("result_hash"), "MNIST_DELTA_NATIVE_TRACE_INVALID"
+            )
+            if expected_replay and current_vote_id != crashed_apply_vote_id:
+                raise MnistDeltaError("MNIST_DELTA_CRASH_RECOVERY_TRACE_INVALID")
+            durable_vote_ids.append(current_vote_id)
+        else:
+            current_verifier = verifier_rows[-1]
+            current_quorum = quorum_rows[-1]
+            current_vote_quorum = vote_quorum_rows[0] if vote_quorum_rows else None
+            if (
+                proposal_rows
+                or len(completions) != 1
+                or completions[0] is not segment[-1]
+                or completions[0].get("action_id") != "OBS-POST-CONFIG-SUBTRACE-COMPLETE"
+                or completions[0].get("outcome") != "QC_FINALIZED"
+                or not isinstance(current_vote_quorum, dict)
+                or current_verifier.get("action_id") != "OBS-TYPED-CERT-VERIFIED-AFTER-QC"
+                or current_verifier.get("vote_kind") != trace_kind
+                or current_verifier.get("body_hash") != body_ids[phase]
+                or current_verifier.get("result_hash") != body_ids[phase]
+                or len(vote_quorum_rows) != 1
+                or current_vote_quorum.get("action_id") != "OBS-CURRENT-VOTE-QUORUM-VALIDATED"
+                or current_vote_quorum.get("vote_kind") != trace_kind
+                or current_vote_quorum.get("body_hash") != body_ids[phase]
+                or current_vote_quorum.get("result_hash") != qc_ids[phase_index]
+                or current_vote_quorum.get("outcome") != "VALIDATED"
+                or current_quorum.get("action_id") != "OBS-CURRENT-QC-DURABLY-FINALIZED"
+                or current_quorum.get("body_hash") != body_ids[phase]
+                or current_quorum.get("result_hash") != qc_ids[phase_index]
+                or current_quorum.get("outcome") not in ("FINALIZED", "NO_OP")
+                or current_quorum.get("replay") is not (current_quorum.get("outcome") == "NO_OP")
+                or not (
+                    segment.index(current_vote_quorum)
+                    < segment.index(current_verifier)
+                    < segment.index(current_quorum)
+                )
+            ):
+                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
+
     expected_event_counts = {
-        "apply_computed": 1,
+        "aggregate_root_assembled": 1,
+        "apply_computed": 2 if expect_crash else 1,
+        "chain_verifier_verified": 47 if expect_crash else 42,
         "current_pointer_applied": 1,
-        "mode_complete": 2,
-        "mode_started": 3 if expect_crash else 2,
-        "quorum_validated": len(REQUIRED_VOTE_KINDS),
+        "input_set_closed": 1,
+        "journal_recovered": 6 if expect_crash else 5,
+        "mode_complete": 13,
+        "mode_started": 14 if expect_crash else 13,
+        "parameter_shard_reduced": 1,
+        "predecessor_vote_replay_verified": 26 if expect_crash else 15,
+        "quorum_validated": 47 if expect_crash else 42,
         "runtime_transition": 10,
-        "vote_durable_and_exposed": 11 if expect_crash else len(REQUIRED_VOTE_KINDS),
+        "seed_generated": 1,
+        "typed_certificate_materialized": 4 if expect_crash else 3,
+        "vote_quorum_validated": len(TRACE_PHASES),
+        "vote_durable_and_exposed": len(TRACE_PHASES),
     }
     if expect_crash:
         expected_event_counts.update(
             {
-                "journal_recovered": 1,
                 "journal_recovery_verified": 1,
+                "runtime_restarted": 1,
                 "simulated_crash": 1,
             }
         )
     if Counter(str(row["event"]) for row in rows) != expected_event_counts:
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-    if any(
-        row.get("error_code") is not None and row.get("event") != "simulated_crash" for row in rows
-    ):
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-
-    started_rows = [row for row in rows if row.get("event") == "mode_started"]
-    prepare_complete_rows = [
-        row
-        for row in rows
-        if row.get("event") == "mode_complete" and row.get("mode") == "prepare-votes"
-    ]
-    if (
-        [row.get("mode") for row in started_rows]
-        != (
-            ["prepare-votes", "prepare-votes", "finalize"]
-            if expect_crash
-            else ["prepare-votes", "finalize"]
-        )
-        or any(row.get("outcome") != "ACCEPTED" for row in started_rows)
-        or len(prepare_complete_rows) != 1
-        or prepare_complete_rows[0].get("outcome") != "VOTES_EXPOSED"
-        or prepare_complete_rows[0].get("replay") is not expect_crash
-        or prepare_complete_rows[0].get("body_hash")
-        != cast(Mapping[str, object], prepare_result["body_ids"])["apply"]
-    ):
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-    runtime_rows = [row for row in rows if row.get("event") == "runtime_transition"]
-    if any(
-        row.get("mode") not in ("prepare-votes", "finalize")
-        or row.get("outcome") != "ACCEPTED"
-        or row.get("replay") is not False
-        for row in runtime_rows
-    ):
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-
-    body_ids = cast(Mapping[str, object], prepare_result["body_ids"])
-    certificates = finalize_result.get("quorum_certificates")
-    if not isinstance(certificates, list):
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-    certificate_by_kind = {
-        str(item.get("kind")): item for item in certificates if isinstance(item, dict)
-    }
-    for phase, trace_kind, vote_action, finalize_action in TRACE_PHASES:
-        vote_rows = [
-            row
-            for row in rows
-            if row.get("event") == "vote_durable_and_exposed" and row.get("vote_kind") == trace_kind
-        ]
-        expected_vote_count = 2 if expect_crash and phase != "apply" else 1
-        if len(vote_rows) != expected_vote_count:
-            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-        final_vote = vote_rows[-1]
-        expected_sequence = REQUIRED_VOTE_KINDS.index(phase) + 1
-        if (
-            final_vote.get("action_id") != vote_action
-            or final_vote.get("body_hash") != body_ids[phase]
-            or final_vote.get("durable_sequence") != expected_sequence
-            or final_vote.get("replay") is not expect_crash
-            or final_vote.get("outcome") != ("NO_OP" if expect_crash else "ACCEPTED")
-        ):
-            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-        if expect_crash and phase != "apply":
-            first_vote = vote_rows[0]
-            if (
-                first_vote.get("action_id") != vote_action
-                or first_vote.get("body_hash") != body_ids[phase]
-                or first_vote.get("durable_sequence") != expected_sequence
-                or first_vote.get("replay") is not False
-                or first_vote.get("outcome") != "ACCEPTED"
-            ):
-                raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-        certificate = certificate_by_kind.get(phase)
-        quorum_rows = [
-            row
-            for row in rows
-            if row.get("event") == "quorum_validated" and row.get("vote_kind") == trace_kind
-        ]
-        if (
-            not isinstance(certificate, dict)
-            or len(quorum_rows) != 1
-            or quorum_rows[0].get("action_id") != finalize_action
-            or quorum_rows[0].get("body_hash") != certificate.get("body_hash")
-            or quorum_rows[0].get("result_hash") != certificate.get("qc_id")
-            or quorum_rows[0].get("vote_context_id") != certificate.get("context_id")
-            or quorum_rows[0].get("outcome") != "FINALIZED"
-        ):
-            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-
-    apply_rows = [row for row in rows if row.get("event") == "apply_computed"]
-    pointer_rows = [row for row in rows if row.get("event") == "current_pointer_applied"]
-    terminal_rows = [
-        row
-        for row in rows
-        if row.get("event") == "mode_complete"
-        and row.get("mode") == "finalize"
-        and row.get("outcome") == "APPLIED"
-    ]
-    if (
-        len(apply_rows) != 1
-        or apply_rows[0].get("action_id") != "ACT-APPLY-COMPUTE"
-        or apply_rows[0].get("body_hash") != finalize_result.get("aggregate_root_qc_id")
-        or apply_rows[0].get("result_hash") != finalize_result.get("apply_candidate_id")
-        or len(pointer_rows) != 1
-        or pointer_rows[0].get("action_id") != "ACT-CURRENT-ADVANCE"
-        or pointer_rows[0].get("body_hash") != finalize_result.get("apply_qc_id")
-        or pointer_rows[0].get("result_hash") != finalize_result.get("model_hash")
-        or len(terminal_rows) != 1
-        or terminal_rows[0] is not rows[-1]
-        or terminal_rows[0].get("result_hash") != finalize_result.get("model_hash")
-    ):
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-
-    row_positions = {id(row): index for index, row in enumerate(rows)}
-    final_vote_rows = [
-        next(
-            row
-            for row in reversed(rows)
-            if row.get("event") == "vote_durable_and_exposed" and row.get("vote_kind") == trace_kind
-        )
-        for _phase, trace_kind, _vote_action, _finalize_action in TRACE_PHASES
-    ]
-    quorum_rows_in_phase_order = [
-        next(
-            row
-            for row in rows
-            if row.get("event") == "quorum_validated" and row.get("vote_kind") == trace_kind
-        )
-        for _phase, trace_kind, _vote_action, _finalize_action in TRACE_PHASES
-    ]
-    critical_positions = [
-        *(row_positions[id(row)] for row in final_vote_rows),
-        row_positions[id(prepare_complete_rows[0])],
-        row_positions[id(started_rows[-1])],
-        *(row_positions[id(row)] for row in quorum_rows_in_phase_order),
-        row_positions[id(apply_rows[0])],
-        row_positions[id(pointer_rows[0])],
-        row_positions[id(terminal_rows[0])],
-    ]
-    if critical_positions != sorted(critical_positions) or len(set(critical_positions)) != len(
-        critical_positions
-    ):
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-
-    crash_rows = [row for row in rows if row.get("event") == "simulated_crash"]
-    recovery_rows = [row for row in rows if row.get("event") == "journal_recovery_verified"]
-    journal_rows = [row for row in rows if row.get("event") == "journal_recovered"]
-    if expect_crash:
-        if (
-            len(crash_rows) != 1
-            or crash_rows[0].get("action_id") != "ACT-CRASH"
-            or crash_rows[0].get("body_hash") != body_ids["apply"]
-            or crash_rows[0].get("error_code") != "SIMULATED_CRASH_AFTER_DURABILITY"
-            or crash_rows[0].get("outcome") != "DURABLE_NOT_EXPOSED"
-            or len(recovery_rows) != 1
-            or recovery_rows[0].get("replay") is not True
-            or len(journal_rows) != 1
-            or journal_rows[0].get("replay") is not True
-        ):
-            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-        crash_positions = [
-            row_positions[id(crash_rows[0])],
-            row_positions[id(recovery_rows[0])],
-            row_positions[id(started_rows[1])],
-            row_positions[id(journal_rows[0])],
-            row_positions[id(final_vote_rows[0])],
-        ]
-        if crash_positions != sorted(crash_positions) or len(set(crash_positions)) != len(
-            crash_positions
-        ):
-            raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-    elif crash_rows or recovery_rows or journal_rows:
-        raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
-
-    if workload_id != str(finalize_result.get("workload_id")):
         raise MnistDeltaError("MNIST_DELTA_NATIVE_TRACE_INVALID")
     return rows
 
@@ -1699,7 +1898,8 @@ def _write_execution_evidence(
     workload_id: str,
     contributions: Sequence[NodeContribution],
     transport_receipts: Sequence[Mapping[str, object]],
-    prepare_results: Sequence[Mapping[str, object]],
+    vote_results: Sequence[Mapping[str, object]],
+    certify_results: Sequence[Mapping[str, object]],
     finalize_results: Sequence[Mapping[str, object]],
     native_traces: Mapping[str, Sequence[Mapping[str, object]]],
     toolchain_document: Mapping[str, object],
@@ -1738,6 +1938,35 @@ def _write_execution_evidence(
     observed_quorum_events = sum(
         row.get("event") == "quorum_validated" for rows in native_traces.values() for row in rows
     )
+    observed_vote_quorum_events = sum(
+        row.get("event") == "vote_quorum_validated"
+        for rows in native_traces.values()
+        for row in rows
+    )
+    observed_typed_certificate_events = sum(
+        row.get("event") == "chain_verifier_verified"
+        for rows in native_traces.values()
+        for row in rows
+    )
+    observed_certified_phases = sum(
+        row.get("event") == "mode_complete"
+        and row.get("mode") == "certify-phase"
+        and row.get("outcome") == "QC_FINALIZED"
+        for rows in native_traces.values()
+        for row in rows
+    )
+
+    def component_validators(event: str, vote_kind: str | None = None) -> set[str]:
+        return {
+            validator_id
+            for validator_id, rows in native_traces.items()
+            if any(
+                row.get("mode") == "vote-phase"
+                and row.get("event") == event
+                and (vote_kind is None or row.get("vote_kind") == vote_kind)
+                for row in rows
+            )
+        }
 
     def source(path: str) -> str:
         return source_ids[path]
@@ -1771,6 +2000,9 @@ def _write_execution_evidence(
         {
             "component": "io.deltareduce.demo.MnistDeltaNettyRelay",
             "evidence": {
+                "vote_delivery_count": NODE_COUNT * NODE_COUNT * len(REQUIRED_VOTE_KINDS),
+                "vote_relay_receipt_count": NODE_COUNT * len(REQUIRED_VOTE_KINDS),
+                "votes_delivered_per_phase_receiver": NODE_COUNT,
                 "receipt_ids": transport_receipt_ids,
                 "source_ids": [
                     source(
@@ -1789,8 +2021,16 @@ def _write_execution_evidence(
             "implementation_class": "DEMO_ADAPTER_USING_PRODUCTION_NETTY_TRANSPORT",
             "sequence": 2,
             "status": observed(
-                len(transport_receipts) == NODE_COUNT * 2
-                and all(receipt.get("status") == "PASS" for receipt in transport_receipts),
+                len(transport_receipts) == NODE_COUNT * (1 + len(REQUIRED_VOTE_KINDS))
+                and all(receipt.get("status") == "PASS" for receipt in transport_receipts)
+                and all(
+                    receipt.get("entry_count") == NODE_COUNT + 1
+                    for receipt in transport_receipts[:NODE_COUNT]
+                )
+                and all(
+                    receipt.get("entry_count") == NODE_COUNT
+                    for receipt in transport_receipts[NODE_COUNT:]
+                ),
                 "MNIST_DELTA_NETTY_COMPONENT_NOT_OBSERVED",
             ),
         },
@@ -1804,20 +2044,39 @@ def _write_execution_evidence(
             "implementation_class": "PRODUCTION_DELTA",
             "sequence": 3,
             "status": observed(
-                observed_vote_events == NODE_COUNT * len(REQUIRED_VOTE_KINDS) + 5,
+                len(vote_results) == NODE_COUNT * len(REQUIRED_VOTE_KINDS)
+                and observed_vote_events == NODE_COUNT * len(REQUIRED_VOTE_KINDS),
                 "MNIST_DELTA_VOTE_RUNTIME_NOT_OBSERVED",
             ),
         },
         {
-            "component": "delta::certificates::ChainVerifier",
+            "component": VOTE_QUORUM_COMPONENT,
             "evidence": {
-                "quorum_validation_events": observed_quorum_events,
-                "source_id": source("delta-core-cpp/src/certificates/verifier.cpp"),
+                "delivered_votes_per_receiver": NODE_COUNT,
+                "validated_vote_quorum_count": observed_vote_quorum_events,
+                "source_id": source("delta-core-cpp/src/consensus.cpp"),
             },
             "implementation_class": "PRODUCTION_DELTA",
             "sequence": 4,
             "status": observed(
-                observed_quorum_events == NODE_COUNT * len(REQUIRED_VOTE_KINDS),
+                observed_vote_quorum_events == NODE_COUNT * len(REQUIRED_VOTE_KINDS),
+                "MNIST_DELTA_VOTE_QUORUM_VALIDATOR_NOT_OBSERVED",
+            ),
+        },
+        {
+            "component": TYPED_CERTIFICATE_VERIFIER,
+            "evidence": {
+                "certified_phase_count": observed_certified_phases,
+                "parent_and_current_typed_verification_events": (observed_typed_certificate_events),
+                "post_quorum_only": True,
+                "source_id": source("delta-core-cpp/src/certificates/verifier.cpp"),
+            },
+            "implementation_class": "PRODUCTION_DELTA",
+            "sequence": 5,
+            "status": observed(
+                len(certify_results) == NODE_COUNT * len(REQUIRED_VOTE_KINDS)
+                and observed_certified_phases == NODE_COUNT * len(REQUIRED_VOTE_KINDS)
+                and observed_typed_certificate_events == observed_quorum_events,
                 "MNIST_DELTA_CHAIN_VERIFIER_NOT_OBSERVED",
             ),
         },
@@ -1825,12 +2084,17 @@ def _write_execution_evidence(
             "component": "delta::robust::build_plan",
             "evidence": {
                 "aggregate_root_ids": [item["aggregate_root_qc_id"] for item in finalize_results],
+                "observed_validator_count": len(
+                    component_validators("typed_certificate_materialized", "APC")
+                ),
                 "source_id": source("delta-core-cpp/src/robust/plan.cpp"),
             },
             "implementation_class": "PRODUCTION_DELTA",
-            "sequence": 5,
+            "sequence": 6,
             "status": observed(
-                len({item["aggregate_root_qc_id"] for item in finalize_results}) == 1,
+                len({item["aggregate_root_qc_id"] for item in finalize_results}) == 1
+                and len(component_validators("typed_certificate_materialized", "APC"))
+                == NODE_COUNT,
                 "MNIST_DELTA_ROBUST_PLAN_NOT_OBSERVED",
             ),
         },
@@ -1838,15 +2102,17 @@ def _write_execution_evidence(
             "component": "delta::robust::reduce_parameter_shard",
             "evidence": {
                 "applied_model_file_sha256": model.content_id,
+                "observed_validator_count": len(component_validators("parameter_shard_reduced")),
                 "source_id": source("delta-core-cpp/src/robust/plan.cpp"),
             },
             "implementation_class": "PRODUCTION_DELTA_AGGREGATION_AUTHORITY",
-            "sequence": 6,
+            "sequence": 7,
             "status": observed(
                 all(
                     nested(item, "model_artifact", "sha256") == model.content_id
                     for item in finalize_results
-                ),
+                )
+                and len(component_validators("parameter_shard_reduced")) == NODE_COUNT,
                 "MNIST_DELTA_ROBUST_REDUCE_NOT_OBSERVED",
             ),
         },
@@ -1854,12 +2120,14 @@ def _write_execution_evidence(
             "component": "delta::apply::compute_candidate",
             "evidence": {
                 "candidate_ids": [item["apply_candidate_id"] for item in finalize_results],
+                "observed_validator_count": len(component_validators("apply_computed")),
                 "source_id": source("delta-core-cpp/src/apply/engine.cpp"),
             },
             "implementation_class": "PRODUCTION_DELTA",
-            "sequence": 7,
+            "sequence": 8,
             "status": observed(
-                len({item["apply_candidate_id"] for item in finalize_results}) == 1,
+                len({item["apply_candidate_id"] for item in finalize_results}) == 1
+                and len(component_validators("apply_computed")) == NODE_COUNT,
                 "MNIST_DELTA_APPLY_NOT_OBSERVED",
             ),
         },
@@ -1871,7 +2139,7 @@ def _write_execution_evidence(
                 "source_id": source("delta-runtime-cpp/src/certificate_runtime.cpp"),
             },
             "implementation_class": "PRODUCTION_DELTA",
-            "sequence": 8,
+            "sequence": 9,
             "status": observed(
                 len(finalize_results) == NODE_COUNT
                 and all(
@@ -1882,28 +2150,147 @@ def _write_execution_evidence(
             ),
         },
     ]
+    proposal_components = (
+        "delta::certificates::InputSetCertificate",
+        "delta::robust::build_plan",
+        "delta::robust::build_plan",
+        "delta::robust::reduce_parameter_shard",
+        "delta::certificates::aggregate_merkle_root",
+        "delta::apply::compute_candidate",
+    )
+    final_certificates = finalize_results[0].get("quorum_certificates")
+    if not isinstance(final_certificates, list) or len(final_certificates) != len(TRACE_PHASES):
+        raise MnistDeltaError("MNIST_DELTA_PHASE_EXECUTION_INVALID")
+    phase_execution: list[dict[str, object]] = []
+    for index, (phase, _trace_kind, vote_action) in enumerate(TRACE_PHASES):
+        phase_votes = [item for item in vote_results if item.get("phase") == phase]
+        phase_certificates = [item for item in certify_results if item.get("phase") == phase]
+        certificate = final_certificates[index]
+        if (
+            len(phase_votes) != NODE_COUNT
+            or len(phase_certificates) != NODE_COUNT
+            or not isinstance(certificate, dict)
+            or any(item.get("mode") != "vote-phase" for item in phase_votes)
+            or any(item.get("mode") != "certify-phase" for item in phase_certificates)
+        ):
+            raise MnistDeltaError("MNIST_DELTA_PHASE_EXECUTION_INVALID")
+        typed_certificate_id = _require_content_id(
+            certificate.get("body_hash"), "MNIST_DELTA_PHASE_EXECUTION_INVALID"
+        )
+        vote_quorum_id = _require_content_id(
+            certificate.get("qc_id"), "MNIST_DELTA_PHASE_EXECUTION_INVALID"
+        )
+        preceding_certificates = final_certificates[:index]
+        if not all(isinstance(item, dict) for item in preceding_certificates):
+            raise MnistDeltaError("MNIST_DELTA_PHASE_EXECUTION_INVALID")
+        parent_vote_quorum_ids = [
+            _require_content_id(
+                cast(Mapping[str, object], item).get("qc_id"),
+                "MNIST_DELTA_PHASE_EXECUTION_INVALID",
+            )
+            for item in preceding_certificates
+        ]
+        if (
+            typed_certificate_id == vote_quorum_id
+            or any(
+                item.get("validated_parent_qc_ids") != parent_vote_quorum_ids
+                for item in (*phase_votes, *phase_certificates)
+            )
+            or any(
+                cast(Mapping[str, object], item.get("vote_frame")).get("body_hash")
+                != typed_certificate_id
+                for item in phase_votes
+            )
+            or any(item.get("quorum_certificate") != certificate for item in phase_certificates)
+        ):
+            raise MnistDeltaError("MNIST_DELTA_PHASE_EXECUTION_INVALID")
+        parent_typed_certificate_id = (
+            None
+            if index == 0
+            else _require_content_id(
+                cast(Mapping[str, object], final_certificates[index - 1]).get("body_hash"),
+                "MNIST_DELTA_PHASE_EXECUTION_INVALID",
+            )
+        )
+        parent_vote_quorum_id = parent_vote_quorum_ids[-1] if parent_vote_quorum_ids else None
+        phase_execution.append(
+            {
+                "body_hash": typed_certificate_id,
+                "certifying_nodes": len(phase_certificates),
+                "delivered_vote_count_per_receiver": len(phase_votes),
+                "execution_order": [
+                    "typed_body_proposed",
+                    "vote_persisted",
+                    "four_netty_deliveries",
+                    "generic_vote_quorum_validated",
+                    "typed_certificate_verified",
+                    "generic_qc_durably_finalized",
+                ],
+                "qc_durable_finalize_action_id": "OBS-CURRENT-QC-DURABLY-FINALIZED",
+                "parent_gate_enforced": True,
+                "phase": phase,
+                "position": index + 1,
+                "proposal_component": proposal_components[index],
+                "required_parent_typed_certificate_id": parent_typed_certificate_id,
+                "required_parent_vote_quorum_id": parent_vote_quorum_id,
+                "transport_component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+                "typed_certificate_id": typed_certificate_id,
+                "typed_certificate_action_id": "OBS-TYPED-CERT-VERIFIED-AFTER-QC",
+                "typed_certificate_verification_after_vote_quorum": True,
+                "typed_certificate_verifier": TYPED_CERTIFICATE_VERIFIER,
+                "validated_parent_typed_certificate_ids": [
+                    _require_content_id(
+                        cast(Mapping[str, object], item).get("body_hash"),
+                        "MNIST_DELTA_PHASE_EXECUTION_INVALID",
+                    )
+                    for item in preceding_certificates
+                ],
+                "validated_parent_vote_quorum_ids": parent_vote_quorum_ids,
+                "vote_action_id": vote_action,
+                "vote_frames_relayed_per_receiver": len(phase_votes),
+                "vote_persistence_component": "delta::runtime::CertificateVoteRuntime",
+                "vote_quorum_action_id": "OBS-CURRENT-VOTE-QUORUM-VALIDATED",
+                "vote_quorum_component": VOTE_QUORUM_COMPONENT,
+                "vote_quorum_id": vote_quorum_id,
+            }
+        )
     deterministic_trace: dict[str, object] = {
         "aggregation_authority": "delta::robust::reduce_parameter_shard",
+        "apply_qc_id": finalize_results[0].get("apply_qc_id"),
         "authoritative": False,
+        "certificate_signature_semantics": "CONTENT_ID_PLACEHOLDER_LOCAL_DEMO_ONLY",
         "classification": "LOCAL_DEMO_ONLY",
         "components": components,
         "contribution_ids": [item.content_id for item in contributions],
         "contributions_bound_netty_to_native": True,
+        "current_pointer": finalize_results[0].get("current_pointer"),
+        "demo_owned_aggregation": False,
         "execution_authorized": False,
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "formal_refinement_claimed": False,
         "governance_eligible": False,
         "applied_model_file_sha256": model.content_id,
-        "native_results": [_logical_result(item) for item in (*prepare_results, *finalize_results)],
+        "native_results": [
+            _logical_result(item) for item in (*vote_results, *certify_results, *finalize_results)
+        ],
+        "native_cryptographic_signatures_verified": False,
         "native_trace_ids": native_trace_ids,
+        "phase_execution": phase_execution,
+        "phase_ordering_enforced": True,
         "distributed_orchestrator_received_node_local_numeric_arrays": False,
         "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",
         "python_cross_node_aggregation_performed": False,
+        "python_vote_quorum_assembly_performed": False,
         "schema_version": "1.0.0",
+        "semantic_completeness_claimed": False,
         "terminal_outcome": "APPLIED",
+        "trace_scope": TRACE_SCOPE,
         "transport_receipts": [_logical_result(item) for item in transport_receipts],
         "transport_receipt_ids": transport_receipt_ids,
         "toolchain": dict(toolchain_document),
         "type_name": "DELTAREDUCE_MNIST_EXECUTION_TRACE",
+        "typed_certificate_verifier": TYPED_CERTIFICATE_VERIFIER,
+        "vote_quorum_component": VOTE_QUORUM_COMPONENT,
         "workload_id": workload_id,
     }
     execution_path_id = _content_id(_canonical_bytes(deterministic_trace))
@@ -1917,41 +2304,79 @@ def _write_execution_evidence(
     trace_path = destination / "execution-trace.json"
     _write_json_new(trace_path, trace_document)
     diagram_path = destination / "execution-path.mmd"
-    diagram = """flowchart LR
-    A[4 Python MNIST workers] -->|worker-local computation| W[seal 4 opaque contribution files]
-    W -->|Ed25519-verified exact bytes| B[Java Netty loopback]
-    B --> C[demo-only native process adapter: bind all 4 records]
-    C --> D[CertificateVoteRuntime + durable WAL]
-    D --> E[ChainVerifier: ISC / EC / APC / ParameterShardQC / AggregateRootQC / ApplyQC]
-    E --> F[robust::reduce_parameter_shard]
-    F --> G[apply::compute_candidate]
-    G --> H[CurrentPointerStore: APPLIED]
-    H -->|native model bytes| I[Python evaluation + UI]
-    Z[centralized baseline] -. comparison only; never a Delta input .-> I
+    diagram = """flowchart TB
+    A[4 Python MNIST workers] -->|node-local compute only| W[seal 4 opaque contribution files]
+    W -->|Ed25519 verified bytes| B[Java Netty workload relay]
+    B --> N[4 native Delta nodes]
+    N --> I[InputSetCertificate typed body]
+    I --> IV[CertificateVoteRuntime: persist ISC vote]
+    IV --> IN[Java Netty: 4 ISC deliveries per receiver]
+    IN --> IQ[consensus::validate_quorum: generic ISC quorum]
+    IQ --> IT[ChainVerifier: typed ISC certificate]
+    IT -->|parent quorum plus typed certificate| E[Eligibility via robust::build_plan]
+    E --> EV[CertificateVoteRuntime: persist EC vote]
+    EV --> EN[Java Netty: 4 EC deliveries per receiver]
+    EN --> EQ[consensus::validate_quorum: generic EC quorum]
+    EQ --> ET[ChainVerifier: typed EC certificate]
+    ET -->|parent quorum plus typed certificate| P[Aggregation plan via robust::build_plan]
+    P --> PV[CertificateVoteRuntime: persist APC vote]
+    PV --> PN[Java Netty: 4 APC deliveries per receiver]
+    PN --> PQ[consensus::validate_quorum: generic APC quorum]
+    PQ --> PT[ChainVerifier: typed APC certificate]
+    PT -->|required before numeric reduction| R[robust::reduce_parameter_shard]
+    R --> RV[CertificateVoteRuntime: persist ParameterShard vote]
+    RV --> RN[Java Netty: 4 ParameterShard deliveries per receiver]
+    RN --> RQ[consensus::validate_quorum: generic ParameterShard quorum]
+    RQ --> RT[ChainVerifier: typed ParameterShardQC]
+    RT -->|generic parent quorum plus typed parent certificate| G[aggregate_merkle_root]
+    G --> GV[CertificateVoteRuntime: persist AggregateRoot vote]
+    GV --> GN[Java Netty: 4 AggregateRoot deliveries per receiver]
+    GN --> GQ[consensus::validate_quorum: generic AggregateRoot quorum]
+    GQ --> GT[ChainVerifier: typed AggregateRootQC]
+    GT -->|generic parent quorum plus typed parent certificate| AC[apply::compute_candidate]
+    AC --> AV[CertificateVoteRuntime: persist Apply vote]
+    AV --> AN[Java Netty: 4 Apply deliveries per receiver]
+    AN --> AQ[consensus::validate_quorum: generic Apply quorum]
+    AQ --> AT[ChainVerifier: typed ApplyQC]
+    AT -->|pointer apply_qc_id equals typed ApplyQC ID| C[CurrentPointerStore: APPLIED]
+    C -->|native model bytes| UI[Python evaluation plus UI]
+    Z[centralized baseline] -. comparison only; never a Delta input .-> UI
 """
     _write_new(diagram_path, diagram.encode("utf-8"))
     delta_execution: dict[str, object] = {
         "aggregation_authority": "delta::robust::reduce_parameter_shard",
+        "apply_qc_id": finalize_results[0].get("apply_qc_id"),
         "applied_model_file_sha256": model.content_id,
         "authoritative": False,
         "certificate_signature_semantics": "CONTENT_ID_PLACEHOLDER_LOCAL_DEMO_ONLY",
+        "classification": "LOCAL_DEMO_ONLY",
         "components": components,
         "contributions_bound_netty_to_native": True,
         "current_pointer": finalize_results[0].get("current_pointer"),
+        "demo_owned_aggregation": False,
+        "execution_authorized": False,
         "execution_path_id": execution_path_id,
         "execution_trace_sha256": _content_id(trace_path.read_bytes()),
         "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "formal_refinement_claimed": False,
         "governance_eligible": False,
         "model_state_hash": finalize_results[0].get("model_hash"),
         "native_cryptographic_signatures_verified": False,
         "node_count": NODE_COUNT,
+        "phase_execution": phase_execution,
+        "phase_ordering_enforced": True,
         "distributed_orchestrator_received_node_local_numeric_arrays": False,
         "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",
         "python_cross_node_aggregation_performed": False,
+        "python_vote_quorum_assembly_performed": False,
         "quorum_certificates": finalize_results[0].get("quorum_certificates"),
+        "semantic_completeness_claimed": False,
         "status": "PASS",
         "terminal_outcome": "APPLIED",
+        "trace_scope": TRACE_SCOPE,
         "transport_ed25519_verified": True,
+        "typed_certificate_verifier": TYPED_CERTIFICATE_VERIFIER,
+        "vote_quorum_component": VOTE_QUORUM_COMPONENT,
         "toolchain": dict(toolchain_document),
         "workload_id": workload_id,
     }
@@ -1967,7 +2392,7 @@ def run_delta_nodes(
     *,
     toolchain: DeltaToolchain | None = None,
 ) -> DeltaExecutionResult:
-    """Run four local Delta node processes through Netty to terminal APPLIED."""
+    """Run four local Delta nodes through six interleaved vote/QC phases."""
     root = repository_root.resolve(strict=True)
     output = destination.resolve(strict=False)
     if output.exists():
@@ -1982,15 +2407,15 @@ def run_delta_nodes(
     workload_path = workload_root / "mnist-workload.bin"
     contributions, workload_id = write_workload(node_contributions, source_id, workload_path)
     contribution_ids = tuple(item.content_id for item in contributions)
+    validator_ids = tuple(f"validator-{index:02d}" for index in range(1, NODE_COUNT + 1))
 
     transport_receipts: list[dict[str, object]] = []
     relayed_workloads: dict[str, Path] = {}
     relayed_contribution_roots: dict[str, Path] = {}
-    for validator_index in range(1, NODE_COUNT + 1):
-        validator_id = f"validator-{validator_index:02d}"
+    for validator_index, validator_id in enumerate(validator_ids):
         destination_root = output / "network" / "workloads" / validator_id
         entries = [
-            _RelayEntry(workload_path, PurePosixPath("workload.bin"), validator_index - 1),
+            _RelayEntry(workload_path, PurePosixPath("workload.bin"), validator_index),
             *(
                 _RelayEntry(
                     workload_root / f"contribution-{item.node_index:02d}.bin",
@@ -2020,96 +2445,173 @@ def run_delta_nodes(
         raise MnistDeltaError("MNIST_DELTA_CONTRIBUTION_TRANSPORT_BINDING_INVALID")
 
     runtime_root = output / "native-nodes"
-    prepare_results: list[dict[str, object]] = []
-    crash_result_path = output / "results" / "validator-04-crash.json"
-    for validator_index in range(1, NODE_COUNT + 1):
-        validator_id = f"validator-{validator_index:02d}"
-        node_dir = runtime_root / validator_id
-        result_path = output / "results" / f"{validator_id}-prepare.json"
-        result_path.parent.mkdir(parents=True, exist_ok=True)
-        if validator_index == NODE_COUNT:
+    results_root = output / "results"
+    results_root.mkdir()
+    qcs_roots = {validator_id: output / "qcs" / validator_id for validator_id in validator_ids}
+    for qcs_root in qcs_roots.values():
+        qcs_root.mkdir(parents=True)
+    vote_results_by_validator: dict[str, list[dict[str, object]]] = {
+        validator_id: [] for validator_id in validator_ids
+    }
+    certify_results_by_validator: dict[str, list[dict[str, object]]] = {
+        validator_id: [] for validator_id in validator_ids
+    }
+    crash_result_path = results_root / "validator-04-apply-crash.json"
+    crash_result: dict[str, object] | None = None
+
+    for phase_index, phase in enumerate(REQUIRED_VOTE_KINDS):
+        phase_body_ids: list[str] = []
+        for validator_id in validator_ids:
+            node_dir = runtime_root / validator_id
+            qcs_argument = qcs_roots[validator_id] if phase_index > 0 else None
+            expected_parent_qc_ids = [
+                _require_content_id(
+                    cast(Mapping[str, object], item.get("quorum_certificate")).get("qc_id"),
+                    "MNIST_DELTA_PARENT_QCS_INVALID",
+                )
+                for item in certify_results_by_validator[validator_id]
+            ]
+            if validator_id == "validator-04" and phase == "apply":
+                _run_process(
+                    _native_command(
+                        selected_toolchain,
+                        "vote-phase",
+                        workload=relayed_workloads[validator_id],
+                        contributions_root=relayed_contribution_roots[validator_id],
+                        node_dir=node_dir,
+                        validator_id=validator_id,
+                        result_path=crash_result_path,
+                        phase=phase,
+                        qcs_root=qcs_argument,
+                        crash=True,
+                    ),
+                    expected_codes=frozenset({75}),
+                )
+                crash_result = _load_json(crash_result_path, "MNIST_DELTA_CRASH_RESULT_INVALID")
+                _validate_vote_phase_result(
+                    crash_result,
+                    validator_id,
+                    workload_id,
+                    source_id,
+                    contribution_ids,
+                    node_dir,
+                    crash_result_path,
+                    phase_index,
+                    expected_parent_qc_ids,
+                    crash=True,
+                )
+            result_path = results_root / f"{validator_id}-{phase}-vote.json"
             _run_process(
                 _native_command(
                     selected_toolchain,
-                    "prepare-votes",
+                    "vote-phase",
                     workload=relayed_workloads[validator_id],
                     contributions_root=relayed_contribution_roots[validator_id],
                     node_dir=node_dir,
                     validator_id=validator_id,
-                    result_path=crash_result_path,
-                    crash=True,
+                    result_path=result_path,
+                    phase=phase,
+                    qcs_root=qcs_argument,
                 ),
-                expected_codes=frozenset({75}),
+                expected_codes=frozenset({0}),
             )
-            crash_result = _load_json(crash_result_path, "MNIST_DELTA_CRASH_RESULT_INVALID")
-            _validate_prepare_result(
-                crash_result,
+            result = _load_json(result_path, "MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
+            _validate_vote_phase_result(
+                result,
                 validator_id,
                 workload_id,
                 source_id,
                 contribution_ids,
                 node_dir,
-                crash_result_path,
-                crash=True,
+                result_path,
+                phase_index,
+                expected_parent_qc_ids,
+                crash=False,
             )
-        _run_process(
-            _native_command(
-                selected_toolchain,
-                "prepare-votes",
-                workload=relayed_workloads[validator_id],
-                contributions_root=relayed_contribution_roots[validator_id],
-                node_dir=node_dir,
-                validator_id=validator_id,
-                result_path=result_path,
-            ),
-            expected_codes=frozenset({0}),
-        )
-        result = _load_json(result_path, "MNIST_DELTA_PREPARE_RESULT_INVALID")
-        _validate_prepare_result(
-            result,
-            validator_id,
-            workload_id,
-            source_id,
-            contribution_ids,
-            node_dir,
-            result_path,
-            crash=False,
-        )
-        if validator_index == NODE_COUNT:
-            frames = result.get("vote_frames")
-            apply_frame = frames[-1] if isinstance(frames, list) and frames else None
-            if not isinstance(apply_frame, dict) or apply_frame.get("replay") is not True:
-                raise MnistDeltaError("MNIST_DELTA_APPLY_VOTE_NOT_REPLAYED")
-        prepare_results.append(result)
+            frame = result.get("vote_frame")
+            if not isinstance(frame, dict):
+                raise MnistDeltaError("MNIST_DELTA_VOTE_PHASE_RESULT_INVALID")
+            phase_body_ids.append(
+                _require_content_id(frame.get("body_hash"), "MNIST_DELTA_VOTE_BODY_ID_INVALID")
+            )
+            vote_results_by_validator[validator_id].append(result)
+        if len(set(phase_body_ids)) != 1:
+            raise MnistDeltaError("MNIST_DELTA_NODE_PHASE_BODIES_DIVERGED")
 
-    vote_sources: list[_RelayEntry] = []
-    for sender_index in range(1, NODE_COUNT + 1):
-        for kind in REQUIRED_VOTE_KINDS:
-            vote_sources.append(
-                _RelayEntry(
-                    runtime_root / f"validator-{sender_index:02d}" / "vote-frames" / f"{kind}.vote",
-                    PurePosixPath(f"validator-{sender_index:02d}/vote-frames/{kind}.vote"),
-                    sender_index - 1,
-                )
+        vote_sources = [
+            _RelayEntry(
+                runtime_root / sender_id / "vote-frames" / f"{phase}.vote",
+                PurePosixPath(f"{sender_id}/vote-frames/{phase}.vote"),
+                sender_index,
             )
+            for sender_index, sender_id in enumerate(validator_ids)
+        ]
+        phase_qc_documents: list[bytes] = []
+        for receiver_id in validator_ids:
+            expected_parent_qc_ids = [
+                _require_content_id(
+                    cast(Mapping[str, object], item.get("quorum_certificate")).get("qc_id"),
+                    "MNIST_DELTA_PARENT_QCS_INVALID",
+                )
+                for item in certify_results_by_validator[receiver_id]
+            ]
+            votes_root = output / "network" / "votes" / phase / receiver_id
+            receipt = _run_relay(
+                selected_toolchain,
+                signers,
+                vote_sources,
+                votes_root,
+                output / "transport-evidence",
+                f"votes-{phase}-to-{receiver_id}",
+            )
+            transport_receipts.append(receipt)
+            qc_output = qcs_roots[receiver_id] / f"{phase}.qc"
+            result_path = results_root / f"{receiver_id}-{phase}-certify.json"
+            _run_process(
+                _native_command(
+                    selected_toolchain,
+                    "certify-phase",
+                    workload=relayed_workloads[receiver_id],
+                    contributions_root=relayed_contribution_roots[receiver_id],
+                    node_dir=runtime_root / receiver_id,
+                    validator_id=receiver_id,
+                    result_path=result_path,
+                    phase=phase,
+                    votes_root=votes_root,
+                    qcs_root=qcs_roots[receiver_id] if phase_index > 0 else None,
+                    qc_output=qc_output,
+                ),
+                expected_codes=frozenset({0}),
+            )
+            result = _load_json(result_path, "MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID")
+            _validate_certify_phase_result(
+                result,
+                receiver_id,
+                workload_id,
+                source_id,
+                contribution_ids,
+                qcs_roots[receiver_id],
+                result_path,
+                phase_index,
+                expected_parent_qc_ids,
+            )
+            certificate = result.get("quorum_certificate")
+            if (
+                not isinstance(certificate, dict)
+                or certificate.get("body_hash") != phase_body_ids[0]
+            ):
+                raise MnistDeltaError("MNIST_DELTA_CERTIFY_PHASE_RESULT_INVALID")
+            certify_results_by_validator[receiver_id].append(result)
+            phase_qc_documents.append(qc_output.read_bytes())
+        if len(set(phase_qc_documents)) != 1:
+            raise MnistDeltaError("MNIST_DELTA_NODE_QCS_DIVERGED")
 
     finalize_results: list[dict[str, object]] = []
     models: list[AppliedModel] = []
-    for receiver_index in range(1, NODE_COUNT + 1):
-        validator_id = f"validator-{receiver_index:02d}"
-        votes_root = output / "network" / "votes" / validator_id
-        receipt = _run_relay(
-            selected_toolchain,
-            signers,
-            vote_sources,
-            votes_root,
-            output / "transport-evidence",
-            f"votes-to-{validator_id}",
-        )
-        transport_receipts.append(receipt)
+    for validator_id in validator_ids:
         model_path = output / "models" / validator_id / "applied-model.bin"
         model_path.parent.mkdir(parents=True, exist_ok=True)
-        result_path = output / "results" / f"{validator_id}-finalize.json"
+        result_path = results_root / f"{validator_id}-finalize.json"
         _run_process(
             _native_command(
                 selected_toolchain,
@@ -2119,7 +2621,7 @@ def run_delta_nodes(
                 node_dir=runtime_root / validator_id,
                 validator_id=validator_id,
                 result_path=result_path,
-                votes_root=votes_root,
+                qcs_root=qcs_roots[validator_id],
                 applied_model=model_path,
             ),
             expected_codes=frozenset({0}),
@@ -2136,6 +2638,23 @@ def run_delta_nodes(
             runtime_root / validator_id,
             result_path,
         )
+        body_ids = _validate_body_ids(result)
+        vote_body_ids = [
+            cast(Mapping[str, object], vote.get("vote_frame"))["body_hash"]
+            for vote in vote_results_by_validator[validator_id]
+        ]
+        qc_ids = [
+            cast(Mapping[str, object], certificate.get("quorum_certificate"))["qc_id"]
+            for certificate in certify_results_by_validator[validator_id]
+        ]
+        final_qcs = result.get("quorum_certificates")
+        if (
+            vote_body_ids != [body_ids[kind] for kind in REQUIRED_VOTE_KINDS]
+            or not isinstance(final_qcs, list)
+            or qc_ids
+            != [cast(Mapping[str, object], certificate)["qc_id"] for certificate in final_qcs]
+        ):
+            raise MnistDeltaError("MNIST_DELTA_PHASE_CHAIN_BINDING_INVALID")
         models.append(model)
         finalize_results.append(result)
 
@@ -2156,18 +2675,17 @@ def run_delta_nodes(
         for key in semantic_keys
     ):
         raise MnistDeltaError("MNIST_DELTA_NODE_RECEIPTS_DIVERGED")
-    if len({_canonical_bytes(result.get("body_ids")) for result in prepare_results}) != 1:
-        raise MnistDeltaError("MNIST_DELTA_NODE_RECEIPTS_DIVERGED")
 
     native_traces = {
-        f"validator-{index:02d}": _collect_native_trace(
-            runtime_root / f"validator-{index:02d}" / "trace.jsonl",
-            f"validator-{index:02d}",
-            prepare_results[index - 1],
-            finalize_results[index - 1],
-            expect_crash=index == NODE_COUNT,
+        validator_id: _collect_native_trace(
+            runtime_root / validator_id / "trace.jsonl",
+            validator_id,
+            vote_results_by_validator[validator_id],
+            certify_results_by_validator[validator_id],
+            finalize_results[index],
+            expect_crash=validator_id == "validator-04",
         )
-        for index in range(1, NODE_COUNT + 1)
+        for index, validator_id in enumerate(validator_ids)
     }
     validator_four_events = [row.get("event") for row in native_traces["validator-04"]]
     if "simulated_crash" not in validator_four_events or not any(
@@ -2175,18 +2693,28 @@ def run_delta_nodes(
     ):
         raise MnistDeltaError("MNIST_DELTA_CRASH_RECOVERY_TRACE_INVALID")
 
+    vote_results = [
+        item for validator_id in validator_ids for item in vote_results_by_validator[validator_id]
+    ]
+    certify_results = [
+        item
+        for validator_id in validator_ids
+        for item in certify_results_by_validator[validator_id]
+    ]
     delta_execution, trace_path, diagram_path = _write_execution_evidence(
         output,
         workload_id,
         contributions,
         transport_receipts,
-        prepare_results,
+        vote_results,
+        certify_results,
         finalize_results,
         native_traces,
         toolchain_document,
         models[0],
     )
-    crash_result = _load_json(crash_result_path, "MNIST_DELTA_CRASH_RESULT_INVALID")
+    if crash_result is None:
+        raise MnistDeltaError("MNIST_DELTA_CRASH_RESULT_INVALID")
     failure_simulation: dict[str, object] = {
         "available_nodes_after_restart": NODE_COUNT,
         "crash_exit_code": 75,
@@ -2194,7 +2722,9 @@ def run_delta_nodes(
         "failed_node_id": "validator-04",
         "model_hash_after_recovery": models[0].content_id,
         "protocol_accepted_after_recovery": True,
-        "recovered_vote_count": prepare_results[-1].get("recovered_vote_count"),
+        "recovered_vote_count": vote_results_by_validator["validator-04"][-1].get(
+            "recovered_vote_count"
+        ),
         "replay_observed": True,
         "status": "RECOVERED_AND_APPLIED",
         "terminal_outcome": "APPLIED",

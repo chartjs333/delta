@@ -17,6 +17,13 @@ from pathlib import Path
 from typing import Any, ClassVar
 from urllib.parse import urlsplit
 
+from deltatorrent.benchmark.mnist_delta_nodes import (
+    NODE_COUNT,
+    REQUIRED_VOTE_KINDS,
+    TRACE_SCOPE,
+    TYPED_CERTIFICATE_VERIFIER,
+    VOTE_QUORUM_COMPONENT,
+)
 from deltatorrent.benchmark.mnist_demo import MnistDemoError, run_mnist_demo
 
 WORKSPACE_HTML = r"""<!doctype html>
@@ -133,7 +140,7 @@ WORKSPACE_HTML = r"""<!doctype html>
       <div>Распределённое обучение, которое можно увидеть</div>
       <h1>Четыре узла.<br>Десять цифр.<br>Один результат.</h1>
       <p>Настоящий MNIST, непересекающиеся локальные шарды и общий test set. Вклады
-         проходят через Netty, durable Delta WAL, шесть QC, native reduce и Apply.</p>
+         проходят через шесть реальных циклов Delta vote → Netty → QC, native reduce и Apply.</p>
     </div>
     <div>
       <button id="run">Запустить демо</button>
@@ -340,8 +347,8 @@ WORKSPACE_HTML = r"""<!doctype html>
     const rows = [
       ['Централизованный baseline', report.centralized.samples_seen, report.centralized.training_ms, 'локальная память'],
       ['4 MNIST worker-процесса', report.distributed.samples_seen, report.distributed.training_ms, formatBytes(totalPayload)],
-      ['Java Netty loopback', 4, 'в составе прогона', 'payload byte-identical'],
-      ['Native Delta nodes', 4, 'в составе прогона', '6 QC → APPLIED'],
+      ['Java Netty loopback', 28, 'в составе прогона', '28 signed relay receipts'],
+      ['Native Delta nodes', 4, 'в составе прогона', '24 votes → 24 QC results → APPLIED'],
       ['Crash/restart validator-04', 1, 'в составе прогона', report.failure_simulation.status],
     ];
     rows.forEach(values => {
@@ -363,7 +370,7 @@ WORKSPACE_HTML = r"""<!doctype html>
     document.getElementById('distributed-accuracy').textContent = formatAccuracy(report.distributed.evaluation.accuracy_ppm);
     document.getElementById('model-match').textContent = report.distributed.exact_model_match_with_centralized ? 'ПОБАЙТНО' : 'НЕТ';
     document.getElementById('delta-terminal').textContent = report.delta_execution.terminal_outcome;
-    document.getElementById('aggregate-copy').textContent = `Netty → 6 QC → delta::robust::reduce_parameter_shard → Apply → ${report.delta_execution.terminal_outcome}`;
+    document.getElementById('aggregate-copy').textContent = `24 durable votes → 24 Netty-fed QC results → delta::robust::reduce_parameter_shard → Apply → ${report.delta_execution.terminal_outcome}`;
     renderNodes(report);
     renderExecutionPath(report);
     renderChart(report, false);
@@ -470,30 +477,57 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
     components = delta.get("components")
     toolchain = delta.get("toolchain")
     source_snapshot = toolchain.get("source_snapshot") if isinstance(toolchain, dict) else None
-    required_components = {
+    required_components = (
+        "deltatorrent.benchmark.mnist_demo",
         "io.deltareduce.demo.MnistDeltaNettyRelay",
         "delta::runtime::CertificateVoteRuntime",
-        "delta::certificates::ChainVerifier",
+        VOTE_QUORUM_COMPONENT,
+        TYPED_CERTIFICATE_VERIFIER,
+        "delta::robust::build_plan",
         "delta::robust::reduce_parameter_shard",
         "delta::apply::compute_candidate",
         "delta::runtime::CurrentPointerStore",
-    }
+    )
+    phase_execution = delta.get("phase_execution")
+    certificates = delta.get("quorum_certificates")
+    current_pointer = delta.get("current_pointer")
     if (
         delta.get("status") != "PASS"
         or delta.get("terminal_outcome") != "APPLIED"
+        or delta.get("classification") != "LOCAL_DEMO_ONLY"
+        or delta.get("authoritative") is not False
+        or delta.get("governance_eligible") is not False
+        or delta.get("execution_authorized") is not False
+        or delta.get("formal_refinement_claimed") is not False
+        or delta.get("semantic_completeness_claimed") is not False
+        or delta.get("trace_scope") != TRACE_SCOPE
         or delta.get("python_cross_node_aggregation_performed") is not False
+        or delta.get("python_vote_quorum_assembly_performed") is not False
+        or delta.get("demo_owned_aggregation") is not False
         or delta.get("distributed_orchestrator_received_node_local_numeric_arrays") is not False
         or delta.get("contributions_bound_netty_to_native") is not True
         or delta.get("aggregation_authority") != "delta::robust::reduce_parameter_shard"
+        or delta.get("protocol_scope") != "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA"
+        or delta.get("vote_quorum_component") != VOTE_QUORUM_COMPONENT
+        or delta.get("typed_certificate_verifier") != TYPED_CERTIFICATE_VERIFIER
+        or delta.get("native_cryptographic_signatures_verified") is not False
+        or delta.get("certificate_signature_semantics") != "CONTENT_ID_PLACEHOLDER_LOCAL_DEMO_ONLY"
+        or delta.get("phase_ordering_enforced") is not True
         or distributed.get("native_runtime_terminal") != "APPLIED"
         or distributed.get("parallel_processes_observed") != 4
         or distributed.get("worker_processes_required") != 4
         or distributed.get("exact_model_match_with_centralized") is not True
         or distributed.get("applied_model_file_sha256") != delta.get("applied_model_file_sha256")
         or execution_path.get("trace_id") != delta.get("execution_path_id")
+        or execution_path.get("acceptance_status") != "PASS"
+        or execution_path.get("aggregation_owner") != "delta::robust::reduce_parameter_shard"
         or execution_path.get("terminal_outcome") != "APPLIED"
         or execution_path.get("centralized_baseline_isolated_from_delta_inputs") is not True
         or execution_path.get("demo_owned_aggregation") is not False
+        or execution_path.get("existing_delta_node_interfaces") is not True
+        or execution_path.get("mnist_is_workload_only") is not True
+        or execution_path.get("phase_ordering_enforced") is not True
+        or execution_path.get("protocol_scope") != "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA"
         or execution_path.get("distributed_orchestrator_received_node_local_numeric_arrays")
         is not False
         or execution_path.get("four_distinct_worker_processes_observed") is not True
@@ -501,13 +535,18 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or failure.get("replay_observed") is not True
         or failure.get("terminal_outcome") != "APPLIED"
         or not isinstance(components, list)
-        or len(components) < len(required_components)
+        or len(components) != len(required_components)
+        or not isinstance(phase_execution, list)
+        or len(phase_execution) != len(REQUIRED_VOTE_KINDS)
+        or not isinstance(certificates, list)
+        or len(certificates) != len(REQUIRED_VOTE_KINDS)
+        or not isinstance(current_pointer, dict)
         or not isinstance(source_snapshot, dict)
         or source_snapshot.get("no_hidden_aggregation_static_gate") != "PASS"
         or source_snapshot.get("semantic_completeness_claimed") is not False
     ):
         raise MnistDemoError("MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID")
-    observed_components: set[str] = set()
+    observed_components: list[str] = []
     for expected_sequence, component in enumerate(components, start=1):
         if (
             not isinstance(component, dict)
@@ -517,9 +556,140 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
             or not isinstance(component.get("evidence"), dict)
         ):
             raise MnistDemoError("MNIST_WORKSPACE_DELTA_COMPONENT_INVALID")
-        observed_components.add(str(component["component"]))
-    if not required_components.issubset(observed_components):
+        observed_components.append(str(component["component"]))
+    if tuple(observed_components) != required_components:
         raise MnistDemoError("MNIST_WORKSPACE_DELTA_COMPONENT_MISSING")
+
+    expected_phase_fields = {
+        "body_hash",
+        "certifying_nodes",
+        "delivered_vote_count_per_receiver",
+        "execution_order",
+        "parent_gate_enforced",
+        "phase",
+        "position",
+        "proposal_component",
+        "qc_durable_finalize_action_id",
+        "required_parent_typed_certificate_id",
+        "required_parent_vote_quorum_id",
+        "transport_component",
+        "typed_certificate_action_id",
+        "typed_certificate_id",
+        "typed_certificate_verification_after_vote_quorum",
+        "typed_certificate_verifier",
+        "validated_parent_typed_certificate_ids",
+        "validated_parent_vote_quorum_ids",
+        "vote_action_id",
+        "vote_frames_relayed_per_receiver",
+        "vote_persistence_component",
+        "vote_quorum_action_id",
+        "vote_quorum_component",
+        "vote_quorum_id",
+    }
+    expected_execution_order = [
+        "typed_body_proposed",
+        "vote_persisted",
+        "four_netty_deliveries",
+        "generic_vote_quorum_validated",
+        "typed_certificate_verified",
+        "generic_qc_durably_finalized",
+    ]
+    expected_vote_actions = (
+        "ACT-ISC-VOTE",
+        "ACT-EC-VOTE",
+        "ACT-APC-VOTE",
+        "ACT-PARAM-VOTE",
+        "ACT-ROOT-VOTE",
+        "ACT-APPLY-VOTE",
+    )
+    expected_proposal_components = (
+        "delta::certificates::InputSetCertificate",
+        "delta::robust::build_plan",
+        "delta::robust::build_plan",
+        "delta::robust::reduce_parameter_shard",
+        "delta::certificates::aggregate_merkle_root",
+        "delta::apply::compute_candidate",
+    )
+    expected_trace_kinds = (
+        "ISC",
+        "EC",
+        "APC",
+        "PARAMETER_SHARD_QC",
+        "AGGREGATE_ROOT_QC",
+        "APPLY_QC",
+    )
+    typed_certificate_ids: list[str] = []
+    vote_quorum_ids: list[str] = []
+
+    def content_id(item: object) -> str | None:
+        if not isinstance(item, str) or not item.startswith("sha256:"):
+            return None
+        digest = item[7:]
+        return (
+            item
+            if len(digest) == 64 and all(char in "0123456789abcdef" for char in digest)
+            else None
+        )
+
+    for index, (phase, certificate) in enumerate(zip(phase_execution, certificates, strict=True)):
+        if not isinstance(phase, dict) or not isinstance(certificate, dict):
+            raise MnistDemoError("MNIST_WORKSPACE_DELTA_PHASE_INVALID")
+        typed_certificate_id = content_id(phase.get("typed_certificate_id"))
+        vote_quorum_id = content_id(phase.get("vote_quorum_id"))
+        expected_parent_typed_id = typed_certificate_ids[-1] if typed_certificate_ids else None
+        expected_parent_quorum_id = vote_quorum_ids[-1] if vote_quorum_ids else None
+        if (
+            set(phase) != expected_phase_fields
+            or phase.get("phase") != REQUIRED_VOTE_KINDS[index]
+            or phase.get("position") != index + 1
+            or phase.get("body_hash") != typed_certificate_id
+            or typed_certificate_id is None
+            or vote_quorum_id is None
+            or typed_certificate_id == vote_quorum_id
+            or typed_certificate_id in vote_quorum_ids
+            or vote_quorum_id in typed_certificate_ids
+            or phase.get("required_parent_typed_certificate_id") != expected_parent_typed_id
+            or phase.get("required_parent_vote_quorum_id") != expected_parent_quorum_id
+            or phase.get("validated_parent_typed_certificate_ids") != typed_certificate_ids
+            or phase.get("validated_parent_vote_quorum_ids") != vote_quorum_ids
+            or phase.get("parent_gate_enforced") is not True
+            or phase.get("execution_order") != expected_execution_order
+            or phase.get("proposal_component") != expected_proposal_components[index]
+            or phase.get("vote_action_id") != expected_vote_actions[index]
+            or phase.get("vote_persistence_component") != "delta::runtime::CertificateVoteRuntime"
+            or phase.get("transport_component") != "io.deltareduce.demo.MnistDeltaNettyRelay"
+            or phase.get("delivered_vote_count_per_receiver") != NODE_COUNT
+            or phase.get("vote_frames_relayed_per_receiver") != NODE_COUNT
+            or phase.get("vote_quorum_action_id") != "OBS-CURRENT-VOTE-QUORUM-VALIDATED"
+            or phase.get("vote_quorum_component") != VOTE_QUORUM_COMPONENT
+            or phase.get("typed_certificate_action_id") != "OBS-TYPED-CERT-VERIFIED-AFTER-QC"
+            or phase.get("typed_certificate_verifier") != TYPED_CERTIFICATE_VERIFIER
+            or phase.get("typed_certificate_verification_after_vote_quorum") is not True
+            or phase.get("qc_durable_finalize_action_id") != "OBS-CURRENT-QC-DURABLY-FINALIZED"
+            or phase.get("certifying_nodes") != NODE_COUNT
+            or set(certificate)
+            != {"body_hash", "context_id", "kind", "qc_id", "signer_count", "threshold"}
+            or certificate.get("kind") != REQUIRED_VOTE_KINDS[index]
+            or not isinstance(certificate.get("context_id"), str)
+            or not str(certificate["context_id"]).startswith(f"{expected_trace_kinds[index]}:")
+            or certificate.get("body_hash") != typed_certificate_id
+            or certificate.get("qc_id") != vote_quorum_id
+            or certificate.get("signer_count") != NODE_COUNT
+            or certificate.get("threshold") != 3
+        ):
+            raise MnistDemoError("MNIST_WORKSPACE_DELTA_PHASE_INVALID")
+        typed_certificate_ids.append(typed_certificate_id)
+        vote_quorum_ids.append(vote_quorum_id)
+    if (
+        len(set(typed_certificate_ids)) != len(typed_certificate_ids)
+        or len(set(vote_quorum_ids)) != len(vote_quorum_ids)
+        or not set(typed_certificate_ids).isdisjoint(vote_quorum_ids)
+        or delta.get("apply_qc_id") != typed_certificate_ids[-1]
+        or current_pointer.get("apply_qc_id") != typed_certificate_ids[-1]
+        or current_pointer.get("disposition") != "ADVANCED"
+        or current_pointer.get("height") != 1
+    ):
+        raise MnistDemoError("MNIST_WORKSPACE_DELTA_PHASE_INVALID")
     return value
 
 

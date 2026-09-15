@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 from dataclasses import dataclass
+from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,7 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     DIGIT_COUNT,
     NODE_COUNT,
     PIXELS_PER_DIGIT,
+    REQUIRED_VOTE_KINDS,
     VECTOR_WIDTH,
     DeltaToolchain,
     MnistDeltaError,
@@ -23,6 +25,7 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     write_node_contribution,
 )
 from deltatorrent.benchmark.mnist_demo import MnistDataset, run_mnist_demo
+from deltatorrent.benchmark.mnist_demo_workspace import _validate_workspace_report
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,12 +131,85 @@ def test_real_delta_path_reaches_applied_without_demo_aggregation(tmp_path: Path
 
     trace = json.loads(result.execution_trace_path.read_text(encoding="utf-8"))
     assert trace["terminal_outcome"] == "APPLIED"
+    assert trace["classification"] == "LOCAL_DEMO_ONLY"
+    assert trace["authoritative"] is False
+    assert trace["governance_eligible"] is False
+    assert trace["execution_authorized"] is False
+    assert trace["formal_refinement_claimed"] is False
+    assert trace["semantic_completeness_claimed"] is False
+    assert trace["trace_scope"] == "POST_CONFIG_POST_AVAILABILITY_DEMO_SUBTRACE"
     assert trace["python_cross_node_aggregation_performed"] is False
+    assert trace["python_vote_quorum_assembly_performed"] is False
+    assert trace["demo_owned_aggregation"] is False
     assert trace["aggregation_authority"] == "delta::robust::reduce_parameter_shard"
+    assert trace["vote_quorum_component"] == "delta::core::consensus::validate_quorum"
+    assert trace["typed_certificate_verifier"] == "delta::certificates::ChainVerifier"
+    assert trace["phase_ordering_enforced"] is True
+    phase_execution = trace["phase_execution"]
+    assert [item["phase"] for item in phase_execution] == list(REQUIRED_VOTE_KINDS)
+    assert [item["position"] for item in phase_execution] == list(
+        range(1, len(REQUIRED_VOTE_KINDS) + 1)
+    )
+    assert phase_execution[0]["required_parent_typed_certificate_id"] is None
+    assert phase_execution[0]["required_parent_vote_quorum_id"] is None
+    assert all(
+        current["required_parent_typed_certificate_id"] == previous["typed_certificate_id"]
+        and current["required_parent_vote_quorum_id"] == previous["vote_quorum_id"]
+        for previous, current in pairwise(phase_execution)
+    )
+    assert all(
+        item["validated_parent_typed_certificate_ids"]
+        == [parent["typed_certificate_id"] for parent in phase_execution[:index]]
+        and item["validated_parent_vote_quorum_ids"]
+        == [parent["vote_quorum_id"] for parent in phase_execution[:index]]
+        for index, item in enumerate(phase_execution)
+    )
+    assert {item["typed_certificate_id"] for item in phase_execution}.isdisjoint(
+        {item["vote_quorum_id"] for item in phase_execution}
+    )
+    assert all(item["certifying_nodes"] == NODE_COUNT for item in phase_execution)
+    assert all(item["delivered_vote_count_per_receiver"] == NODE_COUNT for item in phase_execution)
+    assert all(item["vote_frames_relayed_per_receiver"] == NODE_COUNT for item in phase_execution)
+    assert all(
+        item["vote_persistence_component"] == "delta::runtime::CertificateVoteRuntime"
+        and item["transport_component"] == "io.deltareduce.demo.MnistDeltaNettyRelay"
+        and item["vote_quorum_component"] == "delta::core::consensus::validate_quorum"
+        and item["typed_certificate_verifier"] == "delta::certificates::ChainVerifier"
+        and item["vote_quorum_action_id"] == "OBS-CURRENT-VOTE-QUORUM-VALIDATED"
+        and item["typed_certificate_action_id"] == "OBS-TYPED-CERT-VERIFIED-AFTER-QC"
+        and item["qc_durable_finalize_action_id"] == "OBS-CURRENT-QC-DURABLY-FINALIZED"
+        and item["typed_certificate_verification_after_vote_quorum"] is True
+        and item["parent_gate_enforced"] is True
+        and item["typed_certificate_id"] == item["body_hash"]
+        and item["vote_quorum_id"] != item["typed_certificate_id"]
+        for item in phase_execution
+    )
+    assert all(
+        item["execution_order"]
+        == [
+            "typed_body_proposed",
+            "vote_persisted",
+            "four_netty_deliveries",
+            "generic_vote_quorum_validated",
+            "typed_certificate_verified",
+            "generic_qc_durably_finalized",
+        ]
+        for item in phase_execution
+    )
+    assert len(trace["transport_receipts"]) == NODE_COUNT * (1 + len(REQUIRED_VOTE_KINDS))
+    assert len(trace["native_results"]) == (NODE_COUNT * len(REQUIRED_VOTE_KINDS) * 2 + NODE_COUNT)
+    assert sum(
+        result["type_name"] == "MNIST_DELTA_VOTE_PHASE_RESULT" for result in trace["native_results"]
+    ) == NODE_COUNT * len(REQUIRED_VOTE_KINDS)
+    assert sum(
+        result["type_name"] == "MNIST_DELTA_CERTIFY_PHASE_RESULT"
+        for result in trace["native_results"]
+    ) == NODE_COUNT * len(REQUIRED_VOTE_KINDS)
     assert [component["component"] for component in trace["components"]] == [
         "deltatorrent.benchmark.mnist_demo",
         "io.deltareduce.demo.MnistDeltaNettyRelay",
         "delta::runtime::CertificateVoteRuntime",
+        "delta::core::consensus::validate_quorum",
         "delta::certificates::ChainVerifier",
         "delta::robust::build_plan",
         "delta::robust::reduce_parameter_shard",
@@ -158,30 +234,89 @@ def test_real_delta_path_reaches_applied_without_demo_aggregation(tmp_path: Path
     ]
     assert all(certificate["signer_count"] == NODE_COUNT for certificate in certificates)
     assert all(certificate["threshold"] == 3 for certificate in certificates)
+    assert [certificate["body_hash"] for certificate in certificates] == [
+        item["typed_certificate_id"] for item in phase_execution
+    ]
+    assert [certificate["qc_id"] for certificate in certificates] == [
+        item["vote_quorum_id"] for item in phase_execution
+    ]
+    assert trace["apply_qc_id"] == phase_execution[-1]["typed_certificate_id"]
+    assert trace["current_pointer"]["apply_qc_id"] == phase_execution[-1]["typed_certificate_id"]
     assert result.failure_simulation["status"] == "RECOVERED_AND_APPLIED"
     assert result.failure_simulation["replay_observed"] is True
     assert result.failure_simulation["terminal_outcome"] == "APPLIED"
+    diagram = result.execution_diagram_path.read_text(encoding="utf-8")
+    assert "generic parent quorum plus typed parent certificate" in diagram
+    assert "required before numeric reduction" in diagram
+    assert "CertificateVoteRuntime: persist Apply vote" in diagram
+    assert "consensus::validate_quorum: generic Apply quorum" in diagram
+    assert "ChainVerifier: typed ApplyQC" in diagram
+    assert "robust::build_plan" in diagram
+    assert "robust::reduce_parameter_shard" in diagram
 
     result_root = tmp_path / "delta-execution"
-    prepare_path = result_root / "results/validator-01-prepare.json"
+    vote_paths = [
+        result_root / f"results/validator-01-{phase}-vote.json" for phase in REQUIRED_VOTE_KINDS
+    ]
+    certify_paths = [
+        result_root / f"results/validator-01-{phase}-certify.json" for phase in REQUIRED_VOTE_KINDS
+    ]
     finalize_path = result_root / "results/validator-01-finalize.json"
-    prepare_result = json.loads(prepare_path.read_text(encoding="utf-8"))
+    vote_results = [json.loads(path.read_text(encoding="utf-8")) for path in vote_paths]
+    certify_results = [json.loads(path.read_text(encoding="utf-8")) for path in certify_paths]
     finalize_result = json.loads(finalize_path.read_text(encoding="utf-8"))
-    forged_prepare = dict(prepare_result)
-    forged_prepare["result_id"] = "sha256:" + "0" * 64
+    forged_vote = dict(vote_results[0])
+    forged_vote["result_id"] = "sha256:" + "0" * 64
     with pytest.raises(MnistDeltaError, match="NATIVE_RESULT_ID_INVALID"):
-        mnist_delta_nodes._validate_prepare_result(
-            forged_prepare,
+        mnist_delta_nodes._validate_vote_phase_result(
+            forged_vote,
             "validator-01",
             trace["workload_id"],
             "sha256:" + "a" * 64,
             contribution_ids,
             result_root / "native-nodes/validator-01",
-            prepare_path,
+            vote_paths[0],
+            0,
+            (),
             crash=False,
         )
 
     native_trace_path = result_root / "native-nodes/validator-01/trace.jsonl"
+    conflated_certify_results = json.loads(json.dumps(certify_results))
+    conflated_certificate = conflated_certify_results[0]["quorum_certificate"]
+    conflated_certificate["qc_id"] = conflated_certificate["body_hash"]
+    with pytest.raises(MnistDeltaError, match="TYPED_CERTIFICATE_QUORUM_ID_CONFLATED"):
+        mnist_delta_nodes._collect_native_trace(
+            native_trace_path,
+            "validator-01",
+            vote_results,
+            conflated_certify_results,
+            finalize_result,
+            expect_crash=False,
+        )
+
+    for rows in trace["native_trace"].values():
+        current_vote_quorums = [
+            (index, row)
+            for index, row in enumerate(rows)
+            if row["action_id"] == "OBS-CURRENT-VOTE-QUORUM-VALIDATED"
+        ]
+        assert len(current_vote_quorums) == len(REQUIRED_VOTE_KINDS)
+        for quorum_index, quorum_row in current_vote_quorums:
+            typed_index = next(
+                index
+                for index, row in enumerate(rows[quorum_index + 1 :], start=quorum_index + 1)
+                if row["action_id"] == "OBS-TYPED-CERT-VERIFIED-AFTER-QC"
+                and row["body_hash"] == quorum_row["body_hash"]
+            )
+            durable_qc_index = next(
+                index
+                for index, row in enumerate(rows[typed_index + 1 :], start=typed_index + 1)
+                if row["action_id"] == "OBS-CURRENT-QC-DURABLY-FINALIZED"
+                and row["body_hash"] == quorum_row["body_hash"]
+            )
+            assert quorum_index < typed_index < durable_qc_index
+
     reordered_rows = [
         json.loads(line) for line in native_trace_path.read_text(encoding="utf-8").splitlines()
     ]
@@ -202,7 +337,8 @@ def test_real_delta_path_reaches_applied_without_demo_aggregation(tmp_path: Path
         mnist_delta_nodes._collect_native_trace(
             reordered_path,
             "validator-01",
-            prepare_result,
+            vote_results,
+            certify_results,
             finalize_result,
             expect_crash=False,
         )
@@ -248,6 +384,7 @@ def test_full_demo_orchestration_uses_four_workers_and_real_delta(
     assert report["delta_execution"]["terminal_outcome"] == "APPLIED"
     assert report["delta_execution"]["python_cross_node_aggregation_performed"] is False
     assert report["distributed"]["exact_model_match_with_centralized"] is True
+    assert _validate_workspace_report(report) is report
 
     retained = _retain_delta_evidence(result.output_dir / "delta-execution", "full-demo-path")
     if retained is not None:
@@ -287,7 +424,7 @@ def test_deleted_relayed_contribution_stops_before_delta_votes(
 
     def delete_before_native(command: tuple[str, ...], *, expected_codes: frozenset[int]) -> object:
         nonlocal mutated
-        if not mutated and len(command) > 1 and command[1] == "prepare-votes":
+        if not mutated and len(command) > 1 and command[1] == "vote-phase":
             contribution_root = Path(command[command.index("--contributions-root") + 1])
             (contribution_root / "worker-01.bin").unlink()
             mutated = True
@@ -304,6 +441,47 @@ def test_deleted_relayed_contribution_stops_before_delta_votes(
         )
     assert mutated is True
     assert not (tmp_path / "delta-execution/native-nodes/validator-01/votes/runtime.wal").exists()
+
+
+@pytest.mark.skipif(
+    os.environ.get("DELTA_MNIST_E2E") != "1",
+    reason="requires the compiled native node and JDK 25 Netty relay",
+)
+def test_missing_parent_qc_stops_next_phase_before_vote(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    controllers = tmp_path / "controllers"
+    generate_demo_controller_bundle(controllers)
+    contributions = _node_contributions(tmp_path)
+    original_run_process = mnist_delta_nodes._run_process
+    removed = False
+
+    def remove_parent_qc(command: tuple[str, ...], *, expected_codes: frozenset[int]) -> object:
+        nonlocal removed
+        if (
+            not removed
+            and len(command) > 1
+            and command[1] == "vote-phase"
+            and command[command.index("--phase") + 1] == "eligibility"
+        ):
+            qcs_root = Path(command[command.index("--qcs-root") + 1])
+            (qcs_root / "input_set.qc").unlink()
+            removed = True
+        return original_run_process(command, expected_codes=expected_codes)
+
+    monkeypatch.setattr(mnist_delta_nodes, "_run_process", remove_parent_qc)
+    with pytest.raises(MnistDeltaError, match="MNIST_DELTA_PROCESS_FAILED"):
+        run_delta_nodes(
+            Path(__file__).resolve().parents[3],
+            tmp_path / "delta-execution",
+            controllers,
+            contributions,
+            "sha256:" + "a" * 64,
+        )
+    assert removed is True
+    assert not (
+        tmp_path / "delta-execution/native-nodes/validator-01/vote-frames/eligibility.vote"
+    ).exists()
 
 
 @pytest.mark.skipif(

@@ -1,8 +1,10 @@
 {
   "actual_run": true,
   "applied_model_sha256": "sha256:a623434ebd2a6c707758e7fe6a0bdb984ec5cc53c2f6d75bbcb18fdddf9c14d0",
+  "apply_qc_id": "sha256:36838bb4b0eb31372dc4ac9c7fa4f4e3953ad50f1e9d1e26cd05320d88f32d1d",
   "authoritative": false,
   "centralized_accuracy_ppm": 820500,
+  "certificate_signature_semantics": "CONTENT_ID_PLACEHOLDER_LOCAL_DEMO_ONLY",
   "classification": "LOCAL_DEMO_ONLY",
   "components": [
     {
@@ -21,28 +23,33 @@
       "status": "PASS"
     },
     {
-      "component": "delta::certificates::ChainVerifier",
+      "component": "delta::core::consensus::validate_quorum",
       "sequence": 4,
       "status": "PASS"
     },
     {
-      "component": "delta::robust::build_plan",
+      "component": "delta::certificates::ChainVerifier",
       "sequence": 5,
       "status": "PASS"
     },
     {
-      "component": "delta::robust::reduce_parameter_shard",
+      "component": "delta::robust::build_plan",
       "sequence": 6,
       "status": "PASS"
     },
     {
-      "component": "delta::apply::compute_candidate",
+      "component": "delta::robust::reduce_parameter_shard",
       "sequence": 7,
       "status": "PASS"
     },
     {
-      "component": "delta::runtime::CurrentPointerStore",
+      "component": "delta::apply::compute_candidate",
       "sequence": 8,
+      "status": "PASS"
+    },
+    {
+      "component": "delta::runtime::CurrentPointerStore",
+      "sequence": 9,
       "status": "PASS"
     }
   ],
@@ -60,33 +67,285 @@
     "optimizer_id": "sha256:53195fc99dafd2ed99a65b5ded1b143dbe12ef0d6424bc1436f943e7a49b302a"
   },
   "dataset": {
+    "image_shape": [
+      28,
+      28
+    ],
     "name": "MNIST",
     "source_id": "sha256:590f4ed453b4c8dba28d914bb76c4d110f739c17650bf5e072e0ed0df2ef312b",
     "test_samples": 10000,
     "train_samples": 60000
   },
+  "demo_owned_aggregation": false,
   "distributed_accuracy_ppm": 820500,
   "exact_model_match_with_centralized": true,
-  "execution_path_id": "sha256:94c5183f8439587469922b6a8080fbc9b4e99053ec55fb4b0f3a4c60fc3c33af",
+  "execution_authorized": false,
+  "execution_path_id": "sha256:84b216f62e7540739ac3ef7610e5f4464b5d4e0e0ec5e3ffaee3fa44e3fabe0e",
+  "formal_refinement_claimed": false,
   "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
   "governance_eligible": false,
+  "native_cryptographic_signatures_verified": false,
   "native_results": {
     "applied": 4,
-    "votes_exposed": 4
+    "qcs_finalized": 24,
+    "votes_exposed": 24
   },
   "network": {
     "ed25519_verified": true,
     "native_receipts_bound_contribution_ids": true,
-    "netty_loopback_receipts": 8,
+    "netty_loopback_receipts": 28,
     "receipt_status": "PASS",
+    "vote_frames_per_phase_receiver": 4,
     "vote_frames_per_receiver": 24,
     "workload_entries_per_receiver": 5
   },
-  "native_cryptographic_signatures_verified": false,
-  "note": "Exact portable excerpt of one successful full-MNIST trace. The complete generated trace is retained locally and bound by source_execution_trace_sha256.",
+  "note": "Exact portable excerpt of one successful full-MNIST trace. Every phase ran as native typed-body proposal and durable vote, Java Netty vote relay, native generic vote-quorum validation, native typed-certificate verification, and durable generic-QC finalization before the next phase. The complete generated trace is retained locally and bound by source_execution_trace_sha256.",
+  "phase_execution": [
+    {
+      "body_hash": "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
+      "certifying_nodes": 4,
+      "delivered_vote_count_per_receiver": 4,
+      "execution_order": [
+        "typed_body_proposed",
+        "vote_persisted",
+        "four_netty_deliveries",
+        "generic_vote_quorum_validated",
+        "typed_certificate_verified",
+        "generic_qc_durably_finalized"
+      ],
+      "parent_gate_enforced": true,
+      "phase": "input_set",
+      "position": 1,
+      "proposal_component": "delta::certificates::InputSetCertificate",
+      "qc_durable_finalize_action_id": "OBS-CURRENT-QC-DURABLY-FINALIZED",
+      "required_parent_typed_certificate_id": null,
+      "required_parent_vote_quorum_id": null,
+      "transport_component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+      "typed_certificate_action_id": "OBS-TYPED-CERT-VERIFIED-AFTER-QC",
+      "typed_certificate_id": "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
+      "typed_certificate_verification_after_vote_quorum": true,
+      "typed_certificate_verifier": "delta::certificates::ChainVerifier",
+      "validated_parent_typed_certificate_ids": [],
+      "validated_parent_vote_quorum_ids": [],
+      "vote_action_id": "ACT-ISC-VOTE",
+      "vote_frames_relayed_per_receiver": 4,
+      "vote_persistence_component": "delta::runtime::CertificateVoteRuntime",
+      "vote_quorum_action_id": "OBS-CURRENT-VOTE-QUORUM-VALIDATED",
+      "vote_quorum_component": "delta::core::consensus::validate_quorum",
+      "vote_quorum_id": "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1"
+    },
+    {
+      "body_hash": "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d",
+      "certifying_nodes": 4,
+      "delivered_vote_count_per_receiver": 4,
+      "execution_order": [
+        "typed_body_proposed",
+        "vote_persisted",
+        "four_netty_deliveries",
+        "generic_vote_quorum_validated",
+        "typed_certificate_verified",
+        "generic_qc_durably_finalized"
+      ],
+      "parent_gate_enforced": true,
+      "phase": "eligibility",
+      "position": 2,
+      "proposal_component": "delta::robust::build_plan",
+      "qc_durable_finalize_action_id": "OBS-CURRENT-QC-DURABLY-FINALIZED",
+      "required_parent_typed_certificate_id": "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
+      "required_parent_vote_quorum_id": "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1",
+      "transport_component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+      "typed_certificate_action_id": "OBS-TYPED-CERT-VERIFIED-AFTER-QC",
+      "typed_certificate_id": "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d",
+      "typed_certificate_verification_after_vote_quorum": true,
+      "typed_certificate_verifier": "delta::certificates::ChainVerifier",
+      "validated_parent_typed_certificate_ids": [
+        "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08"
+      ],
+      "validated_parent_vote_quorum_ids": [
+        "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1"
+      ],
+      "vote_action_id": "ACT-EC-VOTE",
+      "vote_frames_relayed_per_receiver": 4,
+      "vote_persistence_component": "delta::runtime::CertificateVoteRuntime",
+      "vote_quorum_action_id": "OBS-CURRENT-VOTE-QUORUM-VALIDATED",
+      "vote_quorum_component": "delta::core::consensus::validate_quorum",
+      "vote_quorum_id": "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442"
+    },
+    {
+      "body_hash": "sha256:1714e701c109b69bafb59ceb36b2e481048bf0f8994aaa86b78f2758dcf1f8d0",
+      "certifying_nodes": 4,
+      "delivered_vote_count_per_receiver": 4,
+      "execution_order": [
+        "typed_body_proposed",
+        "vote_persisted",
+        "four_netty_deliveries",
+        "generic_vote_quorum_validated",
+        "typed_certificate_verified",
+        "generic_qc_durably_finalized"
+      ],
+      "parent_gate_enforced": true,
+      "phase": "aggregation_plan",
+      "position": 3,
+      "proposal_component": "delta::robust::build_plan",
+      "qc_durable_finalize_action_id": "OBS-CURRENT-QC-DURABLY-FINALIZED",
+      "required_parent_typed_certificate_id": "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d",
+      "required_parent_vote_quorum_id": "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442",
+      "transport_component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+      "typed_certificate_action_id": "OBS-TYPED-CERT-VERIFIED-AFTER-QC",
+      "typed_certificate_id": "sha256:1714e701c109b69bafb59ceb36b2e481048bf0f8994aaa86b78f2758dcf1f8d0",
+      "typed_certificate_verification_after_vote_quorum": true,
+      "typed_certificate_verifier": "delta::certificates::ChainVerifier",
+      "validated_parent_typed_certificate_ids": [
+        "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
+        "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d"
+      ],
+      "validated_parent_vote_quorum_ids": [
+        "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1",
+        "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442"
+      ],
+      "vote_action_id": "ACT-APC-VOTE",
+      "vote_frames_relayed_per_receiver": 4,
+      "vote_persistence_component": "delta::runtime::CertificateVoteRuntime",
+      "vote_quorum_action_id": "OBS-CURRENT-VOTE-QUORUM-VALIDATED",
+      "vote_quorum_component": "delta::core::consensus::validate_quorum",
+      "vote_quorum_id": "sha256:79726e37aa2b67570a14233a2541d399d3a30bd2795c266d3640d5b28116aa25"
+    },
+    {
+      "body_hash": "sha256:292320aa0fd409858aca3e9802201231ee3e130d3cdcec2f658cab43f6d4f01b",
+      "certifying_nodes": 4,
+      "delivered_vote_count_per_receiver": 4,
+      "execution_order": [
+        "typed_body_proposed",
+        "vote_persisted",
+        "four_netty_deliveries",
+        "generic_vote_quorum_validated",
+        "typed_certificate_verified",
+        "generic_qc_durably_finalized"
+      ],
+      "parent_gate_enforced": true,
+      "phase": "parameter_shard",
+      "position": 4,
+      "proposal_component": "delta::robust::reduce_parameter_shard",
+      "qc_durable_finalize_action_id": "OBS-CURRENT-QC-DURABLY-FINALIZED",
+      "required_parent_typed_certificate_id": "sha256:1714e701c109b69bafb59ceb36b2e481048bf0f8994aaa86b78f2758dcf1f8d0",
+      "required_parent_vote_quorum_id": "sha256:79726e37aa2b67570a14233a2541d399d3a30bd2795c266d3640d5b28116aa25",
+      "transport_component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+      "typed_certificate_action_id": "OBS-TYPED-CERT-VERIFIED-AFTER-QC",
+      "typed_certificate_id": "sha256:292320aa0fd409858aca3e9802201231ee3e130d3cdcec2f658cab43f6d4f01b",
+      "typed_certificate_verification_after_vote_quorum": true,
+      "typed_certificate_verifier": "delta::certificates::ChainVerifier",
+      "validated_parent_typed_certificate_ids": [
+        "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
+        "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d",
+        "sha256:1714e701c109b69bafb59ceb36b2e481048bf0f8994aaa86b78f2758dcf1f8d0"
+      ],
+      "validated_parent_vote_quorum_ids": [
+        "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1",
+        "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442",
+        "sha256:79726e37aa2b67570a14233a2541d399d3a30bd2795c266d3640d5b28116aa25"
+      ],
+      "vote_action_id": "ACT-PARAM-VOTE",
+      "vote_frames_relayed_per_receiver": 4,
+      "vote_persistence_component": "delta::runtime::CertificateVoteRuntime",
+      "vote_quorum_action_id": "OBS-CURRENT-VOTE-QUORUM-VALIDATED",
+      "vote_quorum_component": "delta::core::consensus::validate_quorum",
+      "vote_quorum_id": "sha256:2d85b3de5abbd9c0fadb70d35a719d40e41a5cc49ea7510497a4b636efd113a6"
+    },
+    {
+      "body_hash": "sha256:1de18a91e12dc0df198254cd8b91c9841b3d9d76a6d1c528fe07906495c4c4cf",
+      "certifying_nodes": 4,
+      "delivered_vote_count_per_receiver": 4,
+      "execution_order": [
+        "typed_body_proposed",
+        "vote_persisted",
+        "four_netty_deliveries",
+        "generic_vote_quorum_validated",
+        "typed_certificate_verified",
+        "generic_qc_durably_finalized"
+      ],
+      "parent_gate_enforced": true,
+      "phase": "aggregate_root",
+      "position": 5,
+      "proposal_component": "delta::certificates::aggregate_merkle_root",
+      "qc_durable_finalize_action_id": "OBS-CURRENT-QC-DURABLY-FINALIZED",
+      "required_parent_typed_certificate_id": "sha256:292320aa0fd409858aca3e9802201231ee3e130d3cdcec2f658cab43f6d4f01b",
+      "required_parent_vote_quorum_id": "sha256:2d85b3de5abbd9c0fadb70d35a719d40e41a5cc49ea7510497a4b636efd113a6",
+      "transport_component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+      "typed_certificate_action_id": "OBS-TYPED-CERT-VERIFIED-AFTER-QC",
+      "typed_certificate_id": "sha256:1de18a91e12dc0df198254cd8b91c9841b3d9d76a6d1c528fe07906495c4c4cf",
+      "typed_certificate_verification_after_vote_quorum": true,
+      "typed_certificate_verifier": "delta::certificates::ChainVerifier",
+      "validated_parent_typed_certificate_ids": [
+        "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
+        "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d",
+        "sha256:1714e701c109b69bafb59ceb36b2e481048bf0f8994aaa86b78f2758dcf1f8d0",
+        "sha256:292320aa0fd409858aca3e9802201231ee3e130d3cdcec2f658cab43f6d4f01b"
+      ],
+      "validated_parent_vote_quorum_ids": [
+        "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1",
+        "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442",
+        "sha256:79726e37aa2b67570a14233a2541d399d3a30bd2795c266d3640d5b28116aa25",
+        "sha256:2d85b3de5abbd9c0fadb70d35a719d40e41a5cc49ea7510497a4b636efd113a6"
+      ],
+      "vote_action_id": "ACT-ROOT-VOTE",
+      "vote_frames_relayed_per_receiver": 4,
+      "vote_persistence_component": "delta::runtime::CertificateVoteRuntime",
+      "vote_quorum_action_id": "OBS-CURRENT-VOTE-QUORUM-VALIDATED",
+      "vote_quorum_component": "delta::core::consensus::validate_quorum",
+      "vote_quorum_id": "sha256:467124a58671530fd7ef988b9fee44d9b84982131212434e4fe3830aedc50c28"
+    },
+    {
+      "body_hash": "sha256:36838bb4b0eb31372dc4ac9c7fa4f4e3953ad50f1e9d1e26cd05320d88f32d1d",
+      "certifying_nodes": 4,
+      "delivered_vote_count_per_receiver": 4,
+      "execution_order": [
+        "typed_body_proposed",
+        "vote_persisted",
+        "four_netty_deliveries",
+        "generic_vote_quorum_validated",
+        "typed_certificate_verified",
+        "generic_qc_durably_finalized"
+      ],
+      "parent_gate_enforced": true,
+      "phase": "apply",
+      "position": 6,
+      "proposal_component": "delta::apply::compute_candidate",
+      "qc_durable_finalize_action_id": "OBS-CURRENT-QC-DURABLY-FINALIZED",
+      "required_parent_typed_certificate_id": "sha256:1de18a91e12dc0df198254cd8b91c9841b3d9d76a6d1c528fe07906495c4c4cf",
+      "required_parent_vote_quorum_id": "sha256:467124a58671530fd7ef988b9fee44d9b84982131212434e4fe3830aedc50c28",
+      "transport_component": "io.deltareduce.demo.MnistDeltaNettyRelay",
+      "typed_certificate_action_id": "OBS-TYPED-CERT-VERIFIED-AFTER-QC",
+      "typed_certificate_id": "sha256:36838bb4b0eb31372dc4ac9c7fa4f4e3953ad50f1e9d1e26cd05320d88f32d1d",
+      "typed_certificate_verification_after_vote_quorum": true,
+      "typed_certificate_verifier": "delta::certificates::ChainVerifier",
+      "validated_parent_typed_certificate_ids": [
+        "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
+        "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d",
+        "sha256:1714e701c109b69bafb59ceb36b2e481048bf0f8994aaa86b78f2758dcf1f8d0",
+        "sha256:292320aa0fd409858aca3e9802201231ee3e130d3cdcec2f658cab43f6d4f01b",
+        "sha256:1de18a91e12dc0df198254cd8b91c9841b3d9d76a6d1c528fe07906495c4c4cf"
+      ],
+      "validated_parent_vote_quorum_ids": [
+        "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1",
+        "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442",
+        "sha256:79726e37aa2b67570a14233a2541d399d3a30bd2795c266d3640d5b28116aa25",
+        "sha256:2d85b3de5abbd9c0fadb70d35a719d40e41a5cc49ea7510497a4b636efd113a6",
+        "sha256:467124a58671530fd7ef988b9fee44d9b84982131212434e4fe3830aedc50c28"
+      ],
+      "vote_action_id": "ACT-APPLY-VOTE",
+      "vote_frames_relayed_per_receiver": 4,
+      "vote_persistence_component": "delta::runtime::CertificateVoteRuntime",
+      "vote_quorum_action_id": "OBS-CURRENT-VOTE-QUORUM-VALIDATED",
+      "vote_quorum_component": "delta::core::consensus::validate_quorum",
+      "vote_quorum_id": "sha256:4148b547914bc3f59e118f8fbad35d529ce2d0a847b749131d8e5b216ba8971d"
+    }
+  ],
+  "phase_ordering_enforced": true,
   "python_cross_node_aggregation_performed": false,
+  "python_vote_quorum_assembly_performed": false,
   "quorum_certificates": [
     {
+      "body_hash": "sha256:d60891904de5aa6941033fced913a96e37513f7d3ff143316c9786b9b7e1cf08",
       "context_id": "ISC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "input_set",
       "qc_id": "sha256:359e185a07627a0d4ae7b131cee7e4a668a78c1a0d1eded939d8fa891f9247e1",
@@ -94,6 +353,7 @@
       "threshold": 3
     },
     {
+      "body_hash": "sha256:df5feb285026150584a154075795efefbb654064cb495acaf5f5c65a9ac8c36d",
       "context_id": "EC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "eligibility",
       "qc_id": "sha256:2c3a96d4e9ac87cd7b48405b867f6b908d6d4c839d34a74f5accc3ddb629c442",
@@ -101,6 +361,7 @@
       "threshold": 3
     },
     {
+      "body_hash": "sha256:1714e701c109b69bafb59ceb36b2e481048bf0f8994aaa86b78f2758dcf1f8d0",
       "context_id": "APC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "aggregation_plan",
       "qc_id": "sha256:79726e37aa2b67570a14233a2541d399d3a30bd2795c266d3640d5b28116aa25",
@@ -108,6 +369,7 @@
       "threshold": 3
     },
     {
+      "body_hash": "sha256:292320aa0fd409858aca3e9802201231ee3e130d3cdcec2f658cab43f6d4f01b",
       "context_id": "PARAMETER_SHARD_QC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "parameter_shard",
       "qc_id": "sha256:2d85b3de5abbd9c0fadb70d35a719d40e41a5cc49ea7510497a4b636efd113a6",
@@ -115,6 +377,7 @@
       "threshold": 3
     },
     {
+      "body_hash": "sha256:1de18a91e12dc0df198254cd8b91c9841b3d9d76a6d1c528fe07906495c4c4cf",
       "context_id": "AGGREGATE_ROOT_QC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "aggregate_root",
       "qc_id": "sha256:467124a58671530fd7ef988b9fee44d9b84982131212434e4fe3830aedc50c28",
@@ -122,6 +385,7 @@
       "threshold": 3
     },
     {
+      "body_hash": "sha256:36838bb4b0eb31372dc4ac9c7fa4f4e3953ad50f1e9d1e26cd05320d88f32d1d",
       "context_id": "APPLY_QC:mnist-demo-83a57a3ab80203a1b94b:1:0",
       "kind": "apply",
       "qc_id": "sha256:4148b547914bc3f59e118f8fbad35d529ce2d0a847b749131d8e5b216ba8971d",
@@ -137,19 +401,23 @@
     "replay_observed": true,
     "status": "RECOVERED_AND_APPLIED"
   },
-  "reproducibility_id": "sha256:b4975321e107c9f593494a8cfbb4d7a05ad9d964e0b4c72ce6f266f8847a0e7d",
-  "run_date": "2026-09-14",
+  "reproducibility_id": "sha256:bc3e6fb2137e74b24cbd1f84d365c183c312fffa9285c6862cc0aae0e78f553d",
+  "run_date": "2026-09-15",
   "schema_version": "1.0.0",
-  "source_execution_trace_bytes": 173765,
-  "source_execution_trace_sha256": "sha256:62767aeb9a0ebe83b77de85bb9750870717d8b23831eddf03d084e2286f2fba8",
+  "semantic_completeness_claimed": false,
+  "source_execution_trace_bytes": 682494,
+  "source_execution_trace_sha256": "sha256:29df2b1c60d01a21aa5624db62f423f52b8f400240f7d20ca28c8f6c9dcd59b4",
   "terminal_outcome": "APPLIED",
   "toolchain": {
     "classpath_content_id": "sha256:50728538a75e8ad4fced90bf926e3ec2392441fd39b6a218d15d4698de593cf4",
     "java_executable_sha256": "sha256:5808527e3dfc4eb285c7664ba356bc267055ef906e83ed4660d9f7976da7349b",
     "java_feature": 25,
-    "native_executable_sha256": "sha256:e060dd96a8e0816b9559bac22d71914a0e372767f63bd15e73a8751d5b1a81b9",
-    "source_snapshot_content_id": "sha256:c213a5c18681bbcd078b14660e390d2e76bb717c505e13f34dbfba2ad4c27d50"
+    "native_executable_sha256": "sha256:1cb85ebc06d58cc3d0d5b3439a54623031ca49519387831ffad8b28797362972",
+    "source_snapshot_content_id": "sha256:b53d639ce92f431f89415afdd1afa9d82fb4552eeb5cc0f959eff0d59ecda6d6"
   },
+  "trace_scope": "POST_CONFIG_POST_AVAILABILITY_DEMO_SUBTRACE",
   "type_name": "MNIST_DELTA_VERIFIED_RUN_TRACE_EXCERPT",
+  "typed_certificate_verifier": "delta::certificates::ChainVerifier",
+  "vote_quorum_component": "delta::core::consensus::validate_quorum",
   "workload_id": "sha256:83a57a3ab80203a1b94b4d718c98f75676e68e3536e6d9a88bf2b73b342dcbd5"
 }

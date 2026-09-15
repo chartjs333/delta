@@ -664,7 +664,7 @@ def run_mnist_demo(
         update(
             "delta-path",
             61,
-            "Netty передаёт вклады: Delta пишет WAL, собирает QC, выполняет reduce и Apply",
+            "Шесть раз: Delta compute/vote → Netty relay → Delta QC; затем APPLIED",
         )
         delta_result = run_delta_nodes(
             root,
@@ -798,6 +798,7 @@ def run_mnist_demo(
                 "diagram": delta_result.execution_diagram_path.relative_to(destination).as_posix(),
                 "existing_delta_node_interfaces": True,
                 "mnist_is_workload_only": True,
+                "phase_ordering_enforced": delta_result.delta_execution["phase_ordering_enforced"],
                 "distributed_orchestrator_received_node_local_numeric_arrays": False,
                 "four_distinct_worker_processes_observed": len(worker_process_ids) == 4,
                 "protocol_scope": "MNIST_WORKLOAD_TO_APPLIED_LOCAL_DELTA",

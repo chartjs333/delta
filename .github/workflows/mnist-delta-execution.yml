@@ -115,7 +115,7 @@ jobs:
           test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/evidence-scope.json"
           test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/native-nodes/validator-04/trace.jsonl"
           test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/native-nodes/validator-04/votes/runtime.wal"
-          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/network/votes/validator-04/relay-evidence/receipt.json"
+          test -s "$RUNNER_TEMP/mnist-delta-public-evidence/full-demo-path/network/votes/apply/validator-04/relay-evidence/receipt.json"
           test -z "$(find "$RUNNER_TEMP/mnist-delta-public-evidence" -type f -name '*.pem' -print -quit)"
 
       - name: Retain sanitized raw execution evidence

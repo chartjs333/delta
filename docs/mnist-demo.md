@@ -5,9 +5,14 @@ Delta component interfaces without changing Campaign 02 governance. MNIST is onl
 the workload: each of four distinct Python worker processes produces and seals
 one independent canonical contribution before returning, while the parent sees
 only display metadata and opaque files from the distributed arm. Existing Java
-and C++ Delta components perform
-transport validation, durability,
-certificate validation, aggregation, Apply, and the current-state transition.
+and C++ Delta components perform transport validation, durability, delivered-vote
+quorum validation, typed-certificate validation, aggregation, Apply, and the
+current-state transition.
+
+The demonstrated protocol scope is
+`POST_CONFIG_POST_AVAILABILITY_DEMO_SUBTRACE`. It is a workload integration trace,
+not a refinement proof for the complete Delta lifecycle. MNIST supplies only four
+node-local contributions; it does not replace or reimplement any Delta transition.
 
 ## Start the presentation
 
@@ -63,17 +68,31 @@ fallback.
    loopback TCP without numeric arithmetic. Before any vote, the native adapter
    requires exactly four relayed contribution files and byte-compares them with
    the four records embedded in the signed workload.
-4. `CertificateVoteRuntime` persists every phase vote before exposing its frame.
-5. `ChainVerifier` validates ISC, EC, APC, ParameterShardQC, AggregateRootQC, and
-   ApplyQC under the existing Delta certificate interfaces.
-6. The only cross-node numeric reduction is
+4. Every phase runs as native body materialization and vote, Java Netty delivery
+   of the four exact vote frames to each validator, generic delivered-vote quorum
+   validation, and only then typed Delta certificate validation. The next phase
+   cannot vote until that sequence succeeds. This produces 24 durable unique vote
+   frames, 24 per-validator phase certifications, and 28 Netty receipts including
+   workload delivery.
+5. `CertificateVoteRuntime` persists every phase vote before exposing its frame.
+6. The generic quorum ID and typed certificate ID remain distinct. The generic
+   `protocol::QuorumCertificate.qc_id` commits the four delivered vote IDs; its
+   `body_hash` must equal the typed Delta certificate content ID.
+7. Only after `consensus::validate_quorum` accepts that generic quorum does
+   `ChainVerifier` validate the corresponding ISC, EC, APC, ParameterShardQC,
+   AggregateRootQC, or ApplyQC. Each later phase reconstructs and validates the
+   complete immutable predecessor chain.
+8. The only cross-node numeric reduction is
    `delta::robust::reduce_parameter_shard` in the native core.
-7. `delta::apply::compute_candidate` produces the model candidate and
-   `CurrentPointerStore` reaches `APPLIED`.
-8. The distributed result is evaluated only from native `applied-model.bin`; its
+9. `delta::robust::build_plan` materializes the eligibility and aggregation-plan
+   stage bodies. Parameter reduction starts only after both the generic APC quorum
+   and typed APC verification; `delta::apply::compute_candidate` starts only after
+   the corresponding AggregateRoot pair. `CurrentPointerStore` then reaches
+   `APPLIED`.
+10. The distributed result is evaluated only from native `applied-model.bin`; its
    bytes must equal the separately computed centralized baseline under the same
    integer profile.
-9. The machine-readable execution trace contains the ordered component chain,
+11. The machine-readable execution trace contains the ordered component chain,
    source/toolchain identities, and records both
    `python_cross_node_aggregation_performed=false` and
    `distributed_orchestrator_received_node_local_numeric_arrays=false`.
@@ -99,16 +118,28 @@ flowchart LR
     C2 --> F
     C3 --> F
     C4 --> F
-    F -->|relay signs; Java verifies exact bytes| D[Java Netty loopback]
-    D --> E[demo-only native adapter: bind all 4 files to workload]
-    E --> V[CertificateVoteRuntime + durable WAL]
-    V --> G[ChainVerifier: six QC phases]
-    G --> P[robust::build_plan]
-    P --> H[robust::reduce_parameter_shard]
-    H --> I[apply::compute_candidate]
-    I --> J[CurrentPointerStore: APPLIED]
+    F -->|relay signs; Java verifies exact bytes| D[Java Netty workload relay]
+    D --> E[4 demo-only native adapters: bind all 4 files]
+    E --> M[materialize current typed body<br/>ISC input; EC/APC robust::build_plan;<br/>shard robust::reduce_parameter_shard;<br/>root aggregate_merkle_root; Apply compute_candidate]
+    M --> V[CertificateVoteRuntime:<br/>persist one vote per node]
+    V -->|4 exact vote frames per receiver| T[Java Netty vote relay]
+    T --> Q[consensus::validate_quorum:<br/>generic delivered-vote QC ID]
+    Q -->|body_hash = typed certificate ID| G[ChainVerifier verifies typed<br/>ISC / EC / APC / shard / root / Apply]
+    G -->|verified predecessor pair gates next phase body| M
+    G -->|after typed ApplyQC| J[CurrentPointerStore: APPLIED]
     J -->|native model bytes| K[MNIST evaluation + UI]
 ```
+
+For each phase, two content identities are reported and must not be conflated:
+
+| Identity | Meaning |
+| --- | --- |
+| Generic delivered-vote quorum ID | `protocol::QuorumCertificate.qc_id`, derived from the four delivered vote IDs, body, and context |
+| Typed Delta certificate ID | Content ID returned by the phase-specific `ChainVerifier.verify_*`; it equals the generic quorum's `body_hash` |
+
+The repeated phase order is `ISC -> EC -> APC -> ParameterShardQC ->
+AggregateRootQC -> ApplyQC`. Proposal/body construction alone is not certificate
+acceptance: typed verification happens only after the generic quorum has passed.
 
 The adapter boundary and its exact acceptance criteria are documented in
 `integration/mnist-delta/README.md`. Every run also writes a run-specific diagram to
@@ -135,16 +166,19 @@ delta-execution/network/**/relay-evidence/*.json*
 delta-execution/models/validator-*/applied-model.bin
 ```
 
-`execution-trace.json` binds the contribution IDs, transport receipts, six
-certificate identities, model SHA-256, exact executable/classpath hashes, source
-snapshot, ordered real Delta components, terminal `APPLIED`, and crash/recovery
-observations. These inputs participate in `execution_path_id`.
+`execution-trace.json` binds the contribution IDs, transport receipts, six generic
+quorum IDs, six separate typed certificate IDs, model SHA-256, exact
+executable/classpath hashes, source snapshot, ordered Delta library components,
+terminal `APPLIED`, and crash/recovery observations. These inputs participate in
+`execution_path_id`.
 The repository also includes a human-readable excerpt from one successful full
 MNIST run at `integration/mnist-delta/example-execution-trace.json`. The excerpt is
-for inspection, not standalone proof. Every live full-MNIST run writes its own
-complete local trace. CI separately retains a complete synthetic-workload trace
-from the same Delta execution path; it does not claim to retain this 60,000-image
-local run.
+illustrative and non-authoritative: it is for inspection, not standalone proof,
+and cannot replace a fresh complete run trace. Every live full-MNIST run writes its
+own complete local trace. CI separately retains a complete small
+synthetic-workload trace through the same component path; that CI artifact tests
+the integration contract, not MNIST dataset admission or 60,000-image model
+quality, and it is not the local full-MNIST trace summarized by the excerpt.
 
 ## Fault demonstration
 
@@ -166,6 +200,8 @@ authoritative: false
 governance_eligible: false
 execution_authorized: false
 feature_010_go_claimed: false
+formal_refinement_claimed: false
+protocol_scope: POST_CONFIG_POST_AVAILABILITY_DEMO_SUBTRACE
 ```
 
 The Java transport signatures use real disposable Ed25519 demo keys. Native QC
@@ -174,7 +210,9 @@ from independent human/controller identities. Consequently, `ChainVerifier` is
 exercised against the demo QC objects, but the run does not prove a cryptographic
 controller quorum. It also does not create `BenchmarkDefinitionQC`,
 `BenchmarkResultQC`, a real-WAN result, controller appointment, Feature 010 GO, or
-Feature 011 authority. Controller governance remains a separate workflow.
+Feature 011 authority. Recording the accepted `formal_semantics_id` binds the
+expected semantics version; it does not turn this demo subtrace into a formal
+refinement result. Controller governance remains a separate workflow.
 
 MNIST attribution: Yann LeCun, Corinna Cortes, and Christopher J.C. Burges,
 <https://yann.lecun.org/exdb/mnist/index.html>.
