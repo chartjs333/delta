@@ -39,6 +39,7 @@ from deltatorrent.model_plugins import (
     PluginRegistryError,
     bind_model_and_dataset,
     bind_model_dataset_domains,
+    validate_model_dataset_capability,
 )
 
 
@@ -663,6 +664,64 @@ def test_runner_capability_validation_fail_closed() -> None:
             (spec,),
             model_registry=test_model_registry,
             dataset_registry=test_dataset_registry,
+        )
+
+
+def test_descriptor_scope_validation_helper_is_authoritative() -> None:
+    mnist_model = PluginDescriptor(
+        plugin_id="mnist-capable-v1",
+        display_name="MNIST Capable",
+        model_family="centroid",
+        task_type="classification",
+        sample_kind="image/grayscale-28x28",
+        target_kind="class-id/0-9",
+        deterministic=True,
+        supports_stage_c_real_drq1=True,
+    )
+    mnist_dataset = MNIST_DESCRIPTOR
+    validate_model_dataset_capability(
+        model_descriptor=mnist_model,
+        dataset_descriptor=mnist_dataset,
+        requested_scope="STAGE_C_REAL_DRQ1",
+    )
+
+    eeg_model = PluginDescriptor(
+        plugin_id="eeg-observation-v1",
+        display_name="EEG Observation",
+        model_family="centroid",
+        task_type="classification",
+        sample_kind="eeg/bandpower-4ch-4band",
+        target_kind="class-id/0-1",
+        deterministic=True,
+        supports_stage_c_real_drq1=False,
+    )
+    eeg_dataset = DatasetDescriptor(
+        dataset_id="eeg-v1",
+        display_name="EEG",
+        sample_kind="eeg/bandpower-4ch-4band",
+        target_kind="class-id/0-1",
+        deterministic=True,
+        supports_offline_cache=False,
+    )
+    with pytest.raises(ModelPluginRunnerError, match="CAPABILITY_MISMATCH"):
+        validate_model_dataset_capability(
+            model_descriptor=eeg_model,
+            dataset_descriptor=eeg_dataset,
+            requested_scope="STAGE_C_REAL_DRQ1",
+        )
+
+    with pytest.raises(ContractCompatibilityError, match="SAMPLE_KIND_MISMATCH"):
+        validate_model_dataset_capability(
+            model_descriptor=mnist_model,
+            dataset_descriptor=eeg_dataset,
+            requested_scope="PLUGIN_BOUNDARY",
+        )
+
+    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_SCOPE"):
+        validate_model_dataset_capability(
+            model_descriptor=mnist_model,
+            dataset_descriptor=mnist_dataset,
+            requested_scope="CUSTOM_SCOPE",
         )
 
 

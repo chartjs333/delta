@@ -38,6 +38,7 @@ from deltatorrent.model_plugins.runner import (
     MultiDomainBinding,
     bind_model_and_dataset,
     bind_model_dataset_domains,
+    validate_model_dataset_capability,
 )
 
 __all__ = [
@@ -69,4 +70,5 @@ __all__ = [
     "bind_model_dataset_domains",
     "build_default_registry",
     "get_default_registry",
+    "validate_model_dataset_capability",
 ]

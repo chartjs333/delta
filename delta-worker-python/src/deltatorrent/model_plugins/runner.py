@@ -49,6 +49,27 @@ VALID_EXECUTION_SCOPES: Final[tuple[str, ...]] = (
 )
 
 
+def validate_model_dataset_capability(
+    *,
+    model_descriptor: PluginDescriptor,
+    dataset_descriptor: DatasetDescriptor,
+    requested_scope: str,
+) -> None:
+    """Validate descriptor compatibility and requested execution scope fail-closed."""
+    if requested_scope not in VALID_EXECUTION_SCOPES:
+        raise ModelPluginRunnerError(f"INVALID_EXECUTION_SCOPE: {requested_scope}")
+    check_contract_compatibility(
+        model_sample_kind=model_descriptor.sample_kind,
+        model_target_kind=model_descriptor.target_kind,
+        dataset_descriptor=dataset_descriptor,
+    )
+    if requested_scope == "STAGE_C_REAL_DRQ1" and not model_descriptor.supports_stage_c_real_drq1:
+        raise ModelPluginRunnerError(
+            f"CAPABILITY_MISMATCH: plugin '{model_descriptor.plugin_id}' "
+            f"does not support STAGE_C_REAL_DRQ1"
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class ModelDatasetBinding:
     """Validated, fail-closed binding between a model plugin and dataset provider."""
@@ -159,23 +180,13 @@ class ModelPluginRunner:
             raise ModelPluginRunnerError("INVALID_PLUGIN_ID")
         if not dataset_id or not isinstance(dataset_id, str):
             raise ModelPluginRunnerError("INVALID_DATASET_ID")
-        if execution_scope not in VALID_EXECUTION_SCOPES:
-            raise ModelPluginRunnerError(f"INVALID_EXECUTION_SCOPE: {execution_scope}")
-
         binding = bind_model_and_dataset(
             model_plugin_id=plugin_id,
             dataset_id=dataset_id,
+            requested_execution_scope=execution_scope,
             model_registry=model_registry,
             dataset_registry=dataset_registry,
         )
-        if (
-            execution_scope == "STAGE_C_REAL_DRQ1"
-            and not binding.model_descriptor.supports_stage_c_real_drq1
-        ):
-            raise ModelPluginRunnerError(
-                f"CAPABILITY_MISMATCH: plugin '{binding.model_descriptor.plugin_id}' "
-                f"does not support STAGE_C_REAL_DRQ1"
-            )
 
         self._binding = binding
         self._execution_scope = execution_scope
@@ -321,6 +332,7 @@ def bind_model_and_dataset(
     *,
     model_plugin_id: str,
     dataset_id: str,
+    requested_execution_scope: str = "PLUGIN_BOUNDARY",
     model_registry: ModelPluginRegistry | None = None,
     dataset_registry: DatasetRegistry | None = None,
 ) -> ModelDatasetBinding:
@@ -337,10 +349,10 @@ def bind_model_and_dataset(
     model_descriptor = models.get_descriptor(model_plugin_id)
     dataset_descriptor = datasets.get_descriptor(dataset_id)
 
-    check_contract_compatibility(
-        model_sample_kind=model_descriptor.sample_kind,
-        model_target_kind=model_descriptor.target_kind,
+    validate_model_dataset_capability(
+        model_descriptor=model_descriptor,
         dataset_descriptor=dataset_descriptor,
+        requested_scope=requested_execution_scope,
     )
 
     model_plugin = models.get(model_plugin_id)
@@ -372,17 +384,10 @@ def bind_model_dataset_domains(
         binding = bind_model_and_dataset(
             model_plugin_id=spec.model_plugin_id,
             dataset_id=spec.dataset_id,
+            requested_execution_scope=spec.execution_scope,
             model_registry=model_registry,
             dataset_registry=dataset_registry,
         )
-        if (
-            spec.execution_scope == "STAGE_C_REAL_DRQ1"
-            and not binding.model_descriptor.supports_stage_c_real_drq1
-        ):
-            raise ModelPluginRunnerError(
-                f"CAPABILITY_MISMATCH: plugin '{binding.model_descriptor.plugin_id}' "
-                f"does not support STAGE_C_REAL_DRQ1"
-            )
         bindings[spec.domain_id] = binding
         spec_map[spec.domain_id] = spec
 
@@ -402,4 +407,5 @@ __all__ = [
     "MultiDomainBinding",
     "bind_model_and_dataset",
     "bind_model_dataset_domains",
+    "validate_model_dataset_capability",
 ]

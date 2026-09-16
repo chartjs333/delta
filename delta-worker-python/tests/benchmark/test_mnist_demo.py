@@ -643,7 +643,7 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
         == "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
     )
     assert domains["qlora-adapter"]["reference_anchor_evidence"] == (
-        "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+        "REFERENCE_CONFORMANCE_ANCHOR_DECLARED"
     )
     assert domains["qlora-adapter"]["reference_anchor_is_current_workspace_receipt"] is False
     assert domains["qlora-adapter"]["delta_stage_c_execution_claimed"] is False
@@ -697,7 +697,7 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     assert qlora_showcase["delta_stage_c_execution_claimed"] is False
     assert qlora_showcase["live_consensus_claimed_in_this_run"] is False
     assert qlora_showcase["supports_stage_c_real_drq1"] is True
-    assert qlora_showcase["trajectory_anchor_verified"] is True
+    assert qlora_showcase["reference_anchor_declared"] is True
     assert qlora_showcase["reference_trajectory_anchor"] == (
         "437558d886d4fc7aac4d8a72f2e4d69696fab7f7"
     )
@@ -705,7 +705,7 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
         qlora_showcase["verified_execution_evidence"]
         == "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
     )
-    assert qlora_showcase["reference_anchor_evidence"] == "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+    assert qlora_showcase["reference_anchor_evidence"] == "REFERENCE_CONFORMANCE_ANCHOR_DECLARED"
     assert qlora_showcase["reference_anchor_is_current_workspace_receipt"] is False
     eeg_showcase = report["plugin_showcase"]["eeg_bandpower"]
     assert eeg_showcase["type_name"] == "DELTAREDUCE_EEG_PLUGIN_SHOWCASE"
@@ -916,6 +916,48 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     ] = "LIVE_STAGE_C_APPLIED_RECEIPT"
     with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
         _validate_workspace_report(wrong_qlora_showcase_receipt)
+
+
+def test_qlora_showcase_accepts_registry_compatible_provider_without_class_coupling(
+    tmp_path: Path,
+) -> None:
+    class AlternateQloraDatasetProvider:
+        def __init__(self) -> None:
+            self._delegate = mnist_demo.get_default_dataset_registry().get(
+                mnist_demo.QLORA_DATASET_DESCRIPTOR.dataset_id
+            )
+
+        @property
+        def dataset_id(self) -> str:
+            return mnist_demo.QLORA_DATASET_DESCRIPTOR.dataset_id
+
+        def descriptor(self):
+            return mnist_demo.QLORA_DATASET_DESCRIPTOR
+
+        def materialize(self, cache_dir: Path, *, allow_download: bool):
+            return self._delegate.materialize(cache_dir, allow_download=allow_download)
+
+        def training_partition(self, partition_id: str):
+            return self._delegate.training_partition(partition_id)
+
+        def evaluation_data(self):
+            return self._delegate.evaluation_data()
+
+    binding = mnist_demo.ModelDatasetBinding(
+        model_plugin=mnist_demo.get_default_model_registry().get(
+            mnist_demo.QLORA_DESCRIPTOR.plugin_id
+        ),
+        model_descriptor=mnist_demo.QLORA_DESCRIPTOR,
+        dataset_provider=AlternateQloraDatasetProvider(),
+        dataset_descriptor=mnist_demo.QLORA_DATASET_DESCRIPTOR,
+    )
+
+    showcase = mnist_demo._run_qlora_plugin_showcase(tmp_path / "qlora", binding)
+
+    assert showcase["type_name"] == "DELTAREDUCE_QLORA_PLUGIN_SHOWCASE"
+    assert showcase["worker_count"] == 4
+    assert showcase["dataset_id"] == "tiny-qlora-regression-v1"
+    assert showcase["reference_anchor_evidence"] == "REFERENCE_CONFORMANCE_ANCHOR_DECLARED"
 
 
 def test_reproducibility_identity_excludes_observational_timings(

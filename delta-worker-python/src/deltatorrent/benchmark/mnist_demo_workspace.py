@@ -30,6 +30,14 @@ from deltatorrent.benchmark.mnist_demo import (
     _model_plugin_catalog,
     run_mnist_demo,
 )
+from deltatorrent.data.base import ContractCompatibilityError
+from deltatorrent.data.registry import get_default_dataset_registry
+from deltatorrent.model_plugins.registry import get_default_registry as get_default_model_registry
+from deltatorrent.model_plugins.runner import (
+    VALID_EXECUTION_SCOPES,
+    ModelPluginRunnerError,
+    validate_model_dataset_capability,
+)
 
 WORKSPACE_HTML = r"""<!doctype html>
 <html lang="ru">
@@ -754,26 +762,32 @@ def _workspace_catalog() -> dict[str, object]:
     """Return read-only registry descriptors and compatibility matrix for UI consumers."""
     model_plugins = _model_plugin_catalog()
     datasets = _dataset_catalog()
+    model_registry = get_default_model_registry()
+    dataset_registry = get_default_dataset_registry()
+    model_descriptors = model_registry.list_descriptors()
+    dataset_descriptors = dataset_registry.list_descriptors()
     compatibility: list[dict[str, object]] = []
-    for model in model_plugins:
-        model_sample = model.get("sample_kind")
-        model_target = model.get("target_kind")
-        stage_c_capable = bool(model.get("supports_stage_c_real_drq1"))
-        for dataset in datasets:
-            contract_compatible = model_sample == dataset.get(
-                "sample_kind"
-            ) and model_target == dataset.get("target_kind")
+    for model_descriptor in model_descriptors:
+        for dataset_descriptor in dataset_descriptors:
+            requested_scope_allowed: dict[str, bool] = {}
+            for scope in VALID_EXECUTION_SCOPES:
+                try:
+                    validate_model_dataset_capability(
+                        model_descriptor=model_descriptor,
+                        dataset_descriptor=dataset_descriptor,
+                        requested_scope=scope,
+                    )
+                except (ContractCompatibilityError, ModelPluginRunnerError):
+                    requested_scope_allowed[scope] = False
+                else:
+                    requested_scope_allowed[scope] = True
             compatibility.append(
                 {
-                    "contract_compatible": contract_compatible,
-                    "dataset_id": dataset.get("dataset_id"),
-                    "model_plugin_id": model.get("plugin_id"),
-                    "requested_scope_allowed": {
-                        "MODEL_DATASET_BINDING_ONLY": contract_compatible,
-                        "PLUGIN_BOUNDARY": contract_compatible,
-                        "STAGE_C_REAL_DRQ1": contract_compatible and stage_c_capable,
-                    },
-                    "supports_stage_c_real_drq1": stage_c_capable,
+                    "contract_compatible": requested_scope_allowed["PLUGIN_BOUNDARY"],
+                    "dataset_id": dataset_descriptor.dataset_id,
+                    "model_plugin_id": model_descriptor.plugin_id,
+                    "requested_scope_allowed": requested_scope_allowed,
+                    "supports_stage_c_real_drq1": (model_descriptor.supports_stage_c_real_drq1),
                 }
             )
     return {
@@ -1010,7 +1024,7 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or qlora_domain.get("requested_execution_scope") != "STAGE_C_REAL_DRQ1"
         or qlora_domain.get("verified_execution_evidence")
         != "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
-        or qlora_domain.get("reference_anchor_evidence") != "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+        or qlora_domain.get("reference_anchor_evidence") != "REFERENCE_CONFORMANCE_ANCHOR_DECLARED"
         or qlora_domain.get("reference_anchor_is_current_workspace_receipt") is not False
         or qlora_domain.get("delta_stage_c_execution_claimed") is not False
         or qlora_domain.get("live_consensus_claimed_in_this_run") is not False
@@ -1069,13 +1083,13 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or qlora_showcase.get("delta_stage_c_execution_claimed") is not False
         or qlora_showcase.get("live_consensus_claimed_in_this_run") is not False
         or qlora_showcase.get("supports_stage_c_real_drq1") is not True
-        or qlora_showcase.get("trajectory_anchor_verified") is not True
+        or qlora_showcase.get("reference_anchor_declared") is not True
         or qlora_showcase.get("reference_trajectory_anchor")
         != "437558d886d4fc7aac4d8a72f2e4d69696fab7f7"
         or qlora_showcase.get("verified_execution_evidence")
         != "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
         or qlora_showcase.get("reference_anchor_evidence")
-        != "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+        != "REFERENCE_CONFORMANCE_ANCHOR_DECLARED"
         or qlora_showcase.get("reference_anchor_is_current_workspace_receipt") is not False
         or qlora_showcase.get("python_cross_node_aggregation_performed") is not False
         or qlora_showcase.get("raw_samples_shared_outside_provider") is not False

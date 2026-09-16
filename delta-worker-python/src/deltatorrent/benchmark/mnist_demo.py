@@ -62,7 +62,6 @@ from deltatorrent.data.mnist import MNIST_DESCRIPTOR
 from deltatorrent.data.qlora import (
     DEMO_QLORA_PARTITIONS,
     QLORA_DATASET_DESCRIPTOR,
-    TinyQloraDatasetProvider,
 )
 from deltatorrent.data.registry import get_default_dataset_registry
 from deltatorrent.model_plugins.mnist_centroid import (
@@ -82,6 +81,7 @@ from deltatorrent.model_plugins.runner import (
     ModelDatasetBinding,
     MultiDomainBinding,
     bind_model_dataset_domains,
+    validate_model_dataset_capability,
 )
 
 
@@ -749,8 +749,16 @@ def _run_qlora_plugin_showcase(
     accuracy and MSE loss.
     """
     materialization = binding.materialize_dataset(cache_dir=cache_dir, allow_download=False)
-    if not isinstance(binding.dataset_provider, TinyQloraDatasetProvider):
-        raise MnistDemoError("QLORA_SHOWCASE_PROVIDER_TYPE_INVALID")
+    if (
+        binding.model_descriptor.plugin_id != QLORA_DESCRIPTOR.plugin_id
+        or binding.dataset_descriptor.dataset_id != QLORA_DATASET_DESCRIPTOR.dataset_id
+    ):
+        raise MnistDemoError("QLORA_SHOWCASE_DESCRIPTOR_ID_INVALID")
+    validate_model_dataset_capability(
+        model_descriptor=binding.model_descriptor,
+        dataset_descriptor=binding.dataset_descriptor,
+        requested_scope="STAGE_C_REAL_DRQ1",
+    )
 
     worker_documents: list[dict[str, object]] = []
     accuracies: list[int] = []
@@ -795,7 +803,7 @@ def _run_qlora_plugin_showcase(
         "plugin_scope": "LOCAL_PLUGIN_WORKER_SMOKE",
         "python_cross_node_aggregation_performed": False,
         "raw_samples_shared_outside_provider": False,
-        "reference_anchor_evidence": "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED",
+        "reference_anchor_evidence": "REFERENCE_CONFORMANCE_ANCHOR_DECLARED",
         "reference_anchor_is_current_workspace_receipt": False,
         "reference_trajectory_anchor": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
         "requested_execution_scope": "STAGE_C_REAL_DRQ1",
@@ -804,7 +812,7 @@ def _run_qlora_plugin_showcase(
         "supports_stage_c_real_drq1": True,
         "target_kind": binding.model_descriptor.target_kind,
         "total_elements": binding.model_plugin.total_elements,
-        "trajectory_anchor_verified": True,
+        "reference_anchor_declared": True,
         "type_name": "DELTAREDUCE_QLORA_PLUGIN_SHOWCASE",
         "verified_execution_evidence": "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN",
         "worker_count": len(worker_documents),
@@ -855,14 +863,14 @@ def _build_multi_domain_structure(
                     "metric_scope": "LOCAL_PLUGIN_WORKER_SMOKE",
                     "python_cross_node_aggregation_performed": False,
                     "raw_samples_shared_outside_provider": False,
-                    "reference_anchor_evidence": "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED",
+                    "reference_anchor_evidence": "REFERENCE_CONFORMANCE_ANCHOR_DECLARED",
                     "reference_anchor_is_current_workspace_receipt": False,
                     "reference_trajectory_anchor": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
                     "requested_execution_scope": requested_scope,
                     "stage_c_execution_mode": None,
                     "stage_c_outcome": None,
                     "supports_stage_c_real_drq1": True,
-                    "trajectory_anchor_verified": True,
+                    "reference_anchor_declared": True,
                     "verified_execution_evidence": (
                         "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
                     ),
