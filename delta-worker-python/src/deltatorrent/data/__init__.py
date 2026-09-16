@@ -52,6 +52,10 @@ from deltatorrent.data.mnist import (
     MnistDatasetProvider,
     MnistFile,
 )
+from deltatorrent.data.qlora import (
+    QLORA_DATASET_DESCRIPTOR,
+    TinyQloraDatasetProvider,
+)
 from deltatorrent.data.registry import (
     DatasetRegistry,
     DatasetRegistryError,
@@ -70,6 +74,7 @@ __all__ = [
     "DEFAULT_EEG_PROFILE",
     "EEG_DATASET_DESCRIPTOR",
     "MNIST_DESCRIPTOR",
+    "QLORA_DATASET_DESCRIPTOR",
     "BindingAssertion",
     "BindingAssertionError",
     "BindingAuthority",
@@ -101,6 +106,7 @@ __all__ = [
     "ResolvedBindingSetError",
     "ResponseAnalysisInput",
     "ResponseAnalysisResult",
+    "TinyQloraDatasetProvider",
     "build_default_dataset_registry",
     "check_compatibility",
     "check_contract_compatibility",

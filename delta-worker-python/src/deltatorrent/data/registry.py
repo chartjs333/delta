@@ -8,6 +8,7 @@ from typing import Final
 from deltatorrent.data.base import DatasetDescriptor, DatasetProvider
 from deltatorrent.data.eeg import EEG_DATASET_DESCRIPTOR, EegWindowDatasetProvider
 from deltatorrent.data.mnist import MNIST_DESCRIPTOR, MnistDatasetProvider
+from deltatorrent.data.qlora import QLORA_DATASET_DESCRIPTOR, TinyQloraDatasetProvider
 
 
 class DatasetRegistryError(ValueError):
@@ -93,6 +94,10 @@ def build_default_dataset_registry() -> DatasetRegistry:
     registry.register(
         descriptor=EEG_DATASET_DESCRIPTOR,
         factory=EegWindowDatasetProvider,
+    )
+    registry.register(
+        descriptor=QLORA_DATASET_DESCRIPTOR,
+        factory=TinyQloraDatasetProvider,
     )
     return registry
 

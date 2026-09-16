@@ -13,6 +13,7 @@ from deltatorrent.data import (
     DatasetRegistryError,
     EegWindowDatasetProvider,
     MnistDatasetProvider,
+    TinyQloraDatasetProvider,
     get_default_dataset_registry,
 )
 
@@ -176,3 +177,18 @@ def test_default_dataset_registry_contains_eeg_provider() -> None:
     provider = registry.get("eeg-synthetic-bci-v1")
     assert isinstance(provider, EegWindowDatasetProvider)
     assert provider.dataset_id == "eeg-synthetic-bci-v1"
+
+
+def test_default_dataset_registry_contains_qlora_provider() -> None:
+    registry = get_default_dataset_registry()
+    assert registry.has_dataset("tiny-qlora-regression-v1") is True
+
+    descriptor = registry.get_descriptor("tiny-qlora-regression-v1")
+    assert descriptor.dataset_id == "tiny-qlora-regression-v1"
+    assert descriptor.sample_kind == "vector/tiny-qlora-2d"
+    assert descriptor.target_kind == "regression/vector-2d"
+    assert descriptor.deterministic is True
+
+    provider = registry.get("tiny-qlora-regression-v1")
+    assert isinstance(provider, TinyQloraDatasetProvider)
+    assert provider.dataset_id == "tiny-qlora-regression-v1"

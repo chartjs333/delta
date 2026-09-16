@@ -93,6 +93,13 @@ def test_multi_domain_binding_structure_is_model_agnostic() -> None:
                 execution_scope="STAGE_C_REAL_DRQ1",
             ),
             DomainBindingSpec(
+                domain_id="qlora-adapter",
+                model_plugin_id="qlora-tiny-adapter-v1",
+                dataset_id="tiny-qlora-regression-v1",
+                role="PRIMARY_DELTA_EXECUTION",
+                execution_scope="STAGE_C_REAL_DRQ1",
+            ),
+            DomainBindingSpec(
                 domain_id="eeg-bandpower",
                 model_plugin_id="eeg-bandpower-centroid-v1",
                 dataset_id="eeg-synthetic-bci-v1",
@@ -102,16 +109,24 @@ def test_multi_domain_binding_structure_is_model_agnostic() -> None:
         )
     )
 
-    assert domains.domain_ids == ("mnist-image", "eeg-bandpower")
+    assert domains.domain_ids == ("mnist-image", "qlora-adapter", "eeg-bandpower")
     assert domains.get("mnist-image").model_descriptor.plugin_id == "mnist-centroid-v1"
-    assert domains.get("eeg-bandpower").model_descriptor.plugin_id == ("eeg-bandpower-centroid-v1")
+    assert domains.get("qlora-adapter").model_descriptor.plugin_id == "qlora-tiny-adapter-v1"
+    assert domains.get("eeg-bandpower").model_descriptor.plugin_id == "eeg-bandpower-centroid-v1"
 
     descriptions = domains.describe()
-    assert [item["domain_id"] for item in descriptions] == ["mnist-image", "eeg-bandpower"]
+    assert [item["domain_id"] for item in descriptions] == [
+        "mnist-image",
+        "qlora-adapter",
+        "eeg-bandpower",
+    ]
     assert descriptions[0]["execution_scope"] == "STAGE_C_REAL_DRQ1"
-    assert descriptions[1]["execution_scope"] == "MODEL_DATASET_BINDING_ONLY"
-    assert descriptions[1]["sample_kind"] == "eeg/bandpower-4ch-4band"
-    assert descriptions[1]["total_elements"] == 34
+    assert descriptions[1]["execution_scope"] == "STAGE_C_REAL_DRQ1"
+    assert descriptions[1]["sample_kind"] == "vector/tiny-qlora-2d"
+    assert descriptions[1]["total_elements"] == 8
+    assert descriptions[2]["execution_scope"] == "MODEL_DATASET_BINDING_ONLY"
+    assert descriptions[2]["sample_kind"] == "eeg/bandpower-4ch-4band"
+    assert descriptions[2]["total_elements"] == 34
 
 
 def test_multi_domain_binding_fail_closed_on_invalid_domain_set() -> None:

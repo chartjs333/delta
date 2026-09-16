@@ -6,11 +6,12 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Final
 
 import numpy as np
 
 from deltatorrent.data.base import (
+    DataPartition,
     DatasetDescriptor,
     DatasetProvider,
     check_contract_compatibility,
@@ -35,6 +36,19 @@ class ModelPluginRunnerError(ValueError):
     """Stable error raised by generic model/dataset runner binding operations."""
 
 
+VALID_DOMAIN_ROLES: Final[tuple[str, ...]] = (
+    "PRIMARY_DELTA_EXECUTION",
+    "WORKLOAD_DOMAIN",
+    "PLUGIN_BINDING_SMOKE",
+)
+
+VALID_EXECUTION_SCOPES: Final[tuple[str, ...]] = (
+    "STAGE_C_REAL_DRQ1",
+    "PLUGIN_BOUNDARY",
+    "MODEL_DATASET_BINDING_ONLY",
+)
+
+
 @dataclass(frozen=True, slots=True)
 class ModelDatasetBinding:
     """Validated, fail-closed binding between a model plugin and dataset provider."""
@@ -46,12 +60,17 @@ class ModelDatasetBinding:
 
     def materialize_dataset(
         self,
-        cache_dir: Path,
+        cache_dir: Path | None = None,
         *,
         allow_download: bool = True,
     ) -> Mapping[str, object]:
         """Ensure dataset sources are materialized and validated fail-closed."""
-        return self.dataset_provider.materialize(cache_dir, allow_download=allow_download)
+        resolved_cache = (
+            cache_dir
+            if cache_dir is not None
+            else Path(".cache") / "deltatorrent" / self.dataset_descriptor.dataset_id
+        )
+        return self.dataset_provider.materialize(resolved_cache, allow_download=allow_download)
 
     def train_ticket(
         self,
@@ -62,7 +81,34 @@ class ModelDatasetBinding:
         **kwargs: Any,
     ) -> LocalTrainingResult:
         """Retrieve partition from dataset provider and train model plugin ticket."""
+        if not ticket_id or not isinstance(ticket_id, str):
+            raise ModelPluginRunnerError("INVALID_TICKET_ID")
+        if not partition_id or not isinstance(partition_id, str):
+            raise ModelPluginRunnerError("INVALID_PARTITION_ID")
+
         partition = self.dataset_provider.training_partition(partition_id)
+        if not isinstance(partition, DataPartition):
+            raise ModelPluginRunnerError("INVALID_DATA_PARTITION")
+
+        # Fail-closed ticket context validation when present
+        ticket_context = partition.metadata.get("ticket_context")
+        if ticket_context is not None:
+            if not isinstance(ticket_context, (list, tuple)):
+                raise ModelPluginRunnerError("INVALID_TICKET_CONTEXT_TYPE")
+            sample_count = len(partition.samples) if hasattr(partition.samples, "__len__") else 0
+            if len(ticket_context) != sample_count:
+                raise ModelPluginRunnerError(
+                    f"TICKET_CONTEXT_COUNT_MISMATCH: context={len(ticket_context)} "
+                    f"vs samples={sample_count}"
+                )
+            for idx, item in enumerate(ticket_context):
+                if not isinstance(item, Mapping):
+                    raise ModelPluginRunnerError(f"INVALID_TICKET_CONTEXT_ITEM:{idx}")
+                for key in ("session_id", "data_window_id", "intervention_event_id"):
+                    val = item.get(key)
+                    if not val or not isinstance(val, str):
+                        raise ModelPluginRunnerError(f"TICKET_CONTEXT_KEY_MISSING:{key}:{idx}")
+
         result = self.model_plugin.train_ticket(
             ticket_id=ticket_id,
             data=(partition.samples, partition.targets),
@@ -92,6 +138,95 @@ class ModelDatasetBinding:
         return self.evaluate(model)
 
 
+class ModelPluginRunner:
+    """Generic runner dispatching model and dataset execution by unique IDs.
+
+    Resolves ModelPlugin and DatasetProvider strictly by plugin_id and dataset_id
+    through ModelPluginRegistry and DatasetRegistry, ensuring fail-closed contract
+    validation and fresh instance isolation.
+    """
+
+    def __init__(
+        self,
+        *,
+        plugin_id: str,
+        dataset_id: str,
+        model_registry: ModelPluginRegistry | None = None,
+        dataset_registry: DatasetRegistry | None = None,
+    ) -> None:
+        if not plugin_id or not isinstance(plugin_id, str):
+            raise ModelPluginRunnerError("INVALID_PLUGIN_ID")
+        if not dataset_id or not isinstance(dataset_id, str):
+            raise ModelPluginRunnerError("INVALID_DATASET_ID")
+        self._binding = bind_model_and_dataset(
+            model_plugin_id=plugin_id,
+            dataset_id=dataset_id,
+            model_registry=model_registry,
+            dataset_registry=dataset_registry,
+        )
+
+    @property
+    def binding(self) -> ModelDatasetBinding:
+        """Return the underlying validated ModelDatasetBinding."""
+        return self._binding
+
+    @property
+    def model_plugin(self) -> ModelPlugin:
+        """Return the resolved model plugin instance."""
+        return self._binding.model_plugin
+
+    @property
+    def model_descriptor(self) -> PluginDescriptor:
+        """Return the model plugin descriptor."""
+        return self._binding.model_descriptor
+
+    @property
+    def dataset_provider(self) -> DatasetProvider:
+        """Return the resolved dataset provider instance."""
+        return self._binding.dataset_provider
+
+    @property
+    def dataset_descriptor(self) -> DatasetDescriptor:
+        """Return the dataset provider descriptor."""
+        return self._binding.dataset_descriptor
+
+    def materialize_dataset(
+        self,
+        cache_dir: Path | None = None,
+        *,
+        allow_download: bool = True,
+    ) -> Mapping[str, object]:
+        """Ensure dataset sources are materialized and validated fail-closed."""
+        return self._binding.materialize_dataset(cache_dir, allow_download=allow_download)
+
+    def train_ticket(
+        self,
+        *,
+        ticket_id: str,
+        partition_id: str,
+        parent_model: Any | None = None,
+        **kwargs: Any,
+    ) -> LocalTrainingResult:
+        """Execute local worker ticket training on a dataset partition."""
+        return self._binding.train_ticket(
+            ticket_id=ticket_id,
+            partition_id=partition_id,
+            parent_model=parent_model,
+            **kwargs,
+        )
+
+    def evaluate(self, model: Any) -> EvaluationResult:
+        """Evaluate model against dataset evaluation split."""
+        return self._binding.evaluate(model)
+
+    def evaluate_checkpoint(
+        self,
+        checkpoint_values: Sequence[int] | np.ndarray,
+    ) -> EvaluationResult:
+        """Decode applied checkpoint integer coordinates and evaluate against dataset."""
+        return self._binding.evaluate_checkpoint(checkpoint_values)
+
+
 @dataclass(frozen=True, slots=True)
 class DomainBindingSpec:
     """One named domain in a multi-domain model/dataset run."""
@@ -109,10 +244,10 @@ class DomainBindingSpec:
             raise ModelPluginRunnerError("DOMAIN_MODEL_PLUGIN_ID_EMPTY")
         if not self.dataset_id:
             raise ModelPluginRunnerError("DOMAIN_DATASET_ID_EMPTY")
-        if not self.role:
-            raise ModelPluginRunnerError("DOMAIN_ROLE_EMPTY")
-        if not self.execution_scope:
-            raise ModelPluginRunnerError("DOMAIN_EXECUTION_SCOPE_EMPTY")
+        if self.role not in VALID_DOMAIN_ROLES:
+            raise ModelPluginRunnerError(f"INVALID_DOMAIN_ROLE: {self.role}")
+        if self.execution_scope not in VALID_EXECUTION_SCOPES:
+            raise ModelPluginRunnerError(f"INVALID_EXECUTION_SCOPE: {self.execution_scope}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -210,15 +345,37 @@ def bind_model_dataset_domains(
     for spec in specs:
         if spec.domain_id in bindings:
             raise ModelPluginRunnerError(f"DUPLICATE_DOMAIN_ID: {spec.domain_id}")
-        bindings[spec.domain_id] = bind_model_and_dataset(
+        binding = bind_model_and_dataset(
             model_plugin_id=spec.model_plugin_id,
             dataset_id=spec.dataset_id,
             model_registry=model_registry,
             dataset_registry=dataset_registry,
         )
+        if (
+            spec.execution_scope == "STAGE_C_REAL_DRQ1"
+            and not binding.model_descriptor.supports_stage_c_real_drq1
+        ):
+            raise ModelPluginRunnerError(
+                f"CAPABILITY_MISMATCH: plugin '{binding.model_descriptor.plugin_id}' "
+                f"does not support STAGE_C_REAL_DRQ1"
+            )
+        bindings[spec.domain_id] = binding
         spec_map[spec.domain_id] = spec
 
     return MultiDomainBinding(
         bindings=MappingProxyType(bindings),
         specs=MappingProxyType(spec_map),
     )
+
+
+__all__ = [
+    "VALID_DOMAIN_ROLES",
+    "VALID_EXECUTION_SCOPES",
+    "DomainBindingSpec",
+    "ModelDatasetBinding",
+    "ModelPluginRunner",
+    "ModelPluginRunnerError",
+    "MultiDomainBinding",
+    "bind_model_and_dataset",
+    "bind_model_dataset_domains",
+]

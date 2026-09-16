@@ -29,8 +29,11 @@ from deltatorrent.model_plugins.registry import (
     get_default_registry,
 )
 from deltatorrent.model_plugins.runner import (
+    VALID_DOMAIN_ROLES,
+    VALID_EXECUTION_SCOPES,
     DomainBindingSpec,
     ModelDatasetBinding,
+    ModelPluginRunner,
     ModelPluginRunnerError,
     MultiDomainBinding,
     bind_model_and_dataset,
@@ -41,6 +44,8 @@ __all__ = [
     "EEG_BANDPOWER_DESCRIPTOR",
     "MNIST_CENTROID_DESCRIPTOR",
     "QLORA_DESCRIPTOR",
+    "VALID_DOMAIN_ROLES",
+    "VALID_EXECUTION_SCOPES",
     "DomainBindingSpec",
     "EegBandpowerCentroidPlugin",
     "EegBandpowerModel",
@@ -52,6 +57,7 @@ __all__ = [
     "ModelDatasetBinding",
     "ModelPlugin",
     "ModelPluginRegistry",
+    "ModelPluginRunner",
     "ModelPluginRunnerError",
     "MultiDomainBinding",
     "PluginDescriptor",
