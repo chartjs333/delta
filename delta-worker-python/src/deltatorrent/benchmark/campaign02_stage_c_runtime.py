@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import base64
+import json
 import os
 import re
 import subprocess
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
@@ -16,6 +18,7 @@ from deltatorrent.protocol.canonical import sha256_content_id
 
 _CONTENT_ID: Final = re.compile(r"^sha256:[0-9a-f]{64}$")
 _TOKEN: Final = re.compile(r"^[A-Za-z0-9_.-]{1,128}$")
+_SAFE_TICKET_ID: Final = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _PROFILE_RECEIPT_DOMAIN: Final = b"deltareduce.010.stagec-java-transport-receipt.v1\0"
 _NATIVE_TRACE_SET_DOMAIN: Final = b"deltareduce.010.stagec-native-fault-trace-set.v1\0"
 _FORBIDDEN_MODES: Final = {"DRY", "FIXTURE", "SYNTHETIC", "CALLER_SUPPLIED", "SIMULATED_ONLY"}
@@ -155,6 +158,7 @@ class NativeFaultCausalEvidence:
     abort_qc_id: str | None
     parent_checkpoint_id: str | None
     next_checkpoint_id: str | None
+    next_model_values: tuple[int, ...]
     parent_optimizer_state_id: str | None
     next_optimizer_state_id: str | None
     current_pointer_before: str | None
@@ -274,6 +278,7 @@ class NativeFaultCausalEvidence:
                 or self.current_pointer_before != self.parent_checkpoint_id
                 or self.current_pointer_after != self.next_checkpoint_id
                 or self.current_pointer_before == self.current_pointer_after
+                or not self.next_model_values
                 or len(aggregate_ticks) != 3
                 or len(apply_ticks) != 3
                 or max(aggregate_ticks, default=0) != self.aggregate_root_qc_tick
@@ -289,9 +294,39 @@ class NativeFaultCausalEvidence:
                 raise _fail("CAMPAIGN02_STAGE_C_APPLIED_WITHOUT_EXACT_APPLY_QC")
         elif transition.current_checkpoint_advanced:
             raise _fail("CAMPAIGN02_STAGE_C_NON_APPLIED_POINTER_ADVANCE")
+        elif self.next_model_values:
+            raise _fail("CAMPAIGN02_STAGE_C_NON_APPLIED_MODEL_VALUES")
         if transition.actor_class == "WORKER" and transition.action == "CRASH":
             required = dict(self.per_domain_required_tickets)
             remaining = dict(self.per_domain_remaining_tickets)
+            if transition.event_id in {"mnist-4-workers", "qlora-4-workers"}:
+                delivery_ids = {message_id for message_id, _ in self.message_delivery_ticks}
+                mnist_invalid = (
+                    transition.observed_outcome != "APPLIED"
+                    or self.worker_count_before != 4
+                    or self.worker_count_lost != 0
+                    or self.loss_fraction != (0, 4)
+                    or self.lost_worker_ids
+                    or self.lost_ticket_ids
+                    or required != {"code": 2, "text": 2}
+                    or remaining != {"code": 2, "text": 2}
+                    or self.quorum_capacity_before != 4
+                    or self.quorum_capacity_after != 4
+                    or self.missing_work_policy_result != "FULL_QUORUM_DELIVERED_EXACT_ISC"
+                    or self.unavailable_ids
+                    or self.failed_quorum_reason is not None
+                    or self.dropped_message_ids
+                    or self.isc_ticket_set != tuple(f"ticket-{index:03d}" for index in range(4))
+                    or {name for name in delivery_ids if name.startswith("worker-ticket-")}
+                    != {f"worker-ticket-{index:03d}" for index in range(4)}
+                    or {name for name in delivery_ids if name.startswith("aggregate-vote-")}
+                    != {f"aggregate-vote-{index}" for index in range(3)}
+                    or {name for name in delivery_ids if name.startswith("apply-vote-")}
+                    != {f"apply-vote-{index}" for index in range(3)}
+                )
+                if mnist_invalid:
+                    raise _fail("CAMPAIGN02_STAGE_C_WORKER_LOSS_CAUSAL_EVIDENCE_INVALID")
+                return
             common_invalid = (
                 self.worker_count_before != 10
                 or required != {"code": 4, "text": 4}
@@ -429,6 +464,7 @@ class NativeFaultCausalEvidence:
             "missing_work_policy_result": self.missing_work_policy_result,
             "network_profile_id": self.network_profile_id,
             "next_checkpoint_id": self.next_checkpoint_id,
+            "next_model_values": list(self.next_model_values),
             "next_optimizer_state_id": self.next_optimizer_state_id,
             "parent_checkpoint_id": self.parent_checkpoint_id,
             "parent_optimizer_state_id": self.parent_optimizer_state_id,
@@ -634,6 +670,8 @@ class MeasuredStageCRuntimeBoundary:
         payload_bytes: int,
         network_profiles: tuple[tuple[str, NetworkProfile], ...],
         fault_profile: FaultProfile,
+        worker_shards: Mapping[str, bytes] | None = None,
+        shards_manifest: Mapping[str, object] | None = None,
     ) -> MeasuredStageCReceipt:
         self.verify_artifacts()
         _id(plan_id, "CAMPAIGN02_STAGE_C_PLAN_ID_INVALID")
@@ -653,6 +691,18 @@ class MeasuredStageCRuntimeBoundary:
                     fault_profile,
                 )
             )
+            if worker_shards is not None:
+                shards_dir = plan_root / "shards"
+                shards_dir.mkdir(parents=True, exist_ok=True)
+                for ticket_id, shard_bytes in worker_shards.items():
+                    if _SAFE_TICKET_ID.fullmatch(ticket_id) is None:
+                        raise _fail("CAMPAIGN02_STAGE_C_TICKET_ID_UNSAFE")
+                    (shards_dir / f"{ticket_id}.drq1").write_bytes(shard_bytes)
+                if shards_manifest is not None:
+                    (shards_dir / "manifest.json").write_text(
+                        json.dumps(dict(shards_manifest), indent=2, sort_keys=True),
+                        encoding="utf-8",
+                    )
         except FileExistsError as exc:
             raise _fail("CAMPAIGN02_STAGE_C_RUNTIME_OUTPUT_ALREADY_EXISTS") from exc
         classpath = os.pathsep.join(
@@ -681,6 +731,8 @@ class MeasuredStageCRuntimeBoundary:
                 "NO_PROXY": "localhost,127.0.0.1,::1",
             }
         )
+        if worker_shards is not None or shards_manifest is not None:
+            environment["DELTA_STAGE_C_REAL_DRQ1"] = "1"
         try:
             completed = subprocess.run(
                 command,
@@ -772,6 +824,8 @@ _CAUSAL_FIELDS: Final = {
     "missing_work_policy_result",
     "network_profile_id",
     "next_checkpoint_id",
+    "next_model_value_count",
+    "next_model_values",
     "next_optimizer_state_id",
     "parent_checkpoint_id",
     "parent_optimizer_state_id",
@@ -848,6 +902,28 @@ def _parse_causal_evidence(
             raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_PAIR_SET_INVALID")
         return tuple(result)
 
+    def signed_values(name: str, count_name: str) -> tuple[int, ...]:
+        value = fields[name]
+        expected_count = _nonnegative(
+            fields[count_name], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        )
+        if value == "NONE":
+            if expected_count != 0:
+                raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+            return ()
+        raw_items = value.split(",")
+        if len(raw_items) != expected_count:
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+        result: list[int] = []
+        for item in raw_items:
+            if not item or (item[0] == "-" and len(item) == 1):
+                raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+            digits = item[1:] if item[0] == "-" else item
+            if not digits.isdecimal():
+                raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+            result.append(int(item))
+        return tuple(result)
+
     numerator, separator, denominator = fields["loss_fraction"].partition("/")
     if not separator:
         raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_LOSS_FRACTION_INVALID")
@@ -871,6 +947,7 @@ def _parse_causal_evidence(
         abort_qc_id=optional("abort_qc_id"),
         parent_checkpoint_id=optional("parent_checkpoint_id"),
         next_checkpoint_id=optional("next_checkpoint_id"),
+        next_model_values=signed_values("next_model_values", "next_model_value_count"),
         parent_optimizer_state_id=optional("parent_optimizer_state_id"),
         next_optimizer_state_id=optional("next_optimizer_state_id"),
         current_pointer_before=optional("current_pointer_before"),

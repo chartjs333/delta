@@ -13,6 +13,7 @@ from deltatorrent.benchmark.campaign02_stage_c_runtime import (
     _parse_receipt,
     _request_bytes,
 )
+from deltatorrent.benchmark.definition import FORMAL_SEMANTICS_ID
 from deltatorrent.benchmark.fault_profiles import FaultProfile
 from deltatorrent.benchmark.network_profiles import NetworkProfile
 from deltatorrent.protocol.canonical import canonical_json_bytes, sha256_content_id
@@ -36,6 +37,7 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
     partition = event.actor_class == "REGION" and event.action == "PARTITION"
     worker = event.actor_class == "WORKER" and event.action == "CRASH"
     concentrated = event.event_id == "worker-loss-concentrated"
+    mnist_workers = event.event_id == "mnist-4-workers"
     profile = (
         "wan-regional"
         if event.actor_class == "REGION" and event.action == "DELAY"
@@ -47,7 +49,13 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
     parent = "sha256:" + "c" * 64
     next_checkpoint = "sha256:" + "d" * 64
     hard_deadline = event.at_step + 60
-    if concentrated:
+    if mnist_workers:
+        deliveries = [
+            *(f"worker-ticket-{index:03d}:{event.at_step + index}" for index in range(4)),
+            *(f"aggregate-vote-{index}:{event.at_step + 20 + index}" for index in range(3)),
+            *(f"apply-vote-{index}:{event.at_step + 30 + index}" for index in range(3)),
+        ]
+    elif concentrated:
         deliveries = [
             *(f"worker-ticket-{index:03d}:{event.at_step + index}" for index in range(2, 10)),
             *(f"abort-vote-{index}:{hard_deadline}" for index in range(3)),
@@ -94,7 +102,7 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
             else "worker-ticket-000,worker-ticket-001"
             if concentrated
             else "worker-ticket-009"
-            if worker
+            if worker and not mnist_workers
             else none
         ),
         "event_id": event.event_id,
@@ -108,22 +116,36 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
         "gst_tick": str(event.at_step),
         "hard_deadline_tick": str(hard_deadline),
         "isc_ticket_set": (
-            ",".join(f"ticket-{index:03d}" for index in range(9))
+            ",".join(f"ticket-{index:03d}" for index in range(4))
+            if mnist_workers
+            else ",".join(f"ticket-{index:03d}" for index in range(9))
             if worker and not concentrated
             else ",".join(f"ticket-{index:03d}" for index in range(4))
             if applied
             else none
         ),
-        "loss_fraction": "2/10" if concentrated else "1/10" if worker else "0/1",
+        "loss_fraction": (
+            "0/4" if mnist_workers else "2/10" if concentrated else "1/10" if worker else "0/1"
+        ),
         "lost_ticket_ids": (
-            "ticket-000,ticket-001" if concentrated else "ticket-009" if worker else none
+            "ticket-000,ticket-001"
+            if concentrated
+            else "ticket-009"
+            if worker and not mnist_workers
+            else none
         ),
         "lost_worker_ids": (
-            "worker-000,worker-001" if concentrated else "worker-009" if worker else none
+            "worker-000,worker-001"
+            if concentrated
+            else "worker-009"
+            if worker and not mnist_workers
+            else none
         ),
         "message_delivery_ticks": ",".join(deliveries),
         "missing_work_policy_result": (
-            "MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT"
+            "FULL_QUORUM_DELIVERED_EXACT_ISC"
+            if mnist_workers
+            else "MANDATORY_DOMAIN_CAPACITY_UNSATISFIED_ABORT"
             if concentrated
             else "OMIT_PRE_FREEZE_LOST_TICKET_EXACT_ISC"
             if worker
@@ -131,19 +153,39 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
         ),
         "network_profile_id": profile,
         "next_checkpoint_id": next_checkpoint if applied else none,
+        "next_model_value_count": "2" if applied else "0",
+        "next_model_values": "12,-3" if applied else none,
         "next_optimizer_state_id": "sha256:" + "f" * 64 if applied else none,
         "parent_checkpoint_id": parent if applied or partition or concentrated else none,
         "parent_optimizer_state_id": "sha256:" + "e" * 64 if applied else none,
         "partition_start_tick": str(event.at_step if partition else 0),
         "per_domain_remaining_tickets": (
-            "code:3,text:5" if concentrated else "code:5,text:4" if worker else none
+            "code:2,text:2"
+            if mnist_workers
+            else "code:3,text:5"
+            if concentrated
+            else "code:5,text:4"
+            if worker
+            else none
         ),
-        "per_domain_required_tickets": "code:4,text:4" if worker else none,
+        "per_domain_required_tickets": (
+            "code:2,text:2" if mnist_workers else "code:4,text:4" if worker else none
+        ),
         "pi_d_renormalized": "false",
         "quorum_capacity_after": (
-            "8" if concentrated else "9" if worker else "2" if partition else "0"
+            "4"
+            if mnist_workers
+            else "8"
+            if concentrated
+            else "9"
+            if worker
+            else "2"
+            if partition
+            else "0"
         ),
-        "quorum_capacity_before": "10" if worker else "4" if partition else "0",
+        "quorum_capacity_before": (
+            "4" if mnist_workers else "10" if worker else "4" if partition else "0"
+        ),
         "quorum_formation_tick": str(event.at_step + 22 if applied else 0),
         "schema_version": "1.0.0",
         "unavailable_ids": (
@@ -153,8 +195,10 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
             if concentrated
             else none
         ),
-        "worker_count_before": "10" if worker else "0",
-        "worker_count_lost": "2" if concentrated else "1" if worker else "0",
+        "worker_count_before": "4" if mnist_workers else "10" if worker else "0",
+        "worker_count_lost": (
+            "0" if mnist_workers else "2" if concentrated else "1" if worker else "0"
+        ),
     }
     return "".join(f"{key}={value}\n" for key, value in sorted(fields.items())).encode("ascii")
 
@@ -169,8 +213,9 @@ def _receipt(
     view_change_override: bool | None = None,
     current_advanced_override: bool | None = None,
     availability_override: bool | None = None,
+    inputs: tuple[tuple[tuple[str, NetworkProfile], ...], FaultProfile] | None = None,
 ) -> bytes:
-    profiles, faults = _inputs()
+    profiles, faults = inputs if inputs is not None else _inputs()
     plan_id = "sha256:" + "a" * 64
     lines = [f"STAGEC_V1 {plan_id}"]
     for _profile_id, profile in profiles:
@@ -299,6 +344,45 @@ def test_measured_receipt_reconciles_java_native_and_os_layers() -> None:
     assert all(item.passed for item in receipt.fault_transitions)
 
 
+def test_mnist_four_worker_real_drq1_receipt_shape_is_accepted() -> None:
+    profiles, _faults = _inputs()
+    lan_profile = tuple(item for item in profiles if item[1].profile_id == "lan-control")
+    fault_profile = FaultProfile.from_dict(
+        {
+            "events": [
+                {
+                    "action": "CRASH",
+                    "actor_class": "WORKER",
+                    "assumptions_hold": True,
+                    "at_step": 100,
+                    "event_id": "mnist-4-workers",
+                    "expected_outcome": "APPLIED",
+                }
+            ],
+            "formal_semantics_id": FORMAL_SEMANTICS_ID,
+            "profile_id": "mnist-real-drq1-stagec-v1",
+            "schema_version": "1.0.0",
+            "type_name": "FAULT_PROFILE",
+        }
+    )
+    receipt = _parse_receipt(
+        _receipt(inputs=(lan_profile, fault_profile)),
+        plan_id="sha256:" + "a" * 64,
+        network_profiles=lan_profile,
+        fault_profile=fault_profile,
+    )
+    transition = receipt.fault_transitions[0]
+
+    assert transition.event_id == "mnist-4-workers"
+    assert transition.observed_outcome == "APPLIED"
+    assert transition.current_checkpoint_advanced
+    assert transition.causal_evidence.worker_count_before == 4
+    assert transition.causal_evidence.worker_count_lost == 0
+    assert transition.causal_evidence.missing_work_policy_result == (
+        "FULL_QUORUM_DELIVERED_EXACT_ISC"
+    )
+
+
 def test_executable_profile_binds_concentrated_loss_to_cross_language_request() -> None:
     profiles, faults = _inputs()
     concentrated = next(
@@ -313,6 +397,19 @@ def test_executable_profile_binds_concentrated_loss_to_cross_language_request() 
     assert concentrated.expected_outcome == "ABORTED"
     assert "fault_count=8\n" in request
     assert "fault.1.id=worker-loss-concentrated\n" in request
+
+
+def test_java_stage_c_transport_declares_four_worker_model_plugin_schedules() -> None:
+    java = (
+        ROOT
+        / "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java"
+    ).read_text(encoding="utf-8")
+
+    assert 'fault.id().equals("mnist-4-workers")' in java
+    assert 'fault.id().equals("qlora-4-workers")' in java
+    assert "addFourTickets(messages, fault.step())" in java
+    assert 'addQuorumMessages(messages, "aggregate", "AGGREGATE_VOTE", fault.step() + 20)' in java
+    assert 'addQuorumMessages(messages, "apply", "APPLY_VOTE", fault.step() + 30)' in java
 
 
 def test_expected_outcome_is_only_an_assertion() -> None:
@@ -604,3 +701,64 @@ def test_primary_runner_source_has_no_simulation_or_expected_outcome_assignment(
     assert "expected_outcome" not in sidecar
     assert 'fault.id().equals("worker-loss-concentrated")' in java
     assert '"ABORT_VOTE", hardDeadlineTick, true' in java
+
+
+def test_stage_c_runtime_stages_real_drq1_shards_and_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    executable = tmp_path / "runtime"
+    executable.write_bytes(b"actual runtime")
+    executable.chmod(0o755)
+    valid = RuntimeArtifact(executable, sha256_content_id(executable.read_bytes()))
+    counter_root = tmp_path / "counters"
+    counter_root.mkdir()
+    for name in ("tx_bytes", "rx_bytes"):
+        (counter_root / name).write_text("0\n", encoding="ascii")
+    boundary = MeasuredStageCRuntimeBoundary(
+        image_id="sha256:" + "2" * 64,
+        java_executable=valid,
+        native_executable=valid,
+        transport_harness=valid,
+        netty_artifacts=(valid,),
+        os_interface_counter_root=counter_root,
+        working_root=tmp_path / "work",
+    )
+    network_profiles, fault_profile = _inputs()
+    plan_id = "sha256:" + "a" * 64
+    captured_env: dict[str, str] = {}
+
+    def mock_run(command: object, **kwargs: object) -> object:
+        env = kwargs.get("env")
+        if isinstance(env, dict):
+            captured_env.update(env)
+
+        class MockCompleted:
+            returncode = 0
+            stdout = b""
+            stderr = b""
+
+        return MockCompleted()
+
+    monkeypatch.setattr("subprocess.run", mock_run)
+
+    dummy_shards = {"ticket-000": b"DRQ1\x00\x01shard0", "ticket-001": b"DRQ1\x00\x01shard1"}
+    dummy_manifest = {"formal_semantics_id": FORMAL_SEMANTICS_ID}
+
+    with pytest.raises(MeasuredStageCRuntimeError):
+        boundary.execute(
+            plan_id=plan_id,
+            packet_count=10,
+            payload_bytes=1000,
+            network_profiles=network_profiles,
+            fault_profile=fault_profile,
+            worker_shards=dummy_shards,
+            shards_manifest=dummy_manifest,
+        )
+
+    plan_root = tmp_path / "work" / plan_id[7:]
+    shards_dir = plan_root / "shards"
+    assert (shards_dir / "ticket-000.drq1").read_bytes() == b"DRQ1\x00\x01shard0"
+    assert (shards_dir / "ticket-001.drq1").read_bytes() == b"DRQ1\x00\x01shard1"
+    manifest_loaded = json.loads((shards_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest_loaded["formal_semantics_id"] == FORMAL_SEMANTICS_ID
+    assert captured_env.get("DELTA_STAGE_C_REAL_DRQ1") == "1"
