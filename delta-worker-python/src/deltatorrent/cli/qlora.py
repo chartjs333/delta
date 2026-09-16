@@ -8,6 +8,10 @@ from pathlib import Path
 
 import torch
 
+from deltatorrent.benchmark.qlora_delta_e2e import (
+    run_qlora_delta_e2e,
+    run_qlora_training_quality,
+)
 from deltatorrent.qlora.composition import compose
 from deltatorrent.qlora.manifests import load_import_request
 from deltatorrent.qlora.model_loader import load_tiny_backend
@@ -37,6 +41,19 @@ def configure(parser: argparse.ArgumentParser) -> None:
     qualify.add_argument("--profile", type=Path, required=True)
     qualify.add_argument("--native-library", type=Path, required=True)
     qualify.add_argument("--output", type=Path, required=True)
+    distributed = commands.add_parser(
+        "distributed-e2e",
+        help="run the tiny QLoRA 4-worker Stage C REAL_DRQ1 comparison harness",
+    )
+    distributed.add_argument("--repository-root", type=Path, default=Path.cwd())
+    distributed.add_argument("--output", type=Path, required=True)
+    training_quality = commands.add_parser(
+        "training-quality",
+        help="run multi-round QLoRA training-quality over Stage C REAL_DRQ1",
+    )
+    training_quality.add_argument("--repository-root", type=Path, default=Path.cwd())
+    training_quality.add_argument("--output", type=Path, required=True)
+    training_quality.add_argument("--rounds", type=int, default=3)
 
 
 def _print(value: object) -> None:
@@ -93,5 +110,17 @@ def execute(args: argparse.Namespace) -> int:
         report = run_physical_qualification(args.profile, args.native_library)
         write_evidence(report, args.output)
         _print(report)
+        return 0
+    if args.qlora_command == "distributed-e2e":
+        result = run_qlora_delta_e2e(args.repository_root, args.output)
+        _print({"report": str(result.report_path), "status": "PASS"})
+        return 0
+    if args.qlora_command == "training-quality":
+        quality_result = run_qlora_training_quality(
+            args.repository_root,
+            args.output,
+            rounds=args.rounds,
+        )
+        _print({"report": str(quality_result.report_path), "status": "PASS"})
         return 0
     return 2

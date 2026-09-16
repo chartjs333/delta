@@ -350,7 +350,7 @@ public final class MeasuredStageCTransport {
       Fault fault, Profile profile, long hardDeadlineTick) {
     var messages = new ArrayList<CausalMessage>();
     if (fault.actor().equals("WORKER") && fault.action().equals("CRASH")) {
-      if (fault.id().equals("mnist-4-workers")) {
+      if (fault.id().equals("mnist-4-workers") || fault.id().equals("qlora-4-workers")) {
         addFourTickets(messages, fault.step());
         addQuorumMessages(messages, "aggregate", "AGGREGATE_VOTE", fault.step() + 20);
         addQuorumMessages(messages, "apply", "APPLY_VOTE", fault.step() + 30);

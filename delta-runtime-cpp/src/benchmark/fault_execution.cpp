@@ -627,6 +627,8 @@ struct ScenarioObservation {
       {"message_delivery_ticks", join_strings(delivered)},
       {"missing_work_policy_result", "NOT_APPLICABLE"},
       {"next_checkpoint_id", "NONE"},
+      {"next_model_value_count", "0"},
+      {"next_model_values", "NONE"},
       {"next_optimizer_state_id", "NONE"},
       {"network_profile_id", schedule.network_profile_id},
       {"parent_checkpoint_id", "NONE"},
@@ -661,6 +663,7 @@ struct ApplyObservation {
   std::uint64_t apply_qc_tick{};
   std::uint64_t operation_count{};
   std::string final_effect_id;
+  std::vector<std::string> next_model_values;
 };
 
 [[nodiscard]] std::vector<const CausalMessage*> exact_delivered_votes(
@@ -913,20 +916,31 @@ struct ApplyObservation {
     throw BenchmarkError("actual Feature 003 aggregation did not bind AggregateRootQC");
   }
 
-  certificates::ApplyArithmeticProfile profile{
-      .accumulator_proof_id = accumulator_proof_id,
-      .domain_weights = {{"code", {1, 2U}}, {"text", {1, 2U}}},
-      .learning_rate = {1, 10U},
-      .momentum = {9, 10U},
-      .nesterov = true,
-      .rounding = "HALF_TOWARD_POSITIVE",
-      .weight_decay = {1, 100U},
-  };
+  certificates::ApplyArithmeticProfile profile =
+      real_drq1_mode
+          ? certificates::ApplyArithmeticProfile{
+                .accumulator_proof_id = accumulator_proof_id,
+                .domain_weights = {{"code", {1, 1U}}, {"text", {1, 1U}}},
+                .learning_rate = {1, 1U},
+                .momentum = {0, 1U},
+                .nesterov = true,
+                .rounding = "HALF_TOWARD_POSITIVE",
+                .weight_decay = {0, 1U},
+            }
+          : certificates::ApplyArithmeticProfile{
+                .accumulator_proof_id = accumulator_proof_id,
+                .domain_weights = {{"code", {1, 2U}}, {"text", {1, 2U}}},
+                .learning_rate = {1, 10U},
+                .momentum = {9, 10U},
+                .nesterov = true,
+                .rounding = "HALF_TOWARD_POSITIVE",
+                .weight_decay = {1, 100U},
+            };
   const auto parent_optimizer_id = derived_id("stagec-parent-optimizer:", event.event_id);
   const auto dimension = aggregates[0].values.size();
-  std::vector<std::int64_t> parent_model(dimension, 100);
-  std::vector<std::int64_t> parent_momentum(dimension, 10);
-  if (dimension >= 2U) {
+  std::vector<std::int64_t> parent_model(dimension, real_drq1_mode ? 0 : 100);
+  std::vector<std::int64_t> parent_momentum(dimension, real_drq1_mode ? 0 : 10);
+  if (!real_drq1_mode && dimension >= 2U) {
     parent_model[1] = -50;
     parent_momentum[1] = -5;
   }
@@ -1013,6 +1027,7 @@ struct ApplyObservation {
       .apply_qc_tick = apply_votes.back()->delivered_tick,
       .operation_count = static_cast<std::uint64_t>(tickets.size() * 2U + 11U),
       .final_effect_id = finalized.effect_batch_id,
+      .next_model_values = candidate.next_model_values,
   };
 }
 
@@ -1231,6 +1246,8 @@ struct ApplyObservation {
   fields["current_pointer_after"] = applied.current_pointer_after;
   fields["current_pointer_before"] = applied.current_pointer_before;
   fields["next_checkpoint_id"] = applied.next_checkpoint_id;
+  fields["next_model_value_count"] = std::to_string(applied.next_model_values.size());
+  fields["next_model_values"] = join_strings(applied.next_model_values);
   fields["next_optimizer_state_id"] = applied.next_optimizer_state_id;
   fields["parent_checkpoint_id"] = applied.parent_checkpoint_id;
   fields["parent_optimizer_state_id"] = applied.parent_optimizer_state_id;

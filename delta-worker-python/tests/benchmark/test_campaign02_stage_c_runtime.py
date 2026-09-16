@@ -153,6 +153,8 @@ def _causal(event, observed: str, current_advanced: bool) -> bytes:
         ),
         "network_profile_id": profile,
         "next_checkpoint_id": next_checkpoint if applied else none,
+        "next_model_value_count": "2" if applied else "0",
+        "next_model_values": "12,-3" if applied else none,
         "next_optimizer_state_id": "sha256:" + "f" * 64 if applied else none,
         "parent_checkpoint_id": parent if applied or partition or concentrated else none,
         "parent_optimizer_state_id": "sha256:" + "e" * 64 if applied else none,
@@ -397,13 +399,14 @@ def test_executable_profile_binds_concentrated_loss_to_cross_language_request() 
     assert "fault.1.id=worker-loss-concentrated\n" in request
 
 
-def test_java_stage_c_transport_declares_mnist_four_worker_schedule() -> None:
+def test_java_stage_c_transport_declares_four_worker_model_plugin_schedules() -> None:
     java = (
         ROOT
         / "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java"
     ).read_text(encoding="utf-8")
 
     assert 'fault.id().equals("mnist-4-workers")' in java
+    assert 'fault.id().equals("qlora-4-workers")' in java
     assert "addFourTickets(messages, fault.step())" in java
     assert 'addQuorumMessages(messages, "aggregate", "AGGREGATE_VOTE", fault.step() + 20)' in java
     assert 'addQuorumMessages(messages, "apply", "APPLY_VOTE", fault.step() + 30)' in java

@@ -158,6 +158,7 @@ class NativeFaultCausalEvidence:
     abort_qc_id: str | None
     parent_checkpoint_id: str | None
     next_checkpoint_id: str | None
+    next_model_values: tuple[int, ...]
     parent_optimizer_state_id: str | None
     next_optimizer_state_id: str | None
     current_pointer_before: str | None
@@ -277,6 +278,7 @@ class NativeFaultCausalEvidence:
                 or self.current_pointer_before != self.parent_checkpoint_id
                 or self.current_pointer_after != self.next_checkpoint_id
                 or self.current_pointer_before == self.current_pointer_after
+                or not self.next_model_values
                 or len(aggregate_ticks) != 3
                 or len(apply_ticks) != 3
                 or max(aggregate_ticks, default=0) != self.aggregate_root_qc_tick
@@ -292,10 +294,12 @@ class NativeFaultCausalEvidence:
                 raise _fail("CAMPAIGN02_STAGE_C_APPLIED_WITHOUT_EXACT_APPLY_QC")
         elif transition.current_checkpoint_advanced:
             raise _fail("CAMPAIGN02_STAGE_C_NON_APPLIED_POINTER_ADVANCE")
+        elif self.next_model_values:
+            raise _fail("CAMPAIGN02_STAGE_C_NON_APPLIED_MODEL_VALUES")
         if transition.actor_class == "WORKER" and transition.action == "CRASH":
             required = dict(self.per_domain_required_tickets)
             remaining = dict(self.per_domain_remaining_tickets)
-            if transition.event_id == "mnist-4-workers":
+            if transition.event_id in {"mnist-4-workers", "qlora-4-workers"}:
                 delivery_ids = {message_id for message_id, _ in self.message_delivery_ticks}
                 mnist_invalid = (
                     transition.observed_outcome != "APPLIED"
@@ -460,6 +464,7 @@ class NativeFaultCausalEvidence:
             "missing_work_policy_result": self.missing_work_policy_result,
             "network_profile_id": self.network_profile_id,
             "next_checkpoint_id": self.next_checkpoint_id,
+            "next_model_values": list(self.next_model_values),
             "next_optimizer_state_id": self.next_optimizer_state_id,
             "parent_checkpoint_id": self.parent_checkpoint_id,
             "parent_optimizer_state_id": self.parent_optimizer_state_id,
@@ -819,6 +824,8 @@ _CAUSAL_FIELDS: Final = {
     "missing_work_policy_result",
     "network_profile_id",
     "next_checkpoint_id",
+    "next_model_value_count",
+    "next_model_values",
     "next_optimizer_state_id",
     "parent_checkpoint_id",
     "parent_optimizer_state_id",
@@ -895,6 +902,28 @@ def _parse_causal_evidence(
             raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_PAIR_SET_INVALID")
         return tuple(result)
 
+    def signed_values(name: str, count_name: str) -> tuple[int, ...]:
+        value = fields[name]
+        expected_count = _nonnegative(
+            fields[count_name], "CAMPAIGN02_STAGE_C_CAUSAL_INTEGER_INVALID"
+        )
+        if value == "NONE":
+            if expected_count != 0:
+                raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+            return ()
+        raw_items = value.split(",")
+        if len(raw_items) != expected_count:
+            raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+        result: list[int] = []
+        for item in raw_items:
+            if not item or (item[0] == "-" and len(item) == 1):
+                raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+            digits = item[1:] if item[0] == "-" else item
+            if not digits.isdecimal():
+                raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_VALUE_SET_INVALID")
+            result.append(int(item))
+        return tuple(result)
+
     numerator, separator, denominator = fields["loss_fraction"].partition("/")
     if not separator:
         raise _fail("CAMPAIGN02_STAGE_C_CAUSAL_LOSS_FRACTION_INVALID")
@@ -918,6 +947,7 @@ def _parse_causal_evidence(
         abort_qc_id=optional("abort_qc_id"),
         parent_checkpoint_id=optional("parent_checkpoint_id"),
         next_checkpoint_id=optional("next_checkpoint_id"),
+        next_model_values=signed_values("next_model_values", "next_model_value_count"),
         parent_optimizer_state_id=optional("parent_optimizer_state_id"),
         next_optimizer_state_id=optional("next_optimizer_state_id"),
         current_pointer_before=optional("current_pointer_before"),
