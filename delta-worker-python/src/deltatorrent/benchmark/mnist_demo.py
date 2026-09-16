@@ -55,6 +55,7 @@ from deltatorrent.data.binding import BINDING_ASSERTION_SCHEMA_VERSION
 from deltatorrent.data.eeg import (
     DEMO_EEG_PARTITIONS,
     EEG_DATASET_DESCRIPTOR,
+    EegBandpowerResponseAnalyzer,
     EegWindowDatasetProvider,
 )
 from deltatorrent.data.mnist import MNIST_DESCRIPTOR
@@ -580,6 +581,7 @@ def _run_eeg_plugin_showcase(
     temporal_examples: list[dict[str, object]] = []
     worker_documents: list[dict[str, object]] = []
     accuracies: list[int] = []
+    resolved_bindings = eeg_provider.resolved_binding_set()
     for ordinal, partition_id in enumerate(DEMO_EEG_PARTITIONS):
         ticket_id = f"eeg-ticket-{ordinal:03d}"
         local_result = binding.train_ticket(ticket_id=ticket_id, partition_id=partition_id)
@@ -593,11 +595,21 @@ def _run_eeg_plugin_showcase(
         first_context = ticket_context[0]
         event = eeg_provider.intervention_event(str(first_context["intervention_event_id"]))
         assertion = eeg_provider.binding_assertion(str(first_context["data_window_id"]))
+        decision = eeg_provider.binding_decision(str(first_context["data_window_id"]))
         if assertion.binding_assertion_id != first_context["binding_assertion_id"]:
             raise MnistDemoError("EEG_BINDING_ASSERTION_CONTEXT_MISMATCH")
+        if decision.binding_decision_id != first_context["binding_decision_id"]:
+            raise MnistDemoError("EEG_BINDING_DECISION_CONTEXT_MISMATCH")
+        if resolved_bindings.resolved_binding_set_id != first_context["resolved_binding_set_id"]:
+            raise MnistDemoError("EEG_RESOLVED_BINDING_SET_CONTEXT_MISMATCH")
         temporal_examples.append(
             {
                 "binding_assertion_id": assertion.binding_assertion_id,
+                "binding_authority_id": decision.binding_authority_id,
+                "binding_decision_id": decision.binding_decision_id,
+                "binding_provider_id": assertion.binding_provider_id,
+                "binding_provider_type": assertion.binding_provider_type,
+                "binding_status": assertion.status,
                 "data_window_id": assertion.data_window_id,
                 "end_offset_ms": assertion.end_offset_ms,
                 "intervention_type": event.intervention_type,
@@ -608,7 +620,10 @@ def _run_eeg_plugin_showcase(
                 "point_source": "InterventionEvent.point_id",
                 "protocol_id": event.protocol_id,
                 "raw_data_hash": assertion.raw_data_hash,
+                "reason_code": decision.reason_code,
                 "relation": assertion.relation,
+                "resolved_binding_set_id": resolved_bindings.resolved_binding_set_id,
+                "authority_decision": decision.decision,
                 "session_id": assertion.session_id,
                 "start_offset_ms": assertion.start_offset_ms,
                 "ticket_id": ticket_id,
@@ -630,6 +645,38 @@ def _run_eeg_plugin_showcase(
             }
         )
 
+    first_partition = binding.dataset_provider.training_partition(DEMO_EEG_PARTITIONS[0])
+    samples = cast(NDArray[np.float64], first_partition.samples)
+    targets = cast(NDArray[np.uint8], first_partition.targets)
+    baseline_samples = samples[targets == 0]
+    post_samples = samples[targets == 1]
+    if baseline_samples.size == 0 or post_samples.size == 0:
+        raise MnistDemoError("EEG_OBSERVATION_DEMO_WINDOWS_EMPTY")
+    alpha_indices = np.array([2, 6, 10, 14], dtype=np.int64)
+    beta_indices = np.array([3, 7, 11, 15], dtype=np.int64)
+    alpha_delta_ppm = round(
+        (
+            float(np.mean(post_samples[:, alpha_indices]))
+            - float(np.mean(baseline_samples[:, alpha_indices]))
+        )
+        * 1_000_000
+    )
+    beta_delta_ppm = round(
+        (
+            float(np.mean(post_samples[:, beta_indices]))
+            - float(np.mean(baseline_samples[:, beta_indices]))
+        )
+        * 1_000_000
+    )
+    response_input = eeg_provider.response_analysis_input(
+        "evt-demo-eeg-01",
+        model_outputs={
+            "alpha_delta_ppm": alpha_delta_ppm,
+            "beta_delta_ppm": beta_delta_ppm,
+        },
+    )
+    response = EegBandpowerResponseAnalyzer().analyze(response_input).document()
+
     return {
         "contract_compatibility": "PASS",
         "dataset_id": binding.dataset_descriptor.dataset_id,
@@ -644,18 +691,36 @@ def _run_eeg_plugin_showcase(
         "runner_boundary": "ModelDatasetBinding",
         "sample_kind": binding.model_descriptor.sample_kind,
         "target_kind": binding.model_descriptor.target_kind,
+        "observation_demo": {
+            "binding_semantics_in_delta": False,
+            "clinical_conclusion_claimed": False,
+            "delta_spine_modified": False,
+            "event_id": "evt-demo-eeg-01",
+            "recommendation_claimed": False,
+            "response": response,
+            "type_name": "DELTAREDUCE_EEG_OBSERVATION_DEMO",
+        },
         "temporal_binding": {
+            "accepted_count": materialization["accepted_binding_count"],
             "assertion_count": materialization["binding_assertion_count"],
             "assertion_schema_version": BINDING_ASSERTION_SCHEMA_VERSION,
-            "binding_layer": "deltatorrent.data.binding.BindingAssertion",
+            "binding_authority_id": materialization["binding_authority_id"],
+            "binding_layer": (
+                "deltatorrent.data.binding.BindingProvider/BindingAuthority/ResolvedBindingSet"
+            ),
+            "binding_provider_id": materialization["binding_provider_id"],
+            "binding_provider_type": materialization["binding_provider_type"],
             "delta_spine_knows_medical_semantics": False,
             "event_count": materialization["intervention_event_count"],
             "examples": temporal_examples,
             "model_plugin_creates_intervention_event": False,
             "point_id_exposed_to_ticket_context": False,
+            "rejected_count": materialization["rejected_binding_count"],
             "relation_contract": (
                 "EegWindow.intervention_event_id == InterventionEvent.intervention_event_id"
             ),
+            "resolved_binding_set_id": materialization["resolved_binding_set_id"],
+            "review_count": materialization["review_binding_count"],
             "ticket_context_contains_ids_hashes_only": True,
             "type_name": "DELTAREDUCE_TEMPORAL_EVENT_BINDING_EVIDENCE",
             "window_count": materialization["physiological_window_count"],

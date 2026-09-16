@@ -245,18 +245,18 @@ WORKSPACE_HTML = r"""<!doctype html>
     </section>
 
     <section class="panel">
-      <h2>Observation view</h2>
+      <h2>Intervention EEG Explorer</h2>
       <div class="observation-layout">
         <article class="observation-card">
-          <h3>Intervention event</h3>
+          <h3>Event metadata</h3>
           <div class="observation-row"><span>Point</span><strong id="obs-point"></strong></div>
           <div class="observation-row"><span>Side</span><strong id="obs-side"></strong></div>
           <div class="observation-row"><span>Event</span><strong id="obs-event"></strong></div>
-          <div class="observation-row"><span>Binding</span><strong id="obs-binding"></strong></div>
-          <div class="observation-row"><span>Source</span><strong id="obs-source"></strong></div>
+          <div class="observation-row"><span>Decision</span><strong id="obs-binding"></strong></div>
+          <div class="observation-row"><span>Provider</span><strong id="obs-source"></strong></div>
         </article>
         <article class="observation-card eeg-card">
-          <div class="eeg-title"><strong>EEG around event</strong><span>baseline → t=0 → post-event</span></div>
+          <div class="eeg-title"><strong>EEG Timeline</strong><span>baseline → t=0 → post-event</span></div>
           <svg class="eeg-svg" viewBox="0 0 560 140" role="img" aria-label="EEG window around intervention event">
             <path d="M32 74 L56 54 L80 88 L104 56 L128 82 L152 58 L176 78 L200 56 L224 92 L248 66 L272 78 L296 62 L320 72 L344 48 L368 88 L392 54 L416 84 L440 58 L464 82 L488 62 L512 86 L536 70" fill="none" stroke="#4e9b21" stroke-width="3" />
             <line x1="312" y1="26" x2="312" y2="116" stroke="#ffd45e" stroke-width="2" stroke-dasharray="5 6" />
@@ -266,7 +266,7 @@ WORKSPACE_HTML = r"""<!doctype html>
           </svg>
         </article>
       </div>
-      <h3>Model observations</h3>
+      <h3>Response</h3>
       <div id="observation-models" class="model-observations"></div>
       <div class="observation-note">
         This view records an observed association between a clinician/protocol-defined intervention
@@ -275,15 +275,17 @@ WORKSPACE_HTML = r"""<!doctype html>
     </section>
 
     <section class="panel">
-      <h2>Intervention ↔ EEG binding</h2>
+      <h2>Binding Provenance</h2>
       <p>Физиологическое окно связано не с именем точки напрямую, а с конкретным
-         InterventionEvent. DatasetProvider фиксирует это как content-addressed BindingAssertion
-         до запуска ModelPlugin.</p>
+         InterventionEvent. BindingProvider предлагает PROPOSED assertions, BindingAuthority
+         принимает решение, а DatasetProvider материализует только accepted bindings.</p>
       <div class="temporal-chain">
         <div class="temporal-step"><strong>InterventionEvent</strong><span id="temporal-event-id"></span></div>
         <div class="temporal-step"><strong>ObservationSession</strong><span id="temporal-session-id"></span></div>
         <div class="temporal-step"><strong>EegWindow</strong><span id="temporal-window-id"></span></div>
         <div class="temporal-step"><strong>BindingAssertion</strong><span id="temporal-assertion-id"></span></div>
+        <div class="temporal-step"><strong>BindingDecision</strong><span id="temporal-decision-id"></span></div>
+        <div class="temporal-step"><strong>ResolvedBindingSet</strong><span id="temporal-resolved-id"></span></div>
         <div class="temporal-step"><strong>DataPartition</strong><span id="temporal-ticket-context"></span></div>
       </div>
       <div class="binding-grid">
@@ -305,7 +307,7 @@ WORKSPACE_HTML = r"""<!doctype html>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Worker</th><th>Event / point</th><th>Window</th><th>Offsets</th><th>Assertion</th></tr></thead>
+          <thead><tr><th>Worker</th><th>Event / point</th><th>Window</th><th>Decision</th><th>Binding</th></tr></thead>
           <tbody id="temporal-binding-rows"></tbody>
         </table>
       </div>
@@ -442,7 +444,7 @@ WORKSPACE_HTML = r"""<!doctype html>
     document.getElementById('eeg-plugin-accuracy').textContent = formatAccuracy(eeg.mean_local_accuracy_ppm);
     document.getElementById('eeg-plugin-workers').textContent = `${eeg.worker_count} EEG partitions · ${eeg.total_elements} checkpoint coords`;
     document.getElementById('eeg-plugin-boundary').textContent = eeg.plugin_scope;
-    document.getElementById('eeg-plugin-kinds').textContent = `${eeg.sample_kind} → ${eeg.target_kind}; event ${firstContext.intervention_event_id}; window ${firstContext.data_window_id}; binding ${firstContext.binding_assertion_id.slice(0, 19)}…; Stage C claim: ${eeg.delta_stage_c_execution_claimed}`;
+    document.getElementById('eeg-plugin-kinds').textContent = `${eeg.sample_kind} → ${eeg.target_kind}; event ${firstContext.intervention_event_id}; window ${firstContext.data_window_id}; decision ${firstContext.binding_decision_id.slice(0, 19)}…; Stage C claim: ${eeg.delta_stage_c_execution_claimed}`;
   }
 
   function renderTemporalBinding(report) {
@@ -452,13 +454,15 @@ WORKSPACE_HTML = r"""<!doctype html>
     document.getElementById('temporal-session-id').textContent = first.session_id;
     document.getElementById('temporal-window-id').textContent = `${first.data_window_id} · ${first.relation}`;
     document.getElementById('temporal-assertion-id').textContent = first.binding_assertion_id;
+    document.getElementById('temporal-decision-id').textContent = `${first.authority_decision} · ${first.binding_decision_id}`;
+    document.getElementById('temporal-resolved-id').textContent = first.resolved_binding_set_id;
     document.getElementById('temporal-ticket-context').textContent = 'IDs/hashes only';
-    document.getElementById('temporal-binding-count').textContent = `${binding.assertion_count}`;
+    document.getElementById('temporal-binding-count').textContent = `${binding.accepted_count} accepted`;
     document.getElementById('temporal-window-count').textContent = `${binding.window_count} windows · ${binding.event_count} events`;
     document.getElementById('temporal-binding-contract').textContent = 'event_id equality';
     document.getElementById('temporal-binding-schema').textContent = `${binding.binding_layer} · schema ${binding.assertion_schema_version}`;
     document.getElementById('temporal-binding-boundary').textContent = binding.delta_spine_knows_medical_semantics ? 'LEAK' : 'NO MEDICAL SEMANTICS';
-    document.getElementById('temporal-binding-safety').textContent = `point in ticket: ${binding.point_id_exposed_to_ticket_context}; plugin creates event: ${binding.model_plugin_creates_intervention_event}`;
+    document.getElementById('temporal-binding-safety').textContent = `provider ${binding.binding_provider_type}; rejected ${binding.rejected_count}; review ${binding.review_count}`;
 
     const rows = document.getElementById('temporal-binding-rows');
     rows.replaceChildren();
@@ -470,11 +474,11 @@ WORKSPACE_HTML = r"""<!doctype html>
       event.textContent = `${example.intervention_event_id} / ${example.point_id}`;
       const windowCell = document.createElement('td');
       windowCell.textContent = `${example.data_window_id} · ${example.relation}`;
-      const offsets = document.createElement('td');
-      offsets.textContent = `${example.start_offset_ms} → ${example.end_offset_ms} ms`;
+      const decision = document.createElement('td');
+      decision.textContent = `${example.authority_decision} · ${example.reason_code}`;
       const assertion = document.createElement('td');
-      assertion.textContent = `${example.binding_assertion_id.slice(0, 19)}…`;
-      row.append(worker, event, windowCell, offsets, assertion);
+      assertion.textContent = `${example.binding_assertion_id.slice(0, 19)}… / ${example.binding_decision_id.slice(0, 19)}…`;
+      row.append(worker, event, windowCell, decision, assertion);
       rows.appendChild(row);
     });
   }
@@ -482,28 +486,29 @@ WORKSPACE_HTML = r"""<!doctype html>
   function renderObservationView(report) {
     const eeg = report.plugin_showcase.eeg_bandpower;
     const binding = eeg.temporal_binding;
+    const response = eeg.observation_demo.response;
     const first = binding.examples[0];
     document.getElementById('obs-point').textContent = first.point_id;
     document.getElementById('obs-side').textContent = first.laterality.toUpperCase();
     document.getElementById('obs-event').textContent = first.intervention_event_id;
-    document.getElementById('obs-binding').textContent = 'ACCEPTED';
-    document.getElementById('obs-source').textContent = 'DATA LAYER';
+    document.getElementById('obs-binding').textContent = first.authority_decision;
+    document.getElementById('obs-source').textContent = `${first.binding_provider_type} → ${first.binding_authority_id}`;
 
     const models = [
+      {
+        title: 'Bandpower response',
+        finding: response.observation,
+        confidence: `alpha Δ ${response.alpha_delta_ppm} ppm · beta Δ ${response.beta_delta_ppm} ppm`,
+      },
       {
         title: eeg.display_name,
         finding: `${formatAccuracy(eeg.mean_local_accuracy_ppm)} local smoke`,
         confidence: `actual plugin · ${eeg.model_plugin_id}`,
       },
       {
-        title: 'Temporal binding validator',
-        finding: `${binding.assertion_count} accepted assertions`,
-        confidence: `schema ${binding.assertion_schema_version}`,
-      },
-      {
-        title: 'Future model slots',
-        finding: 'not executed in this run',
-        confidence: 'no CNN/Transformer claim',
+        title: 'Clinical boundary',
+        finding: response.clinical_conclusion_claimed ? 'clinical claim present' : 'observations only',
+        confidence: response.recommendation_claimed ? 'recommendation claim present' : 'no recommendation',
       },
     ];
     const target = document.getElementById('observation-models');
@@ -807,6 +812,12 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
     temporal_binding = (
         eeg_showcase.get("temporal_binding") if isinstance(eeg_showcase, dict) else None
     )
+    observation_demo = (
+        eeg_showcase.get("observation_demo") if isinstance(eeg_showcase, dict) else None
+    )
+    observation_response = (
+        observation_demo.get("response") if isinstance(observation_demo, dict) else None
+    )
     temporal_examples = (
         temporal_binding.get("examples") if isinstance(temporal_binding, dict) else None
     )
@@ -971,28 +982,58 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or first_eeg_worker.get("point_semantics_in_ticket_context") is not False
         or not isinstance(first_eeg_context, dict)
         or not isinstance(temporal_binding, dict)
+        or not isinstance(observation_demo, dict)
+        or not isinstance(observation_response, dict)
         or not isinstance(temporal_examples, list)
         or len(temporal_examples) != 4
         or not isinstance(first_temporal_example, dict)
         or temporal_binding.get("type_name") != "DELTAREDUCE_TEMPORAL_EVENT_BINDING_EVIDENCE"
-        or temporal_binding.get("binding_layer") != "deltatorrent.data.binding.BindingAssertion"
+        or temporal_binding.get("binding_layer")
+        != "deltatorrent.data.binding.BindingProvider/BindingAuthority/ResolvedBindingSet"
         or temporal_binding.get("assertion_schema_version") != "1.0.0"
         or temporal_binding.get("assertion_count") != 160
+        or temporal_binding.get("accepted_count") != 160
+        or temporal_binding.get("rejected_count") != 0
+        or temporal_binding.get("review_count") != 0
         or temporal_binding.get("window_count") != 160
         or temporal_binding.get("event_count") != 4
+        or temporal_binding.get("binding_provider_id") != "eeg-window-rule-provider-v1"
+        or temporal_binding.get("binding_provider_type") != "RULE"
+        or temporal_binding.get("binding_authority_id") != "eeg-demo-binding-authority-v1"
+        or not str(temporal_binding.get("resolved_binding_set_id", "")).startswith("sha256:")
         or temporal_binding.get("relation_contract")
         != "EegWindow.intervention_event_id == InterventionEvent.intervention_event_id"
         or temporal_binding.get("point_id_exposed_to_ticket_context") is not False
         or temporal_binding.get("model_plugin_creates_intervention_event") is not False
         or temporal_binding.get("delta_spine_knows_medical_semantics") is not False
         or temporal_binding.get("ticket_context_contains_ids_hashes_only") is not True
+        or observation_demo.get("type_name") != "DELTAREDUCE_EEG_OBSERVATION_DEMO"
+        or observation_demo.get("event_id") != "evt-demo-eeg-01"
+        or observation_demo.get("clinical_conclusion_claimed") is not False
+        or observation_demo.get("recommendation_claimed") is not False
+        or observation_demo.get("delta_spine_modified") is not False
+        or observation_demo.get("binding_semantics_in_delta") is not False
+        or observation_response.get("type_name") != "DELTAREDUCE_EEG_RESPONSE_ANALYSIS_RESULT"
+        or observation_response.get("intervention_event_id") != "evt-demo-eeg-01"
+        or observation_response.get("clinical_conclusion_claimed") is not False
+        or observation_response.get("recommendation_claimed") is not False
         or first_temporal_example.get("binding_assertion_id")
         != first_eeg_context.get("binding_assertion_id")
+        or first_temporal_example.get("binding_decision_id")
+        != first_eeg_context.get("binding_decision_id")
+        or first_temporal_example.get("resolved_binding_set_id")
+        != first_eeg_context.get("resolved_binding_set_id")
         or first_temporal_example.get("data_window_id") != first_eeg_context.get("data_window_id")
         or first_temporal_example.get("intervention_event_id")
         != first_eeg_context.get("intervention_event_id")
         or first_temporal_example.get("session_id") != first_eeg_context.get("session_id")
         or first_temporal_example.get("raw_data_hash") != first_eeg_context.get("raw_data_hash")
+        or first_temporal_example.get("binding_provider_id") != "eeg-window-rule-provider-v1"
+        or first_temporal_example.get("binding_provider_type") != "RULE"
+        or first_temporal_example.get("binding_status") != "PROPOSED"
+        or first_temporal_example.get("binding_authority_id") != "eeg-demo-binding-authority-v1"
+        or first_temporal_example.get("authority_decision") != "ACCEPTED"
+        or first_temporal_example.get("reason_code") != "RULE_EVENT_WINDOW_CONTEXT_MATCH"
         or first_temporal_example.get("point_id") != "TCM-ST36"
         or first_temporal_example.get("point_source") != "InterventionEvent.point_id"
         or first_temporal_example.get("laterality") != "left"
@@ -1004,17 +1045,19 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         != {
             "acquisition_profile_id",
             "binding_assertion_id",
+            "binding_authority_id",
+            "binding_decision_id",
             "binding_schema_version",
             "data_window_id",
-            "end_offset_ms",
             "intervention_event_id",
             "preprocessing_profile_id",
             "raw_data_hash",
-            "relation",
+            "resolved_binding_set_id",
             "session_id",
-            "start_offset_ms",
         }
         or not str(first_eeg_context.get("binding_assertion_id", "")).startswith("sha256:")
+        or not str(first_eeg_context.get("binding_decision_id", "")).startswith("sha256:")
+        or not str(first_eeg_context.get("resolved_binding_set_id", "")).startswith("sha256:")
         or first_eeg_context.get("binding_schema_version") != "1.0.0"
         or not str(first_eeg_context.get("session_id", "")).startswith("obs-demo-eeg-")
         or not str(first_eeg_context.get("intervention_event_id", "")).startswith("evt-demo-eeg-")

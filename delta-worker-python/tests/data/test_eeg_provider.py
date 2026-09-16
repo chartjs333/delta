@@ -2,28 +2,40 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import numpy as np
 import pytest
 from deltatorrent.data import (
     BINDING_ASSERTION_SCHEMA_VERSION,
+    BINDING_DECISION_ACCEPTED,
+    BINDING_DECISION_REJECTED,
     DEFAULT_EEG_ACQUISITION_PROFILE_ID,
     DEFAULT_EEG_PROFILE,
     EEG_DATASET_DESCRIPTOR,
     BindingAssertion,
+    BindingDecision,
     DataPartition,
     DatasetProvider,
     DataWindow,
+    DeterministicBindingAuthority,
+    EegBandpowerResponseAnalyzer,
     EegDataError,
     EegPreprocessingProfile,
     EegWindow,
+    EegWindowBindingProvider,
     EegWindowDatasetProvider,
     InterventionEvent,
     ObservationSession,
+    ResolvedBindingSet,
+    ResolvedBindingSetError,
     ResponseAnalysisInput,
     eeg_raw_data_hash,
 )
 from deltatorrent.data.eeg import (
+    DEFAULT_EEG_PROFILE_ID,
     DEMO_EEG_PARTITIONS,
+    EEG_DATASET_ID,
     compute_window_bandpower,
     generate_synthetic_raw_eeg,
 )
@@ -143,6 +155,61 @@ def _eeg_window(
         end_sample=profile.window_samples,
         channels=profile.channels,
     )
+
+
+def _accepted_binding_for_window(
+    window: EegWindow,
+) -> tuple[BindingAssertion, ResolvedBindingSet]:
+    assertion = BindingAssertion.create(
+        modality="eeg",
+        dataset_id="eeg-synthetic-bci-v1",
+        session_id=window.session_id,
+        intervention_event_id=window.intervention_event_id,
+        data_window_id=window.window_id,
+        relation=window.relation,
+        start_offset_ms=window.start_offset_ms,
+        end_offset_ms=window.end_offset_ms,
+        acquisition_profile_id=window.acquisition_profile_id,
+        preprocessing_profile_id=window.preprocessing_profile_id,
+        raw_data_hash=window.raw_data_hash,
+        binding_provider_id="test-binding-provider-v1",
+        binding_provider_type="HUMAN",
+    )
+    resolved = DeterministicBindingAuthority(
+        binding_authority_id="test-binding-authority-v1",
+    ).resolve((assertion,))
+    return assertion, resolved
+
+
+class _RejectFirstWindowAuthority:
+    binding_authority_id = "test-reject-first-window-authority-v1"
+
+    def resolve(self, proposed_assertions: Sequence[BindingAssertion]) -> ResolvedBindingSet:
+        sorted_assertions = tuple(
+            sorted(proposed_assertions, key=lambda item: item.binding_assertion_id)
+        )
+        decisions = tuple(
+            BindingDecision.create(
+                binding_assertion_id=assertion.binding_assertion_id,
+                binding_authority_id=self.binding_authority_id,
+                decision=(
+                    BINDING_DECISION_REJECTED
+                    if assertion.data_window_id.endswith("-000")
+                    else BINDING_DECISION_ACCEPTED
+                ),
+                reason_code=(
+                    "TEST_REJECT_FIRST_WINDOW"
+                    if assertion.data_window_id.endswith("-000")
+                    else "TEST_ACCEPT_REMAINING_WINDOWS"
+                ),
+            )
+            for assertion in sorted_assertions
+        )
+        return ResolvedBindingSet.create(
+            binding_authority_id=self.binding_authority_id,
+            assertions=sorted_assertions,
+            decisions=decisions,
+        )
 
 
 def test_intervention_event_to_eeg_window_temporal_provenance() -> None:
@@ -319,7 +386,14 @@ def test_eeg_partitions_and_determinism() -> None:
     meta1 = provider1.materialize()
     assert meta1["status"] == "materialized"
     assert meta1["dataset_id"] == "eeg-synthetic-bci-v1"
+    assert meta1["accepted_binding_count"] == 160
     assert meta1["binding_assertion_count"] == 160
+    assert meta1["binding_provider_id"] == "eeg-window-rule-provider-v1"
+    assert meta1["binding_provider_type"] == "RULE"
+    assert meta1["binding_authority_id"] == "eeg-demo-binding-authority-v1"
+    assert str(meta1["resolved_binding_set_id"]).startswith("sha256:")
+    assert meta1["rejected_binding_count"] == 0
+    assert meta1["review_binding_count"] == 0
     assert meta1["intervention_event_count"] == 4
     assert meta1["observation_session_count"] == 4
     assert meta1["physiological_window_count"] == 160
@@ -338,25 +412,41 @@ def test_eeg_partitions_and_determinism() -> None:
         assert set(contexts[0]) == {
             "acquisition_profile_id",
             "binding_assertion_id",
+            "binding_authority_id",
+            "binding_decision_id",
             "binding_schema_version",
             "data_window_id",
-            "end_offset_ms",
             "intervention_event_id",
             "preprocessing_profile_id",
             "raw_data_hash",
-            "relation",
+            "resolved_binding_set_id",
             "session_id",
-            "start_offset_ms",
         }
         assert contexts[0]["binding_schema_version"] == BINDING_ASSERTION_SCHEMA_VERSION
         assert str(contexts[0]["binding_assertion_id"]).startswith("sha256:")
+        assert str(contexts[0]["binding_decision_id"]).startswith("sha256:")
+        assert str(contexts[0]["resolved_binding_set_id"]).startswith("sha256:")
         assert "point_id" not in contexts[0]
         assert "intervention_type" not in contexts[0]
+        assert "relation" not in contexts[0]
+        assert "start_offset_ms" not in contexts[0]
         assert np.array_equal(part1.samples, part2.samples)
         assert np.array_equal(part1.targets, part2.targets)
 
     with pytest.raises(EegDataError, match="UNKNOWN_PARTITION"):
         provider1.training_partition("nonexistent-worker")
+
+
+def test_eeg_provider_rejects_rejected_window_and_does_not_silently_shrink_samples() -> None:
+    provider = EegWindowDatasetProvider(
+        windows_per_session=4,
+        binding_authority=_RejectFirstWindowAuthority(),
+    )
+    # Fail-closed: exactly one accepted binding per window is required.
+    # Zero accepted bindings must fail materialization immediately,
+    # rather than silently shrinking data.
+    with pytest.raises(EegDataError, match="WINDOW_BINDING_REJECTED_OR_MISSING"):
+        provider.materialize()
 
 
 def test_eeg_materialize_window_streaming() -> None:
@@ -426,11 +516,23 @@ def test_eeg_materialize_window_validates_intervention_bound_hash() -> None:
         channels=profile.channels,
     )
 
-    part = provider.materialize_window(window, raw_signal, label=1)
+    with pytest.raises(EegDataError, match="RESOLVED_BINDING_SET_REQUIRED"):
+        provider.materialize_window(window, raw_signal, label=1)
+
+    assertion, resolved = _accepted_binding_for_window(window)
+    part = provider.materialize_window(
+        window,
+        raw_signal,
+        label=1,
+        binding_assertion=assertion,
+        resolved_binding_set=resolved,
+    )
     assert part.metadata["ticket_context"][0]["intervention_event_id"] == "evt-bound"
     assert part.metadata["ticket_context"][0]["data_window_id"] == "eegwin-bound"
     assert part.metadata["ticket_context"][0]["raw_data_hash"] == eeg_raw_data_hash(raw_signal)
     assert str(part.metadata["ticket_context"][0]["binding_assertion_id"]).startswith("sha256:")
+    assert str(part.metadata["ticket_context"][0]["binding_decision_id"]).startswith("sha256:")
+    assert "relation" not in part.metadata["ticket_context"][0]
 
     forged = EegWindow(
         window_id="eegwin-forged",
@@ -461,13 +563,19 @@ def test_eeg_materialize_window_validates_intervention_bound_hash() -> None:
         acquisition_profile_id=DEFAULT_EEG_ACQUISITION_PROFILE_ID,
         preprocessing_profile_id=profile.profile_id,
         raw_data_hash=eeg_raw_data_hash(raw_signal),
+        binding_provider_id="test-binding-provider-v1",
+        binding_provider_type="HUMAN",
     )
+    mismatch_resolved = DeterministicBindingAuthority(
+        binding_authority_id="test-binding-authority-v1",
+    ).resolve((mismatched_assertion,))
     with pytest.raises(EegDataError, match="BINDING_ASSERTION_WINDOW_MISMATCH"):
         provider.materialize_window(
             window,
             raw_signal,
             label=1,
             binding_assertion=mismatched_assertion,
+            resolved_binding_set=mismatch_resolved,
         )
 
 
@@ -493,7 +601,15 @@ def test_eeg_provider_response_analysis_lookup() -> None:
     assert analysis.post_windows == post_windows
     assert first_assertion.intervention_event_id == event_id
     assert first_assertion.data_window_id == "eegwin-demo-01-000"
-    assert first_assertion.ticket_context()["data_window_id"] == "eegwin-demo-01-000"
+    first_decision = provider.binding_decision("eegwin-demo-01-000")
+    resolved = provider.resolved_binding_set()
+    first_context = resolved.ticket_context_for_assertion(first_assertion)
+    assert first_decision.decision == BINDING_DECISION_ACCEPTED
+    assert first_context["data_window_id"] == "eegwin-demo-01-000"
+    assert first_context["binding_decision_id"] == first_decision.binding_decision_id
+    assert first_context["resolved_binding_set_id"] == resolved.resolved_binding_set_id
+    assert "point_id" not in first_context
+    assert "relation" not in first_context
 
     with pytest.raises(EegDataError, match="UNKNOWN_BINDING_ASSERTION_WINDOW_ID"):
         provider.binding_assertion("eegwin-missing")
@@ -507,3 +623,276 @@ def test_eeg_evaluation_data() -> None:
     # Exactly balanced 20 rest and 20 task
     assert np.count_nonzero(eval_targets == 0) == 20
     assert np.count_nonzero(eval_targets == 1) == 20
+
+
+class _InjectForeignAcceptedAuthority:
+    binding_authority_id = "test-foreign-authority-v1"
+
+    def resolve(self, proposed_assertions: Sequence[BindingAssertion]) -> ResolvedBindingSet:
+        sorted_assertions = tuple(
+            sorted(proposed_assertions, key=lambda item: item.binding_assertion_id)
+        )
+        decisions = [
+            BindingDecision.create(
+                binding_assertion_id=a.binding_assertion_id,
+                binding_authority_id=self.binding_authority_id,
+                decision=BINDING_DECISION_ACCEPTED,
+                reason_code="OK",
+            )
+            for a in sorted_assertions
+        ]
+        foreign_assertion = BindingAssertion.create(
+            modality="eeg",
+            dataset_id=EEG_DATASET_ID,
+            session_id="obs-foreign",
+            intervention_event_id="evt-foreign",
+            data_window_id="eegwin-foreign-999",
+            relation="post",
+            start_offset_ms=30_000,
+            end_offset_ms=60_000,
+            acquisition_profile_id=DEFAULT_EEG_ACQUISITION_PROFILE_ID,
+            preprocessing_profile_id=DEFAULT_EEG_PROFILE_ID,
+            raw_data_hash="sha256:" + "3" * 64,
+            binding_provider_id="provider-foreign",
+            binding_provider_type="HUMAN",
+        )
+        foreign_decision = BindingDecision.create(
+            binding_assertion_id=foreign_assertion.binding_assertion_id,
+            binding_authority_id=self.binding_authority_id,
+            decision=BINDING_DECISION_ACCEPTED,
+            reason_code="FOREIGN_ACCEPTED",
+        )
+        all_assertions = (*sorted_assertions, foreign_assertion)
+        all_decisions = (*decisions, foreign_decision)
+        return ResolvedBindingSet.create(
+            binding_authority_id=self.binding_authority_id,
+            assertions=all_assertions,
+            decisions=all_decisions,
+        )
+
+
+def test_eeg_provider_rejects_foreign_accepted_binding() -> None:
+    provider = EegWindowDatasetProvider(
+        windows_per_session=2,
+        binding_authority=_InjectForeignAcceptedAuthority(),
+    )
+    with pytest.raises(EegDataError, match="FOREIGN_ACCEPTED_BINDING_ASSERTION"):
+        provider.materialize()
+
+
+class _UnknownWindowBindingProvider:
+    binding_provider_id = "test-unknown-window-provider-v1"
+    binding_provider_type = "RULE"
+
+    def propose_bindings(self, observation_session: object) -> tuple[BindingAssertion, ...]:
+        assert isinstance(observation_session, ObservationSession)
+        real_proposals = EegWindowBindingProvider().propose_bindings(observation_session)
+        first = real_proposals[0]
+        bad_assertion = BindingAssertion.create(
+            modality=first.modality,
+            dataset_id=first.dataset_id,
+            session_id=first.session_id,
+            intervention_event_id=first.intervention_event_id,
+            data_window_id="eegwin-unknown-999",
+            relation=first.relation,
+            start_offset_ms=first.start_offset_ms,
+            end_offset_ms=first.end_offset_ms,
+            acquisition_profile_id=first.acquisition_profile_id,
+            preprocessing_profile_id=first.preprocessing_profile_id,
+            raw_data_hash=first.raw_data_hash,
+            binding_provider_id=self.binding_provider_id,
+            binding_provider_type=self.binding_provider_type,
+        )
+        return (bad_assertion, *real_proposals[1:])
+
+
+def test_eeg_provider_rejects_unknown_window_binding() -> None:
+    provider = EegWindowDatasetProvider(
+        windows_per_session=2,
+        binding_provider=_UnknownWindowBindingProvider(),
+    )
+    with pytest.raises(EegDataError, match="UNKNOWN_PHYSIOLOGICAL_WINDOW_ID"):
+        provider.materialize()
+
+
+class _UnknownEventBindingProvider:
+    binding_provider_id = "test-unknown-event-provider-v1"
+    binding_provider_type = "RULE"
+
+    def propose_bindings(self, observation_session: object) -> tuple[BindingAssertion, ...]:
+        assert isinstance(observation_session, ObservationSession)
+        real_proposals = EegWindowBindingProvider().propose_bindings(observation_session)
+        first = real_proposals[0]
+        bad_assertion = BindingAssertion.create(
+            modality=first.modality,
+            dataset_id=first.dataset_id,
+            session_id=first.session_id,
+            intervention_event_id="evt-unknown-999",
+            data_window_id=first.data_window_id,
+            relation=first.relation,
+            start_offset_ms=first.start_offset_ms,
+            end_offset_ms=first.end_offset_ms,
+            acquisition_profile_id=first.acquisition_profile_id,
+            preprocessing_profile_id=first.preprocessing_profile_id,
+            raw_data_hash=first.raw_data_hash,
+            binding_provider_id=self.binding_provider_id,
+            binding_provider_type=self.binding_provider_type,
+        )
+        return (bad_assertion, *real_proposals[1:])
+
+
+def test_eeg_provider_rejects_unknown_event_binding() -> None:
+    provider = EegWindowDatasetProvider(
+        windows_per_session=2,
+        binding_provider=_UnknownEventBindingProvider(),
+    )
+    with pytest.raises(EegDataError, match="UNKNOWN_INTERVENTION_EVENT_ID"):
+        provider.materialize()
+
+
+class _DuplicateWindowBindingProvider:
+    binding_provider_id = "test-duplicate-window-provider-v1"
+    binding_provider_type = "RULE"
+
+    def propose_bindings(self, observation_session: object) -> tuple[BindingAssertion, ...]:
+        assert isinstance(observation_session, ObservationSession)
+        real_proposals = EegWindowBindingProvider().propose_bindings(observation_session)
+        first = real_proposals[0]
+        second = BindingAssertion.create(
+            modality=first.modality,
+            dataset_id=first.dataset_id,
+            session_id=first.session_id,
+            intervention_event_id=first.intervention_event_id,
+            data_window_id=first.data_window_id,
+            relation=first.relation,
+            start_offset_ms=first.start_offset_ms,
+            end_offset_ms=first.end_offset_ms,
+            acquisition_profile_id=first.acquisition_profile_id,
+            preprocessing_profile_id=first.preprocessing_profile_id,
+            raw_data_hash=first.raw_data_hash,
+            binding_provider_id="second-provider-v2",
+            binding_provider_type="MODEL",
+        )
+        return (first, second, *real_proposals[1:])
+
+
+def test_eeg_provider_rejects_two_accepted_bindings_for_one_window() -> None:
+    provider = EegWindowDatasetProvider(
+        windows_per_session=2,
+        binding_provider=_DuplicateWindowBindingProvider(),
+    )
+    with pytest.raises(
+        (ResolvedBindingSetError, EegDataError),
+        match="DUPLICATE_ACCEPTED_BINDING_FOR_WINDOW",
+    ):
+        provider.materialize()
+
+
+def test_eeg_response_analyzer_missing_output_rejected() -> None:
+    provider = EegWindowDatasetProvider()
+    provider.materialize()
+    event = provider.intervention_event("evt-demo-eeg-01")
+    baseline_windows = provider.windows_for_event("evt-demo-eeg-01", relation="baseline")
+    post_windows = provider.windows_for_event("evt-demo-eeg-01", relation="post")
+
+    analyzer = EegBandpowerResponseAnalyzer()
+
+    # Missing alpha_delta_ppm
+    input_missing_alpha = ResponseAnalysisInput(
+        intervention_event=event,
+        baseline_windows=baseline_windows,
+        post_windows=post_windows,
+        model_outputs={"beta_delta_ppm": 100},
+    )
+    with pytest.raises(EegDataError, match="RESPONSE_MODEL_OUTPUT_MISSING:alpha_delta_ppm"):
+        analyzer.analyze(input_missing_alpha)
+
+    # Missing beta_delta_ppm
+    input_missing_beta = ResponseAnalysisInput(
+        intervention_event=event,
+        baseline_windows=baseline_windows,
+        post_windows=post_windows,
+        model_outputs={"alpha_delta_ppm": 200},
+    )
+    with pytest.raises(EegDataError, match="RESPONSE_MODEL_OUTPUT_MISSING:beta_delta_ppm"):
+        analyzer.analyze(input_missing_beta)
+
+    # Non-integer value
+    input_non_int = ResponseAnalysisInput(
+        intervention_event=event,
+        baseline_windows=baseline_windows,
+        post_windows=post_windows,
+        model_outputs={"alpha_delta_ppm": "not_an_int", "beta_delta_ppm": 100},
+    )
+    with pytest.raises(EegDataError, match="RESPONSE_MODEL_OUTPUT_NOT_INTEGER"):
+        analyzer.analyze(input_non_int)
+
+
+class _WrongModalityBindingProvider:
+    binding_provider_id = "test-wrong-modality-provider-v1"
+    binding_provider_type = "RULE"
+
+    def propose_bindings(self, observation_session: object) -> tuple[BindingAssertion, ...]:
+        assert isinstance(observation_session, ObservationSession)
+        real_proposals = EegWindowBindingProvider().propose_bindings(observation_session)
+        first = real_proposals[0]
+        bad_assertion = BindingAssertion.create(
+            modality="ecg",
+            dataset_id=first.dataset_id,
+            session_id=first.session_id,
+            intervention_event_id=first.intervention_event_id,
+            data_window_id=first.data_window_id,
+            relation=first.relation,
+            start_offset_ms=first.start_offset_ms,
+            end_offset_ms=first.end_offset_ms,
+            acquisition_profile_id=first.acquisition_profile_id,
+            preprocessing_profile_id=first.preprocessing_profile_id,
+            raw_data_hash=first.raw_data_hash,
+            binding_provider_id=self.binding_provider_id,
+            binding_provider_type=self.binding_provider_type,
+        )
+        return (bad_assertion, *real_proposals[1:])
+
+
+def test_eeg_provider_rejects_wrong_binding_modality() -> None:
+    provider = EegWindowDatasetProvider(
+        windows_per_session=2,
+        binding_provider=_WrongModalityBindingProvider(),
+    )
+    with pytest.raises(EegDataError, match="BINDING_ASSERTION_WINDOW_MISMATCH"):
+        provider.materialize()
+
+
+class _ForeignDatasetBindingProvider:
+    binding_provider_id = "test-foreign-dataset-provider-v1"
+    binding_provider_type = "RULE"
+
+    def propose_bindings(self, observation_session: object) -> tuple[BindingAssertion, ...]:
+        assert isinstance(observation_session, ObservationSession)
+        real_proposals = EegWindowBindingProvider().propose_bindings(observation_session)
+        first = real_proposals[0]
+        bad_assertion = BindingAssertion.create(
+            modality="eeg",
+            dataset_id="foreign-dataset-v1",
+            session_id=first.session_id,
+            intervention_event_id=first.intervention_event_id,
+            data_window_id=first.data_window_id,
+            relation=first.relation,
+            start_offset_ms=first.start_offset_ms,
+            end_offset_ms=first.end_offset_ms,
+            acquisition_profile_id=first.acquisition_profile_id,
+            preprocessing_profile_id=first.preprocessing_profile_id,
+            raw_data_hash=first.raw_data_hash,
+            binding_provider_id=self.binding_provider_id,
+            binding_provider_type=self.binding_provider_type,
+        )
+        return (bad_assertion, *real_proposals[1:])
+
+
+def test_eeg_provider_rejects_foreign_binding_dataset() -> None:
+    provider = EegWindowDatasetProvider(
+        windows_per_session=2,
+        binding_provider=_ForeignDatasetBindingProvider(),
+    )
+    with pytest.raises(EegDataError, match="BINDING_ASSERTION_WINDOW_MISMATCH"):
+        provider.materialize()

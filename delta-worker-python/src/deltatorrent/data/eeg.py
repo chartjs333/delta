@@ -8,7 +8,7 @@ only canonical extracted feature tensors and model parameters cross into consens
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -21,7 +21,16 @@ from deltatorrent.data.base import (
     DatasetProvider,
     DatasetProviderError,
 )
-from deltatorrent.data.binding import BindingAssertion, is_sha256_content_id
+from deltatorrent.data.binding import (
+    BINDING_DECISION_ACCEPTED,
+    BindingAssertion,
+    BindingAuthority,
+    BindingDecision,
+    BindingProvider,
+    DeterministicBindingAuthority,
+    ResolvedBindingSet,
+    is_sha256_content_id,
+)
 
 DEFAULT_EEG_CHANNELS: tuple[str, ...] = ("F3", "F4", "C3", "C4")
 DEFAULT_EEG_FREQUENCY_BANDS: tuple[tuple[str, float, float], ...] = (
@@ -43,6 +52,8 @@ VALID_INTERVENTION_LATERALITY: tuple[str, ...] = (
     "none",
 )
 VALID_WINDOW_RELATIONS: tuple[str, ...] = ("baseline", "post")
+DEFAULT_EEG_BINDING_PROVIDER_ID = "eeg-window-rule-provider-v1"
+DEFAULT_EEG_BINDING_AUTHORITY_ID = "eeg-demo-binding-authority-v1"
 
 DEMO_EEG_PARTITIONS: tuple[str, ...] = (
     "demo-eeg-worker-01",
@@ -66,7 +77,13 @@ def eeg_raw_data_hash(raw_signal: np.ndarray) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
-def _binding_assertion_for_window(dataset_id: str, window: PhysiologicalWindow) -> BindingAssertion:
+def _binding_assertion_for_window(
+    dataset_id: str,
+    window: PhysiologicalWindow,
+    *,
+    binding_provider_id: str = DEFAULT_EEG_BINDING_PROVIDER_ID,
+    binding_provider_type: str = "RULE",
+) -> BindingAssertion:
     """Create a dataset-layer assertion for one physiological window."""
     return BindingAssertion.create(
         modality="eeg",
@@ -80,6 +97,8 @@ def _binding_assertion_for_window(dataset_id: str, window: PhysiologicalWindow) 
         acquisition_profile_id=window.acquisition_profile_id,
         preprocessing_profile_id=window.preprocessing_profile_id,
         raw_data_hash=window.raw_data_hash,
+        binding_provider_id=binding_provider_id,
+        binding_provider_type=binding_provider_type,
     )
 
 
@@ -90,8 +109,19 @@ def _validate_binding_assertion_for_window(
     window: PhysiologicalWindow,
 ) -> None:
     """Fail closed if a pre-training binding assertion does not match its window."""
-    expected = _binding_assertion_for_window(dataset_id, window)
-    if assertion != expected:
+    if (
+        assertion.modality != "eeg"
+        or assertion.dataset_id != dataset_id
+        or assertion.session_id != window.session_id
+        or assertion.intervention_event_id != window.intervention_event_id
+        or assertion.data_window_id != window.window_id
+        or assertion.relation != window.relation
+        or assertion.start_offset_ms != window.start_offset_ms
+        or assertion.end_offset_ms != window.end_offset_ms
+        or assertion.acquisition_profile_id != window.acquisition_profile_id
+        or assertion.preprocessing_profile_id != window.preprocessing_profile_id
+        or assertion.raw_data_hash != window.raw_data_hash
+    ):
         raise EegDataError("BINDING_ASSERTION_WINDOW_MISMATCH")
 
 
@@ -251,6 +281,99 @@ class ResponseAnalysisInput:
         for window in self.post_windows:
             if window.intervention_event_id != event_id or window.relation != "post":
                 raise EegDataError("RESPONSE_POST_WINDOW_MISMATCH")
+
+
+@dataclass(frozen=True, slots=True)
+class EegWindowBindingProvider(BindingProvider):
+    """Deterministic EEG BindingProvider that proposes window/event bindings."""
+
+    dataset_id: str = EEG_DATASET_ID
+    binding_provider_id: str = DEFAULT_EEG_BINDING_PROVIDER_ID
+    binding_provider_type: str = "RULE"
+
+    def propose_bindings(self, observation_session: object) -> tuple[BindingAssertion, ...]:
+        """Return PROPOSED assertions for every physiological window in one session."""
+        if not isinstance(observation_session, ObservationSession):
+            raise EegDataError("EEG_BINDING_PROVIDER_SESSION_TYPE_INVALID")
+        proposals = [
+            _binding_assertion_for_window(
+                self.dataset_id,
+                window,
+                binding_provider_id=self.binding_provider_id,
+                binding_provider_type=self.binding_provider_type,
+            )
+            for window in observation_session.physiological_windows
+        ]
+        return tuple(sorted(proposals, key=lambda item: item.binding_assertion_id))
+
+
+@dataclass(frozen=True, slots=True)
+class ResponseAnalysisResult:
+    """Observation-only response analysis result with no clinical recommendation."""
+
+    intervention_event_id: str
+    baseline_window_count: int
+    post_window_count: int
+    alpha_delta_ppm: int
+    beta_delta_ppm: int
+    observation: str
+    clinical_conclusion_claimed: bool = False
+    recommendation_claimed: bool = False
+    type_name: str = "DELTAREDUCE_EEG_RESPONSE_ANALYSIS_RESULT"
+
+    def document(self) -> dict[str, object]:
+        """Return a JSON-safe response document."""
+        return {
+            "alpha_delta_ppm": self.alpha_delta_ppm,
+            "baseline_window_count": self.baseline_window_count,
+            "beta_delta_ppm": self.beta_delta_ppm,
+            "clinical_conclusion_claimed": self.clinical_conclusion_claimed,
+            "intervention_event_id": self.intervention_event_id,
+            "observation": self.observation,
+            "post_window_count": self.post_window_count,
+            "recommendation_claimed": self.recommendation_claimed,
+            "type_name": self.type_name,
+        }
+
+
+class EegBandpowerResponseAnalyzer:
+    """Observation-only analyzer for baseline/post EEG bandpower summaries."""
+
+    analyzer_id = "eeg-bandpower-response-analyzer-v1"
+
+    def analyze(self, analysis_input: ResponseAnalysisInput) -> ResponseAnalysisResult:
+        """Summarize observed baseline/post changes without medical interpretation."""
+        alpha_delta_ppm = self._required_int_output(
+            analysis_input.model_outputs,
+            "alpha_delta_ppm",
+        )
+        beta_delta_ppm = self._required_int_output(
+            analysis_input.model_outputs,
+            "beta_delta_ppm",
+        )
+        if alpha_delta_ppm > 0:
+            direction = "increased"
+        elif alpha_delta_ppm < 0:
+            direction = "decreased"
+        else:
+            direction = "unchanged"
+        return ResponseAnalysisResult(
+            intervention_event_id=analysis_input.intervention_event.intervention_event_id,
+            baseline_window_count=len(analysis_input.baseline_windows),
+            post_window_count=len(analysis_input.post_windows),
+            alpha_delta_ppm=alpha_delta_ppm,
+            beta_delta_ppm=beta_delta_ppm,
+            observation=f"Alpha bandpower {direction} in observed post-event windows.",
+        )
+
+    @staticmethod
+    def _required_int_output(model_outputs: Mapping[str, object], key: str) -> int:
+        if key not in model_outputs:
+            raise EegDataError(f"RESPONSE_MODEL_OUTPUT_MISSING:{key}")
+        value = model_outputs[key]
+        if type(value) is not int:
+            raise EegDataError(f"RESPONSE_MODEL_OUTPUT_NOT_INTEGER:{key}")
+        return value
 
 
 @dataclass(frozen=True, slots=True)
@@ -435,18 +558,27 @@ class EegWindowDatasetProvider(DatasetProvider):
         profile: EegPreprocessingProfile = DEFAULT_EEG_PROFILE,
         windows_per_session: int = 40,
         seed: int = 42,
+        binding_provider: BindingProvider | None = None,
+        binding_authority: BindingAuthority | None = None,
     ) -> None:
         if windows_per_session <= 0:
             raise EegDataError("WINDOWS_PER_SESSION_INVALID")
         self._profile = profile
         self._windows_per_session = windows_per_session
         self._seed = seed
+        self._binding_provider = binding_provider or EegWindowBindingProvider()
+        self._binding_authority = binding_authority or DeterministicBindingAuthority(
+            binding_authority_id=DEFAULT_EEG_BINDING_AUTHORITY_ID,
+            default_reason_code="RULE_EVENT_WINDOW_CONTEXT_MATCH",
+        )
         self._materialized = False
         self._sessions: dict[str, tuple[np.ndarray, np.ndarray]] = {}
         self._partition_window_contexts: dict[str, tuple[dict[str, object], ...]] = {}
         self._observation_sessions: dict[str, ObservationSession] = {}
         self._intervention_events: dict[str, InterventionEvent] = {}
         self._binding_assertions_by_window: dict[str, BindingAssertion] = {}
+        self._binding_decisions_by_window: dict[str, BindingDecision] = {}
+        self._resolved_binding_set: ResolvedBindingSet | None = None
         self._windows_by_event: dict[str, tuple[EegWindow, ...]] = {}
         self._eval_data: tuple[np.ndarray, np.ndarray] | None = None
 
@@ -471,9 +603,17 @@ class EegWindowDatasetProvider(DatasetProvider):
         if not self._materialized:
             self._generate_sessions()
             self._materialized = True
+        assert self._resolved_binding_set is not None
         return {
             "acquisition_profile_id": DEFAULT_EEG_ACQUISITION_PROFILE_ID,
-            "binding_assertion_count": len(self._binding_assertions_by_window),
+            "accepted_binding_count": self._resolved_binding_set.accepted_count,
+            "binding_assertion_count": len(self._resolved_binding_set.assertions),
+            "binding_authority_id": self._resolved_binding_set.binding_authority_id,
+            "binding_provider_id": self._binding_provider.binding_provider_id,
+            "binding_provider_type": self._binding_provider.binding_provider_type,
+            "rejected_binding_count": self._resolved_binding_set.rejected_count,
+            "resolved_binding_set_id": self._resolved_binding_set.resolved_binding_set_id,
+            "review_binding_count": self._resolved_binding_set.review_count,
             "dataset_id": self.dataset_id,
             "intervention_event_count": len(self._intervention_events),
             "observation_session_count": len(self._observation_sessions),
@@ -489,6 +629,79 @@ class EegWindowDatasetProvider(DatasetProvider):
     def _ensure_materialized(self) -> None:
         if not self._materialized:
             self.materialize()
+
+    def _validate_proposed_assertions_for_session(
+        self,
+        session: ObservationSession,
+        proposals: Sequence[BindingAssertion],
+    ) -> None:
+        windows_by_id = {win.window_id: win for win in session.physiological_windows}
+        events_by_id = {evt.intervention_event_id: evt for evt in session.intervention_events}
+
+        for assertion in proposals:
+            # 1. session_id belongs to current ObservationSession
+            if assertion.session_id != session.session_id:
+                raise EegDataError(
+                    f"BINDING_ASSERTION_SESSION_MISMATCH:{assertion.session_id}!={session.session_id}"
+                )
+            # 2. physiological_window_id exists
+            if assertion.data_window_id not in windows_by_id:
+                raise EegDataError(f"UNKNOWN_PHYSIOLOGICAL_WINDOW_ID:{assertion.data_window_id}")
+            # 3. intervention_event_id exists
+            if assertion.intervention_event_id not in events_by_id:
+                raise EegDataError(
+                    f"UNKNOWN_INTERVENTION_EVENT_ID:{assertion.intervention_event_id}"
+                )
+            # 4. assertion references the same event/window/session relation, modality, and dataset
+            window = windows_by_id[assertion.data_window_id]
+            _validate_binding_assertion_for_window(
+                assertion,
+                dataset_id=self.dataset_id,
+                window=window,
+            )
+
+    def _validate_resolved_binding_set(
+        self,
+        *,
+        all_materialized_windows: Sequence[EegWindow],
+        proposed_assertions: Sequence[BindingAssertion],
+        resolved_set: ResolvedBindingSet,
+    ) -> None:
+        proposed_by_id = {a.binding_assertion_id: a for a in proposed_assertions}
+        window_ids = {w.window_id for w in all_materialized_windows}
+
+        # 1. No foreign accepted assertions may enter ResolvedBindingSet/evidence counts
+        for accepted in resolved_set.accepted_assertions:
+            if accepted.binding_assertion_id not in proposed_by_id:
+                raise EegDataError(
+                    f"FOREIGN_ACCEPTED_BINDING_ASSERTION:{accepted.binding_assertion_id}"
+                )
+            if accepted.data_window_id not in window_ids:
+                raise EegDataError(f"FOREIGN_ACCEPTED_BINDING_WINDOW:{accepted.data_window_id}")
+            if accepted != proposed_by_id[accepted.binding_assertion_id]:
+                raise EegDataError(
+                    f"MUTATED_ACCEPTED_BINDING_ASSERTION:{accepted.binding_assertion_id}"
+                )
+
+        # 2. Check accepted binding cardinality: exactly one accepted binding
+        # per materialized EEG window.
+        accepted_by_window: dict[str, list[BindingAssertion]] = {}
+        for accepted in resolved_set.accepted_assertions:
+            accepted_by_window.setdefault(accepted.data_window_id, []).append(accepted)
+
+        for window in all_materialized_windows:
+            accepted_list = accepted_by_window.get(window.window_id, [])
+            if len(accepted_list) == 0:
+                raise EegDataError(f"WINDOW_BINDING_REJECTED_OR_MISSING:{window.window_id}")
+            if len(accepted_list) > 1:
+                raise EegDataError(
+                    f"WINDOW_BINDING_AMBIGUOUS:{window.window_id}:count={len(accepted_list)}"
+                )
+
+        if resolved_set.accepted_count != len(all_materialized_windows):
+            raise EegDataError(
+                f"ACCEPTED_BINDING_COUNT_MISMATCH:accepted={resolved_set.accepted_count}!={len(all_materialized_windows)}"
+            )
 
     def _generate_sessions(self) -> None:
         """Generate reproducible multi-channel EEG sessions with label-skewed worker partitions."""
@@ -511,11 +724,14 @@ class EegWindowDatasetProvider(DatasetProvider):
             [0] * balanced_rest + [1] * balanced_task,
             [0] * balanced_rest + [1] * balanced_task,
         ]
+        partition_windows: dict[str, tuple[EegWindow, ...]] = {}
+        partition_samples: dict[str, tuple[np.ndarray, ...]] = {}
+        partition_targets: dict[str, tuple[int, ...]] = {}
+        proposed_assertions: list[BindingAssertion] = []
 
         for p_idx, p_name in enumerate(DEMO_EEG_PARTITIONS):
             labels_list = partition_class_distributions[p_idx % len(partition_class_distributions)]
             samples_list: list[np.ndarray] = []
-            window_contexts: list[dict[str, object]] = []
             session_id = f"obs-demo-eeg-{p_idx + 1:02d}"
             event = InterventionEvent(
                 intervention_event_id=f"evt-demo-eeg-{p_idx + 1:02d}",
@@ -564,19 +780,14 @@ class EegWindowDatasetProvider(DatasetProvider):
                     channels=self._profile.channels,
                 )
                 windows.append(window)
-                assertion = _binding_assertion_for_window(self.dataset_id, window)
-                self._binding_assertions_by_window[window.window_id] = assertion
-                window_contexts.append(assertion.ticket_context())
                 features = compute_window_bandpower(raw, self._profile)
                 samples_list.append(features)
 
-            samples_arr = np.stack(samples_list, axis=0).astype(np.float64)
-            labels_arr = np.array(labels_list, dtype=np.uint8)
-            self._sessions[p_name] = (samples_arr, labels_arr)
-            self._partition_window_contexts[p_name] = tuple(window_contexts)
+            partition_samples[p_name] = tuple(samples_list)
+            partition_targets[p_name] = tuple(int(label) for label in labels_list)
             self._intervention_events[event.intervention_event_id] = event
             self._windows_by_event[event.intervention_event_id] = tuple(windows)
-            self._observation_sessions[session_id] = ObservationSession(
+            observation_session = ObservationSession(
                 session_id=session_id,
                 subject_pseudonym=f"subject-demo-{p_idx + 1:02d}",
                 acquisition_profile_id=DEFAULT_EEG_ACQUISITION_PROFILE_ID,
@@ -584,6 +795,53 @@ class EegWindowDatasetProvider(DatasetProvider):
                 intervention_events=(event,),
                 physiological_windows=tuple(windows),
             )
+            self._observation_sessions[session_id] = observation_session
+            partition_windows[p_name] = tuple(windows)
+            session_proposals = self._binding_provider.propose_bindings(observation_session)
+            self._validate_proposed_assertions_for_session(observation_session, session_proposals)
+            proposed_assertions.extend(session_proposals)
+
+        self._resolved_binding_set = self._binding_authority.resolve(proposed_assertions)
+
+        all_materialized_windows: list[EegWindow] = []
+        for wins in partition_windows.values():
+            all_materialized_windows.extend(wins)
+
+        self._validate_resolved_binding_set(
+            all_materialized_windows=all_materialized_windows,
+            proposed_assertions=proposed_assertions,
+            resolved_set=self._resolved_binding_set,
+        )
+
+        for assertion in self._resolved_binding_set.accepted_assertions:
+            self._binding_assertions_by_window[assertion.data_window_id] = assertion
+            self._binding_decisions_by_window[assertion.data_window_id] = (
+                self._resolved_binding_set.decision_for_assertion_id(
+                    assertion.binding_assertion_id,
+                )
+            )
+
+        for partition_id, partition_eeg_windows in partition_windows.items():
+            accepted_contexts: list[dict[str, object]] = []
+            accepted_samples: list[np.ndarray] = []
+            accepted_targets: list[int] = []
+            for index, window in enumerate(partition_eeg_windows):
+                context = self._resolved_binding_set.ticket_context_for_window(
+                    window.window_id,
+                )
+                accepted_contexts.append(context)
+                accepted_samples.append(partition_samples[partition_id][index])
+                accepted_targets.append(partition_targets[partition_id][index])
+            if len(accepted_samples) != len(partition_eeg_windows):
+                raise EegDataError(
+                    f"PARTITION_SAMPLE_COUNT_SHRUNK:{partition_id}:"
+                    f"{len(accepted_samples)}!={len(partition_eeg_windows)}"
+                )
+            self._sessions[partition_id] = (
+                np.stack(accepted_samples, axis=0).astype(np.float64),
+                np.array(accepted_targets, dtype=np.uint8),
+            )
+            self._partition_window_contexts[partition_id] = tuple(accepted_contexts)
 
         # Generate evaluation session (40 balanced windows)
         eval_labels_list = [0] * 20 + [1] * 20
@@ -678,12 +936,26 @@ class EegWindowDatasetProvider(DatasetProvider):
         return tuple(window for window in windows if window.relation == relation)
 
     def binding_assertion(self, data_window_id: str) -> BindingAssertion:
-        """Return the immutable pre-training binding assertion for one physiological window."""
+        """Return the accepted immutable binding assertion for one physiological window."""
         self._ensure_materialized()
         try:
             return self._binding_assertions_by_window[data_window_id]
         except KeyError as exc:
             raise EegDataError(f"UNKNOWN_BINDING_ASSERTION_WINDOW_ID:{data_window_id}") from exc
+
+    def binding_decision(self, data_window_id: str) -> BindingDecision:
+        """Return the authority decision for one accepted physiological window."""
+        self._ensure_materialized()
+        try:
+            return self._binding_decisions_by_window[data_window_id]
+        except KeyError as exc:
+            raise EegDataError(f"UNKNOWN_BINDING_DECISION_WINDOW_ID:{data_window_id}") from exc
+
+    def resolved_binding_set(self) -> ResolvedBindingSet:
+        """Return the deterministic resolved binding set for this provider materialization."""
+        self._ensure_materialized()
+        assert self._resolved_binding_set is not None
+        return self._resolved_binding_set
 
     def response_analysis_input(
         self,
@@ -709,12 +981,14 @@ class EegWindowDatasetProvider(DatasetProvider):
         label: int = 0,
         *,
         binding_assertion: BindingAssertion | None = None,
+        resolved_binding_set: ResolvedBindingSet | None = None,
     ) -> DataPartition:
         """Deterministically extract and preprocess a single explicit DataWindow.
 
         Bridges the streaming DataWindow abstraction into a standard DataPartition.
         """
         assertion: BindingAssertion | None = None
+        decision: BindingDecision | None = None
         if isinstance(window, EegWindow):
             if window.acquisition_profile_id != DEFAULT_EEG_ACQUISITION_PROFILE_ID:
                 raise EegDataError("ACQUISITION_PROFILE_MISMATCH")
@@ -726,6 +1000,13 @@ class EegWindowDatasetProvider(DatasetProvider):
                 dataset_id=self.dataset_id,
                 window=window,
             )
+            if resolved_binding_set is None:
+                raise EegDataError("RESOLVED_BINDING_SET_REQUIRED")
+            decision = resolved_binding_set.decision_for_assertion_id(
+                assertion.binding_assertion_id,
+            )
+            if decision.decision != BINDING_DECISION_ACCEPTED:
+                raise EegDataError(f"BINDING_ASSERTION_NOT_ACCEPTED:{window.window_id}")
         if window.preprocessing_profile_id != self._profile.profile_id:
             raise EegDataError(
                 f"PROFILE_MISMATCH: window specifies '{window.preprocessing_profile_id}', "
@@ -753,7 +1034,11 @@ class EegWindowDatasetProvider(DatasetProvider):
         }
         if isinstance(window, EegWindow):
             assert assertion is not None
-            metadata["ticket_context"] = [assertion.ticket_context()]
+            assert decision is not None
+            assert resolved_binding_set is not None
+            metadata["ticket_context"] = [
+                resolved_binding_set.ticket_context_for_assertion(assertion)
+            ]
         return DataPartition(
             partition_id=window.window_id,
             samples=samples,

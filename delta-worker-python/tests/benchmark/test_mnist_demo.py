@@ -662,28 +662,40 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     assert set(first_ticket_context) == {
         "acquisition_profile_id",
         "binding_assertion_id",
+        "binding_authority_id",
+        "binding_decision_id",
         "binding_schema_version",
         "data_window_id",
-        "end_offset_ms",
         "intervention_event_id",
         "preprocessing_profile_id",
         "raw_data_hash",
-        "relation",
+        "resolved_binding_set_id",
         "session_id",
-        "start_offset_ms",
     }
     assert first_ticket_context["binding_schema_version"] == "1.0.0"
     assert first_ticket_context["binding_assertion_id"].startswith("sha256:")
+    assert first_ticket_context["binding_decision_id"].startswith("sha256:")
+    assert first_ticket_context["resolved_binding_set_id"].startswith("sha256:")
     assert first_ticket_context["intervention_event_id"].startswith("evt-demo-eeg-")
     assert first_ticket_context["data_window_id"].startswith("eegwin-demo-")
     assert first_ticket_context["raw_data_hash"].startswith("sha256:")
     temporal_binding = eeg_showcase["temporal_binding"]
     assert temporal_binding["type_name"] == "DELTAREDUCE_TEMPORAL_EVENT_BINDING_EVIDENCE"
-    assert temporal_binding["binding_layer"] == "deltatorrent.data.binding.BindingAssertion"
+    assert (
+        temporal_binding["binding_layer"]
+        == "deltatorrent.data.binding.BindingProvider/BindingAuthority/ResolvedBindingSet"
+    )
     assert temporal_binding["assertion_schema_version"] == "1.0.0"
     assert temporal_binding["assertion_count"] == 160
+    assert temporal_binding["accepted_count"] == 160
+    assert temporal_binding["rejected_count"] == 0
+    assert temporal_binding["review_count"] == 0
     assert temporal_binding["window_count"] == 160
     assert temporal_binding["event_count"] == 4
+    assert temporal_binding["binding_provider_id"] == "eeg-window-rule-provider-v1"
+    assert temporal_binding["binding_provider_type"] == "RULE"
+    assert temporal_binding["binding_authority_id"] == "eeg-demo-binding-authority-v1"
+    assert temporal_binding["resolved_binding_set_id"].startswith("sha256:")
     assert (
         temporal_binding["relation_contract"]
         == "EegWindow.intervention_event_id == InterventionEvent.intervention_event_id"
@@ -695,10 +707,20 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     assert len(temporal_binding["examples"]) == 4
     first_binding = temporal_binding["examples"][0]
     assert first_binding["binding_assertion_id"] == first_ticket_context["binding_assertion_id"]
+    assert first_binding["binding_decision_id"] == first_ticket_context["binding_decision_id"]
+    assert (
+        first_binding["resolved_binding_set_id"] == first_ticket_context["resolved_binding_set_id"]
+    )
     assert first_binding["intervention_event_id"] == first_ticket_context["intervention_event_id"]
     assert first_binding["data_window_id"] == first_ticket_context["data_window_id"]
     assert first_binding["session_id"] == first_ticket_context["session_id"]
     assert first_binding["raw_data_hash"] == first_ticket_context["raw_data_hash"]
+    assert first_binding["binding_provider_id"] == "eeg-window-rule-provider-v1"
+    assert first_binding["binding_provider_type"] == "RULE"
+    assert first_binding["binding_status"] == "PROPOSED"
+    assert first_binding["binding_authority_id"] == "eeg-demo-binding-authority-v1"
+    assert first_binding["authority_decision"] == "ACCEPTED"
+    assert first_binding["reason_code"] == "RULE_EVENT_WINDOW_CONTEXT_MATCH"
     assert first_binding["point_id"] == "TCM-ST36"
     assert first_binding["point_source"] == "InterventionEvent.point_id"
     assert first_binding["laterality"] == "left"
@@ -708,6 +730,23 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     assert "laterality" not in first_ticket_context
     assert "intervention_type" not in first_ticket_context
     assert "protocol_id" not in first_ticket_context
+    assert "relation" not in first_ticket_context
+    assert "start_offset_ms" not in first_ticket_context
+    assert "end_offset_ms" not in first_ticket_context
+    observation_demo = eeg_showcase["observation_demo"]
+    assert observation_demo["type_name"] == "DELTAREDUCE_EEG_OBSERVATION_DEMO"
+    assert observation_demo["event_id"] == "evt-demo-eeg-01"
+    assert observation_demo["clinical_conclusion_claimed"] is False
+    assert observation_demo["recommendation_claimed"] is False
+    assert observation_demo["delta_spine_modified"] is False
+    assert observation_demo["binding_semantics_in_delta"] is False
+    response = observation_demo["response"]
+    assert response["type_name"] == "DELTAREDUCE_EEG_RESPONSE_ANALYSIS_RESULT"
+    assert response["intervention_event_id"] == "evt-demo-eeg-01"
+    assert response["baseline_window_count"] > 0
+    assert response["post_window_count"] > 0
+    assert response["clinical_conclusion_claimed"] is False
+    assert response["recommendation_claimed"] is False
     assert report["distributed"]["exact_model_match_with_centralized"] is True
     assert report["distributed"]["aggregation_owner"] == ("delta::robust::reduce_parameter_shard")
     assert report["distributed"]["native_runtime_terminal"] == "APPLIED"
@@ -833,12 +872,16 @@ def test_workspace_is_one_button_and_does_not_expose_raw_json_by_default() -> No
     assert "Мульти-доменная структура" in WORKSPACE_HTML
     assert "multi-domain-grid" in WORKSPACE_HTML
     assert "EEG плагин подключён" in WORKSPACE_HTML
-    assert "Observation view" in WORKSPACE_HTML
-    assert "Model observations" in WORKSPACE_HTML
+    assert "Intervention EEG Explorer" in WORKSPACE_HTML
+    assert "Event metadata" in WORKSPACE_HTML
+    assert "EEG Timeline" in WORKSPACE_HTML
+    assert "Response" in WORKSPACE_HTML
     assert "observed association" in WORKSPACE_HTML
-    assert "no CNN/Transformer claim" in WORKSPACE_HTML
     assert "InterventionEvent" in WORKSPACE_HTML
-    assert "Intervention ↔ EEG binding" in WORKSPACE_HTML
+    assert "Binding Provenance" in WORKSPACE_HTML
+    assert "BindingProvider" in WORKSPACE_HTML
+    assert "BindingAuthority" in WORKSPACE_HTML
+    assert "ResolvedBindingSet" in WORKSPACE_HTML
     assert "temporal-binding-rows" in WORKSPACE_HTML
     assert "BindingAssertion" in WORKSPACE_HTML
     assert "eeg-plugin-id" in WORKSPACE_HTML
