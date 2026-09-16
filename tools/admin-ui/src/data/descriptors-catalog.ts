@@ -108,9 +108,21 @@ export function validateCatalogSnapshot(raw: unknown): DescriptorCatalogSnapshot
       typeof m.plugin_id !== "string" ||
       !m.plugin_id.trim() ||
       typeof m.display_name !== "string" ||
+      !m.display_name.trim() ||
+      typeof m.model_family !== "string" ||
+      !m.model_family.trim() ||
+      typeof m.task_type !== "string" ||
+      !m.task_type.trim() ||
       typeof m.sample_kind !== "string" ||
+      !m.sample_kind.trim() ||
       typeof m.target_kind !== "string" ||
-      typeof m.supports_stage_c_real_drq1 !== "boolean"
+      !m.target_kind.trim() ||
+      typeof m.deterministic !== "boolean" ||
+      typeof m.supports_stage_c_real_drq1 !== "boolean" ||
+      !(
+        m.parameter_schema_id === null ||
+        (typeof m.parameter_schema_id === "string" && m.parameter_schema_id.trim().length > 0)
+      )
     ) {
       throw new CatalogValidationError("Invalid model_plugin entry in catalog");
     }
@@ -132,8 +144,17 @@ export function validateCatalogSnapshot(raw: unknown): DescriptorCatalogSnapshot
       typeof d.dataset_id !== "string" ||
       !d.dataset_id.trim() ||
       typeof d.display_name !== "string" ||
+      !d.display_name.trim() ||
       typeof d.sample_kind !== "string" ||
-      typeof d.target_kind !== "string"
+      !d.sample_kind.trim() ||
+      typeof d.target_kind !== "string" ||
+      !d.target_kind.trim() ||
+      typeof d.deterministic !== "boolean" ||
+      typeof d.supports_offline_cache !== "boolean" ||
+      typeof d.description !== "string" ||
+      !d.description.trim() ||
+      typeof d.version !== "string" ||
+      !d.version.trim()
     ) {
       throw new CatalogValidationError("Invalid dataset entry in catalog");
     }
@@ -195,6 +216,14 @@ export function validateCatalogSnapshot(raw: unknown): DescriptorCatalogSnapshot
     seenPairs.add(pairKey);
 
     const scopesAllowed = c.requested_scope_allowed as Record<string, unknown>;
+    const scopeKeys = Object.keys(scopesAllowed);
+    for (const key of scopeKeys) {
+      if (!VALID_SCOPES.includes(key as ExecutionScopeName)) {
+        throw new CatalogValidationError(
+          `Compatibility pair ${pairKey} contains unknown scope key: '${key}'`
+        );
+      }
+    }
     for (const scope of VALID_SCOPES) {
       if (typeof scopesAllowed[scope] !== "boolean") {
         throw new CatalogValidationError(

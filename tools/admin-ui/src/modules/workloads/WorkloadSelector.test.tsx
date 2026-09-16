@@ -318,4 +318,56 @@ describe("validateCatalogSnapshot", () => {
       /allows STAGE_C_REAL_DRQ1 but supports_stage_c_real_drq1 is false/u
     );
   });
+
+  it("fails closed when requested_scope_allowed contains an unknown scope key", () => {
+    const invalid = {
+      ...CANONICAL_DESCRIPTOR_CATALOG,
+      compatibility: CANONICAL_DESCRIPTOR_CATALOG.compatibility.map((c, idx) => {
+        if (idx === 0) {
+          return {
+            ...c,
+            requested_scope_allowed: {
+              ...c.requested_scope_allowed,
+              FUTURE_UNKNOWN_SCOPE: true,
+            },
+          };
+        }
+        return c;
+      }),
+    };
+    expect(() => validateCatalogSnapshot(invalid)).toThrow(CatalogValidationError);
+    expect(() => validateCatalogSnapshot(invalid)).toThrow(
+      /contains unknown scope key: 'FUTURE_UNKNOWN_SCOPE'/u
+    );
+  });
+
+  it("fails closed when a model descriptor is missing required metadata", () => {
+    const badModel = {
+      ...CANONICAL_DESCRIPTOR_CATALOG.model_plugins[0],
+      model_family: "",
+    };
+    const invalid = {
+      ...CANONICAL_DESCRIPTOR_CATALOG,
+      model_plugins: [badModel, ...CANONICAL_DESCRIPTOR_CATALOG.model_plugins.slice(1)],
+    };
+    expect(() => validateCatalogSnapshot(invalid)).toThrow(CatalogValidationError);
+    expect(() => validateCatalogSnapshot(invalid)).toThrow(
+      /Invalid model_plugin entry in catalog/u
+    );
+  });
+
+  it("fails closed when a dataset descriptor is missing required metadata", () => {
+    const badDataset = {
+      ...CANONICAL_DESCRIPTOR_CATALOG.datasets[0],
+      description: "",
+    };
+    const invalid = {
+      ...CANONICAL_DESCRIPTOR_CATALOG,
+      datasets: [badDataset, ...CANONICAL_DESCRIPTOR_CATALOG.datasets.slice(1)],
+    };
+    expect(() => validateCatalogSnapshot(invalid)).toThrow(CatalogValidationError);
+    expect(() => validateCatalogSnapshot(invalid)).toThrow(
+      /Invalid dataset entry in catalog/u
+    );
+  });
 });

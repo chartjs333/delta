@@ -69,8 +69,9 @@ export function WorkloadSelector({
         <h1 id="workloads-heading">Workloads</h1>
         <p>
           Configure and inspect candidate model and dataset combinations against
-          the frozen descriptor catalog. Pre-flight capabilities are verified directly
-          from registry descriptors; execution evidence is strictly isolated.
+          the frozen descriptor catalog. Pre-flight capabilities are verified from
+          frozen catalog snapshot derived from registry descriptors; execution evidence
+          is strictly isolated.
         </p>
       </header>
 
