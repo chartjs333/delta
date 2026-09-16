@@ -34,14 +34,47 @@ from deltatorrent.benchmark.fault_profiles import FaultProfile
 from deltatorrent.benchmark.network_profiles import NetworkProfile
 from deltatorrent.domain.manifests import ArtifactRef
 from deltatorrent.domain.updates import NormalizedContributionCandidate
+from deltatorrent.model_plugins.qlora import QLORA_PARAMETER_SCHEMA_ID
 from deltatorrent.qlora.backend import (
-    QuantizedAdapterBackend,
-    TinyOfflineBackend,
     clone_adapters,
     logical_adapter_hash,
     logical_base_hash,
 )
 from deltatorrent.qlora.contribution import encode_adapter_contribution
+from deltatorrent.qlora.tiny_profile import (
+    ADAPTER_ORDER,
+    ADAPTER_SHAPES,
+    ADAPTER_WIDTH,
+    DEFAULT_LEARNING_RATE,
+    QLORA_DATASET_ID,
+    QLORA_PLUGIN_ID,
+    QLORA_QUANTUM_DENOMINATOR,
+    QLORA_SEGMENT_ID,
+)
+from deltatorrent.qlora.tiny_profile import (
+    adapter_id_from_arrays as _adapter_id_from_arrays,
+)
+from deltatorrent.qlora.tiny_profile import (
+    backend_from_adapter_arrays as _backend_from_adapter_arrays,
+)
+from deltatorrent.qlora.tiny_profile import (
+    evaluate_backend as _evaluate_backend,
+)
+from deltatorrent.qlora.tiny_profile import (
+    evaluation_batch as _evaluation_batch,
+)
+from deltatorrent.qlora.tiny_profile import (
+    flatten_adapters as _flatten_adapters,
+)
+from deltatorrent.qlora.tiny_profile import (
+    new_tiny_backend as _new_tiny_backend,
+)
+from deltatorrent.qlora.tiny_profile import (
+    split_adapter_values as _split_adapter_values,
+)
+from deltatorrent.qlora.tiny_profile import (
+    worker_batches as _worker_batches,
+)
 from deltatorrent.qlora.trainer import Batch, Ticket, TrainingResult, train_fixed_ticket
 from deltatorrent.worker.drq1_producer import (
     DEFAULT_PROFILE_ID,
@@ -56,13 +89,6 @@ class QloraDeltaE2EError(ValueError):
 
 NODE_COUNT: Final = 4
 QLORA_EVENT_ID: Final = "qlora-4-workers"
-QLORA_SEGMENT_ID: Final = "qlora.adapter.flat"
-QLORA_PLUGIN_ID: Final = "qlora-tiny-adapter-v1"
-QLORA_DATASET_ID: Final = "tiny-qlora-regression-v1"
-QLORA_QUANTUM_DENOMINATOR: Final = 10_000
-QLORA_PARAMETER_SCHEMA_ID: Final = (
-    "sha256:2eeeaeb91b4e26a21c41e7734bff8a2382d4d7ec29fe06c81a03820c63ad5197"
-)
 QLORA_PROOF_INSTANCE_ID: Final = (
     "sha256:d959fcae746ccbdde7f3c8a50ce7f0f9a3ef273eaf58d24ce48ae25098686c78"
 )
@@ -76,11 +102,7 @@ QLORA_SHARD_PLAN_ID: Final = (
     "sha256:1a18dd3135d2c3f1e2abef695326592534340d7afcdf6e4af451b142a0fa10d5"
 )
 QLORA_ARITHMETIC_PROFILE_ID: Final = DEFAULT_PROFILE_ID
-
-ADAPTER_ORDER: Final = ("model.layer0.lora_A", "model.layer0.lora_B")
-ADAPTER_SHAPES: Final = ((2, 2), (2, 2))
-ADAPTER_WIDTH: Final = 8
-LEARNING_RATE: Final = 0.05
+LEARNING_RATE: Final = DEFAULT_LEARNING_RATE
 TRAJECTORY_MAX_LOSS_DELTA_TOLERANCE: Final = 1.0e-3
 TRAJECTORY_MAX_CHECKPOINT_L2_TOLERANCE: Final = 1.0e-2
 TRAJECTORY_MIN_COSINE_SIMILARITY: Final = 0.999
@@ -150,108 +172,11 @@ def _stagec_values_hash(values: Sequence[int]) -> str:
     return f"sha256:{hashlib.sha256(raw).hexdigest()}"
 
 
-def _torch_tensor(value: Sequence[Sequence[float]]) -> torch.Tensor:
-    return torch.tensor(value, dtype=torch.float32)
-
-
-def _new_tiny_backend() -> TinyOfflineBackend:
-    base = {
-        "model.embed.weight": _torch_tensor([[0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]),
-        "model.layer0.weight": _torch_tensor([[1.0, -1.0], [1.0, 1.0]]),
-        "model.output.weight": _torch_tensor([[1.0, 0.0], [0.0, 1.0]]),
-    }
-    buffers = {"model.layer0.scale": torch.tensor([1.0], dtype=torch.float32)}
-    adapters = {
-        "model.layer0.lora_A": torch.nn.Parameter(_torch_tensor([[0.1, -0.1], [0.05, 0.0]])),
-        "model.layer0.lora_B": torch.nn.Parameter(_torch_tensor([[0.0, 0.0], [0.0, 0.0]])),
-    }
-    return TinyOfflineBackend(base, buffers, adapters)
-
-
-def _worker_batches() -> tuple[Batch, ...]:
-    return (
-        Batch(_torch_tensor([[1.0, 0.0], [0.0, 1.0]]), _torch_tensor([[0.0, 0.0], [0.0, 0.0]]), 2),
-        Batch(_torch_tensor([[1.0, 1.0], [0.5, -0.5]]), _torch_tensor([[1.0, 1.0], [1.0, 1.0]]), 2),
-        Batch(
-            _torch_tensor([[2.0, 0.0], [0.0, 2.0]]),
-            _torch_tensor([[1.0, -1.0], [-1.0, 1.0]]),
-            2,
-        ),
-        Batch(
-            _torch_tensor([[-1.0, 0.5], [0.25, 1.0]]),
-            _torch_tensor([[0.5, 0.0], [0.0, 0.5]]),
-            2,
-        ),
-    )
-
-
-def _evaluation_batch() -> Batch:
-    return Batch(
-        _torch_tensor(
-            [
-                [1.0, 0.0],
-                [0.0, 1.0],
-                [1.0, 1.0],
-                [-1.0, 0.5],
-                [0.25, 1.0],
-            ]
-        ),
-        _torch_tensor(
-            [
-                [0.0, 0.0],
-                [0.0, 0.0],
-                [1.0, 1.0],
-                [0.5, 0.0],
-                [0.0, 0.5],
-            ]
-        ),
-        5,
-    )
-
-
-def _flatten_adapters(adapters: Mapping[str, torch.Tensor]) -> np.ndarray:
-    parts: list[np.ndarray] = []
-    for name in ADAPTER_ORDER:
-        if name not in adapters:
-            raise QloraDeltaE2EError(f"QLORA_ADAPTER_TENSOR_MISSING: {name}")
-        parts.append(adapters[name].detach().cpu().numpy().astype(np.float64).reshape(-1))
-    flat = np.concatenate(parts) if parts else np.empty(0, dtype=np.float64)
-    if flat.shape != (ADAPTER_WIDTH,):
-        raise QloraDeltaE2EError("QLORA_ADAPTER_WIDTH_INVALID")
-    return np.ascontiguousarray(flat, dtype=np.float64)
-
-
-def _split_adapter_values(values: object) -> dict[str, np.ndarray]:
-    flat = np.asarray(values, dtype=np.float64).reshape(-1)
-    if flat.shape != (ADAPTER_WIDTH,):
-        raise QloraDeltaE2EError("QLORA_APPLIED_ADAPTER_WIDTH_INVALID")
-    result: dict[str, np.ndarray] = {}
-    cursor = 0
-    for name, shape in zip(ADAPTER_ORDER, ADAPTER_SHAPES, strict=True):
-        count = int(np.prod(shape))
-        result[name] = np.ascontiguousarray(flat[cursor : cursor + count].reshape(shape))
-        cursor += count
-    return result
-
-
 def _metric_float(metrics: Mapping[str, object], name: str) -> float:
     value = metrics.get(name)
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise QloraDeltaE2EError(f"QLORA_EVALUATION_METRIC_INVALID: {name}")
     return float(value)
-
-
-def _backend_from_adapter_arrays(adapters: Mapping[str, np.ndarray]) -> TinyOfflineBackend:
-    backend = _new_tiny_backend()
-    for name in ADAPTER_ORDER:
-        backend._adapters[name] = torch.nn.Parameter(
-            torch.tensor(adapters[name], dtype=torch.float32)
-        )
-    return backend
-
-
-def _adapter_id_from_arrays(adapters: Mapping[str, np.ndarray]) -> str:
-    return logical_adapter_hash(_backend_from_adapter_arrays(adapters))
 
 
 def _adapter_vector(adapters: Mapping[str, np.ndarray]) -> np.ndarray:
@@ -306,24 +231,6 @@ def _object_int(value: object, code: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise QloraDeltaE2EError(code)
     return value
-
-
-def _evaluate_backend(backend: QuantizedAdapterBackend) -> dict[str, object]:
-    batch = _evaluation_batch()
-    with torch.no_grad():
-        weight = backend.base_tensors()["model.layer0.weight"]
-        adapter_a = backend.adapter_tensors()["model.layer0.lora_A"]
-        adapter_b = backend.adapter_tensors()["model.layer0.lora_B"]
-        prediction = batch.inputs @ weight.T + (batch.inputs @ adapter_a.T) @ adapter_b.T
-        residual = prediction - batch.targets
-        mse = torch.mean(residual**2)
-        mae = torch.mean(torch.abs(residual))
-    return {
-        "evaluation_dataset_id": QLORA_DATASET_ID,
-        "loss_mse": round(float(mse), 12),
-        "mean_absolute_error": round(float(mae), 12),
-        "sample_count": int(batch.token_count),
-    }
 
 
 def _scale_table() -> dict[str, object]:

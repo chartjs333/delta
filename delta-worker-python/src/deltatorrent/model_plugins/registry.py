@@ -8,6 +8,7 @@ from typing import Final
 from deltatorrent.model_plugins.base import ModelPlugin, PluginDescriptor
 from deltatorrent.model_plugins.eeg_bandpower import EegBandpowerCentroidPlugin
 from deltatorrent.model_plugins.mnist_centroid import MnistCentroidPlugin
+from deltatorrent.model_plugins.qlora import QLORA_PARAMETER_SCHEMA_ID, QloraModelPlugin
 
 
 class PluginRegistryError(ValueError):
@@ -101,6 +102,18 @@ EEG_BANDPOWER_DESCRIPTOR: Final[PluginDescriptor] = PluginDescriptor(
     parameter_schema_id=None,
 )
 
+QLORA_DESCRIPTOR: Final[PluginDescriptor] = PluginDescriptor(
+    plugin_id="qlora-tiny-adapter-v1",
+    display_name="QLoRA Tiny Quantized Adapter",
+    model_family="qlora",
+    task_type="adapter_regression",
+    sample_kind="vector/tiny-qlora-2d",
+    target_kind="regression/vector-2d",
+    deterministic=True,
+    supports_stage_c_real_drq1=True,
+    parameter_schema_id=QLORA_PARAMETER_SCHEMA_ID,
+)
+
 
 def build_default_registry() -> ModelPluginRegistry:
     """Construct a new ModelPluginRegistry pre-populated with baseline plugins."""
@@ -112,6 +125,10 @@ def build_default_registry() -> ModelPluginRegistry:
     registry.register(
         descriptor=EEG_BANDPOWER_DESCRIPTOR,
         factory=EegBandpowerCentroidPlugin,
+    )
+    registry.register(
+        descriptor=QLORA_DESCRIPTOR,
+        factory=QloraModelPlugin,
     )
     return registry
 

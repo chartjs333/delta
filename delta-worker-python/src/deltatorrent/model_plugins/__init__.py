@@ -14,9 +14,15 @@ from deltatorrent.model_plugins.eeg_bandpower import (
     EegPluginError,
 )
 from deltatorrent.model_plugins.mnist_centroid import MnistCentroidModel, MnistCentroidPlugin
+from deltatorrent.model_plugins.qlora import (
+    QloraAdapterModel,
+    QloraModelPlugin,
+    QloraPluginError,
+)
 from deltatorrent.model_plugins.registry import (
     EEG_BANDPOWER_DESCRIPTOR,
     MNIST_CENTROID_DESCRIPTOR,
+    QLORA_DESCRIPTOR,
     ModelPluginRegistry,
     PluginRegistryError,
     build_default_registry,
@@ -34,6 +40,7 @@ from deltatorrent.model_plugins.runner import (
 __all__ = [
     "EEG_BANDPOWER_DESCRIPTOR",
     "MNIST_CENTROID_DESCRIPTOR",
+    "QLORA_DESCRIPTOR",
     "DomainBindingSpec",
     "EegBandpowerCentroidPlugin",
     "EegBandpowerModel",
@@ -49,6 +56,9 @@ __all__ = [
     "MultiDomainBinding",
     "PluginDescriptor",
     "PluginRegistryError",
+    "QloraAdapterModel",
+    "QloraModelPlugin",
+    "QloraPluginError",
     "bind_model_and_dataset",
     "bind_model_dataset_domains",
     "build_default_registry",

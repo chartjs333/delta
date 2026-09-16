@@ -23,6 +23,7 @@ from deltatorrent.model_plugins import (
     ModelPluginRegistry,
     PluginDescriptor,
     PluginRegistryError,
+    QloraModelPlugin,
     get_default_registry,
 )
 from deltatorrent.worker.drq1_producer import produce_drq1_shards
@@ -235,6 +236,26 @@ def test_default_registry_contains_eeg_bandpower_centroid() -> None:
     assert isinstance(plugin, EegBandpowerCentroidPlugin)
     assert plugin.plugin_id == "eeg-bandpower-centroid-v1"
     assert plugin.total_elements == 34
+
+
+def test_default_registry_contains_qlora() -> None:
+    registry = get_default_registry()
+    assert registry.has_plugin("qlora-tiny-adapter-v1") is True
+
+    desc = registry.get_descriptor("qlora-tiny-adapter-v1")
+    assert desc.plugin_id == "qlora-tiny-adapter-v1"
+    assert desc.display_name == "QLoRA Tiny Quantized Adapter"
+    assert desc.model_family == "qlora"
+    assert desc.task_type == "adapter_regression"
+    assert desc.sample_kind == "vector/tiny-qlora-2d"
+    assert desc.target_kind == "regression/vector-2d"
+    assert desc.deterministic is True
+    assert desc.supports_stage_c_real_drq1 is True
+    plugin = registry.get("qlora-tiny-adapter-v1")
+    assert isinstance(plugin, QloraModelPlugin)
+    assert plugin.plugin_id == "qlora-tiny-adapter-v1"
+    assert plugin.total_elements == 8
+    assert desc.parameter_schema_id == plugin.parameter_schema().fingerprint
 
 
 def test_extensibility_architectural_proof_dummy_plugin() -> None:
