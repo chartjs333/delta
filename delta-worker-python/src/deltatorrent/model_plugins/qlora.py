@@ -222,6 +222,8 @@ class QloraModelPlugin(ModelPlugin):
         if isinstance(state, (tuple, list, np.ndarray)):
             return self.load_applied_checkpoint(state)
         if isinstance(state, Mapping):
+            if set(state.keys()) == {SEGMENT_ID}:
+                state = split_adapter_values(state[SEGMENT_ID])
             _validate_adapter_mapping_shapes(state)
             adapter_arrays = {
                 name: np.ascontiguousarray(np.asarray(state[name], dtype=np.float64))

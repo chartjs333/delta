@@ -151,6 +151,7 @@ class ModelPluginRunner:
         *,
         plugin_id: str,
         dataset_id: str,
+        execution_scope: str = "PLUGIN_BOUNDARY",
         model_registry: ModelPluginRegistry | None = None,
         dataset_registry: DatasetRegistry | None = None,
     ) -> None:
@@ -158,12 +159,31 @@ class ModelPluginRunner:
             raise ModelPluginRunnerError("INVALID_PLUGIN_ID")
         if not dataset_id or not isinstance(dataset_id, str):
             raise ModelPluginRunnerError("INVALID_DATASET_ID")
-        self._binding = bind_model_and_dataset(
+        if execution_scope not in VALID_EXECUTION_SCOPES:
+            raise ModelPluginRunnerError(f"INVALID_EXECUTION_SCOPE: {execution_scope}")
+
+        binding = bind_model_and_dataset(
             model_plugin_id=plugin_id,
             dataset_id=dataset_id,
             model_registry=model_registry,
             dataset_registry=dataset_registry,
         )
+        if (
+            execution_scope == "STAGE_C_REAL_DRQ1"
+            and not binding.model_descriptor.supports_stage_c_real_drq1
+        ):
+            raise ModelPluginRunnerError(
+                f"CAPABILITY_MISMATCH: plugin '{binding.model_descriptor.plugin_id}' "
+                f"does not support STAGE_C_REAL_DRQ1"
+            )
+
+        self._binding = binding
+        self._execution_scope = execution_scope
+
+    @property
+    def execution_scope(self) -> str:
+        """Return the validated execution scope."""
+        return self._execution_scope
 
     @property
     def binding(self) -> ModelDatasetBinding:
@@ -284,8 +304,12 @@ class MultiDomainBinding:
                     "execution_scope": spec.execution_scope,
                     "model_name": binding.model_descriptor.display_name,
                     "model_plugin_id": binding.model_descriptor.plugin_id,
+                    "requested_execution_scope": spec.execution_scope,
                     "role": spec.role,
                     "sample_kind": binding.model_descriptor.sample_kind,
+                    "supports_stage_c_real_drq1": (
+                        binding.model_descriptor.supports_stage_c_real_drq1
+                    ),
                     "target_kind": binding.model_descriptor.target_kind,
                     "total_elements": binding.model_plugin.total_elements,
                 }

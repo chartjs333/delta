@@ -664,3 +664,51 @@ def test_runner_capability_validation_fail_closed() -> None:
             model_registry=test_model_registry,
             dataset_registry=test_dataset_registry,
         )
+
+
+def test_single_runner_execution_scope_and_capability_checks() -> None:
+    # 1. Default execution_scope is PLUGIN_BOUNDARY
+    runner_mnist = ModelPluginRunner(
+        plugin_id="mnist-centroid-v1",
+        dataset_id="mnist-v1",
+    )
+    assert runner_mnist.execution_scope == "PLUGIN_BOUNDARY"
+
+    # 2. Explicit STAGE_C_REAL_DRQ1 succeeds for Stage C capable plugins (MNIST & QLoRA)
+    runner_mnist_stagec = ModelPluginRunner(
+        plugin_id="mnist-centroid-v1",
+        dataset_id="mnist-v1",
+        execution_scope="STAGE_C_REAL_DRQ1",
+    )
+    assert runner_mnist_stagec.execution_scope == "STAGE_C_REAL_DRQ1"
+
+    runner_qlora_stagec = ModelPluginRunner(
+        plugin_id="qlora-tiny-adapter-v1",
+        dataset_id="tiny-qlora-regression-v1",
+        execution_scope="STAGE_C_REAL_DRQ1",
+    )
+    assert runner_qlora_stagec.execution_scope == "STAGE_C_REAL_DRQ1"
+
+    # 3. Explicit MODEL_DATASET_BINDING_ONLY succeeds for EEG
+    runner_eeg_binding = ModelPluginRunner(
+        plugin_id="eeg-bandpower-centroid-v1",
+        dataset_id="eeg-synthetic-bci-v1",
+        execution_scope="MODEL_DATASET_BINDING_ONLY",
+    )
+    assert runner_eeg_binding.execution_scope == "MODEL_DATASET_BINDING_ONLY"
+
+    # 4. Fail-closed: EEG does NOT support STAGE_C_REAL_DRQ1
+    with pytest.raises(ModelPluginRunnerError, match="CAPABILITY_MISMATCH"):
+        ModelPluginRunner(
+            plugin_id="eeg-bandpower-centroid-v1",
+            dataset_id="eeg-synthetic-bci-v1",
+            execution_scope="STAGE_C_REAL_DRQ1",
+        )
+
+    # 5. Fail-closed: Invalid execution_scope string
+    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_SCOPE"):
+        ModelPluginRunner(
+            plugin_id="mnist-centroid-v1",
+            dataset_id="mnist-v1",
+            execution_scope="UNSUPPORTED_CUSTOM_SCOPE",
+        )

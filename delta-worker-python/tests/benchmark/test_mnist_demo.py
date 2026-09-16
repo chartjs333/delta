@@ -39,6 +39,7 @@ from deltatorrent.benchmark.mnist_demo import (
 from deltatorrent.benchmark.mnist_demo_workspace import (
     WORKSPACE_HTML,
     _validate_workspace_report,
+    _workspace_catalog,
     serve_workspace,
 )
 
@@ -616,25 +617,66 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     multi_domain = report["multi_domain"]
     assert multi_domain["type_name"] == "DELTAREDUCE_MULTI_DOMAIN_DEMO_STRUCTURE"
     assert multi_domain["model_dataset_runner"] == "MultiDomainBinding"
-    assert multi_domain["domain_count"] == 2
+    assert multi_domain["domain_count"] == 3
     assert multi_domain["delta_stage_c_domain_count"] == 1
     assert multi_domain["active_stage_c_domain_id"] == "mnist-image"
     assert multi_domain["cross_domain_aggregation_performed"] is False
     assert multi_domain["registry_backed"] is True
     domains = {item["domain_id"]: item for item in multi_domain["domains"]}
-    assert set(domains) == {"mnist-image", "eeg-bandpower"}
-    assert domains["mnist-image"]["execution_scope"] == "STAGE_C_REAL_DRQ1"
+    assert set(domains) == {"mnist-image", "qlora-adapter", "eeg-bandpower"}
+
+    # MNIST: Live Stage C execution
+    assert domains["mnist-image"]["requested_execution_scope"] == "STAGE_C_REAL_DRQ1"
+    assert domains["mnist-image"]["verified_execution_evidence"] == "LIVE_STAGE_C_APPLIED_RECEIPT"
     assert domains["mnist-image"]["delta_stage_c_execution_claimed"] is True
+    assert domains["mnist-image"]["live_consensus_claimed_in_this_run"] is True
     assert domains["mnist-image"]["checkpoint_accuracy_claimed_from_stage_c"] is False
     assert domains["mnist-image"]["python_cross_node_aggregation_performed"] is False
     assert domains["mnist-image"]["raw_samples_shared_outside_provider"] is False
-    assert domains["eeg-bandpower"]["execution_scope"] == "MODEL_DATASET_BINDING_ONLY"
+    assert domains["mnist-image"]["stage_c_execution_mode"] == "REAL_DRQ1"
+    assert domains["mnist-image"]["stage_c_outcome"] == "APPLIED"
+
+    # QLoRA: Stage C capable, verified via historical trajectory anchor
+    assert domains["qlora-adapter"]["requested_execution_scope"] == "STAGE_C_REAL_DRQ1"
+    assert (
+        domains["qlora-adapter"]["verified_execution_evidence"]
+        == "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
+    )
+    assert domains["qlora-adapter"]["reference_anchor_evidence"] == (
+        "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+    )
+    assert domains["qlora-adapter"]["reference_anchor_is_current_workspace_receipt"] is False
+    assert domains["qlora-adapter"]["delta_stage_c_execution_claimed"] is False
+    assert domains["qlora-adapter"]["live_consensus_claimed_in_this_run"] is False
+    assert domains["qlora-adapter"]["reference_trajectory_anchor"] == (
+        "437558d886d4fc7aac4d8a72f2e4d69696fab7f7"
+    )
+    assert domains["qlora-adapter"]["supports_stage_c_real_drq1"] is True
+    assert domains["qlora-adapter"]["checkpoint_accuracy_claimed_from_stage_c"] is False
+    assert domains["qlora-adapter"]["python_cross_node_aggregation_performed"] is False
+    assert domains["qlora-adapter"]["raw_samples_shared_outside_provider"] is False
+    assert domains["qlora-adapter"]["stage_c_execution_mode"] is None
+    assert domains["qlora-adapter"]["stage_c_outcome"] is None
+    assert domains["qlora-adapter"]["total_elements"] == 8
+
+    # EEG: Model/dataset binding smoke, observation only
+    assert domains["eeg-bandpower"]["requested_execution_scope"] == "MODEL_DATASET_BINDING_ONLY"
+    assert domains["eeg-bandpower"]["verified_execution_evidence"] == "LOCAL_PLUGIN_WORKER_SMOKE"
     assert domains["eeg-bandpower"]["delta_stage_c_execution_claimed"] is False
+    assert domains["eeg-bandpower"]["live_consensus_claimed_in_this_run"] is False
+    assert domains["eeg-bandpower"]["supports_stage_c_real_drq1"] is False
     assert domains["eeg-bandpower"]["checkpoint_accuracy_claimed_from_stage_c"] is False
     assert domains["eeg-bandpower"]["python_cross_node_aggregation_performed"] is False
     assert domains["eeg-bandpower"]["raw_samples_shared_outside_provider"] is False
     assert domains["eeg-bandpower"]["stage_c_execution_mode"] is None
     assert domains["eeg-bandpower"]["total_elements"] == 34
+
+    assert any(
+        item["plugin_id"] == "qlora-tiny-adapter-v1" for item in report["registry"]["model_plugins"]
+    )
+    assert any(
+        item["dataset_id"] == "tiny-qlora-regression-v1" for item in report["registry"]["datasets"]
+    )
     assert any(
         item["plugin_id"] == "eeg-bandpower-centroid-v1"
         for item in report["registry"]["model_plugins"]
@@ -642,6 +684,29 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     assert any(
         item["dataset_id"] == "eeg-synthetic-bci-v1" for item in report["registry"]["datasets"]
     )
+    qlora_showcase = report["plugin_showcase"]["qlora_adapter"]
+    assert qlora_showcase["type_name"] == "DELTAREDUCE_QLORA_PLUGIN_SHOWCASE"
+    assert qlora_showcase["model_plugin_id"] == "qlora-tiny-adapter-v1"
+    assert qlora_showcase["dataset_id"] == "tiny-qlora-regression-v1"
+    assert qlora_showcase["runner_boundary"] == "ModelDatasetBinding"
+    assert qlora_showcase["contract_compatibility"] == "PASS"
+    assert qlora_showcase["sample_kind"] == "vector/tiny-qlora-2d"
+    assert qlora_showcase["target_kind"] == "regression/vector-2d"
+    assert qlora_showcase["worker_count"] == 4
+    assert qlora_showcase["total_elements"] == 8
+    assert qlora_showcase["delta_stage_c_execution_claimed"] is False
+    assert qlora_showcase["live_consensus_claimed_in_this_run"] is False
+    assert qlora_showcase["supports_stage_c_real_drq1"] is True
+    assert qlora_showcase["trajectory_anchor_verified"] is True
+    assert qlora_showcase["reference_trajectory_anchor"] == (
+        "437558d886d4fc7aac4d8a72f2e4d69696fab7f7"
+    )
+    assert (
+        qlora_showcase["verified_execution_evidence"]
+        == "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
+    )
+    assert qlora_showcase["reference_anchor_evidence"] == "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+    assert qlora_showcase["reference_anchor_is_current_workspace_receipt"] is False
     eeg_showcase = report["plugin_showcase"]["eeg_bandpower"]
     assert eeg_showcase["type_name"] == "DELTAREDUCE_EEG_PLUGIN_SHOWCASE"
     assert eeg_showcase["model_plugin_id"] == "eeg-bandpower-centroid-v1"
@@ -836,6 +901,22 @@ def test_run_uses_applied_delta_model_and_real_recovery_contract(
     with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
         _validate_workspace_report(wrong_multi_domain)
 
+    wrong_qlora_receipt_claim = json.loads(json.dumps(report))
+    qlora_domain = wrong_qlora_receipt_claim["multi_domain"]["domains"][1]
+    qlora_domain["verified_execution_evidence"] = "LIVE_STAGE_C_APPLIED_RECEIPT"
+    qlora_domain["reference_anchor_is_current_workspace_receipt"] = True
+    qlora_domain["stage_c_execution_mode"] = "REAL_DRQ1"
+    qlora_domain["stage_c_outcome"] = "APPLIED"
+    with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
+        _validate_workspace_report(wrong_qlora_receipt_claim)
+
+    wrong_qlora_showcase_receipt = json.loads(json.dumps(report))
+    wrong_qlora_showcase_receipt["plugin_showcase"]["qlora_adapter"][
+        "verified_execution_evidence"
+    ] = "LIVE_STAGE_C_APPLIED_RECEIPT"
+    with pytest.raises(MnistDemoError, match="MNIST_WORKSPACE_DELTA_EVIDENCE_INVALID"):
+        _validate_workspace_report(wrong_qlora_showcase_receipt)
+
 
 def test_reproducibility_identity_excludes_observational_timings(
     tmp_path: Path,
@@ -886,8 +967,27 @@ def test_workspace_is_one_button_and_does_not_expose_raw_json_by_default() -> No
     assert "BindingAssertion" in WORKSPACE_HTML
     assert "eeg-plugin-id" in WORKSPACE_HTML
     assert "registry/worker smoke" in WORKSPACE_HTML
+    assert "Requested scope" in WORKSPACE_HTML
+    assert "historical reference" in WORKSPACE_HTML
     assert "<pre" not in WORKSPACE_HTML
     assert "mnist-demo-report.json" not in WORKSPACE_HTML
+
+
+def test_workspace_catalog_is_read_only_and_reports_scope_capabilities() -> None:
+    catalog = _workspace_catalog()
+    assert catalog["type_name"] == "DELTAREDUCE_WORKSPACE_PLUGIN_DATASET_CATALOG"
+    assert catalog["register_exposed"] is False
+    assert any(item["plugin_id"] == "qlora-tiny-adapter-v1" for item in catalog["model_plugins"])
+    assert any(item["dataset_id"] == "tiny-qlora-regression-v1" for item in catalog["datasets"])
+    pairs = {
+        (item["model_plugin_id"], item["dataset_id"]): item for item in catalog["compatibility"]
+    }
+    qlora_pair = pairs[("qlora-tiny-adapter-v1", "tiny-qlora-regression-v1")]
+    assert qlora_pair["contract_compatible"] is True
+    assert qlora_pair["requested_scope_allowed"]["STAGE_C_REAL_DRQ1"] is True
+    eeg_pair = pairs[("eeg-bandpower-centroid-v1", "eeg-synthetic-bci-v1")]
+    assert eeg_pair["contract_compatible"] is True
+    assert eeg_pair["requested_scope_allowed"]["STAGE_C_REAL_DRQ1"] is False
 
 
 def test_workspace_refuses_non_loopback_binding(tmp_path: Path) -> None:

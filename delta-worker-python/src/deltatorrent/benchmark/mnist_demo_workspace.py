@@ -14,7 +14,7 @@ from datetime import UTC, datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 from urllib.parse import urlsplit
 
 from deltatorrent.benchmark.mnist_delta_nodes import (
@@ -24,7 +24,12 @@ from deltatorrent.benchmark.mnist_delta_nodes import (
     TYPED_CERTIFICATE_VERIFIER,
     VOTE_QUORUM_COMPONENT,
 )
-from deltatorrent.benchmark.mnist_demo import MnistDemoError, run_mnist_demo
+from deltatorrent.benchmark.mnist_demo import (
+    MnistDemoError,
+    _dataset_catalog,
+    _model_plugin_catalog,
+    run_mnist_demo,
+)
 
 WORKSPACE_HTML = r"""<!doctype html>
 <html lang="ru">
@@ -214,9 +219,10 @@ WORKSPACE_HTML = r"""<!doctype html>
 
     <section class="panel">
       <h2>Мульти-доменная структура</h2>
-      <p>Демо теперь строит один registry-backed multi-domain contract. MNIST является
-         единственным Stage C REAL_DRQ1 доменом; EEG проверяет расширяемость model/data
-         boundary без отдельного consensus claim.</p>
+      <p>Демо теперь строит один registry-backed multi-domain contract. Requested scope
+         отделён от verified evidence: capability можно показать заранее, но APPLIED/WAL/checkpoint
+         показываются только из receipt текущего запуска. QLoRA anchor остаётся historical reference,
+         а EEG проверяет model/data boundary без consensus claim.</p>
       <div id="multi-domain-grid" class="binding-grid"></div>
     </section>
 
@@ -544,9 +550,12 @@ WORKSPACE_HTML = r"""<!doctype html>
       value.textContent = domain.domain_id;
       const code = document.createElement('div');
       code.className = 'binding-code';
-      const stage = domain.delta_stage_c_execution_claimed
+      const requested = domain.requested_execution_scope || 'UNSPECIFIED_REQUEST';
+      const evidence = domain.verified_execution_evidence || 'NO_VERIFIED_EXECUTION_EVIDENCE';
+      const capability = domain.supports_stage_c_real_drq1 ? 'Stage C capable' : 'no Stage C capability';
+      const stage = domain.live_consensus_claimed_in_this_run
         ? `${domain.stage_c_execution_mode} → ${domain.stage_c_outcome}`
-        : domain.execution_scope;
+        : `requested ${requested}; evidence ${evidence}; ${capability}`;
       code.textContent = `${domain.model_plugin_id} + ${domain.dataset_id}; ${stage}; ${domain.sample_kind} → ${domain.target_kind}`;
       card.append(label, value, code);
       target.appendChild(card);
@@ -741,6 +750,41 @@ WORKSPACE_HTML = r"""<!doctype html>
 """
 
 
+def _workspace_catalog() -> dict[str, object]:
+    """Return read-only registry descriptors and compatibility matrix for UI consumers."""
+    model_plugins = _model_plugin_catalog()
+    datasets = _dataset_catalog()
+    compatibility: list[dict[str, object]] = []
+    for model in model_plugins:
+        model_sample = model.get("sample_kind")
+        model_target = model.get("target_kind")
+        stage_c_capable = bool(model.get("supports_stage_c_real_drq1"))
+        for dataset in datasets:
+            contract_compatible = model_sample == dataset.get(
+                "sample_kind"
+            ) and model_target == dataset.get("target_kind")
+            compatibility.append(
+                {
+                    "contract_compatible": contract_compatible,
+                    "dataset_id": dataset.get("dataset_id"),
+                    "model_plugin_id": model.get("plugin_id"),
+                    "requested_scope_allowed": {
+                        "MODEL_DATASET_BINDING_ONLY": contract_compatible,
+                        "PLUGIN_BOUNDARY": contract_compatible,
+                        "STAGE_C_REAL_DRQ1": contract_compatible and stage_c_capable,
+                    },
+                    "supports_stage_c_real_drq1": stage_c_capable,
+                }
+            )
+    return {
+        "compatibility": compatibility,
+        "datasets": datasets,
+        "model_plugins": model_plugins,
+        "register_exposed": False,
+        "type_name": "DELTAREDUCE_WORKSPACE_PLUGIN_DATASET_CATALOG",
+    }
+
+
 def _validate_workspace_report(value: object) -> dict[str, object]:
     """Reject any report that cannot prove the displayed real-Delta path."""
     if not isinstance(value, dict):
@@ -779,14 +823,24 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or not isinstance(registry, dict)
         or not isinstance(showcase, dict)
         or not isinstance(eeg_showcase, dict)
+        or not isinstance(showcase.get("qlora_adapter"), dict)
         or not isinstance(stage_c, dict)
     ):
         raise MnistDemoError("MNIST_WORKSPACE_REPORT_INVALID")
+    qlora_showcase = cast(dict[str, Any], showcase["qlora_adapter"])
     mnist_domain = next(
         (
             item
             for item in multi_domain_domains
             if isinstance(item, dict) and item.get("domain_id") == "mnist-image"
+        ),
+        None,
+    )
+    qlora_domain = next(
+        (
+            item
+            for item in multi_domain_domains
+            if isinstance(item, dict) and item.get("domain_id") == "qlora-adapter"
         ),
         None,
     )
@@ -801,9 +855,15 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
     model_catalog = registry.get("model_plugins")
     dataset_catalog = registry.get("datasets")
     eeg_workers = eeg_showcase.get("workers")
+    qlora_workers = qlora_showcase.get("workers")
     first_eeg_worker = (
         eeg_workers[0]
         if isinstance(eeg_workers, list) and eeg_workers and isinstance(eeg_workers[0], dict)
+        else None
+    )
+    first_qlora_worker = (
+        qlora_workers[0]
+        if isinstance(qlora_workers, list) and qlora_workers and isinstance(qlora_workers[0], dict)
         else None
     )
     first_eeg_context = (
@@ -919,33 +979,59 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or binding.get("runner_boundary") != "ModelDatasetBinding"
         or multi_domain.get("type_name") != "DELTAREDUCE_MULTI_DOMAIN_DEMO_STRUCTURE"
         or multi_domain.get("model_dataset_runner") != "MultiDomainBinding"
-        or multi_domain.get("domain_count") != 2
+        or multi_domain.get("domain_count") != 3
         or multi_domain.get("delta_stage_c_domain_count") != 1
         or multi_domain.get("active_stage_c_domain_id") != "mnist-image"
         or multi_domain.get("cross_domain_aggregation_performed") is not False
         or multi_domain.get("registry_backed") is not True
-        or multi_domain.get("stage_c_support_scope") != "MNIST_ONLY_REAL_DRQ1_IN_THIS_DEMO"
+        or multi_domain.get("stage_c_support_scope") != "MNIST_LIVE_STAGE_C_QLORA_ANCHOR_EEG_SMOKE"
         or multi_domain.get("protocol_scope")
-        != "MULTI_DOMAIN_PLUGIN_STRUCTURE_WITH_SINGLE_DOMAIN_STAGE_C_DEMO"
-        or len(multi_domain_domains) != 2
+        != "MULTI_DOMAIN_PLUGIN_STRUCTURE_WITH_SINGLE_DOMAIN_LIVE_STAGE_C"
+        or len(multi_domain_domains) != 3
         or not isinstance(mnist_domain, dict)
+        or not isinstance(qlora_domain, dict)
         or not isinstance(eeg_domain, dict)
         or mnist_domain.get("model_plugin_id") != "mnist-centroid-v1"
         or mnist_domain.get("dataset_id") != "mnist-v1"
         or mnist_domain.get("role") != "PRIMARY_DELTA_EXECUTION"
-        or mnist_domain.get("execution_scope") != "STAGE_C_REAL_DRQ1"
+        or mnist_domain.get("requested_execution_scope") != "STAGE_C_REAL_DRQ1"
+        or mnist_domain.get("verified_execution_evidence") != "LIVE_STAGE_C_APPLIED_RECEIPT"
         or mnist_domain.get("delta_stage_c_execution_claimed") is not True
+        or mnist_domain.get("live_consensus_claimed_in_this_run") is not True
         or mnist_domain.get("checkpoint_accuracy_claimed_from_stage_c") is not False
         or mnist_domain.get("python_cross_node_aggregation_performed") is not False
         or mnist_domain.get("raw_samples_shared_outside_provider") is not False
         or mnist_domain.get("stage_c_execution_mode") != "REAL_DRQ1"
         or mnist_domain.get("stage_c_outcome") != "APPLIED"
         or mnist_domain.get("worker_count") != 4
+        or qlora_domain.get("model_plugin_id") != "qlora-tiny-adapter-v1"
+        or qlora_domain.get("dataset_id") != "tiny-qlora-regression-v1"
+        or qlora_domain.get("role") != "PRIMARY_DELTA_EXECUTION"
+        or qlora_domain.get("requested_execution_scope") != "STAGE_C_REAL_DRQ1"
+        or qlora_domain.get("verified_execution_evidence")
+        != "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
+        or qlora_domain.get("reference_anchor_evidence") != "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+        or qlora_domain.get("reference_anchor_is_current_workspace_receipt") is not False
+        or qlora_domain.get("delta_stage_c_execution_claimed") is not False
+        or qlora_domain.get("live_consensus_claimed_in_this_run") is not False
+        or qlora_domain.get("reference_trajectory_anchor")
+        != "437558d886d4fc7aac4d8a72f2e4d69696fab7f7"
+        or qlora_domain.get("supports_stage_c_real_drq1") is not True
+        or qlora_domain.get("checkpoint_accuracy_claimed_from_stage_c") is not False
+        or qlora_domain.get("python_cross_node_aggregation_performed") is not False
+        or qlora_domain.get("raw_samples_shared_outside_provider") is not False
+        or qlora_domain.get("stage_c_execution_mode") is not None
+        or qlora_domain.get("stage_c_outcome") is not None
+        or qlora_domain.get("worker_count") != 4
+        or qlora_domain.get("total_elements") != 8
         or eeg_domain.get("model_plugin_id") != "eeg-bandpower-centroid-v1"
         or eeg_domain.get("dataset_id") != "eeg-synthetic-bci-v1"
         or eeg_domain.get("role") != "PLUGIN_BINDING_SMOKE"
-        or eeg_domain.get("execution_scope") != "MODEL_DATASET_BINDING_ONLY"
+        or eeg_domain.get("requested_execution_scope") != "MODEL_DATASET_BINDING_ONLY"
+        or eeg_domain.get("verified_execution_evidence") != "LOCAL_PLUGIN_WORKER_SMOKE"
         or eeg_domain.get("delta_stage_c_execution_claimed") is not False
+        or eeg_domain.get("live_consensus_claimed_in_this_run") is not False
+        or eeg_domain.get("supports_stage_c_real_drq1") is not False
         or eeg_domain.get("checkpoint_accuracy_claimed_from_stage_c") is not False
         or eeg_domain.get("python_cross_node_aggregation_performed") is not False
         or eeg_domain.get("raw_samples_shared_outside_provider") is not False
@@ -956,6 +1042,14 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
         or not isinstance(model_catalog, list)
         or not isinstance(dataset_catalog, list)
         or not any(
+            isinstance(item, dict) and item.get("plugin_id") == "qlora-tiny-adapter-v1"
+            for item in model_catalog
+        )
+        or not any(
+            isinstance(item, dict) and item.get("dataset_id") == "tiny-qlora-regression-v1"
+            for item in dataset_catalog
+        )
+        or not any(
             isinstance(item, dict) and item.get("plugin_id") == "eeg-bandpower-centroid-v1"
             for item in model_catalog
         )
@@ -963,6 +1057,31 @@ def _validate_workspace_report(value: object) -> dict[str, object]:
             isinstance(item, dict) and item.get("dataset_id") == "eeg-synthetic-bci-v1"
             for item in dataset_catalog
         )
+        or qlora_showcase.get("type_name") != "DELTAREDUCE_QLORA_PLUGIN_SHOWCASE"
+        or qlora_showcase.get("model_plugin_id") != "qlora-tiny-adapter-v1"
+        or qlora_showcase.get("dataset_id") != "tiny-qlora-regression-v1"
+        or qlora_showcase.get("sample_kind") != "vector/tiny-qlora-2d"
+        or qlora_showcase.get("target_kind") != "regression/vector-2d"
+        or qlora_showcase.get("runner_boundary") != "ModelDatasetBinding"
+        or qlora_showcase.get("contract_compatibility") != "PASS"
+        or qlora_showcase.get("worker_count") != 4
+        or qlora_showcase.get("total_elements") != 8
+        or qlora_showcase.get("delta_stage_c_execution_claimed") is not False
+        or qlora_showcase.get("live_consensus_claimed_in_this_run") is not False
+        or qlora_showcase.get("supports_stage_c_real_drq1") is not True
+        or qlora_showcase.get("trajectory_anchor_verified") is not True
+        or qlora_showcase.get("reference_trajectory_anchor")
+        != "437558d886d4fc7aac4d8a72f2e4d69696fab7f7"
+        or qlora_showcase.get("verified_execution_evidence")
+        != "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
+        or qlora_showcase.get("reference_anchor_evidence")
+        != "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED"
+        or qlora_showcase.get("reference_anchor_is_current_workspace_receipt") is not False
+        or qlora_showcase.get("python_cross_node_aggregation_performed") is not False
+        or qlora_showcase.get("raw_samples_shared_outside_provider") is not False
+        or not isinstance(qlora_workers, list)
+        or len(qlora_workers) != 4
+        or not isinstance(first_qlora_worker, dict)
         or eeg_showcase.get("type_name") != "DELTAREDUCE_EEG_PLUGIN_SHOWCASE"
         or eeg_showcase.get("model_plugin_id") != "eeg-bandpower-centroid-v1"
         or eeg_showcase.get("dataset_id") != "eeg-synthetic-bci-v1"
@@ -1360,6 +1479,9 @@ class WorkspaceRequestHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/status":
             self._json(HTTPStatus.OK, self.state.snapshot())
+            return
+        if path == "/api/catalog":
+            self._json(HTTPStatus.OK, _workspace_catalog())
             return
         if path == "/favicon.ico":
             self._write(HTTPStatus.NO_CONTENT, b"", "image/x-icon")

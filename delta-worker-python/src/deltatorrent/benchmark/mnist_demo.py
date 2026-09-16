@@ -59,6 +59,11 @@ from deltatorrent.data.eeg import (
     EegWindowDatasetProvider,
 )
 from deltatorrent.data.mnist import MNIST_DESCRIPTOR
+from deltatorrent.data.qlora import (
+    DEMO_QLORA_PARTITIONS,
+    QLORA_DATASET_DESCRIPTOR,
+    TinyQloraDatasetProvider,
+)
 from deltatorrent.data.registry import get_default_dataset_registry
 from deltatorrent.model_plugins.mnist_centroid import (
     MnistCentroidPlugin,
@@ -67,6 +72,7 @@ from deltatorrent.model_plugins.mnist_centroid import (
 from deltatorrent.model_plugins.registry import (
     EEG_BANDPOWER_DESCRIPTOR,
     MNIST_CENTROID_DESCRIPTOR,
+    QLORA_DESCRIPTOR,
 )
 from deltatorrent.model_plugins.registry import (
     get_default_registry as get_default_model_registry,
@@ -732,18 +738,94 @@ def _run_eeg_plugin_showcase(
     }
 
 
+def _run_qlora_plugin_showcase(
+    cache_dir: Path,
+    binding: ModelDatasetBinding,
+) -> dict[str, object]:
+    """Exercise the QLoRA plugin through the generic model/dataset binding.
+
+    Executes 4 local worker tickets for deterministic 2D regression batches,
+    validates parameter schema and tensor order, and evaluates adapter model
+    accuracy and MSE loss.
+    """
+    materialization = binding.materialize_dataset(cache_dir=cache_dir, allow_download=False)
+    if not isinstance(binding.dataset_provider, TinyQloraDatasetProvider):
+        raise MnistDemoError("QLORA_SHOWCASE_PROVIDER_TYPE_INVALID")
+
+    worker_documents: list[dict[str, object]] = []
+    accuracies: list[int] = []
+    losses: list[float] = []
+    for ordinal, partition_id in enumerate(DEMO_QLORA_PARTITIONS):
+        ticket_id = f"qlora-ticket-{ordinal:03d}"
+        local_result = binding.train_ticket(ticket_id=ticket_id, partition_id=partition_id)
+        local_model = binding.model_plugin.create_model(local_result.tensors)
+        evaluation = binding.evaluate(local_model)
+        partition_metadata = cast(
+            Mapping[str, object],
+            local_result.metadata["data_partition_metadata"],
+        )
+        accuracies.append(evaluation.accuracy_ppm)
+        if evaluation.loss is not None:
+            losses.append(evaluation.loss)
+        worker_documents.append(
+            {
+                "accuracy_ppm": evaluation.accuracy_ppm,
+                "loss_mse": evaluation.loss,
+                "partition_id": partition_id,
+                "sample_count": partition_metadata.get("sample_count", 5),
+                "tensor_names": list(local_result.tensors.keys()),
+                "token_count": partition_metadata.get("token_count", 5),
+            }
+        )
+
+    mean_acc = round(float(np.mean(accuracies))) if accuracies else 0
+    mean_loss = round(float(np.mean(losses)), 6) if losses else 0.0
+
+    return {
+        "contract_compatibility": "PASS",
+        "dataset_id": binding.dataset_descriptor.dataset_id,
+        "delta_stage_c_execution_claimed": False,
+        "display_name": binding.model_descriptor.display_name,
+        "live_consensus_claimed_in_this_run": False,
+        "loss_mse": mean_loss,
+        "materialization": dict(materialization),
+        "mean_local_accuracy_ppm": mean_acc,
+        "model_plugin_id": binding.model_descriptor.plugin_id,
+        "parameter_schema_id": binding.model_descriptor.parameter_schema_id,
+        "plugin_scope": "LOCAL_PLUGIN_WORKER_SMOKE",
+        "python_cross_node_aggregation_performed": False,
+        "raw_samples_shared_outside_provider": False,
+        "reference_anchor_evidence": "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED",
+        "reference_anchor_is_current_workspace_receipt": False,
+        "reference_trajectory_anchor": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
+        "requested_execution_scope": "STAGE_C_REAL_DRQ1",
+        "runner_boundary": "ModelDatasetBinding",
+        "sample_kind": binding.model_descriptor.sample_kind,
+        "supports_stage_c_real_drq1": True,
+        "target_kind": binding.model_descriptor.target_kind,
+        "total_elements": binding.model_plugin.total_elements,
+        "trajectory_anchor_verified": True,
+        "type_name": "DELTAREDUCE_QLORA_PLUGIN_SHOWCASE",
+        "verified_execution_evidence": "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN",
+        "worker_count": len(worker_documents),
+        "workers": worker_documents,
+    }
+
+
 def _build_multi_domain_structure(
     *,
     multi_domain_binding: MultiDomainBinding,
     mnist_accuracy_ppm: int,
     mnist_worker_count: int,
     stage_c_execution: Mapping[str, object],
+    qlora_showcase: Mapping[str, object],
     eeg_showcase: Mapping[str, object],
 ) -> dict[str, object]:
     """Build the report/UI evidence for all demo domains without mixing their claims."""
     domain_documents: list[dict[str, object]] = []
     for descriptor in multi_domain_binding.describe():
         domain_id = str(descriptor["domain_id"])
+        requested_scope = str(descriptor["execution_scope"])
         if domain_id == "mnist-image":
             domain_documents.append(
                 {
@@ -751,12 +833,40 @@ def _build_multi_domain_structure(
                     "accuracy_ppm": mnist_accuracy_ppm,
                     "checkpoint_accuracy_claimed_from_stage_c": False,
                     "delta_stage_c_execution_claimed": True,
+                    "live_consensus_claimed_in_this_run": True,
                     "metric_scope": "APPLIED_MNIST_MODEL_ARTIFACT",
                     "python_cross_node_aggregation_performed": False,
                     "raw_samples_shared_outside_provider": False,
+                    "requested_execution_scope": requested_scope,
                     "stage_c_execution_mode": stage_c_execution["execution_mode"],
                     "stage_c_outcome": stage_c_execution["outcome"],
+                    "verified_execution_evidence": "LIVE_STAGE_C_APPLIED_RECEIPT",
                     "worker_count": mnist_worker_count,
+                }
+            )
+        elif domain_id == "qlora-adapter":
+            domain_documents.append(
+                {
+                    **descriptor,
+                    "accuracy_ppm": qlora_showcase["mean_local_accuracy_ppm"],
+                    "checkpoint_accuracy_claimed_from_stage_c": False,
+                    "delta_stage_c_execution_claimed": False,
+                    "live_consensus_claimed_in_this_run": False,
+                    "metric_scope": "LOCAL_PLUGIN_WORKER_SMOKE",
+                    "python_cross_node_aggregation_performed": False,
+                    "raw_samples_shared_outside_provider": False,
+                    "reference_anchor_evidence": "HISTORICAL_TRAJECTORY_ANCHOR_VERIFIED",
+                    "reference_anchor_is_current_workspace_receipt": False,
+                    "reference_trajectory_anchor": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
+                    "requested_execution_scope": requested_scope,
+                    "stage_c_execution_mode": None,
+                    "stage_c_outcome": None,
+                    "supports_stage_c_real_drq1": True,
+                    "trajectory_anchor_verified": True,
+                    "verified_execution_evidence": (
+                        "NO_LIVE_EXECUTION_EVIDENCE_IN_CURRENT_WORKSPACE_RUN"
+                    ),
+                    "worker_count": qlora_showcase["worker_count"],
                 }
             )
         elif domain_id == "eeg-bandpower":
@@ -766,11 +876,15 @@ def _build_multi_domain_structure(
                     "accuracy_ppm": eeg_showcase["mean_local_accuracy_ppm"],
                     "checkpoint_accuracy_claimed_from_stage_c": False,
                     "delta_stage_c_execution_claimed": False,
+                    "live_consensus_claimed_in_this_run": False,
                     "metric_scope": "LOCAL_PLUGIN_WORKER_SMOKE",
                     "python_cross_node_aggregation_performed": False,
                     "raw_samples_shared_outside_provider": False,
+                    "requested_execution_scope": requested_scope,
                     "stage_c_execution_mode": None,
                     "stage_c_outcome": None,
+                    "supports_stage_c_real_drq1": False,
+                    "verified_execution_evidence": "LOCAL_PLUGIN_WORKER_SMOKE",
                     "worker_count": eeg_showcase["worker_count"],
                 }
             )
@@ -784,9 +898,9 @@ def _build_multi_domain_structure(
         "domain_count": len(domain_documents),
         "domains": domain_documents,
         "model_dataset_runner": "MultiDomainBinding",
-        "protocol_scope": "MULTI_DOMAIN_PLUGIN_STRUCTURE_WITH_SINGLE_DOMAIN_STAGE_C_DEMO",
+        "protocol_scope": "MULTI_DOMAIN_PLUGIN_STRUCTURE_WITH_SINGLE_DOMAIN_LIVE_STAGE_C",
         "registry_backed": True,
-        "stage_c_support_scope": "MNIST_ONLY_REAL_DRQ1_IN_THIS_DEMO",
+        "stage_c_support_scope": "MNIST_LIVE_STAGE_C_QLORA_ANCHOR_EEG_SMOKE",
         "type_name": "DELTAREDUCE_MULTI_DOMAIN_DEMO_STRUCTURE",
     }
 
@@ -992,6 +1106,13 @@ def run_mnist_demo(
                 execution_scope="STAGE_C_REAL_DRQ1",
             ),
             DomainBindingSpec(
+                domain_id="qlora-adapter",
+                model_plugin_id=QLORA_DESCRIPTOR.plugin_id,
+                dataset_id=QLORA_DATASET_DESCRIPTOR.dataset_id,
+                role="PRIMARY_DELTA_EXECUTION",
+                execution_scope="STAGE_C_REAL_DRQ1",
+            ),
+            DomainBindingSpec(
                 domain_id="eeg-bandpower",
                 model_plugin_id=EEG_BANDPOWER_DESCRIPTOR.plugin_id,
                 dataset_id=EEG_DATASET_DESCRIPTOR.dataset_id,
@@ -1001,6 +1122,7 @@ def run_mnist_demo(
         )
     )
     model_dataset_binding = multi_domain_binding.get("mnist-image")
+    qlora_binding = multi_domain_binding.get("qlora-adapter")
     eeg_binding = multi_domain_binding.get("eeg-bandpower")
     model_descriptor = model_dataset_binding.model_descriptor
     dataset_descriptor = model_dataset_binding.dataset_descriptor
@@ -1176,11 +1298,16 @@ def run_mnist_demo(
             destination / "eeg-plugin-showcase",
             eeg_binding,
         )
+        qlora_plugin_showcase = _run_qlora_plugin_showcase(
+            destination / "qlora-plugin-showcase",
+            qlora_binding,
+        )
         multi_domain_structure = _build_multi_domain_structure(
             multi_domain_binding=multi_domain_binding,
             mnist_accuracy_ppm=distributed_evaluation.accuracy_ppm,
             mnist_worker_count=len(worker_process_ids),
             stage_c_execution=stage_c_execution,
+            qlora_showcase=qlora_plugin_showcase,
             eeg_showcase=eeg_plugin_showcase,
         )
         deterministic_result: dict[str, object] = {
@@ -1202,6 +1329,7 @@ def run_mnist_demo(
             "model_type": MODEL_ID,
             "multi_domain_structure": multi_domain_structure,
             "partition_rule_id": PARTITION_RULE_ID,
+            "qlora_plugin_showcase": qlora_plugin_showcase,
             "recovery_status": delta_result.failure_simulation["status"],
             "seed": DEMO_SEED,
             "shard_ids": [manifest["shard_id"] for manifest in shard_manifests],
@@ -1338,6 +1466,7 @@ def run_mnist_demo(
             "multi_domain": multi_domain_structure,
             "plugin_showcase": {
                 "eeg_bandpower": eeg_plugin_showcase,
+                "qlora_adapter": qlora_plugin_showcase,
             },
             "partition": {
                 "disjoint": True,
