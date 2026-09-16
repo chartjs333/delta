@@ -40,4 +40,19 @@ describe("product extension registry", () => {
     ).toBeTruthy();
     expect(screen.getByText(/does not infer governance or protocol meaning/u)).toBeTruthy();
   });
+
+  it("registers the workloads route and navigation entry", () => {
+    const navigation = extensionRegistry.navigation.find(
+      (item) => item.id === "workloads",
+    );
+    const domain = extensionRegistry.domainModules.find(
+      (item) => item.id === "workloads",
+    );
+
+    expect(navigation).toMatchObject({
+      label: "Workloads",
+      route: "/workloads",
+    });
+    expect(domain?.routes.map((route) => route.path)).toEqual(["/workloads"]);
+  });
 });

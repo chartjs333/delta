@@ -256,6 +256,34 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 .provenance-grid dt { color: #6e7773; font-size: 0.72rem; text-transform: uppercase; }
 .provenance-grid dd { margin: 0.15rem 0 0; overflow-wrap: anywhere; font: 0.78rem monospace; }
 
+/* Workloads Module */
+.workloads-container { display: grid; gap: 1.5rem; }
+.workload-controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; border: 1px solid #dcd7cb; border-radius: 12px; padding: 1.2rem; background: #fffdf7; }
+.control-group { display: grid; gap: 0.35rem; }
+.control-group label { font-size: 0.8rem; font-weight: 750; color: #43524b; }
+.control-group select { width: 100%; min-height: 42px; padding: 0.5rem 0.75rem; border: 1px solid #bcb7ab; border-radius: 8px; background: #fff; }
+.workload-panels-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; }
+.workload-panel { display: grid; gap: 1rem; border: 1px solid #dcd7cb; border-radius: 12px; padding: 1.25rem; background: #fffdf7; }
+.workload-panel .panel-header { display: grid; gap: 0.15rem; }
+.workload-panel h2 { margin: 0; font-size: 1.2rem; }
+.code-subtext { display: block; font-size: 0.75rem; font-family: monospace; color: #6b7771; }
+.status-pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; }
+.pill-ok { background: #e2f4ea; color: #1e6945; border: 1px solid #9ed4b7; }
+.pill-warn { background: #fdf2e9; color: #9c501e; border: 1px solid #eec09e; }
+.pill-capable { background: #e0f2fe; color: #0369a1; border: 1px solid #93c5fd; }
+.pill-smoke { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+.verdict-box { border-radius: 8px; padding: 0.85rem 1rem; display: grid; gap: 0.35rem; }
+.verdict-allowed { background: #eaf6ef; border: 1px solid #93ceab; color: #134e32; }
+.verdict-rejected { background: #fdf2f2; border: 1px solid #f8b4b4; color: #842029; }
+.verdict-status { display: flex; gap: 0.5rem; align-items: center; font-size: 0.95rem; }
+.verdict-label { font-size: 1.05rem; letter-spacing: 0.04em; }
+.verdict-reason { font-size: 0.82rem; }
+.panel-provenance { font-size: 0.72rem; color: #78857f; border-top: 1px solid #eae5db; padding-top: 0.65rem; }
+.panel-provenance code { font-family: monospace; font-size: 0.72rem; }
+.empty-evidence-box { padding: 1.5rem; border: 1px dashed #c8c3b7; border-radius: 8px; background: #faf8f3; display: grid; gap: 0.6rem; }
+.empty-evidence-title { margin: 0; font-weight: 750; color: #43524b; }
+.empty-evidence-desc { margin: 0; font-size: 0.82rem; color: #6b7771; line-height: 1.45; }
+
 @media (max-width: 900px) {
   .shell-grid { grid-template-columns: 1fr; }
   .sidebar { display: none; }
