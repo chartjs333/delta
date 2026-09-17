@@ -1,0 +1,150 @@
+.live-execution-container {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.live-execution-header {
+  display: flex;
+  gap: 1rem;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.live-execution-header h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+}
+
+.live-mode-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  justify-content: flex-end;
+  max-width: 100%;
+  color: #43524b;
+  font-size: 0.82rem;
+}
+
+.live-mode-panel code,
+.live-boundary-note code {
+  overflow-wrap: anywhere;
+}
+
+.live-boundary-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.42fr) minmax(0, 0.58fr);
+  gap: 1rem;
+}
+
+.live-status-list,
+.live-status-detail,
+.live-boundary-note {
+  border: 1px solid #dcd7cb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fffdf7;
+}
+
+.live-status-buttons {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.live-status-button {
+  display: flex;
+  width: 100%;
+  height: auto;
+  justify-content: space-between;
+  gap: 0.8rem;
+  text-align: left;
+}
+
+.live-status-button.selected {
+  color: #fff;
+  border-color: #214f3e;
+  background: #214f3e;
+}
+
+.live-status-button small {
+  opacity: 0.75;
+}
+
+.live-status-summary {
+  color: #43524b;
+  line-height: 1.45;
+}
+
+.live-status-grid,
+.live-lineage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 1rem 0 0;
+}
+
+.live-status-grid div,
+.live-lineage-grid div {
+  min-width: 0;
+  border: 1px solid #e1dcd1;
+  border-radius: 8px;
+  padding: 0.7rem;
+  background: #faf8f3;
+}
+
+.live-status-grid dt,
+.live-lineage-grid dt {
+  color: #6e7773;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.live-status-grid dd,
+.live-lineage-grid dd {
+  margin: 0.2rem 0 0;
+  overflow-wrap: anywhere;
+  font: 0.76rem/1.4 monospace;
+}
+
+.live-lineage-panel {
+  margin-top: 1rem;
+}
+
+.live-lineage-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.muted-value {
+  color: #76817c;
+  font-family: inherit;
+}
+
+.live-boundary-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  color: #53615b;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+  .live-boundary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .live-execution-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .live-status-grid,
+  .live-lineage-grid {
+    grid-template-columns: 1fr;
+  }
+}

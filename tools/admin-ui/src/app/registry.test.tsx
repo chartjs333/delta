@@ -55,4 +55,28 @@ describe("product extension registry", () => {
     });
     expect(domain?.routes.map((route) => route.path)).toEqual(["/workloads"]);
   });
+
+  it("registers the live execution mock route and navigation entry", () => {
+    const navigation = extensionRegistry.navigation.find(
+      (item) => item.id === "live-execution",
+    );
+    const domain = extensionRegistry.domainModules.find(
+      (item) => item.id === "live-execution",
+    );
+
+    expect(navigation).toMatchObject({
+      label: "Live execution",
+      route: "/live-execution",
+    });
+    expect(domain?.requiredCapabilities).toEqual(["live.status.mock"]);
+    expect(domain?.routes.map((route) => route.path)).toEqual([
+      "/live-execution",
+    ]);
+
+    const LiveExecutionRoute = domain?.routes[0]?.component;
+    expect(LiveExecutionRoute).toBeDefined();
+    render(LiveExecutionRoute ? <LiveExecutionRoute /> : null);
+    expect(screen.getByRole("heading", { name: "Live execution" })).toBeTruthy();
+    expect(screen.getByText("MOCK ONLY")).toBeTruthy();
+  });
 });
