@@ -233,7 +233,6 @@ async function main() {
 
   const generated = await generateCatalogSnapshot({
     registryRoot,
-    targetSnapshotPath,
     backendRef,
   });
 
