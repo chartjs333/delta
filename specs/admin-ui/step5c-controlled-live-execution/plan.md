@@ -1,7 +1,7 @@
 # Implementation Plan: Step 5C Controlled Live Execution
 
-**Status**: Draft / STOP before implementation branches  
-**Authority**: ADR 0002 + this SpecKit  
+**Status**: Draft / STOP before implementation branches
+**Authority**: ADR 0002 + this SpecKit
 **Design baseline**: `f26c863d8dc2c5c019b77308b9ca0d0754bc3ff9`
 
 ## Constitution Check
@@ -18,7 +18,7 @@ No implementation feature branch may be created or assigned until all of the fol
 
 1. ADR 0002 is reviewed and marked `Accepted`.
 2. `spec.md`, `plan.md`, `tasks.md`, `task-map.md`, `runtime-profile.md`, `runtime-tasks.md`, and checklists are reviewed.
-3. `ExecutionIntent`, `AdmissionRecord`, `ExecutionStatus`, error taxonomy, lineage fields, idempotency semantics, and allowed operations are frozen at the design level.
+3. `ExecutionIntent`, `AdmissionRecord`, `AuthorizedExecution`, `ExecutionStatus`, error taxonomy, lineage fields, idempotency semantics, and allowed operations are frozen at the design level.
 4. A merge commit containing the accepted ADR + SpecKit is recorded as `CONTRACT_FREEZE_SHA`.
 
 `CONTRACT_FREEZE_SHA` is the common base for Step 5C implementation branches. No developer may invent or reuse unrelated task IDs after this point.
@@ -27,9 +27,9 @@ No implementation feature branch may be created or assigned until all of the fol
 
 ### Wave A — Contract artifacts and adversarial design
 
-- Contracts branch materializes frozen schemas and golden JCS/digest fixtures.
+- Contracts branch materializes frozen schemas, Ed25519 verification fixtures, and golden JCS/digest fixtures.
 - Security branch prepares attack/replay/confused-deputy matrices against those contracts.
-- UI work may prepare presentation-state mocks but may not add a live network adapter before canonical contract artifacts exist.
+- UI work may prepare presentation-state mocks behind `LiveExecutionPort` with zero-egress CSP, but may not add a live network adapter before canonical contract artifacts exist.
 
 ### Wave B — Parallel implementation
 
@@ -37,13 +37,13 @@ After canonical contract artifacts are merged/rebased, three implementation bran
 
 - trusted Authorization Gate / controller;
 - worker execution adapter;
-- Admin UI live intent/status adapter.
+- Admin UI live intent/status adapter (mock-only).
 
 Each branch has exclusive path ownership described in `branch-matrix.md`. Contract changes require returning to the RFC branch and a reviewed SpecKit amendment.
 
 ### Wave C — Integration
 
-Integration selects the first transport profile, joins controller/worker/UI, proves end-to-end lineage/idempotency/recovery, and adds transport-specific security controls without changing the authority model.
+Integration selects the first transport profile (T035), joins controller/worker/UI, proves end-to-end lineage/idempotency/recovery, and adds transport-specific security controls without changing the authority model.
 
 ### Wave D — Qualification
 
@@ -56,8 +56,8 @@ Run full quality/security gates, publish machine-readable evidence, perform fina
 - remains untrusted;
 - drafts intents from frozen catalog descriptors;
 - computes/displays canonical digests for user visibility but is never authority;
-- submits only through the live adapter;
-- retains existing offline local adapters unchanged.
+- interacts strictly via a dedicated `LiveExecutionPort` abstraction (mocked during Phase 1-5);
+- retains existing offline local adapters and `DataSourcePort` completely unchanged.
 
 ### Zone 2 — Authorization Gate
 

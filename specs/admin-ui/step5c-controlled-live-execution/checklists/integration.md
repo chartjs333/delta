@@ -14,13 +14,14 @@
 ## E2E
 - [ ] Transport implementation note reviewed and does not change ADR trust semantics.
 - [ ] Valid intent produces admission, one execution, terminal receipt.
-- [ ] Intent/admission/execution/receipt IDs and digests match exactly across all boundaries.
-- [ ] Duplicate submission during RUNNING does not start another worker.
-- [ ] Duplicate submission after COMPLETED returns the same terminal result.
+- [ ] Intent/admission/execution/receipt IDs (including `admission_id`), digests, and Ed25519 signatures verify exactly across all boundaries.
+- [ ] Duplicate submission during RUNNING (same id + digest + subject) does not start another worker.
+- [ ] Duplicate submission after COMPLETED (same id + digest + subject) returns the same terminal result from cache.
+- [ ] Re-submission with different digest fails with `ERR_INTENT_ID_DIGEST_CONFLICT`; cross-subject fails with `ERR_UNAUTHORIZED_CALLER`.
 - [ ] Restart/reconnect recovers existing status and idempotency state.
 - [ ] Timeout/cancel/failure paths never produce success receipt.
 - [ ] Invalid/expired/unauthorized/incompatible intents start no worker.
-- [ ] Existing offline Admin UI flow works with controller absent.
+- [ ] Existing offline Admin UI flow works with controller absent and zero network egress.
 
 ## Final Gate
 - [ ] Full quality suites green.

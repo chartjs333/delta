@@ -11,7 +11,7 @@ The SpecKit is the task authority. Developers may report findings, but may not s
 | Governance/contracts | T000–T009 | `feature/step5c-contracts` after T004 | `specs/admin-ui/step5c-controlled-live-execution/contracts/**`, fixtures/evidence | ADR + SpecKit accepted/frozen |
 | Controller | T010–T016 | `feature/step5c-controller` | new `delta-controller-python/**`; controller tests | T004; final review depends T009 |
 | Worker adapter | T017–T022 | `feature/step5c-worker-adapter` | `delta-worker-python/src/deltatorrent/live_execution/**`, narrowly required runner/receipt tests | T004; final review depends T009 |
-| Admin UI | T023–T028 | `feature/step5c-admin-ui-live` | `tools/admin-ui/src/modules/live-execution/**`, explicit adapter/composition/test files | T004; final review depends T009 |
+| Admin UI | T023–T028 | `feature/step5c-admin-ui-live` | `tools/admin-ui/src/modules/live-execution/**`, `tools/admin-ui/src/data/live-execution-port.ts`, explicit adapter/composition/test files (offline `data-source-port.ts` forbidden) | T004; final review depends T009 |
 | Security | T029–T034 | `feature/step5c-security` | Step 5C threat fixtures/tests/evidence; no production semantics | T004; consumes frozen contracts |
 | Integration | T035–T039 | `feature/step5c-e2e` | transport adapter + cross-component E2E/evidence only | review-clean controller/worker/UI/security |
 | Qualification | T040–T044 | `release/step5c-qualification` | CI/evidence/checklists/docs only unless a reviewed defect fix is split to owner branch | integrated Step 5C candidate |

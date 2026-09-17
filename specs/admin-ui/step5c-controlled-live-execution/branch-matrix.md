@@ -28,7 +28,7 @@ Do not create implementation branches until `tasks.md` T000–T004 are complete 
 - Tasks: T023–T028
 - Base: `CONTRACT_FREEZE_SHA`; rebase onto contracts merge before final review.
 - Owns: live intent/status UI module and explicit adapter/composition tests.
-- Forbidden: trusted policy, direct worker invocation, shell/process/native runtime calls.
+- Forbidden: trusted policy, direct worker invocation, shell/process/native runtime calls, modifying offline `data-source-port.ts`, introducing network egress before T035.
 
 ### `feature/step5c-security`
 - Tasks: T029–T034

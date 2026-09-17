@@ -14,10 +14,10 @@ Task IDs are local to this SpecKit. Commit references MUST use the qualified for
 
 ## Phase 1 — Canonical contract artifacts
 
-- [ ] **T005** Materialize strict Draft 2020-12 `ExecutionIntent` schema with operation-specific payloads and forbidden extra properties.
-- [ ] **T006** Materialize strict `AdmissionRecord` / `AuthorizedExecution` schemas with authenticated subject, policy context, resource grants, execution ID, and admission digest.
-- [ ] **T007** Define `ExecutionStatus`, preflight error taxonomy, and terminal `ExecutionReceipt` lineage extension schemas without consensus fields.
-- [ ] **T008** Add RFC 8785 JCS golden vectors and SHA-256 fixtures covering every semantic field, Unicode/number edge cases, tampering, and cross-language parity.
+- [ ] **T005** Materialize strict Draft 2020-12 `ExecutionIntent` schema with operation-specific payloads, `requested_allow_downloads`, optional `retry_of_intent_id`, bounded coordinates, no defaults, and forbidden extra properties.
+- [ ] **T006** Materialize strict `AdmissionRecord` (with Ed25519 `authenticator`, `admission_expires_at`, `resource_grants.allow_downloads`) and minimal `AuthorizedExecution` (schema_version + ExecutionIntent + AdmissionRecord) schemas.
+- [ ] **T007** Define `ExecutionStatus`, preflight error taxonomy (including `ERR_INTENT_ID_DIGEST_CONFLICT`, `ERR_UNAUTHORIZED_CALLER`), and terminal `ExecutionReceipt` lineage extension schemas (`admission_id` included).
+- [ ] **T008** Add RFC 8785 JCS golden vectors and SHA-256 / Ed25519 fixtures covering every semantic field, Unicode/number edge cases, tampering, and cross-language parity.
 - [ ] **T009** Add contract validation tests and valid/invalid fixtures; publish exact artifact hashes. Contracts branch exit gate blocks final review of controller/worker/UI branches.
 
 ## Phase 2 — Trusted Authorization Gate / Controller
@@ -26,27 +26,27 @@ Task IDs are local to this SpecKit. Commit references MUST use the qualified for
 - [ ] **T011** Implement bounded input parsing, schema validation, JCS recomputation, intent TTL validation, and fail-closed digest mismatch handling.
 - [ ] **T012** Implement authentication port and policy evaluation; treat `declared_operator` only as untrusted claimed metadata.
 - [ ] **T013** Implement frozen catalog/ref/capability-matrix validation and operation/scope allowlist checks.
-- [ ] **T014** Implement durable append-only idempotency ledger with one-intent/one-execution semantics, duplicate-in-progress lookup, completed receipt lookup, and restart recovery.
-- [ ] **T015** Implement resource grants, concurrency/quota/timeout admission checks, and typed preflight rejection without worker start.
-- [ ] **T016** Implement `AdmissionRecord`, execution ID allocation, dispatch port, status read model, and audit metadata with secret-redaction tests.
+- [ ] **T014** Implement durable append-only idempotency ledger keyed by `intent_id` (storing first-seen `intent_digest` and `authenticated_subject`), with identical re-submission lookup, `ERR_INTENT_ID_DIGEST_CONFLICT` rejection, `ERR_UNAUTHORIZED_CALLER` rejection, and fresh `intent_id` retry semantics.
+- [ ] **T015** Implement resource grants (`max_memory_bytes`, `timeout_seconds`, `allow_downloads`), concurrency/quota/timeout admission checks, and typed preflight rejection without worker start.
+- [ ] **T016** Implement `AdmissionRecord` with Ed25519 signing, `admission_expires_at` assignment, execution ID allocation, dispatch port, status read model, and audit metadata with secret-redaction tests.
 
 ## Phase 3 — Constrained Worker Adapter
 
-- [ ] **T017** Implement `AuthorizedExecution` validation: intent/admission IDs/digests, catalog ref, operation, scope, TTL/admission validity, and execution ID parity.
+- [ ] **T017** Implement `AuthorizedExecution` preflight validation: execution_id parity, intent_id parity, intent_digest recomputation/parity, Ed25519 controller signature verification, `admission_expires_at` freshness, and effective `allow_downloads` grant.
 - [ ] **T018** Implement closed enum dispatch to existing registered `ModelPluginRunner` operations; no dynamic imports, callable names, shell, or arbitrary paths.
-- [ ] **T019** Implement operation adapters for `TRAIN_TICKET`, `MATERIALIZE_DATASET`, `EVALUATE_SPLIT`, and `EVALUATE_CHECKPOINT` with operation-specific payload validation.
+- [ ] **T019** Implement operation adapters for `TRAIN_TICKET` (receipt-eligible), `EVALUATE_CHECKPOINT` (receipt-eligible), and `MATERIALIZE_DATASET` (status-only, no receipt) with operation-specific payload validation.
 - [ ] **T020** Implement bounded timeout/cancellation behavior that cannot publish a success receipt after timeout/cancel/failure.
 - [ ] **T021** Extend terminal receipt emission with `intent_id`, `intent_digest`, `admission_id`, `admission_digest`, and `execution_id`; preserve existing catalog/producer provenance and unattested semantics.
-- [ ] **T022** Add worker negative/regression tests for forged admission, cross-workload binding, stale/expired bundles, wrong scope, wrong execution ID, arbitrary path/module injection, and false Stage C claims.
+- [ ] **T022** Add worker negative/regression tests for forged admission, invalid Ed25519 signature, expired admission, cross-workload binding, stale/expired bundles, wrong scope, wrong execution ID, arbitrary path/module injection, and false Stage C claims.
 
 ## Phase 4 — Admin UI Live Intent and Status Surface
 
-- [ ] **T023** Add a live-execution `DataSourcePort`/adapter boundary isolated from existing offline adapters; no network behavior in local adapters.
-- [ ] **T024** Implement form-first `ExecutionIntent` builder from the frozen catalog; expose only allowed operation-specific fields and constraints.
+- [ ] **T023** Add a separate `LiveExecutionPort` abstraction isolated from offline `DataSourcePort`; keep Phase 1-5 UI development mock/local-only with zero-egress CSP.
+- [ ] **T024** Implement form-first `ExecutionIntent` builder from the frozen catalog; expose only allowed operation-specific fields (`TRAIN_TICKET`, `EVALUATE_CHECKPOINT`, `MATERIALIZE_DATASET`) and constraints.
 - [ ] **T025** Implement browser RFC 8785 canonicalization/digest verification against T008 golden vectors; UI digest remains informational, gate recomputation remains authority.
 - [ ] **T026** Implement explicit UI states for draft, rejected, admitted, queued, running, completed, failed, timed out, cancelled, stale/unavailable.
 - [ ] **T027** Implement lineage/provenance display linking intent/admission/execution/receipt without trust inflation; retain `UNATTESTED_*` semantics.
-- [ ] **T028** Preserve offline mode, bounded untrusted JSON parsing, CSP, and zero-egress local-adapter tests; live transport must be isolated behind explicit configuration/capability.
+- [ ] **T028** Preserve offline mode, bounded untrusted JSON parsing, CSP `connect-src 'none'`, and zero-egress local-adapter tests; live transport must be isolated behind explicit configuration/capability in T035.
 
 ## Phase 5 — Security and Reliability Hardening
 

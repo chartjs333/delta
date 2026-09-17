@@ -10,11 +10,11 @@ Owns presentation, intent drafting, local structural validation, informational J
 
 ### Authorization Gate / Controller (Zone 2, trusted policy authority)
 
-A separate process. Owns bounded ingress, authenticated caller identity, policy evaluation, catalog/ref/capability checks, TTL, quotas, durable idempotency ledger, admission records, execution IDs, status projection, dispatch authorization, and audit metadata. It does not compute ML results or consensus decisions.
+A separate process. Owns bounded ingress, authenticated caller identity, policy evaluation, catalog/ref/capability checks, intent TTL, resource quotas, durable idempotency ledger, Ed25519 signing key for `AdmissionRecord`, dispatch deadline (`admission_expires_at`), execution IDs, status projection, dispatch authorization, and audit metadata. It does not compute ML results or consensus decisions.
 
 ### Python Worker (Zone 3, constrained execution)
 
-Owns local dataset materialization, ticket training, evaluation, checkpoint evaluation, and receipt production through canonical `DatasetProvider`, `ModelPlugin`, and `ModelPluginRunner` paths. It accepts only an `AuthorizedExecution` bundle and verifies intent/admission parity before operation dispatch.
+Owns local dataset materialization (status-only), ticket training (receipt-eligible), and checkpoint evaluation (receipt-eligible) through canonical `DatasetProvider`, `ModelPlugin`, and `ModelPluginRunner` paths. It accepts only an `AuthorizedExecution` bundle and verifies intent/admission parity, Ed25519 signature, dispatch deadline, and effective download grants before operation dispatch.
 
 ### Delta Consensus Spine (Zone 4, protected)
 
@@ -22,11 +22,11 @@ Unchanged. No local Step 5C operation can claim consensus, mutate WAL/current ch
 
 ## Boundary Rules
 
-- Browser -> controller: declarative schema-bounded data only.
-- Controller -> worker: exact validated intent + admission record + execution identity; no command strings or arbitrary paths.
+- Browser -> controller: declarative schema-bounded data only via `LiveExecutionPort` abstraction.
+- Controller -> worker: immutable `AuthorizedExecution` bundle packaging `ExecutionIntent` and signed `AdmissionRecord`.
 - Worker -> controller/UI: bounded status/result artifacts and terminal receipt; no internal Python objects as wire authority.
 - Contracts are transport-neutral and canonicalized independently at each trust boundary.
-- Failure to canonicalize/verify any required digest is terminal fail-closed for that request.
+- Failure to canonicalize/verify any required digest or Ed25519 signature is terminal fail-closed for that request.
 
 ## Threading / Concurrency
 
