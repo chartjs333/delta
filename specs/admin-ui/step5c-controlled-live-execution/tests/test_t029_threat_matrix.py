@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MATRIX = ROOT / "security" / "t029-threat-negative-test-matrix.json"
 EVIDENCE = ROOT / "evidence" / "t029-threat-matrix.json"
