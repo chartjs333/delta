@@ -42,7 +42,8 @@ export interface LiveIntentDraftPreview {
   readonly state: "DRAFT";
   readonly operation: LiveExecutionOperation;
   readonly workload: LiveWorkloadSelection;
-  readonly digestState: "AWAITING_CONTRACT_ARTIFACTS";
+  readonly digestState: "COMPUTED_INFORMATIONAL" | "AWAITING_CONTRACT_ARTIFACTS";
+  readonly intentDigest?: string;
   readonly authority: "PRESENTATION_MOCK";
 }
 
@@ -74,4 +75,5 @@ export interface LiveExecutionPort {
   ): Promise<LiveIntentDraftPreview>;
   listStatuses(): Promise<readonly LiveExecutionStatus[]>;
   getStatus(statusId: string): Promise<LiveExecutionStatus>;
+  submitIntent?(intent: unknown): Promise<LiveExecutionStatus>;
 }
