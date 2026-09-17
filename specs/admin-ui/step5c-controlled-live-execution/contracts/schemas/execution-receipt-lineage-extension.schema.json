@@ -1,0 +1,204 @@
+{
+  "$id": "https://delta.local/schemas/step5c/execution-receipt-lineage-extension.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "execution": {
+      "additionalProperties": true,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "round_id"
+            ]
+          },
+          {
+            "required": [
+              "state_root"
+            ]
+          },
+          {
+            "required": [
+              "wal_sequence"
+            ]
+          },
+          {
+            "required": [
+              "qc"
+            ]
+          },
+          {
+            "required": [
+              "apply_qc"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "terminal_status": {
+          "enum": [
+            "COMPLETED",
+            "FAILED",
+            "TIMED_OUT",
+            "CANCELLED"
+          ],
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "SUCCESS",
+            "FAILED"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "verdict",
+        "terminal_status"
+      ],
+      "type": "object"
+    },
+    "provenance": {
+      "additionalProperties": true,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "round_id"
+            ]
+          },
+          {
+            "required": [
+              "state_root"
+            ]
+          },
+          {
+            "required": [
+              "wal_sequence"
+            ]
+          },
+          {
+            "required": [
+              "qc"
+            ]
+          },
+          {
+            "required": [
+              "apply_qc"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "admission_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "admission_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "backend_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "catalog_backend_ref": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "controller_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "execution_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "intent_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "intent_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "produced_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "producer_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "repository": {
+          "const": "chartjs333/delta",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "backend_commit",
+        "catalog_backend_ref",
+        "producer_commit",
+        "controller_commit",
+        "produced_at",
+        "intent_id",
+        "intent_digest",
+        "admission_id",
+        "admission_digest",
+        "execution_id"
+      ],
+      "type": "object"
+    },
+    "receipt_type": {
+      "const": "DELTAREDUCE_EXECUTION_RECEIPT",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "type": "string"
+    },
+    "workload": {
+      "additionalProperties": true,
+      "properties": {
+        "dataset_id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9-]+$",
+          "type": "string"
+        },
+        "executed_scope": {
+          "enum": [
+            "PLUGIN_BOUNDARY",
+            "MODEL_DATASET_BINDING_ONLY"
+          ],
+          "type": "string"
+        },
+        "model_plugin_id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9-]+$",
+          "type": "string"
+        },
+        "workload_config_digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_plugin_id",
+        "dataset_id",
+        "executed_scope",
+        "workload_config_digest"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "receipt_type",
+    "provenance",
+    "workload",
+    "execution"
+  ],
+  "title": "ExecutionReceiptLineageExtension",
+  "type": "object"
+}

@@ -1,0 +1,10 @@
+{
+  "artifact_count": 28,
+  "artifact_manifest_sha256": "340e1f233d1a39fcb92831b082d8b95e1c72823a783f12fb869067e2b7d6e55d",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "errors": [],
+  "passed": true,
+  "schema_version": "1.0.0",
+  "validated_invalid_fixture_count": 7,
+  "validated_valid_fixture_count": 7
+}

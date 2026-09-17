@@ -1,0 +1,33 @@
+{
+  "admission_digest": "sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1",
+  "admission_expires_at": "2026-09-17T14:35:00.000Z",
+  "admission_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "admitted_at": "2026-09-17T14:30:05.000Z",
+  "authenticated_subject": {
+    "authenticated_via": "LOCAL_PEER_CREDENTIAL",
+    "effective_roles": [
+      "OPERATOR"
+    ],
+    "subject_id": "operator.alpha"
+  },
+  "authenticator": {
+    "algorithm": "ED25519",
+    "issuer_id": "step5c-fixture-controller",
+    "key_id": "step5c-fixture-ed25519",
+    "signature": "d9eb4c690692b428d951ce111cf17d3e6f93ea552a23a927506225def9103788fddd350bc7be9cc691949dc8fccc5edd855b89067bf30a9f4a2952b288ada90f"
+  },
+  "execution_id": "55555555-5555-4555-8555-555555555555",
+  "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
+  "intent_id": "11111111-1111-4111-8111-111111111111",
+  "policy_context": {
+    "controller_commit": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+    "policy_version": "step5c-policy-v1",
+    "verdict": "ADMITTED"
+  },
+  "resource_grants": {
+    "allow_downloads": false,
+    "max_memory_bytes": 2147483648,
+    "timeout_seconds": 900
+  },
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,228 @@
+{
+  "$id": "https://delta.local/schemas/step5c/execution-intent.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "TRAIN_TICKET"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "operation_payload": {
+            "additionalProperties": false,
+            "properties": {
+              "partition_id": {
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              },
+              "ticket_id": {
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "ticket_id",
+              "partition_id"
+            ],
+            "type": "object"
+          },
+          "workload": {
+            "properties": {
+              "requested_scope": {
+                "const": "PLUGIN_BOUNDARY"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "EVALUATE_CHECKPOINT"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "operation_payload": {
+            "additionalProperties": false,
+            "properties": {
+              "checkpoint_coordinates": {
+                "items": {
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
+                  "type": "integer"
+                },
+                "maxItems": 4096,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "checkpoint_coordinates"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation": {
+            "const": "MATERIALIZE_DATASET"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "operation_payload": {
+            "additionalProperties": false,
+            "properties": {
+              "cache_key": {
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "declared_operator": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "OPERATOR",
+            "RESEARCHER",
+            "AUDITOR"
+          ],
+          "type": "string"
+        },
+        "subject_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id",
+        "role"
+      ],
+      "type": "object"
+    },
+    "execution_constraints": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_allow_downloads": {
+          "type": "boolean"
+        },
+        "retry_of_intent_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "timeout_seconds": {
+          "maximum": 3600,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "timeout_seconds",
+        "requested_allow_downloads"
+      ],
+      "type": "object"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "intent_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "intent_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "operation": {
+      "enum": [
+        "TRAIN_TICKET",
+        "EVALUATE_CHECKPOINT",
+        "MATERIALIZE_DATASET"
+      ],
+      "type": "string"
+    },
+    "operation_payload": {
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "type": "string"
+    },
+    "workload": {
+      "additionalProperties": false,
+      "properties": {
+        "catalog_backend_ref": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "dataset_id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9-]+$",
+          "type": "string"
+        },
+        "model_plugin_id": {
+          "maxLength": 64,
+          "pattern": "^[a-z0-9-]+$",
+          "type": "string"
+        },
+        "requested_scope": {
+          "enum": [
+            "PLUGIN_BOUNDARY",
+            "MODEL_DATASET_BINDING_ONLY"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_plugin_id",
+        "dataset_id",
+        "requested_scope",
+        "catalog_backend_ref"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "intent_id",
+    "created_at",
+    "expires_at",
+    "declared_operator",
+    "workload",
+    "operation",
+    "operation_payload",
+    "execution_constraints",
+    "intent_digest"
+  ],
+  "title": "ExecutionIntent",
+  "type": "object"
+}

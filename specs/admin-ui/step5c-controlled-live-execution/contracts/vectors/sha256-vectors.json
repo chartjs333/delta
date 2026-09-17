@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "authorized-execution",
+      "sha256": "sha256:0b679e1a6bd5362f609fc0fb04501706efa268f9d449061c7ceaa768221b8818"
+    },
+    {
+      "name": "execution-status",
+      "sha256": "sha256:90a6772af0444014cccca5aac7ff8d1eaabe0ef7e437162bcb45213b74c5d924"
+    },
+    {
+      "name": "receipt-lineage-extension",
+      "sha256": "sha256:ada72a956b37d5580661f7e858200f0ba5ceca7f3230fbb065d0de87547614cb"
+    }
+  ]
+}
