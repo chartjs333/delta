@@ -80,6 +80,43 @@ describe("validateExecutionReceipt", () => {
     );
   });
 
+  it("fails closed on non-40-char catalog_backend_ref or mismatch with backend_commit", () => {
+    const invalidFormat = {
+      ...sample10GeneReceipt,
+      provenance: {
+        ...sample10GeneReceipt.provenance,
+        catalog_backend_ref: "short_ref",
+      },
+    };
+    expect(() => validateExecutionReceipt(invalidFormat)).toThrow(
+      /catalog_backend_ref must be a 40-character git SHA/u
+    );
+
+    const mismatched = {
+      ...sample10GeneReceipt,
+      provenance: {
+        ...sample10GeneReceipt.provenance,
+        catalog_backend_ref: "1111111111111111111111111111111111111111",
+      },
+    };
+    expect(() => validateExecutionReceipt(mismatched)).toThrow(
+      /must match backend_commit/u
+    );
+  });
+
+  it("fails closed on non-40-char producer_commit", () => {
+    const invalid = {
+      ...sample10GeneReceipt,
+      provenance: {
+        ...sample10GeneReceipt.provenance,
+        producer_commit: "not_a_valid_sha",
+      },
+    };
+    expect(() => validateExecutionReceipt(invalid)).toThrow(
+      /producer_commit must be a 40-character git SHA/u
+    );
+  });
+
   it("fails closed on tampered workload_config_digest", () => {
     const invalid = {
       ...sampleMnistReceipt,

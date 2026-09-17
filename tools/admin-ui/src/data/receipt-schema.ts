@@ -6,6 +6,8 @@ import {
 export interface ReceiptProvenance {
   readonly repository: string;
   readonly backend_commit: string;
+  readonly catalog_backend_ref?: string;
+  readonly producer_commit?: string;
   readonly produced_at: string;
 }
 
@@ -224,6 +226,31 @@ export function validateExecutionReceipt(raw: unknown): ExecutionReceipt {
     throw new ReceiptValidationError(
       `backend_commit must be a 40-character git SHA hex string, got: ${String(prov.backend_commit)}`
     );
+  }
+  if (prov.catalog_backend_ref !== undefined) {
+    if (
+      typeof prov.catalog_backend_ref !== "string" ||
+      !/^[0-9a-f]{40}$/u.test(prov.catalog_backend_ref)
+    ) {
+      throw new ReceiptValidationError(
+        `catalog_backend_ref must be a 40-character git SHA hex string if present, got: ${String(prov.catalog_backend_ref)}`
+      );
+    }
+    if (prov.catalog_backend_ref !== prov.backend_commit) {
+      throw new ReceiptValidationError(
+        `catalog_backend_ref (${String(prov.catalog_backend_ref)}) must match backend_commit (${String(prov.backend_commit)})`
+      );
+    }
+  }
+  if (prov.producer_commit !== undefined) {
+    if (
+      typeof prov.producer_commit !== "string" ||
+      !/^[0-9a-f]{40}$/u.test(prov.producer_commit)
+    ) {
+      throw new ReceiptValidationError(
+        `producer_commit must be a 40-character git SHA hex string if present, got: ${String(prov.producer_commit)}`
+      );
+    }
   }
 
   // 2. Workload

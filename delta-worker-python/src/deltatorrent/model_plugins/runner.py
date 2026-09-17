@@ -286,7 +286,7 @@ class ModelPluginRunner:
         repository: str = "chartjs333/delta",
         produced_at: str | None = None,
         output_path: Path | str | None = None,
-        execution_token: LocalTrainingResult | EvaluationResult | Mapping[str, Any] | None = None,
+        execution_token: LocalTrainingResult | EvaluationResult | None = None,
     ) -> dict[str, Any]:
         """Emit a validated ExecutionReceipt for this runner binding fail-closed.
 
@@ -294,17 +294,20 @@ class ModelPluginRunner:
         without fabricated consensus evidence.
 
         Requires that the runner has executed a workload step (train_ticket, evaluate,
-        evaluate_checkpoint) or that an explicit execution_token is provided.
+        evaluate_checkpoint) or that an explicit valid execution_token is provided.
 
         Provenance semantics:
         - `backend_commit`: Canonical compatibility reference used in computing
           workload_config_digest (retained for backward compatibility and
           cross-language schema matching).
-        - `catalog_backend_ref`: Explicit alias for the catalog compatibility reference.
-        - `producer_commit`: The commit hash of the worker runtime that produced the receipt.
+        - `catalog_backend_ref`: Explicit alias for catalog compatibility reference.
+          Must equal `backend_commit`.
+        - `producer_commit`: The commit hash of worker runtime that produced receipt.
         """
         import hashlib
         import json
+        import os
+        import re
         from datetime import UTC, datetime
 
         if self._execution_scope == "STAGE_C_REAL_DRQ1":
@@ -313,15 +316,91 @@ class ModelPluginRunner:
                 "local ModelPluginRunner cannot emit consensus evidence"
             )
 
-        if execution_token is None and self._last_execution is None:
+        if execution_token is not None:
+            if not isinstance(execution_token, (LocalTrainingResult, EvaluationResult)):
+                raise ModelPluginRunnerError(
+                    "INVALID_EXECUTION_TOKEN: execution_token must be an instance of "
+                    "LocalTrainingResult or EvaluationResult"
+                )
+            if isinstance(execution_token, LocalTrainingResult):
+                if not execution_token.ticket_id or not execution_token.tensors:
+                    raise ModelPluginRunnerError(
+                        "INVALID_EXECUTION_TOKEN: LocalTrainingResult must contain "
+                        "ticket_id and non-empty tensors"
+                    )
+            elif isinstance(execution_token, EvaluationResult):
+                if execution_token.accuracy_ppm < 0:
+                    raise ModelPluginRunnerError(
+                        "INVALID_EXECUTION_TOKEN: EvaluationResult must have accuracy_ppm >= 0"
+                    )
+        elif self._last_execution is None:
             raise ModelPluginRunnerError(
                 "NO_EXECUTION_RECORDED: cannot emit receipt before workload execution "
-                "(train_ticket, evaluate, or explicit execution_token required)"
+                "(train_ticket, evaluate, or valid execution_token required)"
+            )
+
+        hex40_re = re.compile(r"^[0-9a-f]{40}$")
+
+        if not isinstance(backend_commit, str) or not hex40_re.match(backend_commit):
+            raise ModelPluginRunnerError(
+                f"INVALID_BACKEND_COMMIT: backend_commit must be a 40-character "
+                f"git SHA hex string, got: {backend_commit!r}"
+            )
+
+        if catalog_backend_ref is not None:
+            if not isinstance(catalog_backend_ref, str) or not hex40_re.match(catalog_backend_ref):
+                raise ModelPluginRunnerError(
+                    f"INVALID_CATALOG_BACKEND_REF: catalog_backend_ref must be a 40-character "
+                    f"git SHA hex string, got: {catalog_backend_ref!r}"
+                )
+            if catalog_backend_ref != backend_commit:
+                raise ModelPluginRunnerError(
+                    f"PROVENANCE_REF_MISMATCH: catalog_backend_ref ({catalog_backend_ref}) "
+                    f"must match backend_commit ({backend_commit})"
+                )
+        else:
+            catalog_backend_ref = backend_commit
+
+        resolved_producer_commit = producer_commit
+        if resolved_producer_commit is None:
+            resolved_producer_commit = os.environ.get("PRODUCER_COMMIT") or os.environ.get(
+                "GITHUB_SHA"
+            )
+            if resolved_producer_commit is None:
+                try:
+                    import subprocess
+
+                    res = subprocess.run(
+                        ["git", "rev-parse", "HEAD"],
+                        capture_output=True,
+                        text=True,
+                        timeout=2,
+                        check=False,
+                    )
+                    if res.returncode == 0:
+                        candidate = res.stdout.strip()
+                        if hex40_re.match(candidate):
+                            resolved_producer_commit = candidate
+                except Exception:
+                    pass
+
+        if resolved_producer_commit is None:
+            raise ModelPluginRunnerError(
+                "PRODUCER_COMMIT_REQUIRED: worker receipt emission requires a valid "
+                "40-character producer_commit"
+            )
+
+        if not isinstance(resolved_producer_commit, str) or not hex40_re.match(
+            resolved_producer_commit
+        ):
+            raise ModelPluginRunnerError(
+                f"INVALID_PRODUCER_COMMIT: producer_commit must be a 40-character "
+                f"git SHA hex string, got: {resolved_producer_commit!r}"
             )
 
         canonical_string = (
             f"{self.model_descriptor.plugin_id}:{self.dataset_descriptor.dataset_id}:"
-            f"{self._execution_scope}:{backend_commit}"
+            f"{self._execution_scope}:{catalog_backend_ref}"
         )
         digest = hashlib.sha256(canonical_string.encode("utf-8")).hexdigest()
         workload_config_digest = f"sha256:{digest}"
@@ -331,11 +410,10 @@ class ModelPluginRunner:
         provenance: dict[str, Any] = {
             "repository": repository,
             "backend_commit": backend_commit,
-            "catalog_backend_ref": catalog_backend_ref or backend_commit,
+            "catalog_backend_ref": catalog_backend_ref,
+            "producer_commit": resolved_producer_commit,
             "produced_at": timestamp,
         }
-        if producer_commit is not None:
-            provenance["producer_commit"] = producer_commit
 
         receipt: dict[str, Any] = {
             "schema_version": "1.0.0",

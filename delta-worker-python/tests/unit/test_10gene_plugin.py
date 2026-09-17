@@ -300,7 +300,7 @@ def test_model_plugin_runner_rejects_stage_c_claim_fail_closed() -> None:
 
 
 def test_model_plugin_runner_provenance_separation() -> None:
-    """Reviewer 3 Finding: Provenance clearly separates catalog ref and producer commit."""
+    """Reviewer 3 & 4 Finding: Provenance clearly separates catalog ref and producer commit."""
     runner = ModelPluginRunner(
         plugin_id="tabular-10gene-phenotype-v1",
         dataset_id="synthetic-10gene-cohort-v1",
@@ -319,6 +319,28 @@ def test_model_plugin_runner_provenance_separation() -> None:
     assert receipt["provenance"]["backend_commit"] == catalog_ref
     assert receipt["provenance"]["catalog_backend_ref"] == catalog_ref
     assert receipt["provenance"]["producer_commit"] == prod_commit
+
+    # Mismatched catalog_backend_ref vs backend_commit fails closed
+    with pytest.raises(ModelPluginRunnerError, match="PROVENANCE_REF_MISMATCH"):
+        runner.emit_execution_receipt(
+            backend_commit=catalog_ref,
+            catalog_backend_ref="1111111111111111111111111111111111111111",
+            producer_commit=prod_commit,
+        )
+
+    # Invalid non-40-hex backend_commit fails closed
+    with pytest.raises(ModelPluginRunnerError, match="INVALID_BACKEND_COMMIT"):
+        runner.emit_execution_receipt(
+            backend_commit="not-40-hex",
+            producer_commit=prod_commit,
+        )
+
+    # Invalid non-40-hex producer_commit fails closed
+    with pytest.raises(ModelPluginRunnerError, match="INVALID_PRODUCER_COMMIT"):
+        runner.emit_execution_receipt(
+            backend_commit=catalog_ref,
+            producer_commit="short-sha",
+        )
 
 
 # --- 4. Strict Numeric Hardening & Regressions (Reviewer 1 & 2 Findings) ---
@@ -470,14 +492,41 @@ def test_regression_reviewer1_medium_json_serialization_allow_nan_false() -> Non
 
 
 def test_model_plugin_runner_rejects_receipt_without_prior_execution() -> None:
-    """Reviewer 3 Finding: Runner rejects emitting receipt before workload execution."""
+    """Reviewer 3 & 4 Finding: Runner rejects emitting receipt before workload execution,
+    and rejects arbitrary mappings or invalid execution tokens fail-closed.
+    """
     runner = ModelPluginRunner(
         plugin_id="tabular-10gene-phenotype-v1",
         dataset_id="synthetic-10gene-cohort-v1",
         execution_scope="PLUGIN_BOUNDARY",
     )
+    # Reject when no execution occurred
     with pytest.raises(ModelPluginRunnerError, match="NO_EXECUTION_RECORDED"):
         runner.emit_execution_receipt()
+
+    # Reject empty dictionary bypass attempt
+    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_TOKEN"):
+        runner.emit_execution_receipt(execution_token={})  # type: ignore[arg-type]
+
+    # Reject arbitrary string or other invalid object
+    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_TOKEN"):
+        runner.emit_execution_receipt(execution_token="bypass")  # type: ignore[arg-type]
+
+    # Reject empty LocalTrainingResult with empty tensors
+    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_TOKEN"):
+        runner.emit_execution_receipt(
+            execution_token=LocalTrainingResult(ticket_id="t1", tensors={}, metadata={})
+        )
+
+    # Valid execution token succeeds on unexecuted runner
+    train_res = runner.train_ticket(ticket_id="t-token", partition_id="part-default")
+    unexecuted_runner = ModelPluginRunner(
+        plugin_id="tabular-10gene-phenotype-v1",
+        dataset_id="synthetic-10gene-cohort-v1",
+        execution_scope="PLUGIN_BOUNDARY",
+    )
+    receipt = unexecuted_runner.emit_execution_receipt(execution_token=train_res)
+    assert receipt["execution"]["verdict"] == "SUCCESS"
 
 
 def test_regression_scale_features_pre_int64_overflow() -> None:

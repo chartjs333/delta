@@ -602,7 +602,10 @@ export function WorkloadSelector({
 
               <footer className="panel-provenance">
                 <span>
-                  Produced at: <code>{loadedReceipt.provenance.produced_at}</code> · commit: <code>{loadedReceipt.provenance.backend_commit.slice(0, 7)}</code>
+                  Produced at: <code>{loadedReceipt.provenance.produced_at}</code> · catalog: <code>{loadedReceipt.provenance.backend_commit.slice(0, 7)}</code>
+                  {loadedReceipt.provenance.producer_commit && (
+                    <> · producer: <code>{loadedReceipt.provenance.producer_commit.slice(0, 7)}</code></>
+                  )}
                 </span>
               </footer>
             </div>

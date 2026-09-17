@@ -4,6 +4,8 @@
   "provenance": {
     "repository": "chartjs333/delta",
     "backend_commit": "670b58f6458fe84620f4f9f46401f855d04ae05d",
+    "catalog_backend_ref": "670b58f6458fe84620f4f9f46401f855d04ae05d",
+    "producer_commit": "c3de2e17cc304c9558030ddb2b8f0d5f34157155",
     "produced_at": "2026-09-17T08:00:00.000Z"
   },
   "workload": {
