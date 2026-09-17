@@ -1,0 +1,11 @@
+{
+  "plugin_id": "qlora-tiny-adapter-v1",
+  "display_name": "QLoRA Tiny Quantized Adapter",
+  "model_family": "qlora",
+  "task_type": "adapter_regression",
+  "sample_kind": "vector/tiny-qlora-2d",
+  "target_kind": "regression/vector-2d",
+  "deterministic": true,
+  "supports_stage_c_real_drq1": true,
+  "parameter_schema_id": "sha256:ef62a8c343b4febb6570bb37061cb495b74645aaa9af6486f6d987112bfd7fec"
+}

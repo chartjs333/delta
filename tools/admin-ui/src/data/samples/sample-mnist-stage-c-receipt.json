@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_type": "DELTAREDUCE_EXECUTION_RECEIPT",
+  "provenance": {
+    "repository": "chartjs333/delta",
+    "backend_commit": "670b58f6458fe84620f4f9f46401f855d04ae05d",
+    "produced_at": "2026-09-16T17:30:00.000Z"
+  },
+  "workload": {
+    "model_plugin_id": "mnist-centroid-v1",
+    "dataset_id": "mnist-v1",
+    "executed_scope": "STAGE_C_REAL_DRQ1",
+    "workload_config_digest": "sha256:69e505282e3b7937ebd2fb198f0ade832e853f3eb07cd543afb2ed1067c844fd"
+  },
+  "execution": {
+    "verdict": "SUCCESS",
+    "terminal_status": "COMPLETED"
+  },
+  "consensus_evidence": {
+    "round_id": 1,
+    "state_root": "sha256:4a6f2b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a",
+    "canonical_model_digest": "sha256:11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff",
+    "checkpoint_ref": "delta://checkpoints/mnist-centroid-v1/round-0001.bin",
+    "applied_status": "APPLIED",
+    "wal_sequence": 12
+  }
+}

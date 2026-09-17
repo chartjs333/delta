@@ -1,0 +1,11 @@
+{
+  "plugin_id": "mnist-centroid-v1",
+  "display_name": "MNIST Nearest Centroid",
+  "model_family": "centroid",
+  "task_type": "cv_classification",
+  "sample_kind": "image/grayscale-28x28",
+  "target_kind": "class-id/0-9",
+  "deterministic": true,
+  "supports_stage_c_real_drq1": true,
+  "parameter_schema_id": null
+}

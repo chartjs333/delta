@@ -1,0 +1,95 @@
+{
+  "document_type": "ADMIN_UI_WEB_QA_EVIDENCE",
+  "document_version": "1.1.0",
+  "recorded_on": "2026-09-14",
+  "implementation_branch": "feature/admin-ui-ux-mvp",
+  "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+  "production_bundle": {
+    "javascript": "index-EercMr_h.js",
+    "stylesheet": "index-C03EHJU0.css",
+    "origin": "http://127.0.0.1:4176/"
+  },
+  "status": "PASS",
+  "tester": "web_qa",
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": "PASS"
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": "PASS"
+    }
+  ],
+  "acceptance": {
+    "form_first_without_json_editing": "PASS",
+    "four_dynamic_controllers": "PASS",
+    "six_unique_unordered_pairs": "PASS",
+    "all_pairwise_records_filled": "PASS",
+    "summary_phrase": "6 of 6 pairwise records filled",
+    "summary_attention_items": 0,
+    "local_verdict_terms": 0,
+    "stale_requires_explicit_acceptance": "PASS",
+    "stale_answers_and_evidence_retained": "PASS",
+    "orphaned_answers_and_evidence_retained": "PASS",
+    "orphaned_evidence_retargeted": false,
+    "advanced_json_hidden_by_default": true,
+    "advanced_json_read_only": true,
+    "advanced_json_tracks_document_draft": true,
+    "pairwise_draft_exported_without_mapping": false,
+    "structural_valid_state": "PASS",
+    "friendly_invalid_message": "Document version cannot be empty.",
+    "technical_details": {
+      "document_path": "/document_version",
+      "schema_path": "#/properties/document_version/minLength",
+      "constraint": "minLength",
+      "status": "PASS"
+    },
+    "explicit_download_only": "PASS",
+    "download_name": "controller-register.new.export.json",
+    "controller_capability_reset_after_edit": "PASS",
+    "mobile_menu_keyboard_and_aria": "PASS",
+    "large_collection": {
+      "controllers": 101,
+      "form_page_size": 10,
+      "pagination": "PASS"
+    },
+    "invalid_root_fails_safely": "PASS",
+    "frozen_fixture_remains_historical": "PASS"
+  },
+  "browser_observations": {
+    "horizontal_overflow": false,
+    "control_overlap": false,
+    "console_errors": 0,
+    "page_errors": 0,
+    "failed_requests": 0,
+    "external_requests": 0,
+    "automatic_requests": 0,
+    "requested_origins": [
+      "http://127.0.0.1:4176"
+    ]
+  },
+  "automated_browser_gate": {
+    "command": "npm run test:browser",
+    "status": "PASS",
+    "projects": [
+      "desktop-chrome",
+      "mobile-chrome"
+    ],
+    "tests_passed": 3,
+    "tests_skipped": 1,
+    "skip_reason": "mobile-only navigation case excluded from desktop project"
+  },
+  "typescript_gate": {
+    "native_version": "7.0.2",
+    "native_status": "NOT_CLAIMED_AS_PASSED",
+    "replacement_version": "5.9.3",
+    "replacement_status": "PASS",
+    "classification": "SUBSTITUTION"
+  },
+  "defects": []
+}

@@ -1,0 +1,161 @@
+{
+  "document_type": "ADMIN_UI_FINAL_FORMAL_IMPACT_REVIEW",
+  "document_version": "1.2.0",
+  "recorded_on": "2026-09-14",
+  "implementation_branch": "feature/admin-ui-ux-mvp",
+  "specification_base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+  "predecessor_mvp_commit": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca",
+  "status": "PASS",
+  "classification": "NONE",
+  "review_scope": {
+    "implementation_roots": [
+      "tools/admin-ui/",
+      "specs/admin-ui/"
+    ],
+    "code_complete_through": "T040",
+    "remaining_after_review": "NONE",
+    "changed_files_reviewed": 32
+  },
+  "formal_prerequisite": {
+    "command": "python specs/001-reproducible-training-baseline/scripts/verify_formal_prerequisite.py --check-only",
+    "status": "PASS",
+    "decision": "GO",
+    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+    "report_sha256": "b31c54c3372e36baf1f049b2e45326222b8834362d8fdfbac1e323532986dcab"
+  },
+  "impact_questions": {
+    "new_externally_visible_transition": false,
+    "changed_vote_or_qc_context": false,
+    "changed_deadline": false,
+    "new_or_changed_failure_terminal": false,
+    "changed_durability_ordering": false,
+    "changed_availability_rule": false,
+    "changed_certificate_edge": false,
+    "changed_arithmetic_precondition": false,
+    "changed_current_state_behavior": false,
+    "canonical_schema_changed": false,
+    "protocol_behavior_changed": false,
+    "runtime_state_changed": false,
+    "verifier_changed": false,
+    "c_abi_or_ffm_changed": false,
+    "live_or_state_changing_endpoint_added": false
+  },
+  "boundary_verification": {
+    "exact_diff": {
+      "base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+      "allowed_roots": [
+        "tools/admin-ui/",
+        "specs/admin-ui/"
+      ],
+      "outside_allowed_roots": 0
+    },
+    "repository_audit": {
+      "command": "npm run audit:repository --prefix tools/admin-ui",
+      "status": "PASS",
+      "protected_worktree_entries": 0,
+      "reverse_dependency_hits": 0
+    },
+    "data_source_port": {
+      "status": "UNCHANGED",
+      "path": "tools/admin-ui/src/data/data-source-port.ts",
+      "base_blob_sha": "76ca86c136601f38fe6c547043cfd2f639b7c353",
+      "worktree_blob_sha": "76ca86c136601f38fe6c547043cfd2f639b7c353"
+    },
+    "canonical_and_local_schema_diff": {
+      "status": "PASS",
+      "delta_protocol_changes": 0,
+      "admin_ui_schema_changes": 0
+    },
+    "frozen_fixture_diff": {
+      "status": "UNCHANGED",
+      "changed_files": 0
+    },
+    "c_abi_ffm_import_search": {
+      "status": "PASS",
+      "hits": 0
+    },
+    "bundled_secret_or_restricted_evidence_search": {
+      "status": "PASS",
+      "hits": 0
+    },
+    "live_or_state_changing_endpoint_search": {
+      "status": "PASS",
+      "hits": 0
+    },
+    "ui_free_core_runtime_gate": {
+      "status": "INHERITED_PASS",
+      "evidence_task": "T023",
+      "predecessor_mvp_commit": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca",
+      "note": "T032-T040 change only the isolated Admin UI presentation layer and its evidence; repository audit confirms no reverse dependency."
+    },
+    "final_admin_ui_gate": {
+      "command": "npm run check:substitution --prefix tools/admin-ui",
+      "status": "PASS",
+      "typescript_gate": {
+        "native_typescript_7": "NOT_CLAIMED_AS_PASSED",
+        "classification": "SUBSTITUTION",
+        "substitute_command": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+        "substitute_status": "PASS"
+      },
+      "test_files": 29,
+      "tests": 103,
+      "production_build": "PASS",
+      "production_modules": 45,
+      "offline_product_files": 36,
+      "offline_bundle_files": 1,
+      "offline_violations": 0
+    },
+    "dependency_audit": {
+      "command": "npm audit --audit-level=high --prefix tools/admin-ui",
+      "status": "PASS",
+      "vulnerabilities": 0
+    },
+    "browser_gate": {
+      "command": "npm run test:browser --prefix tools/admin-ui",
+      "status": "PASS",
+      "passed": 3,
+      "skipped": 1,
+      "projects": [
+        "desktop-chrome",
+        "mobile-chrome"
+      ],
+      "network_requests_outside_local_preview": 0
+    },
+    "safe_controller_autofill": {
+      "status": "PASS",
+      "trigger": "EXPLICIT_USER_ACTION",
+      "allowed_fields": [
+        "controller_id",
+        "signer_id",
+        "status"
+      ],
+      "overwrites_nonblank_values": false,
+      "generated_values_editable": true,
+      "authoritative_or_governance_fields_autofilled": 0,
+      "canonical_schema_or_runtime_support_required": false
+    },
+    "independent_web_qa": {
+      "status": "PASS",
+      "scope": "T032-T039",
+      "evidence": "specs/admin-ui/evidence/web-qa.json",
+      "blocking_defects": 0,
+      "functional_defects": 0
+    }
+  },
+  "supplemental_runtime_tasks": {
+    "HR011": {
+      "status": "PASS",
+      "evidence": "The form-first UI mutates one DocumentDraft through known paths and preserves unknown allowed fields."
+    },
+    "HR012": {
+      "status": "PASS",
+      "evidence": "Pairwise answers remain non-authoritative presentation data; no governance, independence, signing-readiness, or protocol verdict is derived."
+    },
+    "HR013": {
+      "status": "PASS",
+      "evidence": "Production-browser and non-technical usability gates passed with explicit export, offline operation, and read-only Advanced JSON."
+    }
+  },
+  "stop_rule_triggered": false,
+  "conclusion": "T032-T040 change only the isolated Admin UI presentation and interaction layer. Safe controller autofill is explicit, editable, and restricted to blank technical draft fields. DataSourcePort, canonical schemas, Delta runtime state, protocol behavior, verifier behavior, offline operation, structural-validation boundary, and explicit-export boundary are unchanged."
+}

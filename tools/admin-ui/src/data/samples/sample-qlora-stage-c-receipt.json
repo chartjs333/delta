@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_type": "DELTAREDUCE_EXECUTION_RECEIPT",
+  "provenance": {
+    "repository": "chartjs333/delta",
+    "backend_commit": "670b58f6458fe84620f4f9f46401f855d04ae05d",
+    "produced_at": "2026-09-16T17:35:00.000Z"
+  },
+  "workload": {
+    "model_plugin_id": "qlora-tiny-adapter-v1",
+    "dataset_id": "tiny-qlora-regression-v1",
+    "executed_scope": "STAGE_C_REAL_DRQ1",
+    "workload_config_digest": "sha256:264e7bddd2eb78908d746a9dca86e8f38889273ce81b531d24551aab8fe80258"
+  },
+  "execution": {
+    "verdict": "SUCCESS",
+    "terminal_status": "COMPLETED"
+  },
+  "consensus_evidence": {
+    "round_id": 2,
+    "state_root": "sha256:7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c",
+    "canonical_model_digest": "sha256:3344556677889900aabbccddeeff11223344556677889900aabbccddeeff1122",
+    "checkpoint_ref": "delta://checkpoints/qlora-tiny-adapter-v1/round-0002.bin",
+    "applied_status": "APPLIED",
+    "wal_sequence": 24
+  },
+  "reference_anchor": {
+    "reference_anchor_declared": true,
+    "anchor_description": "Reference conformance baseline against PyTorch tiny QLoRA adapter",
+    "declared_baseline_metric": "mse_loss:0.0412"
+  }
+}

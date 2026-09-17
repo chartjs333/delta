@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.org/schemas/plugin-descriptor.schema.json",
+  "title": "DeltaReducePluginDescriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "plugin_id",
+    "display_name",
+    "model_family",
+    "task_type",
+    "sample_kind",
+    "target_kind",
+    "deterministic",
+    "supports_stage_c_real_drq1",
+    "parameter_schema_id"
+  ],
+  "properties": {
+    "plugin_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "display_name": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "model_family": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "task_type": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "sample_kind": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "target_kind": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "deterministic": {
+      "type": "boolean"
+    },
+    "supports_stage_c_real_drq1": {
+      "type": "boolean"
+    },
+    "parameter_schema_id": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

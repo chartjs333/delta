@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.org/schemas/dataset-descriptor.schema.json",
+  "title": "DeltaReduceDatasetDescriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dataset_id",
+    "display_name",
+    "sample_kind",
+    "target_kind",
+    "deterministic",
+    "supports_offline_cache",
+    "description",
+    "version"
+  ],
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "display_name": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "sample_kind": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "target_kind": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "deterministic": {
+      "type": "boolean"
+    },
+    "supports_offline_cache": {
+      "type": "boolean"
+    },
+    "description": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "document_type": "ADMIN_UI_SPEC_BASELINE",
+  "document_version": "1.0.0",
+  "recorded_on": "2026-09-14",
+  "repository": "chartjs333/delta",
+  "base": {
+    "branch": "main",
+    "commit": "2197a0eeff6daafa031d002725e09e0cf465ce34",
+    "tree": "b9d482b60ff50b60d361c5c453222621ce85a9f6"
+  },
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "formal_impact": "NONE",
+  "mvp_input": {
+    "pull_request": 29,
+    "url": "https://github.com/chartjs333/delta/pull/29",
+    "head_commit": "de3348fdcbd527046d5b66bc6d8c90df098d5aa8",
+    "state_at_review": "OPEN_DRAFT",
+    "authority": "NON_NORMATIVE_FIXTURE_INPUT",
+    "fixture_path": "docs/templates/campaign02-controller-register.template.json",
+    "fixture_git_blob_sha": "496ea3a9b081040e2670c7d027a63069516496f6"
+  },
+  "assertions": [
+    "The specification changes no protocol or runtime artifact.",
+    "PR 29 does not define the generic controller cardinality or UI architecture.",
+    "Implementation requires a separately reviewed branch and final formal-impact classification."
+  ]
+}

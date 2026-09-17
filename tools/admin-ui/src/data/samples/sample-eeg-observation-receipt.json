@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_type": "DELTAREDUCE_EXECUTION_RECEIPT",
+  "provenance": {
+    "repository": "chartjs333/delta",
+    "backend_commit": "670b58f6458fe84620f4f9f46401f855d04ae05d",
+    "produced_at": "2026-09-16T17:40:00.000Z"
+  },
+  "workload": {
+    "model_plugin_id": "eeg-bandpower-centroid-v1",
+    "dataset_id": "eeg-synthetic-bci-v1",
+    "executed_scope": "MODEL_DATASET_BINDING_ONLY",
+    "workload_config_digest": "sha256:3fc664aa2ba4005f40a10b4641ac48ccf8c59410068a58bed523904c2c7b260c"
+  },
+  "execution": {
+    "verdict": "SUCCESS",
+    "terminal_status": "COMPLETED"
+  },
+  "observation_summary": {
+    "observation_note": "Synthetic EEG 4-channel bandpower feature extraction and centroid alignment completed.",
+    "metrics": {
+      "channel_count": 4,
+      "band_count": 4,
+      "sample_count": 100,
+      "classification_accuracy": 0.94
+    }
+  }
+}

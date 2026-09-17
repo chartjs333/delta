@@ -1,0 +1,64 @@
+{
+  "document_type": "ADMIN_UI_UX_AMENDMENT_EVIDENCE",
+  "document_version": "1.0.0",
+  "recorded_on": "2026-09-14",
+  "status": "IMPLEMENTED",
+  "formal_impact": "NONE",
+  "branch": "feature/admin-ui-ux-spec",
+  "base": {
+    "branch": "feature/admin-ui-mvp",
+    "commit": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca"
+  },
+  "amendment": "amendments/0001-form-first-controller-registry.md",
+  "pairwise_contract": "contracts/pairwise-review-draft.md",
+  "tasks": {
+    "T032": "COMPLETE",
+    "T033": "COMPLETE",
+    "T034": "COMPLETE",
+    "T035": "COMPLETE",
+    "T036": "COMPLETE",
+    "T037": "COMPLETE",
+    "T038": "COMPLETE",
+    "T039": "COMPLETE"
+  },
+  "decisions": {
+    "default_interaction": "GUIDED_FORM_FIRST",
+    "json_role": "INTERNAL_IMPORT_ADVANCED_PREVIEW_EXPORT",
+    "advanced_json": "READ_ONLY_HIDDEN_BY_DEFAULT",
+    "single_state": "DOCUMENT_DRAFT",
+    "pairwise_entry_contains_verdict": false,
+    "pairwise_completion_term": "FILLED",
+    "verdict_requires_sourced_result_with_provenance": true,
+    "frozen_pr29_fixture_is_normative_pair_model": false
+  },
+  "unchanged_boundaries": [
+    "DataSourcePort",
+    "OFFLINE_MODE",
+    "STRUCTURAL_SCHEMA_VALIDATION",
+    "EXPLICIT_NEW_FILE_EXPORT"
+  ],
+  "stop_if_required": [
+    "DELTA_CANONICAL_SCHEMA_CHANGE",
+    "CANONICAL_VALIDATOR_CHANGE",
+    "PROTOCOL_CHANGE",
+    "RUNTIME_CHANGE",
+    "LOCAL_INDEPENDENCE_VERDICT"
+  ],
+  "required_tests": [
+    "PRODUCTION_BROWSER_DESKTOP_AND_MOBILE",
+    "STRICT_CSP",
+    "NON_TECHNICAL_FORM_TO_EXPORT",
+    "UNKNOWN_FIELD_PRESERVATION",
+    "DYNAMIC_PAIR_CARDINALITY",
+    "STALE_ORPHANED_IDENTITY_LIFECYCLE",
+    "NO_LOCAL_VERDICT_LANGUAGE"
+  ],
+  "implementation": {
+    "branch": "feature/admin-ui-ux-mvp",
+    "base_commit": "c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+    "formal_impact": "NONE",
+    "web_qa": "PASS",
+    "typescript_7_native_gate": "NOT_CLAIMED_AS_PASSED",
+    "typescript_5_9_3": "SUBSTITUTION_PASS"
+  }
+}

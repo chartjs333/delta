@@ -1,0 +1,43 @@
+{
+  "name": "@deltareduce/admin-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "audit:offline": "node scripts/check-offline-boundary.mjs",
+    "audit:repository": "node scripts/check-repository-boundary.mjs",
+    "dev": "vite",
+    "preview": "vite preview",
+    "generate:validators": "node scripts/generate-standalone-validator.mjs",
+    "check:validators": "node scripts/generate-standalone-validator.mjs --check",
+    "generate:catalog": "node scripts/generate-catalog-snapshot.mjs",
+    "check:catalog": "node scripts/generate-catalog-snapshot.mjs --check",
+    "build": "tsc --noEmit && vite build",
+    "check": "npm run check:validators && npm run check:catalog && npm run typecheck && npm test && npm run build && npm run audit:offline",
+    "check:substitution": "npm run check:validators && npm run check:catalog && npm run typecheck:substitution && npm test && npm run build:substitution && npm run audit:offline",
+    "test": "vitest run",
+    "test:browser": "npm run build:substitution && playwright test --config tests/browser/playwright.config.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:substitution": "npx --yes --package typescript@5.9.3 tsc --noEmit",
+    "build:substitution": "npm run typecheck:substitution && vite build"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
+    "@types/node": "26.5.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "ajv": "8.20.0",
+    "axe-core": "^4.13.0",
+    "jsdom": "29.0.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.0",
+    "vitest": "5.0.0"
+  }
+}

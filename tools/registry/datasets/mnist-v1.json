@@ -1,0 +1,10 @@
+{
+  "dataset_id": "mnist-v1",
+  "display_name": "MNIST Handwritten Digits",
+  "sample_kind": "image/grayscale-28x28",
+  "target_kind": "class-id/0-9",
+  "deterministic": true,
+  "supports_offline_cache": true,
+  "description": "Standard 28x28 grayscale handwritten digit classification dataset.",
+  "version": "1.0.0"
+}
