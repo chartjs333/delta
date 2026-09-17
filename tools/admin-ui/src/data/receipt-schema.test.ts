@@ -195,6 +195,7 @@ describe("validateExecutionReceipt", () => {
 
 describe("evaluateReceiptBinding", () => {
   const validMnistReceipt = sampleMnistReceipt as unknown as ExecutionReceipt;
+  const SAMPLE_REPO = "chartjs333/delta";
 
   it("returns VERIFIED_EVIDENCE_LOADED with LIVE_CONSENSUS_EVIDENCE when configuration matches", () => {
     const result = evaluateReceiptBinding(
@@ -202,7 +203,8 @@ describe("evaluateReceiptBinding", () => {
       "mnist-centroid-v1",
       "mnist-v1",
       "STAGE_C_REAL_DRQ1",
-      SAMPLE_BACKEND_REF
+      SAMPLE_BACKEND_REF,
+      SAMPLE_REPO
     );
     expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
     expect(result.evidenceType).toBe("LIVE_CONSENSUS_EVIDENCE");
@@ -216,7 +218,8 @@ describe("evaluateReceiptBinding", () => {
       "eeg-bandpower-centroid-v1",
       "eeg-synthetic-bci-v1",
       "MODEL_DATASET_BINDING_ONLY",
-      SAMPLE_BACKEND_REF
+      SAMPLE_BACKEND_REF,
+      SAMPLE_REPO
     );
     expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
     expect(result.evidenceType).toBe("OBSERVATION_EVIDENCE");
@@ -245,7 +248,7 @@ describe("evaluateReceiptBinding", () => {
       "mnist-v1",
       "PLUGIN_BOUNDARY",
       SAMPLE_BACKEND_REF,
-      "chartjs333/delta"
+      SAMPLE_REPO
     );
     expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
     expect(result.evidenceType).toBe("PLUGIN_BOUNDARY_EVIDENCE");
@@ -257,7 +260,8 @@ describe("evaluateReceiptBinding", () => {
       "qlora-tiny-adapter-v1",
       "mnist-v1",
       "STAGE_C_REAL_DRQ1",
-      SAMPLE_BACKEND_REF
+      SAMPLE_BACKEND_REF,
+      SAMPLE_REPO
     );
     expect(result.state).toBe("RECEIPT_LOADED_UNBOUND");
     expect(result.reason).toContain("does not match selected model");
@@ -269,7 +273,8 @@ describe("evaluateReceiptBinding", () => {
       "mnist-centroid-v1",
       "mnist-v1",
       "MODEL_DATASET_BINDING_ONLY",
-      SAMPLE_BACKEND_REF
+      SAMPLE_BACKEND_REF,
+      SAMPLE_REPO
     );
     expect(result.state).toBe("RECEIPT_LOADED_UNBOUND");
     expect(result.reason).toContain("does not match selected scope");
@@ -281,7 +286,8 @@ describe("evaluateReceiptBinding", () => {
       "mnist-centroid-v1",
       "mnist-v1",
       "STAGE_C_REAL_DRQ1",
-      "1111111111111111111111111111111111111111"
+      "1111111111111111111111111111111111111111",
+      SAMPLE_REPO
     );
     expect(result.state).toBe("RECEIPT_LOADED_UNBOUND");
     expect(result.reason).toContain("backend commit does not match");

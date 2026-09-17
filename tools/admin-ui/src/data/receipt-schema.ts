@@ -390,7 +390,7 @@ export function evaluateReceiptBinding(
   currentDatasetId: string,
   currentScope: ExecutionScopeName,
   catalogBackendRef: string,
-  catalogRepository: string = "chartjs333/delta"
+  catalogRepository: string
 ): BindingEvaluationResult {
   const expectedDigest = computeWorkloadConfigDigest(
     currentModelId,
