@@ -17,21 +17,25 @@ describe("WorkloadSelector", () => {
     const modelSelect = screen.getByLabelText("Model Plugin") as HTMLSelectElement;
     const datasetSelect = screen.getByLabelText("Dataset Provider") as HTMLSelectElement;
 
-    expect(modelSelect.options).toHaveLength(4);
-    expect(Array.from(modelSelect.options).map((o) => o.value)).toEqual([
-      "eeg-bandpower-centroid-v1",
-      "mnist-centroid-v1",
-      "qlora-tiny-adapter-v1",
-      "tabular-10gene-phenotype-v1",
-    ]);
+    expect(modelSelect.options).toHaveLength(
+      CANONICAL_DESCRIPTOR_CATALOG.model_plugins.length
+    );
+    expect(Array.from(modelSelect.options).map((o) => o.value)).toEqual(
+      CANONICAL_DESCRIPTOR_CATALOG.model_plugins.map((p) => p.plugin_id)
+    );
+    expect(Array.from(modelSelect.options).map((o) => o.value)).toContain(
+      "tabular-10gene-phenotype-v1"
+    );
 
-    expect(datasetSelect.options).toHaveLength(4);
-    expect(Array.from(datasetSelect.options).map((o) => o.value)).toEqual([
-      "eeg-synthetic-bci-v1",
-      "mnist-v1",
-      "synthetic-10gene-cohort-v1",
-      "tiny-qlora-regression-v1",
-    ]);
+    expect(datasetSelect.options).toHaveLength(
+      CANONICAL_DESCRIPTOR_CATALOG.datasets.length
+    );
+    expect(Array.from(datasetSelect.options).map((o) => o.value)).toEqual(
+      CANONICAL_DESCRIPTOR_CATALOG.datasets.map((d) => d.dataset_id)
+    );
+    expect(Array.from(datasetSelect.options).map((o) => o.value)).toContain(
+      "synthetic-10gene-cohort-v1"
+    );
   });
 
   it("evaluates MNIST + MNIST + STAGE_C_REAL_DRQ1 as ALLOWED", async () => {
