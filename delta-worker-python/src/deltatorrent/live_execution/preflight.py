@@ -3,48 +3,17 @@
 from __future__ import annotations
 
 import copy
-import importlib.util
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
+from deltatorrent.live_execution.crypto import (
+    FIXTURE_PUBLIC_KEY_HEX,
+    verify_admission_digest,
+    verify_admission_signature,
+    verify_intent_digest,
+)
 from deltatorrent.live_execution.errors import WorkerPreflightError
-
-
-def _load_contract_tools():
-    # Dynamically resolve contracts/scripts/contract_tools.py
-    cur = Path(__file__).resolve().parent
-    for parent in [cur, *cur.parents]:
-        candidate = (
-            parent
-            / "specs"
-            / "admin-ui"
-            / "step5c-controlled-live-execution"
-            / "contracts"
-            / "scripts"
-            / "contract_tools.py"
-        )
-        if candidate.exists():
-            import sys
-
-            spec = importlib.util.spec_from_file_location("step5c_contract_tools", candidate)
-            if spec and spec.loader:
-                module = importlib.util.module_from_spec(spec)
-                sys.modules[spec.name] = module
-                spec.loader.exec_module(module)
-                return module
-    raise RuntimeError("Could not find contract_tools.py in workspace")
-
-
-_TOOLS = None
-
-
-def get_tools():
-    global _TOOLS
-    if _TOOLS is None:
-        _TOOLS = _load_contract_tools()
-    return _TOOLS
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,8 +50,7 @@ class AuthorizedExecutionPreflight:
         trusted_public_key_hex: str | None = None,
         pinned_key_ids: frozenset[str] | set[str] | None = None,
     ) -> None:
-        tools = get_tools()
-        self.trusted_public_key_hex = trusted_public_key_hex or tools.FIXTURE_PUBLIC_KEY_HEX
+        self.trusted_public_key_hex = trusted_public_key_hex or FIXTURE_PUBLIC_KEY_HEX
         self.pinned_key_ids = (
             frozenset(pinned_key_ids) if pinned_key_ids is not None else self.PINNED_KEY_IDS
         )
@@ -93,23 +61,30 @@ class AuthorizedExecutionPreflight:
         current_time: datetime | None = None,
     ) -> PreflightContext:
         """Validate an AuthorizedExecution bundle fail-closed."""
-        tools = get_tools()
-
-        # 1. Structural schema validation
-        schema_errors = tools.validate_schema_doc("authorized-execution", bundle)
-        if schema_errors:
+        if not isinstance(bundle, dict):
             raise WorkerPreflightError(
                 "ERR_SCHEMA_VALIDATION_FAILED",
-                f"AuthorizedExecution failed schema validation: {schema_errors[0]}",
-                details={"errors": schema_errors[:5]},
+                "AuthorizedExecution bundle must be an object",
             )
 
-        intent = bundle.get("intent", {})
-        admission = bundle.get("admission", {})
+        if bundle.get("schema_version") != "1.0.0":
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                f"Unsupported schema_version '{bundle.get('schema_version')}'. Expected '1.0.0'",
+            )
 
+        intent = bundle.get("intent")
+        admission = bundle.get("admission")
+        if not isinstance(intent, dict) or not isinstance(admission, dict):
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                "AuthorizedExecution bundle must contain 'intent' and 'admission' objects",
+            )
+
+        # 1. Parity checks between intent and admission
         intent_id = intent.get("intent_id")
         adm_intent_id = admission.get("intent_id")
-        if intent_id != adm_intent_id:
+        if not intent_id or intent_id != adm_intent_id:
             raise WorkerPreflightError(
                 "ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH",
                 f"intent_id mismatch: intent has '{intent_id}', admission has '{adm_intent_id}'",
@@ -118,7 +93,7 @@ class AuthorizedExecutionPreflight:
 
         intent_digest = intent.get("intent_digest")
         adm_intent_digest = admission.get("intent_digest")
-        if intent_digest != adm_intent_digest:
+        if not intent_digest or intent_digest != adm_intent_digest:
             raise WorkerPreflightError(
                 "ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH",
                 "intent_digest parity mismatch between intent and admission",
@@ -129,7 +104,7 @@ class AuthorizedExecutionPreflight:
             )
 
         # 2. Recompute intent digest and verify parity
-        if not tools.verify_intent_digest(intent):
+        if not verify_intent_digest(intent):
             raise WorkerPreflightError(
                 "ERR_INTENT_DIGEST_MISMATCH",
                 f"Recomputed digest does not match declared intent_digest '{intent_digest}'",
@@ -137,7 +112,7 @@ class AuthorizedExecutionPreflight:
             )
 
         # 3. Recompute admission digest and verify parity
-        if not tools.verify_admission_digest(admission):
+        if not verify_admission_digest(admission):
             raise WorkerPreflightError(
                 "ERR_ADMISSION_DIGEST_MISMATCH",
                 "Recomputed digest does not match declared admission_digest",
@@ -146,6 +121,12 @@ class AuthorizedExecutionPreflight:
 
         # 4. Authenticator algorithm and key_id check
         authenticator = admission.get("authenticator", {})
+        if not isinstance(authenticator, dict):
+            raise WorkerPreflightError(
+                "ERR_ADMISSION_SIGNATURE_INVALID",
+                "AdmissionRecord missing authenticator block",
+            )
+
         key_id = authenticator.get("key_id")
         algorithm = authenticator.get("algorithm")
 
@@ -162,7 +143,7 @@ class AuthorizedExecutionPreflight:
             )
 
         # 5. Ed25519 signature verification
-        if not tools.verify_admission_signature(admission):
+        if not verify_admission_signature(admission, self.trusted_public_key_hex):
             raise WorkerPreflightError(
                 "ERR_ADMISSION_SIGNATURE_INVALID",
                 "Admission signature verification failed over RFC8785(admission \\ signature)",
@@ -173,6 +154,12 @@ class AuthorizedExecutionPreflight:
         admitted_at_str = admission.get("admitted_at")
         admission_expires_at_str = admission.get("admission_expires_at")
         intent_expires_at_str = intent.get("expires_at")
+
+        if not admitted_at_str or not admission_expires_at_str or not intent_expires_at_str:
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                "Missing required TTL timestamp fields",
+            )
 
         try:
             admitted_at = datetime.fromisoformat(admitted_at_str.replace("Z", "+00:00"))
@@ -228,20 +215,25 @@ class AuthorizedExecutionPreflight:
 
         # Sole authoritative execution_id comes from admission.execution_id
         execution_id = admission.get("execution_id")
+        if not execution_id:
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                "AdmissionRecord missing authoritative execution_id",
+            )
 
         return PreflightContext(
             execution_id=execution_id,
             intent_id=intent_id,
             intent_digest=intent_digest,
-            admission_id=admission.get("admission_id"),
-            admission_digest=admission.get("admission_digest"),
+            admission_id=admission.get("admission_id", ""),
+            admission_digest=admission.get("admission_digest", ""),
             controller_commit=admission.get("policy_context", {}).get("controller_commit", ""),
-            operation=operation,
+            operation=str(operation),
             operation_payload=copy.deepcopy(intent.get("operation_payload", {})),
-            model_plugin_id=workload.get("model_plugin_id"),
-            dataset_id=workload.get("dataset_id"),
-            requested_scope=requested_scope,
-            catalog_backend_ref=workload.get("catalog_backend_ref"),
+            model_plugin_id=str(workload.get("model_plugin_id", "")),
+            dataset_id=str(workload.get("dataset_id", "")),
+            requested_scope=str(requested_scope),
+            catalog_backend_ref=str(workload.get("catalog_backend_ref", "")),
             allow_downloads=effective_allow_downloads,
             timeout_seconds=timeout_seconds,
             max_memory_bytes=max_memory_bytes,
