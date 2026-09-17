@@ -93,6 +93,7 @@ def encode_10gene_centroid_values(
     if scaled_sums.shape != (CLASS_COUNT, FEATURE_COUNT) or counts.shape != (CLASS_COUNT,):
         raise PhenotypePluginError("ENCODE_SHAPE_INVALID")
 
+    iinfo16 = np.iinfo(np.int16)
     values = np.zeros(TOTAL_ELEMENTS, dtype=np.int16)
     for cls_idx in range(CLASS_COUNT):
         count = int(counts[cls_idx])
@@ -102,6 +103,8 @@ def encode_10gene_centroid_values(
         if count == 0:
             continue
         rounded = round_half_toward_positive(row, count)
+        if bool(np.any((rounded < iinfo16.min) | (rounded > iinfo16.max))):
+            raise PhenotypePluginError("CENTROID_INT16_OVERFLOW")
         values[start:end] = rounded.astype(np.int16)
         values[CENTROID_WEIGHT_ELEMENTS + cls_idx] = 1
 

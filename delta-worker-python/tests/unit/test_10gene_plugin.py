@@ -392,6 +392,31 @@ def test_regression_reviewer1_medium_fit_evaluate_labels_and_features() -> None:
     with pytest.raises(Phenotype10GeneDataError, match="FEATURES_SHAPE_INVALID"):
         plugin.train_ticket(ticket_id="t1", data=(bad_dim_x, valid_y))
 
+    # 6. Non-numeric string labels (e.g. ["0", "1"])
+    str_labels = ["0", "1"] * 10
+    with pytest.raises(Phenotype10GeneDataError, match="LABELS_NOT_NUMERIC"):
+        plugin.train_ticket(ticket_id="t1", data=(valid_x, str_labels))
+
+    with pytest.raises(Phenotype10GeneDataError, match="LABELS_NOT_NUMERIC"):
+        plugin.evaluate(plugin, (valid_x, str_labels))
+
+
+def test_regression_reviewer2_high_int16_overflow_fail_closed() -> None:
+    """Reviewer 2 High: encode_10gene_centroid_values rejects int16 overflow fail-closed."""
+    plugin = Synthetic10GeneCentroidPlugin()
+
+    # Feature values 5.0 -> scaled 50,000, which exceeds int16 max (32,767)
+    overflow_x = np.full((20, 10), 5.0, dtype=np.float64)
+    valid_y = np.array([0, 1] * 10, dtype=np.int64)
+
+    with pytest.raises(PhenotypePluginError, match="CENTROID_INT16_OVERFLOW"):
+        plugin.train_ticket(ticket_id="t_overflow", data=(overflow_x, valid_y))
+
+    # Negative feature values -5.0 -> scaled -50,000, which is below int16 min (-32,768)
+    underflow_x = np.full((20, 10), -5.0, dtype=np.float64)
+    with pytest.raises(PhenotypePluginError, match="CENTROID_INT16_OVERFLOW"):
+        plugin.train_ticket(ticket_id="t_underflow", data=(underflow_x, valid_y))
+
 
 def test_regression_checkpoint_validation_fail_closed() -> None:
     """load_applied_checkpoint rejects invalid shapes, non-integers, and bad presence."""

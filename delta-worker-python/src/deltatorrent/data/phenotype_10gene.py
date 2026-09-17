@@ -88,6 +88,9 @@ def validate_10gene_features_and_labels(
                 f"LABELS_SHAPE_INVALID: expected ({feat_arr.shape[0]},), got {raw_labels.shape}"
             )
 
+        if not np.issubdtype(raw_labels.dtype, np.number):
+            raise Phenotype10GeneDataError("LABELS_NOT_NUMERIC")
+
         if not bool(np.all(np.isfinite(raw_labels))):
             raise Phenotype10GeneDataError("LABELS_NOT_FINITE")
 
