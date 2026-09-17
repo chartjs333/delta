@@ -226,6 +226,35 @@ describe("WorkloadSelector", () => {
     ).toBeTruthy();
   });
 
+  it("loads 10-Gene Stage C sample and displays STRUCTURALLY_VALID_BOUND_RECEIPT with unattested consensus details", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    const modelSelect = screen.getByLabelText("Model Plugin");
+    const datasetSelect = screen.getByLabelText("Dataset Provider");
+    const scopeSelect = screen.getByLabelText("Requested Execution Scope");
+
+    await user.selectOptions(modelSelect, "tabular-10gene-phenotype-v1");
+    await user.selectOptions(datasetSelect, "synthetic-10gene-cohort-v1");
+    await user.selectOptions(scopeSelect, "STAGE_C_REAL_DRQ1");
+
+    const sampleBtn = screen.getByRole("button", { name: "10-Gene Stage C" });
+    await user.click(sampleBtn);
+
+    expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
+    expect(screen.getByText("Recorded Consensus Record")).toBeTruthy();
+    expect(screen.getByText("UNATTESTED_CONSENSUS_RECORD")).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Self-consistent local receipt bound to the active catalog configuration/u
+      )
+    ).toBeTruthy();
+    expect(screen.getByText("APPLIED")).toBeTruthy();
+    expect(
+      screen.getByText("delta://checkpoints/tabular-10gene-phenotype-v1/round-0001.bin")
+    ).toBeTruthy();
+  });
+
   it("transitions to RECEIPT_LOADED_UNBOUND when selector changes away from loaded receipt config", async () => {
     const user = userEvent.setup();
     render(<WorkloadSelector />);

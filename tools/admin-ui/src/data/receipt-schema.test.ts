@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import sampleEegReceipt from "./samples/sample-eeg-observation-receipt.json";
 import sampleMnistReceipt from "./samples/sample-mnist-stage-c-receipt.json";
 import sampleQloraReceipt from "./samples/sample-qlora-stage-c-receipt.json";
+import sample10GeneReceipt from "./samples/sample-10gene-stage-c-receipt.json";
 import {
   computeWorkloadConfigDigest,
   evaluateReceiptBinding,
@@ -45,6 +46,11 @@ describe("validateExecutionReceipt", () => {
 
     const eeg = validateExecutionReceipt(sampleEegReceipt);
     expect(eeg.observation_summary?.observation_note).toBeTruthy();
+
+    const gene = validateExecutionReceipt(sample10GeneReceipt);
+    expect(gene.workload.model_plugin_id).toBe("tabular-10gene-phenotype-v1");
+    expect(gene.workload.dataset_id).toBe("synthetic-10gene-cohort-v1");
+    expect(gene.consensus_evidence?.applied_status).toBe("APPLIED");
   });
 
   it("fails closed on non-object or missing type/version", () => {
@@ -209,6 +215,21 @@ describe("evaluateReceiptBinding", () => {
     expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
     expect(result.evidenceType).toBe("UNATTESTED_CONSENSUS_RECORD");
     expect(result.expectedDigest).toBe(validMnistReceipt.workload.workload_config_digest);
+  });
+
+  it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with UNATTESTED_CONSENSUS_RECORD for 10-gene Stage C receipt", () => {
+    const geneReceipt = sample10GeneReceipt as unknown as ExecutionReceipt;
+    const result = evaluateReceiptBinding(
+      geneReceipt,
+      "tabular-10gene-phenotype-v1",
+      "synthetic-10gene-cohort-v1",
+      "STAGE_C_REAL_DRQ1",
+      SAMPLE_BACKEND_REF,
+      SAMPLE_REPO
+    );
+    expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
+    expect(result.evidenceType).toBe("UNATTESTED_CONSENSUS_RECORD");
+    expect(result.expectedDigest).toBe(geneReceipt.workload.workload_config_digest);
   });
 
   it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with OBSERVATION_RECORD for EEG observation receipt", () => {
