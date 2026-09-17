@@ -190,11 +190,17 @@ class ModelPluginRunner:
 
         self._binding = binding
         self._execution_scope = execution_scope
+        self._last_execution: dict[str, Any] | None = None
 
     @property
     def execution_scope(self) -> str:
         """Return the validated execution scope."""
         return self._execution_scope
+
+    @property
+    def last_execution(self) -> dict[str, Any] | None:
+        """Return metadata for the most recent executed workload step, if any."""
+        return dict(self._last_execution) if self._last_execution is not None else None
 
     @property
     def binding(self) -> ModelDatasetBinding:
@@ -239,36 +245,63 @@ class ModelPluginRunner:
         **kwargs: Any,
     ) -> LocalTrainingResult:
         """Execute local worker ticket training on a dataset partition."""
-        return self._binding.train_ticket(
+        result = self._binding.train_ticket(
             ticket_id=ticket_id,
             partition_id=partition_id,
             parent_model=parent_model,
             **kwargs,
         )
+        self._last_execution = {
+            "type": "TRAIN_TICKET",
+            "ticket_id": ticket_id,
+            "partition_id": partition_id,
+        }
+        return result
 
     def evaluate(self, model: Any) -> EvaluationResult:
         """Evaluate model against dataset evaluation split."""
-        return self._binding.evaluate(model)
+        result = self._binding.evaluate(model)
+        self._last_execution = {
+            "type": "EVALUATE",
+        }
+        return result
 
     def evaluate_checkpoint(
         self,
         checkpoint_values: Sequence[int] | np.ndarray,
     ) -> EvaluationResult:
         """Decode applied checkpoint integer coordinates and evaluate against dataset."""
-        return self._binding.evaluate_checkpoint(checkpoint_values)
+        result = self._binding.evaluate_checkpoint(checkpoint_values)
+        self._last_execution = {
+            "type": "EVALUATE_CHECKPOINT",
+        }
+        return result
 
     def emit_execution_receipt(
         self,
         *,
         backend_commit: str = "670b58f6458fe84620f4f9f46401f855d04ae05d",
+        catalog_backend_ref: str | None = None,
+        producer_commit: str | None = None,
         repository: str = "chartjs333/delta",
         produced_at: str | None = None,
         output_path: Path | str | None = None,
+        execution_token: LocalTrainingResult | EvaluationResult | Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Emit a validated ExecutionReceipt for this runner binding fail-closed.
 
         For PLUGIN_BOUNDARY scope, emits an un-attested plugin boundary execution receipt
         without fabricated consensus evidence.
+
+        Requires that the runner has executed a workload step (train_ticket, evaluate,
+        evaluate_checkpoint) or that an explicit execution_token is provided.
+
+        Provenance semantics:
+        - `backend_commit`: Canonical compatibility reference used in computing
+          workload_config_digest (retained for backward compatibility and
+          cross-language schema matching).
+        - `catalog_backend_ref`: Explicit alias for the catalog compatibility reference.
+        - `producer_commit`: The commit hash of the worker runtime that produced the receipt.
         """
         import hashlib
         import json
@@ -280,6 +313,12 @@ class ModelPluginRunner:
                 "local ModelPluginRunner cannot emit consensus evidence"
             )
 
+        if execution_token is None and self._last_execution is None:
+            raise ModelPluginRunnerError(
+                "NO_EXECUTION_RECORDED: cannot emit receipt before workload execution "
+                "(train_ticket, evaluate, or explicit execution_token required)"
+            )
+
         canonical_string = (
             f"{self.model_descriptor.plugin_id}:{self.dataset_descriptor.dataset_id}:"
             f"{self._execution_scope}:{backend_commit}"
@@ -289,14 +328,19 @@ class ModelPluginRunner:
 
         timestamp = produced_at or datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
+        provenance: dict[str, Any] = {
+            "repository": repository,
+            "backend_commit": backend_commit,
+            "catalog_backend_ref": catalog_backend_ref or backend_commit,
+            "produced_at": timestamp,
+        }
+        if producer_commit is not None:
+            provenance["producer_commit"] = producer_commit
+
         receipt: dict[str, Any] = {
             "schema_version": "1.0.0",
             "receipt_type": "DELTAREDUCE_EXECUTION_RECEIPT",
-            "provenance": {
-                "repository": repository,
-                "backend_commit": backend_commit,
-                "produced_at": timestamp,
-            },
+            "provenance": provenance,
             "workload": {
                 "model_plugin_id": self.model_descriptor.plugin_id,
                 "dataset_id": self.dataset_descriptor.dataset_id,

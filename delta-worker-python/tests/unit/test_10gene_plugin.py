@@ -21,6 +21,7 @@ from deltatorrent.model_plugins.phenotype_10gene import (
     Phenotype10GeneModel,
     PhenotypePluginError,
     Synthetic10GeneCentroidPlugin,
+    scale_10gene_features,
 )
 from deltatorrent.model_plugins.registry import get_default_registry
 from deltatorrent.model_plugins.runner import (
@@ -264,6 +265,7 @@ def test_model_plugin_runner_train_eval_receipt(tmp_path: Path) -> None:
     assert receipt["schema_version"] == "1.0.0"
     assert receipt["receipt_type"] == "DELTAREDUCE_EXECUTION_RECEIPT"
     assert receipt["provenance"]["backend_commit"] == commit
+    assert receipt["provenance"]["catalog_backend_ref"] == commit
     assert receipt["provenance"]["repository"] == "chartjs333/delta"
     assert receipt["workload"]["model_plugin_id"] == "tabular-10gene-phenotype-v1"
     assert receipt["workload"]["dataset_id"] == "synthetic-10gene-cohort-v1"
@@ -295,6 +297,28 @@ def test_model_plugin_runner_rejects_stage_c_claim_fail_closed() -> None:
         match="STAGE_C_REAL_DRQ1_REQUIRES_NATIVE_CONSENSUS_HARNESS",
     ):
         runner.emit_execution_receipt()
+
+
+def test_model_plugin_runner_provenance_separation() -> None:
+    """Reviewer 3 Finding: Provenance clearly separates catalog ref and producer commit."""
+    runner = ModelPluginRunner(
+        plugin_id="tabular-10gene-phenotype-v1",
+        dataset_id="synthetic-10gene-cohort-v1",
+        execution_scope="PLUGIN_BOUNDARY",
+    )
+    runner.train_ticket(ticket_id="ticket-prov", partition_id="part-default")
+
+    catalog_ref = "670b58f6458fe84620f4f9f46401f855d04ae05d"
+    prod_commit = "1e06e89a5840ca88383c267c7e974955b5502bb1"
+
+    receipt = runner.emit_execution_receipt(
+        backend_commit=catalog_ref,
+        catalog_backend_ref=catalog_ref,
+        producer_commit=prod_commit,
+    )
+    assert receipt["provenance"]["backend_commit"] == catalog_ref
+    assert receipt["provenance"]["catalog_backend_ref"] == catalog_ref
+    assert receipt["provenance"]["producer_commit"] == prod_commit
 
 
 # --- 4. Strict Numeric Hardening & Regressions (Reviewer 1 & 2 Findings) ---
@@ -443,3 +467,56 @@ def test_regression_reviewer1_medium_json_serialization_allow_nan_false() -> Non
     payload_with_nan = {"metric": float("nan")}
     with pytest.raises(ValueError, match="Out of range float values are not JSON compliant"):
         json.dumps(payload_with_nan, allow_nan=False)
+
+
+def test_model_plugin_runner_rejects_receipt_without_prior_execution() -> None:
+    """Reviewer 3 Finding: Runner rejects emitting receipt before workload execution."""
+    runner = ModelPluginRunner(
+        plugin_id="tabular-10gene-phenotype-v1",
+        dataset_id="synthetic-10gene-cohort-v1",
+        execution_scope="PLUGIN_BOUNDARY",
+    )
+    with pytest.raises(ModelPluginRunnerError, match="NO_EXECUTION_RECORDED"):
+        runner.emit_execution_receipt()
+
+
+def test_regression_scale_features_pre_int64_overflow() -> None:
+    """Reviewer 3 Finding: scale_10gene_features rejects float values overflowing int64."""
+    # Extremely large float64 (1e308 * 10000 -> inf / int64 overflow)
+    huge_sample = np.full((1, 10), 1e308, dtype=np.float64)
+    with pytest.raises(PhenotypePluginError, match="FEATURE_SCALE_OVERFLOW"):
+        scale_10gene_features(huge_sample)
+
+    # Large finite float that exceeds int64 max after scaling
+    overflow_sample = np.full((1, 10), 1e20, dtype=np.float64)
+    with pytest.raises(PhenotypePluginError, match="FEATURE_SCALE_OVERFLOW"):
+        scale_10gene_features(overflow_sample)
+
+    # Negative large float that exceeds int64 min
+    underflow_sample = np.full((1, 10), -1e20, dtype=np.float64)
+    with pytest.raises(PhenotypePluginError, match="FEATURE_SCALE_OVERFLOW"):
+        scale_10gene_features(underflow_sample)
+
+    # In train_ticket
+    plugin = Synthetic10GeneCentroidPlugin()
+    valid_y = np.array([0, 1] * 5, dtype=np.int64)
+    with pytest.raises(PhenotypePluginError, match="FEATURE_SCALE_OVERFLOW"):
+        plugin.train_ticket(ticket_id="t1", data=(np.full((10, 10), 1e308), valid_y))
+
+
+def test_regression_checkpoint_uint64_narrowing_wrap_fail_closed() -> None:
+    """Reviewer 3 Finding: load_applied_checkpoint rejects large uint64 values
+    before narrowing cast.
+    """
+    plugin = Synthetic10GeneCentroidPlugin()
+
+    # Max uint64 values: 2^64 - 1
+    # Narrowing cast without pre-check would wrap this to -1 and bypass comparison
+    huge_uint64 = np.array([18446744073709551615] * 20 + [1, 1], dtype=np.uint64)
+    with pytest.raises(PhenotypePluginError, match="CHECKPOINT_INT16_OVERFLOW"):
+        plugin.load_applied_checkpoint(huge_uint64)
+
+    # Large uint32 value exceeding int16 max
+    overflow_uint32 = np.array([70000] * 20 + [1, 1], dtype=np.uint32)
+    with pytest.raises(PhenotypePluginError, match="CHECKPOINT_INT16_OVERFLOW"):
+        plugin.load_applied_checkpoint(overflow_uint32)

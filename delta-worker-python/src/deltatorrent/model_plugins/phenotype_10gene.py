@@ -81,7 +81,20 @@ def scale_10gene_features(samples: NDArray[np.float64]) -> NDArray[np.int64]:
     """Convert continuous features to canonical fixed-point integers."""
     if not bool(np.all(np.isfinite(samples))):
         raise PhenotypePluginError("FEATURES_NOT_FINITE")
-    scaled = np.floor(samples * SCALE_FACTOR + 0.5).astype(np.int64)
+
+    max_safe_input = (np.finfo(np.float64).max - 1.0) / SCALE_FACTOR
+    if bool(np.any(np.abs(samples) > max_safe_input)):
+        raise PhenotypePluginError("FEATURE_SCALE_OVERFLOW")
+
+    scaled_flt = np.floor(samples * SCALE_FACTOR + 0.5)
+    if not bool(np.all(np.isfinite(scaled_flt))):
+        raise PhenotypePluginError("FEATURE_SCALE_OVERFLOW")
+
+    iinfo64 = np.iinfo(np.int64)
+    if bool(np.any((scaled_flt < iinfo64.min) | (scaled_flt > iinfo64.max))):
+        raise PhenotypePluginError("FEATURE_SCALE_OVERFLOW")
+
+    scaled = scaled_flt.astype(np.int64)
     return np.ascontiguousarray(scaled, dtype=np.int64)
 
 
@@ -226,11 +239,17 @@ class Synthetic10GeneCentroidPlugin(ModelPlugin, DeltaPlugin):
         counts = np.bincount(labels_arr, minlength=CLASS_COUNT).astype(np.int64)
         scaled_samples = scale_10gene_features(samples_arr)
 
+        iinfo64 = np.iinfo(np.int64)
         sums_list: list[NDArray[np.int64]] = []
         for cls_idx in range(CLASS_COUNT):
             cls_mask = labels_arr == cls_idx
             if np.any(cls_mask):
-                sums_list.append(scaled_samples[cls_mask].sum(axis=0, dtype=np.int64))
+                class_samples = scaled_samples[cls_mask]
+                # Accumulate with arbitrary-precision Python ints to prevent silent int64 wrap
+                sum_obj = class_samples.astype(object).sum(axis=0)
+                if any(val < iinfo64.min or val > iinfo64.max for val in sum_obj):
+                    raise PhenotypePluginError("ACCUMULATION_INT64_OVERFLOW")
+                sums_list.append(np.asarray(sum_obj, dtype=np.int64))
             else:
                 sums_list.append(np.zeros(FEATURE_COUNT, dtype=np.int64))
 
@@ -267,20 +286,27 @@ class Synthetic10GeneCentroidPlugin(ModelPlugin, DeltaPlugin):
         if not np.issubdtype(flat.dtype, np.integer):
             raise PhenotypePluginError("CHECKPOINT_VALUES_NOT_INTEGER")
 
-        centroid_raw = flat[:CENTROID_WEIGHT_ELEMENTS].astype(np.int64)
-        presence_values = flat[CENTROID_WEIGHT_ELEMENTS:].astype(np.int64)
+        # Range check against int16 BEFORE any narrowing cast, handling signed and unsigned
+        iinfo16 = np.iinfo(np.int16)
+        if np.issubdtype(flat.dtype, np.unsignedinteger):
+            if bool(np.any(flat > np.uint64(iinfo16.max))):
+                raise PhenotypePluginError("CHECKPOINT_INT16_OVERFLOW")
+        else:
+            if bool(np.any((flat < iinfo16.min) | (flat > iinfo16.max))):
+                raise PhenotypePluginError("CHECKPOINT_INT16_OVERFLOW")
 
-        if bool(np.any((presence_values != 0) & (presence_values != 1))):
+        presence_raw = flat[CENTROID_WEIGHT_ELEMENTS:]
+        if bool(np.any((presence_raw != 0) & (presence_raw != 1))):
             raise PhenotypePluginError("CHECKPOINT_PRESENCE_INVALID")
 
         values = flat.astype(np.int16)
-        if not np.array_equal(values.astype(np.int64), flat.astype(np.int64)):
-            raise PhenotypePluginError("CHECKPOINT_INT16_OVERFLOW")
+        centroid_raw = values[:CENTROID_WEIGHT_ELEMENTS].astype(np.int64)
+        presence = values[CENTROID_WEIGHT_ELEMENTS:].astype(np.int64)
 
         centroids = (
             centroid_raw.reshape(CLASS_COUNT, FEATURE_COUNT).astype(np.float64) / SCALE_FACTOR
         )
-        presence = np.ascontiguousarray(presence_values, dtype=np.int64)
+        presence = np.ascontiguousarray(presence, dtype=np.int64)
         model = Phenotype10GeneModel(centroids=centroids, presence=presence, values=values)
         self._current_model = model
         return model
