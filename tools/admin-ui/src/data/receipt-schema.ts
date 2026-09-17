@@ -6,6 +6,8 @@ import {
 export interface ReceiptProvenance {
   readonly repository: string;
   readonly backend_commit: string;
+  readonly catalog_backend_ref?: string;
+  readonly producer_commit?: string;
   readonly produced_at: string;
 }
 
@@ -225,6 +227,31 @@ export function validateExecutionReceipt(raw: unknown): ExecutionReceipt {
       `backend_commit must be a 40-character git SHA hex string, got: ${String(prov.backend_commit)}`
     );
   }
+  if (prov.catalog_backend_ref !== undefined) {
+    if (
+      typeof prov.catalog_backend_ref !== "string" ||
+      !/^[0-9a-f]{40}$/u.test(prov.catalog_backend_ref)
+    ) {
+      throw new ReceiptValidationError(
+        `catalog_backend_ref must be a 40-character git SHA hex string if present, got: ${String(prov.catalog_backend_ref)}`
+      );
+    }
+    if (prov.catalog_backend_ref !== prov.backend_commit) {
+      throw new ReceiptValidationError(
+        `catalog_backend_ref (${String(prov.catalog_backend_ref)}) must match backend_commit (${String(prov.backend_commit)})`
+      );
+    }
+  }
+  if (prov.producer_commit !== undefined) {
+    if (
+      typeof prov.producer_commit !== "string" ||
+      !/^[0-9a-f]{40}$/u.test(prov.producer_commit)
+    ) {
+      throw new ReceiptValidationError(
+        `producer_commit must be a 40-character git SHA hex string if present, got: ${String(prov.producer_commit)}`
+      );
+    }
+  }
 
   // 2. Workload
   if (typeof obj.workload !== "object" || obj.workload === null) {
@@ -357,6 +384,16 @@ export function validateExecutionReceipt(raw: unknown): ExecutionReceipt {
     if (hasConsensusEvidence) {
       throw new ReceiptValidationError(
         "Plugin-boundary receipt strictly forbids 'consensus_evidence' block"
+      );
+    }
+    // PLUGIN_BOUNDARY scope emitted by runtime worker requires strict producer_commit provenance.
+    // Legacy Stage C / Observation sample receipts retain optional producer_commit for backward compatibility.
+    if (
+      typeof prov.producer_commit !== "string" ||
+      !/^[0-9a-f]{40}$/u.test(prov.producer_commit)
+    ) {
+      throw new ReceiptValidationError(
+        `PLUGIN_BOUNDARY receipts require a valid 40-character git SHA producer_commit, got: ${String(prov.producer_commit)}`
       );
     }
   }

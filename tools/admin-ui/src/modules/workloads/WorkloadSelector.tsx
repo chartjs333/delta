@@ -14,6 +14,7 @@ import {
 import sampleEegReceipt from "../../data/samples/sample-eeg-observation-receipt.json";
 import sampleMnistReceipt from "../../data/samples/sample-mnist-stage-c-receipt.json";
 import sampleQloraReceipt from "../../data/samples/sample-qlora-stage-c-receipt.json";
+import sample10GeneReceipt from "../../data/samples/sample-10gene-plugin-boundary-receipt.json";
 import { InertText } from "../../components/InertText";
 import { parseUntrustedJson } from "../../security/input-guards";
 
@@ -384,6 +385,13 @@ export function WorkloadSelector({
               >
                 EEG Observation
               </button>
+              <button
+                type="button"
+                onClick={() => loadSample(sample10GeneReceipt)}
+                className="toolbar-btn text-btn"
+              >
+                10-Gene Plugin Boundary
+              </button>
             </div>
           </div>
 
@@ -594,7 +602,10 @@ export function WorkloadSelector({
 
               <footer className="panel-provenance">
                 <span>
-                  Produced at: <code>{loadedReceipt.provenance.produced_at}</code> · commit: <code>{loadedReceipt.provenance.backend_commit.slice(0, 7)}</code>
+                  Produced at: <code>{loadedReceipt.provenance.produced_at}</code> · catalog: <code>{loadedReceipt.provenance.backend_commit.slice(0, 7)}</code>
+                  {loadedReceipt.provenance.producer_commit && (
+                    <> · producer: <code>{loadedReceipt.provenance.producer_commit.slice(0, 7)}</code></>
+                  )}
                 </span>
               </footer>
             </div>

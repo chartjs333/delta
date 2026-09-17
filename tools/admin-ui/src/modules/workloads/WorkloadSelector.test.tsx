@@ -226,6 +226,36 @@ describe("WorkloadSelector", () => {
     ).toBeTruthy();
   });
 
+  it("loads 10-Gene Plugin Boundary sample and displays STRUCTURALLY_VALID_BOUND_RECEIPT with unattested plugin boundary details", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    const modelSelect = screen.getByLabelText("Model Plugin");
+    const datasetSelect = screen.getByLabelText("Dataset Provider");
+    const scopeSelect = screen.getByLabelText("Requested Execution Scope");
+
+    await user.selectOptions(modelSelect, "tabular-10gene-phenotype-v1");
+    await user.selectOptions(datasetSelect, "synthetic-10gene-cohort-v1");
+    await user.selectOptions(scopeSelect, "PLUGIN_BOUNDARY");
+
+    const sampleBtn = screen.getByRole("button", { name: "10-Gene Plugin Boundary" });
+    await user.click(sampleBtn);
+
+    expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
+    expect(screen.getByText("Recorded Plugin Boundary Record")).toBeTruthy();
+    expect(screen.getByText("UNATTESTED_PLUGIN_BOUNDARY_RECORD")).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Plugin boundary record self-consistent without consensus round or WAL commits/u
+      )
+    ).toBeTruthy();
+    expect(screen.getByText("COMPLETED")).toBeTruthy();
+
+    // STRICT: consensus fields must not exist
+    expect(screen.queryByText("Recorded Consensus Record")).toBeNull();
+    expect(screen.queryByText("APPLIED")).toBeNull();
+  });
+
   it("transitions to RECEIPT_LOADED_UNBOUND when selector changes away from loaded receipt config", async () => {
     const user = userEvent.setup();
     render(<WorkloadSelector />);

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import sampleEegReceipt from "./samples/sample-eeg-observation-receipt.json";
 import sampleMnistReceipt from "./samples/sample-mnist-stage-c-receipt.json";
 import sampleQloraReceipt from "./samples/sample-qlora-stage-c-receipt.json";
+import sample10GeneReceipt from "./samples/sample-10gene-plugin-boundary-receipt.json";
 import {
   computeWorkloadConfigDigest,
   evaluateReceiptBinding,
@@ -45,6 +46,12 @@ describe("validateExecutionReceipt", () => {
 
     const eeg = validateExecutionReceipt(sampleEegReceipt);
     expect(eeg.observation_summary?.observation_note).toBeTruthy();
+
+    const gene = validateExecutionReceipt(sample10GeneReceipt);
+    expect(gene.workload.model_plugin_id).toBe("tabular-10gene-phenotype-v1");
+    expect(gene.workload.dataset_id).toBe("synthetic-10gene-cohort-v1");
+    expect(gene.workload.executed_scope).toBe("PLUGIN_BOUNDARY");
+    expect(gene.consensus_evidence).toBeUndefined();
   });
 
   it("fails closed on non-object or missing type/version", () => {
@@ -70,6 +77,58 @@ describe("validateExecutionReceipt", () => {
     };
     expect(() => validateExecutionReceipt(invalid)).toThrow(
       /backend_commit must be a 40-character git SHA/u
+    );
+  });
+
+  it("fails closed on non-40-char catalog_backend_ref or mismatch with backend_commit", () => {
+    const invalidFormat = {
+      ...sample10GeneReceipt,
+      provenance: {
+        ...sample10GeneReceipt.provenance,
+        catalog_backend_ref: "short_ref",
+      },
+    };
+    expect(() => validateExecutionReceipt(invalidFormat)).toThrow(
+      /catalog_backend_ref must be a 40-character git SHA/u
+    );
+
+    const mismatched = {
+      ...sample10GeneReceipt,
+      provenance: {
+        ...sample10GeneReceipt.provenance,
+        catalog_backend_ref: "1111111111111111111111111111111111111111",
+      },
+    };
+    expect(() => validateExecutionReceipt(mismatched)).toThrow(
+      /must match backend_commit/u
+    );
+  });
+
+  it("fails closed on non-40-char producer_commit", () => {
+    const invalid = {
+      ...sample10GeneReceipt,
+      provenance: {
+        ...sample10GeneReceipt.provenance,
+        producer_commit: "not_a_valid_sha",
+      },
+    };
+    expect(() => validateExecutionReceipt(invalid)).toThrow(
+      /producer_commit must be a 40-character git SHA/u
+    );
+  });
+
+  it("fails closed when PLUGIN_BOUNDARY is missing producer_commit", () => {
+    const invalid = {
+      ...sample10GeneReceipt,
+      provenance: {
+        repository: sample10GeneReceipt.provenance.repository,
+        backend_commit: sample10GeneReceipt.provenance.backend_commit,
+        catalog_backend_ref: sample10GeneReceipt.provenance.catalog_backend_ref,
+        produced_at: sample10GeneReceipt.provenance.produced_at,
+      },
+    };
+    expect(() => validateExecutionReceipt(invalid)).toThrow(
+      /PLUGIN_BOUNDARY receipts require a valid 40-character git SHA producer_commit/u
     );
   });
 
@@ -209,6 +268,21 @@ describe("evaluateReceiptBinding", () => {
     expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
     expect(result.evidenceType).toBe("UNATTESTED_CONSENSUS_RECORD");
     expect(result.expectedDigest).toBe(validMnistReceipt.workload.workload_config_digest);
+  });
+
+  it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with UNATTESTED_PLUGIN_BOUNDARY_RECORD for 10-gene plugin boundary receipt", () => {
+    const geneReceipt = sample10GeneReceipt as unknown as ExecutionReceipt;
+    const result = evaluateReceiptBinding(
+      geneReceipt,
+      "tabular-10gene-phenotype-v1",
+      "synthetic-10gene-cohort-v1",
+      "PLUGIN_BOUNDARY",
+      SAMPLE_BACKEND_REF,
+      SAMPLE_REPO
+    );
+    expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
+    expect(result.evidenceType).toBe("UNATTESTED_PLUGIN_BOUNDARY_RECORD");
+    expect(result.expectedDigest).toBe(geneReceipt.workload.workload_config_digest);
   });
 
   it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with OBSERVATION_RECORD for EEG observation receipt", () => {
