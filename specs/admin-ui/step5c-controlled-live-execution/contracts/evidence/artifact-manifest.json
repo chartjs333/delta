@@ -1,0 +1,154 @@
+{
+  "artifact_count": 28,
+  "artifacts": [
+    {
+      "bytes": 1269,
+      "path": "fixtures/invalid/admission-record.invalid-grant-type.json",
+      "sha256": "bc7988aff1909c0ae45520338c18c247db83aa3496bb5b17664ebcb3148c2f3b"
+    },
+    {
+      "bytes": 2364,
+      "path": "fixtures/invalid/authorized-execution.intent-id-mismatch.json",
+      "sha256": "439759e9ea721aa4815ad75373f91557ab8998d2751fc8802a45d81077013c1d"
+    },
+    {
+      "bytes": 863,
+      "path": "fixtures/invalid/execution-intent.checkpoint-overflow.json",
+      "sha256": "2a3967894d08fd1ea5a4e2c455a3dcf9335dc7887499132394e194f7eac85212"
+    },
+    {
+      "bytes": 946,
+      "path": "fixtures/invalid/execution-intent.extra-property.json",
+      "sha256": "056999bfeaa5b031f4e46bc6b3bb9fc9dff71abda10a2d2ec4889c4a86fd3458"
+    },
+    {
+      "bytes": 928,
+      "path": "fixtures/invalid/execution-intent.train-ticket-wrong-scope.json",
+      "sha256": "e2a91b59b6065bf7a8e7d4ec60367a001bc7d4e7e4a952ef192648ebf18c6375"
+    },
+    {
+      "bytes": 919,
+      "path": "fixtures/invalid/execution-intent.unknown-operation.json",
+      "sha256": "bc8526d7652197f8e05090f88abbfb5c25e7c064126425ad52a69c9b4a2135c6"
+    },
+    {
+      "bytes": 1221,
+      "path": "fixtures/invalid/manifest.json",
+      "sha256": "ab4bfa344d7ec82d4769a403c6e318319126a69ad6941d6c5e2eb6d9044fd70e"
+    },
+    {
+      "bytes": 1237,
+      "path": "fixtures/invalid/receipt-lineage.consensus-field.json",
+      "sha256": "ef05e1b8a127214d839f9747d0385f5a1d1464eb1a8d3cfef81146022b5c7f46"
+    },
+    {
+      "bytes": 1267,
+      "path": "fixtures/valid/admission-record.train-ticket.json",
+      "sha256": "174a4e0171bdd91d7f4128def3d2aac3249c0a014c19640e54d9c40f3e7f343a"
+    },
+    {
+      "bytes": 2364,
+      "path": "fixtures/valid/authorized-execution.train-ticket.json",
+      "sha256": "3fc27dee602ba0c2edd8d204170f22aa8b4f449755fa71bc8010547006948ec8"
+    },
+    {
+      "bytes": 893,
+      "path": "fixtures/valid/execution-intent.evaluate-checkpoint.json",
+      "sha256": "6ef1082cb277f4771a1041555b52d587f71515cb6a1fb1373e4e00d0395f2482"
+    },
+    {
+      "bytes": 803,
+      "path": "fixtures/valid/execution-intent.materialize-dataset.json",
+      "sha256": "23bfcb863ba8e72646860030713f912d8e14b8735d35151068b608e1c6b6d9e7"
+    },
+    {
+      "bytes": 917,
+      "path": "fixtures/valid/execution-intent.train-ticket.json",
+      "sha256": "c05698c13453c1149e3083499aa76278103d2cab08c7492f004d59fc60e64250"
+    },
+    {
+      "bytes": 1213,
+      "path": "fixtures/valid/execution-receipt-lineage-extension.train-ticket.json",
+      "sha256": "65324b20fda0101610b1c3256306921614bff29086bc049882da376c4f3c00ad"
+    },
+    {
+      "bytes": 589,
+      "path": "fixtures/valid/execution-status.completed.json",
+      "sha256": "06d982077ad0e98a2a7a1217fac8dad13aca7112a10c077e8db2f1e24a94ead1"
+    },
+    {
+      "bytes": 1302,
+      "path": "README.md",
+      "sha256": "bfa10090a4bb8eb88eb984f1021fc69caf214c687a47ae83392d0bd0877916e9"
+    },
+    {
+      "bytes": 3645,
+      "path": "schemas/admission-record.schema.json",
+      "sha256": "026009459059c02d42e9361a1074f269e29a1d9acecd7e6a7e10be975324a3da"
+    },
+    {
+      "bytes": 10799,
+      "path": "schemas/authorized-execution.schema.json",
+      "sha256": "a3d2000cbc5bb53c133173aef05f93ea0e8a0fd657c1ef0e59f749a0f9afab11"
+    },
+    {
+      "bytes": 5354,
+      "path": "schemas/execution-intent.schema.json",
+      "sha256": "d5c9294741644fcee9ea2f5371c41abb4202a47d1dd5a9d10d1d92c1ca974689"
+    },
+    {
+      "bytes": 4647,
+      "path": "schemas/execution-receipt-lineage-extension.schema.json",
+      "sha256": "d8a9820538026dabbb4eeba733bc7a4d9220f87c5b287f1a4980254b7f350be2"
+    },
+    {
+      "bytes": 2072,
+      "path": "schemas/execution-status.schema.json",
+      "sha256": "fceed3918da0171dca0bf4336ded248211881bbedbaf8a8f86bc679de77ceee3"
+    },
+    {
+      "bytes": 2006,
+      "path": "schemas/preflight-error.schema.json",
+      "sha256": "40efb66022ea992433fc7de83c7b44b8bc12364bf18471cfde1116157922b75e"
+    },
+    {
+      "bytes": 46003,
+      "path": "scripts/contract_tools.py",
+      "sha256": "ed9ed9b93671712643716cb1228a64010b47e3f5850778f44ddc9d843b05f9e1"
+    },
+    {
+      "bytes": 3108,
+      "path": "taxonomy/errors.json",
+      "sha256": "8899f4e3247d16febabc05d6f2819a6301a59477a17d208af0df4eaa6af1a815"
+    },
+    {
+      "bytes": 2243,
+      "path": "tests/test_contracts.py",
+      "sha256": "caf464319251572cd003e8c4cba80b809cc39eb098a6fc5c99b1651367bfba3d"
+    },
+    {
+      "bytes": 1646,
+      "path": "vectors/ed25519-fixture.json",
+      "sha256": "ca2132e279892332928b8ef6f182db35bd54c9e2bf481dc8463a82dc5ef54096"
+    },
+    {
+      "bytes": 7044,
+      "path": "vectors/jcs-golden-vectors.json",
+      "sha256": "80d6079311cbeb9cacba35528e95f2920fa9b9625283f8d058c3d124e2fe468b"
+    },
+    {
+      "bytes": 492,
+      "path": "vectors/sha256-vectors.json",
+      "sha256": "ee0d138df70324f71085f43c2e13ff780c0727fef672b58915a58d2531891fee"
+    }
+  ],
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "schema_version": "1.0.0",
+  "tasks": [
+    "step5c:T005",
+    "step5c:T006",
+    "step5c:T007",
+    "step5c:T008",
+    "step5c:T009"
+  ]
+}

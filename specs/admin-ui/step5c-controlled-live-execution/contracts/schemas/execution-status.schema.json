@@ -1,0 +1,104 @@
+{
+  "$id": "https://delta.local/schemas/step5c/execution-status.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "FAILED",
+              "TIMED_OUT",
+              "CANCELLED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "error"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "COMPLETED"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "receipt_digest"
+        ]
+      }
+    }
+  ],
+  "properties": {
+    "admission_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "admission_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "error": {
+      "$ref": "preflight-error.schema.json"
+    },
+    "execution_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "intent_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "intent_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "receipt_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "ADMITTED",
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "TIMED_OUT",
+        "CANCELLED",
+        "STALE_UNAVAILABLE"
+      ],
+      "type": "string"
+    },
+    "terminal": {
+      "type": "boolean"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "execution_id",
+    "intent_id",
+    "intent_digest",
+    "admission_id",
+    "admission_digest",
+    "state",
+    "updated_at"
+  ],
+  "title": "ExecutionStatus",
+  "type": "object"
+}

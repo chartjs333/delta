@@ -1,0 +1,27 @@
+{
+  "created_at": "2026-09-17T14:31:00.000Z",
+  "declared_operator": {
+    "role": "RESEARCHER",
+    "subject_id": "operator.unicode.é"
+  },
+  "execution_constraints": {
+    "requested_allow_downloads": false,
+    "timeout_seconds": 3600
+  },
+  "expires_at": "2026-09-17T14:41:00.000Z",
+  "intent_digest": "sha256:4ae18f782ef811c7c3de8f17eb91d5134aa717ae478e36d9d32a9dbc3b54ae1c",
+  "intent_id": "22222222-2222-4222-8222-222222222222",
+  "operation": "EVALUATE_CHECKPOINT",
+  "operation_payload": {
+    "checkpoint_coordinates": [
+      2147483648
+    ]
+  },
+  "schema_version": "1.0.0",
+  "workload": {
+    "catalog_backend_ref": "670b58f6458fe84620f4f9f46401f855d04ae05d",
+    "dataset_id": "synthetic-10gene-cohort-v1",
+    "model_plugin_id": "tabular-10gene-phenotype-v1",
+    "requested_scope": "MODEL_DATASET_BINDING_ONLY"
+  }
+}

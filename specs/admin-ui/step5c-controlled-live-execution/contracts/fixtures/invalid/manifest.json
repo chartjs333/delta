@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "expected_error": "ERR_SCHEMA_VALIDATION_FAILED",
+      "name": "execution-intent.unknown-operation",
+      "schema": "execution-intent"
+    },
+    {
+      "expected_error": "ERR_SCHEMA_VALIDATION_FAILED",
+      "name": "execution-intent.extra-property",
+      "schema": "execution-intent"
+    },
+    {
+      "expected_error": "ERR_OPERATION_SCOPE_UNSUPPORTED",
+      "name": "execution-intent.train-ticket-wrong-scope",
+      "schema": "execution-intent"
+    },
+    {
+      "expected_error": "ERR_SCHEMA_VALIDATION_FAILED",
+      "name": "execution-intent.checkpoint-overflow",
+      "schema": "execution-intent"
+    },
+    {
+      "expected_error": "ERR_SCHEMA_VALIDATION_FAILED",
+      "name": "admission-record.invalid-grant-type",
+      "schema": "admission-record"
+    },
+    {
+      "expected_error": "ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH",
+      "name": "authorized-execution.intent-id-mismatch",
+      "schema": "authorized-execution"
+    },
+    {
+      "expected_error": "ERR_STAGE_C_FORBIDDEN",
+      "name": "receipt-lineage.consensus-field",
+      "schema": "execution-receipt-lineage-extension"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

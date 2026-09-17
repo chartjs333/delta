@@ -1,0 +1,77 @@
+{
+  "$id": "https://delta.local/schemas/step5c/preflight-error.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "category": {
+      "enum": [
+        "SCHEMA",
+        "CANONICALIZATION",
+        "DIGEST",
+        "AUTHN",
+        "AUTHZ",
+        "POLICY",
+        "CATALOG",
+        "IDEMPOTENCY",
+        "RESOURCE",
+        "DISPATCH",
+        "WORKER",
+        "LINEAGE",
+        "CONSENSUS_BOUNDARY"
+      ],
+      "type": "string"
+    },
+    "error_code": {
+      "enum": [
+        "ERR_SCHEMA_VERSION_UNSUPPORTED",
+        "ERR_SCHEMA_VALIDATION_FAILED",
+        "ERR_JCS_CANONICALIZATION_FAILED",
+        "ERR_INTENT_DIGEST_MISMATCH",
+        "ERR_ADMISSION_DIGEST_MISMATCH",
+        "ERR_INTENT_EXPIRED",
+        "ERR_ADMISSION_EXPIRED",
+        "ERR_AUTHENTICATION_REQUIRED",
+        "ERR_AUTHENTICATION_FAILED",
+        "ERR_UNAUTHORIZED_CALLER",
+        "ERR_POLICY_DENIED",
+        "ERR_ROLE_FORBIDDEN",
+        "ERR_CATALOG_REF_MISMATCH",
+        "ERR_UNKNOWN_PLUGIN_ID",
+        "ERR_UNKNOWN_DATASET_ID",
+        "ERR_OPERATION_SCOPE_UNSUPPORTED",
+        "ERR_INTENT_ID_DIGEST_CONFLICT",
+        "ERR_INTENT_COLLISION_DETECTED",
+        "ERR_QUOTA_EXCEEDED",
+        "ERR_WORKER_DISPATCH_FAILED",
+        "ERR_ADMISSION_SIGNATURE_INVALID",
+        "ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH",
+        "ERR_RECEIPT_LINEAGE_MISMATCH",
+        "ERR_TIMEOUT",
+        "ERR_CANCELLED",
+        "ERR_STAGE_C_FORBIDDEN"
+      ],
+      "type": "string"
+    },
+    "message": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "error_code",
+    "category",
+    "retryable",
+    "message"
+  ],
+  "title": "Step5CError",
+  "type": "object"
+}
