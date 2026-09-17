@@ -32,6 +32,35 @@
   overflow-wrap: anywhere;
 }
 
+.live-tab-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e1dcd1;
+  padding-bottom: 0.5rem;
+}
+
+.tab-button {
+  border: 1px solid #dcd7cb;
+  border-radius: 8px;
+  background: #fffdf7;
+  color: #333;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.tab-button:hover {
+  background: #f5f2e9;
+}
+
+.tab-button.active {
+  background: #214f3e;
+  border-color: #214f3e;
+  color: #ffffff;
+}
+
 .live-boundary-grid {
   display: grid;
   grid-template-columns: minmax(240px, 0.42fr) minmax(0, 0.58fr);
@@ -40,7 +69,8 @@
 
 .live-status-list,
 .live-status-detail,
-.live-boundary-note {
+.live-boundary-note,
+.live-intent-builder {
   border: 1px solid #dcd7cb;
   border-radius: 12px;
   padding: 1rem;
@@ -130,6 +160,220 @@
   align-items: center;
   color: #53615b;
   font-size: 0.82rem;
+}
+
+/* Intent Builder Styles */
+.intent-builder-intro {
+  color: #43524b;
+  line-height: 1.5;
+  margin: 0.5rem 0 1rem;
+}
+
+.intent-fieldset {
+  border: 1px solid #e1dcd1;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #faf8f3;
+}
+
+.intent-fieldset legend {
+  font-weight: 700;
+  color: #214f3e;
+  padding: 0 0.4rem;
+  font-size: 0.92rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #3d4a44;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #cfc9bb;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 0.88rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: 2px solid #214f3e;
+  outline-offset: 1px;
+}
+
+.field-hint {
+  font-size: 0.74rem;
+  color: #6e7773;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  padding: 0.4rem 0;
+}
+
+.radio-label,
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.checkbox-row {
+  margin-top: 0.8rem;
+}
+
+.compatibility-indicator {
+  margin-top: 0.8rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed #dcd7cb;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.text-ok {
+  color: #1e6b43;
+}
+
+.text-warn {
+  color: #9e2a2b;
+}
+
+.digest-preview-card {
+  border: 1px solid #dcd7cb;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f4f0e6;
+  margin-bottom: 1rem;
+}
+
+.digest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.digest-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #214f3e;
+}
+
+.digest-notice {
+  font-size: 0.78rem;
+  color: #55625c;
+  line-height: 1.4;
+  margin: 0.4rem 0 0.7rem;
+}
+
+.digest-code-block {
+  background: #ffffff;
+  border: 1px solid #dcd7cb;
+  border-radius: 6px;
+  padding: 0.5rem 0.8rem;
+  overflow-x: auto;
+}
+
+.digest-code-block code {
+  font-size: 0.85rem;
+  color: #1a3c2f;
+  font-weight: 600;
+}
+
+.builder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.action-button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.action-button.primary {
+  background: #214f3e;
+  border: 1px solid #214f3e;
+  color: #ffffff;
+}
+
+.action-button.primary:hover:not(:disabled) {
+  background: #17382c;
+}
+
+.action-button.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-button.secondary {
+  background: #fffdf7;
+  border: 1px solid #cfc9bb;
+  color: #214f3e;
+}
+
+.action-button.secondary:hover {
+  background: #f5f2e9;
+}
+
+.action-button.tertiary {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #55625c;
+  text-decoration: underline;
+}
+
+.action-button.tertiary:hover {
+  color: #214f3e;
+}
+
+.canonical-json-preview {
+  margin-top: 1rem;
+  border: 1px solid #dcd7cb;
+  border-radius: 8px;
+  padding: 0.8rem;
+  background: #282c34;
+  color: #abb2bf;
+}
+
+.canonical-json-preview h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  color: #e5c07b;
+}
+
+.canonical-json-preview pre {
+  margin: 0;
+  font-size: 0.78rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 @media (max-width: 900px) {

@@ -15,7 +15,7 @@ const DEFAULT_WORKLOAD: LiveWorkloadSelection = {
   requestedScope: "PLUGIN_BOUNDARY",
 };
 
-const MOCK_STATUSES: readonly LiveExecutionStatus[] = [
+const INITIAL_MOCK_STATUSES: readonly LiveExecutionStatus[] = [
   {
     statusId: "draft-preview",
     state: "DRAFT",
@@ -161,6 +161,8 @@ const MOCK_STATUSES: readonly LiveExecutionStatus[] = [
 ];
 
 export class MockLiveExecutionAdapter implements LiveExecutionPort {
+  private statuses: LiveExecutionStatus[] = [...INITIAL_MOCK_STATUSES];
+
   async describeLiveSource(): Promise<LiveExecutionSourceDescriptor> {
     return {
       adapterId: "mock-live-execution",
@@ -180,17 +182,17 @@ export class MockLiveExecutionAdapter implements LiveExecutionPort {
       state: "DRAFT" as const,
       operation,
       workload,
-      digestState: "AWAITING_CONTRACT_ARTIFACTS" as const,
+      digestState: "COMPUTED_INFORMATIONAL" as const,
       authority: "PRESENTATION_MOCK" as const,
     };
   }
 
   async listStatuses(): Promise<readonly LiveExecutionStatus[]> {
-    return MOCK_STATUSES.map(copyStatus);
+    return this.statuses.map(copyStatus);
   }
 
   async getStatus(statusId: string): Promise<LiveExecutionStatus> {
-    const status = MOCK_STATUSES.find((item) => item.statusId === statusId);
+    const status = this.statuses.find((item) => item.statusId === statusId);
     if (!status) {
       throw new AdminUiError(
         "SOURCE_UNAVAILABLE",
@@ -199,6 +201,40 @@ export class MockLiveExecutionAdapter implements LiveExecutionPort {
       );
     }
     return copyStatus(status);
+  }
+
+  async submitIntent(rawIntent: unknown): Promise<LiveExecutionStatus> {
+    const intent = rawIntent as Record<string, any>;
+    const intentId = String(intent.intent_id ?? "00000000-0000-4000-8000-000000000099");
+    const op = (intent.operation ?? "TRAIN_TICKET") as LiveExecutionOperation;
+    const modelId = String(intent.workload?.model_plugin_id ?? DEFAULT_WORKLOAD.modelPluginId);
+    const dsId = String(intent.workload?.dataset_id ?? DEFAULT_WORKLOAD.datasetId);
+    const scope = (intent.workload?.requested_scope ?? DEFAULT_WORKLOAD.requestedScope);
+
+    const newStatus: LiveExecutionStatus = {
+      statusId: `submitted-${intentId.slice(0, 8)}`,
+      state: "ADMITTED",
+      operation: op,
+      workload: {
+        modelPluginId: modelId,
+        datasetId: dsId,
+        requestedScope: scope,
+      },
+      updatedAt: new Date().toISOString(),
+      authority: "PRESENTATION_MOCK",
+      trustBadge: "UNATTESTED_MOCK_STATUS",
+      summary: `Mock gate admitted intent ${intentId.slice(0, 8)}; queued in mock state.`,
+      lineage: {
+        intentId,
+        intentDigest: String(intent.intent_digest ?? "sha256:0000000000000000000000000000000000000000000000000000000000000000"),
+        admissionId: `adm-${intentId.slice(0, 8)}`,
+        admissionDigest: "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        executionId: `exec-${intentId.slice(0, 8)}`,
+      },
+    };
+
+    this.statuses = [newStatus, ...this.statuses];
+    return copyStatus(newStatus);
   }
 }
 
