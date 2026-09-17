@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T030",
+  "status": "EVIDENCE_VERIFIED",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t030_replay_idempotency.py",
+  "verified_invariants": [
+    "S5C-T029-REPLAY-001: Duplicate exact intent submission returns REPLAY_IDEMPOTENT with zero duplicate worker starts",
+    "S5C-T029-REPLAY-001: Concurrent duplicate submissions serialize to single execution instance",
+    "S5C-T029-REPLAY-002: Re-submission of intent_id with altered payload/digest rejected with ERR_INTENT_COLLISION_DETECTED",
+    "S5C-T029-REPLAY-004: Submission of different intent_id with colliding digest rejected with ERR_INTENT_COLLISION_DETECTED",
+    "S5C-T029-REPLAY-003: Replay query from unauthorized subject rejected with ERR_UNAUTHORIZED_PEER_OR_ROLE",
+    "ADR-0002-LEDGER: Controller reboot restores idempotency ledger without re-executing completed workloads",
+    "ADR-0002-INTEGRITY: Tampered intent_digest rejected fail-closed before ledger entry"
+  ]
+}
