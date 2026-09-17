@@ -17,7 +17,7 @@
 - [ ] Intent/admission/execution/receipt IDs (including `admission_id`), digests, and Ed25519 signatures verify exactly across all boundaries.
 - [ ] Duplicate submission during RUNNING (same id + digest + subject) does not start another worker.
 - [ ] Duplicate submission after COMPLETED (same id + digest + subject) returns the same terminal result from cache.
-- [ ] Re-submission with different digest fails with `ERR_INTENT_ID_DIGEST_CONFLICT`; cross-subject fails with `ERR_UNAUTHORIZED_CALLER`.
+- [ ] Re-submission with different digest fails with `ERR_INTENT_ID_DIGEST_CONFLICT`; cross-subject fails with `ERR_UNAUTHORIZED_CALLER`; collision under different ID fails with `ERR_INTENT_COLLISION_DETECTED`.
 - [ ] Restart/reconnect recovers existing status and idempotency state.
 - [ ] Timeout/cancel/failure paths never produce success receipt.
 - [ ] Invalid/expired/unauthorized/incompatible intents start no worker.

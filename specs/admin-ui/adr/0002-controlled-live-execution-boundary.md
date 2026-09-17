@@ -247,7 +247,7 @@ The intent must declare an explicit operation from the following closed enum:
         "properties": {
           "operation_payload": {
             "type": "object",
-            "required": ["checkpoint_coordinates", "split_name"],
+            "required": ["checkpoint_coordinates"],
             "additionalProperties": false,
             "properties": {
               "checkpoint_coordinates": {
@@ -255,8 +255,7 @@ The intent must declare an explicit operation from the following closed enum:
                 "items": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 },
                 "minItems": 1,
                 "maxItems": 4096
-              },
-              "split_name": { "type": "string", "enum": ["evaluation", "test"] }
+              }
             }
           }
         }
@@ -325,8 +324,8 @@ Zone 2 maintains an append-only, durable **Idempotency Ledger**:
   - Hard preflight rejection with typed error `ERR_INTENT_ID_DIGEST_CONFLICT`. Modifying any payload field under an existing `intent_id` is forbidden.
 - **Cross-Subject Access (`same intent_id + different authenticated_subject`)**:
   - Hard rejection with typed error `ERR_UNAUTHORIZED_CALLER`. Replaying or querying another subject's `intent_id` is denied.
-- **Cryptographic Impossibility (`different intent_id + same intent_digest`)**:
-  - Under full-document RFC 8785 canonicalization, `intent_id` is itself an input to `intent_digest`. Therefore, `different intent_id + same intent_digest` cannot occur under a valid digest.
+- **Digest Collision / Duplicate Payload Under Different ID (`different intent_id + same intent_digest`)**:
+  - Computationally infeasible absent a SHA-256 collision, but if ever observed (hash collision or ledger anomaly), Zone 2 rejects fail-closed with `ERR_INTENT_COLLISION_DETECTED` rather than admitting or deduplicating.
 - **Retry Semantics**:
   - Any retry of a failed, cancelled, or timed-out execution requires a **brand new `intent_id`**.
   - Provenance/lineage to the prior attempt is optionally declared in `intent.execution_constraints.retry_of_intent_id`.
@@ -412,13 +411,13 @@ Upon successful admission, Zone 2 issues a signed, tamper-evident `AdmissionReco
 
 Canonicalization and Authenticity Rules:
 1. `admission_digest` is computed via RFC 8785 canonicalization over `AdmissionRecord \ { "admission_digest", "authenticator" }`.
-2. `authenticator.signature` is computed over the RFC 8785 canonical bytes of `AdmissionRecord \ { "authenticator" }` (which includes `admission_digest`) using the controller's private Ed25519 key.
+2. `authenticator.signature` is computed over the RFC 8785 canonical bytes of `AdmissionRecord \ { "authenticator.signature" }` (which includes `issuer_id`, `key_id`, `algorithm`, `admission_digest`, and all admission fields) using the controller's private Ed25519 key. This guarantees that authenticator metadata cannot be tampered with or substituted.
 3. `admission_expires_at` represents the hard dispatch deadline. It MUST satisfy `now() <= admission_expires_at <= intent.expires_at`.
 4. Shared-secret symmetric MACs (e.g. HMAC) are strictly prohibited as primary admission authenticators because workers with MAC verification keys would share forge authority.
 
 ### AuthorizedExecution Schema
 
-The dispatch contract from Zone 2 (Authorization Gate) to Zone 3 (Worker) packages the exact client intent and the gate admission record into an immutable execution bundle:
+The dispatch contract from Zone 2 (Authorization Gate) to Zone 3 (Worker) packages the exact client intent and the gate admission record into an immutable execution bundle. Authoritative execution identity comes exclusively from `admission.execution_id`:
 
 ```json
 {
@@ -427,27 +426,209 @@ The dispatch contract from Zone 2 (Authorization Gate) to Zone 3 (Worker) packag
   "type": "object",
   "required": [
     "schema_version",
-    "execution_id",
     "intent",
-    "admission",
-    "dispatched_at"
+    "admission"
   ],
   "additionalProperties": false,
   "properties": {
     "schema_version": { "type": "string", "const": "1.0.0" },
-    "execution_id": { "type": "string", "format": "uuid" },
     "intent": { "$ref": "#/$defs/ExecutionIntent" },
-    "admission": { "$ref": "#/$defs/AdmissionRecord" },
-    "dispatched_at": { "type": "string", "format": "date-time" }
+    "admission": { "$ref": "#/$defs/AdmissionRecord" }
+  },
+  "$defs": {
+    "ExecutionIntent": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "intent_id",
+        "created_at",
+        "expires_at",
+        "declared_operator",
+        "workload",
+        "operation",
+        "operation_payload",
+        "execution_constraints",
+        "intent_digest"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "type": "string", "const": "1.0.0" },
+        "intent_id": { "type": "string", "format": "uuid" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "declared_operator": {
+          "type": "object",
+          "required": ["subject_id", "role"],
+          "additionalProperties": false,
+          "properties": {
+            "subject_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "role": { "type": "string", "enum": ["OPERATOR", "RESEARCHER", "AUDITOR"] }
+          }
+        },
+        "workload": {
+          "type": "object",
+          "required": ["model_plugin_id", "dataset_id", "requested_scope", "catalog_backend_ref"],
+          "additionalProperties": false,
+          "properties": {
+            "model_plugin_id": { "type": "string", "pattern": "^[a-z0-9-]+$", "maxLength": 64 },
+            "dataset_id": { "type": "string", "pattern": "^[a-z0-9-]+$", "maxLength": 64 },
+            "requested_scope": { "type": "string", "enum": ["PLUGIN_BOUNDARY", "MODEL_DATASET_BINDING_ONLY"] },
+            "catalog_backend_ref": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+          }
+        },
+        "operation": {
+          "type": "string",
+          "enum": ["TRAIN_TICKET", "EVALUATE_CHECKPOINT", "MATERIALIZE_DATASET"]
+        },
+        "operation_payload": { "type": "object" },
+        "execution_constraints": {
+          "type": "object",
+          "required": ["timeout_seconds", "requested_allow_downloads"],
+          "additionalProperties": false,
+          "properties": {
+            "timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 3600 },
+            "requested_allow_downloads": { "type": "boolean" },
+            "retry_of_intent_id": { "type": "string", "format": "uuid" }
+          }
+        },
+        "intent_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "operation": { "const": "TRAIN_TICKET" } } },
+          "then": {
+            "properties": {
+              "workload": {
+                "properties": {
+                  "requested_scope": { "const": "PLUGIN_BOUNDARY" }
+                }
+              },
+              "operation_payload": {
+                "type": "object",
+                "required": ["ticket_id", "partition_id"],
+                "additionalProperties": false,
+                "properties": {
+                  "ticket_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$", "maxLength": 64 },
+                  "partition_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$", "maxLength": 64 }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "operation": { "const": "EVALUATE_CHECKPOINT" } } },
+          "then": {
+            "properties": {
+              "operation_payload": {
+                "type": "object",
+                "required": ["checkpoint_coordinates"],
+                "additionalProperties": false,
+                "properties": {
+                  "checkpoint_coordinates": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 },
+                    "minItems": 1,
+                    "maxItems": 4096
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "operation": { "const": "MATERIALIZE_DATASET" } } },
+          "then": {
+            "properties": {
+              "operation_payload": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "cache_key": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$", "maxLength": 64 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AdmissionRecord": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "admission_id",
+        "intent_id",
+        "intent_digest",
+        "execution_id",
+        "authenticated_subject",
+        "policy_context",
+        "resource_grants",
+        "admitted_at",
+        "admission_expires_at",
+        "admission_digest",
+        "authenticator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "type": "string", "const": "1.0.0" },
+        "admission_id": { "type": "string", "format": "uuid" },
+        "intent_id": { "type": "string", "format": "uuid" },
+        "intent_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "execution_id": { "type": "string", "format": "uuid" },
+        "authenticated_subject": {
+          "type": "object",
+          "required": ["subject_id", "authenticated_via", "effective_roles"],
+          "additionalProperties": false,
+          "properties": {
+            "subject_id": { "type": "string", "maxLength": 128 },
+            "authenticated_via": { "type": "string", "enum": ["LOCAL_PEER_CREDENTIAL", "MTLS", "TOKEN"] },
+            "effective_roles": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "policy_context": {
+          "type": "object",
+          "required": ["policy_version", "controller_commit", "verdict"],
+          "additionalProperties": false,
+          "properties": {
+            "policy_version": { "type": "string", "maxLength": 64 },
+            "controller_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+            "verdict": { "type": "string", "const": "ADMITTED" }
+          }
+        },
+        "resource_grants": {
+          "type": "object",
+          "required": ["max_memory_bytes", "timeout_seconds", "allow_downloads"],
+          "additionalProperties": false,
+          "properties": {
+            "max_memory_bytes": { "type": "integer", "minimum": 1 },
+            "timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 3600 },
+            "allow_downloads": { "type": "boolean" }
+          }
+        },
+        "admitted_at": { "type": "string", "format": "date-time" },
+        "admission_expires_at": { "type": "string", "format": "date-time" },
+        "admission_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "authenticator": {
+          "type": "object",
+          "required": ["issuer_id", "key_id", "algorithm", "signature"],
+          "additionalProperties": false,
+          "properties": {
+            "issuer_id": { "type": "string", "maxLength": 128 },
+            "key_id": { "type": "string", "pattern": "^[a-z0-9-]+$", "maxLength": 64 },
+            "algorithm": { "type": "string", "const": "ED25519" },
+            "signature": { "type": "string", "pattern": "^[0-9a-f]{128}$" }
+          }
+        }
+      }
+    }
   }
 }
 ```
 
 Worker Preflight Invariants (Zone 3 Fail-Closed):
-1. **Execution Identity**: `AuthorizedExecution.execution_id == admission.execution_id`.
+1. **Authoritative Execution Identity**: `admission.execution_id` is the exclusive source of execution identity across worker execution, logs, status, and terminal receipt.
 2. **Intent Linkage**: `intent.intent_id == admission.intent_id`.
 3. **Intent Digest Parity**: Recomputed `RFC8785(intent \ {"intent_digest"})` matches both `intent.intent_digest` and `admission.intent_digest`.
-4. **Admission Authenticity**: `admission.authenticator.signature` verifies with the pinned controller Ed25519 public key corresponding to `key_id` over `RFC8785(admission \ {"authenticator"})`.
+4. **Admission Authenticity**: `admission.authenticator.signature` verifies with the pinned controller Ed25519 public key corresponding to `admission.authenticator.key_id` over `RFC8785(admission \ {"authenticator.signature"})` (authenticating issuer, key, algorithm, grants, timestamps, and admission digest).
 5. **Freshness & Dispatch Deadline**: `now() <= admission.admission_expires_at <= intent.expires_at`. (Expiry after execution has started does not cancel an active run; active runs are governed by `timeout_seconds`).
 6. **Network Authority**: Worker honors strictly `admission.resource_grants.allow_downloads` (ignoring requested intent flags). Default is `false`.
 

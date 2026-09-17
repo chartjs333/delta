@@ -18,18 +18,18 @@ These runtime obligations are mandatory refinements of `tasks.md`; they do not i
 - Authenticated subject is derived from the trusted mechanism, never copied from `declared_operator`.
 - Admission and idempotency allocation are atomic with respect to duplicate intent submission.
 - Idempotency ledger keyed by `intent_id` (storing first-seen `intent_digest` and `authenticated_subject`).
-- Duplicate lookup: same id + same digest + same subject returns existing status/receipt; same id + different digest rejects with `ERR_INTENT_ID_DIGEST_CONFLICT`; same id + different subject rejects with `ERR_UNAUTHORIZED_CALLER`.
+- Duplicate lookup: same id + same digest + same subject returns existing status/receipt; same id + different digest rejects with `ERR_INTENT_ID_DIGEST_CONFLICT`; same id + different subject rejects with `ERR_UNAUTHORIZED_CALLER`; collision/duplicate digest under different id rejects fail-closed with `ERR_INTENT_COLLISION_DETECTED`.
 - Retrying a failed/cancelled run requires a new `intent_id` (optional `retry_of_intent_id` lineage).
 - `admission_expires_at` is assigned as the dispatch deadline and MUST NOT exceed `intent.expires_at`.
-- Signs `AdmissionRecord` using private Ed25519 controller key.
+- Signs RFC 8785 canonical bytes of `AdmissionRecord \ {"authenticator.signature"}` using private Ed25519 controller key (binding issuer_id, key_id, algorithm, and all admission fields).
 - No denied/expired/quota-rejected request may start a worker.
 - Controller audit output excludes raw secrets and private workload payloads.
 
 ## Worker Runtime Obligations (T017–T022)
 
-- Operation dispatch is a closed enum switch/table over approved handlers (`TRAIN_TICKET`, `EVALUATE_CHECKPOINT`, `MATERIALIZE_DATASET`).
+- Operation dispatch is a closed enum switch/table over approved handlers (`TRAIN_TICKET`, `EVALUATE_CHECKPOINT` [coordinates only], `MATERIALIZE_DATASET`).
 - No `eval`, `exec`, dynamic import, user module name, shell/process string, or unmanaged path can be reached from intent fields.
-- Worker validates `AuthorizedExecution` preflight fail-closed: Ed25519 controller signature, digest parity, execution ID parity, and `now() <= admission_expires_at`.
+- Worker validates `AuthorizedExecution` preflight fail-closed: Ed25519 controller signature over `RFC8785(admission \ {"authenticator.signature"})`, digest parity, `admission.execution_id` exclusive authority, and `now() <= admission_expires_at`.
 - Worker strictly honors `resource_grants.allow_downloads` (default `false`); client-requested flags are ignored.
 - `MATERIALIZE_DATASET` returns typed status only; emits no `ExecutionReceipt` in Step 5C v1.
 - Success receipt is emitted only after receipt-eligible operation (`TRAIN_TICKET`, `EVALUATE_CHECKPOINT`) succeeds on the same execution identity.

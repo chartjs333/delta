@@ -5,7 +5,7 @@ A checked item requires test/evidence, not assertion.
 ## Authority / Identity
 - [ ] Browser-declared identity cannot grant a role.
 - [ ] Trusted authentication result is bound into `AdmissionRecord`.
-- [ ] `AdmissionRecord` Ed25519 signature verifies with pinned controller key; unsigned or tampered admissions are rejected fail-closed.
+- [ ] `AdmissionRecord` Ed25519 signature verifies with pinned controller key over `admission \ {"authenticator.signature"}` (binding issuer/key/algorithm metadata); unsigned or tampered admissions are rejected fail-closed.
 - [ ] `admission_expires_at` is enforced by worker; expired admission fails before worker start.
 - [ ] Wrong/expired credential, role, audience/peer, policy version, or catalog ref fails before worker start.
 
@@ -21,6 +21,7 @@ A checked item requires test/evidence, not assertion.
 - [ ] Duplicate completed submission returns existing terminal result/receipt from cache.
 - [ ] Re-submission of existing `intent_id` with different digest fails with `ERR_INTENT_ID_DIGEST_CONFLICT`.
 - [ ] Re-submission or status lookup by different caller fails with `ERR_UNAUTHORIZED_CALLER`.
+- [ ] Anomalous duplicate digest under different intent ID fails fail-closed with `ERR_INTENT_COLLISION_DETECTED`.
 - [ ] Retry requires a fresh `intent_id` (optional `retry_of_intent_id`).
 - [ ] Controller restart preserves the duplicate-execution invariant.
 - [ ] Expired intents cannot be newly admitted.

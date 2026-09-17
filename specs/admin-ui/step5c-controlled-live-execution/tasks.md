@@ -15,8 +15,8 @@ Task IDs are local to this SpecKit. Commit references MUST use the qualified for
 ## Phase 1 — Canonical contract artifacts
 
 - [ ] **T005** Materialize strict Draft 2020-12 `ExecutionIntent` schema with operation-specific payloads, `requested_allow_downloads`, optional `retry_of_intent_id`, bounded coordinates, no defaults, and forbidden extra properties.
-- [ ] **T006** Materialize strict `AdmissionRecord` (with Ed25519 `authenticator`, `admission_expires_at`, `resource_grants.allow_downloads`) and minimal `AuthorizedExecution` (schema_version + ExecutionIntent + AdmissionRecord) schemas.
-- [ ] **T007** Define `ExecutionStatus`, preflight error taxonomy (including `ERR_INTENT_ID_DIGEST_CONFLICT`, `ERR_UNAUTHORIZED_CALLER`), and terminal `ExecutionReceipt` lineage extension schemas (`admission_id` included).
+- [ ] **T006** Materialize strict `AdmissionRecord` (with Ed25519 `authenticator` binding issuer/key/algorithm metadata, `admission_expires_at`, `resource_grants.allow_downloads`) and minimal `AuthorizedExecution` (schema_version + ExecutionIntent + AdmissionRecord) schemas with self-contained `$defs`.
+- [ ] **T007** Define `ExecutionStatus`, preflight error taxonomy (including `ERR_INTENT_ID_DIGEST_CONFLICT`, `ERR_UNAUTHORIZED_CALLER`, `ERR_INTENT_COLLISION_DETECTED`), and terminal `ExecutionReceipt` lineage extension schemas (`admission_id` included).
 - [ ] **T008** Add RFC 8785 JCS golden vectors and SHA-256 / Ed25519 fixtures covering every semantic field, Unicode/number edge cases, tampering, and cross-language parity.
 - [ ] **T009** Add contract validation tests and valid/invalid fixtures; publish exact artifact hashes. Contracts branch exit gate blocks final review of controller/worker/UI branches.
 
@@ -26,15 +26,15 @@ Task IDs are local to this SpecKit. Commit references MUST use the qualified for
 - [ ] **T011** Implement bounded input parsing, schema validation, JCS recomputation, intent TTL validation, and fail-closed digest mismatch handling.
 - [ ] **T012** Implement authentication port and policy evaluation; treat `declared_operator` only as untrusted claimed metadata.
 - [ ] **T013** Implement frozen catalog/ref/capability-matrix validation and operation/scope allowlist checks.
-- [ ] **T014** Implement durable append-only idempotency ledger keyed by `intent_id` (storing first-seen `intent_digest` and `authenticated_subject`), with identical re-submission lookup, `ERR_INTENT_ID_DIGEST_CONFLICT` rejection, `ERR_UNAUTHORIZED_CALLER` rejection, and fresh `intent_id` retry semantics.
+- [ ] **T014** Implement durable append-only idempotency ledger keyed by `intent_id` (storing first-seen `intent_digest` and `authenticated_subject`), with identical re-submission lookup, `ERR_INTENT_ID_DIGEST_CONFLICT` rejection, `ERR_UNAUTHORIZED_CALLER` rejection, `ERR_INTENT_COLLISION_DETECTED` fail-closed collision rejection, and fresh `intent_id` retry semantics.
 - [ ] **T015** Implement resource grants (`max_memory_bytes`, `timeout_seconds`, `allow_downloads`), concurrency/quota/timeout admission checks, and typed preflight rejection without worker start.
-- [ ] **T016** Implement `AdmissionRecord` with Ed25519 signing, `admission_expires_at` assignment, execution ID allocation, dispatch port, status read model, and audit metadata with secret-redaction tests.
+- [ ] **T016** Implement `AdmissionRecord` with Ed25519 signing (binding authenticator metadata), `admission_expires_at` assignment, execution ID allocation, dispatch port, status read model, and audit metadata with secret-redaction tests.
 
 ## Phase 3 — Constrained Worker Adapter
 
-- [ ] **T017** Implement `AuthorizedExecution` preflight validation: execution_id parity, intent_id parity, intent_digest recomputation/parity, Ed25519 controller signature verification, `admission_expires_at` freshness, and effective `allow_downloads` grant.
+- [ ] **T017** Implement `AuthorizedExecution` preflight validation: `admission.execution_id` authority, intent_id parity, intent_digest recomputation/parity, Ed25519 controller signature verification over `admission \ {"authenticator.signature"}`, `admission_expires_at` freshness, and effective `allow_downloads` grant.
 - [ ] **T018** Implement closed enum dispatch to existing registered `ModelPluginRunner` operations; no dynamic imports, callable names, shell, or arbitrary paths.
-- [ ] **T019** Implement operation adapters for `TRAIN_TICKET` (receipt-eligible), `EVALUATE_CHECKPOINT` (receipt-eligible), and `MATERIALIZE_DATASET` (status-only, no receipt) with operation-specific payload validation.
+- [ ] **T019** Implement operation adapters for `TRAIN_TICKET` (receipt-eligible), `EVALUATE_CHECKPOINT` (receipt-eligible, `checkpoint_coordinates` only without split parameter), and `MATERIALIZE_DATASET` (status-only, no receipt) with operation-specific payload validation.
 - [ ] **T020** Implement bounded timeout/cancellation behavior that cannot publish a success receipt after timeout/cancel/failure.
 - [ ] **T021** Extend terminal receipt emission with `intent_id`, `intent_digest`, `admission_id`, `admission_digest`, and `execution_id`; preserve existing catalog/producer provenance and unattested semantics.
 - [ ] **T022** Add worker negative/regression tests for forged admission, invalid Ed25519 signature, expired admission, cross-workload binding, stale/expired bundles, wrong scope, wrong execution ID, arbitrary path/module injection, and false Stage C claims.

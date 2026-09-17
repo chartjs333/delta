@@ -39,6 +39,7 @@ An operator retries submission because the browser lost connectivity or the page
 4. Same `intent_id` with a different caller produces an immediate `ERR_UNAUTHORIZED_CALLER` rejection.
 5. A failed execution is not silently restarted under the same ID; retry requires a new `intent_id` (with optional `retry_of_intent_id` lineage).
 6. Controller restart preserves idempotency state required to prevent duplicate execution.
+7. An observed collision or duplicate digest under a different intent ID (`different intent_id + same intent_digest`) produces an immediate fail-closed `ERR_INTENT_COLLISION_DETECTED` rejection.
 
 ### US3 — Evaluate checkpoint or materialize without training authority escalation (P1)
 
@@ -67,12 +68,12 @@ An auditor can continue to use the existing local-file catalog/receipt workflows
 - **FR-S5C-002**: Allowed intent operations are exactly `TRAIN_TICKET`, `EVALUATE_CHECKPOINT`, and `MATERIALIZE_DATASET` for this increment.
 - **FR-S5C-003**: `emit_execution_receipt` MUST NOT be an intent operation.
 - **FR-S5C-004**: Zone 2 MUST authenticate the caller independently of `declared_operator` and emit a distinct `AdmissionRecord` for accepted work.
-- **FR-S5C-005**: `AdmissionRecord` MUST bind intent identity/digest, authenticated subject/roles, policy version, controller commit, resource grants (including authorized `allow_downloads`), execution ID, admission time, `admission_expires_at` (<= intent's `expires_at`), its own canonical digest, and an Ed25519 controller `authenticator`.
+- **FR-S5C-005**: `AdmissionRecord` MUST bind intent identity/digest, authenticated subject/roles, policy version, controller commit, resource grants (including authorized `allow_downloads`), execution ID, admission time, `admission_expires_at` (<= intent's `expires_at`), its own canonical digest, and an Ed25519 controller `authenticator` (with signature computed over `AdmissionRecord \ {"authenticator.signature"}` binding all authenticator metadata).
 - **FR-S5C-006**: The gate MUST enforce catalog allowlist, compatibility matrix, catalog ref parity, intent TTL, authorization policy, resource quota, and replay/idempotency checks before worker dispatch.
 - **FR-S5C-007**: One admitted intent MUST map to at most one execution ID. Duplicate submissions MUST be idempotent under matching caller and digest.
 - **FR-S5C-008**: Worker dispatch MUST resolve plugins and datasets exclusively through canonical in-tree registries.
 - **FR-S5C-009**: Worker dispatch MUST reject arbitrary code, module paths, shell arguments, unmanaged filesystem paths, and unregistered workloads.
-- **FR-S5C-010**: Worker execution MUST verify intent/admission parity, controller signature, and dispatch deadline freshness before invoking a workload operation.
+- **FR-S5C-010**: Worker execution MUST verify intent/admission parity, controller signature over `admission \ {"authenticator.signature"}`, and dispatch deadline freshness before invoking a workload operation.
 - **FR-S5C-011**: Terminal receipt lineage MUST include `intent_id`, `intent_digest`, `admission_id`, `admission_digest`, and `execution_id` in addition to existing provenance/workload fields.
 - **FR-S5C-012**: `PLUGIN_BOUNDARY` and `MODEL_DATASET_BINDING_ONLY` remain the only local live scopes; local live execution MUST NOT claim `STAGE_C_REAL_DRQ1`.
 - **FR-S5C-013**: Admin UI MUST distinguish draft, rejected, admitted, queued/running, completed, failed, timed out, and cancelled product states without upgrading them into consensus claims.
