@@ -32,4 +32,3 @@ Verify schemas, fixtures, digests, signatures, and artifact hashes:
 python specs/admin-ui/step5c-controlled-live-execution/contracts/scripts/contract_tools.py verify --write-report
 python -m pytest specs/admin-ui/step5c-controlled-live-execution/contracts/tests
 ```
-
