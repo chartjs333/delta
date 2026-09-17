@@ -1,0 +1,11 @@
+{
+  "plugin_id": "tabular-10gene-phenotype-v1",
+  "display_name": "Synthetic 10-Gene Phenotype Centroid",
+  "model_family": "centroid",
+  "task_type": "phenotype_classification",
+  "sample_kind": "tabular/genomic-10gene-vector",
+  "target_kind": "class-id/0-1",
+  "deterministic": true,
+  "supports_stage_c_real_drq1": true,
+  "parameter_schema_id": null
+}

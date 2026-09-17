@@ -17,17 +17,19 @@ describe("WorkloadSelector", () => {
     const modelSelect = screen.getByLabelText("Model Plugin") as HTMLSelectElement;
     const datasetSelect = screen.getByLabelText("Dataset Provider") as HTMLSelectElement;
 
-    expect(modelSelect.options).toHaveLength(3);
+    expect(modelSelect.options).toHaveLength(4);
     expect(Array.from(modelSelect.options).map((o) => o.value)).toEqual([
       "eeg-bandpower-centroid-v1",
       "mnist-centroid-v1",
       "qlora-tiny-adapter-v1",
+      "tabular-10gene-phenotype-v1",
     ]);
 
-    expect(datasetSelect.options).toHaveLength(3);
+    expect(datasetSelect.options).toHaveLength(4);
     expect(Array.from(datasetSelect.options).map((o) => o.value)).toEqual([
       "eeg-synthetic-bci-v1",
       "mnist-v1",
+      "synthetic-10gene-cohort-v1",
       "tiny-qlora-regression-v1",
     ]);
   });
@@ -115,6 +117,42 @@ describe("WorkloadSelector", () => {
 
     await user.selectOptions(modelSelect, "mnist-centroid-v1");
     await user.selectOptions(datasetSelect, "tiny-qlora-regression-v1");
+
+    const statusEl = screen.getByRole("status");
+    expect(statusEl.textContent).toContain("Status:REJECTED");
+    expect(statusEl.textContent).toContain(
+      "Reason: contract incompatible: sample/target kind mismatch"
+    );
+    expect(screen.getByText("incompatible")).toBeTruthy();
+  });
+
+  it("evaluates Synthetic 10-Gene Phenotype + Synthetic 10-Gene Cohort as ALLOWED with Stage C capability", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    const modelSelect = screen.getByLabelText("Model Plugin");
+    const datasetSelect = screen.getByLabelText("Dataset Provider");
+    const scopeSelect = screen.getByLabelText("Requested Execution Scope");
+
+    await user.selectOptions(modelSelect, "tabular-10gene-phenotype-v1");
+    await user.selectOptions(datasetSelect, "synthetic-10gene-cohort-v1");
+    await user.selectOptions(scopeSelect, "STAGE_C_REAL_DRQ1");
+
+    const statusEl = screen.getByRole("status");
+    expect(statusEl.textContent).toContain("Status:ALLOWED");
+    expect(screen.getByText("compatible")).toBeTruthy();
+    expect(screen.getByText("Stage C capable")).toBeTruthy();
+  });
+
+  it("evaluates Synthetic 10-Gene Phenotype + MNIST dataset as REJECTED due to cross-domain contract mismatch", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    const modelSelect = screen.getByLabelText("Model Plugin");
+    const datasetSelect = screen.getByLabelText("Dataset Provider");
+
+    await user.selectOptions(modelSelect, "tabular-10gene-phenotype-v1");
+    await user.selectOptions(datasetSelect, "mnist-v1");
 
     const statusEl = screen.getByRole("status");
     expect(statusEl.textContent).toContain("Status:REJECTED");
@@ -273,8 +311,9 @@ describe("validateCatalogSnapshot", () => {
     const validated = validateCatalogSnapshot(CANONICAL_DESCRIPTOR_CATALOG);
     expect(validated.type_name).toBe("DELTAREDUCE_DESCRIPTOR_CATALOG_SNAPSHOT");
     expect(validated.schema_version).toBe("1.0.0");
-    expect(validated.source.backend_ref).toHaveLength(40);
-    expect(validated.compatibility).toHaveLength(9);
+    expect(validated.compatibility).toHaveLength(
+      validated.model_plugins.length * validated.datasets.length
+    );
   });
 
   it("fails closed on non-40-character backend_ref SHA", () => {
@@ -320,7 +359,7 @@ describe("validateCatalogSnapshot", () => {
   it("fails closed on incomplete matrix coverage (less than models * datasets pairs)", () => {
     const invalid = {
       ...CANONICAL_DESCRIPTOR_CATALOG,
-      compatibility: CANONICAL_DESCRIPTOR_CATALOG.compatibility.slice(0, 8),
+      compatibility: CANONICAL_DESCRIPTOR_CATALOG.compatibility.slice(0, -1),
     };
     expect(() => validateCatalogSnapshot(invalid)).toThrow(
       /Full matrix coverage violation/u

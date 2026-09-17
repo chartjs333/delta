@@ -39,6 +39,17 @@
       "deterministic": true,
       "supports_stage_c_real_drq1": true,
       "parameter_schema_id": "sha256:ef62a8c343b4febb6570bb37061cb495b74645aaa9af6486f6d987112bfd7fec"
+    },
+    {
+      "plugin_id": "tabular-10gene-phenotype-v1",
+      "display_name": "Synthetic 10-Gene Phenotype Centroid",
+      "model_family": "centroid",
+      "task_type": "phenotype_classification",
+      "sample_kind": "tabular/genomic-10gene-vector",
+      "target_kind": "class-id/0-1",
+      "deterministic": true,
+      "supports_stage_c_real_drq1": true,
+      "parameter_schema_id": null
     }
   ],
   "datasets": [
@@ -60,6 +71,16 @@
       "deterministic": true,
       "supports_offline_cache": true,
       "description": "Standard 28x28 grayscale handwritten digit classification dataset.",
+      "version": "1.0.0"
+    },
+    {
+      "dataset_id": "synthetic-10gene-cohort-v1",
+      "display_name": "Synthetic 10-Gene Cohort Benchmark",
+      "sample_kind": "tabular/genomic-10gene-vector",
+      "target_kind": "class-id/0-1",
+      "deterministic": true,
+      "supports_offline_cache": true,
+      "description": "Deterministic synthetic cohort benchmark containing normalized 10-gene expression vectors for binary phenotype classification.",
       "version": "1.0.0"
     },
     {
@@ -98,6 +119,17 @@
     },
     {
       "model_plugin_id": "eeg-bandpower-centroid-v1",
+      "dataset_id": "synthetic-10gene-cohort-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": false,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
+      "model_plugin_id": "eeg-bandpower-centroid-v1",
       "dataset_id": "tiny-qlora-regression-v1",
       "contract_compatible": false,
       "supports_stage_c_real_drq1": false,
@@ -131,6 +163,17 @@
     },
     {
       "model_plugin_id": "mnist-centroid-v1",
+      "dataset_id": "synthetic-10gene-cohort-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": true,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
+      "model_plugin_id": "mnist-centroid-v1",
       "dataset_id": "tiny-qlora-regression-v1",
       "contract_compatible": false,
       "supports_stage_c_real_drq1": true,
@@ -164,6 +207,17 @@
     },
     {
       "model_plugin_id": "qlora-tiny-adapter-v1",
+      "dataset_id": "synthetic-10gene-cohort-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": true,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
+      "model_plugin_id": "qlora-tiny-adapter-v1",
       "dataset_id": "tiny-qlora-regression-v1",
       "contract_compatible": true,
       "supports_stage_c_real_drq1": true,
@@ -171,6 +225,50 @@
         "STAGE_C_REAL_DRQ1": true,
         "PLUGIN_BOUNDARY": true,
         "MODEL_DATASET_BINDING_ONLY": true
+      }
+    },
+    {
+      "model_plugin_id": "tabular-10gene-phenotype-v1",
+      "dataset_id": "eeg-synthetic-bci-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": true,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
+      "model_plugin_id": "tabular-10gene-phenotype-v1",
+      "dataset_id": "mnist-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": true,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
+      "model_plugin_id": "tabular-10gene-phenotype-v1",
+      "dataset_id": "synthetic-10gene-cohort-v1",
+      "contract_compatible": true,
+      "supports_stage_c_real_drq1": true,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": true,
+        "PLUGIN_BOUNDARY": true,
+        "MODEL_DATASET_BINDING_ONLY": true
+      }
+    },
+    {
+      "model_plugin_id": "tabular-10gene-phenotype-v1",
+      "dataset_id": "tiny-qlora-regression-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": true,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
       }
     }
   ]

@@ -1,0 +1,10 @@
+{
+  "dataset_id": "synthetic-10gene-cohort-v1",
+  "display_name": "Synthetic 10-Gene Cohort Benchmark",
+  "sample_kind": "tabular/genomic-10gene-vector",
+  "target_kind": "class-id/0-1",
+  "deterministic": true,
+  "supports_offline_cache": true,
+  "description": "Deterministic synthetic cohort benchmark containing normalized 10-gene expression vectors for binary phenotype classification.",
+  "version": "1.0.0"
+}
