@@ -117,6 +117,21 @@ describe("validateExecutionReceipt", () => {
     );
   });
 
+  it("fails closed when PLUGIN_BOUNDARY is missing producer_commit", () => {
+    const invalid = {
+      ...sample10GeneReceipt,
+      provenance: {
+        repository: sample10GeneReceipt.provenance.repository,
+        backend_commit: sample10GeneReceipt.provenance.backend_commit,
+        catalog_backend_ref: sample10GeneReceipt.provenance.catalog_backend_ref,
+        produced_at: sample10GeneReceipt.provenance.produced_at,
+      },
+    };
+    expect(() => validateExecutionReceipt(invalid)).toThrow(
+      /PLUGIN_BOUNDARY receipts require a valid 40-character git SHA producer_commit/u
+    );
+  });
+
   it("fails closed on tampered workload_config_digest", () => {
     const invalid = {
       ...sampleMnistReceipt,

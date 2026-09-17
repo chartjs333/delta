@@ -386,6 +386,16 @@ export function validateExecutionReceipt(raw: unknown): ExecutionReceipt {
         "Plugin-boundary receipt strictly forbids 'consensus_evidence' block"
       );
     }
+    // PLUGIN_BOUNDARY scope emitted by runtime worker requires strict producer_commit provenance.
+    // Legacy Stage C / Observation sample receipts retain optional producer_commit for backward compatibility.
+    if (
+      typeof prov.producer_commit !== "string" ||
+      !/^[0-9a-f]{40}$/u.test(prov.producer_commit)
+    ) {
+      throw new ReceiptValidationError(
+        `PLUGIN_BOUNDARY receipts require a valid 40-character git SHA producer_commit, got: ${String(prov.producer_commit)}`
+      );
+    }
   }
 
   // 5. Reference Anchor Validation

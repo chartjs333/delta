@@ -286,15 +286,15 @@ class ModelPluginRunner:
         repository: str = "chartjs333/delta",
         produced_at: str | None = None,
         output_path: Path | str | None = None,
-        execution_token: LocalTrainingResult | EvaluationResult | None = None,
     ) -> dict[str, Any]:
         """Emit a validated ExecutionReceipt for this runner binding fail-closed.
 
         For PLUGIN_BOUNDARY scope, emits an un-attested plugin boundary execution receipt
         without fabricated consensus evidence.
 
-        Requires that the runner has executed a workload step (train_ticket, evaluate,
-        evaluate_checkpoint) or that an explicit valid execution_token is provided.
+        Requires that this runner instance has executed a workload step (train_ticket,
+        evaluate, evaluate_checkpoint). External or unexecuted receipt emission is strictly
+        forbidden fail-closed to prevent forged or cross-runner tokens.
 
         Provenance semantics:
         - `backend_commit`: Canonical compatibility reference used in computing
@@ -316,27 +316,10 @@ class ModelPluginRunner:
                 "local ModelPluginRunner cannot emit consensus evidence"
             )
 
-        if execution_token is not None:
-            if not isinstance(execution_token, (LocalTrainingResult, EvaluationResult)):
-                raise ModelPluginRunnerError(
-                    "INVALID_EXECUTION_TOKEN: execution_token must be an instance of "
-                    "LocalTrainingResult or EvaluationResult"
-                )
-            if isinstance(execution_token, LocalTrainingResult):
-                if not execution_token.ticket_id or not execution_token.tensors:
-                    raise ModelPluginRunnerError(
-                        "INVALID_EXECUTION_TOKEN: LocalTrainingResult must contain "
-                        "ticket_id and non-empty tensors"
-                    )
-            elif isinstance(execution_token, EvaluationResult):
-                if execution_token.accuracy_ppm < 0:
-                    raise ModelPluginRunnerError(
-                        "INVALID_EXECUTION_TOKEN: EvaluationResult must have accuracy_ppm >= 0"
-                    )
-        elif self._last_execution is None:
+        if self._last_execution is None:
             raise ModelPluginRunnerError(
-                "NO_EXECUTION_RECORDED: cannot emit receipt before workload execution "
-                "(train_ticket, evaluate, or valid execution_token required)"
+                "NO_EXECUTION_RECORDED: cannot emit receipt before workload execution on this "
+                "runner instance (must call train_ticket, evaluate, or evaluate_checkpoint first)"
             )
 
         hex40_re = re.compile(r"^[0-9a-f]{40}$")

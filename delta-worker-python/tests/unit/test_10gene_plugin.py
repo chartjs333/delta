@@ -492,41 +492,36 @@ def test_regression_reviewer1_medium_json_serialization_allow_nan_false() -> Non
 
 
 def test_model_plugin_runner_rejects_receipt_without_prior_execution() -> None:
-    """Reviewer 3 & 4 Finding: Runner rejects emitting receipt before workload execution,
-    and rejects arbitrary mappings or invalid execution tokens fail-closed.
+    """Reviewer finding: Runner rejects receipt before execution on runner instance fail-closed.
+
+    External tokens and cross-runner receipt emission are completely eliminated.
     """
     runner = ModelPluginRunner(
         plugin_id="tabular-10gene-phenotype-v1",
         dataset_id="synthetic-10gene-cohort-v1",
         execution_scope="PLUGIN_BOUNDARY",
     )
-    # Reject when no execution occurred
+    # Reject when no execution occurred on this runner
     with pytest.raises(ModelPluginRunnerError, match="NO_EXECUTION_RECORDED"):
         runner.emit_execution_receipt()
 
-    # Reject empty dictionary bypass attempt
-    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_TOKEN"):
-        runner.emit_execution_receipt(execution_token={})  # type: ignore[arg-type]
-
-    # Reject arbitrary string or other invalid object
-    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_TOKEN"):
-        runner.emit_execution_receipt(execution_token="bypass")  # type: ignore[arg-type]
-
-    # Reject empty LocalTrainingResult with empty tensors
-    with pytest.raises(ModelPluginRunnerError, match="INVALID_EXECUTION_TOKEN"):
-        runner.emit_execution_receipt(
-            execution_token=LocalTrainingResult(ticket_id="t1", tensors={}, metadata={})
-        )
-
-    # Valid execution token succeeds on unexecuted runner
-    train_res = runner.train_ticket(ticket_id="t-token", partition_id="part-default")
-    unexecuted_runner = ModelPluginRunner(
+    # Even if another runner instance executes a workload step, this runner remains unexecuted
+    other_runner = ModelPluginRunner(
         plugin_id="tabular-10gene-phenotype-v1",
         dataset_id="synthetic-10gene-cohort-v1",
         execution_scope="PLUGIN_BOUNDARY",
     )
-    receipt = unexecuted_runner.emit_execution_receipt(execution_token=train_res)
+    other_runner.train_ticket(ticket_id="t-other", partition_id="part-default")
+    assert other_runner.last_execution is not None
+
+    # Fresh unexecuted runner still strictly rejects receipt emission fail-closed
+    with pytest.raises(ModelPluginRunnerError, match="NO_EXECUTION_RECORDED"):
+        runner.emit_execution_receipt()
+
+    # But other_runner (which actually executed) emits receipt successfully
+    receipt = other_runner.emit_execution_receipt()
     assert receipt["execution"]["verdict"] == "SUCCESS"
+    assert receipt["execution"]["terminal_status"] == "COMPLETED"
 
 
 def test_regression_scale_features_pre_int64_overflow() -> None:
