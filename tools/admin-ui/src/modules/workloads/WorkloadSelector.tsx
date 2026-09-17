@@ -15,6 +15,7 @@ import sampleEegReceipt from "../../data/samples/sample-eeg-observation-receipt.
 import sampleMnistReceipt from "../../data/samples/sample-mnist-stage-c-receipt.json";
 import sampleQloraReceipt from "../../data/samples/sample-qlora-stage-c-receipt.json";
 import { InertText } from "../../components/InertText";
+import { parseUntrustedJson } from "../../security/input-guards";
 
 export interface WorkloadSelectorProps {
   readonly catalog?: DescriptorCatalogSnapshot;
@@ -52,9 +53,10 @@ export function WorkloadSelector({
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const text = event.target?.result as string;
-        const parsed = JSON.parse(text);
-        const receipt = validateExecutionReceipt(parsed);
+        const buffer = event.target?.result as ArrayBuffer;
+        const bytes = new Uint8Array(buffer);
+        const { value } = parseUntrustedJson(bytes);
+        const receipt = validateExecutionReceipt(value);
         setLoadedReceipt(receipt);
         setReceiptError(null);
       } catch (err) {
@@ -66,7 +68,7 @@ export function WorkloadSelector({
       setLoadedReceipt(null);
       setReceiptError("Failed to read receipt file");
     };
-    reader.readAsText(file);
+    reader.readAsArrayBuffer(file);
   };
 
   const loadSample = (sample: unknown) => {
@@ -447,21 +449,27 @@ export function WorkloadSelector({
             </div>
           )}
 
-          {receiptState === "VERIFIED_EVIDENCE_LOADED" && loadedReceipt && (
+          {receiptState === "STRUCTURALLY_VALID_BOUND_RECEIPT" && loadedReceipt && (
             <div className="verified-evidence-container">
               <div className="verdict-box verdict-allowed" role="status">
                 <div className="verdict-status">
                   <span>Receipt Status:</span>
-                  <strong className="verdict-label">VERIFIED_EVIDENCE_LOADED</strong>
+                  <strong className="verdict-label">STRUCTURALLY_VALID_BOUND_RECEIPT</strong>
                 </div>
                 <div className="verdict-reason">
                   <span>Bound Digest:</span> <code>{loadedReceipt.workload.workload_config_digest}</code>
                 </div>
+                <p className="unattested-disclaimer">
+                  Self-consistent local receipt bound to the active catalog configuration. Not cryptographically attested and not proof of execution by Delta authority.
+                </p>
               </div>
 
-              {bindingResult?.evidenceType === "LIVE_CONSENSUS_EVIDENCE" && loadedReceipt.consensus_evidence && (
+              {bindingResult?.evidenceType === "UNATTESTED_CONSENSUS_RECORD" && loadedReceipt.consensus_evidence && (
                 <div className="evidence-block consensus-evidence-block">
-                  <h3 className="evidence-subtitle">Live Consensus Evidence</h3>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <h3 className="evidence-subtitle" style={{ margin: 0 }}>Recorded Consensus Record</h3>
+                    <span className="status-pill pill-unattested">UNATTESTED_CONSENSUS_RECORD</span>
+                  </div>
                   <div className="evidence-table-container">
                     <table className="evidence-table">
                       <tbody>
@@ -505,9 +513,12 @@ export function WorkloadSelector({
                 </div>
               )}
 
-              {bindingResult?.evidenceType === "OBSERVATION_EVIDENCE" && loadedReceipt.observation_summary && (
+              {bindingResult?.evidenceType === "OBSERVATION_RECORD" && loadedReceipt.observation_summary && (
                 <div className="evidence-block observation-evidence-block">
-                  <h3 className="evidence-subtitle">Observation Summary</h3>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <h3 className="evidence-subtitle" style={{ margin: 0 }}>Observation Record</h3>
+                    <span className="status-pill pill-unattested">OBSERVATION_RECORD</span>
+                  </div>
                   <p className="observation-desc">{loadedReceipt.observation_summary.observation_note}</p>
                   <div className="evidence-table-container">
                     <table className="evidence-table">
@@ -530,11 +541,14 @@ export function WorkloadSelector({
                 </div>
               )}
 
-              {bindingResult?.evidenceType === "PLUGIN_BOUNDARY_EVIDENCE" && (
+              {bindingResult?.evidenceType === "UNATTESTED_PLUGIN_BOUNDARY_RECORD" && (
                 <div className="evidence-block plugin-boundary-evidence-block">
-                  <h3 className="evidence-subtitle">Plugin Boundary Evidence</h3>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <h3 className="evidence-subtitle" style={{ margin: 0 }}>Recorded Plugin Boundary Record</h3>
+                    <span className="status-pill pill-unattested">UNATTESTED_PLUGIN_BOUNDARY_RECORD</span>
+                  </div>
                   <p className="observation-desc">
-                    Plugin boundary execution verified without live consensus round or WAL commits.
+                    Plugin boundary record self-consistent without consensus round or WAL commits.
                   </p>
                   <div className="evidence-table-container">
                     <table className="evidence-table">

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -8,6 +8,7 @@ import {
   validateCatalogSnapshot,
   type DescriptorCatalogSnapshot,
 } from "../../data/descriptors-catalog";
+import sampleMnistReceipt from "../../data/samples/sample-mnist-stage-c-receipt.json";
 import { WorkloadSelector } from "./WorkloadSelector";
 
 describe("WorkloadSelector", () => {
@@ -202,7 +203,7 @@ describe("WorkloadSelector", () => {
     ).toBeTruthy();
   });
 
-  it("loads MNIST Stage C sample and displays VERIFIED_EVIDENCE_LOADED with consensus details", async () => {
+  it("loads MNIST Stage C sample and displays STRUCTURALLY_VALID_BOUND_RECEIPT with unattested consensus details", async () => {
     const user = userEvent.setup();
     render(<WorkloadSelector />);
 
@@ -210,8 +211,14 @@ describe("WorkloadSelector", () => {
     const sampleBtn = screen.getByRole("button", { name: "MNIST Stage C" });
     await user.click(sampleBtn);
 
-    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
-    expect(screen.getByText("Live Consensus Evidence")).toBeTruthy();
+    expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
+    expect(screen.getByText("Recorded Consensus Record")).toBeTruthy();
+    expect(screen.getByText("UNATTESTED_CONSENSUS_RECORD")).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Self-consistent local receipt bound to the active catalog configuration/u
+      )
+    ).toBeTruthy();
     expect(screen.getByText("APPLIED")).toBeTruthy();
     expect(screen.getByText("12")).toBeTruthy(); // WAL Sequence
     expect(
@@ -225,7 +232,7 @@ describe("WorkloadSelector", () => {
 
     // Load MNIST Stage C
     await user.click(screen.getByRole("button", { name: "MNIST Stage C" }));
-    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
+    expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
 
     // Switch model to QLoRA
     const modelSelect = screen.getByLabelText("Model Plugin");
@@ -244,7 +251,7 @@ describe("WorkloadSelector", () => {
     render(<WorkloadSelector />);
 
     await user.click(screen.getByRole("button", { name: "MNIST Stage C" }));
-    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
+    expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
 
     const clearBtn = screen.getByRole("button", { name: "Clear Receipt" });
     await user.click(clearBtn);
@@ -268,15 +275,21 @@ describe("WorkloadSelector", () => {
     // Load EEG sample
     await user.click(screen.getByRole("button", { name: "EEG Observation" }));
 
-    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
-    expect(screen.getByText("Observation Summary")).toBeTruthy();
+    expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Self-consistent local receipt bound to the active catalog configuration/u
+      )
+    ).toBeTruthy();
+    expect(screen.getByText("Observation Record")).toBeTruthy();
+    expect(screen.getByText("OBSERVATION_RECORD")).toBeTruthy();
     expect(
       screen.getByText(/Synthetic EEG 4-channel bandpower feature extraction/u)
     ).toBeTruthy();
     expect(screen.getByText("classification_accuracy")).toBeTruthy();
 
     // Consensus-specific fields must strictly not exist
-    expect(screen.queryByText("Live Consensus Evidence")).toBeNull();
+    expect(screen.queryByText("Recorded Consensus Record")).toBeNull();
     expect(screen.queryByText("Applied Status")).toBeNull();
   });
 
@@ -294,8 +307,14 @@ describe("WorkloadSelector", () => {
 
     await user.click(screen.getByRole("button", { name: "QLoRA Stage C" }));
 
-    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
-    expect(screen.getByText("Live Consensus Evidence")).toBeTruthy();
+    expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Self-consistent local receipt bound to the active catalog configuration/u
+      )
+    ).toBeTruthy();
+    expect(screen.getByText("Recorded Consensus Record")).toBeTruthy();
+    expect(screen.getByText("UNATTESTED_CONSENSUS_RECORD")).toBeTruthy();
     expect(screen.getByText("Declared Reference Anchor")).toBeTruthy();
     expect(
       screen.getByText(
@@ -307,6 +326,100 @@ describe("WorkloadSelector", () => {
         /Reference conformance baseline against PyTorch tiny QLoRA adapter/u
       )
     ).toBeTruthy();
+  });
+
+  it("rejects uploaded receipt exceeding safety file size limit (>5 MiB)", async () => {
+    const { container } = render(<WorkloadSelector />);
+    const fileInput = container.querySelector("#receipt-file-input") as HTMLInputElement;
+
+    const oversizedBuffer = new Uint8Array(5_242_881);
+    const oversizedFile = new File([oversizedBuffer], "oversized-receipt.json", {
+      type: "application/json",
+    });
+
+    fireEvent.change(fileInput, { target: { files: [oversizedFile] } });
+
+    await waitFor(() => {
+      expect(screen.getByText("REJECTED")).toBeTruthy();
+      expect(
+        screen.getByText(/The selected JSON exceeds the JSON or schema file size safety limit/u)
+      ).toBeTruthy();
+    });
+  });
+
+  it("rejects uploaded receipt with excessive nesting depth (>64 levels)", async () => {
+    const { container } = render(<WorkloadSelector />);
+    const fileInput = container.querySelector("#receipt-file-input") as HTMLInputElement;
+
+    const nestedJson = `${"[".repeat(65)}0${"]".repeat(65)}`;
+    const nestedFile = new File([nestedJson], "deeply-nested-receipt.json", {
+      type: "application/json",
+    });
+
+    fireEvent.change(fileInput, { target: { files: [nestedFile] } });
+
+    await waitFor(() => {
+      expect(screen.getByText("REJECTED")).toBeTruthy();
+      expect(
+        screen.getByText(/The selected JSON exceeds the JSON nesting depth safety limit/u)
+      ).toBeTruthy();
+    });
+  });
+
+  it("rejects uploaded receipt containing archive/compressed signature", async () => {
+    const { container } = render(<WorkloadSelector />);
+    const fileInput = container.querySelector("#receipt-file-input") as HTMLInputElement;
+
+    const zipBytes = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x00, 0x00]);
+    const zipFile = new File([zipBytes], "receipt.zip", {
+      type: "application/zip",
+    });
+
+    fireEvent.change(fileInput, { target: { files: [zipFile] } });
+
+    await waitFor(() => {
+      expect(screen.getByText("REJECTED")).toBeTruthy();
+      expect(
+        screen.getByText(/Archive and compressed input is not accepted/u)
+      ).toBeTruthy();
+    });
+  });
+
+  it("rejects uploaded receipt with invalid UTF-8 bytes", async () => {
+    const { container } = render(<WorkloadSelector />);
+    const fileInput = container.querySelector("#receipt-file-input") as HTMLInputElement;
+
+    const invalidUtf8Bytes = new Uint8Array([0xc3, 0x28]);
+    const badFile = new File([invalidUtf8Bytes], "bad-utf8.json", {
+      type: "application/json",
+    });
+
+    fireEvent.change(fileInput, { target: { files: [badFile] } });
+
+    await waitFor(() => {
+      expect(screen.getByText("REJECTED")).toBeTruthy();
+      expect(
+        screen.getByText(/The selected file is not well-formed UTF-8 JSON/u)
+      ).toBeTruthy();
+    });
+  });
+
+  it("successfully parses and loads a valid uploaded receipt via bounded parser", async () => {
+    const { container } = render(<WorkloadSelector />);
+    const fileInput = container.querySelector("#receipt-file-input") as HTMLInputElement;
+
+    const validJsonText = JSON.stringify(sampleMnistReceipt);
+    const validFile = new File([validJsonText], "valid-mnist-receipt.json", {
+      type: "application/json",
+    });
+
+    fireEvent.change(fileInput, { target: { files: [validFile] } });
+
+    await waitFor(() => {
+      expect(screen.getByText("STRUCTURALLY_VALID_BOUND_RECEIPT")).toBeTruthy();
+      expect(screen.getByText("Recorded Consensus Record")).toBeTruthy();
+      expect(screen.getByText("UNATTESTED_CONSENSUS_RECORD")).toBeTruthy();
+    });
   });
 });
 

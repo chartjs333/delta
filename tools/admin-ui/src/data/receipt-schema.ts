@@ -55,17 +55,17 @@ export interface ExecutionReceipt {
 export type ReceiptState =
   | "NO_RECEIPT"
   | "RECEIPT_LOADED_UNBOUND"
-  | "VERIFIED_EVIDENCE_LOADED"
+  | "STRUCTURALLY_VALID_BOUND_RECEIPT"
   | "REJECTED";
 
 export type EvidenceType =
-  | "LIVE_CONSENSUS_EVIDENCE"
-  | "OBSERVATION_EVIDENCE"
-  | "PLUGIN_BOUNDARY_EVIDENCE"
+  | "UNATTESTED_CONSENSUS_RECORD"
+  | "UNATTESTED_PLUGIN_BOUNDARY_RECORD"
+  | "OBSERVATION_RECORD"
   | "REFERENCE_ANCHOR";
 
 export interface BindingEvaluationResult {
-  readonly state: "VERIFIED_EVIDENCE_LOADED" | "RECEIPT_LOADED_UNBOUND";
+  readonly state: "STRUCTURALLY_VALID_BOUND_RECEIPT" | "RECEIPT_LOADED_UNBOUND";
   readonly evidenceType?: EvidenceType;
   readonly expectedDigest: string;
   readonly actualDigest: string;
@@ -429,17 +429,17 @@ export function evaluateReceiptBinding(
     };
   }
 
-  let evidenceType: EvidenceType = "LIVE_CONSENSUS_EVIDENCE";
+  let evidenceType: EvidenceType = "UNATTESTED_CONSENSUS_RECORD";
   if (receipt.workload.executed_scope === "MODEL_DATASET_BINDING_ONLY") {
-    evidenceType = "OBSERVATION_EVIDENCE";
+    evidenceType = "OBSERVATION_RECORD";
   } else if (receipt.workload.executed_scope === "PLUGIN_BOUNDARY") {
-    evidenceType = "PLUGIN_BOUNDARY_EVIDENCE";
+    evidenceType = "UNATTESTED_PLUGIN_BOUNDARY_RECORD";
   } else if (receipt.reference_anchor && !receipt.consensus_evidence) {
     evidenceType = "REFERENCE_ANCHOR";
   }
 
   return {
-    state: "VERIFIED_EVIDENCE_LOADED",
+    state: "STRUCTURALLY_VALID_BOUND_RECEIPT",
     evidenceType,
     expectedDigest,
     actualDigest,

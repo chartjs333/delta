@@ -320,6 +320,8 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 .reference-anchor-title { margin: 0; font-size: 0.92rem; color: #1e40af; }
 .reference-anchor-disclaimer { margin: 0; font-size: 0.75rem; color: #4b5563; font-style: italic; }
 .reference-anchor-details { display: grid; gap: 0.25rem; font-size: 0.8rem; }
+.pill-unattested { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
+.unattested-disclaimer { margin: 0.35rem 0 0.5rem 0; font-size: 0.75rem; color: #6b7280; font-style: italic; line-height: 1.4; }
 
 @media (max-width: 900px) {
   .shell-grid { grid-template-columns: 1fr; }

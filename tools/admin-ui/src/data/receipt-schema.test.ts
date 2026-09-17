@@ -197,7 +197,7 @@ describe("evaluateReceiptBinding", () => {
   const validMnistReceipt = sampleMnistReceipt as unknown as ExecutionReceipt;
   const SAMPLE_REPO = "chartjs333/delta";
 
-  it("returns VERIFIED_EVIDENCE_LOADED with LIVE_CONSENSUS_EVIDENCE when configuration matches", () => {
+  it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with UNATTESTED_CONSENSUS_RECORD when configuration matches", () => {
     const result = evaluateReceiptBinding(
       validMnistReceipt,
       "mnist-centroid-v1",
@@ -206,12 +206,12 @@ describe("evaluateReceiptBinding", () => {
       SAMPLE_BACKEND_REF,
       SAMPLE_REPO
     );
-    expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
-    expect(result.evidenceType).toBe("LIVE_CONSENSUS_EVIDENCE");
+    expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
+    expect(result.evidenceType).toBe("UNATTESTED_CONSENSUS_RECORD");
     expect(result.expectedDigest).toBe(validMnistReceipt.workload.workload_config_digest);
   });
 
-  it("returns VERIFIED_EVIDENCE_LOADED with OBSERVATION_EVIDENCE for EEG observation receipt", () => {
+  it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with OBSERVATION_RECORD for EEG observation receipt", () => {
     const eegReceipt = sampleEegReceipt as unknown as ExecutionReceipt;
     const result = evaluateReceiptBinding(
       eegReceipt,
@@ -221,11 +221,11 @@ describe("evaluateReceiptBinding", () => {
       SAMPLE_BACKEND_REF,
       SAMPLE_REPO
     );
-    expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
-    expect(result.evidenceType).toBe("OBSERVATION_EVIDENCE");
+    expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
+    expect(result.evidenceType).toBe("OBSERVATION_RECORD");
   });
 
-  it("returns VERIFIED_EVIDENCE_LOADED with PLUGIN_BOUNDARY_EVIDENCE for plugin boundary receipt", () => {
+  it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with UNATTESTED_PLUGIN_BOUNDARY_RECORD for plugin boundary receipt", () => {
     const digest = computeWorkloadConfigDigest(
       "mnist-centroid-v1",
       "mnist-v1",
@@ -250,8 +250,8 @@ describe("evaluateReceiptBinding", () => {
       SAMPLE_BACKEND_REF,
       SAMPLE_REPO
     );
-    expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
-    expect(result.evidenceType).toBe("PLUGIN_BOUNDARY_EVIDENCE");
+    expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
+    expect(result.evidenceType).toBe("UNATTESTED_PLUGIN_BOUNDARY_RECORD");
   });
 
   it("returns RECEIPT_LOADED_UNBOUND when model differs from active selector", () => {
