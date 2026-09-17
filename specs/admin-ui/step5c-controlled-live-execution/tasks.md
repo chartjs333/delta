@@ -6,9 +6,9 @@ Task IDs are local to this SpecKit. Commit references MUST use the qualified for
 
 ## Phase 0 — Governance and mandatory STOP checks
 
-- [ ] **T000** Verify exact product baseline `4992d9e`, ADR design baseline `f26c863`, accepted formal semantics ID, and protected-path zero-diff requirement; record preflight evidence.
-- [ ] **T001** Complete independent review of ADR 0002; resolve findings; confirm formal impact `NONE` relative to consensus semantics or STOP/reclassify.
-- [ ] **T002** Review and approve this SpecKit, including task dependencies, branch ownership, threat scope, and exit gate.
+- [x] **T000** Verify exact product baseline `4992d9e`, ADR design baseline `f26c863`, accepted formal semantics ID, and protected-path zero-diff requirement; record preflight evidence.
+- [x] **T001** Complete independent review of ADR 0002; resolve findings; confirm formal impact `NONE` relative to consensus semantics or STOP/reclassify.
+- [x] **T002** Review and approve this SpecKit, including task dependencies, branch ownership, threat scope, and exit gate.
 - [ ] **T003** Merge governance PR with ADR 0002 status `Accepted`; no live-control implementation code in that PR.
 - [ ] **T004** Record `CONTRACT_FREEZE_SHA`, create only the branches authorized by `branch-matrix.md`, and publish branch/base/task assignments.
 

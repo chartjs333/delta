@@ -1,6 +1,6 @@
 # ADR 0002: Controlled Live Execution Boundary
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-09-17
 - **Scope**: Delta Admin UI & Execution Runtime boundary (Step 5C)
 - **Formal impact**: `NONE`
