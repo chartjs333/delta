@@ -283,6 +283,12 @@ class ModelPluginRunner:
         backend_commit: str = "670b58f6458fe84620f4f9f46401f855d04ae05d",
         catalog_backend_ref: str | None = None,
         producer_commit: str | None = None,
+        controller_commit: str | None = None,
+        intent_id: str | None = None,
+        intent_digest: str | None = None,
+        admission_id: str | None = None,
+        admission_digest: str | None = None,
+        execution_id: str | None = None,
         repository: str = "chartjs333/delta",
         produced_at: str | None = None,
         output_path: Path | str | None = None,
@@ -397,6 +403,29 @@ class ModelPluginRunner:
             "producer_commit": resolved_producer_commit,
             "produced_at": timestamp,
         }
+
+        if intent_id is not None or execution_id is not None:
+            uuid_re = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+            sha256_re = re.compile(r"^sha256:[0-9a-f]{64}$")
+            if not controller_commit or not hex40_re.match(controller_commit):
+                raise ModelPluginRunnerError(f"INVALID_CONTROLLER_COMMIT: {controller_commit!r}")
+            if not intent_id or not uuid_re.match(intent_id):
+                raise ModelPluginRunnerError(f"INVALID_INTENT_ID: {intent_id!r}")
+            if not intent_digest or not sha256_re.match(intent_digest):
+                raise ModelPluginRunnerError(f"INVALID_INTENT_DIGEST: {intent_digest!r}")
+            if not admission_id or not uuid_re.match(admission_id):
+                raise ModelPluginRunnerError(f"INVALID_ADMISSION_ID: {admission_id!r}")
+            if not admission_digest or not sha256_re.match(admission_digest):
+                raise ModelPluginRunnerError(f"INVALID_ADMISSION_DIGEST: {admission_digest!r}")
+            if not execution_id or not uuid_re.match(execution_id):
+                raise ModelPluginRunnerError(f"INVALID_EXECUTION_ID: {execution_id!r}")
+
+            provenance["controller_commit"] = controller_commit
+            provenance["intent_id"] = intent_id
+            provenance["intent_digest"] = intent_digest
+            provenance["admission_id"] = admission_id
+            provenance["admission_digest"] = admission_digest
+            provenance["execution_id"] = execution_id
 
         receipt: dict[str, Any] = {
             "schema_version": "1.0.0",
