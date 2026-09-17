@@ -1,0 +1,313 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "step5c-t029-threat-negative-test-matrix",
+  "task_id": "step5c:T029",
+  "branch": "feature/step5c-security",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "formal_impact": "NONE",
+  "status": "DESIGN_READY_EXECUTABLES_BLOCKED_ON_T005_T009",
+  "owner_scope": "Threat fixtures, adversarial test design, evidence, and findings only; production fixes route to owning branches.",
+  "required_categories": [
+    "RCE",
+    "PATH_MODULE_INJECTION",
+    "MALICIOUS_JSON_JCS",
+    "REPLAY",
+    "FORGED_ADMISSION",
+    "CONFUSED_DEPUTY",
+    "ROLE_SPOOFING",
+    "QUOTA_RESOURCE_EXHAUSTION",
+    "STALE_CATALOG",
+    "FORGED_LINEAGE"
+  ],
+  "contract_dependencies": [
+    "step5c:T005",
+    "step5c:T006",
+    "step5c:T007",
+    "step5c:T008",
+    "step5c:T009"
+  ],
+  "test_cases": [
+    {
+      "id": "S5C-T029-RCE-001",
+      "category": "RCE",
+      "severity": "CRITICAL",
+      "attack_vector": "Shell metacharacters or Python source in string fields such as ticket_id, partition_id, cache_key, or declared_operator.subject_id.",
+      "expected_result": "Schema or dispatch rejects before worker start; no shell/process/callable path reachable.",
+      "expected_errors": ["ERR_SCHEMA_VALIDATION", "ERR_OPERATION_PAYLOAD_INVALID"],
+      "owner_tasks": ["step5c:T005", "step5c:T011", "step5c:T018", "step5c:T022", "step5c:T024"],
+      "executable_after": ["step5c:T009", "step5c:T018", "step5c:T022"],
+      "production_fix_owner": ["contracts", "worker-adapter", "admin-ui-live"]
+    },
+    {
+      "id": "S5C-T029-RCE-002",
+      "category": "RCE",
+      "severity": "CRITICAL",
+      "attack_vector": "Command-like values smuggled through unknown fields in operation_payload or root objects.",
+      "expected_result": "Unknown fields fail closed; no ledger allocation and no worker start.",
+      "expected_errors": ["ERR_SCHEMA_ADDITIONAL_PROPERTIES"],
+      "owner_tasks": ["step5c:T005", "step5c:T011", "step5c:T022"],
+      "executable_after": ["step5c:T009", "step5c:T011", "step5c:T022"],
+      "production_fix_owner": ["contracts", "controller", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-PATH-001",
+      "category": "PATH_MODULE_INJECTION",
+      "severity": "HIGH",
+      "attack_vector": "../, absolute paths, Windows drive paths, UNC paths, URL-like paths, or symlink-looking values in payload identifiers.",
+      "expected_result": "Identifier schema rejects or worker dispatch refuses unmanaged filesystem paths.",
+      "expected_errors": ["ERR_SCHEMA_VALIDATION", "ERR_UNMANAGED_PATH"],
+      "owner_tasks": ["step5c:T005", "step5c:T018", "step5c:T022"],
+      "executable_after": ["step5c:T009", "step5c:T018", "step5c:T022"],
+      "production_fix_owner": ["contracts", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-MODULE-001",
+      "category": "PATH_MODULE_INJECTION",
+      "severity": "HIGH",
+      "attack_vector": "model_plugin_id values resembling module paths, import paths, package URLs, mixed case, or dotted names.",
+      "expected_result": "Catalog allowlist rejects; registry lookup is by ID only; no dynamic import.",
+      "expected_errors": ["ERR_CATALOG_UNKNOWN_PLUGIN", "ERR_SCHEMA_VALIDATION"],
+      "owner_tasks": ["step5c:T005", "step5c:T013", "step5c:T018", "step5c:T022"],
+      "executable_after": ["step5c:T009", "step5c:T013", "step5c:T018"],
+      "production_fix_owner": ["contracts", "controller", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-JSON-001",
+      "category": "MALICIOUS_JSON_JCS",
+      "severity": "HIGH",
+      "attack_vector": "Oversized body, excessive depth, huge strings, duplicate keys, invalid UTF-8, malformed dates, or number edge cases.",
+      "expected_result": "Bounded parse/schema/JCS failure returns typed rejection before ledger allocation or worker start.",
+      "expected_errors": ["ERR_BOUNDED_PARSE", "ERR_SCHEMA_VALIDATION", "ERR_JCS_CANONICALIZATION"],
+      "owner_tasks": ["step5c:T008", "step5c:T009", "step5c:T011", "step5c:T033"],
+      "executable_after": ["step5c:T008", "step5c:T009", "step5c:T011", "step5c:T033"],
+      "production_fix_owner": ["contracts", "controller"]
+    },
+    {
+      "id": "S5C-T029-JCS-001",
+      "category": "MALICIOUS_JSON_JCS",
+      "severity": "HIGH",
+      "attack_vector": "Key reorder, Unicode edge cases, negative zero, floats, exponent notation, or integer boundary values to create digest ambiguity.",
+      "expected_result": "Canonicalization mismatch or schema rejection; no ambiguous digest accepted.",
+      "expected_errors": ["ERR_DIGEST_MISMATCH", "ERR_JCS_CANONICALIZATION", "ERR_SCHEMA_VALIDATION"],
+      "owner_tasks": ["step5c:T008", "step5c:T009", "step5c:T011", "step5c:T017", "step5c:T033"],
+      "executable_after": ["step5c:T008", "step5c:T009", "step5c:T011", "step5c:T017"],
+      "production_fix_owner": ["contracts", "controller", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-REPLAY-001",
+      "category": "REPLAY",
+      "severity": "HIGH",
+      "attack_vector": "Concurrent duplicate submit with same intent_id, same intent_digest, and same authenticated_subject.",
+      "expected_result": "One ledger allocation, one execution_id, one worker start; duplicates return in-progress status.",
+      "expected_errors": [],
+      "owner_tasks": ["step5c:T014", "step5c:T030"],
+      "executable_after": ["step5c:T014", "step5c:T030"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-REPLAY-002",
+      "category": "REPLAY",
+      "severity": "HIGH",
+      "attack_vector": "Re-submit same intent_id with changed payload/digest.",
+      "expected_result": "ERR_INTENT_ID_DIGEST_CONFLICT; no worker start.",
+      "expected_errors": ["ERR_INTENT_ID_DIGEST_CONFLICT"],
+      "owner_tasks": ["step5c:T014", "step5c:T030"],
+      "executable_after": ["step5c:T014", "step5c:T030"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-REPLAY-003",
+      "category": "REPLAY",
+      "severity": "HIGH",
+      "attack_vector": "Different authenticated subject queries or replays an existing intent_id.",
+      "expected_result": "ERR_UNAUTHORIZED_CALLER; no status/receipt disclosure and no worker start.",
+      "expected_errors": ["ERR_UNAUTHORIZED_CALLER"],
+      "owner_tasks": ["step5c:T014", "step5c:T031"],
+      "executable_after": ["step5c:T014", "step5c:T031"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-REPLAY-004",
+      "category": "REPLAY",
+      "severity": "HIGH",
+      "attack_vector": "Different intent_id with same intent_digest.",
+      "expected_result": "ERR_INTENT_COLLISION_DETECTED; fail closed.",
+      "expected_errors": ["ERR_INTENT_COLLISION_DETECTED"],
+      "owner_tasks": ["step5c:T014", "step5c:T030"],
+      "executable_after": ["step5c:T014", "step5c:T030"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-ADMISSION-001",
+      "category": "FORGED_ADMISSION",
+      "severity": "CRITICAL",
+      "attack_vector": "Unsigned, self-digested, or random-signature AdmissionRecord.",
+      "expected_result": "Ed25519 verification rejects before operation dispatch.",
+      "expected_errors": ["ERR_ADMISSION_SIGNATURE_INVALID"],
+      "owner_tasks": ["step5c:T008", "step5c:T009", "step5c:T016", "step5c:T017", "step5c:T022"],
+      "executable_after": ["step5c:T008", "step5c:T009", "step5c:T017", "step5c:T022"],
+      "production_fix_owner": ["contracts", "controller", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-ADMISSION-002",
+      "category": "FORGED_ADMISSION",
+      "severity": "CRITICAL",
+      "attack_vector": "Modify resource_grants, execution_id, admission_expires_at, policy_context, issuer/key metadata, or intent_digest after signing.",
+      "expected_result": "admission_digest and/or Ed25519 verification fails; no worker start.",
+      "expected_errors": ["ERR_ADMISSION_DIGEST_MISMATCH", "ERR_ADMISSION_SIGNATURE_INVALID"],
+      "owner_tasks": ["step5c:T008", "step5c:T009", "step5c:T017", "step5c:T022"],
+      "executable_after": ["step5c:T008", "step5c:T009", "step5c:T017"],
+      "production_fix_owner": ["contracts", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-ADMISSION-003",
+      "category": "FORGED_ADMISSION",
+      "severity": "HIGH",
+      "attack_vector": "Dispatch after admission_expires_at or with admission_expires_at later than intent.expires_at.",
+      "expected_result": "Worker rejects stale bundle before operation dispatch.",
+      "expected_errors": ["ERR_ADMISSION_EXPIRED", "ERR_ADMISSION_TTL_INVALID"],
+      "owner_tasks": ["step5c:T016", "step5c:T017", "step5c:T022"],
+      "executable_after": ["step5c:T016", "step5c:T017", "step5c:T022"],
+      "production_fix_owner": ["controller", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-DEPUTY-001",
+      "category": "CONFUSED_DEPUTY",
+      "severity": "HIGH",
+      "attack_vector": "Intent requests downloads but AdmissionRecord.resource_grants.allow_downloads is false.",
+      "expected_result": "Worker honors only admission grant; client request cannot grant network authority.",
+      "expected_errors": ["ERR_DOWNLOAD_NOT_GRANTED"],
+      "owner_tasks": ["step5c:T015", "step5c:T017", "step5c:T022", "step5c:T032"],
+      "executable_after": ["step5c:T017", "step5c:T022", "step5c:T032"],
+      "production_fix_owner": ["controller", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-DEPUTY-002",
+      "category": "CONFUSED_DEPUTY",
+      "severity": "HIGH",
+      "attack_vector": "UI digest or declared operator role is treated as authentication or authorization.",
+      "expected_result": "Gate derives authenticated subject independently; UI text remains informational.",
+      "expected_errors": ["ERR_AUTH_REQUIRED", "ERR_POLICY_DENIED"],
+      "owner_tasks": ["step5c:T012", "step5c:T023", "step5c:T027", "step5c:T031"],
+      "executable_after": ["step5c:T012", "step5c:T027", "step5c:T031"],
+      "production_fix_owner": ["controller", "admin-ui-live"]
+    },
+    {
+      "id": "S5C-T029-ROLE-001",
+      "category": "ROLE_SPOOFING",
+      "severity": "HIGH",
+      "attack_vector": "declared_operator.role is OPERATOR while caller credential lacks operator role.",
+      "expected_result": "Policy rejects before ledger allocation or worker dispatch.",
+      "expected_errors": ["ERR_POLICY_DENIED"],
+      "owner_tasks": ["step5c:T012", "step5c:T031"],
+      "executable_after": ["step5c:T012", "step5c:T031"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-ROLE-002",
+      "category": "ROLE_SPOOFING",
+      "severity": "HIGH",
+      "attack_vector": "Wrong audience, wrong peer, expired token or cert, or mismatched authenticated principal.",
+      "expected_result": "Authentication/policy rejects before worker dispatch and redacts sensitive details.",
+      "expected_errors": ["ERR_AUTH_INVALID", "ERR_AUTH_EXPIRED", "ERR_AUDIENCE_MISMATCH"],
+      "owner_tasks": ["step5c:T012", "step5c:T031", "step5c:T034"],
+      "executable_after": ["step5c:T012", "step5c:T031"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-QUOTA-001",
+      "category": "QUOTA_RESOURCE_EXHAUSTION",
+      "severity": "HIGH",
+      "attack_vector": "checkpoint_coordinates at 4097 items, int outside signed 32-bit range, huge timeout, or large strings.",
+      "expected_result": "Schema/ingress rejects before worker start.",
+      "expected_errors": ["ERR_SCHEMA_VALIDATION", "ERR_REQUEST_TOO_LARGE"],
+      "owner_tasks": ["step5c:T009", "step5c:T011", "step5c:T017", "step5c:T032", "step5c:T033"],
+      "executable_after": ["step5c:T009", "step5c:T011", "step5c:T017"],
+      "production_fix_owner": ["contracts", "controller", "worker-adapter"]
+    },
+    {
+      "id": "S5C-T029-QUOTA-002",
+      "category": "QUOTA_RESOURCE_EXHAUSTION",
+      "severity": "HIGH",
+      "attack_vector": "Valid schema but quota, concurrency, or memory grant would exceed policy.",
+      "expected_result": "Typed quota rejection; no worker start.",
+      "expected_errors": ["ERR_QUOTA_EXCEEDED", "ERR_RESOURCE_GRANT_DENIED"],
+      "owner_tasks": ["step5c:T015", "step5c:T032"],
+      "executable_after": ["step5c:T015", "step5c:T032"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-TIMEOUT-001",
+      "category": "QUOTA_RESOURCE_EXHAUSTION",
+      "severity": "HIGH",
+      "attack_vector": "Operation times out, is cancelled, or fails after partial work.",
+      "expected_result": "Terminal status is failed, timed out, or cancelled; no SUCCESS/COMPLETED receipt.",
+      "expected_errors": ["ERR_EXECUTION_TIMEOUT", "ERR_EXECUTION_CANCELLED"],
+      "owner_tasks": ["step5c:T020", "step5c:T032", "step5c:T039"],
+      "executable_after": ["step5c:T020", "step5c:T032"],
+      "production_fix_owner": ["worker-adapter", "controller"]
+    },
+    {
+      "id": "S5C-T029-CATALOG-001",
+      "category": "STALE_CATALOG",
+      "severity": "HIGH",
+      "attack_vector": "Intent catalog_backend_ref differs from frozen catalog source.backend_ref or catalog lacks plugin/dataset pair.",
+      "expected_result": "Catalog parity/capability matrix rejects before worker start.",
+      "expected_errors": ["ERR_CATALOG_REF_MISMATCH", "ERR_CATALOG_UNKNOWN_PAIR"],
+      "owner_tasks": ["step5c:T013", "step5c:T029", "step5c:T031"],
+      "executable_after": ["step5c:T013", "step5c:T031"],
+      "production_fix_owner": ["controller"]
+    },
+    {
+      "id": "S5C-T029-CATALOG-002",
+      "category": "STALE_CATALOG",
+      "severity": "HIGH",
+      "attack_vector": "Valid IDs but operation/scope unsupported by capability matrix, such as TRAIN_TICKET outside PLUGIN_BOUNDARY.",
+      "expected_result": "Typed policy/capability rejection before worker start.",
+      "expected_errors": ["ERR_CAPABILITY_MISMATCH", "ERR_SCOPE_NOT_ALLOWED"],
+      "owner_tasks": ["step5c:T013", "step5c:T017", "step5c:T024"],
+      "executable_after": ["step5c:T013", "step5c:T017"],
+      "production_fix_owner": ["controller", "worker-adapter", "admin-ui-live"]
+    },
+    {
+      "id": "S5C-T029-LINEAGE-001",
+      "category": "FORGED_LINEAGE",
+      "severity": "HIGH",
+      "attack_vector": "Receipt reuses another intent/admission/execution or omits admission_id, admission_digest, execution_id, producer_commit, or catalog ref.",
+      "expected_result": "Receipt lineage validation rejects; UI does not display as bound receipt.",
+      "expected_errors": ["ERR_RECEIPT_LINEAGE_MISMATCH", "ERR_RECEIPT_SCHEMA_INVALID"],
+      "owner_tasks": ["step5c:T007", "step5c:T021", "step5c:T027", "step5c:T038"],
+      "executable_after": ["step5c:T007", "step5c:T021", "step5c:T027"],
+      "production_fix_owner": ["contracts", "worker-adapter", "admin-ui-live"]
+    },
+    {
+      "id": "S5C-T029-LINEAGE-002",
+      "category": "FORGED_LINEAGE",
+      "severity": "CRITICAL",
+      "attack_vector": "Local PLUGIN_BOUNDARY execution includes STAGE_C_REAL_DRQ1, round_id, state_root, wal_sequence, or QC-looking fields.",
+      "expected_result": "Worker/UI rejects or marks invalid; no consensus wording or authority.",
+      "expected_errors": ["ERR_FALSE_STAGE_C_CLAIM", "ERR_CONSENSUS_FIELD_FORBIDDEN"],
+      "owner_tasks": ["step5c:T022", "step5c:T027", "step5c:T041"],
+      "executable_after": ["step5c:T022", "step5c:T027"],
+      "production_fix_owner": ["worker-adapter", "admin-ui-live"]
+    },
+    {
+      "id": "S5C-T029-AUDIT-001",
+      "category": "FORGED_LINEAGE",
+      "severity": "MEDIUM",
+      "attack_vector": "Audit/status errors include bearer tokens, private dataset payloads, Ed25519 private key material, or raw model data.",
+      "expected_result": "Redaction tests reject unsafe audit output; no secrets committed.",
+      "expected_errors": ["ERR_AUDIT_REDACTION_FAILURE"],
+      "owner_tasks": ["step5c:T016", "step5c:T034"],
+      "executable_after": ["step5c:T016", "step5c:T034"],
+      "production_fix_owner": ["controller", "security"]
+    }
+  ],
+  "owner_handoff": {
+    "contracts": "feature/step5c-contracts",
+    "controller": "feature/step5c-controller",
+    "worker-adapter": "feature/step5c-worker-adapter",
+    "admin-ui-live": "feature/step5c-admin-ui-live",
+    "e2e": "feature/step5c-e2e"
+  }
+}

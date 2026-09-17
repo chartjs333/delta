@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T029",
+  "status": "DESIGN_READY_EXECUTABLES_BLOCKED_ON_T005_T009",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "branch": "feature/step5c-security",
+  "artifacts": [
+    {
+      "path": "specs/admin-ui/step5c-controlled-live-execution/security/t029-threat-negative-test-matrix.md",
+      "purpose": "Human-readable threat and negative-test matrix"
+    },
+    {
+      "path": "specs/admin-ui/step5c-controlled-live-execution/security/t029-threat-negative-test-matrix.json",
+      "purpose": "Machine-readable threat and negative-test matrix"
+    },
+    {
+      "path": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t029_threat_matrix.py",
+      "purpose": "Shape and coverage regression test for the matrix"
+    }
+  ],
+  "covers_required_categories": [
+    "RCE",
+    "PATH_MODULE_INJECTION",
+    "MALICIOUS_JSON_JCS",
+    "REPLAY",
+    "FORGED_ADMISSION",
+    "CONFUSED_DEPUTY",
+    "ROLE_SPOOFING",
+    "QUOTA_RESOURCE_EXHAUSTION",
+    "STALE_CATALOG",
+    "FORGED_LINEAGE"
+  ],
+  "blocked_executable_tests": {
+    "reason": "Executable negative tests must bind to exact contract schemas/vectors from step5c:T005-T009.",
+    "required_upstream_tasks": [
+      "step5c:T005",
+      "step5c:T006",
+      "step5c:T007",
+      "step5c:T008",
+      "step5c:T009"
+    ]
+  },
+  "production_fix_policy": "Security branch records findings and routes production changes to the owning branch; it does not edit controller, worker, or UI production files."
+}
