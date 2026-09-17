@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import sampleEegReceipt from "./samples/sample-eeg-observation-receipt.json";
 import sampleMnistReceipt from "./samples/sample-mnist-stage-c-receipt.json";
 import sampleQloraReceipt from "./samples/sample-qlora-stage-c-receipt.json";
-import sample10GeneReceipt from "./samples/sample-10gene-stage-c-receipt.json";
+import sample10GeneReceipt from "./samples/sample-10gene-plugin-boundary-receipt.json";
 import {
   computeWorkloadConfigDigest,
   evaluateReceiptBinding,
@@ -50,7 +50,8 @@ describe("validateExecutionReceipt", () => {
     const gene = validateExecutionReceipt(sample10GeneReceipt);
     expect(gene.workload.model_plugin_id).toBe("tabular-10gene-phenotype-v1");
     expect(gene.workload.dataset_id).toBe("synthetic-10gene-cohort-v1");
-    expect(gene.consensus_evidence?.applied_status).toBe("APPLIED");
+    expect(gene.workload.executed_scope).toBe("PLUGIN_BOUNDARY");
+    expect(gene.consensus_evidence).toBeUndefined();
   });
 
   it("fails closed on non-object or missing type/version", () => {
@@ -217,18 +218,18 @@ describe("evaluateReceiptBinding", () => {
     expect(result.expectedDigest).toBe(validMnistReceipt.workload.workload_config_digest);
   });
 
-  it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with UNATTESTED_CONSENSUS_RECORD for 10-gene Stage C receipt", () => {
+  it("returns STRUCTURALLY_VALID_BOUND_RECEIPT with UNATTESTED_PLUGIN_BOUNDARY_RECORD for 10-gene plugin boundary receipt", () => {
     const geneReceipt = sample10GeneReceipt as unknown as ExecutionReceipt;
     const result = evaluateReceiptBinding(
       geneReceipt,
       "tabular-10gene-phenotype-v1",
       "synthetic-10gene-cohort-v1",
-      "STAGE_C_REAL_DRQ1",
+      "PLUGIN_BOUNDARY",
       SAMPLE_BACKEND_REF,
       SAMPLE_REPO
     );
     expect(result.state).toBe("STRUCTURALLY_VALID_BOUND_RECEIPT");
-    expect(result.evidenceType).toBe("UNATTESTED_CONSENSUS_RECORD");
+    expect(result.evidenceType).toBe("UNATTESTED_PLUGIN_BOUNDARY_RECORD");
     expect(result.expectedDigest).toBe(geneReceipt.workload.workload_config_digest);
   });
 

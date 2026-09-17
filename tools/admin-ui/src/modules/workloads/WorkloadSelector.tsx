@@ -14,7 +14,7 @@ import {
 import sampleEegReceipt from "../../data/samples/sample-eeg-observation-receipt.json";
 import sampleMnistReceipt from "../../data/samples/sample-mnist-stage-c-receipt.json";
 import sampleQloraReceipt from "../../data/samples/sample-qlora-stage-c-receipt.json";
-import sample10GeneReceipt from "../../data/samples/sample-10gene-stage-c-receipt.json";
+import sample10GeneReceipt from "../../data/samples/sample-10gene-plugin-boundary-receipt.json";
 import { InertText } from "../../components/InertText";
 import { parseUntrustedJson } from "../../security/input-guards";
 
@@ -390,7 +390,7 @@ export function WorkloadSelector({
                 onClick={() => loadSample(sample10GeneReceipt)}
                 className="toolbar-btn text-btn"
               >
-                10-Gene Stage C
+                10-Gene Plugin Boundary
               </button>
             </div>
           </div>
