@@ -1,0 +1,11 @@
+{
+  "plugin_id": "eeg-bandpower-centroid-v1",
+  "display_name": "EEG Bandpower Centroid Classifier",
+  "model_family": "centroid",
+  "task_type": "classification",
+  "sample_kind": "eeg/bandpower-4ch-4band",
+  "target_kind": "class-id/0-1",
+  "deterministic": true,
+  "supports_stage_c_real_drq1": false,
+  "parameter_schema_id": null
+}

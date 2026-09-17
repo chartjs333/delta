@@ -8,6 +8,17 @@
   },
   "model_plugins": [
     {
+      "plugin_id": "eeg-bandpower-centroid-v1",
+      "display_name": "EEG Bandpower Centroid Classifier",
+      "model_family": "centroid",
+      "task_type": "classification",
+      "sample_kind": "eeg/bandpower-4ch-4band",
+      "target_kind": "class-id/0-1",
+      "deterministic": true,
+      "supports_stage_c_real_drq1": false,
+      "parameter_schema_id": null
+    },
+    {
       "plugin_id": "mnist-centroid-v1",
       "display_name": "MNIST Nearest Centroid",
       "model_family": "centroid",
@@ -28,20 +39,19 @@
       "deterministic": true,
       "supports_stage_c_real_drq1": true,
       "parameter_schema_id": "sha256:ef62a8c343b4febb6570bb37061cb495b74645aaa9af6486f6d987112bfd7fec"
-    },
-    {
-      "plugin_id": "eeg-bandpower-centroid-v1",
-      "display_name": "EEG Bandpower Centroid Classifier",
-      "model_family": "centroid",
-      "task_type": "classification",
-      "sample_kind": "eeg/bandpower-4ch-4band",
-      "target_kind": "class-id/0-1",
-      "deterministic": true,
-      "supports_stage_c_real_drq1": false,
-      "parameter_schema_id": null
     }
   ],
   "datasets": [
+    {
+      "dataset_id": "eeg-synthetic-bci-v1",
+      "display_name": "Synthetic BCI EEG 4-Channel Bandpower",
+      "sample_kind": "eeg/bandpower-4ch-4band",
+      "target_kind": "class-id/0-1",
+      "deterministic": true,
+      "supports_offline_cache": true,
+      "description": "Deterministic 4-channel windowed EEG bandpower features (delta, theta, alpha, beta) for binary rest vs. motor imagery classification.",
+      "version": "1.0.0"
+    },
     {
       "dataset_id": "mnist-v1",
       "display_name": "MNIST Handwritten Digits",
@@ -61,20 +71,54 @@
       "supports_offline_cache": false,
       "description": "Deterministic synthetic 2D regression dataset for QLoRA adapter training.",
       "version": "1.0.0"
-    },
-    {
-      "dataset_id": "eeg-synthetic-bci-v1",
-      "display_name": "Synthetic BCI EEG 4-Channel Bandpower",
-      "sample_kind": "eeg/bandpower-4ch-4band",
-      "target_kind": "class-id/0-1",
-      "deterministic": true,
-      "supports_offline_cache": true,
-      "description": "Deterministic 4-channel windowed EEG bandpower features (delta, theta, alpha, beta) for binary rest vs. motor imagery classification.",
-      "version": "1.0.0"
     }
   ],
   "compatibility": [
     {
+      "model_plugin_id": "eeg-bandpower-centroid-v1",
+      "dataset_id": "eeg-synthetic-bci-v1",
+      "contract_compatible": true,
+      "supports_stage_c_real_drq1": false,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": true,
+        "MODEL_DATASET_BINDING_ONLY": true
+      }
+    },
+    {
+      "model_plugin_id": "eeg-bandpower-centroid-v1",
+      "dataset_id": "mnist-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": false,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
+      "model_plugin_id": "eeg-bandpower-centroid-v1",
+      "dataset_id": "tiny-qlora-regression-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": false,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
+      "model_plugin_id": "mnist-centroid-v1",
+      "dataset_id": "eeg-synthetic-bci-v1",
+      "contract_compatible": false,
+      "supports_stage_c_real_drq1": true,
+      "requested_scope_allowed": {
+        "STAGE_C_REAL_DRQ1": false,
+        "PLUGIN_BOUNDARY": false,
+        "MODEL_DATASET_BINDING_ONLY": false
+      }
+    },
+    {
       "model_plugin_id": "mnist-centroid-v1",
       "dataset_id": "mnist-v1",
       "contract_compatible": true,
@@ -97,7 +141,7 @@
       }
     },
     {
-      "model_plugin_id": "mnist-centroid-v1",
+      "model_plugin_id": "qlora-tiny-adapter-v1",
       "dataset_id": "eeg-synthetic-bci-v1",
       "contract_compatible": false,
       "supports_stage_c_real_drq1": true,
@@ -125,50 +169,6 @@
       "supports_stage_c_real_drq1": true,
       "requested_scope_allowed": {
         "STAGE_C_REAL_DRQ1": true,
-        "PLUGIN_BOUNDARY": true,
-        "MODEL_DATASET_BINDING_ONLY": true
-      }
-    },
-    {
-      "model_plugin_id": "qlora-tiny-adapter-v1",
-      "dataset_id": "eeg-synthetic-bci-v1",
-      "contract_compatible": false,
-      "supports_stage_c_real_drq1": true,
-      "requested_scope_allowed": {
-        "STAGE_C_REAL_DRQ1": false,
-        "PLUGIN_BOUNDARY": false,
-        "MODEL_DATASET_BINDING_ONLY": false
-      }
-    },
-    {
-      "model_plugin_id": "eeg-bandpower-centroid-v1",
-      "dataset_id": "mnist-v1",
-      "contract_compatible": false,
-      "supports_stage_c_real_drq1": false,
-      "requested_scope_allowed": {
-        "STAGE_C_REAL_DRQ1": false,
-        "PLUGIN_BOUNDARY": false,
-        "MODEL_DATASET_BINDING_ONLY": false
-      }
-    },
-    {
-      "model_plugin_id": "eeg-bandpower-centroid-v1",
-      "dataset_id": "tiny-qlora-regression-v1",
-      "contract_compatible": false,
-      "supports_stage_c_real_drq1": false,
-      "requested_scope_allowed": {
-        "STAGE_C_REAL_DRQ1": false,
-        "PLUGIN_BOUNDARY": false,
-        "MODEL_DATASET_BINDING_ONLY": false
-      }
-    },
-    {
-      "model_plugin_id": "eeg-bandpower-centroid-v1",
-      "dataset_id": "eeg-synthetic-bci-v1",
-      "contract_compatible": true,
-      "supports_stage_c_real_drq1": false,
-      "requested_scope_allowed": {
-        "STAGE_C_REAL_DRQ1": false,
         "PLUGIN_BOUNDARY": true,
         "MODEL_DATASET_BINDING_ONLY": true
       }

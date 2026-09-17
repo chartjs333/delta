@@ -1,0 +1,10 @@
+{
+  "dataset_id": "tiny-qlora-regression-v1",
+  "display_name": "Tiny QLoRA 2D Regression Dataset",
+  "sample_kind": "vector/tiny-qlora-2d",
+  "target_kind": "regression/vector-2d",
+  "deterministic": true,
+  "supports_offline_cache": false,
+  "description": "Deterministic synthetic 2D regression dataset for QLoRA adapter training.",
+  "version": "1.0.0"
+}

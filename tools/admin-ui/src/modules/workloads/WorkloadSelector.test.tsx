@@ -19,16 +19,16 @@ describe("WorkloadSelector", () => {
 
     expect(modelSelect.options).toHaveLength(3);
     expect(Array.from(modelSelect.options).map((o) => o.value)).toEqual([
+      "eeg-bandpower-centroid-v1",
       "mnist-centroid-v1",
       "qlora-tiny-adapter-v1",
-      "eeg-bandpower-centroid-v1",
     ]);
 
     expect(datasetSelect.options).toHaveLength(3);
     expect(Array.from(datasetSelect.options).map((o) => o.value)).toEqual([
+      "eeg-synthetic-bci-v1",
       "mnist-v1",
       "tiny-qlora-regression-v1",
-      "eeg-synthetic-bci-v1",
     ]);
   });
 

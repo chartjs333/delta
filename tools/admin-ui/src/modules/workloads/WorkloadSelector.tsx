@@ -28,10 +28,16 @@ export function WorkloadSelector({
   const scopeSelectId = useId();
 
   const [selectedModelId, setSelectedModelId] = useState<string>(
-    catalog.model_plugins[0]?.plugin_id ?? ""
+    () =>
+      catalog.model_plugins.find((m) => m.plugin_id === "mnist-centroid-v1")?.plugin_id ??
+      catalog.model_plugins[0]?.plugin_id ??
+      ""
   );
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>(
-    catalog.datasets[0]?.dataset_id ?? ""
+    () =>
+      catalog.datasets.find((d) => d.dataset_id === "mnist-v1")?.dataset_id ??
+      catalog.datasets[0]?.dataset_id ??
+      ""
   );
   const [selectedScope, setSelectedScope] = useState<ExecutionScopeName>(
     "STAGE_C_REAL_DRQ1"

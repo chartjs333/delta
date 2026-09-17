@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.org/schemas/provenance.schema.json",
+  "title": "DeltaReduceRegistryProvenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "repository",
+    "backend_ref",
+    "generator_contract"
+  ],
+  "properties": {
+    "repository": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    },
+    "backend_ref": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "generator_contract": {
+      "type": "string",
+      "pattern": "^\\S+(?:\\s+\\S+)*$"
+    }
+  }
+}

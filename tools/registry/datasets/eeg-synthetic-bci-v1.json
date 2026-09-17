@@ -1,0 +1,10 @@
+{
+  "dataset_id": "eeg-synthetic-bci-v1",
+  "display_name": "Synthetic BCI EEG 4-Channel Bandpower",
+  "sample_kind": "eeg/bandpower-4ch-4band",
+  "target_kind": "class-id/0-1",
+  "deterministic": true,
+  "supports_offline_cache": true,
+  "description": "Deterministic 4-channel windowed EEG bandpower features (delta, theta, alpha, beta) for binary rest vs. motor imagery classification.",
+  "version": "1.0.0"
+}
