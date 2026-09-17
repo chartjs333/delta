@@ -33,8 +33,8 @@ export function validateGeneratedSnapshot(snapshot) {
   if (!snapshot.source.repository || !snapshot.source.repository.trim()) {
     throw new Error("Missing or empty source.repository in snapshot");
   }
-  if (!snapshot.source.backend_ref || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u.test(snapshot.source.backend_ref)) {
-    throw new Error("Invalid source.backend_ref: must be 40 or 64 hex characters");
+  if (!snapshot.source.backend_ref || !/^[a-f0-9]{40}$/u.test(snapshot.source.backend_ref)) {
+    throw new Error("Invalid source.backend_ref: must be 40 hex characters (git commit SHA)");
   }
   if (snapshot.source.generator_contract !== "validate_model_dataset_capability") {
     throw new Error(`Invalid generator_contract: expected 'validate_model_dataset_capability', got '${snapshot.source.generator_contract}'`);
@@ -190,6 +190,9 @@ export async function generateCatalogSnapshot(options = {}) {
   }
 
   const backendRef = options.backendRef || provenance.backend_ref;
+  if (options.backendRef && !/^[a-f0-9]{40}$/u.test(options.backendRef)) {
+    throw new Error(`Invalid options.backendRef '${options.backendRef}': must be a 40-character hex commit SHA`);
+  }
 
   const snapshot = {
     type_name: "DELTAREDUCE_DESCRIPTOR_CATALOG_SNAPSHOT",
@@ -218,9 +221,21 @@ export async function writeCatalogSnapshotAtomically(targetPath, content) {
 
 async function main() {
   const isCheck = process.argv.includes("--check");
-  const targetSnapshotPath = defaultSnapshotPath;
 
-  const generated = await generateCatalogSnapshot();
+  const backendRefIdx = process.argv.indexOf("--backend-ref");
+  const backendRef = backendRefIdx !== -1 ? process.argv[backendRefIdx + 1] : undefined;
+
+  const registryRootIdx = process.argv.indexOf("--registry-root");
+  const registryRoot = registryRootIdx !== -1 ? process.argv[registryRootIdx + 1] : defaultRegistryRoot;
+
+  const targetSnapshotIdx = process.argv.indexOf("--target-snapshot");
+  const targetSnapshotPath = targetSnapshotIdx !== -1 ? process.argv[targetSnapshotIdx + 1] : defaultSnapshotPath;
+
+  const generated = await generateCatalogSnapshot({
+    registryRoot,
+    targetSnapshotPath,
+    backendRef,
+  });
 
   if (isCheck) {
     const existing = await readFile(targetSnapshotPath, "utf8").catch(() => "");

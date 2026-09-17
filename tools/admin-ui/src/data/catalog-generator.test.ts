@@ -124,4 +124,40 @@ describe("catalog snapshot generator and drift gate", () => {
       await rm(tempDir, { recursive: true, force: true });
     }
   });
+
+  it("detects drift and exits 1 when CLI --backend-ref differs from committed snapshot", async () => {
+    const overrideRef = "1111111111111111111111111111111111111111";
+    let failed = false;
+    try {
+      await execFileAsync(
+        process.execPath,
+        ["scripts/generate-catalog-snapshot.mjs", "--backend-ref", overrideRef, "--check"],
+        { cwd: process.cwd() }
+      );
+    } catch (err: any) {
+      failed = true;
+      expect(err.code).toBe(1);
+      expect(err.stderr).toContain("is stale or drifted from tools/registry");
+    }
+    expect(failed).toBe(true);
+  });
+
+  it("strictly rejects 64-character SHA or non-40-hex backend_ref fail-closed", async () => {
+    const sha64 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
+    await expect(generateCatalogSnapshot({ backendRef: sha64 })).rejects.toThrow(
+      /must be a 40-character hex commit SHA/u
+    );
+
+    await expect(generateCatalogSnapshot({ backendRef: "not-a-sha" })).rejects.toThrow(
+      /must be a 40-character hex commit SHA/u
+    );
+
+    expect(() =>
+      validateGeneratedSnapshot({
+        ...rawSnapshot,
+        source: { ...rawSnapshot.source, backend_ref: sha64 },
+      })
+    ).toThrow(/must be 40 hex characters/u);
+  });
 });
