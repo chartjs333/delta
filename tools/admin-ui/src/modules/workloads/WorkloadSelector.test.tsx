@@ -150,6 +150,122 @@ describe("WorkloadSelector", () => {
       )
     ).toBeTruthy();
   });
+
+  it("explicitly clarifies header copy that capabilities are verified from frozen snapshot", () => {
+    render(<WorkloadSelector />);
+    expect(
+      screen.getByText(
+        /Pre-flight capabilities are verified from frozen catalog snapshot derived from registry descriptors/u
+      )
+    ).toBeTruthy();
+  });
+
+  it("loads MNIST Stage C sample and displays VERIFIED_EVIDENCE_LOADED with consensus details", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    // Selector defaults to mnist-centroid-v1 + mnist-v1 + STAGE_C_REAL_DRQ1
+    const sampleBtn = screen.getByRole("button", { name: "MNIST Stage C" });
+    await user.click(sampleBtn);
+
+    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
+    expect(screen.getByText("Live Consensus Evidence")).toBeTruthy();
+    expect(screen.getByText("APPLIED")).toBeTruthy();
+    expect(screen.getByText("12")).toBeTruthy(); // WAL Sequence
+    expect(
+      screen.getByText("delta://checkpoints/mnist-centroid-v1/round-0001.bin")
+    ).toBeTruthy();
+  });
+
+  it("transitions to RECEIPT_LOADED_UNBOUND when selector changes away from loaded receipt config", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    // Load MNIST Stage C
+    await user.click(screen.getByRole("button", { name: "MNIST Stage C" }));
+    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
+
+    // Switch model to QLoRA
+    const modelSelect = screen.getByLabelText("Model Plugin");
+    await user.selectOptions(modelSelect, "qlora-tiny-adapter-v1");
+
+    expect(screen.getByText("RECEIPT_LOADED_UNBOUND")).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Receipt model 'mnist-centroid-v1' does not match selected model 'qlora-tiny-adapter-v1'/u
+      )
+    ).toBeTruthy();
+  });
+
+  it("clears receipt when clicking Clear Receipt button", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    await user.click(screen.getByRole("button", { name: "MNIST Stage C" }));
+    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
+
+    const clearBtn = screen.getByRole("button", { name: "Clear Receipt" });
+    await user.click(clearBtn);
+
+    expect(screen.getByText("No live execution evidence loaded.")).toBeTruthy();
+  });
+
+  it("loads EEG observation receipt and displays metrics without consensus fields", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    // Select EEG + EEG + MODEL_DATASET_BINDING_ONLY
+    const modelSelect = screen.getByLabelText("Model Plugin");
+    const datasetSelect = screen.getByLabelText("Dataset Provider");
+    const scopeSelect = screen.getByLabelText("Requested Execution Scope");
+
+    await user.selectOptions(modelSelect, "eeg-bandpower-centroid-v1");
+    await user.selectOptions(datasetSelect, "eeg-synthetic-bci-v1");
+    await user.selectOptions(scopeSelect, "MODEL_DATASET_BINDING_ONLY");
+
+    // Load EEG sample
+    await user.click(screen.getByRole("button", { name: "EEG Observation" }));
+
+    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
+    expect(screen.getByText("Observation Summary")).toBeTruthy();
+    expect(
+      screen.getByText(/Synthetic EEG 4-channel bandpower feature extraction/u)
+    ).toBeTruthy();
+    expect(screen.getByText("classification_accuracy")).toBeTruthy();
+
+    // Consensus-specific fields must strictly not exist
+    expect(screen.queryByText("Live Consensus Evidence")).toBeNull();
+    expect(screen.queryByText("Applied Status")).toBeNull();
+  });
+
+  it("loads QLoRA receipt and displays consensus evidence alongside distinct reference anchor", async () => {
+    const user = userEvent.setup();
+    render(<WorkloadSelector />);
+
+    const modelSelect = screen.getByLabelText("Model Plugin");
+    const datasetSelect = screen.getByLabelText("Dataset Provider");
+    const scopeSelect = screen.getByLabelText("Requested Execution Scope");
+
+    await user.selectOptions(modelSelect, "qlora-tiny-adapter-v1");
+    await user.selectOptions(datasetSelect, "tiny-qlora-regression-v1");
+    await user.selectOptions(scopeSelect, "STAGE_C_REAL_DRQ1");
+
+    await user.click(screen.getByRole("button", { name: "QLoRA Stage C" }));
+
+    expect(screen.getByText("VERIFIED_EVIDENCE_LOADED")).toBeTruthy();
+    expect(screen.getByText("Live Consensus Evidence")).toBeTruthy();
+    expect(screen.getByText("Declared Reference Anchor")).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Baseline reference for comparison only; does not define live consensus proof/u
+      )
+    ).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Reference conformance baseline against PyTorch tiny QLoRA adapter/u
+      )
+    ).toBeTruthy();
+  });
 });
 
 describe("validateCatalogSnapshot", () => {

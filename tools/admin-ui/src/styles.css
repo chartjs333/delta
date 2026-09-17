@@ -275,6 +275,7 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 .verdict-box { border-radius: 8px; padding: 0.85rem 1rem; display: grid; gap: 0.35rem; }
 .verdict-allowed { background: #eaf6ef; border: 1px solid #93ceab; color: #134e32; }
 .verdict-rejected { background: #fdf2f2; border: 1px solid #f8b4b4; color: #842029; }
+.verdict-unbound { background: #fef9e7; border: 1px solid #f9d877; color: #744210; }
 .verdict-status { display: flex; gap: 0.5rem; align-items: center; font-size: 0.95rem; }
 .verdict-label { font-size: 1.05rem; letter-spacing: 0.04em; }
 .verdict-reason { font-size: 0.82rem; }
@@ -283,6 +284,42 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 .empty-evidence-box { padding: 1.5rem; border: 1px dashed #c8c3b7; border-radius: 8px; background: #faf8f3; display: grid; gap: 0.6rem; }
 .empty-evidence-title { margin: 0; font-weight: 750; color: #43524b; }
 .empty-evidence-desc { margin: 0; font-size: 0.82rem; color: #6b7771; line-height: 1.45; }
+
+/* Receipt Toolbar & Ingestion */
+.receipt-toolbar { display: grid; gap: 0.6rem; border: 1px solid #e2ddd3; border-radius: 8px; padding: 0.85rem; background: #faf8f3; }
+.receipt-upload-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.file-input-label { cursor: pointer; display: inline-flex; align-items: center; padding: 0.45rem 0.9rem; background: #2f433b; color: #fff; font-size: 0.8rem; font-weight: 700; border-radius: 6px; transition: background 0.15s; }
+.file-input-label:hover { background: #22322c; }
+.sr-only-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+.toolbar-btn { cursor: pointer; padding: 0.4rem 0.8rem; font-size: 0.78rem; font-weight: 600; border-radius: 6px; border: 1px solid #bcb7ab; background: #fff; color: #3d4a45; }
+.toolbar-btn:hover { background: #f0ede6; }
+.toolbar-btn.secondary-btn { border-color: #d25f5f; color: #9c2b2b; }
+.toolbar-btn.text-btn { background: #f4f0e6; border: 1px solid #dcd7cb; font-size: 0.74rem; }
+.sample-receipts-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; font-size: 0.78rem; color: #6e7773; }
+.sample-label { font-weight: 650; }
+
+/* Evidence Layouts */
+.evidence-unbound-container, .verified-evidence-container { display: grid; gap: 1rem; }
+.digest-comparison-card { display: grid; gap: 0.5rem; padding: 0.9rem; border: 1px solid #edd9a3; border-radius: 8px; background: #fffcf2; font-size: 0.78rem; }
+.digest-row { display: grid; gap: 0.2rem; }
+.digest-label { font-weight: 700; color: #574516; }
+.digest-value { color: #333; }
+.digest-code { font-family: monospace; font-size: 0.72rem; word-break: break-all; background: #f6eee0; padding: 0.2rem 0.4rem; border-radius: 4px; }
+.digest-explanation { margin: 0.25rem 0 0; color: #745f28; font-style: italic; }
+
+.evidence-block { border: 1px solid #dcd7cb; border-radius: 8px; padding: 1rem; background: #fff; display: grid; gap: 0.6rem; }
+.evidence-subtitle { margin: 0; font-size: 1rem; color: #2f433b; }
+.evidence-table-container { overflow-x: auto; }
+.evidence-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.evidence-table th, .evidence-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #ede9e0; text-align: left; }
+.evidence-table th { width: 35%; color: #626d68; font-weight: 650; background: #faf8f3; }
+.code-break { font-family: monospace; font-size: 0.74rem; word-break: break-all; }
+.observation-desc { margin: 0; font-size: 0.82rem; color: #43524b; }
+
+.reference-anchor-block { border-left: 4px solid #3b82f6; background: #f8fbff; }
+.reference-anchor-title { margin: 0; font-size: 0.92rem; color: #1e40af; }
+.reference-anchor-disclaimer { margin: 0; font-size: 0.75rem; color: #4b5563; font-style: italic; }
+.reference-anchor-details { display: grid; gap: 0.25rem; font-size: 0.8rem; }
 
 @media (max-width: 900px) {
   .shell-grid { grid-template-columns: 1fr; }
