@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["delta-worker-python"]
+members = ["delta-worker-python", "delta-controller-python"]
 
 [dependency-groups]
 dev = [
