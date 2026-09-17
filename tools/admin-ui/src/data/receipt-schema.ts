@@ -61,6 +61,7 @@ export type ReceiptState =
 export type EvidenceType =
   | "LIVE_CONSENSUS_EVIDENCE"
   | "OBSERVATION_EVIDENCE"
+  | "PLUGIN_BOUNDARY_EVIDENCE"
   | "REFERENCE_ANCHOR";
 
 export interface BindingEvaluationResult {
@@ -310,9 +311,9 @@ export function validateExecutionReceipt(raw: unknown): ExecutionReceipt {
       !Number.isInteger(ce.round_id) ||
       ce.round_id < 0 ||
       typeof ce.state_root !== "string" ||
-      !ce.state_root.trim() ||
+      !/^sha256:[0-9a-f]{64}$/u.test(ce.state_root) ||
       typeof ce.canonical_model_digest !== "string" ||
-      !ce.canonical_model_digest.trim() ||
+      !/^sha256:[0-9a-f]{64}$/u.test(ce.canonical_model_digest) ||
       typeof ce.checkpoint_ref !== "string" ||
       !ce.checkpoint_ref.trim() ||
       (ce.applied_status !== "APPLIED" && ce.applied_status !== "COMMITTED") ||
@@ -320,7 +321,15 @@ export function validateExecutionReceipt(raw: unknown): ExecutionReceipt {
       !Number.isInteger(ce.wal_sequence) ||
       ce.wal_sequence < 0
     ) {
-      throw new ReceiptValidationError("Invalid consensus_evidence fields in Stage C receipt");
+      throw new ReceiptValidationError(
+        "Invalid consensus_evidence fields: state_root and canonical_model_digest must be formatted as 'sha256:<64 hex chars>'"
+      );
+    }
+
+    if (exec.verdict !== "SUCCESS") {
+      throw new ReceiptValidationError(
+        `Contradictory consensus status: consensus_evidence with applied_status '${ce.applied_status}' strictly requires execution.verdict to be 'SUCCESS', got '${exec.verdict}'`
+      );
     }
   } else if (executedScope === "MODEL_DATASET_BINDING_ONLY") {
     if (hasConsensusEvidence) {
@@ -380,7 +389,8 @@ export function evaluateReceiptBinding(
   currentModelId: string,
   currentDatasetId: string,
   currentScope: ExecutionScopeName,
-  catalogBackendRef: string
+  catalogBackendRef: string,
+  catalogRepository: string = "chartjs333/delta"
 ): BindingEvaluationResult {
   const expectedDigest = computeWorkloadConfigDigest(
     currentModelId,
@@ -391,6 +401,7 @@ export function evaluateReceiptBinding(
   const actualDigest = receipt.workload.workload_config_digest;
 
   const matches =
+    receipt.provenance.repository === catalogRepository &&
     receipt.workload.model_plugin_id === currentModelId &&
     receipt.workload.dataset_id === currentDatasetId &&
     receipt.workload.executed_scope === currentScope &&
@@ -398,7 +409,9 @@ export function evaluateReceiptBinding(
 
   if (!matches) {
     let reason = "Workload configuration digest mismatch";
-    if (receipt.workload.model_plugin_id !== currentModelId) {
+    if (receipt.provenance.repository !== catalogRepository) {
+      reason = `Receipt repository '${receipt.provenance.repository}' does not match active catalog repository '${catalogRepository}'`;
+    } else if (receipt.workload.model_plugin_id !== currentModelId) {
       reason = `Receipt model '${receipt.workload.model_plugin_id}' does not match selected model '${currentModelId}'`;
     } else if (receipt.workload.dataset_id !== currentDatasetId) {
       reason = `Receipt dataset '${receipt.workload.dataset_id}' does not match selected dataset '${currentDatasetId}'`;
@@ -419,6 +432,8 @@ export function evaluateReceiptBinding(
   let evidenceType: EvidenceType = "LIVE_CONSENSUS_EVIDENCE";
   if (receipt.workload.executed_scope === "MODEL_DATASET_BINDING_ONLY") {
     evidenceType = "OBSERVATION_EVIDENCE";
+  } else if (receipt.workload.executed_scope === "PLUGIN_BOUNDARY") {
+    evidenceType = "PLUGIN_BOUNDARY_EVIDENCE";
   } else if (receipt.reference_anchor && !receipt.consensus_evidence) {
     evidenceType = "REFERENCE_ANCHOR";
   }

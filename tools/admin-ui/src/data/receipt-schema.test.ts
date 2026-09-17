@@ -150,6 +150,47 @@ describe("validateExecutionReceipt", () => {
       /Plugin-boundary receipt strictly forbids 'consensus_evidence' block/u
     );
   });
+  it("fails closed on non-sha256 state_root", () => {
+    const invalid = {
+      ...sampleMnistReceipt,
+      consensus_evidence: {
+        ...sampleMnistReceipt.consensus_evidence,
+        state_root: "not-a-root",
+      },
+    };
+    expect(() => validateExecutionReceipt(invalid)).toThrow(ReceiptValidationError);
+    expect(() => validateExecutionReceipt(invalid)).toThrow(
+      /state_root and canonical_model_digest must be formatted as 'sha256:<64 hex chars>'/u
+    );
+  });
+
+  it("fails closed on non-sha256 canonical_model_digest", () => {
+    const invalid = {
+      ...sampleMnistReceipt,
+      consensus_evidence: {
+        ...sampleMnistReceipt.consensus_evidence,
+        canonical_model_digest: "banana",
+      },
+    };
+    expect(() => validateExecutionReceipt(invalid)).toThrow(ReceiptValidationError);
+    expect(() => validateExecutionReceipt(invalid)).toThrow(
+      /state_root and canonical_model_digest must be formatted as 'sha256:<64 hex chars>'/u
+    );
+  });
+
+  it("fails closed when consensus_evidence declares APPLIED/COMMITTED but execution.verdict is ABORTED", () => {
+    const invalid = {
+      ...sampleMnistReceipt,
+      execution: {
+        verdict: "ABORTED",
+        terminal_status: "ABORTED_ON_TIMEOUT",
+      },
+    };
+    expect(() => validateExecutionReceipt(invalid)).toThrow(ReceiptValidationError);
+    expect(() => validateExecutionReceipt(invalid)).toThrow(
+      /strictly requires execution.verdict to be 'SUCCESS'/u
+    );
+  });
 });
 
 describe("evaluateReceiptBinding", () => {
@@ -179,6 +220,35 @@ describe("evaluateReceiptBinding", () => {
     );
     expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
     expect(result.evidenceType).toBe("OBSERVATION_EVIDENCE");
+  });
+
+  it("returns VERIFIED_EVIDENCE_LOADED with PLUGIN_BOUNDARY_EVIDENCE for plugin boundary receipt", () => {
+    const digest = computeWorkloadConfigDigest(
+      "mnist-centroid-v1",
+      "mnist-v1",
+      "PLUGIN_BOUNDARY",
+      SAMPLE_BACKEND_REF
+    );
+    const pluginReceipt = {
+      ...sampleMnistReceipt,
+      workload: {
+        ...sampleMnistReceipt.workload,
+        executed_scope: "PLUGIN_BOUNDARY",
+        workload_config_digest: digest,
+      },
+      consensus_evidence: undefined,
+    } as unknown as ExecutionReceipt;
+
+    const result = evaluateReceiptBinding(
+      pluginReceipt,
+      "mnist-centroid-v1",
+      "mnist-v1",
+      "PLUGIN_BOUNDARY",
+      SAMPLE_BACKEND_REF,
+      "chartjs333/delta"
+    );
+    expect(result.state).toBe("VERIFIED_EVIDENCE_LOADED");
+    expect(result.evidenceType).toBe("PLUGIN_BOUNDARY_EVIDENCE");
   });
 
   it("returns RECEIPT_LOADED_UNBOUND when model differs from active selector", () => {
@@ -215,5 +285,18 @@ describe("evaluateReceiptBinding", () => {
     );
     expect(result.state).toBe("RECEIPT_LOADED_UNBOUND");
     expect(result.reason).toContain("backend commit does not match");
+  });
+
+  it("returns RECEIPT_LOADED_UNBOUND when repository differs from catalog repository", () => {
+    const result = evaluateReceiptBinding(
+      validMnistReceipt,
+      "mnist-centroid-v1",
+      "mnist-v1",
+      "STAGE_C_REAL_DRQ1",
+      SAMPLE_BACKEND_REF,
+      "other-org/other-repo"
+    );
+    expect(result.state).toBe("RECEIPT_LOADED_UNBOUND");
+    expect(result.reason).toContain("does not match active catalog repository");
   });
 });

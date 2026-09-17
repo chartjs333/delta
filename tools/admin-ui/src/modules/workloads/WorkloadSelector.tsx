@@ -124,7 +124,8 @@ export function WorkloadSelector({
       selectedModelId,
       selectedDatasetId,
       selectedScope,
-      catalog.source.backend_ref
+      catalog.source.backend_ref,
+      catalog.source.repository
     );
     receiptState = bindingResult.state;
   }
@@ -517,6 +518,37 @@ export function WorkloadSelector({
                             <td><strong>{String(val)}</strong></td>
                           </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {bindingResult?.evidenceType === "PLUGIN_BOUNDARY_EVIDENCE" && (
+                <div className="evidence-block plugin-boundary-evidence-block">
+                  <h3 className="evidence-subtitle">Plugin Boundary Evidence</h3>
+                  <p className="observation-desc">
+                    Plugin boundary execution verified without live consensus round or WAL commits.
+                  </p>
+                  <div className="evidence-table-container">
+                    <table className="evidence-table">
+                      <tbody>
+                        <tr>
+                          <th>Execution Verdict</th>
+                          <td>
+                            <span className="status-pill pill-ok">
+                              {loadedReceipt.execution.verdict}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Terminal Status</th>
+                          <td>{loadedReceipt.execution.terminal_status}</td>
+                        </tr>
+                        <tr>
+                          <th>Executed Scope</th>
+                          <td><code>{loadedReceipt.workload.executed_scope}</code></td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
