@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T031",
+  "status": "EVIDENCE_VERIFIED",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t031_auth_policy_negative.py",
+  "verified_invariants": [
+    "S5C-T029-ROLE-001: Role escalation attempt (claimed OPERATOR by non-operator peer) rejected with ERR_ROLE_ESCALATION_DETECTED",
+    "S5C-T029-ROLE-002: Unauthenticated or anonymous peer credentials rejected with ERR_UNAUTHORIZED_PEER_OR_ROLE",
+    "S5C-T029-ROLE-002: Expired peer credentials rejected with ERR_AUTH_TOKEN_EXPIRED",
+    "ADR-0002-AUDIENCE: Mismatched audience token rejected with ERR_INVALID_AUDIENCE",
+    "ADR-0002-POLICY: Unsupported policy_version rejected with ERR_POLICY_VERSION_MISMATCH",
+    "S5C-T029-CATALOG-001: Stale catalog_backend_ref rejected with ERR_CATALOG_REF_MISMATCH",
+    "S5C-T029-CATALOG-002: Unsupported operation for plugin rejected with ERR_UNSUPPORTED_OPERATION",
+    "S5C-T029-CATALOG-002: Unsupported scope for plugin rejected with ERR_UNSUPPORTED_SCOPE",
+    "S5C-T029-ADMISSION-003: Expired admission record rejected before worker dispatch",
+    "ADR-0002-TTL: admission_expires_at <= intent.expires_at invariant enforced"
+  ]
+}
