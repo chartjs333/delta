@@ -1,59 +1,93 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T040-T044",
-  "status": "QUALIFICATION_COMPLETE",
-  "qualification_timestamp": "2026-09-18T09:00:00Z",
+  "status": "COMPLETE",
+  "qualification_timestamp": "2026-09-18T17:35:21Z",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
-  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "component_merge_shas": {
+    "worker": "61cf38311b6c70dd60022280225150458885030a",
+    "admin_ui": "13e8f4ea33784d302ad5d579a1a15e2a4468e70f",
+    "controller_followup": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+    "security": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85"
+  },
+  "final_base_main_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "integration_merge_sha": "c947843c90419cfc0b7d4e443073afbe84059ce4",
+  "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758",
+  "formal_impact": {
+    "classification": "NONE",
+    "protected_paths": [],
+    "base_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+    "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758",
+    "reason": "Step 5C transport adapter and cross-component tests do not change consensus transitions, vote/QC context, durability ordering, arithmetic, or protected formal artifacts."
+  },
   "acceptance_criteria": {
-    "AC-01": {
-      "description": "Declarative ExecutionIntent Schema & RFC 8785 Canonicalization",
-      "status": "PASSED"
-    },
-    "AC-02": {
-      "description": "Zone 2 Trusted Authorization Gate with Ed25519 AdmissionRecord",
-      "status": "PASSED"
-    },
-    "AC-03": {
-      "description": "Zone 3 Constrained Worker Execution without Shell/Arbitrary Code",
-      "status": "PASSED"
-    },
-    "AC-04": {
-      "description": "Zone 4 Consensus Spine Isolation (0 diff on protected paths)",
-      "status": "PASSED"
-    },
-    "AC-05": {
-      "description": "Durable Idempotency Ledger with Collision & Replay Rejection",
-      "status": "PASSED"
-    },
-    "AC-06": {
-      "description": "Unbroken Provenance Lineage: intent -> admission -> execution -> receipt",
-      "status": "PASSED"
-    },
-    "AC-07": {
-      "description": "Admin UI Live Intent Builder with Offline Boundary Independence",
-      "status": "PASSED"
-    },
-    "AC-08": {
-      "description": "Unattested Presentation Authority (No Trust Inflation)",
-      "status": "PASSED"
-    },
-    "AC-09": {
-      "description": "Fail-Closed Timeout, Cancellation, and Restart Recovery",
-      "status": "PASSED"
-    },
-    "AC-10": {
-      "description": "Zero Secrets, Clean Quality Gates (Ruff, Mypy, Pytest, Vitest)",
-      "status": "PASSED"
-    }
+    "AC-01": "PASSED: frozen schemas, independent JCS vectors, and contract tests",
+    "AC-02": "PASSED: explicit trusted authentication and runtime Ed25519 signing identity",
+    "AC-03": "PASSED: Worker preflight plus closed-enum dispatch",
+    "AC-04": "PASSED: protected-spine diff is empty against final base main",
+    "AC-05": "PASSED: durable idempotency, exact-one dispatch, collision/replay rejection",
+    "AC-06": "PASSED: exact intent-to-receipt lineage and post-execution tamper rejection",
+    "AC-07": "PASSED_WITH_SCOPE: UI golden intent artifact crosses Controller/Worker; production HTTP adapter is not claimed",
+    "AC-08": "PASSED: STRUCTURALLY_VALID_BOUND_RECEIPT and UNATTESTED UI labels; no consensus claims",
+    "AC-09": "PASSED: restart cache, timeout, cancellation, and fresh retry",
+    "AC-10": "PASSED_FOR_STEP5C: static quality gates clean; physical 8 GiB eligibility is not claimed"
   },
   "quality_gates": {
-    "step5c_tests": "54/54 PASSED (100%)",
-    "worker_python_tests": "203 passed, 2 skipped (100%)",
-    "admin_ui_vitest": "37 files, 202 tests PASSED (100%)",
-    "ruff_check": "CLEAN (0 errors)",
-    "ruff_format": "CLEAN (440 files formatted)",
-    "mypy": "CLEAN (99 source files checked, 0 errors)",
-    "protected_spine_diff": "STRICTLY 0 DIFF against origin/main"
+    "step5c_tests": {
+      "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests -q",
+      "result": "58 passed",
+      "exit_code": 0
+    },
+    "controller_tests": "50 passed",
+    "controller_ruff": "PASS",
+    "controller_format": "PASS",
+    "controller_mypy": "13 source files, 0 issues",
+    "contracts_tests": "13 passed",
+    "admin_ui": "37 files / 202 tests passed; typecheck, build, catalog, validators, offline audit passed",
+    "worker_python_local": "206 passed, 2 skipped; one physical-readiness probe failed because only 6333399040 of required 6442450944 bytes were free",
+    "worker_physical_claim": "NOT_CLAIMED; dedicated physical eligibility remains outside Step 5C release evidence",
+    "ruff_check_repository": "PASS",
+    "ruff_format_repository": "442 files already formatted",
+    "worker_mypy": "86 source files, 0 issues",
+    "secret_scan": "PASS: 1101 tracked text files with the detector source explicitly excluded",
+    "npm_audit_high": "PASS: 0 vulnerabilities",
+    "changed_path_scope": "17 paths; Controller integration adapter plus Step 5C tests/evidence/docs only",
+    "protected_spine_diff": "PASS: zero paths against 1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+    "github_ci_exact_head": "PENDING_PUSH"
+  },
+  "task_evidence_map": {
+    "step5c:T035": {
+      "commit": "ba1af7ab0ae19f9275dff476626884cbb232f758",
+      "test": "test_t035_transport_profile.py",
+      "artifact_sha256": "c69ba9caa39dc4cee3c8b8e9abd4dcd01bcae3ebf03e93814430c72fd0131c82"
+    },
+    "step5c:T036": {
+      "commit": "ba1af7ab0ae19f9275dff476626884cbb232f758",
+      "test": "test_t036_worker_dispatch_integration.py",
+      "artifact_sha256": "b0d03f4c740cae10be28450949ebbf577e3d6945d3565f9f423208c2d60ecc6c"
+    },
+    "step5c:T037": {
+      "commit": "ba1af7ab0ae19f9275dff476626884cbb232f758",
+      "test": "test_t037_admin_ui_integration.py",
+      "artifact_sha256": "011461427e446ec64e0c156089b05d3c92a5612dee955570168fb20829aeeb98"
+    },
+    "step5c:T038": {
+      "commit": "ba1af7ab0ae19f9275dff476626884cbb232f758",
+      "test": "test_t038_end_to_end_lineage.py",
+      "artifact_sha256": "f6ad66de657e9cc2b8d351b9cb061b9dfa503228b86efd0c8fc4187737bd46ce"
+    },
+    "step5c:T039": {
+      "commit": "ba1af7ab0ae19f9275dff476626884cbb232f758",
+      "test": "test_t039_recovery_terminal_semantics.py",
+      "artifact_sha256": "bd556985aec8f3acf0158fc18d709be8eef9d7e4de7e0ce17463efd7f061e13c"
+    }
+  },
+  "release_decision": {
+    "state": "READY_FOR_TWO_REVIEWER_GATE",
+    "reviewed_sha": null,
+    "unresolved_threads": "PENDING_REVIEW",
+    "mergeability": "PENDING_PUSH_AND_CI"
   }
 }

@@ -1,21 +1,55 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T038",
-  "status": "EVIDENCE_VERIFIED",
+  "status": "COMPLETE",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
-  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "controller_followup_merge_sha": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+  "security_merge_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "final_base_main_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "integration_merge_sha": "c947843c90419cfc0b7d4e443073afbe84059ce4",
+  "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758",
   "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t038_end_to_end_lineage.py",
   "verified_invariants": [
-    "S5C-T038-LINEAGE-001: Complete intent -> admission -> execution -> receipt unbroken provenance linkage",
-    "S5C-T038-LINEAGE-002: Exact digest match across intent, admission, status, and receipt provenance",
-    "S5C-T038-LINEAGE-003: Tamper rejection at boundary 1 (parity mismatch) with ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH",
-    "S5C-T038-LINEAGE-004: Tamper rejection at boundary 2 (intent payload/digest mismatch) with ERR_INTENT_DIGEST_MISMATCH",
-    "S5C-T038-LINEAGE-005: Tamper rejection at boundary 3 (grant elevation / admission digest mismatch) with ERR_ADMISSION_DIGEST_MISMATCH",
-    "S5C-T038-LINEAGE-006: Tamper rejection at boundary 4 (forged signature) with ERR_ADMISSION_SIGNATURE_INVALID"
+    "Intent, admission, execution status, and receipt carry one exact ID/digest lineage",
+    "Parity, intent digest, admission digest, signature, and post-execution receipt tampering fail closed",
+    "A receipt with divergent execution provenance becomes FAILED/ERR_RECEIPT_LINEAGE_MISMATCH and is never published",
+    "Receipt schema recursively excludes consensus fields and authority remains STRUCTURALLY_VALID_BOUND_RECEIPT"
   ],
+  "tamper_matrix": {
+    "intent_admission_parity": "ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH",
+    "intent_payload": "ERR_INTENT_DIGEST_MISMATCH",
+    "admission_grant": "ERR_ADMISSION_DIGEST_MISMATCH",
+    "admission_signature": "ERR_ADMISSION_SIGNATURE_INVALID",
+    "worker_receipt_provenance": "ERR_RECEIPT_LINEAGE_MISMATCH"
+  },
+  "successful_workload_proof": {
+    "operation": "TRAIN_TICKET",
+    "intent_id": "11111111-1111-4111-8111-111111111111",
+    "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
+    "admission_id": "d5c922bd-eca4-4f0e-953e-c1302a6d535f",
+    "admission_digest": "sha256:5c1b45b6ade4f404f8b3d855e46db9d7ceaa332acb0c5c5ad0ab800ec0c6fdb2",
+    "execution_id": "d3a089a1-ae0c-46b1-aec6-a6917fd887a8",
+    "receipt_digest": "sha256:0f25e2c035068c5d37f9df52ff9fc1d2e758f2843d91d55bb35cb1aa1d40e5ff",
+    "receipt_type": "DELTAREDUCE_EXECUTION_RECEIPT",
+    "terminal_state": "COMPLETED",
+    "receipt_verdict": "SUCCESS",
+    "signing_key_id": "step5c-e2e-runtime-key-v1",
+    "dispatch_count": 1,
+    "lineage_exact": true,
+    "authority_label": "STRUCTURALLY_VALID_BOUND_RECEIPT",
+    "consensus_attestation_claimed": false
+  },
   "test_summary": {
-    "total_tests": 2,
-    "passed": 2,
-    "failed": 0
+    "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests/test_t038_end_to_end_lineage.py -q",
+    "exit_code": 0,
+    "total_tests": 3,
+    "passed": 3,
+    "failed": 0,
+    "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758"
+  },
+  "artifact_sha256": {
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t038_end_to_end_lineage.py": "f6ad66de657e9cc2b8d351b9cb061b9dfa503228b86efd0c8fc4187737bd46ce"
   }
 }

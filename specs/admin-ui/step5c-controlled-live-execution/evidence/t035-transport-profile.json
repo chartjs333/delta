@@ -1,20 +1,34 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T035",
-  "status": "EVIDENCE_VERIFIED",
+  "status": "COMPLETE",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
-  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "controller_followup_merge_sha": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+  "security_merge_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "final_base_main_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "integration_merge_sha": "c947843c90419cfc0b7d4e443073afbe84059ce4",
+  "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758",
   "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py",
   "spec_document": "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md",
   "verified_invariants": [
-    "S5C-T035-TRANSPORT-001: Transport profile document defines RESTful live API surface with Zone 4 isolation",
-    "S5C-T035-TRANSPORT-002: Header auth handoff with redacting transport layer prevents credential leakage",
-    "S5C-T035-TRANSPORT-003: Payload limit (10MB) and HTTP 429 backpressure quota rejection enforced",
-    "S5C-T035-TRANSPORT-004: Zero consensus state mutation across live transport ingress"
+    "The HTTP/JSON deployment profile and required host controls are documented without claiming an implemented production HTTP server",
+    "LOCAL_PEER authentication uses an explicit trusted mapping and ignores caller-supplied roles",
+    "The runtime gate requires an explicit non-fixture signing identity and a durable idempotency ledger",
+    "Quota exhaustion is typed as ERR_QUOTA_EXCEEDED; HTTP 429 is a documented transport-host mapping",
+    "The integration gate has no consensus WAL, state-root, QC, or BFT mutation surface"
   ],
   "test_summary": {
+    "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py -q",
+    "exit_code": 0,
     "total_tests": 4,
     "passed": 4,
-    "failed": 0
+    "failed": 0,
+    "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758"
+  },
+  "artifact_sha256": {
+    "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md": "c69ba9caa39dc4cee3c8b8e9abd4dcd01bcae3ebf03e93814430c72fd0131c82",
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py": "f1bfca44df50f611a8e3d8ba65d61af0c749ed051ca7977f515d6156936b6bbf"
   }
 }

@@ -1,18 +1,37 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T036",
-  "status": "EVIDENCE_VERIFIED",
+  "status": "COMPLETE",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
-  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "component_merge_shas": {
+    "worker": "61cf38311b6c70dd60022280225150458885030a",
+    "controller_followup": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+    "security": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85"
+  },
+  "final_base_main_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "integration_merge_sha": "c947843c90419cfc0b7d4e443073afbe84059ce4",
+  "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758",
   "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t036_worker_dispatch_integration.py",
   "verified_invariants": [
-    "S5C-T036-DISPATCH-001: Controller Zone 2 to Worker Zone 3 preflight dispatch executes TRAIN_TICKET",
-    "S5C-T036-DISPATCH-002: Restart-safe execution identity persists in IdempotencyLedger",
-    "S5C-T036-DISPATCH-003: Tampered bundle or invalid controller signature fails closed at worker preflight boundary"
+    "Controller dispatches a schema-valid AuthorizedExecution through Worker preflight and the closed-enum dispatcher",
+    "Worker trust is configured with the Controller runtime key ID rather than frozen fixture signing metadata",
+    "COMPLETED receipt, JCS receipt digest, error, and terminal status are persisted before exposure",
+    "Restart and identical resubmission preserve one execution identity and dispatch_count remains exactly one",
+    "An untrusted Controller key is rejected before worker execution and dispatch_count remains zero"
   ],
   "test_summary": {
+    "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests/test_t036_worker_dispatch_integration.py -q",
+    "exit_code": 0,
     "total_tests": 3,
     "passed": 3,
-    "failed": 0
+    "failed": 0,
+    "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758"
+  },
+  "artifact_sha256": {
+    "delta-controller-python/src/deltacontroller/dispatch.py": "b0d03f4c740cae10be28450949ebbf577e3d6945d3565f9f423208c2d60ecc6c",
+    "delta-controller-python/src/deltacontroller/gate.py": "e4b8193ee653dec029d70129ceb3675b09d6b99abf9bd6a7464b63c8a29218bc",
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t036_worker_dispatch_integration.py": "66ce217f98bc91cc778e1648ae84e1626f451c8efbb67b9bdf109af0254c115e"
   }
 }

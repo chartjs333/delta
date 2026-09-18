@@ -1,18 +1,33 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T037",
-  "status": "EVIDENCE_VERIFIED",
+  "status": "COMPLETE",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
-  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "admin_ui_merge_sha": "13e8f4ea33784d302ad5d579a1a15e2a4468e70f",
+  "controller_followup_merge_sha": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+  "security_merge_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "final_base_main_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "integration_merge_sha": "c947843c90419cfc0b7d4e443073afbe84059ce4",
+  "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758",
   "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py",
   "verified_invariants": [
-    "S5C-T037-UI-001: Admin UI offline adapter retains strict zero-egress and presentation mock authority",
-    "S5C-T037-UI-002: Intent drafted by Admin UI intent builder is admitted and executed by live controller",
-    "S5C-T037-UI-003: Terminal receipt from live controller verifies as STRUCTURALLY_VALID_BOUND_RECEIPT without trust inflation"
+    "Admin UI offline MockLiveExecutionAdapter remains MOCK_ONLY, NONE_PHASE_4, zero-egress, and presentation-only",
+    "The exact frozen intent artifact bound by the TypeScript intent-builder/golden-vector tests is accepted and executed by Controller and Worker",
+    "The cross-contract flow returns status and an exact bound receipt without adding consensus claims",
+    "No production HTTP adapter, origin middleware, or browser credential flow is claimed by this evidence"
   ],
   "test_summary": {
+    "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py -q",
+    "exit_code": 0,
     "total_tests": 3,
     "passed": 3,
-    "failed": 0
+    "failed": 0,
+    "admin_ui_vitest": "37 files, 202 tests passed",
+    "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758"
+  },
+  "artifact_sha256": {
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py": "011461427e446ec64e0c156089b05d3c92a5612dee955570168fb20829aeeb98"
   }
 }
