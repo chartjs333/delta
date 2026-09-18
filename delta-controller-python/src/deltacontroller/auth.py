@@ -29,6 +29,9 @@ class AuthenticatedSubject:
         }
 
 
+VALID_ROLES = frozenset({"OPERATOR", "RESEARCHER", "AUDITOR"})
+
+
 class AuthenticationPort(Protocol):
     """Protocol for authenticating caller credentials."""
 
@@ -42,9 +45,11 @@ class StaticAuthenticationPort:
         self,
         token_map: dict[str, AuthenticatedSubject] | None = None,
         allow_local_peer: bool = True,
+        peer_subjects: dict[str, AuthenticatedSubject] | None = None,
     ) -> None:
         self.token_map = token_map or {}
         self.allow_local_peer = allow_local_peer
+        self.peer_subjects = peer_subjects or {}
 
     def authenticate(self, credentials: dict[str, Any] | None) -> AuthenticatedSubject:
         if not credentials:
@@ -61,22 +66,32 @@ class StaticAuthenticationPort:
             if not self.allow_local_peer:
                 raise AuthenticationFailedError("Local peer authentication disabled")
             subject_id = credentials.get("subject_id", "local-operator")
+            if subject_id in self.peer_subjects:
+                return self.peer_subjects[subject_id]
             roles = credentials.get("roles", ["OPERATOR", "RESEARCHER"])
+            for r in roles:
+                if r not in VALID_ROLES:
+                    raise AuthenticationFailedError(f"Invalid role '{r}' requested in credentials")
             return AuthenticatedSubject(
                 subject_id=subject_id,
                 authenticated_via="LOCAL_PEER_CREDENTIAL",
-                effective_roles=roles,
+                effective_roles=list(roles),
             )
 
         if auth_type == "MTLS":
             cert_cn = credentials.get("client_cn")
             if not cert_cn:
                 raise AuthenticationFailedError("Missing mTLS client certificate common name")
+            if cert_cn in self.peer_subjects:
+                return self.peer_subjects[cert_cn]
             roles = credentials.get("roles", ["OPERATOR"])
+            for r in roles:
+                if r not in VALID_ROLES:
+                    raise AuthenticationFailedError(f"Invalid role '{r}' requested in credentials")
             return AuthenticatedSubject(
                 subject_id=cert_cn,
                 authenticated_via="MTLS",
-                effective_roles=roles,
+                effective_roles=list(roles),
             )
 
         raise AuthenticationFailedError(f"Unsupported authentication credential type: {auth_type}")

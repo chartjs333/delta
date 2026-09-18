@@ -37,6 +37,7 @@ def build_execution_status(
     admission_id: str,
     admission_digest: str,
     state: str,
+    operation: str = "TRAIN_TICKET",
     receipt_digest: str | None = None,
     error: dict[str, Any] | None = None,
     updated_at: str | None = None,
@@ -57,15 +58,23 @@ def build_execution_status(
         "intent_digest": intent_digest,
         "admission_id": admission_id,
         "admission_digest": admission_digest,
+        "operation": operation,
         "state": state,
         "updated_at": now_iso,
         "terminal": is_terminal,
     }
 
     if state == "COMPLETED":
-        if not receipt_digest:
-            raise ValueError("receipt_digest is required when state is COMPLETED")
-        doc["receipt_digest"] = receipt_digest
+        if operation == "MATERIALIZE_DATASET":
+            if receipt_digest:
+                doc["receipt_digest"] = receipt_digest
+        else:
+            if not receipt_digest:
+                op_name = operation or "unspecified"
+                raise ValueError(
+                    f"receipt_digest is required when state is COMPLETED for operation '{op_name}'"
+                )
+            doc["receipt_digest"] = receipt_digest
 
     if state in {"FAILED", "TIMED_OUT", "CANCELLED"}:
         if not error:

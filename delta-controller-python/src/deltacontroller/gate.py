@@ -240,6 +240,7 @@ class AuthorizationGate:
             intent_digest=intent_digest,
             admission_id=admission_id,
             admission_digest=admission_digest,
+            operation=intent["operation"],
             state=ledger_rec.status,
             updated_at=ledger_rec.updated_at,
             schema_registry=self.schema_registry,
