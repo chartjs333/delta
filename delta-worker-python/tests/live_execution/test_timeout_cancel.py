@@ -79,3 +79,33 @@ def test_c_wa_021_cancellation_prevents_receipt_emission(train_bundle: dict) -> 
     assert exc_info.value.code == "ERR_CANCELLED"
     mock_runner.train_ticket.assert_not_called()
     mock_runner.emit_execution_receipt.assert_not_called()
+
+
+def test_c_wa_020_wall_clock_timeout_does_not_block_on_hanging_thread(
+    train_bundle: dict,
+) -> None:
+    """Prove dispatch() unblocks immediately on timeout without waiting on a hanging runner."""
+    import time
+
+    preflight = AuthorizedExecutionPreflight()
+    now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
+    ctx = preflight.validate(train_bundle, current_time=now)
+
+    hanging_runner = MagicMock()
+
+    def hang(*args, **kwargs):
+        time.sleep(10)
+        return MagicMock()
+
+    hanging_runner.train_ticket.side_effect = hang
+    fast_ctx = replace(ctx, timeout_seconds=1)
+    dispatcher = ClosedEnumWorkerDispatcher()
+
+    start_time = time.monotonic()
+    with pytest.raises(WorkerTimeoutError) as exc_info:
+        dispatcher.dispatch(fast_ctx, runner_override=hanging_runner)
+    elapsed = time.monotonic() - start_time
+
+    assert exc_info.value.code == "ERR_TIMEOUT"
+    assert elapsed < 3.0, f"Dispatch waited {elapsed:.2f}s instead of returning promptly on timeout"
+    hanging_runner.emit_execution_receipt.assert_not_called()

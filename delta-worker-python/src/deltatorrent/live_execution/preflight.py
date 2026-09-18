@@ -49,11 +49,31 @@ class AuthorizedExecutionPreflight:
         self,
         trusted_public_key_hex: str | None = None,
         pinned_key_ids: frozenset[str] | set[str] | None = None,
+        trusted_keys: dict[str, str] | None = None,
     ) -> None:
-        self.trusted_public_key_hex = trusted_public_key_hex or FIXTURE_PUBLIC_KEY_HEX
-        self.pinned_key_ids = (
-            frozenset(pinned_key_ids) if pinned_key_ids is not None else self.PINNED_KEY_IDS
-        )
+        self.trusted_keys: dict[str, str] = dict(trusted_keys) if trusted_keys else {}
+        if "step5c-fixture-ed25519" not in self.trusted_keys:
+            self.trusted_keys["step5c-fixture-ed25519"] = FIXTURE_PUBLIC_KEY_HEX
+
+        if trusted_public_key_hex:
+            p_ids = pinned_key_ids or self.PINNED_KEY_IDS
+            for kid in p_ids:
+                self.trusted_keys[kid] = trusted_public_key_hex
+            self.trusted_public_key_hex = trusted_public_key_hex
+        else:
+            self.trusted_public_key_hex = self.trusted_keys.get(
+                "step5c-fixture-ed25519", FIXTURE_PUBLIC_KEY_HEX
+            )
+
+        if pinned_key_ids is not None:
+            self.pinned_key_ids = frozenset(pinned_key_ids)
+        else:
+            self.pinned_key_ids = frozenset(self.trusted_keys.keys())
+
+    def register_trusted_key(self, key_id: str, public_key_hex: str) -> None:
+        """Register an authoritative controller signing key and key_id contract."""
+        self.trusted_keys[key_id] = public_key_hex
+        self.pinned_key_ids = frozenset(self.trusted_keys.keys())
 
     def validate(
         self,
@@ -136,14 +156,16 @@ class AuthorizedExecutionPreflight:
                 f"Unsupported signature algorithm '{algorithm}'. Expected ED25519",
             )
 
-        if key_id not in self.pinned_key_ids:
+        if not key_id or key_id not in self.trusted_keys:
+            allowed_keys = sorted(self.trusted_keys.keys())
             raise WorkerPreflightError(
                 "ERR_ADMISSION_SIGNATURE_INVALID",
-                f"Unknown or un-pinned key_id '{key_id}'. Allowed: {sorted(self.pinned_key_ids)}",
+                f"Unknown or un-pinned key_id '{key_id}'. Allowed: {allowed_keys}",
             )
 
-        # 5. Ed25519 signature verification
-        if not verify_admission_signature(admission, self.trusted_public_key_hex):
+        # 5. Ed25519 signature verification using pinned key for key_id
+        trusted_pubkey = self.trusted_keys[key_id]
+        if not verify_admission_signature(admission, trusted_pubkey):
             raise WorkerPreflightError(
                 "ERR_ADMISSION_SIGNATURE_INVALID",
                 "Admission signature verification failed over RFC8785(admission \\ signature)",
@@ -207,11 +229,47 @@ class AuthorizedExecutionPreflight:
                 f"TRAIN_TICKET requires scope 'PLUGIN_BOUNDARY', got '{requested_scope}'",
             )
 
-        # 8. Effective resource grants (allow_downloads strictly from admission grant)
-        grants = admission.get("resource_grants", {})
-        effective_allow_downloads = bool(grants.get("allow_downloads", False))
-        timeout_seconds = int(grants.get("timeout_seconds", 900))
-        max_memory_bytes = int(grants.get("max_memory_bytes", 2 * 1024 * 1024 * 1024))
+        # 8. Authoritative resource grants (strictly required, fail-closed)
+        grants = admission.get("resource_grants")
+        if not isinstance(grants, dict):
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                "AdmissionRecord missing required 'resource_grants' object",
+            )
+
+        if "allow_downloads" not in grants or not isinstance(grants["allow_downloads"], bool):
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                "resource_grants missing or invalid 'allow_downloads' boolean grant",
+            )
+        effective_allow_downloads = grants["allow_downloads"]
+
+        timeout_val = grants.get("timeout_seconds")
+        if (
+            timeout_val is None
+            or isinstance(timeout_val, bool)
+            or not isinstance(timeout_val, int)
+            or timeout_val < 1
+            or timeout_val > 3600
+        ):
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                "resource_grants missing or invalid 'timeout_seconds' integer grant",
+            )
+        timeout_seconds = timeout_val
+
+        memory_val = grants.get("max_memory_bytes")
+        if (
+            memory_val is None
+            or isinstance(memory_val, bool)
+            or not isinstance(memory_val, int)
+            or memory_val < 1
+        ):
+            raise WorkerPreflightError(
+                "ERR_SCHEMA_VALIDATION_FAILED",
+                "resource_grants missing or invalid 'max_memory_bytes' integer grant",
+            )
+        max_memory_bytes = memory_val
 
         # Sole authoritative execution_id comes from admission.execution_id
         execution_id = admission.get("execution_id")

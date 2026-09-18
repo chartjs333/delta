@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 from typing import Any
 
 # Pinned fixture public key hex matching ADR 0002 / T008 contract fixtures
@@ -15,24 +16,65 @@ FIXTURE_PUBLIC_KEY_HEX = "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc86
 
 
 def _number_to_jcs(value: int | float) -> str:
+    """Serialize number per RFC 8785 Section 3.2.2.3 and ECMA-262 Section 7.1.12.1."""
     if isinstance(value, bool):
-        return "true" if value else "false"
+        raise TypeError("bool is not a number")
     if isinstance(value, int):
         return str(value)
     if isinstance(value, float):
-        if not math_isfinite(value):
-            raise ValueError("JCS does not permit non-finite floats")
+        if not math.isfinite(value):
+            raise ValueError("non-finite numbers are not valid JCS")
         if value == 0.0:
             return "0"
-        text = json.dumps(value)
-        return text
+        if value < 0:
+            return "-" + _number_to_jcs(-value)
+
+        s_rep = repr(value)
+        if "e" in s_rep or "E" in s_rep:
+            parts = s_rep.lower().split("e")
+            significand = parts[0]
+            exp = int(parts[1])
+        else:
+            significand = s_rep
+            exp = 0
+
+        if "." in significand:
+            int_part, frac_part = significand.split(".")
+            digits = int_part + frac_part
+            dec_places = len(frac_part)
+        else:
+            digits = significand
+            dec_places = 0
+
+        digits = digits.lstrip("0")
+        if not digits:
+            return "0"
+
+        trimmed_digits = digits.rstrip("0")
+        trailing_zeroes = len(digits) - len(trimmed_digits)
+        dec_places -= trailing_zeroes
+        digits = trimmed_digits
+
+        k = len(digits)
+        n = exp - dec_places + k
+
+        # Rule 6: If k <= n <= 21
+        if k <= n <= 21:
+            return digits + "0" * (n - k)
+        # Rule 7: If 0 < n <= 21 and n < k
+        if 0 < n <= 21:
+            return digits[:n] + "." + digits[n:]
+        # Rule 8: If -6 < n <= 0
+        if -6 < n <= 0:
+            return "0." + "0" * (-n) + digits
+        # Rule 9 & 10: Exponential
+        exp_val = n - 1
+        sign = "+" if exp_val >= 0 else "-"
+        exp_str = f"e{sign}{abs(exp_val)}"
+        if k == 1:
+            return digits + exp_str
+        return digits[0] + "." + digits[1:] + exp_str
     raise TypeError(f"unsupported number type: {type(value)!r}")
-
-
-def math_isfinite(val: float) -> bool:
-    import math
-
-    return math.isfinite(val)
 
 
 def jcs_dumps(obj: Any) -> str:
