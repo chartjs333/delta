@@ -114,6 +114,113 @@
         },
         "schema_version": "1.0.0"
       }
+    },
+    {
+      "canonical_json": "{\"val\":0}",
+      "name": "number-zero",
+      "sha256": "sha256:3d327872b987fdbbdece95d0d7bec019bb18cf392356e7e155a3606a1415070a",
+      "value": {
+        "val": 0
+      }
+    },
+    {
+      "canonical_json": "{\"val\":0}",
+      "name": "number-negative-zero",
+      "sha256": "sha256:3d327872b987fdbbdece95d0d7bec019bb18cf392356e7e155a3606a1415070a",
+      "value": {
+        "val": 0
+      }
+    },
+    {
+      "canonical_json": "{\"val\":42}",
+      "name": "number-positive-int",
+      "sha256": "sha256:7a9bcbf01c867f7763a1c57dcdef27c6794734fba9c8ee1e59f2bb5daf603257",
+      "value": {
+        "val": 42
+      }
+    },
+    {
+      "canonical_json": "{\"val\":-42}",
+      "name": "number-negative-int",
+      "sha256": "sha256:17f72f635414e01a3d60fa5bc84b396cc771965da8b8b5d21afa569faed3720f",
+      "value": {
+        "val": -42
+      }
+    },
+    {
+      "canonical_json": "{\"val\":9007199254740991}",
+      "name": "number-max-safe-int",
+      "sha256": "sha256:4ede97d1128130648ff7124344efa71277c9b25a113bd36dd46113a69a74df52",
+      "value": {
+        "val": 9007199254740991
+      }
+    },
+    {
+      "canonical_json": "{\"val\":-9007199254740991}",
+      "name": "number-min-safe-int",
+      "sha256": "sha256:48360b351eb4960aa265247d5032240d9c86be1217da50468663c7651268a120",
+      "value": {
+        "val": -9007199254740991
+      }
+    },
+    {
+      "canonical_json": "{\"val\":1000000000000000}",
+      "name": "number-large-int",
+      "sha256": "sha256:9bf4e6f781b9ad4543ded93f39963483c859da88497582eb22211b5d913db3b7",
+      "value": {
+        "val": 1000000000000000
+      }
+    },
+    {
+      "canonical_json": "{\"val\":1.25}",
+      "name": "number-fraction",
+      "sha256": "sha256:4d07dfada045f75ea5c2c99515bb08251f39d77262fc725f9e778d3a21cedbf9",
+      "value": {
+        "val": 1.25
+      }
+    },
+    {
+      "canonical_json": "{\"arr\":[],\"obj\":{}}",
+      "name": "empty-structures",
+      "sha256": "sha256:7c557880ceed861401b04be6735c9708e326427e072562fd259da6f6a2612b96",
+      "value": {
+        "arr": [],
+        "obj": {}
+      }
+    },
+    {
+      "canonical_json": "{\"escapes\":\"\\\"\\\\\\b\\f\\n\\r\\t\"}",
+      "name": "string-escapes",
+      "sha256": "sha256:ed2467273354daf01e8b50d4f40366f5b788a0a2fd3811b8c52d85e86d2b4239",
+      "value": {
+        "escapes": "\"\\\b\f\n\r\t"
+      }
+    },
+    {
+      "canonical_json": "{\"emoji\":\"😀\",\"music\":\"𝄞\"}",
+      "name": "unicode-surrogate-pairs",
+      "sha256": "sha256:b6fb69c11b66aa22265ff67c0c4a3941f7f9f789fb535c1745a139cb43825557",
+      "value": {
+        "emoji": "😀",
+        "music": "𝄞"
+      }
+    },
+    {
+      "canonical_json": "{\"a\":[1,{\"b\":[2,3]}],\"c\":4}",
+      "name": "nested-arrays-and-objects",
+      "sha256": "sha256:a9245b19e980c427449bc02db2355833417bf0d329fd2ff9536b807856243cf5",
+      "value": {
+        "a": [
+          1,
+          {
+            "b": [
+              2,
+              3
+            ]
+          }
+        ],
+        "c": 4
+      }
     }
   ]
 }

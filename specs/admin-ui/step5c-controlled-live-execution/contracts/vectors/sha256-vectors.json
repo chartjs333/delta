@@ -7,7 +7,11 @@
     },
     {
       "name": "execution-status",
-      "sha256": "sha256:90a6772af0444014cccca5aac7ff8d1eaabe0ef7e437162bcb45213b74c5d924"
+      "sha256": "sha256:b0d38d611d0b7ebb3243797025c9735ea71d4752a1f23228c054f5c26a071415"
+    },
+    {
+      "name": "execution-status-materialize-dataset",
+      "sha256": "sha256:68cc2e855f12afd02405588301c6c1dec435f21b20568b13dddc4e01adb2b031"
     },
     {
       "name": "receipt-lineage-extension",

@@ -2,6 +2,60 @@
   "$id": "https://delta.local/schemas/step5c/execution-receipt-lineage-extension.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": true,
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "round_id"
+        ]
+      },
+      {
+        "required": [
+          "state_root"
+        ]
+      },
+      {
+        "required": [
+          "wal_sequence"
+        ]
+      },
+      {
+        "required": [
+          "qc"
+        ]
+      },
+      {
+        "required": [
+          "apply_qc"
+        ]
+      },
+      {
+        "required": [
+          "consensus_round"
+        ]
+      },
+      {
+        "required": [
+          "validator_signatures"
+        ]
+      },
+      {
+        "required": [
+          "bft_quorum"
+        ]
+      },
+      {
+        "required": [
+          "stage_c_claim"
+        ]
+      },
+      {
+        "required": [
+          "consensus_view"
+        ]
+      }
+    ]
+  },
   "properties": {
     "execution": {
       "additionalProperties": true,
@@ -31,6 +85,31 @@
             "required": [
               "apply_qc"
             ]
+          },
+          {
+            "required": [
+              "consensus_round"
+            ]
+          },
+          {
+            "required": [
+              "validator_signatures"
+            ]
+          },
+          {
+            "required": [
+              "bft_quorum"
+            ]
+          },
+          {
+            "required": [
+              "stage_c_claim"
+            ]
+          },
+          {
+            "required": [
+              "consensus_view"
+            ]
           }
         ]
       },
@@ -50,6 +129,22 @@
             "FAILED"
           ],
           "type": "string"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "round_id",
+            "state_root",
+            "wal_sequence",
+            "qc",
+            "apply_qc",
+            "consensus_round",
+            "validator_signatures",
+            "bft_quorum",
+            "stage_c_claim",
+            "consensus_view"
+          ]
         }
       },
       "required": [
@@ -85,6 +180,31 @@
           {
             "required": [
               "apply_qc"
+            ]
+          },
+          {
+            "required": [
+              "consensus_round"
+            ]
+          },
+          {
+            "required": [
+              "validator_signatures"
+            ]
+          },
+          {
+            "required": [
+              "bft_quorum"
+            ]
+          },
+          {
+            "required": [
+              "stage_c_claim"
+            ]
+          },
+          {
+            "required": [
+              "consensus_view"
             ]
           }
         ]
@@ -135,6 +255,22 @@
           "type": "string"
         }
       },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "round_id",
+            "state_root",
+            "wal_sequence",
+            "qc",
+            "apply_qc",
+            "consensus_round",
+            "validator_signatures",
+            "bft_quorum",
+            "stage_c_claim",
+            "consensus_view"
+          ]
+        }
+      },
       "required": [
         "repository",
         "backend_commit",
@@ -160,6 +296,60 @@
     },
     "workload": {
       "additionalProperties": true,
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "round_id"
+            ]
+          },
+          {
+            "required": [
+              "state_root"
+            ]
+          },
+          {
+            "required": [
+              "wal_sequence"
+            ]
+          },
+          {
+            "required": [
+              "qc"
+            ]
+          },
+          {
+            "required": [
+              "apply_qc"
+            ]
+          },
+          {
+            "required": [
+              "consensus_round"
+            ]
+          },
+          {
+            "required": [
+              "validator_signatures"
+            ]
+          },
+          {
+            "required": [
+              "bft_quorum"
+            ]
+          },
+          {
+            "required": [
+              "stage_c_claim"
+            ]
+          },
+          {
+            "required": [
+              "consensus_view"
+            ]
+          }
+        ]
+      },
       "properties": {
         "dataset_id": {
           "maxLength": 64,
@@ -183,6 +373,22 @@
           "type": "string"
         }
       },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "round_id",
+            "state_root",
+            "wal_sequence",
+            "qc",
+            "apply_qc",
+            "consensus_round",
+            "validator_signatures",
+            "bft_quorum",
+            "stage_c_claim",
+            "consensus_view"
+          ]
+        }
+      },
       "required": [
         "model_plugin_id",
         "dataset_id",
@@ -190,6 +396,22 @@
         "workload_config_digest"
       ],
       "type": "object"
+    }
+  },
+  "propertyNames": {
+    "not": {
+      "enum": [
+        "round_id",
+        "state_root",
+        "wal_sequence",
+        "qc",
+        "apply_qc",
+        "consensus_round",
+        "validator_signatures",
+        "bft_quorum",
+        "stage_c_claim",
+        "consensus_view"
+      ]
     }
   },
   "required": [
