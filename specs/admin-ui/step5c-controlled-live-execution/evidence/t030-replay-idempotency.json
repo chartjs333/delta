@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T030",
+  "status": "COMPLETE",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "controller_follow_up_merge_sha": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+  "verification": {
+    "command": "python -m pytest specs/admin-ui/step5c-controlled-live-execution/tests -q",
+    "suite_result": "41 passed",
+    "resolved_finding": "S5C-SEC-T030-CONTROLLER-GATE-NONATOMIC-DUPLICATE",
+    "result": "Concurrent exact duplicates now share one durable execution identity, return one ADMITTED plus one ALREADY_ADMITTED result, and produce exactly one worker dispatch."
+  },
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t030_replay_idempotency.py",
+  "verified_invariants": [
+    "S5C-T029-REPLAY-001: Duplicate exact intent submission returns ALREADY_ADMITTED with zero duplicate worker starts",
+    "S5C-T029-REPLAY-002: Same intent_id with altered payload/digest rejected with frozen ERR_INTENT_ID_DIGEST_CONFLICT",
+    "S5C-T029-REPLAY-004: Submission of different intent_id with colliding digest rejected with ERR_INTENT_COLLISION_DETECTED",
+    "S5C-T029-REPLAY-003: Replay query from different subject rejected with frozen ERR_UNAUTHORIZED_CALLER",
+    "ADR-0002-LEDGER: Controller reboot restores idempotency ledger without re-executing completed workloads",
+    "ADR-0002-INTEGRITY: Tampered intent_digest rejected fail-closed before ledger entry",
+    "ADR-0002-DURABILITY: Duplicate submission arriving during post-commit dispatch observes the committed identity and does not start a second worker"
+  ]
+}

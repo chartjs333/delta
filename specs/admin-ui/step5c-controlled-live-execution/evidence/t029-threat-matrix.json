@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T029",
+  "status": "COMPLETE",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "branch": "feature/step5c-security",
+  "artifacts": [
+    {
+      "path": "specs/admin-ui/step5c-controlled-live-execution/security/t029-threat-negative-test-matrix.md",
+      "purpose": "Human-readable threat and negative-test matrix"
+    },
+    {
+      "path": "specs/admin-ui/step5c-controlled-live-execution/security/t029-threat-negative-test-matrix.json",
+      "purpose": "Machine-readable threat and negative-test matrix"
+    },
+    {
+      "path": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t029_threat_matrix.py",
+      "purpose": "Shape and coverage regression test for the matrix"
+    }
+  ],
+  "covers_required_categories": [
+    "RCE",
+    "PATH_MODULE_INJECTION",
+    "MALICIOUS_JSON_JCS",
+    "REPLAY",
+    "FORGED_ADMISSION",
+    "CONFUSED_DEPUTY",
+    "ROLE_SPOOFING",
+    "QUOTA_RESOURCE_EXHAUSTION",
+    "STALE_CATALOG",
+    "FORGED_LINEAGE"
+  ],
+  "executable_follow_up_tests": [
+    "step5c:T030",
+    "step5c:T031",
+    "step5c:T032",
+    "step5c:T033",
+    "step5c:T034"
+  ],
+  "production_binding_policy": "Security branch now verifies the matrix through production controller and worker boundary tests after corrected contracts were merged."
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T031",
+  "status": "COMPLETE",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t031_auth_policy_negative.py",
+  "verified_invariants": [
+    "S5C-T029-ROLE-001: declared_operator cannot override production authenticated_subject authority",
+    "S5C-T029-ROLE-001: claimed OPERATOR role by AUDITOR-only peer rejected by production PolicyEngine with ERR_ROLE_FORBIDDEN",
+    "S5C-T029-ROLE-002: missing credentials rejected by production AuthenticationPort with ERR_AUTHENTICATION_REQUIRED",
+    "S5C-T029-ROLE-002: invalid LOCAL_PEER_CREDENTIAL role rejected with ERR_AUTHENTICATION_FAILED",
+    "S5C-T029-ROLE-003: token credential mix-up rejected by production idempotency ownership with ERR_UNAUTHORIZED_CALLER",
+    "S5C-T029-CATALOG-001: stale catalog_backend_ref rejected with ERR_CATALOG_REF_MISMATCH",
+    "S5C-T029-CATALOG-002: unsupported scope rejected by production CatalogValidator with ERR_OPERATION_SCOPE_UNSUPPORTED",
+    "S5C-T029-POLICY-001: unknown operation rejected by production PolicyEngine with ERR_POLICY_DENIED"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T033",
+  "status": "COMPLETE",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t033_parser_fuzz_dispatch_boundaries.py",
+  "verified_invariants": [
+    "S5C-T029-PATH-001: Path traversal attacks fail production IngressParser schema validation or worker materialize dispatch before runner call",
+    "S5C-T029-RCE-001: Command injection and Python code smuggling fail production IngressParser schema validation",
+    "S5C-T029-MODULE-001: Closed enum worker dispatch rejects arbitrary operations with ERR_OPERATION_SCOPE_UNSUPPORTED",
+    "S5C-T029-JCS-001: Production worker RFC 8785 canonicalizer preserves UTF-16 key ordering",
+    "S5C-T029-ADMISSION-001: Production worker Ed25519 verifier rejects bit-flip fuzzing with no crashes",
+    "S5C-T029-JSON-001: Production controller canonicalizer rejects non-finite floats fail-closed"
+  ]
+}
