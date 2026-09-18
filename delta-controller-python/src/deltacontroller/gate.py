@@ -215,9 +215,22 @@ class AuthorizationGate:
         self.schema_registry.validate("authorized-execution", bundle)
 
         # 11. Dispatch to Zone 3 worker
-        dispatch_result = self.dispatch_port.dispatch(bundle)
+        try:
+            dispatch_result = self.dispatch_port.dispatch(bundle, current_time=now)
+        except TypeError:
+            dispatch_result = self.dispatch_port.dispatch(bundle)
         worker_state = dispatch_result.get("status", "RUNNING")
-        ledger_rec = self.idempotency_ledger.update_execution(execution_id, status=worker_state)
+        receipt = dispatch_result.get("receipt") or dispatch_result.get("terminal_receipt")
+        receipt_digest = dispatch_result.get("receipt_digest")
+        error = dispatch_result.get("error")
+
+        ledger_rec = self.idempotency_ledger.update_execution(
+            execution_id,
+            status=worker_state,
+            receipt_digest=receipt_digest,
+            terminal_receipt=receipt,
+            error=error,
+        )
 
         # 12. Audit event
         self.audit_logger.log_event(
@@ -241,6 +254,8 @@ class AuthorizationGate:
             admission_id=admission_id,
             admission_digest=admission_digest,
             state=ledger_rec.status,
+            receipt_digest=ledger_rec.receipt_digest,
+            error=ledger_rec.error,
             updated_at=ledger_rec.updated_at,
             schema_registry=self.schema_registry,
         )
@@ -250,4 +265,24 @@ class AuthorizationGate:
             "admission": admission_doc,
             "bundle": bundle,
             "status": status_doc,
+            "receipt": ledger_rec.terminal_receipt,
         }
+
+    def get_status(self, execution_id: str) -> dict[str, Any] | None:
+        """Retrieve the execution status document by execution_id."""
+        rec = self.idempotency_ledger.get_by_execution_id(execution_id)
+        if not rec:
+            return None
+        adm = rec.admission_record or {}
+        return build_execution_status(
+            execution_id=rec.execution_id,
+            intent_id=rec.intent_id,
+            intent_digest=rec.intent_digest,
+            admission_id=adm.get("admission_id", rec.execution_id),
+            admission_digest=adm.get("admission_digest", rec.intent_digest),
+            state=rec.status,
+            receipt_digest=rec.receipt_digest,
+            error=rec.error,
+            updated_at=rec.updated_at,
+            schema_registry=self.schema_registry,
+        )

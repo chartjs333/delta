@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T037",
+  "status": "EVIDENCE_VERIFIED",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py",
+  "verified_invariants": [
+    "S5C-T037-UI-001: Admin UI offline adapter retains strict zero-egress and presentation mock authority",
+    "S5C-T037-UI-002: Intent drafted by Admin UI intent builder is admitted and executed by live controller",
+    "S5C-T037-UI-003: Terminal receipt from live controller verifies as STRUCTURALLY_VALID_BOUND_RECEIPT without trust inflation"
+  ],
+  "test_summary": {
+    "total_tests": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T038",
+  "status": "EVIDENCE_VERIFIED",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t038_end_to_end_lineage.py",
+  "verified_invariants": [
+    "S5C-T038-LINEAGE-001: Complete intent -> admission -> execution -> receipt unbroken provenance linkage",
+    "S5C-T038-LINEAGE-002: Exact digest match across intent, admission, status, and receipt provenance",
+    "S5C-T038-LINEAGE-003: Tamper rejection at boundary 1 (parity mismatch) with ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH",
+    "S5C-T038-LINEAGE-004: Tamper rejection at boundary 2 (intent payload/digest mismatch) with ERR_INTENT_DIGEST_MISMATCH",
+    "S5C-T038-LINEAGE-005: Tamper rejection at boundary 3 (grant elevation / admission digest mismatch) with ERR_ADMISSION_DIGEST_MISMATCH",
+    "S5C-T038-LINEAGE-006: Tamper rejection at boundary 4 (forged signature) with ERR_ADMISSION_SIGNATURE_INVALID"
+  ],
+  "test_summary": {
+    "total_tests": 2,
+    "passed": 2,
+    "failed": 0
+  }
+}

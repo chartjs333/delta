@@ -19,7 +19,11 @@ from deltacontroller.canonical import (
     verify_intent_digest,
 )
 from deltacontroller.catalog import CatalogValidator
-from deltacontroller.dispatch import MockWorkerDispatchPort, WorkerDispatchPort
+from deltacontroller.dispatch import (
+    IntegratedWorkerDispatchPort,
+    MockWorkerDispatchPort,
+    WorkerDispatchPort,
+)
 from deltacontroller.errors import ControllerError
 from deltacontroller.gate import AuthorizationGate
 from deltacontroller.idempotency import IdempotencyLedger, LedgerRecord
@@ -39,6 +43,7 @@ __all__ = [
     "ControllerError",
     "IdempotencyLedger",
     "IngressParser",
+    "IntegratedWorkerDispatchPort",
     "LedgerRecord",
     "MockWorkerDispatchPort",
     "PolicyEngine",

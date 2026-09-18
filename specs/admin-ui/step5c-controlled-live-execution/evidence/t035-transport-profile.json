@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T035",
+  "status": "EVIDENCE_VERIFIED",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py",
+  "spec_document": "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md",
+  "verified_invariants": [
+    "S5C-T035-TRANSPORT-001: Transport profile document defines RESTful live API surface with Zone 4 isolation",
+    "S5C-T035-TRANSPORT-002: Header auth handoff with redacting transport layer prevents credential leakage",
+    "S5C-T035-TRANSPORT-003: Payload limit (10MB) and HTTP 429 backpressure quota rejection enforced",
+    "S5C-T035-TRANSPORT-004: Zero consensus state mutation across live transport ingress"
+  ],
+  "test_summary": {
+    "total_tests": 4,
+    "passed": 4,
+    "failed": 0
+  }
+}

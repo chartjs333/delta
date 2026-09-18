@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T039",
+  "status": "EVIDENCE_VERIFIED",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t039_recovery_terminal_semantics.py",
+  "verified_invariants": [
+    "S5C-T039-RECOVERY-001: Controller restart recovers execution status and cached terminal receipt across reboot",
+    "S5C-T039-RECOVERY-002: Duplicate submission returns ALREADY_ADMITTED with cached receipt without re-dispatching",
+    "S5C-T039-RECOVERY-003: Re-submission with altered payload rejected with ERR_INTENT_ID_DIGEST_CONFLICT",
+    "S5C-T039-RECOVERY-004: Re-submission by unauthorized caller rejected with ERR_UNAUTHORIZED_CALLER",
+    "S5C-T039-RECOVERY-005: Duplicate digest under different intent_id rejected with ERR_INTENT_COLLISION_DETECTED",
+    "S5C-T039-RECOVERY-006: Cancellation produces terminal CANCELLED state and retry requires fresh intent with retry_of_intent_id"
+  ],
+  "test_summary": {
+    "total_tests": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}
