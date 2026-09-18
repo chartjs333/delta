@@ -1,10 +1,122 @@
 {
+  "$defs": {
+    "safeExtensionValue": {
+      "allOf": [
+        {
+          "if": {
+            "type": "object"
+          },
+          "then": {
+            "additionalProperties": {
+              "$ref": "#/$defs/safeExtensionValue"
+            },
+            "propertyNames": {
+              "not": {
+                "enum": [
+                  "round_id",
+                  "state_root",
+                  "wal_sequence",
+                  "qc",
+                  "apply_qc",
+                  "consensus_round",
+                  "validator_signatures",
+                  "bft_quorum",
+                  "stage_c_claim",
+                  "consensus_view",
+                  "proposal_hash",
+                  "commit_certificate"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "array"
+          },
+          "then": {
+            "items": {
+              "$ref": "#/$defs/safeExtensionValue"
+            }
+          }
+        }
+      ]
+    }
+  },
   "$id": "https://delta.local/schemas/step5c/execution-receipt-lineage-extension.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "additionalProperties": {
+    "$ref": "#/$defs/safeExtensionValue"
+  },
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "round_id"
+        ]
+      },
+      {
+        "required": [
+          "state_root"
+        ]
+      },
+      {
+        "required": [
+          "wal_sequence"
+        ]
+      },
+      {
+        "required": [
+          "qc"
+        ]
+      },
+      {
+        "required": [
+          "apply_qc"
+        ]
+      },
+      {
+        "required": [
+          "consensus_round"
+        ]
+      },
+      {
+        "required": [
+          "validator_signatures"
+        ]
+      },
+      {
+        "required": [
+          "bft_quorum"
+        ]
+      },
+      {
+        "required": [
+          "stage_c_claim"
+        ]
+      },
+      {
+        "required": [
+          "consensus_view"
+        ]
+      },
+      {
+        "required": [
+          "proposal_hash"
+        ]
+      },
+      {
+        "required": [
+          "commit_certificate"
+        ]
+      }
+    ]
+  },
   "properties": {
     "execution": {
-      "additionalProperties": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/safeExtensionValue"
+      },
       "not": {
         "anyOf": [
           {
@@ -30,6 +142,41 @@
           {
             "required": [
               "apply_qc"
+            ]
+          },
+          {
+            "required": [
+              "consensus_round"
+            ]
+          },
+          {
+            "required": [
+              "validator_signatures"
+            ]
+          },
+          {
+            "required": [
+              "bft_quorum"
+            ]
+          },
+          {
+            "required": [
+              "stage_c_claim"
+            ]
+          },
+          {
+            "required": [
+              "consensus_view"
+            ]
+          },
+          {
+            "required": [
+              "proposal_hash"
+            ]
+          },
+          {
+            "required": [
+              "commit_certificate"
             ]
           }
         ]
@@ -52,6 +199,24 @@
           "type": "string"
         }
       },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "round_id",
+            "state_root",
+            "wal_sequence",
+            "qc",
+            "apply_qc",
+            "consensus_round",
+            "validator_signatures",
+            "bft_quorum",
+            "stage_c_claim",
+            "consensus_view",
+            "proposal_hash",
+            "commit_certificate"
+          ]
+        }
+      },
       "required": [
         "verdict",
         "terminal_status"
@@ -59,7 +224,9 @@
       "type": "object"
     },
     "provenance": {
-      "additionalProperties": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/safeExtensionValue"
+      },
       "not": {
         "anyOf": [
           {
@@ -85,6 +252,41 @@
           {
             "required": [
               "apply_qc"
+            ]
+          },
+          {
+            "required": [
+              "consensus_round"
+            ]
+          },
+          {
+            "required": [
+              "validator_signatures"
+            ]
+          },
+          {
+            "required": [
+              "bft_quorum"
+            ]
+          },
+          {
+            "required": [
+              "stage_c_claim"
+            ]
+          },
+          {
+            "required": [
+              "consensus_view"
+            ]
+          },
+          {
+            "required": [
+              "proposal_hash"
+            ]
+          },
+          {
+            "required": [
+              "commit_certificate"
             ]
           }
         ]
@@ -135,6 +337,24 @@
           "type": "string"
         }
       },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "round_id",
+            "state_root",
+            "wal_sequence",
+            "qc",
+            "apply_qc",
+            "consensus_round",
+            "validator_signatures",
+            "bft_quorum",
+            "stage_c_claim",
+            "consensus_view",
+            "proposal_hash",
+            "commit_certificate"
+          ]
+        }
+      },
       "required": [
         "repository",
         "backend_commit",
@@ -159,7 +379,73 @@
       "type": "string"
     },
     "workload": {
-      "additionalProperties": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/safeExtensionValue"
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "round_id"
+            ]
+          },
+          {
+            "required": [
+              "state_root"
+            ]
+          },
+          {
+            "required": [
+              "wal_sequence"
+            ]
+          },
+          {
+            "required": [
+              "qc"
+            ]
+          },
+          {
+            "required": [
+              "apply_qc"
+            ]
+          },
+          {
+            "required": [
+              "consensus_round"
+            ]
+          },
+          {
+            "required": [
+              "validator_signatures"
+            ]
+          },
+          {
+            "required": [
+              "bft_quorum"
+            ]
+          },
+          {
+            "required": [
+              "stage_c_claim"
+            ]
+          },
+          {
+            "required": [
+              "consensus_view"
+            ]
+          },
+          {
+            "required": [
+              "proposal_hash"
+            ]
+          },
+          {
+            "required": [
+              "commit_certificate"
+            ]
+          }
+        ]
+      },
       "properties": {
         "dataset_id": {
           "maxLength": 64,
@@ -183,6 +469,24 @@
           "type": "string"
         }
       },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "round_id",
+            "state_root",
+            "wal_sequence",
+            "qc",
+            "apply_qc",
+            "consensus_round",
+            "validator_signatures",
+            "bft_quorum",
+            "stage_c_claim",
+            "consensus_view",
+            "proposal_hash",
+            "commit_certificate"
+          ]
+        }
+      },
       "required": [
         "model_plugin_id",
         "dataset_id",
@@ -190,6 +494,24 @@
         "workload_config_digest"
       ],
       "type": "object"
+    }
+  },
+  "propertyNames": {
+    "not": {
+      "enum": [
+        "round_id",
+        "state_root",
+        "wal_sequence",
+        "qc",
+        "apply_qc",
+        "consensus_round",
+        "validator_signatures",
+        "bft_quorum",
+        "stage_c_claim",
+        "consensus_view",
+        "proposal_hash",
+        "commit_certificate"
+      ]
     }
   },
   "required": [

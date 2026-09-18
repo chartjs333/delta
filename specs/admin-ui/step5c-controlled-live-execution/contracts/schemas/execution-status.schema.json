@@ -22,18 +22,38 @@
       }
     },
     {
+      "else": {
+        "if": {
+          "properties": {
+            "state": {
+              "const": "COMPLETED"
+            }
+          },
+          "required": [
+            "state"
+          ]
+        },
+        "then": {
+          "required": [
+            "receipt_digest"
+          ]
+        }
+      },
       "if": {
         "properties": {
+          "operation": {
+            "const": "MATERIALIZE_DATASET"
+          },
           "state": {
             "const": "COMPLETED"
           }
-        }
-      },
-      "then": {
+        },
         "required": [
-          "receipt_digest"
+          "state",
+          "operation"
         ]
-      }
+      },
+      "then": {}
     }
   ],
   "properties": {
@@ -58,6 +78,14 @@
     },
     "intent_id": {
       "format": "uuid",
+      "type": "string"
+    },
+    "operation": {
+      "enum": [
+        "TRAIN_TICKET",
+        "EVALUATE_CHECKPOINT",
+        "MATERIALIZE_DATASET"
+      ],
       "type": "string"
     },
     "receipt_digest": {
@@ -96,6 +124,7 @@
     "intent_digest",
     "admission_id",
     "admission_digest",
+    "operation",
     "state",
     "updated_at"
   ],
