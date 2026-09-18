@@ -4,7 +4,7 @@
 **Status**: `ACTIVE_REMEDIATION_CYCLE`  
 **Authority**: ADR 0002, SpecKit `specs/admin-ui/step5c-controlled-live-execution/`, Constitution 2.1.0  
 **Coordinator**: ChatGPT / Архитектор-координатор (`phone=2107`, `id=chatgpt-architecture-governance`)  
-**Assigned Task**: `TEAM-GATE-001`  
+**Assigned Task**: `TEAM-GATE-001` / `COORD-001`–`COORD-003`  
 
 ---
 
@@ -15,11 +15,11 @@
 | **ADR 0002 Acceptance** | PR `#33` (`4cf2aa8`) | Accepted |
 | **CONTRACT_FREEZE_SHA** | `66e3e7e5bb07a48aadbee8d9c4683144b812d229` | Frozen |
 | **ORIGINAL_CONTRACTS_SHA** | `9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404` (PR `#34`) | Merged with remediation findings |
-| **CORRECTED_CONTRACTS_SHA** | `PENDING_REMEDIATION_PR` | Blocked on Programmer A follow-up |
-| **PR #35 (Controller)** | `6d62dda` (`feature/step5c-controller`) | Open with blocking findings |
-| **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | Open with blocking findings |
-| **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | Open with blocking findings |
-| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Open with blocking findings |
+| **CORRECTED_CONTRACTS_SHA** | `b7afddb1eb32ceb0b14ef9fc50ad97d75a8a1eb3` | **RATIFIED & RELEASED** (Branch: `feature/step5c-contracts-remediation`) |
+| **PR #35 (Controller)** | `6d62dda` (`feature/step5c-controller`) | Open with blocking findings (awaiting B remediation) |
+| **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | Open with blocking findings (awaiting C remediation) |
+| **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | Open with blocking findings (awaiting D remediation) |
+| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Open with blocking findings (awaiting E remediation) |
 | **PR #39 (E2E Integration)** | `11712f1` (`feature/step5c-e2e`) | **ON HOLD** (Premature integration candidate) |
 
 ---
@@ -37,10 +37,10 @@
 ## 3. Detailed Cross-PR Remediation Findings
 
 ### A. Contracts Follow-Up (Programmer A, Phone: 2101, Branch: `feature/step5c-contracts-remediation`)
-- **A1 (Operation Semantics)**: `MATERIALIZE_DATASET` is status-only and must complete cleanly without emitting `receipt_digest`. Receipt-eligible operations (`TRAIN_TICKET`, `EVALUATE_CHECKPOINT`) remain strictly tied to receipt lineage.
-- **A2 (JCS Reference Vectors)**: Expand RFC 8785 / JCS golden vectors with independent number-edge cases, exponential formatting, Unicode edge cases, and cross-language parity fixtures (Python $\leftrightarrow$ TypeScript).
-- **A3 (Trust Inflation Guard)**: Harden `ExecutionReceipt` lineage extension schema to reject nested or extra consensus trust-inflation claims.
-- **A4 (Evidence Normalization)**: Normalize evidence artifact naming between raw file-byte SHA-256 and canonical JCS digest semantics; regenerate and verify `artifact-manifest.json`.
+- **A1 (Operation Semantics)**: `MATERIALIZE_DATASET` is status-only and completes cleanly without emitting `receipt_digest`. Receipt-eligible operations (`TRAIN_TICKET`, `EVALUATE_CHECKPOINT`) remain strictly tied to receipt lineage. *(RESOLVED in `b7afddb`)*
+- **A2 (JCS Reference Vectors)**: Expand RFC 8785 / JCS golden vectors with independent number-edge cases, exponential formatting, Unicode edge cases, and cross-language parity fixtures (Python $\leftrightarrow$ TypeScript). *(RESOLVED in `b7afddb`)*
+- **A3 (Trust Inflation Guard)**: Harden `ExecutionReceipt` lineage extension schema to reject nested or extra consensus trust-inflation claims. *(RESOLVED in `b7afddb`)*
+- **A4 (Evidence Normalization)**: Normalize evidence artifact naming between raw file-byte SHA-256 and canonical JCS digest semantics; regenerate and verify `artifact-manifest.json`. *(RESOLVED in `b7afddb`)*
 
 ### B. Trusted Authorization Gate / Controller (Programmer B, Phone: 2102, Branch: `feature/step5c-controller`)
 - **B1 (Signing Identity)**: Inject configured Ed25519 runtime signing identity that strictly matches the worker verification key.
@@ -73,10 +73,27 @@
 
 ---
 
-## 4. Remediation Handoff: Sequence 1 -> Programmer A
+## 4. Contracts Remediation Formal Approval & Ratification
 
-The remediation cycle is initiated with **Programmer A** (`phone=2101`, branch `feature/step5c-contracts-remediation`).
-- **Target Task**: `step5c:CONTRACTS-REMEDIATION`
-- **Base Commit**: `ORIGINAL_CONTRACTS_SHA` (`9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404`)
-- **Scope**: Contracts remediation delta for findings A1–A4.
-- **Outcome**: Merge candidate PR for Coordinator review to establish `CORRECTED_CONTRACTS_SHA`.
+The Architecture Governance Coordinator formally confirms independent review and verification of Programmer A's remediation pack on `feature/step5c-contracts-remediation` (`b7afddb1eb32ceb0b14ef9fc50ad97d75a8a1eb3`):
+
+1. **Quality Gates**: All 11 pytest contract validation tests passed cleanly; `uv run ruff check` and `uv run ruff format --check` passed with zero errors.
+2. **Protected Paths Zero-Diff**: Verified zero diff across `delta-core-cpp/`, `delta-runtime-cpp/`, `delta-node-java/`, and `specs/000-formal-tla-spec/`.
+3. **Artifact Integrity**: Canonical schemas, RFC 8785 golden vectors, and fixture hashes verified against `evidence/artifact-manifest.json` and `evidence/validation-report.json`.
+4. **Ratification Decision**: Commit `b7afddb1eb32ceb0b14ef9fc50ad97d75a8a1eb3` is formally ratified as **`CORRECTED_CONTRACTS_SHA`**.
+
+---
+
+## 5. Remediation Handoff: Sequence 2 -> Programmer B (Controller)
+
+With `CORRECTED_CONTRACTS_SHA` established, the remediation baton passes to **Programmer B** (`phone=2102`, branch `feature/step5c-controller`).
+- **Target Task**: `step5c:CONTROLLER-REMEDIATION`
+- **Canonical Contracts Baseline**: `CORRECTED_CONTRACTS_SHA` (`b7afddb1eb32ceb0b14ef9fc50ad97d75a8a1eb3`)
+- **Remediation Scope**:
+  - Rebase `feature/step5c-controller` on `CORRECTED_CONTRACTS_SHA`;
+  - Inject runtime Ed25519 signing identity matching worker verification key;
+  - Implement atomic durable concurrency-safe idempotency ledger reservation/commit;
+  - Enforce transport-derived caller subject/roles;
+  - Align `MATERIALIZE_DATASET` status semantics with zero receipt requirement;
+  - Add production concurrent replay and crash-restart tests.
+- **Delivery**: Update PR #35 and hand off to Coordinator (`phone=2107`).
