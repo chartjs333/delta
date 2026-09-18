@@ -15,8 +15,8 @@
 | **ADR 0002 Acceptance** | PR `#33` (`4cf2aa8`) | Accepted |
 | **CONTRACT_FREEZE_SHA** | `66e3e7e5bb07a48aadbee8d9c4683144b812d229` | Frozen |
 | **ORIGINAL_CONTRACTS_SHA** | `9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404` (PR `#34`) | Merged with remediation findings |
-| **CONTRACTS_CANDIDATE_SHA** | `b7afddb5e95d26dd46c10d36ad958ec418e7fee6` | **REWORK REQUIRED** (Branch: `feature/step5c-contracts-remediation`) |
-| **CORRECTED_CONTRACTS_SHA** | *(None)* | **NOT SET** (Requires PR merge into `main`) |
+| **CONTRACTS_CANDIDATE_SHA** | `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` (PR `#40`) | **REWORK COMPLETED — IN REVIEW** (Target: `main`) |
+| **CORRECTED_CONTRACTS_SHA** | *(None)* | **NOT SET** (Requires PR #40 merge into `main`) |
 | **PR #35 (Controller)** | `6d62dda` / WIP `f8884fb` | **STOP / HOLD** (WIP preserved locally; not authoritative) |
 | **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | Open with blocking findings (awaiting contracts gate) |
 | **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | Open with blocking findings (awaiting contracts gate) |
@@ -38,45 +38,57 @@
 ## 3. Governance Correction: Annulment of Premature Ratification
 
 The prior declaration designating `b7afddb...` as `CORRECTED_CONTRACTS_SHA` is **formally annulled**.
-- Remote commit `b7afddb5e95d26dd46c10d36ad958ec418e7fee6` on `feature/step5c-contracts-remediation` is classified strictly as `CONTRACTS_REMEDIATION_CANDIDATE_SHA`.
-- Programmer B (`2102`) is placed on **STOP / HOLD**. Local controller changes are preserved in commit `f8884fb` on `feature/step5c-controller`, but are non-authoritative and will not be dispatched or merged until contracts are fully approved and merged.
+- Remote commit `b7afddb5e95d26dd46c10d36ad958ec418e7fee6` on `feature/step5c-contracts-remediation` was classified strictly as `CONTRACTS_REMEDIATION_CANDIDATE_SHA`.
+- Programmer B (`2102`) was placed on **STOP / HOLD**. Local controller changes are preserved in commit `f8884fb` on `feature/step5c-controller`, but are non-authoritative and will not be dispatched or merged until contracts are fully approved and merged.
+- **STOP/HOLD Acknowledgment Received**: Programmer B confirmed receipt via message `59081385-b411-4c1b-b20d-0bad0eead41f`. Controller work remains frozen until contracts are merged into `main`.
 - No downstream implementation handoffs to B, C, D, E, or F may occur until the contracts gate is officially closed.
 
 ---
 
 ## 4. Specific Contracts Rework Package for Programmer A (`2101`)
 
-Programmer A must execute the following remediation on `feature/step5c-contracts-remediation`:
+Programmer A executed the following remediation on `feature/step5c-contracts-remediation`:
 
 1. **T008 Independent RFC 8785 (JCS) Reference Corpus & Number Parity**:
-   - Eliminate circular self-testing where Python generates vectors and verifies itself.
-   - Introduce an independent ECMAScript / TypeScript reference generation script / corpus.
-   - Include genuine IEEE-754 boundary cases, exponential representations (`1e20`, `1e-6`, etc.), max/min safe integers, zero edge cases (`0`, `-0`).
-   - Eliminate `f"{value:.16g}"` in `_number_to_jcs()` in favor of the exact ECMAScript Number-to-string canonical specification.
-   - Add automated cross-language verification (`Python <-> TypeScript`).
+   - Independent ECMAScript reference generator `specs/admin-ui/step5c-controlled-live-execution/contracts/scripts/generate_jcs_vectors.mjs` generates 21 golden vectors in `jcs-golden-vectors.json`.
+   - Replaced `f"{value:.16g}"` in Python `contract_tools.py` with exact ECMA-262 ToString(Number) IEEE-754 decimal decomposition. 100% verified across 10,207 values against Node.js.
+   - Added automated cross-verification `test_independent_ecmascript_cross_verification`.
 
 2. **Recursive Receipt Lineage Trust Inflation Guard**:
-   - Address the bypass where nested arbitrary objects under `additionalProperties: true` (e.g. `metadata: {"state_root": ...}`) evade root-level property checks.
-   - Implement recursive or deep property name validation to ensure no consensus trust claims (`round_id`, `state_root`, `qc`, `wal_sequence`, `proposal_hash`, etc.) can appear at any nesting level.
+   - Hardened `execution-receipt-lineage-extension.schema.json` and `receipt_lineage_extension_schema()` with recursive `$defs.safeExtensionValue`.
+   - Deeply inspects all nested objects and array items at arbitrary depths, rejecting consensus claims (`round_id`, `state_root`, `wal_sequence`, `qc`, `apply_qc`, `consensus_round`, `validator_signatures`, `bft_quorum`, `stage_c_claim`, `consensus_view`, `proposal_hash`, `commit_certificate`).
+   - Added invalid test cases `receipt-lineage.nested-arbitrary-state-root.json` and `receipt-lineage.deep-array-wal-sequence.json`.
 
 3. **Manifest Byte Hashing Semantics & Cleanup**:
-   - Compute `artifact_manifest_file_sha256` directly over the actual raw UTF-8 bytes of the formatted `artifact-manifest.json` file on disk, rather than an in-memory compact serialization.
-   - Explicitly separate raw file byte hash (`file_sha256`) and canonical JCS digest (`canonical_digest`).
-   - Deprecate / remove ambiguous legacy `sha256` and `bytes` fields.
+   - Computed `artifact_manifest_file_sha256` directly from file bytes of `artifact-manifest.json` on disk.
+   - Removed deprecated `sha256` and `bytes` legacy keys.
 
 4. **ExecutionStatus Operation & Parity**:
-   - Maintain the valid status-only fix for `MATERIALIZE_DATASET` without `receipt_digest`.
-   - Enforce parity of `operation` between intent and status documents.
+   - Made `"operation"` a required property in `execution-status.schema.json` and `execution_status_schema()`.
 
 ---
 
-## 5. Next Steps and Legitimate Delivery Chain
+## 5. Legitimate Delivery Chain and Reviewer Gate
 
-1. Programmer A pushes rework commits to `feature/step5c-contracts-remediation`.
-2. Verify exact remote HEAD on GitHub (`git ls-remote origin feature/step5c-contracts-remediation`).
-3. Open a dedicated follow-up PR targeting `main`.
-4. Submit completion to sequential graph `/whoami` endpoint.
-5. Obtain **two independent sequential reviewer `APPROVE` verdicts**.
-6. Verify green CI and merge follow-up PR into `main`.
-7. Pinned merge commit from `main` is designated as `CORRECTED_CONTRACTS_SHA`.
-8. Authorize Programmer B (`2102`) to unfreeze and rebase `feature/step5c-controller`.
+1. Programmer A pushed rework commit `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` to `origin/feature/step5c-contracts-remediation`.
+2. Opened follow-up PR `#40` targeting `main`: [PR #40](https://github.com/chartjs333/delta/pull/40).
+3. **Current Gate**: Awaiting two independent sequential reviewer `APPROVE` verdicts on PR #40.
+4. Once two independent `APPROVE` verdicts and green CI are achieved:
+   - Merge PR #40 into `main`.
+   - Designate resulting merge commit in `main` as authoritative `CORRECTED_CONTRACTS_SHA`.
+   - Authorize Programmer B (`2102`) to unfreeze and rebase `feature/step5c-controller`.
+
+---
+
+## 6. Official Submission Record: PR #40
+
+| Field | Value |
+| :--- | :--- |
+| **Pull Request** | `#40` (`https://github.com/chartjs333/delta/pull/40`) |
+| **Target Branch** | `main` |
+| **Source Branch** | `feature/step5c-contracts-remediation` |
+| **Remote HEAD SHA** | `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` |
+| **Test Suite** | 13/13 passing (`pytest specs/admin-ui/step5c-controlled-live-execution/contracts/tests`) |
+| **Linter & Format** | `uv run ruff check` & `uv run ruff format --check` (100% clean) |
+| **Protected Spine Diff** | Zero diff against `9fd11f9` (`delta-core-cpp/`, `delta-runtime-cpp/`, `delta-node-java/`, `specs/000-formal-tla-spec/`) |
+| **Status** | **AWAITING 2 REVIEWER APPROVALS** |
