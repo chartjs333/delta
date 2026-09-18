@@ -18,8 +18,8 @@
 | **CONTRACTS_CANDIDATE_SHA** | `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` (PR `#40`) | **REWORK COMPLETED & MERGED** |
 | **CORRECTED_CONTRACTS_SHA** | `37407f9e69af70dcc8ba571b76bace199a281478` (PR `#40` in `main`) | **RATIFIED & MERGED** |
 | **PR #35 (Controller)** | `6360080` (`feature/step5c-controller`) | **REMEDIATION COMPLETED & VERIFIED** (Rebased on `37407f9`) |
-| **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | **UNFROZEN / AUTHORIZED TO REBASE** (Target: `37407f9` / controller `6360080`) |
-| **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | **UNFROZEN / AUTHORIZED TO REBASE** (Target: `37407f9` / controller `6360080`) |
+| **PR #36 (Worker Adapter)** | `f824328` (`feature/step5c-worker-adapter`) | **REMEDIATION COMPLETED & VERIFIED** (Ready for Review) |
+| **PR #37 (Admin UI Live)** | `7168e64` (`feature/step5c-admin-ui-live`) | **REMEDIATION COMPLETED & VERIFIED** (Ready for Review) |
 | **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Queued for review gate after C & D |
 | **PR #39 (E2E Integration)** | `11712f1` (`feature/step5c-e2e`) | **ON HOLD** (Awaiting full component completion) |
 
@@ -128,3 +128,35 @@ Programmer A executed the following remediation on `feature/step5c-contracts-rem
      - Branch: `feature/step5c-admin-ui-live`
      - Mandate: Rebase onto `origin/main` (`37407f9`), align with Controller `6360080`, verify live execution status polling and SSE connection handling, update PR #37.
 
+---
+
+## 9. Component Remediation Review and Reviewer Gate Dispatch
+
+1. **Worker Adapter Remediation Verification (PR #36)**:
+   - **Branch**: `feature/step5c-worker-adapter`
+   - **Remote HEAD Commit**: `f824328` (rebased on `37407f9e69af70dcc8ba571b76bace199a281478`)
+   - **Review Findings Addressed**:
+     - Signature trust contract established via `register_trusted_key()` and `trusted_keys` mapping.
+     - Unblocked timeout model implemented via `executor.shutdown(wait=False, cancel_futures=True)` with verified wall-clock test.
+     - Fail-closed authoritative resource grants validation without silent defaults.
+     - Number serialization matching exact RFC 8785 / ECMA-262 ToString(Number) decomposition.
+   - **Test Suite**: 25/25 live_execution tests passing, 203/203 unit/integration tests passing.
+   - **Linter & Formatting**: 100% clean (`uv run ruff check` & `uv run ruff format --check`).
+   - **Protected Spine Diff**: Strict 0-diff.
+   - **Outcome**: **WORKER ADAPTER REMEDIATION VERIFIED**
+
+2. **Admin UI Live Remediation Verification (PR #37)**:
+   - **Branch**: `feature/step5c-admin-ui-live`
+   - **Remote HEAD Commit**: `7168e64` (rebased on `37407f9e69af70dcc8ba571b76bace199a281478`)
+   - **Review Findings Addressed**:
+     - Constant fallback `10000000-0000-4000-8000-000000000001` eliminated; replaced with cryptographically secure random UUIDv4 generation via `crypto.getRandomValues()` fail-closed.
+     - Full consumption and verification of all 21 golden JCS vectors from PR #40.
+   - **Test Suite**: 28/28 live-execution tests passing (`npx vitest run src/modules/live-execution`).
+   - **Typecheck**: `npx tsc --noEmit` clean.
+   - **Protected Spine Diff**: Strict 0-diff.
+   - **Outcome**: **ADMIN UI LIVE REMEDIATION VERIFIED**
+
+3. **Reviewer Gate Dispatch**:
+   - Both PR #36 and PR #37 are submitted for dual independent review:
+     - **Reviewer 1 (Programmer E, Security - `phone=2105`)**: Security audit, signature verification, fail-closed grant enforcement, crypto isolation.
+     - **Reviewer 2 (Programmer F, Integration QA - `phone=2106`)**: Integration conformance, golden vector validation, timeout and SSE lifecycle checks.
