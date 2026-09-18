@@ -2,6 +2,7 @@ import { composeExtensions } from "./composition-root";
 import { controllerSummaryRegistration } from "../extensions/controller-summary/registration";
 import { campaignPlaceholderRegistration } from "../modules/campaigns/registration";
 import { controllerModuleRegistration } from "../modules/controllers/registration";
+import { liveExecutionModuleRegistration } from "../modules/live-execution/registration";
 import { workloadModuleRegistration } from "../modules/workloads/registration";
 
 // All product extensions are registered here. Domain modules never mutate this
@@ -11,4 +12,5 @@ export const extensionRegistry = composeExtensions([
   campaignPlaceholderRegistration,
   controllerSummaryRegistration,
   workloadModuleRegistration,
+  liveExecutionModuleRegistration,
 ]);
