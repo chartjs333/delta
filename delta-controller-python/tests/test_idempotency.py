@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from deltacontroller.errors import (
     IntentCollisionDetectedError,
@@ -94,3 +96,65 @@ def test_persistence_reload_across_restart(tmp_path) -> None:
     existing = ledger2.check_intent(intent_id, digest, "operator.alpha")
     assert existing is not None
     assert existing.execution_id == "exec-1"
+
+
+def test_commit_durability_failure_does_not_publish_indexes(tmp_path, monkeypatch) -> None:
+    file_path = tmp_path / "idempotency.jsonl"
+    ledger = IdempotencyLedger(persistence_path=file_path)
+    intent_id = "11111111-1111-4111-8111-111111111111"
+    digest = "sha256:aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000"
+    subject = "operator.alpha"
+
+    state, _ = ledger.acquire_or_check(intent_id, digest, subject)
+    assert state == "RESERVED"
+
+    def fail_fsync(_fd: int) -> None:
+        raise OSError("synthetic durability barrier failure")
+
+    monkeypatch.setattr(os, "fsync", fail_fsync)
+    with pytest.raises(OSError, match="durability barrier failure"):
+        ledger.commit_admission(
+            intent_id,
+            digest,
+            subject,
+            "exec-1",
+            {"admission_id": "adm-1"},
+        )
+
+    assert ledger.get_by_intent_id(intent_id) is None
+    assert ledger.get_by_execution_id("exec-1") is None
+    ledger.release_reservation(intent_id)
+    with pytest.raises(RuntimeError, match="fail-closed"):
+        ledger.acquire_or_check(intent_id, digest, subject, timeout=0.01)
+
+    restarted = IdempotencyLedger(persistence_path=file_path)
+    state, existing = restarted.acquire_or_check(intent_id, digest, subject)
+    assert state == "COMMITTED"
+    assert existing is not None
+    assert existing.execution_id == "exec-1"
+
+
+def test_update_durability_failure_does_not_publish_status(tmp_path, monkeypatch) -> None:
+    file_path = tmp_path / "idempotency.jsonl"
+    ledger = IdempotencyLedger(persistence_path=file_path)
+    intent_id = "11111111-1111-4111-8111-111111111111"
+    digest = "sha256:aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000"
+    record = ledger.record_admission(
+        intent_id,
+        digest,
+        "operator.alpha",
+        "exec-1",
+        {"admission_id": "adm-1"},
+    )
+
+    def fail_fsync(_fd: int) -> None:
+        raise OSError("synthetic status durability barrier failure")
+
+    monkeypatch.setattr(os, "fsync", fail_fsync)
+    with pytest.raises(OSError, match="status durability barrier failure"):
+        ledger.update_execution("exec-1", "RUNNING")
+
+    assert record.status == "ADMITTED"
+    assert ledger.get_by_execution_id("exec-1") is record
+    with pytest.raises(RuntimeError, match="fail-closed"):
+        ledger.acquire_or_check(intent_id, digest, "operator.alpha", timeout=0.01)

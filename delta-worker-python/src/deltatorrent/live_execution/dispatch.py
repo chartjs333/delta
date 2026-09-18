@@ -117,19 +117,24 @@ class ClosedEnumWorkerDispatcher:
                     f"Unsupported operation '{operation}'",
                 )
 
-        # Execute inside bounded thread pool for strict timeout enforcement
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(_timed_run)
-            try:
-                result = future.result(timeout=timeout)
-                return result
-            except concurrent.futures.TimeoutError as exc:
-                local_token.cancel()  # Prevent any receipt emission
-                future.cancel()
-                raise WorkerTimeoutError(
-                    f"Execution timed out after {timeout} seconds",
-                    details={"timeout_seconds": timeout, "execution_id": context.execution_id},
-                ) from exc
+        # Execute inside bounded executor with unblocked timeout termination
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        future = executor.submit(_timed_run)
+        try:
+            result = future.result(timeout=timeout)
+            executor.shutdown(wait=False, cancel_futures=True)
+            return result
+        except concurrent.futures.TimeoutError as exc:
+            local_token.cancel()  # Signal cancellation to runner and prevent receipt emission
+            future.cancel()
+            executor.shutdown(wait=False, cancel_futures=True)
+            raise WorkerTimeoutError(
+                f"Execution timed out after {timeout} seconds",
+                details={"timeout_seconds": timeout, "execution_id": context.execution_id},
+            ) from exc
+        except Exception:
+            executor.shutdown(wait=False, cancel_futures=True)
+            raise
 
     def _execute_train_ticket(
         self,

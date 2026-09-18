@@ -1,145 +1,223 @@
 {
-  "artifact_count": 28,
+  "artifact_count": 37,
   "artifacts": [
     {
-      "bytes": 1269,
-      "path": "fixtures/invalid/admission-record.invalid-grant-type.json",
-      "sha256": "bc7988aff1909c0ae45520338c18c247db83aa3496bb5b17664ebcb3148c2f3b"
+      "canonical_digest": "sha256:786a8fefb1e20a151d23ed1c2d4dc2513319f70413720ac3698a2ff2bb312fd9",
+      "file_bytes": 1269,
+      "file_sha256": "sha256:bc7988aff1909c0ae45520338c18c247db83aa3496bb5b17664ebcb3148c2f3b",
+      "path": "fixtures/invalid/admission-record.invalid-grant-type.json"
     },
     {
-      "bytes": 2364,
-      "path": "fixtures/invalid/authorized-execution.intent-id-mismatch.json",
-      "sha256": "439759e9ea721aa4815ad75373f91557ab8998d2751fc8802a45d81077013c1d"
+      "canonical_digest": "sha256:3291fca267d26933e0965dd59032e25443c403da7943e293076e24dba03ec00b",
+      "file_bytes": 2364,
+      "file_sha256": "sha256:439759e9ea721aa4815ad75373f91557ab8998d2751fc8802a45d81077013c1d",
+      "path": "fixtures/invalid/authorized-execution.intent-id-mismatch.json"
     },
     {
-      "bytes": 863,
-      "path": "fixtures/invalid/execution-intent.checkpoint-overflow.json",
-      "sha256": "2a3967894d08fd1ea5a4e2c455a3dcf9335dc7887499132394e194f7eac85212"
+      "canonical_digest": "sha256:b621514324844ec8aa47cc0ef266859695befeb4d125a9ac1be45374f2af16e9",
+      "file_bytes": 863,
+      "file_sha256": "sha256:2a3967894d08fd1ea5a4e2c455a3dcf9335dc7887499132394e194f7eac85212",
+      "path": "fixtures/invalid/execution-intent.checkpoint-overflow.json"
     },
     {
-      "bytes": 946,
-      "path": "fixtures/invalid/execution-intent.extra-property.json",
-      "sha256": "056999bfeaa5b031f4e46bc6b3bb9fc9dff71abda10a2d2ec4889c4a86fd3458"
+      "canonical_digest": "sha256:0d497d52550a8ebc74f05ed414718e0d144bc09a91bfc4e5a9f69a14ef18ecf6",
+      "file_bytes": 946,
+      "file_sha256": "sha256:056999bfeaa5b031f4e46bc6b3bb9fc9dff71abda10a2d2ec4889c4a86fd3458",
+      "path": "fixtures/invalid/execution-intent.extra-property.json"
     },
     {
-      "bytes": 928,
-      "path": "fixtures/invalid/execution-intent.train-ticket-wrong-scope.json",
-      "sha256": "e2a91b59b6065bf7a8e7d4ec60367a001bc7d4e7e4a952ef192648ebf18c6375"
+      "canonical_digest": "sha256:eb66c0367a863a47191a10664e8d7fb2281017e71644af399c8ae4470e31d2cd",
+      "file_bytes": 928,
+      "file_sha256": "sha256:e2a91b59b6065bf7a8e7d4ec60367a001bc7d4e7e4a952ef192648ebf18c6375",
+      "path": "fixtures/invalid/execution-intent.train-ticket-wrong-scope.json"
     },
     {
-      "bytes": 919,
-      "path": "fixtures/invalid/execution-intent.unknown-operation.json",
-      "sha256": "bc8526d7652197f8e05090f88abbfb5c25e7c064126425ad52a69c9b4a2135c6"
+      "canonical_digest": "sha256:7244ffc6b684a25d7e5e91b2e9ad4cb44ce3dd945c04b0bcbebd601e4db30cb9",
+      "file_bytes": 919,
+      "file_sha256": "sha256:bc8526d7652197f8e05090f88abbfb5c25e7c064126425ad52a69c9b4a2135c6",
+      "path": "fixtures/invalid/execution-intent.unknown-operation.json"
     },
     {
-      "bytes": 1221,
-      "path": "fixtures/invalid/manifest.json",
-      "sha256": "ab4bfa344d7ec82d4769a403c6e318319126a69ad6941d6c5e2eb6d9044fd70e"
+      "canonical_digest": "sha256:8301fdd9613682cc0389a4649697fc887c691a7bd51dbd8be4e0fc2a4f76a6ba",
+      "file_bytes": 525,
+      "file_sha256": "sha256:2deed05122dd75e8b03786ada1b0ab2c7e4803ca3f5d4017cdf5b4bc2981a300",
+      "path": "fixtures/invalid/execution-status.completed-without-receipt-for-train-ticket.json"
     },
     {
-      "bytes": 1237,
-      "path": "fixtures/invalid/receipt-lineage.consensus-field.json",
-      "sha256": "ef05e1b8a127214d839f9747d0385f5a1d1464eb1a8d3cfef81146022b5c7f46"
+      "canonical_digest": "sha256:32176ad06ac662073182e1c3f3af8a83cc121c975388dec351b8ebb4e8054565",
+      "file_bytes": 2306,
+      "file_sha256": "sha256:b3d9c438da5c702f6a81cc476e11551b7c991201d69b7a3a4e9030ec948bb4d3",
+      "path": "fixtures/invalid/manifest.json"
     },
     {
-      "bytes": 1267,
-      "path": "fixtures/valid/admission-record.train-ticket.json",
-      "sha256": "174a4e0171bdd91d7f4128def3d2aac3249c0a014c19640e54d9c40f3e7f343a"
+      "canonical_digest": "sha256:9c4522e0806a12dfb8cf7074c83683e868352491b833e8699e8a2823112bb214",
+      "file_bytes": 1237,
+      "file_sha256": "sha256:ef05e1b8a127214d839f9747d0385f5a1d1464eb1a8d3cfef81146022b5c7f46",
+      "path": "fixtures/invalid/receipt-lineage.consensus-field.json"
     },
     {
-      "bytes": 2364,
-      "path": "fixtures/valid/authorized-execution.train-ticket.json",
-      "sha256": "3fc27dee602ba0c2edd8d204170f22aa8b4f449755fa71bc8010547006948ec8"
+      "canonical_digest": "sha256:35ab82ae94b01730e5bb291c20db7bab51ceec9f2dd65cdf789c9c3b8d1ec4ad",
+      "file_bytes": 1412,
+      "file_sha256": "sha256:fdf594899dd40ac390d01ae9782ca0996189d13321350f84306c2a52c92afe1e",
+      "path": "fixtures/invalid/receipt-lineage.deep-array-wal-sequence.json"
     },
     {
-      "bytes": 893,
-      "path": "fixtures/valid/execution-intent.evaluate-checkpoint.json",
-      "sha256": "6ef1082cb277f4771a1041555b52d587f71515cb6a1fb1373e4e00d0395f2482"
+      "canonical_digest": "sha256:6671a5a3d0697617845884b7e74f564fb3b93edcce5d3929bd9c1d0a4902087e",
+      "file_bytes": 1307,
+      "file_sha256": "sha256:14287f6954c29dec0d7bf146f70cd54b39dd2071254bfc36326b54de9fb0a49d",
+      "path": "fixtures/invalid/receipt-lineage.execution-consensus-claim.json"
     },
     {
-      "bytes": 803,
-      "path": "fixtures/valid/execution-intent.materialize-dataset.json",
-      "sha256": "23bfcb863ba8e72646860030713f912d8e14b8735d35151068b608e1c6b6d9e7"
+      "canonical_digest": "sha256:76ca0a877fb4844b7fe7fab4f23ca53dd1030c0912f9742ea64ad175f578511e",
+      "file_bytes": 1356,
+      "file_sha256": "sha256:7b64ce5c6246d482d9029312c300672c0baae89370277a64e701842e68ce36cf",
+      "path": "fixtures/invalid/receipt-lineage.nested-arbitrary-state-root.json"
     },
     {
-      "bytes": 917,
-      "path": "fixtures/valid/execution-intent.train-ticket.json",
-      "sha256": "c05698c13453c1149e3083499aa76278103d2cab08c7492f004d59fc60e64250"
+      "canonical_digest": "sha256:dff3c0b16fd50168082540854239209ecad5fa978da5df365396a029a0c8180a",
+      "file_bytes": 1231,
+      "file_sha256": "sha256:ba8f5f0e41271acf1f7776b5f730f7142b3fa0d6ff49caaa8ecaf13ca825ace1",
+      "path": "fixtures/invalid/receipt-lineage.top-level-consensus-claim.json"
     },
     {
-      "bytes": 1213,
-      "path": "fixtures/valid/execution-receipt-lineage-extension.train-ticket.json",
-      "sha256": "65324b20fda0101610b1c3256306921614bff29086bc049882da376c4f3c00ad"
+      "canonical_digest": "sha256:703ce8ec61f84ab417f5d5b36ac14abd9790d2060acd32b7feafc4a4dc5d9a51",
+      "file_bytes": 1256,
+      "file_sha256": "sha256:ab893ca900cdda1fc7874305ba005d239025bd82b04960aa5b44cb8c548fb3e8",
+      "path": "fixtures/invalid/receipt-lineage.workload-consensus-claim.json"
     },
     {
-      "bytes": 589,
-      "path": "fixtures/valid/execution-status.completed.json",
-      "sha256": "06d982077ad0e98a2a7a1217fac8dad13aca7112a10c077e8db2f1e24a94ead1"
+      "canonical_digest": "sha256:49f6d75f36dd7de93495308931081252b21f0988fb38c752c5582cb20f4b554b",
+      "file_bytes": 1267,
+      "file_sha256": "sha256:174a4e0171bdd91d7f4128def3d2aac3249c0a014c19640e54d9c40f3e7f343a",
+      "path": "fixtures/valid/admission-record.train-ticket.json"
     },
     {
-      "bytes": 1302,
-      "path": "README.md",
-      "sha256": "bfa10090a4bb8eb88eb984f1021fc69caf214c687a47ae83392d0bd0877916e9"
+      "canonical_digest": "sha256:0b679e1a6bd5362f609fc0fb04501706efa268f9d449061c7ceaa768221b8818",
+      "file_bytes": 2364,
+      "file_sha256": "sha256:3fc27dee602ba0c2edd8d204170f22aa8b4f449755fa71bc8010547006948ec8",
+      "path": "fixtures/valid/authorized-execution.train-ticket.json"
     },
     {
-      "bytes": 3645,
-      "path": "schemas/admission-record.schema.json",
-      "sha256": "026009459059c02d42e9361a1074f269e29a1d9acecd7e6a7e10be975324a3da"
+      "canonical_digest": "sha256:8caff721b1a2df31505bb1585898a40a2b3b7ee6f656e939a2aef3d12254c59a",
+      "file_bytes": 893,
+      "file_sha256": "sha256:6ef1082cb277f4771a1041555b52d587f71515cb6a1fb1373e4e00d0395f2482",
+      "path": "fixtures/valid/execution-intent.evaluate-checkpoint.json"
     },
     {
-      "bytes": 10799,
-      "path": "schemas/authorized-execution.schema.json",
-      "sha256": "a3d2000cbc5bb53c133173aef05f93ea0e8a0fd657c1ef0e59f749a0f9afab11"
+      "canonical_digest": "sha256:6c5c5bc896b881f547d207cce5f81f0d68436673a2ea9dc55fdceeec6bb6c262",
+      "file_bytes": 803,
+      "file_sha256": "sha256:23bfcb863ba8e72646860030713f912d8e14b8735d35151068b608e1c6b6d9e7",
+      "path": "fixtures/valid/execution-intent.materialize-dataset.json"
     },
     {
-      "bytes": 5354,
-      "path": "schemas/execution-intent.schema.json",
-      "sha256": "d5c9294741644fcee9ea2f5371c41abb4202a47d1dd5a9d10d1d92c1ca974689"
+      "canonical_digest": "sha256:798b1136d8f36ac66d326147eac6b8b408aea1040de6f1793a0c8d1efe0c673f",
+      "file_bytes": 917,
+      "file_sha256": "sha256:c05698c13453c1149e3083499aa76278103d2cab08c7492f004d59fc60e64250",
+      "path": "fixtures/valid/execution-intent.train-ticket.json"
     },
     {
-      "bytes": 4647,
-      "path": "schemas/execution-receipt-lineage-extension.schema.json",
-      "sha256": "d8a9820538026dabbb4eeba733bc7a4d9220f87c5b287f1a4980254b7f350be2"
+      "canonical_digest": "sha256:ada72a956b37d5580661f7e858200f0ba5ceca7f3230fbb065d0de87547614cb",
+      "file_bytes": 1213,
+      "file_sha256": "sha256:65324b20fda0101610b1c3256306921614bff29086bc049882da376c4f3c00ad",
+      "path": "fixtures/valid/execution-receipt-lineage-extension.train-ticket.json"
     },
     {
-      "bytes": 2072,
-      "path": "schemas/execution-status.schema.json",
-      "sha256": "fceed3918da0171dca0bf4336ded248211881bbedbaf8a8f86bc679de77ceee3"
+      "canonical_digest": "sha256:b0d38d611d0b7ebb3243797025c9735ea71d4752a1f23228c054f5c26a071415",
+      "file_bytes": 621,
+      "file_sha256": "sha256:dca891f20a73bafa790aa1b292c91a3b9a202f4af58639d72f0532b57d4cfef2",
+      "path": "fixtures/valid/execution-status.completed.json"
     },
     {
-      "bytes": 2006,
-      "path": "schemas/preflight-error.schema.json",
-      "sha256": "40efb66022ea992433fc7de83c7b44b8bc12364bf18471cfde1116157922b75e"
+      "canonical_digest": "sha256:68cc2e855f12afd02405588301c6c1dec435f21b20568b13dddc4e01adb2b031",
+      "file_bytes": 532,
+      "file_sha256": "sha256:1f30cd774ac4b8edf9243cd268676449f2379e6cfb6d585143126ec0ea931c6e",
+      "path": "fixtures/valid/execution-status.materialize-dataset.completed.json"
     },
     {
-      "bytes": 46003,
-      "path": "scripts/contract_tools.py",
-      "sha256": "ed9ed9b93671712643716cb1228a64010b47e3f5850778f44ddc9d843b05f9e1"
+      "file_bytes": 1268,
+      "file_sha256": "sha256:6829074923e8746a6ec663d9e16f371bcb887c4d528f90ddbffa606eeef8d00f",
+      "path": "README.md"
     },
     {
-      "bytes": 3108,
-      "path": "taxonomy/errors.json",
-      "sha256": "8899f4e3247d16febabc05d6f2819a6301a59477a17d208af0df4eaa6af1a815"
+      "canonical_digest": "sha256:15a4d6569ec0818da37f99b44cd292ca61a08e8e5a00ea79cfdd4ea700d4c974",
+      "file_bytes": 3645,
+      "file_sha256": "sha256:026009459059c02d42e9361a1074f269e29a1d9acecd7e6a7e10be975324a3da",
+      "path": "schemas/admission-record.schema.json"
     },
     {
-      "bytes": 2243,
-      "path": "tests/test_contracts.py",
-      "sha256": "caf464319251572cd003e8c4cba80b809cc39eb098a6fc5c99b1651367bfba3d"
+      "canonical_digest": "sha256:40ff244a2bfcef0588a379cf77c5a17978b4404a7846fe940c21307da44b244e",
+      "file_bytes": 10799,
+      "file_sha256": "sha256:a3d2000cbc5bb53c133173aef05f93ea0e8a0fd657c1ef0e59f749a0f9afab11",
+      "path": "schemas/authorized-execution.schema.json"
     },
     {
-      "bytes": 1646,
-      "path": "vectors/ed25519-fixture.json",
-      "sha256": "ca2132e279892332928b8ef6f182db35bd54c9e2bf481dc8463a82dc5ef54096"
+      "canonical_digest": "sha256:10ae52aecc122d18c25ef312c82de7f8093978c78fa910f35ede1c59891052c9",
+      "file_bytes": 5354,
+      "file_sha256": "sha256:d5c9294741644fcee9ea2f5371c41abb4202a47d1dd5a9d10d1d92c1ca974689",
+      "path": "schemas/execution-intent.schema.json"
     },
     {
-      "bytes": 7044,
-      "path": "vectors/jcs-golden-vectors.json",
-      "sha256": "80d6079311cbeb9cacba35528e95f2920fa9b9625283f8d058c3d124e2fe468b"
+      "canonical_digest": "sha256:9cc3b89cfa021f9b99e0a55b734eeeb42342b189d2da6ae83325735ad951b9f0",
+      "file_bytes": 11280,
+      "file_sha256": "sha256:904203a19d29e8846fccbba81d363fa6e8da2831786eeb2bbd31bfeb2ab3743a",
+      "path": "schemas/execution-receipt-lineage-extension.schema.json"
     },
     {
-      "bytes": 492,
-      "path": "vectors/sha256-vectors.json",
-      "sha256": "ee0d138df70324f71085f43c2e13ff780c0727fef672b58915a58d2531891fee"
+      "canonical_digest": "sha256:38b9b0cdbfb6c4bad8fc2e41a48923d99aaadf8818ba6852d82d76d07f2461fe",
+      "file_bytes": 2678,
+      "file_sha256": "sha256:25b254f13fed7c5b5fbc4b6319b3cc7a715c14a3b67326002538d81a95fba328",
+      "path": "schemas/execution-status.schema.json"
+    },
+    {
+      "canonical_digest": "sha256:0e11b4f14f8baf94e4386856e0b06eb309a88a1c48586f4ab999425906639528",
+      "file_bytes": 2006,
+      "file_sha256": "sha256:40efb66022ea992433fc7de83c7b44b8bc12364bf18471cfde1116157922b75e",
+      "path": "schemas/preflight-error.schema.json"
+    },
+    {
+      "file_bytes": 55779,
+      "file_sha256": "sha256:894ba378f568e8c41c9450b993caf4faf68085ff947691eea78bcec305e668f0",
+      "path": "scripts/contract_tools.py"
+    },
+    {
+      "file_bytes": 10614,
+      "file_sha256": "sha256:e62e663c381264192a96978b2a507941d8da1111a2ece62f5773a8a44c5ecd97",
+      "path": "scripts/generate_jcs_vectors.mjs"
+    },
+    {
+      "canonical_digest": "sha256:063574b3ae80d20bb7551965bd13c27e59179e5c3f7b214eef0bee3174ce7979",
+      "file_bytes": 3108,
+      "file_sha256": "sha256:8899f4e3247d16febabc05d6f2819a6301a59477a17d208af0df4eaa6af1a815",
+      "path": "taxonomy/errors.json"
+    },
+    {
+      "file_bytes": 6143,
+      "file_sha256": "sha256:02b2494d537650bb367e10c06c7a8401c1f762711b61c09e6c087cb504428888",
+      "path": "tests/test_contracts.py"
+    },
+    {
+      "canonical_digest": "sha256:46ca4d03fee0f458f7d492f5108f6fef0e51c2c4fde3a3e77e2dece90fadf6b0",
+      "file_bytes": 10178,
+      "file_sha256": "sha256:eceb521c9c2ba158f718bd88c11d31443723bee058f63c447104162e557b0b35",
+      "path": "vectors/canonical-vectors.json"
+    },
+    {
+      "canonical_digest": "sha256:687e9b84e69c972120d8ba3e6e28df7f12ff3868a6c85687d5aec4f93571ea5e",
+      "file_bytes": 1646,
+      "file_sha256": "sha256:ca2132e279892332928b8ef6f182db35bd54c9e2bf481dc8463a82dc5ef54096",
+      "path": "vectors/ed25519-fixture.json"
+    },
+    {
+      "canonical_digest": "sha256:85ff1c4a0144c8e9aaecdb10ec47533cb3add32ff427f38d920dbdc6a910baf5",
+      "file_bytes": 16144,
+      "file_sha256": "sha256:12138b52ff2e2c17456252a6011a93eb70a2246440faf5ee33733395974bfafd",
+      "path": "vectors/jcs-golden-vectors.json"
+    },
+    {
+      "canonical_digest": "sha256:db86f599e824438a614cf36c6d625f2466d0884d70a187e99c9a34d01cdc22b2",
+      "file_bytes": 653,
+      "file_sha256": "sha256:24be6aaf64bc3809710cbc461112ba9bee8f2aadc8075644b53327bb271aff0b",
+      "path": "vectors/sha256-vectors.json"
     }
   ],
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",

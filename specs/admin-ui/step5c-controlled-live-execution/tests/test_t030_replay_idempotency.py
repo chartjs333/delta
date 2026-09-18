@@ -1,185 +1,192 @@
-"""T030: Replay and Idempotency Verification under Concurrent Submission and Restart.
+"""T030: production replay/idempotency verification.
 
-Proves:
-- Duplicate submission of identical intent produces idempotent result, 0 extra worker starts.
-- Re-submission of intent_id with altered payload/digest -> ERR_INTENT_COLLISION_DETECTED.
-- Submission of different intent_id with collision on existing intent_digest is rejected.
-- Submission of existing intent_id by unauthorized subject -> ERR_UNAUTHORIZED_PEER_OR_ROLE.
-- Controller restart preserves idempotency ledger and prevents duplicate executions.
-- Tampered intent digests fail validation before ledger entry.
+These tests exercise the real AuthorizationGate and IdempotencyLedger rather
+than a security-local simulation.
 """
 
 from __future__ import annotations
 
 import copy
-import json
+import threading
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 
 import pytest
+from deltacontroller.canonical import compute_intent_digest
+from deltacontroller.dispatch import MockWorkerDispatchPort
+from deltacontroller.errors import (
+    IntentCollisionDetectedError,
+    IntentDigestMismatchError,
+    IntentIdDigestConflictError,
+    UnauthorizedCallerError,
+)
+from deltacontroller.idempotency import IdempotencyLedger
 from security_support import (
-    SecurityIdempotencyLedger,
-    jcs_bytes,
-    sha256_prefixed,
+    admit_train_ticket,
+    build_gate_harness,
+    frozen_error_codes,
+    load_valid_fixture,
+    operator_credentials,
 )
 
-FIXTURES_DIR = Path(__file__).resolve().parents[1] / "contracts" / "fixtures" / "valid"
+
+class BlockingDispatchPort(MockWorkerDispatchPort):
+    """Hold the first dispatch after its execution identity is durably committed."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.entered = threading.Event()
+        self.release = threading.Event()
+
+    def dispatch(self, bundle: dict) -> dict:
+        self.entered.set()
+        if not self.release.wait(timeout=5):
+            raise AssertionError("Timed out waiting to release security-test dispatch")
+        return super().dispatch(bundle)
 
 
 @pytest.fixture
 def base_intent() -> dict:
-    path = FIXTURES_DIR / "execution-intent.train-ticket.json"
-    return json.loads(path.read_text(encoding="utf-8"))
+    return load_valid_fixture("execution-intent.train-ticket.json")
 
 
-def test_t030_replay_exact_duplicate_is_idempotent_zero_new_worker_starts(
+def assert_frozen_code(code: str) -> None:
+    assert code in frozen_error_codes()
+
+
+def test_t030_gate_exact_duplicate_is_idempotent_zero_new_worker_starts(
     base_intent: dict,
 ) -> None:
-    ledger = SecurityIdempotencyLedger()
-    caller = "operator.alpha"
+    harness = build_gate_harness()
 
-    # First submission
-    outcome1, code1, adm1 = ledger.submit_intent(base_intent, caller)
-    assert outcome1 == "ADMITTED"
-    assert code1 == "OK"
-    assert adm1 is not None
-    assert ledger.worker_start_count == 1
+    first = admit_train_ticket(harness, base_intent)
+    second = admit_train_ticket(harness, base_intent)
 
-    # Exact duplicate submission (same intent_id, same digest, same caller)
-    outcome2, code2, adm2 = ledger.submit_intent(base_intent, caller)
-    assert outcome2 == "REPLAY_IDEMPOTENT"
-    assert code2 == "OK"
-    assert adm2 == adm1
-    assert ledger.worker_start_count == 1  # No duplicate worker started!
+    assert first["action"] == "ADMITTED"
+    assert second["action"] == "ALREADY_ADMITTED"
+    assert second["admission"] == first["admission"]
+    assert second["status"]["execution_id"] == first["status"]["execution_id"]
+    assert len(harness.dispatch_port.dispatched_bundles) == 1
 
 
-def test_t030_replay_concurrent_submissions_serialize_to_single_execution(
+def test_t030_gate_concurrent_duplicates_serialize_to_single_execution(
     base_intent: dict,
 ) -> None:
-    ledger = SecurityIdempotencyLedger()
-    caller = "operator.alpha"
+    dispatch_port = BlockingDispatchPort()
+    harness = build_gate_harness(dispatch_port=dispatch_port)
 
-    def submit() -> tuple[str, str, dict | None]:
-        return ledger.submit_intent(base_intent, caller)
+    def submit() -> dict:
+        return admit_train_ticket(harness, base_intent)
 
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [executor.submit(submit) for _ in range(16)]
-        results = [f.result() for f in futures]
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        first = executor.submit(submit)
+        assert dispatch_port.entered.wait(timeout=5)
+        second = executor.submit(submit)
+        try:
+            replay = second.result(timeout=5)
+        finally:
+            dispatch_port.release.set()
+        results = [first.result(timeout=5), replay]
 
-    admitted = [r for r in results if r[0] == "ADMITTED"]
-    replayed = [r for r in results if r[0] == "REPLAY_IDEMPOTENT"]
+    admitted = [r for r in results if r["action"] == "ADMITTED"]
+    replayed = [r for r in results if r["action"] == "ALREADY_ADMITTED"]
+    execution_ids = {r["status"]["execution_id"] for r in results}
 
     assert len(admitted) == 1
-    assert len(replayed) == 15
-    assert ledger.worker_start_count == 1
-
-    # All returned admissions must share identical execution_id
-    execution_ids = {r[2]["execution_id"] for r in results if r[2]}
+    assert len(replayed) == 1
     assert len(execution_ids) == 1
+    assert len(harness.dispatch_port.dispatched_bundles) == 1
 
 
-def test_t030_replay_modified_payload_same_intent_id_fails_collision(
+def test_t030_gate_modified_payload_same_intent_id_uses_frozen_conflict_code(
     base_intent: dict,
 ) -> None:
-    ledger = SecurityIdempotencyLedger()
-    caller = "operator.alpha"
+    harness = build_gate_harness()
+    admit_train_ticket(harness, base_intent)
 
-    # Admit original
-    outcome1, _, _ = ledger.submit_intent(base_intent, caller)
-    assert outcome1 == "ADMITTED"
-
-    # Alter payload but keep same intent_id
     tampered = copy.deepcopy(base_intent)
     tampered["operation_payload"]["ticket_id"] = "ticket-TAMPERED-001"
-    t_copy = copy.deepcopy(tampered)
-    t_copy.pop("intent_digest", None)
-    tampered["intent_digest"] = sha256_prefixed(jcs_bytes(t_copy))
+    tampered["intent_digest"] = compute_intent_digest(tampered)
 
-    # Re-submit with same intent_id
-    outcome2, code2, adm2 = ledger.submit_intent(tampered, caller)
-    assert outcome2 == "REJECTED"
-    assert code2 == "ERR_INTENT_COLLISION_DETECTED"
-    assert adm2 is None
-    assert ledger.worker_start_count == 1
+    with pytest.raises(IntentIdDigestConflictError) as exc_info:
+        admit_train_ticket(harness, tampered)
+
+    assert exc_info.value.code == "ERR_INTENT_ID_DIGEST_CONFLICT"
+    assert_frozen_code(exc_info.value.code)
+    assert len(harness.dispatch_port.dispatched_bundles) == 1
 
 
-def test_t030_replay_different_intent_id_same_digest_fails_collision(
+def test_t030_ledger_rejects_distinct_intent_id_with_same_digest_collision(
     base_intent: dict,
 ) -> None:
-    ledger = SecurityIdempotencyLedger()
-    caller = "operator.alpha"
+    ledger = IdempotencyLedger()
+    shared_digest = base_intent["intent_digest"]
+    ledger.record_admission(
+        base_intent["intent_id"],
+        shared_digest,
+        "operator.alpha",
+        "55555555-5555-4555-8555-555555555555",
+        {"admission_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"},
+    )
 
-    # Admit original
-    outcome1, _, _ = ledger.submit_intent(base_intent, caller)
-    assert outcome1 == "ADMITTED"
+    with pytest.raises(IntentCollisionDetectedError) as exc_info:
+        ledger.acquire_or_check(
+            "99999999-9999-4999-8999-999999999999",
+            shared_digest,
+            "operator.alpha",
+        )
 
-    # Create distinct intent_id with identical body/digest
-    colliding = copy.deepcopy(base_intent)
-    colliding["intent_id"] = "99999999-9999-4999-8999-999999999999"
-    outcome2, code2, adm2 = ledger.submit_intent(colliding, caller)
-    assert outcome2 == "REJECTED"
-    assert code2 in {"ERR_INTENT_COLLISION_DETECTED", "ERR_INTENT_DIGEST_MISMATCH"}
-    assert adm2 is None
-    assert ledger.worker_start_count == 1
+    assert exc_info.value.code == "ERR_INTENT_COLLISION_DETECTED"
+    assert_frozen_code(exc_info.value.code)
 
 
-def test_t030_replay_mismatched_caller_fails_unauthorized(
+def test_t030_gate_mismatched_caller_fails_unauthorized(
     base_intent: dict,
 ) -> None:
-    ledger = SecurityIdempotencyLedger()
-    legitimate_caller = "operator.alpha"
-    hostile_caller = "attacker.eve"
+    harness = build_gate_harness()
+    admit_train_ticket(harness, base_intent)
 
-    outcome1, _, _ = ledger.submit_intent(base_intent, legitimate_caller)
-    assert outcome1 == "ADMITTED"
+    with pytest.raises(UnauthorizedCallerError) as exc_info:
+        admit_train_ticket(
+            harness,
+            base_intent,
+            credentials=operator_credentials("operator.beta", ["OPERATOR"]),
+        )
 
-    outcome2, code2, adm2 = ledger.submit_intent(base_intent, hostile_caller)
-    assert outcome2 == "REJECTED"
-    assert code2 == "ERR_UNAUTHORIZED_PEER_OR_ROLE"
-    assert adm2 is None
-    assert ledger.worker_start_count == 1
+    assert exc_info.value.code == "ERR_UNAUTHORIZED_CALLER"
+    assert_frozen_code(exc_info.value.code)
+    assert len(harness.dispatch_port.dispatched_bundles) == 1
 
 
-def test_t030_controller_restart_preserves_idempotency_ledger(
+def test_t030_controller_restart_preserves_production_ledger(
     base_intent: dict,
+    tmp_path,
 ) -> None:
-    ledger1 = SecurityIdempotencyLedger()
-    caller = "operator.alpha"
+    ledger_path = tmp_path / "idempotency.jsonl"
+    first_harness = build_gate_harness(ledger=IdempotencyLedger(persistence_path=ledger_path))
+    first = admit_train_ticket(first_harness, base_intent)
+    assert len(first_harness.dispatch_port.dispatched_bundles) == 1
 
-    outcome1, _, adm1 = ledger1.submit_intent(base_intent, caller)
-    assert outcome1 == "ADMITTED"
-    assert ledger1.worker_start_count == 1
+    restarted_harness = build_gate_harness(ledger=IdempotencyLedger(persistence_path=ledger_path))
+    replay = admit_train_ticket(restarted_harness, base_intent)
 
-    # Snapshot to simulated durable storage
-    snapshot_json = ledger1.snapshot()
-
-    # Simulate Controller crash & reboot
-    del ledger1
-    ledger2 = SecurityIdempotencyLedger.restore(snapshot_json)
-
-    assert ledger2.worker_start_count == 1
-
-    # Replay after reboot
-    outcome2, code2, adm2 = ledger2.submit_intent(base_intent, caller)
-    assert outcome2 == "REPLAY_IDEMPOTENT"
-    assert code2 == "OK"
-    assert adm2 == adm1
-    assert ledger2.worker_start_count == 1
+    assert replay["action"] == "ALREADY_ADMITTED"
+    assert replay["status"]["execution_id"] == first["status"]["execution_id"]
+    assert len(restarted_harness.dispatch_port.dispatched_bundles) == 0
 
 
 def test_t030_tampered_intent_digest_rejected_before_ledger(
     base_intent: dict,
 ) -> None:
-    ledger = SecurityIdempotencyLedger()
-    caller = "operator.alpha"
-
+    harness = build_gate_harness()
     tampered = copy.deepcopy(base_intent)
     tampered["intent_digest"] = (
         "sha256:0000000000000000000000000000000000000000000000000000000000000000"
     )
 
-    outcome, code, adm = ledger.submit_intent(tampered, caller)
-    assert outcome == "REJECTED"
-    assert code == "ERR_INTENT_DIGEST_MISMATCH"
-    assert adm is None
-    assert ledger.worker_start_count == 0
+    with pytest.raises(IntentDigestMismatchError) as exc_info:
+        admit_train_ticket(harness, tampered)
+
+    assert exc_info.value.code == "ERR_INTENT_DIGEST_MISMATCH"
+    assert_frozen_code(exc_info.value.code)
+    assert len(harness.dispatch_port.dispatched_bundles) == 0
+    assert harness.ledger.get_by_intent_id(base_intent["intent_id"]) is None

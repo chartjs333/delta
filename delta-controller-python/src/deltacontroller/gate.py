@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -13,11 +14,11 @@ from deltacontroller.auth import (
     AuthenticatedSubject,
     AuthenticationPort,
     PolicyEngine,
-    StaticAuthenticationPort,
 )
 from deltacontroller.canonical import compute_admission_digest, sign_admission
 from deltacontroller.catalog import CatalogValidator
 from deltacontroller.dispatch import MockWorkerDispatchPort, WorkerDispatchPort
+from deltacontroller.errors import ControllerError, WorkerDispatchFailedError
 from deltacontroller.idempotency import IdempotencyLedger
 from deltacontroller.ingress import IngressParser
 from deltacontroller.quota import QuotaManager
@@ -26,9 +27,34 @@ from deltacontroller.status import build_execution_status
 
 DEFAULT_CONTROLLER_COMMIT = "66e3e7e5bb07a48aadbee8d9c4683144b812d229"
 DEFAULT_POLICY_VERSION = "step5c-policy-v1"
-DEFAULT_ISSUER_ID = "step5c-fixture-controller"
-DEFAULT_KEY_ID = "step5c-fixture-ed25519"
 DEFAULT_ADMISSION_TTL_SECONDS = 300  # 5 minutes dispatch deadline
+_FROZEN_TEST_FIXTURE_ISSUER_ID = "step5c-fixture-controller"
+_FROZEN_TEST_FIXTURE_KEY_ID = "step5c-fixture-ed25519"
+
+
+@dataclass(frozen=True, slots=True)
+class AdmissionSigningIdentity:
+    """Explicit runtime signing identity shared with the Worker trust configuration."""
+
+    private_key: Ed25519PrivateKey
+    key_id: str
+    issuer_id: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.private_key, Ed25519PrivateKey):
+            raise TypeError("private_key must be an Ed25519PrivateKey")
+        if not self.key_id.strip():
+            raise ValueError("key_id must be non-empty")
+        if not self.issuer_id.strip():
+            raise ValueError("issuer_id must be non-empty")
+        if (
+            self.key_id == _FROZEN_TEST_FIXTURE_KEY_ID
+            or self.issuer_id == _FROZEN_TEST_FIXTURE_ISSUER_ID
+        ):
+            raise ValueError(
+                "Frozen fixture signing metadata is test-vector-only and cannot be used "
+                "by the runtime AuthorizationGate"
+            )
 
 
 class AuthorizationGate:
@@ -45,27 +71,37 @@ class AuthorizationGate:
         quota_manager: QuotaManager | None = None,
         dispatch_port: WorkerDispatchPort | None = None,
         audit_logger: AuditLogger | None = None,
-        private_key: Ed25519PrivateKey | None = None,
-        key_id: str = DEFAULT_KEY_ID,
-        issuer_id: str = DEFAULT_ISSUER_ID,
+        signing_identity: AdmissionSigningIdentity | None = None,
         controller_commit: str = DEFAULT_CONTROLLER_COMMIT,
         policy_version: str = DEFAULT_POLICY_VERSION,
         admission_ttl_seconds: int = DEFAULT_ADMISSION_TTL_SECONDS,
     ) -> None:
+        if auth_port is None:
+            raise ValueError(
+                "AuthorizationGate requires an explicitly configured trusted AuthenticationPort"
+            )
+        if signing_identity is None:
+            raise ValueError(
+                "AuthorizationGate requires an explicitly configured Ed25519 "
+                "AdmissionSigningIdentity"
+            )
+        if idempotency_ledger is None or idempotency_ledger.persistence_path is None:
+            raise ValueError(
+                "AuthorizationGate requires an explicitly configured durable "
+                "IdempotencyLedger persistence_path"
+            )
         self.schema_registry = schema_registry or SchemaRegistry()
         self.ingress_parser = ingress_parser or IngressParser(schema_registry=self.schema_registry)
-        self.auth_port = auth_port or StaticAuthenticationPort()
+        self.auth_port = auth_port
         self.policy_engine = policy_engine or PolicyEngine()
         self.catalog_validator = catalog_validator or CatalogValidator()
-        self.idempotency_ledger = idempotency_ledger or IdempotencyLedger()
+        self.idempotency_ledger = idempotency_ledger
         self.quota_manager = quota_manager or QuotaManager()
         self.dispatch_port = dispatch_port or MockWorkerDispatchPort(
             schema_registry=self.schema_registry
         )
         self.audit_logger = audit_logger or AuditLogger()
-        self.private_key = private_key or Ed25519PrivateKey.generate()
-        self.key_id = key_id
-        self.issuer_id = issuer_id
+        self.signing_identity = signing_identity
         self.controller_commit = controller_commit
         self.policy_version = policy_version
         self.admission_ttl_seconds = admission_ttl_seconds
@@ -83,13 +119,14 @@ class AuthorizationGate:
             2. Transport caller authentication -> AuthenticatedSubject.
             3. Role-based governance policy evaluation.
             4. Catalog ref, known plugin/dataset, and capability matrix validation.
-            5. Append-only idempotency ledger check (replay/conflict/collision).
+            5. Atomically acquire/check an idempotency reservation.
             6. Resource quota and concurrency check.
             7. Assign UUIDs, determine admission_expires_at, construct AdmissionRecord.
             8. Compute admission_digest and Ed25519 signature over admission \\ signature.
-            9. Record admission in ledger.
-            10. Construct AuthorizedExecution bundle, validate schema, dispatch to Zone 3.
-            11. Structured audit event logging with secret redaction.
+            9. Construct and validate the AuthorizedExecution bundle.
+            10. Durably commit the reserved execution identity before dispatch.
+            11. Dispatch once to Zone 3 and update the committed status.
+            12. Structured audit event logging with secret redaction.
         """
         now = current_time or datetime.now(UTC)
 
@@ -108,10 +145,11 @@ class AuthorizationGate:
         self.catalog_validator.validate(intent["workload"], intent["operation"])
 
         # 5. Idempotency & Replay check
-        existing = self.idempotency_ledger.check_intent(
+        reservation_state, existing = self.idempotency_ledger.acquire_or_check(
             intent_id, intent_digest, subject.subject_id
         )
-        if existing is not None:
+        if reservation_state == "COMMITTED":
+            assert existing is not None
             # Re-submission handling
             self.audit_logger.log_event(
                 "IDEMPOTENT_RESUBMISSION",
@@ -143,93 +181,125 @@ class AuthorizationGate:
                 "receipt": existing.terminal_receipt,
             }
 
-        # 6. Quotas and Resource Grants
-        active_count = self.idempotency_ledger.active_count()
-        grants = self.quota_manager.evaluate_grants(intent, active_count)
+        if reservation_state != "RESERVED":
+            raise RuntimeError(f"Unknown idempotency reservation state: {reservation_state}")
 
-        # 7. Admission record creation
-        admission_id = str(uuid.uuid4())
-        execution_id = str(uuid.uuid4())
-        admitted_at_iso = now.isoformat()
-
-        # admission_expires_at: now <= admission_expires_at <= intent.expires_at
-        intent_expires_at = datetime.fromisoformat(intent["expires_at"].replace("Z", "+00:00"))
-        dispatch_deadline = now + timedelta(seconds=self.admission_ttl_seconds)
-        admission_expires_at = min(intent_expires_at, dispatch_deadline)
-        admission_expires_at_iso = admission_expires_at.isoformat()
-
-        # Build admission document skeleton
-        admission_doc: dict[str, Any] = {
-            "schema_version": "1.0.0",
-            "admission_id": admission_id,
-            "intent_id": intent_id,
-            "intent_digest": intent_digest,
-            "execution_id": execution_id,
-            "authenticated_subject": subject.to_dict(),
-            "policy_context": {
-                "policy_version": self.policy_version,
-                "controller_commit": self.controller_commit,
-                "verdict": "ADMITTED",
-            },
-            "resource_grants": grants.to_dict(),
-            "admitted_at": admitted_at_iso,
-            "admission_expires_at": admission_expires_at_iso,
-        }
-
-        # 8. Compute admission_digest (over doc excluding admission_digest and authenticator)
-        admission_digest = compute_admission_digest(admission_doc)
-        admission_doc["admission_digest"] = admission_digest
-
-        # Add authenticator metadata
-        admission_doc["authenticator"] = {
-            "algorithm": "ED25519",
-            "issuer_id": self.issuer_id,
-            "key_id": self.key_id,
-        }
-
-        # Sign over RFC8785(admission_doc \ {"authenticator.signature"})
-        signature = sign_admission(admission_doc, self.private_key)
-        admission_doc["authenticator"]["signature"] = signature
-
-        # Validate schema of AdmissionRecord
-        self.schema_registry.validate("admission-record", admission_doc)
-
-        # 9. Record admission in ledger
-        constraints = intent.get("execution_constraints", {})
-        retry_of = constraints.get("retry_of_intent_id")
-        self.idempotency_ledger.record_admission(
-            intent_id=intent_id,
-            intent_digest=intent_digest,
-            caller_subject_id=subject.subject_id,
-            execution_id=execution_id,
-            admission_record=admission_doc,
-            retry_of_intent_id=retry_of,
-        )
-
-        # 10. Assemble and validate AuthorizedExecution bundle
-        bundle: dict[str, Any] = {
-            "schema_version": "1.0.0",
-            "intent": intent,
-            "admission": admission_doc,
-        }
-        self.schema_registry.validate("authorized-execution", bundle)
-
-        # 11. Dispatch to Zone 3 worker
+        reservation_active = True
         try:
-            dispatch_result = self.dispatch_port.dispatch(bundle, current_time=now)
-        except TypeError:
-            dispatch_result = self.dispatch_port.dispatch(bundle)
-        worker_state = dispatch_result.get("status", "RUNNING")
-        receipt = dispatch_result.get("receipt") or dispatch_result.get("terminal_receipt")
-        receipt_digest = dispatch_result.get("receipt_digest")
-        error = dispatch_result.get("error")
+            # 6. Quotas and Resource Grants
+            active_count = self.idempotency_ledger.active_count(reservation_intent_id=intent_id)
+            grants = self.quota_manager.evaluate_grants(intent, active_count)
 
+            # 7. Admission record creation
+            admission_id = str(uuid.uuid4())
+            execution_id = str(uuid.uuid4())
+            admitted_at_iso = now.isoformat()
+
+            # admission_expires_at: now <= admission_expires_at <= intent.expires_at
+            intent_expires_at = datetime.fromisoformat(intent["expires_at"].replace("Z", "+00:00"))
+            dispatch_deadline = now + timedelta(seconds=self.admission_ttl_seconds)
+            admission_expires_at = min(intent_expires_at, dispatch_deadline)
+            admission_expires_at_iso = admission_expires_at.isoformat()
+
+            # Build admission document skeleton
+            admission_doc: dict[str, Any] = {
+                "schema_version": "1.0.0",
+                "admission_id": admission_id,
+                "intent_id": intent_id,
+                "intent_digest": intent_digest,
+                "execution_id": execution_id,
+                "authenticated_subject": subject.to_dict(),
+                "policy_context": {
+                    "policy_version": self.policy_version,
+                    "controller_commit": self.controller_commit,
+                    "verdict": "ADMITTED",
+                },
+                "resource_grants": grants.to_dict(),
+                "admitted_at": admitted_at_iso,
+                "admission_expires_at": admission_expires_at_iso,
+            }
+
+            # 8. Compute admission_digest (excluding admission_digest and authenticator)
+            admission_digest = compute_admission_digest(admission_doc)
+            admission_doc["admission_digest"] = admission_digest
+
+            # Add explicitly configured authenticator metadata.
+            admission_doc["authenticator"] = {
+                "algorithm": "ED25519",
+                "issuer_id": self.signing_identity.issuer_id,
+                "key_id": self.signing_identity.key_id,
+            }
+
+            # Sign over RFC8785(admission_doc \ {"authenticator.signature"})
+            signature = sign_admission(admission_doc, self.signing_identity.private_key)
+            admission_doc["authenticator"]["signature"] = signature
+
+            # Validate schema of AdmissionRecord
+            self.schema_registry.validate("admission-record", admission_doc)
+
+            # 9. Assemble and validate AuthorizedExecution bundle
+            bundle: dict[str, Any] = {
+                "schema_version": "1.0.0",
+                "intent": intent,
+                "admission": admission_doc,
+            }
+            self.schema_registry.validate("authorized-execution", bundle)
+
+            # 10. Publish one durable execution identity before external dispatch.
+            constraints = intent.get("execution_constraints", {})
+            retry_of = constraints.get("retry_of_intent_id")
+            ledger_rec = self.idempotency_ledger.commit_admission(
+                intent_id=intent_id,
+                intent_digest=intent_digest,
+                caller_subject_id=subject.subject_id,
+                execution_id=execution_id,
+                admission_record=admission_doc,
+                retry_of_intent_id=retry_of,
+                operation=intent["operation"],
+            )
+            reservation_active = False
+        except BaseException:
+            if reservation_active:
+                self.idempotency_ledger.release_reservation(intent_id)
+            raise
+
+        # 11. Dispatch exactly once after the durable identity is visible.
+        try:
+            dispatch_result = self.dispatch_port.dispatch(bundle)
+        except Exception as exc:
+            if isinstance(exc, ControllerError):
+                controller_error = exc
+            else:
+                controller_error = WorkerDispatchFailedError()
+            stored_error = {
+                "schema_version": "1.0.0",
+                "error_code": controller_error.code,
+                "category": controller_error.category,
+                "retryable": controller_error.retryable,
+                "message": controller_error.message[:512],
+            }
+            self.idempotency_ledger.update_execution(
+                execution_id,
+                status="FAILED",
+                error=stored_error,
+            )
+            self.audit_logger.log_event(
+                "EXECUTION_DISPATCH_FAILED",
+                subject.subject_id,
+                {
+                    "intent_id": intent_id,
+                    "execution_id": execution_id,
+                    "error_code": stored_error["error_code"],
+                },
+                intent_id=intent_id,
+                execution_id=execution_id,
+            )
+            raise
+
+        worker_state = dispatch_result.get("status", "RUNNING")
         ledger_rec = self.idempotency_ledger.update_execution(
             execution_id,
             status=worker_state,
-            receipt_digest=receipt_digest,
-            terminal_receipt=receipt,
-            error=error,
         )
 
         # 12. Audit event
@@ -253,9 +323,8 @@ class AuthorizationGate:
             intent_digest=intent_digest,
             admission_id=admission_id,
             admission_digest=admission_digest,
+            operation=intent["operation"],
             state=ledger_rec.status,
-            receipt_digest=ledger_rec.receipt_digest,
-            error=ledger_rec.error,
             updated_at=ledger_rec.updated_at,
             schema_registry=self.schema_registry,
         )
@@ -265,24 +334,4 @@ class AuthorizationGate:
             "admission": admission_doc,
             "bundle": bundle,
             "status": status_doc,
-            "receipt": ledger_rec.terminal_receipt,
         }
-
-    def get_status(self, execution_id: str) -> dict[str, Any] | None:
-        """Retrieve the execution status document by execution_id."""
-        rec = self.idempotency_ledger.get_by_execution_id(execution_id)
-        if not rec:
-            return None
-        adm = rec.admission_record or {}
-        return build_execution_status(
-            execution_id=rec.execution_id,
-            intent_id=rec.intent_id,
-            intent_digest=rec.intent_digest,
-            admission_id=adm.get("admission_id", rec.execution_id),
-            admission_digest=adm.get("admission_digest", rec.intent_digest),
-            state=rec.status,
-            receipt_digest=rec.receipt_digest,
-            error=rec.error,
-            updated_at=rec.updated_at,
-            schema_registry=self.schema_registry,
-        )

@@ -41,23 +41,25 @@ class SchemaRegistry:
         self._load_all()
 
     def _load_all(self) -> None:
-        resources = []
-        raw_schemas: dict[str, dict[str, Any]] = {}
+        schema_documents: dict[str, dict[str, Any]] = {}
         for alias, filename in self.SCHEMA_FILES.items():
             schema_path = self.schemas_dir / filename
             if not schema_path.exists():
                 raise FileNotFoundError(f"Contract schema not found: {schema_path}")
             with schema_path.open("r", encoding="utf-8") as f:
-                schema_doc = json.load(f)
-            raw_schemas[alias] = schema_doc
-            res = Resource.from_contents(schema_doc)
-            resources.append((filename, res))
-            if "$id" in schema_doc:
-                resources.append((schema_doc["$id"], res))
+                schema_documents[alias] = json.load(f)
 
-        registry = Registry().with_resources(resources)
-        for alias, schema_doc in raw_schemas.items():
-            self._validators[alias] = Draft202012Validator(schema_doc, registry=registry)
+        registry = Registry()
+        for alias, schema_doc in schema_documents.items():
+            schema_id = schema_doc.get("$id")
+            if not isinstance(schema_id, str) or not schema_id:
+                raise RuntimeError(f"Frozen schema '{alias}' has no canonical $id")
+            registry = registry.with_resource(schema_id, Resource.from_contents(schema_doc))
+
+        self._validators = {
+            alias: Draft202012Validator(schema_doc, registry=registry)
+            for alias, schema_doc in schema_documents.items()
+        }
 
     def validate(self, schema_alias: str, document: dict[str, Any]) -> None:
         """Validate a document against a loaded schema; raises typed SchemaValidationError."""

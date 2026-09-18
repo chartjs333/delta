@@ -1,8 +1,9 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T029",
-  "status": "DESIGN_READY_EXECUTABLES_BLOCKED_ON_T005_T009",
+  "status": "COMPLETE",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
   "branch": "feature/step5c-security",
   "artifacts": [
     {
@@ -30,15 +31,12 @@
     "STALE_CATALOG",
     "FORGED_LINEAGE"
   ],
-  "blocked_executable_tests": {
-    "reason": "Executable negative tests must bind to exact contract schemas/vectors from step5c:T005-T009.",
-    "required_upstream_tasks": [
-      "step5c:T005",
-      "step5c:T006",
-      "step5c:T007",
-      "step5c:T008",
-      "step5c:T009"
-    ]
-  },
-  "production_fix_policy": "Security branch records findings and routes production changes to the owning branch; it does not edit controller, worker, or UI production files."
+  "executable_follow_up_tests": [
+    "step5c:T030",
+    "step5c:T031",
+    "step5c:T032",
+    "step5c:T033",
+    "step5c:T034"
+  ],
+  "production_binding_policy": "Security branch now verifies the matrix through production controller and worker boundary tests after corrected contracts were merged."
 }

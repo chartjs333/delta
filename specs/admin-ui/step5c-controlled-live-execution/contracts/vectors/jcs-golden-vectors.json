@@ -1,73 +1,71 @@
 {
   "schema_version": "1.0.0",
+  "generator": "independent-ecmascript-rfc8785-v1",
   "vectors": [
     {
-      "canonical_json": "{\"a\":\"first\",\"emoji\":\"😀\",\"nested\":{\"A\":2,\"Ω\":1},\"z\":\"last\",\"é\":\"latin-small-e-acute\"}",
       "name": "unicode-key-order",
-      "sha256": "sha256:17bae05217b303418b44bb3d5d0182b7e8b7442e87608b865ef8beb87b3190f1",
       "value": {
+        "z": "last",
         "a": "first",
+        "é": "latin-small-e-acute",
         "emoji": "😀",
         "nested": {
-          "A": 2,
-          "Ω": 1
-        },
-        "z": "last",
-        "é": "latin-small-e-acute"
-      }
+          "Ω": 1,
+          "A": 2
+        }
+      },
+      "canonical_json": "{\"a\":\"first\",\"emoji\":\"😀\",\"nested\":{\"A\":2,\"Ω\":1},\"z\":\"last\",\"é\":\"latin-small-e-acute\"}",
+      "sha256": "sha256:17bae05217b303418b44bb3d5d0182b7e8b7442e87608b865ef8beb87b3190f1"
     },
     {
-      "canonical_json": "{\"created_at\":\"2026-09-17T14:30:00.000Z\",\"declared_operator\":{\"role\":\"OPERATOR\",\"subject_id\":\"operator.alpha\"},\"execution_constraints\":{\"requested_allow_downloads\":false,\"retry_of_intent_id\":\"00000000-0000-4000-8000-000000000001\",\"timeout_seconds\":900},\"expires_at\":\"2026-09-17T14:40:00.000Z\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"operation\":\"TRAIN_TICKET\",\"operation_payload\":{\"partition_id\":\"partition_00\",\"ticket_id\":\"ticket_A-0001\"},\"schema_version\":\"1.0.0\",\"workload\":{\"catalog_backend_ref\":\"670b58f6458fe84620f4f9f46401f855d04ae05d\",\"dataset_id\":\"synthetic-10gene-cohort-v1\",\"model_plugin_id\":\"tabular-10gene-phenotype-v1\",\"requested_scope\":\"PLUGIN_BOUNDARY\"}}",
       "name": "execution-intent-train-ticket-without-digest",
-      "sha256": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
       "value": {
-        "created_at": "2026-09-17T14:30:00.000Z",
-        "declared_operator": {
-          "role": "OPERATOR",
-          "subject_id": "operator.alpha"
-        },
-        "execution_constraints": {
-          "requested_allow_downloads": false,
-          "retry_of_intent_id": "00000000-0000-4000-8000-000000000001",
-          "timeout_seconds": 900
-        },
-        "expires_at": "2026-09-17T14:40:00.000Z",
+        "schema_version": "1.0.0",
         "intent_id": "11111111-1111-4111-8111-111111111111",
         "operation": "TRAIN_TICKET",
-        "operation_payload": {
-          "partition_id": "partition_00",
-          "ticket_id": "ticket_A-0001"
-        },
-        "schema_version": "1.0.0",
         "workload": {
-          "catalog_backend_ref": "670b58f6458fe84620f4f9f46401f855d04ae05d",
-          "dataset_id": "synthetic-10gene-cohort-v1",
           "model_plugin_id": "tabular-10gene-phenotype-v1",
+          "dataset_id": "synthetic-10gene-cohort-v1",
+          "catalog_backend_ref": "670b58f6458fe84620f4f9f46401f855d04ae05d",
           "requested_scope": "PLUGIN_BOUNDARY"
-        }
-      }
+        },
+        "operation_payload": {
+          "ticket_id": "ticket_A-0001",
+          "partition_id": "partition_00"
+        },
+        "execution_constraints": {
+          "timeout_seconds": 900,
+          "requested_allow_downloads": false,
+          "retry_of_intent_id": "00000000-0000-4000-8000-000000000001"
+        },
+        "declared_operator": {
+          "subject_id": "operator.alpha",
+          "role": "OPERATOR"
+        },
+        "created_at": "2026-09-17T14:30:00.000Z",
+        "expires_at": "2026-09-17T14:40:00.000Z"
+      },
+      "canonical_json": "{\"created_at\":\"2026-09-17T14:30:00.000Z\",\"declared_operator\":{\"role\":\"OPERATOR\",\"subject_id\":\"operator.alpha\"},\"execution_constraints\":{\"requested_allow_downloads\":false,\"retry_of_intent_id\":\"00000000-0000-4000-8000-000000000001\",\"timeout_seconds\":900},\"expires_at\":\"2026-09-17T14:40:00.000Z\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"operation\":\"TRAIN_TICKET\",\"operation_payload\":{\"partition_id\":\"partition_00\",\"ticket_id\":\"ticket_A-0001\"},\"schema_version\":\"1.0.0\",\"workload\":{\"catalog_backend_ref\":\"670b58f6458fe84620f4f9f46401f855d04ae05d\",\"dataset_id\":\"synthetic-10gene-cohort-v1\",\"model_plugin_id\":\"tabular-10gene-phenotype-v1\",\"requested_scope\":\"PLUGIN_BOUNDARY\"}}",
+      "sha256": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76"
     },
     {
-      "canonical_json": "{\"admission_expires_at\":\"2026-09-17T14:35:00.000Z\",\"admission_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"admitted_at\":\"2026-09-17T14:30:05.000Z\",\"authenticated_subject\":{\"authenticated_via\":\"LOCAL_PEER_CREDENTIAL\",\"effective_roles\":[\"OPERATOR\"],\"subject_id\":\"operator.alpha\"},\"execution_id\":\"55555555-5555-4555-8555-555555555555\",\"intent_digest\":\"sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"policy_context\":{\"controller_commit\":\"66e3e7e5bb07a48aadbee8d9c4683144b812d229\",\"policy_version\":\"step5c-policy-v1\",\"verdict\":\"ADMITTED\"},\"resource_grants\":{\"allow_downloads\":false,\"max_memory_bytes\":2147483648,\"timeout_seconds\":900},\"schema_version\":\"1.0.0\"}",
       "name": "admission-record-without-digest-authenticator",
-      "sha256": "sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1",
       "value": {
-        "admission_expires_at": "2026-09-17T14:35:00.000Z",
+        "schema_version": "1.0.0",
         "admission_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-        "admitted_at": "2026-09-17T14:30:05.000Z",
+        "intent_id": "11111111-1111-4111-8111-111111111111",
+        "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
+        "execution_id": "55555555-5555-4555-8555-555555555555",
         "authenticated_subject": {
-          "authenticated_via": "LOCAL_PEER_CREDENTIAL",
+          "subject_id": "operator.alpha",
           "effective_roles": [
             "OPERATOR"
           ],
-          "subject_id": "operator.alpha"
+          "authenticated_via": "LOCAL_PEER_CREDENTIAL"
         },
-        "execution_id": "55555555-5555-4555-8555-555555555555",
-        "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
-        "intent_id": "11111111-1111-4111-8111-111111111111",
         "policy_context": {
-          "controller_commit": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
           "policy_version": "step5c-policy-v1",
+          "controller_commit": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
           "verdict": "ADMITTED"
         },
         "resource_grants": {
@@ -75,36 +73,31 @@
           "max_memory_bytes": 2147483648,
           "timeout_seconds": 900
         },
-        "schema_version": "1.0.0"
-      }
+        "admitted_at": "2026-09-17T14:30:05.000Z",
+        "admission_expires_at": "2026-09-17T14:35:00.000Z"
+      },
+      "canonical_json": "{\"admission_expires_at\":\"2026-09-17T14:35:00.000Z\",\"admission_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"admitted_at\":\"2026-09-17T14:30:05.000Z\",\"authenticated_subject\":{\"authenticated_via\":\"LOCAL_PEER_CREDENTIAL\",\"effective_roles\":[\"OPERATOR\"],\"subject_id\":\"operator.alpha\"},\"execution_id\":\"55555555-5555-4555-8555-555555555555\",\"intent_digest\":\"sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"policy_context\":{\"controller_commit\":\"66e3e7e5bb07a48aadbee8d9c4683144b812d229\",\"policy_version\":\"step5c-policy-v1\",\"verdict\":\"ADMITTED\"},\"resource_grants\":{\"allow_downloads\":false,\"max_memory_bytes\":2147483648,\"timeout_seconds\":900},\"schema_version\":\"1.0.0\"}",
+      "sha256": "sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1"
     },
     {
-      "canonical_json": "{\"admission_digest\":\"sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1\",\"admission_expires_at\":\"2026-09-17T14:35:00.000Z\",\"admission_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"admitted_at\":\"2026-09-17T14:30:05.000Z\",\"authenticated_subject\":{\"authenticated_via\":\"LOCAL_PEER_CREDENTIAL\",\"effective_roles\":[\"OPERATOR\"],\"subject_id\":\"operator.alpha\"},\"authenticator\":{\"algorithm\":\"ED25519\",\"issuer_id\":\"step5c-fixture-controller\",\"key_id\":\"step5c-fixture-ed25519\"},\"execution_id\":\"55555555-5555-4555-8555-555555555555\",\"intent_digest\":\"sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"policy_context\":{\"controller_commit\":\"66e3e7e5bb07a48aadbee8d9c4683144b812d229\",\"policy_version\":\"step5c-policy-v1\",\"verdict\":\"ADMITTED\"},\"resource_grants\":{\"allow_downloads\":false,\"max_memory_bytes\":2147483648,\"timeout_seconds\":900},\"schema_version\":\"1.0.0\"}",
       "name": "admission-record-without-signature",
-      "sha256": "sha256:643e881e5dc8699a53af59771a09288f0d984700c01f6f256a8584d82a3f069f",
       "value": {
-        "admission_digest": "sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1",
-        "admission_expires_at": "2026-09-17T14:35:00.000Z",
+        "schema_version": "1.0.0",
         "admission_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-        "admitted_at": "2026-09-17T14:30:05.000Z",
+        "intent_id": "11111111-1111-4111-8111-111111111111",
+        "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
+        "execution_id": "55555555-5555-4555-8555-555555555555",
+        "admission_digest": "sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1",
         "authenticated_subject": {
-          "authenticated_via": "LOCAL_PEER_CREDENTIAL",
+          "subject_id": "operator.alpha",
           "effective_roles": [
             "OPERATOR"
           ],
-          "subject_id": "operator.alpha"
+          "authenticated_via": "LOCAL_PEER_CREDENTIAL"
         },
-        "authenticator": {
-          "algorithm": "ED25519",
-          "issuer_id": "step5c-fixture-controller",
-          "key_id": "step5c-fixture-ed25519"
-        },
-        "execution_id": "55555555-5555-4555-8555-555555555555",
-        "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
-        "intent_id": "11111111-1111-4111-8111-111111111111",
         "policy_context": {
-          "controller_commit": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
           "policy_version": "step5c-policy-v1",
+          "controller_commit": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
           "verdict": "ADMITTED"
         },
         "resource_grants": {
@@ -112,8 +105,210 @@
           "max_memory_bytes": 2147483648,
           "timeout_seconds": 900
         },
-        "schema_version": "1.0.0"
-      }
+        "admitted_at": "2026-09-17T14:30:05.000Z",
+        "admission_expires_at": "2026-09-17T14:35:00.000Z",
+        "authenticator": {
+          "issuer_id": "step5c-fixture-controller",
+          "key_id": "step5c-fixture-ed25519",
+          "algorithm": "ED25519"
+        }
+      },
+      "canonical_json": "{\"admission_digest\":\"sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1\",\"admission_expires_at\":\"2026-09-17T14:35:00.000Z\",\"admission_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"admitted_at\":\"2026-09-17T14:30:05.000Z\",\"authenticated_subject\":{\"authenticated_via\":\"LOCAL_PEER_CREDENTIAL\",\"effective_roles\":[\"OPERATOR\"],\"subject_id\":\"operator.alpha\"},\"authenticator\":{\"algorithm\":\"ED25519\",\"issuer_id\":\"step5c-fixture-controller\",\"key_id\":\"step5c-fixture-ed25519\"},\"execution_id\":\"55555555-5555-4555-8555-555555555555\",\"intent_digest\":\"sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"policy_context\":{\"controller_commit\":\"66e3e7e5bb07a48aadbee8d9c4683144b812d229\",\"policy_version\":\"step5c-policy-v1\",\"verdict\":\"ADMITTED\"},\"resource_grants\":{\"allow_downloads\":false,\"max_memory_bytes\":2147483648,\"timeout_seconds\":900},\"schema_version\":\"1.0.0\"}",
+      "sha256": "sha256:643e881e5dc8699a53af59771a09288f0d984700c01f6f256a8584d82a3f069f"
+    },
+    {
+      "name": "execution-status-completed",
+      "value": {
+        "schema_version": "1.0.0",
+        "execution_id": "55555555-5555-4555-8555-555555555555",
+        "intent_id": "11111111-1111-4111-8111-111111111111",
+        "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
+        "admission_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "admission_digest": "sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1",
+        "state": "COMPLETED",
+        "receipt_digest": "sha256:93caaf42c2a8f1bacb9fbc9bf835a48a8641fd16c416794a7a0ca7f52a0138c8",
+        "terminal": true,
+        "updated_at": "2026-09-17T14:35:30.000Z",
+        "operation": "TRAIN_TICKET"
+      },
+      "canonical_json": "{\"admission_digest\":\"sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1\",\"admission_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"execution_id\":\"55555555-5555-4555-8555-555555555555\",\"intent_digest\":\"sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"operation\":\"TRAIN_TICKET\",\"receipt_digest\":\"sha256:93caaf42c2a8f1bacb9fbc9bf835a48a8641fd16c416794a7a0ca7f52a0138c8\",\"schema_version\":\"1.0.0\",\"state\":\"COMPLETED\",\"terminal\":true,\"updated_at\":\"2026-09-17T14:35:30.000Z\"}",
+      "sha256": "sha256:b0d38d611d0b7ebb3243797025c9735ea71d4752a1f23228c054f5c26a071415"
+    },
+    {
+      "name": "execution-receipt-lineage-extension",
+      "value": {
+        "schema_version": "1.0.0",
+        "receipt_type": "DELTAREDUCE_EXECUTION_RECEIPT",
+        "provenance": {
+          "repository": "chartjs333/delta",
+          "backend_commit": "4cf2aa8c05001c37b7b1e42b2f6ef3fbaebc1a01",
+          "catalog_backend_ref": "670b58f6458fe84620f4f9f46401f855d04ae05d",
+          "producer_commit": "4992d9eca319da21b5a2c7b94593f3668b92329c",
+          "controller_commit": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+          "produced_at": "2026-09-17T14:35:25.000Z",
+          "intent_id": "11111111-1111-4111-8111-111111111111",
+          "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
+          "admission_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          "admission_digest": "sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1",
+          "execution_id": "55555555-5555-4555-8555-555555555555"
+        },
+        "workload": {
+          "model_plugin_id": "tabular-10gene-phenotype-v1",
+          "dataset_id": "synthetic-10gene-cohort-v1",
+          "executed_scope": "PLUGIN_BOUNDARY",
+          "workload_config_digest": "sha256:93caaf42c2a8f1bacb9fbc9bf835a48a8641fd16c416794a7a0ca7f52a0138c8"
+        },
+        "execution": {
+          "verdict": "SUCCESS",
+          "terminal_status": "COMPLETED"
+        }
+      },
+      "canonical_json": "{\"execution\":{\"terminal_status\":\"COMPLETED\",\"verdict\":\"SUCCESS\"},\"provenance\":{\"admission_digest\":\"sha256:592c4cef6326853d9d3a34e96cc42552c1dd54899a152678b4a745c17db1c3b1\",\"admission_id\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"backend_commit\":\"4cf2aa8c05001c37b7b1e42b2f6ef3fbaebc1a01\",\"catalog_backend_ref\":\"670b58f6458fe84620f4f9f46401f855d04ae05d\",\"controller_commit\":\"66e3e7e5bb07a48aadbee8d9c4683144b812d229\",\"execution_id\":\"55555555-5555-4555-8555-555555555555\",\"intent_digest\":\"sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76\",\"intent_id\":\"11111111-1111-4111-8111-111111111111\",\"produced_at\":\"2026-09-17T14:35:25.000Z\",\"producer_commit\":\"4992d9eca319da21b5a2c7b94593f3668b92329c\",\"repository\":\"chartjs333/delta\"},\"receipt_type\":\"DELTAREDUCE_EXECUTION_RECEIPT\",\"schema_version\":\"1.0.0\",\"workload\":{\"dataset_id\":\"synthetic-10gene-cohort-v1\",\"executed_scope\":\"PLUGIN_BOUNDARY\",\"model_plugin_id\":\"tabular-10gene-phenotype-v1\",\"workload_config_digest\":\"sha256:93caaf42c2a8f1bacb9fbc9bf835a48a8641fd16c416794a7a0ca7f52a0138c8\"}}",
+      "sha256": "sha256:067d05d360115d2a1541882203fa6c8bf98b0138ccd15b67ecf16653575b0f53"
+    },
+    {
+      "name": "numbers-integers-and-zero",
+      "value": {
+        "pos_zero": 0,
+        "neg_zero": 0,
+        "one": 1,
+        "neg_one": -1,
+        "answer": 42,
+        "neg_answer": -42,
+        "max_safe_int": 9007199254740991,
+        "min_safe_int": -9007199254740991
+      },
+      "canonical_json": "{\"answer\":42,\"max_safe_int\":9007199254740991,\"min_safe_int\":-9007199254740991,\"neg_answer\":-42,\"neg_one\":-1,\"neg_zero\":0,\"one\":1,\"pos_zero\":0}",
+      "sha256": "sha256:f773b4b721b258a1181496c2fae0d698b157fbdefbe472932f42899df97e4ce5"
+    },
+    {
+      "name": "numbers-floats-standard",
+      "value": {
+        "quarter": 0.25,
+        "one_point_twenty_five": 1.25,
+        "eighth": 0.125,
+        "negative_fraction": -1.25,
+        "tenth": 0.1,
+        "sub_millionth_decimal": 0.000001
+      },
+      "canonical_json": "{\"eighth\":0.125,\"negative_fraction\":-1.25,\"one_point_twenty_five\":1.25,\"quarter\":0.25,\"sub_millionth_decimal\":0.000001,\"tenth\":0.1}",
+      "sha256": "sha256:72d15d878f55ab3fba47fa0c9f327709b1e3be09320abf3e6bc5c2f3f045c8a4"
+    },
+    {
+      "name": "numbers-exponential-boundaries",
+      "value": {
+        "exp_pos_large": 1e+21,
+        "exp_pos_twenty": 100000000000000000000,
+        "exp_neg_small": 1e-7,
+        "exp_neg_six": 0.000001,
+        "exp_neg_five": 0.00001,
+        "exp_complex_pos": 123456789012345000000,
+        "exp_complex_neg": 1.23456789012345e-20
+      },
+      "canonical_json": "{\"exp_complex_neg\":1.23456789012345e-20,\"exp_complex_pos\":123456789012345000000,\"exp_neg_five\":0.00001,\"exp_neg_six\":0.000001,\"exp_neg_small\":1e-7,\"exp_pos_large\":1e+21,\"exp_pos_twenty\":100000000000000000000}",
+      "sha256": "sha256:09705c5bd434d3ba66fb36df5b7a08e7ab41559f76b9bc50e5ff5858d812a7fe"
+    },
+    {
+      "name": "empty-structures",
+      "value": {
+        "empty_array": [],
+        "empty_object": {}
+      },
+      "canonical_json": "{\"empty_array\":[],\"empty_object\":{}}",
+      "sha256": "sha256:0f2158204145fd606c11e64e0161a9a78eb7c27fb39b7b5cb6fee328fb5b99da"
+    },
+    {
+      "name": "whitespace-and-escapes",
+      "value": {
+        "escapes": "\"\\\b\f\n\r\t",
+        "slash": "a/b/c",
+        "space": "   "
+      },
+      "canonical_json": "{\"escapes\":\"\\\"\\\\\\b\\f\\n\\r\\t\",\"slash\":\"a/b/c\",\"space\":\"   \"}",
+      "sha256": "sha256:36ad67f81563ebb69e5325d5d494ccd8eb0a7debc022d6b4a7d5769f47a397db"
+    },
+    {
+      "name": "surrogate-pairs-and-unicode",
+      "value": {
+        "emoji_rainbow": "🌈",
+        "emoji_flag": "🇺🇳",
+        "japanese": "日本語",
+        "math_symbols": "∀x∈ℝ: x²≥0"
+      },
+      "canonical_json": "{\"emoji_flag\":\"🇺🇳\",\"emoji_rainbow\":\"🌈\",\"japanese\":\"日本語\",\"math_symbols\":\"∀x∈ℝ: x²≥0\"}",
+      "sha256": "sha256:bc8b83e9a2acdedb6c356581099992850d3d6fcecb757a91a3a1e273cec368e9"
+    },
+    {
+      "name": "number-zero",
+      "value": {
+        "val": 0
+      },
+      "canonical_json": "{\"val\":0}",
+      "sha256": "sha256:3d327872b987fdbbdece95d0d7bec019bb18cf392356e7e155a3606a1415070a"
+    },
+    {
+      "name": "number-negative-zero",
+      "value": {
+        "val": 0
+      },
+      "canonical_json": "{\"val\":0}",
+      "sha256": "sha256:3d327872b987fdbbdece95d0d7bec019bb18cf392356e7e155a3606a1415070a"
+    },
+    {
+      "name": "number-positive-int",
+      "value": {
+        "val": 42
+      },
+      "canonical_json": "{\"val\":42}",
+      "sha256": "sha256:7a9bcbf01c867f7763a1c57dcdef27c6794734fba9c8ee1e59f2bb5daf603257"
+    },
+    {
+      "name": "number-negative-int",
+      "value": {
+        "val": -42
+      },
+      "canonical_json": "{\"val\":-42}",
+      "sha256": "sha256:17f72f635414e01a3d60fa5bc84b396cc771965da8b8b5d21afa569faed3720f"
+    },
+    {
+      "name": "number-max-safe-int",
+      "value": {
+        "val": 9007199254740991
+      },
+      "canonical_json": "{\"val\":9007199254740991}",
+      "sha256": "sha256:4ede97d1128130648ff7124344efa71277c9b25a113bd36dd46113a69a74df52"
+    },
+    {
+      "name": "number-min-safe-int",
+      "value": {
+        "val": -9007199254740991
+      },
+      "canonical_json": "{\"val\":-9007199254740991}",
+      "sha256": "sha256:48360b351eb4960aa265247d5032240d9c86be1217da50468663c7651268a120"
+    },
+    {
+      "name": "number-fraction",
+      "value": {
+        "val": 1.25
+      },
+      "canonical_json": "{\"val\":1.25}",
+      "sha256": "sha256:4d07dfada045f75ea5c2c99515bb08251f39d77262fc725f9e778d3a21cedbf9"
+    },
+    {
+      "name": "number-exponential-small",
+      "value": {
+        "val": 1e-7
+      },
+      "canonical_json": "{\"val\":1e-7}",
+      "sha256": "sha256:87fe0119df7084a532dacfa8783ff553236a93b74c825b8ef19a0d7eaff02321"
+    },
+    {
+      "name": "number-exponential-large",
+      "value": {
+        "val": 1e+21
+      },
+      "canonical_json": "{\"val\":1e+21}",
+      "sha256": "sha256:6e443ac119ea228989381883ce8376fff6b07f02cb27965878a2af197b15570e"
     }
   ]
 }

@@ -6,9 +6,11 @@ import copy
 import hashlib
 import json
 import math
+from pathlib import Path
 from typing import Any
 
 from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PrivateKey,
     Ed25519PublicKey,
@@ -127,3 +129,38 @@ def verify_admission_signature(admission_doc: dict[str, Any], public_key: Ed2551
         return True
     except (ValueError, InvalidSignature):
         return False
+
+
+def get_public_key_hex(private_key: Ed25519PrivateKey) -> str:
+    """Extract raw 32-byte public key as hex string."""
+    return private_key.public_key().public_bytes_raw().hex()
+
+
+def load_private_key(key_input: Ed25519PrivateKey | bytes | str) -> Ed25519PrivateKey:
+    """Load or parse an Ed25519PrivateKey from instance, bytes, hex, or PEM string/path."""
+    if isinstance(key_input, Ed25519PrivateKey):
+        return key_input
+    if isinstance(key_input, bytes):
+        if len(key_input) == 32:
+            return Ed25519PrivateKey.from_private_bytes(key_input)
+        loaded = serialization.load_pem_private_key(key_input, password=None)
+        if isinstance(loaded, Ed25519PrivateKey):
+            return loaded
+        raise ValueError(f"Loaded key is not Ed25519PrivateKey: {type(loaded)}")
+    if isinstance(key_input, str):
+        path = Path(key_input)
+        if path.exists() and path.is_file():
+            return load_private_key(path.read_bytes())
+        if "BEGIN PRIVATE KEY" in key_input or "BEGIN ED25519 PRIVATE KEY" in key_input:
+            loaded = serialization.load_pem_private_key(key_input.encode("utf-8"), password=None)
+            if isinstance(loaded, Ed25519PrivateKey):
+                return loaded
+            raise ValueError(f"Loaded key is not Ed25519PrivateKey: {type(loaded)}")
+        raw_text = key_input.strip()
+        try:
+            raw_bytes = bytes.fromhex(raw_text)
+            if len(raw_bytes) == 32:
+                return Ed25519PrivateKey.from_private_bytes(raw_bytes)
+        except ValueError:
+            pass
+    raise ValueError(f"Cannot load Ed25519 private key from input type: {type(key_input)}")

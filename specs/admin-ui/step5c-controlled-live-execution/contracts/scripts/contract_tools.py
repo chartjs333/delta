@@ -5,6 +5,7 @@ import copy
 import hashlib
 import json
 import math
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from jsonschema.exceptions import ValidationError
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
 SCHEMAS = ROOT / "schemas"
 TAXONOMY = ROOT / "taxonomy"
 VALID = ROOT / "fixtures" / "valid"
@@ -51,6 +53,7 @@ def _ordered(obj: Any) -> Any:
 
 
 def _number_to_jcs(value: int | float) -> str:
+    """Serialize number per RFC 8785 Section 3.2.2.3 and ECMA-262 Section 7.1.12.1."""
     if isinstance(value, bool):
         raise TypeError("bool is not a number")
     if isinstance(value, int):
@@ -58,7 +61,56 @@ def _number_to_jcs(value: int | float) -> str:
     if isinstance(value, float):
         if not math.isfinite(value):
             raise ValueError("non-finite numbers are not valid JCS")
-        raise TypeError("Step 5C contract fixtures intentionally avoid floats")
+        if value == 0.0:
+            return "0"
+        if value < 0:
+            return "-" + _number_to_jcs(-value)
+
+        s_rep = repr(value)
+        if "e" in s_rep or "E" in s_rep:
+            parts = s_rep.lower().split("e")
+            significand = parts[0]
+            exp = int(parts[1])
+        else:
+            significand = s_rep
+            exp = 0
+
+        if "." in significand:
+            int_part, frac_part = significand.split(".")
+            digits = int_part + frac_part
+            dec_places = len(frac_part)
+        else:
+            digits = significand
+            dec_places = 0
+
+        digits = digits.lstrip("0")
+        if not digits:
+            return "0"
+
+        trimmed_digits = digits.rstrip("0")
+        trailing_zeroes = len(digits) - len(trimmed_digits)
+        dec_places -= trailing_zeroes
+        digits = trimmed_digits
+
+        k = len(digits)
+        n = exp - dec_places + k
+
+        # Rule 6: If k <= n <= 21
+        if k <= n <= 21:
+            return digits + "0" * (n - k)
+        # Rule 7: If 0 < n <= 21 and n < k
+        if 0 < n <= 21:
+            return digits[:n] + "." + digits[n:]
+        # Rule 8: If -6 < n <= 0
+        if -6 < n <= 0:
+            return "0." + "0" * (-n) + digits
+        # Rule 9 & 10: Exponential
+        exp_val = n - 1
+        sign = "+" if exp_val >= 0 else "-"
+        exp_str = f"e{sign}{abs(exp_val)}"
+        if k == 1:
+            return digits + exp_str
+        return digits[0] + "." + digits[1:] + exp_str
     raise TypeError(f"unsupported number type: {type(value)!r}")
 
 
@@ -400,6 +452,7 @@ def execution_status_schema() -> dict[str, Any]:
             "intent_digest",
             "admission_id",
             "admission_digest",
+            "operation",
             "state",
             "updated_at",
         ],
@@ -411,6 +464,14 @@ def execution_status_schema() -> dict[str, Any]:
             "intent_digest": base_string_schema(HASH_RE),
             "admission_id": {"type": "string", "format": "uuid"},
             "admission_digest": base_string_schema(HASH_RE),
+            "operation": {
+                "type": "string",
+                "enum": [
+                    "TRAIN_TICKET",
+                    "EVALUATE_CHECKPOINT",
+                    "MATERIALIZE_DATASET",
+                ],
+            },
             "state": {
                 "type": "string",
                 "enum": [
@@ -435,22 +496,75 @@ def execution_status_schema() -> dict[str, Any]:
                 "then": {"required": ["error"]},
             },
             {
-                "if": {"properties": {"state": {"const": "COMPLETED"}}},
-                "then": {"required": ["receipt_digest"]},
+                "if": {
+                    "properties": {
+                        "state": {"const": "COMPLETED"},
+                        "operation": {"const": "MATERIALIZE_DATASET"},
+                    },
+                    "required": ["state", "operation"],
+                },
+                "then": {},
+                "else": {
+                    "if": {"properties": {"state": {"const": "COMPLETED"}}, "required": ["state"]},
+                    "then": {"required": ["receipt_digest"]},
+                },
             },
         ],
     }
 
 
 def receipt_lineage_extension_schema() -> dict[str, Any]:
-    forbidden_consensus = ["round_id", "state_root", "wal_sequence", "qc", "apply_qc"]
+    forbidden_consensus = [
+        "round_id",
+        "state_root",
+        "wal_sequence",
+        "qc",
+        "apply_qc",
+        "consensus_round",
+        "validator_signatures",
+        "bft_quorum",
+        "stage_c_claim",
+        "consensus_view",
+        "proposal_hash",
+        "commit_certificate",
+    ]
+    forbidden_rule: dict[str, Any] = {
+        "not": {
+            "anyOf": [{"required": [field]} for field in forbidden_consensus],
+        },
+        "propertyNames": {
+            "not": {"enum": forbidden_consensus},
+        },
+    }
+    safe_extension_value: dict[str, Any] = {
+        "allOf": [
+            {
+                "if": {"type": "object"},
+                "then": {
+                    "additionalProperties": {"$ref": "#/$defs/safeExtensionValue"},
+                    "propertyNames": {"not": {"enum": forbidden_consensus}},
+                },
+            },
+            {
+                "if": {"type": "array"},
+                "then": {
+                    "items": {"$ref": "#/$defs/safeExtensionValue"},
+                },
+            },
+        ]
+    }
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://delta.local/schemas/step5c/execution-receipt-lineage-extension.schema.json",
         "title": "ExecutionReceiptLineageExtension",
+        "$defs": {
+            "safeExtensionValue": safe_extension_value,
+        },
         "type": "object",
         "required": ["schema_version", "receipt_type", "provenance", "workload", "execution"],
-        "additionalProperties": True,
+        "additionalProperties": {"$ref": "#/$defs/safeExtensionValue"},
+        "not": forbidden_rule["not"],
+        "propertyNames": forbidden_rule["propertyNames"],
         "properties": {
             "schema_version": {"type": "string", "const": SCHEMA_VERSION},
             "receipt_type": {"type": "string", "const": "DELTAREDUCE_EXECUTION_RECEIPT"},
@@ -469,7 +583,9 @@ def receipt_lineage_extension_schema() -> dict[str, Any]:
                     "admission_digest",
                     "execution_id",
                 ],
-                "additionalProperties": True,
+                "additionalProperties": {"$ref": "#/$defs/safeExtensionValue"},
+                "not": forbidden_rule["not"],
+                "propertyNames": forbidden_rule["propertyNames"],
                 "properties": {
                     "repository": {"type": "string", "const": "chartjs333/delta"},
                     "backend_commit": base_string_schema(GIT_SHA_RE),
@@ -483,9 +599,6 @@ def receipt_lineage_extension_schema() -> dict[str, Any]:
                     "admission_digest": base_string_schema(HASH_RE),
                     "execution_id": {"type": "string", "format": "uuid"},
                 },
-                "not": {
-                    "anyOf": [{"required": [field]} for field in forbidden_consensus],
-                },
             },
             "workload": {
                 "type": "object",
@@ -495,7 +608,9 @@ def receipt_lineage_extension_schema() -> dict[str, Any]:
                     "executed_scope",
                     "workload_config_digest",
                 ],
-                "additionalProperties": True,
+                "additionalProperties": {"$ref": "#/$defs/safeExtensionValue"},
+                "not": forbidden_rule["not"],
+                "propertyNames": forbidden_rule["propertyNames"],
                 "properties": {
                     "model_plugin_id": base_string_schema("^[a-z0-9-]+$", 64),
                     "dataset_id": base_string_schema("^[a-z0-9-]+$", 64),
@@ -509,16 +624,15 @@ def receipt_lineage_extension_schema() -> dict[str, Any]:
             "execution": {
                 "type": "object",
                 "required": ["verdict", "terminal_status"],
-                "additionalProperties": True,
+                "additionalProperties": {"$ref": "#/$defs/safeExtensionValue"},
+                "not": forbidden_rule["not"],
+                "propertyNames": forbidden_rule["propertyNames"],
                 "properties": {
                     "verdict": {"type": "string", "enum": ["SUCCESS", "FAILED"]},
                     "terminal_status": {
                         "type": "string",
                         "enum": ["COMPLETED", "FAILED", "TIMED_OUT", "CANCELLED"],
                     },
-                },
-                "not": {
-                    "anyOf": [{"required": [field]} for field in forbidden_consensus],
                 },
             },
         },
@@ -713,10 +827,27 @@ def valid_status(authorized: dict[str, Any]) -> dict[str, Any]:
         "intent_digest": admission["intent_digest"],
         "admission_id": admission["admission_id"],
         "admission_digest": admission["admission_digest"],
+        "operation": authorized["intent"].get("operation", "TRAIN_TICKET"),
         "state": "COMPLETED",
         "updated_at": "2026-09-17T14:35:30.000Z",
         "terminal": True,
         "receipt_digest": "sha256:93caaf42c2a8f1bacb9fbc9bf835a48a8641fd16c416794a7a0ca7f52a0138c8",
+    }
+
+
+def valid_status_materialize(authorized: dict[str, Any]) -> dict[str, Any]:
+    admission = authorized["admission"]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "execution_id": admission["execution_id"],
+        "intent_id": admission["intent_id"],
+        "intent_digest": admission["intent_digest"],
+        "admission_id": admission["admission_id"],
+        "admission_digest": admission["admission_digest"],
+        "operation": "MATERIALIZE_DATASET",
+        "state": "COMPLETED",
+        "updated_at": "2026-09-17T14:35:30.000Z",
+        "terminal": True,
     }
 
 
@@ -792,6 +923,30 @@ def invalid_cases() -> list[SchemaCase]:
     receipt_with_consensus = valid_receipt_lineage(valid_authorized_execution())
     receipt_with_consensus["provenance"]["wal_sequence"] = 7
 
+    receipt_top_consensus = valid_receipt_lineage(valid_authorized_execution())
+    receipt_top_consensus["round_id"] = 1
+
+    receipt_workload_consensus = valid_receipt_lineage(valid_authorized_execution())
+    receipt_workload_consensus["workload"]["qc"] = "consensus_quorum_certificate"
+
+    receipt_execution_consensus = valid_receipt_lineage(valid_authorized_execution())
+    zero_hash = "sha256:" + ("0" * 64)
+    receipt_execution_consensus["execution"]["state_root"] = zero_hash
+
+    status_missing_receipt = copy.deepcopy(valid_status(valid_authorized_execution()))
+    status_missing_receipt["operation"] = "TRAIN_TICKET"
+    status_missing_receipt.pop("receipt_digest", None)
+
+    receipt_nested_state_root = valid_receipt_lineage(valid_authorized_execution())
+    receipt_nested_state_root["arbitrary_extensions"] = {
+        "custom_plugin": {"sub_section": {"state_root": "0x1234567890abcdef"}}
+    }
+
+    receipt_deep_wal = valid_receipt_lineage(valid_authorized_execution())
+    receipt_deep_wal["arbitrary_extensions"] = {
+        "metadata_list": [1, "valid", {"inner": [{"wal_sequence": 42}]}]
+    }
+
     return [
         SchemaCase(
             "execution-intent.unknown-operation",
@@ -835,6 +990,42 @@ def invalid_cases() -> list[SchemaCase]:
             receipt_with_consensus,
             "ERR_STAGE_C_FORBIDDEN",
         ),
+        SchemaCase(
+            "receipt-lineage.top-level-consensus-claim",
+            "execution-receipt-lineage-extension",
+            receipt_top_consensus,
+            "ERR_STAGE_C_FORBIDDEN",
+        ),
+        SchemaCase(
+            "receipt-lineage.workload-consensus-claim",
+            "execution-receipt-lineage-extension",
+            receipt_workload_consensus,
+            "ERR_STAGE_C_FORBIDDEN",
+        ),
+        SchemaCase(
+            "receipt-lineage.execution-consensus-claim",
+            "execution-receipt-lineage-extension",
+            receipt_execution_consensus,
+            "ERR_STAGE_C_FORBIDDEN",
+        ),
+        SchemaCase(
+            "receipt-lineage.nested-arbitrary-state-root",
+            "execution-receipt-lineage-extension",
+            receipt_nested_state_root,
+            "ERR_STAGE_C_FORBIDDEN",
+        ),
+        SchemaCase(
+            "receipt-lineage.deep-array-wal-sequence",
+            "execution-receipt-lineage-extension",
+            receipt_deep_wal,
+            "ERR_STAGE_C_FORBIDDEN",
+        ),
+        SchemaCase(
+            "execution-status.completed-without-receipt-for-train-ticket",
+            "execution-status",
+            status_missing_receipt,
+            "ERR_SCHEMA_VALIDATION_FAILED",
+        ),
     ]
 
 
@@ -867,6 +1058,14 @@ def materialize() -> None:
     status = valid_status(authorized)
     receipt = valid_receipt_lineage(authorized)
 
+    admission_materialize = valid_admission(materialize_dataset)
+    authorized_materialize = {
+        "schema_version": SCHEMA_VERSION,
+        "intent": materialize_dataset,
+        "admission": admission_materialize,
+    }
+    status_materialize = valid_status_materialize(authorized_materialize)
+
     valid_docs = {
         "execution-intent.train-ticket": train,
         "execution-intent.evaluate-checkpoint": checkpoint,
@@ -874,6 +1073,7 @@ def materialize() -> None:
         "admission-record.train-ticket": admission,
         "authorized-execution.train-ticket": authorized,
         "execution-status.completed": status,
+        "execution-status.materialize-dataset.completed": status_materialize,
         "execution-receipt-lineage-extension.train-ticket": receipt,
     }
     for name, doc in valid_docs.items():
@@ -892,9 +1092,16 @@ def materialize() -> None:
     write_json(
         INVALID / "manifest.json", {"schema_version": SCHEMA_VERSION, "cases": invalid_manifest}
     )
+    # Run independent ECMAScript generator first
+    try:
+        subprocess.run(["node", str(SCRIPTS / "generate_jcs_vectors.mjs")], check=True)
+    except Exception as exc:
+        print(f"Warning: Node.js vector generator failed or not present: {exc}")
 
-    canonical_vectors = build_vectors(authorized, status, receipt)
+    canonical_vectors = build_vectors(authorized, status, receipt, status_materialize)
     for name, vector in canonical_vectors.items():
+        if name == "jcs-golden-vectors":
+            continue
         write_json(VECTORS / f"{name}.json", vector)
 
     write_json(EVIDENCE / "artifact-manifest.json", artifact_manifest())
@@ -904,6 +1111,7 @@ def build_vectors(
     authorized: dict[str, Any],
     status: dict[str, Any],
     receipt: dict[str, Any],
+    status_materialize: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     intent = authorized["intent"]
     admission = authorized["admission"]
@@ -917,8 +1125,33 @@ def build_vectors(
     intent_input = without_paths(intent, [("intent_digest",)])
     admission_digest_input = without_paths(admission, [("admission_digest",), ("authenticator",)])
     admission_signature_input = without_paths(admission, [("authenticator", "signature")])
+
+    reference_vectors = [
+        {"name": "number-zero", "value": {"val": 0}},
+        {"name": "number-negative-zero", "value": {"val": -0}},
+        {"name": "number-positive-int", "value": {"val": 42}},
+        {"name": "number-negative-int", "value": {"val": -42}},
+        {"name": "number-max-safe-int", "value": {"val": 9007199254740991}},
+        {"name": "number-min-safe-int", "value": {"val": -9007199254740991}},
+        {"name": "number-large-int", "value": {"val": 1000000000000000}},
+        {"name": "number-fraction", "value": {"val": 1.25}},
+        {"name": "empty-structures", "value": {"arr": [], "obj": {}}},
+        {"name": "string-escapes", "value": {"escapes": '"\\\b\f\n\r\t'}},
+        {"name": "unicode-surrogate-pairs", "value": {"emoji": "😀", "music": "𝄞"}},
+        {"name": "nested-arrays-and-objects", "value": {"a": [1, {"b": [2, 3]}], "c": 4}},
+    ]
+    built_reference_vectors = [
+        {
+            "name": item["name"],
+            "value": item["value"],
+            "canonical_json": jcs_dumps(item["value"]),
+            "sha256": sha256_prefixed(jcs_bytes(item["value"])),
+        }
+        for item in reference_vectors
+    ]
+
     return {
-        "jcs-golden-vectors": {
+        "canonical-vectors": {
             "schema_version": SCHEMA_VERSION,
             "vectors": [
                 {
@@ -928,16 +1161,16 @@ def build_vectors(
                     "sha256": sha256_prefixed(jcs_bytes(unicode_probe)),
                 },
                 {
-                    "name": "execution-intent-train-ticket-without-digest",
+                    "name": "intent-without-digest",
                     "value": intent_input,
                     "canonical_json": jcs_dumps(intent_input),
-                    "sha256": intent["intent_digest"],
+                    "sha256": sha256_prefixed(jcs_bytes(intent_input)),
                 },
                 {
-                    "name": "admission-record-without-digest-authenticator",
+                    "name": "admission-record-without-digest-and-authenticator",
                     "value": admission_digest_input,
                     "canonical_json": jcs_dumps(admission_digest_input),
-                    "sha256": admission["admission_digest"],
+                    "sha256": sha256_prefixed(jcs_bytes(admission_digest_input)),
                 },
                 {
                     "name": "admission-record-without-signature",
@@ -945,6 +1178,7 @@ def build_vectors(
                     "canonical_json": jcs_dumps(admission_signature_input),
                     "sha256": sha256_prefixed(jcs_bytes(admission_signature_input)),
                 },
+                *built_reference_vectors,
             ],
         },
         "sha256-vectors": {
@@ -952,6 +1186,16 @@ def build_vectors(
             "vectors": [
                 {"name": "authorized-execution", "sha256": sha256_prefixed(jcs_bytes(authorized))},
                 {"name": "execution-status", "sha256": sha256_prefixed(jcs_bytes(status))},
+                *(
+                    [
+                        {
+                            "name": "execution-status-materialize-dataset",
+                            "sha256": sha256_prefixed(jcs_bytes(status_materialize)),
+                        }
+                    ]
+                    if status_materialize is not None
+                    else []
+                ),
                 {
                     "name": "receipt-lineage-extension",
                     "sha256": sha256_prefixed(jcs_bytes(receipt)),
@@ -985,13 +1229,20 @@ def artifact_manifest() -> dict[str, Any]:
             and "__pycache__" not in path.parts
             and ".pytest_cache" not in path.parts
         ):
-            files.append(
-                {
-                    "path": relative_path,
-                    "sha256": hash_file(path),
-                    "bytes": path.stat().st_size,
-                }
-            )
+            file_bytes = path.stat().st_size
+            file_sha = hash_file(path)
+            entry: dict[str, Any] = {
+                "path": relative_path,
+                "file_bytes": file_bytes,
+                "file_sha256": f"sha256:{file_sha}",
+            }
+            if path.suffix == ".json":
+                try:
+                    data = read_json(path)
+                    entry["canonical_digest"] = sha256_prefixed(jcs_bytes(data))
+                except Exception:
+                    pass
+            files.append(entry)
     return {
         "schema_version": SCHEMA_VERSION,
         "contract_freeze_sha": CONTRACT_FREEZE_SHA,
@@ -1055,6 +1306,7 @@ def verify_all(write_report: bool = False) -> dict[str, Any]:
         "admission-record.train-ticket.json": "admission-record",
         "authorized-execution.train-ticket.json": "authorized-execution",
         "execution-status.completed.json": "execution-status",
+        "execution-status.materialize-dataset.completed.json": "execution-status",
         "execution-receipt-lineage-extension.train-ticket.json": (
             "execution-receipt-lineage-extension"
         ),
@@ -1113,6 +1365,15 @@ def verify_all(write_report: bool = False) -> dict[str, Any]:
         errors.append(f"Ed25519 fixture verification failed: {exc}")
 
     manifest = artifact_manifest()
+    if write_report:
+        write_json(EVIDENCE / "artifact-manifest.json", manifest)
+    manifest_file_path = EVIDENCE / "artifact-manifest.json"
+    if manifest_file_path.exists():
+        manifest_raw_sha = hashlib.sha256(manifest_file_path.read_bytes()).hexdigest()
+    else:
+        manifest_raw_sha = hashlib.sha256(
+            (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
+        ).hexdigest()
     report = {
         "schema_version": SCHEMA_VERSION,
         "contract_freeze_sha": CONTRACT_FREEZE_SHA,
@@ -1121,15 +1382,11 @@ def verify_all(write_report: bool = False) -> dict[str, Any]:
         "validated_valid_fixture_count": len(valid_expectations),
         "validated_invalid_fixture_count": len(invalid_manifest["cases"]),
         "artifact_count": manifest["artifact_count"],
-        "artifact_manifest_sha256": hashlib.sha256(
-            json.dumps(_ordered(manifest), separators=(",", ":"), ensure_ascii=False).encode(
-                "utf-8"
-            )
-        ).hexdigest(),
+        "artifact_manifest_file_sha256": f"sha256:{manifest_raw_sha}",
+        "artifact_manifest_canonical_digest": sha256_prefixed(jcs_bytes(manifest)),
     }
     if write_report:
         write_json(EVIDENCE / "validation-report.json", report)
-        write_json(EVIDENCE / "artifact-manifest.json", artifact_manifest())
     if errors:
         raise SystemExit("\n".join(errors))
     return report

@@ -1,9 +1,9 @@
 # Transport Implementation Profile: Step 5C Controlled Live Execution
 
-**Status**: Accepted  
-**Increment**: Step 5C  
-**Base ADR**: ADR 0002 (Controlled Live Execution)  
-**Security Boundary**: Zone 1 (Untrusted Browser) <-> Zone 2 (Trusted Authorization Gate) <-> Zone 3 (Constrained Worker)  
+**Status**: Accepted
+**Increment**: Step 5C
+**Base ADR**: ADR 0002 (Controlled Live Execution)
+**Security Boundary**: Zone 1 (Untrusted Browser) <-> Zone 2 (Trusted Authorization Gate) <-> Zone 3 (Constrained Worker)
 
 ---
 

@@ -1,0 +1,12 @@
+{
+  "admission_digest": "sha256:2f77167ae22894adda311735c820aed3e34f7d2edf5e44b969f6139636338d46",
+  "admission_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "execution_id": "55555555-5555-4555-8555-555555555555",
+  "intent_digest": "sha256:1b31651655dbfc3c58a35e4394d603d2916ebeeaf64ad865c2f59881edeef599",
+  "intent_id": "33333333-3333-4333-8333-333333333333",
+  "operation": "MATERIALIZE_DATASET",
+  "schema_version": "1.0.0",
+  "state": "COMPLETED",
+  "terminal": true,
+  "updated_at": "2026-09-17T14:35:30.000Z"
+}

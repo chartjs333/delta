@@ -5,7 +5,6 @@
   "intent_digest": "sha256:957aa9206bd8af232fdaed976e19b2d52ec4d8a502b84b643eb96fbeeafa8d76",
   "intent_id": "11111111-1111-4111-8111-111111111111",
   "operation": "TRAIN_TICKET",
-  "receipt_digest": "sha256:93caaf42c2a8f1bacb9fbc9bf835a48a8641fd16c416794a7a0ca7f52a0138c8",
   "schema_version": "1.0.0",
   "state": "COMPLETED",
   "terminal": true,

@@ -1,10 +1,11 @@
 {
-  "artifact_count": 28,
-  "artifact_manifest_sha256": "f83280061c5f9e47b300f087e272567af81e12ef0f9e0cb2c47ce6db4c3b410d",
+  "artifact_count": 37,
+  "artifact_manifest_canonical_digest": "sha256:9395e2685b77ae7666be36d6c722da04d0e44224f2369bb7fbda7289053da37e",
+  "artifact_manifest_file_sha256": "sha256:39e9acee31bdd07643ac0bbd5126fba736767165e076a66979b15693e30f1d12",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
   "errors": [],
   "passed": true,
   "schema_version": "1.0.0",
-  "validated_invalid_fixture_count": 7,
-  "validated_valid_fixture_count": 7
+  "validated_invalid_fixture_count": 13,
+  "validated_valid_fixture_count": 8
 }

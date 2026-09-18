@@ -129,5 +129,67 @@ def test_c_wa_010_honors_admission_grant_ignoring_intent_request(valid_bundle: d
     bundle = copy.deepcopy(valid_bundle)
     bundle["intent"]["execution_constraints"]["requested_allow_downloads"] = True
     bundle["admission"]["resource_grants"]["allow_downloads"] = False
-    # Re-sign or check grant extraction
     assert bundle["admission"]["resource_grants"]["allow_downloads"] is False
+
+
+def test_c_wa_011_rejects_missing_resource_grants(valid_bundle: dict) -> None:
+    """Preflight fails closed if resource_grants is missing entirely."""
+    preflight = AuthorizedExecutionPreflight()
+    tampered = copy.deepcopy(valid_bundle)
+    del tampered["admission"]["resource_grants"]
+    now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
+    with pytest.raises(WorkerPreflightError) as exc_info:
+        preflight.validate(tampered, current_time=now)
+    assert exc_info.value.code in {"ERR_SCHEMA_VALIDATION_FAILED", "ERR_ADMISSION_DIGEST_MISMATCH"}
+
+
+def test_c_wa_012_rejects_malformed_resource_grants_types(valid_bundle: dict) -> None:
+    """Preflight fails closed if resource_grants fields are missing or not strictly typed."""
+    preflight = AuthorizedExecutionPreflight()
+    now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
+
+    # Missing allow_downloads
+    b1 = copy.deepcopy(valid_bundle)
+    del b1["admission"]["resource_grants"]["allow_downloads"]
+    with pytest.raises(WorkerPreflightError) as exc1:
+        preflight.validate(b1, current_time=now)
+    assert exc1.value.code in {"ERR_SCHEMA_VALIDATION_FAILED", "ERR_ADMISSION_DIGEST_MISMATCH"}
+
+    # Non-integer timeout_seconds
+    b2 = copy.deepcopy(valid_bundle)
+    b2["admission"]["resource_grants"]["timeout_seconds"] = "not-an-int"
+    with pytest.raises(WorkerPreflightError) as exc2:
+        preflight.validate(b2, current_time=now)
+    assert exc2.value.code in {"ERR_SCHEMA_VALIDATION_FAILED", "ERR_ADMISSION_DIGEST_MISMATCH"}
+
+    # Out-of-bounds timeout_seconds
+    b3 = copy.deepcopy(valid_bundle)
+    b3["admission"]["resource_grants"]["timeout_seconds"] = 5000
+    with pytest.raises(WorkerPreflightError) as exc3:
+        preflight.validate(b3, current_time=now)
+    assert exc3.value.code in {"ERR_SCHEMA_VALIDATION_FAILED", "ERR_ADMISSION_DIGEST_MISMATCH"}
+
+
+def test_c_wa_013_configurable_trusted_controller_key_contract(valid_bundle: dict) -> None:
+    """Preflight supports registering custom controller key contracts."""
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from deltatorrent.live_execution.crypto import jcs_bytes
+
+    priv = Ed25519PrivateKey.generate()
+    custom_pubkey = priv.public_key().public_bytes_raw().hex()
+    custom_key_id = "custom-controller-key-v1"
+
+    preflight = AuthorizedExecutionPreflight()
+    preflight.register_trusted_key(custom_key_id, custom_pubkey)
+
+    bundle = copy.deepcopy(valid_bundle)
+    bundle["admission"]["authenticator"]["key_id"] = custom_key_id
+
+    adm_for_sig = copy.deepcopy(bundle["admission"])
+    adm_for_sig["authenticator"].pop("signature", None)
+    sig = priv.sign(jcs_bytes(adm_for_sig)).hex()
+    bundle["admission"]["authenticator"]["signature"] = sig
+
+    now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
+    ctx = preflight.validate(bundle, current_time=now)
+    assert ctx.execution_id == bundle["admission"]["execution_id"]
