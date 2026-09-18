@@ -1,0 +1,1 @@
+{"expected":{"item_count":2,"metrics":{"post_training_hellaswag_accuracy_ppm":500000},"scored_token_count":4},"fixture_class":"NON_PRIMARY_GOLDEN","records":[{"ctx_a":"A person","ctx_b":"moves","endings":["left","right"],"label":0},{"ctx_a":"A person","ctx_b":"waits","endings":["inside","outside"],"label":1}],"schema_version":"1.0.0"}

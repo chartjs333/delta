@@ -1,0 +1,78 @@
+{
+  "$id": "urn:deltareduce:schema:010:network-profile:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "NETWORK_PROFILE"
+    },
+    "bandwidth_kbps": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "disconnect_ms": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "duplication_ppm": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "jitter_ms": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "loss_ppm": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "profile_id": {
+      "maxLength": 180,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+      "type": "string"
+    },
+    "reordering_ppm": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "rtt_ms": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "seed": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "bandwidth_kbps",
+    "disconnect_ms",
+    "duplication_ppm",
+    "formal_semantics_id",
+    "jitter_ms",
+    "loss_ppm",
+    "profile_id",
+    "reordering_ppm",
+    "rtt_ms",
+    "schema_version",
+    "seed",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 network-profile v1",
+  "type": "object"
+}

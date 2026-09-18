@@ -1,0 +1,60 @@
+{
+  "$id": "urn:deltareduce:schema:010:formal-evidence:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "FORMAL_EVIDENCE"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "classification": {
+      "const": "REGRESSION_ONLY"
+    },
+    "formal_go_overlay_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "formal_report_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "formal_source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "regression_report_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "semantic_completeness_claimed": {
+      "const": false
+    },
+    "status": {
+      "const": "PASS"
+    }
+  },
+  "required": [
+    "benchmark_definition_id",
+    "classification",
+    "formal_go_overlay_commit",
+    "formal_report_id",
+    "formal_semantics_id",
+    "formal_source_commit",
+    "regression_report_id",
+    "schema_version",
+    "semantic_completeness_claimed",
+    "status",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 formal-evidence v1",
+  "type": "object"
+}

@@ -1,0 +1,1 @@
+{"expected":{"item_count":1,"metrics":{"per_domain_wikitext_loss_micro":1000000,"validation_loss_micro":1000000,"validation_perplexity_micro":2718282},"scored_token_count":2},"fixture_class":"NON_PRIMARY_GOLDEN","records":[{"domain_id":"wikitext-en","text":"alpha beta gamma"}],"schema_version":"1.0.0"}

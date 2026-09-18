@@ -1,0 +1,72 @@
+{
+  "$id": "urn:deltareduce:schema:010:benchmark-result-qc:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "BENCHMARK_RESULT_QC"
+    },
+    "benchmark_result_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "GO",
+        "NO_GO"
+      ]
+    },
+    "evaluator_set_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "f_b": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "governance_only": {
+      "const": true
+    },
+    "ordered_signers": {
+      "items": {
+        "maxLength": 180,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "protocol_current_transition": {
+      "const": false
+    },
+    "quorum_threshold": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "benchmark_result_id",
+    "decision",
+    "evaluator_set_id",
+    "f_b",
+    "formal_semantics_id",
+    "governance_only",
+    "ordered_signers",
+    "protocol_current_transition",
+    "quorum_threshold",
+    "schema_version",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 benchmark-result-qc v1",
+  "type": "object"
+}

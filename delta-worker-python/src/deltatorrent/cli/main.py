@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from deltatorrent import __version__
-from deltatorrent.cli import artifacts, baseline, netem, qlora, worker
+from deltatorrent.cli import artifacts, baseline, benchmark, netem, qlora, worker
 from deltatorrent.domain.errors import DeltaError
 from deltatorrent.domain.formal_compat import FORMAL_SEMANTICS_ID
 
@@ -21,6 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
     subcommands.add_parser("formal-id", help="print the accepted formal semantics ID")
     artifacts.configure(subcommands.add_parser("artifacts", help="artifact bundle operations"))
     baseline.configure(subcommands.add_parser("baseline", help="single-node reference training"))
+    benchmark.configure(subcommands.add_parser("benchmark", help="preregistered benchmark tools"))
     netem.configure(subcommands.add_parser("netem", help="deterministic WAN emulation"))
     qlora.configure(subcommands.add_parser("qlora", help="certified fixed-ticket QLoRA mode"))
     worker.configure(subcommands.add_parser("worker", help="fixed-ticket local worker"))
@@ -37,6 +38,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return artifacts.execute(args, Path.cwd())
         if args.command == "baseline":
             return baseline.execute(args, Path.cwd())
+        if args.command == "benchmark":
+            return benchmark.execute(args)
         if args.command == "netem":
             return netem.execute(args)
         if args.command == "qlora":

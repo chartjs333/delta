@@ -131,7 +131,11 @@ class Runtime::Impl {
     if (!queue_.try_push(Work{std::move(work)})) {
       reject(ErrorCode::queue_full, "runtime submission queue is full or closed");
     }
-    future.get();
+    try {
+      future.get();
+    } catch (const RuntimeError& error) {
+      throw RuntimeError(error.code(), error.what());
+    }
   }
 
   void close() noexcept {
@@ -443,7 +447,15 @@ std::future<SubmitReceipt> Runtime::submit_async(
 }
 
 SubmitReceipt Runtime::submit(core::canonical::Bytes command_bytes, CrashPoint crash_point) {
-  return submit_async(std::move(command_bytes), crash_point).get();
+  auto future = submit_async(std::move(command_bytes), crash_point);
+  try {
+    return future.get();
+  } catch (const RuntimeError& error) {
+    // Keep the consumer's shared state alive while copying the reactor-owned
+    // exception.  Otherwise its final producer reference can be released while
+    // the caller is inspecting the exception rethrown by future::get().
+    throw RuntimeError(error.code(), error.what());
+  }
 }
 
 std::future<VoteReceipt> Runtime::record_vote_async(
@@ -453,7 +465,12 @@ std::future<VoteReceipt> Runtime::record_vote_async(
 }
 
 VoteReceipt Runtime::record_vote(core::canonical::Bytes vote_bytes, CrashPoint crash_point) {
-  return record_vote_async(std::move(vote_bytes), crash_point).get();
+  auto future = record_vote_async(std::move(vote_bytes), crash_point);
+  try {
+    return future.get();
+  } catch (const RuntimeError& error) {
+    throw RuntimeError(error.code(), error.what());
+  }
 }
 
 void Runtime::snapshot() { impl_->snapshot(); }

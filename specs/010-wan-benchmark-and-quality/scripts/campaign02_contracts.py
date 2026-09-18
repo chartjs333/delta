@@ -1,0 +1,1171 @@
+"""Generate Campaign 02 remediation schemas and registry entries."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from typing import Final
+
+ROOT: Final = Path(__file__).resolve().parents[3]
+FORMAL_ID: Final = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+SCHEMA_ROOT: Final = ROOT / "delta-protocol/schemas/010/campaign-02"
+REGISTRY_PATH: Final = SCHEMA_ROOT / "registry-v1.json"
+
+SCHEMAS: Final = {
+    "benchmark-definition-v2": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-010-V2",
+        "BENCHMARK_DEFINITION",
+        "2.0.0",
+    ),
+    "benchmark-review-validator-set-v1": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-REVIEW-VALIDATOR-SET-010-V1",
+        "BENCHMARK_REVIEW_VALIDATOR_SET",
+        "1.0.0",
+    ),
+    "benchmark-definition-vote-v1": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-VOTE-010-V1",
+        "BENCHMARK_DEFINITION_VOTE",
+        "1.0.0",
+    ),
+    "benchmark-definition-attestation-v2": (
+        "SCHEMA-CAMPAIGN02-BENCHMARK-DEFINITION-ATTESTATION-010-V2",
+        "BENCHMARK_DEFINITION_ATTESTATION",
+        "2.0.0",
+    ),
+    "domain-manifest-v1": (
+        "SCHEMA-CAMPAIGN02-DOMAIN-MANIFEST-010-V1",
+        "CAMPAIGN_DOMAIN_MANIFEST",
+        "1.0.0",
+    ),
+    "ticket-plan-v1": (
+        "SCHEMA-CAMPAIGN02-TICKET-PLAN-010-V1",
+        "CAMPAIGN_TICKET_PLAN",
+        "1.0.0",
+    ),
+    "qualified-runtime-lineage-v1": (
+        "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V1",
+        "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE",
+        "1.0.0",
+    ),
+    "qualified-runtime-lineage-v2": (
+        "SCHEMA-CAMPAIGN02-QUALIFIED-RUNTIME-LINEAGE-010-V2",
+        "CAMPAIGN02_QUALIFIED_RUNTIME_LINEAGE",
+        "2.0.0",
+    ),
+    "workload-v2": ("SCHEMA-CAMPAIGN02-WORKLOAD-010-V2", "CAMPAIGN_WORKLOAD", "2.0.0"),
+    "execution-plan-v2": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V2",
+        "PRIMARY_EXECUTION_PLAN",
+        "2.0.0",
+    ),
+    "execution-plan-v3": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V3",
+        "PRIMARY_EXECUTION_PLAN",
+        "3.0.0",
+    ),
+    "execution-plan-v4": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V4",
+        "PRIMARY_EXECUTION_PLAN",
+        "4.0.0",
+    ),
+    "execution-plan-v5": (
+        "SCHEMA-CAMPAIGN02-EXECUTION-PLAN-010-V5",
+        "PRIMARY_EXECUTION_PLAN",
+        "5.0.0",
+    ),
+    "plan-catalog-v1": (
+        "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V1",
+        "CAMPAIGN02_PLAN_CATALOG",
+        "1.0.0",
+    ),
+    "plan-catalog-v2": (
+        "SCHEMA-CAMPAIGN02-PLAN-CATALOG-010-V2",
+        "CAMPAIGN02_PLAN_CATALOG",
+        "2.0.0",
+    ),
+    "stage-execution-authorization-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V1",
+        "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION",
+        "1.0.0",
+    ),
+    "stage-execution-authorization-v2": (
+        "SCHEMA-CAMPAIGN02-STAGE-EXECUTION-AUTHORIZATION-010-V2",
+        "BENCHMARK_STAGE_EXECUTION_AUTHORIZATION",
+        "2.0.0",
+    ),
+    "stage-authorization-validator-set-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VALIDATOR-SET-010-V1",
+        "BENCHMARK_STAGE_AUTHORIZATION_VALIDATOR_SET",
+        "1.0.0",
+    ),
+    "stage-authorization-vote-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-VOTE-010-V1",
+        "BENCHMARK_STAGE_AUTHORIZATION_VOTE",
+        "1.0.0",
+    ),
+    "stage-authorization-attestation-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-AUTHORIZATION-ATTESTATION-010-V1",
+        "BENCHMARK_STAGE_AUTHORIZATION_ATTESTATION",
+        "1.0.0",
+    ),
+    "stage-gate-receipt-v1": (
+        "SCHEMA-CAMPAIGN02-STAGE-GATE-RECEIPT-010-V1",
+        "BENCHMARK_STAGE_GATE_RECEIPT",
+        "1.0.0",
+    ),
+    "evaluator-profile-v1": (
+        "SCHEMA-CAMPAIGN02-EVALUATOR-PROFILE-010-V1",
+        "EVALUATOR_PROFILE",
+        "1.0.0",
+    ),
+    "measured-evaluation-v1": (
+        "SCHEMA-CAMPAIGN02-MEASURED-EVALUATION-010-V1",
+        "MEASURED_EVALUATION",
+        "1.0.0",
+    ),
+    "component-identity-v1": (
+        "SCHEMA-CAMPAIGN02-COMPONENT-IDENTITY-010-V1",
+        "PRIMARY_COMPONENT_IDENTITY",
+        "1.0.0",
+    ),
+    "observation-v2": (
+        "SCHEMA-CAMPAIGN02-OBSERVATION-010-V2",
+        "PRIMARY_RUN_OBSERVATION",
+        "2.0.0",
+    ),
+    "observation-v3": (
+        "SCHEMA-CAMPAIGN02-OBSERVATION-010-V3",
+        "PRIMARY_RUN_OBSERVATION",
+        "3.0.0",
+    ),
+    "observation-receipt-v1": (
+        "SCHEMA-CAMPAIGN02-OBSERVATION-RECEIPT-010-V1",
+        "PRIMARY_OBSERVATION_RECEIPT",
+        "1.0.0",
+    ),
+    "gpu-environment-lock-v1": (
+        "SCHEMA-CAMPAIGN02-GPU-ENVIRONMENT-LOCK-010-V1",
+        "GPU_ENVIRONMENT_LOCK",
+        "1.0.0",
+    ),
+    "native-chain-admission-bundle-v1": (
+        "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-BUNDLE-010-V1",
+        "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_BUNDLE",
+        "1.0.0",
+    ),
+    "native-chain-admission-receipt-v1": (
+        "SCHEMA-CAMPAIGN02-NATIVE-CHAIN-ADMISSION-RECEIPT-010-V1",
+        "CAMPAIGN02_NATIVE_CHAIN_ADMISSION_RECEIPT",
+        "1.0.0",
+    ),
+}
+
+
+class Campaign02SchemaError(RuntimeError):
+    pass
+
+
+def canonical(value: object) -> bytes:
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode()
+
+
+def pretty(value: object) -> bytes:
+    return (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode()
+
+
+def digest(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def content_id() -> dict[str, object]:
+    return {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"}
+
+
+def commit_id() -> dict[str, object]:
+    return {"pattern": "^[0-9a-f]{40}$", "type": "string"}
+
+
+def uint(minimum: int = 0) -> dict[str, object]:
+    return {"maximum": 9_007_199_254_740_991, "minimum": minimum, "type": "integer"}
+
+
+def text() -> dict[str, object]:
+    return {"minLength": 1, "type": "string"}
+
+
+def array(item: dict[str, object], minimum: int = 1, unique: bool = False) -> dict[str, object]:
+    value: dict[str, object] = {"items": item, "minItems": minimum, "type": "array"}
+    if unique:
+        value["uniqueItems"] = True
+    return value
+
+
+def strict(properties: dict[str, object]) -> dict[str, object]:
+    return {
+        "additionalProperties": False,
+        "properties": properties,
+        "required": sorted(properties),
+        "type": "object",
+    }
+
+
+def schema(
+    name: str,
+    properties: dict[str, object],
+    *,
+    result_class_union: list[dict[str, object]] | None = None,
+) -> dict[str, object]:
+    _, type_name, version = SCHEMAS[name]
+    all_properties = {
+        "formal_semantics_id": {"const": FORMAL_ID},
+        "schema_version": {"const": version},
+        "type_name": {"const": type_name},
+        **properties,
+    }
+    document: dict[str, object] = {
+        "$id": f"urn:deltareduce:schema:010:campaign-02:{name}",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        **strict(all_properties),
+        "title": f"DeltaReduce Feature 010 Campaign 02 {name}",
+    }
+    if result_class_union is not None:
+        document["oneOf"] = result_class_union
+    return document
+
+
+def schema_documents() -> dict[str, dict[str, object]]:
+    domain_count = strict({"domain_id": text(), "ticket_count": uint(1)})
+    ticket = strict(
+        {
+            "domain_id": text(),
+            "optimizer_steps": uint(1),
+            "ordinal": uint(),
+            "ticket_id": content_id(),
+            "tokens_per_optimizer_step": uint(1),
+            "tokens_per_ticket": uint(1),
+        }
+    )
+    metric = strict({"metric_id": text(), "unit": text(), "value": uint()})
+    executable = strict({"content_id": content_id(), "path": text()})
+    ticket_result = strict(
+        {
+            "availability_certificate_id": content_id(),
+            "commitment_id": content_id(),
+            "contribution_id": content_id(),
+            "domain_id": text(),
+            "local_artifact_ids": array(content_id(), unique=True),
+            "optimizer_steps": uint(1),
+            "processed_tokens": uint(1),
+            "ticket_id": content_id(),
+        }
+    )
+    shard_key = strict({"domain_id": text(), "shard_id": text()})
+    certified_policy = strict(
+        {
+            "accumulator_proof_id": content_id(),
+            "apply_arithmetic_profile_id": content_id(),
+            "arithmetic_profile_id": content_id(),
+            "height": uint(1),
+            "parameter_schema_id": content_id(),
+            "quorum_threshold": uint(1),
+            "required_shards": array(shard_key, unique=True),
+            "round_config_id": content_id(),
+            "round_id": text(),
+            "validator_epoch_id": content_id(),
+            "validator_ids": array(text(), unique=True),
+            "view": uint(),
+        }
+    )
+    reference_result = strict(
+        {
+            "final_checkpoint_id": content_id(),
+            "ordered_data_exposure_ids": array(content_id(), unique=True),
+            "ordered_ticket_ids": array(content_id(), unique=True),
+            "parent_checkpoint_id": content_id(),
+            "processed_tokens": uint(1),
+            "result_class": {"const": "REFERENCE"},
+            "round_id": text(),
+            "terminal_outcome": {"const": "COMPLETED"},
+            "training_artifact_ids": array(content_id(), unique=True),
+        }
+    )
+    certified_result = strict(
+        {
+            "aggregate_root_qc_id": content_id(),
+            "aggregation_plan_certificate_id": content_id(),
+            "apply_qc_id": content_id(),
+            "checkpoint_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+            "effect_set_id": content_id(),
+            "eligibility_certificate_id": content_id(),
+            "final_checkpoint_id": content_id(),
+            "input_set_certificate_id": content_id(),
+            "native_chain_admission_receipt_id": content_id(),
+            "native_chain_verifier_id": content_id(),
+            "ordered_contribution_ids": array(content_id(), unique=True),
+            "ordered_ticket_ids": array(content_id(), unique=True),
+            "parameter_shard_qc_ids": array(content_id(), unique=True),
+            "parent_checkpoint_id": content_id(),
+            "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+            "round_id": text(),
+            "runtime_receipt_id": content_id(),
+            "runtime_state_id": content_id(),
+            "runtime_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+            "seed_transcript_id": content_id(),
+            "terminal_outcome": {"const": "APPLIED"},
+        }
+    )
+    lock_ref = strict({"path": text(), "sha256": content_id(), "target": text()})
+    base_definition = json.loads(
+        (ROOT / "delta-protocol/schemas/010/benchmark-definition-v1.json").read_bytes()
+    )
+    base_properties = dict(base_definition["properties"])
+    for field in ("formal_semantics_id", "schema_version", "type_name"):
+        del base_properties[field]
+    definition_v2_properties = {
+        **base_properties,
+        "campaign_id": {"const": "campaign-02"},
+        "qualified_runtime_lineage_id": content_id(),
+        "workload_contract_id": content_id(),
+    }
+    domain = strict(
+        {
+            "dataset_id": content_id(),
+            "denominator": uint(1),
+            "domain_id": text(),
+            "numerator": uint(1),
+            "ticket_count": uint(1),
+        }
+    )
+    timestamp = {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$", "type": "string"}
+    validator = strict(
+        {
+            "controller_id": text(),
+            "key_custody_statement_id": content_id(),
+            "public_key": {"pattern": "^[A-Za-z0-9+/]{43}=$", "type": "string"},
+            "public_key_id": content_id(),
+            "signature_algorithm": {"const": "ED25519"},
+            "valid_from": timestamp,
+            "valid_until": {"oneOf": [{"type": "null"}, timestamp]},
+            "validator_id": text(),
+        }
+    )
+    policy_binding = strict(
+        {
+            "arm_id": content_id(),
+            "arm_name": text(),
+            "policy": certified_policy,
+            "repetition": uint(1),
+            "seed": uint(),
+        }
+    )
+    stages = [
+        "STAGE_A_EXACTNESS",
+        "STAGE_B_SCIENTIFIC",
+        "STAGE_C_EMULATED_WAN",
+    ]
+    policy_binding_v2 = strict(
+        {
+            "arm_id": content_id(),
+            "arm_name": text(),
+            "gate_stage": {"enum": stages},
+            "policy": certified_policy,
+            "repetition": uint(1),
+            "seed": uint(),
+        }
+    )
+    observation_properties = {
+        "arm_id": content_id(),
+        "benchmark_definition_id": content_id(),
+        "campaign_id": {"const": "campaign-02"},
+        "dataset_ids": array(content_id(), unique=True),
+        "definition_attestation_id": content_id(),
+        "environment_id": content_id(),
+        "evaluation_ids": array(content_id(), unique=True),
+        "evaluation_implementation_ids": array(content_id(), unique=True),
+        "evaluation_runner_id": content_id(),
+        "execution_authorization_id": content_id(),
+        "execution_class": {"enum": ["NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"]},
+        "execution_plan_id": content_id(),
+        "hardware_id": content_id(),
+        "image_id": content_id(),
+        "model_artifact_id": content_id(),
+        "processed_tokens": uint(1),
+        "raw_artifact_ids": array(content_id(), unique=True),
+        "repetition": uint(1),
+        "result_class": {"enum": ["REFERENCE", "CERTIFIED_DELTAREDUCE"]},
+        "run_result": {"oneOf": [reference_result, certified_result]},
+        "runner_id": content_id(),
+        "seed": uint(),
+        "source_class": {"enum": ["MEASURED_HARDWARE", "NON_PRIMARY_SMOKE"]},
+        "source_commit": commit_id(),
+        "source_tree": commit_id(),
+        "ticket_results": array(ticket_result),
+        "tokenizer_id": content_id(),
+        "workload_id": content_id(),
+        "writer_id": content_id(),
+    }
+    observation_result_union = [
+        {
+            "properties": {
+                "result_class": {"const": "REFERENCE"},
+                "run_result": reference_result,
+            }
+        },
+        {
+            "properties": {
+                "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                "run_result": certified_result,
+            }
+        },
+    ]
+    observation_v3_properties = {
+        **observation_properties,
+        "execution_class": {"const": "PRIMARY_MEASURED"},
+        "source_class": {"const": "MEASURED_HARDWARE"},
+        "stage_authorization_attestation_id": content_id(),
+        "stage_authorization_id": content_id(),
+        "stage_authorization_proof_artifact_ids": array(content_id(), unique=True),
+        "stage_authorization_quorum_threshold": uint(1),
+        "stage_authorization_signature_set_root": content_id(),
+        "stage_authorization_validator_set_id": content_id(),
+        "stage_authorization_vote_ids": array(content_id(), unique=True),
+    }
+    documents = {
+        "benchmark-definition-v2": schema("benchmark-definition-v2", definition_v2_properties),
+        "benchmark-review-validator-set-v1": schema(
+            "benchmark-review-validator-set-v1",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "f_b": uint(),
+                "purpose": {"const": "BENCHMARK_DEFINITION_REVIEW"},
+                "validators": array(validator, unique=True),
+            },
+        ),
+        "benchmark-definition-vote-v1": schema(
+            "benchmark-definition-vote-v1",
+            {
+                "benchmark_definition_id": content_id(),
+                "public_key_id": content_id(),
+                "purpose": {"const": "BENCHMARK_DEFINITION_REVIEW"},
+                "signature": {"pattern": "^[A-Za-z0-9+/]{86}==$", "type": "string"},
+                "signature_algorithm": {"const": "ED25519"},
+                "signed_message_sha256": content_id(),
+                "signer_id": text(),
+                "submitted_at": timestamp,
+                "validator_set_id": content_id(),
+            },
+        ),
+        "benchmark-definition-attestation-v2": schema(
+            "benchmark-definition-attestation-v2",
+            {
+                "benchmark_definition_id": content_id(),
+                "f_b": uint(),
+                "governance_only": {"const": True},
+                "independent_approval": {"const": True},
+                "ordered_signers": array(text(), unique=True),
+                "ordered_vote_ids": array(content_id(), unique=True),
+                "quorum_threshold": uint(1),
+                "signature_set_root": content_id(),
+                "validator_set_id": content_id(),
+                "verified_at": timestamp,
+            },
+        ),
+        "domain-manifest-v1": schema(
+            "domain-manifest-v1",
+            {"campaign_id": {"const": "campaign-02"}, "domains": array(domain, unique=True)},
+        ),
+        "ticket-plan-v1": schema(
+            "ticket-plan-v1",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "domain_manifest_id": content_id(),
+                "tickets": array(ticket, unique=True),
+                "workload_contract_id": content_id(),
+            },
+        ),
+        "qualified-runtime-lineage-v1": schema(
+            "qualified-runtime-lineage-v1",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "certified_plan_bindings": array(policy_binding, unique=True),
+                "dataset_ids": array(content_id(), unique=True),
+                "environment_id": content_id(),
+                "evaluation_implementation_ids": array(content_id(), unique=True),
+                "evaluation_profile_ids": array(content_id(), unique=True),
+                "evaluation_runner_id": content_id(),
+                "hardware_id": content_id(),
+                "image_id": content_id(),
+                "model_id": content_id(),
+                "parent_checkpoint_id": content_id(),
+                "runner_id": content_id(),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "tokenizer_id": content_id(),
+                "writer_id": content_id(),
+            },
+        ),
+        "qualified-runtime-lineage-v2": schema(
+            "qualified-runtime-lineage-v2",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "certified_plan_bindings": {
+                    "items": policy_binding_v2,
+                    "maxItems": 36,
+                    "minItems": 36,
+                    "type": "array",
+                    "uniqueItems": True,
+                },
+                "dataset_ids": array(content_id(), unique=True),
+                "environment_id": content_id(),
+                "evaluation_implementation_ids": array(content_id(), unique=True),
+                "evaluation_profile_ids": array(content_id(), unique=True),
+                "evaluation_runner_id": content_id(),
+                "hardware_id": content_id(),
+                "image_id": content_id(),
+                "model_id": content_id(),
+                "parent_checkpoint_id": content_id(),
+                "runner_id": content_id(),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "stage_execution_model": {"const": "INDEPENDENT_BFT_RUNS"},
+                "tokenizer_id": content_id(),
+                "writer_id": content_id(),
+            },
+        ),
+        "workload-v2": schema(
+            "workload-v2",
+            {
+                "campaign_id": {"const": "campaign-02"},
+                "domain_ticket_counts": array(domain_count),
+                "execution_class": {"const": "DESIGN_ONLY_NO_PRIMARY_EXECUTION"},
+                "optimizer_steps_per_ticket": uint(1),
+                "ticket_count": uint(1),
+                "tokens_per_optimizer_step": uint(1),
+                "tokens_per_ticket": uint(1),
+                "total_tokens_per_arm_run": uint(1),
+            },
+        ),
+        "execution-plan-v2": schema(
+            "execution-plan-v2",
+            {
+                "arm_id": content_id(),
+                "benchmark_definition_id": content_id(),
+                "campaign_id": {"const": "campaign-02"},
+                "certified_round_policy": {"oneOf": [{"type": "null"}, certified_policy]},
+                "dataset_ids": array(content_id(), unique=True),
+                "definition_attestation_id": content_id(),
+                "environment_id": content_id(),
+                "evaluation_implementation_ids": array(content_id(), unique=True),
+                "evaluation_profile_ids": array(content_id(), unique=True),
+                "evaluation_runner_id": content_id(),
+                "execution_authorization_id": content_id(),
+                "execution_class": {"enum": ["NON_PRIMARY_SMOKE", "PRIMARY_MEASURED"]},
+                "hardware_id": content_id(),
+                "image_id": content_id(),
+                "model_id": content_id(),
+                "optimizer_steps_per_ticket": uint(1),
+                "parent_checkpoint_id": content_id(),
+                "processed_tokens": uint(1),
+                "repetition": uint(1),
+                "result_class": {"enum": ["REFERENCE", "CERTIFIED_DELTAREDUCE"]},
+                "round_id": text(),
+                "runner_id": content_id(),
+                "seed": uint(),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "ticket_count": uint(1),
+                "tickets": array(ticket),
+                "tokenizer_id": content_id(),
+                "tokens_per_optimizer_step": uint(1),
+                "tokens_per_ticket": uint(1),
+                "total_tokens_per_arm_run": uint(1),
+                "workload_id": content_id(),
+                "writer_id": content_id(),
+            },
+            result_class_union=[
+                {
+                    "properties": {
+                        "certified_round_policy": {"type": "null"},
+                        "result_class": {"const": "REFERENCE"},
+                    }
+                },
+                {
+                    "properties": {
+                        "certified_round_policy": certified_policy,
+                        "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                    }
+                },
+            ],
+        ),
+        "evaluator-profile-v1": schema(
+            "evaluator-profile-v1",
+            {
+                "dataset_id": content_id(),
+                "evaluator_id": {"enum": ["hellaswag", "lambada", "wikitext"]},
+                "method": {"minProperties": 1, "type": "object"},
+                "tokenizer_id": content_id(),
+            },
+        ),
+        "measured-evaluation-v1": schema(
+            "measured-evaluation-v1",
+            {
+                "checkpoint_id": content_id(),
+                "dataset_id": content_id(),
+                "environment_id": content_id(),
+                "evaluator_id": {"enum": ["hellaswag", "lambada", "wikitext"]},
+                "evaluator_implementation_id": content_id(),
+                "evaluator_profile_id": content_id(),
+                "execution_plan_id": content_id(),
+                "item_count": uint(1),
+                "item_evidence_root": content_id(),
+                "method_observation": {"minProperties": 1, "type": "object"},
+                "metrics": array(metric),
+                "model_id": content_id(),
+                "scored_token_count": uint(),
+                "source_class": {"const": "MEASURED_MODEL_INFERENCE"},
+                "tokenizer_id": content_id(),
+            },
+        ),
+        "component-identity-v1": schema(
+            "component-identity-v1",
+            {
+                "component": {
+                    "enum": [
+                        "PRIMARY_EVALUATION_RUNNER",
+                        "PRIMARY_OBSERVATION_WRITER",
+                        "PRIMARY_SCIENTIFIC_RUNNER",
+                    ]
+                },
+                "create_only_store_policy_id": content_id(),
+                "environment_id": content_id(),
+                "executable_hashes": array(executable),
+                "hardware_compatibility_class_id": content_id(),
+                "image_id": content_id(),
+                "model_data_staging_policy_id": content_id(),
+                "output_schema_ids": array(content_id(), unique=True),
+                "source_commit": commit_id(),
+                "source_tree": commit_id(),
+                "timeout_policy_id": content_id(),
+            },
+        ),
+        "observation-v2": schema(
+            "observation-v2",
+            observation_properties,
+            result_class_union=observation_result_union,
+        ),
+        "observation-v3": schema(
+            "observation-v3",
+            observation_v3_properties,
+            result_class_union=observation_result_union,
+        ),
+        "observation-receipt-v1": schema(
+            "observation-receipt-v1",
+            {
+                "artifact_ids": array(content_id(), unique=True),
+                "create_only": {"const": True},
+                "execution_plan_id": content_id(),
+                "observation_id": content_id(),
+                "status": {"const": "PUBLISHED"},
+                "writer_id": content_id(),
+            },
+        ),
+        "gpu-environment-lock-v1": schema(
+            "gpu-environment-lock-v1",
+            {
+                "cpu_portable_lock_id": content_id(),
+                "cuda_runtime_id": text(),
+                "image_scope": {"const": "PINNED_CUDA_BASE_PLUS_HASH_LOCKED_PYTHON_ENVIRONMENT"},
+                "immutable_resolution": {"const": True},
+                "oci_image_digest": content_id(),
+                "platform_locks": array(lock_ref),
+                "policy_id": content_id(),
+                "python": {"const": "3.12.1"},
+                "required_packages": {"minProperties": 6, "type": "object"},
+                "requirements_input_id": content_id(),
+                "sbom_id": content_id(),
+                "scientific_use": {"const": True},
+            },
+        ),
+        "native-chain-admission-bundle-v1": schema(
+            "native-chain-admission-bundle-v1",
+            {
+                "aggregate_root_qc": {"minProperties": 1, "type": "object"},
+                "aggregation_plan_certificate": {"minProperties": 1, "type": "object"},
+                "apply_arithmetic_profile": {"minProperties": 1, "type": "object"},
+                "apply_candidate": {"minProperties": 1, "type": "object"},
+                "apply_qc": {"minProperties": 1, "type": "object"},
+                "checkpoint_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "current_pointer_command": {"minProperties": 1, "type": "object"},
+                "effect_set_id": content_id(),
+                "eligibility_certificate": {"minProperties": 1, "type": "object"},
+                "execution_plan_id": content_id(),
+                "expected_input_tuples": array(
+                    strict(
+                        {
+                            "availability_certificate_id": content_id(),
+                            "commitment_id": content_id(),
+                            "domain_id": text(),
+                            "ticket_id": content_id(),
+                        }
+                    )
+                ),
+                "final_checkpoint_id": content_id(),
+                "input_set_certificate": {"minProperties": 1, "type": "object"},
+                "norm_evidence": {"minProperties": 1, "type": "object"},
+                "ordered_contributions": array(
+                    strict({"contribution_id": content_id(), "ticket_id": content_id()})
+                ),
+                "parameter_shard_qcs": array({"minProperties": 1, "type": "object"}),
+                "parent_checkpoint_id": content_id(),
+                "policy": certified_policy,
+                "runtime_state_id": content_id(),
+                "runtime_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "seed_transcript": {"minProperties": 1, "type": "object"},
+                "terminal_outcome": {"const": "APPLIED"},
+            },
+        ),
+        "native-chain-admission-receipt-v1": schema(
+            "native-chain-admission-receipt-v1",
+            {
+                "aggregate_root_qc_id": content_id(),
+                "apply_qc_id": content_id(),
+                "certificate_bundle_id": content_id(),
+                "certified_round_policy_id": content_id(),
+                "checkpoint_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "effect_set_id": content_id(),
+                "execution_plan_id": content_id(),
+                "final_checkpoint_id": content_id(),
+                "input_set_certificate_id": content_id(),
+                "native_build_id": content_id(),
+                "native_chain_verifier_id": content_id(),
+                "runtime_state_id": content_id(),
+                "runtime_wal_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+                "status": {"const": "ACCEPT"},
+            },
+        ),
+    }
+    execution_v2 = documents["execution-plan-v2"]
+    execution_v2_properties = execution_v2["properties"]
+    assert isinstance(execution_v2_properties, dict)
+    documents["execution-plan-v3"] = schema(
+        "execution-plan-v3",
+        {
+            **{
+                key: value
+                for key, value in execution_v2_properties.items()
+                if key not in {"formal_semantics_id", "schema_version", "type_name"}
+            },
+            "domain_manifest_id": content_id(),
+            "qualified_runtime_lineage_id": content_id(),
+            "ticket_plan_id": content_id(),
+        },
+        result_class_union=[
+            {
+                "properties": {
+                    "certified_round_policy": {"type": "null"},
+                    "result_class": {"const": "REFERENCE"},
+                }
+            },
+            {
+                "properties": {
+                    "certified_round_policy": certified_policy,
+                    "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                }
+            },
+        ],
+    )
+    execution_v3 = documents["execution-plan-v3"]
+    execution_v3_properties = execution_v3["properties"]
+    assert isinstance(execution_v3_properties, dict)
+    documents["execution-plan-v4"] = schema(
+        "execution-plan-v4",
+        {
+            **{
+                key: value
+                for key, value in execution_v3_properties.items()
+                if key
+                not in {
+                    "execution_authorization_id",
+                    "formal_semantics_id",
+                    "schema_version",
+                    "type_name",
+                }
+            },
+            "execution_authorized": {"const": False},
+            "gate_stage": {
+                "enum": [
+                    "STAGE_A_EXACTNESS",
+                    "STAGE_B_SCIENTIFIC",
+                    "STAGE_C_EMULATED_WAN",
+                ]
+            },
+        },
+        result_class_union=[
+            {
+                "properties": {
+                    "certified_round_policy": {"type": "null"},
+                    "result_class": {"const": "REFERENCE"},
+                }
+            },
+            {
+                "properties": {
+                    "certified_round_policy": certified_policy,
+                    "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                }
+            },
+        ],
+    )
+    execution_v4 = documents["execution-plan-v4"]
+    execution_v4_properties = execution_v4["properties"]
+    assert isinstance(execution_v4_properties, dict)
+    documents["execution-plan-v5"] = schema(
+        "execution-plan-v5",
+        {
+            **{
+                key: value
+                for key, value in execution_v4_properties.items()
+                if key not in {"formal_semantics_id", "schema_version", "type_name"}
+            },
+            "ticket_identity_scope": {"const": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID"},
+        },
+        result_class_union=[
+            {
+                "properties": {
+                    "certified_round_policy": {"type": "null"},
+                    "result_class": {"const": "REFERENCE"},
+                }
+            },
+            {
+                "properties": {
+                    "certified_round_policy": certified_policy,
+                    "result_class": {"const": "CERTIFIED_DELTAREDUCE"},
+                }
+            },
+        ],
+    )
+    exact_stage_ids = {
+        "items": content_id(),
+        "maxItems": 15,
+        "minItems": 15,
+        "type": "array",
+        "uniqueItems": True,
+    }
+    documents["plan-catalog-v1"] = schema(
+        "plan-catalog-v1",
+        {
+            "base_plan_count": {"const": 15},
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "domain_manifest_id": content_id(),
+            "execution_authorized": {"const": False},
+            "plan_ids": {
+                "items": content_id(),
+                "maxItems": 45,
+                "minItems": 45,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "plan_ids_by_stage": strict(
+                {
+                    "STAGE_A_EXACTNESS": exact_stage_ids,
+                    "STAGE_B_SCIENTIFIC": exact_stage_ids,
+                    "STAGE_C_EMULATED_WAN": exact_stage_ids,
+                }
+            ),
+            "qualified_runtime_lineage_id": content_id(),
+            "status": {"const": "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION"},
+            "ticket_plan_id": content_id(),
+            "workload_contract_id": content_id(),
+        },
+    )
+    documents["plan-catalog-v2"] = schema(
+        "plan-catalog-v2",
+        {
+            "base_plan_count": {"const": 15},
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "definition_attestation_verified_at": timestamp,
+            "domain_manifest_id": content_id(),
+            "execution_authorized": {"const": False},
+            "plan_ids": {
+                "items": content_id(),
+                "maxItems": 45,
+                "minItems": 45,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "plan_ids_by_stage": strict(
+                {
+                    "STAGE_A_EXACTNESS": exact_stage_ids,
+                    "STAGE_B_SCIENTIFIC": exact_stage_ids,
+                    "STAGE_C_EMULATED_WAN": exact_stage_ids,
+                }
+            ),
+            "qualified_runtime_lineage_id": content_id(),
+            "stage_execution_model": {"const": "INDEPENDENT_BFT_RUNS"},
+            "status": {"const": "COMPILED_NOT_EXECUTABLE_REQUIRES_STAGE_AUTHORIZATION"},
+            "ticket_identity_scope": {"const": "ROUND_ID_PLUS_TICKET_TEMPLATE_ID"},
+            "ticket_plan_id": content_id(),
+            "workload_contract_id": content_id(),
+        },
+    )
+    documents["stage-execution-authorization-v1"] = schema(
+        "stage-execution-authorization-v1",
+        {
+            "allowed_plan_ids": array(content_id(), unique=True),
+            "authorized_stage": {
+                "enum": [
+                    "STAGE_A_EXACTNESS",
+                    "STAGE_B_SCIENTIFIC",
+                    "STAGE_C_EMULATED_WAN",
+                ]
+            },
+            "authorized_task_ids": array(text(), unique=True),
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "plan_catalog_id": content_id(),
+            "real_wan_authorized": {"const": False},
+            "required_predecessor_receipt_ids": {
+                "items": content_id(),
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "result_qc_authorized": {"const": False},
+            "stage_a_authorized": {"type": "boolean"},
+            "stage_b_authorized": {"type": "boolean"},
+            "stage_c_authorized": {"type": "boolean"},
+        },
+    )
+    documents["stage-execution-authorization-v2"] = schema(
+        "stage-execution-authorization-v2",
+        {
+            "allowed_plan_ids": {
+                "items": content_id(),
+                "maxItems": 15,
+                "minItems": 15,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "authorized_stage": {"enum": stages},
+            "authorized_task_ids": array(text(), unique=True),
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "definition_attestation_id": content_id(),
+            "issued_at": timestamp,
+            "plan_catalog_id": content_id(),
+            "real_wan_authorized": {"const": False},
+            "required_predecessor_receipt_ids": {
+                "items": content_id(),
+                "maxItems": 2,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "result_qc_authorized": {"const": False},
+            "source_commit": commit_id(),
+            "source_tree": commit_id(),
+            "stage_a_authorized": {"type": "boolean"},
+            "stage_b_authorized": {"type": "boolean"},
+            "stage_c_authorized": {"type": "boolean"},
+            "validator_set_id": content_id(),
+        },
+    )
+    documents["stage-authorization-validator-set-v1"] = schema(
+        "stage-authorization-validator-set-v1",
+        {
+            "campaign_id": {"const": "campaign-02"},
+            "f_b": uint(),
+            "purpose": {"const": "BENCHMARK_STAGE_AUTHORIZATION_REVIEW"},
+            "validators": array(validator, unique=True),
+        },
+    )
+    documents["stage-authorization-vote-v1"] = schema(
+        "stage-authorization-vote-v1",
+        {
+            "public_key_id": content_id(),
+            "purpose": {"const": "BENCHMARK_STAGE_AUTHORIZATION_REVIEW"},
+            "signature": {"pattern": "^[A-Za-z0-9+/]{86}==$", "type": "string"},
+            "signature_algorithm": {"const": "ED25519"},
+            "signed_message_sha256": content_id(),
+            "signer_id": text(),
+            "stage_authorization_id": content_id(),
+            "submitted_at": timestamp,
+            "validator_set_id": content_id(),
+        },
+    )
+    documents["stage-authorization-attestation-v1"] = schema(
+        "stage-authorization-attestation-v1",
+        {
+            "f_b": uint(),
+            "governance_only": {"const": True},
+            "independent_approval": {"const": True},
+            "ordered_public_key_ids": array(content_id(), unique=True),
+            "ordered_signers": array(text(), unique=True),
+            "ordered_vote_ids": array(content_id(), unique=True),
+            "quorum_threshold": uint(1),
+            "signature_set_root": content_id(),
+            "stage_authorization_id": content_id(),
+            "validator_set_id": content_id(),
+            "verified_at": timestamp,
+        },
+    )
+    documents["stage-gate-receipt-v1"] = schema(
+        "stage-gate-receipt-v1",
+        {
+            "accepted_plan_ids": {
+                "items": content_id(),
+                "maxItems": 15,
+                "minItems": 15,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "benchmark_definition_id": content_id(),
+            "campaign_id": {"const": "campaign-02"},
+            "completed_stage": {"enum": stages},
+            "decision": {"enum": ["FAIL", "PASS"]},
+            "definition_attestation_id": content_id(),
+            "evidence_root": content_id(),
+            "finalized_at": timestamp,
+            "gate_analyzer_id": content_id(),
+            "gate_qc_id": content_id(),
+            "gate_result_id": content_id(),
+            "plan_catalog_id": content_id(),
+            "qualified_runtime_lineage_id": content_id(),
+            "required_plan_ids": {
+                "items": content_id(),
+                "maxItems": 15,
+                "minItems": 15,
+                "type": "array",
+                "uniqueItems": True,
+            },
+            "source_commit": commit_id(),
+            "source_tree": commit_id(),
+            "stage_authorization_attestation_id": content_id(),
+        },
+    )
+    return documents
+
+
+def fixture_entries() -> list[dict[str, object]]:
+    result: list[dict[str, object]] = []
+    for path in sorted((ROOT / "delta-protocol/fixtures/010/campaign-02").rglob("*.json")):
+        relative = path.relative_to(ROOT / "delta-protocol").as_posix()
+        result.append(
+            {
+                "id": "BENCHMARK010-CAMPAIGN02-" + path.stem.upper().replace("-", "_"),
+                "path": relative,
+                "sha256": digest(path.read_bytes()),
+            }
+        )
+    return result
+
+
+def registry(schemas: dict[str, dict[str, object]]) -> dict[str, object]:
+    artifacts = []
+    media_types = []
+    for name, (schema_id, _, version) in SCHEMAS.items():
+        path = f"schemas/010/campaign-02/{name}.json"
+        artifacts.append({"id": schema_id, "path": path, "sha256": digest(pretty(schemas[name]))})
+        media_types.append(
+            {
+                "id": "MEDIA-CAMPAIGN02-" + name.upper(),
+                "schema_id": schema_id,
+                "value": (
+                    f"application/vnd.deltareduce.campaign-02.{name}+json;"
+                    f"version={version.split('.')[0]}"
+                ),
+            }
+        )
+    return {
+        "artifacts": artifacts,
+        "fixtures": fixture_entries(),
+        "formal_semantics_id": FORMAL_ID,
+        "media_types": media_types,
+        "registry_version": "010.5.0-signed-stage-governance",
+        "schema_version": "1.0.0",
+        "semantic_completeness_claimed": False,
+    }
+
+
+def root_registry(registry_value: dict[str, object]) -> bytes:
+    root_path = ROOT / "delta-protocol/registry.json"
+    root = json.loads(root_path.read_bytes())
+    if not isinstance(root, dict):
+        raise Campaign02SchemaError("ROOT_REGISTRY_INVALID")
+    schema_ids = {item[0] for item in SCHEMAS.values()}
+    root["extensions"] = [
+        item
+        for item in root["extensions"]
+        if item.get("id") != "REGISTRY-BENCHMARK-010-CAMPAIGN-02"
+    ]
+    root["fixtures"] = [
+        item
+        for item in root["fixtures"]
+        if not str(item.get("id", "")).startswith("BENCHMARK010-CAMPAIGN02-")
+    ]
+    root["media_types"] = [
+        item for item in root["media_types"] if item.get("schema_id") not in schema_ids
+    ]
+    root["schemas"] = [item for item in root["schemas"] if item.get("id") not in schema_ids]
+    registry_bytes = pretty(registry_value)
+    root["extensions"].append(
+        {
+            "id": "REGISTRY-BENCHMARK-010-CAMPAIGN-02",
+            "path": "schemas/010/campaign-02/registry-v1.json",
+            "sha256": digest(registry_bytes),
+        }
+    )
+    root["fixtures"].extend(registry_value["fixtures"])
+    root["media_types"].extend(registry_value["media_types"])
+    root["schemas"].extend(registry_value["artifacts"])
+    for field, key in (
+        ("extensions", "path"),
+        ("fixtures", "path"),
+        ("media_types", "id"),
+        ("schemas", "path"),
+    ):
+        root[field] = sorted(root[field], key=lambda item: item[key])
+    return pretty(root)
+
+
+def expected_outputs() -> dict[Path, bytes]:
+    schemas = schema_documents()
+    registry_value = registry(schemas)
+    outputs = {SCHEMA_ROOT / f"{name}.json": pretty(value) for name, value in schemas.items()}
+    outputs[REGISTRY_PATH] = pretty(registry_value)
+    outputs[ROOT / "delta-protocol/registry.json"] = root_registry(registry_value)
+    return outputs
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--write", action="store_true")
+    arguments = parser.parse_args()
+    outputs = expected_outputs()
+    if arguments.write:
+        for path, value in outputs.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(value)
+    else:
+        for path, expected in outputs.items():
+            if not path.is_file() or path.read_bytes() != expected:
+                raise Campaign02SchemaError(f"CAMPAIGN02_SCHEMA_OUTPUT_DRIFT:{path.name}")
+    print(
+        canonical(
+            {
+                "fixture_count": len(fixture_entries()),
+                "schema_count": len(SCHEMAS),
+                "semantic_completeness_claimed": False,
+                "status": "PASS",
+            }
+        ).decode()
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -154,6 +154,10 @@ target_link_libraries(delta_qlora PUBLIC delta::apply delta::certificates)
 delta_target_defaults(delta_qlora)
 
 add_library(delta_runtime STATIC
+  delta-runtime-cpp/src/benchmark/fault_control.cpp
+  delta-runtime-cpp/src/benchmark/metrics.cpp
+  delta-runtime-cpp/src/benchmark/sidecar_server.cpp
+  delta-runtime-cpp/src/benchmark/trace_export.cpp
   delta-runtime-cpp/src/certificate_runtime.cpp
   delta-runtime-cpp/src/runtime.cpp
   delta-runtime-cpp/src/wal.cpp)
@@ -170,6 +174,8 @@ endif()
 delta_target_defaults(delta_runtime)
 
 add_library(delta_ffi SHARED
+  delta-ffi/src/benchmark_abi.cpp
+  delta-ffi/src/certificate_chain_abi.cpp
   delta-ffi/src/certificates_abi.cpp
   delta-ffi/src/delta_abi.cpp
   delta-ffi/src/distribution_abi.cpp
@@ -188,6 +194,19 @@ target_link_libraries(
 delta_target_defaults(delta_ffi)
 
 if(BUILD_TESTING)
+  add_executable(delta_benchmark_sidecar delta-runtime-cpp/src/benchmark/sidecar_main.cpp)
+  delta_target_defaults(delta_benchmark_sidecar)
+
+  add_executable(delta_runtime_benchmark_test delta-runtime-cpp/tests/benchmark_test.cpp)
+  target_link_libraries(delta_runtime_benchmark_test PRIVATE delta::runtime)
+  delta_target_defaults(delta_runtime_benchmark_test)
+  add_test(NAME delta_runtime.benchmark COMMAND delta_runtime_benchmark_test)
+
+  add_executable(delta_ffi_benchmark_test delta-ffi/tests/benchmark_abi_test.cpp)
+  target_link_libraries(delta_ffi_benchmark_test PRIVATE delta::ffi)
+  delta_target_defaults(delta_ffi_benchmark_test)
+  add_test(NAME delta_ffi.benchmark COMMAND delta_ffi_benchmark_test)
+
   add_executable(
     delta_qlora_certificate_chain_test
     delta-core-cpp/tests/qlora_certificate_chain_test.cpp)
@@ -755,6 +774,42 @@ if(BUILD_TESTING)
     PRIVATE DELTA_CERTIFICATE_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/008/cross-language/golden-v1.json")
   delta_target_defaults(delta_ffi_certificates_test)
   add_test(NAME delta_ffi.certificates COMMAND delta_ffi_certificates_test)
+
+  add_executable(
+    delta_ffi_certificate_chain_test
+    delta-ffi/tests/certificate_chain_abi_test.cpp)
+  target_link_libraries(delta_ffi_certificate_chain_test PRIVATE delta::ffi)
+  target_compile_definitions(
+    delta_ffi_certificate_chain_test
+    PRIVATE DELTA_CERTIFICATE_CHAIN_CORPUS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/010/campaign-02/native-chain-conformance-v1.json")
+  delta_target_defaults(delta_ffi_certificate_chain_test)
+  add_test(NAME delta_ffi.certificate_chain COMMAND delta_ffi_certificate_chain_test)
+
+  foreach(mutant IN ITEMS SEED_PARENT OBSERVED_COVERAGE)
+    string(TOLOWER "${mutant}" mutant_lower)
+    set(mutant_test "delta_ffi_certificate_chain_${mutant_lower}_mutant_test")
+    add_executable(
+      ${mutant_test}
+      delta-ffi/src/certificate_chain_abi.cpp
+      delta-ffi/tests/certificate_chain_abi_test.cpp)
+    target_include_directories(
+      ${mutant_test}
+      PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include)
+    target_link_libraries(
+      ${mutant_test}
+      PRIVATE delta_certificates_${mutant_lower}_mutant delta::core)
+    target_compile_definitions(
+      ${mutant_test}
+      PRIVATE DELTA_FFI_BUILD
+              DELTA_CERTIFICATE_CHAIN_CORPUS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/010/campaign-02/native-chain-conformance-v1.json")
+    delta_target_defaults(${mutant_test})
+    add_test(
+      NAME "delta_ffi.certificate_chain_mutant_${mutant_lower}"
+      COMMAND ${mutant_test})
+    set_tests_properties(
+      "delta_ffi.certificate_chain_mutant_${mutant_lower}"
+      PROPERTIES WILL_FAIL TRUE)
+  endforeach()
 
   add_executable(delta_ffi_scheduling_test delta-ffi/tests/scheduling_abi_test.cpp)
   target_link_libraries(delta_ffi_scheduling_test PRIVATE delta::ffi)

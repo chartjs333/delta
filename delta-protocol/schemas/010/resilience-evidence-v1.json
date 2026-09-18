@@ -1,0 +1,77 @@
+{
+  "$id": "urn:deltareduce:schema:010:resilience-evidence:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "RESILIENCE_EVIDENCE"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scenarios": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "actual_outcome": {
+            "enum": [
+              "ABORTED",
+              "APPLIED",
+              "BLOCKED",
+              "RECOVERED"
+            ]
+          },
+          "current_unchanged_on_non_apply": {
+            "type": "boolean"
+          },
+          "expected_outcome": {
+            "enum": [
+              "ABORTED",
+              "APPLIED",
+              "BLOCKED",
+              "RECOVERED"
+            ]
+          },
+          "scenario_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "actual_outcome",
+          "current_unchanged_on_non_apply",
+          "expected_outcome",
+          "scenario_id"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "FAIL",
+        "PASS"
+      ]
+    }
+  },
+  "required": [
+    "benchmark_definition_id",
+    "formal_semantics_id",
+    "scenarios",
+    "schema_version",
+    "status",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 resilience-evidence v1",
+  "type": "object"
+}

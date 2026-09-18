@@ -1,0 +1,1 @@
+{"expected":{"item_count":2,"metrics":{"downstream_lambada_accuracy_ppm":500000,"downstream_lambada_mean_nll_nano":1000000000},"scored_token_count":2},"fixture_class":"NON_PRIMARY_GOLDEN","records":[{"text":"the sky blue"},{"text":"the grass green"}],"schema_version":"1.0.0"}

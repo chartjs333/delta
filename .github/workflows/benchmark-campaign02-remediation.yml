@@ -1,0 +1,206 @@
+name: Campaign 02 signed-stage-tsan-lifetime exact-source qualification
+
+on:
+  pull_request:
+    branches: [010-wan-benchmark-and-quality]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: campaign-02-signed-stage-tsan-lifetime-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable-exact-source:
+    name: Portable exact-source contract and evaluator gates
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          github.head_ref == '010g-campaign02-execution-binding' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out remediation evidence overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: control
+          persist-credentials: false
+
+      - name: Resolve immutable remediation source
+        id: source
+        shell: bash
+        run: |
+          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
+          git -C control cat-file -e "${source_commit}^{commit}"
+          git -C control merge-base --is-ancestor 8e945ac9713de5898d3abdb10ad2474079a87260 "${source_commit}"
+          printf 'commit=%s\n' "${source_commit}" >> "$GITHUB_OUTPUT"
+
+      - name: Check out immutable remediation source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          path: qualified-source
+          persist-credentials: false
+          ref: ${{ steps.source.outputs.commit }}
+
+      - name: Install pinned portable workspace tool
+        working-directory: qualified-source
+        run: python3 -m pip install --disable-pip-version-check uv==0.6.14
+
+      - name: Materialize CPU-only portable environment
+        working-directory: qualified-source
+        run: uv sync --frozen
+
+      - name: Verify generated Campaign 02 contracts offline
+        working-directory: qualified-source
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_execution_binding.py
+          uv run python specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py
+          git diff --exit-code
+
+      - name: Run portable implementation and golden-fixture gates
+        working-directory: qualified-source
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --target \
+            delta_ffi_certificate_chain_test \
+            delta_ffi_certificate_chain_seed_parent_mutant_test \
+            delta_ffi_certificate_chain_observed_coverage_mutant_test \
+            --parallel 2
+          ctest --test-dir out/build/cpp20 \
+            --output-on-failure \
+            -R '^delta_ffi\.certificate_chain(_mutant_.*)?$'
+          uv run ruff check \
+            delta-worker-python/src/deltatorrent/benchmark \
+            delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
+            delta-worker-python/tests/benchmark/generate_native_chain_corpus.py \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
+            delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
+            delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
+            delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_execution_binding.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
+            specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
+            specs/010-wan-benchmark-and-quality/scripts/qualify_campaign02_hardware.py \
+            specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_exact_source.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py
+          uv run ruff format --check \
+            delta-worker-python/src/deltatorrent/benchmark \
+            delta-worker-python/tests/benchmark/campaign02_chain_fixtures.py \
+            delta-worker-python/tests/benchmark/generate_native_chain_corpus.py \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
+            delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
+            delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
+            delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_contracts.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_execution_binding.py \
+            specs/010-wan-benchmark-and-quality/scripts/campaign02_gpu_environment.py \
+            specs/010-wan-benchmark-and-quality/scripts/benchmark_contracts.py \
+            specs/010-wan-benchmark-and-quality/scripts/qualify_campaign02_hardware.py \
+            specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_exact_source.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py
+          uv run mypy delta-worker-python/src/deltatorrent/benchmark
+          uv run pytest \
+            delta-worker-python/tests/benchmark/test_campaign02_execution_binding.py \
+            delta-worker-python/tests/benchmark/test_campaign02_governance_signatures.py \
+            delta-worker-python/tests/benchmark/test_campaign02_remediation.py \
+            delta-worker-python/tests/benchmark/test_campaign02_run_level_finalization.py \
+            delta-worker-python/tests/benchmark/test_native_chain_conformance.py \
+            specs/010-wan-benchmark-and-quality/tests/test_benchmark_contracts.py \
+            specs/010-wan-benchmark-and-quality/tests/test_campaign02_contracts.py \
+            --junitxml="$RUNNER_TEMP/campaign-02-portable.xml"
+
+      - name: Retain exact-source portable result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign-02-portable-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-portable.xml
+          if-no-files-found: error
+          retention-days: 30
+
+  exact-source-admission:
+    name: Join portable and designated-GPU evidence
+    needs: [portable-exact-source]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out remediation evidence overlay
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: control
+          persist-credentials: false
+
+      - name: Resolve immutable remediation source
+        id: source
+        shell: bash
+        run: |
+          source_commit="$(python3 -c 'import json; print(json.load(open("control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json", encoding="utf-8"))["source"]["commit"])')"
+          git -C control cat-file -e "${source_commit}^{commit}"
+          printf 'commit=%s\n' "${source_commit}" >> "$GITHUB_OUTPUT"
+
+      - name: Check out immutable remediation source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: qualified-source
+          persist-credentials: false
+          ref: ${{ steps.source.outputs.commit }}
+
+      - name: Download portable exact-source result
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: campaign-02-portable-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-portable
+
+      - name: Install pinned portable workspace tool
+        working-directory: qualified-source
+        run: python3 -m pip install --disable-pip-version-check uv==0.6.14
+
+      - name: Materialize CPU-only portable environment
+        working-directory: qualified-source
+        run: uv sync --frozen
+
+      - name: Reproduce exact-source admission artifact
+        working-directory: qualified-source
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "true"
+        run: |
+          uv run python specs/010-wan-benchmark-and-quality/scripts/verify_campaign02_exact_source.py \
+            --source-commit '${{ steps.source.outputs.commit }}' \
+            --portable-junit "$RUNNER_TEMP/campaign-02-portable/campaign-02-portable.xml" \
+            --hardware-evidence "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-hardware-qualification.json" \
+            --output "$RUNNER_TEMP/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json"
+          cmp \
+            "$RUNNER_TEMP/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json" \
+            "$GITHUB_WORKSPACE/control/specs/010-wan-benchmark-and-quality/evidence/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json"
+
+      - name: Retain immutable exact-source admission artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: campaign-02-signed-stage-tsan-lifetime-exact-source-${{ github.run_id }}
+          path: ${{ runner.temp }}/campaign-02-signed-stage-tsan-lifetime-exact-source-qualification.json
+          if-no-files-found: error
+          retention-days: 30

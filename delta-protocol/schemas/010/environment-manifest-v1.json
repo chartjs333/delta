@@ -1,0 +1,97 @@
+{
+  "$id": "urn:deltareduce:schema:010:environment-manifest:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "ENVIRONMENT_MANIFEST"
+    },
+    "abi_descriptor_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "accelerator": {
+      "maxLength": 180,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+      "type": "string"
+    },
+    "compiler_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "dependency_lock_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "hardware_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "image_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "jdk_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "netty_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "os_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "python_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_tree": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "time_sync_status": {
+      "enum": [
+        "BOUNDED",
+        "NOT_APPLICABLE"
+      ]
+    }
+  },
+  "required": [
+    "abi_descriptor_id",
+    "accelerator",
+    "compiler_id",
+    "dependency_lock_ids",
+    "formal_semantics_id",
+    "hardware_id",
+    "image_id",
+    "jdk_id",
+    "netty_id",
+    "os_id",
+    "python_id",
+    "schema_version",
+    "source_commit",
+    "source_tree",
+    "time_sync_status",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 environment-manifest v1",
+  "type": "object"
+}

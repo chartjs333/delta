@@ -1,0 +1,85 @@
+{
+  "$id": "urn:deltareduce:schema:010:safety-evidence:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "SAFETY_EVIDENCE"
+    },
+    "attacks": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "actual_outcome": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "attack_id": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "current_unchanged": {
+            "type": "boolean"
+          },
+          "expected_outcome": {
+            "maxLength": 180,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:/+@=-]+$",
+            "type": "string"
+          },
+          "rejected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "actual_outcome",
+          "attack_id",
+          "current_unchanged",
+          "expected_outcome",
+          "rejected"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "benchmark_definition_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "exact_hashes_match": {
+      "type": "boolean"
+    },
+    "formal_regression_status": {
+      "const": "PASS"
+    },
+    "status": {
+      "enum": [
+        "FAIL",
+        "PASS"
+      ]
+    }
+  },
+  "required": [
+    "attacks",
+    "benchmark_definition_id",
+    "exact_hashes_match",
+    "formal_regression_status",
+    "formal_semantics_id",
+    "schema_version",
+    "status",
+    "type_name"
+  ],
+  "title": "DeltaReduce Feature 010 safety-evidence v1",
+  "type": "object"
+}

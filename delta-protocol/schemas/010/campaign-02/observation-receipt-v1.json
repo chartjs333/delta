@@ -1,0 +1,56 @@
+{
+  "$id": "urn:deltareduce:schema:010:campaign-02:observation-receipt-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "type_name": {
+      "const": "PRIMARY_OBSERVATION_RECEIPT"
+    },
+    "artifact_ids": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "create_only": {
+      "const": true
+    },
+    "execution_plan_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "observation_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "status": {
+      "const": "PUBLISHED"
+    },
+    "writer_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "artifact_ids",
+    "create_only",
+    "execution_plan_id",
+    "formal_semantics_id",
+    "observation_id",
+    "schema_version",
+    "status",
+    "type_name",
+    "writer_id"
+  ],
+  "type": "object",
+  "title": "DeltaReduce Feature 010 Campaign 02 observation-receipt-v1"
+}

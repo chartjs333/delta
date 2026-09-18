@@ -38,3 +38,12 @@ content ID, formal-semantics ID, media type and domain, and return a caller-owne
 inspection result through size negotiation. Java receives only this verifier result; it never
 reconstructs votes, quorums, robust weights, aggregate roots, Apply candidates or current-state
 decisions.
+
+Feature 010 Campaign 02 certified-run admission uses
+`delta_certificate_chain_verify_borrowed` or `delta_certificate_chain_verify_copy`. These entry
+points parse one bounded canonical full-chain bundle into every Feature 008 typed contract and
+invoke the production `delta::certificates::ChainVerifier`, including the immutable required-shard
+matrix and Apply/current-pointer descent. On success they return a content-addressed receipt bound
+to the formal semantics, native build/verifier, execution plan, policy, ISC/root/Apply/final IDs,
+runtime state/effects and both WAL hashes. A semantic rejection exposes no receipt bytes; Python
+preflight is never an admission fallback.
