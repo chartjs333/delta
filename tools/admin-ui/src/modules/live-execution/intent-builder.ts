@@ -327,6 +327,24 @@ export function validateIntentDraft(
   return issues;
 }
 
+function generateCryptoRandomUUID(): string {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  if (typeof globalThis.crypto?.getRandomValues === "function") {
+    const bytes = new Uint8Array(16);
+    globalThis.crypto.getRandomValues(bytes);
+    // RFC 4122 variant and version 4
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+  throw new Error(
+    "ERR_CRYPTO_UNAVAILABLE: Cryptographically secure random UUID generation is required",
+  );
+}
+
 export function buildExecutionIntentDocument(
   draft: ExecutionIntentDraft,
   options?: {
@@ -348,11 +366,7 @@ export function buildExecutionIntentDocument(
 
   const createdAt = createdAtDate.toISOString();
   const expiresAt = expiresAtDate.toISOString();
-  const intentId =
-    options?.intentId ??
-    (typeof globalThis.crypto?.randomUUID === "function"
-      ? globalThis.crypto.randomUUID()
-      : "10000000-0000-4000-8000-000000000001");
+  const intentId = options?.intentId ?? generateCryptoRandomUUID();
 
   // Clean operation payload according to operation
   let operationPayload: OperationPayload;
