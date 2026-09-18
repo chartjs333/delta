@@ -207,4 +207,32 @@ All criteria mandated by the Step 5C Reviewer-Gated Architecture Flow have been 
 
 **GATE STATUS**: **STEP 5C COMPONENT GATE RATIFIED, APPROVED & ALL CORE COMPONENT PRS MERGED INTO MAIN**
 
+## 11. Step 5C Finalization Sprint Entry and Security Remediation Mandate (PR #38)
+
+- **Entry State**:
+  - `main`: `13e8f4ea33784d302ad5d579a1a15e2a4468e70f`
+  - Merged components: PR #40 (`37407f9`), PR #35 (`c1b34c4`), PR #36 (`61cf383`), PR #37 (`13e8f4e`).
+  - Open components: PR #38 (Security, existing head `2c43abb`), PR #39 (E2E & Qualification, existing head `11712f1`).
+- **Sequential Execution Plan**:
+  1. **Node 1 (Coordinator `2107`)**: Open Finalization Governance Gate, verify baseline, dispatch exact implementation mandate to Programmer E (`2105`).
+  2. **Node 2 (Programmer E `2105`)**: Remediate PR #38 (Security T029–T034) against current `main` (`13e8f4e`).
+  3. **Node 3 (Coordinator `2107`)**: Review exact remote HEAD of PR #38, verify CI, execute reviewer gate, merge PR #38 into `main`, and publish `SECURITY_MERGE_SHA`.
+  4. **Node 4 (Programmer F `2106`)**: Rebase PR #39 (E2E T035–T044) onto `main` with merged PR #38, rerun qualification, regenerate superseded evidence.
+  5. **Node 5 (Coordinator `2107`)**: Final E2E review, merge PR #39, verify 0-diff on protected consensus spine, declare `STEP5C_FINAL_STATUS=CLOSED`.
+- **Mandate Dispatched to Programmer E (`2105`) for PR #38**:
+  - Rebase `feature/step5c-security` on current `main` (`13e8f4ea33784d302ad5d579a1a15e2a4468e70f`).
+  - Preserve useful threat matrix.
+  - Replace simulation-only tests with production controller/worker tests.
+  - T030: Production durable atomic idempotency and crash/restart recovery against production ledger.
+  - Frozen error contracts:
+    - Same `intent_id` + different digest => `ERR_INTENT_ID_DIGEST_CONFLICT`.
+    - Same `intent_id` + different subject => `ERR_UNAUTHORIZED_CALLER`.
+    - Different `intent_id` + same digest => `ERR_INTENT_COLLISION_DETECTED`.
+  - Timeout maximum <= 3600s.
+  - T032: Production quota/timeout/cancel with genuine assertion logic (no constant-only assertions).
+  - T034: Production `AuditLogger` redaction of sensitive credentials.
+  - Secret-scan claim scope must match actual repository scope.
+  - Protected consensus spine: strict zero-diff requirement.
+
+
 
