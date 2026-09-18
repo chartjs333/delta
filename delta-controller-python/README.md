@@ -14,3 +14,19 @@ This package implements the trusted Zone 2 Authorization Gate for Step 5C contro
 - Asymmetric Ed25519 signing of `AdmissionRecord` over `AdmissionRecord \ {"authenticator.signature"}`
 - Construction of immutable `AuthorizedExecution` bundles for Zone 3 worker dispatch
 - Secret-redacted audit logging
+
+## Fail-closed runtime configuration
+
+`AuthorizationGate` has no generated/default signing key and no implicit caller
+authority. Runtime composition must inject both:
+
+- an `AdmissionSigningIdentity` whose Ed25519 public key and `key_id` are present
+  in the Worker trust configuration; frozen contract-fixture identities are rejected;
+- an `AuthenticationPort` backed by trusted token or transport-derived
+  LOCAL_PEER/mTLS mappings.
+- an `IdempotencyLedger` with an explicit durable `persistence_path`; an
+  in-memory ledger cannot be attached to the runtime gate.
+
+For `StaticAuthenticationPort`, LOCAL_PEER `subject_id` and mTLS `client_cn` are
+lookup keys populated by the trusted transport adapter. Unknown lookup keys fail
+closed, and caller-provided `roles` never become effective roles.

@@ -6,7 +6,7 @@ import json
 import os
 import threading
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -87,6 +87,9 @@ class IdempotencyLedger:
         self._by_execution_id: dict[str, str] = {}
         # In-flight reservations: intent_id -> Reservation
         self._reservations: dict[str, Reservation] = {}
+        # Any append/fsync failure makes the process-local view ambiguous. Keep the
+        # ledger fail-closed until it is reconstructed from its durable log.
+        self._poisoned_reason: str | None = None
 
         if self.persistence_path and self.persistence_path.exists():
             self._load_from_disk()
@@ -101,6 +104,25 @@ class IdempotencyLedger:
                         continue
                     data = json.loads(line)
                     rec = LedgerRecord.from_dict(data)
+                    previous = self._by_intent_id.get(rec.intent_id)
+                    if previous is not None and (
+                        previous.intent_digest != rec.intent_digest
+                        or previous.authenticated_subject_id != rec.authenticated_subject_id
+                        or previous.execution_id != rec.execution_id
+                    ):
+                        raise ValueError(
+                            f"Conflicting immutable ledger history for intent_id '{rec.intent_id}'"
+                        )
+                    digest_owner = self._by_digest.get(rec.intent_digest)
+                    if digest_owner is not None and digest_owner != rec.intent_id:
+                        raise ValueError(
+                            f"Ledger digest '{rec.intent_digest}' is owned by multiple intents"
+                        )
+                    execution_owner = self._by_execution_id.get(rec.execution_id)
+                    if execution_owner is not None and execution_owner != rec.intent_id:
+                        raise ValueError(
+                            f"Ledger execution_id '{rec.execution_id}' is owned by multiple intents"
+                        )
                     self._by_intent_id[rec.intent_id] = rec
                     self._by_digest[rec.intent_digest] = rec.intent_id
                     self._by_execution_id[rec.execution_id] = rec.intent_id
@@ -112,10 +134,28 @@ class IdempotencyLedger:
         with self.persistence_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record.to_dict(), ensure_ascii=False) + "\n")
             f.flush()
-            try:
-                os.fsync(f.fileno())
-            except OSError:
-                pass
+            os.fsync(f.fileno())
+
+    def _raise_if_poisoned(self) -> None:
+        if self._poisoned_reason is not None:
+            raise RuntimeError(
+                "Idempotency ledger is fail-closed because its durable state is uncertain: "
+                f"{self._poisoned_reason}"
+            )
+
+    def _persist_or_poison(
+        self, record: LedgerRecord, *, reservation_intent_id: str | None = None
+    ) -> None:
+        try:
+            self._persist_append(record)
+        except BaseException as exc:
+            self._poisoned_reason = f"{type(exc).__name__}: {exc}"
+            if reservation_intent_id is not None:
+                reservation = self._reservations.get(reservation_intent_id)
+                if reservation is not None:
+                    reservation.failed = True
+            self._cond.notify_all()
+            raise
 
     def acquire_or_check(
         self,
@@ -139,6 +179,7 @@ class IdempotencyLedger:
         deadline = time.monotonic() + timeout
         with self._lock:
             while True:
+                self._raise_if_poisoned()
                 # 1. Check committed records
                 existing = self._by_intent_id.get(intent_id)
                 if existing is not None:
@@ -261,33 +302,50 @@ class IdempotencyLedger:
         admission_record: dict[str, Any],
         retry_of_intent_id: str | None = None,
         operation: str | None = None,
+        status: str = "ADMITTED",
     ) -> LedgerRecord:
         """Atomically record and commit a new admitted execution in the ledger."""
         with self._lock:
+            self._raise_if_poisoned()
+            reservation = self._reservations.get(intent_id)
+            if reservation is None:
+                raise RuntimeError(f"No active reservation for intent '{intent_id}'")
+            if (
+                reservation.intent_digest != intent_digest
+                or reservation.caller_subject_id != caller_subject_id
+            ):
+                raise RuntimeError(f"Reservation identity mismatch for intent '{intent_id}'")
+            if intent_id in self._by_intent_id:
+                raise RuntimeError(f"Intent '{intent_id}' was committed while reserved")
+
             now_str = datetime.now(UTC).isoformat()
             record = LedgerRecord(
                 intent_id=intent_id,
                 intent_digest=intent_digest,
                 authenticated_subject_id=caller_subject_id,
                 execution_id=execution_id,
-                status="ADMITTED",
+                status=status,
                 created_at=now_str,
                 updated_at=now_str,
                 admission_record=admission_record,
                 retry_of_intent_id=retry_of_intent_id,
                 operation=operation,
             )
+            self._persist_or_poison(record, reservation_intent_id=intent_id)
             self._by_intent_id[intent_id] = record
             self._by_digest[intent_digest] = intent_id
             self._by_execution_id[execution_id] = intent_id
             self._reservations.pop(intent_id, None)
-            self._persist_append(record)
             self._cond.notify_all()
             return record
 
     def release_reservation(self, intent_id: str) -> None:
         """Release an in-flight reservation if admission preflight fails or aborts."""
         with self._lock:
+            if self._poisoned_reason is not None:
+                # The append may have reached storage before its barrier failed.
+                # Retaining the reservation prevents a second execution identity.
+                return
             res = self._reservations.pop(intent_id, None)
             if res is not None:
                 res.failed = True
@@ -305,6 +363,7 @@ class IdempotencyLedger:
         Returns None if intent_id is new and safe to admit.
         """
         with self._lock:
+            self._raise_if_poisoned()
             existing = self._by_intent_id.get(intent_id)
             if existing is not None:
                 if existing.authenticated_subject_id != caller_subject_id:
@@ -365,16 +424,28 @@ class IdempotencyLedger:
         retry_of_intent_id: str | None = None,
         operation: str | None = None,
     ) -> LedgerRecord:
-        """Atomically record a new admitted execution in the ledger."""
-        return self.commit_admission(
+        """Compatibility helper that acquires and commits an admission atomically."""
+        state, existing = self.acquire_or_check(
             intent_id=intent_id,
             intent_digest=intent_digest,
             caller_subject_id=caller_subject_id,
-            execution_id=execution_id,
-            admission_record=admission_record,
-            retry_of_intent_id=retry_of_intent_id,
-            operation=operation,
         )
+        if state == "COMMITTED":
+            assert existing is not None
+            return existing
+        try:
+            return self.commit_admission(
+                intent_id=intent_id,
+                intent_digest=intent_digest,
+                caller_subject_id=caller_subject_id,
+                execution_id=execution_id,
+                admission_record=admission_record,
+                retry_of_intent_id=retry_of_intent_id,
+                operation=operation,
+            )
+        except BaseException:
+            self.release_reservation(intent_id)
+            raise
 
     def update_execution(
         self,
@@ -386,20 +457,26 @@ class IdempotencyLedger:
     ) -> LedgerRecord:
         """Update status and results for an active execution."""
         with self._lock:
+            self._raise_if_poisoned()
             intent_id = self._by_execution_id.get(execution_id)
             if not intent_id:
                 raise KeyError(f"Unknown execution_id '{execution_id}'")
             record = self._by_intent_id[intent_id]
-            record.status = status
-            record.updated_at = datetime.now(UTC).isoformat()
-            if receipt_digest is not None:
-                record.receipt_digest = receipt_digest
-            if terminal_receipt is not None:
-                record.terminal_receipt = terminal_receipt
-            if error is not None:
-                record.error = error
-            self._persist_append(record)
-            return record
+            next_record = replace(
+                record,
+                status=status,
+                updated_at=datetime.now(UTC).isoformat(),
+                receipt_digest=(
+                    receipt_digest if receipt_digest is not None else record.receipt_digest
+                ),
+                terminal_receipt=(
+                    terminal_receipt if terminal_receipt is not None else record.terminal_receipt
+                ),
+                error=error if error is not None else record.error,
+            )
+            self._persist_or_poison(next_record)
+            self._by_intent_id[intent_id] = next_record
+            return next_record
 
     def get_by_intent_id(self, intent_id: str) -> LedgerRecord | None:
         with self._lock:
@@ -412,11 +489,27 @@ class IdempotencyLedger:
                 return None
             return self._by_intent_id.get(intent_id)
 
-    def active_count(self) -> int:
-        """Count executions currently in ADMITTED, QUEUED, or RUNNING state."""
+    def active_count(self, reservation_intent_id: str | None = None) -> int:
+        """Count active executions and reservations ordered before the caller.
+
+        A gate holding ``reservation_intent_id`` excludes its own reservation but
+        includes every earlier in-flight reservation. This gives concurrent new
+        intents a deterministic admission order without allowing each caller to
+        observe the same stale active count.
+        """
         with self._lock:
-            return sum(
+            self._raise_if_poisoned()
+            count = sum(
                 1
                 for r in self._by_intent_id.values()
                 if r.status in {"ADMITTED", "QUEUED", "RUNNING"}
             )
+            if reservation_intent_id is None:
+                return count + len(self._reservations)
+
+            for intent_id in self._reservations:
+                if intent_id == reservation_intent_id:
+                    return count
+                count += 1
+
+            raise KeyError(f"Unknown reservation intent_id '{reservation_intent_id}'")
