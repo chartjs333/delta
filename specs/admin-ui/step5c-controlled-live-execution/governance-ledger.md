@@ -15,12 +15,12 @@
 | **ADR 0002 Acceptance** | PR `#33` (`4cf2aa8`) | Accepted |
 | **CONTRACT_FREEZE_SHA** | `66e3e7e5bb07a48aadbee8d9c4683144b812d229` | Frozen |
 | **ORIGINAL_CONTRACTS_SHA** | `9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404` (PR `#34`) | Merged with remediation findings |
-| **CONTRACTS_CANDIDATE_SHA** | `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` (PR `#40`) | **REWORK COMPLETED — IN REVIEW** (Target: `main`) |
-| **CORRECTED_CONTRACTS_SHA** | *(None)* | **NOT SET** (Requires PR #40 merge into `main`) |
-| **PR #35 (Controller)** | `6d62dda` / WIP `f8884fb` | **STOP / HOLD** (WIP preserved locally; not authoritative) |
-| **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | Open with blocking findings (awaiting contracts gate) |
-| **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | Open with blocking findings (awaiting contracts gate) |
-| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Open with blocking findings (awaiting contracts gate) |
+| **CONTRACTS_CANDIDATE_SHA** | `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` (PR `#40`) | **REWORK COMPLETED & MERGED** |
+| **CORRECTED_CONTRACTS_SHA** | `37407f9e69af70dcc8ba571b76bace199a281478` (PR `#40` in `main`) | **RATIFIED & MERGED** |
+| **PR #35 (Controller)** | `6d62dda` / WIP `f8884fb` | **UNFROZEN / AUTHORIZED TO REBASE** (Target: `37407f9`) |
+| **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | Open with blocking findings (awaiting controller gate) |
+| **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | Open with blocking findings (awaiting controller gate) |
+| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Open with blocking findings (awaiting controller gate) |
 | **PR #39 (E2E Integration)** | `11712f1` (`feature/step5c-e2e`) | **ON HOLD** (Premature integration candidate) |
 
 ---
@@ -37,11 +37,11 @@
 
 ## 3. Governance Correction: Annulment of Premature Ratification
 
-The prior declaration designating `b7afddb...` as `CORRECTED_CONTRACTS_SHA` is **formally annulled**.
+The prior declaration designating `b7afddb...` as `CORRECTED_CONTRACTS_SHA` was **formally annulled**.
 - Remote commit `b7afddb5e95d26dd46c10d36ad958ec418e7fee6` on `feature/step5c-contracts-remediation` was classified strictly as `CONTRACTS_REMEDIATION_CANDIDATE_SHA`.
-- Programmer B (`2102`) was placed on **STOP / HOLD**. Local controller changes are preserved in commit `f8884fb` on `feature/step5c-controller`, but are non-authoritative and will not be dispatched or merged until contracts are fully approved and merged.
-- **STOP/HOLD Acknowledgment Received**: Programmer B confirmed receipt via message `59081385-b411-4c1b-b20d-0bad0eead41f`. Controller work remains frozen until contracts are merged into `main`.
-- No downstream implementation handoffs to B, C, D, E, or F may occur until the contracts gate is officially closed.
+- Programmer B (`2102`) was placed on **STOP / HOLD**. Local controller changes were preserved in commit `f8884fb` on `feature/step5c-controller`.
+- **STOP/HOLD Acknowledgment Received**: Programmer B confirmed receipt via message `59081385-b411-4c1b-b20d-0bad0eead41f`.
+- The reviewer-gated sequential delivery chain was strictly executed, closing the gate with two independent approvals and clean merge into `main`.
 
 ---
 
@@ -68,15 +68,15 @@ Programmer A executed the following remediation on `feature/step5c-contracts-rem
 
 ---
 
-## 5. Legitimate Delivery Chain and Reviewer Gate
+## 5. Legitimate Delivery Chain and Reviewer Gate (CLOSED)
 
 1. Programmer A pushed rework commit `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` to `origin/feature/step5c-contracts-remediation`.
 2. Opened follow-up PR `#40` targeting `main`: [PR #40](https://github.com/chartjs333/delta/pull/40).
-3. **Current Gate**: Awaiting two independent sequential reviewer `APPROVE` verdicts on PR #40.
-4. Once two independent `APPROVE` verdicts and green CI are achieved:
-   - Merge PR #40 into `main`.
-   - Designate resulting merge commit in `main` as authoritative `CORRECTED_CONTRACTS_SHA`.
-   - Authorize Programmer B (`2102`) to unfreeze and rebase `feature/step5c-controller`.
+3. **Independent Reviewer Verdicts Recorded**:
+   - **Reviewer 1 (Programmer E, Security - 2105)**: `APPROVE` (Message: `14c2bbbb-0040-482d-b4cf-840164531133`).
+   - **Reviewer 2 (Programmer F, Integration QA - 2106)**: `APPROVE` (Message: `14f95229-b2c0-4df3-8cd4-16878da8a666`).
+4. **CI & Merge**: PR #40 was cleanly merged into `main`.
+5. **Ratified CORRECTED_CONTRACTS_SHA**: `37407f9e69af70dcc8ba571b76bace199a281478` (Merge commit in `main`).
 
 ---
 
@@ -91,4 +91,17 @@ Programmer A executed the following remediation on `feature/step5c-contracts-rem
 | **Test Suite** | 13/13 passing (`pytest specs/admin-ui/step5c-controlled-live-execution/contracts/tests`) |
 | **Linter & Format** | `uv run ruff check` & `uv run ruff format --check` (100% clean) |
 | **Protected Spine Diff** | Zero diff against `9fd11f9` (`delta-core-cpp/`, `delta-runtime-cpp/`, `delta-node-java/`, `specs/000-formal-tla-spec/`) |
-| **Status** | **AWAITING 2 REVIEWER APPROVALS** |
+| **Reviewer Gate** | **2 / 2 INDEPENDENT APPROVALS (2105 & 2106)** |
+| **Status** | **MERGED INTO MAIN (`37407f9e69af70dcc8ba571b76bace199a281478`)** |
+
+---
+
+## 7. Authorization for Programmer B (`2102`)
+
+1. **Unfreeze Order**: Programmer B (`2102`) is officially unfrozen and authorized to proceed on `feature/step5c-controller`.
+2. **Rebase Target**: `origin/main` at `37407f9e69af70dcc8ba571b76bace199a281478` (`CORRECTED_CONTRACTS_SHA`).
+3. **Controller Mandate**:
+   - Rebase local controller WIP (`f8884fb`) onto `37407f9e69af70dcc8ba571b76bace199a281478`.
+   - Update `contract_freeze_sha` to `37407f9e69af70dcc8ba571b76bace199a281478`.
+   - Verify controller tests against the 21 golden JCS vectors and recursive receipt lineage guard.
+   - Maintain zero diff on protected consensus core.
