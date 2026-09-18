@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 from jsonschema import Draft202012Validator  # type: ignore[import-untyped]
+from referencing import Registry, Resource
 
 from deltacontroller.errors import SchemaValidationError
 
@@ -40,13 +41,25 @@ class SchemaRegistry:
         self._load_all()
 
     def _load_all(self) -> None:
+        schema_documents: dict[str, dict[str, Any]] = {}
         for alias, filename in self.SCHEMA_FILES.items():
             schema_path = self.schemas_dir / filename
             if not schema_path.exists():
                 raise FileNotFoundError(f"Contract schema not found: {schema_path}")
             with schema_path.open("r", encoding="utf-8") as f:
-                schema_doc = json.load(f)
-            self._validators[alias] = Draft202012Validator(schema_doc)
+                schema_documents[alias] = json.load(f)
+
+        registry = Registry()
+        for alias, schema_doc in schema_documents.items():
+            schema_id = schema_doc.get("$id")
+            if not isinstance(schema_id, str) or not schema_id:
+                raise RuntimeError(f"Frozen schema '{alias}' has no canonical $id")
+            registry = registry.with_resource(schema_id, Resource.from_contents(schema_doc))
+
+        self._validators = {
+            alias: Draft202012Validator(schema_doc, registry=registry)
+            for alias, schema_doc in schema_documents.items()
+        }
 
     def validate(self, schema_alias: str, document: dict[str, Any]) -> None:
         """Validate a document against a loaded schema; raises typed SchemaValidationError."""

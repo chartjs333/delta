@@ -21,7 +21,7 @@ from deltacontroller.canonical import (
 from deltacontroller.catalog import CatalogValidator
 from deltacontroller.dispatch import MockWorkerDispatchPort, WorkerDispatchPort
 from deltacontroller.errors import ControllerError
-from deltacontroller.gate import AuthorizationGate
+from deltacontroller.gate import AdmissionSigningIdentity, AuthorizationGate
 from deltacontroller.idempotency import IdempotencyLedger, LedgerRecord
 from deltacontroller.ingress import IngressParser
 from deltacontroller.quota import QuotaManager, ResourceGrants
@@ -31,6 +31,7 @@ from deltacontroller.status import build_execution_status
 __version__ = "1.0.0"
 
 __all__ = [
+    "AdmissionSigningIdentity",
     "AuditLogger",
     "AuthenticatedSubject",
     "AuthenticationPort",

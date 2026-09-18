@@ -59,6 +59,26 @@ class QuotaManager:
         Raises:
             QuotaExceededError (ERR_QUOTA_EXCEEDED) if concurrency or resource limits are breached.
         """
+        if (
+            self.default_memory_bytes < 1
+            or self.default_memory_bytes > self.ceiling_memory_bytes
+            or self.ceiling_memory_bytes > CEILING_MAX_MEMORY_BYTES
+        ):
+            msg = (
+                "Configured memory grant is outside the fail-closed policy bounds: "
+                f"default={self.default_memory_bytes}, "
+                f"configured_ceiling={self.ceiling_memory_bytes}, "
+                f"absolute_ceiling={CEILING_MAX_MEMORY_BYTES}"
+            )
+            raise QuotaExceededError(
+                msg,
+                details={
+                    "default_memory": self.default_memory_bytes,
+                    "configured_ceiling": self.ceiling_memory_bytes,
+                    "max_memory": CEILING_MAX_MEMORY_BYTES,
+                },
+            )
+
         # 1. Concurrency limit check
         if current_active_count >= self.max_concurrency:
             msg = (
