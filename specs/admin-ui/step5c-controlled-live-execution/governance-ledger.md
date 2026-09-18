@@ -1,10 +1,10 @@
 # Step 5C Architecture Governance Ledger and Remediation Record
 
 **Document Type**: `STEP5C_GOVERNANCE_LEDGER`  
-**Status**: `REWORK_CYCLE_ACTIVE`  
+**Status**: `STEP5C_COMPONENTS_RATIFIED_AND_CLOSED`  
 **Authority**: ADR 0002, SpecKit `specs/admin-ui/step5c-controlled-live-execution/`, Constitution 2.1.0  
 **Coordinator**: ChatGPT / Архитектор-координатор (`phone=2107`, `id=chatgpt-architecture-governance`)  
-**Assigned Task**: `TEAM-GATE-001` / `COORD-001`–`COORD-003` / `GOVERNANCE CORRECTION`  
+**Assigned Task**: `TEAM-GATE-001` / `COORD-001`–`COORD-003` / `FINAL-GATE-RATIFICATION`  
 
 ---
 
@@ -17,11 +17,11 @@
 | **ORIGINAL_CONTRACTS_SHA** | `9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404` (PR `#34`) | Merged with remediation findings |
 | **CONTRACTS_CANDIDATE_SHA** | `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` (PR `#40`) | **REWORK COMPLETED & MERGED** |
 | **CORRECTED_CONTRACTS_SHA** | `37407f9e69af70dcc8ba571b76bace199a281478` (PR `#40` in `main`) | **RATIFIED & MERGED** |
-| **PR #35 (Controller)** | `6360080` (`feature/step5c-controller`) | **REMEDIATION COMPLETED & VERIFIED** (Rebased on `37407f9`) |
-| **PR #36 (Worker Adapter)** | `f824328` (`feature/step5c-worker-adapter`) | **REMEDIATION COMPLETED & VERIFIED** (Ready for Review) |
-| **PR #37 (Admin UI Live)** | `7168e64` (`feature/step5c-admin-ui-live`) | **REMEDIATION COMPLETED & VERIFIED** (Ready for Review) |
-| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Queued for review gate after C & D |
-| **PR #39 (E2E Integration)** | `11712f1` (`feature/step5c-e2e`) | **ON HOLD** (Awaiting full component completion) |
+| **PR #35 (Controller)** | `6360080` (`feature/step5c-controller`) | **REMEDIATION VERIFIED & MERGE READY** (Rebased on `37407f9`) |
+| **PR #36 (Worker Adapter)** | `f824328` (`feature/step5c-worker-adapter`) | **REVIEWED & APPROVED (2/2) - MERGE READY** |
+| **PR #37 (Admin UI Live)** | `7168e64` (`feature/step5c-admin-ui-live`) | **REVIEWED & APPROVED (2/2) - MERGE READY** |
+| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Queued for qualification |
+| **PR #39 (E2E Integration)** | `11712f1` (`feature/step5c-e2e`) | Queued for final qualification after component merges |
 
 ---
 
@@ -160,3 +160,50 @@ Programmer A executed the following remediation on `feature/step5c-contracts-rem
    - Both PR #36 and PR #37 are submitted for dual independent review:
      - **Reviewer 1 (Programmer E, Security - `phone=2105`)**: Security audit, signature verification, fail-closed grant enforcement, crypto isolation.
      - **Reviewer 2 (Programmer F, Integration QA - `phone=2106`)**: Integration conformance, golden vector validation, timeout and SSE lifecycle checks.
+
+---
+
+## 10. Step 5C Dual Independent Component Review Ratification and Component Gate Closeout
+
+### 10.1 Reviewer 1 (Security — Programmer E, `phone=2105`) Ratification
+
+- **Audit Scope**: Security posture, cryptographic integrity, Ed25519 signature trust, fail-closed authorization bounds, consensus zero-diff.
+- **PR #36 (Worker Adapter, HEAD: `f824328`)**:
+  - `register_trusted_key()` and `trusted_keys` mapping verified; untrusted key injection rejected.
+  - Fail-closed authoritative resource grants validation confirmed.
+  - Zero-diff on consensus spine (`delta-core-cpp/`, `delta-runtime-cpp/`, `delta-node-java/`, `specs/000-formal-tla-spec/`) confirmed.
+  - Verdict: **APPROVE** (Review Comment posted on PR #36).
+- **PR #37 (Admin UI Live, HEAD: `7168e64`)**:
+  - Cryptographic randomness via `crypto.getRandomValues()` / `crypto.randomUUID()` verified fail-closed (no static dummy UUID fallback).
+  - JCS canonicalization across 21 golden vectors verified.
+  - Zero-diff on consensus spine confirmed.
+  - Verdict: **APPROVE** (Review Comment posted on PR #37).
+- **Official Message**: Dispatched to Coordinator (`2107`) via `tester-all` (1/2 independent approvals).
+
+### 10.2 Reviewer 2 (QA & Integration — Programmer F, `phone=2106`) Ratification
+
+- **Audit Scope**: Integration test execution, RFC 8785 parity, wall-clock timeout promptness, TypeScript type-safety, consensus zero-diff.
+- **PR #36 (Worker Adapter, HEAD: `f824328`)**:
+  - 25/25 live execution tests passing; 203/203 unit/integration tests green.
+  - RFC 8785 IEEE-754 decimal decomposition verified bit-exact against ECMAScript reference.
+  - Wall-clock timeout verified prompt (<3s on 1s timeout via non-blocking executor shutdown).
+  - Zero-diff on consensus spine confirmed.
+  - Verdict: **APPROVE** (Review Comment posted on PR #36).
+- **PR #37 (Admin UI Live, HEAD: `7168e64`)**:
+  - 28/28 live execution tests passing against 21 golden vectors.
+  - TypeScript `npx tsc --noEmit` clean.
+  - Zero-diff on consensus spine confirmed.
+  - Verdict: **APPROVE** (Review Comment posted on PR #37).
+- **Official Message**: Dispatched to Coordinator (`2107`) via `tester-all` (Message ID: `179b443b-7e3f-46cd-8037-ed08c7c10d1b`, 2/2 independent approvals).
+
+### 10.3 Component Gate Final Verdict and Merge Readiness
+
+All criteria mandated by the Step 5C Reviewer-Gated Architecture Flow have been satisfied:
+1. **Contracts Remediation**: Merged into `main` (`37407f9e69af70dcc8ba571b76bace199a281478`).
+2. **Controller (PR #35)**: Rebased on `37407f9`, 32/32 tests green, 0-diff on spine. **Merge Ready**.
+3. **Worker Adapter (PR #36)**: Rebased on `37407f9`, 25/25 + 203/203 tests green, 2/2 independent APPROVE (2105 & 2106), 0-diff on spine. **Merge Ready**.
+4. **Admin UI Live (PR #37)**: Rebased on `37407f9`, 28/28 tests green + tsc clean, 2/2 independent APPROVE (2105 & 2106), 0-diff on spine. **Merge Ready**.
+5. **Protected Consensus Spine**: Strict zero-diff maintained across all PR branches.
+
+**GATE STATUS**: **STEP 5C COMPONENT GATE RATIFIED & CLOSED**
+
