@@ -124,6 +124,7 @@
     "intent_digest",
     "admission_id",
     "admission_digest",
+    "operation",
     "state",
     "updated_at"
   ],

@@ -118,9 +118,41 @@ def test_artifact_manifest_normalized_hash_naming() -> None:
     assert manifest["artifact_count"] >= 30
     for item in manifest["artifacts"]:
         assert item["file_sha256"].startswith("sha256:")
-        assert item["file_bytes"] == item["bytes"]
+        assert item["file_bytes"] > 0
+        assert "bytes" not in item
+        assert "sha256" not in item
         if item["path"].endswith(".json"):
             assert "canonical_digest" in item
             assert item["canonical_digest"].startswith("sha256:")
     assert report["artifact_manifest_file_sha256"].startswith("sha256:")
     assert report["artifact_manifest_canonical_digest"].startswith("sha256:")
+
+
+def test_receipt_lineage_rejects_nested_and_deep_array_consensus_claims() -> None:
+    tools = load_tools()
+    bad_nested = tools.read_json(
+        ROOT / "fixtures" / "invalid" / "receipt-lineage.nested-arbitrary-state-root.json"
+    )
+    bad_deep = tools.read_json(
+        ROOT / "fixtures" / "invalid" / "receipt-lineage.deep-array-wal-sequence.json"
+    )
+    assert tools.validate_schema_doc("execution-receipt-lineage-extension", bad_nested)
+    assert tools.validate_schema_doc("execution-receipt-lineage-extension", bad_deep)
+
+
+def test_independent_ecmascript_cross_verification() -> None:
+    tools = load_tools()
+    import subprocess
+
+    proc = subprocess.run(
+        ["node", str(ROOT / "scripts" / "generate_jcs_vectors.mjs")],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert proc.returncode == 0
+    vectors = tools.read_json(ROOT / "vectors" / "jcs-golden-vectors.json")["vectors"]
+    assert len(vectors) >= 20
+    for vec in vectors:
+        assert tools.jcs_dumps(vec["value"]) == vec["canonical_json"]
+        assert tools.sha256_prefixed(vec["canonical_json"].encode("utf-8")) == vec["sha256"]

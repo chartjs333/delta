@@ -51,6 +51,16 @@
       "schema": "execution-receipt-lineage-extension"
     },
     {
+      "expected_error": "ERR_STAGE_C_FORBIDDEN",
+      "name": "receipt-lineage.nested-arbitrary-state-root",
+      "schema": "execution-receipt-lineage-extension"
+    },
+    {
+      "expected_error": "ERR_STAGE_C_FORBIDDEN",
+      "name": "receipt-lineage.deep-array-wal-sequence",
+      "schema": "execution-receipt-lineage-extension"
+    },
+    {
       "expected_error": "ERR_SCHEMA_VALIDATION_FAILED",
       "name": "execution-status.completed-without-receipt-for-train-ticket",
       "schema": "execution-status"

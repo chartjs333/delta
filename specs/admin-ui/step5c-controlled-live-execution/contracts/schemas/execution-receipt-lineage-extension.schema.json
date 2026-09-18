@@ -1,7 +1,53 @@
 {
+  "$defs": {
+    "safeExtensionValue": {
+      "allOf": [
+        {
+          "if": {
+            "type": "object"
+          },
+          "then": {
+            "additionalProperties": {
+              "$ref": "#/$defs/safeExtensionValue"
+            },
+            "propertyNames": {
+              "not": {
+                "enum": [
+                  "round_id",
+                  "state_root",
+                  "wal_sequence",
+                  "qc",
+                  "apply_qc",
+                  "consensus_round",
+                  "validator_signatures",
+                  "bft_quorum",
+                  "stage_c_claim",
+                  "consensus_view",
+                  "proposal_hash",
+                  "commit_certificate"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "array"
+          },
+          "then": {
+            "items": {
+              "$ref": "#/$defs/safeExtensionValue"
+            }
+          }
+        }
+      ]
+    }
+  },
   "$id": "https://delta.local/schemas/step5c/execution-receipt-lineage-extension.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": true,
+  "additionalProperties": {
+    "$ref": "#/$defs/safeExtensionValue"
+  },
   "not": {
     "anyOf": [
       {
@@ -53,12 +99,24 @@
         "required": [
           "consensus_view"
         ]
+      },
+      {
+        "required": [
+          "proposal_hash"
+        ]
+      },
+      {
+        "required": [
+          "commit_certificate"
+        ]
       }
     ]
   },
   "properties": {
     "execution": {
-      "additionalProperties": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/safeExtensionValue"
+      },
       "not": {
         "anyOf": [
           {
@@ -109,6 +167,16 @@
           {
             "required": [
               "consensus_view"
+            ]
+          },
+          {
+            "required": [
+              "proposal_hash"
+            ]
+          },
+          {
+            "required": [
+              "commit_certificate"
             ]
           }
         ]
@@ -143,7 +211,9 @@
             "validator_signatures",
             "bft_quorum",
             "stage_c_claim",
-            "consensus_view"
+            "consensus_view",
+            "proposal_hash",
+            "commit_certificate"
           ]
         }
       },
@@ -154,7 +224,9 @@
       "type": "object"
     },
     "provenance": {
-      "additionalProperties": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/safeExtensionValue"
+      },
       "not": {
         "anyOf": [
           {
@@ -205,6 +277,16 @@
           {
             "required": [
               "consensus_view"
+            ]
+          },
+          {
+            "required": [
+              "proposal_hash"
+            ]
+          },
+          {
+            "required": [
+              "commit_certificate"
             ]
           }
         ]
@@ -267,7 +349,9 @@
             "validator_signatures",
             "bft_quorum",
             "stage_c_claim",
-            "consensus_view"
+            "consensus_view",
+            "proposal_hash",
+            "commit_certificate"
           ]
         }
       },
@@ -295,7 +379,9 @@
       "type": "string"
     },
     "workload": {
-      "additionalProperties": true,
+      "additionalProperties": {
+        "$ref": "#/$defs/safeExtensionValue"
+      },
       "not": {
         "anyOf": [
           {
@@ -347,6 +433,16 @@
             "required": [
               "consensus_view"
             ]
+          },
+          {
+            "required": [
+              "proposal_hash"
+            ]
+          },
+          {
+            "required": [
+              "commit_certificate"
+            ]
           }
         ]
       },
@@ -385,7 +481,9 @@
             "validator_signatures",
             "bft_quorum",
             "stage_c_claim",
-            "consensus_view"
+            "consensus_view",
+            "proposal_hash",
+            "commit_certificate"
           ]
         }
       },
@@ -410,7 +508,9 @@
         "validator_signatures",
         "bft_quorum",
         "stage_c_claim",
-        "consensus_view"
+        "consensus_view",
+        "proposal_hash",
+        "commit_certificate"
       ]
     }
   },
