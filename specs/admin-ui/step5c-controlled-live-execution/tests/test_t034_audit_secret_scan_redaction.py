@@ -13,7 +13,6 @@ from deltacontroller.errors import SchemaValidationError
 from deltacontroller.schema import SchemaRegistry
 from security_support import CONTRACT_FREEZE_SHA, CONTRACTS_DIR, EVIDENCE_DIR, ROOT_DIR
 
-
 HOSTILE_SECRET_PATTERNS = [
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA |ED25519 )?PRIVATE KEY-----"),
     re.compile(r"bearer\s+[a-zA-Z0-9_\-.]{32,}", re.IGNORECASE),

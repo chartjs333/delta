@@ -1,11 +1,14 @@
 """Shared production-backed fixtures for Step 5C security tests."""
 
+# ruff: noqa: E402 -- production packages are imported after workspace src paths are registered.
+
 from __future__ import annotations
 
 import copy
 import json
 import sys
-from dataclasses import dataclass
+import tempfile
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -30,9 +33,10 @@ for src in (
         sys.path.insert(0, src_text)
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from deltacontroller.auth import AuthenticatedSubject, StaticAuthenticationPort
 from deltacontroller.canonical import compute_intent_digest, get_public_key_hex
 from deltacontroller.dispatch import MockWorkerDispatchPort
-from deltacontroller.gate import AuthorizationGate
+from deltacontroller.gate import AdmissionSigningIdentity, AuthorizationGate
 from deltacontroller.idempotency import IdempotencyLedger
 from deltacontroller.quota import QuotaManager
 
@@ -43,6 +47,30 @@ class GateHarness:
     public_key_hex: str
     dispatch_port: MockWorkerDispatchPort
     ledger: IdempotencyLedger
+    _temporary_ledger_dir: tempfile.TemporaryDirectory[str] | None = field(
+        default=None,
+        repr=False,
+        compare=False,
+    )
+
+
+TRUSTED_LOCAL_PEERS = {
+    "operator.alpha": AuthenticatedSubject(
+        subject_id="operator.alpha",
+        authenticated_via="LOCAL_PEER_CREDENTIAL",
+        effective_roles=["OPERATOR"],
+    ),
+    "operator.beta": AuthenticatedSubject(
+        subject_id="operator.beta",
+        authenticated_via="LOCAL_PEER_CREDENTIAL",
+        effective_roles=["OPERATOR"],
+    ),
+    "auditor.guest": AuthenticatedSubject(
+        subject_id="auditor.guest",
+        authenticated_via="LOCAL_PEER_CREDENTIAL",
+        effective_roles=["AUDITOR"],
+    ),
+}
 
 
 def load_valid_fixture(name: str) -> dict[str, Any]:
@@ -78,10 +106,23 @@ def build_gate_harness(
 ) -> GateHarness:
     private_key = Ed25519PrivateKey.generate()
     public_key_hex = get_public_key_hex(private_key)
-    actual_ledger = ledger or IdempotencyLedger()
+    temporary_ledger_dir: tempfile.TemporaryDirectory[str] | None = None
+    if ledger is None:
+        temporary_ledger_dir = tempfile.TemporaryDirectory(prefix="step5c-security-ledger-")
+        actual_ledger = IdempotencyLedger(Path(temporary_ledger_dir.name) / "idempotency.jsonl")
+    else:
+        actual_ledger = ledger
     actual_dispatch = dispatch_port or MockWorkerDispatchPort()
     gate = AuthorizationGate(
-        private_key=private_key,
+        auth_port=StaticAuthenticationPort(
+            allow_local_peer=True,
+            peer_subjects=TRUSTED_LOCAL_PEERS,
+        ),
+        signing_identity=AdmissionSigningIdentity(
+            private_key=private_key,
+            key_id="step5c-security-runtime-key-v1",
+            issuer_id="step5c-security-runtime-controller",
+        ),
         idempotency_ledger=actual_ledger,
         quota_manager=quota_manager or QuotaManager(),
         dispatch_port=actual_dispatch,
@@ -91,6 +132,7 @@ def build_gate_harness(
         public_key_hex=public_key_hex,
         dispatch_port=actual_dispatch,
         ledger=actual_ledger,
+        _temporary_ledger_dir=temporary_ledger_dir,
     )
 
 

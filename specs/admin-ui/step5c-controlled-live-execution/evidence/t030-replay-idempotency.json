@@ -1,22 +1,16 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T030",
-  "status": "BLOCKED_ON_CONTROLLER_FIX",
+  "status": "COMPLETE",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
   "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
-  "finding_owner": {
-    "component": "delta-controller-python",
-    "agent_phone": "2102",
-    "agent": "Программист B"
+  "controller_follow_up_merge_sha": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+  "verification": {
+    "command": "python -m pytest specs/admin-ui/step5c-controlled-live-execution/tests -q",
+    "suite_result": "41 passed",
+    "resolved_finding": "S5C-SEC-T030-CONTROLLER-GATE-NONATOMIC-DUPLICATE",
+    "result": "Concurrent exact duplicates now share one durable execution identity, return one ADMITTED plus one ALREADY_ADMITTED result, and produce exactly one worker dispatch."
   },
-  "blocking_findings": [
-    {
-      "id": "S5C-SEC-T030-CONTROLLER-GATE-NONATOMIC-DUPLICATE",
-      "test": "test_t030_gate_concurrent_duplicates_serialize_to_single_execution",
-      "expected": "Concurrent duplicate submissions of the same intent_id + intent_digest + authenticated subject serialize to one ADMITTED result, one ALREADY_ADMITTED replay, one execution_id, and one worker dispatch.",
-      "actual": "Production AuthorizationGate performs idempotency check before quota/admission/dispatch without holding an atomic reservation; two synchronized concurrent callers both return ADMITTED and dispatch two worker bundles."
-    }
-  ],
   "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t030_replay_idempotency.py",
   "verified_invariants": [
     "S5C-T029-REPLAY-001: Duplicate exact intent submission returns ALREADY_ADMITTED with zero duplicate worker starts",
@@ -24,6 +18,7 @@
     "S5C-T029-REPLAY-004: Submission of different intent_id with colliding digest rejected with ERR_INTENT_COLLISION_DETECTED",
     "S5C-T029-REPLAY-003: Replay query from different subject rejected with frozen ERR_UNAUTHORIZED_CALLER",
     "ADR-0002-LEDGER: Controller reboot restores idempotency ledger without re-executing completed workloads",
-    "ADR-0002-INTEGRITY: Tampered intent_digest rejected fail-closed before ledger entry"
+    "ADR-0002-INTEGRITY: Tampered intent_digest rejected fail-closed before ledger entry",
+    "ADR-0002-DURABILITY: Duplicate submission arriving during post-commit dispatch observes the committed identity and does not start a second worker"
   ]
 }

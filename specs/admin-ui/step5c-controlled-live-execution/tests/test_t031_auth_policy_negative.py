@@ -75,7 +75,7 @@ def test_t031_claimed_role_escalation_rejected_by_production_policy(
         admit_train_ticket(
             harness,
             intent,
-            credentials=operator_credentials("auditor.guest", ["AUDITOR"]),
+            credentials=operator_credentials("auditor.guest", ["OPERATOR"]),
         )
 
     assert exc_info.value.code == "ERR_ROLE_FORBIDDEN"

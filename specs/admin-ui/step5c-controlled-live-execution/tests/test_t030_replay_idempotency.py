@@ -20,9 +20,7 @@ from deltacontroller.errors import (
     UnauthorizedCallerError,
 )
 from deltacontroller.idempotency import IdempotencyLedger
-from deltacontroller.quota import QuotaManager, ResourceGrants
 from security_support import (
-    CURRENT_TIME,
     admit_train_ticket,
     build_gate_harness,
     frozen_error_codes,
@@ -31,20 +29,19 @@ from security_support import (
 )
 
 
-class BarrierQuotaManager(QuotaManager):
-    """Holds concurrent callers after idempotency lookup and before ledger commit."""
+class BlockingDispatchPort(MockWorkerDispatchPort):
+    """Hold the first dispatch after its execution identity is durably committed."""
 
     def __init__(self) -> None:
         super().__init__()
-        self.barrier = threading.Barrier(2)
+        self.entered = threading.Event()
+        self.release = threading.Event()
 
-    def evaluate_grants(
-        self,
-        intent_doc: dict,
-        current_active_count: int,
-    ) -> ResourceGrants:
-        self.barrier.wait(timeout=5)
-        return super().evaluate_grants(intent_doc, current_active_count)
+    def dispatch(self, bundle: dict) -> dict:
+        self.entered.set()
+        if not self.release.wait(timeout=5):
+            raise AssertionError("Timed out waiting to release security-test dispatch")
+        return super().dispatch(bundle)
 
 
 @pytest.fixture
@@ -74,16 +71,21 @@ def test_t030_gate_exact_duplicate_is_idempotent_zero_new_worker_starts(
 def test_t030_gate_concurrent_duplicates_serialize_to_single_execution(
     base_intent: dict,
 ) -> None:
-    harness = build_gate_harness(
-        dispatch_port=MockWorkerDispatchPort(),
-        quota_manager=BarrierQuotaManager(),
-    )
+    dispatch_port = BlockingDispatchPort()
+    harness = build_gate_harness(dispatch_port=dispatch_port)
 
     def submit() -> dict:
         return admit_train_ticket(harness, base_intent)
 
     with ThreadPoolExecutor(max_workers=2) as executor:
-        results = list(executor.map(lambda _: submit(), range(2)))
+        first = executor.submit(submit)
+        assert dispatch_port.entered.wait(timeout=5)
+        second = executor.submit(submit)
+        try:
+            replay = second.result(timeout=5)
+        finally:
+            dispatch_port.release.set()
+        results = [first.result(timeout=5), replay]
 
     admitted = [r for r in results if r["action"] == "ADMITTED"]
     replayed = [r for r in results if r["action"] == "ALREADY_ADMITTED"]
@@ -164,9 +166,7 @@ def test_t030_controller_restart_preserves_production_ledger(
     first = admit_train_ticket(first_harness, base_intent)
     assert len(first_harness.dispatch_port.dispatched_bundles) == 1
 
-    restarted_harness = build_gate_harness(
-        ledger=IdempotencyLedger(persistence_path=ledger_path)
-    )
+    restarted_harness = build_gate_harness(ledger=IdempotencyLedger(persistence_path=ledger_path))
     replay = admit_train_ticket(restarted_harness, base_intent)
 
     assert replay["action"] == "ALREADY_ADMITTED"
