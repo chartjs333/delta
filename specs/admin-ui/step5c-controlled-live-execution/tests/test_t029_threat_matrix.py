@@ -63,19 +63,19 @@ def test_t029_matrix_cases_are_unique_and_actionable() -> None:
         assert set(case["production_fix_owner"]) <= ALLOWED_OWNERS
 
 
-def test_t029_evidence_points_to_matrix_and_blocks_executables_on_contracts() -> None:
+def test_t029_evidence_points_to_matrix_and_corrected_contracts() -> None:
     evidence = _load(EVIDENCE)
 
     assert evidence["task_id"] == "step5c:T029"
-    assert evidence["status"] == "DESIGN_READY_EXECUTABLES_BLOCKED_ON_T005_T009"
+    assert evidence["status"] == "COMPLETE"
     assert evidence["contract_freeze_sha"] == "66e3e7e5bb07a48aadbee8d9c4683144b812d229"
+    assert evidence["corrected_contracts_sha"] == "37407f9e69af70dcc8ba571b76bace199a281478"
     assert set(evidence["covers_required_categories"]) == REQUIRED_CATEGORIES
 
-    blocked = evidence["blocked_executable_tests"]
-    assert blocked["required_upstream_tasks"] == [
-        "step5c:T005",
-        "step5c:T006",
-        "step5c:T007",
-        "step5c:T008",
-        "step5c:T009",
+    assert evidence["executable_follow_up_tests"] == [
+        "step5c:T030",
+        "step5c:T031",
+        "step5c:T032",
+        "step5c:T033",
+        "step5c:T034",
     ]

@@ -1,15 +1,27 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T032",
-  "status": "EVIDENCE_VERIFIED",
+  "status": "BLOCKED_ON_CONTROLLER_FIX",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
-  "merged_contracts_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "finding_owner": {
+    "component": "delta-controller-python",
+    "agent_phone": "2102",
+    "agent": "Программист B"
+  },
+  "blocking_findings": [
+    {
+      "id": "S5C-SEC-T032-CONTROLLER-MEMORY-CEILING",
+      "test": "test_t032_memory_grant_above_eight_gb_rejected_by_quota",
+      "expected": "QuotaManager rejects configured max_memory_bytes grants above 8 GiB with ERR_QUOTA_EXCEEDED before worker dispatch.",
+      "actual": "QuotaManager(default_memory_bytes=CEILING_MAX_MEMORY_BYTES + 1).evaluate_grants(...) returns a ResourceGrants object instead of failing closed."
+    }
+  ],
   "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t032_quota_exhaustion_timeout.py",
   "verified_invariants": [
     "S5C-T029-QUOTA-001: Checkpoint coordinates exceeding max 4096 rejected at ingress/schema boundary",
     "S5C-T029-QUOTA-001: Coordinate integer outside signed 32-bit range rejected",
-    "S5C-T029-QUOTA-001: Timeout exceeding 86400 seconds rejected",
-    "S5C-T029-QUOTA-002: Memory grant exceeding 8GB policy maximum rejected",
+    "S5C-T029-QUOTA-001: Timeout exceeding 3600 seconds rejected by schema and QuotaManager",
     "S5C-T029-DEPUTY-001: Confused deputy download request overridden by AdmissionRecord allow_downloads=false",
     "S5C-T029-TIMEOUT-001: Timeout terminal state produces TIMED_OUT status and strictly prevents receipt emission",
     "S5C-T029-TIMEOUT-001: Cancellation produces CANCELLED terminal status and strictly prevents receipt emission",
