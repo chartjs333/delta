@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "deltatorrent-controller"
+version = "0.1.0"
+description = "Delta live-execution controller and Authorization Gate (Step 5C)"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "cryptography>=44.0,<45",
+  "jsonschema>=4.23,<5",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/deltacontroller"]
+
+[tool.uv]
+package = true
