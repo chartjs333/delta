@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T036",
-  "status": "COMPLETE",
+  "status": "BLOCKED_ON_WORKER_FIX",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
   "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
   "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
@@ -16,7 +16,7 @@
   "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t036_worker_dispatch_integration.py",
   "verified_invariants": [
     "Controller dispatches a schema-valid AuthorizedExecution through Worker preflight and the closed-enum dispatcher",
-    "Worker trust is configured with the Controller runtime key ID rather than frozen fixture signing metadata",
+    "BLOCKED: the Controller runtime key ID is configured, but Worker preflight also auto-registers frozen fixture signing authority",
     "COMPLETED receipt, JCS receipt digest, error, and terminal status are persisted before exposure",
     "Restart and identical resubmission preserve one execution identity and dispatch_count remains exactly one",
     "An untrusted Controller key is rejected before worker execution and dispatch_count remains zero"
@@ -29,6 +29,20 @@
     "failed": 0,
     "tested_head_sha": "ba1af7ab0ae19f9275dff476626884cbb232f758"
   },
+  "finding_owner": {
+    "component": "delta-worker-python",
+    "module": "deltatorrent.live_execution.preflight.AuthorizedExecutionPreflight",
+    "remediation_branch": "UNASSIGNED_IN_CURRENT_SPRINT_TEAM"
+  },
+  "blocking_findings": [
+    {
+      "severity": "BLOCKER",
+      "reviewed_head_sha": "698e1220436156381f52e482d2245a60297c53de",
+      "finding": "Supplying an explicit runtime trusted_keys mapping still auto-registers step5c-fixture-ed25519, and the frozen fixture-signed AuthorizedExecution is accepted by Worker preflight.",
+      "reproduction": "Construct AuthorizedExecutionPreflight(trusted_keys={runtime_key: public_key}); trusted_keys contains runtime_key and step5c-fixture-ed25519; validate contracts/fixtures/valid/authorized-execution.train-ticket.json at admitted_at succeeds.",
+      "required_remediation": "Make fixture trust explicit and test-only, exclude it from runtime trust configuration, and add a negative production-mode test proving fixture-signed bundle rejection."
+    }
+  ],
   "artifact_sha256": {
     "delta-controller-python/src/deltacontroller/dispatch.py": "b0d03f4c740cae10be28450949ebbf577e3d6945d3565f9f423208c2d60ecc6c",
     "delta-controller-python/src/deltacontroller/gate.py": "e4b8193ee653dec029d70129ceb3675b09d6b99abf9bd6a7464b63c8a29218bc",

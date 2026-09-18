@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "task_id": "step5c:T040-T044",
-  "status": "COMPLETE",
+  "status": "BLOCKED_ON_WORKER_FIX",
   "qualification_timestamp": "2026-09-18T17:35:21Z",
   "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
   "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
@@ -25,14 +25,14 @@
   "acceptance_criteria": {
     "AC-01": "PASSED: frozen schemas, independent JCS vectors, and contract tests",
     "AC-02": "PASSED: explicit trusted authentication and runtime Ed25519 signing identity",
-    "AC-03": "PASSED: Worker preflight plus closed-enum dispatch",
+    "AC-03": "BLOCKED: Worker preflight dispatch works, but runtime trust also accepts frozen fixture signing authority",
     "AC-04": "PASSED: protected-spine diff is empty against final base main",
     "AC-05": "PASSED: durable idempotency, exact-one dispatch, collision/replay rejection",
     "AC-06": "PASSED: exact intent-to-receipt lineage and post-execution tamper rejection",
     "AC-07": "PASSED_WITH_SCOPE: UI golden intent artifact crosses Controller/Worker; production HTTP adapter is not claimed",
     "AC-08": "PASSED: STRUCTURALLY_VALID_BOUND_RECEIPT and UNATTESTED UI labels; no consensus claims",
     "AC-09": "PASSED: restart cache, timeout, cancellation, and fresh retry",
-    "AC-10": "PASSED_FOR_STEP5C: static quality gates clean; physical 8 GiB eligibility is not claimed"
+    "AC-10": "BLOCKED_ON_WORKER_FIX: static quality gates are clean and physical 8 GiB eligibility is not claimed, but runtime Worker trust is not fixture-free"
   },
   "quality_gates": {
     "step5c_tests": {
@@ -55,8 +55,23 @@
     "npm_audit_high": "PASS: 0 vulnerabilities",
     "changed_path_scope": "17 paths; Controller integration adapter plus Step 5C tests/evidence/docs only",
     "protected_spine_diff": "PASS: zero paths against 1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
-    "github_ci_exact_head": "PENDING_PUSH"
+    "github_ci_exact_head": "36/36 SUCCESS on reviewed head 698e1220436156381f52e482d2245a60297c53de"
   },
+  "finding_owner": {
+    "component": "delta-worker-python",
+    "module": "deltatorrent.live_execution.preflight.AuthorizedExecutionPreflight",
+    "remediation_branch": "UNASSIGNED_IN_CURRENT_SPRINT_TEAM"
+  },
+  "blocking_findings": [
+    {
+      "severity": "BLOCKER",
+      "review_decision": "REJECT",
+      "reviewed_head_sha": "698e1220436156381f52e482d2245a60297c53de",
+      "finding": "Explicit runtime trusted_keys does not replace fixture trust; step5c-fixture-ed25519 remains accepted and validates the frozen fixture-signed bundle.",
+      "owner_action": "Worker-owned remediation must merge to main before PR #39 is rebased and requalified.",
+      "e2e_scope_action": "Do not patch Worker production code in feature/step5c-e2e."
+    }
+  ],
   "task_evidence_map": {
     "step5c:T035": {
       "commit": "ba1af7ab0ae19f9275dff476626884cbb232f758",
@@ -85,9 +100,10 @@
     }
   },
   "release_decision": {
-    "state": "READY_FOR_TWO_REVIEWER_GATE",
-    "reviewed_sha": null,
-    "unresolved_threads": "PENDING_REVIEW",
-    "mergeability": "PENDING_PUSH_AND_CI"
+    "state": "BLOCKED_ON_WORKER_FIX",
+    "reviewed_sha": "698e1220436156381f52e482d2245a60297c53de",
+    "review_decision": "REJECT",
+    "unresolved_threads": 0,
+    "mergeability": "MERGEABLE_BUT_RELEASE_BLOCKED"
   }
 }
