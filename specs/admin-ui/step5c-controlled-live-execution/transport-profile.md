@@ -7,6 +7,14 @@
 
 ---
 
+## Implementation Status
+
+This document selects the first HTTP/JSON deployment profile and its required controls. The
+current repository qualification exercises the Admin UI contract artifact through the
+Controller and Worker boundaries directly; it does not claim that a production HTTP server,
+origin/CSRF middleware, socket timeout, or HTTP 413/429 mapping is implemented here. Those
+controls are acceptance requirements for the transport host that binds this profile.
+
 ## 1. Scope and Trust Invariants
 
 This profile specifies the concrete HTTP/JSON transport bindings for Step 5C controlled live execution between the Admin UI (Zone 1) and the Authorization Gate / Controller (Zone 2), and internal execution bridging to the Constrained Worker (Zone 3).
@@ -38,7 +46,7 @@ Transport: HTTP/1.1 or HTTP/2 over TLS (HTTPS) in remote deployments; HTTP over 
   - `403 Forbidden`: `ERR_OPERATION_SCOPE_UNSUPPORTED` or role permission failure.
   - `409 Conflict`: `ERR_INTENT_ID_DIGEST_CONFLICT` or `ERR_INTENT_COLLISION_DETECTED`.
   - `413 Payload Too Large`: Body exceeds 10 MB limit.
-  - `429 Too Many Requests`: `ERR_CONCURRENCY_LIMIT_EXCEEDED` (quota/concurrency limit).
+  - `429 Too Many Requests`: `ERR_QUOTA_EXCEEDED` (quota/concurrency limit).
 
 ### 2.2 Status Inquiry
 - **Method**: `GET /api/v1/execution/{execution_id}/status`
@@ -70,8 +78,8 @@ Transport: HTTP/1.1 or HTTP/2 over TLS (HTTPS) in remote deployments; HTTP over 
 2. **Backpressure and Quotas**:
    - Controller tracks active concurrent executions via `IdempotencyLedger.active_count()`.
    - Global concurrency cap: default 4 concurrent jobs.
-   - Per-operator quota: default 2 concurrent jobs.
-   - Exceeded quotas return HTTP 429 with `ERR_CONCURRENCY_LIMIT_EXCEEDED` without starting a worker.
+   - No separate per-operator concurrency limit is claimed by this increment.
+   - A transport host maps `ERR_QUOTA_EXCEEDED` to HTTP 429 without starting a worker.
 3. **Timeouts**:
    - HTTP transport socket timeout: 30 seconds.
    - Admission TTL (`admission_expires_at`): default 300 seconds (cannot exceed `intent.expires_at`).

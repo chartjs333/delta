@@ -3,43 +3,32 @@
 from __future__ import annotations
 
 import copy
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from deltacontroller.canonical import (
     compute_admission_digest,
     compute_intent_digest,
     sign_admission,
 )
-from deltacontroller.dispatch import IntegratedWorkerDispatchPort
 from deltacontroller.gate import AuthorizationGate
-from deltacontroller.idempotency import IdempotencyLedger
 from deltacontroller.schema import SchemaRegistry
+from deltatorrent.live_execution.dispatch import ClosedEnumWorkerDispatcher
 from deltatorrent.live_execution.errors import WorkerPreflightError
 from deltatorrent.live_execution.preflight import AuthorizedExecutionPreflight
+from e2e_support import CURRENT_TIME, build_integrated_gate, operator_credentials
 
 CONTRACTS_ROOT = Path("specs/admin-ui/step5c-controlled-live-execution/contracts")
 
 
 @pytest.fixture
-def lineage_gate() -> tuple[AuthorizationGate, AuthorizedExecutionPreflight, str]:
-    private_key = Ed25519PrivateKey.generate()
-    public_key_hex = private_key.public_key().public_bytes_raw().hex()
-    preflight = AuthorizedExecutionPreflight(
-        trusted_public_key_hex=public_key_hex,
-        pinned_key_ids={"step5c-fixture-ed25519"},
-    )
-    dispatch_port = IntegratedWorkerDispatchPort(preflight=preflight)
-    ledger = IdempotencyLedger()
-    gate = AuthorizationGate(
-        private_key=private_key,
-        dispatch_port=dispatch_port,
-        idempotency_ledger=ledger,
-    )
-    return gate, preflight, public_key_hex
+def lineage_gate(
+    tmp_path: Path,
+) -> tuple[AuthorizationGate, AuthorizedExecutionPreflight, str]:
+    harness = build_integrated_gate(tmp_path / "lineage.jsonl")
+    return harness.gate, harness.preflight, harness.public_key_hex
 
 
 def _sample_valid_intent() -> dict[str, Any]:
@@ -78,14 +67,11 @@ def test_t038_complete_lineage_chain(
     """Prove unbroken intent -> admission -> execution -> receipt lineage chain."""
     gate, _, _ = lineage_gate
     intent = _sample_valid_intent()
-    now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
-    credentials = {
-        "type": "LOCAL_PEER_CREDENTIAL",
-        "subject_id": "operator.alpha",
-        "roles": ["OPERATOR"],
-    }
-
-    res = gate.admit_and_dispatch(intent, credentials=credentials, current_time=now)
+    res = gate.admit_and_dispatch(
+        intent,
+        credentials=operator_credentials(),
+        current_time=CURRENT_TIME,
+    )
     assert res["status"]["state"] == "COMPLETED"
 
     admission = res["admission"]
@@ -122,16 +108,9 @@ def test_t038_tamper_rejection_at_all_boundaries(
     """Prove tamper rejection at every boundary with typed errors and fail-closed isolation."""
     gate, preflight, _ = lineage_gate
     intent = _sample_valid_intent()
-    now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
-    credentials = {
-        "type": "LOCAL_PEER_CREDENTIAL",
-        "subject_id": "operator.alpha",
-        "roles": ["OPERATOR"],
-    }
-
     # Create valid bundle without dispatching
-    parsed_intent = gate.ingress_parser.parse_intent(intent, current_time=now)
-    subject = gate.auth_port.authenticate(credentials)
+    parsed_intent = gate.ingress_parser.parse_intent(intent, current_time=CURRENT_TIME)
+    subject = gate.auth_port.authenticate(operator_credentials())
     grants = gate.quota_manager.evaluate_grants(parsed_intent, 0)
 
     admission_doc = {
@@ -147,17 +126,19 @@ def test_t038_tamper_rejection_at_all_boundaries(
             "verdict": "ADMITTED",
         },
         "resource_grants": grants.to_dict(),
-        "admitted_at": now.isoformat(),
-        "admission_expires_at": (now + timedelta(seconds=300)).isoformat(),
+        "admitted_at": CURRENT_TIME.isoformat(),
+        "admission_expires_at": (CURRENT_TIME + timedelta(seconds=300)).isoformat(),
     }
     admission_digest = compute_admission_digest(admission_doc)
     admission_doc["admission_digest"] = admission_digest
     admission_doc["authenticator"] = {
         "algorithm": "ED25519",
-        "issuer_id": gate.issuer_id,
-        "key_id": gate.key_id,
-        "signature": sign_admission(admission_doc, gate.private_key),
+        "issuer_id": gate.signing_identity.issuer_id,
+        "key_id": gate.signing_identity.key_id,
     }
+    admission_doc["authenticator"]["signature"] = sign_admission(
+        admission_doc, gate.signing_identity.private_key
+    )
 
     base_bundle = {
         "schema_version": "1.0.0",
@@ -169,26 +150,56 @@ def test_t038_tamper_rejection_at_all_boundaries(
     tampered_1 = copy.deepcopy(base_bundle)
     tampered_1["intent"]["intent_id"] = "99999999-9999-4999-8999-999999999999"
     with pytest.raises(WorkerPreflightError) as exc_info:
-        preflight.validate(tampered_1, current_time=now)
+        preflight.validate(tampered_1, current_time=CURRENT_TIME)
     assert exc_info.value.code == "ERR_AUTHORIZED_EXECUTION_PARITY_MISMATCH"
 
     # Boundary 2: Intent payload tampered (digest mismatch)
     tampered_2 = copy.deepcopy(base_bundle)
     tampered_2["intent"]["operation_payload"]["ticket_id"] = "tampered_ticket"
     with pytest.raises(WorkerPreflightError) as exc_info:
-        preflight.validate(tampered_2, current_time=now)
+        preflight.validate(tampered_2, current_time=CURRENT_TIME)
     assert exc_info.value.code == "ERR_INTENT_DIGEST_MISMATCH"
 
     # Boundary 3: Admission payload tampered (grant elevated, admission digest mismatch)
     tampered_3 = copy.deepcopy(base_bundle)
     tampered_3["admission"]["resource_grants"]["allow_downloads"] = True
     with pytest.raises(WorkerPreflightError) as exc_info:
-        preflight.validate(tampered_3, current_time=now)
+        preflight.validate(tampered_3, current_time=CURRENT_TIME)
     assert exc_info.value.code == "ERR_ADMISSION_DIGEST_MISMATCH"
 
     # Boundary 4: Admission signature tampered / forged
     tampered_4 = copy.deepcopy(base_bundle)
     tampered_4["admission"]["authenticator"]["signature"] = "00" * 64
     with pytest.raises(WorkerPreflightError) as exc_info:
-        preflight.validate(tampered_4, current_time=now)
+        preflight.validate(tampered_4, current_time=CURRENT_TIME)
     assert exc_info.value.code == "ERR_ADMISSION_SIGNATURE_INVALID"
+
+
+def test_t038_tampered_worker_receipt_is_not_published(tmp_path: Path) -> None:
+    """Reject a terminal receipt whose provenance diverges after worker execution."""
+
+    class TamperingDispatcher:
+        def __init__(self) -> None:
+            self._inner = ClosedEnumWorkerDispatcher()
+
+        def dispatch(self, context: Any, cancellation_token: Any = None) -> dict[str, Any]:
+            result = copy.deepcopy(
+                self._inner.dispatch(context, cancellation_token=cancellation_token)
+            )
+            result["receipt"]["provenance"]["execution_id"] = "99999999-9999-4999-8999-999999999999"
+            return result
+
+    harness = build_integrated_gate(
+        tmp_path / "tampered-receipt.jsonl",
+        dispatcher=TamperingDispatcher(),
+    )
+    result = harness.gate.admit_and_dispatch(
+        _sample_valid_intent(),
+        credentials=operator_credentials(),
+        current_time=CURRENT_TIME,
+    )
+
+    assert result["status"]["state"] == "FAILED"
+    assert result["status"]["error"]["error_code"] == "ERR_RECEIPT_LINEAGE_MISMATCH"
+    assert result["receipt"] is None
+    assert harness.dispatch_port.dispatch_count == 1

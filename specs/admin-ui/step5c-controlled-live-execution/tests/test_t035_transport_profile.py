@@ -5,11 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from deltacontroller.audit import redact_sensitive_data
-from deltacontroller.auth import StaticAuthenticationPort
-from deltacontroller.errors import QuotaExceededError
-from deltacontroller.gate import AuthorizationGate
+from deltacontroller.auth import AuthenticatedSubject, StaticAuthenticationPort
+from deltacontroller.errors import AuthenticationFailedError, QuotaExceededError
 from deltacontroller.quota import QuotaManager
+from e2e_support import build_integrated_gate
 
 SPECS_ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS_ROOT = SPECS_ROOT / "contracts"
@@ -26,16 +27,33 @@ def test_t035_transport_profile_document_exists_and_accepted() -> None:
 
 
 def test_t035_transport_auth_handoff_and_redaction() -> None:
-    # 1. Verify credential verification via auth port
-    auth_port = StaticAuthenticationPort()
+    # 1. Transport identity is an explicit trusted mapping; request roles are ignored.
+    auth_port = StaticAuthenticationPort(
+        allow_local_peer=True,
+        peer_subjects={
+            "peer.transport.alpha": AuthenticatedSubject(
+                subject_id="operator.alpha",
+                authenticated_via="LOCAL_PEER_CREDENTIAL",
+                effective_roles=["OPERATOR"],
+            )
+        },
+    )
     creds = {
         "type": "LOCAL_PEER_CREDENTIAL",
-        "subject_id": "operator.alpha",
-        "roles": ["OPERATOR"],
+        "subject_id": "peer.transport.alpha",
+        "roles": ["AUDITOR"],
     }
     subject = auth_port.authenticate(creds)
     assert subject.subject_id == "operator.alpha"
-    assert "OPERATOR" in subject.effective_roles
+    assert subject.effective_roles == ["OPERATOR"]
+    with pytest.raises(AuthenticationFailedError):
+        auth_port.authenticate(
+            {
+                "type": "LOCAL_PEER_CREDENTIAL",
+                "subject_id": "untrusted-peer",
+                "roles": ["OPERATOR"],
+            }
+        )
 
     # 2. Verify sensitive credentials redaction
     event = {
@@ -62,9 +80,9 @@ def test_t035_transport_backpressure_and_quota_rejection() -> None:
         assert exc.code == "ERR_QUOTA_EXCEEDED"
 
 
-def test_t035_transport_zero_consensus_mutation() -> None:
+def test_t035_transport_zero_consensus_mutation(tmp_path: Path) -> None:
     # Verify that controller gate never touches consensus state or native imports
-    gate = AuthorizationGate()
+    gate = build_integrated_gate(tmp_path / "zero-consensus.jsonl").gate
     assert not hasattr(gate, "wal")
     assert not hasattr(gate, "state_root")
     assert not hasattr(gate, "qc")
