@@ -17,11 +17,11 @@
 | **ORIGINAL_CONTRACTS_SHA** | `9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404` (PR `#34`) | Merged with remediation findings |
 | **CONTRACTS_CANDIDATE_SHA** | `6898bc131f7c4b6d49fb40131ea0cced0f5d2f26` (PR `#40`) | **REWORK COMPLETED & MERGED** |
 | **CORRECTED_CONTRACTS_SHA** | `37407f9e69af70dcc8ba571b76bace199a281478` (PR `#40` in `main`) | **RATIFIED & MERGED** |
-| **PR #35 (Controller)** | `6d62dda` / WIP `f8884fb` | **UNFROZEN / AUTHORIZED TO REBASE** (Target: `37407f9`) |
-| **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | Open with blocking findings (awaiting controller gate) |
-| **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | Open with blocking findings (awaiting controller gate) |
-| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Open with blocking findings (awaiting controller gate) |
-| **PR #39 (E2E Integration)** | `11712f1` (`feature/step5c-e2e`) | **ON HOLD** (Premature integration candidate) |
+| **PR #35 (Controller)** | `6360080` (`feature/step5c-controller`) | **REMEDIATION COMPLETED & VERIFIED** (Rebased on `37407f9`) |
+| **PR #36 (Worker Adapter)** | `fdff678` (`feature/step5c-worker-adapter`) | **UNFROZEN / AUTHORIZED TO REBASE** (Target: `37407f9` / controller `6360080`) |
+| **PR #37 (Admin UI Live)** | `8690c94` (`feature/step5c-admin-ui-live`) | **UNFROZEN / AUTHORIZED TO REBASE** (Target: `37407f9` / controller `6360080`) |
+| **PR #38 (Security Hardening)** | `2c43abb` (`feature/step5c-security`) | Queued for review gate after C & D |
+| **PR #39 (E2E Integration)** | `11712f1` (`feature/step5c-e2e`) | **ON HOLD** (Awaiting full component completion) |
 
 ---
 
@@ -105,3 +105,26 @@ Programmer A executed the following remediation on `feature/step5c-contracts-rem
    - Update `contract_freeze_sha` to `37407f9e69af70dcc8ba571b76bace199a281478`.
    - Verify controller tests against the 21 golden JCS vectors and recursive receipt lineage guard.
    - Maintain zero diff on protected consensus core.
+
+---
+
+## 8. Controller Gate Passage and Downstream Task Authorization
+
+1. **Controller Remediation Verification (PR #35)**:
+   - **Branch**: `feature/step5c-controller`
+   - **Remote HEAD Commit**: `6360080` (rebased on `37407f9e69af70dcc8ba571b76bace199a281478`)
+   - **Test Suite**: 32/32 tests passed (`uv run pytest delta-controller-python/tests`)
+   - **Linter & Format**: 100% clean (`uv run ruff check` & `uv run ruff format --check`)
+   - **Protected Core**: Strict 0-diff on `delta-core-cpp/`, `delta-runtime-cpp/`, `delta-node-java/`, `specs/000-formal-tla-spec/`
+   - **Outcome**: **CONTROLLER GATE PASSED**
+
+2. **Downstream Task Authorization**:
+   - **Programmer C (Worker Adapter, `phone=2103`)**:
+     - Status: **UNFROZEN / AUTHORIZED TO PROCEED**
+     - Branch: `feature/step5c-worker-adapter`
+     - Mandate: Rebase onto `origin/main` (`37407f9`), align with Controller `6360080`, implement worker admission token verification and JCS validation, update PR #36.
+   - **Programmer D (Admin UI Live, `phone=2104`)**:
+     - Status: **UNFROZEN / AUTHORIZED TO PROCEED**
+     - Branch: `feature/step5c-admin-ui-live`
+     - Mandate: Rebase onto `origin/main` (`37407f9`), align with Controller `6360080`, verify live execution status polling and SSE connection handling, update PR #37.
+
