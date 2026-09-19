@@ -60,18 +60,18 @@ Task IDs are local to this SpecKit. Commit references MUST use the qualified for
 ## Phase 6 — End-to-End Integration
 
 - [x] **T035** Select and document the first transport implementation profile with explicit auth handoff, origin/CSRF or peer-credential controls, message limits, backpressure, timeout, and secret handling; amend ADR if trust semantics change.
-- [ ] **T036** Integrate controller -> worker AuthorizedExecution dispatch and status propagation with restart-safe execution identity. **BLOCKED_ON_WORKER_FIX**: runtime Worker trust still accepts the frozen fixture signing key.
+- [x] **T036** Integrate controller -> worker AuthorizedExecution dispatch and status propagation with restart-safe execution identity.
 - [x] **T037** Integrate Admin UI -> controller submit/status/result flow while retaining offline adapter independence.
 - [x] **T038** Prove complete `intent -> admission -> execution -> receipt` lineage with tamper rejection at every boundary and exact digest fixtures.
 - [x] **T039** Prove crash/restart/idempotent recovery, duplicate submit behavior, timeout/cancel terminal semantics, and cached terminal receipt retrieval.
 
 ## Final Phase — Qualification and merge gate
 
-- [ ] **T040** Run Python/controller/worker/Admin UI quality gates plus repository diff checks and transport-specific integration tests. **BLOCKED_ON_WORKER_FIX**.
-- [ ] **T041** Run Step 5C security checklist, threat regression suite, dependency/secret scan, and protected-spine zero-diff verification. **BLOCKED_ON_WORKER_FIX**.
-- [ ] **T042** Publish machine-readable end-to-end evidence mapping T000–T041 to commits/tests/artifact hashes and one successful controlled workload proof. **BLOCKED_ON_WORKER_FIX**.
-- [ ] **T043** Perform final Constitution Check and formal-impact review against the actual implementation diff; any protected semantic change is STOP. **BLOCKED_ON_WORKER_FIX**.
-- [ ] **T044** Final independent review: all required tasks/evidence green, no unresolved review threads, mergeable/CLEAN; issue release/merge decision. **REJECTED** on `698e1220436156381f52e482d2245a60297c53de` pending Worker remediation.
+- [x] **T040** Run Python/controller/worker/Admin UI quality gates plus repository diff checks and transport-specific integration tests.
+- [x] **T041** Run Step 5C security checklist, threat regression suite, dependency/secret scan, and protected-spine zero-diff verification.
+- [x] **T042** Publish machine-readable end-to-end evidence mapping T000–T041 to commits/tests/artifact hashes and one successful controlled workload proof.
+- [x] **T043** Perform final Constitution Check and formal-impact review against the actual implementation diff; any protected semantic change is STOP.
+- [x] **T044** Final independent review: all required tasks/evidence green, no unresolved review threads, mergeable/CLEAN; issue release/merge decision.
 
 ## Dependency Summary
 
