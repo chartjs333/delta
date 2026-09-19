@@ -4,12 +4,10 @@
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "formal" / "reports"
@@ -27,20 +25,6 @@ REPORT_OUTPUTS = {
     "formal/reports/toolchain-evidence.json",
 }
 REPORT_OUTPUT_GLOBS = ("formal/reports/reviews/*.json",)
-REPRODUCTION_CHECK_IDS = (
-    "phase0",
-    "contracts",
-    "toolchain",
-    "report-verifier",
-    "parse",
-    "safety",
-    "liveness",
-    "proofs",
-    "mutants",
-    "refinement",
-    "tlc-evidence",
-    "cross-artifact",
-)
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import (  # noqa: E402
@@ -49,6 +33,8 @@ from formal_artifacts import (  # noqa: E402
     discover_semantic_artifacts,
     finalize_report,
     load_json_strict,
+    reproduction_matches_source,
+    review_attestation_matches,
     sha256_file,
     write_canonical_json,
 )
@@ -76,51 +62,7 @@ def is_report_output(path: str) -> bool:
     )
 
 
-def reproduction_matches_source(
-    reproduction: dict[str, Any], commit: str, formal_semantics_id: str
-) -> bool:
-    checks = reproduction.get("checks")
-    if not isinstance(checks, list):
-        return False
-    if [item.get("id") for item in checks if isinstance(item, dict)] != list(
-        REPRODUCTION_CHECK_IDS
-    ):
-        return False
-    checks_pass = all(
-        isinstance(item, dict)
-        and item.get("status") == "PASS"
-        and item.get("exit_code") == 0
-        and isinstance(item.get("command"), list)
-        and bool(item["command"])
-        and isinstance(item.get("output_sha256"), str)
-        and re.fullmatch(r"[0-9a-f]{64}", item["output_sha256"]) is not None
-        for item in checks
-    )
-    return (
-        reproduction.get("schema_version") == "1.0.0"
-        and reproduction.get("status") == "PASS"
-        and reproduction.get("environment")
-        == "linux/amd64 clean container with --network none"
-        and reproduction.get("source_commit") == commit
-        and reproduction.get("source_clean_at_start") is True
-        and reproduction.get("formal_semantics_id") == formal_semantics_id
-        and reproduction.get("network_interfaces") == ["lo"]
-        and reproduction.get("network_proxies_forced_to_loopback") is True
-        and reproduction.get("errors") == []
-        and isinstance(reproduction.get("source_tree"), str)
-        and re.fullmatch(r"[0-9a-f]{40}", reproduction["source_tree"]) is not None
-        and isinstance(reproduction.get("source_manifest_sha256"), str)
-        and re.fullmatch(
-            r"[0-9a-f]{64}", reproduction["source_manifest_sha256"]
-        )
-        is not None
-        and str(reproduction.get("machine", "")).lower() in {"amd64", "x86_64"}
-        and str(reproduction.get("platform", "")).startswith("Linux-")
-        and checks_pass
-    )
-
-
-def source_tree_status() -> tuple[str, bool]:
+def source_tree_status() -> tuple[str, str, bool]:
     """Return the latest source commit and whether that source tree is clean.
 
     Generated machine evidence and independent review attestations are committed
@@ -149,7 +91,10 @@ def source_tree_status() -> tuple[str, bool]:
     )
     if len(commit) != 40:
         raise RuntimeError("unable to identify the attested non-report source commit")
-    return commit, not source_changes
+    source_tree = git("rev-parse", f"{commit}^{{tree}}")
+    if len(source_tree) != 40:
+        raise RuntimeError("unable to identify the attested source Git tree")
+    return commit, source_tree, not source_changes
 
 
 def evidence_node(identifier: str, relative: str, media_type: str) -> dict[str, str]:
@@ -175,7 +120,7 @@ def check(identifier: str, status: str, evidence_id: str) -> dict[str, Any]:
 
 
 def main() -> int:
-    commit, source_clean = source_tree_status()
+    commit, source_tree, source_clean = source_tree_status()
     registry = load_json_strict(REPORTS / "formal-id-registry.json")
     baseline = load_json_strict(REPORTS / "baseline-inputs.json")
     toolchains = load_json_strict(REPORTS / "toolchain-evidence.json")
@@ -237,9 +182,10 @@ def main() -> int:
     if review_directory.is_dir():
         for path in sorted(review_directory.glob("*.json")):
             review = load_json_strict(path)
-            if (
-                review.get("formal_semantics_id") != formal_semantics_id
-                or review.get("reviewed_commit") != commit
+            if not review_attestation_matches(
+                review,
+                reviewed_commit=commit,
+                formal_semantics_id=formal_semantics_id,
             ):
                 continue
             evidence_id = f"EVIDENCE-REVIEW-{len(reviews) + 1}"
@@ -329,7 +275,10 @@ def main() -> int:
         for item in toolchains["checks"]
     ]
     reproduction_pass = reproduction_matches_source(
-        reproduction, commit, formal_semantics_id
+        reproduction,
+        commit,
+        formal_semantics_id,
+        source_tree=source_tree,
     )
     evidence_pass = {
         "EVIDENCE-TOOLCHAINS": all(

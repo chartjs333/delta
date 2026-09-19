@@ -8,12 +8,12 @@
   "declared_base_commit": "e40e697cb67d94a6bc6bc0be9b395e58252c3d19",
   "hash_algorithm": "sha256",
   "input_bundle_canonicalization": "Normalize each UTF-8 text input CRLF/CR to LF before SHA-256; sort paths by ordinal repository-relative path; for each input encode path, one TAB, lowercase SHA-256, one LF as UTF-8; concatenate records and SHA-256 the result.",
-  "input_bundle_sha256": "de4641ef1b28353d461eb56779e1400141db4678e42aa053527e0b4fc623d2d0",
+  "input_bundle_sha256": "2242dec223d2683b1d34c82a2365ff954f56c9d85013fed4911f431dd9a2bee6",
   "inputs": [
     {
       "role": "execution_contract",
       "path": "AGENTS.md",
-      "sha256": "ca70fcbdc7b7b9a0b344fee4b6ccc8185ba05961975d4a254f0d2bf643b04619"
+      "sha256": "6470de74a14d0d6cd745ef6b46858427b0f7b4222b6bad7e9a5b51316313ce56"
     },
     {
       "role": "constitution",
@@ -38,7 +38,7 @@
     {
       "role": "authoritative_branch_topology",
       "path": "specs/ROADMAP.md",
-      "sha256": "33bcd78026537b0ae6483ee4d1deb3133063681c2dfa8c8ea890706cae80d491"
+      "sha256": "92cf5c38792fa926efeb8adb712a72d9769c7f36c1d3f4a06c653dc18b0d5dff"
     },
     {
       "role": "normative_failure_recovery_contract",

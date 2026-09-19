@@ -9,23 +9,26 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 REPOSITORY = Path(__file__).resolve().parents[2]
 SCRIPTS = REPOSITORY / "formal" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 from formal_artifacts import (  # noqa: E402
-    CanonicalJsonError,
     MUTANT_IDS,
+    REPRODUCTION_CHECK_IDS,
     REQUIREMENT_IDS,
     REVIEW_SCOPE,
     TOOLCHAIN_IDS,
+    CanonicalJsonError,
     SchemaValidationError,
     canonical_json_bytes,
     derive_formal_semantics_id,
     discover_semantic_artifacts,
     finalize_report,
     load_json_strict,
+    reproduction_matches_source,
+    review_attestation_matches,
+    semantic_text_sha256,
     sha256_file,
     validate_contract_registry,
     validate_json_schema,
@@ -33,18 +36,13 @@ from formal_artifacts import (  # noqa: E402
     verify_report_document,
     write_canonical_json,
 )
-from run_formal_gate import verify_action_coverage, verify_sany_output  # noqa: E402
+from generate_formal_report import is_report_output  # noqa: E402
 from run_clean_offline_reproduction import (  # noqa: E402
+    COMMANDS,
     git_safe_directory_environment,
     verify_source_manifest,
 )
-from generate_formal_report import (  # noqa: E402
-    REPRODUCTION_CHECK_IDS,
-    is_report_output,
-    reproduction_matches_source,
-)
-from verify_phase0 import semantic_text_sha256  # noqa: E402
-
+from run_formal_gate import verify_action_coverage, verify_sany_output  # noqa: E402
 
 HASH_A = "sha256:" + "a" * 64
 HASH_B = "sha256:" + "b" * 64
@@ -111,6 +109,39 @@ def trace_document() -> dict[str, object]:
     }
 
 
+def reproduction_document(
+    *,
+    commit: str = "1" * 40,
+    source_tree: str = "2" * 40,
+    formal_semantics_id: str = HASH_A,
+) -> dict[str, object]:
+    return {
+        "schema_version": "1.0.0",
+        "status": "PASS",
+        "environment": "linux/amd64 clean container with --network none",
+        "source_commit": commit,
+        "source_tree": source_tree,
+        "source_clean_at_start": True,
+        "source_manifest_sha256": "3" * 64,
+        "formal_semantics_id": formal_semantics_id,
+        "platform": "Linux-6.8.0-x86_64-with-glibc2.36",
+        "machine": "x86_64",
+        "network_interfaces": ["lo"],
+        "network_proxies_forced_to_loopback": True,
+        "checks": [
+            {
+                "id": identifier,
+                "command": ["python", identifier],
+                "exit_code": 0,
+                "output_sha256": "5" * 64,
+                "status": "PASS",
+            }
+            for identifier in REPRODUCTION_CHECK_IDS
+        ],
+        "errors": [],
+    }
+
+
 class ReportSourceBoundaryTests(unittest.TestCase):
     def test_offline_git_safe_directories_are_exact_and_non_wildcard(self) -> None:
         environment = git_safe_directory_environment({"PRESERVED": "yes"})
@@ -166,33 +197,30 @@ class ReportSourceBoundaryTests(unittest.TestCase):
         self.assertFalse(is_report_output("formal/reports/reviews/README.md"))
         self.assertFalse(is_report_output("formal/reports/baseline-inputs.json"))
 
+    def test_offline_runner_regenerates_report_before_verifying_it(self) -> None:
+        check_ids = [identifier for identifier, _command, _timeout in COMMANDS]
+        self.assertEqual(check_ids, list(REPRODUCTION_CHECK_IDS))
+        generation = check_ids.index("report-generation")
+        self.assertEqual(check_ids[generation + 1], "report-verifier")
+
     def test_reproduction_must_bind_exact_source_and_semantics(self) -> None:
-        reproduction = {
-            "schema_version": "1.0.0",
-            "status": "PASS",
-            "environment": "linux/amd64 clean container with --network none",
-            "source_commit": "1" * 40,
-            "source_tree": "2" * 40,
-            "source_clean_at_start": True,
-            "source_manifest_sha256": "3" * 64,
-            "formal_semantics_id": HASH_A,
-            "platform": "Linux-6.8.0-x86_64-with-glibc2.36",
-            "machine": "x86_64",
-            "network_interfaces": ["lo"],
-            "network_proxies_forced_to_loopback": True,
-            "checks": [
-                {
-                    "id": identifier,
-                    "command": ["python", identifier],
-                    "exit_code": 0,
-                    "output_sha256": "5" * 64,
-                    "status": "PASS",
-                }
-                for identifier in REPRODUCTION_CHECK_IDS
-            ],
-            "errors": [],
-        }
-        self.assertTrue(reproduction_matches_source(reproduction, "1" * 40, HASH_A))
+        reproduction = reproduction_document()
+        self.assertTrue(
+            reproduction_matches_source(
+                reproduction,
+                "1" * 40,
+                HASH_A,
+                source_tree="2" * 40,
+            )
+        )
+        self.assertFalse(
+            reproduction_matches_source(
+                reproduction,
+                "1" * 40,
+                HASH_A,
+                source_tree="9" * 40,
+            )
+        )
         reproduction["source_commit"] = "4" * 40
         self.assertFalse(reproduction_matches_source(reproduction, "1" * 40, HASH_A))
 
@@ -289,6 +317,52 @@ class ContractTest(unittest.TestCase):
             crlf.write_bytes(b"alpha\r\nbeta\r\n")
             self.assertEqual(semantic_text_sha256(lf), semantic_text_sha256(crlf))
 
+    def test_semantic_artifact_discovery_is_checkout_eol_independent(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sources = {
+                "formal/tla/Core.tla": "---- MODULE Core ----\n====\n",
+                "formal/proofs/DeltaReduce.lean": (
+                    "namespace DeltaReduce\nend DeltaReduce\n"
+                ),
+                "formal/schemas/formal-trace.schema.json": '{"type":"object"}\n',
+            }
+            for relative, content in sources.items():
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8", newline="\n")
+
+            lf_artifacts = discover_semantic_artifacts(root)
+            lf_id = derive_formal_semantics_id("1.0.0", lf_artifacts)
+            raw_lf_hashes = {
+                relative: sha256_file(root / relative) for relative in sources
+            }
+
+            for relative in sources:
+                path = root / relative
+                path.write_bytes(path.read_bytes().replace(b"\n", b"\r\n"))
+
+            self.assertTrue(
+                any(
+                    sha256_file(root / relative) != raw_lf_hashes[relative]
+                    for relative in sources
+                )
+            )
+            crlf_artifacts = discover_semantic_artifacts(root)
+            self.assertEqual(crlf_artifacts, lf_artifacts)
+            self.assertEqual(
+                derive_formal_semantics_id("1.0.0", crlf_artifacts), lf_id
+            )
+
+            core = root / "formal/tla/Core.tla"
+            core.write_bytes(core.read_bytes().replace(b"Core", b"Changed", 1))
+            self.assertNotEqual(
+                derive_formal_semantics_id(
+                    "1.0.0", discover_semantic_artifacts(root)
+                ),
+                lf_id,
+            )
+
     def test_semantics_id_is_input_order_independent(self) -> None:
         entries = [
             {"kind": "tla_module", "path": "formal/tla/A.tla", "sha256": "a" * 64},
@@ -299,6 +373,48 @@ class ContractTest(unittest.TestCase):
             derive_formal_semantics_id("1.0.0", entries),
             derive_formal_semantics_id("1.0.0", list(reversed(entries))),
         )
+
+    def test_review_payload_binding_is_fail_closed(self) -> None:
+        payload = {
+            "formal_semantics_id": HASH_A,
+            "independent": True,
+            "reviewed_commit": "1" * 40,
+            "reviewer_id": "reviewer-a",
+            "scope": sorted(REVIEW_SCOPE),
+            "status": "PASS",
+        }
+        projection = {
+            "reviewer_id": "reviewer-a",
+            "independent": True,
+            "status": "PASS",
+            "scope": sorted(REVIEW_SCOPE),
+            "evidence_id": "EVIDENCE-REVIEW-1",
+        }
+        self.assertTrue(
+            review_attestation_matches(
+                payload,
+                reviewed_commit="1" * 40,
+                formal_semantics_id=HASH_A,
+                projection=projection,
+            )
+        )
+        for field, value in (
+            ("reviewed_commit", "2" * 40),
+            ("formal_semantics_id", HASH_B),
+            ("reviewer_id", "reviewer-b"),
+            ("scope", ["MODEL"]),
+        ):
+            mutated = copy.deepcopy(payload)
+            mutated[field] = value
+            self.assertFalse(
+                review_attestation_matches(
+                    mutated,
+                    reviewed_commit="1" * 40,
+                    formal_semantics_id=HASH_A,
+                    projection=projection,
+                ),
+                field,
+            )
 
     def test_tlc_action_coverage_is_fail_closed(self) -> None:
         verify_action_coverage(
@@ -397,6 +513,53 @@ class ReportVerifierTest(unittest.TestCase):
 
     def _make_go_report(self) -> dict[str, object]:
         artifacts = discover_semantic_artifacts(self.root)
+        semantics_id = derive_formal_semantics_id("1.0.0", artifacts)
+        reproduction_path = (
+            self.root / "formal" / "reports" / "reproducibility-evidence.json"
+        )
+        write_canonical_json(
+            reproduction_path,
+            reproduction_document(formal_semantics_id=semantics_id),
+        )
+        reproduction_node = {
+            "id": "EVIDENCE-REPRODUCIBILITY",
+            "path": reproduction_path.relative_to(self.root).as_posix(),
+            "sha256": sha256_file(reproduction_path),
+            "media_type": "application/json",
+        }
+        review_nodes = []
+        review_attestations = []
+        for index, reviewer in enumerate(("reviewer-a", "reviewer-b"), start=1):
+            review_path = (
+                self.root / "formal" / "reports" / "reviews" / f"{reviewer}.json"
+            )
+            review_payload = {
+                "formal_semantics_id": semantics_id,
+                "independent": True,
+                "reviewed_commit": "1" * 40,
+                "reviewer_id": reviewer,
+                "scope": sorted(REVIEW_SCOPE),
+                "status": "PASS",
+            }
+            write_canonical_json(review_path, review_payload)
+            evidence_id = f"EVIDENCE-REVIEW-{index}"
+            review_nodes.append(
+                {
+                    "id": evidence_id,
+                    "path": review_path.relative_to(self.root).as_posix(),
+                    "sha256": sha256_file(review_path),
+                    "media_type": "application/json",
+                }
+            )
+            review_attestations.append(
+                {
+                    "reviewer_id": reviewer,
+                    "independent": True,
+                    "status": "PASS",
+                    "scope": sorted(REVIEW_SCOPE),
+                    "evidence_id": evidence_id,
+                }
+            )
         manifest_path = self.root / "formal" / "reports" / "source-tree-manifest.json"
         manifest_files = [
             {"path": item["path"], "sha256": item["sha256"]} for item in artifacts
@@ -409,6 +572,10 @@ class ReportVerifierTest(unittest.TestCase):
                 },
                 {"path": "formal/reports/evidence.txt", "sha256": sha256_file(self.evidence)},
             ]
+        )
+        manifest_files.extend(
+            {"path": node["path"], "sha256": node["sha256"]}
+            for node in [reproduction_node, *review_nodes]
         )
         manifest_files.sort(key=lambda item: item["path"])
         write_canonical_json(
@@ -475,16 +642,7 @@ class ReportVerifierTest(unittest.TestCase):
             "assumptions": ["At most f validators are Byzantine."],
             "abstractions": ["Hashes are collision-resistant identifiers."],
             "limitations": ["Cryptographic implementations are not proved."],
-            "review_attestations": [
-                {
-                    "reviewer_id": reviewer,
-                    "independent": True,
-                    "status": "PASS",
-                    "scope": sorted(REVIEW_SCOPE),
-                    "evidence_id": "EVIDENCE-SUITE",
-                }
-                for reviewer in ("reviewer-a", "reviewer-b")
-            ],
+            "review_attestations": review_attestations,
             "evidence_graph": {
                 "nodes": [
                     {
@@ -492,7 +650,9 @@ class ReportVerifierTest(unittest.TestCase):
                         "path": "formal/reports/evidence.txt",
                         "sha256": sha256_file(self.evidence),
                         "media_type": "text/plain",
-                    }
+                    },
+                    reproduction_node,
+                    *review_nodes,
                 ],
                 "edges": [],
             },
@@ -505,6 +665,66 @@ class ReportVerifierTest(unittest.TestCase):
         self.assertEqual(self.report["decision"], "GO")
         result = verify_report_document(self.report_path, self.root, require_go=True)
         self.assertEqual(result["status"], "PASS")
+
+    def test_report_manifest_uses_same_eol_profile_as_semantic_identity(self) -> None:
+        for item in self.report["source_tree"]["semantic_artifacts"]:
+            path = self.root / item["path"]
+            canonical = (
+                path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+            )
+            path.write_bytes(canonical.replace(b"\n", b"\r\n"))
+
+        result = verify_report_document(self.report_path, self.root, require_go=True)
+        self.assertEqual((result["status"], result["decision"]), ("PASS", "GO"))
+
+        core = self.root / "formal/tla/Core.tla"
+        core.write_bytes(core.read_bytes().replace(b"Core", b"Changed", 1))
+        result = verify_report_document(self.report_path, self.root)
+        self.assertEqual((result["status"], result["decision"]), ("FAIL", "NO_GO"))
+
+    def test_review_projection_cannot_forge_a_valid_evidence_payload(self) -> None:
+        mutated = copy.deepcopy(self.report)
+        mutated["review_attestations"][0]["reviewer_id"] = "forged-reviewer"
+        no_go = finalize_report(mutated, self.root, self.registry)
+        self.assertEqual(no_go["decision"], "NO_GO")
+        self.assertIn(
+            "INVALID_REVIEW_ATTESTATION:EVIDENCE-REVIEW-1",
+            no_go["decision_reasons"],
+        )
+        self.assertIn("INSUFFICIENT_INDEPENDENT_REVIEWS", no_go["decision_reasons"])
+
+    def test_stale_reproduction_cannot_relabel_the_report_source(self) -> None:
+        mutated = copy.deepcopy(self.report)
+        manifest_path = self.root / mutated["source_tree"]["manifest_path"]
+        manifest = load_json_strict(manifest_path)
+        manifest["commit"] = "9" * 40
+        write_canonical_json(manifest_path, manifest)
+        mutated["source_tree"]["commit"] = "9" * 40
+        mutated["source_tree"]["tree_sha256"] = sha256_file(manifest_path)
+
+        no_go = finalize_report(mutated, self.root, self.registry)
+        self.assertEqual(no_go["decision"], "NO_GO")
+        self.assertIn(
+            "INVALID_REPRODUCTION_ATTESTATION", no_go["decision_reasons"]
+        )
+
+    def test_current_regeneration_failure_set_is_stable(self) -> None:
+        draft = copy.deepcopy(self.report)
+        draft["review_attestations"] = []
+        for record in draft["coverage"]["requirements"]:
+            if record["id"] in {"FR-042", "FR-043", "FR-044"}:
+                record["status"] = "FAIL"
+
+        no_go = finalize_report(draft, self.root, self.registry)
+        self.assertEqual(
+            no_go["decision_reasons"],
+            [
+                "FAILED_COVERAGE:FR-042",
+                "FAILED_COVERAGE:FR-043",
+                "FAILED_COVERAGE:FR-044",
+                "INSUFFICIENT_INDEPENDENT_REVIEWS",
+            ],
+        )
 
     def test_report_schema_mutation_is_rejected(self) -> None:
         mutated = copy.deepcopy(self.report)

@@ -42,6 +42,12 @@ local cache and passes every machine gate. It writes
 `formal/reports/clean-offline-reproduction.json`; the report generator consumes
 that exact evidence for FR-042.
 
+After the mounted source manifest is verified, the runner regenerates the
+current deterministic draft report before invoking its offline verifier. This
+prevents a stale checked-in evidence overlay from satisfying the verifier after
+the source baseline changes. The final report is regenerated once more outside
+the runner so it consumes the newly written clean-reproduction record.
+
 ## Update policy
 
 1. Open an explicit toolchain update change.

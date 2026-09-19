@@ -15,7 +15,6 @@ import unicodedata
 from pathlib import Path, PurePosixPath
 from typing import Any, NoReturn
 
-
 ROOT = Path(__file__).resolve().parents[2]
 TRACE_SCHEMA = Path("formal/schemas/formal-trace.schema.json")
 REPORT_SCHEMA = Path("formal/schemas/formal-verification-report.schema.json")
@@ -42,6 +41,29 @@ MUTANT_IDS = {
 }
 REQUIREMENT_IDS = {f"FR-{number:03d}" for number in range(1, 47)}
 REVIEW_SCOPE = {"MODEL", "LIVENESS", "PROOFS", "COVERAGE"}
+REVIEW_ATTESTATION_KEYS = {
+    "formal_semantics_id",
+    "independent",
+    "reviewed_commit",
+    "reviewer_id",
+    "scope",
+    "status",
+}
+REPRODUCTION_CHECK_IDS = (
+    "phase0",
+    "contracts",
+    "toolchain",
+    "report-generation",
+    "report-verifier",
+    "parse",
+    "safety",
+    "liveness",
+    "proofs",
+    "mutants",
+    "refinement",
+    "tlc-evidence",
+    "cross-artifact",
+)
 
 
 class CanonicalJsonError(ValueError):
@@ -145,6 +167,13 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def semantic_text_sha256(path: Path) -> str:
+    """Hash a semantic text artifact using the repository's canonical LF bytes."""
+
+    canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return sha256_bytes(canonical)
 
 
 def _json_equal(left: Any, right: Any) -> bool:
@@ -262,11 +291,98 @@ def safe_repo_path(root: Path, relative: str) -> Path:
     return resolved
 
 
+def review_attestation_matches(
+    payload: Any,
+    *,
+    reviewed_commit: str,
+    formal_semantics_id: str,
+    projection: dict[str, Any] | None = None,
+) -> bool:
+    """Validate a review payload and, when supplied, its report projection."""
+
+    if not isinstance(payload, dict) or set(payload) != REVIEW_ATTESTATION_KEYS:
+        return False
+    if (
+        payload["reviewed_commit"] != reviewed_commit
+        or payload["formal_semantics_id"] != formal_semantics_id
+        or not isinstance(payload["reviewer_id"], str)
+        or not payload["reviewer_id"]
+        or type(payload["independent"]) is not bool
+        or payload["status"] not in {"PASS", "FAIL"}
+        or payload["scope"] != sorted(REVIEW_SCOPE)
+    ):
+        return False
+    if projection is None:
+        return True
+    expected_projection = {
+        "reviewer_id": payload["reviewer_id"],
+        "independent": payload["independent"],
+        "status": payload["status"],
+        "scope": payload["scope"],
+        "evidence_id": projection.get("evidence_id"),
+    }
+    return projection == expected_projection
+
+
+def reproduction_matches_source(
+    reproduction: Any,
+    commit: str,
+    formal_semantics_id: str,
+    *,
+    source_tree: str | None = None,
+) -> bool:
+    """Validate clean-reproduction shape and its exact source binding."""
+
+    if not isinstance(reproduction, dict):
+        return False
+    checks = reproduction.get("checks")
+    if not isinstance(checks, list):
+        return False
+    if [item.get("id") for item in checks if isinstance(item, dict)] != list(
+        REPRODUCTION_CHECK_IDS
+    ):
+        return False
+    checks_pass = all(
+        isinstance(item, dict)
+        and item.get("status") == "PASS"
+        and item.get("exit_code") == 0
+        and isinstance(item.get("command"), list)
+        and bool(item["command"])
+        and isinstance(item.get("output_sha256"), str)
+        and re.fullmatch(r"[0-9a-f]{64}", item["output_sha256"]) is not None
+        for item in checks
+    )
+    recorded_tree = reproduction.get("source_tree")
+    return (
+        reproduction.get("schema_version") == "1.0.0"
+        and reproduction.get("status") == "PASS"
+        and reproduction.get("environment")
+        == "linux/amd64 clean container with --network none"
+        and reproduction.get("source_commit") == commit
+        and reproduction.get("source_clean_at_start") is True
+        and reproduction.get("formal_semantics_id") == formal_semantics_id
+        and reproduction.get("network_interfaces") == ["lo"]
+        and reproduction.get("network_proxies_forced_to_loopback") is True
+        and reproduction.get("errors") == []
+        and isinstance(recorded_tree, str)
+        and re.fullmatch(r"[0-9a-f]{40}", recorded_tree) is not None
+        and (source_tree is None or recorded_tree == source_tree)
+        and isinstance(reproduction.get("source_manifest_sha256"), str)
+        and re.fullmatch(
+            r"[0-9a-f]{64}", reproduction["source_manifest_sha256"]
+        )
+        is not None
+        and str(reproduction.get("machine", "")).lower() in {"amd64", "x86_64"}
+        and str(reproduction.get("platform", "")).startswith("Linux-")
+        and checks_pass
+    )
+
+
 def _artifact_entry(root: Path, path: Path, kind: str) -> dict[str, str]:
     return {
         "kind": kind,
         "path": path.relative_to(root).as_posix(),
-        "sha256": sha256_file(path),
+        "sha256": semantic_text_sha256(path),
     }
 
 
@@ -409,11 +525,19 @@ def _check_source_tree(report: dict[str, Any], root: Path, reasons: set[str]) ->
         paths = [item["path"] for item in files]
         if paths != sorted(paths) or len(paths) != len(set(paths)):
             raise ValueError("manifest paths must be sorted and unique")
+        semantic_paths = {item["path"] for item in discovered}
         for item in files:
             if set(item) != {"path", "sha256"}:
                 raise ValueError("manifest entry shape mismatch")
             path = safe_repo_path(root, item["path"])
-            if not path.is_file() or sha256_file(path) != item["sha256"]:
+            if not path.is_file():
+                raise ValueError(f"manifest file missing: {item['path']}")
+            actual_sha256 = (
+                semantic_text_sha256(path)
+                if item["path"] in semantic_paths
+                else sha256_file(path)
+            )
+            if actual_sha256 != item["sha256"]:
                 raise ValueError(f"manifest file mismatch: {item['path']}")
         mandatory_paths = {item["path"] for item in declared} | {report["baseline_inputs"]["path"]}
         if not mandatory_paths.issubset(set(paths)):
@@ -435,6 +559,39 @@ def _check_baseline(report: dict[str, Any], root: Path, reasons: set[str]) -> No
             raise ValueError("baseline bundle ID mismatch")
     except (CanonicalJsonError, OSError, ValueError):
         _reason(reasons, "BASELINE_INPUTS_INVALID")
+
+
+def _check_reproduction_binding(
+    report: dict[str, Any],
+    root: Path,
+    valid_evidence: set[str],
+    reasons: set[str],
+) -> None:
+    evidence_id = "EVIDENCE-REPRODUCIBILITY"
+    nodes = [
+        node
+        for node in report["evidence_graph"]["nodes"]
+        if node["id"] == evidence_id
+    ]
+    valid = False
+    if len(nodes) == 1 and evidence_id in valid_evidence:
+        node = nodes[0]
+        try:
+            if node["path"] != "formal/reports/reproducibility-evidence.json":
+                raise ValueError("unexpected reproduction evidence path")
+            path = safe_repo_path(root, node["path"])
+            payload = load_json_strict(path)
+            if path.read_bytes() != canonical_json_bytes(payload):
+                raise ValueError("reproduction evidence is not canonical JSON")
+            valid = reproduction_matches_source(
+                payload,
+                report["source_tree"]["commit"],
+                report["formal_semantics_id"],
+            )
+        except (CanonicalJsonError, OSError, TypeError, ValueError):
+            valid = False
+    if not valid:
+        _reason(reasons, "INVALID_REPRODUCTION_ATTESTATION")
 
 
 def _check_expected_records(
@@ -478,6 +635,7 @@ def determine_report_decision(
     _check_source_tree(report, root, reasons)
     _check_baseline(report, root, reasons)
     valid_evidence = _verified_evidence(report, root, reasons)
+    _check_reproduction_binding(report, root, valid_evidence, reasons)
 
     _check_expected_records(
         report["toolchains"], TOOLCHAIN_IDS, "TOOLCHAIN", valid_evidence, reasons
@@ -561,12 +719,38 @@ def determine_report_decision(
         _reason(reasons, "UNRESOLVED_COVERAGE")
 
     passing_reviewers: set[str] = set()
+    evidence_by_id = {
+        node["id"]: node for node in report["evidence_graph"]["nodes"]
+    }
     for review in report["review_attestations"]:
+        evidence_id = review["evidence_id"]
+        binding_valid = False
+        node = evidence_by_id.get(evidence_id)
+        if evidence_id in valid_evidence and node is not None:
+            try:
+                evidence_path = PurePosixPath(node["path"])
+                if (
+                    evidence_path.parts[:3] != ("formal", "reports", "reviews")
+                    or len(evidence_path.parts) != 4
+                    or evidence_path.suffix != ".json"
+                ):
+                    raise ValueError("review evidence path is outside the review directory")
+                payload = load_json_strict(safe_repo_path(root, node["path"]))
+                binding_valid = review_attestation_matches(
+                    payload,
+                    reviewed_commit=report["source_tree"]["commit"],
+                    formal_semantics_id=report["formal_semantics_id"],
+                    projection=review,
+                )
+            except (CanonicalJsonError, OSError, TypeError, ValueError):
+                binding_valid = False
+        if not binding_valid:
+            _reason(reasons, "INVALID_REVIEW_ATTESTATION", evidence_id)
+            continue
         if (
             review["independent"]
             and review["status"] == "PASS"
             and set(review["scope"]) == REVIEW_SCOPE
-            and review["evidence_id"] in valid_evidence
         ):
             passing_reviewers.add(review["reviewer_id"])
     if len(passing_reviewers) < 2:

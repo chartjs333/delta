@@ -13,7 +13,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "formal" / "reports" / "clean-offline-reproduction.json"
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
@@ -26,7 +25,6 @@ from formal_artifacts import (  # noqa: E402
     write_canonical_json,
 )
 
-
 COMMANDS = (
     ("phase0", [sys.executable, "formal/scripts/verify_phase0.py"], 60),
     (
@@ -38,6 +36,11 @@ COMMANDS = (
         "toolchain",
         [sys.executable, "formal/toolchain/verify_locks.py", "--require-cache"],
         300,
+    ),
+    (
+        "report-generation",
+        [sys.executable, "formal/scripts/generate_formal_report.py"],
+        60,
     ),
     (
         "report-verifier",
