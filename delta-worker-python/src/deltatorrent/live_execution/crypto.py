@@ -11,9 +11,6 @@ import json
 import math
 from typing import Any
 
-# Pinned fixture public key hex matching ADR 0002 / T008 contract fixtures
-FIXTURE_PUBLIC_KEY_HEX = "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8"
-
 
 def _number_to_jcs(value: int | float) -> str:
     """Serialize number per RFC 8785 Section 3.2.2.3 and ECMA-262 Section 7.1.12.1."""
@@ -205,7 +202,7 @@ def verify_ed25519(public_key_bytes: bytes, msg: bytes, sig_bytes: bytes) -> boo
 
 def verify_admission_signature(
     admission: dict[str, Any],
-    trusted_pubkey_hex: str | None = None,
+    trusted_pubkey_hex: str,
 ) -> bool:
     """Verify Ed25519 signature on AdmissionRecord over admission \\ {authenticator.signature}."""
     authenticator = admission.get("authenticator")
@@ -215,10 +212,9 @@ def verify_admission_signature(
     if not isinstance(sig_hex, str):
         return False
 
-    pub_hex = trusted_pubkey_hex or FIXTURE_PUBLIC_KEY_HEX
     try:
         sig_bytes = bytes.fromhex(sig_hex)
-        pub_bytes = bytes.fromhex(pub_hex)
+        pub_bytes = bytes.fromhex(trusted_pubkey_hex)
     except Exception:
         return False
 

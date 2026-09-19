@@ -17,7 +17,7 @@ from deltatorrent.live_execution.errors import (
     WorkerCancelledError,
     WorkerTimeoutError,
 )
-from deltatorrent.live_execution.preflight import AuthorizedExecutionPreflight
+from tests.live_execution_fixture_trust import fixture_authorized_execution_preflight
 
 CONTRACTS_ROOT = (
     Path(__file__).resolve().parents[3]
@@ -36,7 +36,7 @@ def train_bundle() -> dict:
 
 
 def test_c_wa_020_timeout_prevents_receipt_emission(train_bundle: dict) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
@@ -63,7 +63,7 @@ def test_c_wa_020_timeout_prevents_receipt_emission(train_bundle: dict) -> None:
 
 
 def test_c_wa_021_cancellation_prevents_receipt_emission(train_bundle: dict) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
@@ -87,7 +87,7 @@ def test_c_wa_020_wall_clock_timeout_does_not_block_on_hanging_thread(
     """Prove dispatch() unblocks immediately on timeout without waiting on a hanging runner."""
     import time
 
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
