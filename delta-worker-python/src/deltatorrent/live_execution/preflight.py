@@ -8,7 +8,6 @@ from datetime import UTC, datetime
 from typing import Any
 
 from deltatorrent.live_execution.crypto import (
-    FIXTURE_PUBLIC_KEY_HEX,
     verify_admission_digest,
     verify_admission_signature,
     verify_intent_digest,
@@ -43,37 +42,61 @@ class PreflightContext:
 class AuthorizedExecutionPreflight:
     """Preflight validator ensuring tamper-evident authority before execution."""
 
-    PINNED_KEY_IDS = frozenset({"step5c-fixture-ed25519"})
-
     def __init__(
         self,
         trusted_public_key_hex: str | None = None,
         pinned_key_ids: frozenset[str] | set[str] | None = None,
         trusted_keys: dict[str, str] | None = None,
     ) -> None:
-        self.trusted_keys: dict[str, str] = dict(trusted_keys) if trusted_keys else {}
-        if "step5c-fixture-ed25519" not in self.trusted_keys:
-            self.trusted_keys["step5c-fixture-ed25519"] = FIXTURE_PUBLIC_KEY_HEX
+        self.trusted_keys: dict[str, str] = dict(trusted_keys or {})
 
-        if trusted_public_key_hex:
-            p_ids = pinned_key_ids or self.PINNED_KEY_IDS
-            for kid in p_ids:
-                self.trusted_keys[kid] = trusted_public_key_hex
-            self.trusted_public_key_hex = trusted_public_key_hex
-        else:
-            self.trusted_public_key_hex = self.trusted_keys.get(
-                "step5c-fixture-ed25519", FIXTURE_PUBLIC_KEY_HEX
-            )
+        if trusted_public_key_hex is not None:
+            if not pinned_key_ids:
+                raise ValueError(
+                    "pinned_key_ids must explicitly bind trusted_public_key_hex to key IDs"
+                )
+            for key_id in pinned_key_ids:
+                configured_key = self.trusted_keys.get(key_id)
+                if configured_key is not None and configured_key != trusted_public_key_hex:
+                    raise ValueError(f"conflicting public keys configured for key_id '{key_id}'")
+                self.trusted_keys[key_id] = trusted_public_key_hex
 
-        if pinned_key_ids is not None:
-            self.pinned_key_ids = frozenset(pinned_key_ids)
-        else:
-            self.pinned_key_ids = frozenset(self.trusted_keys.keys())
+        for key_id, public_key_hex in self.trusted_keys.items():
+            self._validate_trusted_key(key_id, public_key_hex)
+
+        self.pinned_key_ids = (
+            frozenset(pinned_key_ids)
+            if pinned_key_ids is not None
+            else frozenset(self.trusted_keys)
+        )
+        missing_key_material = self.pinned_key_ids.difference(self.trusted_keys)
+        if missing_key_material:
+            missing = ", ".join(sorted(missing_key_material))
+            raise ValueError(f"pinned key IDs lack trusted key material: {missing}")
+
+        # Retained for source compatibility with callers that inspect the
+        # explicitly supplied single-key form. It is never populated from a
+        # fixture or inferred from trusted_keys.
+        self.trusted_public_key_hex = trusted_public_key_hex
+
+    @staticmethod
+    def _validate_trusted_key(key_id: str, public_key_hex: str) -> None:
+        if not isinstance(key_id, str) or not key_id:
+            raise ValueError("trusted key_id must be a non-empty string")
+        if not isinstance(public_key_hex, str):
+            raise ValueError(f"trusted public key for '{key_id}' must be a hex string")
+        try:
+            public_key = bytes.fromhex(public_key_hex)
+        except ValueError as exc:
+            raise ValueError(f"trusted public key for '{key_id}' is not valid hex") from exc
+        if len(public_key) != 32:
+            raise ValueError(f"trusted public key for '{key_id}' must be 32 bytes")
 
     def register_trusted_key(self, key_id: str, public_key_hex: str) -> None:
         """Register an authoritative controller signing key and key_id contract."""
+        self._validate_trusted_key(key_id, public_key_hex)
         self.trusted_keys[key_id] = public_key_hex
-        self.pinned_key_ids = frozenset(self.trusted_keys.keys())
+        self.pinned_key_ids = self.pinned_key_ids.union({key_id})
 
     def validate(
         self,
@@ -156,8 +179,8 @@ class AuthorizedExecutionPreflight:
                 f"Unsupported signature algorithm '{algorithm}'. Expected ED25519",
             )
 
-        if not key_id or key_id not in self.trusted_keys:
-            allowed_keys = sorted(self.trusted_keys.keys())
+        if not key_id or key_id not in self.pinned_key_ids or key_id not in self.trusted_keys:
+            allowed_keys = sorted(self.pinned_key_ids.intersection(self.trusted_keys))
             raise WorkerPreflightError(
                 "ERR_ADMISSION_SIGNATURE_INVALID",
                 f"Unknown or un-pinned key_id '{key_id}'. Allowed: {allowed_keys}",

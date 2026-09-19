@@ -6,11 +6,13 @@ import copy
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 from deltatorrent.live_execution.dispatch import ClosedEnumWorkerDispatcher
 from deltatorrent.live_execution.errors import WorkerDispatchError, WorkerPreflightError
 from deltatorrent.live_execution.preflight import AuthorizedExecutionPreflight
+from tests.live_execution_fixture_trust import fixture_authorized_execution_preflight
 
 CONTRACTS_ROOT = (
     Path(__file__).resolve().parents[3]
@@ -38,7 +40,7 @@ def test_c_wa_011_dispatch_table_contains_only_approved_operations() -> None:
 
 
 def test_c_wa_014_train_ticket_dispatch_produces_receipt(train_bundle: dict) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
@@ -55,7 +57,7 @@ def test_c_wa_014_train_ticket_dispatch_produces_receipt(train_bundle: dict) -> 
 
 
 def test_c_wa_015_train_ticket_rejects_non_plugin_boundary_scope(train_bundle: dict) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     tampered = copy.deepcopy(train_bundle)
     tampered["intent"]["workload"]["requested_scope"] = "MODEL_DATASET_BINDING_ONLY"
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
@@ -69,7 +71,7 @@ def test_c_wa_015_train_ticket_rejects_non_plugin_boundary_scope(train_bundle: d
 
 
 def test_c_wa_018_materialize_dataset_produces_status_only(train_bundle: dict) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
@@ -88,7 +90,7 @@ def test_c_wa_018_materialize_dataset_produces_status_only(train_bundle: dict) -
 
 
 def test_c_wa_019_materialize_path_traversal_rejected(train_bundle: dict) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
@@ -101,3 +103,23 @@ def test_c_wa_019_materialize_path_traversal_rejected(train_bundle: dict) -> Non
     dispatcher = ClosedEnumWorkerDispatcher()
     with pytest.raises(WorkerDispatchError, match="Illegal cache_key"):
         dispatcher.dispatch(bad_ctx)
+
+
+def test_runtime_only_trust_rejects_fixture_before_dispatch(train_bundle: dict) -> None:
+    preflight = AuthorizedExecutionPreflight(
+        trusted_keys={"runtime-ed25519": "00" * 32},
+    )
+    dispatcher = MagicMock(spec=ClosedEnumWorkerDispatcher)
+    runner = MagicMock()
+
+    with pytest.raises(WorkerPreflightError) as exc_info:
+        context = preflight.validate(
+            train_bundle,
+            current_time=datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC),
+        )
+        dispatcher.dispatch(context, runner_override=runner)
+
+    assert exc_info.value.code == "ERR_ADMISSION_SIGNATURE_INVALID"
+    dispatcher.dispatch.assert_not_called()
+    runner.train_ticket.assert_not_called()
+    runner.emit_execution_receipt.assert_not_called()

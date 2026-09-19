@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 from deltatorrent.live_execution.dispatch import ClosedEnumWorkerDispatcher
-from deltatorrent.live_execution.preflight import AuthorizedExecutionPreflight
+from tests.live_execution_fixture_trust import fixture_authorized_execution_preflight
 
 CONTRACTS_ROOT = (
     Path(__file__).resolve().parents[3]
@@ -27,7 +27,7 @@ def train_bundle() -> dict:
 
 
 def test_c_wa_023_receipt_includes_complete_lineage(train_bundle: dict) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
@@ -49,7 +49,7 @@ def test_c_wa_023_receipt_includes_complete_lineage(train_bundle: dict) -> None:
 def test_c_wa_024_receipt_validates_against_lineage_schema_and_forbids_consensus(
     train_bundle: dict,
 ) -> None:
-    preflight = AuthorizedExecutionPreflight()
+    preflight = fixture_authorized_execution_preflight()
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
