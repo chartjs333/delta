@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -15,10 +16,19 @@ from deltacontroller.auth import (
     AuthenticationPort,
     PolicyEngine,
 )
-from deltacontroller.canonical import compute_admission_digest, sign_admission
+from deltacontroller.canonical import (
+    canonicalize_jcs,
+    compute_admission_digest,
+    sha256_digest,
+    sign_admission,
+)
 from deltacontroller.catalog import CatalogValidator
 from deltacontroller.dispatch import MockWorkerDispatchPort, WorkerDispatchPort
-from deltacontroller.errors import ControllerError, WorkerDispatchFailedError
+from deltacontroller.errors import (
+    ControllerError,
+    UnauthorizedCallerError,
+    WorkerDispatchFailedError,
+)
 from deltacontroller.idempotency import IdempotencyLedger
 from deltacontroller.ingress import IngressParser
 from deltacontroller.quota import QuotaManager
@@ -106,6 +116,111 @@ class AuthorizationGate:
         self.policy_version = policy_version
         self.admission_ttl_seconds = admission_ttl_seconds
 
+    def _validate_dispatch_result(
+        self,
+        dispatch_result: Any,
+        *,
+        intent_id: str,
+        execution_id: str,
+        admission_id: str,
+        intent_digest: str,
+        admission_digest: str,
+        operation: str,
+        controller_commit: str,
+        catalog_backend_ref: str,
+        model_plugin_id: str,
+        dataset_id: str,
+        requested_scope: str,
+    ) -> dict[str, Any]:
+        """Validate worker output before it becomes a durable status read model."""
+        if not isinstance(dispatch_result, dict):
+            raise WorkerDispatchFailedError("Worker dispatch result must be an object")
+        if dispatch_result.get("intent_id") != intent_id:
+            raise WorkerDispatchFailedError("Worker dispatch intent_id mismatch")
+        if dispatch_result.get("execution_id") != execution_id:
+            raise WorkerDispatchFailedError("Worker dispatch execution_id mismatch")
+        if not isinstance(dispatch_result.get("dispatched"), bool):
+            raise WorkerDispatchFailedError("Worker dispatch result lacks dispatched boolean")
+
+        state = dispatch_result.get("status")
+        allowed_states = {"QUEUED", "RUNNING", "COMPLETED", "FAILED", "TIMED_OUT", "CANCELLED"}
+        if state not in allowed_states:
+            raise WorkerDispatchFailedError(f"Worker returned invalid status '{state}'")
+
+        receipt = dispatch_result.get("receipt")
+        receipt_digest = dispatch_result.get("receipt_digest")
+        error = dispatch_result.get("error")
+
+        if receipt is not None:
+            if not isinstance(receipt, dict):
+                raise WorkerDispatchFailedError("Worker receipt must be an object")
+            self.schema_registry.validate("receipt-lineage", receipt)
+            provenance = receipt.get("provenance", {})
+            expected_lineage = {
+                "intent_id": intent_id,
+                "intent_digest": intent_digest,
+                "admission_id": admission_id,
+                "admission_digest": admission_digest,
+                "execution_id": execution_id,
+                "controller_commit": controller_commit,
+                "catalog_backend_ref": catalog_backend_ref,
+            }
+            if any(provenance.get(key) != value for key, value in expected_lineage.items()):
+                raise WorkerDispatchFailedError("Worker receipt lineage mismatch")
+            if provenance.get("backend_commit") != catalog_backend_ref:
+                raise WorkerDispatchFailedError("Worker receipt backend reference mismatch")
+            receipt_workload = receipt.get("workload", {})
+            expected_workload = {
+                "model_plugin_id": model_plugin_id,
+                "dataset_id": dataset_id,
+                "executed_scope": requested_scope,
+            }
+            if any(receipt_workload.get(key) != value for key, value in expected_workload.items()):
+                raise WorkerDispatchFailedError("Worker receipt workload binding mismatch")
+            receipt_execution = receipt.get("execution", {})
+            if (
+                receipt_execution.get("verdict") != "SUCCESS"
+                or receipt_execution.get("terminal_status") != "COMPLETED"
+            ):
+                raise WorkerDispatchFailedError("Worker receipt terminal verdict mismatch")
+            computed_receipt_digest = sha256_digest(canonicalize_jcs(receipt))
+            if receipt_digest != computed_receipt_digest:
+                raise WorkerDispatchFailedError("Worker receipt digest mismatch")
+
+        if state == "COMPLETED":
+            if dispatch_result.get("dispatched") is not True:
+                raise WorkerDispatchFailedError("Completed worker result was not dispatched")
+            if error is not None:
+                raise WorkerDispatchFailedError("Completed worker result contains an error")
+            if operation == "MATERIALIZE_DATASET":
+                if receipt is not None or receipt_digest is not None:
+                    raise WorkerDispatchFailedError(
+                        "MATERIALIZE_DATASET must not claim a terminal receipt"
+                    )
+            elif receipt is None or receipt_digest is None:
+                raise WorkerDispatchFailedError(
+                    "Completed worker result requires a bound terminal receipt"
+                )
+        elif state in {"FAILED", "TIMED_OUT", "CANCELLED"}:
+            if receipt is not None or receipt_digest is not None:
+                raise WorkerDispatchFailedError("Failed worker result must not contain a receipt")
+            if not isinstance(error, dict):
+                raise WorkerDispatchFailedError("Terminal worker failure requires an error")
+            self.schema_registry.validate("preflight-error", error)
+            if (
+                state in {"TIMED_OUT", "CANCELLED"}
+                and dispatch_result.get("dispatched") is not True
+            ):
+                raise WorkerDispatchFailedError(
+                    f"Worker state {state} requires an attempted dispatch"
+                )
+        elif receipt is not None or receipt_digest is not None or error is not None:
+            raise WorkerDispatchFailedError(
+                "Non-terminal worker result must not contain terminal artifacts"
+            )
+
+        return dispatch_result
+
     def admit_and_dispatch(
         self,
         raw_or_dict_intent: bytes | str | dict[str, Any],
@@ -150,6 +265,8 @@ class AuthorizationGate:
         )
         if reservation_state == "COMMITTED":
             assert existing is not None
+            if existing.admission_record is None or existing.operation is None:
+                raise RuntimeError("Durable execution record is missing admission metadata")
             # Re-submission handling
             self.audit_logger.log_event(
                 "IDEMPOTENT_RESUBMISSION",
@@ -162,12 +279,9 @@ class AuthorizationGate:
                 execution_id=existing.execution_id,
                 intent_id=existing.intent_id,
                 intent_digest=existing.intent_digest,
-                admission_id=existing.admission_record["admission_id"]
-                if existing.admission_record
-                else "",
-                admission_digest=existing.admission_record["admission_digest"]
-                if existing.admission_record
-                else "",
+                admission_id=existing.admission_record["admission_id"],
+                admission_digest=existing.admission_record["admission_digest"],
+                operation=existing.operation,
                 state=existing.status,
                 receipt_digest=existing.receipt_digest,
                 error=existing.error,
@@ -176,9 +290,9 @@ class AuthorizationGate:
             )
             return {
                 "action": "ALREADY_ADMITTED",
-                "admission": existing.admission_record,
+                "admission": copy.deepcopy(existing.admission_record),
                 "status": status_doc,
-                "receipt": existing.terminal_receipt,
+                "receipt": copy.deepcopy(existing.terminal_receipt),
             }
 
         if reservation_state != "RESERVED":
@@ -253,7 +367,7 @@ class AuthorizationGate:
                 intent_digest=intent_digest,
                 caller_subject_id=subject.subject_id,
                 execution_id=execution_id,
-                admission_record=admission_doc,
+                admission_record=copy.deepcopy(admission_doc),
                 retry_of_intent_id=retry_of,
                 operation=intent["operation"],
             )
@@ -265,7 +379,20 @@ class AuthorizationGate:
 
         # 11. Dispatch exactly once after the durable identity is visible.
         try:
-            dispatch_result = self.dispatch_port.dispatch(bundle)
+            dispatch_result = self._validate_dispatch_result(
+                self.dispatch_port.dispatch(bundle),
+                intent_id=intent_id,
+                execution_id=execution_id,
+                admission_id=admission_id,
+                intent_digest=intent_digest,
+                admission_digest=admission_digest,
+                operation=intent["operation"],
+                controller_commit=self.controller_commit,
+                catalog_backend_ref=intent["workload"]["catalog_backend_ref"],
+                model_plugin_id=intent["workload"]["model_plugin_id"],
+                dataset_id=intent["workload"]["dataset_id"],
+                requested_scope=intent["workload"]["requested_scope"],
+            )
         except Exception as exc:
             if isinstance(exc, ControllerError):
                 controller_error = exc
@@ -296,10 +423,13 @@ class AuthorizationGate:
             )
             raise
 
-        worker_state = dispatch_result.get("status", "RUNNING")
+        worker_state = dispatch_result["status"]
         ledger_rec = self.idempotency_ledger.update_execution(
             execution_id,
             status=worker_state,
+            receipt_digest=dispatch_result.get("receipt_digest"),
+            terminal_receipt=copy.deepcopy(dispatch_result.get("receipt")),
+            error=copy.deepcopy(dispatch_result.get("error")),
         )
 
         # 12. Audit event
@@ -325,6 +455,8 @@ class AuthorizationGate:
             admission_digest=admission_digest,
             operation=intent["operation"],
             state=ledger_rec.status,
+            receipt_digest=ledger_rec.receipt_digest,
+            error=ledger_rec.error,
             updated_at=ledger_rec.updated_at,
             schema_registry=self.schema_registry,
         )
@@ -334,4 +466,41 @@ class AuthorizationGate:
             "admission": admission_doc,
             "bundle": bundle,
             "status": status_doc,
+            "receipt": copy.deepcopy(ledger_rec.terminal_receipt),
         }
+
+    def get_status(
+        self,
+        execution_id: str,
+        *,
+        credentials: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Rebuild an owner's durable execution status read model after restart."""
+        subject = self.auth_port.authenticate(credentials)
+        record = self.idempotency_ledger.get_by_execution_id(execution_id)
+        if record is None:
+            return None
+        if record.authenticated_subject_id != subject.subject_id:
+            raise UnauthorizedCallerError(
+                f"Subject '{subject.subject_id}' cannot read execution '{execution_id}'",
+                details={
+                    "execution_id": execution_id,
+                    "caller_subject_id": subject.subject_id,
+                },
+            )
+        if record.admission_record is None or record.operation is None:
+            raise RuntimeError("Durable execution record is missing admission metadata")
+        admission = record.admission_record
+        return build_execution_status(
+            execution_id=record.execution_id,
+            intent_id=record.intent_id,
+            intent_digest=record.intent_digest,
+            admission_id=admission["admission_id"],
+            admission_digest=admission["admission_digest"],
+            operation=record.operation,
+            state=record.status,
+            receipt_digest=record.receipt_digest,
+            error=record.error,
+            updated_at=record.updated_at,
+            schema_registry=self.schema_registry,
+        )

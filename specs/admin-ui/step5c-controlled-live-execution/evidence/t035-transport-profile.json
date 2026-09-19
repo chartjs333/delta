@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T035",
+  "status": "COMPLETE",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "controller_followup_merge_sha": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+  "security_merge_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "worker_security_merge_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+  "final_base_main_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+  "integration_merge_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+  "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py",
+  "spec_document": "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md",
+  "verified_invariants": [
+    "The HTTP/JSON deployment profile and required host controls are documented without claiming an implemented production HTTP server",
+    "LOCAL_PEER authentication uses an explicit trusted mapping and ignores caller-supplied roles",
+    "The runtime gate requires an explicit non-fixture signing identity and a durable idempotency ledger",
+    "Quota exhaustion is typed as ERR_QUOTA_EXCEEDED; HTTP 429 is a documented transport-host mapping",
+    "The integration gate has no consensus WAL, state-root, QC, or BFT mutation surface"
+  ],
+  "test_summary": {
+    "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py -q",
+    "exit_code": 0,
+    "total_tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87"
+  },
+  "artifact_sha256": {
+    "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md": "c69ba9caa39dc4cee3c8b8e9abd4dcd01bcae3ebf03e93814430c72fd0131c82",
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py": "f1bfca44df50f611a8e3d8ba65d61af0c749ed051ca7977f515d6156936b6bbf"
+  }
+}

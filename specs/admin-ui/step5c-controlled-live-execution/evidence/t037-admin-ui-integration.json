@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T037",
+  "status": "COMPLETE",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "admin_ui_merge_sha": "13e8f4ea33784d302ad5d579a1a15e2a4468e70f",
+  "controller_followup_merge_sha": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+  "security_merge_sha": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+  "worker_security_merge_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+  "final_base_main_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+  "integration_merge_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+  "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+  "test_file": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py",
+  "verified_invariants": [
+    "Admin UI offline MockLiveExecutionAdapter remains MOCK_ONLY, NONE_PHASE_4, zero-egress, and presentation-only",
+    "The exact frozen intent artifact bound by the TypeScript intent-builder/golden-vector tests is accepted and executed by Controller and Worker",
+    "The cross-contract flow returns status and an exact bound receipt without adding consensus claims",
+    "No production HTTP adapter, origin middleware, or browser credential flow is claimed by this evidence"
+  ],
+  "test_summary": {
+    "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py -q",
+    "exit_code": 0,
+    "total_tests": 3,
+    "passed": 3,
+    "failed": 0,
+    "admin_ui_vitest": "37 files, 202 tests passed",
+    "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87"
+  },
+  "artifact_sha256": {
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py": "011461427e446ec64e0c156089b05d3c92a5612dee955570168fb20829aeeb98"
+  }
+}

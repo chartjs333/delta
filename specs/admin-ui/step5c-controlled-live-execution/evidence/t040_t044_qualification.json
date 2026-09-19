@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "step5c:T040-T044",
+  "status": "COMPLETE",
+  "qualification_timestamp": "2026-09-19T11:13:04Z",
+  "contract_freeze_sha": "66e3e7e5bb07a48aadbee8d9c4683144b812d229",
+  "initial_contracts_merge_sha": "9fd11f9fb8b17e0029ab97eaa7fa13d8689b9404",
+  "corrected_contracts_sha": "37407f9e69af70dcc8ba571b76bace199a281478",
+  "component_merge_shas": {
+    "worker": "61cf38311b6c70dd60022280225150458885030a",
+    "admin_ui": "13e8f4ea33784d302ad5d579a1a15e2a4468e70f",
+    "controller_followup": "127ecb79b9a6c0b22e78cd96e5d1d31ed9d657df",
+    "security": "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+    "worker_security": "94721c271307e48aae1e1f09133660d169387ed0"
+  },
+  "final_base_main_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+  "integration_merge_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+  "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+  "formal_impact": {
+    "classification": "NONE",
+    "protected_paths": [],
+    "base_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+    "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+    "reason": "Step 5C transport adapter and cross-component tests do not change consensus transitions, vote/QC context, durability ordering, arithmetic, or protected formal artifacts."
+  },
+  "acceptance_criteria": {
+    "AC-01": "PASSED: frozen schemas, independent JCS vectors, and contract tests",
+    "AC-02": "PASSED: explicit trusted authentication and runtime Ed25519 signing identity",
+    "AC-03": "PASSED: Worker preflight uses only explicitly configured runtime trust, rejects the frozen fixture key before dispatch, and preserves closed-enum dispatch",
+    "AC-04": "PASSED: protected-spine diff is empty against final base main",
+    "AC-05": "PASSED: durable idempotency, exact-one dispatch, collision/replay rejection",
+    "AC-06": "PASSED: exact intent-to-receipt lineage and post-execution tamper rejection",
+    "AC-07": "PASSED_WITH_SCOPE: UI golden intent artifact crosses Controller/Worker; production HTTP adapter is not claimed",
+    "AC-08": "PASSED: STRUCTURALLY_VALID_BOUND_RECEIPT and UNATTESTED UI labels; no consensus claims",
+    "AC-09": "PASSED: restart cache, timeout, cancellation, and fresh retry",
+    "AC-10": "PASSED_FOR_STEP5C: static quality gates are clean; physical 8 GiB eligibility is not claimed"
+  },
+  "quality_gates": {
+    "step5c_tests": {
+      "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests -q",
+      "result": "58 passed",
+      "exit_code": 0
+    },
+    "controller_tests": "50 passed",
+    "controller_ruff": "PASS",
+    "controller_format": "PASS",
+    "controller_mypy": "13 source files, 0 issues",
+    "contracts_tests": "13 passed",
+    "admin_ui": "37 files / 202 tests passed; typecheck, build, catalog, validators, offline audit passed",
+    "worker_python_local": "211 passed, 2 skipped; dedicated physical 8 GiB and optional CUDA lanes were explicitly skipped",
+    "worker_physical_claim": "NOT_CLAIMED; dedicated physical eligibility remains outside Step 5C release evidence",
+    "ruff_check_scoped": "PASS: Controller, Worker, and Step 5C test paths",
+    "ruff_format_scoped": "168 files already formatted",
+    "python_mypy": "99 Controller and Worker source files, 0 issues",
+    "secret_scan": "PASS: 1102 tracked text files with the detector source explicitly excluded",
+    "npm_audit_high": "PASS: 0 vulnerabilities",
+    "changed_path_scope": "17 paths: 3 Controller integration production paths plus 14 Step 5C tests/evidence/docs paths",
+    "production_code_changed_paths": [
+      "delta-controller-python/src/deltacontroller/__init__.py",
+      "delta-controller-python/src/deltacontroller/dispatch.py",
+      "delta-controller-python/src/deltacontroller/gate.py"
+    ],
+    "protected_spine_diff": "PASS: zero paths against 94721c271307e48aae1e1f09133660d169387ed0",
+    "github_ci_exact_head": "PENDING_FINAL_PUSH; bind the exact remote PR head externally before PASS handoff"
+  },
+  "resolved_findings": [
+    {
+      "finding_id": "STEP5C-WORKER-IMPLICIT-FIXTURE-TRUST",
+      "previously_rejected_head_sha": "698e1220436156381f52e482d2245a60297c53de",
+      "worker_security_merge_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+      "status": "RESOLVED",
+      "verification": "Step 5C 58/58 and exact trust-root regressions prove fixture-signed bundles fail before dispatch under runtime-only trust."
+    }
+  ],
+  "task_evidence_map": {
+    "step5c:T035": {
+      "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+      "test": "test_t035_transport_profile.py",
+      "artifact_sha256": "c69ba9caa39dc4cee3c8b8e9abd4dcd01bcae3ebf03e93814430c72fd0131c82"
+    },
+    "step5c:T036": {
+      "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+      "test": "test_t036_worker_dispatch_integration.py",
+      "artifact_sha256": "b0d03f4c740cae10be28450949ebbf577e3d6945d3565f9f423208c2d60ecc6c"
+    },
+    "step5c:T037": {
+      "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+      "test": "test_t037_admin_ui_integration.py",
+      "artifact_sha256": "011461427e446ec64e0c156089b05d3c92a5612dee955570168fb20829aeeb98"
+    },
+    "step5c:T038": {
+      "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+      "test": "test_t038_end_to_end_lineage.py",
+      "artifact_sha256": "f6ad66de657e9cc2b8d351b9cb061b9dfa503228b86efd0c8fc4187737bd46ce"
+    },
+    "step5c:T039": {
+      "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+      "test": "test_t039_recovery_terminal_semantics.py",
+      "artifact_sha256": "bd556985aec8f3acf0158fc18d709be8eef9d7e4de7e0ce17463efd7f061e13c"
+    }
+  },
+  "release_decision": {
+    "state": "READY_FOR_TWO_REVIEWER_GATE",
+    "reviewed_sha": null,
+    "unresolved_threads": "PENDING_REVIEW",
+    "mergeability": "PENDING_FINAL_PUSH_AND_CI"
+  }
+}
