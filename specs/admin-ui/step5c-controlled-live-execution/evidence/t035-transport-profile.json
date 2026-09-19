@@ -29,7 +29,7 @@
     "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87"
   },
   "artifact_sha256": {
-    "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md": "c69ba9caa39dc4cee3c8b8e9abd4dcd01bcae3ebf03e93814430c72fd0131c82",
-    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py": "f1bfca44df50f611a8e3d8ba65d61af0c749ed051ca7977f515d6156936b6bbf"
+    "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md": "89d717ec601df0ee0a850e5f9dc5e65a70ea3694053baa9d7537cb8ad1ec0d73",
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t035_transport_profile.py": "e4c79bab9477b85f0d696f64d030507c9a2db848952505d1515ca671b8773661"
   }
 }

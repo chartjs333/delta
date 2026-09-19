@@ -51,6 +51,6 @@
     "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87"
   },
   "artifact_sha256": {
-    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t038_end_to_end_lineage.py": "f6ad66de657e9cc2b8d351b9cb061b9dfa503228b86efd0c8fc4187737bd46ce"
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t038_end_to_end_lineage.py": "211288c5eadf79a573c48fb891937ff9d595c03da437d65e6b33e13cbc6850a6"
   }
 }

@@ -29,6 +29,6 @@
     "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87"
   },
   "artifact_sha256": {
-    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t039_recovery_terminal_semantics.py": "bd556985aec8f3acf0158fc18d709be8eef9d7e4de7e0ce17463efd7f061e13c"
+    "specs/admin-ui/step5c-controlled-live-execution/tests/test_t039_recovery_terminal_semantics.py": "d40f046cf4290c99d80586eb3f6bfa1cf0c5075bbde726dabb518db0db8a3e3e"
   }
 }

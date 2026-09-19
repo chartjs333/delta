@@ -16,6 +16,26 @@
   "final_base_main_sha": "94721c271307e48aae1e1f09133660d169387ed0",
   "integration_merge_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
   "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+  "pr39_provenance": {
+    "number": 39,
+    "qualification_base_sha": "94721c271307e48aae1e1f09133660d169387ed0",
+    "qualified_code_test_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
+    "reviewed_sha": "614355b36aac8d00dca3043b732ae50f7023e3a5",
+    "exact_head_github_ci": {
+      "head_sha": "614355b36aac8d00dca3043b732ae50f7023e3a5",
+      "conclusion": "SUCCESS",
+      "successful_checks": 36,
+      "total_checks": 36,
+      "failed_checks": 0,
+      "pending_checks": 0,
+      "source_url": "https://github.com/chartjs333/delta/pull/39/checks"
+    },
+    "unresolved_review_threads": 0,
+    "state": "MERGED",
+    "merge_sha": "1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+    "merged_at": "2026-09-19T11:35:21Z",
+    "url": "https://github.com/chartjs333/delta/pull/39"
+  },
   "formal_impact": {
     "classification": "NONE",
     "protected_paths": [],
@@ -39,7 +59,8 @@
     "step5c_tests": {
       "command": "uv run pytest specs/admin-ui/step5c-controlled-live-execution/tests -q",
       "result": "58 passed",
-      "exit_code": 0
+      "exit_code": 0,
+      "tested_head_sha": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87"
     },
     "controller_tests": "50 passed",
     "controller_ruff": "PASS",
@@ -61,7 +82,7 @@
       "delta-controller-python/src/deltacontroller/gate.py"
     ],
     "protected_spine_diff": "PASS: zero paths against 94721c271307e48aae1e1f09133660d169387ed0",
-    "github_ci_exact_head": "PENDING_FINAL_PUSH; bind the exact remote PR head externally before PASS handoff"
+    "github_ci_exact_head": "PASS: 36/36 SUCCESS on exact PR head 614355b36aac8d00dca3043b732ae50f7023e3a5"
   },
   "resolved_findings": [
     {
@@ -76,33 +97,41 @@
     "step5c:T035": {
       "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
       "test": "test_t035_transport_profile.py",
-      "artifact_sha256": "c69ba9caa39dc4cee3c8b8e9abd4dcd01bcae3ebf03e93814430c72fd0131c82"
+      "artifact": "specs/admin-ui/step5c-controlled-live-execution/transport-profile.md",
+      "artifact_sha256": "89d717ec601df0ee0a850e5f9dc5e65a70ea3694053baa9d7537cb8ad1ec0d73"
     },
     "step5c:T036": {
       "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
       "test": "test_t036_worker_dispatch_integration.py",
+      "artifact": "delta-controller-python/src/deltacontroller/dispatch.py",
       "artifact_sha256": "b0d03f4c740cae10be28450949ebbf577e3d6945d3565f9f423208c2d60ecc6c"
     },
     "step5c:T037": {
       "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
       "test": "test_t037_admin_ui_integration.py",
-      "artifact_sha256": "011461427e446ec64e0c156089b05d3c92a5612dee955570168fb20829aeeb98"
+      "artifact": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t037_admin_ui_integration.py",
+      "artifact_sha256": "9d4d81eeb0df93b75ebe9b44b7ae6ff974a2543fbd4e573ac87ae9c90563ee3e"
     },
     "step5c:T038": {
       "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
       "test": "test_t038_end_to_end_lineage.py",
-      "artifact_sha256": "f6ad66de657e9cc2b8d351b9cb061b9dfa503228b86efd0c8fc4187737bd46ce"
+      "artifact": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t038_end_to_end_lineage.py",
+      "artifact_sha256": "211288c5eadf79a573c48fb891937ff9d595c03da437d65e6b33e13cbc6850a6"
     },
     "step5c:T039": {
       "commit": "f5a6f37d9720b620bdd871ccbc7b0e4b6b60dc87",
       "test": "test_t039_recovery_terminal_semantics.py",
-      "artifact_sha256": "bd556985aec8f3acf0158fc18d709be8eef9d7e4de7e0ce17463efd7f061e13c"
+      "artifact": "specs/admin-ui/step5c-controlled-live-execution/tests/test_t039_recovery_terminal_semantics.py",
+      "artifact_sha256": "d40f046cf4290c99d80586eb3f6bfa1cf0c5075bbde726dabb518db0db8a3e3e"
     }
   },
   "release_decision": {
-    "state": "READY_FOR_TWO_REVIEWER_GATE",
-    "reviewed_sha": null,
-    "unresolved_threads": "PENDING_REVIEW",
-    "mergeability": "PENDING_FINAL_PUSH_AND_CI"
+    "state": "PR39_MERGED",
+    "reviewed_sha": "614355b36aac8d00dca3043b732ae50f7023e3a5",
+    "unresolved_threads": 0,
+    "pr39_state": "MERGED",
+    "pr39_merge_sha": "1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+    "step5c_final_status_claimed": false,
+    "required_closure_authority": "step5c-final-closure-v2 graph node"
   }
 }
