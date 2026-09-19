@@ -36,7 +36,10 @@ from formal_artifacts import (  # noqa: E402
     verify_report_document,
     write_canonical_json,
 )
-from generate_formal_report import is_report_output  # noqa: E402
+from generate_formal_report import (  # noqa: E402
+    is_report_output,
+    verified_source_manifest_status,
+)
 from run_clean_offline_reproduction import (  # noqa: E402
     COMMANDS,
     git_safe_directory_environment,
@@ -202,6 +205,26 @@ class ReportSourceBoundaryTests(unittest.TestCase):
         self.assertEqual(check_ids, list(REPRODUCTION_CHECK_IDS))
         generation = check_ids.index("report-generation")
         self.assertEqual(check_ids[generation + 1], "report-verifier")
+
+    def test_verified_source_manifest_supplies_gitless_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "source-manifest.json"
+            manifest = {
+                "schema_version": "1.0.0",
+                "source_commit": "1" * 40,
+                "source_tree": "2" * 40,
+                "source_clean": True,
+                "files": [{"path": "tracked.txt", "sha256": "3" * 64}],
+            }
+            write_canonical_json(path, manifest)
+            self.assertEqual(
+                verified_source_manifest_status(path),
+                ("1" * 40, "2" * 40, True),
+            )
+            manifest["source_clean"] = False
+            write_canonical_json(path, manifest)
+            with self.assertRaises(ValueError):
+                verified_source_manifest_status(path)
 
     def test_reproduction_must_bind_exact_source_and_semantics(self) -> None:
         reproduction = reproduction_document()

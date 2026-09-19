@@ -226,6 +226,7 @@ def main() -> int:
     formal_semantics_id = derive_formal_semantics_id("1.0.0", semantic_artifacts)
 
     environment = dict(os.environ)
+    environment.pop("FORMAL_VERIFIED_SOURCE_MANIFEST", None)
     environment.update(
         {
             "PYTHONHASHSEED": "0",
@@ -236,6 +237,8 @@ def main() -> int:
             "NO_PROXY": "",
         }
     )
+    if source_manifest is not None and not errors:
+        environment["FORMAL_VERIFIED_SOURCE_MANIFEST"] = str(manifest_path)
     environment = git_safe_directory_environment(environment)
     checks: list[dict[str, Any]] = []
     if not errors:

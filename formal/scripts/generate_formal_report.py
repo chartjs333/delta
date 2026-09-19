@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -62,6 +64,34 @@ def is_report_output(path: str) -> bool:
     )
 
 
+def verified_source_manifest_status(path: Path) -> tuple[str, str, bool]:
+    """Read source identity previously verified by the offline runner."""
+
+    manifest = load_json_strict(path)
+    if not isinstance(manifest, dict) or set(manifest) != {
+        "schema_version",
+        "source_commit",
+        "source_tree",
+        "source_clean",
+        "files",
+    }:
+        raise ValueError("verified source manifest shape mismatch")
+    commit = manifest["source_commit"]
+    source_tree = manifest["source_tree"]
+    if (
+        manifest["schema_version"] != "1.0.0"
+        or manifest["source_clean"] is not True
+        or not isinstance(commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", commit) is None
+        or not isinstance(source_tree, str)
+        or re.fullmatch(r"[0-9a-f]{40}", source_tree) is None
+        or not isinstance(manifest["files"], list)
+        or not manifest["files"]
+    ):
+        raise ValueError("verified source manifest identity is invalid")
+    return commit, source_tree, True
+
+
 def source_tree_status() -> tuple[str, str, bool]:
     """Return the latest source commit and whether that source tree is clean.
 
@@ -70,6 +100,10 @@ def source_tree_status() -> tuple[str, str, bool]:
     known outputs avoids a circular reviewed_commit while every other tracked or
     untracked path remains fail-closed.
     """
+
+    verified_manifest = os.environ.get("FORMAL_VERIFIED_SOURCE_MANIFEST")
+    if verified_manifest:
+        return verified_source_manifest_status(Path(verified_manifest))
 
     status_lines = git(
         "status", "--porcelain=v1", "--untracked-files=all"
