@@ -1,6 +1,6 @@
 # Executed TLC coverage evidence
 
-All counts below come from the checked-in deterministic config manifest and the corresponding retained TLC log. No TLC symmetry set or state constraint is used. Bounds reduce constants only; every required action is checked for non-zero invocation coverage.
+All metrics below come from the checked-in deterministic config manifest and a validated TLC semantic-result projection. Raw PID, timing, host telemetry and coverage counters are diagnostic only and are not content-addressed. No TLC symmetry set or state constraint is used. Bounds reduce constants only; every required action is checked for non-zero reachability.
 
 | Config | Kind | States | Distinct | Diameter | Terminal outcome classes | Required actions |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
