@@ -5,12 +5,9 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import io
 import json
 import subprocess
 import sys
-import tarfile
-import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any, NoReturn
 
@@ -19,7 +16,9 @@ FEATURE_ROOT = ROOT / "specs" / "001-reproducible-training-baseline"
 DEFAULT_REPORT = ROOT / "formal" / "reports" / "formal-verification-report.json"
 DEFAULT_OUTPUT = FEATURE_ROOT / "evidence" / "formal-prerequisite.json"
 EXPECTED_SEMANTICS_ID = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
-EXPECTED_SOURCE_COMMIT = "1e6e0f6f70056161d95933e71494ec390c7c1151"
+EXPECTED_SOURCE_COMMIT = "b390d3aacd1449a43d8f5b293f514e48e1adce85"
+EXPECTED_REPORT_COMMIT = "83d73bc67ba26e2c1d1e44cba43a8640bbabf732"
+EXPECTED_MERGE_COMMIT = "ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e"
 SEMANTICS_DOMAIN = "deltareduce.formal-semantics.v1"
 REVIEW_SCOPE = {"COVERAGE", "LIVENESS", "MODEL", "PROOFS"}
 TOOLCHAIN_IDS = {
@@ -51,6 +50,19 @@ EVIDENCE_IDS = {
     "EVIDENCE-SEMANTICS",
     "EVIDENCE-TLC",
     "EVIDENCE-TOOLCHAINS",
+}
+REPRODUCTION_CHECK_IDS = {
+    "contracts",
+    "cross-artifact",
+    "liveness",
+    "mutants",
+    "parse",
+    "phase0",
+    "proofs",
+    "refinement",
+    "safety",
+    "tlc-evidence",
+    "toolchain",
 }
 PROTECTED_BASELINE_ROLES = {
     "canonical_rational_rounding_decision",
@@ -214,29 +226,25 @@ def verify_merged_predecessor(root: Path, report_path: Path, source_commit: str)
 
     canonical_report = DEFAULT_REPORT.relative_to(root).as_posix()
     report_commit = git_text(root, "log", "-1", "--format=%H", "--", canonical_report)
-    require(len(report_commit) == 40, "REPORT_COMMIT_NOT_FOUND")
+    require(report_commit == EXPECTED_REPORT_COMMIT, "REPORT_COMMIT_MISMATCH")
     require(git_is_ancestor(root, report_commit, head), "GO_REPORT_NOT_ANCESTOR")
 
-    merge_commit = ""
     merge_parent = ""
-    for candidate in git_text(root, "rev-list", "--first-parent", "--merges", head).splitlines():
-        subject = git_text(root, "show", "-s", "--format=%s", candidate)
-        if not subject.startswith("Merge pull request #1 "):
-            continue
-        parents = git_text(root, "show", "-s", "--format=%P", candidate).split()
-        for parent in parents[1:]:
-            if git_is_ancestor(root, report_commit, parent):
-                merge_commit = candidate
-                merge_parent = parent
-                break
-        if merge_commit:
+    require(git_is_ancestor(root, EXPECTED_MERGE_COMMIT, head), "FORMAL_GO_NOT_MERGED")
+    require(
+        git_is_ancestor(root, EXPECTED_MERGE_COMMIT, origin_main),
+        "FORMAL_MERGE_NOT_ON_ORIGIN_MAIN",
+    )
+    parents = git_text(root, "show", "-s", "--format=%P", EXPECTED_MERGE_COMMIT).split()
+    for parent in parents[1:]:
+        if git_is_ancestor(root, report_commit, parent):
+            merge_parent = parent
             break
-    require(bool(merge_commit), "FORMAL_GO_NOT_MERGED")
-    require(git_is_ancestor(root, merge_commit, origin_main), "FORMAL_MERGE_NOT_ON_ORIGIN_MAIN")
+    require(bool(merge_parent), "FORMAL_REPORT_NOT_IN_MERGED_BRANCH")
     require(report_path.resolve() == DEFAULT_REPORT.resolve(), "NONCANONICAL_REPORT_PATH")
     return {
         "feature_head": head,
-        "merge_commit": merge_commit,
+        "merge_commit": EXPECTED_MERGE_COMMIT,
         "merged_report_parent": merge_parent,
         "origin_main": origin_main,
         "report_commit": report_commit,
@@ -495,7 +503,12 @@ def verify_report_records(
         "REPRODUCTION_SEMANTICS_MISMATCH",
     )
     checks = reproduction.get("checks")
-    require(isinstance(checks, list) and len(checks) == 12, "REPRODUCTION_CHECK_COUNT_MISMATCH")
+    require(isinstance(checks, list), "REPRODUCTION_CHECKS_MISSING")
+    require(
+        {item.get("id") for item in checks} == REPRODUCTION_CHECK_IDS,
+        "REPRODUCTION_CHECK_ID_SET_MISMATCH",
+    )
+    require(len(checks) == len(REPRODUCTION_CHECK_IDS), "REPRODUCTION_CHECK_ID_DUPLICATE")
     require(all(item.get("status") == "PASS" for item in checks), "REPRODUCTION_CHECK_FAILED")
 
     semantics = loaded_evidence["EVIDENCE-SEMANTICS"]
@@ -557,27 +570,35 @@ def verify_hybrid_refinement(root: Path) -> dict[str, Any]:
 
 
 def run_formal_report_verifier(root: Path, report_path: Path) -> dict[str, Any]:
-    archive = git_bytes(root, "archive", "--format=tar", "HEAD")
-    with tempfile.TemporaryDirectory(prefix="delta-formal-prerequisite-") as directory:
-        snapshot = Path(directory)
-        with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as bundle:
-            bundle.extractall(snapshot, filter="data")
-        snapshot_report = snapshot / "formal" / "reports" / "formal-verification-report.json"
-        snapshot_report.write_bytes(report_path.read_bytes())
-        command = [
-            sys.executable,
-            str(snapshot / "formal" / "scripts" / "verify_formal_report.py"),
-            str(snapshot_report),
-            "--require-go",
-        ]
-        completed = subprocess.run(
-            command,
-            cwd=snapshot,
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
+    canonical_report = DEFAULT_REPORT.relative_to(root).as_posix()
+    require(
+        git_text(root, "rev-parse", "--is-shallow-repository") == "false",
+        "FULL_GIT_HISTORY_REQUIRED",
+    )
+    require(
+        report_path.read_bytes() == tracked_bytes(root, canonical_report),
+        "REPORT_WORKTREE_BYTES_MISMATCH",
+    )
+    require(
+        not git_text(root, "status", "--porcelain=v1", "--untracked-files=all", "--", "formal"),
+        "FORMAL_WORKTREE_NOT_CLEAN",
+    )
+    command = [
+        sys.executable,
+        str(root / "formal" / "scripts" / "verify_formal_report.py"),
+        str(report_path),
+        "--root",
+        str(root),
+        "--require-go",
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
     require(completed.returncode == 0, "FORMAL_REPORT_VERIFIER_FAILED", completed.stdout.strip())
     lines = [line for line in completed.stdout.splitlines() if line.strip()]
     require(bool(lines), "FORMAL_REPORT_VERIFIER_EMPTY")
