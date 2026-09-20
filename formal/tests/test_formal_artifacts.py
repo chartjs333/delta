@@ -481,6 +481,19 @@ class ReportSourceBoundaryTests(unittest.TestCase):
             self.assertIn("set -o pipefail", [item.strip() for item in lines[run_index:index]])
         self.assertGreaterEqual(pipeline_count, 5)
 
+    def test_formal_workflow_fetches_complete_git_history(self) -> None:
+        lines = (
+            (REPOSITORY / ".github" / "workflows" / "formal.yml")
+            .read_text(encoding="utf-8")
+            .splitlines()
+        )
+        checkout_lines = [
+            index for index, line in enumerate(lines) if "uses: actions/checkout@" in line
+        ]
+        self.assertGreaterEqual(len(checkout_lines), 5)
+        for index in checkout_lines:
+            self.assertIn("fetch-depth: 0", [line.strip() for line in lines[index : index + 6]])
+
     def test_generated_evidence_overlay_does_not_change_source_commit(self) -> None:
         self.assertTrue(is_report_output("formal/reports/tlc-evidence.json"))
         self.assertTrue(is_report_output("formal/reports/executed-coverage.md"))
@@ -710,6 +723,14 @@ class ReportSourceBoundaryTests(unittest.TestCase):
                 verified_source_manifest_status(manifest_path),
                 (source_commit, source_tree, True),
             )
+
+            shallow = temporary / "shallow"
+            subprocess.run(
+                ["git", "clone", "-q", "--depth", "1", "--no-local", str(root), str(shallow)],
+                check=True,
+            )
+            with self.assertRaises(ValueError):
+                source_commit_from_history(shallow)
 
             forged_path = temporary / "forged-source-manifest.json"
             forged = load_json_strict(manifest_path)

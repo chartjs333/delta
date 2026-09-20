@@ -325,6 +325,8 @@ def is_generated_report_output(path: str) -> bool:
 def source_commit_from_history(root: Path) -> str:
     """Return the newest commit that changes bytes outside generated evidence."""
 
+    if git_output(root, "rev-parse", "--is-shallow-repository").strip() != "false":
+        raise ValueError("full Git history is required for source/evidence separation")
     exclusions = [f":(exclude){path}" for path in sorted(GENERATED_REPORT_OUTPUTS)]
     exclusions.extend(f":(exclude,glob){pattern}" for pattern in GENERATED_REPORT_OUTPUT_GLOBS)
     commit = git_output(root, "log", "-1", "--format=%H", "--", ".", *exclusions).strip()
