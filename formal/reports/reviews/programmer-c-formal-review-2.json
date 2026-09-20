@@ -1,0 +1,1 @@
+{"formal_semantics_id":"sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6","independent":true,"reviewed_commit":"b390d3aacd1449a43d8f5b293f514e48e1adce85","reviewer_id":"programmer-c-formal-review-2","scope":["COVERAGE","LIVENESS","MODEL","PROOFS"],"status":"PASS"}
