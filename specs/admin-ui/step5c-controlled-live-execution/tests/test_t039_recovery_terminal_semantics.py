@@ -94,8 +94,11 @@ def test_t039_restart_recovery_and_cached_terminal_receipt(tmp_path: Path) -> No
     assert status_recovered["terminal"] is True
     assert status_recovered["execution_id"] == exec_id
     assert status_recovered["intent_id"] == intent["intent_id"]
+    assert gate_2.get_receipt(exec_id, credentials=creds) == receipt_1
     with pytest.raises(UnauthorizedCallerError):
         gate_2.get_status(exec_id, credentials=operator_credentials("operator.beta"))
+    with pytest.raises(UnauthorizedCallerError):
+        gate_2.get_receipt(exec_id, credentials=operator_credentials("operator.beta"))
 
     rec_recovered = gate_2.idempotency_ledger.get_by_execution_id(exec_id)
     assert rec_recovered is not None
@@ -218,7 +221,12 @@ def test_t039_timeout_is_terminal_and_restart_safe(tmp_path: Path) -> None:
     """Prove timeout persists without a receipt and is recovered after restart."""
 
     class TimeoutDispatcher:
-        def dispatch(self, context: Any, cancellation_token: Any = None) -> dict[str, Any]:
+        def dispatch(
+            self,
+            context: Any,
+            cancellation_token: Any = None,
+            producer_commit: str | None = None,
+        ) -> dict[str, Any]:
             raise WorkerTimeoutError(
                 "Synthetic bounded timeout",
                 details={"execution_id": context.execution_id},

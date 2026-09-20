@@ -27,6 +27,8 @@ from security_support import (
     load_valid_fixture,
 )
 
+TEST_PRODUCER_COMMIT = "ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e"
+
 
 @pytest.fixture
 def train_intent() -> dict:
@@ -93,7 +95,8 @@ def test_t033_closed_enum_dispatch_rejects_arbitrary_operations(
     train_intent: dict,
 ) -> None:
     harness = build_gate_harness()
-    bundle = admit_train_ticket(harness, train_intent)["bundle"]
+    admit_train_ticket(harness, train_intent)
+    bundle = harness.dispatch_port.dispatched_bundles[-1]
     preflight = AuthorizedExecutionPreflight(
         trusted_keys={bundle["admission"]["authenticator"]["key_id"]: harness.public_key_hex}
     )
@@ -109,7 +112,7 @@ def test_t033_closed_enum_dispatch_rejects_arbitrary_operations(
         "",
     ):
         with pytest.raises(WorkerDispatchError) as exc_info:
-            ClosedEnumWorkerDispatcher().dispatch(
+            ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT).dispatch(
                 replace(ctx, operation=op),
                 runner_override=mock_runner,
             )
@@ -123,7 +126,8 @@ def test_t033_materialize_cache_key_path_escape_fails_before_runner_call(
     train_intent: dict,
 ) -> None:
     harness = build_gate_harness()
-    bundle = admit_train_ticket(harness, train_intent)["bundle"]
+    admit_train_ticket(harness, train_intent)
+    bundle = harness.dispatch_port.dispatched_bundles[-1]
     preflight = AuthorizedExecutionPreflight(
         trusted_keys={bundle["admission"]["authenticator"]["key_id"]: harness.public_key_hex}
     )
@@ -132,7 +136,7 @@ def test_t033_materialize_cache_key_path_escape_fails_before_runner_call(
 
     for cache_key in ("../../escape", "/tmp/escape", "C:\\Windows\\system.ini"):
         with pytest.raises(WorkerDispatchError) as exc_info:
-            ClosedEnumWorkerDispatcher().dispatch(
+            ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT).dispatch(
                 replace(
                     ctx,
                     operation="MATERIALIZE_DATASET",

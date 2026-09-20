@@ -16,6 +16,7 @@ dependencies = [
 
 [project.scripts]
 delta = "deltatorrent.cli:main"
+delta-live-worker = "deltatorrent.live_execution.process:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/deltatorrent"]

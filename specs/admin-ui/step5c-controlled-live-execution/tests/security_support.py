@@ -22,6 +22,7 @@ VALID_FIXTURES_DIR = FIXTURES_DIR / "valid"
 INVALID_FIXTURES_DIR = FIXTURES_DIR / "invalid"
 CURRENT_TIME = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
 CONTRACT_FREEZE_SHA = "66e3e7e5bb07a48aadbee8d9c4683144b812d229"
+TEST_BUILD_SHA = "ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e"
 
 
 for src in (
@@ -114,6 +115,7 @@ def build_gate_harness(
         actual_ledger = ledger
     actual_dispatch = dispatch_port or MockWorkerDispatchPort()
     gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=StaticAuthenticationPort(
             allow_local_peer=True,
             peer_subjects=TRUSTED_LOCAL_PEERS,

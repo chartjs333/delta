@@ -22,6 +22,8 @@ from security_support import (
     load_valid_fixture,
 )
 
+TEST_PRODUCER_COMMIT = "ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e"
+
 
 @pytest.fixture
 def eval_intent() -> dict:
@@ -110,8 +112,8 @@ def test_t032_confused_deputy_download_request_uses_admission_grant(
     intent["intent_digest"] = compute_intent_digest(intent)
     harness = build_gate_harness()
 
-    result = admit_train_ticket(harness, intent)
-    bundle = result["bundle"]
+    admit_train_ticket(harness, intent)
+    bundle = harness.dispatch_port.dispatched_bundles[-1]
     preflight = AuthorizedExecutionPreflight(
         trusted_keys={bundle["admission"]["authenticator"]["key_id"]: harness.public_key_hex}
     )
@@ -126,7 +128,8 @@ def test_t032_worker_timeout_prevents_success_receipt_emission(
     train_intent: dict,
 ) -> None:
     harness = build_gate_harness()
-    bundle = admit_train_ticket(harness, train_intent)["bundle"]
+    admit_train_ticket(harness, train_intent)
+    bundle = harness.dispatch_port.dispatched_bundles[-1]
     preflight = AuthorizedExecutionPreflight(
         trusted_keys={bundle["admission"]["authenticator"]["key_id"]: harness.public_key_hex}
     )
@@ -142,7 +145,9 @@ def test_t032_worker_timeout_prevents_success_receipt_emission(
     slow_runner.train_ticket.side_effect = slow_train
 
     with pytest.raises(WorkerTimeoutError) as exc_info:
-        ClosedEnumWorkerDispatcher().dispatch(fast_ctx, runner_override=slow_runner)
+        ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT).dispatch(
+            fast_ctx, runner_override=slow_runner
+        )
 
     assert exc_info.value.code == "ERR_TIMEOUT"
     slow_runner.emit_execution_receipt.assert_not_called()
@@ -152,7 +157,8 @@ def test_t032_worker_cancellation_prevents_success_receipt_emission(
     train_intent: dict,
 ) -> None:
     harness = build_gate_harness()
-    bundle = admit_train_ticket(harness, train_intent)["bundle"]
+    admit_train_ticket(harness, train_intent)
+    bundle = harness.dispatch_port.dispatched_bundles[-1]
     preflight = AuthorizedExecutionPreflight(
         trusted_keys={bundle["admission"]["authenticator"]["key_id"]: harness.public_key_hex}
     )
@@ -163,7 +169,7 @@ def test_t032_worker_cancellation_prevents_success_receipt_emission(
     mock_runner = MagicMock()
 
     with pytest.raises(WorkerCancelledError) as exc_info:
-        ClosedEnumWorkerDispatcher().dispatch(
+        ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT).dispatch(
             ctx,
             cancellation_token=token,
             runner_override=mock_runner,

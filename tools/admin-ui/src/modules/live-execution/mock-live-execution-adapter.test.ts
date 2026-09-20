@@ -16,6 +16,7 @@ describe("MockLiveExecutionAdapter", () => {
     expect(source.capabilities).toEqual([
       "live.intent.preview",
       "live.status.mock",
+      "live.status.read",
     ]);
   });
 

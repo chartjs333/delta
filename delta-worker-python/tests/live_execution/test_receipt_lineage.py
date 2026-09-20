@@ -17,6 +17,7 @@ CONTRACTS_ROOT = (
     / "step5c-controlled-live-execution"
     / "contracts"
 )
+TEST_PRODUCER_COMMIT = "4992d9eca319da21b5a2c7b94593f3668b92329c"
 
 
 @pytest.fixture
@@ -31,7 +32,7 @@ def test_c_wa_023_receipt_includes_complete_lineage(train_bundle: dict) -> None:
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
     result = dispatcher.dispatch(ctx)
 
     receipt = result["receipt"]
@@ -53,7 +54,7 @@ def test_c_wa_024_receipt_validates_against_lineage_schema_and_forbids_consensus
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
     result = dispatcher.dispatch(ctx)
     receipt = result["receipt"]
 

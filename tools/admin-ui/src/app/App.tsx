@@ -22,6 +22,7 @@ import { ControllerExplorer } from "../modules/controllers/ControllerExplorer";
 import { controllersFromDocument } from "../modules/controllers/controller-model";
 import { PairwiseReviewStep } from "../modules/controllers/PairwiseReviewStep";
 import { ReadinessSummary } from "../modules/controllers/ReadinessSummary";
+import { useLiveExecutionRuntime } from "../modules/live-execution/live-execution-context";
 import {
   syncPairwiseReviewDrafts,
   type PairwiseReviewDraft,
@@ -46,6 +47,7 @@ export interface AppProps {
 }
 
 export function App({ adapter = defaultAdapter }: AppProps) {
+  const liveExecutionRuntime = useLiveExecutionRuntime();
   const [activeRoute, setActiveRoute] = useState(routeFromLocation);
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [source, setSource] = useState<SourceDescriptor>();
@@ -221,7 +223,11 @@ export function App({ adapter = defaultAdapter }: AppProps) {
             <span aria-hidden="true">☰</span>
             <span>Menu</span>
           </button>
-          <div className="boundary-pill">Browser-local · offline</div>
+          <div className="boundary-pill">
+            {liveExecutionRuntime.mode === "HTTP_LIVE"
+              ? "HTTP live · unattested"
+              : "Browser-local · offline"}
+          </div>
         </div>
       </header>
 

@@ -22,12 +22,14 @@ import {
 
 export interface LiveIntentBuilderProps {
   readonly onIntentBuilt?: (intent: ExecutionIntentDocument) => void;
-  readonly onSubmitToMockGate?: (intent: ExecutionIntentDocument) => void;
+  readonly onSubmit?: (intent: ExecutionIntentDocument) => void;
+  readonly submitLabel?: string;
 }
 
 export function LiveIntentBuilder({
   onIntentBuilt,
-  onSubmitToMockGate,
+  onSubmit,
+  submitLabel = "Submit to Mock Gate",
 }: LiveIntentBuilderProps) {
   const [operation, setOperation] =
     useState<LiveExecutionOperation>("TRAIN_TICKET");
@@ -164,7 +166,7 @@ export function LiveIntentBuilder({
 
   const handleSubmit = () => {
     if (issues.length === 0) {
-      onSubmitToMockGate?.(document);
+      onSubmit?.(document);
       onIntentBuilt?.(document);
     }
   };
@@ -483,7 +485,7 @@ export function LiveIntentBuilder({
             disabled={issues.length > 0}
             type="submit"
           >
-            Submit to Mock Gate
+            {submitLabel}
           </button>
           <button
             className="action-button secondary"

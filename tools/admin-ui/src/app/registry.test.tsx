@@ -68,7 +68,7 @@ describe("product extension registry", () => {
       label: "Live execution",
       route: "/live-execution",
     });
-    expect(domain?.requiredCapabilities).toEqual(["live.status.mock"]);
+    expect(domain?.requiredCapabilities).toEqual(["live.status.read"]);
     expect(domain?.routes.map((route) => route.path)).toEqual([
       "/live-execution",
     ]);

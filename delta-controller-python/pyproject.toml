@@ -10,11 +10,18 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "cryptography>=44.0,<45",
+  "deltatorrent-worker==0.1.0",
   "jsonschema>=4.23,<5",
 ]
+
+[project.scripts]
+delta-working-version = "deltacontroller.host:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/deltacontroller"]
 
 [tool.uv]
 package = true
+
+[tool.uv.sources]
+deltatorrent-worker = { workspace = true }

@@ -21,8 +21,11 @@ from deltacontroller.canonical import (
 from deltacontroller.catalog import CatalogValidator
 from deltacontroller.dispatch import (
     IntegratedWorkerDispatchPort,
+    JsonSubprocessWorkerRunner,
     MockWorkerDispatchPort,
+    SubprocessWorkerDispatchPort,
     WorkerDispatchPort,
+    WorkerProcessRunner,
 )
 from deltacontroller.errors import ControllerError
 from deltacontroller.gate import AdmissionSigningIdentity, AuthorizationGate
@@ -45,6 +48,7 @@ __all__ = [
     "IdempotencyLedger",
     "IngressParser",
     "IntegratedWorkerDispatchPort",
+    "JsonSubprocessWorkerRunner",
     "LedgerRecord",
     "MockWorkerDispatchPort",
     "PolicyEngine",
@@ -52,7 +56,9 @@ __all__ = [
     "ResourceGrants",
     "SchemaRegistry",
     "StaticAuthenticationPort",
+    "SubprocessWorkerDispatchPort",
     "WorkerDispatchPort",
+    "WorkerProcessRunner",
     "build_execution_status",
     "canonicalize_jcs",
     "compute_admission_digest",

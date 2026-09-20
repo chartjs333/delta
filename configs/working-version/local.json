@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "profile": "LOCAL_LOOPBACK",
+  "protocol_id": "deltareduce.step5c.http.v1",
+  "contract_schema_version": "1.0.0",
+  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+  "build_id_source": "required-cli-argument",
+  "bindings": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "allowed_origins": [
+      "http://127.0.0.1:8765"
+    ]
+  },
+  "limits": {
+    "request_bytes": 10485760,
+    "json_depth": 32,
+    "request_timeout_seconds": 30,
+    "max_inflight_requests": 16,
+    "request_queue_size": 16,
+    "worker_queue_capacity": 8,
+    "worker_processes": 2,
+    "shutdown_grace_seconds": 30
+  },
+  "identity": {
+    "local_subject_id": "local.operator",
+    "local_effective_roles": [
+      "OPERATOR"
+    ]
+  },
+  "components": {
+    "controller": {
+      "entrypoint": "delta-working-version",
+      "role": "HTTP_HOST_AND_AUTHORIZATION_GATE"
+    },
+    "worker": {
+      "entrypoint": "delta-live-worker",
+      "role": "CONSTRAINED_SUBPROCESS",
+      "trust_roots": "EXPLICIT_RUNTIME_CONFIGURATION"
+    },
+    "admin_ui": {
+      "artifact": "tools/admin-ui/dist-live",
+      "role": "UNTRUSTED_LIVE_PRESENTATION"
+    },
+    "native_runtime": {
+      "paths": [
+        "delta-core-cpp",
+        "delta-runtime-cpp",
+        "delta-ffi"
+      ],
+      "mode": "REFERENCE_ONLY",
+      "started": false,
+      "semantic_claim": "NONE"
+    },
+    "jvm_node": {
+      "path": "delta-node-java",
+      "mode": "REFERENCE_ONLY",
+      "started": false,
+      "semantic_claim": "NONE"
+    }
+  }
+}

@@ -5,15 +5,14 @@ import { asAdminUiError } from "../../core/errors";
 import "./live-execution.css";
 import type {
   LiveExecutionPort,
+  LiveExecutionReceipt,
   LiveExecutionSourceDescriptor,
   LiveExecutionState,
   LiveExecutionStatus,
 } from "./live-execution-port";
-import { MockLiveExecutionAdapter } from "./mock-live-execution-adapter";
+import { useLiveExecutionRuntime } from "./live-execution-context";
 import { LiveIntentBuilder } from "./LiveIntentBuilder";
 import type { ExecutionIntentDocument } from "./intent-builder";
-
-const defaultPort = new MockLiveExecutionAdapter();
 
 const STATE_LABELS: Readonly<Record<LiveExecutionState, string>> = {
   DRAFT: "Draft",
@@ -36,23 +35,30 @@ export interface LiveExecutionSurfaceProps {
 }
 
 export function LiveExecutionSurface({
-  port = defaultPort,
+  port,
   initialTab = "STATUSES",
 }: LiveExecutionSurfaceProps) {
+  const runtime = useLiveExecutionRuntime();
+  const activePort = port ?? runtime.port;
   const [source, setSource] = useState<LiveExecutionSourceDescriptor>();
   const [statuses, setStatuses] = useState<readonly LiveExecutionStatus[]>([]);
   const [selectedStatusId, setSelectedStatusId] = useState<string>();
   const [notice, setNotice] = useState<string>();
+  const [receipt, setReceipt] = useState<LiveExecutionReceipt>();
   const [activeTab, setActiveTab] = useState<LiveExecutionTab>(initialTab);
 
-  const loadStatuses = () => {
-    Promise.all([port.describeLiveSource(), port.listStatuses()])
+  const loadStatuses = (preferredStatusId?: string) => {
+    Promise.all([activePort.describeLiveSource(), activePort.listStatuses()])
       .then(([nextSource, nextStatuses]) => {
         setSource(nextSource);
         setStatuses(nextStatuses);
-        if (!selectedStatusId && nextStatuses.length > 0) {
-          setSelectedStatusId(nextStatuses[0].statusId);
-        }
+        setSelectedStatusId((current) => {
+          if (preferredStatusId) return preferredStatusId;
+          if (current && nextStatuses.some((item) => item.statusId === current)) {
+            return current;
+          }
+          return nextStatuses[0]?.statusId;
+        });
       })
       .catch((error: unknown) => {
         setNotice(asAdminUiError(error).message);
@@ -61,7 +67,7 @@ export function LiveExecutionSurface({
 
   useEffect(() => {
     let active = true;
-    Promise.all([port.describeLiveSource(), port.listStatuses()])
+    Promise.all([activePort.describeLiveSource(), activePort.listStatuses()])
       .then(([nextSource, nextStatuses]) => {
         if (!active) return;
         setSource(nextSource);
@@ -74,24 +80,68 @@ export function LiveExecutionSurface({
     return () => {
       active = false;
     };
-  }, [port]);
+  }, [activePort]);
 
   const selectedStatus = useMemo(
     () => statuses.find((status) => status.statusId === selectedStatusId),
     [selectedStatusId, statuses],
   );
 
-  const handleMockSubmit = async (intent: ExecutionIntentDocument) => {
-    if (typeof port.submitIntent === "function") {
-      try {
-        const newStatus = await port.submitIntent(intent);
-        setNotice(`Intent submitted to mock gate: ${newStatus.statusId}`);
-        loadStatuses();
-        setSelectedStatusId(newStatus.statusId);
-        setActiveTab("STATUSES");
-      } catch (err: unknown) {
-        setNotice(asAdminUiError(err).message);
-      }
+  const handleSubmit = async (intent: ExecutionIntentDocument) => {
+    try {
+      const newStatus = await activePort.submitIntent(intent);
+      const target = source?.mode === "HTTP_LIVE" ? "controller" : "mock gate";
+      setNotice(`Intent submitted to ${target}: ${newStatus.statusId}`);
+      setReceipt(undefined);
+      loadStatuses(newStatus.statusId);
+      setActiveTab("STATUSES");
+    } catch (err: unknown) {
+      setNotice(asAdminUiError(err).message);
+    }
+  };
+
+  const refreshSelectedStatus = async () => {
+    if (!selectedStatus) return;
+    try {
+      const refreshed = await activePort.getStatus(selectedStatus.statusId);
+      setStatuses((current) =>
+        current.map((item) =>
+          item.statusId === refreshed.statusId ? refreshed : item,
+        ),
+      );
+      setNotice(`Status refreshed: ${refreshed.state}`);
+    } catch (error: unknown) {
+      setNotice(asAdminUiError(error).message);
+    }
+  };
+
+  const cancelSelectedExecution = async () => {
+    const executionId = selectedStatus?.lineage.executionId;
+    if (!executionId || !activePort.cancelExecution) return;
+    try {
+      const cancelled = await activePort.cancelExecution(executionId);
+      setStatuses((current) =>
+        current.map((item) =>
+          item.statusId === cancelled.statusId ? cancelled : item,
+        ),
+      );
+      setReceipt(undefined);
+      setNotice(`Cancellation requested: ${cancelled.state}`);
+    } catch (error: unknown) {
+      setNotice(asAdminUiError(error).message);
+    }
+  };
+
+  const loadSelectedReceipt = async () => {
+    const executionId = selectedStatus?.lineage.executionId;
+    if (!executionId || !activePort.getReceipt) return;
+    try {
+      const nextReceipt = await activePort.getReceipt(executionId);
+      setReceipt(nextReceipt);
+      setNotice("Terminal receipt loaded from the controller.");
+    } catch (error: unknown) {
+      setReceipt(undefined);
+      setNotice(asAdminUiError(error).message);
     }
   };
 
@@ -106,7 +156,15 @@ export function LiveExecutionSurface({
           <h1 id="live-execution-heading">Live execution</h1>
         </div>
         <div className="live-mode-panel" aria-label="Live execution source">
-          <span className="status-pill pill-smoke">MOCK ONLY</span>
+          <span
+            className={
+              source?.mode === "HTTP_LIVE"
+                ? "status-pill pill-capable"
+                : "status-pill pill-smoke"
+            }
+          >
+            {source?.mode === "HTTP_LIVE" ? "HTTP LIVE" : "MOCK ONLY"}
+          </span>
           <span>{source?.label ?? "Loading source"}</span>
           <code>{source?.contractFreezeSha.slice(0, 12) ?? "pending"}</code>
         </div>
@@ -139,7 +197,12 @@ export function LiveExecutionSurface({
 
       {activeTab === "BUILDER" ? (
         <LiveIntentBuilder
-          onSubmitToMockGate={handleMockSubmit}
+          onSubmit={handleSubmit}
+          submitLabel={
+            source?.mode === "HTTP_LIVE"
+              ? "Submit to Controller"
+              : "Submit to Mock Gate"
+          }
         />
       ) : (
         <div className="live-boundary-grid">
@@ -164,7 +227,10 @@ export function LiveExecutionSurface({
                   }
                   key={status.statusId}
                   type="button"
-                  onClick={() => setSelectedStatusId(status.statusId)}
+                  onClick={() => {
+                    setSelectedStatusId(status.statusId);
+                    setReceipt(undefined);
+                  }}
                 >
                   <span>{STATE_LABELS[status.state]}</span>
                   <small>{status.operation}</small>
@@ -211,19 +277,31 @@ export function LiveExecutionSurface({
                   <div>
                     <dt>Model plugin</dt>
                     <dd>
-                      <code>{selectedStatus.workload.modelPluginId}</code>
+                      {selectedStatus.workload ? (
+                        <code>{selectedStatus.workload.modelPluginId}</code>
+                      ) : (
+                        <span className="muted-value">Not in status response</span>
+                      )}
                     </dd>
                   </div>
                   <div>
                     <dt>Dataset</dt>
                     <dd>
-                      <code>{selectedStatus.workload.datasetId}</code>
+                      {selectedStatus.workload ? (
+                        <code>{selectedStatus.workload.datasetId}</code>
+                      ) : (
+                        <span className="muted-value">Not in status response</span>
+                      )}
                     </dd>
                   </div>
                   <div>
                     <dt>Scope</dt>
                     <dd>
-                      <code>{selectedStatus.workload.requestedScope}</code>
+                      {selectedStatus.workload ? (
+                        <code>{selectedStatus.workload.requestedScope}</code>
+                      ) : (
+                        <span className="muted-value">Not in status response</span>
+                      )}
                     </dd>
                   </div>
                   <div>
@@ -233,6 +311,39 @@ export function LiveExecutionSurface({
                     </dd>
                   </div>
                 </dl>
+
+                {source?.mode === "HTTP_LIVE" ? (
+                  <div className="builder-actions" aria-label="Execution actions">
+                    <button
+                      className="action-button secondary"
+                      type="button"
+                      onClick={() => void refreshSelectedStatus()}
+                    >
+                      Refresh status
+                    </button>
+                    {activePort.cancelExecution &&
+                    !isTerminalState(selectedStatus) ? (
+                      <button
+                        className="action-button secondary"
+                        type="button"
+                        onClick={() => void cancelSelectedExecution()}
+                      >
+                        Cancel execution
+                      </button>
+                    ) : null}
+                    {activePort.getReceipt &&
+                    selectedStatus.state === "COMPLETED" &&
+                    selectedStatus.operation !== "MATERIALIZE_DATASET" ? (
+                      <button
+                        className="action-button secondary"
+                        type="button"
+                        onClick={() => void loadSelectedReceipt()}
+                      >
+                        Load terminal receipt
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <section
                   className="live-lineage-panel"
@@ -262,10 +373,48 @@ export function LiveExecutionSurface({
                     />
                   </dl>
                 </section>
+
+                {receipt ? (
+                  <section
+                    className="live-lineage-panel"
+                    aria-labelledby="live-receipt-heading"
+                  >
+                    <div className="section-heading">
+                      <h3 id="live-receipt-heading">Terminal receipt</h3>
+                      <span className="status-pill pill-smoke">
+                        UNATTESTED PLUGIN RECORD
+                      </span>
+                    </div>
+                    <p>
+                      Controller-returned receipt with structural and lineage
+                      checks. It is not a consensus certificate.
+                    </p>
+                    <dl className="live-lineage-grid">
+                      <LineageRow
+                        label="Intent ID"
+                        value={receipt.provenance.intent_id}
+                      />
+                      <LineageRow
+                        label="Admission ID"
+                        value={receipt.provenance.admission_id}
+                      />
+                      <LineageRow
+                        label="Execution ID"
+                        value={receipt.provenance.execution_id}
+                      />
+                      <LineageRow
+                        label="Producer commit"
+                        value={receipt.provenance.producer_commit}
+                      />
+                    </dl>
+                  </section>
+                ) : null}
               </>
             ) : (
               <div className="capability-state state-unavailable" role="status">
-                No mock execution status selected.
+                {source?.mode === "HTTP_LIVE"
+                  ? "No live execution has been submitted in this browser session."
+                  : "No mock execution status selected."}
               </div>
             )}
           </section>
@@ -275,7 +424,11 @@ export function LiveExecutionSurface({
       <footer className="live-boundary-note">
         <span>Transport profile</span>
         <strong>{source?.transportProfile ?? "NONE_PHASE_4"}</strong>
-        <span>Offline CSP remains authoritative until T035.</span>
+        <span>
+          {source?.mode === "HTTP_LIVE"
+            ? "Same-origin controller status is unattested and never a consensus claim."
+            : "Offline CSP connect-src 'none' remains authoritative."}
+        </span>
       </footer>
     </section>
   );
@@ -312,4 +465,14 @@ function statusPillClass(state: LiveExecutionState): string {
     default:
       return "status-pill pill-capable";
   }
+}
+
+function isTerminalState(status: LiveExecutionStatus): boolean {
+  return (
+    status.terminal === true ||
+    status.state === "COMPLETED" ||
+    status.state === "FAILED" ||
+    status.state === "TIMED_OUT" ||
+    status.state === "CANCELLED"
+  );
 }

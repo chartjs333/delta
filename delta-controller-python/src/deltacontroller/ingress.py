@@ -14,7 +14,7 @@ from deltacontroller.errors import (
 )
 from deltacontroller.schema import SchemaRegistry
 
-MAX_INGRESS_BYTES = 1024 * 1024  # 1 MiB max raw payload
+MAX_INGRESS_BYTES = 10 * 1024 * 1024  # 10 MiB exact transport-profile limit
 MAX_JSON_DEPTH = 32
 
 

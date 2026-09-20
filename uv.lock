@@ -101,12 +101,14 @@ version = "0.1.0"
 source = { editable = "delta-controller-python" }
 dependencies = [
     { name = "cryptography" },
+    { name = "deltatorrent-worker" },
     { name = "jsonschema" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "cryptography", specifier = ">=44.0,<45" },
+    { name = "deltatorrent-worker", editable = "delta-worker-python" },
     { name = "jsonschema", specifier = ">=4.23,<5" },
 ]
 

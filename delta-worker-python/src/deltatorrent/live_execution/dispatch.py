@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import concurrent.futures
+import re
 import threading
 from collections.abc import Sequence
 from pathlib import Path
@@ -43,14 +44,36 @@ class ClosedEnumWorkerDispatcher:
         }
     )
 
+    def __init__(
+        self,
+        *,
+        producer_commit: str | None = None,
+        cache_root: Path | str | None = None,
+    ) -> None:
+        if producer_commit is not None and re.fullmatch(r"[0-9a-f]{40}", producer_commit) is None:
+            raise ValueError("producer_commit must be a 40-character lowercase build SHA")
+        self.producer_commit = producer_commit
+        self.cache_root = (
+            Path(cache_root) if cache_root is not None else Path(".cache/deltatorrent")
+        )
+
     def dispatch(
         self,
         context: PreflightContext,
         cancellation_token: CancellationToken | None = None,
         runner_override: ModelPluginRunner | None = None,
-        producer_commit: str = "4992d9eca319da21b5a2c7b94593f3668b92329c",
+        producer_commit: str | None = None,
     ) -> dict[str, Any]:
         """Execute the preflighted workload within bounded timeout and cancellation."""
+        effective_producer_commit = producer_commit or self.producer_commit
+        if (
+            effective_producer_commit is None
+            or re.fullmatch(r"[0-9a-f]{40}", effective_producer_commit) is None
+        ):
+            raise WorkerDispatchError(
+                "ERR_WORKER_DISPATCH_FAILED",
+                "An explicit 40-character producer_commit is required",
+            )
         if cancellation_token and cancellation_token.is_cancelled:
             raise WorkerCancelledError("Operation was cancelled before start")
 
@@ -77,11 +100,11 @@ class ClosedEnumWorkerDispatcher:
 
             if operation == "TRAIN_TICKET":
                 return self._execute_train_ticket(
-                    runner, context, cancellation_token, producer_commit
+                    runner, context, cancellation_token, effective_producer_commit
                 )
             elif operation == "EVALUATE_CHECKPOINT":
                 return self._execute_evaluate_checkpoint(
-                    runner, context, cancellation_token, producer_commit
+                    runner, context, cancellation_token, effective_producer_commit
                 )
             elif operation == "MATERIALIZE_DATASET":
                 return self._execute_materialize_dataset(runner, context, cancellation_token)
@@ -104,10 +127,12 @@ class ClosedEnumWorkerDispatcher:
             )
 
             if operation == "TRAIN_TICKET":
-                return self._execute_train_ticket(runner, context, local_token, producer_commit)
+                return self._execute_train_ticket(
+                    runner, context, local_token, effective_producer_commit
+                )
             elif operation == "EVALUATE_CHECKPOINT":
                 return self._execute_evaluate_checkpoint(
-                    runner, context, local_token, producer_commit
+                    runner, context, local_token, effective_producer_commit
                 )
             elif operation == "MATERIALIZE_DATASET":
                 return self._execute_materialize_dataset(runner, context, local_token)
@@ -252,7 +277,7 @@ class ClosedEnumWorkerDispatcher:
                     "ERR_SCHEMA_VALIDATION_FAILED",
                     f"Illegal cache_key '{cache_key}': path traversal or absolute path forbidden",
                 )
-            cache_dir = Path(".cache") / "deltatorrent" / cache_key
+            cache_dir = self.cache_root / cache_key
 
         if token and token.is_cancelled:
             raise WorkerCancelledError("Operation cancelled before materialization")
