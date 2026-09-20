@@ -9,16 +9,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from formal_artifacts import semantic_text_sha256
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "formal" / "reports"
-
-
-def semantic_text_sha256(path: Path) -> str:
-    """Hash text inputs after Git-compatible newline canonicalization."""
-
-    canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-    return hashlib.sha256(canonical).hexdigest()
 
 
 def read_json(path: Path) -> dict[str, Any]:

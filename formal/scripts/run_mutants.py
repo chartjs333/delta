@@ -7,7 +7,6 @@ import difflib
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -15,7 +14,6 @@ import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[2]
 TLA_ROOT = ROOT / "formal" / "tla"
@@ -26,6 +24,7 @@ sys.path.insert(0, str(TOOLCHAIN))
 
 from formal_artifacts import canonical_json_bytes, sha256_file, write_canonical_json  # noqa: E402
 from prepare_cache import artifacts, verify  # noqa: E402
+from tlc_results import TlcResultError, mutant_tlc_result, result_sha256  # noqa: E402
 
 
 @dataclass(frozen=True)
@@ -122,10 +121,8 @@ MUTATIONS = (
                 "        /\\ SeedsForISC(isc) = {}",
             ),
             Replacement(
-                "GenerateSeedAction ==\n"
-                "    \\E isc \\in FinalizedISCBodies : GenerateSeed(isc)",
-                "GenerateSeedAction ==\n"
-                "    \\E isc \\in closedInputBodies : GenerateSeed(isc)",
+                "GenerateSeedAction ==\n    \\E isc \\in FinalizedISCBodies : GenerateSeed(isc)",
+                "GenerateSeedAction ==\n    \\E isc \\in closedInputBodies : GenerateSeed(isc)",
             ),
         ),
     ),
@@ -179,8 +176,7 @@ MUTATIONS = (
                 "    /\\ ValidParameterResultBody(body)\n"
                 "    /\\ ~RoundAbortRequired(body.round)\n"
                 "    /\\ currentCheckpoint = body.parent",
-                "    /\\ IsParameterResultBody(body)\n"
-                "    /\\ ~RoundAbortRequired(body.round)",
+                "    /\\ IsParameterResultBody(body)\n    /\\ ~RoundAbortRequired(body.round)",
             ),
             Replacement(
                 "        /\\ ValidParameterResultBody(body)\n"
@@ -243,10 +239,8 @@ MUTATIONS = (
         "arithmetic-boundary.cfg",
         (
             Replacement(
-                "    /\\ ValidParameterResultBody(body)\n"
-                "    /\\ ~RoundAbortRequired(body.round)",
-                "    /\\ IsParameterResultBody(body)\n"
-                "    /\\ ~RoundAbortRequired(body.round)",
+                "    /\\ ValidParameterResultBody(body)\n    /\\ ~RoundAbortRequired(body.round)",
+                "    /\\ IsParameterResultBody(body)\n    /\\ ~RoundAbortRequired(body.round)",
             ),
             Replacement(
                 "ProposeParameterResultAction ==\n"
@@ -281,10 +275,10 @@ MUTATIONS = (
             Replacement(
                 "    /\\ body \\in FinalizedApplyBodies\n"
                 "    /\\ ValidApplyBody(body)\n"
-                "    /\\ phase \\in {\"ACTIVE\", \"ABORTING\"}",
+                '    /\\ phase \\in {"ACTIVE", "ABORTING"}',
                 "    /\\ body \\in applyCandidates\n"
                 "    /\\ ValidApplyBody(body)\n"
-                "    /\\ phase \\in {\"ACTIVE\", \"ABORTING\"}",
+                '    /\\ phase \\in {"ACTIVE", "ABORTING"}',
             ),
             Replacement(
                 "AdvanceCurrentCheckpointAction ==\n"
@@ -338,13 +332,6 @@ def invariant_only_config(text: str, invariant: str) -> str:
     return f"{text[:start]}INVARIANT {invariant}\n\n{text[end:]}"
 
 
-def normalized_tlc_trace(output: str) -> list[str]:
-    trace = [match.strip() for match in re.findall(r"State \d+: <([^>]+)>", output)]
-    if not trace:
-        raise RuntimeError("TLC counterexample did not contain a state/action trace")
-    return trace
-
-
 def write_fixture(path: Path, value: object) -> None:
     data = canonical_json_bytes(value)
     for attempt in range(5):
@@ -371,18 +358,21 @@ def main() -> int:
         raise RuntimeError("java executable is missing")
 
     tool_hash = sha256_file(jar)
+    tla_lock = json.loads((TOOLCHAIN / "tla.lock").read_text(encoding="utf-8"))
+    expected_version = tla_lock["tla_tools"]["reported_tlc_version"]
+    expected_revision = tla_lock["tla_tools"]["release_commit"]
     FIXTURES.mkdir(parents=True, exist_ok=True)
     summaries: list[dict[str, object]] = []
 
     requested = os.environ.get("MUTANT_FILTER")
     selected = tuple(
-        mutation for mutation in MUTATIONS
-        if requested is None or mutation.mutant_id == requested
+        mutation for mutation in MUTATIONS if requested is None or mutation.mutant_id == requested
     )
     if requested is not None and not selected:
         raise RuntimeError(f"unknown MUTANT_FILTER: {requested}")
 
-    for index, mutation in enumerate(selected):
+    for mutation in selected:
+        index = MUTATIONS.index(mutation)
         with tempfile.TemporaryDirectory(prefix="deltareduce-production-mutant-") as raw_temp:
             work = Path(raw_temp)
             for tla in TLA_ROOT.glob("*.tla"):
@@ -404,6 +394,8 @@ def main() -> int:
             cfg_path = work / "production-mutant.cfg"
             cfg_path.write_text(cfg_text, encoding="utf-8", newline="\n")
 
+            fingerprint_index = (index * 7 + 3) % 64
+            seed = 2026082500 + index
             command = [
                 java,
                 "-XX:+UseParallelGC",
@@ -417,9 +409,9 @@ def main() -> int:
                 "-workers",
                 "1",
                 "-fp",
-                str((index * 7 + 3) % 64),
+                str(fingerprint_index),
                 "-seed",
-                str(2026082500 + index),
+                str(seed),
                 "-config",
                 cfg_path.name,
                 mutation.module,
@@ -435,20 +427,24 @@ def main() -> int:
                 timeout=240,
             )
             output = f"{result.stdout}\n{result.stderr}"
-            expected_marker = f"Invariant {mutation.invariant} is violated."
             if "Finished computing initial states: 0 distinct states generated" in output:
                 raise RuntimeError(f"{mutation.mutant_id}: vacuous model has no initial states")
-            if result.returncode == 0:
-                raise RuntimeError(
-                    f"{mutation.mutant_id}: unexpectedly passed; output={output[-2000:]!r}"
+            try:
+                tlc_result = mutant_tlc_result(
+                    output,
+                    return_code=result.returncode,
+                    expected_invariant=mutation.invariant,
+                    expected_version=expected_version,
+                    expected_revision=expected_revision,
+                    fingerprint_index=fingerprint_index,
+                    seed=seed,
+                    workers=1,
                 )
-            if expected_marker not in output:
-                match = re.search(r"Invariant ([A-Za-z0-9_]+) is violated", output)
-                actual = match.group(1) if match else "NO_INVARIANT"
+            except TlcResultError as error:
                 raise RuntimeError(
-                    f"{mutation.mutant_id}: intended {mutation.invariant}, observed {actual}; "
+                    f"{mutation.mutant_id}: invalid intended counterexample: {error}; "
                     f"output={output[-2000:]!r}"
-                )
+                ) from error
 
             diff = "".join(
                 difflib.unified_diff(
@@ -459,7 +455,7 @@ def main() -> int:
                 )
             )
             fixture = {
-                "schema_version": "2.0.0",
+                "schema_version": "3.0.0",
                 "mutant_id": mutation.mutant_id,
                 "expected_property_id": mutation.property_id,
                 "expected_invariant": mutation.invariant,
@@ -483,8 +479,9 @@ def main() -> int:
                     "mutated_sha256": sha256_file(cfg_path),
                 },
                 "tool_sha256": tool_hash,
-                "tlc_output_sha256": hashlib.sha256(output.encode()).hexdigest(),
-                "normalized_trace": normalized_tlc_trace(output),
+                "tlc_result": tlc_result,
+                "tlc_result_sha256": result_sha256(tlc_result),
+                "normalized_trace": tlc_result["normalized_trace"],
             }
             fixture_path = FIXTURES / f"{mutation.mutant_id.lower()}.json"
             write_fixture(fixture_path, fixture)
@@ -493,6 +490,9 @@ def main() -> int:
                     "id": mutation.mutant_id,
                     "property": mutation.property_id,
                     "production_operator": mutation.operator,
+                    "fixture": fixture_path.relative_to(ROOT).as_posix(),
+                    "fixture_sha256": sha256_file(fixture_path),
+                    "tlc_result_sha256": fixture["tlc_result_sha256"],
                     "status": "PASS",
                 }
             )
@@ -502,7 +502,7 @@ def main() -> int:
             )
 
     report = {
-        "schema_version": "2.0.0",
+        "schema_version": "3.0.0",
         "status": "PASS",
         "mutation_scope": "PRODUCTION_ACTION_SOURCE",
         "mutants": summaries,

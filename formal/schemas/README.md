@@ -34,6 +34,11 @@ sha256:<SHA-256(canonical-json({
 }))>
 ```
 
+Before each artifact hash is computed, CRLF and lone CR line endings are
+canonicalized to LF; no other byte transformation is applied. This is the same
+text profile used by the phase-0 input bundle and makes the compatibility ID
+independent of Git checkout EOL conversion while preserving every non-EOL byte.
+
 Renaming, adding, removing or changing any compatibility input changes the ID.
 Mutants, finite TLC configuration bounds, evidence and the report schema are
 bound separately by the report and do not silently change protocol semantics.

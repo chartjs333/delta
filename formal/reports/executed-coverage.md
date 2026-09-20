@@ -1,6 +1,6 @@
 # Executed TLC coverage evidence
 
-All counts below come from the checked-in deterministic config manifest and the corresponding retained TLC log. No TLC symmetry set or state constraint is used. Bounds reduce constants only; every required action is checked for non-zero invocation coverage.
+All metrics below come from the checked-in deterministic config manifest and a validated TLC semantic-result projection. Raw PID, timing, host telemetry and coverage counters are diagnostic only and are not content-addressed. No TLC symmetry set or state constraint is used. Bounds reduce constants only; every required action is checked for non-zero reachability.
 
 | Config | Kind | States | Distinct | Diameter | Terminal outcome classes | Required actions |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
@@ -9,8 +9,8 @@ All counts below come from the checked-in deterministic config manifest and the 
 | CFG-VOTE-CRASH-RECOVERY | safety | 722325 | 24332 | 26 | none | 3 |
 | CFG-VOTE-LIFECYCLE-CONFIG | safety | 639 | 204 | 17 | none | 10 |
 | CFG-VOTE-LIFECYCLE-ISC | safety | 642 | 212 | 28 | none | 10 |
-| CFG-VOTE-LIFECYCLE-EC | safety | 647 | 217 | 34 | none | 10 |
-| CFG-VOTE-LIFECYCLE-APC | safety | 651 | 221 | 38 | none | 10 |
+| CFG-VOTE-LIFECYCLE-EC | safety | 647 | 217 | 33 | none | 10 |
+| CFG-VOTE-LIFECYCLE-APC | safety | 651 | 221 | 37 | none | 10 |
 | CFG-VOTE-LIFECYCLE-PARAMETER | safety | 664 | 229 | 42 | none | 10 |
 | CFG-VOTE-LIFECYCLE-AGGREGATE | safety | 669 | 234 | 47 | none | 10 |
 | CFG-VOTE-LIFECYCLE-APPLY | safety | 674 | 239 | 52 | none | 10 |

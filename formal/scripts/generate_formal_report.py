@@ -4,43 +4,15 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "formal" / "reports"
-REPORT_OUTPUTS = {
-    "formal/reports/clean-offline-reproduction.json",
-    "formal/reports/cross-artifact-analysis.json",
-    "formal/reports/formal-verification-report.json",
-    "formal/reports/formal-semantics.json",
-    "formal/reports/lean-proof-report.json",
-    "formal/reports/mutant-evidence.json",
-    "formal/reports/refinement-evidence.json",
-    "formal/reports/reproducibility-evidence.json",
-    "formal/reports/source-tree-manifest.json",
-    "formal/reports/tlc-evidence.json",
-    "formal/reports/toolchain-evidence.json",
-}
-REPORT_OUTPUT_GLOBS = ("formal/reports/reviews/*.json",)
-REPRODUCTION_CHECK_IDS = (
-    "phase0",
-    "contracts",
-    "toolchain",
-    "report-verifier",
-    "parse",
-    "safety",
-    "liveness",
-    "proofs",
-    "mutants",
-    "refinement",
-    "tlc-evidence",
-    "cross-artifact",
-)
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import (  # noqa: E402
@@ -48,8 +20,12 @@ from formal_artifacts import (  # noqa: E402
     derive_formal_semantics_id,
     discover_semantic_artifacts,
     finalize_report,
+    is_generated_report_output,
     load_json_strict,
+    reproduction_matches_source,
+    review_attestation_matches,
     sha256_file,
+    source_commit_from_history,
     write_canonical_json,
 )
 
@@ -69,58 +45,44 @@ def git(*arguments: str) -> str:
 
 
 def is_report_output(path: str) -> bool:
-    normalized = path.replace("\\", "/")
-    return normalized in REPORT_OUTPUTS or (
-        normalized.startswith("formal/reports/reviews/")
-        and normalized.endswith(".json")
-    )
+    return is_generated_report_output(path)
 
 
-def reproduction_matches_source(
-    reproduction: dict[str, Any], commit: str, formal_semantics_id: str
-) -> bool:
-    checks = reproduction.get("checks")
-    if not isinstance(checks, list):
-        return False
-    if [item.get("id") for item in checks if isinstance(item, dict)] != list(
-        REPRODUCTION_CHECK_IDS
+def verified_source_manifest_status(path: Path) -> tuple[str, str, bool]:
+    """Read source identity previously verified by the offline runner."""
+
+    manifest = load_json_strict(path)
+    if not isinstance(manifest, dict) or set(manifest) != {
+        "schema_version",
+        "checkout_commit",
+        "checkout_tree",
+        "source_commit",
+        "source_tree",
+        "source_clean",
+        "files",
+    }:
+        raise ValueError("verified source manifest shape mismatch")
+    commit = manifest["source_commit"]
+    source_tree = manifest["source_tree"]
+    if (
+        manifest["schema_version"] != "2.0.0"
+        or manifest["source_clean"] is not True
+        or not isinstance(commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", commit) is None
+        or not isinstance(source_tree, str)
+        or re.fullmatch(r"[0-9a-f]{40}", source_tree) is None
+        or not isinstance(manifest["checkout_commit"], str)
+        or re.fullmatch(r"[0-9a-f]{40}", manifest["checkout_commit"]) is None
+        or not isinstance(manifest["checkout_tree"], str)
+        or re.fullmatch(r"[0-9a-f]{40}", manifest["checkout_tree"]) is None
+        or not isinstance(manifest["files"], list)
+        or not manifest["files"]
     ):
-        return False
-    checks_pass = all(
-        isinstance(item, dict)
-        and item.get("status") == "PASS"
-        and item.get("exit_code") == 0
-        and isinstance(item.get("command"), list)
-        and bool(item["command"])
-        and isinstance(item.get("output_sha256"), str)
-        and re.fullmatch(r"[0-9a-f]{64}", item["output_sha256"]) is not None
-        for item in checks
-    )
-    return (
-        reproduction.get("schema_version") == "1.0.0"
-        and reproduction.get("status") == "PASS"
-        and reproduction.get("environment")
-        == "linux/amd64 clean container with --network none"
-        and reproduction.get("source_commit") == commit
-        and reproduction.get("source_clean_at_start") is True
-        and reproduction.get("formal_semantics_id") == formal_semantics_id
-        and reproduction.get("network_interfaces") == ["lo"]
-        and reproduction.get("network_proxies_forced_to_loopback") is True
-        and reproduction.get("errors") == []
-        and isinstance(reproduction.get("source_tree"), str)
-        and re.fullmatch(r"[0-9a-f]{40}", reproduction["source_tree"]) is not None
-        and isinstance(reproduction.get("source_manifest_sha256"), str)
-        and re.fullmatch(
-            r"[0-9a-f]{64}", reproduction["source_manifest_sha256"]
-        )
-        is not None
-        and str(reproduction.get("machine", "")).lower() in {"amd64", "x86_64"}
-        and str(reproduction.get("platform", "")).startswith("Linux-")
-        and checks_pass
-    )
+        raise ValueError("verified source manifest identity is invalid")
+    return commit, source_tree, True
 
 
-def source_tree_status() -> tuple[str, bool]:
+def source_tree_status() -> tuple[str, str, bool]:
     """Return the latest source commit and whether that source tree is clean.
 
     Generated machine evidence and independent review attestations are committed
@@ -129,27 +91,21 @@ def source_tree_status() -> tuple[str, bool]:
     untracked path remains fail-closed.
     """
 
-    status_lines = git(
-        "status", "--porcelain=v1", "--untracked-files=all"
-    ).splitlines()
+    verified_manifest = os.environ.get("FORMAL_VERIFIED_SOURCE_MANIFEST")
+    if verified_manifest:
+        return verified_source_manifest_status(Path(verified_manifest))
+
+    status_lines = git("status", "--porcelain=v1", "--untracked-files=all").splitlines()
     source_changes = []
     for line in status_lines:
         path = line[3:].split(" -> ")[-1].replace("\\", "/")
         if not is_report_output(path):
             source_changes.append(line)
-    exclusions = [f":(exclude){path}" for path in sorted(REPORT_OUTPUTS)]
-    exclusions.extend(f":(exclude,glob){pattern}" for pattern in REPORT_OUTPUT_GLOBS)
-    commit = git(
-        "log",
-        "-1",
-        "--format=%H",
-        "--",
-        ".",
-        *exclusions,
-    )
-    if len(commit) != 40:
-        raise RuntimeError("unable to identify the attested non-report source commit")
-    return commit, not source_changes
+    commit = source_commit_from_history(ROOT)
+    source_tree = git("rev-parse", f"{commit}^{{tree}}")
+    if len(source_tree) != 40:
+        raise RuntimeError("unable to identify the attested source Git tree")
+    return commit, source_tree, not source_changes
 
 
 def evidence_node(identifier: str, relative: str, media_type: str) -> dict[str, str]:
@@ -175,7 +131,7 @@ def check(identifier: str, status: str, evidence_id: str) -> dict[str, Any]:
 
 
 def main() -> int:
-    commit, source_clean = source_tree_status()
+    commit, source_tree, source_clean = source_tree_status()
     registry = load_json_strict(REPORTS / "formal-id-registry.json")
     baseline = load_json_strict(REPORTS / "baseline-inputs.json")
     toolchains = load_json_strict(REPORTS / "toolchain-evidence.json")
@@ -215,21 +171,35 @@ def main() -> int:
             "reason": "CLEAN_OFFLINE_REPRODUCTION_NOT_RECORDED",
             "required_task": "T062",
         }
-        write_canonical_json(
-            REPORTS / "reproducibility-evidence.json", reproduction
-        )
+        write_canonical_json(REPORTS / "reproducibility-evidence.json", reproduction)
     if clean_reproduction_path.is_file():
         write_canonical_json(REPORTS / "reproducibility-evidence.json", reproduction)
 
     nodes = [
-        evidence_node("EVIDENCE-TOOLCHAINS", "formal/reports/toolchain-evidence.json", "application/json"),
+        evidence_node(
+            "EVIDENCE-TOOLCHAINS", "formal/reports/toolchain-evidence.json", "application/json"
+        ),
         evidence_node("EVIDENCE-TLC", "formal/reports/tlc-evidence.json", "application/json"),
         evidence_node("EVIDENCE-LEAN", "formal/reports/lean-proof-report.json", "application/json"),
-        evidence_node("EVIDENCE-MUTANTS", "formal/reports/mutant-evidence.json", "application/json"),
-        evidence_node("EVIDENCE-REFINEMENT", "formal/reports/refinement-evidence.json", "application/json"),
-        evidence_node("EVIDENCE-CROSS-ARTIFACT", "formal/reports/cross-artifact-analysis.json", "application/json"),
-        evidence_node("EVIDENCE-REPRODUCIBILITY", "formal/reports/reproducibility-evidence.json", "application/json"),
-        evidence_node("EVIDENCE-SEMANTICS", "formal/reports/formal-semantics.json", "application/json"),
+        evidence_node(
+            "EVIDENCE-MUTANTS", "formal/reports/mutant-evidence.json", "application/json"
+        ),
+        evidence_node(
+            "EVIDENCE-REFINEMENT", "formal/reports/refinement-evidence.json", "application/json"
+        ),
+        evidence_node(
+            "EVIDENCE-CROSS-ARTIFACT",
+            "formal/reports/cross-artifact-analysis.json",
+            "application/json",
+        ),
+        evidence_node(
+            "EVIDENCE-REPRODUCIBILITY",
+            "formal/reports/reproducibility-evidence.json",
+            "application/json",
+        ),
+        evidence_node(
+            "EVIDENCE-SEMANTICS", "formal/reports/formal-semantics.json", "application/json"
+        ),
     ]
 
     reviews: list[dict[str, Any]] = []
@@ -237,9 +207,10 @@ def main() -> int:
     if review_directory.is_dir():
         for path in sorted(review_directory.glob("*.json")):
             review = load_json_strict(path)
-            if (
-                review.get("formal_semantics_id") != formal_semantics_id
-                or review.get("reviewed_commit") != commit
+            if not review_attestation_matches(
+                review,
+                reviewed_commit=commit,
+                formal_semantics_id=formal_semantics_id,
             ):
                 continue
             evidence_id = f"EVIDENCE-REVIEW-{len(reviews) + 1}"
@@ -261,12 +232,9 @@ def main() -> int:
             )
 
     manifest_files = [
-        {"path": item["path"], "sha256": item["sha256"]}
-        for item in semantic_artifacts
+        {"path": item["path"], "sha256": item["sha256"]} for item in semantic_artifacts
     ]
-    manifest_files.extend(
-        {"path": node["path"], "sha256": node["sha256"]} for node in nodes
-    )
+    manifest_files.extend({"path": node["path"], "sha256": node["sha256"]} for node in nodes)
     manifest_files.append(
         {
             "path": "formal/reports/baseline-inputs.json",
@@ -275,8 +243,9 @@ def main() -> int:
     )
     by_path = {item["path"]: item for item in manifest_files}
     source_manifest = {
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "commit": commit,
+        "git_tree": source_tree,
         "files": [by_path[path] for path in sorted(by_path)],
     }
     manifest_path = REPORTS / "source-tree-manifest.json"
@@ -293,8 +262,7 @@ def main() -> int:
                 "diameter": model["diameter"],
                 "terminal_states": model["terminal_outcome_class_count"],
                 "properties": [
-                    {"id": identifier, "status": "PASS"}
-                    for identifier in model["properties"]
+                    {"id": identifier, "status": "PASS"} for identifier in model["properties"]
                 ],
             }
         )
@@ -303,9 +271,7 @@ def main() -> int:
     theorem_checks: list[dict[str, Any]] = []
     for theorem in lean["theorems"]:
         item = check(theorem["id"], theorem["status"], "EVIDENCE-LEAN")
-        item.update(
-            {"source": theorem["source"], "axioms": theorem["kernel_axioms"]}
-        )
+        item.update({"source": theorem["source"], "axioms": theorem["kernel_axioms"]})
         theorem_checks.append(item)
 
     mutant_checks: list[dict[str, Any]] = []
@@ -314,9 +280,7 @@ def main() -> int:
         item["expected_property_id"] = mutant["property"]
         mutant_checks.append(item)
 
-    refinement_check = check(
-        "REFINEMENT-SUITE", refinement["status"], "EVIDENCE-REFINEMENT"
-    )
+    refinement_check = check("REFINEMENT-SUITE", refinement["status"], "EVIDENCE-REFINEMENT")
     refinement_check.update(
         {
             "legal_fixture_count": refinement["legal_fixture_count"],
@@ -325,19 +289,18 @@ def main() -> int:
     )
 
     toolchain_checks = [
-        check(item["id"], item["status"], "EVIDENCE-TOOLCHAINS")
-        for item in toolchains["checks"]
+        check(item["id"], item["status"], "EVIDENCE-TOOLCHAINS") for item in toolchains["checks"]
     ]
     reproduction_pass = reproduction_matches_source(
-        reproduction, commit, formal_semantics_id
+        reproduction,
+        commit,
+        formal_semantics_id,
+        source_tree=source_tree,
+        root=ROOT,
     )
     evidence_pass = {
-        "EVIDENCE-TOOLCHAINS": all(
-            item.get("status") == "PASS" for item in toolchains["checks"]
-        ),
-        "EVIDENCE-TLC": all(
-            item.get("status") == "PASS" for item in tlc["models"]
-        ),
+        "EVIDENCE-TOOLCHAINS": all(item.get("status") == "PASS" for item in toolchains["checks"]),
+        "EVIDENCE-TLC": all(item.get("status") == "PASS" for item in tlc["models"]),
         "EVIDENCE-LEAN": (
             lean.get("status") == "PASS"
             and lean.get("conjunct_completeness", {}).get("status") == "PASS"
@@ -380,9 +343,7 @@ def main() -> int:
     for identifier in sorted(REQUIREMENT_IDS):
         evidence_id = requirement_evidence(identifier)
         status = "PASS" if evidence_pass[evidence_id] else "FAIL"
-        coverage.append(
-            {"id": identifier, "status": status, "evidence_id": evidence_id}
-        )
+        coverage.append({"id": identifier, "status": status, "evidence_id": evidence_id})
 
     report: dict[str, Any] = {
         "report_schema_version": "1.0.0",
@@ -413,15 +374,20 @@ def main() -> int:
             "Certified bytes needed after ISC remain available or repair succeeds before abort.",
         ],
         "abstractions": [
-            "Hashes and signatures are collision-resistant unforgeable identifiers, not cryptographic implementations.",
-            "Consensus arithmetic is modeled as bounded canonical integers with explicit accept or reject outcomes.",
+            "Hashes and signatures are collision-resistant unforgeable identifiers, "
+            "not cryptographic implementations.",
+            "Consensus arithmetic is modeled as bounded canonical integers with "
+            "explicit accept or reject outcomes.",
             "Artifact transfer is modeled by exact content identity and availability state.",
         ],
         "limitations": [
             "Finite TLC scopes do not prove unbounded state-space safety.",
-            "Lean arithmetic and quorum theorems do not prove cryptographic libraries, worker honesty, convergence or model quality.",
-            "The cross-artifact analyzer is a syntactic traceability gate and does not establish semantic completeness, liveness non-vacuity or theorem strength.",
-            "A clean offline Linux reproduction and two independent technical reviews are required before Formal GO.",
+            "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
+            "worker honesty, convergence or model quality.",
+            "The cross-artifact analyzer is a syntactic traceability gate and does not "
+            "establish semantic completeness, liveness non-vacuity or theorem strength.",
+            "A clean offline Linux reproduction and two independent technical reviews "
+            "are required before Formal GO.",
         ],
         "review_attestations": reviews,
         "evidence_graph": {"nodes": nodes, "edges": []},
