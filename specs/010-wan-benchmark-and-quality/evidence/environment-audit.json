@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0.0",
+  "type_name": "FEATURE010_ASSIGNMENT_ENVIRONMENT_AUDIT",
+  "observed_at_utc": "2026-09-20T14:08:03Z",
+  "scope": "assignment_host_and_repository_visible_names_only",
+  "command_working_directory": "repository_root",
+  "authority": false,
+  "observations": [
+    {
+      "id": "physical_gpu",
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,memory.total,compute_cap",
+        "--format=csv,noheader,nounits"
+      ],
+      "exit_code": 0,
+      "normalized_output": "NVIDIA GeForce RTX 3070 Laptop GPU|8192 MiB|compute_capability=8.6",
+      "output_sha256": "4751cda0c7ba984319705eb68de1c20fdc5bcdaf39ac410b7f0c9ea8ed1a9429"
+    },
+    {
+      "id": "host_cuda_toolkit",
+      "command": [
+        "nvcc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "normalized_output": "CUDA 12.8|V12.8.61",
+      "output_sha256": "47cdb0797dad2e5b53fb5e5cf272bee96fd928f35ac0e932ee1c146ce003649d"
+    },
+    {
+      "id": "current_worktree_torch",
+      "command": [
+        ".venv/Scripts/python.exe",
+        "-c",
+        "import torch; print(torch.__version__); print(torch.cuda.is_available()); print(torch.version.cuda)"
+      ],
+      "exit_code": 0,
+      "normalized_output": "torch=2.6.0+cpu|cuda_available=false|cuda_runtime=null",
+      "output_sha256": "555e2e3bced121b735101765986a912c0e58af9e2f653a82df6f33e22973c35f"
+    },
+    {
+      "id": "separate_untracked_torch",
+      "command": [
+        "D:/delta/out/gpu-venv/Scripts/python.exe",
+        "-c",
+        "import torch; p=torch.cuda.get_device_properties(0); print(torch.__version__); print(torch.cuda.is_available()); print(torch.version.cuda); print(p.total_memory)"
+      ],
+      "exit_code": 0,
+      "normalized_output": "torch=2.6.0+cu124|cuda_available=true|cuda_runtime=12.4|total_memory=8589410304",
+      "output_sha256": "03711970a3486c8ffc8cad08f8e5d3b17122e170d4125940049dc6ab2aff7f47"
+    },
+    {
+      "id": "historical_memory_threshold",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$visible=[Int64]8589410304; $threshold=[Int64]8589934592; [Console]::WriteLine(('visible={0}|threshold={1}|delta={2}' -f $visible,$threshold,($visible-$threshold)))"
+      ],
+      "exit_code": 0,
+      "normalized_output": "visible=8589410304|threshold=8589934592|delta=-524288",
+      "output_sha256": "31ded22d2d1a08d447349e956316103decaaf630815027b87272306955009331"
+    },
+    {
+      "id": "historical_campaign_image",
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "sha256:0bb88834d973ca1b450fcc2a05333c6fe45510bee289912a5391274c351c4a4d",
+        "--format",
+        "{{.Id}}"
+      ],
+      "exit_code": 1,
+      "normalized_output": "image=sha256:0bb88834d973ca1b450fcc2a05333c6fe45510bee289912a5391274c351c4a4d|present=false",
+      "output_sha256": "04da0e890b769f6ace7858005812532d03ab70e734fec663dea80157ec88e176"
+    },
+    {
+      "id": "model_cache_names",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$root=Join-Path $env:USERPROFILE '.cache/huggingface/hub'; @(Get-ChildItem -LiteralPath $root -Directory -Filter 'models--*' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name | Sort-Object -Unique) | ForEach-Object { [Console]::WriteLine($_) }"
+      ],
+      "exit_code": 0,
+      "normalized_output": "models--microsoft--Phi-3.5-mini-instruct",
+      "output_sha256": "9209bad85bc2abf81b3990e368120fa58929e13eddd0bfc289bb6880270a5959"
+    },
+    {
+      "id": "evaluation_dataset_cache_names",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$root=Join-Path $env:USERPROFILE '.cache/huggingface'; $names=@(Get-ChildItem -LiteralPath $root -Recurse -Directory -ErrorAction SilentlyContinue | ForEach-Object { $_.Name.ToLowerInvariant() }); $w=@($names | Where-Object { $_ -match 'wikitext' }).Count -gt 0; $l=@($names | Where-Object { $_ -match 'lambada' }).Count -gt 0; $h=@($names | Where-Object { $_ -match 'hellaswag' }).Count -gt 0; [Console]::WriteLine(('root=%USERPROFILE%/.cache/huggingface|wikitext={0}|lambada={1}|hellaswag={2}' -f $w.ToString().ToLowerInvariant(),$l.ToString().ToLowerInvariant(),$h.ToString().ToLowerInvariant()))"
+      ],
+      "exit_code": 0,
+      "normalized_output": "root=%USERPROFILE%/.cache/huggingface|wikitext=false|lambada=false|hellaswag=false",
+      "output_sha256": "72abe435e5e3ee24d7fcb9d2467aacaaf12b1cbc0958b64715c5e1a7574ba3ef"
+    },
+    {
+      "id": "repository_actions_names",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$secretJson=& gh secret list --repo chartjs333/delta --app actions --json name 2>$null; $secretExit=$LASTEXITCODE; if($secretExit -ne 0){exit $secretExit}; $variableJson=& gh variable list --repo chartjs333/delta --json name 2>$null; $variableExit=$LASTEXITCODE; if($variableExit -ne 0){exit $variableExit}; $secretNames=@($secretJson | ConvertFrom-Json | ForEach-Object {$_.name} | Sort-Object -Unique); $variableNames=@($variableJson | ConvertFrom-Json | ForEach-Object {$_.name} | Sort-Object -Unique); $secretText=if($secretNames.Count -eq 0){'[]'}else{'['+($secretNames -join ',')+']'}; $variableText=if($variableNames.Count -eq 0){'[]'}else{'['+($variableNames -join ',')+']'}; [Console]::WriteLine(('actions_secret_names={0}|repository_variable_names={1}' -f $secretText,$variableText))"
+      ],
+      "exit_code": 0,
+      "normalized_output": "actions_secret_names=[]|repository_variable_names=[]",
+      "output_sha256": "252e0266066c07f7619c2200732a01ea94ac26ccde633e5e12bf2c12c55493be"
+    },
+    {
+      "id": "local_controller_authority",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$localRepo='D:/delta'; $authorityRepo=(Get-Location).Path; $paths=@('GOVERNANCE-APPROVAL-RECORD.md','controller-register-v1.json','governance-approval-record.json'); $status=@(& git -C $localRepo status --porcelain=v1 --untracked-files=all -- @paths); if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}; $registerUntracked=$status -contains '?? controller-register-v1.json'; $approvalUntracked=$status -contains '?? governance-approval-record.json'; $register=Get-Content -Raw -LiteralPath (Join-Path $localRepo 'controller-register-v1.json') | ConvertFrom-Json; $approval=Get-Content -Raw -LiteralPath (Join-Path $localRepo 'governance-approval-record.json') | ConvertFrom-Json; $sameCampaign=$register.campaign_id -ceq $approval.campaign_id; $samePackage=$register.reference_package -ceq $approval.reference_package; $sameAuthority=$register.governance_authority -ceq $approval.governance_authority; & git -C $authorityRepo merge-base --is-ancestor $approval.adopted_policy_head HEAD 2>$null; $policyInLineage=$LASTEXITCODE -eq 0; & git -C $authorityRepo cat-file -e 'HEAD:reports/benchmark/campaigns/campaign-02/controller-governance/controller-register-v1.json' 2>$null; $canonicalTracked=$LASTEXITCODE -eq 0; [Console]::WriteLine(('untracked_register_present={0}|untracked_approval_present={1}|register_approval_same_campaign={2}|register_approval_same_reference_package={3}|register_approval_same_governance_authority={4}|adopted_policy_in_current_lineage={5}|canonical_register_tracked={6}' -f $registerUntracked.ToString().ToLowerInvariant(),$approvalUntracked.ToString().ToLowerInvariant(),$sameCampaign.ToString().ToLowerInvariant(),$samePackage.ToString().ToLowerInvariant(),$sameAuthority.ToString().ToLowerInvariant(),$policyInLineage.ToString().ToLowerInvariant(),$canonicalTracked.ToString().ToLowerInvariant()))"
+      ],
+      "exit_code": 0,
+      "normalized_output": "untracked_register_present=true|untracked_approval_present=true|register_approval_same_campaign=true|register_approval_same_reference_package=false|register_approval_same_governance_authority=false|adopted_policy_in_current_lineage=false|canonical_register_tracked=false",
+      "output_sha256": "5ebc9e6908ef6e1e72ecb11e38223140ed1753f569152bb8e5f92ff9e593b657"
+    },
+    {
+      "id": "remote_inventory_paths",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$allRoots = @(@('configs', '.github', 'deploy') | Where-Object { Test-Path -LiteralPath $_ }); $candidatePaths = if ($allRoots.Count -gt 0) { @(rg --files @allRoots | rg -i 'pilot|real.?wan|tls|inventory|campaign.?02') } else { @() }; if ($LASTEXITCODE -notin @(0, 1)) { exit $LASTEXITCODE }; $approvedRoots = @(@('configs', 'deploy') | Where-Object { Test-Path -LiteralPath $_ }); $approvedPaths = if ($approvedRoots.Count -gt 0) { @(rg --files @approvedRoots | rg -i 'pilot|real.?wan|tls|inventory|campaign.?02') } else { @() }; if ($LASTEXITCODE -notin @(0, 1)) { exit $LASTEXITCODE }; $candidateList = (@($candidatePaths | ForEach-Object { $_ -replace '\\\\', '/' } | Sort-Object) -join ','); $approvedList = (@($approvedPaths | ForEach-Object { $_ -replace '\\\\', '/' } | Sort-Object) -join ','); \"candidate_paths=$candidateList|approved_inventory_paths=[$approvedList]\""
+      ],
+      "exit_code": 0,
+      "normalized_output": "candidate_paths=.github/workflows/campaign02-stage-a-bootstrap.yml|approved_inventory_paths=[]",
+      "output_sha256": "f7258b425c35342be6f504443b2c64a4de54c359af5657cbbaacfe91b2b2d0e5"
+    }
+  ],
+  "conclusion": {
+    "eligible_current_lineage_campaign02_gpu_environment": false,
+    "controller_governance_complete": false,
+    "approved_real_wan_inventory_found": false,
+    "pilot_multiregion_inventory_found": false,
+    "status": "STOPPED_BEFORE_PRIMARY_EXECUTION"
+  }
+}

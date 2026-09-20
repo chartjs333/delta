@@ -54,9 +54,20 @@ Python loads the frozen base and trains adapters under fixed tickets. C++ certif
 
 Run the complete polyglot system: Python quality arms, C++ exact state/arithmetic, Java WAN/P2P. Mandatory suites include GCC/Clang, x86_64/aarch64 where available, ASan/UBSan, TSan lane, parser fuzzing, JDK 25/26, embedded/sidecar crash behavior and exact cross-language fixtures.
 
+Benchmark governance QCs remain outside the runtime certificate graph. Current-lineage scientific
+execution is fail-closed until independent controller custody/quorums, exact physical CUDA/model/
+data identities and separate execution authority exist. Localhost, VM, VPN labels and `tc/netem`
+results are `SIMULATED`; they cannot satisfy the approved real-WAN gate.
+
 ### 011 — Pilot
 
 Deploy Java node + native runtime for validators/reducers/apply/P2P and Python workers for training. The PilotDefinition chooses embedded or sidecar profile explicitly. No implicit crash-isolation claim is permitted.
+
+Remote provisioning additionally requires an exact compatible Feature 010 GO checkpoint. The pilot
+uses externally approved TLS/signing identities and a private/controlled overlay, then advances in
+order from offline qualification through a real four-validator canary, at-least-three-region
+hierarchy canary, 20–50-worker/3–5-region target, fault campaign and signed result. Local simulation
+or the single-host working version cannot substitute for any remote wave.
 
 ## ABI and effect categories
 

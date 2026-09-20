@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0.0",
+  "type_name": "FEATURE010011_RECONCILIATION_STATUS",
+  "recorded_date": "2026-09-20",
+  "status": "WORKING_VERSION_READY",
+  "source": {
+    "branch": "feature/overnight-010-011-requalification",
+    "base_commit": "7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+    "base_tree": "2ae9ad2ad0064cfb65c956464dc737c2ab03034a",
+    "candidate_commit_binding": "runtime_git_head_and_external_handoff"
+  },
+  "formal": {
+    "status": "GO",
+    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+    "report_path": "formal/reports/formal-verification-report.json",
+    "report_sha256": "3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7",
+    "semantic_change": false
+  },
+  "working_version": {
+    "status": "PASS",
+    "scope": "single-host Step 5C only",
+    "ready_sha": "7a9faf852e0ccae4d25fdc363fbf39ecf1719341"
+  },
+  "predecessor_feature_009": {
+    "status": "PASS",
+    "merge_commit": "007eb08aa3aaee849128ba428274a9fbda561bf8",
+    "source_commit": "f43e39fa1c60d256bab5d7e37e0756f28438d5e4",
+    "evidence_commit": "a5e73b41feb2dad73aa11d810d0c700c548e11ba",
+    "report_path": "specs/009-qlora-8gb-mode/evidence/final-compatibility.json",
+    "report_sha256": "95b312b45f3c2df4293ceaa0cbb16dd1e89c5d12a86c890211353a45798516ef"
+  },
+  "historical_inputs": [
+    {
+      "pull_request": 11,
+      "head": "881301d8443c667a478617cc663d1450aee9777a",
+      "classification": "HISTORICAL_NO_GO",
+      "eligible_as_authority": false
+    },
+    {
+      "pull_request": 19,
+      "head": "b2af7b926f3525494bb5634dbedcca3fe97051e1",
+      "classification": "GOVERNANCE_STOP",
+      "eligible_as_authority": false
+    },
+    {
+      "pull_request": 28,
+      "head": "84b337892cb70d0ce9823ef2d64fab572752b145",
+      "classification": "UNSIGNED_ZERO_EXECUTION_REGISTRATION",
+      "eligible_as_authority": false
+    },
+    {
+      "pull_request": 29,
+      "head": "de3348fdcbd527046d5b66bc6d8c90df098d5aa8",
+      "classification": "PROPOSED_CUSTODY_POLICY_NOT_ADOPTED",
+      "eligible_as_authority": false
+    },
+    {
+      "pull_request": 30,
+      "head": "670b58f4c400f5c8904ca40ba9cf3a2072e98d78",
+      "classification": "NON_AUTHORITATIVE_DEMO",
+      "eligible_as_authority": false
+    }
+  ],
+  "environment_observation": {
+    "observed_at_utc": "2026-09-20T14:08:03Z",
+    "evidence_path": "specs/010-wan-benchmark-and-quality/evidence/environment-audit.json",
+    "evidence_sha256": "7e85058bd01a43e499c93a8db938798d07b76a04bbf752942ba20ac9385a4992",
+    "narrative_path": "specs/010-wan-benchmark-and-quality/evidence/environment-audit.md",
+    "physical_gpu_present": true,
+    "gpu_name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+    "gpu_memory_mib": 8192,
+    "gpu_compute_capability": "8.6",
+    "host_cuda_install_version": "12.8",
+    "worker_torch_version": "2.6.0+cpu",
+    "worker_cuda_available": false,
+    "worker_cuda_runtime": null,
+    "separate_untracked_cuda_environment_observed": true,
+    "separate_untracked_torch_version": "2.6.0+cu124",
+    "separate_untracked_torch_visible_gpu_bytes": 8589410304,
+    "historical_literal_8gib_threshold_bytes": 8589934592,
+    "required_container_image_present": false,
+    "local_model_snapshot_present": true,
+    "model_identity_bound_to_current_definition": false,
+    "required_evaluation_datasets_present": false,
+    "eligible_current_lineage_campaign02_gpu_environment": false,
+    "repository_secret_names_found": [],
+    "repository_variable_names_found": [],
+    "untracked_controller_register_observed": true,
+    "independent_controller_registry_verified": false,
+    "matching_custodial_private_keys_verified": false,
+    "bootstrap_signature_quorums_verified": false,
+    "approved_real_wan_inventory_found": false,
+    "pilot_tls_identity_inventory_found": false,
+    "pilot_multiregion_inventory_found": false
+  },
+  "feature_010": {
+    "status": "STOPPED_BEFORE_PRIMARY_EXECUTION",
+    "primary_observations": 0,
+    "simulated_wan_runs": 0,
+    "approved_real_wan_runs": 0,
+    "benchmark_result_qc_id": null,
+    "feature010_go_checkpoint_sha": null
+  },
+  "feature_011": {
+    "status": "BLOCKED_ON_FEATURE010_GO",
+    "remote_provisioning_runs": 0,
+    "pilot_runs": 0,
+    "pilot_result_qc_id": null
+  },
+  "missing_external_requirements": [
+    "adopted_campaign02_governance_and_custody_policy",
+    "four_independent_controller_authorities_and_fresh_ed25519_keys",
+    "four_authenticated_owner_key_bindings_and_six_pairwise_independence_passes",
+    "canonical_four_member_validator_set_with_three_mapping_and_three_registration_votes",
+    "fresh_current_lineage_definition_attestation_and_separate_execution_authorization",
+    "pinned_current_lineage_cuda_runtime_with_authorized_immutable_model_data_and_evaluators",
+    "approved_real_wan_multiregion_endpoints_credentials_tls_identities_and_measurement",
+    "pilot_pki_overlay_signed_images_and_20_to_50_worker_3_to_5_region_inventory",
+    "pilot_definition_and_evaluator_quorums"
+  ],
+  "claims": {
+    "feature010_go": false,
+    "feature011_go": false,
+    "real_wan_qualified": false,
+    "multiregion_qualified": false,
+    "physical_cuda_campaign02_qualified": false,
+    "controller_governance_complete": false
+  },
+  "diff_guard": {
+    "protected_paths": [
+      "formal/**",
+      "delta-core-cpp/**",
+      "delta-runtime-cpp/**",
+      "delta-ffi/**",
+      "delta-node-java/**"
+    ],
+    "protected_spine_diff_count": 0
+  }
+}
