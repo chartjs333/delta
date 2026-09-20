@@ -6,13 +6,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLCHAIN = ROOT / "formal" / "toolchain"
@@ -20,8 +18,9 @@ TLA_ROOT = ROOT / "formal" / "tla"
 PROOFS = ROOT / "formal" / "proofs"
 sys.path.insert(0, str(TOOLCHAIN))
 
+from formal_artifacts import canonical_json_bytes  # noqa: E402
 from prepare_cache import artifacts, verify  # noqa: E402
-
+from tlc_results import TlcResultError, successful_tlc_result  # noqa: E402
 
 GATES = ("parse", "safety", "liveness", "proofs", "mutants", "refinement", "report")
 
@@ -48,9 +47,7 @@ def run(
     )
 
 
-def run_capture(
-    command: list[str], *, cwd: Path, timeout: int, echo: bool = True
-) -> str:
+def run_capture(command: list[str], *, cwd: Path, timeout: int, echo: bool = True) -> str:
     rendered = " ".join(command)
     print(f"formal-gate: {rendered}", flush=True)
     result = subprocess.run(
@@ -73,17 +70,13 @@ def run_capture(
 
 
 def verify_action_coverage(output: str, required_actions: list[str]) -> None:
+    from tlc_results import top_level_action_counts
+
+    counts = top_level_action_counts(output)
     for action in required_actions:
-        pattern = re.compile(
-            rf"^<{re.escape(action)}\b[^>]*>:\s+"
-            rf"([0-9][0-9,]*):([0-9][0-9,]*)",
-            flags=re.MULTILINE,
-        )
-        match = pattern.search(output)
-        if match is None:
+        if action not in counts:
             fail(f"TLC action coverage missing for {action}")
-        invocation_count = int(match.group(2).replace(",", ""))
-        if invocation_count <= 0:
+        if counts[action] <= 0:
             fail(f"TLC action coverage is zero for {action}")
 
 
@@ -108,14 +101,7 @@ def tla_runtime() -> tuple[str, list[str], Path]:
     valid, reason = verify(jar, artifact)
     if not valid:
         fail(f"TLA2TOOLS_JAR is not the locked artifact: {reason}")
-    native_java = (
-        TOOLCHAIN
-        / "windows"
-        / "tla-runtime-17.0.20.1"
-        / "java"
-        / "bin"
-        / "java.exe"
-    )
+    native_java = TOOLCHAIN / "windows" / "tla-runtime-17.0.20.1" / "java" / "bin" / "java.exe"
     java = os.environ.get(
         "JAVA",
         str(native_java) if os.name == "nt" and native_java.is_file() else "java",
@@ -158,9 +144,7 @@ def run_tlc(kind: str) -> None:
     if len(identifiers) != len(all_configs) or len(identifiers) != len(set(identifiers)):
         fail("TLA config manifest has malformed or duplicate IDs")
     registry = json.loads(
-        (ROOT / "formal" / "reports" / "formal-id-registry.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "formal" / "reports" / "formal-id-registry.json").read_text(encoding="utf-8")
     )
     registered_configs = {entry["id"] for entry in registry["configs"]}
     unknown = set(identifiers) - registered_configs
@@ -170,6 +154,9 @@ def run_tlc(kind: str) -> None:
     if not configs:
         fail(f"no {kind} configs registered; gate success cannot be vacuous")
     java, options, jar = tla_runtime()
+    tla_lock = json.loads((TOOLCHAIN / "tla.lock").read_text(encoding="utf-8"))
+    expected_version = tla_lock["tla_tools"]["reported_tlc_version"]
+    expected_revision = tla_lock["tla_tools"]["release_commit"]
     for entry in configs:
         if not isinstance(entry.get("fingerprint_index"), int) or not (
             0 <= entry["fingerprint_index"] <= 63
@@ -190,39 +177,39 @@ def run_tlc(kind: str) -> None:
         metadata = ROOT / "formal" / "build" / "tlc" / entry["id"]
         metadata.mkdir(parents=True, exist_ok=True)
         command = [
-                java,
-                *options,
-                "-cp",
-                str(jar),
-                "tlc2.TLC",
-                "-workers",
-                str(entry.get("workers", 1)),
-                "-fp",
-                str(entry["fingerprint_index"]),
-                "-seed",
-                str(entry["seed"]),
-                "-metadir",
-                str(metadata),
-            ]
+            java,
+            *options,
+            "-cp",
+            str(jar),
+            "tlc2.TLC",
+            "-workers",
+            str(entry.get("workers", 1)),
+            "-fp",
+            str(entry["fingerprint_index"]),
+            "-seed",
+            str(entry["seed"]),
+            "-metadir",
+            str(metadata),
+        ]
         if required_coverage:
             command.extend(["-coverage", "1"])
         command.extend(["-config", str(config), str(module)])
-        output = run_capture(
-            command, cwd=TLA_ROOT, timeout=timeout, echo=not required_coverage
-        )
+        output = run_capture(command, cwd=TLA_ROOT, timeout=timeout, echo=False)
         (metadata / "tlc.log").write_text(output, encoding="utf-8")
-        verify_action_coverage(output, required_coverage)
-        if required_coverage:
-            summary_patterns = (
-                "Model checking completed.",
-                " states generated, ",
-                "The depth of the complete state graph",
+        try:
+            result = successful_tlc_result(
+                output,
+                expected_version=expected_version,
+                expected_revision=expected_revision,
+                fingerprint_index=entry["fingerprint_index"],
+                seed=entry["seed"],
+                workers=entry.get("workers", 1),
+                required_actions=required_coverage,
             )
-            for line in output.splitlines():
-                if any(pattern in line for pattern in summary_patterns) or any(
-                    line.startswith(f"<{action} ") for action in required_coverage
-                ):
-                    print(line)
+        except TlcResultError as error:
+            fail(f"{entry['id']}: invalid TLC result: {error}")
+        stable_summary = {"id": entry["id"], "kind": kind, **result}
+        print(canonical_json_bytes(stable_summary).decode("utf-8"))
 
 
 def run_proofs() -> None:
@@ -232,13 +219,7 @@ def run_proofs() -> None:
             "missing pinned formal/proofs/lake-manifest.json; "
             "implicit dependency resolution is forbidden"
         )
-    native_lake = (
-        TOOLCHAIN
-        / "windows"
-        / "lean-4.32.1-windows"
-        / "bin"
-        / "lake.exe"
-    )
+    native_lake = TOOLCHAIN / "windows" / "lean-4.32.1-windows" / "bin" / "lake.exe"
     lake = os.environ.get(
         "LAKE",
         str(native_lake) if os.name == "nt" and native_lake.is_file() else "lake",

@@ -8,11 +8,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
-from formal_artifacts import sha256_file, write_canonical_json  # noqa: E402
+from formal_artifacts import (  # noqa: E402
+    git_revision,
+    sha256_file,
+    source_commit_from_history,
+    write_canonical_json,
+)
 
 
 def git(*arguments: str) -> str:
@@ -45,12 +49,19 @@ def main() -> int:
             raise RuntimeError(f"tracked source is not a regular file: {relative}")
         files.append({"path": relative, "sha256": sha256_file(source)})
 
+    checkout_commit = git_revision(ROOT, "HEAD")
+    checkout_tree = git_revision(ROOT, "HEAD^{tree}")
+    source_commit = source_commit_from_history(ROOT)
+    source_tree = git_revision(ROOT, f"{source_commit}^{{tree}}")
+
     write_canonical_json(
         arguments.output,
         {
-            "schema_version": "1.0.0",
-            "source_commit": git("rev-parse", "HEAD"),
-            "source_tree": git("rev-parse", "HEAD^{tree}"),
+            "schema_version": "2.0.0",
+            "checkout_commit": checkout_commit,
+            "checkout_tree": checkout_tree,
+            "source_commit": source_commit,
+            "source_tree": source_tree,
             "source_clean": True,
             "files": files,
         },

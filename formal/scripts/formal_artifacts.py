@@ -7,10 +7,12 @@ checked-in formal contracts.  Production DeltaReduce packages are not imported.
 
 from __future__ import annotations
 
+import ast
 import copy
 import hashlib
 import json
 import re
+import subprocess
 import unicodedata
 from pathlib import Path, PurePosixPath
 from typing import Any, NoReturn
@@ -39,6 +41,24 @@ MUTANT_IDS = {
     "MUT-PARTIAL-PUBLICATION",
     "MUT-UNCHECKED-OVERFLOW",
 }
+GENERATED_REPORT_OUTPUTS = {
+    "formal/reports/clean-offline-reproduction.json",
+    "formal/reports/cross-artifact-analysis.json",
+    "formal/reports/executed-coverage.md",
+    "formal/reports/final-constitution-check.md",
+    "formal/reports/formal-verification-report.json",
+    "formal/reports/formal-semantics.json",
+    "formal/reports/lean-proof-report.json",
+    "formal/reports/liveness-countercheck.json",
+    "formal/reports/mutant-evidence.json",
+    "formal/reports/refinement-evidence.json",
+    "formal/reports/reproducibility-evidence.json",
+    "formal/reports/source-tree-manifest.json",
+    "formal/reports/tlc-evidence.json",
+    "formal/reports/toolchain-evidence.json",
+    *{f"formal/fixtures/counterexamples/{identifier.lower()}.json" for identifier in MUTANT_IDS},
+}
+GENERATED_REPORT_OUTPUT_GLOBS = ("formal/reports/reviews/*.json",)
 REQUIREMENT_IDS = {f"FR-{number:03d}" for number in range(1, 47)}
 REVIEW_SCOPE = {"MODEL", "LIVENESS", "PROOFS", "COVERAGE"}
 REVIEW_ATTESTATION_KEYS = {
@@ -49,21 +69,108 @@ REVIEW_ATTESTATION_KEYS = {
     "scope",
     "status",
 }
-REPRODUCTION_CHECK_IDS = (
-    "phase0",
-    "contracts",
-    "toolchain",
-    "report-generation",
-    "report-verifier",
-    "parse",
-    "safety",
-    "liveness",
-    "proofs",
-    "mutants",
-    "refinement",
-    "tlc-evidence",
-    "cross-artifact",
+REPRODUCTION_COMMANDS = (
+    ("phase0", ("python3", "formal/scripts/verify_phase0.py")),
+    (
+        "contracts",
+        (
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "formal/tests",
+            "-v",
+        ),
+    ),
+    ("parse", ("python3", "formal/scripts/run_formal_gate.py", "parse")),
+    ("safety", ("python3", "formal/scripts/run_formal_gate.py", "safety")),
+    ("liveness", ("python3", "formal/scripts/run_formal_gate.py", "liveness")),
+    ("proofs", ("python3", "formal/scripts/run_formal_gate.py", "proofs")),
+    (
+        "toolchain",
+        ("python3", "formal/scripts/collect_toolchain_evidence.py"),
+    ),
+    ("mutants", ("python3", "formal/scripts/run_formal_gate.py", "mutants")),
+    (
+        "refinement",
+        ("python3", "formal/scripts/run_formal_gate.py", "refinement"),
+    ),
+    (
+        "tlc-evidence",
+        ("python3", "formal/scripts/collect_tlc_evidence.py"),
+    ),
+    (
+        "cross-artifact",
+        ("python3", "formal/scripts/analyze_formal_consistency.py"),
+    ),
 )
+REPRODUCTION_CHECK_IDS = tuple(identifier for identifier, _ in REPRODUCTION_COMMANDS)
+REPRODUCTION_RESULT_KINDS = {
+    "phase0": "phase0-summary",
+    "contracts": "unittest-summary",
+    "parse": "sany-module-set",
+    "safety": "tlc-model-set",
+    "liveness": "tlc-model-set",
+    "proofs": "artifact-set",
+    "toolchain": "artifact-set",
+    "mutants": "artifact-set",
+    "refinement": "artifact-set",
+    "tlc-evidence": "artifact-set",
+    "cross-artifact": "artifact-set",
+}
+REPRODUCTION_RECEIPT_PROFILE = "deltareduce.clean-offline-check.v1"
+REPRODUCTION_TLC_IDS = {
+    "safety": (
+        "CFG-CONFIG-QC",
+        "CFG-SAFETY-F1",
+        "CFG-VOTE-CRASH-RECOVERY",
+        "CFG-VOTE-LIFECYCLE-CONFIG",
+        "CFG-VOTE-LIFECYCLE-ISC",
+        "CFG-VOTE-LIFECYCLE-EC",
+        "CFG-VOTE-LIFECYCLE-APC",
+        "CFG-VOTE-LIFECYCLE-PARAMETER",
+        "CFG-VOTE-LIFECYCLE-AGGREGATE",
+        "CFG-VOTE-LIFECYCLE-APPLY",
+        "CFG-VOTE-LIFECYCLE-VIEW",
+        "CFG-VOTE-LIFECYCLE-ABORT",
+        "CFG-TICKET-LEASE-AVAILABILITY",
+        "CFG-AVAILABILITY-LOSS-REPAIR",
+        "CFG-INPUT-FREEZE-SEED",
+        "CFG-CERTIFICATE-FRANKENSTEIN",
+        "CFG-SPLIT-BRAIN-PARTITION",
+        "CFG-ARITHMETIC-BOUNDARY",
+        "CFG-APPLY-RECOVERY",
+    ),
+    "liveness": (
+        "CFG-LIVENESS-CONFIG-QC",
+        "CFG-LIVENESS-ISC",
+        "CFG-LIVENESS-PLAN",
+        "CFG-LIVENESS-EVENTUAL-SYNCHRONY",
+        "CFG-LIVENESS-VIEW-CHANGE",
+        "CFG-LIVENESS-ABORT-QC",
+    ),
+}
+REPRODUCTION_ARTIFACT_PATHS = {
+    "proofs": ("formal/reports/lean-proof-report.json",),
+    "toolchain": ("formal/reports/toolchain-evidence.json",),
+    "mutants": (
+        "formal/reports/mutant-evidence.json",
+        *tuple(
+            f"formal/fixtures/counterexamples/{identifier.lower()}.json"
+            for identifier in sorted(MUTANT_IDS)
+        ),
+    ),
+    "refinement": ("formal/reports/refinement-evidence.json",),
+    "tlc-evidence": (
+        "formal/reports/executed-coverage.md",
+        "formal/reports/tlc-evidence.json",
+    ),
+    "cross-artifact": (
+        "formal/reports/cross-artifact-analysis.json",
+        "formal/reports/final-constitution-check.md",
+    ),
+}
 
 
 class CanonicalJsonError(ValueError):
@@ -167,6 +274,63 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def git_output(root: Path, *arguments: str) -> str:
+    """Run a read-only Git query against one exact checkout."""
+
+    try:
+        completed = subprocess.run(
+            [
+                "git",
+                "-c",
+                f"safe.directory={root.resolve()}",
+                "-C",
+                str(root.resolve()),
+                *arguments,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        raise ValueError(f"Git query failed: {error}") from error
+    if completed.returncode != 0:
+        raise ValueError(f"Git query failed: {completed.stderr.strip()}")
+    return completed.stdout.rstrip("\n")
+
+
+def git_revision(root: Path, revision: str) -> str:
+    """Resolve an exact Git object without consulting the network."""
+
+    value = git_output(root, "rev-parse", "--verify", revision).strip()
+    if re.fullmatch(r"[0-9a-f]{40}", value) is None:
+        raise ValueError(f"cannot resolve Git revision {revision}")
+    return value
+
+
+def is_generated_report_output(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    pure = PurePosixPath(normalized)
+    return normalized in GENERATED_REPORT_OUTPUTS or (
+        pure.parent == PurePosixPath("formal/reports/reviews")
+        and pure.suffix == ".json"
+        and bool(pure.stem)
+    )
+
+
+def source_commit_from_history(root: Path) -> str:
+    """Return the newest commit that changes bytes outside generated evidence."""
+
+    exclusions = [f":(exclude){path}" for path in sorted(GENERATED_REPORT_OUTPUTS)]
+    exclusions.extend(f":(exclude,glob){pattern}" for pattern in GENERATED_REPORT_OUTPUT_GLOBS)
+    commit = git_output(root, "log", "-1", "--format=%H", "--", ".", *exclusions).strip()
+    if re.fullmatch(r"[0-9a-f]{40}", commit) is None:
+        raise ValueError("cannot identify the latest non-evidence source commit")
+    return commit
 
 
 def semantic_text_sha256(path: Path) -> str:
@@ -324,16 +488,389 @@ def review_attestation_matches(
     return projection == expected_projection
 
 
+def reproduction_check_sha256(check: dict[str, Any], reproduction: dict[str, Any]) -> str:
+    """Hash a source-bound, independently recomputable clean-check receipt."""
+
+    receipt = {
+        "profile": REPRODUCTION_RECEIPT_PROFILE,
+        "id": check["id"],
+        "command": check["command"],
+        "exit_code": check["exit_code"],
+        "status": check["status"],
+        "result": check["result"],
+        "source_commit": reproduction["source_commit"],
+        "source_tree": reproduction["source_tree"],
+        "source_manifest_sha256": reproduction["source_manifest_sha256"],
+        "formal_semantics_id": reproduction["formal_semantics_id"],
+        "environment": reproduction["environment"],
+    }
+    return sha256_bytes(canonical_json_bytes(receipt))
+
+
+def _is_sha256(value: Any) -> bool:
+    return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+
+
+def _declared_unittest_count(root: Path) -> int:
+    """Count source-declared unittest methods without importing or executing tests."""
+
+    count = 0
+    tests_root = root / "formal" / "tests"
+    for path in sorted(tests_root.rglob("test*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in tree.body:
+            if not isinstance(node, ast.ClassDef):
+                continue
+            is_test_case = any(
+                (isinstance(base, ast.Name) and base.id == "TestCase")
+                or (isinstance(base, ast.Attribute) and base.attr == "TestCase")
+                for base in node.bases
+            )
+            if not is_test_case:
+                continue
+            count += sum(
+                isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and member.name.startswith("test_")
+                for member in node.body
+            )
+    return count
+
+
+def _valid_artifact_payload(
+    payload: Any,
+    *,
+    expected_paths: tuple[str, ...] | None = None,
+    root: Path | None = None,
+) -> bool:
+    if not isinstance(payload, dict) or set(payload) != {"artifacts"}:
+        return False
+    artifacts = payload["artifacts"]
+    if not isinstance(artifacts, list) or not artifacts:
+        return False
+    paths: list[str] = []
+    for item in artifacts:
+        if (
+            not isinstance(item, dict)
+            or set(item) != {"path", "sha256"}
+            or not isinstance(item["path"], str)
+            or not _is_sha256(item["sha256"])
+        ):
+            return False
+        paths.append(item["path"])
+        if root is not None:
+            try:
+                path = safe_repo_path(root, item["path"])
+            except ValueError:
+                return False
+            if not path.is_file() or sha256_file(path) != item["sha256"]:
+                return False
+    if paths != sorted(paths) or len(paths) != len(set(paths)):
+        return False
+    if expected_paths is not None and paths != sorted(expected_paths):
+        return False
+    return True
+
+
+def _valid_tlc_projection(value: Any) -> bool:
+    expected_keys = {
+        "schema_version",
+        "outcome",
+        "tlc_version",
+        "tlc_revision",
+        "fingerprint_index",
+        "seed",
+        "workers",
+        "states",
+        "distinct_states",
+        "diameter",
+        "required_action_reached",
+    }
+    if not isinstance(value, dict) or set(value) != expected_keys:
+        return False
+    reached = value["required_action_reached"]
+    return (
+        value["schema_version"] == "1.0.0"
+        and value["outcome"] == "NO_ERROR"
+        and isinstance(value["tlc_version"], str)
+        and bool(value["tlc_version"])
+        and isinstance(value["tlc_revision"], str)
+        and re.fullmatch(r"[0-9a-f]{7}", value["tlc_revision"]) is not None
+        and isinstance(value["fingerprint_index"], int)
+        and not isinstance(value["fingerprint_index"], bool)
+        and 0 <= value["fingerprint_index"] <= 63
+        and isinstance(value["seed"], int)
+        and not isinstance(value["seed"], bool)
+        and value["seed"] > 0
+        and value["workers"] == 1
+        and isinstance(value["states"], int)
+        and isinstance(value["distinct_states"], int)
+        and isinstance(value["diameter"], int)
+        and value["states"] >= value["distinct_states"] > 0
+        and value["diameter"] >= 0
+        and isinstance(reached, dict)
+        and all(isinstance(action, str) and action for action in reached)
+        and all(flag is True for flag in reached.values())
+    )
+
+
+def _valid_tlc_payload(identifier: str, payload: Any, root: Path | None) -> bool:
+    kind = identifier
+    expected_keys = {"models"} | ({"artifacts"} if kind == "liveness" else set())
+    if not isinstance(payload, dict) or set(payload) != expected_keys:
+        return False
+    models = payload["models"]
+    if not isinstance(models, list) or [
+        model.get("id") for model in models if isinstance(model, dict)
+    ] != list(REPRODUCTION_TLC_IDS[kind]):
+        return False
+
+    source_entries: dict[str, Any] | None = None
+    tool: dict[str, Any] | None = None
+    evidence_models: dict[str, Any] | None = None
+    if root is not None:
+        try:
+            manifest = load_json_strict(root / "formal" / "tla" / "cfg" / "config-manifest.json")
+            lock = load_json_strict(root / "formal" / "toolchain" / "tla.lock")
+            evidence = load_json_strict(root / "formal" / "reports" / "tlc-evidence.json")
+            entries = [entry for entry in manifest["configs"] if entry.get("kind") == kind]
+            if [entry.get("id") for entry in entries] != list(REPRODUCTION_TLC_IDS[kind]):
+                return False
+            source_entries = {entry["id"]: entry for entry in entries}
+            tool = lock["tla_tools"]
+            if (
+                not _is_sha256(tool.get("sha256"))
+                or not isinstance(tool.get("reported_tlc_version"), str)
+                or not isinstance(tool.get("release_commit"), str)
+                or re.fullmatch(r"[0-9a-f]{40}", tool["release_commit"]) is None
+            ):
+                return False
+            all_evidence_models = evidence["models"]
+            expected_evidence_ids = [
+                *REPRODUCTION_TLC_IDS["safety"],
+                *REPRODUCTION_TLC_IDS["liveness"],
+            ]
+            if (
+                evidence.get("schema_version") != "2.0.0"
+                or evidence.get("status") != "PASS"
+                or not isinstance(all_evidence_models, list)
+                or [record.get("id") for record in all_evidence_models] != expected_evidence_ids
+            ):
+                return False
+            evidence_models = {record["id"]: record for record in all_evidence_models}
+        except (AttributeError, CanonicalJsonError, KeyError, OSError, TypeError, ValueError):
+            return False
+
+    for model in models:
+        if not isinstance(model, dict) or set(model) != {
+            "id",
+            "module_sha256",
+            "config_sha256",
+            "tool_sha256",
+            "result",
+        }:
+            return False
+        if not all(
+            _is_sha256(model[field]) for field in ("module_sha256", "config_sha256", "tool_sha256")
+        ) or not _valid_tlc_projection(model["result"]):
+            return False
+        if (
+            root is not None
+            and source_entries is not None
+            and tool is not None
+            and evidence_models is not None
+        ):
+            entry = source_entries[model["id"]]
+            result = model["result"]
+            try:
+                required_actions = entry.get("required_action_coverage", [])
+                if (
+                    not isinstance(required_actions, list)
+                    or len(required_actions) != len(set(required_actions))
+                    or not all(isinstance(action, str) and action for action in required_actions)
+                ):
+                    return False
+                module = safe_repo_path(root, f"formal/tla/{entry['module']}")
+                config = safe_repo_path(root, f"formal/tla/{entry['config']}")
+                evidence_model = evidence_models[model["id"]]
+                evidence_without_hash = dict(evidence_model)
+                evidence_hash = evidence_without_hash.pop("tlc_result_sha256")
+                if (
+                    not module.is_file()
+                    or not config.is_file()
+                    or model["module_sha256"] != sha256_file(module)
+                    or model["config_sha256"] != sha256_file(config)
+                    or model["tool_sha256"] != tool["sha256"]
+                    or result["tlc_version"] != tool["reported_tlc_version"]
+                    or result["tlc_revision"] != tool["release_commit"][:7]
+                    or result["fingerprint_index"] != entry["fingerprint_index"]
+                    or result["seed"] != entry["seed"]
+                    or result["workers"] != entry["workers"]
+                    or result["required_action_reached"]
+                    != {action: True for action in sorted(required_actions)}
+                    or evidence_hash != sha256_bytes(canonical_json_bytes(evidence_without_hash))
+                    or evidence_model.get("status") != "PASS"
+                    or evidence_model.get("kind") != kind
+                    or evidence_model.get("module") != f"formal/tla/{entry['module']}"
+                    or evidence_model.get("config") != f"formal/tla/{entry['config']}"
+                    or evidence_model.get("module_sha256") != model["module_sha256"]
+                    or evidence_model.get("config_sha256") != model["config_sha256"]
+                    or evidence_model.get("tool_sha256") != model["tool_sha256"]
+                    or evidence_model.get("fingerprint_index") != result["fingerprint_index"]
+                    or evidence_model.get("seed") != result["seed"]
+                    or evidence_model.get("workers") != result["workers"]
+                    or evidence_model.get("states") != result["states"]
+                    or evidence_model.get("distinct_states") != result["distinct_states"]
+                    or evidence_model.get("diameter") != result["diameter"]
+                    or evidence_model.get("required_action_reached")
+                    != result["required_action_reached"]
+                ):
+                    return False
+            except (KeyError, OSError, TypeError, ValueError):
+                return False
+    if kind == "liveness" and not _valid_artifact_payload(
+        {"artifacts": payload["artifacts"]},
+        expected_paths=("formal/reports/liveness-countercheck.json",),
+        root=root,
+    ):
+        return False
+    return True
+
+
+def _valid_reproduction_result(identifier: str, result: Any, root: Path | None = None) -> bool:
+    if not isinstance(result, dict) or set(result) != {
+        "schema_version",
+        "kind",
+        "status",
+        "payload",
+    }:
+        return False
+    if (
+        result["schema_version"] != "1.0.0"
+        or result["kind"] != REPRODUCTION_RESULT_KINDS.get(identifier)
+        or result["status"] != "PASS"
+        or not isinstance(result["payload"], dict)
+    ):
+        return False
+    payload = result["payload"]
+    if identifier == "phase0":
+        count_keys = {
+            "actions",
+            "configs",
+            "faults",
+            "invariants",
+            "proof_obligations",
+            "temporal_properties",
+        }
+        valid_payload = (
+            set(payload)
+            == {
+                "schema_version",
+                "phase",
+                "status",
+                "formal_semantics_version",
+                "input_bundle_sha256",
+                "counts",
+                "errors",
+            }
+            and payload["schema_version"] == "1.0.0"
+            and payload["phase"] == "T000-T003"
+            and payload["status"] == "PASS"
+            and payload["formal_semantics_version"] == "1.0.0"
+            and _is_sha256(payload["input_bundle_sha256"])
+            and isinstance(payload["counts"], dict)
+            and set(payload["counts"]) == count_keys
+            and all(
+                isinstance(count, int) and not isinstance(count, bool) and count > 0
+                for count in payload["counts"].values()
+            )
+            and payload["errors"] == []
+        )
+        if valid_payload and root is not None:
+            try:
+                baseline = load_json_strict(root / "formal" / "reports" / "baseline-inputs.json")
+                registry = load_json_strict(root / "formal" / "reports" / "formal-id-registry.json")
+                expected_counts = {key: len(registry[key]) for key in count_keys}
+                valid_payload = (
+                    payload["formal_semantics_version"]
+                    == registry["formal_semantics_version"]
+                    == baseline["formal_semantics_version"]
+                    and payload["input_bundle_sha256"] == baseline["input_bundle_sha256"]
+                    and payload["counts"] == expected_counts
+                )
+            except (CanonicalJsonError, KeyError, OSError, TypeError, ValueError):
+                valid_payload = False
+    elif identifier == "contracts":
+        valid_payload = (
+            set(payload) == {"framework", "tests_run"}
+            and payload["framework"] == "unittest"
+            and isinstance(payload["tests_run"], int)
+            and not isinstance(payload["tests_run"], bool)
+            and payload["tests_run"] > 0
+        )
+        if valid_payload and root is not None:
+            try:
+                expected_test_count = _declared_unittest_count(root)
+                valid_payload = (
+                    expected_test_count > 0 and payload["tests_run"] == expected_test_count
+                )
+            except (OSError, SyntaxError, UnicodeError):
+                valid_payload = False
+    elif identifier == "parse":
+        valid_payload = _valid_artifact_payload(payload, root=root)
+        if valid_payload:
+            paths = [item["path"] for item in payload["artifacts"]]
+            valid_payload = all(
+                path.startswith("formal/tla/") and path.endswith(".tla") for path in paths
+            )
+            if root is not None:
+                expected = sorted(
+                    path.relative_to(root).as_posix()
+                    for path in (root / "formal" / "tla").rglob("*.tla")
+                )
+                valid_payload = paths == expected
+    elif identifier in {"safety", "liveness"}:
+        valid_payload = _valid_tlc_payload(identifier, payload, root)
+    else:
+        expected_paths = REPRODUCTION_ARTIFACT_PATHS.get(identifier)
+        valid_payload = expected_paths is not None and _valid_artifact_payload(
+            payload, expected_paths=expected_paths, root=root
+        )
+    if not valid_payload:
+        return False
+    try:
+        canonical_json_bytes(result)
+    except CanonicalJsonError:
+        return False
+    return True
+
+
 def reproduction_matches_source(
     reproduction: Any,
     commit: str,
     formal_semantics_id: str,
     *,
     source_tree: str | None = None,
+    root: Path | None = None,
 ) -> bool:
     """Validate clean-reproduction shape and its exact source binding."""
 
-    if not isinstance(reproduction, dict):
+    expected_keys = {
+        "schema_version",
+        "status",
+        "environment",
+        "source_commit",
+        "source_tree",
+        "source_clean_at_start",
+        "source_manifest_sha256",
+        "formal_semantics_id",
+        "platform",
+        "machine",
+        "network_interfaces",
+        "network_proxies_forced_to_loopback",
+        "checks",
+        "errors",
+    }
+    if not isinstance(reproduction, dict) or set(reproduction) != expected_keys:
         return False
     checks = reproduction.get("checks")
     if not isinstance(checks, list):
@@ -342,22 +879,42 @@ def reproduction_matches_source(
         REPRODUCTION_CHECK_IDS
     ):
         return False
-    checks_pass = all(
-        isinstance(item, dict)
-        and item.get("status") == "PASS"
-        and item.get("exit_code") == 0
-        and isinstance(item.get("command"), list)
-        and bool(item["command"])
-        and isinstance(item.get("output_sha256"), str)
-        and re.fullmatch(r"[0-9a-f]{64}", item["output_sha256"]) is not None
-        for item in checks
-    )
+    expected_commands = {identifier: list(command) for identifier, command in REPRODUCTION_COMMANDS}
+    checks_pass = True
+    for item in checks:
+        if not isinstance(item, dict) or set(item) != {
+            "id",
+            "command",
+            "exit_code",
+            "result",
+            "output_sha256",
+            "status",
+        }:
+            checks_pass = False
+            break
+        identifier = item["id"]
+        if (
+            item["status"] != "PASS"
+            or item["exit_code"] != 0
+            or item["command"] != expected_commands.get(identifier)
+            or not _valid_reproduction_result(identifier, item["result"], root)
+            or not isinstance(item["output_sha256"], str)
+            or re.fullmatch(r"[0-9a-f]{64}", item["output_sha256"]) is None
+        ):
+            checks_pass = False
+            break
+        try:
+            if item["output_sha256"] != reproduction_check_sha256(item, reproduction):
+                checks_pass = False
+                break
+        except (CanonicalJsonError, KeyError, TypeError):
+            checks_pass = False
+            break
     recorded_tree = reproduction.get("source_tree")
     return (
-        reproduction.get("schema_version") == "1.0.0"
+        reproduction.get("schema_version") == "2.0.0"
         and reproduction.get("status") == "PASS"
-        and reproduction.get("environment")
-        == "linux/amd64 clean container with --network none"
+        and reproduction.get("environment") == "linux/amd64 clean container with --network none"
         and reproduction.get("source_commit") == commit
         and reproduction.get("source_clean_at_start") is True
         and reproduction.get("formal_semantics_id") == formal_semantics_id
@@ -368,12 +925,9 @@ def reproduction_matches_source(
         and re.fullmatch(r"[0-9a-f]{40}", recorded_tree) is not None
         and (source_tree is None or recorded_tree == source_tree)
         and isinstance(reproduction.get("source_manifest_sha256"), str)
-        and re.fullmatch(
-            r"[0-9a-f]{64}", reproduction["source_manifest_sha256"]
-        )
-        is not None
+        and re.fullmatch(r"[0-9a-f]{64}", reproduction["source_manifest_sha256"]) is not None
         and str(reproduction.get("machine", "")).lower() in {"amd64", "x86_64"}
-        and str(reproduction.get("platform", "")).startswith("Linux-")
+        and reproduction.get("platform") == "Linux-amd64"
         and checks_pass
     )
 
@@ -515,10 +1069,17 @@ def _check_source_tree(report: dict[str, Any], root: Path, reasons: set[str]) ->
         if not manifest_path.is_file() or sha256_file(manifest_path) != source["tree_sha256"]:
             raise ValueError("manifest content ID mismatch")
         manifest = load_json_strict(manifest_path)
-        if set(manifest) != {"schema_version", "commit", "files"}:
+        if set(manifest) != {"schema_version", "commit", "git_tree", "files"}:
             raise ValueError("manifest shape mismatch")
-        if manifest["schema_version"] != "1.0.0" or manifest["commit"] != source["commit"]:
+        if (
+            manifest["schema_version"] != "2.0.0"
+            or manifest["commit"] != source["commit"]
+            or not isinstance(manifest["git_tree"], str)
+            or re.fullmatch(r"[0-9a-f]{40}", manifest["git_tree"]) is None
+        ):
             raise ValueError("manifest version/commit mismatch")
+        if git_revision(root, f"{manifest['commit']}^{{tree}}") != manifest["git_tree"]:
+            raise ValueError("manifest Git tree does not belong to its source commit")
         files = manifest["files"]
         if not isinstance(files, list):
             raise ValueError("manifest files must be an array")
@@ -533,9 +1094,7 @@ def _check_source_tree(report: dict[str, Any], root: Path, reasons: set[str]) ->
             if not path.is_file():
                 raise ValueError(f"manifest file missing: {item['path']}")
             actual_sha256 = (
-                semantic_text_sha256(path)
-                if item["path"] in semantic_paths
-                else sha256_file(path)
+                semantic_text_sha256(path) if item["path"] in semantic_paths else sha256_file(path)
             )
             if actual_sha256 != item["sha256"]:
                 raise ValueError(f"manifest file mismatch: {item['path']}")
@@ -568,11 +1127,7 @@ def _check_reproduction_binding(
     reasons: set[str],
 ) -> None:
     evidence_id = "EVIDENCE-REPRODUCIBILITY"
-    nodes = [
-        node
-        for node in report["evidence_graph"]["nodes"]
-        if node["id"] == evidence_id
-    ]
+    nodes = [node for node in report["evidence_graph"]["nodes"] if node["id"] == evidence_id]
     valid = False
     if len(nodes) == 1 and evidence_id in valid_evidence:
         node = nodes[0]
@@ -583,10 +1138,14 @@ def _check_reproduction_binding(
             payload = load_json_strict(path)
             if path.read_bytes() != canonical_json_bytes(payload):
                 raise ValueError("reproduction evidence is not canonical JSON")
+            source_manifest_path = safe_repo_path(root, report["source_tree"]["manifest_path"])
+            source_manifest = load_json_strict(source_manifest_path)
             valid = reproduction_matches_source(
                 payload,
                 report["source_tree"]["commit"],
                 report["formal_semantics_id"],
+                source_tree=source_manifest["git_tree"],
+                root=root,
             )
         except (CanonicalJsonError, OSError, TypeError, ValueError):
             valid = False
@@ -644,9 +1203,7 @@ def determine_report_decision(
     _check_expected_records(
         report["model_checks"], config_ids, "MODEL_CHECK", valid_evidence, reasons
     )
-    property_ids = {
-        item["id"] for item in registry["invariants"] + registry["temporal_properties"]
-    }
+    property_ids = {item["id"] for item in registry["invariants"] + registry["temporal_properties"]}
     for record in report["model_checks"]:
         properties = record["properties"]
         numeric_results = (
@@ -658,8 +1215,7 @@ def determine_report_decision(
         if (
             not properties
             or any(
-                item["id"] not in property_ids or item["status"] != "PASS"
-                for item in properties
+                item["id"] not in property_ids or item["status"] != "PASS" for item in properties
             )
             or any(value is None for value in numeric_results)
             or (
@@ -719,9 +1275,7 @@ def determine_report_decision(
         _reason(reasons, "UNRESOLVED_COVERAGE")
 
     passing_reviewers: set[str] = set()
-    evidence_by_id = {
-        node["id"]: node for node in report["evidence_graph"]["nodes"]
-    }
+    evidence_by_id = {node["id"]: node for node in report["evidence_graph"]["nodes"]}
     for review in report["review_attestations"]:
         evidence_id = review["evidence_id"]
         binding_valid = False

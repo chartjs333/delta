@@ -35,20 +35,32 @@ docker run --rm --network none -v "$PWD:/workspace" -w /workspace \
   deltareduce-formal:local python formal/scripts/run_clean_offline_reproduction.py
 ```
 
-The script refuses to pass unless it starts from a clean Git tree inside Linux,
-whose complete tracked bytes match the mounted clean-Git manifest, detects
-`/.dockerenv`, observes only the loopback network interface, verifies the complete
-local cache and passes every machine gate. It writes
+The script refuses to pass unless it starts from complete tracked bytes matching
+the mounted clean-Git manifest, runs inside Linux and Docker, observes only the
+loopback network interface, verifies the complete local cache and passes every
+machine gate. It regenerates Linux toolchain evidence and writes
 `formal/reports/clean-offline-reproduction.json`; the report generator consumes
-that exact evidence for FR-042.
+that exact evidence for FR-042. Report generation and verification then execute
+as mandatory post-finalization gates. They are deliberately outside the
+reproduction payload, which breaks the otherwise unavoidable
+report→reproduction→report self-reference and ensures the report consumes the
+fresh evidence from the same run.
 
-After the mounted source manifest is verified, the runner regenerates the
-current deterministic draft report before invoking its offline verifier. This
-prevents a stale checked-in evidence overlay from satisfying the verifier after
-the source baseline changes. The runner passes that already verified manifest
-to the generator as its source identity, so the network-none image does not
-need an ambient Git executable. The final report is regenerated once more
-outside the runner so it consumes the newly written clean-reproduction record.
+The source manifest records two identities: the exact clean checkout (including
+committed evidence/review overlays) and the latest commit that changes anything
+outside the registered generated-output boundary. The latter remains the
+reviewed source identity, so committing reproducible evidence or review
+attestations cannot create a new `reviewed_commit` cycle.
+
+Each successful reproduction check contains a versioned canonical result and a
+source-bound receipt hash that the offline report verifier recomputes. Raw
+stdout is retained only in failure diagnostics. Mandatory TLC configs use one
+worker so graph depth is deterministic. TLC evidence content-addresses the
+locked tool, module/config bytes, final state metrics, properties and required
+action reachability; PID, timestamps, durations, heap/host telemetry, progress
+rates and exact coverage counters remain non-addressed runtime diagnostics in
+`formal/build/`. Mutant evidence hashes a normalized full counterexample that
+retains state valuations while removing only those documented runtime fields.
 
 ## Update policy
 

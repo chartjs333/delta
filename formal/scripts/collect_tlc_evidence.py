@@ -4,11 +4,9 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parents[2]
 TLA = ROOT / "formal" / "tla"
@@ -16,16 +14,11 @@ REPORTS = ROOT / "formal" / "reports"
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import load_json_strict, sha256_file, write_canonical_json  # noqa: E402
-
-
-SUMMARY = re.compile(
-    r"([0-9][0-9,]*) states generated, ([0-9][0-9,]*) distinct states found"
-)
-DEPTH = re.compile(r"The depth of the complete state graph search is ([0-9][0-9,]*)")
-ACTION = re.compile(
-    r"^<([A-Za-z][A-Za-z0-9_]*)\b[^>]*>:\s+"
-    r"([0-9][0-9,]*):([0-9][0-9,]*)",
-    flags=re.MULTILINE,
+from tlc_results import (  # noqa: E402
+    TlcResultError,
+    result_sha256,
+    successful_tlc_result,
+    top_level_action_counts,
 )
 
 
@@ -70,17 +63,23 @@ def main() -> int:
     manifest_path = TLA / "cfg" / "config-manifest.json"
     manifest = load_json_strict(manifest_path)
     registry = load_json_strict(REPORTS / "formal-id-registry.json")
+    tla_lock = load_json_strict(ROOT / "formal" / "toolchain" / "tla.lock")
+    expected_version = tla_lock["tla_tools"]["reported_tlc_version"]
+    expected_revision = tla_lock["tla_tools"]["release_commit"]
+    tool_sha256 = tla_lock["tla_tools"]["sha256"]
     records: list[dict[str, Any]] = []
     errors: list[str] = []
     markdown = [
         "# Executed TLC coverage evidence",
         "",
-        "All counts below come from the checked-in deterministic config manifest and "
-        "the corresponding retained TLC log. No TLC symmetry set or state constraint "
-        "is used. Bounds reduce constants only; every required action is checked for "
-        "non-zero invocation coverage.",
+        "All metrics below come from the checked-in deterministic config manifest and "
+        "a validated TLC semantic-result projection. Raw PID, timing, host telemetry "
+        "and coverage counters are diagnostic only and are not content-addressed. No "
+        "TLC symmetry set or state constraint is used. Bounds reduce constants only; "
+        "every required action is checked for non-zero reachability.",
         "",
-        "| Config | Kind | States | Distinct | Diameter | Terminal outcome classes | Required actions |",
+        "| Config | Kind | States | Distinct | Diameter | "
+        "Terminal outcome classes | Required actions |",
         "| --- | --- | ---: | ---: | ---: | --- | ---: |",
     ]
 
@@ -91,29 +90,24 @@ def main() -> int:
             errors.append(f"{identifier}: missing TLC log")
             continue
         output = log.read_text(encoding="utf-8", errors="replace")
-        summaries = SUMMARY.findall(output)
-        depths = DEPTH.findall(output)
-        if (
-            "Model checking completed. No error has been found." not in output
-            or not summaries
-            or not depths
-        ):
-            errors.append(f"{identifier}: incomplete or failed TLC evidence")
+        try:
+            parsed = successful_tlc_result(
+                output,
+                expected_version=expected_version,
+                expected_revision=expected_revision,
+                fingerprint_index=entry["fingerprint_index"],
+                seed=entry["seed"],
+                workers=entry["workers"],
+                required_actions=entry.get("required_action_coverage", []),
+            )
+            action_counts = top_level_action_counts(output)
+        except TlcResultError as error:
+            errors.append(f"{identifier}: invalid TLC evidence: {error}")
             continue
-        action_counts = {
-            action: int(invocations.replace(",", ""))
-            for action, _distinct, invocations in ACTION.findall(output)
-        }
-        required_counts: dict[str, int] = {}
-        for action in entry.get("required_action_coverage", []):
-            count = action_counts.get(action, 0)
-            required_counts[action] = count
-            if count <= 0:
-                errors.append(f"{identifier}: unreachable required action {action}")
-        states, distinct = (
-            int(value.replace(",", "")) for value in summaries[-1]
-        )
-        diameter = int(depths[-1].replace(",", ""))
+        required_reached = parsed["required_action_reached"]
+        states = parsed["states"]
+        distinct = parsed["distinct_states"]
+        diameter = parsed["diameter"]
         terminals: list[str] = []
         if action_counts.get("HardAbortAction", 0) > 0:
             terminals.append("ABORTED")
@@ -134,11 +128,16 @@ def main() -> int:
             and "ABORTED" not in terminals
         ):
             terminals.append("ABORTED")
+        module_path = TLA / entry["module"]
+        config_path = TLA / entry["config"]
         record = {
             "id": identifier,
             "kind": entry["kind"],
             "module": f"formal/tla/{entry['module']}",
+            "module_sha256": sha256_file(module_path),
             "config": f"formal/tla/{entry['config']}",
+            "config_sha256": sha256_file(config_path),
+            "tool_sha256": tool_sha256,
             "seed": entry["seed"],
             "fingerprint_index": entry["fingerprint_index"],
             "workers": entry["workers"],
@@ -148,19 +147,19 @@ def main() -> int:
             "terminal_outcomes_observed": terminals,
             "terminal_outcome_class_count": len(terminals),
             "properties": properties,
-            "required_action_invocations": required_counts,
-            "log_sha256": sha256_file(log),
+            "required_action_reached": required_reached,
             "status": "PASS",
         }
+        record["tlc_result_sha256"] = result_sha256(record)
         records.append(record)
         markdown.append(
             f"| {identifier} | {entry['kind']} | {states} | {distinct} | "
             f"{diameter} | {', '.join(terminals) if terminals else 'none'} | "
-            f"{len(required_counts)} |"
+            f"{len(required_reached)} |"
         )
 
     evidence = {
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "status": "PASS" if not errors else "FAIL",
         "manifest": {
             "path": "formal/tla/cfg/config-manifest.json",
@@ -197,9 +196,7 @@ def main() -> int:
         "errors": errors,
     }
     write_canonical_json(REPORTS / "tlc-evidence.json", evidence)
-    (REPORTS / "executed-coverage.md").write_text(
-        "\n".join(markdown) + "\n", encoding="utf-8"
-    )
+    (REPORTS / "executed-coverage.md").write_text("\n".join(markdown) + "\n", encoding="utf-8")
     print(json.dumps(evidence, sort_keys=True, separators=(",", ":")))
     return 0 if not errors else 1
 

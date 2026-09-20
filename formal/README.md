@@ -63,3 +63,11 @@ python formal/scripts/verify_formal_report.py formal/reports/formal-verification
 
 `make formal-report` additionally requires a deterministic `GO`; it is expected
 to fail closed while either mandatory independent review is absent.
+
+The retained clean-container runner performs the same substantive gates with
+single-worker TLC, records source-bound canonical result receipts, then
+generates and verifies the report only after the fresh reproduction record
+exists. Raw TLC timing, PID, host telemetry, progress rates and exact coverage
+counters are diagnostics rather than correctness evidence; final state metrics,
+properties, required-action reachability and normalized counterexamples remain
+content-addressed.
