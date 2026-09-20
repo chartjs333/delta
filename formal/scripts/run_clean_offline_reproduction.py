@@ -20,6 +20,7 @@ FINAL_REPORT = ROOT / "formal" / "reports" / "formal-verification-report.json"
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import (  # noqa: E402
+    GENERATED_REPORT_OUTPUTS,
     REPRODUCTION_COMMANDS,
     CanonicalJsonError,
     canonical_json_bytes,
@@ -65,6 +66,17 @@ FINALIZATION_COMMANDS = (
         60,
     ),
 )
+
+
+def clear_generated_outputs(root: Path) -> None:
+    """Remove only the declared evidence overlay before a clean reproduction."""
+
+    for relative in sorted(GENERATED_REPORT_OUTPUTS):
+        (root / relative).unlink(missing_ok=True)
+    review_directory = root / "formal" / "reports" / "reviews"
+    for review in sorted(review_directory.glob("*.json")):
+        if review.is_file():
+            review.unlink()
 
 
 RUNTIME_PREFIXES = (
@@ -378,8 +390,7 @@ def main() -> int:
         except (OSError, ValueError) as error:
             errors.append(f"source manifest verification failed: {error}")
 
-    for stale_output in (REPORT, REPRODUCTION_EVIDENCE, FINAL_REPORT):
-        stale_output.unlink(missing_ok=True)
+    clear_generated_outputs(ROOT)
 
     semantic_artifacts = discover_semantic_artifacts(ROOT)
     formal_semantics_id = derive_formal_semantics_id("1.0.0", semantic_artifacts)

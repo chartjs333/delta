@@ -13,7 +13,10 @@ REPOSITORY = Path(__file__).resolve().parents[2]
 SCRIPTS = REPOSITORY / "formal" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
+from collect_tlc_evidence import observed_terminal_outcomes  # noqa: E402
+from compare_reproduction_evidence import compare_generated_evidence  # noqa: E402
 from formal_artifacts import (  # noqa: E402
+    GENERATED_REPORT_OUTPUTS,
     MUTANT_IDS,
     REPRODUCTION_ARTIFACT_PATHS,
     REPRODUCTION_CHECK_IDS,
@@ -52,12 +55,14 @@ from generate_formal_report import (  # noqa: E402
 from run_clean_offline_reproduction import (  # noqa: E402
     COMMANDS,
     FINALIZATION_COMMANDS,
+    clear_generated_outputs,
     git_safe_directory_environment,
     stage_result,
     verify_complete_reproduction_receipt,
     verify_source_manifest,
 )
 from run_formal_gate import verify_action_coverage, verify_sany_output  # noqa: E402
+from stage_reproduction_evidence import stage_generated_evidence  # noqa: E402
 
 HASH_A = "sha256:" + "a" * 64
 HASH_B = "sha256:" + "b" * 64
@@ -494,6 +499,105 @@ class ReportSourceBoundaryTests(unittest.TestCase):
         self.assertGreaterEqual(len(checkout_lines), 5)
         for index in checkout_lines:
             self.assertIn("fetch-depth: 0", [line.strip() for line in lines[index : index + 6]])
+
+    def test_formal_workflow_runs_two_complete_clean_reproductions(self) -> None:
+        workflow = (REPOSITORY / ".github" / "workflows" / "formal.yml").read_text(encoding="utf-8")
+        self.assertIn("replica: [a, b]", workflow)
+        self.assertIn("python3 formal/scripts/stage_reproduction_evidence.py ", workflow)
+        self.assertIn("formal-clean-offline-${{ matrix.replica }}-${{ github.run_id }}", workflow)
+        self.assertIn("compare-clean-offline-reproductions:", workflow)
+        self.assertIn("Require byte-identical complete evidence bundles", workflow)
+        self.assertIn("- compare-clean-offline-reproductions", workflow)
+
+    def test_reproduction_artifact_stages_only_exact_generated_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            root = temporary / "source"
+            output = temporary / "staged"
+            for relative in GENERATED_REPORT_OUTPUTS:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(relative.encode("utf-8"))
+            unknown = root / "formal" / "fixtures" / "counterexamples" / "unknown.json"
+            unknown.write_text("{}", encoding="utf-8")
+
+            staged = stage_generated_evidence(root, output)
+
+            self.assertEqual(staged, sorted(GENERATED_REPORT_OUTPUTS))
+            self.assertEqual(
+                {
+                    path.relative_to(output).as_posix()
+                    for path in output.rglob("*")
+                    if path.is_file()
+                },
+                GENERATED_REPORT_OUTPUTS,
+            )
+            self.assertFalse((output / unknown.relative_to(root)).exists())
+
+    def test_reproduction_artifact_rejects_stale_reviews(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            root = temporary / "source"
+            for relative in GENERATED_REPORT_OUTPUTS:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"evidence")
+            review = root / "formal" / "reports" / "reviews" / "stale.json"
+            review.parent.mkdir(parents=True, exist_ok=True)
+            review.write_text("{}", encoding="utf-8")
+
+            with self.assertRaisesRegex(RuntimeError, "stale review attestations"):
+                stage_generated_evidence(root, temporary / "staged")
+
+    def test_reproduction_artifact_comparison_is_exact_and_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            left = temporary / "left"
+            right = temporary / "right"
+            for relative in GENERATED_REPORT_OUTPUTS:
+                for root in (left, right):
+                    path = root / relative
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(relative.encode("utf-8"))
+
+            hashes = compare_generated_evidence(left, right)
+            self.assertEqual(set(hashes), GENERATED_REPORT_OUTPUTS)
+
+            changed_relative = sorted(GENERATED_REPORT_OUTPUTS)[0]
+            changed = right / changed_relative
+            changed.write_bytes(b"different")
+            with self.assertRaisesRegex(RuntimeError, "evidence bytes differ"):
+                compare_generated_evidence(left, right)
+
+            changed.write_bytes(changed_relative.encode("utf-8"))
+            (right / "unexpected.json").write_text("{}", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "path set mismatch"):
+                compare_generated_evidence(left, right)
+
+    def test_clean_runner_removes_only_declared_generated_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for relative in GENERATED_REPORT_OUTPUTS:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"stale")
+            direct_review = root / "formal" / "reports" / "reviews" / "stale.json"
+            nested_review = root / "formal" / "reports" / "reviews" / "nested" / "preserved.json"
+            unknown_fixture = root / "formal" / "fixtures" / "counterexamples" / "unknown.json"
+            review_readme = root / "formal" / "reports" / "reviews" / "README.md"
+            for path in (direct_review, nested_review, unknown_fixture, review_readme):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"preserved")
+
+            clear_generated_outputs(root)
+
+            self.assertFalse(direct_review.exists())
+            self.assertTrue(nested_review.exists())
+            self.assertTrue(unknown_fixture.exists())
+            self.assertTrue(review_readme.exists())
+            self.assertFalse(
+                any((root / relative).exists() for relative in GENERATED_REPORT_OUTPUTS)
+            )
 
     def test_generated_evidence_overlay_does_not_change_source_commit(self) -> None:
         self.assertTrue(is_report_output("formal/reports/tlc-evidence.json"))
@@ -933,14 +1037,16 @@ class ContractTest(unittest.TestCase):
             self.assertEqual(trace["formal_semantics_id"], semantics_id, fixture)
             validate_trace_document(trace, REPOSITORY)
 
-    def test_full_liveness_evidence_reaches_applied(self) -> None:
-        evidence = load_json_strict(REPOSITORY / "formal/reports/tlc-evidence.json")
-        model = next(
-            item for item in evidence["models"] if item["id"] == "CFG-LIVENESS-EVENTUAL-SYNCHRONY"
+    def test_liveness_applied_terminal_requires_executed_action(self) -> None:
+        properties = ["LIVE-APPLIED-REACHED"]
+        self.assertEqual(
+            observed_terminal_outcomes(properties, {"PositiveAdvanceCurrent": 1}),
+            ["APPLIED"],
         )
-        self.assertIn("LIVE-APPLIED-REACHED", model["properties"])
-        self.assertIn("APPLIED", model["terminal_outcomes_observed"])
-        self.assertGreater(model["terminal_outcome_class_count"], 0)
+        self.assertEqual(
+            observed_terminal_outcomes(properties, {"PositiveAdvanceCurrent": 0}),
+            [],
+        )
 
 
 class ReportVerifierTest(unittest.TestCase):

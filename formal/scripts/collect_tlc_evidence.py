@@ -59,6 +59,29 @@ def config_properties(config: Path, registry: dict[str, Any]) -> list[str]:
     return result
 
 
+def observed_terminal_outcomes(properties: list[str], action_counts: dict[str, int]) -> list[str]:
+    """Project terminal classes from validated non-zero TLC action coverage."""
+
+    terminals: list[str] = []
+    if action_counts.get("HardAbortAction", 0) > 0:
+        terminals.append("ABORTED")
+    if action_counts.get("AdvanceCurrentCheckpointAction", 0) > 0:
+        terminals.append("APPLIED")
+    if (
+        "LIVE-APPLIED-REACHED" in properties
+        and action_counts.get("PositiveAdvanceCurrent", 0) > 0
+        and "APPLIED" not in terminals
+    ):
+        terminals.append("APPLIED")
+    if (
+        "LIVE-ABORT-QC-REACHED" in properties
+        and action_counts.get("PositiveFinalizeHardAbort", 0) > 0
+        and "ABORTED" not in terminals
+    ):
+        terminals.append("ABORTED")
+    return terminals
+
+
 def main() -> int:
     manifest_path = TLA / "cfg" / "config-manifest.json"
     manifest = load_json_strict(manifest_path)
@@ -108,26 +131,10 @@ def main() -> int:
         states = parsed["states"]
         distinct = parsed["distinct_states"]
         diameter = parsed["diameter"]
-        terminals: list[str] = []
-        if action_counts.get("HardAbortAction", 0) > 0:
-            terminals.append("ABORTED")
-        if action_counts.get("AdvanceCurrentCheckpointAction", 0) > 0:
-            terminals.append("APPLIED")
         properties = config_properties(TLA / entry["config"], registry)
         if not properties:
             errors.append(f"{identifier}: no registered property in config")
-        if (
-            "LIVE-APPLIED-REACHED" in properties
-            and action_counts.get("PositiveAdvanceCurrent", 0) > 0
-            and "APPLIED" not in terminals
-        ):
-            terminals.append("APPLIED")
-        if (
-            "LIVE-ABORT-QC-REACHED" in properties
-            and action_counts.get("PositiveFinalizeHardAbort", 0) > 0
-            and "ABORTED" not in terminals
-        ):
-            terminals.append("ABORTED")
+        terminals = observed_terminal_outcomes(properties, action_counts)
         module_path = TLA / entry["module"]
         config_path = TLA / entry["config"]
         record = {
