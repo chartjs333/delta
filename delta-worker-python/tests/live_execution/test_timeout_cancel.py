@@ -26,6 +26,7 @@ CONTRACTS_ROOT = (
     / "step5c-controlled-live-execution"
     / "contracts"
 )
+TEST_PRODUCER_COMMIT = "4992d9eca319da21b5a2c7b94593f3668b92329c"
 
 
 @pytest.fixture
@@ -52,7 +53,7 @@ def test_c_wa_020_timeout_prevents_receipt_emission(train_bundle: dict) -> None:
     slow_runner.train_ticket.side_effect = slow_train
 
     fast_ctx = replace(ctx, timeout_seconds=1)
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
 
     with pytest.raises(WorkerTimeoutError) as exc_info:
         dispatcher.dispatch(fast_ctx, runner_override=slow_runner)
@@ -71,7 +72,7 @@ def test_c_wa_021_cancellation_prevents_receipt_emission(train_bundle: dict) -> 
     token.cancel()  # Pre-cancelled token
 
     mock_runner = MagicMock()
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
 
     with pytest.raises(WorkerCancelledError) as exc_info:
         dispatcher.dispatch(ctx, cancellation_token=token, runner_override=mock_runner)
@@ -99,7 +100,7 @@ def test_c_wa_020_wall_clock_timeout_does_not_block_on_hanging_thread(
 
     hanging_runner.train_ticket.side_effect = hang
     fast_ctx = replace(ctx, timeout_seconds=1)
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
 
     start_time = time.monotonic()
     with pytest.raises(WorkerTimeoutError) as exc_info:

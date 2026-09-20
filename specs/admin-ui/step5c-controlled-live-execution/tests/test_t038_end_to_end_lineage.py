@@ -182,9 +182,18 @@ def test_t038_tampered_worker_receipt_is_not_published(tmp_path: Path) -> None:
         def __init__(self) -> None:
             self._inner = ClosedEnumWorkerDispatcher()
 
-        def dispatch(self, context: Any, cancellation_token: Any = None) -> dict[str, Any]:
+        def dispatch(
+            self,
+            context: Any,
+            cancellation_token: Any = None,
+            producer_commit: str | None = None,
+        ) -> dict[str, Any]:
             result = copy.deepcopy(
-                self._inner.dispatch(context, cancellation_token=cancellation_token)
+                self._inner.dispatch(
+                    context,
+                    cancellation_token=cancellation_token,
+                    producer_commit=producer_commit,
+                )
             )
             result["receipt"]["provenance"]["execution_id"] = "99999999-9999-4999-8999-999999999999"
             return result

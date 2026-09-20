@@ -21,6 +21,7 @@ CONTRACTS_ROOT = (
     / "step5c-controlled-live-execution"
     / "contracts"
 )
+TEST_PRODUCER_COMMIT = "4992d9eca319da21b5a2c7b94593f3668b92329c"
 
 
 @pytest.fixture
@@ -31,7 +32,7 @@ def train_bundle() -> dict:
 
 
 def test_c_wa_011_dispatch_table_contains_only_approved_operations() -> None:
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
     assert dispatcher.APPROVED_OPERATIONS == {
         "TRAIN_TICKET",
         "EVALUATE_CHECKPOINT",
@@ -44,7 +45,7 @@ def test_c_wa_014_train_ticket_dispatch_produces_receipt(train_bundle: dict) -> 
     now = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
     ctx = preflight.validate(train_bundle, current_time=now)
 
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
     result = dispatcher.dispatch(ctx)
 
     assert result["status"] == "COMPLETED"
@@ -80,7 +81,7 @@ def test_c_wa_018_materialize_dataset_produces_status_only(train_bundle: dict) -
 
     mat_ctx = replace(ctx, operation="MATERIALIZE_DATASET", operation_payload={})
 
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
     result = dispatcher.dispatch(mat_ctx)
 
     assert result["status"] == "COMPLETED"
@@ -100,7 +101,7 @@ def test_c_wa_019_materialize_path_traversal_rejected(train_bundle: dict) -> Non
         ctx, operation="MATERIALIZE_DATASET", operation_payload={"cache_key": "../../escaped_path"}
     )
 
-    dispatcher = ClosedEnumWorkerDispatcher()
+    dispatcher = ClosedEnumWorkerDispatcher(producer_commit=TEST_PRODUCER_COMMIT)
     with pytest.raises(WorkerDispatchError, match="Illegal cache_key"):
         dispatcher.dispatch(bad_ctx)
 

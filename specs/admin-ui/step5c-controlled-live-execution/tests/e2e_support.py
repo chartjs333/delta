@@ -17,6 +17,7 @@ from deltatorrent.live_execution.preflight import AuthorizedExecutionPreflight
 CURRENT_TIME = datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC)
 RUNTIME_KEY_ID = "step5c-e2e-runtime-key-v1"
 RUNTIME_ISSUER_ID = "step5c-e2e-runtime-controller"
+RUNTIME_BUILD_SHA = "ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e"
 
 TRUSTED_LOCAL_PEERS = {
     "operator.alpha": AuthenticatedSubject(
@@ -69,8 +70,10 @@ def build_integrated_gate(
         dispatcher=dispatcher,
         cancellation_token=cancellation_token,
         clock=lambda: CURRENT_TIME,
+        producer_commit=RUNTIME_BUILD_SHA,
     )
     gate = AuthorizationGate(
+        controller_commit=RUNTIME_BUILD_SHA,
         auth_port=StaticAuthenticationPort(
             allow_local_peer=True,
             peer_subjects=TRUSTED_LOCAL_PEERS,
@@ -95,6 +98,7 @@ def build_integrated_gate(
 def rebuild_gate(harness: IntegratedGateHarness, ledger_path: Path) -> AuthorizationGate:
     """Rebuild only Controller process state while reusing explicit runtime trust."""
     return AuthorizationGate(
+        controller_commit=RUNTIME_BUILD_SHA,
         auth_port=StaticAuthenticationPort(
             allow_local_peer=True,
             peer_subjects=TRUSTED_LOCAL_PEERS,

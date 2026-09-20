@@ -34,6 +34,7 @@ TEST_SUBJECT = AuthenticatedSubject(
     authenticated_via="LOCAL_PEER_CREDENTIAL",
     effective_roles=["OPERATOR"],
 )
+TEST_BUILD_SHA = "ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e"
 
 
 def _load_train_ticket() -> dict:
@@ -75,6 +76,7 @@ def test_full_authorization_pipeline_success(tmp_path: Path) -> None:
     dispatch_mock = MockWorkerDispatchPort()
 
     gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=_trusted_auth_port(),
         signing_identity=_test_signing_identity(private_key),
         idempotency_ledger=IdempotencyLedger(tmp_path / "ledger.jsonl"),
@@ -86,6 +88,7 @@ def test_full_authorization_pipeline_success(tmp_path: Path) -> None:
 
     result = gate.admit_and_dispatch(intent_doc, credentials=credentials, current_time=now)
     assert result["action"] == "ADMITTED"
+    assert "bundle" not in result
 
     admission = result["admission"]
     assert admission["schema_version"] == "1.0.0"
@@ -121,6 +124,7 @@ def test_full_authorization_pipeline_success(tmp_path: Path) -> None:
     assert status["schema_version"] == "1.0.0"
     assert status["execution_id"] == admission["execution_id"]
     assert status["state"] == "RUNNING"
+    assert gate.get_receipt(status["execution_id"], credentials=credentials) is None
 
 
 def test_audit_sensitive_data_redaction() -> None:
@@ -184,13 +188,16 @@ def test_audit_logger_never_persists_secret_bearing_neutral_values(tmp_path: Pat
 
 def test_gate_requires_explicit_authentication_and_signing_identity() -> None:
     with pytest.raises(ValueError, match="AuthenticationPort"):
-        AuthorizationGate(signing_identity=_test_signing_identity())
+        AuthorizationGate(
+            signing_identity=_test_signing_identity(), controller_commit=TEST_BUILD_SHA
+        )
 
     with pytest.raises(ValueError, match="AdmissionSigningIdentity"):
-        AuthorizationGate(auth_port=_trusted_auth_port())
+        AuthorizationGate(auth_port=_trusted_auth_port(), controller_commit=TEST_BUILD_SHA)
 
     with pytest.raises(ValueError, match="durable IdempotencyLedger"):
         AuthorizationGate(
+            controller_commit=TEST_BUILD_SHA,
             auth_port=_trusted_auth_port(),
             signing_identity=_test_signing_identity(),
             idempotency_ledger=IdempotencyLedger(),
@@ -224,6 +231,7 @@ def test_concurrent_duplicate_submissions_dispatch_one_execution(tmp_path: Path)
     ledger = IdempotencyLedger(tmp_path / "duplicate-ledger.jsonl")
     dispatch_port = _BlockingDispatchPort()
     gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=_trusted_auth_port(),
         signing_identity=_test_signing_identity(),
         idempotency_ledger=ledger,
@@ -275,11 +283,53 @@ class _FailOnceQuotaManager(QuotaManager):
         return super().evaluate_grants(intent_doc, current_active_count)
 
 
+class _FailOnceCapacityPort(MockWorkerDispatchPort):
+    def __init__(self) -> None:
+        super().__init__()
+        self.reserve_calls = 0
+
+    def reserve_capacity(self, intent_id: str) -> None:
+        self.reserve_calls += 1
+        if self.reserve_calls == 1:
+            raise QuotaExceededError("Synthetic physical queue exhaustion")
+        super().reserve_capacity(intent_id)
+
+
+def test_capacity_failure_precedes_durable_admission_and_allows_retry(tmp_path: Path) -> None:
+    intent_doc = _load_train_ticket()
+    ledger = IdempotencyLedger(tmp_path / "capacity-ledger.jsonl")
+    dispatch_port = _FailOnceCapacityPort()
+    gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
+        auth_port=_trusted_auth_port(),
+        signing_identity=_test_signing_identity(),
+        idempotency_ledger=ledger,
+        dispatch_port=dispatch_port,
+    )
+
+    with pytest.raises(QuotaExceededError, match="physical queue"):
+        gate.admit_and_dispatch(
+            intent_doc,
+            credentials=_operator_credentials(),
+            current_time=datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC),
+        )
+
+    assert ledger.get_by_intent_id(intent_doc["intent_id"]) is None
+    retry = gate.admit_and_dispatch(
+        intent_doc,
+        credentials=_operator_credentials(),
+        current_time=datetime(2026, 9, 17, 14, 30, 0, tzinfo=UTC),
+    )
+    assert retry["action"] == "ADMITTED"
+    assert len(dispatch_port.dispatched_bundles) == 1
+
+
 def test_precommit_failure_releases_idempotency_reservation(tmp_path: Path) -> None:
     intent_doc = _load_train_ticket()
     ledger = IdempotencyLedger(tmp_path / "precommit-ledger.jsonl")
     dispatch_port = MockWorkerDispatchPort()
     gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=_trusted_auth_port(),
         signing_identity=_test_signing_identity(),
         idempotency_ledger=ledger,
@@ -311,6 +361,7 @@ def test_memory_ceiling_rejection_starts_no_worker_and_leaves_no_record(
     ledger = IdempotencyLedger(tmp_path / "memory-ledger.jsonl")
     dispatch_port = MockWorkerDispatchPort()
     gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=_trusted_auth_port(),
         signing_identity=_test_signing_identity(),
         idempotency_ledger=ledger,
@@ -348,6 +399,7 @@ def test_dispatch_failure_is_terminal_for_committed_execution_identity(tmp_path:
     dispatch_port = _FailOnceDispatchPort()
     signing_identity = _test_signing_identity()
     gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=_trusted_auth_port(),
         signing_identity=signing_identity,
         idempotency_ledger=ledger,
@@ -369,6 +421,7 @@ def test_dispatch_failure_is_terminal_for_committed_execution_identity(tmp_path:
 
     restarted_dispatch = MockWorkerDispatchPort()
     restarted_gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=_trusted_auth_port(),
         signing_identity=signing_identity,
         idempotency_ledger=IdempotencyLedger(ledger_path),
@@ -406,6 +459,7 @@ def test_concurrent_distinct_intents_cannot_bypass_concurrency_limit(tmp_path: P
     ledger = _BarrierLedger(tmp_path / "concurrency-ledger.jsonl")
     dispatch_port = MockWorkerDispatchPort()
     gate = AuthorizationGate(
+        controller_commit=TEST_BUILD_SHA,
         auth_port=_trusted_auth_port(),
         signing_identity=_test_signing_identity(),
         idempotency_ledger=ledger,

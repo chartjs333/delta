@@ -10,10 +10,12 @@
 ## Implementation Status
 
 This document selects the first HTTP/JSON deployment profile and its required controls. The
-current repository qualification exercises the Admin UI contract artifact through the
-Controller and Worker boundaries directly; it does not claim that a production HTTP server,
-origin/CSRF middleware, socket timeout, or HTTP 413/429 mapping is implemented here. Those
-controls are acceptance requirements for the transport host that binds this profile.
+single-host working version implements the profile in `deltacontroller.http_host`, composes it
+with the durable Controller and constrained Worker subprocess boundary in
+`deltacontroller.host`, and serves the separately built live Admin UI from the same origin. The
+loopback lifecycle and restart behavior are exercised through `integration/working-version`.
+This implementation remains a single-machine Step 5C profile and makes no WAN, multi-region, or
+consensus-runtime qualification claim.
 
 ## 1. Scope and Trust Invariants
 
@@ -35,15 +37,17 @@ Transport: HTTP/1.1 or HTTP/2 over TLS (HTTPS) in remote deployments; HTTP over 
 - **Method**: `POST /api/v1/intent/submit`
 - **Request Headers**:
   - `Content-Type: application/json`
-  - `Authorization: Bearer <token>` or peer credential header
+  - `Authorization: Bearer <token>` for the remote TLS profile; the loopback profile derives its
+    subject from the accepted socket peer and rejects an `Authorization` header
   - `X-Delta-Request: 1` (anti-CSRF protection)
 - **Request Body**: `ExecutionIntent` JSON document (max 10 MB).
 - **Responses**:
   - `201 Created`: Newly admitted intent. Body contains `action: "ADMITTED"`, `admission: <AdmissionRecord>`, `status: <ExecutionStatus>`.
   - `200 OK`: Idempotent resubmission of already admitted intent. Body contains `action: "ALREADY_ADMITTED"`, `admission`, `status`, `receipt` (if completed).
   - `400 Bad Request`: `ERR_SCHEMA_VALIDATION_FAILED` or `ERR_INTENT_DIGEST_MISMATCH`.
-  - `401 Unauthorized`: `ERR_UNAUTHORIZED_CALLER` (missing/invalid credential).
-  - `403 Forbidden`: `ERR_OPERATION_SCOPE_UNSUPPORTED` or role permission failure.
+  - `401 Unauthorized`: `ERR_AUTHENTICATION_REQUIRED` or `ERR_AUTHENTICATION_FAILED`.
+  - `403 Forbidden`: `ERR_UNAUTHORIZED_CALLER`, `ERR_OPERATION_SCOPE_UNSUPPORTED`, or role
+    permission failure.
   - `409 Conflict`: `ERR_INTENT_ID_DIGEST_CONFLICT` or `ERR_INTENT_COLLISION_DETECTED`.
   - `413 Payload Too Large`: Body exceeds 10 MB limit.
   - `429 Too Many Requests`: `ERR_QUOTA_EXCEEDED` (quota/concurrency limit).
@@ -81,7 +85,10 @@ Transport: HTTP/1.1 or HTTP/2 over TLS (HTTPS) in remote deployments; HTTP over 
    - No separate per-operator concurrency limit is claimed by this increment.
    - A transport host maps `ERR_QUOTA_EXCEEDED` to HTTP 429 without starting a worker.
 3. **Timeouts**:
-   - HTTP transport socket timeout: 30 seconds.
+   - TLS handshake, HTTP header, and body intake use one absolute 30-second monotonic deadline.
+   - Trusted Controller durability calls are fail-closed rather than asynchronously interrupted;
+     if an OS/storage call does not return, the process keeps its data-directory lease and a
+     graceful-stop observer may time out without force-killing it.
    - Admission TTL (`admission_expires_at`): default 300 seconds (cannot exceed `intent.expires_at`).
    - Worker execution timeout: bounded by `resource_grants.timeout_seconds` (max 3600 seconds).
 4. **Secret Handling**:
@@ -89,5 +96,7 @@ Transport: HTTP/1.1 or HTTP/2 over TLS (HTTPS) in remote deployments; HTTP over 
    - Authorization tokens and credentials are redacted in all logs and audit events (`[REDACTED]`).
    - Zero sensitive tokens in URL query strings.
 5. **CORS and Origin Isolation**:
-   - Origin header validated against configured allowed origins (`http://localhost:*` in local mode).
+   - Any supplied Origin header is validated against exact, non-wildcard configured origins. The
+     browser live adapter is same-origin; the local descriptor allows only
+     `http://127.0.0.1:8765`.
    - Requests without `X-Delta-Request: 1` rejected with HTTP 400.

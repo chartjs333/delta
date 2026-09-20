@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import re
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -29,13 +30,12 @@ from deltacontroller.errors import (
     UnauthorizedCallerError,
     WorkerDispatchFailedError,
 )
-from deltacontroller.idempotency import IdempotencyLedger
+from deltacontroller.idempotency import NONTERMINAL_STATUSES, IdempotencyLedger, LedgerRecord
 from deltacontroller.ingress import IngressParser
 from deltacontroller.quota import QuotaManager
 from deltacontroller.schema import SchemaRegistry
 from deltacontroller.status import build_execution_status
 
-DEFAULT_CONTROLLER_COMMIT = "66e3e7e5bb07a48aadbee8d9c4683144b812d229"
 DEFAULT_POLICY_VERSION = "step5c-policy-v1"
 DEFAULT_ADMISSION_TTL_SECONDS = 300  # 5 minutes dispatch deadline
 _FROZEN_TEST_FIXTURE_ISSUER_ID = "step5c-fixture-controller"
@@ -82,7 +82,7 @@ class AuthorizationGate:
         dispatch_port: WorkerDispatchPort | None = None,
         audit_logger: AuditLogger | None = None,
         signing_identity: AdmissionSigningIdentity | None = None,
-        controller_commit: str = DEFAULT_CONTROLLER_COMMIT,
+        controller_commit: str | None = None,
         policy_version: str = DEFAULT_POLICY_VERSION,
         admission_ttl_seconds: int = DEFAULT_ADMISSION_TTL_SECONDS,
     ) -> None:
@@ -99,6 +99,10 @@ class AuthorizationGate:
             raise ValueError(
                 "AuthorizationGate requires an explicitly configured durable "
                 "IdempotencyLedger persistence_path"
+            )
+        if controller_commit is None or re.fullmatch(r"[0-9a-f]{40}", controller_commit) is None:
+            raise ValueError(
+                "AuthorizationGate requires an explicit 40-character lowercase build SHA"
             )
         self.schema_registry = schema_registry or SchemaRegistry()
         self.ingress_parser = ingress_parser or IngressParser(schema_registry=self.schema_registry)
@@ -299,10 +303,16 @@ class AuthorizationGate:
             raise RuntimeError(f"Unknown idempotency reservation state: {reservation_state}")
 
         reservation_active = True
+        capacity_reserved = False
         try:
             # 6. Quotas and Resource Grants
             active_count = self.idempotency_ledger.active_count(reservation_intent_id=intent_id)
             grants = self.quota_manager.evaluate_grants(intent, active_count)
+            # Physical queue capacity is reserved before publishing a durable
+            # admission. This closes the cancel/process-exit window where the
+            # ledger is terminal but its Worker still owns the real slot.
+            self.dispatch_port.reserve_capacity(intent_id)
+            capacity_reserved = True
 
             # 7. Admission record creation
             admission_id = str(uuid.uuid4())
@@ -362,17 +372,20 @@ class AuthorizationGate:
             # 10. Publish one durable execution identity before external dispatch.
             constraints = intent.get("execution_constraints", {})
             retry_of = constraints.get("retry_of_intent_id")
-            ledger_rec = self.idempotency_ledger.commit_admission(
+            self.idempotency_ledger.commit_admission(
                 intent_id=intent_id,
                 intent_digest=intent_digest,
                 caller_subject_id=subject.subject_id,
                 execution_id=execution_id,
                 admission_record=copy.deepcopy(admission_doc),
+                intent=copy.deepcopy(intent),
                 retry_of_intent_id=retry_of,
                 operation=intent["operation"],
             )
             reservation_active = False
         except BaseException:
+            if capacity_reserved:
+                self.dispatch_port.release_capacity_reservation(intent_id)
             if reservation_active:
                 self.idempotency_ledger.release_reservation(intent_id)
             raise
@@ -405,8 +418,9 @@ class AuthorizationGate:
                 "retryable": controller_error.retryable,
                 "message": controller_error.message[:512],
             }
-            self.idempotency_ledger.update_execution(
+            self.idempotency_ledger.transition_execution(
                 execution_id,
+                expected_statuses=NONTERMINAL_STATUSES,
                 status="FAILED",
                 error=stored_error,
             )
@@ -422,15 +436,39 @@ class AuthorizationGate:
                 execution_id=execution_id,
             )
             raise
+        finally:
+            if capacity_reserved:
+                # The subprocess port consumes this atomically with queue
+                # publication; this call is a no-op in that successful case.
+                self.dispatch_port.release_capacity_reservation(intent_id)
 
         worker_state = dispatch_result["status"]
-        ledger_rec = self.idempotency_ledger.update_execution(
-            execution_id,
-            status=worker_state,
-            receipt_digest=dispatch_result.get("receipt_digest"),
-            terminal_receipt=copy.deepcopy(dispatch_result.get("receipt")),
-            error=copy.deepcopy(dispatch_result.get("error")),
-        )
+        if worker_state == "QUEUED":
+            # The async subprocess port durably commits ADMITTED -> QUEUED before
+            # returning its acknowledgement and may already have advanced to
+            # RUNNING/terminal.  Never roll that newer state back to QUEUED.
+            updated_record = self.idempotency_ledger.get_by_execution_id(execution_id)
+            if updated_record is not None and updated_record.status == "ADMITTED":
+                updated_record = self.idempotency_ledger.transition_execution(
+                    execution_id,
+                    expected_statuses={"ADMITTED"},
+                    status="QUEUED",
+                )
+        else:
+            updated_record = self.idempotency_ledger.transition_execution(
+                execution_id,
+                expected_statuses=NONTERMINAL_STATUSES | {worker_state},
+                status=worker_state,
+                receipt_digest=dispatch_result.get("receipt_digest"),
+                terminal_receipt=copy.deepcopy(dispatch_result.get("receipt")),
+                error=copy.deepcopy(dispatch_result.get("error")),
+            )
+        if updated_record is None:
+            # A concurrent cancellation/terminal update won the durable CAS.
+            # Never return the losing worker's receipt to the caller.
+            updated_record = self.idempotency_ledger.get_by_execution_id(execution_id)
+            if updated_record is None:
+                raise RuntimeError("Durable execution disappeared during dispatch")
 
         # 12. Audit event
         self.audit_logger.log_event(
@@ -454,28 +492,27 @@ class AuthorizationGate:
             admission_id=admission_id,
             admission_digest=admission_digest,
             operation=intent["operation"],
-            state=ledger_rec.status,
-            receipt_digest=ledger_rec.receipt_digest,
-            error=ledger_rec.error,
-            updated_at=ledger_rec.updated_at,
+            state=updated_record.status,
+            receipt_digest=updated_record.receipt_digest,
+            error=updated_record.error,
+            updated_at=updated_record.updated_at,
             schema_registry=self.schema_registry,
         )
 
         return {
             "action": "ADMITTED",
             "admission": admission_doc,
-            "bundle": bundle,
             "status": status_doc,
-            "receipt": copy.deepcopy(ledger_rec.terminal_receipt),
+            "receipt": copy.deepcopy(updated_record.terminal_receipt),
         }
 
-    def get_status(
+    def _get_owned_record(
         self,
         execution_id: str,
         *,
         credentials: dict[str, Any] | None,
-    ) -> dict[str, Any] | None:
-        """Rebuild an owner's durable execution status read model after restart."""
+    ) -> LedgerRecord | None:
+        """Authenticate the caller and return only its durable execution record."""
         subject = self.auth_port.authenticate(credentials)
         record = self.idempotency_ledger.get_by_execution_id(execution_id)
         if record is None:
@@ -488,6 +525,18 @@ class AuthorizationGate:
                     "caller_subject_id": subject.subject_id,
                 },
             )
+        return record
+
+    def get_status(
+        self,
+        execution_id: str,
+        *,
+        credentials: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Rebuild an owner's durable execution status read model after restart."""
+        record = self._get_owned_record(execution_id, credentials=credentials)
+        if record is None:
+            return None
         if record.admission_record is None or record.operation is None:
             raise RuntimeError("Durable execution record is missing admission metadata")
         admission = record.admission_record
@@ -504,3 +553,15 @@ class AuthorizationGate:
             updated_at=record.updated_at,
             schema_registry=self.schema_registry,
         )
+
+    def get_receipt(
+        self,
+        execution_id: str,
+        *,
+        credentials: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Return a defensive copy of an owner's durable terminal receipt."""
+        record = self._get_owned_record(execution_id, credentials=credentials)
+        if record is None:
+            return None
+        return copy.deepcopy(record.terminal_receipt)

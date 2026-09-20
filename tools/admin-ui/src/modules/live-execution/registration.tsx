@@ -12,6 +12,6 @@ export const liveExecutionModuleRegistration: ExtensionRegistration = {
     id: "live-execution",
     routes: [{ path: "/live-execution", component: LiveExecutionSurface }],
     views: ["live-execution-status"],
-    requiredCapabilities: ["live.status.mock"],
+    requiredCapabilities: ["live.status.read"],
   },
 };

@@ -169,7 +169,11 @@ export class MockLiveExecutionAdapter implements LiveExecutionPort {
       label: "Mock live execution",
       mode: "MOCK_ONLY",
       transportProfile: "NONE_PHASE_4",
-      capabilities: ["live.intent.preview", "live.status.mock"],
+      capabilities: [
+        "live.intent.preview",
+        "live.status.mock",
+        "live.status.read",
+      ],
       contractFreezeSha: CONTRACT_FREEZE_SHA,
     };
   }
@@ -241,7 +245,7 @@ export class MockLiveExecutionAdapter implements LiveExecutionPort {
 function copyStatus(status: LiveExecutionStatus): LiveExecutionStatus {
   return {
     ...status,
-    workload: { ...status.workload },
+    ...(status.workload ? { workload: { ...status.workload } } : {}),
     lineage: { ...status.lineage },
   };
 }
