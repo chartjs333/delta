@@ -28,6 +28,7 @@ from formal_artifacts import (  # noqa: E402
     _declared_unittest_count,
     canonical_json_bytes,
     derive_formal_semantics_id,
+    determine_report_decision,
     discover_semantic_artifacts,
     finalize_report,
     load_json_strict,
@@ -1154,19 +1155,26 @@ class ReportVerifierTest(unittest.TestCase):
         result = verify_report_document(self.report_path, self.root, require_go=True)
         self.assertEqual(result["status"], "PASS")
 
-    def test_report_manifest_uses_same_eol_profile_as_semantic_identity(self) -> None:
+    def test_semantic_identity_ignores_eol_but_exact_reproduction_does_not(self) -> None:
+        semantics_id = derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(self.root))
         for item in self.report["source_tree"]["semantic_artifacts"]:
             path = self.root / item["path"]
-            canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-            path.write_bytes(canonical.replace(b"\n", b"\r\n"))
+            original = path.read_bytes()
+            canonical = original.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+            flipped = canonical if b"\r\n" in original else canonical.replace(b"\n", b"\r\n")
+            self.assertNotEqual(flipped, original)
+            path.write_bytes(flipped)
 
-        result = verify_report_document(self.report_path, self.root, require_go=True)
-        self.assertEqual((result["status"], result["decision"]), ("PASS", "GO"))
-
-        core = self.root / "formal/tla/Core.tla"
-        core.write_bytes(core.read_bytes().replace(b"Core", b"Changed", 1))
+        self.assertEqual(
+            derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(self.root)),
+            semantics_id,
+        )
         result = verify_report_document(self.report_path, self.root)
         self.assertEqual((result["status"], result["decision"]), ("FAIL", "NO_GO"))
+        decision, reasons = determine_report_decision(self.report, self.root, self.registry)
+        self.assertEqual(decision, "NO_GO")
+        self.assertIn("INVALID_REPRODUCTION_ATTESTATION", reasons)
+        self.assertNotIn("SOURCE_TREE_MANIFEST_INVALID", reasons)
 
     def test_review_projection_cannot_forge_a_valid_evidence_payload(self) -> None:
         mutated = copy.deepcopy(self.report)
