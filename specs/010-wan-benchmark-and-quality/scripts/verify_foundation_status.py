@@ -16,6 +16,7 @@ from typing import Any
 BASE_COMMIT = "ac0e54ffbab4b9a5c20945b17ede2930b78ff080"
 IMPLEMENTATION_COMMIT = "6054e35ed627392172f94c2a90dfb7d799d5251e"
 IMPLEMENTATION_TREE = "0640a117aba6772b7c0b22ec9cdaa047e507e1d5"
+FOUNDATION_OVERLAY_COMMIT = "628aebbf96ac07904b7f13a22cca842c174e48f5"
 FORMAL_ID = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
 FORMAL_REPORT_SHA256 = "3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7"
 PREFLIGHT_MANIFEST_ID = "sha256:fe29fae984c3fb1b27aefd58dbb0a0bf1ff8a4a2d23468de84471a70b38bb627"
@@ -158,7 +159,7 @@ def git_text(root: Path, *arguments: str) -> str:
 
 def candidate_bytes(root: Path, path: Path, allow_worktree: bool) -> bytes:
     if allow_worktree:
-        return (root / path).read_bytes()
+        return git_bytes(root, "show", f"{FOUNDATION_OVERLAY_COMMIT}:{path.as_posix()}")
     return git_bytes(root, "show", f"HEAD:{path.as_posix()}")
 
 
@@ -521,8 +522,18 @@ def validate_repository(root: Path, *, allow_worktree: bool) -> dict[str, object
         git_text(root, "rev-parse", f"{IMPLEMENTATION_COMMIT}^") == BASE_COMMIT,
         "IMPLEMENTATION_PARENT_MISMATCH",
     )
-    candidate = "WORKTREE" if allow_worktree else git_text(root, "rev-parse", "HEAD")
-    if not allow_worktree:
+    candidate = FOUNDATION_OVERLAY_COMMIT if allow_worktree else git_text(root, "rev-parse", "HEAD")
+    if allow_worktree:
+        require(
+            git_text(root, "rev-parse", f"{FOUNDATION_OVERLAY_COMMIT}^") == IMPLEMENTATION_COMMIT,
+            "FOUNDATION_OVERLAY_PARENT_MISMATCH",
+        )
+        require(
+            set(changed_paths(root, IMPLEMENTATION_COMMIT, FOUNDATION_OVERLAY_COMMIT))
+            == OVERLAY_PATHS,
+            "FOUNDATION_OVERLAY_PATH_SET_INVALID",
+        )
+    else:
         require(candidate != IMPLEMENTATION_COMMIT, "OVERLAY_COMMIT_REQUIRED")
         require(
             git_text(root, "rev-parse", f"{candidate}^") == IMPLEMENTATION_COMMIT,

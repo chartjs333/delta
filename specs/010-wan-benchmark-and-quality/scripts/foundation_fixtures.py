@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[3]
 WORKER = ROOT / "delta-worker-python"
-if str(WORKER) not in sys.path:
-    sys.path.insert(0, str(WORKER))
+for import_root in (WORKER / "src", WORKER):
+    if str(import_root) not in sys.path:
+        sys.path.insert(0, str(import_root))
 
 from deltatorrent.benchmark.canonical import canonical_bytes  # noqa: E402
 from deltatorrent.benchmark.contracts import (  # noqa: E402
@@ -18,6 +20,7 @@ from deltatorrent.benchmark.contracts import (  # noqa: E402
     FORMAL_SEMANTICS_ID,
     SCHEMA_VERSION,
     CanonicalContract,
+    ContractError,
 )
 from deltatorrent.benchmark.decision import (  # noqa: E402
     GateOutcome,
@@ -278,10 +281,62 @@ def config_document() -> dict[str, Any]:
     }
 
 
+def exactness_corpus_document() -> dict[str, Any]:
+    """Return the shared Python/C++/Java status corpus without execution authority."""
+
+    fixture = fixture_document()
+    artifacts = fixture["artifacts"]
+    ordered = fixture["ordered_artifact_names"]
+    negative_statuses = []
+    definition_bytes = bytes.fromhex(artifacts["definition"]["bytes_hex"])
+    try:
+        CanonicalContract.from_bytes(b" " + definition_bytes)
+    except ValueError as error:
+        status = str(error)
+    else:
+        raise RuntimeError("definition-leading-space was accepted")
+    if status != "JSON_BYTES_NOT_CANONICAL":
+        raise RuntimeError(f"unexpected definition-leading-space status: {status}")
+    negative_statuses.append({"case_id": "definition-leading-space", "status": status})
+
+    promoted_run = dict(artifacts["run_manifest"]["value"])
+    promoted_run["primary_eligible"] = True
+    try:
+        CanonicalContract.from_dict(promoted_run)
+    except ContractError as error:
+        status = str(error)
+    else:
+        raise RuntimeError("run-primary-promotion was accepted")
+    if status != "PRIMARY_ELIGIBILITY_FORBIDDEN":
+        raise RuntimeError(f"unexpected run-primary-promotion status: {status}")
+    negative_statuses.append({"case_id": "run-primary-promotion", "status": status})
+    return {
+        "artifact_ids": [artifacts[name]["content_id"] for name in ordered],
+        "execution_class": "CONFORMANCE_SAFETY_ONLY",
+        "formal_semantics_id": FORMAL_SEMANTICS_ID,
+        "negative_statuses": negative_statuses,
+        "primary_observation_count": 0,
+        "schema_version": SCHEMA_VERSION,
+        "status": "PASS",
+        "type_name": "FEATURE010_EXACTNESS_CORPUS",
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--emit-corpus", action="store_true")
     arguments = parser.parse_args()
+    if arguments.emit_corpus:
+        print(
+            json.dumps(
+                exactness_corpus_document(),
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+        )
+        return 0
     outputs = {
         FIXTURE_OUTPUT: canonical_bytes(fixture_document()),
         CONFIG_OUTPUT: canonical_bytes(config_document()),
