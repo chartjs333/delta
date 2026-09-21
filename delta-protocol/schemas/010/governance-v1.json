@@ -1,0 +1,297 @@
+{
+  "$id": "https://deltareduce.org/schemas/010/governance-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "contentId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controller_id",
+        "custody_id",
+        "key_id",
+        "public_key_hex",
+        "signer_id",
+        "valid_from_epoch_ms",
+        "valid_until_epoch_ms"
+      ],
+      "properties": {
+        "controller_id": {
+          "type": "string"
+        },
+        "custody_id": {
+          "type": "string"
+        },
+        "key_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "public_key_hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "signer_id": {
+          "type": "string"
+        },
+        "valid_from_epoch_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "valid_until_epoch_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "ReviewerSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "evidence_class",
+        "f",
+        "formal_semantics_id",
+        "members",
+        "role",
+        "schema_version",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "f": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "members": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "$ref": "#/$defs/reviewer"
+          }
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "type_name": {
+          "const": "BENCHMARK_REVIEWER_SET"
+        },
+        "role": {
+          "enum": [
+            "DEFINITION_REVIEWERS",
+            "RESULT_EVALUATORS"
+          ]
+        }
+      }
+    },
+    "Vote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "body_id",
+        "decision",
+        "key_id",
+        "purpose",
+        "reviewer_set_id",
+        "signature_hex",
+        "signer_id",
+        "submitted_at_epoch_ms"
+      ],
+      "properties": {
+        "body_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "decision": {
+          "enum": [
+            "APPROVE",
+            "NO_GO",
+            "NOT_EVALUATED"
+          ]
+        },
+        "key_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "purpose": {
+          "enum": [
+            "BENCHMARK_DEFINITION_VOTE",
+            "BENCHMARK_RESULT_VOTE"
+          ]
+        },
+        "reviewer_set_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "signature_hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{128}$"
+        },
+        "signer_id": {
+          "type": "string"
+        },
+        "submitted_at_epoch_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "purpose": {
+                "const": "BENCHMARK_DEFINITION_VOTE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "decision": {
+                "const": "APPROVE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "purpose": {
+                "const": "BENCHMARK_RESULT_VOTE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "decision": {
+                "enum": [
+                  "NO_GO",
+                  "NOT_EVALUATED"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "QC": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "body_id",
+        "decision",
+        "evidence_class",
+        "execution_authorized",
+        "finalized_at_epoch_ms",
+        "formal_semantics_id",
+        "reviewer_set_id",
+        "runtime_certificate_kind",
+        "schema_version",
+        "type_name",
+        "votes"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "body_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "decision": {
+          "enum": [
+            "APPROVE",
+            "NO_GO",
+            "NOT_EVALUATED"
+          ]
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "execution_authorized": {
+          "const": false
+        },
+        "finalized_at_epoch_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "reviewer_set_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "runtime_certificate_kind": {
+          "type": "null"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "type_name": {
+          "enum": [
+            "BENCHMARK_DEFINITION_QC",
+            "BENCHMARK_RESULT_QC"
+          ]
+        },
+        "votes": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/$defs/Vote"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type_name": {
+                "const": "BENCHMARK_DEFINITION_QC"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "decision": {
+                "const": "APPROVE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type_name": {
+                "const": "BENCHMARK_RESULT_QC"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "decision": {
+                "enum": [
+                  "NO_GO",
+                  "NOT_EVALUATED"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "title": "DeltaReduce Feature 010 benchmark governance attestations"
+}

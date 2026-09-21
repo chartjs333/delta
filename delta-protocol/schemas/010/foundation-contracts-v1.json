@@ -1,0 +1,1928 @@
+{
+  "$id": "https://deltareduce.org/schemas/010/foundation-contracts-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "contentId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "gitId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "phaseTiming": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "end_ns",
+        "phase",
+        "start_ns"
+      ],
+      "properties": {
+        "end_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "phase": {
+          "enum": [
+            "compute",
+            "upload",
+            "availability",
+            "certificate",
+            "reduce",
+            "apply",
+            "p2p",
+            "wait"
+          ]
+        },
+        "start_ns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "baseProperties": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "gate_eligible": {
+          "const": false
+        }
+      }
+    },
+    "BenchmarkArm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter_id",
+        "arm_kind",
+        "authority_scope",
+        "deployment_profile",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "model_mode",
+        "primary_eligible",
+        "schema_version",
+        "topology",
+        "type_name"
+      ],
+      "properties": {
+        "adapter_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "arm_kind": {
+          "enum": [
+            "REFERENCE",
+            "DELTAREDUCE"
+          ]
+        },
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "deployment_profile": {
+          "enum": [
+            "EMBEDDED_FFM",
+            "ISOLATED_SIDECAR"
+          ]
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "model_mode": {
+          "enum": [
+            "FULL_MODEL",
+            "QLORA_ADAPTER"
+          ]
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "topology": {
+          "enum": [
+            "FLAT",
+            "HIERARCHICAL"
+          ]
+        },
+        "type_name": {
+          "const": "BENCHMARK_ARM"
+        }
+      }
+    },
+    "BenchmarkDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "B",
+        "H",
+        "approved_license_ids",
+        "arm_ids",
+        "authority_scope",
+        "decision_function",
+        "definition_reviewer_set_id",
+        "dependencies",
+        "evidence_class",
+        "fault_profile_ids",
+        "formal_semantics_id",
+        "gate_eligible",
+        "metrics",
+        "missing_run_policy",
+        "network_profile_ids",
+        "policy",
+        "primary_eligible",
+        "result_evaluator_set_id",
+        "runtime_identity_id",
+        "schema_version",
+        "scientific_profile_id",
+        "type_name"
+      ],
+      "properties": {
+        "B": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "H": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "arm_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "decision_function": {
+          "const": "ALL_MANDATORY"
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/dependency"
+          }
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "fault_profile_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/metric"
+          }
+        },
+        "missing_run_policy": {
+          "const": "FAIL_CLOSED"
+        },
+        "network_profile_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "policy": {
+          "$ref": "#/$defs/zeroTolerancePolicy"
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "runtime_identity_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "scientific_profile_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "type_name": {
+          "const": "BENCHMARK_DEFINITION"
+        },
+        "approved_license_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "definition_reviewer_set_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "result_evaluator_set_id": {
+          "$ref": "#/$defs/contentId"
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "access_policy",
+        "availability",
+        "content_id",
+        "license_id",
+        "locator",
+        "name"
+      ],
+      "properties": {
+        "content_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "license_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "locator": {
+          "type": "string",
+          "pattern": "^cas://sha256/[0-9a-f]{64}$"
+        },
+        "name": {
+          "$ref": "#/$defs/identifier"
+        },
+        "access_policy": {
+          "enum": [
+            "PUBLIC_FIXTURE",
+            "RESTRICTED_LOCAL"
+          ]
+        },
+        "availability": {
+          "const": "VERIFIED_IMMUTABLE"
+        }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "aggregation",
+        "direction",
+        "mandatory",
+        "metric_id",
+        "missing_rule",
+        "threshold"
+      ],
+      "properties": {
+        "aggregation": {
+          "enum": [
+            "ALL",
+            "MEAN",
+            "MEDIAN",
+            "P95",
+            "P99"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "EXACT",
+            "HIGHER",
+            "LOWER"
+          ]
+        },
+        "mandatory": {
+          "type": "boolean"
+        },
+        "metric_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "missing_rule": {
+          "const": "FAIL"
+        },
+        "threshold": {
+          "$ref": "#/$defs/rational"
+        }
+      }
+    },
+    "rational": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "denominator",
+        "numerator"
+      ],
+      "properties": {
+        "denominator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "zeroTolerancePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accept_stale",
+        "adaptive_h",
+        "consensus_arithmetic",
+        "current_authority",
+        "threshold_override"
+      ],
+      "properties": {
+        "accept_stale": {
+          "const": false
+        },
+        "adaptive_h": {
+          "const": false
+        },
+        "consensus_arithmetic": {
+          "const": "CHECKED_FIXED_POINT"
+        },
+        "current_authority": {
+          "const": "NATIVE_RUNTIME"
+        },
+        "threshold_override": {
+          "const": false
+        }
+      }
+    },
+    "RuntimeIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "abi_header_id",
+        "abi_schema_id",
+        "authority_scope",
+        "binary_build_id",
+        "compiler_lock_id",
+        "cpp_core_id",
+        "cuda_profile_id",
+        "deployment_profile",
+        "evidence_class",
+        "fixture_corpus_id",
+        "formal_report_id",
+        "formal_semantics_id",
+        "gate_eligible",
+        "java_dependency_lock_id",
+        "java_toolchain_id",
+        "native_runtime_id",
+        "netty_profile_id",
+        "primary_eligible",
+        "protocol_registry_id",
+        "python_lock_id",
+        "python_profile_id",
+        "sbom_id",
+        "schema_version",
+        "source_commit",
+        "source_tree",
+        "type_name"
+      ],
+      "properties": {
+        "abi_header_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "abi_schema_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "binary_build_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "compiler_lock_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "cpp_core_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "cuda_profile_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "deployment_profile": {
+          "enum": [
+            "EMBEDDED_FFM",
+            "ISOLATED_SIDECAR"
+          ]
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "fixture_corpus_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "formal_report_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "java_dependency_lock_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "java_toolchain_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "native_runtime_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "netty_profile_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "protocol_registry_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "python_lock_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "python_profile_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "sbom_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "source_commit": {
+          "$ref": "#/$defs/gitId"
+        },
+        "source_tree": {
+          "$ref": "#/$defs/gitId"
+        },
+        "type_name": {
+          "const": "BENCHMARK_RUNTIME_IDENTITY"
+        }
+      }
+    },
+    "ScientificProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "dataset_id",
+        "domain_tokens",
+        "evaluator_ids",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "model_id",
+        "model_mode",
+        "optimizer_id",
+        "primary_eligible",
+        "repetitions",
+        "schema_version",
+        "seeds",
+        "ticket_ids",
+        "ticket_plan_id",
+        "tokenizer_id",
+        "total_eligible_tokens",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "dataset_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "domain_tokens": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807
+          }
+        },
+        "evaluator_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "model_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "model_mode": {
+          "enum": [
+            "FULL_MODEL",
+            "QLORA_ADAPTER"
+          ]
+        },
+        "optimizer_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "repetitions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "seeds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9223372036854775807
+          }
+        },
+        "ticket_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "ticket_plan_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "tokenizer_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "total_eligible_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "type_name": {
+          "const": "BENCHMARK_SCIENTIFIC_PROFILE"
+        }
+      }
+    },
+    "NetworkProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter",
+        "authority_scope",
+        "bandwidth_bytes_per_second",
+        "disconnect_after_ms",
+        "duplicate_ppm",
+        "duration_ms",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "jitter_ms",
+        "label",
+        "loss_ppm",
+        "partition_after_ms",
+        "primary_eligible",
+        "reorder_ppm",
+        "rtt_ms",
+        "schema_version",
+        "seed",
+        "type_name"
+      ],
+      "properties": {
+        "adapter": {
+          "enum": [
+            "UNPRIVILEGED_LOGICAL",
+            "OPTIONAL_TC_NETEM"
+          ]
+        },
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "bandwidth_bytes_per_second": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "disconnect_after_ms": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "duplicate_ppm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "jitter_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "label": {
+          "const": "SIMULATED"
+        },
+        "loss_ppm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "partition_after_ms": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "reorder_ppm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "rtt_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "type_name": {
+          "const": "BENCHMARK_NETWORK_PROFILE"
+        }
+      }
+    },
+    "FaultProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "duration_ms",
+        "events",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "label",
+        "primary_eligible",
+        "schema_version",
+        "seed",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "at_ms",
+              "event_id",
+              "expected_terminal",
+              "kind",
+              "target"
+            ],
+            "properties": {
+              "at_ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9223372036854775807
+              },
+              "event_id": {
+                "$ref": "#/$defs/identifier"
+              },
+              "expected_terminal": {
+                "enum": [
+                  "CONTINUE",
+                  "SAFE_ABORT",
+                  "RECOVER"
+                ]
+              },
+              "kind": {
+                "enum": [
+                  "WORKER_CRASH",
+                  "WORKER_RESTART",
+                  "VALIDATOR_CRASH",
+                  "VALIDATOR_RESTART",
+                  "STORAGE_CRASH",
+                  "STORAGE_RESTART",
+                  "REGION_PARTITION",
+                  "REGION_RESTORE",
+                  "DISPERSED_CHURN",
+                  "CONCENTRATED_CHURN"
+                ]
+              },
+              "target": {
+                "$ref": "#/$defs/identifier"
+              }
+            },
+            "allOf": [
+              {
+                "if": {"properties": {"kind": {"enum": ["WORKER_CRASH", "VALIDATOR_CRASH", "STORAGE_CRASH", "DISPERSED_CHURN"]}}},
+                "then": {"properties": {"expected_terminal": {"const": "CONTINUE"}}}
+              },
+              {
+                "if": {"properties": {"kind": {"enum": ["WORKER_RESTART", "VALIDATOR_RESTART", "STORAGE_RESTART", "REGION_RESTORE"]}}},
+                "then": {"properties": {"expected_terminal": {"const": "RECOVER"}}}
+              },
+              {
+                "if": {"properties": {"kind": {"enum": ["REGION_PARTITION", "CONCENTRATED_CHURN"]}}},
+                "then": {"properties": {"expected_terminal": {"const": "SAFE_ABORT"}}}
+              }
+            ]
+          }
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "label": {
+          "const": "SIMULATED"
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "type_name": {
+          "const": "BENCHMARK_FAULT_PROFILE"
+        }
+      }
+    },
+    "EnvironmentManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "binary_ids",
+        "capture_epoch_ms",
+        "dependency_lock_ids",
+        "environment_variable_names",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "hardware_inventory_id",
+        "image_id",
+        "primary_eligible",
+        "runtime_identity_id",
+        "sbom_id",
+        "schema_version",
+        "source_commit",
+        "source_tree",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "binary_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "capture_epoch_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "dependency_lock_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "environment_variable_names": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "hardware_inventory_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "image_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "runtime_identity_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "sbom_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "source_commit": {
+          "$ref": "#/$defs/gitId"
+        },
+        "source_tree": {
+          "$ref": "#/$defs/gitId"
+        },
+        "type_name": {
+          "const": "BENCHMARK_ENVIRONMENT_MANIFEST"
+        }
+      }
+    },
+    "RunManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arm_id",
+        "authority_scope",
+        "benchmark_definition_id",
+        "environment_manifest_id",
+        "evidence_class",
+        "execution_authorization_id",
+        "execution_mode",
+        "fault_profile_id",
+        "formal_semantics_id",
+        "gate_eligible",
+        "network_profile_id",
+        "primary_eligible",
+        "repetition",
+        "run_id",
+        "schema_version",
+        "scientific_profile_id",
+        "seed",
+        "stage_receipt_ids",
+        "status",
+        "ticket_ids",
+        "type_name"
+      ],
+      "properties": {
+        "arm_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "benchmark_definition_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "environment_manifest_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "evidence_class": {
+          "enum": [
+            "FOUNDATION_ONLY",
+            "TEST_FIXTURE"
+          ]
+        },
+        "execution_authorization_id": {
+          "type": "null"
+        },
+        "execution_mode": {
+          "enum": [
+            "PLAN_ONLY",
+            "CONFORMANCE_FIXTURE"
+          ]
+        },
+        "fault_profile_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "network_profile_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "repetition": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "run_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "scientific_profile_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "stage_receipt_ids": {
+          "type": "array",
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "status": {
+          "enum": [
+            "PLANNED",
+            "FIXTURE_COMPLETE"
+          ]
+        },
+        "ticket_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "type_name": {
+          "const": "BENCHMARK_RUN_MANIFEST"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "PLANNED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "execution_mode": {
+                "const": "PLAN_ONLY"
+              },
+              "stage_receipt_ids": {
+                "maxItems": 0
+              },
+              "evidence_class": {
+                "enum": [
+                  "FOUNDATION_ONLY",
+                  "TEST_FIXTURE"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "FIXTURE_COMPLETE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "execution_mode": {
+                "const": "CONFORMANCE_FIXTURE"
+              },
+              "stage_receipt_ids": {
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "ticket_ids": {
+                "minItems": 1,
+                "maxItems": 1
+              },
+              "evidence_class": {
+                "const": "TEST_FIXTURE"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "StageReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arm_id",
+        "authority_scope",
+        "benchmark_definition_id",
+        "component_identity_id",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "input_ids",
+        "native_opaque_refs",
+        "output_ids",
+        "previous_receipt_id",
+        "primary_eligible",
+        "run_id",
+        "schema_version",
+        "sequence",
+        "source_commit",
+        "stage",
+        "ticket_id",
+        "type_name"
+      ],
+      "properties": {
+        "arm_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "benchmark_definition_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "component_identity_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "input_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "native_opaque_refs": {
+          "type": "object"
+        },
+        "output_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "previous_receipt_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/contentId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "run_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "source_commit": {
+          "$ref": "#/$defs/gitId"
+        },
+        "stage": {
+          "enum": [
+            "WORKER_PYTHON",
+            "TRANSPORT_JAVA_NETTY",
+            "NATIVE_CPP_WAL"
+          ]
+        },
+        "ticket_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "type_name": {
+          "const": "BENCHMARK_STAGE_RECEIPT"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "WORKER_PYTHON"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "sequence": {
+                "const": 1
+              },
+              "previous_receipt_id": {
+                "type": "null"
+              },
+              "native_opaque_refs": {
+                "type": "object",
+                "maxProperties": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "TRANSPORT_JAVA_NETTY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "sequence": {
+                "const": 2
+              },
+              "previous_receipt_id": {
+                "$ref": "#/$defs/contentId"
+              },
+              "native_opaque_refs": {
+                "type": "object",
+                "maxProperties": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stage": {
+                "const": "NATIVE_CPP_WAL"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "sequence": {
+                "const": 3
+              },
+              "previous_receipt_id": {
+                "$ref": "#/$defs/contentId"
+              },
+              "native_opaque_refs": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "checkpoint_id",
+                  "durability_evidence_id",
+                  "effect_id",
+                  "state_root_id",
+                  "submit_receipt_id",
+                  "wal_record_id"
+                ],
+                "properties": {
+                  "checkpoint_id": {
+                    "$ref": "#/$defs/contentId"
+                  },
+                  "durability_evidence_id": {
+                    "$ref": "#/$defs/contentId"
+                  },
+                  "effect_id": {
+                    "$ref": "#/$defs/contentId"
+                  },
+                  "state_root_id": {
+                    "$ref": "#/$defs/contentId"
+                  },
+                  "submit_receipt_id": {
+                    "$ref": "#/$defs/contentId"
+                  },
+                  "wal_record_id": {
+                    "$ref": "#/$defs/contentId"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvidenceNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "benchmark_definition_id",
+        "dependencies",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "kind",
+        "media_type",
+        "ordinal",
+        "payload_id",
+        "primary_eligible",
+        "run_id",
+        "schema_id",
+        "schema_version",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "benchmark_definition_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "kind": {
+          "$ref": "#/$defs/identifier"
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "payload_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "run_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "schema_id": {
+          "type": "string",
+          "pattern": "^SCHEMA-[A-Z0-9-]+-010-V1$"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "type_name": {
+          "const": "BENCHMARK_EVIDENCE_NODE"
+        }
+      }
+    },
+    "EvidenceManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "benchmark_definition_id",
+        "definition_qc_id",
+        "definition_reviewer_set_id",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "node_ids",
+        "primary_eligible",
+        "required_kinds",
+        "run_ids",
+        "schema_version",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "benchmark_definition_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "definition_qc_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/contentId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "node_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentId"
+          }
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "required_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "run_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "type_name": {
+          "const": "BENCHMARK_EVIDENCE_MANIFEST"
+        },
+        "definition_reviewer_set_id": {
+          "$ref": "#/$defs/contentId"
+        }
+      }
+    },
+    "Metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "byte_counters",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "gpu_metrics",
+        "phase_timings",
+        "primary_eligible",
+        "resource_metrics",
+        "run_id",
+        "schema_version",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "byte_counters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "duplicate_bytes",
+            "global_bytes",
+            "p2p_bytes",
+            "regional_bytes",
+            "retry_bytes",
+            "storage_bytes",
+            "validator_bytes",
+            "worker_bytes"
+          ],
+          "properties": {
+            "duplicate_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "global_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "p2p_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "regional_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "retry_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "storage_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "validator_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "worker_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            }
+          }
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "gpu_metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "device_id",
+            "memory_peak_bytes",
+            "sample_count",
+            "utilization_basis_points"
+          ],
+          "properties": {
+            "device_id": {
+              "$ref": "#/$defs/contentId"
+            },
+            "memory_peak_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "sample_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "utilization_basis_points": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          }
+        },
+        "phase_timings": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "prefixItems": [
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "compute"}}},
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "upload"}}},
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "availability"}}},
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "certificate"}}},
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "reduce"}}},
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "apply"}}},
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "p2p"}}},
+            {"$ref": "#/$defs/phaseTiming", "properties": {"phase": {"const": "wait"}}}
+          ],
+          "items": false
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "resource_metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cpu_time_ns",
+            "p2p_bytes",
+            "peak_rss_bytes"
+          ],
+          "properties": {
+            "cpu_time_ns": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "p2p_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            "peak_rss_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            }
+          }
+        },
+        "run_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "type_name": {
+          "const": "BENCHMARK_METRICS"
+        }
+      }
+    },
+    "BenchmarkResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "benchmark_definition_id",
+        "commentary",
+        "decision",
+        "evidence_class",
+        "evidence_manifest_id",
+        "failed_gates",
+        "formal_semantics_id",
+        "gate_eligible",
+        "gate_table",
+        "limitations",
+        "missing_evidence",
+        "primary_eligible",
+        "result_evaluator_set_id",
+        "run_ids",
+        "schema_version",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "benchmark_definition_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "commentary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "enum": [
+            "NO_GO",
+            "NOT_EVALUATED"
+          ]
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "evidence_manifest_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "failed_gates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "gate_table": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "gate_id",
+              "mandatory",
+              "status"
+            ],
+            "properties": {
+              "gate_id": {
+                "$ref": "#/$defs/identifier"
+              },
+              "mandatory": {
+                "type": "boolean"
+              },
+              "status": {
+                "enum": [
+                  "PASS",
+                  "FAIL",
+                  "MISSING"
+                ]
+              }
+            }
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "run_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "type_name": {
+          "const": "BENCHMARK_RESULT"
+        },
+        "result_evaluator_set_id": {
+          "$ref": "#/$defs/contentId"
+        }
+      }
+    },
+    "BoundArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_kind",
+        "authority_scope",
+        "byte_length",
+        "evidence_class",
+        "formal_semantics_id",
+        "gate_eligible",
+        "license_id",
+        "media_type",
+        "name",
+        "primary_eligible",
+        "schema_version",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "artifact_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "artifact_kind": {
+          "$ref": "#/$defs/identifier"
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "license_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/contentId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "media_type": {
+          "const": "application/octet-stream"
+        },
+        "name": {
+          "$ref": "#/$defs/identifier"
+        },
+        "type_name": {
+          "const": "BENCHMARK_BOUND_ARTIFACT"
+        }
+      }
+    },
+    "AttestationManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_scope",
+        "benchmark_result_id",
+        "benchmark_result_qc_id",
+        "definition_reviewer_set_id",
+        "evidence_class",
+        "evidence_manifest_id",
+        "formal_semantics_id",
+        "gate_eligible",
+        "primary_eligible",
+        "result_evaluator_set_id",
+        "schema_version",
+        "type_name"
+      ],
+      "properties": {
+        "authority_scope": {
+          "const": "BENCHMARK_GOVERNANCE_ONLY"
+        },
+        "evidence_class": {
+          "const": "TEST_FIXTURE"
+        },
+        "formal_semantics_id": {
+          "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+        },
+        "gate_eligible": {
+          "const": false
+        },
+        "primary_eligible": {
+          "const": false
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "benchmark_result_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "benchmark_result_qc_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/contentId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "definition_reviewer_set_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "evidence_manifest_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "result_evaluator_set_id": {
+          "$ref": "#/$defs/contentId"
+        },
+        "type_name": {
+          "const": "BENCHMARK_ATTESTATION_MANIFEST"
+        }
+      }
+    }
+  },
+  "title": "DeltaReduce Feature 010 Foundation Contract Set"
+}

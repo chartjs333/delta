@@ -1,0 +1,1 @@
+{"$id":"https://deltareduce.org/schemas/010/runtime-identity-v1.json","$ref":"foundation-contracts-v1.json#/$defs/RuntimeIdentity","$schema":"https://json-schema.org/draft/2020-12/schema"}

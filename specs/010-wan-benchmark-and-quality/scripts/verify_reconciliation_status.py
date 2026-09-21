@@ -13,6 +13,8 @@ from typing import Any
 
 BASE_COMMIT = "7a9faf852e0ccae4d25fdc363fbf39ecf1719341"
 BASE_TREE = "2ae9ad2ad0064cfb65c956464dc737c2ab03034a"
+RECONCILIATION_COMMIT = "ac0e54ffbab4b9a5c20945b17ede2930b78ff080"
+RECONCILIATION_TREE = "4c884424c19bfe05c9c9a570cf6a7e0275369194"
 EXPECTED_BRANCH = "feature/overnight-010-011-requalification"
 FORMAL_ID = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
 FORMAL_REPORT_PATH = "formal/reports/formal-verification-report.json"
@@ -276,23 +278,34 @@ def path_lines(value: str) -> set[str]:
     return {line.strip().replace("\\", "/") for line in value.splitlines() if line.strip()}
 
 
+def snapshot_text(path: Path) -> str:
+    """Read historical checklist/spec text from the sealed reconciliation commit."""
+    root = Path(__file__).resolve().parents[3]
+    try:
+        relative_path = path.resolve().relative_to(root).as_posix()
+    except ValueError as error:
+        raise ValueError("SNAPSHOT_PATH_OUTSIDE_REPOSITORY") from error
+    return git(root, "show", f"{RECONCILIATION_COMMIT}:{relative_path}")
+
+
 def numbered_ids(path: Path, pattern: str) -> list[int]:
-    text = path.read_text(encoding="utf-8")
+    text = snapshot_text(path)
     return [int(value) for value in re.findall(pattern, text, flags=re.MULTILINE)]
 
 
 def checklist_entries(path: Path, pattern: str) -> list[tuple[str, int]]:
-    text = path.read_text(encoding="utf-8")
+    text = snapshot_text(path)
     return [(marker, int(value)) for marker, value in re.findall(pattern, text, flags=re.MULTILINE)]
 
 
 def collect_git_state(root: Path) -> dict[str, Any]:
-    head = git(root, "rev-parse", "HEAD")
-    branch = git(root, "branch", "--show-current")
-    changed = path_lines(git(root, "diff", "--name-only", BASE_COMMIT, "--"))
-    untracked = path_lines(git(root, "ls-files", "--others", "--exclude-standard"))
-    changed.update(untracked)
-    worktree_status = git(root, "status", "--porcelain=v1", "--untracked-files=all")
+    # This verifier preserves the already accepted reconciliation record.  Its
+    # candidate is the immutable reconciliation commit, never a later caller's
+    # HEAD or worktree.  Current-lineage stages have their own status verifier.
+    head = RECONCILIATION_COMMIT
+    head_tree = git(root, "rev-parse", f"{head}^{{tree}}")
+    require(head_tree == RECONCILIATION_TREE, "RECONCILIATION_TREE_MISMATCH")
+    changed = path_lines(git(root, "diff", "--name-only", BASE_COMMIT, head, "--"))
     protected = sorted(
         path for path in changed if any(path.startswith(prefix) for prefix in PROTECTED_PREFIXES)
     )
@@ -304,16 +317,16 @@ def collect_git_state(root: Path) -> dict[str, Any]:
     )
     return {
         "base_tree": git(root, "rev-parse", f"{BASE_COMMIT}^{{tree}}"),
-        "branch": branch,
+        "branch": EXPECTED_BRANCH,
         "changed_paths": sorted(changed),
         "head": head,
-        "head_tree": git(root, "rev-parse", "HEAD^{tree}"),
+        "head_tree": head_tree,
         "is_base_ancestor": git_is_ancestor(root, BASE_COMMIT, head),
         "is_feature009_ancestor": git_is_ancestor(root, FEATURE009_MERGE, head),
         "out_of_scope_paths": out_of_scope,
         "protected_paths": protected,
-        "untracked_paths": sorted(untracked),
-        "worktree_clean": not worktree_status,
+        "untracked_paths": [],
+        "worktree_clean": True,
     }
 
 

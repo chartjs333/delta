@@ -1,0 +1,9 @@
+{
+  "$id": "https://deltareduce.org/schemas/010/raw-artifact-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Descriptor for opaque SHA-256-addressed bytes. Raw payloads are never JSON instances and are not base64-reencoded.",
+  "not": {},
+  "x-deltareduce-content-address": "sha256",
+  "x-deltareduce-media-type": "application/octet-stream",
+  "x-deltareduce-payload-kind": "opaque-bytes"
+}

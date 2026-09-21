@@ -188,6 +188,11 @@
       "sha256": "c2982a55e642a1f03ad07d82e9d3d5e1bb9c24f9be6c0d8124e25d819d1abcd9"
     },
     {
+      "id": "FIXTURE-BENCHMARK-FOUNDATION-010-V1",
+      "path": "fixtures/010/cross-language/foundation-v1.json",
+      "sha256": "662024f60e54619d69110a3dce278a712d691fb4631f9338b3284a18510978a8"
+    },
+    {
       "id": "CANONICAL-JSON-001",
       "path": "fixtures/canonical-json/canonical-json-v1.json",
       "sha256": "61ddd50bb35a3ef943b49359b597cf141b7683ab9fd5c72858fabd13e9bdd482"
@@ -299,6 +304,101 @@
       "id": "MEDIA-BASELINE-CONFIG-V1",
       "schema_id": "SCHEMA-BASELINE-CONFIG-V1",
       "value": "application/vnd.deltareduce.baseline-config+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-ARM-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-ARM-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-arm+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-ATTESTATION-MANIFEST-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-ATTESTATION-MANIFEST-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-attestation-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-BOUND-ARTIFACT-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-BOUND-ARTIFACT-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-bound-artifact+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-DEFINITION-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-DEFINITION-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-definition+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-ENVIRONMENT-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-ENVIRONMENT-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-environment+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-EVIDENCE-MANIFEST-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-EVIDENCE-MANIFEST-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-evidence-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-EVIDENCE-NODE-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-EVIDENCE-NODE-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-evidence-node+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-FAULT-PROFILE-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-FAULT-PROFILE-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-fault-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-GOVERNANCE-QC-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-GOVERNANCE-QC-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-governance-qc+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-GOVERNANCE-VOTE-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-GOVERNANCE-VOTE-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-governance-vote+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-METRICS-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-METRICS-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-metrics+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-NETWORK-PROFILE-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-NETWORK-PROFILE-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-network-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-RAW-ARTIFACT-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-RAW-ARTIFACT-010-V1",
+      "value": "application/octet-stream"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-RESULT-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-RESULT-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-result+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-REVIEWER-SET-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-REVIEWER-SET-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-reviewer-set+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-RUN-MANIFEST-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-RUN-MANIFEST-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-run-manifest+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-RUNTIME-IDENTITY-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-RUNTIME-IDENTITY-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-runtime-identity+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-SCIENTIFIC-PROFILE-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-SCIENTIFIC-PROFILE-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-scientific-profile+json;version=1"
+    },
+    {
+      "id": "MEDIA-BENCHMARK-STAGE-RECEIPT-010-V1",
+      "schema_id": "SCHEMA-BENCHMARK-STAGE-RECEIPT-010-V1",
+      "value": "application/vnd.deltareduce.benchmark-stage-receipt+json;version=1"
     },
     {
       "id": "MEDIA-BFT-CANONICAL-BINARY-V1",
@@ -863,6 +963,116 @@
       "id": "SCHEMA-TRAINING-MODE-009-V1",
       "path": "schemas/009/training-mode-v1.json",
       "sha256": "05684e231aa187464bedb324b4cdae7f87b867089b926e24cba183233554e999"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-ATTESTATION-MANIFEST-010-V1",
+      "path": "schemas/010/attestation-manifest-v1.json",
+      "sha256": "cef3b5a214b599c4701525dffc1c6ebc4baa2cc6b757c8fbb18fb8c231fd3325"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-ARM-010-V1",
+      "path": "schemas/010/benchmark-arm-v1.json",
+      "sha256": "a8f18eec8df4eef5e21334dcfe078b6fd0aa41f345ddf49d4b5a0faddf7d246b"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-BOUND-ARTIFACT-010-V1",
+      "path": "schemas/010/benchmark-bound-artifact-v1.json",
+      "sha256": "c9f2c66af072ec30ffedcbda9577b5481c4cf4f5d1781026ffbee55522b30639"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-DEFINITION-010-V1",
+      "path": "schemas/010/benchmark-definition-v1.json",
+      "sha256": "d401b5c93bac7653ae5eb9fef738b9607b5b635901970aea7cc7a4dc751fd426"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-RESULT-010-V1",
+      "path": "schemas/010/benchmark-result-v1.json",
+      "sha256": "edb758a32fdbd7fa38f6c4831d300f76424a23a1a452336971667e1bf91f4eb0"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-ENVIRONMENT-010-V1",
+      "path": "schemas/010/environment-manifest-v1.json",
+      "sha256": "5522bab0564d09f72a64b8e0ab8ec596902762aaffb0132214a9364ec9d7cedf"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-EVIDENCE-MANIFEST-010-V1",
+      "path": "schemas/010/evidence-manifest-v1.json",
+      "sha256": "7a8ff918f131df08224d253300b076217ec7f1f3515b7deeaad6146124c60b26"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-EVIDENCE-NODE-010-V1",
+      "path": "schemas/010/evidence-node-v1.json",
+      "sha256": "370916ea6a4aa5394dfe5325e30111d275e21e8879855064e8276df007b1b2d7"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-FAULT-PROFILE-010-V1",
+      "path": "schemas/010/fault-profile-v1.json",
+      "sha256": "2b4b9af04322fb9c3d3fe248273b70c7659fa48642844ed3fd25b8fa4ef260ae"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-FOUNDATION-CONFIG-010-V1",
+      "path": "schemas/010/foundation-config-v1.json",
+      "sha256": "2d8a8227f9a89eb2c9118ddcb175a4d5949e373a0c75bf457b676ccd5d48145f"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-FOUNDATION-CONTRACTS-010-V1",
+      "path": "schemas/010/foundation-contracts-v1.json",
+      "sha256": "bd4812b5d18999929e8ab38d8d88283d60d983ed2f32b5ec8a664118947493cf"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-GOVERNANCE-QC-010-V1",
+      "path": "schemas/010/governance-qc-v1.json",
+      "sha256": "72ae36747d6c333cb0f0fc0bd44772fb6550e6c58f34b1c8e3bd41afc1fe1e09"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-GOVERNANCE-CONTRACTS-010-V1",
+      "path": "schemas/010/governance-v1.json",
+      "sha256": "fa8619b8c0b2509a3b69a0aeab566e2f1b2e2e349d5c537fc8238eff1b7b0fac"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-GOVERNANCE-VOTE-010-V1",
+      "path": "schemas/010/governance-vote-v1.json",
+      "sha256": "6c6e0cf56c1af826eb6947bcaa3a86fad07c2da9a8073e190fd3598d89bc1f87"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-METRICS-010-V1",
+      "path": "schemas/010/metrics-v1.json",
+      "sha256": "6c0c733a9de839dc633abca89aa2717130d4ef9fd9ad4ba4c78208c2b332672b"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-NETWORK-PROFILE-010-V1",
+      "path": "schemas/010/network-profile-v1.json",
+      "sha256": "59562262d789e942a9b059a3fc62764f344ee9af51f533b099531333630c97fa"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-RAW-ARTIFACT-010-V1",
+      "path": "schemas/010/raw-artifact-v1.json",
+      "sha256": "21d33270c5ec38f745815f0dd78511a065c2e5835145f9c2cb0e3ec8e537c269"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-REVIEWER-SET-010-V1",
+      "path": "schemas/010/reviewer-set-v1.json",
+      "sha256": "3487d3f99c9f50684c45531c7beb61b5b410bf233eb798f07949984cd14fabfd"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-RUN-MANIFEST-010-V1",
+      "path": "schemas/010/run-manifest-v1.json",
+      "sha256": "72c7ac5bdb4a8fbb5642c4b137f582ff4a20adeca700a06f7ae28852e2924ca3"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-RUNTIME-IDENTITY-010-V1",
+      "path": "schemas/010/runtime-identity-v1.json",
+      "sha256": "cc406e9e8f1ff2095d0df5aac204e9ea305ed1c4a58194ce085bacb00c437e03"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-SCIENTIFIC-PROFILE-010-V1",
+      "path": "schemas/010/scientific-profile-v1.json",
+      "sha256": "d76ab5787313e496a0d11b6a120b2c37144e31a97647f4be1e968aec3e609b38"
+    },
+    {
+      "id": "SCHEMA-BENCHMARK-STAGE-RECEIPT-010-V1",
+      "path": "schemas/010/stage-receipt-v1.json",
+      "sha256": "5ae9d48010778b37ed55898be87f3c60cccab248dfb456d2165dfcb5474278c8"
     },
     {
       "id": "SCHEMA-ARTIFACT-REF-V1",
