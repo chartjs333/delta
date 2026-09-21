@@ -53,6 +53,12 @@ def environment_inputs() -> tuple[dict[str, object], dict[str, object], dict[str
     return audit, manifest["environment_observation"], manifest["claims"]
 
 
+def expected_branch_state(verifier: ModuleType, root: Path) -> dict[str, object]:
+    state = copy.deepcopy(verifier.collect_git_state(root))
+    state["branch"] = verifier.EXPECTED_BRANCH
+    return state
+
+
 def changed_value(value: object) -> object:
     if value is None:
         return "tampered"
@@ -114,11 +120,198 @@ def test_manifest_tampering_is_rejected(
     assert expected_error in completed.stderr
 
 
+@pytest.mark.parametrize(
+    ("mutation", "expected_error"),
+    [
+        ("top_level_go", "DOCUMENT_FIELD_SET_MISMATCH"),
+        ("source_execution_authorized", "SOURCE_FIELD_SET_MISMATCH"),
+        ("feature010_all_gates_passed", "FEATURE010_FIELD_SET_MISMATCH"),
+        ("duplicate_external_requirement", "EXTERNAL_REQUIREMENTS_DUPLICATE"),
+        ("bool_primary_observations", "PRIMARY_OBSERVATION_FORBIDDEN"),
+        ("bool_pilot_runs", "PILOT_RUN_FORBIDDEN"),
+    ],
+)
+def test_required_reviewer_mutations_are_rejected(
+    tmp_path: Path,
+    mutation: str,
+    expected_error: str,
+) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    if mutation == "top_level_go":
+        document["qualification_decision"] = "GO"
+    elif mutation == "source_execution_authorized":
+        document["source"]["execution_authorized"] = True
+    elif mutation == "feature010_all_gates_passed":
+        document["feature_010"]["all_gates_passed"] = True
+    elif mutation == "duplicate_external_requirement":
+        document["missing_external_requirements"].append(
+            document["missing_external_requirements"][0]
+        )
+    elif mutation == "bool_primary_observations":
+        document["feature_010"]["primary_observations"] = False
+    elif mutation == "bool_pilot_runs":
+        document["feature_011"]["pilot_runs"] = False
+    else:  # pragma: no cover - keeps the parameter table exhaustive
+        raise AssertionError(mutation)
+
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert expected_error in completed.stderr
+
+
+@pytest.mark.parametrize(
+    ("path", "expected_error"),
+    [
+        ((), "DOCUMENT_FIELD_SET_MISMATCH"),
+        (("source",), "SOURCE_FIELD_SET_MISMATCH"),
+        (("formal",), "FORMAL_FIELD_SET_MISMATCH"),
+        (("working_version",), "WORKING_VERSION_FIELD_SET_MISMATCH"),
+        (("predecessor_feature_009",), "FEATURE009_PREDECESSOR_FIELD_SET_MISMATCH"),
+        (("historical_inputs", 0), "HISTORY_RECORD_FIELD_SET_MISMATCH"),
+        (("feature_010",), "FEATURE010_FIELD_SET_MISMATCH"),
+        (("feature_011",), "FEATURE011_FIELD_SET_MISMATCH"),
+        (("claims",), "CLAIM_SET_MISMATCH"),
+        (("diff_guard",), "DIFF_GUARD_FIELD_SET_MISMATCH"),
+    ],
+)
+def test_authoritative_objects_reject_extra_fields(
+    tmp_path: Path,
+    path: tuple[str | int, ...],
+    expected_error: str,
+) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    target = document
+    for component in path:
+        target = target[component]
+    target["unreviewed_extra"] = False
+
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert expected_error in completed.stderr
+
+
+@pytest.mark.parametrize(
+    ("section", "field", "expected_error"),
+    [
+        ("feature_010", "primary_observations", "PRIMARY_OBSERVATION_FORBIDDEN"),
+        ("feature_010", "simulated_wan_runs", "SIMULATED_WAN_RUN_FORBIDDEN"),
+        ("feature_010", "approved_real_wan_runs", "REAL_WAN_CLAIM_FORBIDDEN"),
+        ("feature_011", "remote_provisioning_runs", "REMOTE_PROVISIONING_FORBIDDEN"),
+        ("feature_011", "pilot_runs", "PILOT_RUN_FORBIDDEN"),
+        ("diff_guard", "protected_spine_diff_count", "RECORDED_PROTECTED_DIFF_MISMATCH"),
+    ],
+)
+@pytest.mark.parametrize("invalid_zero", [False, 0.0])
+def test_numeric_fields_reject_bool_and_float_zero(
+    tmp_path: Path,
+    section: str,
+    field: str,
+    expected_error: str,
+    invalid_zero: object,
+) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    document[section][field] = invalid_zero
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert expected_error in completed.stderr
+
+
+def test_duplicate_historical_pull_request_is_rejected(tmp_path: Path) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    document["historical_inputs"][-1] = copy.deepcopy(document["historical_inputs"][0])
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert "HISTORY_PR_DUPLICATE" in completed.stderr
+
+
+def test_historical_pull_request_type_confusion_is_rejected(tmp_path: Path) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    document["historical_inputs"][0]["pull_request"] = 11.0
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert "HISTORY_PR_TYPE_MISMATCH" in completed.stderr
+
+
+def test_external_requirements_must_be_a_list(tmp_path: Path) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    requirements = document["missing_external_requirements"]
+    document["missing_external_requirements"] = dict.fromkeys(requirements, True)
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert "EXTERNAL_REQUIREMENTS_NOT_LIST" in completed.stderr
+
+
+def test_external_requirement_elements_must_be_strings(tmp_path: Path) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    document["missing_external_requirements"][0] = False
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert "EXTERNAL_REQUIREMENT_TYPE_MISMATCH" in completed.stderr
+
+
+@pytest.mark.parametrize(
+    ("mutation", "expected_error"),
+    [
+        ("recorded_date", "RECORDED_DATE_MISMATCH"),
+        ("predecessor_status", "FEATURE009_STATUS_NOT_PASS"),
+        ("formal_report_path", "FORMAL_REPORT_PATH_MISMATCH"),
+        ("predecessor_report_path", "FEATURE009_REPORT_PATH_MISMATCH"),
+        ("claim_type", "QUALIFICATION_CLAIM_FORBIDDEN"),
+    ],
+)
+def test_authoritative_value_and_boolean_types_are_rejected(
+    tmp_path: Path,
+    mutation: str,
+    expected_error: str,
+) -> None:
+    document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    if mutation == "recorded_date":
+        document["recorded_date"] = "1970-01-01"
+    elif mutation == "predecessor_status":
+        document["predecessor_feature_009"]["status"] = "FAIL"
+    elif mutation == "formal_report_path":
+        document["formal"]["report_path"] = document["predecessor_feature_009"]["report_path"]
+    elif mutation == "predecessor_report_path":
+        document["predecessor_feature_009"]["report_path"] = document["formal"]["report_path"]
+    elif mutation == "claim_type":
+        document["claims"]["feature010_go"] = 0
+    else:  # pragma: no cover - keeps the parameter table exhaustive
+        raise AssertionError(mutation)
+    completed = run_manifest(write_manifest(tmp_path, document))
+    assert completed.returncode == 1
+    assert expected_error in completed.stderr
+
+
+@pytest.mark.parametrize("location", ["root", "nested"])
+def test_duplicate_json_keys_are_rejected(tmp_path: Path, location: str) -> None:
+    text = MANIFEST.read_text(encoding="utf-8")
+    if location == "root":
+        text = text.replace(
+            '  "status": "WORKING_VERSION_READY",',
+            '  "status": "QUALIFIED",\n  "status": "WORKING_VERSION_READY",',
+            1,
+        )
+    elif location == "nested":
+        text = text.replace(
+            '    "branch": "feature/overnight-010-011-requalification",',
+            '    "branch": "wrong/branch",\n'
+            '    "branch": "feature/overnight-010-011-requalification",',
+            1,
+        )
+    else:  # pragma: no cover - keeps the parameter table exhaustive
+        raise AssertionError(location)
+    path = tmp_path / "reconciliation-status.json"
+    path.write_text(text, encoding="utf-8")
+    completed = run_manifest(path)
+    assert completed.returncode == 1
+    assert "DUPLICATE_JSON_KEY_" in completed.stderr
+
+
 def test_actual_protected_git_diff_is_rejected() -> None:
     verifier = load_verifier()
     root = SCRIPT.resolve().parents[3]
     document = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    state = copy.deepcopy(verifier.collect_git_state(root))
+    state = expected_branch_state(verifier, root)
     state["protected_paths"] = ["formal/example.tla"]
     with pytest.raises(ValueError, match="PROTECTED_GIT_DIFF_FORBIDDEN"):
         verifier.validate_document(document, root, state, require_branch=True)
@@ -128,7 +321,7 @@ def test_actual_out_of_scope_git_diff_is_rejected() -> None:
     verifier = load_verifier()
     root = SCRIPT.resolve().parents[3]
     document = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    state = copy.deepcopy(verifier.collect_git_state(root))
+    state = expected_branch_state(verifier, root)
     state["out_of_scope_paths"] = ["unexpected.txt"]
     with pytest.raises(ValueError, match="OUT_OF_SCOPE_DIFF"):
         verifier.validate_document(document, root, state, require_branch=True)
@@ -207,7 +400,7 @@ def test_uncommitted_candidate_cannot_pass_sealed_mode() -> None:
     verifier = load_verifier()
     root = SCRIPT.resolve().parents[3]
     document = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    state = copy.deepcopy(verifier.collect_git_state(root))
+    state = expected_branch_state(verifier, root)
     state["head"] = verifier.BASE_COMMIT
     state["untracked_paths"] = ["specs/010-wan-benchmark-and-quality/spec.md"]
     state["worktree_clean"] = False
@@ -238,6 +431,6 @@ def test_feature011_completion_checkbox_cannot_be_forged(monkeypatch: pytest.Mon
         verifier.validate_document(
             document,
             root,
-            verifier.collect_git_state(root),
+            expected_branch_state(verifier, root),
             require_branch=True,
         )

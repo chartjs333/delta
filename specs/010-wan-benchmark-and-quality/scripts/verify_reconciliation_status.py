@@ -15,12 +15,61 @@ BASE_COMMIT = "7a9faf852e0ccae4d25fdc363fbf39ecf1719341"
 BASE_TREE = "2ae9ad2ad0064cfb65c956464dc737c2ab03034a"
 EXPECTED_BRANCH = "feature/overnight-010-011-requalification"
 FORMAL_ID = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+FORMAL_REPORT_PATH = "formal/reports/formal-verification-report.json"
 FORMAL_REPORT_SHA256 = "3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7"
 FEATURE009_MERGE = "007eb08aa3aaee849128ba428274a9fbda561bf8"
 FEATURE009_SOURCE = "f43e39fa1c60d256bab5d7e37e0756f28438d5e4"
 FEATURE009_EVIDENCE = "a5e73b41feb2dad73aa11d810d0c700c548e11ba"
+FEATURE009_REPORT_PATH = "specs/009-qlora-8gb-mode/evidence/final-compatibility.json"
 FEATURE009_REPORT_SHA256 = "95b312b45f3c2df4293ceaa0cbb16dd1e89c5d12a86c890211353a45798516ef"
 ENVIRONMENT_EVIDENCE_SHA256 = "7e85058bd01a43e499c93a8db938798d07b76a04bbf752942ba20ac9385a4992"
+RECORDED_DATE = "2026-09-20"
+
+DOCUMENT_FIELDS = {
+    "schema_version",
+    "type_name",
+    "recorded_date",
+    "status",
+    "source",
+    "formal",
+    "working_version",
+    "predecessor_feature_009",
+    "historical_inputs",
+    "environment_observation",
+    "feature_010",
+    "feature_011",
+    "missing_external_requirements",
+    "claims",
+    "diff_guard",
+}
+SOURCE_FIELDS = {"branch", "base_commit", "base_tree", "candidate_commit_binding"}
+FORMAL_FIELDS = {
+    "status",
+    "formal_semantics_id",
+    "report_path",
+    "report_sha256",
+    "semantic_change",
+}
+WORKING_VERSION_FIELDS = {"status", "scope", "ready_sha"}
+PREDECESSOR_FIELDS = {
+    "status",
+    "merge_commit",
+    "source_commit",
+    "evidence_commit",
+    "report_path",
+    "report_sha256",
+}
+HISTORY_FIELDS = {"pull_request", "head", "classification", "eligible_as_authority"}
+FEATURE010_FIELDS = {
+    "status",
+    "primary_observations",
+    "simulated_wan_runs",
+    "approved_real_wan_runs",
+    "benchmark_result_qc_id",
+    "feature010_go_checkpoint_sha",
+}
+FEATURE011_FIELDS = {"status", "remote_provisioning_runs", "pilot_runs", "pilot_result_qc_id"}
+DIFF_GUARD_FIELDS = {"protected_paths", "protected_spine_diff_count"}
 
 PROTECTED_PREFIXES = (
     "formal/",
@@ -174,6 +223,26 @@ ENVIRONMENT_MANIFEST_OBSERVATION = {
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def require_exact_object(value: Any, fields: set[str], name: str) -> None:
+    require(type(value) is dict, f"{name}_NOT_OBJECT")
+    require(set(value) == fields, f"{name}_FIELD_SET_MISMATCH")
+
+
+def reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        require(key not in result, f"DUPLICATE_JSON_KEY_{key}")
+        result[key] = value
+    return result
+
+
+def load_json(path: Path) -> Any:
+    return json.loads(
+        path.read_text(encoding="utf-8"),
+        object_pairs_hook=reject_duplicate_json_keys,
+    )
 
 
 def digest(path: Path) -> str:
@@ -395,12 +464,14 @@ def validate_document(
     require_branch: bool,
     sealed: bool = False,
 ) -> dict[str, Any]:
-    require(type(document) is dict, "DOCUMENT_NOT_OBJECT")
-    require(document.get("schema_version") == "1.0.0", "SCHEMA_VERSION_MISMATCH")
-    require(document.get("type_name") == "FEATURE010011_RECONCILIATION_STATUS", "TYPE_MISMATCH")
-    require(document.get("status") == "WORKING_VERSION_READY", "STATUS_MUST_REMAIN_WVR")
+    require_exact_object(document, DOCUMENT_FIELDS, "DOCUMENT")
+    require(document["schema_version"] == "1.0.0", "SCHEMA_VERSION_MISMATCH")
+    require(document["type_name"] == "FEATURE010011_RECONCILIATION_STATUS", "TYPE_MISMATCH")
+    require(document["recorded_date"] == RECORDED_DATE, "RECORDED_DATE_MISMATCH")
+    require(document["status"] == "WORKING_VERSION_READY", "STATUS_MUST_REMAIN_WVR")
 
     source = document["source"]
+    require_exact_object(source, SOURCE_FIELDS, "SOURCE")
     require(source["branch"] == EXPECTED_BRANCH, "RECORDED_BRANCH_MISMATCH")
     require(source["base_commit"] == BASE_COMMIT, "BASE_COMMIT_MISMATCH")
     require(source["base_tree"] == BASE_TREE, "BASE_TREE_MISMATCH")
@@ -421,21 +492,29 @@ def validate_document(
         require(state["worktree_clean"], "SEALED_CANDIDATE_WORKTREE_DIRTY")
 
     formal = document["formal"]
+    require_exact_object(formal, FORMAL_FIELDS, "FORMAL")
     require(formal["status"] == "GO", "FORMAL_NOT_GO")
     require(formal["formal_semantics_id"] == FORMAL_ID, "FORMAL_ID_MISMATCH")
     require(formal["semantic_change"] is False, "SEMANTIC_CHANGE_FORBIDDEN")
+    require(formal["report_path"] == FORMAL_REPORT_PATH, "FORMAL_REPORT_PATH_MISMATCH")
     formal_report = root / formal["report_path"]
     report_digest = digest(formal_report)
-    report_document = json.loads(formal_report.read_text(encoding="utf-8"))
+    report_document = load_json(formal_report)
     require(report_digest == FORMAL_REPORT_SHA256, "FORMAL_REPORT_HASH_MISMATCH")
     require(formal["report_sha256"] == report_digest, "RECORDED_REPORT_HASH_MISMATCH")
     require(report_document["decision"] == "GO", "FORMAL_REPORT_DECISION_NOT_GO")
     require(report_document["formal_semantics_id"] == FORMAL_ID, "FORMAL_REPORT_ID_MISMATCH")
 
     predecessor = document["predecessor_feature_009"]
+    require_exact_object(predecessor, PREDECESSOR_FIELDS, "FEATURE009_PREDECESSOR")
+    require(predecessor["status"] == "PASS", "FEATURE009_STATUS_NOT_PASS")
     require(predecessor["merge_commit"] == FEATURE009_MERGE, "FEATURE009_MERGE_MISMATCH")
     require(predecessor["source_commit"] == FEATURE009_SOURCE, "FEATURE009_SOURCE_MISMATCH")
     require(predecessor["evidence_commit"] == FEATURE009_EVIDENCE, "FEATURE009_EVIDENCE_MISMATCH")
+    require(
+        predecessor["report_path"] == FEATURE009_REPORT_PATH,
+        "FEATURE009_REPORT_PATH_MISMATCH",
+    )
     require(state["is_feature009_ancestor"], "FEATURE009_NOT_ANCESTOR")
     predecessor_report = root / predecessor["report_path"]
     require(
@@ -445,7 +524,7 @@ def validate_document(
         predecessor["report_sha256"] == FEATURE009_REPORT_SHA256,
         "RECORDED_FEATURE009_HASH_MISMATCH",
     )
-    predecessor_document = json.loads(predecessor_report.read_text(encoding="utf-8"))
+    predecessor_document = load_json(predecessor_report)
     require(predecessor_document["status"] == "PASS", "FEATURE009_REPORT_NOT_PASS")
     require(
         predecessor_document["formal"]["formal_semantics_id"] == FORMAL_ID,
@@ -453,12 +532,19 @@ def validate_document(
     )
 
     working = document["working_version"]
+    require_exact_object(working, WORKING_VERSION_FIELDS, "WORKING_VERSION")
     require(working["status"] == "PASS", "WORKING_VERSION_NOT_PASS")
     require(working["scope"] == "single-host Step 5C only", "WORKING_VERSION_SCOPE_MISMATCH")
     require(working["ready_sha"] == BASE_COMMIT, "WORKING_VERSION_SHA_MISMATCH")
 
     history_items = document["historical_inputs"]
+    require(type(history_items) is list, "HISTORY_NOT_LIST")
     require(len(history_items) == len(HISTORY), "HISTORY_COUNT_MISMATCH")
+    for item in history_items:
+        require_exact_object(item, HISTORY_FIELDS, "HISTORY_RECORD")
+        require(type(item["pull_request"]) is int, "HISTORY_PR_TYPE_MISMATCH")
+    history_numbers = [item["pull_request"] for item in history_items]
+    require(len(history_numbers) == len(set(history_numbers)), "HISTORY_PR_DUPLICATE")
     history = {item["pull_request"]: item for item in history_items}
     require(set(history) == set(HISTORY), "HISTORY_PR_SET_MISMATCH")
     for number, (head, classification) in HISTORY.items():
@@ -485,36 +571,74 @@ def validate_document(
     require(evidence_path.is_file(), "ENVIRONMENT_EVIDENCE_MISSING")
     environment_digest = digest(evidence_path)
     require(environment_digest == ENVIRONMENT_EVIDENCE_SHA256, "ENVIRONMENT_EVIDENCE_HASH_MISMATCH")
-    environment_record = json.loads(evidence_path.read_text(encoding="utf-8"))
+    environment_record = load_json(evidence_path)
     validate_environment_payload(environment_record, observation, claims)
     require((root / observation["narrative_path"]).is_file(), "ENVIRONMENT_NARRATIVE_MISSING")
 
     feature_010 = document["feature_010"]
+    require_exact_object(feature_010, FEATURE010_FIELDS, "FEATURE010")
     require(
         feature_010["status"] == "STOPPED_BEFORE_PRIMARY_EXECUTION",
         "FEATURE010_STATUS_MUST_BE_STOP",
     )
-    require(feature_010["primary_observations"] == 0, "PRIMARY_OBSERVATION_FORBIDDEN")
-    require(feature_010["simulated_wan_runs"] == 0, "SIMULATED_WAN_RUN_FORBIDDEN")
-    require(feature_010["approved_real_wan_runs"] == 0, "REAL_WAN_CLAIM_FORBIDDEN")
+    require(
+        type(feature_010["primary_observations"]) is int
+        and feature_010["primary_observations"] == 0,
+        "PRIMARY_OBSERVATION_FORBIDDEN",
+    )
+    require(
+        type(feature_010["simulated_wan_runs"]) is int and feature_010["simulated_wan_runs"] == 0,
+        "SIMULATED_WAN_RUN_FORBIDDEN",
+    )
+    require(
+        type(feature_010["approved_real_wan_runs"]) is int
+        and feature_010["approved_real_wan_runs"] == 0,
+        "REAL_WAN_CLAIM_FORBIDDEN",
+    )
     require(feature_010["benchmark_result_qc_id"] is None, "RESULT_QC_MUST_BE_ABSENT")
     require(feature_010["feature010_go_checkpoint_sha"] is None, "GO_CHECKPOINT_FORBIDDEN")
 
     feature_011 = document["feature_011"]
+    require_exact_object(feature_011, FEATURE011_FIELDS, "FEATURE011")
     require(feature_011["status"] == "BLOCKED_ON_FEATURE010_GO", "FEATURE011_NOT_BLOCKED")
-    require(feature_011["remote_provisioning_runs"] == 0, "REMOTE_PROVISIONING_FORBIDDEN")
-    require(feature_011["pilot_runs"] == 0, "PILOT_RUN_FORBIDDEN")
+    require(
+        type(feature_011["remote_provisioning_runs"]) is int
+        and feature_011["remote_provisioning_runs"] == 0,
+        "REMOTE_PROVISIONING_FORBIDDEN",
+    )
+    require(
+        type(feature_011["pilot_runs"]) is int and feature_011["pilot_runs"] == 0,
+        "PILOT_RUN_FORBIDDEN",
+    )
     require(feature_011["pilot_result_qc_id"] is None, "PILOT_QC_MUST_BE_ABSENT")
 
+    missing_requirements = document["missing_external_requirements"]
+    require(type(missing_requirements) is list, "EXTERNAL_REQUIREMENTS_NOT_LIST")
     require(
-        set(document["missing_external_requirements"]) == MISSING_EXTERNAL_REQUIREMENTS,
+        all(type(requirement) is str for requirement in missing_requirements),
+        "EXTERNAL_REQUIREMENT_TYPE_MISMATCH",
+    )
+    require(
+        len(missing_requirements) == len(set(missing_requirements)),
+        "EXTERNAL_REQUIREMENTS_DUPLICATE",
+    )
+    require(
+        len(missing_requirements) == len(MISSING_EXTERNAL_REQUIREMENTS)
+        and set(missing_requirements) == MISSING_EXTERNAL_REQUIREMENTS,
         "EXTERNAL_REQUIREMENTS_MISMATCH",
     )
 
     guard = document["diff_guard"]
-    require(guard["protected_paths"] == PROTECTED_PATTERNS, "PROTECTED_PATTERN_MISMATCH")
+    require_exact_object(guard, DIFF_GUARD_FIELDS, "DIFF_GUARD")
     require(
-        guard["protected_spine_diff_count"] == len(state["protected_paths"]),
+        type(guard["protected_paths"]) is list
+        and all(type(path) is str for path in guard["protected_paths"])
+        and guard["protected_paths"] == PROTECTED_PATTERNS,
+        "PROTECTED_PATTERN_MISMATCH",
+    )
+    require(
+        type(guard["protected_spine_diff_count"]) is int
+        and guard["protected_spine_diff_count"] == len(state["protected_paths"]),
         "RECORDED_PROTECTED_DIFF_MISMATCH",
     )
     require(guard["protected_spine_diff_count"] == 0, "PROTECTED_DIFF_FORBIDDEN")
@@ -632,7 +756,7 @@ def main() -> int:
     )
     evidence_path = arguments.manifest.resolve() if arguments.manifest else default_manifest
     try:
-        document = json.loads(evidence_path.read_text(encoding="utf-8"))
+        document = load_json(evidence_path)
         result = validate_document(
             document,
             root,
