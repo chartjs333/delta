@@ -1,0 +1,325 @@
+name: Feature 010 exactness and safety verification
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: feature010-exactness-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  native-exactness:
+    name: ${{ matrix.family }} C++${{ matrix.standard }} exact process corpus
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: gcc
+            compiler: g++
+            image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+            standard: 20
+            version_pattern: g++ (GCC) 14.2.0
+          - family: gcc
+            compiler: g++
+            image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+            standard: 23
+            version_pattern: g++ (GCC) 14.2.0
+          - family: clang
+            compiler: clang++
+            image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+            standard: 20
+            version_pattern: clang version 20.1.8
+          - family: clang
+            compiler: clang++
+            image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+            standard: 23
+            version_pattern: clang version 20.1.8
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Provision content-addressed compiler
+        run: docker pull "${{ matrix.image }}"
+
+      - name: Build exact validator aggregate apply probe
+        env:
+          COMPILER: ${{ matrix.compiler }}
+          COMPILER_IMAGE: ${{ matrix.image }}
+          EXPECTED_VERSION: ${{ matrix.version_pattern }}
+          STANDARD: ${{ matrix.standard }}
+        run: |
+          docker run --rm --network none \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$RUNNER_TEMP:/qualification" \
+            --workdir /workspace \
+            "$COMPILER_IMAGE" \
+            sh specs/010-wan-benchmark-and-quality/scripts/build_exactness_probe.sh \
+              "$COMPILER" "$STANDARD" "$EXPECTED_VERSION" \
+              /qualification/compiler-version.txt \
+              /qualification/feature010-exactness-probe \
+              /qualification/foundation-consumer
+
+      - name: Run four independent frozen-scale processes
+        env:
+          COMPILER_IMAGE: ${{ matrix.image }}
+          FAMILY: ${{ matrix.family }}
+          STANDARD: ${{ matrix.standard }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/lane"
+          start_ns="$(date +%s%N)"
+          for repetition in 1 2 3 4; do
+            receipt_dir="$RUNNER_TEMP/lane/repetition-$repetition"
+            mkdir -p "$receipt_dir"
+            for validator in 0 1 2 3; do
+              "$RUNNER_TEMP/feature010-exactness-probe" \
+                validator "validator-$validator" \
+                > "$receipt_dir/validator-$validator.json"
+            done
+            "$RUNNER_TEMP/feature010-exactness-probe" \
+              aggregator \
+              "$receipt_dir/validator-0.json" \
+              "$receipt_dir/validator-1.json" \
+              "$receipt_dir/validator-2.json" \
+              "$receipt_dir/validator-3.json" \
+              > "$receipt_dir/aggregator.json"
+            "$RUNNER_TEMP/feature010-exactness-probe" \
+              apply "$receipt_dir/aggregator.json" "$RUNNER_TEMP/process-$repetition" \
+              > "$RUNNER_TEMP/lane/process-$repetition.json"
+          done
+          elapsed_ns="$(( $(date +%s%N) - start_ns ))"
+          actual_compiler_version="$(cat "$RUNNER_TEMP/compiler-version.txt")"
+          cmp "$RUNNER_TEMP/lane/process-1.json" "$RUNNER_TEMP/lane/process-2.json"
+          cmp "$RUNNER_TEMP/lane/process-1.json" "$RUNNER_TEMP/lane/process-3.json"
+          cmp "$RUNNER_TEMP/lane/process-1.json" "$RUNNER_TEMP/lane/process-4.json"
+          "$RUNNER_TEMP/foundation-consumer" \
+            delta-protocol/fixtures/010/cross-language/foundation-v1.json \
+            --emit-corpus > "$RUNNER_TEMP/lane/corpus.json"
+          python3 specs/010-wan-benchmark-and-quality/scripts/exactness_gate.py \
+            emit-native-lane \
+            --source-commit "$SOURCE_SHA" \
+            --compiler "$FAMILY" \
+            --compiler-image "$COMPILER_IMAGE" \
+            --compiler-version "$actual_compiler_version" \
+            --standard "$STANDARD" \
+            --architecture x86_64 \
+            --elapsed-ns "$elapsed_ns" \
+            --process-output "$RUNNER_TEMP/lane/process-1.json" \
+            --process-output "$RUNNER_TEMP/lane/process-2.json" \
+            --process-output "$RUNNER_TEMP/lane/process-3.json" \
+            --process-output "$RUNNER_TEMP/lane/process-4.json" \
+            --receipt-dir "$RUNNER_TEMP/lane/repetition-1" \
+            --receipt-dir "$RUNNER_TEMP/lane/repetition-2" \
+            --receipt-dir "$RUNNER_TEMP/lane/repetition-3" \
+            --receipt-dir "$RUNNER_TEMP/lane/repetition-4" \
+            --corpus-output "$RUNNER_TEMP/lane/corpus.json" \
+            --output "$RUNNER_TEMP/lane/lane.json"
+
+      - name: Retain exact native lane
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: feature010-native-${{ matrix.family }}-cpp${{ matrix.standard }}-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/lane/
+          if-no-files-found: error
+          retention-days: 30
+
+  safety-suite:
+    name: Native attacks crash refinement and fuzz corpus
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Build complete native test graph
+        run: |
+          cmake --preset cpp20
+          cmake --build --preset cpp20 --parallel
+
+      - name: Execute attacks crash replay mutants and fuzz smoke
+        run: |
+          mkdir -p "$RUNNER_TEMP/safety"
+          ctest --preset cpp20 --output-on-failure \
+            --output-junit "$RUNNER_TEMP/safety/ctest.xml"
+
+      - name: Verify implementation trace projections
+        run: |
+          python3 specs/003-bft-round-state-machine/scripts/verify_native_refinement.py \
+            --check-only > "$RUNNER_TEMP/safety/native-refinement.json"
+          python3 specs/006-regional-hierarchical-reduce/scripts/verify_hierarchy_execution.py \
+            --trace-dir out/build/cpp20/hierarchy-traces \
+            > "$RUNNER_TEMP/safety/hierarchy-refinement.json"
+          python3 specs/007-domain-pure-ticket-scheduling/scripts/verify_scheduling_refinement.py \
+            --check-only --trace-dir out/build/cpp20/scheduling-traces \
+            > "$RUNNER_TEMP/safety/scheduling-refinement.json"
+          python3 specs/008-certificates-and-consensus/scripts/verify_certificate_refinement.py \
+            --check-only > "$RUNNER_TEMP/safety/certificate-refinement.json"
+          python3 formal/scripts/verify_formal_report.py \
+            formal/reports/formal-verification-report.json --root . --require-go
+
+      - name: Retain raw safety and refinement evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: feature010-safety-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/safety/
+          if-no-files-found: error
+          retention-days: 30
+
+  java-corpus:
+    name: JDK ${{ matrix.feature }} exact canonical status corpus
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir -p "$RUNNER_TEMP/jdk" "$RUNNER_TEMP/classes" "$RUNNER_TEMP/java-corpus"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" \
+            --directory "$RUNNER_TEMP/jdk" --strip-components=1
+
+      - name: Execute exact Java corpus offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+        run: |
+          "$RUNNER_TEMP/jdk/bin/java" -version 2>&1 | head -n 1 | grep -F '${{ matrix.version }}'
+          "$RUNNER_TEMP/jdk/bin/javac" --release '${{ matrix.feature }}' \
+            -Xlint:all -Werror -d "$RUNNER_TEMP/classes" \
+            specs/010-wan-benchmark-and-quality/conformance/FoundationFixtureConsumer.java
+          "$RUNNER_TEMP/jdk/bin/java" --class-path "$RUNNER_TEMP/classes" \
+            FoundationFixtureConsumer \
+            delta-protocol/fixtures/010/cross-language/foundation-v1.json \
+            --emit-corpus > "$RUNNER_TEMP/java-corpus/corpus.json"
+
+      - name: Retain exact Java corpus
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: feature010-java-jdk${{ matrix.feature }}-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/java-corpus/corpus.json
+          if-no-files-found: error
+          retention-days: 30
+
+  exactness-gate:
+    name: Deterministic fail-closed exactness analyzer
+    needs: [native-exactness, safety-suite, java-corpus]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Download exact native lanes
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          pattern: feature010-native-*-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/lanes
+
+      - name: Download safety evidence
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: feature010-safety-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/safety
+
+      - name: Download exact Java corpora
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          pattern: feature010-java-*-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/java-corpus
+
+      - name: Aggregate exact-source execution evidence
+        run: |
+          python3 specs/010-wan-benchmark-and-quality/scripts/foundation_fixtures.py \
+            --emit-corpus > "$RUNNER_TEMP/python-corpus.json"
+          python3 specs/010-wan-benchmark-and-quality/scripts/exactness_gate.py aggregate \
+            --source-commit "$SOURCE_SHA" \
+            --lanes-dir "$RUNNER_TEMP/lanes" \
+            --safety-junit "$RUNNER_TEMP/safety/ctest.xml" \
+            --refinement-dir "$RUNNER_TEMP/safety" \
+            --python-corpus "$RUNNER_TEMP/python-corpus.json" \
+            --java-corpus-dir "$RUNNER_TEMP/java-corpus" \
+            --output "$RUNNER_TEMP/exactness-execution.json"
+          python3 specs/010-wan-benchmark-and-quality/scripts/exactness_gate.py \
+            verify-execution "$RUNNER_TEMP/exactness-execution.json"
+
+      - name: Verify implementation source boundary
+        if: ${{ hashFiles('specs/010-wan-benchmark-and-quality/evidence/exactness-status.json') == '' }}
+        run: >-
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_exactness_status.py
+          --check-source --source-commit "$SOURCE_SHA"
+
+      - name: Run deterministic analyzer mutation tests
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.6.14
+          uv sync --frozen
+          uv run ruff check \
+            specs/010-wan-benchmark-and-quality/scripts \
+            specs/010-wan-benchmark-and-quality/tests
+          uv run ruff format --check \
+            specs/010-wan-benchmark-and-quality/scripts \
+            specs/010-wan-benchmark-and-quality/tests
+          uv run pytest -q specs/010-wan-benchmark-and-quality/tests
+
+      - name: Verify committed evidence overlay
+        if: ${{ hashFiles('specs/010-wan-benchmark-and-quality/evidence/exactness-status.json') != '' }}
+        run: |
+          python3 specs/010-wan-benchmark-and-quality/scripts/capture_exactness_ci.py \
+            --check-only
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_exactness_status.py \
+            --check-only
+
+      - name: Retain exactness execution artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: feature010-exactness-execution-${{ github.run_id }}-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/exactness-execution.json
+          if-no-files-found: error
+          retention-days: 30

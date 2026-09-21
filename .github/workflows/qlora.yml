@@ -27,6 +27,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Build strict native authority
         run: |
           cmake --preset "cpp${{ matrix.standard }}"
@@ -44,6 +45,7 @@ jobs:
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Configure sanitizers
         run: >-
           cmake -S . -B out/build/qlora-sanitizer
@@ -80,6 +82,7 @@ jobs:
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Provision and verify exact JDK archive
         env:
           ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
@@ -126,6 +129,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Verify committed deterministic evidence when present
         run: |
           test -f specs/009-qlora-8gb-mode/evidence/preflight.json
