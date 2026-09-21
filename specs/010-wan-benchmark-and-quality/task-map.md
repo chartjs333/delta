@@ -4,6 +4,15 @@ This map preserves the existing `T000–T054` and `HR010-001–HR010-018` identi
 Both sets are mandatory. Historical completion does not carry to the current
 lineage; synthetic fixtures cannot substitute for primary quality/WAN evidence.
 
+The current-lineage foundation checkpoint is implementation commit
+`6054e35ed627392172f94c2a90dfb7d799d5251e` (tree
+`0640a117aba6772b7c0b22ec9cdaa047e507e1d5`). Machine-readable mapping and status
+are in `evidence/foundation-task-map.json` and `evidence/foundation-status.json`.
+T001–T027 and HR010-001–003 are complete only within the explicit foundation
+completion classes recorded there. T028 and HR010-004 are the next open gates;
+no Definition execution authorization, primary observation, qualifying Gate C or
+Gate D run, actual ResultQC, or Feature 010 GO exists.
+
 | Semantic tasks | Runtime obligations | Mandatory evidence boundary |
 | --- | --- | --- |
 | T000–T001 | HR010-001–003, 007, 017 | Exact predecessor, Formal GO, architecture scan and semantic STOP |
@@ -35,6 +44,7 @@ durability outcome or current transition is `SEMANTIC` and returns to Feature 00
 - Feature 009 final report SHA-256:
   `95b312b45f3c2df4293ceaa0cbb16dd1e89c5d12a86c890211353a45798516ef`
 
-Primary execution remains forbidden until T001–T034 and their mapped runtime
-obligations pass on one exact current-lineage candidate and the required external
-governance/scientific resources exist.
+Primary execution remains forbidden. Foundation completion through T027 and
+HR010-003 does not substitute for T028–T034, HR010-004+, separate Definition
+execution authorization, or the required external governance/scientific
+resources.

@@ -1,0 +1,347 @@
+{
+  "boundary": {
+    "actual_result_qc": null,
+    "definition_execution_authorization": null,
+    "execution_started": false,
+    "feature010_go": false,
+    "primary_scientific_observation_count": 0,
+    "qualification_complete": false,
+    "qualifying_gate_c": false,
+    "qualifying_gate_d": false
+  },
+  "excluded_claims": [
+    "ACTUAL_GOVERNANCE_OR_DEFINITION_EXECUTION_AUTHORIZATION",
+    "ACTUAL_RESULT_QC",
+    "FEATURE010_GO",
+    "LIVE_POLYGLOT_EXECUTION",
+    "PRIMARY_SCIENTIFIC_OBSERVATIONS",
+    "QUALIFYING_GATE_C",
+    "QUALIFYING_GATE_D"
+  ],
+  "implementation_commit": "6054e35ed627392172f94c2a90dfb7d799d5251e",
+  "implementation_tree": "0640a117aba6772b7c0b22ec9cdaa047e507e1d5",
+  "runtime_tasks": [
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/compatibility.py",
+        "delta-worker-python/src/deltatorrent/benchmark/contracts.py"
+      ],
+      "task_id": "HR010-001",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_every_runtime_identity_mismatch_rejects_exact_admission"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "configs/benchmark/foundation-v1.json",
+        "delta-worker-python/src/deltatorrent/benchmark/capture.py",
+        "delta-worker-python/src/deltatorrent/benchmark/config.py"
+      ],
+      "task_id": "HR010-002",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_contracts.py::test_frozen_foundation_config_is_canonical_joined_and_schema_valid"
+      ]
+    },
+    {
+      "completion_class": "FOUNDATION_IMPLEMENTATION_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/capture.py",
+        "delta-worker-python/src/deltatorrent/benchmark/compatibility.py"
+      ],
+      "task_id": "HR010-003",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_evidence_class_and_environment_identity_joins_are_exact"
+      ]
+    }
+  ],
+  "schema_version": "1.0.0",
+  "semantic_tasks": [
+    {
+      "completion_class": "OFFLINE_VERIFIER",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/preflight.py"
+      ],
+      "task_id": "T001",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_contracts.py::test_zero_tolerance_preflight_is_bound_to_exact_source_and_ignores_worktree"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-protocol/schemas/010/foundation-contracts-v1.json",
+        "delta-worker-python/src/deltatorrent/benchmark/contracts.py"
+      ],
+      "task_id": "T002",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_contracts.py::test_definition_round_trip_identity_and_context_are_stable"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/contracts.py",
+        "delta-worker-python/src/deltatorrent/benchmark/evidence.py"
+      ],
+      "task_id": "T003",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_evidence.py::test_complete_content_addressed_graph_verifies_offline"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/decision.py",
+        "delta-worker-python/src/deltatorrent/benchmark/governance.py"
+      ],
+      "task_id": "T004",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_all_mandatory_decision_is_fail_closed_and_non_overridable"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/canonical.py",
+        "delta-worker-python/src/deltatorrent/benchmark/governance.py"
+      ],
+      "task_id": "T005",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_contracts.py::test_canonical_json_is_utf8_sorted_integer_only_and_locale_independent"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-protocol/fixtures/010/cross-language/foundation-v1.json",
+        "specs/010-wan-benchmark-and-quality/scripts/foundation_fixtures.py"
+      ],
+      "task_id": "T006",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_fixtures.py::test_golden_fixture_is_reproducible_and_every_wrapper_is_exact"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "specs/010-wan-benchmark-and-quality/conformance/FoundationFixtureConsumer.java",
+        "specs/010-wan-benchmark-and-quality/conformance/foundation_fixture_consumer.cpp"
+      ],
+      "task_id": "T007",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_fixtures.py::test_cpp_fixture_consumer_checks_exact_bytes_when_compiler_is_available",
+        "delta-worker-python/tests/benchmark/test_foundation_fixtures.py::test_java_fixture_consumer_checks_exact_bytes_and_sha256"
+      ]
+    },
+    {
+      "completion_class": "OFFLINE_VERIFIER",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/contracts.py"
+      ],
+      "task_id": "T008",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_contracts.py::test_definition_mutations_fail_closed"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-protocol/schemas/010/governance-v1.json",
+        "delta-worker-python/src/deltatorrent/benchmark/governance.py"
+      ],
+      "task_id": "T009",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_governance.py::test_valid_three_of_four_qc_is_deterministic_and_has_no_runtime_authority"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "configs/benchmark/foundation-v1.json",
+        "delta-protocol/schemas/010/foundation-config-v1.json",
+        "delta-worker-python/src/deltatorrent/benchmark/config.py"
+      ],
+      "task_id": "T010",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_contracts.py::test_frozen_foundation_config_is_canonical_joined_and_schema_valid"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/profiles.py"
+      ],
+      "task_id": "T011",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_attack_corpus_is_frozen_and_complete"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/contracts.py",
+        "delta-worker-python/src/deltatorrent/benchmark/governance.py"
+      ],
+      "task_id": "T012",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_governance.py::test_post_qc_body_mutation_cannot_reuse_definition_votes"
+      ]
+    },
+    {
+      "completion_class": "FOUNDATION_IMPLEMENTATION_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/capture.py"
+      ],
+      "task_id": "T013",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_capture.py::test_explicit_environment_capture_binds_runtime_build_locks_and_sbom"
+      ]
+    },
+    {
+      "completion_class": "FOUNDATION_IMPLEMENTATION_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/orchestrator.py"
+      ],
+      "task_id": "T014",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_deterministic_planner_expands_exact_matrix_without_execution_authority"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/adapters.py"
+      ],
+      "task_id": "T015",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_capture.py::test_full_model_arm_adapter_is_bound_but_remains_plan_only"
+      ]
+    },
+    {
+      "completion_class": "OFFLINE_VERIFIER",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/orchestrator.py"
+      ],
+      "task_id": "T016",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_token_domain_and_scientific_reconciliation_is_exact"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/compatibility.py",
+        "delta-worker-python/src/deltatorrent/benchmark/orchestrator.py"
+      ],
+      "task_id": "T017",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_planner_rejects_arm_runtime_and_frozen_ticket_mismatch"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/profiles.py"
+      ],
+      "task_id": "T018",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_network_and_fault_plans_remain_deterministic_and_simulated"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/profiles.py"
+      ],
+      "task_id": "T019",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_network_and_fault_plans_remain_deterministic_and_simulated",
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_real_wan_and_reordered_fault_events_are_rejected"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/profiles.py"
+      ],
+      "task_id": "T020",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_capture.py::test_frozen_fault_corpus_covers_all_process_and_churn_kinds"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/profiles.py"
+      ],
+      "task_id": "T021",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_attack_corpus_is_frozen_and_complete"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/profiles.py"
+      ],
+      "task_id": "T022",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_planning.py::test_real_wan_and_reordered_fault_events_are_rejected"
+      ]
+    },
+    {
+      "completion_class": "FOUNDATION_IMPLEMENTATION_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/evidence.py"
+      ],
+      "task_id": "T023",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_evidence.py::test_complete_content_addressed_graph_verifies_offline"
+      ]
+    },
+    {
+      "completion_class": "PLAN_ONLY",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/receipts.py"
+      ],
+      "task_id": "T024",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_evidence.py::test_receipt_chain_binds_all_three_stages_ticket_and_native_refs"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/capture.py",
+        "delta-worker-python/src/deltatorrent/benchmark/contracts.py"
+      ],
+      "task_id": "T025",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_contracts.py::test_metrics_schema_and_contract_reject_incomplete_or_duplicate_phases"
+      ]
+    },
+    {
+      "completion_class": "OFFLINE_VERIFIER",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/verifier.py"
+      ],
+      "task_id": "T026",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_evidence.py::test_complete_content_addressed_graph_verifies_offline"
+      ]
+    },
+    {
+      "completion_class": "CONTRACT_AND_FIXTURE",
+      "implementation_paths": [
+        "delta-worker-python/src/deltatorrent/benchmark/verifier.py"
+      ],
+      "task_id": "T027",
+      "test_nodeids": [
+        "delta-worker-python/tests/benchmark/test_foundation_evidence.py::test_missing_and_mutated_objects_fail_hash_or_presence_checks"
+      ]
+    }
+  ],
+  "type_name": "FEATURE010_FOUNDATION_TASK_MAP"
+}

@@ -3,12 +3,18 @@
 **Input**: `spec.md`, `plan.md`, `task-map.md`, Constitution 2.1.0 and exact merged
 Feature 009 (`007eb08aa3aaee849128ba428274a9fbda561bf8`).
 
-**Formal impact**: `NONE`; benchmark attestations remain outside the runtime
-certificate graph and cannot change current state.
+**Formal impact**: `NO_SEMANTIC_CHANGE` / `REFINEMENT_ONLY`; benchmark
+attestations remain outside the runtime certificate graph and cannot change
+current state.
 
-Historical task completion from unmerged PRs is not inherited. A checkbox below
-is complete only when current-lineage implementation and machine-readable evidence
-exist. The reconciliation verifier completes T000 only; T001 is the next STOP.
+Historical task completion from unmerged PRs is not inherited. T000 records the
+sealed reconciliation at `ac0e54ffbab4b9a5c20945b17ede2930b78ff080`.
+The immutable foundation implementation at
+`6054e35ed627392172f94c2a90dfb7d799d5251e` and its evidence overlay complete
+T001–T027 only as contract, fixture, plan, foundation-implementation or offline-
+verification obligations. Their checked state is not qualification, execution
+authorization, a primary observation, Gate C, Gate D, ResultQC or Feature 010 GO.
+T028 is the next execution-gate STOP.
 
 ## Phase 0: Mandatory STOP prerequisites
 
@@ -17,66 +23,69 @@ exist. The reconciliation verifier completes T000 only; T001 is the next STOP.
   primary benchmark execution. Current evidence:
   `evidence/reconciliation-status.json` plus
   `scripts/verify_reconciliation_status.py`.
-- [ ] T001 Search the future current-lineage benchmark implementation/config for
+- [x] T001 Search the current-lineage benchmark implementation/config for
   adaptive `H`, stale acceptance, floating-point consensus fallback, threshold
   override or central-current authority; publish a zero-tolerance preflight bound
   to its exact source.
 
 ## Phase 1: Definition, evidence and result contracts
 
-- [ ] T002 Define `BenchmarkDefinition`, arm, threshold, fault/network profile and
+- [x] T002 Define `BenchmarkDefinition`, arm, threshold, fault/network profile and
   compatibility models in current-lineage worker/protocol paths.
-- [ ] T003 Define `RunManifest`, environment/build/data/evaluation and immutable
+- [x] T003 Define `RunManifest`, environment/build/data/evaluation and immutable
   evidence-graph models.
-- [ ] T004 Define gate table, `BenchmarkResult`, deterministic GO/NO_GO decision and
+- [x] T004 Define gate table, `BenchmarkResult`, deterministic GO/NO_GO decision and
   reviewer/evaluator QCs.
-- [ ] T005 Implement canonical serialization/hash/signature contexts.
-- [ ] T006 Create golden definition/run/evidence/result fixtures under schema 010.
-- [ ] T007 Add contract/mutation tests and cross-runtime fixture consumers.
+- [x] T005 Implement canonical serialization/hash/signature contexts.
+- [x] T006 Create golden definition/run/evidence/result fixtures under schema 010.
+- [x] T007 Add contract/mutation tests and cross-runtime fixture consumers.
 
 ## Phase 2: Preregistration and completeness
 
-- [ ] T008 Implement definition completeness, license and immutable-dependency
+- [x] T008 Implement definition completeness, license and immutable-dependency
   validation.
-- [ ] T009 Implement benchmark governance review/attestation without adding runtime
+- [x] T009 Implement benchmark governance review/attestation without adding runtime
   certificate types.
-- [ ] T010 Freeze exact primary model/mode, dataset/domain policy, fixed tickets,
+- [x] T010 Freeze exact planned model/mode, dataset/domain policy, fixed tickets,
   evaluation tasks, repetitions/seeds, thresholds and missing-run rules.
-- [ ] T011 Freeze network/fault/attack profiles.
-- [ ] T012 Add post-QC mutation, missing-threshold and mutable-dependency rejection
+- [x] T011 Freeze network/fault/attack profiles for later authorized execution.
+- [x] T012 Add post-QC mutation, missing-threshold and mutable-dependency rejection
   tests.
 
 ## Phase 3: Reproducible execution foundation
 
-- [ ] T013 Implement source/build/image/dependency/SBOM/environment capture.
-- [ ] T014 Implement an isolated benchmark namespace and deterministic run
+- [x] T013 Implement source/build/image/dependency/SBOM/environment capture.
+- [x] T014 Implement an isolated benchmark namespace and deterministic run
   orchestrator.
-- [ ] T015 Implement scientific, flat, hierarchical and selected QLoRA/full-model
-  arm adapters, including the bound Python → Java/Netty → native C++/WAL primary
-  path.
-- [ ] T016 Implement token/domain/workload identity reconciliation before run
+- [x] T015 Implement plan-only scientific, flat, hierarchical and selected
+  QLoRA/full-model
+  arm adapters, including planned receipt-lineage binding for the future Python →
+  Java/Netty → native C++/WAL primary path.
+- [x] T016 Implement token/domain/workload identity reconciliation before run
   comparison.
-- [ ] T017 Add environment-drift, wrong-arm and token/domain mismatch tests.
+- [x] T017 Add environment-drift, wrong-arm and token/domain mismatch tests.
 
 ## Phase 4: WAN and fault harness
 
-- [ ] T018 Implement deterministic unprivileged network/fault profiles across the
-  Python, Java and native runtimes.
-- [ ] T019 Implement optional `tc/netem` adapter and profile-conformance tests;
+- [x] T018 Implement deterministic runtime-neutral planned network/fault profiles
+  for the future Python, Java and native boundary.
+- [x] T019 Implement the optional `tc/netem` plan adapter and profile-conformance tests;
   every output remains labeled `SIMULATED`.
-- [ ] T020 Implement worker/validator/storage/region crash, restart, partition and
+- [x] T020 Implement fixture-only worker/validator/storage/region crash, restart, partition and
   churn traces.
-- [ ] T021 Implement the Byzantine attack corpus.
-- [ ] T022 Add exact trace replay and terminal-outcome tests.
+- [x] T021 Implement the Byzantine attack corpus as deterministic fixtures.
+- [x] T022 Add exact fixture trace replay and terminal-outcome tests.
 
 ## Phase 5: Immutable evidence collection
 
-- [ ] T023 Implement append-only/content-addressed run evidence collection.
-- [ ] T024 Collect bound ticket, stage-receipt, certificate, effect, checkpoint,
-  model and evaluation identities for every primary observation.
-- [ ] T025 Collect phase timing, byte accounting, GPU/resource and P2P metrics.
-- [ ] T026 Implement an offline evidence-graph verifier.
-- [ ] T027 Add missing/mutated/reordered/incompatible evidence tests.
+- [x] T023 Implement append-only/content-addressed fixture evidence collection.
+- [x] T024 Define contracts and fixture identities for the ticket, stage-receipt,
+  certificate, effect, checkpoint, model and evaluation lineage required by every
+  future primary observation.
+- [x] T025 Define and fixture-test phase timing, byte accounting, GPU/resource and
+  P2P metrics without creating a primary observation.
+- [x] T026 Implement an offline evidence-graph verifier.
+- [x] T027 Add missing/mutated/reordered/incompatible evidence tests.
 
 ## Phase 6: Protocol determinism and safety gate
 
@@ -136,14 +145,13 @@ exist. The reconciliation verifier completes T000 only; T001 is the next STOP.
 
 ## Dependencies
 
-T000 is the formal/predecessor implementation gate and is complete. T002–T034 and
-their mapped HR tasks may implement and test the current-lineage benchmark while
-T001 remains open, but T001 blocks DefinitionQC, authorization and every primary,
-simulated-WAN or real-WAN execution. T002–T007 block preregistration; T008–T012
-block any primary run; T013–T017 block comparisons; T018–T022 block WAN/fault
-scenarios; T023–T027 block gate decisions. T028–T034, T035–T039 and T040–T045 are
-independent mandatory gate families. T046–T050 require all evidence. T051–T054 are
-final.
+T000 and the T001–T027 foundation obligations are complete on their separately
+bound immutable commits. These completions expose only contracts, fixtures,
+plans, local foundation checks and offline verifiers. T028–T034 and HR010-004+
+remain the first qualifying execution/safety gates and block Definition execution
+authorization and every primary, qualifying simulated-WAN or real-WAN run.
+T035–T039 and T040–T045 are independent mandatory gate families. T046–T050
+require all qualifying evidence. T051–T054 are final.
 
 ## Exit gate
 

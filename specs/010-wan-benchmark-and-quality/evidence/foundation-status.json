@@ -1,0 +1,354 @@
+{
+  "authority_claims": {
+    "actual_benchmark_result_qc": null,
+    "definition_execution_authorization": null,
+    "execution_started": false,
+    "feature010_go": false,
+    "feature010_go_checkpoint_sha": null,
+    "primary_scientific_observation_count": 0,
+    "qualifying_gate_c": false,
+    "qualifying_gate_c_run_count": 0,
+    "qualifying_gate_d": false,
+    "qualifying_gate_d_run_count": 0
+  },
+  "evidence_links": {
+    "formal_impact_path": "specs/010-wan-benchmark-and-quality/evidence/foundation-formal-impact.json",
+    "formal_impact_sha256": "sha256:137fed83a4e396d55123735f5ae18942fda726b788446747b4da34d71965e56e",
+    "task_map_path": "specs/010-wan-benchmark-and-quality/evidence/foundation-task-map.json",
+    "task_map_sha256": "sha256:e8f6d35eb3bfda6ae1fcc5ad33d103bbdb7b7948b166fdeb80a1b743dae6f5df"
+  },
+  "formal_baseline": {
+    "formal_report_sha256": "3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7",
+    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+    "prerequisite_result": "PASS_ON_CLEAN_LF_DETACHED_RECONCILIATION_WORKTREE"
+  },
+  "foundation_only": true,
+  "implementation": {
+    "artifact_count": 54,
+    "artifacts": [
+      {
+        "path": "configs/benchmark/foundation-v1.json",
+        "sha256": "2073e914c99d02496fee3bd16bea179eeb1303378572411d9d364a26ac872c4b"
+      },
+      {
+        "path": "delta-protocol/fixtures/010/cross-language/foundation-v1.json",
+        "sha256": "662024f60e54619d69110a3dce278a712d691fb4631f9338b3284a18510978a8"
+      },
+      {
+        "path": "delta-protocol/registry.json",
+        "sha256": "977be9cbe4b6b00fa566cdc47ac1f96d4831144bee3a4e13fb410853924b22c9"
+      },
+      {
+        "path": "delta-protocol/schemas/010/attestation-manifest-v1.json",
+        "sha256": "cef3b5a214b599c4701525dffc1c6ebc4baa2cc6b757c8fbb18fb8c231fd3325"
+      },
+      {
+        "path": "delta-protocol/schemas/010/benchmark-arm-v1.json",
+        "sha256": "a8f18eec8df4eef5e21334dcfe078b6fd0aa41f345ddf49d4b5a0faddf7d246b"
+      },
+      {
+        "path": "delta-protocol/schemas/010/benchmark-bound-artifact-v1.json",
+        "sha256": "c9f2c66af072ec30ffedcbda9577b5481c4cf4f5d1781026ffbee55522b30639"
+      },
+      {
+        "path": "delta-protocol/schemas/010/benchmark-definition-v1.json",
+        "sha256": "d401b5c93bac7653ae5eb9fef738b9607b5b635901970aea7cc7a4dc751fd426"
+      },
+      {
+        "path": "delta-protocol/schemas/010/benchmark-result-v1.json",
+        "sha256": "edb758a32fdbd7fa38f6c4831d300f76424a23a1a452336971667e1bf91f4eb0"
+      },
+      {
+        "path": "delta-protocol/schemas/010/environment-manifest-v1.json",
+        "sha256": "5522bab0564d09f72a64b8e0ab8ec596902762aaffb0132214a9364ec9d7cedf"
+      },
+      {
+        "path": "delta-protocol/schemas/010/evidence-manifest-v1.json",
+        "sha256": "7a8ff918f131df08224d253300b076217ec7f1f3515b7deeaad6146124c60b26"
+      },
+      {
+        "path": "delta-protocol/schemas/010/evidence-node-v1.json",
+        "sha256": "370916ea6a4aa5394dfe5325e30111d275e21e8879855064e8276df007b1b2d7"
+      },
+      {
+        "path": "delta-protocol/schemas/010/fault-profile-v1.json",
+        "sha256": "2b4b9af04322fb9c3d3fe248273b70c7659fa48642844ed3fd25b8fa4ef260ae"
+      },
+      {
+        "path": "delta-protocol/schemas/010/foundation-config-v1.json",
+        "sha256": "2d8a8227f9a89eb2c9118ddcb175a4d5949e373a0c75bf457b676ccd5d48145f"
+      },
+      {
+        "path": "delta-protocol/schemas/010/foundation-contracts-v1.json",
+        "sha256": "bd4812b5d18999929e8ab38d8d88283d60d983ed2f32b5ec8a664118947493cf"
+      },
+      {
+        "path": "delta-protocol/schemas/010/governance-qc-v1.json",
+        "sha256": "72ae36747d6c333cb0f0fc0bd44772fb6550e6c58f34b1c8e3bd41afc1fe1e09"
+      },
+      {
+        "path": "delta-protocol/schemas/010/governance-v1.json",
+        "sha256": "fa8619b8c0b2509a3b69a0aeab566e2f1b2e2e349d5c537fc8238eff1b7b0fac"
+      },
+      {
+        "path": "delta-protocol/schemas/010/governance-vote-v1.json",
+        "sha256": "6c6e0cf56c1af826eb6947bcaa3a86fad07c2da9a8073e190fd3598d89bc1f87"
+      },
+      {
+        "path": "delta-protocol/schemas/010/metrics-v1.json",
+        "sha256": "6c0c733a9de839dc633abca89aa2717130d4ef9fd9ad4ba4c78208c2b332672b"
+      },
+      {
+        "path": "delta-protocol/schemas/010/network-profile-v1.json",
+        "sha256": "59562262d789e942a9b059a3fc62764f344ee9af51f533b099531333630c97fa"
+      },
+      {
+        "path": "delta-protocol/schemas/010/raw-artifact-v1.json",
+        "sha256": "21d33270c5ec38f745815f0dd78511a065c2e5835145f9c2cb0e3ec8e537c269"
+      },
+      {
+        "path": "delta-protocol/schemas/010/reviewer-set-v1.json",
+        "sha256": "3487d3f99c9f50684c45531c7beb61b5b410bf233eb798f07949984cd14fabfd"
+      },
+      {
+        "path": "delta-protocol/schemas/010/run-manifest-v1.json",
+        "sha256": "72c7ac5bdb4a8fbb5642c4b137f582ff4a20adeca700a06f7ae28852e2924ca3"
+      },
+      {
+        "path": "delta-protocol/schemas/010/runtime-identity-v1.json",
+        "sha256": "cc406e9e8f1ff2095d0df5aac204e9ea305ed1c4a58194ce085bacb00c437e03"
+      },
+      {
+        "path": "delta-protocol/schemas/010/scientific-profile-v1.json",
+        "sha256": "d76ab5787313e496a0d11b6a120b2c37144e31a97647f4be1e968aec3e609b38"
+      },
+      {
+        "path": "delta-protocol/schemas/010/stage-receipt-v1.json",
+        "sha256": "5ae9d48010778b37ed55898be87f3c60cccab248dfb456d2165dfcb5474278c8"
+      },
+      {
+        "path": "delta-worker-python/pyproject.toml",
+        "sha256": "eb5a438a43f3c86d6b3d506e279bf98b292452fd251ffe3b0823c719f67b84fb"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/__init__.py",
+        "sha256": "45bfe1a9b42606a4a7af82219cd0c98381c7cb1b2cfc0eb151379b8eb825cab9"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/adapters.py",
+        "sha256": "99bfc1bb2389f1569e2ccc45f5b4a95eeec92097dc706b7264a7b79af1dee960"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/canonical.py",
+        "sha256": "d210feb05544837039121d4e60312a85a18fcc5db471ebb2ed5d4f5b869801dd"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/capture.py",
+        "sha256": "6058d6f6290421df07ab061864b660ecb459b038af25f1308eb16229ebf8d110"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/compatibility.py",
+        "sha256": "e6d3cf76184b5a2564d1a1a0059515531800448255fd82850932d3530c04f35f"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/config.py",
+        "sha256": "78d504901659830a5577d195c1f2098849e4ad1023d55be1f849b20cc3a5710d"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/contracts.py",
+        "sha256": "d68bcee45f52d26763ca7d523e235689a903e7ec81f8ba39bf2da5496f040fcb"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/decision.py",
+        "sha256": "96fc022137dc07088ea67e63f72d9cdc75e53492ca1d1706f076e6007558bdda"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/evidence.py",
+        "sha256": "8e04269ed61fa8713cb7ea0b6289f06f168daa597501023413cf8706da308463"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/governance.py",
+        "sha256": "43f9cde9d707db6b896a81936a7e9531e213813105df468f603b3fb7c91d1da3"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/orchestrator.py",
+        "sha256": "f5861fcf135115c14c697a9e0a90b560ea1482a303b1a018e9f5f0af442055c1"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/preflight.py",
+        "sha256": "5fc7ed978f97ebe2ff4c0acac6fc172f26695a840f3092823d26919dd9d9686c"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/profiles.py",
+        "sha256": "b37e0debffe7fb35e2994a9a16b1a7ca4a62b3f0f9005e022fb55cba90e8154a"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/receipts.py",
+        "sha256": "ca276139351d2265ec158c4b856f721d6998ccd48ef7bb65c0bac7682c797f60"
+      },
+      {
+        "path": "delta-worker-python/src/deltatorrent/benchmark/verifier.py",
+        "sha256": "15d89f18bf1a57878098a997547e6a4021991f19410ec7b443773cecadb11672"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/__init__.py",
+        "sha256": "c773f6c9d331e904e938fa821c5cb09e3945d10c56ec04e839d662d5794e109c"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/conftest.py",
+        "sha256": "54548156a05aa1506386056988788285eb4d157fd6038b4442d46238a74adb48"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/test_foundation_capture.py",
+        "sha256": "09e1c39a1438cd67de7a2ce7071ca5c8534770aeb9e05a70e89afcb28c68decd"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/test_foundation_contracts.py",
+        "sha256": "217372497faf6941e6486394fa65dd84021711811d4bdfa3375fcf0b633de3e5"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/test_foundation_evidence.py",
+        "sha256": "040a19ad57a0752888f5ef0339bb6b4189f924b7288929630e1742681606309e"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/test_foundation_fixtures.py",
+        "sha256": "4d6648457c705596294e420789710f7e3ea4550d08e82682e7f3bb253f01c4ce"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/test_foundation_governance.py",
+        "sha256": "6c041294c0aee157096a075577caf91893b4be3d007e5456c30bf4570dc821c7"
+      },
+      {
+        "path": "delta-worker-python/tests/benchmark/test_foundation_planning.py",
+        "sha256": "2025ccc62ad4a655ed4bb95507ac4e1148ac6e8d669a1e3dfaab3c6dbc4c9b8e"
+      },
+      {
+        "path": "specs/010-wan-benchmark-and-quality/conformance/FoundationFixtureConsumer.java",
+        "sha256": "016a911b5ce90d6efa71500dc704bed55e5b57506783ae4870c071030fd4f974"
+      },
+      {
+        "path": "specs/010-wan-benchmark-and-quality/conformance/foundation_fixture_consumer.cpp",
+        "sha256": "a9cb853a04d6da9d21735d1f82e9162b47b02c7481bd9d097f9dbb40e3c95bf4"
+      },
+      {
+        "path": "specs/010-wan-benchmark-and-quality/scripts/foundation_fixtures.py",
+        "sha256": "59009867398cd9ed217385196c9538d0258796655782271593197391681348da"
+      },
+      {
+        "path": "specs/010-wan-benchmark-and-quality/scripts/verify_reconciliation_status.py",
+        "sha256": "42fdf6612b0197a55793f29e73fef1c78dcbf2a4d2b2aeb95958f2034099417a"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "85db66e66244e960136d20cff67476eadf1c0914fa37439716a0b9832ca7d2e3"
+      }
+    ],
+    "base_commit": "ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+    "commit": "6054e35ed627392172f94c2a90dfb7d799d5251e",
+    "tree": "0640a117aba6772b7c0b22ec9cdaa047e507e1d5"
+  },
+  "preflight": {
+    "finding_count": 0,
+    "policy_id": "feature010-zero-tolerance-v1",
+    "scanned_path_count": 46,
+    "source_commit": "6054e35ed627392172f94c2a90dfb7d799d5251e",
+    "source_manifest_id": "sha256:fe29fae984c3fb1b27aefd58dbb0a0bf1ff8a4a2d23468de84471a70b38bb627",
+    "source_tree": "0640a117aba6772b7c0b22ec9cdaa047e507e1d5",
+    "status": "PASS"
+  },
+  "production_and_protected_diff": {
+    "native_java_consensus_runtime_paths": [],
+    "offline_foundation_source_paths": [
+      "delta-worker-python/src/deltatorrent/benchmark/__init__.py",
+      "delta-worker-python/src/deltatorrent/benchmark/adapters.py",
+      "delta-worker-python/src/deltatorrent/benchmark/canonical.py",
+      "delta-worker-python/src/deltatorrent/benchmark/capture.py",
+      "delta-worker-python/src/deltatorrent/benchmark/compatibility.py",
+      "delta-worker-python/src/deltatorrent/benchmark/config.py",
+      "delta-worker-python/src/deltatorrent/benchmark/contracts.py",
+      "delta-worker-python/src/deltatorrent/benchmark/decision.py",
+      "delta-worker-python/src/deltatorrent/benchmark/evidence.py",
+      "delta-worker-python/src/deltatorrent/benchmark/governance.py",
+      "delta-worker-python/src/deltatorrent/benchmark/orchestrator.py",
+      "delta-worker-python/src/deltatorrent/benchmark/preflight.py",
+      "delta-worker-python/src/deltatorrent/benchmark/profiles.py",
+      "delta-worker-python/src/deltatorrent/benchmark/receipts.py",
+      "delta-worker-python/src/deltatorrent/benchmark/verifier.py"
+    ],
+    "protected_paths": [],
+    "protected_prefixes": [
+      "delta-core-cpp/",
+      "delta-ffi/",
+      "delta-node-java/",
+      "delta-runtime-cpp/",
+      "formal/"
+    ],
+    "runtime_semantic_paths": []
+  },
+  "qualification_complete": false,
+  "schema_version": "1.0.0",
+  "status": "PASS_FOUNDATION_ONLY",
+  "test_evidence": [
+    {
+      "command": "uv run pytest -q delta-worker-python/tests",
+      "result": "319 passed, 3 skipped",
+      "scope": "LOCAL_FOUNDATION_CHECK; standalone C++ PATH, physical 8 GiB, and optional CUDA lanes skipped"
+    },
+    {
+      "command": "uv run pytest -q specs/010-wan-benchmark-and-quality/tests",
+      "result": "90 passed",
+      "scope": "SEALED_RECONCILIATION_REGRESSION"
+    },
+    {
+      "command": "uv run pytest -q delta-worker-python/tests/contract/test_registry.py delta-worker-python/tests/architecture delta-worker-python/tests/contract/test_protocol_fixtures.py",
+      "result": "21 passed",
+      "scope": "LOCAL_FOUNDATION_CHECK"
+    },
+    {
+      "command": "uv run ruff check delta-worker-python/src/deltatorrent/benchmark delta-worker-python/tests/benchmark specs/010-wan-benchmark-and-quality/scripts/foundation_fixtures.py specs/010-wan-benchmark-and-quality/scripts/verify_reconciliation_status.py",
+      "result": "All checks passed",
+      "scope": "LOCAL_FOUNDATION_CHECK"
+    },
+    {
+      "command": "uv run ruff format --check delta-worker-python/src/deltatorrent/benchmark delta-worker-python/tests/benchmark specs/010-wan-benchmark-and-quality/scripts/foundation_fixtures.py specs/010-wan-benchmark-and-quality/scripts/verify_reconciliation_status.py",
+      "result": "25 files already formatted",
+      "scope": "LOCAL_FOUNDATION_CHECK"
+    },
+    {
+      "command": "uv run mypy delta-worker-python/src",
+      "result": "Success: no issues found in 102 source files",
+      "scope": "LOCAL_FOUNDATION_CHECK"
+    },
+    {
+      "command": "uv run python specs/010-wan-benchmark-and-quality/scripts/foundation_fixtures.py --check",
+      "result": "FOUNDATION_FIXTURE_PASS",
+      "scope": "LOCAL_FOUNDATION_CHECK"
+    },
+    {
+      "command": "uv run pytest -q delta-worker-python/tests/benchmark/test_foundation_fixtures.py",
+      "result": "3 passed, 1 skipped; Java consumer passed on javac/java 17.0.5; standalone C++ PATH lookup skipped",
+      "scope": "LOCAL_CONFORMANCE_CHECK; not JDK 25/26 qualification"
+    },
+    {
+      "command": "MSVC 14.29 cl.exe /nologo /std:c++20 /EHsc /W4 /WX foundation_fixture_consumer.cpp; run consumer against foundation-v1.json",
+      "result": "exit 0; sha256:476b466992370b989ac24ef63569bb179b1c3ac9e215b8ce01fe68054c5c9b73",
+      "scope": "LOCAL_CONFORMANCE_CHECK; not GCC/Clang qualification"
+    },
+    {
+      "command": "formal prerequisite verifier in clean LF detached worktree at ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+      "result": "PASS; report sha256 3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7; semantics sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+      "scope": "FORMAL_PREREQUISITE_ONLY"
+    },
+    {
+      "command": "run_required_preflight for implementation commit/tree",
+      "result": "PASS; 46 scanned paths; 0 findings; sha256:fe29fae984c3fb1b27aefd58dbb0a0bf1ff8a4a2d23468de84471a70b38bb627",
+      "scope": "IMMUTABLE_FOUNDATION_PREFLIGHT"
+    },
+    {
+      "command": "independent final foundation code audit",
+      "result": "CLEAN; 93 targeted tests passed; staged diff and protected scope clean",
+      "scope": "FOUNDATION_REVIEW_ONLY; no execution or qualification authority"
+    }
+  ],
+  "type_name": "FEATURE010_FOUNDATION_STATUS"
+}

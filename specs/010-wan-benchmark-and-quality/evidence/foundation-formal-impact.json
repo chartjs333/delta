@@ -1,0 +1,51 @@
+{
+  "formal_baseline": {
+    "formal_report_path": "formal/reports/formal-verification-report.json",
+    "formal_report_sha256": "3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7",
+    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+  },
+  "formal_impact_classification": "NO_SEMANTIC_CHANGE",
+  "governance_boundary": {
+    "authority_scope": "BENCHMARK_GOVERNANCE_ONLY",
+    "execution_authority": false,
+    "governance_qc_types": [
+      "BENCHMARK_DEFINITION_QC",
+      "BENCHMARK_RESULT_QC"
+    ],
+    "governance_vote_types": [
+      "BENCHMARK_DEFINITION_VOTE",
+      "BENCHMARK_RESULT_VOTE"
+    ],
+    "runtime_certificate_graph_member": false,
+    "runtime_state_transition_authority": false
+  },
+  "implementation": {
+    "base_commit": "ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+    "commit": "6054e35ed627392172f94c2a90dfb7d799d5251e",
+    "tree": "0640a117aba6772b7c0b22ec9cdaa047e507e1d5"
+  },
+  "implementation_boundary_classification": "REFINEMENT_ONLY",
+  "new_runtime_semantics": {
+    "actions": [],
+    "arithmetic_preconditions": [],
+    "availability_rules": [],
+    "certificate_parent_edges": [],
+    "current_state_transitions": [],
+    "durability_outcomes": [],
+    "failure_terminals": [],
+    "qc_types": [],
+    "vote_contexts": []
+  },
+  "protected_diff": {
+    "paths": [],
+    "prefixes": [
+      "delta-core-cpp/",
+      "delta-ffi/",
+      "delta-node-java/",
+      "delta-runtime-cpp/",
+      "formal/"
+    ]
+  },
+  "schema_version": "1.0.0",
+  "type_name": "FEATURE010_FOUNDATION_FORMAL_IMPACT"
+}

@@ -1,10 +1,11 @@
 # Feature Specification: Reconciled WAN Benchmark and Quality Gate
 
-**Feature branch**: `feature/overnight-010-011-requalification`
-**Reconciled**: 2026-09-20
-**Status**: `STOPPED_BEFORE_PRIMARY_EXECUTION` / local working version remains ready
-**Exact base**: `7a9faf852e0ccae4d25fdc363fbf39ecf1719341`
-**Base tree**: `2ae9ad2ad0064cfb65c956464dc737c2ab03034a`
+**Feature branch**: `feature/010-current-lineage-foundation`
+**Reconciled**: 2026-09-21
+**Status**: `FOUNDATION_COMPLETE` / `STOPPED_BEFORE_PRIMARY_EXECUTION`
+**Historical reconciliation**: `ac0e54ffbab4b9a5c20945b17ede2930b78ff080`
+**Foundation implementation**: `6054e35ed627392172f94c2a90dfb7d799d5251e`
+**Foundation tree**: `0640a117aba6772b7c0b22ec9cdaa047e507e1d5`
 **Formal semantics**: `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`
 
 ## Authority and boundary
@@ -14,14 +15,18 @@ It becomes current-main authority only if this candidate is reviewed and merged.
 Historical draft PRs are audit inputs only. They are not merged, cherry-picked, or
 treated as a composite release. The immutable inventory and current gate state are
 recorded in `evidence/historical-input-inventory.md` and
-`evidence/reconciliation-status.json`.
+`evidence/reconciliation-status.json`. That record describes the historical
+reconciliation snapshot. The later foundation implementation and its deliberately
+zero-authority outcome are separately bound by `evidence/foundation-status.json`.
 
 The accepted formal report is `formal/reports/formal-verification-report.json`
 (SHA-256 `3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7`).
-This reconciliation has formal-impact classification `NONE`: it adds no protocol action, vote
-context, certificate parent edge, failure terminal, durability outcome, availability
-rule, arithmetic precondition, or current-state transition. Discovery of any such
-change is an unconditional STOP and returns the work to Feature 000.
+The historical reconciliation was classified `NONE`; the current foundation is
+classified `NO_SEMANTIC_CHANGE` / `REFINEMENT_ONLY`. It adds no runtime protocol
+action, vote context, QC type, certificate parent edge, failure terminal,
+durability outcome, availability rule, arithmetic precondition, or current-state
+transition. Discovery of any such change is an unconditional STOP and returns the
+work to Feature 000.
 
 `BenchmarkDefinitionQC` and `BenchmarkResultQC` are experiment-governance
 attestations. They never enter the runtime certificate lineage and cannot advance
@@ -45,12 +50,14 @@ Feature 010 therefore has no GO checkpoint:
 Historical NO_GO/STOP records remain immutable. This specification does not convert
 them into PASS and does not synthesize a replacement result.
 
-The current base also does not contain a current-lineage Feature 010 contract set,
-campaign runner, stage-receipt chain, gate analyzers or ResultQC implementation.
-Those existing T002–T034/T037–T049 and HR010 task identities are restored as open
-work in `tasks.md`, `runtime-tasks.md` and `task-map.md`. The implementation may be
-rebuilt or selectively reimplemented only through reviewed current-lineage work;
-this reconciliation imports none of the historical draft implementation.
+The current lineage now contains a fixture-only foundation: canonical contracts,
+schemas, planned profiles/adapters, stage-receipt and evidence-graph primitives,
+governance attestations outside the runtime certificate graph, and offline
+verification. This closes T001–T027 and HR010-001–003 only in their documented
+foundation completion classes. It does not contain qualifying execution evidence,
+an execution authorization or an actual ResultQC. T028+, HR010-004+ and every
+qualification/decision gate remain open. None of this imports a historical draft
+claim or promotes a fixture into a primary result.
 
 ## Historical inputs
 
