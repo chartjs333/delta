@@ -290,11 +290,13 @@ jobs:
           python3 specs/010-wan-benchmark-and-quality/scripts/exactness_gate.py \
             verify-execution "$RUNNER_TEMP/exactness-execution.json"
 
-      - name: Verify implementation source boundary
+      - name: Verify historical exactness and sidecar design source boundary
         if: ${{ hashFiles('specs/010-wan-benchmark-and-quality/evidence/exactness-status.json') == '' }}
-        run: >-
-          python3 specs/010-wan-benchmark-and-quality/scripts/verify_exactness_status.py
-          --check-source --source-commit "$SOURCE_SHA"
+        run: |
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_exactness_status.py \
+            --check-source --source-commit "$SOURCE_SHA"
+          python3 specs/010-wan-benchmark-and-quality/scripts/verify_sidecar_refinement_design.py \
+            --check-only --source-commit "$SOURCE_SHA"
 
       - name: Run deterministic analyzer mutation tests
         run: |

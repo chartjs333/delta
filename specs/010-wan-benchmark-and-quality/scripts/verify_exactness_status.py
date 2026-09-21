@@ -28,7 +28,9 @@ FEATURE: Final = Path("specs/010-wan-benchmark-and-quality")
 CI_PATH: Final = FEATURE / "evidence/exactness-ci.json"
 EXECUTION_PATH: Final = FEATURE / "evidence/exactness-execution.json"
 STATUS_PATH: Final = FEATURE / "evidence/exactness-status.json"
-SOURCE_PATHS: Final = {
+HISTORICAL_FAIL_COMMIT: Final = "fc012861d8a1577f155abb94877102adef5cbf36"
+HISTORICAL_FAIL_TREE: Final = "deeb2bda4c0a7e68015843d2ebe6fe4396edfb7b"
+HISTORICAL_SOURCE_PATHS: Final = {
     ".github/workflows/certificates.yml",
     ".github/workflows/ci.yml",
     ".github/workflows/distribution.yml",
@@ -51,6 +53,15 @@ SOURCE_PATHS: Final = {
     (FEATURE / "scripts/verify_foundation_status.py").as_posix(),
     (FEATURE / "tests/test_exactness_gate.py").as_posix(),
 }
+DESIGN_PATHS: Final = {
+    ".github/workflows/feature010-exactness.yml",
+    (FEATURE / "isolated-sidecar-refinement.md").as_posix(),
+    (FEATURE / "sidecar-refinement-design.json").as_posix(),
+    (FEATURE / "scripts/verify_exactness_status.py").as_posix(),
+    (FEATURE / "scripts/verify_sidecar_refinement_design.py").as_posix(),
+    (FEATURE / "tests/test_sidecar_refinement_design.py").as_posix(),
+}
+SOURCE_PATHS: Final = HISTORICAL_SOURCE_PATHS | DESIGN_PATHS
 OVERLAY_PATHS: Final = {
     CI_PATH.as_posix(),
     EXECUTION_PATH.as_posix(),
@@ -138,6 +149,11 @@ def commit_bytes(commit: str, path: str) -> bytes:
     return process.stdout
 
 
+def validate_single_parent(commit: str, expected_parent: str, code: str) -> None:
+    lineage = git_text("rev-list", "--parents", "-n", "1", commit).split()
+    require(len(lineage) == 2 and lineage[1] == expected_parent, code)
+
+
 def validate_exact_checkouts(commit: str) -> None:
     head_expression = "ref: ${{ github.event.pull_request.head.sha || github.sha }}"
     feature_expression = "ref: ${{ env.SOURCE_SHA }}"
@@ -151,18 +167,7 @@ def validate_exact_checkouts(commit: str) -> None:
         require(text.count(expression) == checkout_count, "WORKFLOW_NOT_EXACT_HEAD", path)
 
 
-def validate_source(source: dict[str, str]) -> None:
-    commit = source["commit"]
-    require(source == source_identity(commit), "STATUS_SOURCE_IDENTITY")
-    require(git_text("rev-parse", f"{commit}^") == BASE_COMMIT, "SOURCE_PARENT")
-    actual_paths = set(changed_paths(BASE_COMMIT, commit))
-    require(
-        actual_paths == SOURCE_PATHS,
-        "SOURCE_PATH_SET",
-        ",".join(sorted(actual_paths ^ SOURCE_PATHS)),
-    )
-    protected = sorted(path for path in actual_paths if path.startswith(PROTECTED_PREFIXES))
-    require(not protected, "SOURCE_PROTECTED_DIFF", ",".join(protected))
+def validate_no_post_execution_evidence(commit: str) -> None:
     for path in (CI_PATH, EXECUTION_PATH, STATUS_PATH):
         exists = subprocess.run(
             ["git", "cat-file", "-e", f"{commit}:{path.as_posix()}"],
@@ -171,6 +176,51 @@ def validate_source(source: dict[str, str]) -> None:
             capture_output=True,
         ).returncode
         require(exists != 0, "SOURCE_CONTAINS_POST_EXECUTION_EVIDENCE", path.as_posix())
+
+
+def validate_historical_source() -> None:
+    historical = source_identity(HISTORICAL_FAIL_COMMIT)
+    require(historical["tree"] == HISTORICAL_FAIL_TREE, "HISTORICAL_SOURCE_TREE")
+    validate_single_parent(HISTORICAL_FAIL_COMMIT, BASE_COMMIT, "HISTORICAL_SOURCE_PARENT")
+    actual_paths = set(changed_paths(BASE_COMMIT, HISTORICAL_FAIL_COMMIT))
+    require(
+        actual_paths == HISTORICAL_SOURCE_PATHS,
+        "HISTORICAL_SOURCE_PATH_SET",
+        ",".join(sorted(actual_paths ^ HISTORICAL_SOURCE_PATHS)),
+    )
+    protected = sorted(path for path in actual_paths if path.startswith(PROTECTED_PREFIXES))
+    require(not protected, "HISTORICAL_SOURCE_PROTECTED_DIFF", ",".join(protected))
+    validate_no_post_execution_evidence(HISTORICAL_FAIL_COMMIT)
+    validate_exact_checkouts(HISTORICAL_FAIL_COMMIT)
+
+
+def validate_source(source: dict[str, str]) -> None:
+    commit = source["commit"]
+    require(source == source_identity(commit), "STATUS_SOURCE_IDENTITY")
+    validate_historical_source()
+    if commit == HISTORICAL_FAIL_COMMIT:
+        return
+
+    validate_single_parent(commit, HISTORICAL_FAIL_COMMIT, "DESIGN_SOURCE_PARENT")
+    design_paths = set(changed_paths(HISTORICAL_FAIL_COMMIT, commit))
+    require(
+        design_paths == DESIGN_PATHS,
+        "DESIGN_SOURCE_PATH_SET",
+        ",".join(sorted(design_paths ^ DESIGN_PATHS)),
+    )
+    actual_paths = set(changed_paths(BASE_COMMIT, commit))
+    require(
+        actual_paths == SOURCE_PATHS,
+        "SOURCE_PATH_SET",
+        ",".join(sorted(actual_paths ^ SOURCE_PATHS)),
+    )
+    protected = sorted(path for path in design_paths if path.startswith(PROTECTED_PREFIXES))
+    require(not protected, "DESIGN_SOURCE_PROTECTED_DIFF", ",".join(protected))
+    require(
+        not any("/evidence/" in f"/{path}" for path in design_paths),
+        "DESIGN_SOURCE_EVIDENCE_DIFF",
+    )
+    validate_no_post_execution_evidence(commit)
     validate_exact_checkouts(commit)
 
 
