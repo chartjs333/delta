@@ -1,15 +1,17 @@
 # Hybrid Runtime Tasks: Feature 010 Polyglot Benchmark
 
-Historical completion marks are not inherited. Every obligation is open until a
-current-lineage implementation and exact evidence satisfy it.
+Historical completion marks are not inherited. HR010-001–003 are complete only as
+current-lineage foundation identity/admission/evidence obligations at
+`6054e35ed627392172f94c2a90dfb7d799d5251e`. These marks do not qualify a runtime
+lane, authorize execution, create primary evidence, or satisfy HR010-004+.
 
 ## Identity and environment
 
-- [ ] **HR010-001** Bind BenchmarkDefinition to exact C++/ABI/Java/Python/build,
+- [x] **HR010-001** Bind BenchmarkDefinition to exact C++/ABI/Java/Python/build,
   formal-semantics and deployment-profile identities.
-- [ ] **HR010-002** Freeze primary compiler/JDK/Python/Netty/native/CUDA flags and
-  the canonical fixture corpus before results.
-- [ ] **HR010-003** Add runtime compatibility admission and evidence capture.
+- [x] **HR010-002** Freeze planned compiler/JDK/Python/Netty/native/CUDA identities
+  and the canonical fixture corpus before any authorized results.
+- [x] **HR010-003** Add runtime compatibility admission and fixture evidence capture.
 
 ## Exact cross-language gates
 

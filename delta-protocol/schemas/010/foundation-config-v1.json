@@ -1,0 +1,86 @@
+{
+  "$id": "https://deltareduce.org/schemas/010/foundation-config-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "arms",
+    "attack_vectors",
+    "authority_scope",
+    "benchmark_definition",
+    "definition_qc_id",
+    "evidence_class",
+    "execution_authorized",
+    "fault_profiles",
+    "feature010_go",
+    "formal_semantics_id",
+    "gate_eligible",
+    "network_profiles",
+    "ordered_receipt_stages",
+    "primary_eligible",
+    "primary_observation_count",
+    "qualifying_gate_c",
+    "real_wan_gate_d",
+    "required_byte_counters",
+    "required_metric_phases",
+    "result_qc_id",
+    "runtime_constraints",
+    "runtime_identity",
+    "schema_version",
+    "scientific_profile",
+    "type_name"
+  ],
+  "properties": {
+    "arms": {"type": "array", "minItems": 2, "items": {"$ref": "foundation-contracts-v1.json#/$defs/BenchmarkArm"}},
+    "attack_vectors": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["attack_id", "expected_terminal", "mutation", "target_stage"],
+        "properties": {
+          "attack_id": {"type": "string"},
+          "expected_terminal": {"const": "REJECT"},
+          "mutation": {"type": "string"},
+          "target_stage": {"type": "string"}
+        }
+      }
+    },
+    "authority_scope": {"const": "BENCHMARK_GOVERNANCE_ONLY"},
+    "benchmark_definition": {"$ref": "foundation-contracts-v1.json#/$defs/BenchmarkDefinition"},
+    "definition_qc_id": {"type": "null"},
+    "evidence_class": {"const": "TEST_FIXTURE"},
+    "execution_authorized": {"const": false},
+    "fault_profiles": {"type": "array", "minItems": 1, "items": {"$ref": "foundation-contracts-v1.json#/$defs/FaultProfile"}},
+    "feature010_go": {"const": false},
+    "formal_semantics_id": {"const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"},
+    "gate_eligible": {"const": false},
+    "network_profiles": {"type": "array", "minItems": 1, "items": {"$ref": "foundation-contracts-v1.json#/$defs/NetworkProfile"}},
+    "ordered_receipt_stages": {"const": ["WORKER_PYTHON", "TRANSPORT_JAVA_NETTY", "NATIVE_CPP_WAL"]},
+    "primary_eligible": {"const": false},
+    "primary_observation_count": {"const": 0},
+    "qualifying_gate_c": {"const": false},
+    "real_wan_gate_d": {"const": false},
+    "required_byte_counters": {"const": ["duplicate_bytes", "global_bytes", "p2p_bytes", "regional_bytes", "retry_bytes", "storage_bytes", "validator_bytes", "worker_bytes"]},
+    "required_metric_phases": {"const": ["compute", "upload", "availability", "certificate", "reduce", "apply", "p2p", "wait"]},
+    "result_qc_id": {"type": "null"},
+    "runtime_constraints": {
+      "const": {
+        "cpp_compilers": ["CLANG", "GCC"],
+        "cuda_profile_status": "UNQUALIFIED",
+        "fast_math": false,
+        "jdk_compatibility": 26,
+        "jdk_reference": 25,
+        "native_checked_arithmetic": true,
+        "netty_lock_required": true,
+        "python_minor": "3.12"
+      }
+    },
+    "runtime_identity": {"$ref": "foundation-contracts-v1.json#/$defs/RuntimeIdentity"},
+    "schema_version": {"const": "1.0.0"},
+    "scientific_profile": {"$ref": "foundation-contracts-v1.json#/$defs/ScientificProfile"},
+    "type_name": {"const": "FEATURE010_FOUNDATION_CONFIG"}
+  }
+}

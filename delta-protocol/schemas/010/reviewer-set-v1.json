@@ -1,0 +1,1 @@
+{"$id":"https://deltareduce.org/schemas/010/reviewer-set-v1.json","$ref":"governance-v1.json#/$defs/ReviewerSet","$schema":"https://json-schema.org/draft/2020-12/schema"}

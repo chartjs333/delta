@@ -1,0 +1,1 @@
+{"$id":"https://deltareduce.org/schemas/010/governance-vote-v1.json","$ref":"governance-v1.json#/$defs/Vote","$schema":"https://json-schema.org/draft/2020-12/schema"}

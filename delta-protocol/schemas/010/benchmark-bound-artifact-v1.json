@@ -1,0 +1,5 @@
+{
+  "$id": "https://deltareduce.org/schemas/010/benchmark-bound-artifact-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "foundation-contracts-v1.json#/$defs/BoundArtifact"
+}
