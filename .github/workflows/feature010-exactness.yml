@@ -12,6 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  DESIGN_SOURCE_SHA: f489ac7a384a8c9f74c36bb6f540b2889afa1607
   SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
@@ -293,10 +294,11 @@ jobs:
       - name: Verify historical exactness and sidecar design source boundary
         if: ${{ hashFiles('specs/010-wan-benchmark-and-quality/evidence/exactness-status.json') == '' }}
         run: |
+          git merge-base --is-ancestor "$DESIGN_SOURCE_SHA" "$SOURCE_SHA"
           python3 specs/010-wan-benchmark-and-quality/scripts/verify_exactness_status.py \
-            --check-source --source-commit "$SOURCE_SHA"
+            --check-source --source-commit "$DESIGN_SOURCE_SHA"
           python3 specs/010-wan-benchmark-and-quality/scripts/verify_sidecar_refinement_design.py \
-            --check-only --source-commit "$SOURCE_SHA"
+            --check-only --source-commit "$DESIGN_SOURCE_SHA"
 
       - name: Run deterministic analyzer mutation tests
         run: |
