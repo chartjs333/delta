@@ -11,6 +11,12 @@ if(NOT DELTA_CXX_STANDARD STREQUAL "20" AND NOT DELTA_CXX_STANDARD STREQUAL "23"
 endif()
 
 option(DELTA_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+option(DELTA_BUILD_ISOLATED_SIDECAR "Build the isolated native sidecar profile" OFF)
+option(DELTA_BUILD_ISOLATED_SIDECAR_TESTS "Register isolated sidecar-only CTest cases" OFF)
+option(
+  DELTA_BUILD_SIDECAR_QUALIFICATION
+  "Build opt-in test-only sidecar qualification helpers"
+  OFF)
 
 function(delta_target_defaults target)
   target_compile_features(${target} PUBLIC cxx_std_${DELTA_CXX_STANDARD})
@@ -187,7 +193,178 @@ target_link_libraries(
                    delta::scheduling delta::certificates delta::apply delta::qlora)
 delta_target_defaults(delta_ffi)
 
+if(DELTA_BUILD_ISOLATED_SIDECAR)
+  add_library(delta_sidecar_protocol STATIC
+    delta-runtime-cpp/src/sidecar_protocol.cpp)
+  add_library(delta::sidecar_protocol ALIAS delta_sidecar_protocol)
+  set_target_properties(delta_sidecar_protocol PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  target_include_directories(
+    delta_sidecar_protocol
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
+  target_link_libraries(delta_sidecar_protocol PUBLIC delta::core)
+  if(WIN32)
+    target_link_libraries(delta_sidecar_protocol PRIVATE Normaliz)
+  else()
+    find_package(ICU REQUIRED COMPONENTS uc)
+    target_link_libraries(delta_sidecar_protocol PRIVATE ICU::uc)
+  endif()
+  delta_target_defaults(delta_sidecar_protocol)
+
+  add_library(delta_sidecar_lock STATIC
+    delta-runtime-cpp/src/sidecar_directory_lock.cpp)
+  add_library(delta::sidecar_lock ALIAS delta_sidecar_lock)
+  target_include_directories(
+    delta_sidecar_lock
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
+  delta_target_defaults(delta_sidecar_lock)
+
+  add_library(delta_sidecar_server STATIC
+    delta-runtime-cpp/src/sidecar_server.cpp)
+  add_library(delta::sidecar_server ALIAS delta_sidecar_server)
+  target_include_directories(
+    delta_sidecar_server
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>
+    PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include>)
+  target_link_libraries(
+    delta_sidecar_server
+    PUBLIC delta::sidecar_protocol delta::sidecar_lock delta::runtime)
+  delta_target_defaults(delta_sidecar_server)
+
+  add_executable(delta_runtime_sidecar delta-runtime-cpp/src/sidecar_main.cpp)
+  target_link_libraries(delta_runtime_sidecar PRIVATE delta::sidecar_server)
+  delta_target_defaults(delta_runtime_sidecar)
+
+  add_executable(
+    delta_sidecar_trace_generator
+    delta-runtime-cpp/tools/sidecar_trace_generator.cpp)
+  target_link_libraries(delta_sidecar_trace_generator PRIVATE delta::core)
+  delta_target_defaults(delta_sidecar_trace_generator)
+endif()
+
+if(DELTA_BUILD_SIDECAR_QUALIFICATION)
+  if(TARGET delta_sidecar_server)
+    target_compile_definitions(
+      delta_sidecar_server
+      PUBLIC DELTA_SIDECAR_QUALIFICATION_ENABLED)
+    target_include_directories(
+      delta_sidecar_server
+      PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/tools)
+  endif()
+
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_library(
+      delta_sidecar_qualification_fsync_interposer SHARED
+      delta-runtime-cpp/tools/sidecar_qualification_fsync_interposer.cpp)
+    target_include_directories(
+      delta_sidecar_qualification_fsync_interposer
+      PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/tools)
+    target_compile_definitions(
+      delta_sidecar_qualification_fsync_interposer
+      PRIVATE DELTA_SIDECAR_QUALIFICATION_FSYNC_INTERPOSER_BUILD)
+    delta_target_defaults(delta_sidecar_qualification_fsync_interposer)
+  endif()
+
+  add_library(
+    delta_sidecar_qualification_probe SHARED
+    delta-runtime-cpp/tools/sidecar_qualification_probe.cpp)
+  target_include_directories(
+    delta_sidecar_qualification_probe
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/tools>)
+  target_compile_definitions(
+    delta_sidecar_qualification_probe
+    PRIVATE DELTA_SIDECAR_QUALIFICATION_BUILD)
+  target_link_libraries(
+    delta_sidecar_qualification_probe
+    PRIVATE delta::runtime)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_options(
+      delta_sidecar_qualification_probe
+      PRIVATE "LINKER:--exclude-libs,ALL")
+  endif()
+  delta_target_defaults(delta_sidecar_qualification_probe)
+
+  add_executable(
+    delta_sidecar_durable_inspector
+    delta-runtime-cpp/tools/sidecar_durable_inspector.cpp)
+  target_link_libraries(
+    delta_sidecar_durable_inspector
+    PRIVATE delta::runtime delta::core)
+  delta_target_defaults(delta_sidecar_durable_inspector)
+
+  if(BUILD_TESTING AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_executable(
+      delta_sidecar_qualification_interposer_smoke
+      delta-runtime-cpp/tests/sidecar_qualification_interposer_smoke.cpp)
+    target_link_libraries(
+      delta_sidecar_qualification_interposer_smoke
+      PRIVATE delta_sidecar_qualification_probe delta::core)
+    target_compile_definitions(
+      delta_sidecar_qualification_interposer_smoke
+      PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+    delta_target_defaults(delta_sidecar_qualification_interposer_smoke)
+    add_test(
+      NAME delta_sidecar.qualification_fsync_interposer
+      COMMAND
+        ${CMAKE_COMMAND}
+        -DSMOKE_EXECUTABLE=$<TARGET_FILE:delta_sidecar_qualification_interposer_smoke>
+        -DINTERPOSER_LIBRARY=$<TARGET_FILE:delta_sidecar_qualification_fsync_interposer>
+        -DINSPECTOR_EXECUTABLE=$<TARGET_FILE:delta_sidecar_durable_inspector>
+        -DSMOKE_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/qualification-interposer-smoke
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/tests/sidecar_qualification_interposer_smoke.cmake)
+  endif()
+endif()
+
 if(BUILD_TESTING)
+  if(DELTA_BUILD_ISOLATED_SIDECAR AND DELTA_BUILD_ISOLATED_SIDECAR_TESTS)
+    add_executable(
+      delta_sidecar_protocol_test
+      delta-runtime-cpp/tests/sidecar_protocol_test.cpp)
+    target_link_libraries(delta_sidecar_protocol_test PRIVATE delta::sidecar_protocol)
+    delta_target_defaults(delta_sidecar_protocol_test)
+    add_test(
+      NAME delta_sidecar.protocol
+      COMMAND delta_sidecar_protocol_test)
+
+    add_executable(
+      delta_sidecar_directory_lock_test
+      delta-runtime-cpp/tests/sidecar_directory_lock_test.cpp)
+    target_link_libraries(delta_sidecar_directory_lock_test PRIVATE delta::sidecar_lock)
+    delta_target_defaults(delta_sidecar_directory_lock_test)
+    add_test(
+      NAME delta_sidecar.directory_lock
+      COMMAND delta_sidecar_directory_lock_test)
+
+    add_executable(
+      delta_sidecar_fail_closed_test
+      delta-runtime-cpp/tests/sidecar_fail_closed_test.cpp)
+    target_include_directories(
+      delta_sidecar_fail_closed_test
+      PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include)
+    target_link_libraries(
+      delta_sidecar_fail_closed_test
+      PRIVATE delta::sidecar_server)
+    target_compile_definitions(
+      delta_sidecar_fail_closed_test
+      PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
+    delta_target_defaults(delta_sidecar_fail_closed_test)
+    add_test(
+      NAME delta_sidecar.fail_closed
+      COMMAND delta_sidecar_fail_closed_test)
+
+    if(NOT DELTA_BUILD_SIDECAR_QUALIFICATION)
+      add_test(
+        NAME delta_sidecar.production_cli_rejects_fault
+        COMMAND
+          ${CMAKE_COMMAND}
+          -DSIDECAR_EXECUTABLE=$<TARGET_FILE:delta_runtime_sidecar>
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/tests/sidecar_production_cli_reject_fault.cmake)
+    endif()
+
+    add_test(
+      NAME delta_sidecar.trace_generator_self_test
+      COMMAND delta_sidecar_trace_generator --self-test)
+  endif()
+
   add_executable(
     delta_qlora_certificate_chain_test
     delta-core-cpp/tests/qlora_certificate_chain_test.cpp)

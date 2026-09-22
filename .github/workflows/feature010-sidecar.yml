@@ -1,0 +1,541 @@
+name: Feature 010 isolated sidecar conformance
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: feature010-sidecar-${{ github.workflow }}-${{ github.event.pull_request.head.sha }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+  DESIGN_SOURCE_SHA: f489ac7a384a8c9f74c36bb6f540b2889afa1607
+
+jobs:
+  python-contracts:
+    name: Frozen design and comparison gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact implementation source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Check out the independently frozen design source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          fetch-depth: 0
+          path: .design-source
+          persist-credentials: false
+          ref: ${{ env.DESIGN_SOURCE_SHA }}
+
+      - name: Verify exact source boundaries
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git -C .design-source rev-parse HEAD)" = "$DESIGN_SOURCE_SHA"
+
+      - name: Provision the repository-locked Python environment
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.6.14
+          uv sync --frozen
+
+      - name: Run frozen-design and comparison-gate checks offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          UV_OFFLINE: "1"
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/sidecar-python"
+          mkdir -p "$evidence"
+          {
+            echo "implementation_source_sha=$SOURCE_SHA"
+            echo "implementation_head=$(git rev-parse HEAD)"
+            echo "design_source_sha=$DESIGN_SOURCE_SHA"
+            echo "design_head=$(git -C .design-source rev-parse HEAD)"
+            echo "python=$(.venv/bin/python --version 2>&1)"
+            echo "uv=$(uv --version)"
+            echo "uv_lock_sha256=$(sha256sum uv.lock | cut -d ' ' -f 1)"
+          } > "$evidence/source-metadata.txt"
+
+          (
+            cd .design-source
+            "$GITHUB_WORKSPACE/.venv/bin/python" -m pytest -q \
+              specs/010-wan-benchmark-and-quality/tests/test_sidecar_refinement_design.py
+          ) 2>&1 | tee "$evidence/frozen-design-pytest.txt"
+
+          .venv/bin/ruff check \
+            specs/010-wan-benchmark-and-quality/scripts/assemble_sidecar_comparison.py \
+            specs/010-wan-benchmark-and-quality/scripts/sidecar_comparison_gate.py \
+            specs/010-wan-benchmark-and-quality/tests/test_assemble_sidecar_comparison.py \
+            specs/010-wan-benchmark-and-quality/tests/test_sidecar_comparison_gate.py \
+            2>&1 | tee "$evidence/comparison-ruff-check.txt"
+          .venv/bin/ruff format --check \
+            specs/010-wan-benchmark-and-quality/scripts/assemble_sidecar_comparison.py \
+            specs/010-wan-benchmark-and-quality/scripts/sidecar_comparison_gate.py \
+            specs/010-wan-benchmark-and-quality/tests/test_assemble_sidecar_comparison.py \
+            specs/010-wan-benchmark-and-quality/tests/test_sidecar_comparison_gate.py \
+            2>&1 | tee "$evidence/comparison-ruff-format.txt"
+          .venv/bin/python -m pytest -q \
+            specs/010-wan-benchmark-and-quality/tests/test_assemble_sidecar_comparison.py \
+            specs/010-wan-benchmark-and-quality/tests/test_sidecar_comparison_gate.py \
+            2>&1 | tee "$evidence/comparison-pytest.txt"
+
+      - name: Retain Python conformance evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: feature010-sidecar-python-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/sidecar-python/
+          if-no-files-found: error
+          retention-days: 30
+
+  native-sidecar:
+    name: ${{ matrix.family }} C++${{ matrix.standard }} focused sidecar tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: gcc-14.2.0
+            compiler: g++
+            image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+            standard: 20
+            version_pattern: g++ (GCC) 14.2.0
+          - family: gcc-14.2.0
+            compiler: g++
+            image: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+            standard: 23
+            version_pattern: g++ (GCC) 14.2.0
+          - family: clang-20.1.8
+            compiler: clang++
+            image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+            standard: 20
+            version_pattern: clang version 20.1.8
+          - family: clang-20.1.8
+            compiler: clang++
+            image: docker.io/silkeh/clang@sha256:ae2f3deffd84470fbb2904cfb990db208a5f9880b4bcf9d3eae080a50a8900b4
+            standard: 23
+            version_pattern: clang version 20.1.8
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Provision content-addressed compiler image
+        run: docker pull "${{ matrix.image }}"
+
+      - name: Build the isolated sidecar and run only its focused tests offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          COMPILER: ${{ matrix.compiler }}
+          COMPILER_IMAGE: ${{ matrix.image }}
+          EXPECTED_VERSION: ${{ matrix.version_pattern }}
+          STANDARD: ${{ matrix.standard }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          build="$RUNNER_TEMP/sidecar-build"
+          evidence="$RUNNER_TEMP/sidecar-native-evidence"
+          toolchain="$RUNNER_TEMP/sidecar-toolchain"
+          mkdir -p "$build" "$evidence" "$toolchain"
+
+          cat > "$toolchain/cxx" <<'WRAPPER'
+          #!/bin/sh
+          exec docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --volume "$RUNNER_TEMP:$RUNNER_TEMP" \
+            --workdir "$PWD" \
+            "$COMPILER_IMAGE" "$COMPILER" "$@"
+          WRAPPER
+          cat > "$toolchain/ar" <<'WRAPPER'
+          #!/bin/sh
+          exec docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --volume "$RUNNER_TEMP:$RUNNER_TEMP" \
+            --workdir "$PWD" \
+            "$COMPILER_IMAGE" ar "$@"
+          WRAPPER
+          cat > "$toolchain/ranlib" <<'WRAPPER'
+          #!/bin/sh
+          exec docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --volume "$RUNNER_TEMP:$RUNNER_TEMP" \
+            --workdir "$PWD" \
+            "$COMPILER_IMAGE" ranlib "$@"
+          WRAPPER
+          chmod +x "$toolchain/cxx" "$toolchain/ar" "$toolchain/ranlib"
+
+          docker run --rm --network none "$COMPILER_IMAGE" \
+            "$COMPILER" --version > "$evidence/compiler-version-full.txt"
+          sed -n '1p' "$evidence/compiler-version-full.txt" \
+            | tee "$evidence/compiler-version.txt"
+          grep -F "$EXPECTED_VERSION" "$evidence/compiler-version.txt"
+          {
+            echo "source_sha=$SOURCE_SHA"
+            echo "head=$(git rev-parse HEAD)"
+            echo "compiler_image=$COMPILER_IMAGE"
+            echo "cxx_standard=$STANDARD"
+            cmake --version | sed -n '1p'
+          } > "$evidence/source-metadata.txt"
+
+          cmake -S "$GITHUB_WORKSPACE" -B "$build" \
+            -DBUILD_TESTING=ON \
+            -DDELTA_BUILD_ISOLATED_SIDECAR=ON \
+            -DDELTA_BUILD_ISOLATED_SIDECAR_TESTS=ON \
+            -DDELTA_BUILD_SIDECAR_QUALIFICATION=ON \
+            -DDELTA_CXX_STANDARD="$STANDARD" \
+            -DDELTA_WARNINGS_AS_ERRORS=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
+            -DCMAKE_AR="$toolchain/ar" \
+            -DCMAKE_RANLIB="$toolchain/ranlib"
+          cmake --build "$build" --parallel 2 --target \
+            delta_runtime_sidecar \
+            delta_sidecar_protocol_test \
+            delta_sidecar_directory_lock_test \
+            delta_sidecar_fail_closed_test \
+            delta_sidecar_trace_generator \
+            delta_sidecar_qualification_fsync_interposer \
+            delta_sidecar_qualification_probe \
+            delta_sidecar_durable_inspector \
+            delta_sidecar_qualification_interposer_smoke
+          ctest --test-dir "$build" \
+            --output-on-failure \
+            --no-tests=error \
+            --output-junit "$evidence/ctest.xml" \
+            -R '^delta_sidecar\.' \
+            2>&1 | tee "$evidence/ctest.txt"
+
+          if test "$COMPILER" = g++ && test "$STANDARD" = 20; then
+            production_build="$RUNNER_TEMP/sidecar-production-build"
+            cmake -S "$GITHUB_WORKSPACE" -B "$production_build" \
+              -DBUILD_TESTING=ON \
+              -DDELTA_BUILD_ISOLATED_SIDECAR=ON \
+              -DDELTA_BUILD_ISOLATED_SIDECAR_TESTS=ON \
+              -DDELTA_BUILD_SIDECAR_QUALIFICATION=OFF \
+              -DDELTA_CXX_STANDARD=20 \
+              -DDELTA_WARNINGS_AS_ERRORS=ON \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
+              -DCMAKE_AR="$toolchain/ar" \
+              -DCMAKE_RANLIB="$toolchain/ranlib"
+            cmake --build "$production_build" --parallel 2 --target \
+              delta_runtime_sidecar \
+              delta_sidecar_fail_closed_test
+            ctest --test-dir "$production_build" \
+              --output-on-failure \
+              --no-tests=error \
+              --output-junit "$evidence/production-ctest.xml" \
+              -R '^delta_sidecar\.(fail_closed|production_cli_rejects_fault)$' \
+              2>&1 | tee "$evidence/production-ctest.txt"
+            for forbidden in '--fault' 'before-wal-append' 'during-ipc-response-frame'; do
+              if grep -a -q -F -- "$forbidden" "$production_build/delta_runtime_sidecar"; then
+                echo "production sidecar unexpectedly contains qualification text: $forbidden" >&2
+                exit 1
+              fi
+            done
+          fi
+
+          if test "$COMPILER" = g++ && test "$STANDARD" = 20; then
+            projector="$evidence/formal-projector"
+            mkdir -p "$projector"
+            source_tree="$(git rev-parse 'HEAD^{tree}')"
+            "$build/delta_sidecar_trace_generator" \
+              delta-protocol/fixtures/003/cross-language/golden-v1.json \
+              61000 \
+              "$projector/corpus.bin" \
+              "$SOURCE_SHA" \
+              "$source_tree" \
+              "$projector/formal-trace.json" \
+              "$projector/receipt.json" \
+              2>&1 | tee "$projector/generator.txt"
+            python3 formal/scripts/check-refinement.py \
+              "$projector/formal-trace.json" \
+              2>&1 | tee "$projector/refinement.txt"
+            python3 - \
+              "$projector/corpus.bin" \
+              "$projector/receipt.json" <<'PY'
+          import hashlib
+          import json
+          import pathlib
+          import sys
+
+          corpus = pathlib.Path(sys.argv[1]).read_bytes()
+          receipt_path = pathlib.Path(sys.argv[2])
+          receipt_bytes = receipt_path.read_bytes()
+          receipt = json.loads(receipt_bytes)
+          canonical = (
+              json.dumps(receipt, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+              + "\n"
+          ).encode()
+          if receipt_bytes != canonical:
+              raise SystemExit("projector receipt is not canonical JSON")
+          if receipt["canonical_input_trace_sha256"] != (
+              "sha256:" + hashlib.sha256(corpus).hexdigest()
+          ):
+              raise SystemExit("projector corpus digest mismatch")
+          for value_key, digest_key in (
+              ("initial_abstraction_witness", "initial_abstraction_witness_sha256"),
+              ("projected_trace", "projected_trace_sha256"),
+          ):
+              value = json.dumps(
+                  receipt[value_key],
+                  ensure_ascii=False,
+                  sort_keys=True,
+                  separators=(",", ":"),
+              ).encode()
+              if receipt[digest_key] != "sha256:" + hashlib.sha256(value).hexdigest():
+                  raise SystemExit(f"projector {value_key} digest mismatch")
+          PY
+            sha256sum \
+              "$projector/corpus.bin" \
+              "$projector/formal-trace.json" \
+              "$projector/receipt.json" \
+              > "$projector/artifacts.sha256"
+          fi
+          sha256sum "$build/delta_runtime_sidecar" > "$evidence/sidecar-executable.sha256"
+          sha256sum \
+            "$build/libdelta_sidecar_qualification_fsync_interposer.so" \
+            "$build/libdelta_sidecar_qualification_probe.so" \
+            "$build/delta_sidecar_durable_inspector" \
+            > "$evidence/qualification-helpers.sha256"
+
+      - name: Retain native sidecar conformance evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: feature010-sidecar-${{ matrix.family }}-cpp${{ matrix.standard }}-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/sidecar-native-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+  java-sidecar:
+    name: JDK ${{ matrix.feature }} sidecar conformance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - feature: 25
+            version: 25.0.4.1
+            archive_url: https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz
+            archive_sha256: dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e
+            archive_size: 141329719
+          - feature: 26
+            version: 26.0.2
+            archive_url: https://github.com/adoptium/temurin26-binaries/releases/download/jdk-26.0.2%2B10/OpenJDK26U-jdk_x64_linux_hotspot_26.0.2_10.tar.gz
+            archive_sha256: 56f768372f6ca1e2eb4c5f46b78f627949e8dcfe9c9723926cf45a45faf35802
+            archive_size: 144453933
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Provision and verify exact JDK archive
+        env:
+          ARCHIVE_SHA256: ${{ matrix.archive_sha256 }}
+          ARCHIVE_SIZE: ${{ matrix.archive_size }}
+          ARCHIVE_URL: ${{ matrix.archive_url }}
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/jdk.tar.gz" "$ARCHIVE_URL"
+          echo "$ARCHIVE_SHA256  $RUNNER_TEMP/jdk.tar.gz" | sha256sum --check --strict
+          test "$(stat --format=%s "$RUNNER_TEMP/jdk.tar.gz")" = "$ARCHIVE_SIZE"
+          mkdir -p "$RUNNER_TEMP/jdk"
+          tar --extract --gzip --file "$RUNNER_TEMP/jdk.tar.gz" \
+            --directory "$RUNNER_TEMP/jdk" --strip-components=1
+
+      - name: Provision content-addressed native compiler
+        env:
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+        run: docker pull "$COMPILER_IMAGE"
+
+      - name: Compile and execute available Java/native conformance offline
+        env:
+          ALL_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: localhost,127.0.0.1,::1
+          COMPILER: g++
+          COMPILER_IMAGE: docker.io/library/gcc@sha256:82549aa8f90ada3236a8be70c74543132a76662ef33f0c3271ed802b81584a82
+          EXPECTED_COMPILER_VERSION: g++ (GCC) 14.2.0
+          JDK_FEATURE: ${{ matrix.feature }}
+          JDK_VERSION: ${{ matrix.version }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          build="$RUNNER_TEMP/java-native-build"
+          classes="$RUNNER_TEMP/java-classes"
+          evidence="$RUNNER_TEMP/sidecar-java-evidence"
+          toolchain="$RUNNER_TEMP/java-native-toolchain"
+          mkdir -p "$build" "$classes" "$evidence" "$toolchain"
+
+          cat > "$toolchain/cxx" <<'WRAPPER'
+          #!/bin/sh
+          exec docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --volume "$RUNNER_TEMP:$RUNNER_TEMP" \
+            --workdir "$PWD" \
+            "$COMPILER_IMAGE" "$COMPILER" "$@"
+          WRAPPER
+          cat > "$toolchain/ar" <<'WRAPPER'
+          #!/bin/sh
+          exec docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --volume "$RUNNER_TEMP:$RUNNER_TEMP" \
+            --workdir "$PWD" \
+            "$COMPILER_IMAGE" ar "$@"
+          WRAPPER
+          cat > "$toolchain/ranlib" <<'WRAPPER'
+          #!/bin/sh
+          exec docker run --rm --network none \
+            --user "$(id -u):$(id -g)" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --volume "$RUNNER_TEMP:$RUNNER_TEMP" \
+            --workdir "$PWD" \
+            "$COMPILER_IMAGE" ranlib "$@"
+          WRAPPER
+          chmod +x "$toolchain/cxx" "$toolchain/ar" "$toolchain/ranlib"
+
+          docker run --rm --network none "$COMPILER_IMAGE" \
+            "$COMPILER" --version > "$evidence/compiler-version-full.txt"
+          sed -n '1p' "$evidence/compiler-version-full.txt" \
+            | tee "$evidence/compiler-version.txt"
+          grep -F "$EXPECTED_COMPILER_VERSION" "$evidence/compiler-version.txt"
+          "$RUNNER_TEMP/jdk/bin/java" -version \
+            > "$evidence/java-version-full.txt" 2>&1
+          sed -n '1p' "$evidence/java-version-full.txt" \
+            | tee "$evidence/java-version.txt"
+          grep -F "$JDK_VERSION" "$evidence/java-version.txt"
+
+          cmake -S "$GITHUB_WORKSPACE" -B "$build" \
+            -DBUILD_TESTING=OFF \
+            -DDELTA_BUILD_ISOLATED_SIDECAR=ON \
+            -DDELTA_BUILD_ISOLATED_SIDECAR_TESTS=OFF \
+            -DDELTA_BUILD_SIDECAR_QUALIFICATION=ON \
+            -DDELTA_CXX_STANDARD=20 \
+            -DDELTA_WARNINGS_AS_ERRORS=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
+            -DCMAKE_AR="$toolchain/ar" \
+            -DCMAKE_RANLIB="$toolchain/ranlib"
+          cmake --build "$build" --parallel 2 --target \
+            delta_runtime_sidecar \
+            delta_sidecar_qualification_probe \
+            delta_sidecar_durable_inspector \
+            delta_sidecar_qualification_fsync_interposer
+          sha256sum "$build/delta_runtime_sidecar" > "$evidence/sidecar-executable.sha256"
+
+          mapfile -d '' java_sources < <(
+            find delta-node-java/src/main/java/io/deltareduce/node/sidecar \
+                 delta-node-java/src/test/java/io/deltareduce/node/sidecar \
+              -type f -name '*.java' -print0 | sort -z
+          )
+          test "${#java_sources[@]}" -gt 0
+          printf '%s\n' "${java_sources[@]}" > "$evidence/java-sources.txt"
+          "$RUNNER_TEMP/jdk/bin/javac" \
+            --release "$JDK_FEATURE" \
+            -Xlint:all -Werror \
+            -d "$classes" \
+            "${java_sources[@]}"
+
+          for conformance in \
+            SidecarIpcConformance \
+            SidecarSupervisorConformance \
+            SidecarQualificationRawConformance \
+            NativeSidecarConformance \
+            SidecarComparisonCaptureDryRun; do
+            source="delta-node-java/src/test/java/io/deltareduce/node/sidecar/$conformance.java"
+            if test ! -f "$source"; then
+              echo "$conformance=not-present" >> "$evidence/executed-classes.txt"
+              continue
+            fi
+            echo "$conformance=executed" >> "$evidence/executed-classes.txt"
+            if test "$conformance" = NativeSidecarConformance; then
+              durable="$RUNNER_TEMP/native-sidecar-durable"
+              mkdir -p "$durable"
+              "$RUNNER_TEMP/jdk/bin/java" -ea --class-path "$classes" \
+                io.deltareduce.node.sidecar.NativeSidecarConformance \
+                "$build/delta_runtime_sidecar" \
+                delta-protocol/fixtures/003/cross-language/golden-v1.json \
+                "$durable" \
+                2>&1 | tee "$evidence/$conformance.txt"
+            else
+              "$RUNNER_TEMP/jdk/bin/java" -ea --class-path "$classes" \
+                "io.deltareduce.node.sidecar.$conformance" \
+              2>&1 | tee "$evidence/$conformance.txt"
+            fi
+          done
+
+          if test "$JDK_FEATURE" = 25; then
+            crash="$evidence/crash-qualification"
+            mkdir -p "$crash/embedded-work" "$crash/sidecar-work"
+            "$RUNNER_TEMP/jdk/bin/java" -ea --class-path "$classes" \
+              io.deltareduce.node.sidecar.SidecarCrashQualification \
+              --profile EMBEDDED_FFM \
+              --mode FULL \
+              --output "$crash/embedded.json" \
+              --work-root "$crash/embedded-work" \
+              --golden-fixture \
+                delta-protocol/fixtures/003/cross-language/golden-v1.json \
+              --inspector "$build/delta_sidecar_durable_inspector" \
+              --java-executable "$RUNNER_TEMP/jdk/bin/java" \
+              --classpath "$classes" \
+              --probe-library "$build/libdelta_sidecar_qualification_probe.so" \
+              --fsync-interposer \
+                "$build/libdelta_sidecar_qualification_fsync_interposer.so" \
+              2>&1 | tee "$crash/embedded-run.txt"
+            "$RUNNER_TEMP/jdk/bin/java" -ea --class-path "$classes" \
+              io.deltareduce.node.sidecar.SidecarCrashQualification \
+              --profile ISOLATED_SIDECAR \
+              --mode FULL \
+              --output "$crash/sidecar.json" \
+              --work-root "$crash/sidecar-work" \
+              --golden-fixture \
+                delta-protocol/fixtures/003/cross-language/golden-v1.json \
+              --inspector "$build/delta_sidecar_durable_inspector" \
+              --sidecar-executable "$build/delta_runtime_sidecar" \
+              --fsync-interposer \
+                "$build/libdelta_sidecar_qualification_fsync_interposer.so" \
+              2>&1 | tee "$crash/sidecar-run.txt"
+            sha256sum \
+              "$crash/embedded.json" \
+              "$crash/sidecar.json" \
+              > "$crash/artifacts.sha256"
+          fi
+          {
+            echo "source_sha=$SOURCE_SHA"
+            echo "head=$(git rev-parse HEAD)"
+            echo "jdk_feature=$JDK_FEATURE"
+            echo "jdk_version=$JDK_VERSION"
+            echo "compiler_image=$COMPILER_IMAGE"
+          } > "$evidence/source-metadata.txt"
+
+      - name: Retain Java/native sidecar conformance evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: feature010-sidecar-java-jdk${{ matrix.feature }}-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/sidecar-java-evidence/
+          if-no-files-found: error
+          retention-days: 30
