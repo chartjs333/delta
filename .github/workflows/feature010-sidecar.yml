@@ -151,8 +151,21 @@ jobs:
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           build="$RUNNER_TEMP/sidecar-build"
           evidence="$RUNNER_TEMP/sidecar-native-evidence"
+          icu="$RUNNER_TEMP/sidecar-icu"
           toolchain="$RUNNER_TEMP/sidecar-toolchain"
-          mkdir -p "$build" "$evidence" "$toolchain"
+          mkdir -p "$build" "$evidence" "$icu" "$toolchain"
+
+          docker run --rm --network none "$COMPILER_IMAGE" \
+            tar -C / -cf - \
+              usr/include/unicode \
+              usr/lib/x86_64-linux-gnu/libicuuc.a \
+            | tar -C "$icu" -xf -
+          test -f "$icu/usr/include/unicode/utypes.h"
+          test -s "$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
+          sha256sum \
+            "$icu/usr/include/unicode/uvernum.h" \
+            "$icu/usr/lib/x86_64-linux-gnu/libicuuc.a" \
+            > "$evidence/icu-sysroot.sha256"
 
           cat > "$toolchain/cxx" <<'WRAPPER'
           #!/bin/sh
@@ -206,7 +219,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
             -DCMAKE_AR="$toolchain/ar" \
-            -DCMAKE_RANLIB="$toolchain/ranlib"
+            -DCMAKE_RANLIB="$toolchain/ranlib" \
+            -DICU_INCLUDE_DIR="$icu/usr/include" \
+            -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
           cmake --build "$build" --parallel 2 --target \
             delta_runtime_sidecar \
             delta_sidecar_protocol_test \
@@ -236,7 +251,9 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
               -DCMAKE_AR="$toolchain/ar" \
-              -DCMAKE_RANLIB="$toolchain/ranlib"
+              -DCMAKE_RANLIB="$toolchain/ranlib" \
+              -DICU_INCLUDE_DIR="$icu/usr/include" \
+              -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
             cmake --build "$production_build" --parallel 2 --target \
               delta_runtime_sidecar \
               delta_sidecar_fail_closed_test
@@ -386,8 +403,21 @@ jobs:
           build="$RUNNER_TEMP/java-native-build"
           classes="$RUNNER_TEMP/java-classes"
           evidence="$RUNNER_TEMP/sidecar-java-evidence"
+          icu="$RUNNER_TEMP/java-native-icu"
           toolchain="$RUNNER_TEMP/java-native-toolchain"
-          mkdir -p "$build" "$classes" "$evidence" "$toolchain"
+          mkdir -p "$build" "$classes" "$evidence" "$icu" "$toolchain"
+
+          docker run --rm --network none "$COMPILER_IMAGE" \
+            tar -C / -cf - \
+              usr/include/unicode \
+              usr/lib/x86_64-linux-gnu/libicuuc.a \
+            | tar -C "$icu" -xf -
+          test -f "$icu/usr/include/unicode/utypes.h"
+          test -s "$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
+          sha256sum \
+            "$icu/usr/include/unicode/uvernum.h" \
+            "$icu/usr/lib/x86_64-linux-gnu/libicuuc.a" \
+            > "$evidence/icu-sysroot.sha256"
 
           cat > "$toolchain/cxx" <<'WRAPPER'
           #!/bin/sh
@@ -439,7 +469,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
             -DCMAKE_AR="$toolchain/ar" \
-            -DCMAKE_RANLIB="$toolchain/ranlib"
+            -DCMAKE_RANLIB="$toolchain/ranlib" \
+            -DICU_INCLUDE_DIR="$icu/usr/include" \
+            -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
           cmake --build "$build" --parallel 2 --target \
             delta_runtime_sidecar \
             delta_sidecar_qualification_probe \
