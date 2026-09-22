@@ -155,6 +155,13 @@ jobs:
           toolchain="$RUNNER_TEMP/sidecar-toolchain"
           mkdir -p "$build" "$evidence" "$icu" "$toolchain"
 
+          gcc_diagnostics=""
+          if test "$COMPILER" = g++; then
+            # GCC 14 diagnoses moved std::variant storage in the protected MPSC queue.
+            # Keep the diagnostics visible while leaving every other warning fatal.
+            gcc_diagnostics="-Wno-error=uninitialized -Wno-error=maybe-uninitialized"
+          fi
+
           docker run --rm --network none "$COMPILER_IMAGE" \
             tar -C / -cf - \
               usr/include/unicode \
@@ -206,6 +213,7 @@ jobs:
             echo "head=$(git rev-parse HEAD)"
             echo "compiler_image=$COMPILER_IMAGE"
             echo "cxx_standard=$STANDARD"
+            echo "gcc_diagnostic_exceptions=$gcc_diagnostics"
             cmake --version | sed -n '1p'
           } > "$evidence/source-metadata.txt"
 
@@ -220,6 +228,7 @@ jobs:
             -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
             -DCMAKE_AR="$toolchain/ar" \
             -DCMAKE_RANLIB="$toolchain/ranlib" \
+            -DCMAKE_CXX_FLAGS="$gcc_diagnostics" \
             -DICU_INCLUDE_DIR="$icu/usr/include" \
             -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
           cmake --build "$build" --parallel 2 --target \
@@ -252,6 +261,7 @@ jobs:
               -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
               -DCMAKE_AR="$toolchain/ar" \
               -DCMAKE_RANLIB="$toolchain/ranlib" \
+              -DCMAKE_CXX_FLAGS="$gcc_diagnostics" \
               -DICU_INCLUDE_DIR="$icu/usr/include" \
               -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
             cmake --build "$production_build" --parallel 2 --target \
@@ -406,6 +416,7 @@ jobs:
           icu="$RUNNER_TEMP/java-native-icu"
           toolchain="$RUNNER_TEMP/java-native-toolchain"
           mkdir -p "$build" "$classes" "$evidence" "$icu" "$toolchain"
+          gcc_diagnostics="-Wno-error=uninitialized -Wno-error=maybe-uninitialized"
 
           docker run --rm --network none "$COMPILER_IMAGE" \
             tar -C / -cf - \
@@ -470,6 +481,7 @@ jobs:
             -DCMAKE_CXX_COMPILER="$toolchain/cxx" \
             -DCMAKE_AR="$toolchain/ar" \
             -DCMAKE_RANLIB="$toolchain/ranlib" \
+            -DCMAKE_CXX_FLAGS="$gcc_diagnostics" \
             -DICU_INCLUDE_DIR="$icu/usr/include" \
             -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
           cmake --build "$build" --parallel 2 --target \
@@ -562,6 +574,7 @@ jobs:
             echo "jdk_feature=$JDK_FEATURE"
             echo "jdk_version=$JDK_VERSION"
             echo "compiler_image=$COMPILER_IMAGE"
+            echo "gcc_diagnostic_exceptions=$gcc_diagnostics"
           } > "$evidence/source-metadata.txt"
 
       - name: Retain Java/native sidecar conformance evidence
