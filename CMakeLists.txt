@@ -249,6 +249,9 @@ if(DELTA_BUILD_SIDECAR_QUALIFICATION)
     target_include_directories(
       delta_sidecar_server
       PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/tools)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      target_link_libraries(delta_sidecar_server PRIVATE ${CMAKE_DL_LIBS})
+    endif()
   endif()
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
