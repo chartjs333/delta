@@ -114,7 +114,12 @@ class Sha256 final {
     }
 
     while ((input.size() - cursor) >= buffer_.size()) {
-      transform(input.data() + cursor);
+      // Keep transform's input backed by the fixed-size block. Besides making
+      // the 64-byte precondition explicit, this avoids GCC 14 losing the loop
+      // bound while inlining pointer arithmetic from a smaller caller span.
+      std::copy_n(
+          input.begin() + static_cast<std::ptrdiff_t>(cursor), buffer_.size(), buffer_.begin());
+      transform(buffer_.data());
       cursor += buffer_.size();
     }
     const auto remaining = input.size() - cursor;

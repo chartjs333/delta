@@ -11,6 +11,9 @@
 
 #if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
 #include "sidecar_qualification_fsync_interposer.h"
+#if defined(__linux__)
+#include <dlfcn.h>
+#endif
 #endif
 
 #include <algorithm>
@@ -239,15 +242,21 @@ void write_all(std::ostream& output, std::span<const std::byte> bytes) {
 
 void require_exact_pre_durability_interposer(const std::filesystem::path& directory) {
 #if defined(__linux__)
+  using ArmInterposer = decltype(&delta_sidecar_qualification_fsync_interposer_arm_v1);
+  const auto symbol = ::dlsym(
+      RTLD_DEFAULT, "delta_sidecar_qualification_fsync_interposer_arm_v1");
+  static_assert(sizeof(ArmInterposer) == sizeof(symbol));
+  ArmInterposer arm_interposer = nullptr;
+  std::memcpy(&arm_interposer, &symbol, sizeof(arm_interposer));
   require(
-      delta_sidecar_qualification_fsync_interposer_arm_v1 != nullptr,
+      arm_interposer != nullptr,
       "qualification fsync interposer is not loaded");
   const auto wal_path = std::filesystem::absolute(directory / "runtime.wal")
                             .lexically_normal()
                             .u8string();
   const auto* bytes = reinterpret_cast<const std::uint8_t*>(wal_path.data());
   require(
-      delta_sidecar_qualification_fsync_interposer_arm_v1(bytes, wal_path.size()) == 1U,
+      arm_interposer(bytes, wal_path.size()) == 1U,
       "qualification fsync interposer is not armed for this runtime.wal");
 #else
   static_cast<void>(directory);
