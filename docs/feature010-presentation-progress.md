@@ -58,3 +58,17 @@ The no-referrer login policy causes real browser form POSTs to send Origin:null;
 reproduced with the same gateway handler in an isolated loopback browser fixture.
 The login document now uses same-origin referrer policy. Strict Origin checking,
 code comparison, signed cookies and private control fencing remain in place.
+
+Visual guide source 8447294 and login correction 00aa732 are deployed. Seven
+public HTTPS PNG hashes match; 266 UI tests/45 files and 29 presentation tests
+pass. Real browser EN/RU login/regression checks use an isolated instance of the
+production handler; actual public browser remains blocked by this host's DNS.
+See presentation-local/20260924/visual-guide for exact acceptance and limitations.
+
+Operational recovery at 23:41Z: a managed execution-session interruption stopped
+the local processes. Restored through an independent hidden Windows launcher
+(Win32_Process.Create, ShowWindow=0), with data and installed UI retained.
+Controller instance is now d7602a7b-f488-47eb-8ef3-220dea499291; source stays
+c8aea649 and the previous exact canonical receipt remains available. Do not
+restart the currently working gateway needlessly. Use START-REMOTE.ps1 status
+for the current URL; old links from earlier in the conversation no longer work.

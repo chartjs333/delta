@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "checked_at": "2026-09-23T23:44:27.232801+00:00",
+  "scope": "T051/HR010-001 presentation visual guide",
+  "status": "PASS",
+  "qualifying_evidence": false,
+  "mode": "SIMULATED_LOCAL",
+  "public_url": "https://wright-lid-gym-concepts.trycloudflare.com",
+  "tls_certificate_and_hostname_validation": true,
+  "dns_resolution": "Cloudflare public DNS (host resolver unavailable)",
+  "images": [
+    {
+      "path": "assets/slide-1-Ctcc81oZ.png",
+      "bytes": 1600485,
+      "sha256": "00154ac488030f89acd46c09b5bc35a064c6e0ed0a1fdfc91b5d8529d5eb14d7",
+      "public_https": "PASS"
+    },
+    {
+      "path": "assets/slide-2-B9VlhhHk.png",
+      "bytes": 1877242,
+      "sha256": "ce7f4fa1e319276c5c102e1fdba3423a1d733e1b2c213e6b6452d77d916ea359",
+      "public_https": "PASS"
+    },
+    {
+      "path": "assets/slide-3-D4pwEd5A.png",
+      "bytes": 1861604,
+      "sha256": "bfbfaf6624757f1776f253a338c5f4a57d832824c6e75b7ccd060d4bfa136785",
+      "public_https": "PASS"
+    },
+    {
+      "path": "assets/slide-4-0fBfcd9Y.png",
+      "bytes": 1628306,
+      "sha256": "98924b677202cc323550833d5b0d9c74730b723ca4fc647bbe9f5b4e9da52f05",
+      "public_https": "PASS"
+    },
+    {
+      "path": "assets/slide-5-B-OlhR5K.png",
+      "bytes": 1895030,
+      "sha256": "8be5391a0f48411aa6584241ab2447c362502aa6e6a31e1d3d6c1731315b6abe",
+      "public_https": "PASS"
+    },
+    {
+      "path": "assets/slide-6-HEPugfpg.png",
+      "bytes": 1604439,
+      "sha256": "cd4e3c32f0f03752b3dd35b2c3c01cd887bff8018034c254a08c5f3a8fce007f",
+      "public_https": "PASS"
+    },
+    {
+      "path": "assets/slide-7-C8dZ9QbZ.png",
+      "bytes": 1825946,
+      "sha256": "41e59e6bb3cf02a214c0436fa7f3c5bde505f9c79a8b7df47c1beac002cd4b8d",
+      "public_https": "PASS"
+    }
+  ],
+  "anonymous_image_status": 401,
+  "source_commit": "84472949f0e6eb4e8663c20f8a6816f424fa1dd9",
+  "controller_instance_id": "d7602a7b-f488-47eb-8ef3-220dea499291",
+  "controller_source": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "controller_instance_preserved": false,
+  "receipt_execution": "934a9d51-e5aa-46da-bbc3-963b9f409914",
+  "receipt_sha256": "ec715072b34d3add3e3cd7c191341e491e70866c40663752a91f7a5b6bf0230d",
+  "public_local_receipt_equal": true,
+  "public_login_referrer_policy": "same-origin",
+  "controller_instance_before": "7e879144-c460-4e52-9dbb-b2b5060ac6c2",
+  "runtime_recovery": "Managed launcher session ended; services restored through a hidden independent Windows process. Saved receipt and signing key retained."
+}

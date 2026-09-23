@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "SIMULATED_LOCAL",
+  "qualifying": false,
+  "files": [
+    {
+      "path": "checks.json",
+      "sha256": "690a1f27b7aba16e03845de552c99718d253139c54b6d9d830122207eb390d71"
+    },
+    {
+      "path": "http-acceptance.json",
+      "sha256": "fa0c13af2d77f446aa17dfa9c00a1800c1b75f69670ab6e72e9aa42433f4b499"
+    },
+    {
+      "path": "installed-admin-ui.json",
+      "sha256": "47e535bf570fc5b9fad510073fb92834077f4553ceff14b3e7ad76ff9b27a995"
+    },
+    {
+      "path": "README.md",
+      "sha256": "ac30fcfa4f21f8a62e0f8a4307076cce6bc2a630b985a12be3591673f07305e3"
+    }
+  ]
+}

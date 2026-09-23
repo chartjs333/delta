@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "PRESENTATION_UI_ONLY",
+  "qualifying_evidence": false,
+  "files": [
+    {
+      "sha256": "a1995497e382ae5e707fe83b1dc7fac81bafd27d7fc6f0a5a936ced45419895b",
+      "path": "live.html"
+    },
+    {
+      "sha256": "9e8d4d1b10a47b96e1ce078c75100bbc3f70af49233e838e31a74823a7e3bf91",
+      "path": "assets/live-Drj7Klfw.js"
+    },
+    {
+      "sha256": "311982a300e6d21d48fa41900b80729f8accabb7c92cf497b3dafa1e9aa51610",
+      "path": "assets/live-DzP9KhNF.css"
+    },
+    {
+      "sha256": "00154ac488030f89acd46c09b5bc35a064c6e0ed0a1fdfc91b5d8529d5eb14d7",
+      "path": "assets/slide-1-Ctcc81oZ.png"
+    },
+    {
+      "sha256": "ce7f4fa1e319276c5c102e1fdba3423a1d733e1b2c213e6b6452d77d916ea359",
+      "path": "assets/slide-2-B9VlhhHk.png"
+    },
+    {
+      "sha256": "bfbfaf6624757f1776f253a338c5f4a57d832824c6e75b7ccd060d4bfa136785",
+      "path": "assets/slide-3-D4pwEd5A.png"
+    },
+    {
+      "sha256": "98924b677202cc323550833d5b0d9c74730b723ca4fc647bbe9f5b4e9da52f05",
+      "path": "assets/slide-4-0fBfcd9Y.png"
+    },
+    {
+      "sha256": "8be5391a0f48411aa6584241ab2447c362502aa6e6a31e1d3d6c1731315b6abe",
+      "path": "assets/slide-5-B-OlhR5K.png"
+    },
+    {
+      "sha256": "cd4e3c32f0f03752b3dd35b2c3c01cd887bff8018034c254a08c5f3a8fce007f",
+      "path": "assets/slide-6-HEPugfpg.png"
+    },
+    {
+      "sha256": "41e59e6bb3cf02a214c0436fa7f3c5bde505f9c79a8b7df47c1beac002cd4b8d",
+      "path": "assets/slide-7-C8dZ9QbZ.png"
+    }
+  ],
+  "installed_at": "2026-09-23T23:26:04.3534887Z",
+  "admin_ui_source_commit": "84472949f0e6eb4e8663c20f8a6816f424fa1dd9",
+  "controller_source_commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "protocol_semantics_changed": false
+}

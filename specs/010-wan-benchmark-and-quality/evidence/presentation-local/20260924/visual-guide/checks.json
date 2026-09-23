@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "T051/HR010-001 presentation tooling",
+  "formal_impact": "NONE",
+  "qualifying_evidence": false,
+  "review": "SELF_REVIEW_ONLY",
+  "source_ui": "8447294",
+  "source_gateway": "00aa73257d8a2e39dbdef1767d6c0ef83a2f7f42",
+  "checks": {
+    "ui_tests": 266,
+    "ui_test_files": 45,
+    "presentation_tests": 29,
+    "gateway_tests": 9,
+    "typescript": "PASS",
+    "offline_build_audit": "PASS",
+    "live_build_audit": "PASS",
+    "repository_boundary": "PASS",
+    "validator_and_catalog_sync": "PASS",
+    "ruff": "PASS",
+    "powershell_parse": "PASS",
+    "source_images_identical": 7,
+    "accepted_baseline_formal_report": "PASS_GO_EXISTING_SEMANTICS_ONLY",
+    "pre_final_constitution_check": "PASS_UI_TOOLING_SCOPE"
+  },
+  "browser": {
+    "local_guide_en_ru": "PASS",
+    "keyboard_arrows_home_end": "PASS",
+    "first_last_bounded": "PASS",
+    "url_refresh": "PASS",
+    "fullscreen": "PASS",
+    "visible_arithmetic_corrections": "PASS",
+    "presentation_admin_language_link": "PASS",
+    "login_fixture_before": "Origin:null reproduced",
+    "login_fixture_after": "Origin:http://127.0.0.1:8872; authenticated page reached",
+    "login_fixture_ru_invalid_code_retry": "PASS",
+    "public_browser": "NOT_VERIFIED: host DNS unavailable",
+    "public_https_assets_and_receipt": "PASS"
+  },
+  "recovery": {
+    "independent_hidden_windows_launcher": true,
+    "windows_startup_service_installed": false,
+    "managed_tool_completion_and_new_user_input_survived": true,
+    "independent_launcher_exited": false,
+    "baseline_source_unchanged": true,
+    "baseline_instance_restarted_after_session_end": true
+  },
+  "acceptance_driver_sha256": "5a3fdd3490c37b0c5ca70c378fceb67fb2eb0bf93e2db89b7b069fa6268126f7",
+  "browser_fixture_sha256": "4b5496a99bdc8066918bd75acef0ef044b585a244ebcb25401bdd891afe8b404"
+}
