@@ -93,6 +93,7 @@ class RemoteTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertIn(expected, body.decode())
             self.assertIn("form-action 'self'", headers["Content-Security-Policy"])
+            self.assertEqual(headers["Referrer-Policy"], "same-origin")
         self.assertFalse(Upstream.calls)
 
     def test_authenticated_slide_assets_only_forward_allowed_paths(self):
@@ -112,6 +113,22 @@ class RemoteTests(unittest.TestCase):
         self.assertEqual(headers["Location"], "/?lang=en")
         for attribute in ("Secure", "HttpOnly", "SameSite=Strict", "Path=/"):
             self.assertIn(attribute, headers["Set-Cookie"])
+
+    def test_login_still_rejects_missing_null_and_cross_site_origins(self):
+        body = urlencode({"code": "a" * 64})
+        for origin in (None, "null", "https://evil.invalid"):
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            if origin is not None:
+                headers["Origin"] = origin
+            status, data, response_headers = self.request("/_access/login", "POST", body, **headers)
+            self.assertEqual(status, 403)
+            self.assertEqual(json.loads(data)["error"], "ORIGIN_FORBIDDEN")
+            self.assertNotIn("Set-Cookie", response_headers)
+            self.assertEqual(response_headers["Referrer-Policy"], "no-referrer")
+        status, _, headers = self.login(code="wrong")
+        self.assertEqual(status, 401)
+        self.assertEqual(headers["Referrer-Policy"], "same-origin")
+        self.assertEqual(self.login()[0], 303)
 
     def test_authenticated_proxy_rewrites_origin_and_strips_credentials(self):
         status, _, _ = self.request(

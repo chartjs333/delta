@@ -52,3 +52,9 @@ EN/RU captions, navigation/keyboard/fullscreen, URL-selected slide, visible
 arithmetic corrections on slide 5. Static image allowlists retain fixed paths
 and remote authentication. Source and deployment checks are recorded under
 presentation-local/20260924/visual-guide; no qualifying claims are added.
+
+Browser login follow-up: user reported ORIGIN_FORBIDDEN on access-code submission.
+The no-referrer login policy causes real browser form POSTs to send Origin:null;
+reproduced with the same gateway handler in an isolated loopback browser fixture.
+The login document now uses same-origin referrer policy. Strict Origin checking,
+code comparison, signed cookies and private control fencing remain in place.

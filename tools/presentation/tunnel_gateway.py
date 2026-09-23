@@ -133,13 +133,21 @@ class Handler(BaseHTTPRequestHandler):
         # Never log cookies, login bodies, or private controls.
         pass
 
-    def reply(self, status, body=b"", media="application/json", headers=None):
+    def reply(
+        self,
+        status,
+        body=b"",
+        media="application/json",
+        headers=None,
+        *,
+        referrer_policy="no-referrer",
+    ):
         self.send_response(status)
         self.send_header("Content-Type", media)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Referrer-Policy", referrer_policy)
         self.send_header("X-Frame-Options", "DENY")
         for key, value in (headers or {}).items():
             self.send_header(key, value)
@@ -216,6 +224,10 @@ required maxlength="128" autocomplete="current-password" autofocus>
                 "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; "
                 "form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
             },
+            # no-referrer makes browser form POSTs send Origin: null, which our
+            # strict origin gate must reject. Preserve the origin for this form
+            # while continuing to suppress referrers to other sites.
+            referrer_policy="same-origin",
         )
 
     def dispatch(self):

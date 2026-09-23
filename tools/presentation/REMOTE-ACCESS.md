@@ -94,6 +94,17 @@ passwordless access stays unchanged. Codes/control metadata are outside Git,
 in an ACL-restricted directory. Sessions expire after 12 hours or gateway restart.
 To rotate a code: stop the tunnel, remove only `access-code.txt`, then start again.
 
+The login document uses `Referrer-Policy: same-origin`: browser form submissions
+must retain their real Origin. `no-referrer` can turn that Origin into `null`,
+causing ORIGIN_FORBIDDEN even with the correct code. Null/missing/cross-site
+origins remain rejected. Other gateway responses retain `no-referrer`.
+If an older login page is already open after an update, reopen the current URL
+printed by the launcher before entering the code.
+
+Если после ввода кода появляется `ORIGIN_FORBIDDEN`, заново откройте актуальную
+ссылку из `START-REMOTE.ps1`, чтобы загрузить исправленную форму входа. Код
+не меняется. Форма сохраняет Origin своего сайта; проверка чужих адресов остаётся.
+
 Quick Tunnels are for temporary development/testing, use a random hostname,
 have no uptime SLA, permit at most 200 concurrent in-flight requests and do not
 support SSE. This app polls for status. Cloudflare docs:
