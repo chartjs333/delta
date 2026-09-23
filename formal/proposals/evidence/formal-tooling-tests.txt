@@ -34,8 +34,8 @@ warning: in the working copy of 'formal/schemas/formal-verification-report.schem
 .warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
 warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
 warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
-...............
+..........................
 ----------------------------------------------------------------------
-Ran 61 tests in 15.359s
+Ran 72 tests in 16.629s
 
 OK

@@ -6,10 +6,12 @@ No new Formal GO, qualifying BenchmarkResultQC or Feature010 GO checkpoint exist
 ## Morning presentation — working app available
 
 The user's latest priority is presenting a working application on September 24.
-The separate simulation worktree now contains a runnable Russian presentation UI:
-`http://127.0.0.1:8870/`, with the baseline Controller/Worker at port 8865.
-Source commit: `b5f06eff7488c367b882050483bb08130456bfd7`; acceptance/evidence
-overlay: `856ddaf`. The clean baseline `D:/delta-main-demo` remains at `c8aea649...`.
+The separate simulation worktree contains a runnable English/Russian presentation UI:
+`http://127.0.0.1:8870/?lang=en`, with the baseline Controller/Worker at port 8865.
+Presentation source: `b5f06eff7488c367b882050483bb08130456bfd7`; acceptance/evidence
+overlay: `856ddaf`; localization: `173da69`. English is the default and the one-click
+launcher explicitly opens English. The clean baseline `D:/delta-main-demo` remains
+at `c8aea649...`.
 
 One-click user entry: `D:/delta-presentation/START.cmd`. Data root:
 `D:/delta-data/presentation-20260924`. Read `tools/presentation/README.md` and
@@ -87,6 +89,33 @@ The changed candidate has a different semantics ID and cannot inherit that GO.
 Task checkboxes remain open until their complete evidence requirements are met.
 
 ## Self-review: remaining Feature000 work, in order
+
+### September 23 continuation: trace admission regression closure
+
+The public checker incorrectly accepted all 15 newly retained negative traces:
+mixed vote height/epoch, relabeled finalizer height/epoch, a crashed validator
+voting, and votes/recovery enabled by unsuccessful recovery/restart outcomes.
+The fixed checker rejects all 15 with the intended reason. It preserves durable
+conflict detection across recovery and permits recovery retry and config QC
+finalization after a leader-view change. `view` is not blindly appended to all
+QC keys: `ConfigContext` binds height/epoch, and view-change-specific contexts
+remain action-specific. Source anchors are `DeltaReduceTypes.RoundContexts`,
+`ConfigContext`, `DeltaReduceQuorums.CanVote`, and the existing recovery actions.
+
+Evidence: `formal/proposals/evidence/refinement-admission.json`, the retained
+test log and `formal/reports/refinement-evidence.json`. There are now 72 passing
+formal tooling tests and 9 legal / 31 illegal public fixtures. The before/after
+comparison executes the checker from source `0aacd14` against the same 15 traces.
+Changed Python files pass Ruff and formatting. This is self-review only.
+
+TLA/Lean/public schema bytes did not change in this correction, so the candidate
+semantics ID stays `e3db697d...`. Arithmetic witnesses, the full proof gate and
+independent reviews are still missing; the updated report must remain NO_GO.
+The full formal check still stops at its phase-zero frozen-input mismatch; do not
+refreeze incomplete contracts merely to hide it. No native implementation is
+authorized by these partial fixture checks.
+
+### Next substantive stage
 
 1. Freeze production artifact encoding and a trace schema that independently
    binds authenticated native pre-state, canonical source bytes and certified

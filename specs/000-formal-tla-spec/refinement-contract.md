@@ -59,6 +59,24 @@ the parameter events that happened to appear in the trace.
 - An implementation action with no formal counterpart is a semantic change and blocks merge until the formal baseline is amended.
 - The projection MUST not hide a protocol-visible parent/body hash, vote, certificate, artifact availability or current-pointer change.
 
+Existing model guards apply to fixture validation as follows:
+
+- Matching QC votes must share action kind, round ID, height, validator epoch,
+  exact vote context and body. A finalizer cannot relabel a collected quorum's
+  height or epoch. These are necessary checks, not certificate authentication.
+- Leader `view` is not a universal addition to the vote context. For example,
+  `ConfigContext` binds height/epoch and its durable votes survive view changes.
+  Action-specific parent/view bindings remain part of the canonical body/context.
+- `CanVote` requires `READY`; both `CRASHED` and `RECOVERING` disable new votes.
+  `ACT-CRASH` with `FAULT` records the crash; rejected/stuttering/no-op crash
+  attempts do not. Only successful restart and journal recovery advance recovery
+  state. A rejected, blocked, no-op, stuttering or failed recovery cannot enable
+  votes, and successful recovery does not erase durable vote conflicts.
+
+These checks enforce `RoundContexts`, `ConfigContext`, `CanVote`, `Restart` and
+`RecoverJournal` already present in the TLA model. They do not establish the
+pending arithmetic witness or a complete concrete-state abstraction.
+
 ## 4. State abstraction
 
 Concrete bytes/tensors are abstracted by canonical content IDs plus exact metadata/bound predicates. Concrete network connections are abstracted to message multiset and partition/delivery actions. Concrete clocks are abstracted to logical deadline transitions. Persistent stores are abstracted to durable maps/journals and atomic visibility.

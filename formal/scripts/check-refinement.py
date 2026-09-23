@@ -11,7 +11,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
@@ -23,7 +22,6 @@ from formal_artifacts import (  # noqa: E402
     validate_trace_document,
     write_canonical_json,
 )
-
 
 QUORUM = 3
 FINALIZE_TO_VOTE = {
@@ -38,6 +36,7 @@ FINALIZE_TO_VOTE = {
     "ACT-ABORT-FINALIZE": "ACT-ABORT-VOTE",
 }
 VOTE_ACTIONS = set(FINALIZE_TO_VOTE.values())
+QuorumKey = tuple[str, str, int, str, str, str]
 FAULT_PROGRESS_ACTIONS = {
     "ACT-ABORT-VOTE",
     "ACT-ABORT-FINALIZE",
@@ -87,11 +86,7 @@ def verify_round_contract(trace: dict[str, Any]) -> tuple[set[str], str]:
     parameter_schema = contract["parameter_schema"]
     shard_plan = contract["shard_plan"]
 
-    event_round = (
-        trace["events"][0]["round_id"]
-        if trace["events"]
-        else contract["round_id"]
-    )
+    event_round = trace["events"][0]["round_id"] if trace["events"] else contract["round_id"]
     if contract["round_id"] != event_round:
         fail("ROUND_CONTRACT_ID_MISMATCH", trace["trace_id"])
 
@@ -154,16 +149,29 @@ def verify_round_contract(trace: dict[str, Any]) -> tuple[set[str], str]:
     return required_contexts, round_config["body_hash"]
 
 
+def quorum_key(event: dict[str, Any], vote_action: str) -> QuorumKey:
+    # RoundContexts binds height/epoch in DeltaReduceTypes. Leader view is not
+    # a universal vote context: durable config votes survive a view change.
+    return (
+        vote_action,
+        event["round_id"],
+        event["height"],
+        event["validator_epoch"],
+        event["vote_context_id"],
+        event["body_hash"],
+    )
+
+
 def verify_quorum(
     event: dict[str, Any],
-    votes: dict[tuple[str, str, str, str], set[str]],
+    votes: dict[QuorumKey, set[str]],
 ) -> None:
     vote_action = FINALIZE_TO_VOTE[event["action_id"]]
     context = event["vote_context_id"]
     body = event["body_hash"]
     if context is None or body is None:
         fail("QC_CONTEXT_MISSING", event["action_id"])
-    key = (vote_action, event["round_id"], context, body)
+    key = quorum_key(event, vote_action)
     if len(votes[key]) < QUORUM:
         fail(
             "QC_QUORUM_MISSING",
@@ -177,15 +185,13 @@ def check_trace(path: Path) -> dict[str, Any]:
     if path.read_bytes().removesuffix(b"\n") != canonical_json_bytes(trace):
         fail("NONCANONICAL_TRACE", str(path))
 
-    expected_semantics = derive_formal_semantics_id(
-        "1.0.0", discover_semantic_artifacts(ROOT)
-    )
+    expected_semantics = derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(ROOT))
     if trace["formal_semantics_id"] != expected_semantics:
         fail("FORMAL_SEMANTICS_MISMATCH", trace["trace_id"])
 
     required_parameter_contexts, round_config_hash = verify_round_contract(trace)
 
-    votes: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
+    votes: dict[QuorumKey, set[str]] = defaultdict(set)
     durable_votes: dict[tuple[str, str], str] = {}
     commitments: dict[tuple[str, str], str] = {}
     isc_body_by_round: dict[str, str] = {}
@@ -219,10 +225,7 @@ def check_trace(path: Path) -> dict[str, Any]:
 
         if hard_deadline_reached and accepted and action not in FAULT_PROGRESS_ACTIONS:
             fail("PROGRESS_AFTER_HARD_DEADLINE", action)
-        if (
-            action == "ACT-LOGICAL-TIME-ADVANCE"
-            and event["error_code"] == "HARD_DEADLINE_REACHED"
-        ):
+        if action == "ACT-LOGICAL-TIME-ADVANCE" and event["error_code"] == "HARD_DEADLINE_REACHED":
             hard_deadline_reached = True
 
         if accepted and event["error_code"] in UNSAFE_ARITHMETIC_CODES:
@@ -231,14 +234,14 @@ def check_trace(path: Path) -> dict[str, Any]:
         if action in VOTE_ACTIONS and accepted:
             if actor is None or context is None or body is None:
                 fail("VOTE_CONTEXT_MISSING", f"event {index}")
-            if validator_recovery[actor] == "RECOVERING":
+            if validator_recovery[actor] != "READY":
                 fail("VOTE_BEFORE_JOURNAL_RECOVERY", actor)
             durable_key = (actor, context)
             prior_body = durable_votes.get(durable_key)
             if prior_body is not None and prior_body != body:
                 fail("CONFLICTING_DURABLE_VOTE", f"{actor}:{context}")
             durable_votes[durable_key] = body
-            votes[(action, event["round_id"], context, body)].add(actor)
+            votes[quorum_key(event, action)].add(actor)
 
         if action in FINALIZE_TO_VOTE and accepted:
             if action == "ACT-ISC-FINALIZE":
@@ -275,9 +278,7 @@ def check_trace(path: Path) -> dict[str, Any]:
             parent_iscs = set(event["parent_hashes"]) & isc_results
             if not parent_iscs:
                 fail("EC_APC_WITHOUT_ISC_PARENT", action)
-            permitted = set().union(
-                *(isc_members_by_result[parent] for parent in parent_iscs)
-            )
+            permitted = set().union(*(isc_members_by_result[parent] for parent in parent_iscs))
             if not set(event["artifact_refs"]) <= permitted:
                 fail("EC_APC_NON_ISC_MEMBER", action)
             result = event_identity(event)
@@ -311,8 +312,7 @@ def check_trace(path: Path) -> dict[str, Any]:
                     f"event {index} missing {sorted(missing)}",
                 )
             expected = {
-                parameter_results_by_context[context][0]
-                for context in required_parameter_contexts
+                parameter_results_by_context[context][0] for context in required_parameter_contexts
             }
             if set(event["artifact_refs"]) != expected:
                 fail("AGGREGATE_ARTIFACT_MATRIX_MISMATCH", f"event {index}")
@@ -342,13 +342,13 @@ def check_trace(path: Path) -> dict[str, Any]:
             ):
                 fail("PARTIAL_OR_UNCERTIFIED_PUBLICATION", f"event {index}")
 
-        if action == "ACT-CRASH" and actor is not None:
+        if action == "ACT-CRASH" and actor is not None and (accepted or outcome == "FAULT"):
             validator_recovery[actor] = "CRASHED"
-        elif action == "ACT-RESTART" and actor is not None:
+        elif action == "ACT-RESTART" and actor is not None and accepted:
             if validator_recovery[actor] != "CRASHED":
                 fail("RESTART_WITHOUT_CRASH", actor)
             validator_recovery[actor] = "RECOVERING"
-        elif action == "ACT-JOURNAL-RECOVER" and actor is not None:
+        elif action == "ACT-JOURNAL-RECOVER" and actor is not None and accepted:
             if validator_recovery[actor] != "RECOVERING":
                 fail("JOURNAL_RECOVERY_OUT_OF_ORDER", actor)
             validator_recovery[actor] = "READY"
@@ -384,9 +384,7 @@ def check_all_fixtures() -> dict[str, Any]:
         try:
             check_trace(path)
         except RefinementError as error:
-            illegal.append(
-                {"fixture": path.name, "reason": error.reason, "status": "PASS"}
-            )
+            illegal.append({"fixture": path.name, "reason": error.reason, "status": "PASS"})
         else:
             raise RuntimeError(f"illegal fixture unexpectedly refined: {path.name}")
     return {
@@ -409,9 +407,7 @@ def main() -> int:
     arguments = parser.parse_args()
     if arguments.all_fixtures:
         result = check_all_fixtures()
-        write_canonical_json(
-            ROOT / "formal" / "reports" / "refinement-evidence.json", result
-        )
+        write_canonical_json(ROOT / "formal" / "reports" / "refinement-evidence.json", result)
     elif arguments.trace is not None:
         result = check_trace(arguments.trace)
     else:

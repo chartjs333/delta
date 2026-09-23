@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
@@ -20,12 +19,9 @@ from formal_artifacts import (  # noqa: E402
     write_canonical_json,
 )
 
-
 LEGAL = ROOT / "formal" / "fixtures" / "traces" / "legal"
 ILLEGAL = ROOT / "formal" / "fixtures" / "traces" / "illegal"
-SEMANTICS_ID = derive_formal_semantics_id(
-    "1.0.0", discover_semantic_artifacts(ROOT)
-)
+SEMANTICS_ID = derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(ROOT))
 
 
 def cid(label: str) -> str:
@@ -209,9 +205,7 @@ def trace(
 
 def valid_isc(label: str = "isc") -> tuple[list[dict[str, Any]], str, list[str]]:
     members = [cid(label + "-ticket-1"), cid(label + "-ticket-2")]
-    events, _body, result = qc_events(
-        "ACT-ISC-VOTE", "ACT-ISC-FINALIZE", label, artifacts=members
-    )
+    events, _body, result = qc_events("ACT-ISC-VOTE", "ACT-ISC-FINALIZE", label, artifacts=members)
     return events, result, members
 
 
@@ -312,9 +306,7 @@ def generate_legal() -> None:
         trace("TRACE-NORMAL-APPLY", events, "APPLIED"),
     )
 
-    view_events = [
-        make_event("ACT-TIMEOUT-SOFT", body=cid("timeout-observation"))
-    ]
+    view_events = [make_event("ACT-TIMEOUT-SOFT", body=cid("timeout-observation"))]
     view_qc, _view_body, _view_result = qc_events(
         "ACT-VIEW-VOTE", "ACT-VIEW-FINALIZE", "view-change", view=0
     )
@@ -417,12 +409,8 @@ def generate_legal() -> None:
 
 
 def generate_illegal() -> None:
-    vote_a = make_event(
-        "ACT-CONFIG-VOTE", body=cid("vote-a"), context="CONFIG:1", durable=1
-    )
-    vote_b = make_event(
-        "ACT-CONFIG-VOTE", body=cid("vote-b"), context="CONFIG:1", durable=2
-    )
+    vote_a = make_event("ACT-CONFIG-VOTE", body=cid("vote-a"), context="CONFIG:1", durable=1)
+    vote_b = make_event("ACT-CONFIG-VOTE", body=cid("vote-b"), context="CONFIG:1", durable=2)
     write_fixture(
         ILLEGAL,
         "conflicting-durable-vote",
@@ -497,7 +485,7 @@ def generate_illegal() -> None:
             ),
         )
 
-    wrong_parent_votes, body, result = qc_events(
+    wrong_parent_votes, _body, _result = qc_events(
         "ACT-PARAM-VOTE",
         "ACT-PARAM-FINALIZE",
         "wrong-parent-param",
@@ -683,11 +671,86 @@ def generate_illegal() -> None:
     )
 
 
+def generate_admission_regressions() -> None:
+    def config() -> list[dict[str, Any]]:
+        return qc_events(
+            "ACT-CONFIG-VOTE",
+            "ACT-CONFIG-FINALIZE",
+            "admission-config",
+            body_hash=ROUND_CONFIG_HASH,
+        )[0]
+
+    def crash() -> dict[str, Any]:
+        return make_event("ACT-CRASH", outcome="FAULT", error="CRASH_AFTER_PERSIST")
+
+    for field, value, label in (("height", 2, "height"), ("validator_epoch", "epoch-2", "epoch")):
+        for index, kind in ((2, "mixed-vote"), (-1, "relabeled-finalizer")):
+            name = f"qc-{kind}-{label}"
+            events = config()
+            events[index][field] = value
+            write_fixture(ILLEGAL, name, trace("TRACE-ILLEGAL-" + name.upper(), events))
+
+    write_fixture(
+        ILLEGAL,
+        "crashed-validator-vote",
+        trace("TRACE-ILLEGAL-CRASHED-VALIDATOR-VOTE", [crash(), config()[0]]),
+    )
+    for outcome in ("REJECTED", "STUTTER", "NO_OP", "BLOCKED", "FAULT"):
+        recovery_name = "vote-after-recovery-" + outcome.lower().replace("_", "-")
+        write_fixture(
+            ILLEGAL,
+            recovery_name,
+            trace(
+                "TRACE-ILLEGAL-" + recovery_name.upper(),
+                [
+                    crash(),
+                    make_event("ACT-RESTART"),
+                    make_event("ACT-JOURNAL-RECOVER", outcome=outcome),
+                    config()[0],
+                ],
+            ),
+        )
+        restart_name = "recover-after-restart-" + outcome.lower().replace("_", "-")
+        write_fixture(
+            ILLEGAL,
+            restart_name,
+            trace(
+                "TRACE-ILLEGAL-" + restart_name.upper(),
+                [
+                    crash(),
+                    make_event("ACT-RESTART", outcome=outcome),
+                    make_event("ACT-JOURNAL-RECOVER"),
+                ],
+            ),
+        )
+
+    events = config()
+    events[-1]["view"] = 1
+    write_fixture(
+        LEGAL, "config-qc-later-leader-view", trace("TRACE-CONFIG-QC-LATER-LEADER-VIEW", events)
+    )
+    write_fixture(
+        LEGAL,
+        "journal-recovery-retry",
+        trace(
+            "TRACE-JOURNAL-RECOVERY-RETRY",
+            [
+                crash(),
+                make_event("ACT-RESTART"),
+                make_event("ACT-JOURNAL-RECOVER", outcome="REJECTED"),
+                make_event("ACT-JOURNAL-RECOVER"),
+                *config(),
+            ],
+        ),
+    )
+
+
 def main() -> int:
     LEGAL.mkdir(parents=True, exist_ok=True)
     ILLEGAL.mkdir(parents=True, exist_ok=True)
     generate_legal()
     generate_illegal()
+    generate_admission_regressions()
     print(
         f"generated semantics={SEMANTICS_ID} "
         f"legal={len(list(LEGAL.glob('*.json')))} "
