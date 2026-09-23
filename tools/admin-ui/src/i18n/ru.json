@@ -380,5 +380,7 @@
   "Scope '{scope}' is not permitted for this workload in catalog.": "Режим '{scope}' не разрешён каталогом для этой нагрузки.",
   "Catalog backend ref must match active catalog '{ref}'.": "Версия каталога должна совпадать с активной: '{ref}'.",
   "Stage C capable": "Поддерживает этап C",
-  "Observation only": "Только наблюдение"
+  "Observation only": "Только наблюдение",
+  "compatible": "совместимо",
+  "incompatible": "несовместимо"
 }

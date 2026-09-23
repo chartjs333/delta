@@ -282,7 +282,7 @@ export function WorkloadSelector({
                   }`}
                 >
                   <InertText
-                    value={contractCompatible ? "compatible" : "incompatible"}
+                    value={t(contractCompatible ? "compatible" : "incompatible")}
                   />
                 </span>
               </span>
