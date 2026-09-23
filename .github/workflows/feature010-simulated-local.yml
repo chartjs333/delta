@@ -1,0 +1,46 @@
+name: Feature 010 simulated local infrastructure
+
+on:
+  pull_request:
+    paths:
+      - tools/feature010/**
+      - .github/workflows/feature010-simulated-local.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  infrastructure-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0
+      - name: Build pinned simulation image
+        run: |
+          docker build --quiet --network none -f tools/feature010/Dockerfile.simulated tools/feature010 > /tmp/simulation-image-id
+      - name: Test signature and mode boundaries
+        run: |
+          docker run --rm --network none --entrypoint python3 \
+            --mount type=bind,source="$PWD/tools/feature010",target=/tests,readonly \
+            -w /tests "$(cat /tmp/simulation-image-id)" -m unittest -v test_simulated_local
+      - name: Execute isolated non-qualifying smoke
+        run: |
+          python3 tools/feature010/simulated_local.py run \
+            --mode SIMULATED_LOCAL --image "$(cat /tmp/simulation-image-id)"
+      - name: Verify executed evidence and reject promotion mutations offline
+        run: |
+          evidence=$(find "$PWD/artifacts/feature010/SIMULATED_LOCAL" -mindepth 1 -maxdepth 1 -type d)
+          docker run --rm --network none --entrypoint python3 \
+            --mount type=bind,source="$PWD/tools/feature010",target=/tests,readonly \
+            --mount type=bind,source="$evidence",target=/evidence,readonly \
+            -e SIM_LOCAL_EVIDENCE=/evidence -w /tests \
+            "$(cat /tmp/simulation-image-id)" -m unittest -v test_simulated_local
+      - name: Preserve simulation evidence including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: simulated-infrastructure-only-${{ github.sha }}
+          path: artifacts/feature010/SIMULATED_LOCAL/
+          if-no-files-found: warn
+          retention-days: 14
