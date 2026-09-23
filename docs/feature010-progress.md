@@ -3,6 +3,26 @@
 Updated: 2026-09-23. Current stage: **Feature000 arithmetic binding candidate, IN_PROGRESS**.
 No new Formal GO, qualifying BenchmarkResultQC or Feature010 GO checkpoint exists.
 
+## Morning presentation — working app available
+
+The user's latest priority is presenting a working application on September 24.
+The separate simulation worktree now contains a runnable Russian presentation UI:
+`http://127.0.0.1:8870/`, with the baseline Controller/Worker at port 8865.
+Source commit: `b5f06eff7488c367b882050483bb08130456bfd7`; acceptance/evidence
+overlay: `856ddaf`. The clean baseline `D:/delta-main-demo` remains at `c8aea649...`.
+
+One-click user entry: `D:/delta-presentation/START.cmd`. Data root:
+`D:/delta-data/presentation-20260924`. Read `tools/presentation/README.md` and
+`docs/feature010-presentation-status.md` in the simulation worktree for lifecycle,
+reviewed evidence and the five-minute demo. Ten tests, real browser-triggered
+CPU training/receipt and Docker 4→3→2→3 runs passed. Full graceful stop/restart
+preserved history. Do not disturb the unrelated service on port 8765.
+
+Keep the presentation available while continuing the formal work below. This
+wrapper has semantic impact NONE and does not implement Java/native/WAL or GPU
+scientific training. It does not close qualifying gates or change this candidate's
+NO_GO. The hourly continuation has been updated with this presentation priority.
+
 ## Authorization and working copies
 
 The user authorized sequential implementation, self-review and continued overnight
