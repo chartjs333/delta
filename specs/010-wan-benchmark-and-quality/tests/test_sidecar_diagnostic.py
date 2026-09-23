@@ -535,6 +535,7 @@ def test_host_wrapper_fails_closed_on_stale_receipts_before_container_start() ->
     )
     assert wrapper.index('"--preflight-only"') < wrapper.index('"--arm-only"')
     assert wrapper.index('"--arm-only"') < wrapper.index("$collectorJob = Start-Job")
+    assert "([int]$manifest.environment.host_telemetry_wait_seconds + 300)" in wrapper
     assert '"--fail-armed"' in wrapper
     assert wrapper.index("catch {") > wrapper.index('"--arm-only"')
     assert '@("attempt", "started", "terminal", "completed", "failed")' in wrapper

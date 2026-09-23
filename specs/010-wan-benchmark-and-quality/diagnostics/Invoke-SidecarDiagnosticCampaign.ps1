@@ -222,7 +222,7 @@ try {
         $receiptHost,
         $lanesCompleteHost,
         $telemetryHost,
-        [int]$manifest.environment.host_telemetry_wait_seconds + 300
+        ([int]$manifest.environment.host_telemetry_wait_seconds + 300)
     )
     $collectorJob = Start-Job -FilePath $collectorHost -ArgumentList $collectorArguments
     $receiptDeadline = [DateTime]::UtcNow.AddSeconds(60)
