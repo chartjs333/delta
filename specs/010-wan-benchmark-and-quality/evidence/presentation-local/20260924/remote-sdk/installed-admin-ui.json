@@ -1,0 +1,23 @@
+{
+  "controller_source_commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "mode": "PRESENTATION_UI_ONLY",
+  "protocol_semantics_changed": false,
+  "installed_at": "2026-09-23T23:07:27.5503149Z",
+  "admin_ui_source_commit": "bbd83b0f40bf21ad7d901b9f758e043527a3062a",
+  "files": [
+    {
+      "path": "live.html",
+      "sha256": "5d5ff2ca20fc6f805cf3074d68400fd4ed188c7c2aa21be4599a205c265a6f7b"
+    },
+    {
+      "path": "assets/live-BJ-k0UAO.css",
+      "sha256": "84d32f5b88dfc0e5b6e9289af0a97d70a897f5f1c4ad0fffe170da6e5aac27c3"
+    },
+    {
+      "path": "assets/live-Dh0sA3ih.js",
+      "sha256": "d22070b1c5f7ef8079bb72db02785a761b5d46519c9a4fdca47ea2fb5b233a9a"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "qualifying_evidence": false
+}

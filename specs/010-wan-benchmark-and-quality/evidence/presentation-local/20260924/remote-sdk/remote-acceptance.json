@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "mode": "SIMULATED_LOCAL",
+  "qualifying": false,
+  "public_url": "https://alert-wanted-result-receiving.trycloudflare.com",
+  "https_hostname_and_certificate_verified": true,
+  "dns_method": "Cloudflare public DNS A record pinned for this acceptance request",
+  "anonymous_apis_denied": true,
+  "bilingual_login": true,
+  "authenticated_admin_assets": true,
+  "cross_origin_writes_denied": true,
+  "missing_action_marker_denied": true,
+  "remote_shutdown_and_private_controls_denied": true,
+  "shared_profile_write": true,
+  "job_id": "6b50d8294e51413ca8708439076aacb9",
+  "execution_id": "934a9d51-e5aa-46da-bbc3-963b9f409914",
+  "lineage_verified": true,
+  "receipt_sha256": "ec715072b34d3add3e3cd7c191341e491e70866c40663752a91f7a5b6bf0230d",
+  "remote_receipt_equals_local": true,
+  "controller_instance_id": "7e879144-c460-4e52-9dbb-b2b5060ac6c2",
+  "benchmark_result_qc": null,
+  "feature010_go_checkpoint_sha": null
+}

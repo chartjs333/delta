@@ -40,6 +40,7 @@ function applyLanguage() {
   document.documentElement.lang = language;
   document.title = t('documentTitle');
   $('language').value = language;
+  $('advanced').href = adminLink('/live-execution', linkedId);
   document.querySelectorAll('[data-i18n]').forEach((node) => { node.textContent = t(node.dataset.i18n); });
   document.querySelectorAll('[data-i18n-aria]').forEach((node) => { node.setAttribute('aria-label', t(node.dataset.i18nAria)); });
   try { localStorage.setItem(preferenceKey, language); } catch { /* Keep the current in-memory selection. */ }

@@ -32,3 +32,16 @@ legacy redirects. 262 UI tests / 44 files, 26 presentation tests, TypeScript,
 offline build/audit passed during development. Live install and real external
 browser/restart evidence follow under remote-sdk. Formal impact NONE; baseline
 protocol sources unchanged; no qualifying WAN/GO claims.
+
+SDK/remote acceptance recorded under remote-sdk: installed Admin bbd83b0, external
+HTTPS execution 934a9d51-e5aa-46da-bbc3-963b9f409914 completed; receipt
+ec715072b34d3add3e3cd7c191341e491e70866c40663752a91f7a5b6bf0230d equals local bytes.
+Controller instance/source unchanged. Real tunnel restart changes hostname and
+repeat start reuses the same PID/instance. D:/delta-presentation/START-REMOTE.ps1
+prints current URL/code; start/status/stop are documented in REMOTE-ACCESS.md.
+Gateway remains running on loopback 8871. Preserve it for the morning demo;
+do not restart it needlessly because that invalidates the shared public URL.
+Default host DNS returns NXDOMAIN for some new tunnel names; HTTPS acceptance
+with public Cloudflare DNS passes while public browser on host remains explicitly
+BLOCKED_HOST_DNS. The launcher reports this without changing Windows DNS/hosts/TLS.
+Continue formal work in the separate candidate; this UI access is not Gate D.
