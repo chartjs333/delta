@@ -842,6 +842,31 @@ def test_preflight_rejects_nonexecutable_exact_artifact(
         )
 
 
+def test_preflight_requires_native_library_readability_but_not_execute_mode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = example_manifest()
+    allocation, _ = allocation_fixture(tmp_path, manifest)
+    native = Path(str(allocation["artifacts"][5]["path"]))
+    executable_checks: list[Path] = []
+
+    def access(path: object, mode: int) -> bool:
+        resolved = Path(str(path))
+        if mode == runner.os.X_OK:
+            executable_checks.append(resolved)
+            return resolved != native
+        return True
+
+    monkeypatch.setattr(runner.os, "access", access)
+    monkeypatch.setattr(runner, "mount_is_read_only", lambda _path: True)
+    with pytest.raises(diagnostic.DiagnosticError, match="PREFLIGHT_LANES_REQUIRED"):
+        runner.preflight_allocation(
+            allocation,
+            allocation_root=Path(manifest["environment"]["allocation_root"]),
+        )
+    assert native not in executable_checks
+
+
 def test_failed_non_consuming_preflight_creates_no_receipt_or_campaign_artifact(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

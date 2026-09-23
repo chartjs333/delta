@@ -1452,7 +1452,6 @@ def preflight_allocation(
     for identifier in (
         "JAVA_EXECUTABLE",
         "JFR_EXECUTABLE",
-        "NATIVE_LIBRARY",
         "SIDECAR_EXECUTABLE",
         "STRACE_EXECUTABLE",
     ):
