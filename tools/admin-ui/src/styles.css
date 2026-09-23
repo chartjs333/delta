@@ -368,4 +368,9 @@ main { width: min(1440px, 100%); padding: 2rem clamp(1rem, 2.5vw, 3rem) 4rem; }
 .live-tab-nav { margin-bottom: .5rem; }
 .live-tab-nav .tab-button { font-size: .83rem; }
 .live-tab-nav .tab-button.active { background: #1f5fb5; border-color: #1f5fb5; color: white; }
+.extension-route:has(.guided-run) { padding: .5rem 0; border: none; background: transparent; box-shadow: none; }
+.live-execution-container:has(.guided-run) { gap: .8rem; }
+.guided-intro p { font-size: .88rem; }
+.guided-card .eyebrow { margin-top: 0; }
+.live-tab-nav { flex-wrap: wrap; }
 @media (max-width: 900px) { .shell-grid { grid-template-columns: minmax(0, 1fr); } }

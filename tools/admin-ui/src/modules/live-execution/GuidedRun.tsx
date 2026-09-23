@@ -215,17 +215,6 @@ export function GuidedRun({
               "A small classifier learns from a synthetic dataset with ten features. Everything runs locally.",
             )}
           </p>
-          <div className="sample-visual" aria-hidden="true">
-            <span>
-              01
-              <br />
-              10
-            </span>
-            <i>→</i>
-            <span>Δ</span>
-            <i>→</i>
-            <span>✓</span>
-          </div>
           <dl className="example-facts">
             <div>
               <dt>{t("Data")}</dt>

@@ -12,11 +12,6 @@
 .guided-card h2 { font-size: 1.45rem; letter-spacing: -.03em; margin: .35rem 0 .6rem; }
 .guided-card p { font-size: .9rem; line-height: 1.65; color: #52667d; }
 .guided-run .eyebrow { color: #426f9f; }
-.sample-visual { display: flex; align-items: center; gap: 1rem; padding: .9rem 0; }
-.sample-visual > span { display: grid; place-items: center; background: #e6f0ff; border: 1px solid #c9ddfa; width: 60px; height: 54px; border-radius: 12px; font: 700 1.4rem/1 monospace; color: #245dad; }
-.sample-visual > span:first-child { font-size: 1rem; background: #eff7ff; }
-.sample-visual > span:last-child { background: #eaf7f1; border-color: #c6e6d7; color: #216647; }
-.sample-visual > i { font-style: normal; color: #85a0c4; }
 .example-facts { display: grid; grid-template-columns: 1fr; gap: .55rem; margin: .8rem 0 1.25rem; }
 .example-facts > div { display: flex; justify-content: space-between; gap: .7rem; font-size: .8rem; }
 .example-facts dt { color: #65758d; }
