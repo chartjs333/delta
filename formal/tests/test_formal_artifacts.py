@@ -700,6 +700,13 @@ class ReportSourceBoundaryTests(unittest.TestCase):
                 target = root / "formal" / "reports" / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(REPOSITORY / "formal" / "reports" / name, target)
+            # This positive verifier fixture freezes its own temporary inputs;
+            # the repository's unfinished amendment baseline is never rewritten.
+            baseline_path = root / "formal/reports/baseline-inputs.json"
+            baseline = load_json_strict(baseline_path)
+            registry = load_json_strict(root / "formal/reports/formal-id-registry.json")
+            baseline["formal_semantics_version"] = registry["formal_semantics_version"]
+            write_canonical_json(baseline_path, baseline)
             reproduction = reproduction_document(root=root)
             self.assertTrue(reproduction_matches_source(reproduction, "1" * 40, HASH_A, root=root))
             reproduction["status"] = "FAIL"
@@ -1026,7 +1033,12 @@ class ContractTest(unittest.TestCase):
             verify_sany_output("SANY produced no semantic evidence")
 
     def test_legal_trace_fixtures_are_canonical_and_compatible(self) -> None:
-        semantics_id = derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(REPOSITORY))
+        semantics_id = derive_formal_semantics_id(
+            load_json_strict(REPOSITORY / "formal/reports/formal-id-registry.json")[
+                "formal_semantics_version"
+            ],
+            discover_semantic_artifacts(REPOSITORY),
+        )
         fixtures = sorted((REPOSITORY / "formal/fixtures/traces/legal").glob("*.json"))
         self.assertGreaterEqual(len(fixtures), 2)
         for fixture in fixtures:
@@ -1070,11 +1082,14 @@ class ReportVerifierTest(unittest.TestCase):
         lean.write_text("namespace DeltaReduce\nend DeltaReduce\n", encoding="utf-8")
 
         self.baseline = self.root / "formal" / "reports" / "baseline-inputs.json"
+        self.version = load_json_strict(self.root / "formal/reports/formal-id-registry.json")[
+            "formal_semantics_version"
+        ]
         write_canonical_json(
             self.baseline,
             {
                 "schema_version": "1.0.0",
-                "formal_semantics_version": "1.0.0",
+                "formal_semantics_version": self.version,
                 "input_bundle_sha256": "d" * 64,
             },
         )
@@ -1104,7 +1119,7 @@ class ReportVerifierTest(unittest.TestCase):
 
     def _make_go_report(self) -> dict[str, object]:
         artifacts = discover_semantic_artifacts(self.root)
-        semantics_id = derive_formal_semantics_id("1.0.0", artifacts)
+        semantics_id = derive_formal_semantics_id(self.version, artifacts)
         reproduction_path = self.root / "formal" / "reports" / "reproducibility-evidence.json"
         write_canonical_json(
             reproduction_path,
@@ -1213,7 +1228,7 @@ class ReportVerifierTest(unittest.TestCase):
         ]
         report: dict[str, object] = {
             "report_schema_version": "1.0.0",
-            "formal_semantics_version": "1.0.0",
+            "formal_semantics_version": self.version,
             "formal_semantics_id": HASH_A,
             "source_tree": {
                 "commit": self.source_commit,
@@ -1262,7 +1277,9 @@ class ReportVerifierTest(unittest.TestCase):
         self.assertEqual(result["status"], "PASS")
 
     def test_semantic_identity_ignores_eol_but_exact_reproduction_does_not(self) -> None:
-        semantics_id = derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(self.root))
+        semantics_id = derive_formal_semantics_id(
+            self.version, discover_semantic_artifacts(self.root)
+        )
         for item in self.report["source_tree"]["semantic_artifacts"]:
             path = self.root / item["path"]
             original = path.read_bytes()
@@ -1272,7 +1289,7 @@ class ReportVerifierTest(unittest.TestCase):
             path.write_bytes(flipped)
 
         self.assertEqual(
-            derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(self.root)),
+            derive_formal_semantics_id(self.version, discover_semantic_artifacts(self.root)),
             semantics_id,
         )
         result = verify_report_document(self.report_path, self.root)

@@ -48,27 +48,81 @@ class Mutation:
 
 
 MUTATIONS = (
-    Mutation(
-        "MUT-PARAMETER-ARITHMETIC-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
-        "DeltaReduceReduceApply.tla", "ValidParameterArithmetic", "DeltaReducePhase6Harness",
-        "native-arithmetic-binding.cfg",
-        (Replacement("\n    /\\ body.value = NativeParameterValue(body.apc, body.domain)\n", "", 1),),
+    *(
+        Mutation(
+            f"MUT-{kind}-STALE-CURRENT{suffix}",
+            "NoStaleArithmeticVotes",
+            "INV-NO-STALE-ARITHMETIC-VOTES",
+            "DeltaReduceReduceApply.tla",
+            operator,
+            "DeltaReduceCurrentBindingHarness",
+            config,
+            (
+                Replacement(
+                    f"        /\\ body \\in {candidates}\n"
+                    f"        /\\ {valid}(body)\n"
+                    "        /\\ ~RoundAbortRequired(body.round)\n"
+                    "        /\\ currentCheckpoint = body.parent\n",
+                    f"        /\\ body \\in {candidates}\n"
+                    f"        /\\ {valid}(body)\n"
+                    "        /\\ ~RoundAbortRequired(body.round)\n",
+                ),
+            ),
+        )
+        for kind, operator, candidates, valid in (
+            ("PARAMETER", "VoteParameter", "parameterResults", "ValidParameterResultBody"),
+            ("APPLY", "VoteApply", "applyCandidates", "ValidApplyBody"),
+        )
+        for suffix, config in (
+            ("", "current-binding.cfg"),
+            ("-RECOVERY", "current-binding-recovery.cfg"),
+        )
     ),
     Mutation(
-        "MUT-PARAMETER-MODEL-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
-        "DeltaReduceReduceApply.tla", "ValidParameterArithmetic", "DeltaReducePhase6Harness",
+        "MUT-PARAMETER-ARITHMETIC-BINDING",
+        "ArithmeticBindingSound",
+        "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla",
+        "ValidParameterArithmetic",
+        "DeltaReducePhase6Harness",
+        "native-arithmetic-binding.cfg",
+        (
+            Replacement(
+                "\n    /\\ body.value = NativeParameterValue(body.apc, body.domain)\n", "", 1
+            ),
+        ),
+    ),
+    Mutation(
+        "MUT-PARAMETER-MODEL-BINDING",
+        "ArithmeticBindingSound",
+        "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla",
+        "ValidParameterArithmetic",
+        "DeltaReducePhase6Harness",
         "native-arithmetic-binding.cfg",
         (Replacement("\n    /\\ body.authority = NativeArithmeticAuthority(body.apc)\n", "", 1),),
     ),
     Mutation(
-        "MUT-APPLY-OPTIMIZER-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
-        "DeltaReduceReduceApply.tla", "ValidApplyArithmetic", "DeltaReducePhase6Harness",
+        "MUT-APPLY-OPTIMIZER-BINDING",
+        "ArithmeticBindingSound",
+        "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla",
+        "ValidApplyArithmetic",
+        "DeltaReducePhase6Harness",
         "native-arithmetic-binding.cfg",
-        (Replacement("\n    /\\ body.authority = NativeArithmeticAuthority(body.aggregate.apc)\n", "", 1),),
+        (
+            Replacement(
+                "\n    /\\ body.authority = NativeArithmeticAuthority(body.aggregate.apc)\n", "", 1
+            ),
+        ),
     ),
     Mutation(
-        "MUT-APPLY-ARITHMETIC-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
-        "DeltaReduceReduceApply.tla", "ValidApplyArithmetic", "DeltaReducePhase6Harness",
+        "MUT-APPLY-ARITHMETIC-BINDING",
+        "ArithmeticBindingSound",
+        "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla",
+        "ValidApplyArithmetic",
+        "DeltaReducePhase6Harness",
         "native-arithmetic-binding.cfg",
         (Replacement("\n    /\\ body.nextModelHash = NativeModelHash(body.aggregate)\n", "", 1),),
     ),

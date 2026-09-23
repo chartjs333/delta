@@ -13,6 +13,13 @@ artifact repair, deadline and certified-abort rules still apply; local mismatch
 cannot manufacture AbortQC. This candidate requires new Formal GO before runtime
 implementation; the historical report does not cover it.
 
+For this amendment, `ACT-PARAM-VOTE` and `ACT-APPLY-VOTE` revalidate the current
+parent at vote persistence, even if the candidate was previously accepted.
+Advancing current invalidates admission of a first vote for the former parent;
+restart/recovery does not restore that permission. Existing durable votes and
+exact retry identities remain historical records. Failure of this precondition
+has the rejection/stutter behavior above, with no new WAL sequence or outcome.
+
 ## 1. Outcome classes
 
 Every protocol operation resolves into one of four abstract outcomes:

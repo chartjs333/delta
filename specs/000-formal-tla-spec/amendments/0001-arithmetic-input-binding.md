@@ -132,6 +132,21 @@ tuple. Hash abstraction does not replace canonical artifact decoding.
 authority, exact current context/role/deadline/recovery readiness and exact
 canonical equality with the recomputed expected body **before WAL append**.
 
+Candidate creation is not a lease on the current checkpoint. Both vote actions
+must compare `body.parent` with the recovered native `currentCheckpoint` again
+at the persist boundary. After an ApplyQC advances current, a delayed first vote
+for the old parent is disabled, including after crash/restart/journal recovery.
+Historical durable votes and exact persisted retry receipts remain valid history;
+this rule does not delete them or allocate a new sequence for a retry. A failed
+current-parent check stutters/rejects without a new receipt, vote or terminal.
+
+The focused `DeltaReduceCurrentBindingHarness` starts with certified Phase 6
+parents, executes production 3-of-4 PARAMETER/AGGREGATE/APPLY quorums and advances
+current, then probes the fourth validator. Separate configurations probe before
+and after recovery; production guard-removal mutants must fail in both. This
+serialized suffix does not establish arbitrary interleavings, heterogeneous
+arithmetic, public arithmetic-witness refinement or complete crash-cut coverage.
+
 Missing bytes, a wrong artifact/schema/scale/domain/profile/current optimizer,
 unsafe bound, arithmetic overflow or result mismatch disables the vote. It maps
 to the existing rejection/stutter boundary: no new durable vote, sendable effect,

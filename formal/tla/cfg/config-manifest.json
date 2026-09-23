@@ -568,6 +568,53 @@
         "PositiveFinalizeApply",
         "PositiveAdvanceCurrent"
       ]
+    },
+    {
+      "id": "CFG-CURRENT-BINDING",
+      "kind": "safety",
+      "module": "DeltaReduceCurrentBindingHarness.tla",
+      "config": "cfg/current-binding.cfg",
+      "workers": 1,
+      "fingerprint_index": 34,
+      "seed": 2026092301,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "BindingPropose",
+        "BindingParameterQuorum",
+        "BindingParameterFinalize",
+        "BindingAssemble",
+        "BindingRootQuorum",
+        "BindingRootFinalize",
+        "BindingCompute",
+        "BindingApplyQuorum",
+        "BindingApplyFinalize",
+        "BindingAdvance"
+      ]
+    },
+    {
+      "id": "CFG-CURRENT-BINDING-RECOVERY",
+      "kind": "safety",
+      "module": "DeltaReduceCurrentBindingHarness.tla",
+      "config": "cfg/current-binding-recovery.cfg",
+      "workers": 1,
+      "fingerprint_index": 35,
+      "seed": 2026092302,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "BindingPropose",
+        "BindingParameterQuorum",
+        "BindingParameterFinalize",
+        "BindingAssemble",
+        "BindingRootQuorum",
+        "BindingRootFinalize",
+        "BindingCompute",
+        "BindingApplyQuorum",
+        "BindingApplyFinalize",
+        "BindingAdvance",
+        "BindingCrash",
+        "BindingRestart",
+        "BindingRecover"
+      ]
     }
   ]
 }

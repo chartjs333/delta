@@ -344,6 +344,7 @@ VoteParameter(validator, body) ==
         /\ body \in parameterResults
         /\ ValidParameterResultBody(body)
         /\ ~RoundAbortRequired(body.round)
+        /\ currentCheckpoint = body.parent
         /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin parameterVotes
         /\ \/ validator \in byzantine

@@ -12,6 +12,14 @@ must reconstruct the same relation. The candidate public trace schema/checker
 has not yet incorporated this witness: passing existing fixtures demonstrates
 only their existing checks and cannot close amendment 0001 or authorize runtime.
 
+The required witness must describe the recovered current checkpoint at the vote
+persist boundary, not only the checkpoint used to create a candidate. A first
+PARAMETER/APPLY vote after current advances must fail admission when its parent
+is stale. A replay of an already durable identical vote is distinguished from a
+new append and retains its original receipt/sequence. The focused current-binding
+TLC suffix covers this model rule before and after journal recovery; it is not
+evidence that the public trace checker already verifies the arithmetic witness.
+
 ## 2. Canonical trace event
 
 Every protocol-relevant implementation event MUST project to a canonical record containing:

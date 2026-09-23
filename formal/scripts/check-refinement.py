@@ -185,7 +185,12 @@ def check_trace(path: Path) -> dict[str, Any]:
     if path.read_bytes().removesuffix(b"\n") != canonical_json_bytes(trace):
         fail("NONCANONICAL_TRACE", str(path))
 
-    expected_semantics = derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(ROOT))
+    expected_semantics = derive_formal_semantics_id(
+        load_json_strict(ROOT / "formal/reports/formal-id-registry.json")[
+            "formal_semantics_version"
+        ],
+        discover_semantic_artifacts(ROOT),
+    )
     if trace["formal_semantics_id"] != expected_semantics:
         fail("FORMAL_SEMANTICS_MISMATCH", trace["trace_id"])
 
@@ -391,7 +396,10 @@ def check_all_fixtures() -> dict[str, Any]:
         "schema_version": "1.0.0",
         "status": "PASS",
         "formal_semantics_id": derive_formal_semantics_id(
-            "1.0.0", discover_semantic_artifacts(ROOT)
+            load_json_strict(ROOT / "formal/reports/formal-id-registry.json")[
+                "formal_semantics_version"
+            ],
+            discover_semantic_artifacts(ROOT),
         ),
         "legal_fixture_count": len(legal),
         "illegal_fixture_count": len(illegal),

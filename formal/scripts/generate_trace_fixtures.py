@@ -21,7 +21,10 @@ from formal_artifacts import (  # noqa: E402
 
 LEGAL = ROOT / "formal" / "fixtures" / "traces" / "legal"
 ILLEGAL = ROOT / "formal" / "fixtures" / "traces" / "illegal"
-SEMANTICS_ID = derive_formal_semantics_id("1.0.0", discover_semantic_artifacts(ROOT))
+SEMANTICS_ID = derive_formal_semantics_id(
+    load_json_strict(ROOT / "formal/reports/formal-id-registry.json")["formal_semantics_version"],
+    discover_semantic_artifacts(ROOT),
+)
 
 
 def cid(label: str) -> str:

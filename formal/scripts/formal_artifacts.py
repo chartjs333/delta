@@ -30,6 +30,10 @@ TOOLCHAIN_IDS = {
     "TOOLCHAIN-TLA",
 }
 MUTANT_IDS = {
+    "MUT-PARAMETER-STALE-CURRENT",
+    "MUT-PARAMETER-STALE-CURRENT-RECOVERY",
+    "MUT-APPLY-STALE-CURRENT",
+    "MUT-APPLY-STALE-CURRENT-RECOVERY",
     "MUT-PARAMETER-ARITHMETIC-BINDING",
     "MUT-PARAMETER-MODEL-BINDING",
     "MUT-APPLY-OPTIMIZER-BINDING",
@@ -146,6 +150,8 @@ REPRODUCTION_TLC_IDS = {
         "CFG-ARITHMETIC-BOUNDARY",
         "CFG-APPLY-RECOVERY",
         "CFG-NATIVE-ARITHMETIC-BINDING",
+        "CFG-CURRENT-BINDING",
+        "CFG-CURRENT-BINDING-RECOVERY",
     ),
     "liveness": (
         "CFG-LIVENESS-CONFIG-QC",
@@ -783,7 +789,12 @@ def _valid_reproduction_result(identifier: str, result: Any, root: Path | None =
             and payload["schema_version"] == "1.0.0"
             and payload["phase"] == "T000-T003"
             and payload["status"] == "PASS"
-            and payload["formal_semantics_version"] == "1.0.0"
+            and isinstance(payload["formal_semantics_version"], str)
+            and re.fullmatch(
+                r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)",
+                payload["formal_semantics_version"],
+            )
+            is not None
             and _is_sha256(payload["input_bundle_sha256"])
             and isinstance(payload["counts"], dict)
             and set(payload["counts"]) == count_keys

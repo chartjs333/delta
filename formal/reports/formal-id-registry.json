@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "formal_semantics_version": "1.0.0",
+  "formal_semantics_version": "1.1.0",
   "namespace": "deltareduce.formal.v1",
   "status": "frozen_for_model_implementation",
   "actions": [
@@ -354,6 +354,10 @@
     {
       "id": "INV-ARITHMETIC-BINDING",
       "name": "ArithmeticBindingSound"
+    },
+    {
+      "id": "INV-NO-STALE-ARITHMETIC-VOTES",
+      "name": "NoStaleArithmeticVotes"
     }
   ],
   "temporal_properties": [
@@ -754,6 +758,14 @@
     {
       "id": "CFG-NATIVE-ARITHMETIC-LIVENESS",
       "path": "formal/tla/cfg/native-arithmetic-liveness.cfg"
+    },
+    {
+      "id": "CFG-CURRENT-BINDING",
+      "path": "formal/tla/cfg/current-binding.cfg"
+    },
+    {
+      "id": "CFG-CURRENT-BINDING-RECOVERY",
+      "path": "formal/tla/cfg/current-binding-recovery.cfg"
     }
   ],
   "report_fields": [
@@ -777,8 +789,8 @@
     "decision_reasons"
   ],
   "compatibility": {
-    "id_derivation_status": "published_by_T057_artifact_manifest",
-    "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+    "id_derivation_status": "candidate_pending_formal_go",
+    "formal_semantics_id": "sha256:f57b27a2feae0328e1ecf0c8d14b0a041eef260231a26958647af41303caedda",
     "hash_algorithm": "sha256",
     "domain": "deltareduce.formal-semantics.v1",
     "canonicalization": "formal/scripts/formal_artifacts.py:canonical_json_bytes",

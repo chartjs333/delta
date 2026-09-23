@@ -393,7 +393,12 @@ def main() -> int:
     clear_generated_outputs(ROOT)
 
     semantic_artifacts = discover_semantic_artifacts(ROOT)
-    formal_semantics_id = derive_formal_semantics_id("1.0.0", semantic_artifacts)
+    formal_semantics_id = derive_formal_semantics_id(
+        load_json_strict(ROOT / "formal/reports/formal-id-registry.json")[
+            "formal_semantics_version"
+        ],
+        semantic_artifacts,
+    )
 
     environment = dict(os.environ)
     for inherited_override in (
