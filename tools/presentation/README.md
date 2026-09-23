@@ -160,6 +160,11 @@ pwsh -NoProfile -File tools/presentation/install-admin-ui.ps1
 
 ## Общий профиль Admin UI и Presentation
 
+В обоих интерфейсах есть пункт **Как это работает / How it works** с семью
+присланными иллюстрациями, переключением назад/вперёд, клавиатурой и полным экраном.
+Подписи и управление EN/RU; текст внутри исходных картинок остаётся английским.
+См. [VISUAL-GUIDE.md](VISUAL-GUIDE.md) и [REMOTE-ACCESS.md](REMOTE-ACCESS.md).
+
 Откройте `http://127.0.0.1:8870/admin/?lang=ru#/campaigns` (или `lang=en`).
 Старый вход на 8865 перенаправляет сюда; Controller/Worker продолжает работать
 на 8865 с прежним source commit. Presentation остаётся на 8870.

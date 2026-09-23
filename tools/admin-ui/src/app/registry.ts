@@ -5,6 +5,7 @@ import { controllerModuleRegistration } from "../modules/controllers/registratio
 import { liveExecutionModuleRegistration } from "../modules/live-execution/registration";
 import { workloadModuleRegistration } from "../modules/workloads/registration";
 import { sdkModuleRegistration } from "../modules/sdk/registration";
+import { guideModuleRegistration } from "../modules/guide/registration";
 
 // All product extensions are registered here. Domain modules never mutate this
 // registry themselves, which keeps extension wiring localized and auditable.
@@ -14,5 +15,6 @@ export const extensionRegistry = composeExtensions([
   controllerSummaryRegistration,
   workloadModuleRegistration,
   liveExecutionModuleRegistration,
+  guideModuleRegistration,
   sdkModuleRegistration,
 ]);

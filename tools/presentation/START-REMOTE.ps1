@@ -87,6 +87,8 @@ function Show-Address($Health) {
     Write-Output "Admin UI EN:     $($Health.url)/admin/?lang=en#/live-execution"
     Write-Output "Admin UI RU:     $($Health.url)/admin/?lang=ru#/live-execution"
     Write-Output "SDK:             $($Health.url)/admin/?lang=en#/sdk"
+    Write-Output "Visual guide EN: $($Health.url)/admin/?lang=en#/guide"
+    Write-Output "Visual guide RU: $($Health.url)/admin/?lang=ru#/guide"
     Write-Output "Access code:     $((Get-Content -LiteralPath $CodePath -Raw).Trim())"
     Write-Output "Current URL file: $UrlPath"
     Write-Output 'Keep this host powered on and connected. Share the URL and code only with your audience.'

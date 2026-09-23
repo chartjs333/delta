@@ -16,7 +16,8 @@ the browser on your presentation computer; nothing needs installing there.
 
 The launcher starts the existing local app if necessary, starts one authenticated
 gateway and one Cloudflare Quick Tunnel, waits for connection, then checks the
-public login page before printing **Presentation EN/RU, Admin UI EN/RU and SDK**.
+public login page before printing **Presentation EN/RU, Admin UI EN/RU, SDK
+and Visual guide EN/RU**.
 Repeating `start` reuses the verified process and prints its current address.
 After a reboot or tunnel stop, run it again: the new address replaces the old one.
 This is a manual restart launcher; it does not install a Windows startup service.

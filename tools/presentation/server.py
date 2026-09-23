@@ -497,7 +497,7 @@ class Handler(BaseHTTPRequestHandler):
         ):
             self.proxy("GET", path)
         elif path in {"/admin", "/admin/"} or re.fullmatch(
-            r"/(?:admin/)?assets/[A-Za-z0-9_.-]+\.(js|css)", path
+            r"/(?:admin/)?assets/[A-Za-z0-9_.-]+\.(js|css|png)", path
         ):
             filename = (
                 "live.html"
@@ -509,13 +509,19 @@ class Handler(BaseHTTPRequestHandler):
                 self.json(404, {"error": "ADMIN_BUILD_UNAVAILABLE"})
             else:
                 media = (
-                    "text/html"
+                    "image/png"
+                    if filename.endswith(".png")
+                    else "text/html"
                     if filename == "live.html"
                     else "text/css"
                     if filename.endswith(".css")
                     else "text/javascript"
                 )
-                self.send(200, target.read_bytes(), media + "; charset=utf-8")
+                self.send(
+                    200,
+                    target.read_bytes(),
+                    media if media == "image/png" else media + "; charset=utf-8",
+                )
         elif path == "/api/health":
             self.json(
                 200,

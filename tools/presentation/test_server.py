@@ -60,6 +60,27 @@ class PresentationTests(unittest.TestCase):
             self.assertEqual(self.request("/api/report/../../server.py")[0], 404)
             submit.assert_not_called()
 
+    def test_slide_assets_preserve_png_bytes_and_restrict_paths(self):
+        self.app.admin_root = Path(self.temp.name) / "admin-build"
+        assets = self.app.admin_root / "assets"
+        assets.mkdir(parents=True)
+        png = b"\x89PNG\r\n\x1a\n\x00\xff\x80"
+        (assets / "slide-1-example.png").write_bytes(png)
+        (self.app.admin_root / "private.png").write_bytes(b"private")
+        for prefix in ("/assets/", "/admin/assets/"):
+            status, body, headers = self.request(prefix + "slide-1-example.png")
+            self.assertEqual(status, 200)
+            self.assertEqual(body, png)
+            self.assertEqual(headers["Content-Type"], "image/png")
+            self.assertEqual(headers["X-Content-Type-Options"], "nosniff")
+        for path in (
+            "/assets/missing.png",
+            "/assets/../private.png",
+            "/assets/%2e%2e/private.png",
+            "/assets/slide-1-example.png/private.png",
+        ):
+            self.assertEqual(self.request(path)[0], 404)
+
     def test_busy_rejects_second_job(self):
         self.app.active = "already-running"
         self.assertEqual(self.request("/api/simulate", body=b"{}")[0], 409)

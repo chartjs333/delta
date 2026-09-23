@@ -507,5 +507,6 @@
   "Controller definitions are saved automatically in the local profile. Original imported files are never overwritten.": "Настройки контроллеров автоматически сохраняются в локальном профиле. Исходные импортированные файлы не перезаписываются.",
   "Profile needs attention": "Проверьте сохранение профиля",
   "Unsaved changes": "Есть несохранённые изменения",
+  "How it works": "Как это работает",
   "The campaign and workload come from your shared local profile. Controller registry entries document governance; the existing local Controller executes this run.": "Кампания и задача взяты из общего локального профиля. Реестр документирует данные для проверки полномочий; этот запуск выполняет подключённый локальный Controller."
 }

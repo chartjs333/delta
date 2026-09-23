@@ -45,3 +45,10 @@ Default host DNS returns NXDOMAIN for some new tunnel names; HTTPS acceptance
 with public Cloudflare DNS passes while public browser on host remains explicitly
 BLOCKED_HOST_DNS. The launcher reports this without changing Windows DNS/hosts/TLS.
 Continue formal work in the separate candidate; this UI access is not Gate D.
+
+Visual guide follow-up (T051 / HR010-001, formal impact NONE): one shared
+How it works page links from Presentation and Admin. Seven original PNGs,
+EN/RU captions, navigation/keyboard/fullscreen, URL-selected slide, visible
+arithmetic corrections on slide 5. Static image allowlists retain fixed paths
+and remote authentication. Source and deployment checks are recorded under
+presentation-local/20260924/visual-guide; no qualifying claims are added.

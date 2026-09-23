@@ -1,5 +1,6 @@
 // Presentation text only. Original receipts, IDs and evidence remain unchanged.
 const strings = {
+  howItWorks: ['How it works', 'Как это работает'],
   sharedProfileNote: ['One local profile for Admin UI and Presentation. Definitions are saved on the application host.', 'Общий локальный профиль Admin UI и Presentation. Настройки сохраняются на компьютере, где запущено приложение.'],
   configureCampaign: ['Configure campaign →', 'Настроить кампанию →'],
   profileUnavailable: ['Local profile unavailable. Saved definitions have not been overwritten.', 'Локальный профиль недоступен. Сохранённые настройки не перезаписаны.'],

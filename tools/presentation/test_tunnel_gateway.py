@@ -78,7 +78,14 @@ class RemoteTests(unittest.TestCase):
         return self.login()[2]["Set-Cookie"].split(";")[0]
 
     def test_anonymous_api_and_assets_blocked_bilingual_login(self):
-        for path in ("/api/state", "/api/workspace", "/assets/app.js", "/readyz"):
+        for path in (
+            "/api/state",
+            "/api/workspace",
+            "/assets/app.js",
+            "/readyz",
+            "/assets/slide-1-example.png",
+            "/admin/assets/slide-1-example.png",
+        ):
             self.assertEqual(self.request(path)[0], 401)
         self.assertEqual(self.request("/admin/?lang=ru")[0], 303)
         for lang, expected in (("en", "Access code"), ("ru", "Код доступа")):
@@ -87,6 +94,16 @@ class RemoteTests(unittest.TestCase):
             self.assertIn(expected, body.decode())
             self.assertIn("form-action 'self'", headers["Content-Security-Policy"])
         self.assertFalse(Upstream.calls)
+
+    def test_authenticated_slide_assets_only_forward_allowed_paths(self):
+        cookie = self.cookie()
+        for path in ("/assets/slide-1-example.png", "/admin/assets/slide-1-example.png"):
+            self.assertEqual(self.request(path, Cookie=cookie)[0], 200)
+            self.assertEqual(Upstream.calls[-1][1], path)
+        count = len(Upstream.calls)
+        for path in ("/assets/arbitrary.svg", "/assets/nested/private.png"):
+            self.assertEqual(self.request(path, Cookie=cookie)[0], 404)
+        self.assertEqual(len(Upstream.calls), count)
 
     def test_login_cookie_and_open_redirect_rejection(self):
         self.assertEqual(self.login(code="wrong")[0], 401)

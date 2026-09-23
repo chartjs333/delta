@@ -27,7 +27,7 @@ function navigate(page) {
   $("page-title").textContent = t(page === 'runs' ? 'runs' : page);
   location.hash = page;
 }
-document.querySelectorAll(".nav").forEach((button) => button.addEventListener("click", () => navigate(button.dataset.page)));
+document.querySelectorAll(".nav[data-page]").forEach((button) => button.addEventListener("click", () => navigate(button.dataset.page)));
 window.addEventListener("hashchange", () => navigate(location.hash.slice(1)));
 function message(text) { $("notice").textContent = text; $("notice").hidden = !text; }
 function renderNotice() {
@@ -41,6 +41,7 @@ function applyLanguage() {
   document.title = t('documentTitle');
   $('language').value = language;
   $('advanced').href = adminLink('/live-execution', linkedId);
+  $('visual-guide').href = adminLink('/guide');
   document.querySelectorAll('[data-i18n]').forEach((node) => { node.textContent = t(node.dataset.i18n); });
   document.querySelectorAll('[data-i18n-aria]').forEach((node) => { node.setAttribute('aria-label', t(node.dataset.i18nAria)); });
   try { localStorage.setItem(preferenceKey, language); } catch { /* Keep the current in-memory selection. */ }

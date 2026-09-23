@@ -36,7 +36,7 @@ if (@(& git -C $SourceRepo status --porcelain).Count -ne 0 -or
 $Files = @(Get-ChildItem -LiteralPath $BuildRoot -File -Recurse)
 $ManifestFiles = foreach ($File in $Files) {
     $Relative = [IO.Path]::GetRelativePath($BuildRoot, $File.FullName).Replace('\', '/')
-    if ($Relative -cne 'live.html' -and $Relative -cnotmatch '^assets/[A-Za-z0-9_.-]+\.(js|css)$') {
+    if ($Relative -cne 'live.html' -and $Relative -cnotmatch '^assets/[A-Za-z0-9_.-]+\.(js|css|png)$') {
         throw "Unexpected build file: $Relative"
     }
     if ($File.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Build links are not supported.' }

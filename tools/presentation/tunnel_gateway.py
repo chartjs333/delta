@@ -46,7 +46,7 @@ def allowed(method: str, path: str) -> bool:
             "/readyz",
         } or bool(
             re.fullmatch(
-                r"/(?:admin/)?assets/[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:js|css)"
+                r"/(?:admin/)?assets/[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:js|css|png)"
                 r"|/api/linked-execution/"
                 + UUID
                 + r"|/api/report/[0-9a-f]{32}|/api/v1/execution/"
