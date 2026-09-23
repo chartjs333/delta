@@ -467,7 +467,7 @@
   "Campaign": "Кампания",
   "Workload": "Задача",
   "Live Execution sends requests to the Controller serving this Admin UI.": "Live Execution отправляет задания в подключённый Controller через локальный сервис.",
-  "The local controller register below documents governance. Editing it does not switch the execution target.": "Реестр ниже описывает независимых контроллеров. Его редактирование не переключает исполнителя.",
+  "The local controller register below documents governance. Editing it does not switch the execution target.": "Реестр ниже документирует данные для проверки полномочий контроллеров. Его редактирование не переключает исполнителя.",
   "Choose a workload": "Выбрать задачу",
   "Your experiments": "Ваши эксперименты",
   "Group real local runs, then open their status, receipt or presentation.": "Объединяйте реальные локальные запуски в кампании, открывайте их статус, receipt и презентацию.",
@@ -506,5 +506,6 @@
   "Campaigns are available in the live workspace.": "Кампании доступны в подключённом рабочем пространстве.",
   "Controller definitions are saved automatically in the local profile. Original imported files are never overwritten.": "Настройки контроллеров автоматически сохраняются в локальном профиле. Исходные импортированные файлы не перезаписываются.",
   "Profile needs attention": "Проверьте сохранение профиля",
-  "Unsaved changes": "Есть несохранённые изменения"
+  "Unsaved changes": "Есть несохранённые изменения",
+  "The campaign and workload come from your shared local profile. Controller registry entries document governance; the existing local Controller executes this run.": "Кампания и задача взяты из общего локального профиля. Реестр документирует данные для проверки полномочий; этот запуск выполняет подключённый локальный Controller."
 }

@@ -393,7 +393,9 @@ export function GuidedRun({
       <ProtocolGuide />
       <p className="guide-note">
         {t(
-          "Controller registry entries are local drafts. They do not configure this run. Presentation and Admin use the same Controller, with separate run lists.",
+          workspace
+            ? "The campaign and workload come from your shared local profile. Controller registry entries document governance; the existing local Controller executes this run."
+            : "Controller registry entries are local drafts. They do not configure this run. Presentation and Admin use the same Controller, with separate run lists.",
         )}
       </p>
     </div>

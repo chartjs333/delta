@@ -16,3 +16,4 @@
 .workspace-profile { padding:12px 16px; border:1px solid #d7e7fb; border-radius:12px; margin-bottom:20px; color:#334966; background:#f7fbff; }
 .workspace-profile form { display:flex; gap:12px; align-items:end; flex-wrap:wrap; }
 .workspace-profile label { display:grid; gap:8px; }
+.campaign-controls input, .campaign-controls select, .workspace-profile input { min-height:42px; padding:10px 12px; border:1px solid #bdcce0; border-radius:9px; background:#fff; color:#193454; font:inherit; max-width:100%; }

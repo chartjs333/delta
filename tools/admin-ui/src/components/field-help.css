@@ -1,5 +1,7 @@
 .help-label { position: relative; min-width: 0; display: flex; align-items: flex-start; gap: .4rem; }
 .help-label > label { flex: 1; min-width: 0; }
+.help-label.form-field { display: flex; align-items: flex-start; }
+.field-help-anchor > button.field-hint-button { min-height: 28px; height: 28px; }
 .field-help-anchor { position: relative; display: inline-flex; flex: none; vertical-align: middle; font-style: normal; }
 button.field-hint-button { display: grid; place-items: center; width: 28px; height: 28px; min-width: 28px; padding: 0; border: 1px solid #b7cbe2; border-radius: 50%; background: #f0f6ff; color: #20538f; font: 700 17px/1 system-ui, sans-serif; cursor: pointer; }
 button.field-hint-button:hover, button.field-hint-button[aria-expanded="true"] { background: #dcecff; border-color: #497db7; }
