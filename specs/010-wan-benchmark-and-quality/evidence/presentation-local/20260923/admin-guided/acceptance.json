@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "GUIDED_ADMIN_UI_ACCEPTANCE",
+  "mode": "PRESENTATION_UI_ONLY",
+  "observed_at": "2026-09-23T21:33:51.575Z",
+  "admin_ui_source_commit": "4f6682451882358a6af26786982e81fa7b56728d",
+  "controller_source_commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "checks": {
+    "formal_baseline_report": "VERIFIED_GO_UNCHANGED",
+    "npm_check": {
+      "status": "PASS",
+      "tests": 249,
+      "files": 40
+    },
+    "live_build_and_boundary_audit": "PASS",
+    "installed_file_hashes": "PASS",
+    "browser_en_ru": "OBSERVED_PASS",
+    "actual_training_and_automatic_receipt": "OBSERVED_PASS",
+    "downloaded_receipt_sha256": "PASS",
+    "interactive_protocol_explanation": "OBSERVED_PASS",
+    "laptop_primary_action_visibility": "OBSERVED_PASS"
+  },
+  "browser_execution": {
+    "source_commit": "3ea34305bbe397044537649f0832fc011ea1e3eb",
+    "execution_id": "04729563-03b7-4c13-a969-fbdbc8101ede",
+    "receipt_digest": "sha256:165fa93ab5f3609f518ea320ab65f03d40bd5ddd2688502ccc7f6e3a054e87cb",
+    "scope": "PLUGIN_BOUNDARY",
+    "device": "CPU",
+    "data": "SYNTHETIC"
+  },
+  "files": {
+    "status.json": "sha256:883c412243e3b13025c67bbcdd51da0a52acac12b19249d7727903e4e3ec0dfe",
+    "receipt.json": "sha256:165fa93ab5f3609f518ea320ab65f03d40bd5ddd2688502ccc7f6e3a054e87cb",
+    "download-verification.json": "sha256:518c545fa156a64d321e760f4e0dc7dc2a56257ef1cc1fada45ffa3fa228fdd2",
+    "installed.json": "sha256:fcdaa56a032ed2029a71ebfa1b2363f158fe92353ff2a0655e06fe235ce8ba99",
+    "npm-check.txt": "sha256:f9260c641f17be2e981ef72515637670db9080f4449f2f3852ec6f5631d78916"
+  },
+  "self_review": true,
+  "independent_review": false,
+  "protocol_semantics_changed": false,
+  "qualifying_evidence": false,
+  "benchmark_result_qc": null,
+  "feature010_go_checkpoint_sha": null
+}

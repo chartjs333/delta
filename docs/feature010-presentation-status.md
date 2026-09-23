@@ -96,3 +96,26 @@ Acceptance, test output, asset manifest, status and receipt are retained under
 `specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260923/admin-ui/`.
 Local shortcuts: `D:/delta-presentation/ADMIN-EN.url` and `ADMIN-RU.url`.
 Self-review only; no qualifying gate completion or independent attestation is claimed.
+
+## Guided Admin UI
+
+Latest installed Admin source: `4f6682451882358a6af26786982e81fa7b56728d`.
+The live execution page now opens in **Simple mode / Простой режим**. A named
+synthetic CPU example uses the existing intent/HTTP adapter, polls its actual
+status and downloads the receipt only after existing schema/hash/lineage checks.
+Uncertain admission blocks blind resubmission. Read failures expose no verified
+result; completed/failed runs can be inspected in the technical views. No new
+backend or protocol action is introduced. The six-stage protocol explanation is
+explicitly educational and separate from local run progress.
+
+All 249 tests in 40 files pass, including duplicate-click prevention, receipt
+failure, uncertain admission, failed execution, language changes and unmount
+fencing. Both bundle audits pass. Browser execution
+`04729563-03b7-4c13-a969-fbdbc8101ede` completed; its downloaded receipt matched
+the Controller digest and lineage. Its source was `3ea3430`; final source only
+moved controls for the laptop viewport. Both languages and interactive explanation
+were inspected. Controller baseline stays clean at `c8aea649…`.
+
+Evidence: `specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260923/admin-guided/`.
+Scope/review: `tools/presentation/ADMIN-UX.md`. Startup continues to preserve the
+installed static bundle. This remains local presentation evidence, without GO/QC.

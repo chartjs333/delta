@@ -18,4 +18,20 @@ remains a local worksheet; guided execution does not make it live configuration.
 
 Validation: meaningful UI tests for submission, result gating, read failures,
 language changes and request lifetime; existing Admin check and live boundary
-audit; browser execution, bilingual layout and responsive review before install.
+audit; browser execution and bilingual layout review.
+
+Final Constitution Check: PASS within UI-only scope. No formal, protocol, native,
+FFI, Java or Worker files changed. The installed source is
+`4f6682451882358a6af26786982e81fa7b56728d`. All 249 tests in 40 files, the offline
+build/audit and live build/audit pass. Browser review confirmed English/Russian,
+automatic status and receipt retrieval, six interactive explanatory stages, and
+the primary action visible at the laptop's normal viewport. No responsive-device
+qualification is claimed. The Controller was not restarted.
+
+Browser execution `04729563-03b7-4c13-a969-fbdbc8101ede` completed using source
+`3ea3430` (the final change only repositioned controls). The downloaded JSON's
+SHA-256 equals the Controller's receipt digest:
+`165fa93ab5f3609f518ea320ab65f03d40bd5ddd2688502ccc7f6e3a054e87cb`.
+Acceptance and original result records are retained in
+`specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260923/admin-guided/`.
+Review is self-review; Feature010 qualification remains open.

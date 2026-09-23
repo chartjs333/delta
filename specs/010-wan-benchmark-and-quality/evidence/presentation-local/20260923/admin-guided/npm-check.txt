@@ -1,0 +1,54 @@
+
+> @deltareduce/admin-ui@0.1.0 check
+> npm run check:validators && npm run check:catalog && npm run typecheck && npm test && npm run build && npm run audit:offline
+
+
+> @deltareduce/admin-ui@0.1.0 check:validators
+> node scripts/generate-standalone-validator.mjs --check
+
+
+> @deltareduce/admin-ui@0.1.0 check:catalog
+> node scripts/generate-catalog-snapshot.mjs --check
+
+Catalog snapshot is in sync with tools/registry.
+
+> @deltareduce/admin-ui@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @deltareduce/admin-ui@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.0 C:/Users/madoev/.codex/worktrees/feature000-arithmetic-binding/delta/tools/admin-ui
+
+Not implemented: navigation to another Document
+
+ Test Files  40 passed (40)
+      Tests  249 passed (249)
+   Start at  23:31:49
+   Duration  16.52s (environment 62%, tests 22%, setup 11%, transform 3%, import 2%)
+
+Environment  jsdom was created 40 times · 130.29s total, 62% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+
+> @deltareduce/admin-ui@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 67 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.82 kB │ gzip:   0.45 kB
+dist/assets/index-Dqburz2w.css   28.43 kB │ gzip:   6.70 kB
+dist/assets/index-CHhskQch.js   403.32 kB │ gzip: 117.88 kB
+
+✓ built in 221ms
+
+> @deltareduce/admin-ui@0.1.0 audit:offline
+> node scripts/check-offline-boundary.mjs
+
+{"schema_version":"1.0.0","status":"PASS","checks":{"analytics_payload":false,"automatic_network_request":false,"backend_dependency":false,"credential_flow":false,"live_pr_read":false,"login_flow":false,"static_browser_build":true},"scanned_product_files":54,"scanned_bundle_files":1,"violations":[]}
