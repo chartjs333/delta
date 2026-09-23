@@ -16,7 +16,8 @@ run (`83737f24-d4c7-478c-867f-9a944cd282a4`, COMPLETED). Ten wrapper tests passe
 JavaScript syntax, Ruff and the complete recorded training/Docker log translations
 were checked. No console errors were observed.
 
-Source: `b5f06eff7488c367b882050483bb08130456bfd7`.
+Original presentation source: `b5f06eff7488c367b882050483bb08130456bfd7`;
+bilingual presentation checkpoint: `173da69`.
 Baseline Controller: `c8aea64972f741060d1e527ebbb6f9a5a168a075`, clean
 `D:/delta-main-demo`. Original port 8765 was not stopped or modified.
 
@@ -55,3 +56,43 @@ remain null, and Feature011 stays blocked.
 Next: keep the app operational and continue the actual formal/runtime/qualification
 work using `docs/feature010-progress.md` in the feature000-binding-candidate worktree.
 Do not rewrite this demo as a qualifying benchmark or mark mandatory tasks done.
+
+## Bilingual Admin UI checkpoint
+
+Admin UI is available in English and Russian at
+`http://127.0.0.1:8865/?lang=en#/live-execution` and
+`http://127.0.0.1:8865/?lang=ru#/live-execution`.
+Presentation → Admin and Admin → Presentation links preserve the selected language.
+The Admin language selector preserves the current form, route and in-session
+execution state; reload preserves the language through the URL. Admin execution
+lists remain session-local, while Controller receipts remain available on the server.
+Protocol IDs, canonical intent bytes, digests and original receipts are unchanged.
+
+Installed UI source: `52ddc939a38fdb36ab2190bca4b6ff42b67fb534`.
+The Controller stayed online at clean baseline `c8aea649…`; its build identity is
+separate from the UI identity in `D:/delta-data/presentation-20260924/admin-ui/installed.json`.
+Use `tools/presentation/install-admin-ui.ps1` to reproduce this UI deployment.
+`START.cmd` preserves it; rebuilding the old baseline UI would replace it.
+
+Verification:
+
+- Full `npm run check` on the installed UI source passed: 242 tests in 39 files,
+  pinned TypeScript typecheck, validator/catalog checks, offline build and boundary audit.
+- Live build and boundary audit passed; all installed file SHA-256 hashes match
+  the installation manifest. Browser review covered both languages, catalog,
+  Controller forms, execution builder, language-preserving navigation and reload.
+- Actual Admin-submitted execution `4ea0df87-ead3-41fb-8749-a614f7beb358`
+  completed and loaded its terminal receipt. EN → RU switching preserved that
+  execution. It used UI source `520287a`; later UI changes adjusted header contrast
+  and compatibility labels. Receipt canonical digest and all lineage fields were
+  checked again against saved Controller status:
+  `sha256:1521a04bc0eada4008439c8238d3761d4b15ced69cb8d0ebb5b52b0aca868d93`.
+- This is CPU synthetic training with `PLUGIN_BOUNDARY`, not GPU/native qualification.
+  Workloads sample buttons show fixtures; Controllers is a local worksheet;
+  Campaigns remains an unavailable placeholder. The English runbook describes
+  the working Admin demonstration path.
+
+Acceptance, test output, asset manifest, status and receipt are retained under
+`specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260923/admin-ui/`.
+Local shortcuts: `D:/delta-presentation/ADMIN-EN.url` and `ADMIN-RU.url`.
+Self-review only; no qualifying gate completion or independent attestation is claimed.

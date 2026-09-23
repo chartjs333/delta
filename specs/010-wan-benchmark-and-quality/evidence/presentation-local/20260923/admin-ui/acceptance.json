@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "BILINGUAL_ADMIN_PRESENTATION_ACCEPTANCE",
+  "mode": "PRESENTATION_UI_ONLY",
+  "observed_at": "2026-09-23T21:06:41.875Z",
+  "admin_ui_source_commit": "52ddc939a38fdb36ab2190bca4b6ff42b67fb534",
+  "controller_source_commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "checks": {
+    "npm_check": {
+      "status": "PASS",
+      "tests": 242,
+      "files": 39,
+      "source_commit": "52ddc939a38fdb36ab2190bca4b6ff42b67fb534"
+    },
+    "live_build_and_boundary_audit": "PASS",
+    "installed_asset_hashes": "PASS",
+    "receipt_jcs_sha256": "PASS",
+    "receipt_lineage": "PASS",
+    "browser_en_ru_navigation_forms_catalog": "OBSERVED_PASS",
+    "browser_language_switch_preserves_form_and_execution": "OBSERVED_PASS",
+    "browser_same_language_presentation_links": "OBSERVED_PASS",
+    "browser_reload_preserves_url_language": "OBSERVED_PASS"
+  },
+  "browser_execution": {
+    "source_commit": "520287adf90b34c008d93c672b980794baa68fd3",
+    "execution_id": "4ea0df87-ead3-41fb-8749-a614f7beb358",
+    "receipt_digest": "sha256:1521a04bc0eada4008439c8238d3761d4b15ced69cb8d0ebb5b52b0aca868d93",
+    "state": "COMPLETED",
+    "scope": "PLUGIN_BOUNDARY",
+    "dataset_id": "synthetic-10gene-cohort-v1",
+    "model_plugin_id": "tabular-10gene-phenotype-v1"
+  },
+  "review": {
+    "self_review": true,
+    "independent_review": false
+  },
+  "files": {
+    "installed.json": "sha256:a0f52a1a6f524a88701c51f84e652ffc371ea61ef54e0f8c954b49224e261faf",
+    "browser-run-status.json": "sha256:e4fd8ff0fad5442c034e79983bff6bc23fd86eeb5165cec1110a7c8c18827ffa",
+    "browser-run-receipt.json": "sha256:1521a04bc0eada4008439c8238d3761d4b15ced69cb8d0ebb5b52b0aca868d93",
+    "npm-check.log": "sha256:a8f4dea054e5db4da22a225700b7f6831924d5dd1d1f686fe6d9a71d4a72f732"
+  },
+  "protocol_semantics_changed": false,
+  "qualifying_evidence": false,
+  "benchmark_result_qc": null,
+  "feature010_go_checkpoint_sha": null,
+  "feature011_admitted": false
+}
