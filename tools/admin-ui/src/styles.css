@@ -349,5 +349,5 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 }
 
 /* Shared language choice; no remount of forms or live execution. */
-.language-picker{font:inherit;max-width:130px;padding:.45rem .65rem;border:1px solid var(--border,#ddd);border-radius:6px;background:var(--surface,#fff);color:inherit}.presentation-link{font-size:.8rem;text-decoration:none;white-space:nowrap}.topbar-actions{flex-wrap:wrap}.language-picker:focus-visible,.presentation-link:focus-visible{outline:3px solid #b6a8ff;outline-offset:3px}
+.language-picker{font:inherit;width:auto;max-width:130px;min-height:38px;margin:0;padding:.45rem .65rem;border:1px solid #91a99b;border-radius:6px;background:#fffdf8;color:#17201d;flex:0 0 auto}.presentation-link{font-size:.8rem;text-decoration:none;white-space:nowrap;color:#f8f5ec}.presentation-link:hover{text-decoration:underline}.topbar-actions{flex-wrap:wrap;justify-content:flex-end}.language-picker:focus-visible,.presentation-link:focus-visible{outline:3px solid #b6a8ff;outline-offset:3px}
 @media(max-width:600px){.topbar{gap:.6rem;flex-wrap:wrap}.topbar-actions{gap:.5rem}.language-picker{font-size:.8rem}.boundary-pill{font-size:.7rem}}
