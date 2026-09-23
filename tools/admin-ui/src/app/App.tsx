@@ -225,7 +225,11 @@ export function App({ adapter = defaultAdapter }: AppProps) {
       <header className="topbar">
         <a
           className="brand"
-          href="#/controllers"
+          href={
+            liveExecutionRuntime.mode === "HTTP_LIVE"
+              ? "#/live-execution"
+              : "#/controllers"
+          }
           aria-label={t("Delta Admin UI home")}
         >
           <span className="brand-mark" aria-hidden="true">
@@ -303,7 +307,15 @@ export function App({ adapter = defaultAdapter }: AppProps) {
             ))}
           </nav>
           {source ? (
-            <SourceSummary source={source} />
+            liveExecutionRuntime.mode === "HTTP_LIVE" &&
+            activeRoute !== DEFAULT_ROUTE ? (
+              <details className="sidebar-source">
+                <summary>{t("Controller document source")}</summary>
+                <SourceSummary source={source} />
+              </details>
+            ) : (
+              <SourceSummary source={source} />
+            )
           ) : (
             <p role="status">{t("Loading source…")}</p>
           )}

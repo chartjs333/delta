@@ -13,6 +13,7 @@ import type {
 } from "./live-execution-port";
 import { useLiveExecutionRuntime } from "./live-execution-context";
 import { LiveIntentBuilder } from "./LiveIntentBuilder";
+import { GuidedRun } from "./GuidedRun";
 import type { ExecutionIntentDocument } from "./intent-builder";
 
 const STATE_LABELS: Readonly<Record<LiveExecutionState, string>> = {
@@ -28,7 +29,7 @@ const STATE_LABELS: Readonly<Record<LiveExecutionState, string>> = {
   STALE_UNAVAILABLE: "Stale/unavailable",
 };
 
-export type LiveExecutionTab = "STATUSES" | "BUILDER";
+export type LiveExecutionTab = "STATUSES" | "BUILDER" | "GUIDED";
 
 export interface LiveExecutionSurfaceProps {
   readonly port?: LiveExecutionPort;
@@ -37,7 +38,7 @@ export interface LiveExecutionSurfaceProps {
 
 export function LiveExecutionSurface({
   port,
-  initialTab = "STATUSES",
+  initialTab,
 }: LiveExecutionSurfaceProps) {
   const runtime = useLiveExecutionRuntime();
   const activePort = port ?? runtime.port;
@@ -46,7 +47,9 @@ export function LiveExecutionSurface({
   const [selectedStatusId, setSelectedStatusId] = useState<string>();
   const [notice, setNotice] = useState<string>();
   const [receipt, setReceipt] = useState<LiveExecutionReceipt>();
-  const [activeTab, setActiveTab] = useState<LiveExecutionTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<LiveExecutionTab>(
+    initialTab ?? (runtime.mode === "HTTP_LIVE" ? "GUIDED" : "STATUSES"),
+  );
 
   const loadStatuses = (preferredStatusId?: string) => {
     Promise.all([activePort.describeLiveSource(), activePort.listStatuses()])
@@ -156,8 +159,20 @@ export function LiveExecutionSurface({
     >
       <header className="live-execution-header">
         <div>
-          <p className="eyebrow">{t("Controlled execution boundary")}</p>
-          <h1 id="live-execution-heading">{t("Live execution")}</h1>
+          <p className="eyebrow">
+            {t(
+              activeTab === "GUIDED"
+                ? "DeltaReduce workspace"
+                : "Controlled execution boundary",
+            )}
+          </p>
+          <h1 id="live-execution-heading">
+            {t(
+              activeTab === "GUIDED"
+                ? "Run a local experiment"
+                : "Live execution",
+            )}
+          </h1>
         </div>
         <div
           className="live-mode-panel"
@@ -173,11 +188,23 @@ export function LiveExecutionSurface({
             {source?.mode === "HTTP_LIVE" ? "HTTP LIVE" : "MOCK ONLY"}
           </span>
           <span>{t(source?.label ?? "Loading source")}</span>
-          <code>{source?.contractFreezeSha.slice(0, 12) ?? "pending"}</code>
+          {activeTab !== "GUIDED" ? (
+            <code>{source?.contractFreezeSha.slice(0, 12) ?? "pending"}</code>
+          ) : null}
         </div>
       </header>
 
       <nav className="live-tab-nav" aria-label={t("Live execution views")}>
+        <button
+          type="button"
+          aria-current={activeTab === "GUIDED" ? "page" : undefined}
+          className={
+            activeTab === "GUIDED" ? "tab-button active" : "tab-button"
+          }
+          onClick={() => setActiveTab("GUIDED")}
+        >
+          {t("Simple mode")}
+        </button>
         <button
           aria-current={activeTab === "STATUSES" ? "page" : undefined}
           className={
@@ -200,11 +227,26 @@ export function LiveExecutionSurface({
         </button>
       </nav>
 
-      {notice ? (
+      {notice && activeTab !== "GUIDED" ? (
         <div className="capability-state state-available" role="status">
           {message(notice)}
         </div>
       ) : null}
+
+      <div hidden={activeTab !== "GUIDED"}>
+        <GuidedRun
+          port={activePort}
+          enabled={source?.mode === "HTTP_LIVE"}
+          onStatus={(next) => {
+            setReceipt(undefined);
+            setStatuses((current) => [
+              next,
+              ...current.filter((item) => item.statusId !== next.statusId),
+            ]);
+            setSelectedStatusId(next.statusId);
+          }}
+        />
+      </div>
 
       {activeTab === "BUILDER" ? (
         <LiveIntentBuilder
@@ -215,7 +257,7 @@ export function LiveExecutionSurface({
               : "Submit to Mock Gate"
           }
         />
-      ) : (
+      ) : activeTab === "STATUSES" ? (
         <div className="live-boundary-grid">
           <section
             className="live-status-list"
@@ -442,9 +484,9 @@ export function LiveExecutionSurface({
             )}
           </section>
         </div>
-      )}
+      ) : null}
 
-      <footer className="live-boundary-note">
+      <footer className="live-boundary-note" hidden={activeTab === "GUIDED"}>
         <span>{t("Transport profile")}</span>
         <strong>{source?.transportProfile ?? "NONE_PHASE_4"}</strong>
         <span>

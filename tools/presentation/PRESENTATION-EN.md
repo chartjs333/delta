@@ -37,6 +37,20 @@ For the Admin UI segment, click **Open Admin UI**. The same language is carried
 over, and the top-right selector supports English and Russian without resetting
 the form. **Presentation** returns to the main application in the selected language.
 
+The live Admin opens in **Simple mode**. Keep the prepared synthetic CPU example,
+give the run a name, and click **Start training**. Status updates automatically;
+**Download receipt** appears only after the existing adapter checks the returned
+receipt. **Prepare another run** clears the form after a terminal run. On an
+uncertain submission, inspect the technical views instead of blindly resubmitting.
+Opening the other execution views preserves this guided run during the session;
+leaving the execution page or reloading stops automatic updates. The technical
+status list can still inspect runs retained by the current adapter session.
+
+**How DeltaReduce works** opens a six-stage protocol explanation. Click a stage
+to explain workers, content IDs, input agreement, shards, aggregation and the
+certified checkpoint. This diagram is educational, not a progress display for
+the CPU example. The example does not produce ISC, ApplyQC or a current checkpoint.
+
 - **Workloads:** inspect the catalog and model/data compatibility. Sample receipt
   buttons explicitly load examples; they are not fresh execution evidence.
 - **Live execution → ExecutionIntent builder:** keep the default synthetic
