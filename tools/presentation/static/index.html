@@ -1,47 +1,51 @@
 <!doctype html>
-<html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DeltaReduce · Локальная лаборатория</title><link rel="stylesheet" href="/style.css"></head>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DeltaReduce · Local Lab</title><link rel="stylesheet" href="/style.css"></head>
 <body>
 <aside class="sidebar">
   <a class="brand" href="/"><span class="brand-mark">Δ</span><span>DeltaReduce<small>LOCAL LAB</small></span></a>
-  <div class="nav-label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
-  <nav aria-label="Основная навигация">
-    <button class="nav active" data-page="overview"><span>◈</span> Обзор</button>
-    <button class="nav" data-page="runs"><span>↗</span> История запусков <b id="run-count">0</b></button>
-    <button class="nav" data-page="readiness"><span>▤</span> Готовность Feature010</button>
+  <div class="nav-label" data-i18n="workspaceLabel">WORKSPACE</div>
+  <nav aria-label="Main navigation" data-i18n-aria="mainNavigation">
+    <button class="nav active" data-page="overview" aria-label="Overview" data-i18n-aria="overview"><span>◈</span><span class="nav-text" data-i18n="overview">Overview</span></button>
+    <button class="nav" data-page="runs" aria-label="Run history" data-i18n-aria="runs"><span>↗</span><span class="nav-text" data-i18n="runs">Run history</span><b id="run-count">0</b></button>
+    <button class="nav" data-page="readiness" aria-label="Feature010 readiness" data-i18n-aria="readiness"><span>▤</span><span class="nav-text" data-i18n="readiness">Feature010 readiness</span></button>
   </nav>
-  <div class="sidebar-bottom"><span class="dot"></span> Локальный стенд<small>Один компьютер · SIMULATED_LOCAL</small></div>
+  <div class="sidebar-bottom"><span class="dot"></span><span data-i18n="localLab">Local lab</span><small data-i18n="singleComputer">One computer · SIMULATED_LOCAL</small></div>
 </aside>
 <main>
-  <header><div class="breadcrumb">Workspace <span>/</span> <b id="page-title">Обзор</b></div><span class="mode"><i></i> SIMULATED_LOCAL</span><span class="avatar">Δ</span></header>
+  <header>
+    <div class="breadcrumb"><span class="workspace-label" data-i18n="workspace">Workspace</span><span>/</span><b id="page-title">Overview</b></div>
+    <span class="mode"><i></i> SIMULATED_LOCAL</span>
+    <label class="language-picker"><span class="sr-only" data-i18n="language">Interface language</span><select id="language" aria-label="Interface language" data-i18n-aria="language"><option value="en" lang="en">English</option><option value="ru" lang="ru">Русский</option></select></label>
+  </header>
   <section id="page-overview" class="page">
-    <div class="page-heading"><div><div class="eyebrow">ОТ КОМАНДЫ ДО ПРОВЕРЯЕМОГО РЕЗУЛЬТАТА</div><h1>Система в действии<span>.</span></h1><p>Запускайте задания, проверяйте отказоустойчивость и сохраняйте результаты.</p></div><a id="advanced" class="button secondary" href="http://127.0.0.1:8865/" target="_blank" rel="noopener">Расширенный интерфейс ↗</a></div>
+    <div class="page-heading"><div><div class="eyebrow" data-i18n="overviewEyebrow">FROM COMMAND TO VERIFIABLE RESULT</div><h1><span data-i18n="overviewHeading">The system in action</span><span>.</span></h1><p data-i18n="overviewDescription">Run jobs, test resilience and save the results.</p></div><a id="advanced" class="button secondary" href="http://127.0.0.1:8865/" target="_blank" rel="noopener" data-i18n="advanced">Advanced interface ↗</a></div>
     <div id="notice" class="notice" role="alert" hidden></div>
     <div class="metrics">
-      <article class="metric"><div class="metric-label">Controller <span>◉</span></div><strong id="controller-state">Проверяем…</strong><small id="controller-detail">Проверка HTTP readiness</small></article>
-      <article class="metric"><div class="metric-label">Выполнено запусков <span>↗</span></div><strong id="completed-count">0</strong><small>Из последних 30 локальных запусков</small></article>
-      <article class="metric"><div class="metric-label">Физическая GPU <span>▦</span></div><strong id="gpu-memory">Проверяем…</strong><small id="gpu-name">Чтение nvidia-smi</small></article>
-      <article class="metric"><div class="metric-label">Среда <span>⌘</span></div><strong>Local + Docker</strong><small>Тестовые подписи · локальная сеть</small></article>
+      <article class="metric"><div class="metric-label">Controller <span>◉</span></div><strong id="controller-state">Checking…</strong><small id="controller-detail">Checking HTTP readiness</small></article>
+      <article class="metric"><div class="metric-label"><span class="metric-name" data-i18n="completedRuns">Completed runs</span><span>↗</span></div><strong id="completed-count">0</strong><small data-i18n="lastThirty">Of the last 30 local runs</small></article>
+      <article class="metric"><div class="metric-label"><span class="metric-name" data-i18n="physicalGpu">Physical GPU</span><span>▦</span></div><strong id="gpu-memory">Checking…</strong><small id="gpu-name">Reading nvidia-smi</small></article>
+      <article class="metric"><div class="metric-label"><span class="metric-name" data-i18n="environment">Environment</span><span>⌘</span></div><strong>Local + Docker</strong><small data-i18n="testEnvironment">Test signatures · local network</small></article>
     </div>
     <div class="workspace-grid">
-      <section class="panel experiment"><div class="panel-kicker">01 / LIVE EXECUTION</div><h2>Запустить обучение</h2><p class="muted">Реальное задание через HTTP Controller и отдельный Python Worker.</p>
-        <div class="workload"><span class="workload-icon">⌘</span><div><b>10-Gene Phenotype</b><small>Классификатор по ближайшему центроиду</small></div><span class="chip">CPU</span></div>
-        <dl class="details"><div><dt>Датасет</dt><dd>Синтетический 10-gene cohort</dd></div><div><dt>Исполнение</dt><dd>Локальное обучение · PLUGIN_BOUNDARY</dd></div><div><dt>Результат</dt><dd>Проверяемый execution receipt</dd></div></dl>
+      <section class="panel experiment"><div class="panel-kicker" data-i18n="executionKicker">01 / LIVE EXECUTION</div><h2 data-i18n="train">Run training</h2><p class="muted" data-i18n="trainingDescription">A real job through the HTTP Controller and a separate Python Worker.</p>
+        <div class="workload"><span class="workload-icon">⌘</span><div><b>10-Gene Phenotype</b><small data-i18n="classifier">Nearest-centroid classifier</small></div><span class="chip">CPU</span></div>
+        <dl class="details"><div><dt data-i18n="dataset">Dataset</dt><dd data-i18n="datasetName">Synthetic 10-gene cohort</dd></div><div><dt data-i18n="execution">Execution</dt><dd data-i18n="executionScope">Local training · PLUGIN_BOUNDARY</dd></div><div><dt data-i18n="result">Result</dt><dd data-i18n="receiptDescription">Verifiable execution receipt</dd></div></dl>
         <div class="flow"><span>Browser</span><i>→</i><span>Controller</span><i>→</i><span>Worker</span><i>→</i><span>Receipt</span></div>
-        <button id="train" class="button primary wide" disabled><span>▶</span> Запустить обучение</button>
-        <div class="fine-print">Измеренный результат локального плагина; scientific Gate B этим запуском не закрывается.</div>
+        <button id="train" class="button primary wide" disabled><span>▶</span><span data-i18n="train">Run training</span></button>
+        <div class="fine-print" data-i18n="trainingBoundary">Measured local plugin execution; this run does not qualify scientific Gate B.</div>
       </section>
-      <section class="panel experiment"><div class="panel-kicker teal">02 / FAILURE SIMULATION</div><h2>Проверить кворум</h2><p class="muted">Четыре Docker-процесса. Реальные тестовые подписи. Управляемые отказы.</p>
-        <div class="nodes" aria-label="Четыре контроллера"><div><span>◈</span><b>C1</b><small>controller</small></div><div><span>◈</span><b>C2</b><small>controller</small></div><div><span>◈</span><b>C3</b><small>controller</small></div><div><span>◈</span><b>C4</b><small>controller</small></div></div>
-        <div class="scenario"><span>4/4 online</span><i>→</i><span>3/4 quorum</span><i>→</i><span>2/4 blocked</span><i>→</i><span>restart</span></div>
-        <button id="simulate" class="button secondary wide" disabled><span>↻</span> Запустить сценарии в Docker</button>
-        <div class="fine-print">Один хост и один администратор. Подписи не независимы; Docker bridge не является real WAN.</div>
+      <section class="panel experiment"><div class="panel-kicker teal" data-i18n="simulationKicker">02 / FAILURE SIMULATION</div><h2 data-i18n="quorumHeading">Test the quorum</h2><p class="muted" data-i18n="simulationDescription">Four Docker processes. Real test signatures. Controlled failures.</p>
+        <div class="nodes" aria-label="Four controllers" data-i18n-aria="fourControllers"><div><span>◈</span><b>C1</b><small>controller</small></div><div><span>◈</span><b>C2</b><small>controller</small></div><div><span>◈</span><b>C3</b><small>controller</small></div><div><span>◈</span><b>C4</b><small>controller</small></div></div>
+        <div class="scenario"><span data-i18n="scenarioOnline">4/4 online</span><i>→</i><span data-i18n="scenarioQuorum">3/4 quorum</span><i>→</i><span data-i18n="scenarioBlocked">2/4 blocked</span><i>→</i><span data-i18n="scenarioRestart">restart</span></div>
+        <button id="simulate" class="button secondary wide" disabled><span>↻</span><span data-i18n="simulate">Run Docker scenarios</span></button>
+        <div class="fine-print" data-i18n="simulationBoundary">One host and one administrator. Signatures are not independent; a Docker bridge is not a real WAN.</div>
       </section>
     </div>
-    <section class="panel activity"><div class="panel-title"><div><h2>Журнал выполнения</h2><p class="muted">События реального процесса, без сгенерированных метрик.</p></div><span id="live-label" class="chip">ОЖИДАНИЕ</span></div><div id="activity-log" class="log"><div class="empty"><span>↗</span><b>Готово к первому запуску</b><p>Выберите обучение или Docker-сценарий выше.</p></div></div><div id="latest-result" hidden></div></section>
-    <footer>DeltaReduce / Presentation workspace <span>Локальный режим · Feature010 GO не выдан</span></footer>
+    <section class="panel activity"><div class="panel-title"><div><h2 data-i18n="activity">Execution log</h2><p class="muted" data-i18n="activityDescription">Events from the actual process, without generated metrics.</p></div><span id="live-label" class="chip">IDLE</span></div><div id="activity-log" class="log"><div class="empty"><span>↗</span><b data-i18n="emptyTitle">Ready for your first run</b><p data-i18n="emptyDescription">Choose training or a Docker scenario above.</p></div></div><div id="latest-result" hidden></div></section>
+    <footer>DeltaReduce / Presentation workspace <span data-i18n="footerBoundary">Local mode · Feature010 GO has not been issued</span></footer>
   </section>
-  <section id="page-runs" class="page" hidden><div class="page-heading"><div class="eyebrow">EXECUTION HISTORY</div><h1>История запусков<span>.</span></h1><p>Результаты сохранены на диске и доступны после перезапуска интерфейса.</p></div><div id="history" class="history"></div></section>
-  <section id="page-readiness" class="page" hidden><div class="page-heading"><div class="eyebrow">EVIDENCE & QUALIFICATION</div><h1>Готовность Feature010<span>.</span></h1><p>Работающее локальное приложение и статус полной квалификации.</p></div><section class="panel"><div class="readiness-intro"><span class="status warning">В РАЗРАБОТКЕ</span><h2>BenchmarkResultQC(GO) ещё не получен</h2><p class="muted">Демонстрация запускает существующий локальный Controller/Worker и отдельные Docker-сценарии. Полная цепочка Java/Netty → native C++/WAL → checkpoint зависит от нового Formal GO.</p></div><div id="gates"></div><details><summary>Проверенный отчёт formal-кандидата</summary><pre id="formal-detail"></pre></details></section></section>
+  <section id="page-runs" class="page" hidden><div class="page-heading"><div class="eyebrow" data-i18n="historyEyebrow">EXECUTION HISTORY</div><h1><span data-i18n="runs">Run history</span><span>.</span></h1><p data-i18n="historyDescription">Results are saved on disk and remain available after restarting the interface.</p></div><div id="history" class="history"></div></section>
+  <section id="page-readiness" class="page" hidden><div class="page-heading"><div class="eyebrow" data-i18n="readinessEyebrow">EVIDENCE & QUALIFICATION</div><h1><span data-i18n="readiness">Feature010 readiness</span><span>.</span></h1><p data-i18n="readinessDescription">The working local application and the status of full qualification.</p></div><section class="panel"><div class="readiness-intro"><span class="status warning" data-i18n="inDevelopment">IN DEVELOPMENT</span><h2 data-i18n="noGo">BenchmarkResultQC(GO) has not been obtained</h2><p class="muted" data-i18n="readinessBoundary">This demo runs the existing local Controller/Worker and separate Docker scenarios. The full Java/Netty → native C++/WAL → checkpoint pipeline depends on a new Formal GO.</p></div><div id="gates"></div><details><summary data-i18n="formalReport">Reviewed formal candidate report</summary><pre id="formal-detail"></pre></details></section></section>
 </main><script type="module" src="/app.js"></script>
 </body></html>

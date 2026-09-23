@@ -1,35 +1,73 @@
+import {locales, supportedLanguage, translate, translateLog} from './i18n.mjs';
+
 const $ = (id) => document.getElementById(id);
-const titles = {overview: "Обзор", runs: "История запусков", readiness: "Готовность Feature010"};
-const stateNames = {QUEUED: "В очереди", RUNNING: "Выполняется", COMPLETED: "Завершено", FAILED: "Ошибка", INTERRUPTED: "Прервано"};
+const pages = ['overview', 'runs', 'readiness'];
+const preferenceKey = 'delta-presentation-language';
+let storedLanguage;
+try { storedLanguage = localStorage.getItem(preferenceKey); } catch { /* Storage may be disabled. */ }
+const queryLanguage = new URL(location.href).searchParams.get('lang');
+let language = supportedLanguage(queryLanguage) ? queryLanguage : supportedLanguage(storedLanguage) ? storedLanguage : 'en';
+const t = (key, parameters) => translate(language, key, parameters);
 let current = null;
 let requested = false;
 let refreshing = false;
 let connectionFailed = false;
+let connectionError = null;
+let operationError = null;
 let lastSignature = "";
 const el = (tag, text, cls) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (cls) node.className = cls; return node; };
 function navigate(page) {
-  if (!(page in titles)) page = "overview";
-  for (const name of Object.keys(titles)) $(`page-${name}`).hidden = name !== page;
+  if (!pages.includes(page)) page = "overview";
+  for (const name of pages) $(`page-${name}`).hidden = name !== page;
   document.querySelectorAll(".nav").forEach((button) => button.classList.toggle("active", button.dataset.page === page));
-  $("page-title").textContent = titles[page];
+  $("page-title").textContent = t(page === 'runs' ? 'runs' : page);
   location.hash = page;
 }
 document.querySelectorAll(".nav").forEach((button) => button.addEventListener("click", () => navigate(button.dataset.page)));
 window.addEventListener("hashchange", () => navigate(location.hash.slice(1)));
-navigate(location.hash.slice(1) || "overview");
 function message(text) { $("notice").textContent = text; $("notice").hidden = !text; }
-function download(job) { const link = el("a", "Скачать результат ↓", "button secondary"); link.href = `/api/report/${job.id}`; link.download = "delta-run.json"; return link; }
-function badge(job) { return el("span", stateNames[job.state] || job.state, `status ${job.state === "COMPLETED" ? "success" : job.state === "FAILED" ? "failed" : "warning"}`); }
-function title(job) { return job.kind === "training" ? "Обучение · 10-Gene Phenotype" : "Docker · контроллеры и кворум"; }
+function renderNotice() {
+  message(connectionFailed ? t('connectionError', {error: connectionError}) : operationError ? translateLog(language, operationError) : '');
+}
+function download(job) { const link = el("a", t('download'), "button secondary"); link.href = `/api/report/${job.id}`; link.download = "delta-run.json"; return link; }
+function badge(job) { return el("span", t(job.state), `status ${job.state === "COMPLETED" ? "success" : job.state === "FAILED" ? "failed" : "warning"}`); }
+function title(job) { return t(job.kind === "training" ? 'trainingTitle' : 'controllersTitle'); }
+function applyLanguage() {
+  document.documentElement.lang = language;
+  document.title = t('documentTitle');
+  $('language').value = language;
+  document.querySelectorAll('[data-i18n]').forEach((node) => { node.textContent = t(node.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-aria]').forEach((node) => { node.setAttribute('aria-label', t(node.dataset.i18nAria)); });
+  try { localStorage.setItem(preferenceKey, language); } catch { /* Keep the current in-memory selection. */ }
+  lastSignature = '';
+  navigate(location.hash.slice(1) || 'overview');
+  if (current) renderState();
+  else {
+    $('controller-state').textContent = t('checking');
+    $('controller-detail').textContent = t('checkingHttp');
+    $('gpu-memory').textContent = t('checking');
+    $('gpu-name').textContent = t('readingGpu');
+    $('live-label').textContent = t('idle');
+  }
+  renderNotice();
+}
+$('language').addEventListener('change', (event) => {
+  if (!supportedLanguage(event.target.value)) return;
+  language = event.target.value;
+  const url = new URL(location.href);
+  url.searchParams.set('lang', language);
+  history.replaceState(null, '', url);
+  applyLanguage();
+});
 function renderJobs(state) {
   const jobs = state.jobs;
   $("run-count").textContent = jobs.length;
   $("completed-count").textContent = jobs.filter((job) => job.state === "COMPLETED").length;
   const busy = !!state.active_job || requested;
-  $("train").disabled = busy || state.controller.status !== "READY";
-  $("simulate").disabled = busy;
-  $("live-label").textContent = busy ? "● ВЫПОЛНЯЕТСЯ" : "ОЖИДАНИЕ";
-  if (!jobs.length) return;
+  $("train").disabled = connectionFailed || busy || state.controller.status !== "READY";
+  $("simulate").disabled = connectionFailed || busy;
+  $("live-label").textContent = t(busy ? 'live' : 'idle');
+  if (!jobs.length) { $('history').replaceChildren(el('p', t('emptyTitle'))); return; }
   const job = jobs[0];
   const signature = JSON.stringify(jobs.map((value) => [value.id, value.state, value.events.length, value.elapsed_ms]));
   if (signature === lastSignature) return;
@@ -37,22 +75,23 @@ function renderJobs(state) {
   const log = $("activity-log"); log.replaceChildren();
   for (const event of job.events) {
     const row = el("div", undefined, "log-row");
-    row.append(el("time", new Date(event.time).toLocaleTimeString("ru-RU")), el("span", event.message)); log.append(row);
+    row.append(el("time", new Date(event.time).toLocaleTimeString(locales[language], {hour12: false})), el("span", translateLog(language, event.message))); log.append(row);
   }
-  if (job.error) { const row = el("div", undefined, "log-row"); row.append(el("time", "ERROR"), el("span", job.error)); log.append(row); }
+  if (job.error) { const row = el("div", undefined, "log-row"); row.append(el("time", t('error')), el("span", translateLog(language, job.error))); log.append(row); }
   log.scrollTop = log.scrollHeight;
   const result = $("latest-result"); result.hidden = job.state !== "COMPLETED"; result.replaceChildren();
   if (job.state === "COMPLETED") {
     const row = el("div", undefined, "result-row"); const text = el("div", undefined, "result-text");
-    text.append(el("b", job.kind === "training" ? "✓ Обучение завершено · receipt проверен" : "✓ Docker-сценарии и офлайн-проверка пройдены"), el("small", `${(job.elapsed_ms / 1000).toFixed(1)} с · ${job.id.slice(0, 12)}`));
+    const duration = Number.isFinite(job.elapsed_ms) ? (job.elapsed_ms / 1000).toLocaleString(locales[language], {minimumFractionDigits: 1, maximumFractionDigits: 1}) : '…';
+    text.append(el("b", t(job.kind === "training" ? 'trainingSuccess' : 'simulationSuccess')), el("small", `${duration} ${t('seconds')} · ${job.id.slice(0, 12)}`));
     row.append(text, download(job)); result.append(row);
     if (job.result?.phases) {
       const phases = el("div", undefined, "phase-results");
-      const names = {"all-online": "Все online", "one-lost": "Один отказ", "two-lost": "Два отказа", restarted: "После restart"};
+      const names = {"all-online": 'allOnline', "one-lost": 'oneLost', "two-lost": 'twoLost', restarted: 'restarted'};
       for (const [key, name] of Object.entries(names)) {
         const phase = job.result.phases[key];
         const card = el("div", undefined, "phase-result");
-        card.append(el("small", name), el("b", `${phase.votes.length}/4 · ${phase.simulated_quorum_present ? "кворум" : "блок"}`)); phases.append(card);
+        card.append(el("small", t(name)), el("b", `${phase.votes.length}/4 · ${t(phase.simulated_quorum_present ? 'quorum' : 'blocked')}`)); phases.append(card);
       }
       result.append(phases);
     }
@@ -60,23 +99,34 @@ function renderJobs(state) {
   const history = $("history"); history.replaceChildren();
   for (const item of jobs) {
     const card = el("article", undefined, "panel history-item"); const info = el("div");
-    info.append(el("h2", title(item)), el("p", `${new Date(item.created_at).toLocaleString("ru-RU")} · ${item.id.slice(0, 12)} · SIMULATED_LOCAL`));
+    info.append(el("h2", title(item)), el("p", `${new Date(item.created_at).toLocaleString(locales[language], {hour12: false})} · ${item.id.slice(0, 12)} · SIMULATED_LOCAL`));
     card.append(info, badge(item), download(item)); history.append(card);
   }
 }
 function renderGates(state) {
   const rows = [
-    ["Локальное приложение", "HTTP Controller → Python Worker → execution receipt", state.controller.status === "READY" ? "Работает" : "Недоступно"],
-    ["Docker-контроллеры", "Тестовые Ed25519 подписи, потеря кворума, смена поколения", "SIMULATED_LOCAL"],
-    ["Feature000", "Arithmetic/model binding; обязательные доказательства и refinement", state.formal_candidate.decision],
-    ["PR50 / native runtime", "PARAMETER/APPLY, WAL, retry/recovery, C ABI/FFM/IPC", "Зависит от Formal GO"],
-    ["Gate A · безопасность", "Полные процессы и mandatory runtime проверки", "Не квалифицирован"],
-    ["Gate B · scientific quality", "Физическая GPU, реальные frozen модели/данные и joined lineage", "Не квалифицирован"],
-    ["Gate C / D · сеть", "Simulated WAN отдельно от approved real WAN", "Не квалифицированы"],
-    ["ResultQC / GO checkpoint", "Все mandatory gates и evaluator quorum", "Отсутствуют"],
+    [t('localApplication'), "HTTP Controller → Python Worker → execution receipt", t(state.controller.status === "READY" ? 'working' : 'unavailable')],
+    [t('dockerControllers'), t('dockerGateDescription'), "SIMULATED_LOCAL"],
+    ["Feature000", t('formalGateDescription'), state.formal_candidate.decision],
+    ["PR50 / native runtime", "PARAMETER/APPLY, WAL, retry/recovery, C ABI/FFM/IPC", t('dependsFormal')],
+    [t('gateA'), t('gateADescription'), t('notQualified')],
+    [t('gateB'), t('gateBDescription'), t('notQualified')],
+    [t('gateNetwork'), t('gateNetworkDescription'), t('notQualified')],
+    ["ResultQC / GO checkpoint", t('resultQcDescription'), t('absent')],
   ];
-  $("gates").replaceChildren(...rows.map(([name, desc, status]) => { const row = el("div", undefined, "gate"); const info = el("div"); info.append(el("b", name), el("small", desc)); row.append(info, el("span", status || "UNKNOWN", `status ${status === "Работает" ? "success" : "warning"}`)); return row; }));
+  $("gates").replaceChildren(...rows.map(([name, desc, status], index) => { const row = el("div", undefined, "gate"); const info = el("div"); info.append(el("b", name), el("small", desc)); row.append(info, el("span", status || "UNKNOWN", `status ${index === 0 && state.controller.status === 'READY' ? "success" : "warning"}`)); return row; }));
   $("formal-detail").textContent = JSON.stringify(state.formal_candidate, null, 2);
+}
+function renderState() {
+  const ready = current.controller.status === 'READY';
+  $('controller-state').textContent = t(connectionFailed ? 'disconnected' : ready ? 'online' : 'unavailable');
+  $('controller-state').className = ready && !connectionFailed ? 'good' : '';
+  $('controller-detail').textContent = ready ? `HTTP ready · ${(current.controller.build_id || '').slice(0, 8)}` : t('startServer');
+  $('advanced').href = current.controller_url;
+  const gpu = (current.gpu.observation || '').split(',').map((value) => value.trim());
+  $('gpu-memory').textContent = current.gpu.state === 'VISIBLE' ? gpu[2] : t(current.gpu.state === 'CHECKING' ? 'checking' : 'unavailable');
+  $('gpu-name').textContent = current.gpu.state === 'VISIBLE' ? gpu[0].replace('NVIDIA GeForce ', '') : t('gpuScope');
+  renderJobs(current); renderGates(current);
 }
 async function refresh() {
   if (refreshing) return;
@@ -84,32 +134,27 @@ async function refresh() {
   try {
     const response = await fetch("/api/state", {signal: AbortSignal.timeout(10000)}); if (!response.ok) throw new Error(`HTTP ${response.status}`);
     current = await response.json();
-    if (connectionFailed) { message(""); connectionFailed = false; }
-    $("controller-state").textContent = current.controller.status === "READY" ? "Online" : "Недоступен";
-    $("controller-state").className = current.controller.status === "READY" ? "good" : "";
-    $("controller-detail").textContent = current.controller.status === "READY" ? `HTTP ready · ${(current.controller.build_id || "").slice(0, 8)}` : "Запустите presentation-start.ps1";
-    $("advanced").href = current.controller_url;
-    const observation = current.gpu.observation || ""; const gpu = observation.split(",").map((value) => value.trim());
-    $("gpu-memory").textContent = current.gpu.state === "VISIBLE" ? gpu[2] : current.gpu.state === "CHECKING" ? "Проверяем…" : "Недоступна";
-    $("gpu-name").textContent = current.gpu.state === "VISIBLE" ? gpu[0].replace("NVIDIA GeForce ", "") : "Видимость устройства; обучение здесь использует CPU";
-    renderJobs(current); renderGates(current);
+    connectionFailed = false; connectionError = null;
+    renderState(); renderNotice();
   } catch (error) {
     connectionFailed = true;
+    connectionError = error.message;
     $("train").disabled = true; $("simulate").disabled = true;
-    $("controller-state").textContent = "Нет связи";
+    $("controller-state").textContent = t('disconnected');
     $("controller-state").className = "";
-    message(`Связь с приложением прервана: ${error.message}. Проверьте, что сервер запущен.`);
+    renderNotice();
   } finally { refreshing = false; }
 }
 async function submit(path) {
-  if (requested) return; requested = true; message(""); $("train").disabled = true; $("simulate").disabled = true;
+  if (requested) return; requested = true; operationError = null; renderNotice(); $("train").disabled = true; $("simulate").disabled = true;
   try {
     const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json", "X-Delta-Presentation": "1"}, body: "{}"});
     const value = await response.json(); if (!response.ok) throw new Error(value.error || `HTTP ${response.status}`);
-  } catch (error) { message(error.message); }
+  } catch (error) { operationError = error.message; renderNotice(); }
   finally { requested = false; await refresh(); }
 }
 $("train").addEventListener("click", () => submit("/api/train"));
 $("simulate").addEventListener("click", () => submit("/api/simulate"));
+applyLanguage();
 await refresh();
 setInterval(refresh, 1500);

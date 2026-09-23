@@ -392,9 +392,15 @@ class Handler(BaseHTTPRequestHandler):
             with self.server.application.lock:
                 job = copy.deepcopy(self.server.application.jobs.get(path.rsplit("/", 1)[1]))
             self.json(200 if job else 404, job or {"error": "NOT_FOUND"}, download=True)
-        elif path in {"/", "/app.js", "/style.css"}:
-            filename = {"/": "index.html", "/app.js": "app.js", "/style.css": "style.css"}[path]
-            media = {"/": "text/html", "/app.js": "text/javascript", "/style.css": "text/css"}[path]
+        elif path in {"/", "/app.js", "/i18n.mjs", "/style.css"}:
+            filename = "index.html" if path == "/" else path[1:]
+            media = (
+                "text/html"
+                if path == "/"
+                else "text/css"
+                if path == "/style.css"
+                else "text/javascript"
+            )
             self.send(200, (STATIC / filename).read_bytes(), media + "; charset=utf-8")
         else:
             self.json(404, {"error": "NOT_FOUND"})

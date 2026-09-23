@@ -5,6 +5,17 @@ is now runnable at **http://127.0.0.1:8870/**; the existing Controller/Worker an
 advanced UI run at **http://127.0.0.1:8865/**. Keep these services available while
 continuing formal work in the other worktree.
 
+The presentation now supports **English / Русский**. New browsers default to
+English; `?lang=en` explicitly selects it, and the UI remembers language changes.
+The one-click launcher opens English. All presentation pages, known log messages,
+statuses, dates and durations are localized. Original receipts/evidence retain
+their bytes. English speaker notes: `tools/presentation/PRESENTATION-EN.md`.
+Browser verification covered both languages, reload and storage persistence,
+query-language override, history/readiness and switching during an actual training
+run (`83737f24-d4c7-478c-867f-9a944cd282a4`, COMPLETED). Ten wrapper tests passed;
+JavaScript syntax, Ruff and the complete recorded training/Docker log translations
+were checked. No console errors were observed.
+
 Source: `b5f06eff7488c367b882050483bb08130456bfd7`.
 Baseline Controller: `c8aea64972f741060d1e527ebbb6f9a5a168a075`, clean
 `D:/delta-main-demo`. Original port 8765 was not stopped or modified.
