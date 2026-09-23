@@ -177,3 +177,27 @@ task using this file. Each run should make concrete progress and update this
 checkpoint; report meaningful completion/failures, not unchanged status. When
 all locally executable work is complete, stop the continuation and report the
 remaining external requirements honestly.
+
+## September 23: current-parent vote admission
+
+Source `0615ade`: TLC reproduced a delayed first PARAMETER vote after current
+advanced (36-state counterexample). VoteParameter now rechecks current at
+persistence, matching VoteApply. Two focused f=1 configurations execute
+production 3-of-4 quorums and probe the fourth validator before and after
+crash/restart/recovery. Four current-guard removal mutants fail the intended
+invariant; historical votes remain intact. This is a serialized Phase6 suffix,
+not full lifecycle or public arithmetic-witness refinement.
+
+Pinned parsing, 22 safety configs, 7 liveness configs, 18 production mutants and
+72 tooling tests pass. The 9 legal / 31 illegal traces regenerate under version
+1.1.0, candidate ID `f57b27a2feae0328e1ecf0c8d14b0a041eef260231a26958647af41303caedda`.
+Trace/reproduction tools read the registry version; the exact frozen baseline
+remains required and intentionally unchanged. Phase zero still fails. No native
+guard removed, no independent attestations and no Formal GO. Evidence:
+`formal/proposals/evidence/current-binding.json`, TLC report and four retained
+production counterexample fixtures. Next formal work remains the production
+witness, heterogeneous arithmetic and parametric proofs listed above.
+
+The user additionally requested connected Admin/Presentation workflows with
+a shared disk-backed local profile (accounts later). That presentation work
+continues in the separate presentation worktree; keep baseline c8aea649 intact.
