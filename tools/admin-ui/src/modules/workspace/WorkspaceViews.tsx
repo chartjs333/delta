@@ -47,8 +47,8 @@ export function ProfilePanel({ pendingDocument = false }: { pendingDocument?: bo
   const language = useLanguage();
   const [name, setName] = useState(workspace?.profileName ?? "");
   if (!workspace) return null;
-  return <details className="workspace-profile"><summary>{t("Local profile")}: {workspace.profileName} · {t(workspace.warning ? "Profile needs attention" : pendingDocument || name !== workspace.profileName ? "Unsaved changes" : workspace.saving ? "Saving…" : "Saved on this computer")}</summary>
-    <p>{t("Shared by Admin UI and Presentation. No account or password is required on this computer.")}</p>
+  return <details className="workspace-profile"><summary>{t("Local profile")}: {workspace.profileName} · {t(workspace.warning ? "Profile needs attention" : pendingDocument || name !== workspace.profileName ? "Unsaved changes" : workspace.saving ? "Saving…" : "Saved on application host")}</summary>
+    <p>{t("Shared by Admin UI and Presentation. Local access needs no account; remote access uses the presentation code.")}</p>
     <form onSubmit={event => { event.preventDefault(); void workspace.savePreferences(name, language).catch(() => {}); }}>
       <HelpLabel>{t("Profile name")}<input maxLength={80} value={name} onChange={event => setName(event.target.value)} /></HelpLabel>
       <button disabled={!name.trim() || workspace.saving}>{t("Save profile")}</button>

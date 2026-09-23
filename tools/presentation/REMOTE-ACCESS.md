@@ -42,6 +42,18 @@ run `status` to check it after an unexpected crash.
 Локальные приложения и сохранённые данные остаются. При аварии файл URL может
 содержать последний проверенный адрес — команда `status` проверит его заново.
 
+If the host resolver returns NXDOMAIN for a new hostname, the launcher can verify
+HTTPS using that hostname's A record from Cloudflare public DNS. TLS hostname and
+certificate checks remain enabled. It prints a DNS note in this case; system DNS
+and the hosts file are not changed. A browser on the same failing resolver may
+still be unable to open the URL. Retry later or use another network that resolves
+the hostname; this fallback is verification, not a browser DNS reconfiguration.
+
+Если DNS текущей сети не разрешает новый адрес, скрипт проверяет HTTPS по записи
+публичного DNS Cloudflare с проверкой имени и сертификата и выводит предупреждение.
+DNS Windows и hosts не меняются. Браузер с тем же неисправным DNS может не открыть
+ссылку: повторите позже или используйте сеть, где разрешается этот адрес.
+
 Files / Файлы в `D:\delta-data\presentation-20260924\tunnel`:
 
 - `current-url.txt` — last verified public URL / последний проверенный внешний URL.
@@ -102,6 +114,6 @@ a runnable teaching example; it does not dynamically install plugins.
 Checks cover authentication, tampered/expired sessions, origin enforcement,
 forbidden/private routes, bounded inputs, credential stripping, bilingual login,
 remote-safe links, SDK language state and exact downloadable example contents.
-Real public-origin browser and restart evidence is recorded separately under
+Public HTTPS execution, local browser and tunnel restart evidence is recorded under
 `specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260924/remote-sdk/`.
 This is self-review, not an independent attestation.

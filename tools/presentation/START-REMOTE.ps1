@@ -58,9 +58,28 @@ function Show-Address($Health) {
         throw 'Tunnel is not connected yet. No old URL will be displayed.'
     }
     # Verify the public edge, not just a line in cloudflared's startup log.
-    $Page = Invoke-WebRequest "$($Health.url)/_access/login?lang=en" -TimeoutSec 15
-    if ($Page.StatusCode -ne 200 -or -not $Page.Content.Contains('DeltaReduce') -or
-        -not $Page.Content.Contains('name="code"')) { throw 'Public login page did not pass verification.' }
+    $PublicDnsFallback = $false
+    try {
+        $Page = Invoke-WebRequest "$($Health.url)/_access/login?lang=en" -TimeoutSec 10
+        if ($Page.StatusCode -ne 200) { throw 'Public login is unavailable.' }
+        $PageText = $Page.Content
+    } catch {
+        # Some ISP resolvers retain NXDOMAIN for a newly allocated Quick Tunnel.
+        # Resolve this one hostname via Cloudflare DNS and verify normal HTTPS
+        # with the same hostname/SNI/certificate. Never disable TLS checks or
+        # change the computer's DNS settings/hosts file.
+        $PublicHost = ([Uri]$Health.url).DnsSafeHost
+        $Addresses = @(Resolve-DnsName $PublicHost -Server 1.1.1.1 -Type A -DnsOnly -QuickTimeout |
+            Where-Object { $_.Type -eq 'A' } | Select-Object -ExpandProperty IPAddress)
+        if ($Addresses.Count -eq 0) { throw 'The new public hostname is not resolvable yet. Run status shortly.' }
+        $Resolved = $PublicHost + ':443:' + $Addresses[0]
+        $PageText = (& curl.exe --fail --silent --show-error --connect-timeout 5 --max-time 15 `
+            --resolve $Resolved "$($Health.url)/_access/login?lang=en") -join "`n"
+        if ($LASTEXITCODE -ne 0) { throw 'The public HTTPS login is not reachable yet. Inspect cloudflared.log.' }
+        $PublicDnsFallback = $true
+    }
+    if (-not $PageText.Contains('DeltaReduce') -or
+        -not $PageText.Contains('name="code"')) { throw 'Public login page did not pass verification.' }
     [IO.File]::WriteAllText($UrlPath, "$($Health.url)/?lang=en" + [Environment]::NewLine)
     Write-Output ''
     Write-Output "Presentation EN: $($Health.url)/?lang=en"
@@ -72,10 +91,15 @@ function Show-Address($Health) {
     Write-Output "Current URL file: $UrlPath"
     Write-Output 'Keep this host powered on and connected. Share the URL and code only with your audience.'
     Write-Output 'After a reboot, run START-REMOTE.ps1 again to obtain the new URL.'
+    if ($PublicDnsFallback) {
+        Write-Output 'DNS note: HTTPS was verified using public DNS; the host DNS could not resolve this hostname. If the browser cannot open it, retry later or use a network whose DNS resolves trycloudflare.com.'
+    }
 }
 function Protect-Directory {
     New-Item -ItemType Directory -Path $RemoteData -Force | Out-Null
-    $Acl = Get-Acl -LiteralPath $RemoteData
+    # Build only a DACL, without copying owner/SACL fields from Get-Acl.
+    # This also works on repeat starts without SeSecurityPrivilege elevation.
+    $Acl = [Security.AccessControl.DirectorySecurity]::new()
     $Acl.SetAccessRuleProtection($true, $false)
     foreach ($Sid in @([Security.Principal.WindowsIdentity]::GetCurrent().User,
             [Security.Principal.SecurityIdentifier]::new('S-1-5-18'),
@@ -84,7 +108,7 @@ function Protect-Directory {
             'ContainerInherit,ObjectInherit', 'None', 'Allow')
         $Acl.AddAccessRule($Rule)
     }
-    Set-Acl -LiteralPath $RemoteData -AclObject $Acl
+    [IO.FileSystemAclExtensions]::SetAccessControl([IO.DirectoryInfo]::new($RemoteData), $Acl)
 }
 
 $Mutex = [Threading.Mutex]::new($false, "Local\DeltaPresentationQuickTunnel-$Port")

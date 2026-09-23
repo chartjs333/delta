@@ -32,4 +32,3 @@ it("downloads the same complete Python example that the executable checks use", 
   expect(await text).toBe(example);
   expect((click.mock.instances[0] as HTMLAnchorElement).download).toBe("sdk_plugin_example.py");
 });
-
