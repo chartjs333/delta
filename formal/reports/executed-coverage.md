@@ -31,3 +31,5 @@ All metrics below come from the checked-in deterministic config manifest and a v
 | CFG-LIVENESS-VIEW-CHANGE | liveness | 7 | 7 | 7 | none | 6 |
 | CFG-LIVENESS-ABORT-QC | liveness | 7 | 7 | 7 | ABORTED | 5 |
 | CFG-NATIVE-ARITHMETIC-LIVENESS | liveness | 42 | 42 | 42 | APPLIED | 10 |
+| CFG-CURRENT-BINDING | safety | 35 | 35 | 35 | none | 10 |
+| CFG-CURRENT-BINDING-RECOVERY | safety | 38 | 38 | 38 | none | 13 |
