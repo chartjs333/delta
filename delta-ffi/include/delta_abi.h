@@ -20,10 +20,15 @@ extern "C" {
 
 #define DELTA_ABI_MAJOR UINT16_C(1)
 #define DELTA_ABI_MINOR UINT16_C(0)
-#define DELTA_ABI_FEATURE_BITS UINT64_C(7)
+#define DELTA_ABI_FEATURE_RECORD_VOTE_V1 UINT64_C(8)
+#define DELTA_ABI_FEATURE_SUBMIT_RECEIPT_V1 UINT64_C(16)
+#define DELTA_ABI_FEATURE_BITS \
+  (UINT64_C(7) | DELTA_ABI_FEATURE_RECORD_VOTE_V1 | DELTA_ABI_FEATURE_SUBMIT_RECEIPT_V1)
 #define DELTA_ABI_DESCRIPTOR_SIZE UINT32_C(64)
 #define DELTA_ABI_OPEN_OPTIONS_SIZE UINT32_C(128)
 #define DELTA_ABI_OUTPUT_BUFFER_SIZE UINT32_C(32)
+#define DELTA_VOTE_RECEIPT_V1_SIZE UINT32_C(40)
+#define DELTA_SUBMIT_RECEIPT_V1_SIZE UINT32_C(48)
 #define DELTA_HIERARCHY_CONTEXT_SIZE UINT32_C(168)
 #define DELTA_SCHEDULING_ELIGIBILITY_CONTEXT_SIZE UINT32_C(184)
 #define DELTA_CERTIFICATE_INSPECT_CONTEXT_SIZE UINT32_C(40)
@@ -98,6 +103,19 @@ typedef struct delta_runtime_open_options {
   delta_bytes_view_t expected_schema_set_id;
 } delta_runtime_open_options_t;
 
+typedef struct delta_vote_receipt_v1 {
+  uint32_t struct_size;
+  uint32_t reserved;
+  delta_output_buffer_t canonical_receipt;
+} delta_vote_receipt_v1_t;
+
+typedef struct delta_submit_receipt_v1 {
+  uint32_t struct_size;
+  uint32_t reserved;
+  uint64_t journal_sequence;
+  delta_output_buffer_t canonical_effect;
+} delta_submit_receipt_v1_t;
+
 typedef struct delta_hierarchy_context {
   uint32_t struct_size;
   uint32_t reserved;
@@ -170,6 +188,10 @@ DELTA_API const char* delta_status_message(delta_status_t status);
 DELTA_API delta_status_t delta_runtime_open(
     const delta_runtime_open_options_t* options,
     delta_runtime_t** output);
+DELTA_API delta_status_t delta_runtime_open_with_vote_policy_v1(
+    const delta_runtime_open_options_t* options,
+    delta_bytes_view_t canonical_vote_policy,
+    delta_runtime_t** output);
 DELTA_API delta_status_t delta_runtime_submit_borrowed(
     delta_runtime_t* runtime,
     delta_bytes_view_t command,
@@ -178,6 +200,22 @@ DELTA_API delta_status_t delta_runtime_submit_copy(
     delta_runtime_t* runtime,
     delta_bytes_view_t command,
     delta_output_buffer_t* effect_output);
+DELTA_API delta_status_t delta_runtime_submit_receipt_borrowed_v1(
+    delta_runtime_t* runtime,
+    delta_bytes_view_t command,
+    delta_submit_receipt_v1_t* receipt);
+DELTA_API delta_status_t delta_runtime_submit_receipt_copy_v1(
+    delta_runtime_t* runtime,
+    delta_bytes_view_t command,
+    delta_submit_receipt_v1_t* receipt);
+DELTA_API delta_status_t delta_runtime_record_vote_borrowed_v1(
+    delta_runtime_t* runtime,
+    delta_bytes_view_t canonical_vote,
+    delta_vote_receipt_v1_t* receipt);
+DELTA_API delta_status_t delta_runtime_record_vote_copy_v1(
+    delta_runtime_t* runtime,
+    delta_bytes_view_t canonical_vote,
+    delta_vote_receipt_v1_t* receipt);
 DELTA_API delta_status_t delta_runtime_state(
     delta_runtime_t* runtime,
     delta_output_buffer_t* state_output);

@@ -73,31 +73,54 @@ std::string_view vote_kind_name(VoteKind kind) noexcept {
     case VoteKind::aggregation_plan:
       return "APC";
     case VoteKind::parameter_shard:
-      return "PARAMETER_SHARD_QC";
+      return "PARAMETER";
     case VoteKind::aggregate_root:
-      return "AGGREGATE_ROOT_QC";
+      return "AGGREGATE_ROOT";
     case VoteKind::apply:
-      return "APPLY_QC";
+      return "APPLY";
   }
   return "UNKNOWN";
+}
+
+core::consensus::VoteAction vote_action(VoteKind kind) noexcept {
+  switch (kind) {
+    case VoteKind::input_set:
+      return core::consensus::VoteAction::input_set;
+    case VoteKind::eligibility:
+      return core::consensus::VoteAction::eligibility;
+    case VoteKind::aggregation_plan:
+      return core::consensus::VoteAction::aggregation_plan;
+    case VoteKind::parameter_shard:
+      return core::consensus::VoteAction::parameter;
+    case VoteKind::aggregate_root:
+      return core::consensus::VoteAction::aggregate_root;
+    case VoteKind::apply:
+      return core::consensus::VoteAction::apply;
+  }
+  return static_cast<core::consensus::VoteAction>(0U);
 }
 
 core::protocol::Vote make_vote(
     VoteKind kind,
     const Context& context,
-    std::string body_id,
+    const core::consensus::VoteCandidateBinding& candidate,
     std::string validator_id,
     std::string signature_id,
     std::uint64_t durable_sequence) {
-  require(is_content_id(body_id), ErrorCode::identifier_invalid, "vote body ID is invalid");
+  require(
+      candidate.action == vote_action(kind) && is_content_id(candidate.body_hash) &&
+          !candidate.context_id.empty() && candidate.height == context.height &&
+          candidate.view == context.view &&
+          candidate.parents.round_config_id == context.round_config_id,
+      ErrorCode::context_mismatch,
+      "vote candidate does not match the typed certificate context");
   require(
       is_content_id(signature_id), ErrorCode::identifier_invalid, "vote signature ID is invalid");
   require(durable_sequence > 0U, ErrorCode::context_mismatch, "vote sequence is zero");
   require(!validator_id.empty(), ErrorCode::identifier_invalid, "validator ID is empty");
   return core::protocol::Vote{
-      .body_hash = std::move(body_id),
-      .context_id = std::string(vote_kind_name(kind)) + ":" + context.round_id + ":" +
-                    std::to_string(context.height) + ":" + std::to_string(context.view),
+      .body_hash = candidate.body_hash,
+      .context_id = candidate.context_id,
       .durable_sequence = durable_sequence,
       .height = context.height,
       .kind = std::string(vote_kind_name(kind)),

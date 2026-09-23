@@ -70,12 +70,14 @@ void expose_durability_mutant(const std::filesystem::path& output) {
       state, "ACCEPT_COMMITMENT", "mutant-undurable-effect", body);
   runtime::SubmitReceipt exposed;
   {
-    runtime::Runtime instance({directory, initial, 16U});
+    runtime::Runtime instance(
+        {directory, initial, 16U, {}, std::nullopt, std::nullopt});
     exposed = instance.submit(protocol::encode(command));
     test::expect(!exposed.effect_batch_bytes.empty(), "durability mutant exposed no effect");
   }
   {
-    runtime::Runtime recovered({directory, initial, 16U});
+    runtime::Runtime recovered(
+        {directory, initial, 16U, {}, std::nullopt, std::nullopt});
     test::expect(
         recovered.journal_sequence() == 0U && recovered.state_bytes() == initial &&
             recovered.state_bytes() != exposed.next_state_bytes,

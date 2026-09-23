@@ -1,0 +1,189 @@
+{
+  "authority": {
+    "assembler_eligible": false,
+    "benchmark_result_qc": null,
+    "execution_class": "NON_QUALIFYING_DIAGNOSTIC_ONLY",
+    "feature010_go": false,
+    "gate_a_qualified": false,
+    "gate_b_qualified": false,
+    "gate_c_qualified": false,
+    "gate_d_qualified": false,
+    "official_comparison": false,
+    "profile_selection_allowed": false,
+    "selected_profile": null
+  },
+  "diagnostic_campaign_id": "example-pr50-diagnostic-not-executable",
+  "environment": {
+    "allocation_manifest": {
+      "path": "/nonexistent/frozen-allocation.json",
+      "sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_bytes": 1
+    },
+    "allocation_root": "/nonexistent/pinned-allocation",
+    "campaign_ledger_directory": "/nonexistent/sidecar-diagnostic-ledger",
+    "container_image_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "container_runtime": {
+      "name": "docker",
+      "version": "EXAMPLE_NOT_EXECUTABLE"
+    },
+    "host_collector_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "host_receipt_nonce": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "host_receipt_path": "/nonexistent/host-exchange/host-receipt.json",
+    "host_telemetry_path": "/nonexistent/host-exchange/host-telemetry.json",
+    "host_telemetry_wait_seconds": 120,
+    "mandatory_collectors": [
+      "SCHEDULED_ACTUAL_AND_LATENESS_NS",
+      "PROCESS_AND_THREAD_CPU_TIME_DELTAS",
+      "CGROUP_CPU_STAT",
+      "CPU_PSI",
+      "IO_PSI",
+      "SCHEDSTAT_OR_RUN_QUEUE",
+      "WAL_AND_FSYNC_LATENCY",
+      "CPUSET_QUOTA_PROCESSORS_MEMORY_CONTAINER_RUNTIME",
+      "JAVA_JFR_GC_SAFEPOINT_COMPILER"
+    ],
+    "optional_host_collectors": [
+      "DOCKER_DESKTOP_AND_WSL_PAUSE_RESTART_SUSPEND",
+      "WINDOWS_WHEA_STORAGE_RESET_THERMAL_POWER"
+    ],
+    "sampling_interval_ms": 10
+  },
+  "evidence_directory": "/nonexistent/sidecar-diagnostic-evidence",
+  "lanes": [
+    {
+      "argv": [
+        "{ALLOCATION_ROOT}/jdk/bin/java",
+        "-XX:StartFlightRecording=filename={JFR_FILE},settings=profile,dumponexit=true",
+        "--enable-native-access=ALL-UNNAMED",
+        "-cp",
+        "{ALLOCATION_ROOT}/sidecar-diagnostic-tests.jar",
+        "io.deltareduce.node.sidecar.SidecarDiagnosticCapture",
+        "--profile",
+        "{PROFILE_ID}",
+        "--corpus",
+        "{ALLOCATION_ROOT}/corpus.bin",
+        "--event-log",
+        "{EVENT_LOG}",
+        "--durable-directory",
+        "{LANE_DIRECTORY}/durable",
+        "--source-root",
+        "{SOURCE_ROOT}",
+        "--duration-seconds",
+        "{DURATION_SECONDS}",
+        "--offers-per-second",
+        "{OFFERS_PER_SECOND}",
+        "--native-library",
+        "{ALLOCATION_ROOT}/libdelta_ffi.so"
+      ],
+      "environment": {
+        "HOME": "/tmp",
+        "JAVA_HOME": "{ALLOCATION_ROOT}/jdk",
+        "LANG": "C.UTF-8",
+        "LANGUAGE": "C",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "{ALLOCATION_ROOT}/jdk/bin:/usr/bin:/bin",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC"
+      },
+      "java_involved": true,
+      "jfr_events": [
+        "jdk.GarbageCollection",
+        "jdk.GCPhasePause",
+        "jdk.SafepointBegin",
+        "jdk.SafepointEnd",
+        "jdk.Compilation",
+        "jdk.CompilerPhase"
+      ],
+      "profile_id": "EMBEDDED_FFM",
+      "strace_fsync": {
+        "argv_prefix": [
+          "{ALLOCATION_ROOT}/bin/strace",
+          "-ff",
+          "-ttt",
+          "-T",
+          "-e",
+          "trace=fsync,fdatasync"
+        ],
+        "unavailable_policy": "RECORD_NOT_AVAILABLE_NEVER_INFER"
+      },
+      "working_directory": "{SOURCE_ROOT}"
+    },
+    {
+      "argv": [
+        "{ALLOCATION_ROOT}/jdk/bin/java",
+        "-XX:StartFlightRecording=filename={JFR_FILE},settings=profile,dumponexit=true",
+        "--enable-native-access=ALL-UNNAMED",
+        "-cp",
+        "{ALLOCATION_ROOT}/sidecar-diagnostic-tests.jar",
+        "io.deltareduce.node.sidecar.SidecarDiagnosticCapture",
+        "--profile",
+        "{PROFILE_ID}",
+        "--corpus",
+        "{ALLOCATION_ROOT}/corpus.bin",
+        "--event-log",
+        "{EVENT_LOG}",
+        "--durable-directory",
+        "{LANE_DIRECTORY}/durable",
+        "--source-root",
+        "{SOURCE_ROOT}",
+        "--duration-seconds",
+        "{DURATION_SECONDS}",
+        "--offers-per-second",
+        "{OFFERS_PER_SECOND}",
+        "--sidecar-executable",
+        "{ALLOCATION_ROOT}/delta_runtime_sidecar"
+      ],
+      "environment": {
+        "HOME": "/tmp",
+        "JAVA_HOME": "{ALLOCATION_ROOT}/jdk",
+        "LANG": "C.UTF-8",
+        "LANGUAGE": "C",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "{ALLOCATION_ROOT}/jdk/bin:/usr/bin:/bin",
+        "TMPDIR": "/tmp",
+        "TZ": "UTC"
+      },
+      "java_involved": true,
+      "jfr_events": [
+        "jdk.GarbageCollection",
+        "jdk.GCPhasePause",
+        "jdk.SafepointBegin",
+        "jdk.SafepointEnd",
+        "jdk.Compilation",
+        "jdk.CompilerPhase"
+      ],
+      "profile_id": "ISOLATED_SIDECAR",
+      "strace_fsync": {
+        "argv_prefix": [
+          "{ALLOCATION_ROOT}/bin/strace",
+          "-ff",
+          "-ttt",
+          "-T",
+          "-e",
+          "trace=fsync,fdatasync"
+        ],
+        "unavailable_policy": "RECORD_NOT_AVAILABLE_NEVER_INFER"
+      },
+      "working_directory": "{SOURCE_ROOT}"
+    }
+  ],
+  "manifest_state": "EXAMPLE_NOT_EXECUTABLE",
+  "schedule": {
+    "duration_seconds_per_lane": 60,
+    "lane_order": [
+      "EMBEDDED_FFM",
+      "ISOLATED_SIDECAR"
+    ],
+    "late_offer_policy": "ABSOLUTE_MONOTONIC_DEADLINES_NO_RATE_REDUCTION_NO_CATCHUP_REBASE",
+    "offers_per_second": 100,
+    "overlap_policy": "SEQUENTIAL_NO_OVERLAP",
+    "warmup_operations": 1000
+  },
+  "schema_version": "1.1.0",
+  "source": {
+    "commit": "0000000000000000000000000000000000000000",
+    "repository": "https://github.com/chartjs333/delta.git",
+    "tree": "0000000000000000000000000000000000000000"
+  },
+  "type_name": "FEATURE010_SIDECAR_DIAGNOSTIC_MANIFEST"
+}

@@ -80,20 +80,24 @@ void append_durable(const std::filesystem::path& path, std::string_view bytes) {
 
 CertificateVoteRuntime::CertificateVoteRuntime(
     std::filesystem::path directory,
-    core::canonical::Bytes initial_state_bytes)
+    core::canonical::Bytes initial_state_bytes,
+    core::consensus::VoteAdmissionPolicy vote_policy)
     : runtime_(std::make_unique<Runtime>(Config{
           .directory = std::move(directory),
           .initial_state_bytes = std::move(initial_state_bytes),
           .submission_capacity = 64U,
+          .durable_binding_guard = {},
+          .vote_policy = std::move(vote_policy),
+          .expected_wal_identity = {},
       })) {}
 
 PersistedVoteFrame CertificateVoteRuntime::persist_and_expose(
     const core::protocol::Vote& vote,
     CrashPoint crash_point) {
   auto frame = core::protocol::encode(vote);
-  const auto receipt = runtime_->record_vote(frame, crash_point);
+  const auto receipt = runtime_->record_vote(std::move(frame), crash_point);
   return PersistedVoteFrame{
-      .frame = std::move(frame),
+      .frame = receipt.frame,
       .vote_id = receipt.vote_id,
       .journal_sequence = receipt.journal_sequence,
       .replay = receipt.replay,

@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.example/schemas/feature010-sidecar-diagnostic-manifest-v1.1.json",
+  "title": "Feature 010 non-qualifying sidecar diagnostic manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "authority",
+    "diagnostic_campaign_id",
+    "environment",
+    "evidence_directory",
+    "lanes",
+    "manifest_state",
+    "schedule",
+    "schema_version",
+    "source",
+    "type_name"
+  ],
+  "properties": {
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assembler_eligible",
+        "benchmark_result_qc",
+        "execution_class",
+        "feature010_go",
+        "gate_a_qualified",
+        "gate_b_qualified",
+        "gate_c_qualified",
+        "gate_d_qualified",
+        "official_comparison",
+        "profile_selection_allowed",
+        "selected_profile"
+      ],
+      "properties": {
+        "assembler_eligible": {"const": false},
+        "benchmark_result_qc": {"const": null},
+        "execution_class": {"const": "NON_QUALIFYING_DIAGNOSTIC_ONLY"},
+        "feature010_go": {"const": false},
+        "gate_a_qualified": {"const": false},
+        "gate_b_qualified": {"const": false},
+        "gate_c_qualified": {"const": false},
+        "gate_d_qualified": {"const": false},
+        "official_comparison": {"const": false},
+        "profile_selection_allowed": {"const": false},
+        "selected_profile": {"const": null}
+      }
+    },
+    "diagnostic_campaign_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allocation_manifest",
+        "allocation_root",
+        "campaign_ledger_directory",
+        "container_image_digest",
+        "container_runtime",
+        "host_collector_sha256",
+        "host_receipt_nonce",
+        "host_receipt_path",
+        "host_telemetry_path",
+        "host_telemetry_wait_seconds",
+        "mandatory_collectors",
+        "optional_host_collectors",
+        "sampling_interval_ms"
+      ],
+      "properties": {
+        "allocation_manifest": {"$ref": "#/$defs/fileRecord"},
+        "allocation_root": {"$ref": "#/$defs/absolutePath"},
+        "campaign_ledger_directory": {"$ref": "#/$defs/absolutePath"},
+        "container_image_digest": {"$ref": "#/$defs/contentId"},
+        "container_runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version"],
+          "properties": {
+            "name": {"enum": ["docker", "podman"]},
+            "version": {"type": "string", "minLength": 1, "maxLength": 512}
+          }
+        },
+        "host_collector_sha256": {"$ref": "#/$defs/contentId"},
+        "host_receipt_nonce": {"$ref": "#/$defs/contentId"},
+        "host_receipt_path": {"$ref": "#/$defs/absolutePath"},
+        "host_telemetry_path": {"$ref": "#/$defs/absolutePath"},
+        "host_telemetry_wait_seconds": {"type": "integer", "minimum": 1, "maximum": 600},
+        "mandatory_collectors": {
+          "const": [
+            "SCHEDULED_ACTUAL_AND_LATENESS_NS",
+            "PROCESS_AND_THREAD_CPU_TIME_DELTAS",
+            "CGROUP_CPU_STAT",
+            "CPU_PSI",
+            "IO_PSI",
+            "SCHEDSTAT_OR_RUN_QUEUE",
+            "WAL_AND_FSYNC_LATENCY",
+            "CPUSET_QUOTA_PROCESSORS_MEMORY_CONTAINER_RUNTIME",
+            "JAVA_JFR_GC_SAFEPOINT_COMPILER"
+          ]
+        },
+        "optional_host_collectors": {
+          "const": [
+            "DOCKER_DESKTOP_AND_WSL_PAUSE_RESTART_SUSPEND",
+            "WINDOWS_WHEA_STORAGE_RESET_THERMAL_POWER"
+          ]
+        },
+        "sampling_interval_ms": {"type": "integer", "minimum": 1, "maximum": 100}
+      }
+    },
+    "evidence_directory": {"$ref": "#/$defs/absolutePath"},
+    "lanes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/lane"},
+            {
+              "properties": {
+                "profile_id": {"const": "EMBEDDED_FFM"},
+                "argv": {
+                  "allOf": [
+                    {"contains": {"const": "--native-library"}},
+                    {"not": {"contains": {"const": "--sidecar-executable"}}}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/lane"},
+            {
+              "properties": {
+                "profile_id": {"const": "ISOLATED_SIDECAR"},
+                "argv": {
+                  "allOf": [
+                    {"contains": {"const": "--sidecar-executable"}},
+                    {"not": {"contains": {"const": "--native-library"}}}
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "manifest_state": {"enum": ["EXAMPLE_NOT_EXECUTABLE", "FROZEN_EXECUTABLE"]},
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "duration_seconds_per_lane",
+        "lane_order",
+        "late_offer_policy",
+        "offers_per_second",
+        "overlap_policy",
+        "warmup_operations"
+      ],
+      "properties": {
+        "duration_seconds_per_lane": {"type": "integer", "minimum": 1, "maximum": 3600},
+        "lane_order": {"const": ["EMBEDDED_FFM", "ISOLATED_SIDECAR"]},
+        "late_offer_policy": {
+          "const": "ABSOLUTE_MONOTONIC_DEADLINES_NO_RATE_REDUCTION_NO_CATCHUP_REBASE"
+        },
+        "offers_per_second": {"const": 100},
+        "overlap_policy": {"const": "SEQUENTIAL_NO_OVERLAP"},
+        "warmup_operations": {"const": 1000}
+      }
+    },
+    "schema_version": {"const": "1.1.0"},
+    "source": {"$ref": "#/$defs/source"},
+    "type_name": {"const": "FEATURE010_SIDECAR_DIAGNOSTIC_MANIFEST"}
+  },
+  "$defs": {
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?:/|[A-Za-z]:[\\\\/]|\\\\\\\\).+"
+    },
+    "contentId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "fileRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "size_bytes"],
+      "properties": {
+        "path": {"$ref": "#/$defs/absolutePath"},
+        "sha256": {"$ref": "#/$defs/contentId"},
+        "size_bytes": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "repository", "tree"],
+      "properties": {
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "repository": {"const": "https://github.com/chartjs333/delta.git"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "argv",
+        "environment",
+        "java_involved",
+        "jfr_events",
+        "profile_id",
+        "strace_fsync",
+        "working_directory"
+      ],
+      "properties": {
+        "argv": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"type": "string", "minLength": 1, "maxLength": 4096},
+          "prefixItems": [
+            {"type": "string", "pattern": "\\{ALLOCATION_ROOT\\}"}
+          ],
+          "allOf": [
+            {"contains": {"const": "io.deltareduce.node.sidecar.SidecarDiagnosticCapture"}},
+            {"contains": {"const": "--corpus"}},
+            {"contains": {"const": "--durable-directory"}},
+            {"contains": {"const": "--duration-seconds"}},
+            {"contains": {"const": "--event-log"}},
+            {"contains": {"const": "--offers-per-second"}},
+            {"contains": {"const": "--profile"}},
+            {"contains": {"const": "--source-root"}},
+            {"contains": {"const": "-cp"}},
+            {"contains": {"pattern": "\\{ALLOCATION_ROOT\\}"}},
+            {"contains": {"const": "{DURATION_SECONDS}"}},
+            {"contains": {"const": "{EVENT_LOG}"}},
+            {"contains": {"pattern": "\\{JFR_FILE\\}"}},
+            {"contains": {"const": "{OFFERS_PER_SECOND}"}},
+            {"contains": {"const": "{PROFILE_ID}"}},
+            {"contains": {"const": "{SOURCE_ROOT}"}}
+          ]
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["HOME", "JAVA_HOME", "LANG", "LANGUAGE", "LC_ALL", "PATH", "TMPDIR", "TZ"],
+          "properties": {
+            "HOME": {"const": "/tmp"},
+            "JAVA_HOME": {"const": "{ALLOCATION_ROOT}/jdk"},
+            "LANG": {"const": "C.UTF-8"},
+            "LANGUAGE": {"const": "C"},
+            "LC_ALL": {"const": "C.UTF-8"},
+            "PATH": {"const": "{ALLOCATION_ROOT}/jdk/bin:/usr/bin:/bin"},
+            "TMPDIR": {"const": "/tmp"},
+            "TZ": {"const": "UTC"}
+          }
+        },
+        "java_involved": {"const": true},
+        "jfr_events": {
+          "const": [
+            "jdk.GarbageCollection",
+            "jdk.GCPhasePause",
+            "jdk.SafepointBegin",
+            "jdk.SafepointEnd",
+            "jdk.Compilation",
+            "jdk.CompilerPhase"
+          ]
+        },
+        "profile_id": {"enum": ["EMBEDDED_FFM", "ISOLATED_SIDECAR"]},
+        "strace_fsync": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["argv_prefix", "unavailable_policy"],
+          "properties": {
+            "argv_prefix": {
+              "type": "array",
+              "minItems": 2,
+              "items": {"type": "string", "minLength": 1, "maxLength": 4096},
+              "prefixItems": [
+                {"type": "string", "pattern": "\\{ALLOCATION_ROOT\\}"}
+              ]
+            },
+            "unavailable_policy": {"const": "RECORD_NOT_AVAILABLE_NEVER_INFER"}
+          }
+        },
+        "working_directory": {"const": "{SOURCE_ROOT}"}
+      }
+    }
+  }
+}

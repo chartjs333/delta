@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.example/schemas/feature010-sidecar-diagnostic-allocation-v1.1.json",
+  "title": "Feature 010 sidecar diagnostic pinned allocation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifacts",
+    "container",
+    "jdk_tree",
+    "resources",
+    "schema_version",
+    "source",
+    "type_name"
+  ],
+  "properties": {
+    "artifacts": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "prefixItems": [
+        {"$ref": "#/$defs/buildProvenanceReceipt"},
+        {"$ref": "#/$defs/canonicalCorpus"},
+        {"$ref": "#/$defs/javaClassesJar"},
+        {"$ref": "#/$defs/javaExecutable"},
+        {"$ref": "#/$defs/jfrExecutable"},
+        {"$ref": "#/$defs/nativeLibrary"},
+        {"$ref": "#/$defs/sidecarExecutable"},
+        {"$ref": "#/$defs/straceExecutable"}
+      ],
+      "items": false
+    },
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image_digest", "runtime", "runtime_version"],
+      "properties": {
+        "image_digest": {"$ref": "#/$defs/contentId"},
+        "runtime": {"enum": ["docker", "podman"]},
+        "runtime_version": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "jdk_tree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "entry_count", "root", "sha256", "total_size_bytes"],
+      "properties": {
+        "algorithm": {"const": "CANONICAL_PATH_KIND_MODE_CONTENT_V1"},
+        "entry_count": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+        "root": {"$ref": "#/$defs/absolutePath"},
+        "sha256": {"$ref": "#/$defs/contentId"},
+        "total_size_bytes": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807}
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "available_processors",
+        "cgroup_mode",
+        "cpu_max",
+        "cpuset_cpus_effective",
+        "memory_max"
+      ],
+      "properties": {
+        "available_processors": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "cgroup_mode": {"enum": ["V1", "V2"]},
+        "cpu_max": {"type": "string", "minLength": 1, "maxLength": 512},
+        "cpuset_cpus_effective": {"type": "string", "minLength": 1, "maxLength": 512},
+        "memory_max": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "schema_version": {"const": "1.1.0"},
+    "source": {"$ref": "#/$defs/source"},
+    "type_name": {"const": "FEATURE010_SIDECAR_DIAGNOSTIC_ALLOCATION"}
+  },
+  "$defs": {
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?:/|[A-Za-z]:[\\\\/]|\\\\\\\\).+"
+    },
+    "contentId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "path", "sha256", "size_bytes"],
+      "properties": {
+        "artifact_id": {"type": "string"},
+        "path": {"$ref": "#/$defs/absolutePath"},
+        "sha256": {"$ref": "#/$defs/contentId"},
+        "size_bytes": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807}
+      }
+    },
+    "canonicalCorpus": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "CANONICAL_CORPUS"}}}
+      ]
+    },
+    "buildProvenanceReceipt": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "BUILD_PROVENANCE_RECEIPT"}}}
+      ]
+    },
+    "javaClassesJar": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "JAVA_CLASSES_JAR"}}}
+      ]
+    },
+    "javaExecutable": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "JAVA_EXECUTABLE"}}}
+      ]
+    },
+    "jfrExecutable": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "JFR_EXECUTABLE"}}}
+      ]
+    },
+    "nativeLibrary": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "NATIVE_LIBRARY"}}}
+      ]
+    },
+    "sidecarExecutable": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "SIDECAR_EXECUTABLE"}}}
+      ]
+    },
+    "straceExecutable": {
+      "allOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"properties": {"artifact_id": {"const": "STRACE_EXECUTABLE"}}}
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "repository", "tree"],
+      "properties": {
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "repository": {"const": "https://github.com/chartjs333/delta.git"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    }
+  }
+}
