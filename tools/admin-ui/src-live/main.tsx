@@ -5,6 +5,8 @@ import { App } from "../src/app/App";
 import { LiveExecutionProvider } from "../src/modules/live-execution/live-execution-context";
 import "../src/styles.css";
 import { HttpLiveExecutionAdapter } from "./http-live-execution-adapter";
+import { WorkspaceProvider } from "../src/modules/workspace/workspace-context";
+import { HttpWorkspaceStorage } from "./http-workspace-storage";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -20,11 +22,17 @@ if (!window.location.hash) {
 }
 
 const liveExecutionPort = new HttpLiveExecutionAdapter();
-
-createRoot(rootElement).render(
+const profileStorage = new HttpWorkspaceStorage();
+const sharedAddress = import.meta.env.VITE_PRESENTATION_URL as string | undefined;
+if (sharedAddress && window.location.origin !== new URL(sharedAddress).origin) {
+  const destination = new URL("admin/", sharedAddress);
+  destination.search = window.location.search;
+  destination.hash = window.location.hash;
+  window.location.replace(destination.href);
+} else createRoot(rootElement).render(
   <StrictMode>
     <LiveExecutionProvider mode="HTTP_LIVE" port={liveExecutionPort}>
-      <App />
+      {sharedAddress ? <WorkspaceProvider storage={profileStorage}><App /></WorkspaceProvider> : <App />}
     </LiveExecutionProvider>
   </StrictMode>,
 );

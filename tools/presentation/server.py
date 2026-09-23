@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import importlib.util
 import json
 import os
@@ -26,6 +27,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
+
+from workspace_store import EXECUTION, UUID, default_profile, parse_json, read_profile, save_profile
 
 ROOT = Path(__file__).resolve().parents[2]
 STATIC = Path(__file__).with_name("static")
@@ -85,6 +88,12 @@ class Presentation:
         self.jobs_dir = self.data / "jobs"
         self.jobs_dir.mkdir(exist_ok=True)
         self.controller_url = f"http://127.0.0.1:{controller_port}"
+        self.admin_root = (
+            Path("D:/delta-main-demo/tools/admin-ui/dist-live")
+            if os.name == "nt"
+            else ROOT / "tools/admin-ui/dist-live"
+        )
+        self.profile_path = self.data / "workspace.json"
         self.smoke = load_smoke()
         self.client = self.smoke.WorkingVersionClient(
             self.controller_url, self.controller_url, timeout_seconds=5
@@ -158,6 +167,10 @@ class Presentation:
                 for key in ("decision", "formal_semantics_id", "decision_reasons")
             }
         with self.lock:
+            try:
+                workspace = read_profile(self.profile_path)["data"] or default_profile()
+            except (ValueError, OSError, TypeError, RecursionError):
+                workspace = None
             return {
                 "instance_id": self.instance_id,
                 "mode": "SIMULATED_LOCAL",
@@ -166,6 +179,7 @@ class Presentation:
                 "feature011_admitted": False,
                 "controller": ready,
                 "controller_url": self.controller_url,
+                "workspace": workspace,
                 "gpu": copy.deepcopy(self.gpu),
                 "formal_candidate": formal,
                 "active_job": self.active,
@@ -219,9 +233,31 @@ class Presentation:
     def _train(self, job_id: str) -> dict[str, Any]:
         self.log(job_id, "Отправка TRAIN_TICKET в существующий HTTP Controller.")
         intent = self.smoke.build_train_intent()
+        with self.lock:
+            profile = read_profile(self.profile_path)
+            data = profile["data"] or default_profile()
+            data["runs"] = [
+                *data["runs"],
+                {
+                    "intentId": intent["intent_id"],
+                    "intentDigest": intent["intent_digest"],
+                    "campaignId": data["activeCampaignId"],
+                    "name": "Presentation training",
+                    "workload": intent["workload"],
+                    "operation": intent["operation"],
+                    "createdAt": intent["created_at"],
+                },
+            ][-100:]
+            save_profile(self.profile_path, {"revision": profile["revision"], "data": data})
         submission = self.client.submit(intent)
         admission = submission["admission"]
         execution_id = admission["execution_id"]
+        with self.lock:
+            profile = read_profile(self.profile_path)
+            for run in profile["data"]["runs"]:
+                if run["intentId"] == intent["intent_id"]:
+                    run["executionId"] = execution_id
+            save_profile(self.profile_path, profile)
         self.update(job_id, execution_id=execution_id, intent=intent, admission=admission)
         self.log(job_id, f"Controller принял задание {execution_id}.")
         deadline, previous = time.monotonic() + 90, None
@@ -259,6 +295,64 @@ class Presentation:
             "scientific_gate_b": "NOT_QUALIFIED",
             "native_consensus": "NOT_EXECUTED",
             "java_transport": "NOT_EXECUTED",
+        }
+
+    def linked_execution(self, execution_id: str) -> dict[str, Any]:
+        if not EXECUTION.fullmatch(execution_id):
+            raise ValueError("INVALID_EXECUTION_ID")
+        status = self.client.status(execution_id)
+        if status.get("execution_id") != execution_id or status.get("state") not in TERMINAL | {
+            "ADMITTED",
+            "QUEUED",
+            "RUNNING",
+        }:
+            raise ValueError("STATUS_LINEAGE_MISMATCH")
+        receipt = None
+        if status["state"] == "COMPLETED" and status.get("operation") != "MATERIALIZE_DATASET":
+            receipt = self.client.receipt(execution_id)
+            expected = {
+                key: status.get(key)
+                for key in (
+                    "intent_id",
+                    "intent_digest",
+                    "admission_id",
+                    "admission_digest",
+                    "execution_id",
+                )
+            }
+            if any(
+                value is None or receipt.get("provenance", {}).get(key) != value
+                for key, value in expected.items()
+            ):
+                raise ValueError("RECEIPT_LINEAGE_MISMATCH")
+            actual = "sha256:" + hashlib.sha256(self.smoke.canonical_json(receipt)).hexdigest()
+            if status.get("receipt_digest") != actual:
+                raise ValueError("RECEIPT_DIGEST_MISMATCH")
+        with self.lock:
+            profile = read_profile(self.profile_path)
+        data = profile["data"] or {}
+        run = next(
+            (item for item in data.get("runs", []) if item.get("executionId") == execution_id), None
+        )
+        if run and (
+            run["intentId"] != status.get("intent_id")
+            or run["intentDigest"] != status.get("intent_digest")
+        ):
+            raise ValueError("PROFILE_EXECUTION_MISMATCH")
+        campaign = next(
+            (item for item in data.get("campaigns", []) if run and item["id"] == run["campaignId"]),
+            None,
+        )
+        return {
+            "mode": "SIMULATED_LOCAL",
+            "gate_eligible": False,
+            "execution_id": execution_id,
+            "status": status,
+            "receipt": receipt,
+            "receipt_verified": receipt is not None,
+            "run": run,
+            "campaign": campaign,
+            "profile_name": data.get("profileName"),
         }
 
     def _controllers(self, job_id: str) -> dict[str, Any]:
@@ -373,7 +467,52 @@ class Handler(BaseHTTPRequestHandler):
             self.json(403, {"error": "HOST_FORBIDDEN"})
             return
         path = urlsplit(self.path).path
-        if path == "/api/health":
+        if path == "/api/workspace":
+            try:
+                with self.server.application.lock:
+                    self.json(200, read_profile(self.server.application.profile_path))
+            except (ValueError, OSError, TypeError, RecursionError):
+                self.json(503, {"error": "PROFILE_UNAVAILABLE"})
+        elif path.startswith("/api/linked-execution/") and EXECUTION.fullmatch(
+            path.rsplit("/", 1)[1]
+        ):
+            try:
+                linked = self.server.application.linked_execution(path.rsplit("/", 1)[1])
+                if urlsplit(self.path).query == "download=receipt":
+                    if not linked["receipt_verified"]:
+                        self.json(409, {"error": "RECEIPT_NOT_AVAILABLE"})
+                    else:
+                        self.send(
+                            200,
+                            self.server.application.smoke.canonical_json(linked["receipt"]),
+                            "application/json; charset=utf-8",
+                            download=True,
+                        )
+                else:
+                    self.json(200, linked)
+            except Exception:
+                self.json(502, {"error": "EXECUTION_NOT_VERIFIED"})
+        elif path == "/readyz" or re.fullmatch(
+            r"/api/v1/execution/" + UUID + r"/(status|receipt)", path
+        ):
+            self.proxy("GET", path)
+        elif path in {"/admin", "/admin/"} or re.fullmatch(
+            r"/assets/[A-Za-z0-9_.-]+\.(js|css)", path
+        ):
+            filename = "live.html" if path.startswith("/admin") else path.lstrip("/")
+            target = self.server.application.admin_root / filename
+            if not target.is_file():
+                self.json(404, {"error": "ADMIN_BUILD_UNAVAILABLE"})
+            else:
+                media = (
+                    "text/html"
+                    if filename == "live.html"
+                    else "text/css"
+                    if filename.endswith(".css")
+                    else "text/javascript"
+                )
+                self.send(200, target.read_bytes(), media + "; charset=utf-8")
+        elif path == "/api/health":
             self.json(
                 200,
                 {
@@ -406,13 +545,26 @@ class Handler(BaseHTTPRequestHandler):
             self.json(404, {"error": "NOT_FOUND"})
 
     def do_POST(self) -> None:
+        if self.path == "/api/v1/intent/submit" or re.fullmatch(
+            r"/api/v1/execution/" + UUID + r"/cancel", self.path
+        ):
+            if not self.write_allowed("X-Delta-Request"):
+                self.reject_write()
+                return
+            try:
+                body = self.read_object()
+            except (ValueError, RecursionError, TypeError):
+                self.json(400, {"error": "INVALID_BODY"})
+                return
+            self.proxy("POST", self.path, body)
+            return
         if (
             not self.valid_host()
             or self.headers.get("Origin") != self.server.origin
             or self.headers.get("X-Delta-Presentation") != "1"
             or self.headers.get("Content-Type") != "application/json"
         ):
-            self.json(403, {"error": "REQUEST_ORIGIN_FORBIDDEN"})
+            self.reject_write()
             return
         if self.headers.get("Transfer-Encoding") or self.headers.get("Content-Length") != "2":
             self.json(400, {"error": "EMPTY_OBJECT_REQUIRED"})
@@ -437,6 +589,68 @@ class Handler(BaseHTTPRequestHandler):
             self.json(202, self.server.application.submit(route[self.path]))
         except BusyError as error:
             self.json(409, {"error": str(error)})
+
+    def write_allowed(self, marker: str) -> bool:
+        return (
+            self.valid_host()
+            and self.headers.get("Origin") == self.server.origin
+            and self.headers.get(marker) == "1"
+            and self.headers.get("Content-Type") == "application/json"
+        )
+
+    def reject_write(self) -> None:
+        # Drain a bounded declared body before closing. Otherwise Windows can
+        # reset a socket with unread request bytes before the 403 reaches the UI.
+        size = self.headers.get("Content-Length", "")
+        if not self.headers.get("Transfer-Encoding") and size.isdecimal() and int(size) <= 300_000:
+            try:
+                self.rfile.read(int(size))
+            except OSError:
+                self.close_connection = True
+                return
+        self.json(403, {"error": "REQUEST_ORIGIN_FORBIDDEN"})
+
+    def read_object(self) -> dict[str, Any]:
+        size = self.headers.get("Content-Length", "")
+        if (
+            self.headers.get("Transfer-Encoding")
+            or not size.isdecimal()
+            or not 2 <= int(size) <= 300_000
+        ):
+            raise ValueError("INVALID_LENGTH")
+        value = parse_json(self.rfile.read(int(size)))
+        if not isinstance(value, dict):
+            raise ValueError("OBJECT_REQUIRED")
+        return value
+
+    def proxy(self, method: str, path: str, body=None) -> None:
+        client = self.server.application.client
+        try:
+            code, document = client._request(method, path, body)
+            self.json(code, document)
+        except self.server.application.smoke.HttpFailure as error:
+            self.json(error.status, error.document)
+        except Exception:
+            self.json(502, {"error": "CONTROLLER_UNAVAILABLE"})
+
+    def do_PUT(self) -> None:
+        if not self.write_allowed("X-Delta-Presentation"):
+            self.reject_write()
+            return
+        if self.path != "/api/workspace":
+            self.json(404, {"error": "NOT_FOUND"})
+            return
+        try:
+            payload = self.read_object()
+            with self.server.application.lock:
+                result = save_profile(self.server.application.profile_path, payload)
+            self.json(200, {"revision": result["revision"]})
+        except FileExistsError:
+            self.json(409, {"error": "PROFILE_REVISION_CONFLICT"})
+        except (ValueError, TypeError, RecursionError):
+            self.json(400, {"error": "INVALID_PROFILE"})
+        except OSError:
+            self.json(503, {"error": "PROFILE_SAVE_FAILED"})
 
 
 def main() -> None:

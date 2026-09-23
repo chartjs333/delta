@@ -1,0 +1,18 @@
+.workspace-summary { display:flex; flex-wrap:wrap; gap:20px; padding:16px 20px; margin:16px 0 24px; background:#eff6ff; border:1px solid #d7e7fb; border-radius:16px; }
+.workspace-summary>div { flex:1; min-width:160px; display:grid; gap:5px; }
+.workspace-summary small, .campaign-runs small { color:#586a83; }
+.workspace-summary a { font-weight:650; }
+.workspace-link { display:inline-block; padding:10px 15px; border:1px solid #a8c9f7; border-radius:10px; background:#f0f7ff; text-decoration:none; font-weight:650; }
+.campaign-controls { display:flex; flex-wrap:wrap; gap:24px; margin:24px 0; align-items:end; }
+.campaign-controls label { display:grid; gap:8px; }
+.campaign-controls form { display:flex; gap:12px; align-items:end; flex-wrap:wrap; }
+.campaign-runs { display:grid; gap:16px; list-style:none; padding:0; }
+.campaign-runs li { display:grid; gap:10px; }
+.campaign-runs code, .linked-execution code { overflow-wrap:anywhere; }
+.execution-target { margin-bottom:24px; }
+.linked-execution { margin-bottom:24px; }
+.linked-execution pre { max-height:420px; overflow:auto; }
+.workload-handoff { margin:20px 0; padding:18px; border:1px solid #cce0f7; border-radius:14px; }
+.workspace-profile { padding:12px 16px; border:1px solid #d7e7fb; border-radius:12px; margin-bottom:20px; color:#334966; background:#f7fbff; }
+.workspace-profile form { display:flex; gap:12px; align-items:end; flex-wrap:wrap; }
+.workspace-profile label { display:grid; gap:8px; }

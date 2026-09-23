@@ -15,6 +15,8 @@ import { useLiveExecutionRuntime } from "./live-execution-context";
 import { LiveIntentBuilder } from "./LiveIntentBuilder";
 import { GuidedRun } from "./GuidedRun";
 import type { ExecutionIntentDocument } from "./intent-builder";
+import { useWorkspace } from "../workspace/workspace-context";
+import { ExecutionDetail, WorkspaceSummary } from "../workspace/WorkspaceViews";
 
 const STATE_LABELS: Readonly<Record<LiveExecutionState, string>> = {
   DRAFT: "Draft",
@@ -40,6 +42,8 @@ export function LiveExecutionSurface({
   port,
   initialTab,
 }: LiveExecutionSurfaceProps) {
+  const workspace = useWorkspace();
+  const linkedExecution = new URLSearchParams(window.location.search).get("execution");
   const runtime = useLiveExecutionRuntime();
   const activePort = port ?? runtime.port;
   const [source, setSource] = useState<LiveExecutionSourceDescriptor>();
@@ -96,7 +100,9 @@ export function LiveExecutionSurface({
 
   const handleSubmit = async (intent: ExecutionIntentDocument) => {
     try {
+      await workspace?.beginRun(intent, intent.operation);
       const newStatus = await activePort.submitIntent(intent);
+      await workspace?.bindStatus(intent, newStatus);
       const target = source?.mode === "HTTP_LIVE" ? "controller" : "mock gate";
       setNotice(`Intent submitted to ${target}: ${newStatus.statusId}`);
       setReceipt(undefined);
@@ -151,6 +157,12 @@ export function LiveExecutionSurface({
       setNotice(asAdminUiError(error).message);
     }
   };
+
+  if (workspace && linkedExecution) return <>
+    <WorkspaceSummary /><ExecutionDetail executionId={linkedExecution} />
+    <a href={`?lang=${new URLSearchParams(window.location.search).get("lang") === "ru" ? "ru" : "en"}#/live-execution`}>
+      {t("Prepare another run")}</a>
+  </>;
 
   return (
     <section

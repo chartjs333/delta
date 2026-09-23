@@ -17,6 +17,7 @@
     <div class="breadcrumb"><span class="workspace-label" data-i18n="workspace">Workspace</span><span>/</span><b id="page-title">Overview</b></div>
     <span class="mode"><i></i> SIMULATED_LOCAL</span>
     <label class="language-picker"><span class="sr-only" data-i18n="language">Interface language</span><select id="language" aria-label="Interface language" data-i18n-aria="language"><option value="en" lang="en">English</option><option value="ru" lang="ru">Русский</option></select></label>
+    <details class="language-help"><summary aria-label="Help: Interface language" data-i18n-aria="languageHelpLabel">ⓘ</summary><div role="note"><strong data-i18n="language">Interface language</strong><p data-i18n="languageHelp"></p><b data-i18n="example">Example</b><p>English / Русский</p></div></details>
   </header>
   <section id="page-overview" class="page">
     <div class="page-heading"><div><div class="eyebrow" data-i18n="overviewEyebrow">FROM COMMAND TO VERIFIABLE RESULT</div><h1><span data-i18n="overviewHeading">The system in action</span><span>.</span></h1><p data-i18n="overviewDescription">Run jobs, test resilience and save the results.</p></div><a id="advanced" class="button secondary" href="http://127.0.0.1:8865/?lang=en#/live-execution" target="_blank" rel="noopener" data-i18n="advanced">Open Admin UI ↗</a></div>
@@ -27,6 +28,8 @@
       <article class="metric"><div class="metric-label"><span class="metric-name" data-i18n="physicalGpu">Physical GPU</span><span>▦</span></div><strong id="gpu-memory">Checking…</strong><small id="gpu-name">Reading nvidia-smi</small></article>
       <article class="metric"><div class="metric-label"><span class="metric-name" data-i18n="environment">Environment</span><span>⌘</span></div><strong>Local + Docker</strong><small data-i18n="testEnvironment">Test signatures · local network</small></article>
     </div>
+    <section id="shared-workspace" class="panel shared-workspace"></section>
+    <section id="linked-execution" class="panel linked-execution" hidden></section>
     <div class="workspace-grid">
       <section class="panel experiment"><div class="panel-kicker" data-i18n="executionKicker">01 / LIVE EXECUTION</div><h2 data-i18n="train">Run training</h2><p class="muted" data-i18n="trainingDescription">A real job through the HTTP Controller and a separate Python Worker.</p>
         <div class="workload"><span class="workload-icon">⌘</span><div><b>10-Gene Phenotype</b><small data-i18n="classifier">Nearest-centroid classifier</small></div><span class="chip">CPU</span></div>

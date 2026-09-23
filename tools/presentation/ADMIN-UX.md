@@ -35,3 +35,45 @@ SHA-256 equals the Controller's receipt digest:
 Acceptance and original result records are retained in
 `specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260923/admin-guided/`.
 Review is self-review; Feature010 qualification remains open.
+
+
+## Shared local profile and field help — 2026-09-24
+
+T051 / HR010-001. Pre-implementation Constitution Check: presentation metadata
+and UI only; semantic impact NONE. The accepted baseline FormalVerificationReport
+was reverified as GO (report SHA-256 `3e2e2344a038b2c902b06d275fb3e3820f95e5a780c2750e5c1a367dd82936d7`).
+This does not authorize the arithmetic candidate or native runtime work.
+
+The presentation host serves the Admin build at `/admin/` and forwards only the
+fixed existing readiness/intent/status/receipt/cancel HTTP routes to the baseline
+Controller. The browser keeps same-origin CSP and the original write marker.
+The old 8865 UI entry redirects to this shared workspace, preserving language,
+route and execution ID. Controller source and process remain unchanged.
+
+`panel/workspace.json` stores a bounded local profile: language, profile name,
+controller-register document, campaigns, selected supported workload, and actual
+intent/execution bindings. Atomic replacement and revision comparison reject
+lost updates. A failed save blocks a new submission. A corrupt profile is not
+silently reset. This is a local workstation profile, not authentication or
+independent governance. Pairwise review worksheets still require explicit export.
+
+Campaigns link actual runs. Admin and Presentation fetch status/receipts from
+the same Controller and check lineage/digest before offering a verified receipt.
+Presentation downloads canonical receipt bytes. Saved run metadata cannot assert
+success if the Controller is unavailable. Only the baseline's supported synthetic
+10-gene PLUGIN_BOUNDARY workload is enabled in the shared profile; other catalog
+entries remain browsable with an explicit unsupported message.
+
+Every editable form field and read-only input has a clickable help control,
+including profile/campaign forms and advanced intent fields. English/Russian hints
+explain purpose, constraints and examples without changing data. Keyboard Enter,
+Escape, focus restoration and outside-click dismissal are supported. Help buttons
+sit outside labels, so clicking help cannot toggle checkboxes or change input names.
+
+Self-review validation before installation: 257 tests / 42 files, TypeScript,
+offline build/audit, live build/audit; 15 Python presentation tests; Ruff and JS
+syntax check. Python tests cover disk restore, conflicting revisions, failed
+atomic replacement, corrupted files, origin/write headers, fixed proxy routes,
+receipt digest/lineage mismatch and canonical downloads. Windows rejected-body
+handling drains only a bounded declared body so a 403 is not lost to socket reset.
+Browser acceptance and installed-source identities are recorded separately.

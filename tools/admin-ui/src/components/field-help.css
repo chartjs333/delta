@@ -1,0 +1,12 @@
+.help-label { position: relative; min-width: 0; display: flex; align-items: flex-start; gap: .4rem; }
+.help-label > label { flex: 1; min-width: 0; }
+.field-help-anchor { position: relative; display: inline-flex; flex: none; vertical-align: middle; font-style: normal; }
+button.field-hint-button { display: grid; place-items: center; width: 28px; height: 28px; min-width: 28px; padding: 0; border: 1px solid #b7cbe2; border-radius: 50%; background: #f0f6ff; color: #20538f; font: 700 17px/1 system-ui, sans-serif; cursor: pointer; }
+button.field-hint-button:hover, button.field-hint-button[aria-expanded="true"] { background: #dcecff; border-color: #497db7; }
+button.field-hint-button:focus-visible { outline: 3px solid #235ba5; outline-offset: 2px; }
+.field-hint-popover { position: absolute; z-index: 30; right: 0; top: calc(100% + 7px); width: min(320px, 72vw); display: grid; gap: .65rem; padding: 1rem; border: 1px solid #bccfe4; border-radius: 12px; background: #fff; color: #233c58; box-shadow: 0 8px 28px #18365726; font: 400 .84rem/1.55 system-ui, sans-serif; text-align: left; text-transform: none; letter-spacing: normal; overflow-wrap: anywhere; }
+.field-hint-popover strong { font-size: .9rem; }
+.field-hint-example { display: grid; gap: .25rem; padding: .65rem; border-radius: 7px; background: #f1f6fc; }
+.field-hint-example b { color: #526b84; font-size: .73rem; }
+.help-label.radio-label, .help-label.checkbox-label { align-items: center; }
+.topbar .field-hint-popover { right: 0; }

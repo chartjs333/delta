@@ -1,3 +1,4 @@
+import { FieldHelp } from "./FieldHelp";
 import { t } from "../i18n";
 export interface JsonEditorProps {
   readonly value: string;
@@ -22,6 +23,7 @@ export function JsonEditor({
       <label className="sr-only" htmlFor="json-editor">
         {t("JSON document text")}
       </label>
+      <FieldHelp field="JSON document text" />
       <textarea
         id="json-editor"
         aria-describedby={invalidMessage ? "json-editor-error" : undefined}

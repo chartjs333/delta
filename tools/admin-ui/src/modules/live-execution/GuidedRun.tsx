@@ -1,3 +1,4 @@
+import { HelpLabel } from "../../components/FieldHelp";
 import { useEffect, useRef, useState } from "react";
 import { message, t } from "../../i18n";
 import { asAdminUiError } from "../../core/errors";
@@ -13,6 +14,8 @@ import type {
   LiveExecutionStatus,
 } from "./live-execution-port";
 import { ProtocolGuide } from "./ProtocolGuide";
+import { useWorkspace } from "../workspace/workspace-context";
+import { PresentationLink, WorkspaceSummary } from "../workspace/WorkspaceViews";
 import "./guided-run.css";
 
 const terminalStates = new Set([
@@ -43,6 +46,8 @@ export function GuidedRun({
   readonly enabled: boolean;
   readonly onStatus: (status: LiveExecutionStatus) => void;
 }) {
+  const workspace = useWorkspace();
+  const activeIntent = useRef<ExecutionIntentDocument | undefined>(undefined);
   const [ticket, setTicket] = useState("presentation_demo");
   const [intent, setIntent] = useState<ExecutionIntentDocument>();
   const [status, setStatus] = useState<LiveExecutionStatus>();
@@ -71,6 +76,8 @@ export function GuidedRun({
     generation: number,
     reads: number,
   ) {
+    if (generation !== request.current) return;
+    if (workspace && activeIntent.current) await workspace.bindStatus(activeIntent.current, next);
     if (generation !== request.current) return;
     setStatus(next);
     notify.current(next);
@@ -122,6 +129,7 @@ export function GuidedRun({
     const draft = createDefaultIntentDraft("TRAIN_TICKET");
     const built = buildExecutionIntentDocument({
       ...draft,
+      workload: workspace?.workload ?? draft.workload,
       operation_payload: { ticket_id: ticket, partition_id: "partition_00" },
     });
     if (built.issues.length) {
@@ -131,10 +139,13 @@ export function GuidedRun({
     running.current = true;
     const generation = ++request.current;
     setIntent(built.document);
+    activeIntent.current = built.document;
     setBusy(true);
     setError(undefined);
     setPaused(false);
     try {
+      await workspace?.beginRun(built.document, ticket);
+      if (generation !== request.current) return;
       await readResult(await port.submitIntent(built.document), generation, 0);
     } catch (reason) {
       fail(reason, generation);
@@ -156,6 +167,7 @@ export function GuidedRun({
     request.current += 1;
     clearTimeout(timer.current);
     setIntent(undefined);
+    activeIntent.current = undefined;
     setStatus(undefined);
     setReceipt(undefined);
     setError(undefined);
@@ -183,6 +195,7 @@ export function GuidedRun({
   const currentStep = receipt ? 3 : status ? 2 : intent ? 1 : 0;
   return (
     <div className="guided-run">
+      <WorkspaceSummary />
       <div className="guided-intro">
         <p>
           {t(
@@ -214,7 +227,7 @@ export function GuidedRun({
               "A small classifier learns from a synthetic dataset with ten features. Everything runs locally.",
             )}
           </p>
-          <label className="run-name" htmlFor="guided-ticket">
+          <HelpLabel className="run-name" htmlFor="guided-ticket">
             {t("Run name")}
             <input
               id="guided-ticket"
@@ -224,7 +237,7 @@ export function GuidedRun({
               onChange={(event) => setTicket(event.target.value)}
               aria-describedby="guided-name-help"
             />
-          </label>
+          </HelpLabel>
           <small id="guided-name-help">
             {t("Use letters, numbers, underscores or hyphens.")}
           </small>
@@ -339,6 +352,8 @@ export function GuidedRun({
             </p>
           ) : null}
           <div className="guided-actions">
+            {status?.lineage.executionId ? <PresentationLink executionId={status.lineage.executionId} /> : null}
+            {workspace && status ? <a href="#/campaigns">{t("Back to campaign")}</a> : null}
             {receipt ? (
               <button className="primary" type="button" onClick={download}>
                 {t("Download receipt")}

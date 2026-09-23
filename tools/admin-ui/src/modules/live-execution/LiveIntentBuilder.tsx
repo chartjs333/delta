@@ -1,5 +1,7 @@
+import { HelpLabel } from "../../components/FieldHelp";
 import { message, t } from "../../i18n";
 import { useId, useMemo, useState } from "react";
+import { useWorkspace } from "../workspace/workspace-context";
 
 import { InertText } from "../../components/InertText";
 import { CANONICAL_DESCRIPTOR_CATALOG } from "../../data/descriptors-catalog";
@@ -32,16 +34,17 @@ export function LiveIntentBuilder({
   onSubmit,
   submitLabel = "Submit to Mock Gate",
 }: LiveIntentBuilderProps) {
+  const workspace = useWorkspace();
   const [operation, setOperation] =
     useState<LiveExecutionOperation>("TRAIN_TICKET");
   const [modelPluginId, setModelPluginId] = useState<string>(
-    "tabular-10gene-phenotype-v1",
+    workspace?.workload.model_plugin_id ?? "tabular-10gene-phenotype-v1",
   );
   const [datasetId, setDatasetId] = useState<string>(
-    "synthetic-10gene-cohort-v1",
+    workspace?.workload.dataset_id ?? "synthetic-10gene-cohort-v1",
   );
   const [requestedScope, setRequestedScope] =
-    useState<LiveExecutionScope>("PLUGIN_BOUNDARY");
+    useState<LiveExecutionScope>(workspace?.workload.requested_scope ?? "PLUGIN_BOUNDARY");
 
   // Operator
   const [operatorRole, setOperatorRole] = useState<OperatorRole>("OPERATOR");
@@ -206,7 +209,7 @@ export function LiveIntentBuilder({
         <fieldset className="intent-fieldset">
           <legend>{t("Operation selection")}</legend>
           <div className="form-row radio-group" role="radiogroup">
-            <label className="radio-label">
+            <HelpLabel className="radio-label">
               <input
                 checked={operation === "TRAIN_TICKET"}
                 name="operation"
@@ -215,8 +218,8 @@ export function LiveIntentBuilder({
                 onChange={() => setOperation("TRAIN_TICKET")}
               />
               <span>TRAIN_TICKET</span>
-            </label>
-            <label className="radio-label">
+            </HelpLabel>
+            <HelpLabel className="radio-label">
               <input
                 checked={operation === "EVALUATE_CHECKPOINT"}
                 name="operation"
@@ -225,8 +228,8 @@ export function LiveIntentBuilder({
                 onChange={() => setOperation("EVALUATE_CHECKPOINT")}
               />
               <span>EVALUATE_CHECKPOINT</span>
-            </label>
-            <label className="radio-label">
+            </HelpLabel>
+            <HelpLabel className="radio-label">
               <input
                 checked={operation === "MATERIALIZE_DATASET"}
                 name="operation"
@@ -235,7 +238,7 @@ export function LiveIntentBuilder({
                 onChange={() => setOperation("MATERIALIZE_DATASET")}
               />
               <span>MATERIALIZE_DATASET</span>
-            </label>
+            </HelpLabel>
           </div>
         </fieldset>
 
@@ -243,7 +246,7 @@ export function LiveIntentBuilder({
           <legend>{t("Workload catalog binding")}</legend>
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor={`${baseId}-model`}>{t("Model plugin")}</label>
+              <HelpLabel htmlFor={`${baseId}-model`}>{t("Model plugin")}</HelpLabel>
               <select
                 id={`${baseId}-model`}
                 value={modelPluginId}
@@ -258,7 +261,7 @@ export function LiveIntentBuilder({
             </div>
 
             <div className="form-group">
-              <label htmlFor={`${baseId}-dataset`}>{t("Dataset")}</label>
+              <HelpLabel htmlFor={`${baseId}-dataset`}>{t("Dataset")}</HelpLabel>
               <select
                 id={`${baseId}-dataset`}
                 value={datasetId}
@@ -273,7 +276,7 @@ export function LiveIntentBuilder({
             </div>
 
             <div className="form-group">
-              <label htmlFor={`${baseId}-scope`}>{t("Requested scope")}</label>
+              <HelpLabel htmlFor={`${baseId}-scope`}>{t("Requested scope")}</HelpLabel>
               <select
                 disabled={operation === "TRAIN_TICKET"}
                 id={`${baseId}-scope`}
@@ -295,8 +298,9 @@ export function LiveIntentBuilder({
             </div>
 
             <div className="form-group">
-              <label>{t("Catalog backend reference")}</label>
+              <HelpLabel htmlFor={`${baseId}-catalog`}>{t("Catalog backend reference")}</HelpLabel>
               <input
+                id={`${baseId}-catalog`}
                 readOnly
                 type="text"
                 value={CANONICAL_DESCRIPTOR_CATALOG.source.backend_ref}
@@ -325,7 +329,7 @@ export function LiveIntentBuilder({
           {operation === "TRAIN_TICKET" ? (
             <div className="form-grid">
               <div className="form-group">
-                <label htmlFor={`${baseId}-ticket-id`}>{t("Ticket ID")}</label>
+                <HelpLabel htmlFor={`${baseId}-ticket-id`}>{t("Ticket ID")}</HelpLabel>
                 <input
                   id={`${baseId}-ticket-id`}
                   type="text"
@@ -337,9 +341,9 @@ export function LiveIntentBuilder({
                 </small>
               </div>
               <div className="form-group">
-                <label htmlFor={`${baseId}-partition-id`}>
+                <HelpLabel htmlFor={`${baseId}-partition-id`}>
                   {t("Partition ID")}
-                </label>
+                </HelpLabel>
                 <input
                   id={`${baseId}-partition-id`}
                   type="text"
@@ -355,9 +359,9 @@ export function LiveIntentBuilder({
 
           {operation === "EVALUATE_CHECKPOINT" ? (
             <div className="form-group">
-              <label htmlFor={`${baseId}-coords`}>
+              <HelpLabel htmlFor={`${baseId}-coords`}>
                 {t("Checkpoint coordinates (integers)")}
-              </label>
+              </HelpLabel>
               <input
                 id={`${baseId}-coords`}
                 type="text"
@@ -372,9 +376,9 @@ export function LiveIntentBuilder({
 
           {operation === "MATERIALIZE_DATASET" ? (
             <div className="form-group">
-              <label htmlFor={`${baseId}-cache-key`}>
+              <HelpLabel htmlFor={`${baseId}-cache-key`}>
                 {t("Cache key (optional)")}
-              </label>
+              </HelpLabel>
               <input
                 id={`${baseId}-cache-key`}
                 type="text"
@@ -394,7 +398,7 @@ export function LiveIntentBuilder({
           <legend>{t("Declared operator & constraints")}</legend>
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor={`${baseId}-role`}>{t("Operator role")}</label>
+              <HelpLabel htmlFor={`${baseId}-role`}>{t("Operator role")}</HelpLabel>
               <select
                 id={`${baseId}-role`}
                 value={operatorRole}
@@ -408,7 +412,7 @@ export function LiveIntentBuilder({
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor={`${baseId}-subject`}>{t("Subject ID")}</label>
+              <HelpLabel htmlFor={`${baseId}-subject`}>{t("Subject ID")}</HelpLabel>
               <input
                 id={`${baseId}-subject`}
                 type="text"
@@ -417,9 +421,9 @@ export function LiveIntentBuilder({
               />
             </div>
             <div className="form-group">
-              <label htmlFor={`${baseId}-timeout`}>
+              <HelpLabel htmlFor={`${baseId}-timeout`}>
                 {t("Timeout (seconds)")}
-              </label>
+              </HelpLabel>
               <input
                 id={`${baseId}-timeout`}
                 max={3600}
@@ -430,9 +434,9 @@ export function LiveIntentBuilder({
               />
             </div>
             <div className="form-group">
-              <label htmlFor={`${baseId}-retry`}>
+              <HelpLabel htmlFor={`${baseId}-retry`}>
                 {t("Retry of intent ID (optional)")}
-              </label>
+              </HelpLabel>
               <input
                 id={`${baseId}-retry`}
                 placeholder={t("UUID if retrying a failed intent")}
@@ -444,7 +448,7 @@ export function LiveIntentBuilder({
           </div>
 
           <div className="form-row checkbox-row">
-            <label className="checkbox-label">
+            <HelpLabel className="checkbox-label">
               <input
                 checked={allowDownloads}
                 type="checkbox"
@@ -455,7 +459,7 @@ export function LiveIntentBuilder({
                   "Request external downloads (Informational intent constraint; controller policy and AdmissionRecord determine actual authority)",
                 )}
               </span>
-            </label>
+            </HelpLabel>
           </div>
         </fieldset>
 

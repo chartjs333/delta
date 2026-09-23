@@ -1,3 +1,4 @@
+import { HelpLabel } from "../../components/FieldHelp";
 import { message, t } from "../../i18n";
 import { useEffect, useMemo, useState } from "react";
 
@@ -199,7 +200,7 @@ export function ControllerRegistryForm({
         )}
       </p>
 
-      <label className="form-field">
+      <HelpLabel className="form-field">
         <span>{t("Document version")}</span>
         <input
           aria-label={t("Document version")}
@@ -213,7 +214,7 @@ export function ControllerRegistryForm({
             patch(["document_version"], event.currentTarget.value)
           }
         />
-      </label>
+      </HelpLabel>
 
       <div className="controller-form-list">
         {visibleControllers.map(({ controller, arrayIndex, keyIndex }) => {
@@ -229,7 +230,7 @@ export function ControllerRegistryForm({
               </legend>
               <div className="controller-fields">
                 {controllerFields.map(([field, label]) => (
-                  <label className="form-field" key={field}>
+                  <HelpLabel className="form-field" key={field}>
                     <span>{t(label)}</span>
                     <input
                       aria-label={t("Controller {number} {field}", {
@@ -245,7 +246,7 @@ export function ControllerRegistryForm({
                         )
                       }
                     />
-                  </label>
+                  </HelpLabel>
                 ))}
               </div>
               <div className="safe-autofill-actions">

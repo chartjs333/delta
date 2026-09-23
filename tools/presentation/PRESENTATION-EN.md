@@ -63,3 +63,22 @@ the CPU example. The example does not produce ISC, ApplyQC or a current checkpoi
   implemented campaign execution screen.
 
 Technical IDs, operation codes and original evidence retain their original values.
+
+
+## Connected Admin walkthrough
+
+Open <http://127.0.0.1:8870/admin/?lang=en#/campaigns>.
+Create/select a campaign, choose the supported synthetic 10-gene workload in
+Workloads, then select **Use in campaign** and **Start training** in Live execution.
+Return to Campaigns to reopen the same execution, download its receipt, or click
+**Present this run**. Presentation checks the same Controller result and offers
+the same canonical receipt. The local profile saves definitions and run links on
+disk; it does not store an authenticated account or grant controller authority.
+
+Click ⓘ beside any field for its purpose and an example. Switch the language to
+Russian to show the same workflow and localized guidance. Identifiers and evidence
+stay unchanged. Wait for the saved indicator before reloading a changed form.
+If another tab changed the profile, reload to resolve the explicit revision conflict.
+Controller register entries describe governance; the actual execution target is
+the existing local Controller/Worker. Scientific and governance qualification
+remain outside this local demonstration.

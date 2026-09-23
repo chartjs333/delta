@@ -1,3 +1,4 @@
+import { HelpLabel } from "../../components/FieldHelp";
 import { message, t } from "../../i18n";
 import { useId, useState } from "react";
 import {
@@ -18,6 +19,9 @@ import sampleQloraReceipt from "../../data/samples/sample-qlora-stage-c-receipt.
 import sample10GeneReceipt from "../../data/samples/sample-10gene-plugin-boundary-receipt.json";
 import { InertText } from "../../components/InertText";
 import { parseUntrustedJson } from "../../security/input-guards";
+import { useWorkspace, locallyRunnable } from "../workspace/workspace-context";
+import { getDefaultWorkload } from "../live-execution/intent-builder";
+import { WorkspaceSummary } from "../workspace/WorkspaceViews";
 
 export interface WorkloadSelectorProps {
   readonly catalog?: DescriptorCatalogSnapshot;
@@ -26,25 +30,26 @@ export interface WorkloadSelectorProps {
 export function WorkloadSelector({
   catalog = CANONICAL_DESCRIPTOR_CATALOG,
 }: WorkloadSelectorProps) {
+  const workspace = useWorkspace();
   const modelSelectId = useId();
   const datasetSelectId = useId();
   const scopeSelectId = useId();
 
   const [selectedModelId, setSelectedModelId] = useState<string>(
     () =>
-      catalog.model_plugins.find((m) => m.plugin_id === "mnist-centroid-v1")
+      workspace?.workload.model_plugin_id ?? catalog.model_plugins.find((m) => m.plugin_id === "mnist-centroid-v1")
         ?.plugin_id ??
       catalog.model_plugins[0]?.plugin_id ??
       "",
   );
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>(
     () =>
-      catalog.datasets.find((d) => d.dataset_id === "mnist-v1")?.dataset_id ??
+      workspace?.workload.dataset_id ?? catalog.datasets.find((d) => d.dataset_id === "mnist-v1")?.dataset_id ??
       catalog.datasets[0]?.dataset_id ??
       "",
   );
   const [selectedScope, setSelectedScope] =
-    useState<ExecutionScopeName>("STAGE_C_REAL_DRQ1");
+    useState<ExecutionScopeName>(workspace?.workload.requested_scope ?? "STAGE_C_REAL_DRQ1");
 
   const [loadedReceipt, setLoadedReceipt] = useState<ExecutionReceipt | null>(
     null,
@@ -158,9 +163,11 @@ export function WorkloadSelector({
         </p>
       </header>
 
+      <WorkspaceSummary />
+
       <div className="workload-controls-grid">
         <div className="control-group">
-          <label htmlFor={modelSelectId}>{t("Model Plugin")}</label>
+          <HelpLabel htmlFor={modelSelectId}>{t("Model Plugin")}</HelpLabel>
           <select
             id={modelSelectId}
             value={selectedModelId}
@@ -175,7 +182,7 @@ export function WorkloadSelector({
         </div>
 
         <div className="control-group">
-          <label htmlFor={datasetSelectId}>{t("Dataset Provider")}</label>
+          <HelpLabel htmlFor={datasetSelectId}>{t("Dataset Provider")}</HelpLabel>
           <select
             id={datasetSelectId}
             value={selectedDatasetId}
@@ -190,9 +197,9 @@ export function WorkloadSelector({
         </div>
 
         <div className="control-group">
-          <label htmlFor={scopeSelectId}>
+          <HelpLabel htmlFor={scopeSelectId}>
             {t("Requested Execution Scope")}
-          </label>
+          </HelpLabel>
           <select
             id={scopeSelectId}
             value={selectedScope}
@@ -213,6 +220,21 @@ export function WorkloadSelector({
         </div>
       </div>
 
+      {workspace ? <div className="workload-handoff">
+        {selectedScope === "PLUGIN_BOUNDARY" && isAllowed && locallyRunnable({
+          model_plugin_id: selectedModelId, dataset_id: selectedDatasetId,
+          requested_scope: selectedScope, catalog_backend_ref: catalog.source.backend_ref,
+        }) ? <button className="primary" onClick={() => {
+          void workspace.selectWorkload({ model_plugin_id: selectedModelId, dataset_id: selectedDatasetId,
+            requested_scope: "PLUGIN_BOUNDARY", catalog_backend_ref: catalog.source.backend_ref })
+            .then(() => { window.location.hash = "/campaigns"; }).catch(() => {});
+        }}>{t("Use in campaign")} →</button> : <>
+          <p>{t("This catalog entry is not enabled on the local Controller. Choose the runnable example to continue.")}</p>
+          <button onClick={() => { const example = getDefaultWorkload(); setSelectedModelId(example.model_plugin_id);
+            setSelectedDatasetId(example.dataset_id); setSelectedScope(example.requested_scope); }}>
+            {t("Choose the runnable example")}</button>
+        </>}
+      </div> : null}
       <div className="workload-panels-grid">
         {/* Panel 1: Pre-flight capability */}
         <article
@@ -356,9 +378,9 @@ export function WorkloadSelector({
 
           <div className="receipt-toolbar">
             <div className="receipt-upload-row">
-              <label htmlFor="receipt-file-input" className="file-input-label">
+              <HelpLabel htmlFor="receipt-file-input" className="file-input-label">
                 {t("Load Receipt JSON")}
-              </label>
+              </HelpLabel>
               <input
                 id="receipt-file-input"
                 type="file"

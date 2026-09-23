@@ -1,3 +1,4 @@
+import { HelpLabel } from "../../components/FieldHelp";
 import { t } from "../../i18n";
 import { useEffect, useMemo, useState } from "react";
 
@@ -158,7 +159,7 @@ export function PairwiseReviewStep({
                   <legend>{t(question.label)}</legend>
                   <div className="answer-options">
                     {answers.map((answer) => (
-                      <label key={answer}>
+                      <HelpLabel key={answer}>
                         <input
                           checked={current.answers[question.id] === answer}
                           disabled={current.state !== "ACTIVE"}
@@ -180,14 +181,14 @@ export function PairwiseReviewStep({
                           : answer === "NO"
                             ? t("No")
                             : t("Unknown")}
-                      </label>
+                      </HelpLabel>
                     ))}
                   </div>
                 </fieldset>
               ))}
             </div>
 
-            <label className="form-field">
+            <HelpLabel className="form-field">
               <span>{t("Evidence references, one per line")}</span>
               <textarea
                 aria-label={t("Evidence references")}
@@ -200,7 +201,7 @@ export function PairwiseReviewStep({
                   )
                 }
               />
-            </label>
+            </HelpLabel>
 
             <p className="field-help">
               {t(

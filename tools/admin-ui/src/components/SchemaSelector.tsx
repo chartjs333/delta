@@ -1,3 +1,4 @@
+import { HelpLabel } from "./FieldHelp";
 import { t } from "../i18n";
 import type { SchemaDescriptor } from "../core/contracts";
 import { schemaDescriptorKey } from "../data/local-json-adapter";
@@ -18,7 +19,7 @@ export function SchemaSelector({
   return (
     <section aria-labelledby="schema-heading">
       <h2 id="schema-heading">{t("Structural schema")}</h2>
-      <label htmlFor="schema-select">{t("Schema descriptor")}</label>
+      <HelpLabel htmlFor="schema-select">{t("Schema descriptor")}</HelpLabel>
       <select
         id="schema-select"
         value={selectedKey}

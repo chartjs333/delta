@@ -1,3 +1,4 @@
+import { FieldHelp } from "../components/FieldHelp";
 import {
   isLanguage,
   languageLink,
@@ -41,6 +42,8 @@ import {
 } from "../results/result-loader";
 import { SourcedResultsPanel } from "../results/SourcedResultsPanel";
 import { extensionRegistry } from "./registry";
+import { ExecutionTarget, ProfilePanel } from "../modules/workspace/WorkspaceViews";
+import { useWorkspace } from "../modules/workspace/workspace-context";
 
 const defaultAdapter = new LocalJsonAdapter(new BrowserFileGateway());
 const DEFAULT_ROUTE = "/controllers";
@@ -58,6 +61,8 @@ export interface AppProps {
 }
 
 export function App({ adapter = defaultAdapter }: AppProps) {
+  const workspace = useWorkspace();
+  const restoredProfile = useRef(false);
   const language = useLanguage();
   const presentationAddress = import.meta.env.VITE_PRESENTATION_URL as
     | string
@@ -80,6 +85,23 @@ export function App({ adapter = defaultAdapter }: AppProps) {
   });
   const [notice, setNotice] = useState<string>();
   const nextControllerKey = useRef(0);
+
+  useEffect(() => {
+    if (!workspace || restoredProfile.current) return;
+    restoredProfile.current = true;
+    if (workspace.controllerDocument) {
+      try { activateDocument(adapter.updateDocumentText(adapter.createDocument(), workspace.controllerDocument)); }
+      catch { setNotice("Saved controller document could not be opened."); }
+    }
+  }, [workspace, adapter]);
+
+  useEffect(() => {
+    if (!workspace || !document || document.text === workspace.controllerDocument) return;
+    const timer = setTimeout(() => {
+      void workspace.saveDocument(document.text).catch(() => setNotice("Controller document could not be saved to the profile."));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [document?.text, workspace?.controllerDocument]);
 
   function createControllerKey(): string {
     nextControllerKey.current += 1;
@@ -254,8 +276,10 @@ export function App({ adapter = defaultAdapter }: AppProps) {
             aria-label={t("Interface language")}
             value={language}
             onChange={(event) => {
-              if (isLanguage(event.currentTarget.value))
+              if (isLanguage(event.currentTarget.value)) {
                 setLanguage(event.currentTarget.value);
+                void workspace?.savePreferences(workspace.profileName, event.currentTarget.value).catch(() => {});
+              }
             }}
           >
             <option value="en" lang="en">
@@ -265,6 +289,7 @@ export function App({ adapter = defaultAdapter }: AppProps) {
               Русский
             </option>
           </select>
+          <FieldHelp field="Interface language" />
           <button
             aria-controls="primary-sidebar"
             aria-expanded={navigationOpen}
@@ -322,8 +347,10 @@ export function App({ adapter = defaultAdapter }: AppProps) {
         </aside>
 
         <main id="workspace">
+          <ProfilePanel pendingDocument={Boolean(document && document.text !== workspace?.controllerDocument)} />
           {activeRoute === DEFAULT_ROUTE ? (
             <>
+              <ExecutionTarget />
               <section className="hero">
                 <div>
                   <p className="eyebrow">{t("Local document workspace")}</p>
@@ -364,7 +391,7 @@ export function App({ adapter = defaultAdapter }: AppProps) {
                   <h2>{t("Start with a local file or a clean register.")}</h2>
                   <p>
                     {t(
-                      "Files remain in this browser session. The original is never overwritten, and no URL is fetched automatically.",
+                      workspace ? "Controller definitions are saved automatically in the local profile. Original imported files are never overwritten." : "Files remain in this browser session. The original is never overwritten, and no URL is fetched automatically.",
                     )}
                   </p>
                 </section>

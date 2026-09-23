@@ -51,7 +51,10 @@ describe("accessibility and primary states", () => {
 
     const expectedTabOrder = [
       screen.getByRole("link", { name: "Delta Admin UI home" }),
+      ...(screen.queryByRole("link", { name: /Presentation/u })
+        ? [screen.getByRole("link", { name: /Presentation/u })] : []),
       screen.getByRole("combobox", { name: "Interface language" }),
+      screen.getByRole("button", { name: "Help: Interface language" }),
       screen.getByRole("button", { name: "Menu" }),
       screen.getByRole("link", { name: /Controllers/u }),
       screen.getByRole("link", { name: /Campaigns/u }),

@@ -15,6 +15,10 @@ let connectionFailed = false;
 let connectionError = null;
 let operationError = null;
 let lastSignature = "";
+let linked = null;
+let linkedError = false;
+const linkedId = new URL(location.href).searchParams.get('execution');
+let profileLanguageRead = false;
 const el = (tag, text, cls) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (cls) node.className = cls; return node; };
 function navigate(page) {
   if (!pages.includes(page)) page = "overview";
@@ -58,7 +62,19 @@ $('language').addEventListener('change', (event) => {
   url.searchParams.set('lang', language);
   history.replaceState(null, '', url);
   applyLanguage();
+  void saveProfileLanguage();
 });
+async function saveProfileLanguage() {
+  try {
+    const previous = await fetch('/api/workspace', {cache:'no-store', signal:AbortSignal.timeout(10000)});
+    if (!previous.ok) throw new Error('Profile unavailable');
+    const profile = await previous.json();
+    if (!profile.data) return;
+    profile.data.language = language;
+    const response = await fetch('/api/workspace', {method:'PUT', headers:{'Content-Type':'application/json','X-Delta-Presentation':'1'}, body:JSON.stringify(profile), signal:AbortSignal.timeout(10000)});
+    if (!response.ok) throw new Error('Profile save failed');
+  } catch { operationError = t('profileUnavailable'); renderNotice(); }
+}
 function renderJobs(state) {
   const jobs = state.jobs;
   $("run-count").textContent = jobs.length;
@@ -122,14 +138,67 @@ function renderState() {
   $('controller-state').textContent = t(connectionFailed ? 'disconnected' : ready ? 'online' : 'unavailable');
   $('controller-state').className = ready && !connectionFailed ? 'good' : '';
   $('controller-detail').textContent = ready ? `HTTP ready · ${(current.controller.build_id || '').slice(0, 8)}` : t('startServer');
-  const adminUrl = new URL(current.controller_url);
+  const adminUrl = new URL('/admin/', location.origin);
   adminUrl.searchParams.set('lang', language);
+  if (linkedId) adminUrl.searchParams.set('execution', linkedId);
   adminUrl.hash = '/live-execution';
   $('advanced').href = adminUrl.href;
   const gpu = (current.gpu.observation || '').split(',').map((value) => value.trim());
   $('gpu-memory').textContent = current.gpu.state === 'VISIBLE' ? gpu[2] : t(current.gpu.state === 'CHECKING' ? 'checking' : 'unavailable');
   $('gpu-name').textContent = current.gpu.state === 'VISIBLE' ? gpu[0].replace('NVIDIA GeForce ', '') : t('gpuScope');
   renderJobs(current); renderGates(current);
+  renderWorkspace(); renderLinked();
+}
+function adminLink(route, execution) {
+  const url = new URL('/admin/', location.origin); url.searchParams.set('lang', language);
+  if (execution) url.searchParams.set('execution', execution);
+  url.hash = route; return url.href;
+}
+function renderWorkspace() {
+  const box = $('shared-workspace'); box.replaceChildren();
+  const profile = current.workspace;
+  if (!profile) { box.append(el('p', t('profileUnavailable'))); return; }
+  const campaign = profile.campaigns.find(item => item.id === profile.activeCampaignId);
+  const header = el('div', undefined, 'panel-title');
+  const text = el('div'); text.append(el('h2', `${profile.profileName} · ${campaign?.name ?? ''}`), el('p', t('sharedProfileNote'), 'muted'));
+  const configure = el('a', t('configureCampaign'), 'button secondary'); configure.href = adminLink('/campaigns');
+  header.append(text, configure); box.append(header);
+  const runs = profile.runs.filter(item => item.campaignId === profile.activeCampaignId && item.executionId).slice(-5).reverse();
+  const list = el('div', undefined, 'shared-runs');
+  for (const run of runs) {
+    const url = new URL(location.href); url.searchParams.set('execution', run.executionId); url.searchParams.set('lang', language); url.hash = 'overview';
+    const link = el('a', `${run.name} · ${run.executionId.slice(0, 8)}`, 'button secondary'); link.href = url.href; list.append(link);
+  }
+  box.append(list);
+}
+function renderLinked() {
+  const box = $('linked-execution'); box.hidden = !linkedId; box.replaceChildren();
+  if (!linkedId) return;
+  box.append(el('div', t('linkedRun'), 'eyebrow'), el('h2', linked?.run?.name || t('controllerRun')), el('code', linkedId));
+  if (linkedError) { box.append(el('p', t('linkedUnavailable'), 'muted')); return; }
+  if (!linked) { box.append(el('p', t('checking'))); return; }
+  box.append(el('p', t(linked.status.state), linked.receipt_verified ? 'good' : 'muted'));
+  if (linked.campaign) box.append(el('p', `${linked.profile_name} · ${linked.campaign.name}`));
+  const actions = el('div', undefined, 'shared-runs');
+  const back = el('a', t('openSameRun'), 'button secondary'); back.href = adminLink('/live-execution', linkedId); actions.append(back);
+  if (linked.receipt_verified && linked.receipt) {
+    box.append(el('p', t('linkedVerified')));
+    const downloadReceipt = el('a', t('downloadReceipt'), 'button');
+    downloadReceipt.href = `/api/linked-execution/${linkedId}?download=receipt`;
+    downloadReceipt.download = `receipt-${linkedId}.json`;
+    actions.append(downloadReceipt);
+  }
+  box.append(actions);
+}
+async function refreshLinked() {
+  if (!linkedId) return;
+  try {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(linkedId)) throw new Error('Invalid execution');
+    const response = await fetch(`/api/linked-execution/${linkedId}`, {cache:'no-store', signal:AbortSignal.timeout(10000)});
+    if (!response.ok) throw new Error('Unverified result');
+    linked = await response.json(); linkedError = false;
+  } catch { linked = null; linkedError = true; }
+  renderLinked();
 }
 async function refresh() {
   if (refreshing) return;
@@ -137,8 +206,15 @@ async function refresh() {
   try {
     const response = await fetch("/api/state", {signal: AbortSignal.timeout(10000)}); if (!response.ok) throw new Error(`HTTP ${response.status}`);
     current = await response.json();
+    if (!profileLanguageRead) {
+      profileLanguageRead = true;
+      if (!supportedLanguage(queryLanguage) && supportedLanguage(current.workspace?.language)) {
+        language = current.workspace.language; applyLanguage();
+      }
+    }
     connectionFailed = false; connectionError = null;
     renderState(); renderNotice();
+    await refreshLinked();
   } catch (error) {
     connectionFailed = true;
     connectionError = error.message;
@@ -161,3 +237,6 @@ $("simulate").addEventListener("click", () => submit("/api/simulate"));
 applyLanguage();
 await refresh();
 setInterval(refresh, 1500);
+
+document.addEventListener("keydown", event => { if (event.key === "Escape") document.querySelector(".language-help").open = false; });
+document.addEventListener("pointerdown", event => { const help = document.querySelector(".language-help"); if (!help.contains(event.target)) help.open = false; });

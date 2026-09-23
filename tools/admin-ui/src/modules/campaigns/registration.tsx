@@ -1,8 +1,12 @@
 import { t } from "../../i18n";
 import type { ExtensionRegistration } from "../../app/extensions";
 import { CapabilityStateView } from "../../components/CapabilityStateView";
+import { useWorkspace } from "../workspace/workspace-context";
+import { CampaignWorkspace } from "../workspace/WorkspaceViews";
 
 export function CampaignsPlaceholderRoute() {
+  const workspace = useWorkspace();
+  if (workspace) return <CampaignWorkspace />;
   return (
     <section aria-labelledby="campaigns-heading">
       <p className="eyebrow">{t("Placeholder domain module")}</p>

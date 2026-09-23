@@ -1,3 +1,4 @@
+import { FieldHelp } from "./FieldHelp";
 import { t } from "../i18n";
 import type { DocumentEnvelope } from "../core/contracts";
 
@@ -15,6 +16,7 @@ export function AdvancedJsonView({
             "This is a read-only projection of the same local draft used by the form, structural validation, and explicit export.",
           )}
         </p>
+        <FieldHelp field="Read-only JSON document" />
         <textarea
           aria-label={t("Read-only JSON document")}
           readOnly
