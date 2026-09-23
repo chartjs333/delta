@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "LOCAL_PRESENTATION_ACCEPTANCE",
+  "mode": "SIMULATED_LOCAL",
+  "observed_at": "2026-09-23T20:08:37.742926+00:00",
+  "source": {
+    "commit": "b5f06eff7488c367b882050483bb08130456bfd7",
+    "dirty": false,
+    "dockerfile_id": "sha256:231d18b5adf648ad407aa4624c97ef1d7554e8a0ad44700236afa5f7fe8297bc",
+    "simulation_script_id": "sha256:37401cd8012c7a63fba51843a49575fd72edfa0dcaed7c82b888854a78593c76",
+    "tree": "eafa0f7a114d36899632d56f7858762dab8eb073"
+  },
+  "controller_source": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "checks": {
+    "presentation_backend_unit_tests": {
+      "status": "PASS",
+      "count": 10
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "javascript_syntax": "PASS",
+    "powershell_parse": "PASS",
+    "controller_black_box_smoke": "PASS",
+    "graceful_stop_restart_saved_jobs": "PASS",
+    "idempotent_launcher_start": "PASS",
+    "ui_training_and_receipt": "OBSERVED_PASS",
+    "ui_docker_four_phases": "OBSERVED_PASS",
+    "ui_history": "OBSERVED_PASS",
+    "ui_download_event": "OBSERVED_PASS",
+    "ui_readiness_boundaries": "OBSERVED_PASS",
+    "browser_console_errors": 0,
+    "offline_simulation_verification": "PASS_IN_PINNED_DOCKER",
+    "formal_semantic_impact": "NONE"
+  },
+  "self_review": true,
+  "independent_review": false,
+  "files": {
+    "simulation/all-online.json": "sha256:f8474548e0e7e7cc3761ae38d721408248c86ff567a10c373bc22229c12376c8",
+    "simulation/cleanup.json": "sha256:925ff4d2d48f669a202ac383208e5139e8d6c4965c900322b05a4fcff304f7a6",
+    "simulation/Dockerfile.simulated": "sha256:231d18b5adf648ad407aa4624c97ef1d7554e8a0ad44700236afa5f7fe8297bc",
+    "simulation/manifest.json": "sha256:1c57a2a4de131da8935c9d11244845a04d8b5c8c04fd96661aa9ec3ea62a39cb",
+    "simulation/one-lost.json": "sha256:4f5d4853e38e0562b1fd404edc30aeae74a245743abe9114aaf77b99e95ac669",
+    "simulation/report.json": "sha256:c61ecd92950170a90fdca71593f8bc1acb62d75cb8c4ffe48f1df802cee3b128",
+    "simulation/restarted.json": "sha256:26ca69095832d6959dea9053f402321a83cb177c322521cac3ea552ed6336658",
+    "simulation/runner.py": "sha256:37401cd8012c7a63fba51843a49575fd72edfa0dcaed7c82b888854a78593c76",
+    "simulation/two-lost.json": "sha256:0c128dbd11b5aa9a6433b93b2611912c1276124e3afbe330c27770b41d9e9e67",
+    "simulation-job.json": "sha256:1b76a55ea483f90f2414ef64ccc717c6e777183b5d1a5085f67790d46599f087",
+    "training.json": "sha256:4d210dbe2db417ea4a4193207b9a4879ffe192e583119850049e7a04b3ba3cdf"
+  },
+  "gate_eligible": false,
+  "benchmark_result_qc": null,
+  "feature010_go_checkpoint_sha": null,
+  "feature011_admitted": false
+}

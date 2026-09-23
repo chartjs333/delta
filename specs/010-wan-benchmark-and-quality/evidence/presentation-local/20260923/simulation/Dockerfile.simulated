@@ -1,0 +1,5 @@
+FROM python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY simulated_local.py /simulated_local.py
+USER 65534:65534
+ENTRYPOINT ["python3", "/simulated_local.py"]
