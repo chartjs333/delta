@@ -1,0 +1,23 @@
+{
+  "files": [
+    {
+      "sha256": "148374be9e508f1e0d59608ef45478aec3a587f8c21c75723272cf646cd076f1",
+      "path": "live.html"
+    },
+    {
+      "sha256": "8ae4084ea72573ca06534b0d02536571e7fd7f1121d1b24c20ec8e6de8461672",
+      "path": "assets/live-5BKLat_r.css"
+    },
+    {
+      "sha256": "a2a108910ad65edcef65039072485ead51173cf1d3ccfccdbc43d378bdb24cad",
+      "path": "assets/live-B0uksi11.js"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "mode": "PRESENTATION_UI_ONLY",
+  "qualifying_evidence": false,
+  "admin_ui_source_commit": "91b51eb7ef67a7bda970342dabdbfaf63aecdacd",
+  "controller_source_commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "installed_at": "2026-09-23T22:31:39.3207393Z",
+  "protocol_semantics_changed": false
+}

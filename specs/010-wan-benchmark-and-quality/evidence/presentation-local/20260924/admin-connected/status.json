@@ -1,0 +1,13 @@
+{
+  "admission_digest": "sha256:34a91985550699ba5c4b5497409d56d0390bd37f2f75b90e1f303868fdb8960c",
+  "admission_id": "00eef01b-ad30-4dcd-93f6-a437a0f99fe9",
+  "execution_id": "8dd03d5b-3a12-4201-ae16-2ba7cb427c78",
+  "intent_digest": "sha256:51676a673f6b78595ad2fe050c5414f50a4cdb828be114b2953b015291825edb",
+  "intent_id": "d90a5264-a5c7-4036-855d-b09af64afb4a",
+  "operation": "TRAIN_TICKET",
+  "receipt_digest": "sha256:005109f750db3a28852bdd92985078560ca5e3693010776ca77cee9c046435a9",
+  "schema_version": "1.0.0",
+  "state": "COMPLETED",
+  "terminal": true,
+  "updated_at": "2026-09-24T00:29:10.793606+02:00"
+}

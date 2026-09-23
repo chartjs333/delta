@@ -15,3 +15,11 @@ report SHA-256 00c7bafdcfea3e08c6fec6bae51ae08021cb78b72548de87935e0b46d4a6b1b6,
 verifier PASS but decision NO_GO. This bounded stage is self-reviewed and does
 not replace missing full binding/proofs/independent attestations/merged authority.
 Feature010 qualifying gates, ResultQC and GO checkpoint remain unfulfilled.
+
+
+Presentation acceptance complete: installed source 91b51eb, 257 UI tests,
+16 server tests, EN/RU browser checks, actual run and identical canonical receipt,
+profile persistence across server restart. Evidence and limitations are recorded
+in specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260924/admin-connected/.
+Controller source and instance remain unchanged. Open the shared Admin workspace
+at http://127.0.0.1:8870/admin/?lang=en#/campaigns for the morning walkthrough.

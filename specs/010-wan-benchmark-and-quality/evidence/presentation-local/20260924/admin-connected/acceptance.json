@@ -1,0 +1,65 @@
+{
+  "mode": "SIMULATED_LOCAL",
+  "gate_eligible": false,
+  "receipt_sha256": "005109f750db3a28852bdd92985078560ca5e3693010776ca77cee9c046435a9",
+  "status": "PASS",
+  "controller_instance_unchanged": true,
+  "profile_revision": 12,
+  "execution_id": "8dd03d5b-3a12-4201-ae16-2ba7cb427c78",
+  "profile_survives_server_restart": true,
+  "schema_version": "1.0.0",
+  "task_ids": [
+    "T051",
+    "HR010-001"
+  ],
+  "review_kind": "SELF_REVIEW",
+  "independent_attestations": false,
+  "source_commit": "91b51eb7ef67a7bda970342dabdbfaf63aecdacd",
+  "controller_source_commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "formal_semantics_changed": false,
+  "benchmark_result_qc": null,
+  "feature010_go_checkpoint_sha": null,
+  "browser_checks": {
+    "old_8865_entry_redirects_to_shared_admin": true,
+    "campaign_workload_to_real_run": true,
+    "same_execution_in_admin_and_presentation": true,
+    "profile_and_controller_document_restore": true,
+    "english_and_russian_field_purpose_and_examples": true,
+    "advanced_intent_help": true,
+    "controller_identity_custody_help": true,
+    "presentation_language_help": true,
+    "keyboard_escape_and_no_autofill": "covered by UI tests",
+    "visual_review": "normal laptop viewport"
+  },
+  "checks": {
+    "ui_tests": 257,
+    "ui_test_files": 42,
+    "presentation_tests": 16,
+    "typecheck": "PASS",
+    "live_build_and_audit": "PASS",
+    "offline_build_and_audit": "PASS",
+    "ruff": "PASS",
+    "javascript_syntax": "PASS"
+  },
+  "limits": [
+    "Local synthetic CPU plugin run; no scientific Gate B qualification.",
+    "Only the supported 10-gene PLUGIN_BOUNDARY workload is enabled in the shared profile.",
+    "Pairwise review worksheets require explicit export.",
+    "Concurrent profile edits fail closed with a reload notice.",
+    "Independent authorities, real WAN and evaluator quorum remain external prerequisites."
+  ],
+  "files": [
+    {
+      "path": "installed-admin-ui.json",
+      "sha256": "8211e1e2986e24adcd89391102a2b7209b5297da33a3442237ae9561de2e4cc4"
+    },
+    {
+      "path": "receipt.json",
+      "sha256": "005109f750db3a28852bdd92985078560ca5e3693010776ca77cee9c046435a9"
+    },
+    {
+      "path": "status.json",
+      "sha256": "af1d18e959ee591dc08d94db30caf0a7ac3e183b117a3288ca261e13f1c30a7d"
+    }
+  ]
+}

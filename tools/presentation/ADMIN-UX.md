@@ -77,3 +77,19 @@ atomic replacement, corrupted files, origin/write headers, fixed proxy routes,
 receipt digest/lineage mismatch and canonical downloads. Windows rejected-body
 handling drains only a bounded declared body so a 403 is not lost to socket reset.
 Browser acceptance and installed-source identities are recorded separately.
+
+
+Final shared-workspace Constitution Check: PASS for presentation-only scope.
+Installed UI/source: `91b51eb` (exact identity in installed-admin-ui.json).
+257 UI tests and 16 presentation tests pass. Browser review confirms all new
+fields and technical fields have EN/RU help with examples, campaigns hand off
+workload selection, controller document restores after reload, and Presentation
+opens the exact real execution `8dd03d5b-3a12-4201-ae16-2ba7cb427c78`.
+Canonical receipt SHA-256:
+`005109f750db3a28852bdd92985078560ca5e3693010776ca77cee9c046435a9`.
+Profile revision 12 survived a real presentation-server restart byte-for-byte;
+the baseline Controller instance did not change. Evidence is under
+`specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260924/admin-connected/`.
+The earlier 403 Windows socket reset and `/admin/` relative-asset issue were
+fixed and covered before acceptance. This remains self-review, SIMULATED_LOCAL,
+and no BenchmarkResultQC or GO checkpoint is issued.
