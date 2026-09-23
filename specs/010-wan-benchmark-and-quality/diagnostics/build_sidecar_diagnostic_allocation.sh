@@ -85,6 +85,24 @@ fi
 
 /usr/bin/mkdir -p "$allocation_root/jdk" "$allocation_root/bin"
 /usr/bin/cp -a /opt/java/openjdk/. "$allocation_root/jdk/"
+/usr/bin/python3 - "$allocation_root/jdk/lib/jfr/profile.jfc" <<'PY'
+import sys
+from pathlib import Path
+
+profile = Path(sys.argv[1])
+payload = profile.read_bytes()
+disabled = (
+    b'<event name="jdk.SafepointEnd">\n'
+    b'      <setting name="enabled">false</setting>'
+)
+enabled = (
+    b'<event name="jdk.SafepointEnd">\n'
+    b'      <setting name="enabled">true</setting>'
+)
+if payload.count(disabled) != 1 or enabled in payload:
+    raise SystemExit("unexpected pinned JDK SafepointEnd profile setting")
+profile.write_bytes(payload.replace(disabled, enabled))
+PY
 /usr/bin/install -m 0755 /usr/bin/strace "$allocation_root/bin/strace"
 
 for artifact in \

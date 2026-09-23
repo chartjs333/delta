@@ -182,13 +182,23 @@ def allocation_plan_fixture(tmp_path: Path) -> tuple[dict[str, object], Path]:
         "libdelta_ffi.so",
         "delta_runtime_sidecar",
         "bin/strace",
+        "jdk/lib/jfr/profile.jfc",
     ]
+    jfr_profile = (
+        "<configuration>"
+        + "".join(
+            f'<event name="{name}"><setting name="enabled">true</setting></event>'
+            for name in allocation_assembler.REQUIRED_JFR_EVENTS
+        )
+        + "</configuration>"
+    )
     command = (
         "from pathlib import Path;"
         f"r=Path({str(allocation_root)!r});"
         f"names={relative_outputs!r};"
         "[(r/n).parent.mkdir(parents=True,exist_ok=True) for n in names];"
         "[(r/n).write_bytes((n+'\\n').encode()) for n in names];"
+        f"(r/'jdk/lib/jfr/profile.jfc').write_text({jfr_profile!r});"
         "[(r/n).chmod(0o755) for n in "
         "['jdk/bin/java','jdk/bin/jfr','delta_runtime_sidecar','bin/strace']]"
     )
@@ -817,6 +827,63 @@ def test_allocation_assembler_builds_seals_and_round_trips_exclusively(
     jar.write_bytes(b"tampered")
     with pytest.raises(diagnostic.DiagnosticError, match=r"ARTIFACT_(SIZE|SHA256)"):
         allocation_assembler.verify_generated_allocation(plan, source_root, manifest_path)
+
+
+def test_allocation_assembler_rejects_disabled_preregistered_jfr_event(tmp_path: Path) -> None:
+    java = tmp_path / "jdk" / "bin" / "java"
+    java.parent.mkdir(parents=True)
+    java.write_bytes(b"java")
+    profile = tmp_path / "jdk" / "lib" / "jfr" / "profile.jfc"
+    profile.parent.mkdir(parents=True)
+    profile.write_text(
+        "<configuration>"
+        + "".join(
+            f'<event name="{name}"><setting name="enabled">'
+            f"{'false' if name == 'jdk.SafepointEnd' else 'true'}</setting></event>"
+            for name in allocation_assembler.REQUIRED_JFR_EVENTS
+        )
+        + "</configuration>",
+        encoding="utf-8",
+    )
+    with pytest.raises(
+        diagnostic.DiagnosticError,
+        match=r"ASSEMBLER_JFR_EVENTS_NOT_ENABLED:jdk\.SafepointEnd",
+    ):
+        allocation_assembler.verify_jfr_profile(java)
+
+
+def test_allocation_assembler_rejects_disabled_jfr_event_before_sealing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plan, source_root = allocation_plan_fixture(tmp_path)
+    invocation = plan["invocation"]
+    assert isinstance(invocation, dict)
+    argv = invocation["argv"]
+    assert isinstance(argv, list)
+    enabled = '<event name="jdk.SafepointEnd"><setting name="enabled">true</setting></event>'
+    disabled = enabled.replace(">true<", ">false<")
+    argv[-1] = str(argv[-1]).replace(enabled, disabled)
+    receipt = {
+        "checkout_root": str(source_root.resolve()),
+        "commit": plan["source"]["commit"],
+        "git_invocations": [synthetic_process_receipt(source_root, "git-probe")],
+        "status_porcelain_sha256": diagnostic.sha256_id(b""),
+        "tree": plan["source"]["tree"],
+    }
+    monkeypatch.setattr(
+        diagnostic,
+        "verify_source_checkout",
+        lambda _root, _source: copy.deepcopy(receipt),
+    )
+
+    with pytest.raises(
+        diagnostic.DiagnosticError,
+        match=r"ASSEMBLER_JFR_EVENTS_NOT_ENABLED:jdk\.SafepointEnd",
+    ):
+        allocation_assembler.build_and_assemble(plan, source_root)
+    allocation_root = Path(str(plan["allocation_root"]))
+    assert not (allocation_root / "build-provenance.json").exists()
+    assert not Path(str(plan["allocation_manifest_path"])).exists()
 
 
 def test_preflight_rejects_nonexecutable_exact_artifact(

@@ -73,11 +73,13 @@ The checked-in source-bound builder used by that argv is
 `/bin/sh`, passing a fresh allocation root and a distinct fresh retained build
 root. It uses JDK 25, GCC/C++20 with warnings-as-errors and no fast-math, builds
 the production FFI and non-qualification sidecar, emits exactly 7,000 ordered
-DLTSTRC1 operations (1,000 warm-up plus 60 seconds at 100/s), and copies the
-complete JDK plus the exact `strace` executable into the frozen allocation. The
-allocation assembler remains the only supported caller because it binds the
-complete argv, replacement environment, logs, source commit/tree, and output
-hashes.
+DLTSTRC1 operations (1,000 warm-up plus 60 seconds at 100/s), copies the
+complete JDK, deterministically enables the preregistered `jdk.SafepointEnd`
+event in the allocation-local `profile.jfc`, and copies the exact `strace`
+executable into the frozen allocation. The allocation assembler independently
+rejects a profile that does not enable every preregistered event and remains the
+only supported caller because it binds the complete argv, replacement
+environment, logs, source commit/tree, and output hashes.
 
 Run exactly:
 

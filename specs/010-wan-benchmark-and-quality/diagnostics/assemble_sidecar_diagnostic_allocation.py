@@ -7,6 +7,7 @@ import argparse
 import os
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +43,14 @@ EXECUTABLE_ARTIFACT_IDS = {
     "SIDECAR_EXECUTABLE",
     "STRACE_EXECUTABLE",
 }
+REQUIRED_JFR_EVENTS = (
+    "jdk.GarbageCollection",
+    "jdk.GCPhasePause",
+    "jdk.SafepointBegin",
+    "jdk.SafepointEnd",
+    "jdk.Compilation",
+    "jdk.CompilerPhase",
+)
 
 
 def exclusive_write(path: Path, payload: bytes) -> None:
@@ -185,6 +194,27 @@ def artifact_paths(plan: dict[str, Any]) -> dict[str, Path]:
     return {identifier: root / relative for identifier, relative in FIXED_ARTIFACT_PATHS.items()}
 
 
+def verify_jfr_profile(java: Path) -> None:
+    profile = java.parent.parent / "lib" / "jfr" / "profile.jfc"
+    contract.require(profile.is_file(), "ASSEMBLER_JFR_PROFILE_MISSING", str(profile))
+    try:
+        root = ET.parse(profile).getroot()
+    except (ET.ParseError, OSError) as error:
+        raise contract.DiagnosticError("ASSEMBLER_JFR_PROFILE_INVALID") from error
+    settings: dict[str, bool] = {}
+    for event in root.iter():
+        if event.tag.rsplit("}", 1)[-1] != "event" or "name" not in event.attrib:
+            continue
+        for setting in event:
+            if (
+                setting.tag.rsplit("}", 1)[-1] == "setting"
+                and setting.attrib.get("name") == "enabled"
+            ):
+                settings[event.attrib["name"]] = (setting.text or "").strip().lower() == "true"
+    missing = [name for name in REQUIRED_JFR_EVENTS if settings.get(name) is not True]
+    contract.require(not missing, "ASSEMBLER_JFR_EVENTS_NOT_ENABLED", ",".join(missing))
+
+
 def manifest_stub(plan: dict[str, Any]) -> dict[str, Any]:
     return {
         "environment": {
@@ -210,6 +240,7 @@ def verify_generated_allocation(
     contract.require(allocation["resources"] == plan["resources"], "ASSEMBLER_VERIFY_RESOURCES")
     contract.require(allocation["source"] == plan["source"], "ASSEMBLER_VERIFY_SOURCE")
     expected_paths = artifact_paths(plan)
+    verify_jfr_profile(expected_paths["JAVA_EXECUTABLE"])
     indexed = {item["artifact_id"]: item for item in allocation["artifacts"]}
     for identifier in contract.ALLOCATION_ARTIFACT_IDS:
         contract.require(
@@ -252,6 +283,7 @@ def build_and_assemble(plan: dict[str, Any], source_root: Path) -> dict[str, Any
     exclusive_write(stderr_path, completed.stderr)
 
     paths = artifact_paths(plan)
+    verify_jfr_profile(paths["JAVA_EXECUTABLE"])
     contract.require(
         not paths["BUILD_PROVENANCE_RECEIPT"].exists(), "ASSEMBLER_PROVENANCE_MUST_BE_FRESH"
     )
