@@ -3,6 +3,16 @@
 **Status**: Normative input to the TLA+ model  
 **Feature**: `000-formal-tla-spec`
 
+**Pending semantic amendment 0001**: native arithmetic admission requires a
+complete, independently bound artifact graph and exact recomputed PARAMETER/APPLY
+body before vote persistence. Missing bytes, wrong current model/optimizer,
+schema/profile/assignment mismatch or unsafe arithmetic disables the vote and
+stutters/rejects at the existing boundary. It creates no durable vote, sendable
+effect, current-pointer change, receipt or new failure terminal. Existing exact
+artifact repair, deadline and certified-abort rules still apply; local mismatch
+cannot manufacture AbortQC. This candidate requires new Formal GO before runtime
+implementation; the historical report does not cover it.
+
 ## 1. Outcome classes
 
 Every protocol operation resolves into one of four abstract outcomes:

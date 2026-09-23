@@ -6,6 +6,10 @@ or Formal GO. The merged `cc98f15a...` report remains authority only for its
 unchanged artifact set. This draft does not authorize removal of PR50's arithmetic
 input guard or a qualifying benchmark in either deployment mode.
 
+Candidate progress is tracked in `docs/feature010-progress.md`. Initial production
+TLA+ integration, a concrete draft byte-graph oracle, C++ arithmetic comparison
+and standalone Lean helpers now exist. They do not complete the obligations below.
+
 ## Observed gap
 
 At main `c8aea64972f741060d1e527ebbb6f9a5a168a075`,
@@ -151,8 +155,10 @@ inline/SHM cannot alter this rule.
    traces and cross-language canonical vectors under the new schema/semantics ID.
 3. Instantiate existing rounding, accumulator, hierarchy and Apply proofs for
    conversion products, output range, coverage, serialization and recovery.
-   Check whether INT64_MIN behavior in the existing Apply implementation agrees
-   with the chosen full signed range; no silent precondition widening is allowed.
+   The candidate selects `FULL_SIGNED_INT64`, including exact `INT64_MIN / 1`;
+   the existing Apply implementation rejects that case. This difference must be
+   represented in the new authority before runtime changes, with no silent
+   precondition widening under the historical report.
 4. Add production-source mutants for omitted recomputation, wrong rounding
    placement, substituted parent model/optimizer, swapped domains/shards,
    mismatched scale/profile, and arithmetic-result changes with rehashed bodies.

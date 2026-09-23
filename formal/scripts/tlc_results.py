@@ -29,6 +29,8 @@ TOP_LEVEL_ACTION = re.compile(
     r"([0-9][0-9,]*):([0-9][0-9,]*)$",
     re.MULTILINE,
 )
+COVERAGE_START = re.compile(r"^The coverage statistics at [^\n]*\n", re.MULTILINE)
+COVERAGE_END = re.compile(r"^End of statistics\.$", re.MULTILINE)
 SUCCESS = "Model checking completed. No error has been found."
 FAILURE_PATTERNS = (
     re.compile(r"^Error:", re.MULTILINE),
@@ -88,7 +90,34 @@ def _verify_identity(
 
 
 def top_level_action_counts(output: str) -> dict[str, int]:
-    """Return unique top-level action invocation counts from TLC coverage."""
+    """Use the final complete cumulative snapshot; reject malformed snapshots.
+
+    TLC emits periodic coverage during long checks. Those are separate snapshots,
+    not duplicate declarations within one snapshot. Never accumulate their counts.
+    """
+
+    starts = list(COVERAGE_START.finditer(output))
+    ends = list(COVERAGE_END.finditer(output))
+    if starts or ends:
+        if len(starts) != len(ends):
+            raise TlcResultError("incomplete TLC coverage snapshot")
+        previous: dict[str, int] = {}
+        cursor = 0
+        for index, (start, end) in enumerate(zip(starts, ends, strict=True)):
+            if start.start() < cursor or end.start() < start.end():
+                raise TlcResultError("nested or unordered TLC coverage snapshots")
+            if index + 1 < len(starts) and starts[index + 1].start() < end.end():
+                raise TlcResultError("nested TLC coverage snapshots")
+            if TOP_LEVEL_ACTION.search(output[cursor:start.start()]):
+                raise TlcResultError("TLC coverage row outside a snapshot")
+            counts = top_level_action_counts(output[start.end():end.start()])
+            if any(counts.get(action, -1) < count for action, count in previous.items()):
+                raise TlcResultError("TLC cumulative action coverage regressed")
+            previous = counts
+            cursor = end.end()
+        if TOP_LEVEL_ACTION.search(output[cursor:]):
+            raise TlcResultError("TLC coverage row outside a snapshot")
+        return previous
 
     counts: dict[str, int] = {}
     for match in TOP_LEVEL_ACTION.finditer(output):
@@ -142,6 +171,11 @@ def successful_tlc_result(
     if len(required_actions) != len(set(required_actions)):
         raise TlcResultError("required TLC action list contains duplicates")
     action_counts = top_level_action_counts(output)
+    if required_actions:
+        starts = list(COVERAGE_START.finditer(output))
+        ends = list(COVERAGE_END.finditer(output))
+        if not starts or not (success_offset < starts[-1].start() < ends[-1].end() < summary.start()):
+            raise TlcResultError("missing final TLC coverage between success and summary")
     reached: dict[str, bool] = {}
     for action in sorted(required_actions):
         count = action_counts.get(action)

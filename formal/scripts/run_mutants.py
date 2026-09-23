@@ -49,6 +49,30 @@ class Mutation:
 
 MUTATIONS = (
     Mutation(
+        "MUT-PARAMETER-ARITHMETIC-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla", "ValidParameterArithmetic", "DeltaReducePhase6Harness",
+        "native-arithmetic-binding.cfg",
+        (Replacement("\n    /\\ body.value = NativeParameterValue(body.apc, body.domain)\n", "", 1),),
+    ),
+    Mutation(
+        "MUT-PARAMETER-MODEL-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla", "ValidParameterArithmetic", "DeltaReducePhase6Harness",
+        "native-arithmetic-binding.cfg",
+        (Replacement("\n    /\\ body.authority = NativeArithmeticAuthority(body.apc)\n", "", 1),),
+    ),
+    Mutation(
+        "MUT-APPLY-OPTIMIZER-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla", "ValidApplyArithmetic", "DeltaReducePhase6Harness",
+        "native-arithmetic-binding.cfg",
+        (Replacement("\n    /\\ body.authority = NativeArithmeticAuthority(body.aggregate.apc)\n", "", 1),),
+    ),
+    Mutation(
+        "MUT-APPLY-ARITHMETIC-BINDING", "ArithmeticBindingSound", "INV-ARITHMETIC-BINDING",
+        "DeltaReduceReduceApply.tla", "ValidApplyArithmetic", "DeltaReducePhase6Harness",
+        "native-arithmetic-binding.cfg",
+        (Replacement("\n    /\\ body.nextModelHash = NativeModelHash(body.aggregate)\n", "", 1),),
+    ),
+    Mutation(
         "MUT-MISSING-DURABLE-VOTE",
         "AllQCVotesPersisted",
         "INV-ALL-QC-VOTES-PERSISTED",
@@ -173,6 +197,13 @@ MUTATIONS = (
         "arithmetic-boundary.cfg",
         (
             Replacement(
+                "        /\\ body \\in parameterResults\n"
+                "        /\\ ValidParameterResultBody(body)\n"
+                "        /\\ ~RoundAbortRequired(body.round)",
+                "        /\\ body \\in parameterResults\n"
+                "        /\\ ~RoundAbortRequired(body.round)",
+            ),
+            Replacement(
                 "    /\\ ValidParameterResultBody(body)\n"
                 "    /\\ ~RoundAbortRequired(body.round)\n"
                 "    /\\ currentCheckpoint = body.parent",
@@ -186,13 +217,15 @@ MUTATIONS = (
             Replacement(
                 "ProposeParameterResultAction ==\n"
                 "    \\E apc \\in FinalizedAPCBodies, domain \\in Domains,\n"
-                "       shard \\in Shards :\n"
+                "       shard \\in Shards, value \\in ParameterValues :\n"
                 "        ProposeParameterResult(\n"
                 "            ParameterResultBody(\n"
                 "                apc, domain, shard, ConfiguredParentCheckpoint,",
                 "ProposeParameterResultAction ==\n"
                 "    \\E apc \\in FinalizedAPCBodies, domain \\in Domains,\n"
                 "       shard \\in Shards, parent \\in ParentCheckpoints :\n"
+                "        LET value == NativeParameterValue(apc, domain)\n"
+                "        IN\n"
                 "        ProposeParameterResult(\n"
                 "            ParameterResultBody(\n"
                 "                apc, domain, shard, parent,",
@@ -245,12 +278,12 @@ MUTATIONS = (
             Replacement(
                 "ProposeParameterResultAction ==\n"
                 "    \\E apc \\in FinalizedAPCBodies, domain \\in Domains,\n"
-                "       shard \\in Shards :\n"
+                "       shard \\in Shards, value \\in ParameterValues :\n"
                 "        ProposeParameterResult(\n"
                 "            ParameterResultBody(\n"
                 "                apc, domain, shard, ConfiguredParentCheckpoint,\n"
                 "                ConfiguredParameterSchema, ConfiguredArithmeticProfile,\n"
-                "                ExpectedParameterValue, TRUE))",
+                "                value, TRUE))",
                 "ProposeParameterResultAction ==\n"
                 "    \\E apc \\in FinalizedAPCBodies, domain \\in Domains,\n"
                 "       shard \\in Shards, value \\in ParameterValues,\n"

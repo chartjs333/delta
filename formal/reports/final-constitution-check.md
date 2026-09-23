@@ -1,6 +1,6 @@
 # Syntactic Traceability and Constitution Vocabulary Check
 
-Syntactic traceability result: **PASS**.
+Syntactic traceability result: **FAIL**.
 
 This tool checks identifier presence, registry/set equality, source anchors, fixture cardinality and Constitution vocabulary. It does **not** claim semantic completeness, liveness non-vacuity or proof-statement strength.
 

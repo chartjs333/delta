@@ -20,6 +20,15 @@ from formal_artifacts import sha256_file, write_canonical_json  # noqa: E402
 
 
 OBLIGATIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
+    "PO-AB1": (
+        "DeltaReduce/ArithmeticBinding.lean",
+        (
+            ("native-byte-graph-unique", "nativeArithmeticGraphUnique"),
+            ("checked-parameter-conversion", "nativeParameterConversionSound"),
+            ("checked-apply-result-unique", "nativeApplyResultUnique"),
+            ("admission-recovery-refinement", "nativeArithmeticRecoveryRefines"),
+        ),
+    ),
     "PO-Q1": ("DeltaReduce/Quorum.lean", (("intersection", "quorumIntersection"),)),
     "PO-Q2": (
         "DeltaReduce/Quorum.lean",

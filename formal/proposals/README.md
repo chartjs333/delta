@@ -1,44 +1,58 @@
-# Arithmetic binding proposal: no formal authority
+# Arithmetic binding candidate: no formal authority
 
-These files make amendment `0001-arithmetic-input-binding.md` reviewable as
-concrete arithmetic and negative design vectors. They are not a production
-artifact parser, TLA refinement, theorem proof, runtime implementation or new
-FormalVerificationReport. `DRAFT_NOT_AUTHORITY` and `formal_go=false` are explicit
-in the generated vector document.
+These files make amendment `0001-arithmetic-input-binding.md` reviewable through
+concrete arithmetic, canonical draft byte graphs and negative design vectors.
+They are not a production artifact parser, completed refinement proof, runtime
+implementation or new FormalVerificationReport. `DRAFT_NOT_AUTHORITY` and
+`formal_go=false` remain explicit in generated evidence.
 
 ```text
 python -m unittest discover -s formal/proposals -v
 python formal/proposals/arithmetic_binding.py
+python formal/proposals/check_cross_language.py --help
+lean formal/proposals/ArithmeticBinding.lean
 ```
 
-The first candidate has 13 tests for positive/negative half ties, non-ties,
-weighted accumulation, conversion quantum, overflow before cancellation, unsafe
-prefixes, missing/reordered tickets, noncanonical fractions, substituted parent
-model/optimizer/schema and domain-separated value bytes. The matched candidate is
-`model=[16,-18]`, `optimizer=[5,-4]` for the checked-in vector.
+`arithmetic_binding.py` covers half ties, weighted accumulation, conversion
+quantum, checked prefixes, model/optimizer state and domain-separated value bytes.
+`native_binding.py` adds an exact content-addressed graph rooted in a separately
+supplied native anchor. Its fixture has two domains, two shards, positive/negative
+half ties and yields `model=[19,-21]`, `optimizer=[2,0]`.
 
-The native authority arguments in this mathematical reference must ultimately be
-resolved from native durable state. Passing both a candidate and its claimed
-authority from one untrusted command would not establish binding. This proposal
-does not implement that resolver.
+Draft graph bytes are bounded ASCII canonical JSON with the domain separator
+`deltareduce.000.arithmetic-binding.draft1` followed by NUL. Exact type, length,
+hash, schema coverage, q-shard commitments, context and result checks are required.
+ISC/EC/APC/Aggregate projections assume independently verified certificates.
+This assumption is not a signature verifier or a production certificate codec.
+
+The native authority arguments must ultimately be resolved from native durable
+state. Passing both a candidate and its claimed authority from one untrusted
+command would not establish binding. This proposal does not implement that
+resolver, a WAL, a durable receipt or a QC.
+
+The independent C++ arithmetic oracle matched Python on 1,012 cases under GCC
+and UBSan. This checks arithmetic rather than complete runtime/canonical graph
+conformance. The standalone Lean file has 15 checked helper statements with only
+declared standard axioms; it does not discharge the complete binding obligation.
+
+Production TLA+ modules in this candidate now compute bounded PARAMETER/APPLY
+results from native input constants instead of expected-result constants. Their
+current scope is one coordinate per shard with uniform q/weights. All 20 safety
+and 7 liveness configurations and 14 production-source mutants passed, but the
+public trace witness, arbitrary-vector proof and lifecycle binding remain open.
 
 Self-review found two material migration issues:
 
-- Per-domain rounding before mixture changes results relative to mixing exact
-  rationals first. The tested counterexample is `1/2` and `-1/2` with equal
-  weights. The chosen operation order needs a new formal authority.
-- The reference accepts the full signed minimum when the exact result fits.
-  The current C++ `round_half_toward_positive` rejects `INT64_MIN / 1` because it
-  first bounds the unsigned quotient by `INT64_MAX`. The output-range contract
-  must be settled in the formal profile before any native modification.
+- Per-domain rounding before mixture differs from mixing exact rationals first.
+  For `1/2` and `-1/2` with equal weights, the candidate's result is 1 rather than 0.
+  The selected operation order requires new formal authority.
+- The candidate explicitly selects `FULL_SIGNED_INT64`, including exact
+  `INT64_MIN / 1`. The existing native helper rejects that case by bounding an
+  unsigned quotient by `INT64_MAX`. This is a migration issue, not permission to
+  change runtime under the old report.
 
-The accepted semantic input set is unchanged by this proposal. Its independently
-recomputed ID remains `sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6`.
-That fact is **not** evidence that this proposed arithmetic binding has GO. No
-accepted TLA/schema/proof was changed, no accepted report was regenerated and no
-independent review was fabricated.
-
-Next work remains the production model/schema/refinement integration, arithmetic
-proof instantiations, production mutants, cross-language vectors, full pinned
-gate/reproduction and a newly reviewed merged authority. PR50's PARAMETER/APPLY
-guard must remain until those obligations pass.
+The source semantics have changed. The old `cc98f15a...` GO is historical evidence
+for its own merged source only; it cannot authorize this candidate. No independent
+reviewer attestations were fabricated. See `docs/feature010-progress.md` for the
+executed checks and remaining obligations. PR50's PARAMETER/APPLY guard remains
+until complete, reviewed and merged new formal authority exists.

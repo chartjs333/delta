@@ -22,6 +22,52 @@ ReduceApplyInit ==
 ParameterKey(domain, shard) ==
     [domain |-> domain, shard |-> shard]
 
+DomainMembers(apc, domain) ==
+    {ticket \in apc.members :
+        \E definition \in ticketPlan :
+            /\ definition.ticket = ticket
+            /\ definition.domain = domain}
+
+\* Records are the injective canonical-content-ID abstraction. The resolver and
+\* cross-language vectors must separately establish its concrete byte premise.
+NativeArithmeticAuthority(apc) ==
+    [parent |-> ConfiguredParentCheckpoint,
+     schema |-> ConfiguredParameterSchema,
+     profile |-> ConfiguredArithmeticProfile,
+     applyProfile |-> ConfiguredApplyProfile,
+     inputs |-> NativeArithmeticInputs,
+     isc |-> apc.isc, ec |-> apc.ec, apc |-> apc,
+     model |-> [kind |-> "MODEL", schema |-> ConfiguredParameterSchema,
+                values |-> [shard \in Shards |-> NativeArithmeticInputs.model]],
+     optimizer |-> [kind |-> "OPTIMIZER", schema |-> ConfiguredParameterSchema,
+                    values |-> [shard \in Shards |-> NativeArithmeticInputs.optimizer]]]
+
+NativeParameterValue(apc, domain) == ABParameter(Cardinality(DomainMembers(apc, domain)))
+
+NativeDomainValue(root, domain, shard) ==
+    LET leaf == CHOOSE item \in root.leaves :
+                    item.domain = domain /\ item.shard = shard
+    IN ABDomain(leaf.value)
+
+NativeGradient(root, shard) ==
+    ABRound(ABSum(Domains, [domain \in Domains |-> NativeDomainValue(root, domain, shard)]),
+            Cardinality(Domains))
+
+NativeModelHash(root) ==
+    [kind |-> "MODEL", schema |-> ConfiguredParameterSchema,
+     values |-> [shard \in Shards |-> ABApply(NativeGradient(root, shard)).model]]
+
+NativeOptimizerHash(root) ==
+    [kind |-> "OPTIMIZER", schema |-> ConfiguredParameterSchema,
+     values |-> [shard \in Shards |-> ABApply(NativeGradient(root, shard)).optimizer]]
+
+NativeApplyChecked(root) ==
+    /\ \A leaf \in root.leaves : ABDomainChecked(leaf.value)
+    /\ \A shard \in Shards :
+        /\ ABInRange(ABSum(Domains,
+            [domain \in Domains |-> NativeDomainValue(root, domain, shard)]))
+        /\ ABApplyChecked(NativeGradient(root, shard))
+
 ParameterResultBody(apc, domain, shard, parent, schema,
                     arithmeticProfile, value, checked) ==
     [round |-> apc.isc.round,
@@ -36,6 +82,7 @@ ParameterResultBody(apc, domain, shard, parent, schema,
      schema |-> schema,
      arithmeticProfile |-> arithmeticProfile,
      coefficientProfile |-> apc.coefficientProfile,
+     authority |-> NativeArithmeticAuthority(apc),
      value |-> value,
      checked |-> checked]
 
@@ -112,6 +159,7 @@ ApplyBody(root, parent, applyProfile, nextCheckpoint,
      aggregate |-> root,
      parent |-> parent,
      applyProfile |-> applyProfile,
+     authority |-> NativeArithmeticAuthority(root.apc),
      nextCheckpoint |-> nextCheckpoint,
      nextModelHash |-> nextModelHash,
      nextOptimizerHash |-> nextOptimizerHash,
@@ -124,8 +172,10 @@ IsApplyBody(body) ==
     /\ body.parent \in CheckpointIds
     /\ body.applyProfile \in ApplyProfiles
     /\ body.nextCheckpoint \in CheckpointIds
-    /\ body.nextModelHash \in ModelHashes
-    /\ body.nextOptimizerHash \in OptimizerHashes
+    /\ body.nextModelHash \in ModelHashes \cup
+        [kind : {"MODEL"}, schema : ParameterSchemas, values : [Shards -> Int]]
+    /\ body.nextOptimizerHash \in OptimizerHashes \cup
+        [kind : {"OPTIMIZER"}, schema : ParameterSchemas, values : [Shards -> Int]]
     /\ body.checked \in BOOLEAN
 
 ApplyVoteRecord(validator, body) ==
@@ -207,12 +257,6 @@ TicketMatchesParameterContext(ticket) ==
         /\ definition.schema = ConfiguredParameterSchema
         /\ definition.profile = ConfiguredArithmeticProfile
 
-DomainMembers(apc, domain) ==
-    {ticket \in apc.members :
-        \E definition \in ticketPlan :
-            /\ definition.ticket = ticket
-            /\ definition.domain = domain}
-
 APCContextMatches(apc) ==
     /\ apc \in FinalizedAPCBodies
     /\ apc.coefficientProfile = ConfiguredCoefficientProfile
@@ -236,7 +280,9 @@ ValidParameterParent(body) ==
 ValidParameterArithmetic(body) ==
     /\ body.checked = TRUE
     /\ CheckedParameterValue(body.value)
-    /\ body.value = ExpectedParameterValue
+    /\ body.authority = NativeArithmeticAuthority(body.apc)
+    /\ ABParameterChecked(Cardinality(DomainMembers(body.apc, body.domain)))
+    /\ body.value = NativeParameterValue(body.apc, body.domain)
 
 ValidParameterResultBody(body) ==
     /\ IsParameterResultBody(body)
@@ -296,6 +342,8 @@ VoteParameter(validator, body) ==
     IN  /\ EnableReduceApplyActions
         /\ validator \in Validators
         /\ body \in parameterResults
+        /\ ValidParameterResultBody(body)
+        /\ ~RoundAbortRequired(body.round)
         /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin parameterVotes
         /\ \/ validator \in byzantine
@@ -631,8 +679,10 @@ ValidApplyArithmetic(body) ==
     /\ body.applyProfile = ConfiguredApplyProfile
     /\ body.applyProfile \in SafeApplyProfiles
     /\ body.nextCheckpoint = ExpectedNextCheckpoint
-    /\ body.nextModelHash = ExpectedNextModelHash
-    /\ body.nextOptimizerHash = ExpectedNextOptimizerHash
+    /\ body.authority = NativeArithmeticAuthority(body.aggregate.apc)
+    /\ NativeApplyChecked(body.aggregate)
+    /\ body.nextModelHash = NativeModelHash(body.aggregate)
+    /\ body.nextOptimizerHash = NativeOptimizerHash(body.aggregate)
     /\ body.checked = TRUE
 
 ValidApplyBody(body) ==
@@ -679,6 +729,8 @@ VoteApply(validator, body) ==
         /\ EnableApplyActions
         /\ validator \in Validators
         /\ body \in applyCandidates
+        /\ ValidApplyBody(body)
+        /\ ~RoundAbortRequired(body.round)
         /\ currentCheckpoint = body.parent
         /\ CanPersistVoteEnvelope(envelope)
         /\ vote \notin applyVotes
@@ -896,12 +948,22 @@ RejectForbiddenPublication(object) ==
 
 ProposeParameterResultAction ==
     \E apc \in FinalizedAPCBodies, domain \in Domains,
-       shard \in Shards :
+       shard \in Shards, value \in ParameterValues :
         ProposeParameterResult(
             ParameterResultBody(
                 apc, domain, shard, ConfiguredParentCheckpoint,
                 ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                ExpectedParameterValue, TRUE))
+                value, TRUE))
+
+ProposeSubstitutedParameterAuthorityAction ==
+    /\ EnableReduceApplyFaults
+    /\ \E apc \in FinalizedAPCBodies, domain \in Domains, shard \in Shards :
+        LET body == ParameterResultBody(
+                apc, domain, shard, ConfiguredParentCheckpoint,
+                ConfiguredParameterSchema, ConfiguredArithmeticProfile,
+                NativeParameterValue(apc, domain), TRUE)
+            wrongModel == [key \in Shards |-> NativeArithmeticInputs.model + 1]
+        IN ProposeParameterResult([body EXCEPT !.authority.model.values = wrongModel])
 
 VoteParameterAction ==
     \E validator \in Validators, body \in parameterResults :
@@ -920,7 +982,7 @@ RejectParameterWrongParentAction ==
                 ParameterResultBody(
                     otherAPC, domain, shard, ConfiguredParentCheckpoint,
                     ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                    ExpectedParameterValue, TRUE))
+                    NativeParameterValue(apc, domain), TRUE))
 
 RejectParameterUncheckedAction ==
     \E apc \in FinalizedAPCBodies, domain \in Domains,
@@ -929,7 +991,7 @@ RejectParameterUncheckedAction ==
             ParameterResultBody(
                 apc, domain, shard, ConfiguredParentCheckpoint,
                 ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                ExpectedParameterValue, FALSE))
+                NativeParameterValue(apc, domain), FALSE))
 
 RejectParameterOverflowAction ==
     \E apc \in FinalizedAPCBodies, domain \in Domains,
@@ -997,8 +1059,25 @@ ComputeApplyCandidateAction ==
         ComputeApplyCandidate(
             ApplyBody(
                 root, root.parent, ConfiguredApplyProfile,
-                ExpectedNextCheckpoint, ExpectedNextModelHash,
-                ExpectedNextOptimizerHash, TRUE))
+                ExpectedNextCheckpoint, NativeModelHash(root),
+                NativeOptimizerHash(root), TRUE))
+
+ComputeSubstitutedApplyAuthorityAction ==
+    /\ EnableReduceApplyFaults
+    /\ \E root \in FinalizedAggregateBodies :
+        LET body == ApplyBody(root, root.parent, ConfiguredApplyProfile,
+                    ExpectedNextCheckpoint, NativeModelHash(root), NativeOptimizerHash(root), TRUE)
+            wrongOptimizer == [shard \in Shards |-> NativeArithmeticInputs.optimizer + 1]
+        IN ComputeApplyCandidate([body EXCEPT !.authority.optimizer.values = wrongOptimizer])
+
+ComputeWrongApplyResultAction ==
+    /\ EnableReduceApplyFaults
+    /\ \E root \in FinalizedAggregateBodies :
+        LET correct == NativeModelHash(root)
+            wrong == [correct EXCEPT !.values =
+                        [shard \in Shards |-> correct.values[shard] + 1]]
+        IN ComputeApplyCandidate(ApplyBody(root, root.parent, ConfiguredApplyProfile,
+                ExpectedNextCheckpoint, wrong, NativeOptimizerHash(root), TRUE))
 
 VoteApplyAction ==
     \E validator \in Validators, body \in applyCandidates :
@@ -1013,16 +1092,16 @@ RejectWrongApplyParentAction ==
             RejectWrongApplyParent(
                 ApplyBody(
                     root, parent, ConfiguredApplyProfile,
-                    ExpectedNextCheckpoint, ExpectedNextModelHash,
-                    ExpectedNextOptimizerHash, TRUE))
+                    ExpectedNextCheckpoint, NativeModelHash(root),
+                    NativeOptimizerHash(root), TRUE))
 
 RejectUnsafeApplyAction ==
     \E root \in FinalizedAggregateBodies :
         RejectUnsafeApply(
             ApplyBody(
                 root, root.parent, ConfiguredApplyProfile,
-                ExpectedNextCheckpoint, ExpectedNextModelHash,
-                ExpectedNextOptimizerHash, TRUE))
+                ExpectedNextCheckpoint, NativeModelHash(root),
+                NativeOptimizerHash(root), TRUE))
 
 RejectConflictingApplyAction ==
     \E body \in FinalizedApplyBodies :
@@ -1054,6 +1133,9 @@ RejectForbiddenPublicationAction ==
         RejectForbiddenPublication(object)
 
 ReduceApplyNext ==
+    \/ ProposeSubstitutedParameterAuthorityAction
+    \/ ComputeSubstitutedApplyAuthorityAction
+    \/ ComputeWrongApplyResultAction
     \/ ProposeParameterResultAction
     \/ VoteParameterAction
     \/ FinalizeParameterQCAction
@@ -1085,6 +1167,15 @@ ConsensusIntegerOnly ==
     /\ \A body \in parameterResults : body.value \in Int
     /\ \A certificate \in parameterQCs :
         certificate.body.value \in Int
+
+ArithmeticBindingSound ==
+    /\ \A body \in parameterResults :
+        /\ body.authority = NativeArithmeticAuthority(body.apc)
+        /\ body.value = NativeParameterValue(body.apc, body.domain)
+    /\ \A body \in applyCandidates :
+        /\ body.authority = NativeArithmeticAuthority(body.aggregate.apc)
+        /\ body.nextModelHash = NativeModelHash(body.aggregate)
+        /\ body.nextOptimizerHash = NativeOptimizerHash(body.aggregate)
 
 NoOverflow ==
     /\ \A body \in parameterResults :

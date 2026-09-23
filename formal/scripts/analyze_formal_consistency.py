@@ -75,8 +75,8 @@ def main() -> int:
     proof_names = {
         item["name"] for item in registry["proof_obligations"]
     }
-    if len(proof_names) != 13:
-        errors.append("proof registry does not contain thirteen obligations")
+    if len(proof_names) != 14:
+        errors.append("proof registry does not contain fourteen obligations")
     lean_report = REPORTS / "lean-proof-report.json"
     if lean_report.is_file():
         proven = {item["id"] for item in load_json_strict(lean_report)["theorems"]}

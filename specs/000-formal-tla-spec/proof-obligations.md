@@ -5,6 +5,31 @@
 
 TLC explores finite behaviors. The obligations below cover claims parameterized by `f`, ticket counts, integer bounds and partitions. Mandatory proofs MUST compile without `sorry`, unreviewed axioms or hidden classical/choice assumptions beyond those explicitly listed.
 
+## PO-AB1 — Native arithmetic artifact binding (pending amendment 0001)
+
+**Status**: OPEN; the standalone `formal/proposals/ArithmeticBinding.lean` helper
+statements do not discharge this obligation. New Formal GO is blocked until the
+mandatory proof project and its axiom audit cover all conjuncts below.
+
+- An independently authenticated native anchor and canonical typed byte graph
+  determine exactly one parameter schema, eligible ordered contribution set,
+  domain/shard placement, profile, current model and current optimizer. Hash
+  collision resistance, certificate authentication and durable-anchor recovery
+  must be named assumptions rather than claims proved by a byte equality check.
+- For every allowed width and vector length, each coefficient/product/prefix,
+  quantum conversion and ordered rounding step agrees with the frozen PARAMETER
+  semantics. Exact coverage and metadata prevent subset or fraction aliases.
+- The per-domain conversion, mixture and optimizer operations determine unique
+  expected APPLY/model/optimizer bytes, including full signed output bounds.
+  Recomputed equality must cover the whole body, not just self-consistent hashes.
+- Public trace vote admission and recovered native state refine the same binding
+  relation before WAL persistence. Missing/mismatched authority disables admission;
+  exact persisted replay preserves the original bytes, effect and sequence.
+
+**Lean artifact target**: `formal/proofs/DeltaReduce/ArithmeticBinding.lean`.
+The concrete decoder/refinement and source-linked vector checks are additional
+obligations; an abstract pure-function determinism lemma alone is insufficient.
+
 ## PO-Q1 — Quorum intersection
 
 **Statement**

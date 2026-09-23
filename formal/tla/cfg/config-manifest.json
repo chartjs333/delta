@@ -77,9 +77,16 @@
       "seed": 2026082416,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "PositiveVoteISC", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "ISCCrashBefore", "ISCCrashAfterPersist", "ISCCrashAfterSend",
-        "ISCRestart", "ISCRecover", "ISCDrop", "ISCDuplicate"
+        "PositiveVoteISC",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "ISCCrashBefore",
+        "ISCCrashAfterPersist",
+        "ISCCrashAfterSend",
+        "ISCRestart",
+        "ISCRecover",
+        "ISCDrop",
+        "ISCDuplicate"
       ]
     },
     {
@@ -92,9 +99,16 @@
       "seed": 2026082417,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "PositiveVoteEC", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "ECCrashBefore", "ECCrashAfterPersist", "ECCrashAfterSend",
-        "ECRestart", "ECRecover", "ECDrop", "ECDuplicate"
+        "PositiveVoteEC",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "ECCrashBefore",
+        "ECCrashAfterPersist",
+        "ECCrashAfterSend",
+        "ECRestart",
+        "ECRecover",
+        "ECDrop",
+        "ECDuplicate"
       ]
     },
     {
@@ -107,9 +121,16 @@
       "seed": 2026082418,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "PositiveVoteAPC", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "APCCrashBefore", "APCCrashAfterPersist", "APCCrashAfterSend",
-        "APCRestart", "APCRecover", "APCDrop", "APCDuplicate"
+        "PositiveVoteAPC",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "APCCrashBefore",
+        "APCCrashAfterPersist",
+        "APCCrashAfterSend",
+        "APCRestart",
+        "APCRecover",
+        "APCDrop",
+        "APCDuplicate"
       ]
     },
     {
@@ -122,9 +143,16 @@
       "seed": 2026082419,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "PositiveVoteParameter", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "ParameterCrashBefore", "ParameterCrashAfterPersist", "ParameterCrashAfterSend",
-        "ParameterRestart", "ParameterRecover", "ParameterDrop", "ParameterDuplicate"
+        "PositiveVoteParameter",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "ParameterCrashBefore",
+        "ParameterCrashAfterPersist",
+        "ParameterCrashAfterSend",
+        "ParameterRestart",
+        "ParameterRecover",
+        "ParameterDrop",
+        "ParameterDuplicate"
       ]
     },
     {
@@ -137,9 +165,16 @@
       "seed": 2026082420,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "PositiveVoteAggregate", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "AggregateCrashBefore", "AggregateCrashAfterPersist", "AggregateCrashAfterSend",
-        "AggregateRestart", "AggregateRecover", "AggregateDrop", "AggregateDuplicate"
+        "PositiveVoteAggregate",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "AggregateCrashBefore",
+        "AggregateCrashAfterPersist",
+        "AggregateCrashAfterSend",
+        "AggregateRestart",
+        "AggregateRecover",
+        "AggregateDrop",
+        "AggregateDuplicate"
       ]
     },
     {
@@ -152,9 +187,16 @@
       "seed": 2026082421,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "PositiveVoteApply", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "ApplyCrashBefore", "ApplyCrashAfterPersist", "ApplyCrashAfterSend",
-        "ApplyRestart", "ApplyRecover", "ApplyDrop", "ApplyDuplicate"
+        "PositiveVoteApply",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "ApplyCrashBefore",
+        "ApplyCrashAfterPersist",
+        "ApplyCrashAfterSend",
+        "ApplyRestart",
+        "ApplyRecover",
+        "ApplyDrop",
+        "ApplyDuplicate"
       ]
     },
     {
@@ -167,9 +209,16 @@
       "seed": 2026082422,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "VoteViewChange", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "ViewCrashBefore", "ViewCrashAfterPersist", "ViewCrashAfterSend",
-        "ViewRestart", "ViewRecover", "ViewDrop", "ViewDuplicate"
+        "VoteViewChange",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "ViewCrashBefore",
+        "ViewCrashAfterPersist",
+        "ViewCrashAfterSend",
+        "ViewRestart",
+        "ViewRecover",
+        "ViewDrop",
+        "ViewDuplicate"
       ]
     },
     {
@@ -182,9 +231,16 @@
       "seed": 2026082423,
       "timeout_seconds": 600,
       "required_action_coverage": [
-        "VoteHardAbort", "SendVoteEnvelopeAction", "DeliverVoteEnvelopeAction",
-        "AbortCrashBefore", "AbortCrashAfterPersist", "AbortCrashAfterSend",
-        "AbortRestart", "AbortRecover", "AbortDrop", "AbortDuplicate"
+        "VoteHardAbort",
+        "SendVoteEnvelopeAction",
+        "DeliverVoteEnvelopeAction",
+        "AbortCrashBefore",
+        "AbortCrashAfterPersist",
+        "AbortCrashAfterSend",
+        "AbortRestart",
+        "AbortRecover",
+        "AbortDrop",
+        "AbortDuplicate"
       ]
     },
     {
@@ -350,6 +406,39 @@
       ]
     },
     {
+      "id": "CFG-NATIVE-ARITHMETIC-BINDING",
+      "kind": "safety",
+      "module": "DeltaReducePhase6Harness.tla",
+      "config": "cfg/native-arithmetic-binding.cfg",
+      "workers": 1,
+      "fingerprint_index": 27,
+      "seed": 2026092301,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "ProposeParameterResultAction",
+        "VoteParameterAction",
+        "FinalizeParameterQCAction",
+        "AssembleAggregateRootAction",
+        "VoteAggregateRootAction",
+        "FinalizeAggregateRootQCAction",
+        "RejectIncompleteAggregateAction",
+        "RejectDuplicateAggregateAction",
+        "RejectMixedAggregateAction",
+        "RejectConflictingAggregateAction",
+        "ComputeApplyCandidateAction",
+        "VoteApplyAction",
+        "FinalizeApplyQCAction",
+        "RejectWrongApplyParentAction",
+        "RejectConflictingApplyAction",
+        "CrashAfterApplyQCBeforePointerAction",
+        "AdvanceCurrentCheckpointAction",
+        "ReplayCurrentAdvanceAction",
+        "RejectCurrentConflictAction",
+        "PublishCertifiedObjectAction",
+        "RejectForbiddenPublicationAction"
+      ]
+    },
+    {
       "id": "CFG-LIVENESS-CONFIG-QC",
       "kind": "liveness",
       "module": "DeltaReduceLivenessHarness.tla",
@@ -456,6 +545,28 @@
         "SendVoteEnvelopeAction",
         "DeliverVoteEnvelopeAction",
         "PositiveFinalizeHardAbort"
+      ]
+    },
+    {
+      "id": "CFG-NATIVE-ARITHMETIC-LIVENESS",
+      "kind": "liveness",
+      "module": "DeltaReduceLivenessHarness.tla",
+      "config": "cfg/native-arithmetic-liveness.cfg",
+      "workers": 1,
+      "fingerprint_index": 13,
+      "seed": 2026092302,
+      "timeout_seconds": 600,
+      "required_action_coverage": [
+        "PositiveProposeParameter",
+        "PositiveVoteParameter",
+        "PositiveFinalizeParameter",
+        "PositiveAssembleAggregate",
+        "PositiveVoteAggregate",
+        "PositiveFinalizeAggregate",
+        "PositiveComputeApply",
+        "PositiveVoteApply",
+        "PositiveFinalizeApply",
+        "PositiveAdvanceCurrent"
       ]
     }
   ]

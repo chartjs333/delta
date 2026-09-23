@@ -1,5 +1,5 @@
 ------------------------- MODULE DeltaReduceTypes -------------------------
-EXTENDS Integers, FiniteSets, TLC
+EXTENDS Integers, FiniteSets, TLC, DeltaReduceArithmetic
 
 CONSTANTS
     Validators,
@@ -31,7 +31,6 @@ CONSTANTS
     SafeCoefficientProfiles,
     ParameterValues,
     AccumulatorBound,
-    ExpectedParameterValue,
     ConfiguredParameterSchema,
     ConfiguredArithmeticProfile,
     ConfiguredParentCheckpoint,
@@ -43,8 +42,6 @@ CONSTANTS
     ExpectedNextCheckpoint,
     ModelHashes,
     OptimizerHashes,
-    ExpectedNextModelHash,
-    ExpectedNextOptimizerHash,
     Views,
     MaxLogicalTime,
     SoftDeadline,
@@ -364,6 +361,7 @@ ViewChangeBodies ==
 QuorumSize == (2 * F) + 1
 
 ModelConstantsOK ==
+    /\ ABInputsValid
     /\ Validators # {}
     /\ Heights # {}
     /\ ValidatorEpochs # {}
@@ -397,9 +395,6 @@ ModelConstantsOK ==
     /\ ParameterValues # {}
     /\ ParameterValues \subseteq Int
     /\ AccumulatorBound \in Nat
-    /\ ExpectedParameterValue \in ParameterValues
-    /\ -AccumulatorBound <= ExpectedParameterValue
-    /\ ExpectedParameterValue <= AccumulatorBound
     /\ ConfiguredParameterSchema \in ParameterSchemas
     /\ ConfiguredArithmeticProfile \in ArithmeticProfiles
     /\ ConfiguredParentCheckpoint \in ParentCheckpoints
@@ -414,8 +409,6 @@ ModelConstantsOK ==
     /\ ExpectedNextCheckpoint # InitialCurrentCheckpoint
     /\ ModelHashes # {}
     /\ OptimizerHashes # {}
-    /\ ExpectedNextModelHash \in ModelHashes
-    /\ ExpectedNextOptimizerHash \in OptimizerHashes
     /\ Views \subseteq Nat
     /\ 0 \in Views
     /\ MaxLogicalTime \in Nat \ {0}

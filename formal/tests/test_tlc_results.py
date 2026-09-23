@@ -99,6 +99,42 @@ def parse_mutant(output: str) -> dict[str, object]:
 
 
 class SuccessfulTlcResultTests(unittest.TestCase):
+    def test_periodic_coverage_uses_final_snapshot(self) -> None:
+        output = successful_output(action_count=7)
+        periodic = ("The coverage statistics at 2026-09-20 01:02:02\n"
+                    "<RequiredAction line 1, col 1 to line 1, col 2 of module M>: 0:0\n"
+                    "End of statistics.\n")
+        output = output.replace("Model checking completed.", periodic + "Model checking completed.")
+        self.assertEqual(parse_success(output), parse_success(successful_output()))
+
+    def test_periodic_snapshot_cannot_hide_missing_final_coverage(self) -> None:
+        output = successful_output()
+        start = output.index("The coverage statistics at")
+        end = output.index("End of statistics.") + len("End of statistics.\n")
+        coverage = output[start:end]
+        output = output[:start] + output[end:]
+        output = output.replace("Model checking completed.", coverage + "Model checking completed.")
+        with self.assertRaisesRegex(TlcResultError, "missing final TLC coverage"):
+            parse_success(output)
+
+    def test_duplicate_within_coverage_snapshot_is_rejected(self) -> None:
+        output = successful_output().replace("End of statistics.",
+                "<RequiredAction line 1, col 1 to line 1, col 2 of module M>: 1:3\nEnd of statistics.")
+        with self.assertRaisesRegex(TlcResultError, "duplicate top-level"):
+            parse_success(output)
+
+    def test_incomplete_snapshot_is_rejected(self) -> None:
+        with self.assertRaisesRegex(TlcResultError, "incomplete TLC coverage"):
+            parse_success(successful_output().replace("End of statistics.\n", ""))
+
+    def test_cumulative_snapshot_regression_is_rejected(self) -> None:
+        periodic = ("The coverage statistics at earlier\n"
+                    "<RequiredAction line 1, col 1 to line 1, col 2 of module M>: 1:999\n"
+                    "End of statistics.\n")
+        with self.assertRaisesRegex(TlcResultError, "regressed"):
+            parse_success(successful_output().replace("Model checking completed.",
+                                                      periodic + "Model checking completed."))
+
     def test_runtime_noise_and_positive_coverage_counts_do_not_change_hash(self) -> None:
         first = parse_success(successful_output())
         second = parse_success(

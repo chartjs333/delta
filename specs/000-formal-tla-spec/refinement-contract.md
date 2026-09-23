@@ -4,6 +4,14 @@
 
 The formal model is useful only if later implementations can demonstrate that their externally visible behavior is an allowed formal behavior. This contract defines a stable event vocabulary and projection boundary.
 
+**Pending amendment 0001 — arithmetic witness**: `ACT-PARAM-VOTE` and
+`ACT-APPLY-VOTE` must bind independently authenticated native pre-state, exact
+canonical input bytes/IDs and the recomputed expected result. Current-state and
+certificate parentage cannot come solely from the candidate command. Recovery
+must reconstruct the same relation. The candidate public trace schema/checker
+has not yet incorporated this witness: passing existing fixtures demonstrates
+only their existing checks and cannot close amendment 0001 or authorize runtime.
+
 ## 2. Canonical trace event
 
 Every protocol-relevant implementation event MUST project to a canonical record containing:

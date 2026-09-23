@@ -177,6 +177,7 @@ def main() -> int:
         "ECSubsetISC",
         "APCParentage",
         "ConsensusIntegerOnly",
+        "ArithmeticBindingSound",
         "NoOverflow",
         "ShardViewAtomicity",
         "AggregateCompleteness",
@@ -230,6 +231,7 @@ def main() -> int:
     )
 
     required_proofs = {
+        "PO-AB1",
         "PO-Q1",
         "PO-Q2",
         "PO-A1",

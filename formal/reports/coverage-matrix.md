@@ -165,6 +165,23 @@ configs.
 
 ## Gate rule
 
+### Pending arithmetic amendment 0001
+
+The following candidate rows extend the historical matrix. Their executed finite
+checks do not complete the amendment's public-byte refinement or parametric proofs.
+
+| ID | Candidate evidence | Remaining obligation | Status |
+| --- | --- | --- | --- |
+| `INV-ARITHMETIC-BINDING` | `ArithmeticBindingSound` in production TLA+, four source mutants | heterogeneous vectors/weights, concrete byte resolver and current-state/crash-cut relation | UNRESOLVED |
+| `CFG-NATIVE-ARITHMETIC-BINDING` | executed nonzero bounded scalar safety model | arbitrary vectors and independently authenticated input graph | FINITE CHECK PASS; AMENDMENT UNRESOLVED |
+| `CFG-NATIVE-ARITHMETIC-LIVENESS` | executed nonzero full positive chain, without abort as progress | actual byte availability/recovery refinement | FINITE CHECK PASS; AMENDMENT UNRESOLVED |
+| `PO-AB1` | 15 standalone helper statements; four mandatory production theorem targets registered | complete native graph, conversion, Apply and recovery/admission conjuncts | UNRESOLVED |
+
+The regenerated legacy refinement traces exercise their existing checks only.
+No row asserts that caller-supplied matching hashes authenticate native state.
+
+### Overall decision
+
 The matrix records intended executable coverage; it does not certify semantic
 completeness. Missing config coverage, an unreachable required action, a
 contradictory assumption or any mismatch between a proof statement and

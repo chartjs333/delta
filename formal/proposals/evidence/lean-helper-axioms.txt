@@ -1,0 +1,15 @@
+'ArithmeticBinding.noDoubleRemainderOverflow' depends on axioms: [propext, Quot.sound]
+'ArithmeticBinding.tieTowardPositive' depends on axioms: [propext, Quot.sound]
+'ArithmeticBinding.adjacentIntegers' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ArithmeticBinding.outputRange' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ArithmeticBinding.exactMinimum' depends on axioms: [propext]
+'ArithmeticBinding.negativeHalf' does not depend on any axioms
+'ArithmeticBinding.positiveHalf' does not depend on any axioms
+'ArithmeticBinding.fullSignedMinimum' does not depend on any axioms
+'ArithmeticBinding.roundingCannotMoveAcrossMixture' does not depend on any axioms
+'ArithmeticBinding.convertedQuantum' does not depend on any axioms
+'ArithmeticBinding.checkedFixtureStep' does not depend on any axioms
+'ArithmeticBinding.acceptedEqualsRecomputed' depends on axioms: [propext]
+'ArithmeticBinding.substitutionRejected' depends on axioms: [propext]
+'ArithmeticBinding.exactBytesFromBoundHash' does not depend on any axioms
+'ArithmeticBinding.deterministicRecovery' does not depend on any axioms

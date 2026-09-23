@@ -111,7 +111,7 @@ PositiveProposeParameter ==
             ParameterResultBody(
                 apc, domain, shard, ConfiguredParentCheckpoint,
                 ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                ExpectedParameterValue, TRUE))
+                NativeParameterValue(apc, domain), TRUE))
 
 PositiveVoteParameter ==
     \E validator \in Validators, body \in parameterResults :
@@ -138,8 +138,8 @@ PositiveComputeApply ==
         ComputeApplyCandidate(
             ApplyBody(
                 root, root.parent, ConfiguredApplyProfile,
-                ExpectedNextCheckpoint, ExpectedNextModelHash,
-                ExpectedNextOptimizerHash, TRUE))
+                ExpectedNextCheckpoint, NativeModelHash(root),
+                NativeOptimizerHash(root), TRUE))
 
 PositiveVoteApply ==
     \E validator \in Validators, body \in applyCandidates :
