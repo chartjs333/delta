@@ -189,7 +189,6 @@ export function GuidedRun({
             "Start with a small, real training run. Follow its progress and download the result.",
           )}
         </p>
-        <span className="guided-mode">{t("Local example · CPU")}</span>
       </div>
       <ol className="run-steps" aria-label={t("Run steps")}>
         {steps.map((step, index) => (
@@ -215,20 +214,6 @@ export function GuidedRun({
               "A small classifier learns from a synthetic dataset with ten features. Everything runs locally.",
             )}
           </p>
-          <dl className="example-facts">
-            <div>
-              <dt>{t("Data")}</dt>
-              <dd>{t("Synthetic · 10 features")}</dd>
-            </div>
-            <div>
-              <dt>{t("Compute")}</dt>
-              <dd>{t("Python Worker · CPU")}</dd>
-            </div>
-            <div>
-              <dt>{t("Output")}</dt>
-              <dd>{t("Execution receipt")}</dd>
-            </div>
-          </dl>
           <label className="run-name" htmlFor="guided-ticket">
             {t("Run name")}
             <input
@@ -252,6 +237,20 @@ export function GuidedRun({
             {t(busy ? "Working…" : "Start training")}{" "}
             <span aria-hidden="true">→</span>
           </button>
+          <dl className="example-facts">
+            <div>
+              <dt>{t("Data")}</dt>
+              <dd>{t("Synthetic · 10 features")}</dd>
+            </div>
+            <div>
+              <dt>{t("Compute")}</dt>
+              <dd>{t("Python Worker · CPU")}</dd>
+            </div>
+            <div>
+              <dt>{t("Output")}</dt>
+              <dd>{t("Execution receipt")}</dd>
+            </div>
+          </dl>
           {!enabled ? (
             <p>
               {t(

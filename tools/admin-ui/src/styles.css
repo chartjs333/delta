@@ -374,3 +374,7 @@ main { width: min(1440px, 100%); padding: 2rem clamp(1rem, 2.5vw, 3rem) 4rem; }
 .guided-card .eyebrow { margin-top: 0; }
 .live-tab-nav { flex-wrap: wrap; }
 @media (max-width: 900px) { .shell-grid { grid-template-columns: minmax(0, 1fr); } }
+/* Keep the primary action in the first laptop viewport. */
+main:has(.guided-run) { padding-top: 1.2rem; }
+.guided-intro p { max-width: none; }
+.example-facts { margin-top: 1.2rem; }
