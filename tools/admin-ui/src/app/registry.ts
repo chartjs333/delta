@@ -4,6 +4,7 @@ import { campaignPlaceholderRegistration } from "../modules/campaigns/registrati
 import { controllerModuleRegistration } from "../modules/controllers/registration";
 import { liveExecutionModuleRegistration } from "../modules/live-execution/registration";
 import { workloadModuleRegistration } from "../modules/workloads/registration";
+import { sdkModuleRegistration } from "../modules/sdk/registration";
 
 // All product extensions are registered here. Domain modules never mutate this
 // registry themselves, which keeps extension wiring localized and auditable.
@@ -13,4 +14,5 @@ export const extensionRegistry = composeExtensions([
   controllerSummaryRegistration,
   workloadModuleRegistration,
   liveExecutionModuleRegistration,
+  sdkModuleRegistration,
 ]);

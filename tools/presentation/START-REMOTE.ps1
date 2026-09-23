@@ -1,0 +1,172 @@
+[CmdletBinding()]
+param(
+    [Parameter(Position = 0)][ValidateSet('start', 'status', 'stop')][string]$Action = 'start',
+    [string]$DataRoot = 'D:\delta-data\presentation-20260924',
+    [string]$ControllerRepo = 'D:\delta-main-demo',
+    [string]$Cloudflared = 'C:\Program Files (x86)\cloudflared\cloudflared.exe',
+    [int]$Port = 8871,
+    [int]$PresentationPort = 8870
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$RemoteData = Join-Path ([IO.Path]::GetFullPath($DataRoot)) 'tunnel'
+$MetadataPath = Join-Path $RemoteData 'process.json'
+$ControlPath = Join-Path $RemoteData 'control.json'
+$CodePath = Join-Path $RemoteData 'access-code.txt'
+$UrlPath = Join-Path $RemoteData 'current-url.txt'
+$LocalUrl = "http://127.0.0.1:$Port"
+$Python = Join-Path $ControllerRepo '.venv/Scripts/python.exe'
+
+function Read-Saved([string]$Path) {
+    if (Test-Path -LiteralPath $Path) { return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json }
+    return $null
+}
+function Read-Health($Control) {
+    if ($null -eq $Control) { return $null }
+    try {
+        return Invoke-RestMethod "$LocalUrl/_tunnel/health" -Headers @{'X-Delta-Tunnel-Control' = $Control.control} -TimeoutSec 3
+    } catch { return $null }
+}
+function Owned-Process($Metadata) {
+    if ($null -eq $Metadata) { return $null }
+    $Candidate = Get-Process -Id $Metadata.pid -ErrorAction SilentlyContinue
+    if ($null -eq $Candidate) { return $null }
+    if ($Candidate.StartTime.ToUniversalTime().Ticks -ne [long]$Metadata.start_ticks) {
+        # Stale metadata after reboot/PID reuse is not ownership of the new process.
+        # The caller still checks the authenticated listener and port before starting.
+        return $null
+    }
+    return $Candidate
+}
+function Assert-Identity($Health, $Metadata, $Control) {
+    if ($null -eq $Health -or $null -eq $Metadata -or $null -eq $Control -or
+        $Health.service -cne 'delta-remote-gateway' -or $Health.instance_id -cne $Control.instance_id -or
+        $Metadata.instance_id -cne $Control.instance_id -or
+        $Metadata.local_url -cne $LocalUrl -or $null -eq (Owned-Process $Metadata)) {
+        throw 'Tunnel process ownership could not be verified.'
+    }
+    # A Windows venv Python launcher remains the parent of the actual interpreter.
+    if ($Health.pid -ne $Metadata.pid) {
+        $Interpreter = Get-CimInstance Win32_Process -Filter "ProcessId = $([int]$Health.pid)"
+        if ($null -eq $Interpreter -or $Interpreter.ParentProcessId -ne $Metadata.pid) {
+            throw 'Gateway interpreter is not the child of the owned Python launcher.'
+        }
+    }
+}
+function Show-Address($Health) {
+    if ($Health.status -cne 'READY' -or $Health.url -cnotmatch '^https://[a-z0-9]+(-[a-z0-9]+)*\.trycloudflare\.com$') {
+        throw 'Tunnel is not connected yet. No old URL will be displayed.'
+    }
+    # Verify the public edge, not just a line in cloudflared's startup log.
+    $Page = Invoke-WebRequest "$($Health.url)/_access/login?lang=en" -TimeoutSec 15
+    if ($Page.StatusCode -ne 200 -or -not $Page.Content.Contains('DeltaReduce') -or
+        -not $Page.Content.Contains('name="code"')) { throw 'Public login page did not pass verification.' }
+    [IO.File]::WriteAllText($UrlPath, "$($Health.url)/?lang=en" + [Environment]::NewLine)
+    Write-Output ''
+    Write-Output "Presentation EN: $($Health.url)/?lang=en"
+    Write-Output "Presentation RU: $($Health.url)/?lang=ru"
+    Write-Output "Admin UI EN:     $($Health.url)/admin/?lang=en#/live-execution"
+    Write-Output "Admin UI RU:     $($Health.url)/admin/?lang=ru#/live-execution"
+    Write-Output "SDK:             $($Health.url)/admin/?lang=en#/sdk"
+    Write-Output "Access code:     $((Get-Content -LiteralPath $CodePath -Raw).Trim())"
+    Write-Output "Current URL file: $UrlPath"
+    Write-Output 'Keep this host powered on and connected. Share the URL and code only with your audience.'
+    Write-Output 'After a reboot, run START-REMOTE.ps1 again to obtain the new URL.'
+}
+function Protect-Directory {
+    New-Item -ItemType Directory -Path $RemoteData -Force | Out-Null
+    $Acl = Get-Acl -LiteralPath $RemoteData
+    $Acl.SetAccessRuleProtection($true, $false)
+    foreach ($Sid in @([Security.Principal.WindowsIdentity]::GetCurrent().User,
+            [Security.Principal.SecurityIdentifier]::new('S-1-5-18'),
+            [Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))) {
+        $Rule = [Security.AccessControl.FileSystemAccessRule]::new($Sid, 'FullControl',
+            'ContainerInherit,ObjectInherit', 'None', 'Allow')
+        $Acl.AddAccessRule($Rule)
+    }
+    Set-Acl -LiteralPath $RemoteData -AclObject $Acl
+}
+
+$Mutex = [Threading.Mutex]::new($false, "Local\DeltaPresentationQuickTunnel-$Port")
+$Held = $false
+try {
+    try { $Held = $Mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $Held = $true }
+    if (-not $Held) { throw 'Another tunnel launcher is running. Wait for it to finish.' }
+    $Metadata = Read-Saved $MetadataPath
+    $Control = Read-Saved $ControlPath
+    $Health = Read-Health $Control
+    $Owned = Owned-Process $Metadata
+    if ($Action -eq 'stop') {
+        if ($null -ne $Health) {
+            Assert-Identity $Health $Metadata $Control
+            Invoke-RestMethod "$LocalUrl/_tunnel/stop" -Method Post -Body '{}' -ContentType 'application/json' `
+                -Headers @{'X-Delta-Tunnel-Control' = $Control.control} -TimeoutSec 5 | Out-Null
+            if (-not $Owned.WaitForExit(20000)) { throw 'Graceful tunnel stop timed out. Inspect gateway.stderr.txt.' }
+        } elseif ($null -ne $Owned) { throw 'Owned gateway is unresponsive. Nothing was killed.' }
+        if (Test-Path -LiteralPath $UrlPath) { [IO.File]::WriteAllText($UrlPath, 'STOPPED - run START-REMOTE.ps1 to obtain a new URL.') }
+        Write-Output 'Remote access stopped. Local Presentation and Controller remain running.'
+        exit 0
+    }
+    if ($null -ne $Health) {
+        Assert-Identity $Health $Metadata $Control
+        Show-Address $Health
+        exit 0
+    }
+    if ($null -ne $Owned) { throw 'Gateway is starting or unresponsive. Inspect gateway.stderr.txt; no duplicate was started.' }
+    if (Test-Path -LiteralPath $UrlPath) { [IO.File]::WriteAllText($UrlPath, 'NOT CONNECTED - no current verified URL.') }
+    if ($Action -eq 'status') { Write-Output 'Tunnel: STOPPED. Run START-REMOTE.ps1 start.'; exit 1 }
+    if (-not (Test-Path -LiteralPath $Cloudflared)) {
+        $Found = Get-Command cloudflared -ErrorAction SilentlyContinue
+        if ($null -eq $Found) { throw 'cloudflared is missing. Install Cloudflare cloudflared and run again.' }
+        $Cloudflared = $Found.Source
+    }
+    foreach ($ConfigName in @('config.yml', 'config.yaml')) {
+        if (Test-Path -LiteralPath (Join-Path $env:USERPROFILE ".cloudflared/$ConfigName")) {
+            throw 'An existing cloudflared config may disable Quick Tunnels. Use a separate prepared account or temporarily move that config yourself.'
+        }
+    }
+    $Probe = [Net.Sockets.TcpClient]::new()
+    try {
+        try { $Probe.Connect('127.0.0.1', $Port) } catch [Net.Sockets.SocketException] { }
+        if ($Probe.Connected) { throw "Port $Port is occupied by an unverified service; nothing was stopped." }
+    } finally { $Probe.Dispose() }
+    & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'presentation-start.ps1') start `
+        -DataRoot $DataRoot -ControllerRepo $ControllerRepo -Port $PresentationPort
+    if ($LASTEXITCODE -ne 0) { throw 'Local application startup failed; tunnel was not started.' }
+    Protect-Directory
+    if (-not (Test-Path -LiteralPath $CodePath)) {
+        $Bytes = [Security.Cryptography.RandomNumberGenerator]::GetBytes(32)
+        [IO.File]::WriteAllText($CodePath, [Convert]::ToHexString($Bytes).ToLowerInvariant())
+    }
+    $Control = @{instance_id = [Guid]::NewGuid().ToString('N');
+        control = [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))}
+    $Control | ConvertTo-Json | Set-Content -LiteralPath $ControlPath -Encoding utf8
+    $Arguments = @((Join-Path $PSScriptRoot 'tunnel_gateway.py'), '--data-dir', $RemoteData,
+        '--cloudflared', $Cloudflared, '--port', [string]$Port, '--upstream', [string]$PresentationPort)
+    $Quoted = $Arguments | ForEach-Object {
+        if ($_.Contains('"')) { throw 'Embedded quotes in paths are not supported.' }
+        '"' + $_ + '"'
+    }
+    $Process = Start-Process -FilePath $Python -ArgumentList ($Quoted -join ' ') -WindowStyle Hidden -PassThru `
+        -RedirectStandardOutput (Join-Path $RemoteData 'gateway.stdout.txt') `
+        -RedirectStandardError (Join-Path $RemoteData 'gateway.stderr.txt')
+    $Metadata = @{pid = $Process.Id; start_ticks = $Process.StartTime.ToUniversalTime().Ticks;
+        instance_id = $Control.instance_id; local_url = $LocalUrl}
+    $Metadata | ConvertTo-Json | Set-Content -LiteralPath $MetadataPath -Encoding utf8
+    Write-Output 'Connecting to Cloudflare; waiting for the current public URL...'
+    for ($Attempt = 0; $Attempt -lt 90; $Attempt++) {
+        if ($Process.HasExited) { throw "Tunnel exited. Inspect $RemoteData/gateway.stderr.txt and cloudflared.log." }
+        $Health = Read-Health $Control
+        if ($null -ne $Health -and $Health.status -ceq 'READY') {
+            Assert-Identity $Health $Metadata $Control
+            try { Show-Address $Health; exit 0 } catch {
+                if ($Attempt -gt 75) { throw }
+            }
+        }
+        Start-Sleep -Seconds 1
+    }
+    throw "Tunnel did not become reachable. Inspect $RemoteData/cloudflared.log; then use status or stop."
+} finally {
+    if ($Held) { $Mutex.ReleaseMutex() }
+    $Mutex.Dispose()
+}

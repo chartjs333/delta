@@ -23,3 +23,12 @@ profile persistence across server restart. Evidence and limitations are recorded
 in specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260924/admin-connected/.
 Controller source and instance remain unchanged. Open the shared Admin workspace
 at http://127.0.0.1:8870/admin/?lang=en#/campaigns for the morning walkthrough.
+
+SDK / remote access follow-up (T051 / HR010-001): bilingual SDK contracts, complete
+executable example and downloadable code; authenticated Cloudflare Quick Tunnel
+gateway and START-REMOTE.ps1 with live URL verification, ownership checks and
+restart support. Shared Admin links use the public origin, retaining local
+legacy redirects. 262 UI tests / 44 files, 26 presentation tests, TypeScript,
+offline build/audit passed during development. Live install and real external
+browser/restart evidence follow under remote-sdk. Formal impact NONE; baseline
+protocol sources unchanged; no qualifying WAN/GO claims.

@@ -1,4 +1,5 @@
 import { HelpLabel } from "../../components/FieldHelp";
+import { presentationUrl } from "../../presentation-url";
 import { useEffect, useState } from "react";
 import { languageLink, message, t, useLanguage } from "../../i18n";
 import { useLiveExecutionRuntime } from "../live-execution/live-execution-context";
@@ -12,7 +13,7 @@ export function executionLink(id: string, language: string) {
 }
 export function PresentationLink({ executionId }: { executionId: string }) {
   const language = useLanguage();
-  const address = import.meta.env.VITE_PRESENTATION_URL as string | undefined;
+  const address = presentationUrl(new URL(window.location.href), import.meta.env.VITE_PRESENTATION_URL as string | undefined);
   if (!address || !uuidPattern.test(executionId)) return null;
   const url = new URL(languageLink(address, language));
   url.searchParams.set("execution", executionId);

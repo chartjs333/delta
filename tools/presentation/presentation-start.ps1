@@ -40,7 +40,10 @@ function Get-OwnedProcess($Metadata) {
     $Candidate = Get-Process -Id $Metadata.pid -ErrorAction SilentlyContinue
     if ($null -eq $Candidate) { return $null }
     if ($Candidate.StartTime.ToUniversalTime().Ticks -ne [long]$Metadata.start_ticks) {
-        throw 'PID identity changed; refusing to control another process.'
+        # After reboot Windows may reuse a saved PID. It no longer identifies
+        # our process; never stop it. Health identity and the port probe below
+        # still prevent taking over an unrelated listener.
+        return $null
     }
     return $Candidate
 }

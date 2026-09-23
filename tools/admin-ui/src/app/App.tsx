@@ -1,4 +1,5 @@
 import { FieldHelp } from "../components/FieldHelp";
+import { presentationUrl } from "../presentation-url";
 import {
   isLanguage,
   languageLink,
@@ -64,9 +65,7 @@ export function App({ adapter = defaultAdapter }: AppProps) {
   const workspace = useWorkspace();
   const restoredProfile = useRef(false);
   const language = useLanguage();
-  const presentationAddress = import.meta.env.VITE_PRESENTATION_URL as
-    | string
-    | undefined;
+  const presentationAddress = presentationUrl(new URL(window.location.href), import.meta.env.VITE_PRESENTATION_URL as string | undefined);
   const liveExecutionRuntime = useLiveExecutionRuntime();
   const [activeRoute, setActiveRoute] = useState(routeFromLocation);
   const [navigationOpen, setNavigationOpen] = useState(false);

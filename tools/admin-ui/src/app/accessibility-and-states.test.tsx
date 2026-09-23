@@ -60,6 +60,7 @@ describe("accessibility and primary states", () => {
       screen.getByRole("link", { name: /Campaigns/u }),
       screen.getByRole("link", { name: /Workloads/u }),
       screen.getByRole("link", { name: /Live execution/u }),
+    screen.getByRole("link", { name: "SDK" }),
       screen.getByRole("button", { name: "Open JSON" }),
       screen.getByRole("button", { name: "New document" }),
     ];

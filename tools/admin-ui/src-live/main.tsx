@@ -7,6 +7,7 @@ import "../src/styles.css";
 import { HttpLiveExecutionAdapter } from "./http-live-execution-adapter";
 import { WorkspaceProvider } from "../src/modules/workspace/workspace-context";
 import { HttpWorkspaceStorage } from "./http-workspace-storage";
+import { presentationUrl } from "../src/presentation-url";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -23,7 +24,7 @@ if (!window.location.hash) {
 
 const liveExecutionPort = new HttpLiveExecutionAdapter();
 const profileStorage = new HttpWorkspaceStorage();
-const sharedAddress = import.meta.env.VITE_PRESENTATION_URL as string | undefined;
+const sharedAddress = presentationUrl(new URL(window.location.href), import.meta.env.VITE_PRESENTATION_URL as string | undefined);
 if (sharedAddress && window.location.origin !== new URL(sharedAddress).origin) {
   const destination = new URL("admin/", sharedAddress);
   destination.search = window.location.search;
