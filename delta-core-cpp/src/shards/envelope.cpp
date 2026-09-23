@@ -109,9 +109,9 @@ EncodedShard write_shard(const ShardHeader& input, std::span<const std::int16_t>
   }
   std::vector<std::byte> envelope;
   envelope.reserve(16U + header_json.size() + payload.size());
-  for (const char character : std::string_view{"DRQ1"}) {
-    envelope.push_back(static_cast<std::byte>(character));
-  }
+  constexpr std::array magic{
+      std::byte{'D'}, std::byte{'R'}, std::byte{'Q'}, std::byte{'1'}};
+  envelope.insert(envelope.end(), magic.begin(), magic.end());
   append_u16(envelope, 1U);
   append_u16(envelope, 0U);
   append_u32(envelope, static_cast<std::uint32_t>(header_json.size()));
