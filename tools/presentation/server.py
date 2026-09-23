@@ -497,9 +497,13 @@ class Handler(BaseHTTPRequestHandler):
         ):
             self.proxy("GET", path)
         elif path in {"/admin", "/admin/"} or re.fullmatch(
-            r"/assets/[A-Za-z0-9_.-]+\.(js|css)", path
+            r"/(?:admin/)?assets/[A-Za-z0-9_.-]+\.(js|css)", path
         ):
-            filename = "live.html" if path.startswith("/admin") else path.lstrip("/")
+            filename = (
+                "live.html"
+                if path in {"/admin", "/admin/"}
+                else path.removeprefix("/admin").lstrip("/")
+            )
             target = self.server.application.admin_root / filename
             if not target.is_file():
                 self.json(404, {"error": "ADMIN_BUILD_UNAVAILABLE"})

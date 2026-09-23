@@ -17,6 +17,18 @@ class WorkspaceTests(unittest.TestCase):
     tearDown = test_server.PresentationTests.tearDown
     request = test_server.PresentationTests.request
 
+    def test_admin_relative_assets_resolve_under_shared_path(self):
+        self.app.admin_root = self.app.data / "admin-build"
+        (self.app.admin_root / "assets").mkdir(parents=True)
+        (self.app.admin_root / "live.html").write_text('<script src="./assets/live-x.js"></script>')
+        (self.app.admin_root / "assets/live-x.js").write_text("export const ready=true;")
+        self.assertEqual(self.request("/admin/")[0], 200)
+        code, body, headers = self.request("/admin/assets/live-x.js")
+        self.assertEqual(code, 200)
+        self.assertIn("text/javascript", headers["Content-Type"])
+        self.assertEqual(body, b"export const ready=true;")
+        self.assertEqual(self.request("/admin/assets/../../server.py")[0], 404)
+
     def put(self, payload, *, origin=None):
         request = Request(
             self.base + "/api/workspace",
