@@ -13,12 +13,13 @@ from typing import Any, Final
 ROOT: Final = Path(__file__).resolve().parents[3]
 DESIGN_PATH: Final = ROOT / "specs/010-wan-benchmark-and-quality/sidecar-refinement-design.json"
 EXPECTED_DESIGN_SHA256: Final = (
-    "sha256:d1e26d2a5b207fb0632f2d775598e8fdb0545bba0509c3012b3daed19909e04e"
+    "sha256:dc031e7fb413d9ef1ed33b2d4fe1fedb170100e2782f636e7162b40cabbeb4c8"
 )
 EXPECTED_DESIGN_CANONICAL_ID: Final = (
-    "sha256:204ff9dae0ed97684c18a947501217964cea63b82e44a4c4fade4f31cb6c642f"
+    "sha256:080074ff7de58d7ba025b8156ceafb0085937bb6ed74485d217af664d0ecf6ef"
 )
 FORMAL_ID: Final = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+EMPTY_SHA256: Final = "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 U64_MAX: Final = (1 << 64) - 1
 U128_MAX: Final = (1 << 128) - 1
 CONTENT_ID = re.compile(r"sha256:[0-9a-f]{64}\Z")
@@ -54,6 +55,7 @@ PROFILE_FIELDS: Final = {
     "raw_capture_sha256",
     "restart_to_ready_ns",
     "saturation_blocks",
+    "wal_artifacts",
     "warmup_completed_operations",
 }
 FIXED_BLOCK_FIELDS: Final = {
@@ -76,6 +78,8 @@ FALLBACK_FIELDS: Final = {
     "operation_id",
     "total_bytes",
 }
+WAL_ARTIFACTS_FIELDS: Final = {"record_vote", "runtime"}
+WAL_ARTIFACT_FIELDS: Final = {"sha256", "size_bytes"}
 
 
 class ComparisonError(RuntimeError):
@@ -298,6 +302,15 @@ def validate_profile(
     require(profile["profile_id"] == expected_profile, "PROFILE_ID", expected_profile)
     content_id(profile["input_provenance_sha256"], "INPUT_PROVENANCE_SHA256")
     content_id(profile["raw_capture_sha256"], "RAW_CAPTURE_SHA256")
+    wal_artifacts = exact_object(
+        profile["wal_artifacts"], WAL_ARTIFACTS_FIELDS, "WAL_ARTIFACTS_FIELDS"
+    )
+    for artifact_id in ("record_vote", "runtime"):
+        artifact = exact_object(
+            wal_artifacts[artifact_id], WAL_ARTIFACT_FIELDS, "WAL_ARTIFACT_FIELDS"
+        )
+        content_id(artifact["sha256"], "WAL_ARTIFACT_SHA256")
+        strict_u64(artifact["size_bytes"], "WAL_ARTIFACT_SIZE", positive=True)
     comparison = design["comparison_plan"]
     aggregation = comparison["aggregation"]
     require(
@@ -360,6 +373,7 @@ def validate_profile(
     )
     require(copy["ZERO_COPY_HIT_COUNT"] <= copy["ZERO_COPY_ELIGIBLE_COUNT"], "ZERO_COPY_COUNTS")
     require(copy["ZERO_COPY_ELIGIBLE_COUNT"] <= measured_operations, "ZERO_COPY_COUNTS")
+    require(copy["ZERO_COPY_HIT_COUNT"] == 0, "ZERO_COPY_HIT_FORBIDDEN")
 
     fallback = exact_object(profile["max_staging_fallback"], FALLBACK_FIELDS, "FALLBACK_FIELDS")
     require(
@@ -392,6 +406,7 @@ def validate_profile(
         "measurements_complete": measurements_complete,
         "saturation_min": saturation_min,
         "sidecar_java_survived": survived,
+        "wal_transcript_sha256": sha256_id(canonical_bytes(wal_artifacts)),
     }
 
 
@@ -476,6 +491,15 @@ def validate_evidence(
         code="SEMANTIC_EQUALITIES",
         paired_hashes=True,
     )
+    vote_receipt_index = comparison["exact_cross_profile_equalities"].index(
+        "CANONICAL_VOTE_RECEIPT_BYTES"
+    )
+    vote_receipt_equality = document["semantic_equalities"][vote_receipt_index]
+    require(
+        vote_receipt_equality["embedded_sha256"] != EMPTY_SHA256
+        and vote_receipt_equality["sidecar_sha256"] != EMPTY_SHA256,
+        "VOTE_RECEIPT_TRANSCRIPT_EMPTY",
+    )
     common_pass = validate_marker_list(
         document["common_hard_gates"],
         comparison["hard_gates_common"],
@@ -503,6 +527,15 @@ def validate_evidence(
     }
     embedded = profile_results["EMBEDDED_FFM"]
     sidecar = profile_results["ISOLATED_SIDECAR"]
+    wal_equality_index = comparison["exact_cross_profile_equalities"].index(
+        "WAL_RECEIPTS_AND_DURABLE_SEQUENCES"
+    )
+    wal_equality = document["semantic_equalities"][wal_equality_index]
+    require(
+        wal_equality["embedded_sha256"] == embedded["wal_transcript_sha256"]
+        and wal_equality["sidecar_sha256"] == sidecar["wal_transcript_sha256"],
+        "WAL_EQUALITY_BINDING",
+    )
 
     p99_ratio = checked_ratio_bps(sidecar["fixed_p99"], embedded["fixed_p99"], ceiling=True)
     throughput_ratio = checked_ratio_bps(

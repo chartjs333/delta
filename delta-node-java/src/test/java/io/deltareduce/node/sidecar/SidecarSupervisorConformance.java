@@ -6,11 +6,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CountDownLatch;
@@ -43,20 +47,30 @@ public final class SidecarSupervisorConformance {
     testDefaultCorrelationAllocationIsMonotonicAndConcurrent();
     testCorrelationPermitFenceCompletesAll();
     testStaleAndDuplicateResponseSuppression();
+    testVoteStaleGenerationResponseSuppression();
     testAdmittedRetryCannotBecomeNotAdmitted();
     testWrongErrorResponseOperationIsStale();
     testSafePreparseSentinel();
     testSharedMemoryCarrierFences();
+    testSharedMemoryProbeFallback();
+    testMappedProbeFailureTelemetry();
+    testLateReadAfterCountingTransportCloseDoesNotRepublish();
     testUnsignedMaxSequenceAcceptedOnce();
     testPostHandoffTimeoutIsOutcomeUnknown();
     testConcurrentUnknownRecordingIsExactlyOnce();
+    testDurableDirectoryRebindFailsBeforeConnect();
+    testWalReplacementBetweenGenerationsFailsBeforeConnect();
+    testRetryableCleanupConfirmation();
     testTerminalCloseLinearizesBeforeCompletion();
     testTerminalCloseRacesAlwaysComplete();
     testSupervisorRecoveryRetryAndExpectedClose();
+    testSupervisorVoteLostResponseRecoveryRetry();
     testImmediatePostOpenFailureIsNotLost();
+    testReplacementOpenErrorClearsGenerationCopyObservations();
     testStalePendingReplacementFailureDoesNotKillReadyGeneration();
     testImpossibleFutureFailureFailsClosed();
     testRecoveryReadyDeadlineAndRestartLimit();
+    testCleanupFailureStaysQuarantinedUntilConfirmed();
     testUnconfirmedReplacementCleanupIsTerminal();
     testExpectedCloseRequiresConfirmedExit();
     testCloseDuringHandshakeCannotResurrectReady();
@@ -92,8 +106,8 @@ public final class SidecarSupervisorConformance {
       queued.add(submission);
     }
     var overflow = client.tryEnqueue(
-        LocalSidecarClient.submitRequest(ascii("overflow"), new byte[] {3}));
-    require(!overflow.accepted(), "ingress capacity +1 was accepted");
+        LocalSidecarClient.voteRequest(ascii("vote-overflow"), new byte[] {3}));
+    require(!overflow.accepted(), "VOTE ingress capacity +1 was accepted");
     expectFailure(overflow.completion(), LocalSidecarClient.BackpressureException.class);
     var telemetry = client.telemetry();
     require(telemetry.queued() == SidecarIpcV1.INGRESS_QUEUE_REQUESTS,
@@ -107,12 +121,100 @@ public final class SidecarSupervisorConformance {
         () -> client.telemetry().queued() < SidecarIpcV1.INGRESS_QUEUE_REQUESTS,
         "queue space after backpressure rejection");
     var reuseRejectedId = client.tryEnqueue(
-        LocalSidecarClient.submitRequest(ascii("overflow"), new byte[] {4}));
+        LocalSidecarClient.voteRequest(ascii("vote-overflow"), new byte[] {4}));
     require(reuseRejectedId.accepted(),
-        "pre-admission queue rejection leaked request identity into the durable ledger");
+        "pre-admission VOTE queue rejection leaked request identity into the durable ledger");
     client.close();
     expectFailure(
         reuseRejectedId.completion(), LocalSidecarClient.GenerationFencedException.class);
+  }
+
+  private static void testRetryableCleanupConfirmation() throws Exception {
+    var progress = new SidecarSharedMemory.CleanupProgress();
+    var firstCalls = new AtomicInteger();
+    var secondCalls = new AtomicInteger();
+    var allowSecond = new AtomicBoolean();
+    IOException remembered = null;
+    for (var attempt = 0; attempt < 2; ++attempt) {
+      try {
+        progress.close(
+            () -> firstCalls.incrementAndGet(),
+            () -> {
+              secondCalls.incrementAndGet();
+              if (!allowSecond.get()) {
+                throw new IOException("injected unmap failure");
+              }
+            });
+        throw new IllegalStateException("failed cleanup was reported as confirmed");
+      } catch (IOException expected) {
+        if (remembered == null) {
+          remembered = expected;
+        } else {
+          require(expected == remembered, "cleanup did not retain its first failure");
+        }
+      }
+      require(!progress.confirmed(), "failed cleanup became false idempotent success");
+    }
+    require(firstCalls.get() == 1 && secondCalls.get() == 2,
+        "cleanup did not retry only the failed step");
+    allowSecond.set(true);
+    progress.close(
+        () -> firstCalls.incrementAndGet(),
+        () -> secondCalls.incrementAndGet());
+    require(progress.confirmed() && firstCalls.get() == 1 && secondCalls.get() == 3,
+        "cleanup was not confirmed after the failed step eventually succeeded");
+  }
+
+  private static void testSharedMemoryProbeFallback() throws Exception {
+    var missing = Files.createTempDirectory("delta-sidecar-probe-fallback-")
+        .resolve("missing-sidecar");
+    if (SidecarSharedMemory.atomicAbiSupported()) {
+      try (var resources = SidecarSharedMemory.GenerationResources.create(31)) {
+        require(!SidecarSupervisor.PipeProcessConnector.mappedSharedMemoryAtomicAbiSupported(
+                missing, resources, Duration.ofMillis(100)),
+            "unavailable native executable passed the exact mapped atomic probe");
+        require(resources.javaToNative().rawState(0) == SidecarSharedMemory.FREE
+                && Arrays.equals(
+                    resources.javaToNative().rawStateBytes(0),
+                    new byte[] {0, 0, 0, 0})
+                && !resources.mappedAtomicAbiProbed(),
+            "failed mapped atomic probe did not restore its reserved slot to fresh FREE");
+      }
+    }
+  }
+
+  private static void testMappedProbeFailureTelemetry() throws Exception {
+    if (!SidecarSharedMemory.atomicAbiSupported()) {
+      return;
+    }
+    var failingExecutable = Path.of("/bin/false");
+    if (!Files.isRegularFile(failingExecutable) || !Files.isExecutable(failingExecutable)) {
+      return;
+    }
+    var config = new SidecarSupervisor.Config(
+        Files.createTempDirectory("delta-sidecar-mapped-probe-fallback-"),
+        new byte[] {1},
+        SidecarSupervisor.PipeProcessConnector.executableSha256(failingExecutable),
+        BUILD_ID,
+        nestedDescriptor());
+    var timing = new SidecarSupervisor.Timing(
+        Duration.ofSeconds(30),
+        Duration.ofMillis(100),
+        Duration.ofSeconds(2),
+        Duration.ofMillis(1));
+    var supervisor = new SidecarSupervisor(
+        config,
+        new SidecarSupervisor.PipeProcessConnector(failingExecutable, List.of()),
+        timing,
+        Thread::sleep);
+    try {
+      expectAnyFailure(supervisor.start());
+      require(supervisor.telemetry().sharedMemoryStatus().equals(
+              "DISABLED_MAPPED_ATOMIC_ABI_PROBE_FAILED"),
+          "failed exact mapped atomic probe was not exposed in fallback telemetry");
+    } finally {
+      supervisor.close();
+    }
   }
 
   private static void testTimeoutReenqueueCannotRebindActiveIdentity() throws Exception {
@@ -130,7 +232,7 @@ public final class SidecarSupervisorConformance {
           new CountingIds(),
           ledger,
           ignored -> {},
-          (request, response) -> {},
+          (request, response) -> null,
           Duration.ofNanos(10),
           Duration.ofMillis(1));
       var blocker = client.tryEnqueue(
@@ -308,6 +410,47 @@ public final class SidecarSupervisorConformance {
         "completed request conflict was not retained in the generation ledger");
     require(client.telemetry().retries() == 2,
         "accepted exact same-generation retry was not counted");
+    client.close();
+  }
+
+  private static void testVoteStaleGenerationResponseSuppression() throws Exception {
+    var pair = TransportPair.create();
+    var failures = new LinkedBlockingQueue<LocalSidecarClient.Failure>();
+    var client = client(pair.javaEndpoint, failures::add, System::nanoTime, new CountingIds());
+    var request = LocalSidecarClient.voteRequest(
+        ascii("vote-stale-generation"), new byte[] {4, 5, 6});
+    var submission = client.tryEnqueue(request);
+    require(submission.accepted(), "VOTE stale-generation request was rejected");
+    var received = SidecarIpcV1.decodeFrame(pair.peerEndpoint.read());
+
+    var receipt = ascii("opaque-native-vote-receipt");
+    pair.peerEndpoint.write(
+        voteResponse(
+                received,
+                received.sessionId(),
+                Math.addExact(received.generation(), 1),
+                1,
+                2,
+                receipt)
+            .canonicalBytes());
+    pair.peerEndpoint.write(
+        voteResponse(
+                received,
+                received.sessionId(),
+                received.generation(),
+                1,
+                2,
+                receipt)
+            .canonicalBytes());
+    var response = await(submission.completion());
+    require(response.messageType() == SidecarIpcV1.MessageType.VOTE_RESPONSE,
+        "current-generation VOTE response was not published");
+    requireOperationalTiming(response.operationalTiming());
+    waitUntil(
+        () -> client.telemetry().staleResponses() == 1,
+        "stale-generation VOTE response count");
+    require(client.isAccepting() && failures.isEmpty(),
+        "stale-generation VOTE response changed generation availability");
     client.close();
   }
 
@@ -660,6 +803,77 @@ public final class SidecarSupervisorConformance {
     client.close();
   }
 
+  private static void testLateReadAfterCountingTransportCloseDoesNotRepublish()
+      throws Exception {
+    var ledger = new SidecarSupervisor.CopyLedger();
+    var newerGeneration = 42L;
+    var newerResponse = copyTestErrorResponse(newerGeneration, 42);
+    var newer =
+        new SidecarSupervisor.CountingTransport(
+            new OneShotReadTransport(newerResponse), ledger, newerGeneration);
+    require(
+        Arrays.equals(newer.read(), newerResponse),
+        "newer-generation copy test did not read its response");
+    require(
+        ledger.transientObservationCount() == 1,
+        "newer-generation copy observation was not retained for isolation test");
+
+    var closedGeneration = 41L;
+    var lateResponse = copyTestErrorResponse(closedGeneration, 41);
+    var lateDelegate = new LateReadAfterCloseTransport(lateResponse);
+    var closed =
+        new SidecarSupervisor.CountingTransport(lateDelegate, ledger, closedGeneration);
+    var lateBytes = new AtomicReference<byte[]>();
+    var lateFailure = new AtomicReference<Throwable>();
+    var reader = new Thread(
+        () -> {
+          try {
+            lateBytes.set(closed.read());
+          } catch (Throwable error) {
+            lateFailure.set(error);
+          }
+        },
+        "delta-sidecar-late-counting-read");
+    reader.setDaemon(true);
+    reader.start();
+    require(
+        lateDelegate.readEntered.await(TEST_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS),
+        "late copy read did not enter the delegate");
+
+    closed.close();
+    require(
+        ledger.transientObservationCount() == 1,
+        "closing an old generation cleared a newer generation observation");
+    lateDelegate.releaseRead.countDown();
+    reader.join(TEST_TIMEOUT.toMillis());
+    require(!reader.isAlive(), "late copy read did not finish after release");
+    require(lateFailure.get() == null, "late copy read failed: " + lateFailure.get());
+    require(Arrays.equals(lateBytes.get(), lateResponse), "late copy read bytes changed");
+    require(
+        ledger.transientObservationCount() == 1,
+        "late read republished a closed-generation copy observation");
+
+    newer.close();
+    require(
+        ledger.transientObservationCount() == 0,
+        "newer-generation close did not clear its copy observation");
+  }
+
+  private static byte[] copyTestErrorResponse(long generation, int identityByte) {
+    var prepared =
+        LocalSidecarClient.submitRequest(
+            ascii("copy-close-" + identityByte), new byte[] {(byte) identityByte});
+    var request =
+        SidecarIpcV1.frame(
+            SidecarIpcV1.MessageType.SUBMIT_REQUEST,
+            id(identityByte),
+            generation,
+            id(identityByte + 64),
+            1,
+            SidecarIpcV1.decodePayload(prepared.type(), prepared.canonicalPayload()));
+    return notAdmittedResponse(request, 2).canonicalBytes();
+  }
+
   private static void testSupervisorRecoveryRetryAndExpectedClose() throws Exception {
     var connector = new FakeConnector();
     var durableDirectory = Files.createTempDirectory("delta-sidecar-fake-");
@@ -687,6 +901,9 @@ public final class SidecarSupervisorConformance {
           () -> connector.launches.get() == 2
               && supervisor.state() == SidecarSupervisor.State.READY,
           "replacement generation READY");
+      require(
+          supervisor.transientCopyObservationCount() == 0,
+          "failed generation retained transient copy observations across recovery");
       require(firstClient.outcomeUnknownRequests().equals(List.of(exact)),
           "failed generation lost the exact outcome-unknown request");
 
@@ -702,6 +919,26 @@ public final class SidecarSupervisorConformance {
       require(retryResponse.messageType() == SidecarIpcV1.MessageType.SUBMIT_RESPONSE
               && retryResponse.admittedSequenceBits() == 2,
           "recovery retry did not return the durable native result");
+      var retryCopy = supervisor.operationCopy(retryResponse);
+      require(
+          retryCopy.generation() == 2
+              && retryCopy.inlineIngressBytes()
+                  == Math.addExact(
+                      SidecarIpcV1.HEADER_BYTES, exact.canonicalPayloadLength())
+              && retryCopy.inlineEgressBytes()
+                  == Math.addExact(
+                      SidecarIpcV1.HEADER_BYTES, retryResponse.payload().canonicalLength())
+              && retryCopy.sharedMemoryIngressBytes() == 0
+              && retryCopy.sharedMemoryEgressBytes() == 0
+              && retryCopy.stagingFallbackIngressBytes() == exact.canonicalPayloadLength()
+              && retryCopy.stagingFallbackEgressBytes()
+                  == retryResponse.payload().canonicalLength()
+              && retryCopy.zeroCopyEligibleCount() == 1
+              && retryCopy.zeroCopyHitCount() == 0,
+          "correlation-bound inline SUBMIT copy evidence is not exact");
+      require(
+          supervisor.transientCopyObservationCount() == 0,
+          "completed SUBMIT retained transient copy observations");
       waitUntil(() -> connector.submitPayloads.size() == 2, "both submit attempts recorded");
       require(Arrays.equals(
               connector.submitPayloads.get(0), connector.submitPayloads.get(1)),
@@ -719,6 +956,9 @@ public final class SidecarSupervisorConformance {
           "CLOSE did not return closed=1");
       waitUntil(() -> supervisor.state() == SidecarSupervisor.State.CLOSED,
           "expected-close supervisor state");
+      require(
+          supervisor.transientCopyObservationCount() == 0,
+          "closed generation retained transient copy observations");
       Thread.sleep(25);
       require(connector.launches.get() == 2,
           "validated CLOSE_RESPONSE incorrectly triggered a restart");
@@ -731,11 +971,14 @@ public final class SidecarSupervisorConformance {
           "bounded staging fallback traffic was not accounted");
       require(telemetry.sharedMemoryIngressBytes() == 0
               && telemetry.sharedMemoryEgressBytes() == 0
-              && telemetry.zeroCopyEligibleCount() == 0
+              && telemetry.zeroCopyEligibleCount() > 0
               && telemetry.zeroCopyHitCount() == 0,
-          "disabled shared-memory/zero-copy counters are nonzero");
-      require(telemetry.sharedMemoryStatus().equals("DISABLED_UNREACHABLE_COPY_FALLBACK"),
-          "copy-only evidence label changed");
+          "inline-only fake transport SHM counters are inconsistent");
+      require(telemetry.sharedMemoryStatus().equals(
+              SidecarSharedMemory.atomicAbiSupported()
+                  ? "AVAILABLE_NOT_CONFIGURED"
+                  : "DISABLED_ATOMIC_ABI_UNAVAILABLE"),
+          "shared-memory capability evidence label changed");
       require(telemetry.client() != null && telemetry.client().retries() == 1,
           "accepted exact cross-generation retry was not counted");
       var maximum = telemetry.maxSubmitStagingFallback();
@@ -752,6 +995,172 @@ public final class SidecarSupervisorConformance {
                       exact.canonicalPayload().length,
                       retryResponse.payload().canonicalBytes().length),
           "maximum measured SUBMIT copy pair is not exact ingress+egress bytes");
+    } finally {
+      supervisor.close();
+    }
+  }
+
+  private static void testDurableDirectoryRebindFailsBeforeConnect() throws Exception {
+    if (isWindows()) {
+      return;
+    }
+    for (var symlinkReplacement : List.of(false, true)) {
+      var root = Files.createTempDirectory("delta-sidecar-directory-rebind-");
+      var durableDirectory = Files.createDirectory(root.resolve("durable"));
+      var heldDirectory = root.resolve("held");
+      var connector = new FakeConnector();
+      var config = new SidecarSupervisor.Config(
+          durableDirectory,
+          new byte[] {1},
+          digest(0x6a),
+          BUILD_ID,
+          nestedDescriptor());
+      var supervisor = new SidecarSupervisor(config, connector);
+      try {
+        Files.move(durableDirectory, heldDirectory, StandardCopyOption.ATOMIC_MOVE);
+        if (symlinkReplacement) {
+          Files.createSymbolicLink(durableDirectory, heldDirectory);
+        } else {
+          Files.createDirectory(durableDirectory);
+        }
+        expectAnyFailure(supervisor.start());
+        require(connector.launches.get() == 0,
+            "durable directory replacement reached the generation connector");
+        require(containsMessage(supervisor.lastFailure(), "durable directory"),
+            "durable directory replacement did not retain a pathname-binding failure");
+      } finally {
+        supervisor.close();
+      }
+    }
+  }
+
+  private static void testWalReplacementBetweenGenerationsFailsBeforeConnect() throws Exception {
+    if (isWindows()) {
+      return;
+    }
+    var connector = new FakeConnector();
+    var durableDirectory = Files.createTempDirectory("delta-sidecar-wal-rebind-");
+    var config = new SidecarSupervisor.Config(
+        durableDirectory,
+        new byte[] {1},
+        digest(0x6b),
+        BUILD_ID,
+        nestedDescriptor());
+    var timing = new SidecarSupervisor.Timing(
+        Duration.ofSeconds(30),
+        Duration.ofMillis(100),
+        Duration.ofSeconds(2),
+        Duration.ofMillis(1));
+    var backoffEntered = new CountDownLatch(1);
+    var releaseBackoff = new CountDownLatch(1);
+    var firstBackoff = new AtomicBoolean(true);
+    var supervisor = new SidecarSupervisor(
+        config,
+        connector,
+        timing,
+        ignored -> {
+          if (firstBackoff.compareAndSet(true, false)) {
+            backoffEntered.countDown();
+            releaseBackoff.await();
+          }
+        });
+    try {
+      var first = await(supervisor.start());
+      var trigger = first.tryEnqueue(
+          LocalSidecarClient.submitRequest(ascii("wal-rebind-trigger"), new byte[] {1}));
+      require(trigger.accepted(), "WAL-rebind recovery trigger was rejected");
+      expectAnyFailure(trigger.completion());
+      require(backoffEntered.await(TEST_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS),
+          "recovery did not confirm native death before replacement backoff");
+      require(connector.firstConnection != null
+              && !connector.firstConnection.isAlive()
+              && connector.firstConnection.endpointClosed(),
+          "WAL replacement test did not observe confirmed generation-1 death/cleanup");
+
+      var wal = durableDirectory.resolve("runtime.wal");
+      Files.move(wal, durableDirectory.resolve("runtime.wal.generation-1"));
+      Files.write(
+          wal,
+          new byte[] {9, 9, 9},
+          StandardOpenOption.CREATE_NEW,
+          StandardOpenOption.WRITE);
+      releaseBackoff.countDown();
+
+      waitUntil(
+          () -> supervisor.state() == SidecarSupervisor.State.UNREADY,
+          "WAL replacement fail-closed recovery exhaustion");
+      require(connector.launches.get() == 1,
+          "replacement WAL reached the generation-2 connector");
+      require(containsMessage(supervisor.lastFailure(), "runtime.wal pathname binding changed"),
+          "replacement WAL did not retain the exact pathname-binding failure");
+    } finally {
+      releaseBackoff.countDown();
+      supervisor.close();
+    }
+  }
+
+  private static void testSupervisorVoteLostResponseRecoveryRetry() throws Exception {
+    var connector = new FakeConnector();
+    var durableDirectory = Files.createTempDirectory("delta-sidecar-vote-recovery-fake-");
+    var config = new SidecarSupervisor.Config(
+        durableDirectory,
+        new byte[] {1, 2, 3},
+        digest(0x45),
+        BUILD_ID,
+        nestedDescriptor());
+    var timing = new SidecarSupervisor.Timing(
+        Duration.ofSeconds(30),
+        Duration.ofMillis(100),
+        Duration.ofSeconds(2),
+        Duration.ofMillis(1));
+    var supervisor = new SidecarSupervisor(config, connector, timing, Thread::sleep);
+    try {
+      var firstClient = await(supervisor.start());
+      var exact = LocalSidecarClient.voteRequest(
+          ascii("supervised-vote-retry"), new byte[] {9, 10, 11});
+      var lostResponse = firstClient.tryEnqueue(exact);
+      require(lostResponse.accepted(), "first supervised VOTE was rejected");
+      expectAnyFailure(lostResponse.completion());
+      waitUntil(
+          () -> connector.launches.get() == 2
+              && supervisor.state() == SidecarSupervisor.State.READY,
+          "replacement generation READY after lost VOTE response");
+      require(firstClient.telemetry().fenced()
+              && firstClient.outcomeUnknownRequests().equals(List.of(exact)),
+          "dead VOTE generation was not fenced with the exact outcome-unknown request");
+
+      var conflict = supervisor.client().tryEnqueue(
+          LocalSidecarClient.voteRequest(
+              ascii("supervised-vote-retry"), new byte[] {99}));
+      require(!conflict.accepted(),
+          "replacement generation accepted conflicting VOTE bytes for a prior request ID");
+      expectFailure(conflict.completion(), LocalSidecarClient.RequestConflictException.class);
+
+      var recovered = supervisor.retryAfterRecovery(exact);
+      require(recovered.accepted(), "exact VOTE retry after READY was rejected");
+      var recoveredResponse = await(recovered.completion());
+      require(recoveredResponse.messageType() == SidecarIpcV1.MessageType.VOTE_RESPONSE
+              && recoveredResponse.payload().u32(5) == 0,
+          "recovered VOTE did not return its opaque durable result");
+      var recoveredReceipt = recoveredResponse.payload().bytes(16);
+      var recoveredReceiptDigest = recoveredResponse.payload().bytes(17);
+
+      var sameGenerationRetry = supervisor.client().tryEnqueue(exact);
+      require(sameGenerationRetry.accepted(),
+          "same-generation exact VOTE retry was rejected");
+      var repeatedResponse = await(sameGenerationRetry.completion());
+      require(Arrays.equals(recoveredReceipt, repeatedResponse.payload().bytes(16))
+              && Arrays.equals(
+                  recoveredReceiptDigest, repeatedResponse.payload().bytes(17)),
+          "exact VOTE replay changed the opaque durable recovery proof");
+
+      waitUntil(() -> connector.votePayloads.size() == 3, "all VOTE attempts recorded");
+      require(Arrays.equals(connector.votePayloads.get(0), connector.votePayloads.get(1))
+              && Arrays.equals(connector.votePayloads.get(1), connector.votePayloads.get(2)),
+          "VOTE recovery retry changed canonical operation/request ID/body/digest bytes");
+      require(supervisor.state() == SidecarSupervisor.State.READY
+              && supervisor.client().isAccepting(),
+          "exact VOTE recovery retry did not preserve READY availability");
     } finally {
       supervisor.close();
     }
@@ -783,6 +1192,39 @@ public final class SidecarSupervisorConformance {
       Thread.sleep(25);
       require(connector.launches.get() == 3,
           "immediate post-OPEN failure caused an unbounded or duplicate recovery");
+    } finally {
+      supervisor.close();
+    }
+  }
+
+  private static void testReplacementOpenErrorClearsGenerationCopyObservations()
+      throws Exception {
+    var connector = new FakeConnector();
+    connector.errorReplacementOpen.set(true);
+    var config = new SidecarSupervisor.Config(
+        Files.createTempDirectory("delta-sidecar-open-error-copy-cleanup-"),
+        new byte[] {1},
+        digest(0x4c),
+        BUILD_ID,
+        nestedDescriptor());
+    var timing = new SidecarSupervisor.Timing(
+        Duration.ofSeconds(30),
+        Duration.ofMillis(25),
+        Duration.ofSeconds(1),
+        Duration.ofMillis(1));
+    var supervisor = new SidecarSupervisor(config, connector, timing, Thread::sleep);
+    try {
+      var first = await(supervisor.start());
+      var trigger = first.tryEnqueue(
+          LocalSidecarClient.submitRequest(ascii("open-error-copy-cleanup"), new byte[] {1}));
+      require(trigger.accepted(), "OPEN-error recovery trigger was rejected");
+      expectAnyFailure(trigger.completion());
+      waitUntil(
+          () -> connector.launches.get() == 3 && isReadyAndAccepting(supervisor),
+          "recovery after replacement OPEN ERROR_RESPONSE");
+      require(
+          supervisor.transientCopyObservationCount() == 0,
+          "failed pre-READY generation retained ERROR_RESPONSE copy observations");
     } finally {
       supervisor.close();
     }
@@ -910,6 +1352,52 @@ public final class SidecarSupervisorConformance {
     }
   }
 
+  private static void testCleanupFailureStaysQuarantinedUntilConfirmed() throws Exception {
+    var cleanupRelease = new CountDownLatch(1);
+    var connector = new FakeConnector(cleanupRelease);
+    var config = new SidecarSupervisor.Config(
+        Files.createTempDirectory("delta-sidecar-retryable-cleanup-"),
+        new byte[] {1},
+        digest(0x45),
+        BUILD_ID,
+        nestedDescriptor());
+    var timing = new SidecarSupervisor.Timing(
+        Duration.ofSeconds(30),
+        Duration.ofMillis(10),
+        Duration.ofSeconds(1),
+        Duration.ofMillis(1));
+    var supervisor = new SidecarSupervisor(config, connector, timing, Thread::sleep);
+    try {
+      var client = await(supervisor.start());
+      var submission = client.tryEnqueue(
+          LocalSidecarClient.submitRequest(ascii("retryable-cleanup"), new byte[] {1}));
+      require(submission.accepted(), "retryable-cleanup trigger was rejected");
+      expectAnyFailure(submission.completion());
+      waitUntil(
+          () -> supervisor.state() == SidecarSupervisor.State.UNREADY
+              && supervisor.quarantinedConnectionCount() == 1
+              && connector.cleanupAttempts.get() >= 2,
+          "failed cleanup retained in quarantine");
+      require(connector.firstConnection != null
+              && !connector.firstConnection.endpointClosed()
+              && connector.firstConnection.closeCalls.get() == 0,
+          "failed cleanup falsely confirmed endpoint/mapping release");
+      Thread.sleep(10);
+      require(supervisor.quarantinedConnectionCount() == 1
+              && !connector.firstConnection.endpointClosed(),
+          "quarantine cleared after repeated cleanup failure");
+      cleanupRelease.countDown();
+      waitUntil(
+          () -> connector.firstConnection.endpointClosed()
+              && connector.firstConnection.closeCalls.get() == 1
+              && supervisor.quarantinedConnectionCount() == 0,
+          "retryable cleanup confirmation and quarantine release");
+    } finally {
+      cleanupRelease.countDown();
+      supervisor.close();
+    }
+  }
+
   private static void testUnconfirmedReplacementCleanupIsTerminal() throws Exception {
     var connector = new FakeConnector(false, true);
     var config = new SidecarSupervisor.Config(
@@ -938,6 +1426,11 @@ public final class SidecarSupervisorConformance {
       require(supervisor.lastFailure()
               instanceof SidecarSupervisor.ReplacementTerminationException,
           "unconfirmed replacement cleanup did not retain the terminal failure type");
+      require(connector.unstoppableReplacement != null
+              && connector.unstoppableReplacement.closeCalls.get() == 0,
+          "unconfirmed live replacement released its retained generation resources");
+      require(supervisor.quarantinedConnectionCount() == 1,
+          "unconfirmed live replacement was not retained in quarantine");
       Thread.sleep(25);
       require(connector.launches.get() == 2,
           "terminal cleanup failure was retried after reaching UNREADY");
@@ -980,9 +1473,21 @@ public final class SidecarSupervisorConformance {
           "unconfirmed expected-close cleanup did not retain a terminal recovery failure");
       require(connector.expectedCloseRelease.getCount() == 1,
           "test process exited despite refusing graceful and forced termination");
+      require(connector.firstConnection != null
+              && connector.firstConnection.closeCalls.get() == 0
+              && !connector.firstConnection.endpointClosed(),
+          "unconfirmed expected-close peer released generation resources before death");
+      require(supervisor.quarantinedConnectionCount() == 1,
+          "unconfirmed expected-close peer was not retained in quarantine");
       Thread.sleep(25);
       require(connector.launches.get() == 1,
           "unconfirmed expected CLOSE incorrectly entered recovery");
+      connector.expectedCloseRelease.countDown();
+      waitUntil(
+          () -> connector.firstConnection.endpointClosed()
+              && connector.firstConnection.closeCalls.get() == 1
+              && supervisor.quarantinedConnectionCount() == 0,
+          "confirmed-death generation resource cleanup");
     } finally {
       connector.expectedCloseRelease.countDown();
       supervisor.close();
@@ -1135,6 +1640,21 @@ public final class SidecarSupervisorConformance {
     }
   }
 
+  private static boolean containsMessage(Throwable failure, String expected) {
+    for (var current = failure; current != null; current = current.getCause()) {
+      if (current.getMessage() != null && current.getMessage().contains(expected)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean isWindows() {
+    return System.getProperty("os.name", "")
+        .toLowerCase(java.util.Locale.ROOT)
+        .contains("win");
+  }
+
   private static void injectClientFailure(
       SidecarSupervisor supervisor, LocalSidecarClient.Failure failure) throws Exception {
     var callback = SidecarSupervisor.class.getDeclaredMethod(
@@ -1193,6 +1713,32 @@ public final class SidecarSupervisorConformance {
             SidecarIpcV1.sha256Field(21, digest(nextStateDigestByte))));
     return SidecarIpcV1.frame(
         SidecarIpcV1.MessageType.SUBMIT_RESPONSE,
+        session,
+        generation,
+        request.correlationId(),
+        sequence,
+        payload);
+  }
+
+  private static SidecarIpcV1.Frame voteResponse(
+      SidecarIpcV1.Frame request,
+      SidecarIpcV1.Id128 session,
+      long generation,
+      long sequence,
+      long admissionSequence,
+      byte[] opaqueReceipt) {
+    var payload = SidecarIpcV1.responsePayload(
+        SidecarIpcV1.MessageType.VOTE_RESPONSE,
+        request.payload().bytes(1),
+        request.payload().bytes(2),
+        List.of(
+            SidecarIpcV1.u8(3, SidecarIpcV1.AdmissionState.ADMITTED_OUTCOME_AVAILABLE.code()),
+            SidecarIpcV1.u64(4, admissionSequence),
+            SidecarIpcV1.u32(5, 0),
+            SidecarIpcV1.bytes(16, opaqueReceipt),
+            SidecarIpcV1.sha256Field(17, SidecarIpcV1.sha256(opaqueReceipt))));
+    return SidecarIpcV1.frame(
+        SidecarIpcV1.MessageType.VOTE_RESPONSE,
         session,
         generation,
         request.correlationId(),
@@ -1301,7 +1847,7 @@ public final class SidecarSupervisorConformance {
             64,
             1,
             0,
-            7,
+            SidecarIpcV1.NESTED_ABI_FEATURE_BITS,
             "1.0.0",
             "003.1.0",
             FORMAL_SEMANTICS_ID,
@@ -1399,6 +1945,81 @@ public final class SidecarSupervisorConformance {
     @Override
     public SidecarIpcV1.Id128 next() {
       return id(next.getAndIncrement());
+    }
+  }
+
+  private static final class OneShotReadTransport implements LocalSidecarClient.Transport {
+    private final byte[] response;
+    private final AtomicBoolean open = new AtomicBoolean(true);
+    private final AtomicBoolean read = new AtomicBoolean();
+
+    private OneShotReadTransport(byte[] response) {
+      this.response = Arrays.copyOf(response, response.length);
+    }
+
+    @Override
+    public void write(byte[] canonicalFrame) throws IOException {
+      throw new IOException("one-shot read transport does not accept writes");
+    }
+
+    @Override
+    public byte[] read() throws IOException {
+      if (!open.get() || !read.compareAndSet(false, true)) {
+        throw new EOFException("one-shot read transport is exhausted");
+      }
+      return Arrays.copyOf(response, response.length);
+    }
+
+    @Override
+    public boolean isOpen() {
+      return open.get();
+    }
+
+    @Override
+    public void close() {
+      open.set(false);
+    }
+  }
+
+  private static final class LateReadAfterCloseTransport
+      implements LocalSidecarClient.Transport {
+    private final byte[] response;
+    private final AtomicBoolean closed = new AtomicBoolean();
+    private final CountDownLatch readEntered = new CountDownLatch(1);
+    private final CountDownLatch releaseRead = new CountDownLatch(1);
+
+    private LateReadAfterCloseTransport(byte[] response) {
+      this.response = Arrays.copyOf(response, response.length);
+    }
+
+    @Override
+    public void write(byte[] canonicalFrame) throws IOException {
+      throw new IOException("late-read transport does not accept writes");
+    }
+
+    @Override
+    public byte[] read() throws IOException {
+      readEntered.countDown();
+      try {
+        if (!releaseRead.await(TEST_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
+          throw new IOException("late read release timed out");
+        }
+      } catch (InterruptedException interrupted) {
+        Thread.currentThread().interrupt();
+        throw new IOException("late read was interrupted", interrupted);
+      }
+      require(closed.get(), "late read was released before delegate close");
+      return Arrays.copyOf(response, response.length);
+    }
+
+    @Override
+    public boolean isOpen() {
+      return !closed.get();
+    }
+
+    @Override
+    public void close() {
+      closed.set(true);
     }
   }
 
@@ -1555,19 +2176,32 @@ public final class SidecarSupervisorConformance {
   private static final class FakeConnector implements SidecarSupervisor.GenerationConnector {
     private final AtomicInteger launches = new AtomicInteger();
     private final AtomicBoolean crashFirstSubmit = new AtomicBoolean(true);
+    private final AtomicBoolean crashFirstVote = new AtomicBoolean(true);
     private final List<byte[]> submitPayloads = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private final List<byte[]> votePayloads = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private final byte[] durableVoteReceipt = ascii("opaque-native-vote-receipt");
     private final boolean hangReplacements;
     private final boolean failReplacementCleanup;
     private final boolean refuseExpectedCloseTermination;
     private final AtomicBoolean crashReplacementAfterOpen;
+    private final AtomicBoolean errorReplacementOpen = new AtomicBoolean();
     private final boolean failSecondHandshakeRetryably;
     private final AtomicInteger forcedTerminations = new AtomicInteger();
     private final CountDownLatch expectedCloseRelease = new CountDownLatch(1);
     private final CountDownLatch retryableHandshakeRead = new CountDownLatch(1);
     private final CountDownLatch releaseRetryableHandshake = new CountDownLatch(1);
+    private final AtomicInteger cleanupAttempts = new AtomicInteger();
+    private CountDownLatch cleanupRelease;
+    private volatile FakeConnection firstConnection;
+    private volatile UnstoppableHandshakeFailureConnection unstoppableReplacement;
 
     private FakeConnector() {
       this(false, false, false, false, false);
+    }
+
+    private FakeConnector(CountDownLatch cleanupRelease) {
+      this();
+      this.cleanupRelease = Objects.requireNonNull(cleanupRelease, "cleanupRelease");
     }
 
     private FakeConnector(boolean hangReplacements) {
@@ -1618,21 +2252,32 @@ public final class SidecarSupervisorConformance {
 
     @Override
     public SidecarSupervisor.Connection connect(
-        SidecarSupervisor.LaunchContext context, Duration readyTimeout) {
+        SidecarSupervisor.LaunchContext context, Duration readyTimeout) throws IOException {
       require(!readyTimeout.isNegative() && !readyTimeout.isZero(),
           "supervisor supplied a non-positive recovery timeout");
       var launch = launches.incrementAndGet();
+      if (launch == 1) {
+        Files.write(
+            context.durableDirectory().resolve("runtime.wal"),
+            new byte[] {1, 2, 3},
+            StandardOpenOption.CREATE_NEW,
+            StandardOpenOption.WRITE);
+      }
       if (hangReplacements && launch > 1) {
         return new HungConnection(this);
       }
       if (failReplacementCleanup && launch > 1) {
-        return new UnstoppableHandshakeFailureConnection();
+        unstoppableReplacement = new UnstoppableHandshakeFailureConnection();
+        return unstoppableReplacement;
       }
       if (failSecondHandshakeRetryably && launch == 2) {
         return new RetryableHandshakeFailureConnection(
             retryableHandshakeRead, releaseRetryableHandshake);
       }
       var connection = new FakeConnection(context, this);
+      if (launch == 1) {
+        firstConnection = connection;
+      }
       connection.start();
       return connection;
     }
@@ -1641,6 +2286,7 @@ public final class SidecarSupervisorConformance {
   private static final class UnstoppableHandshakeFailureConnection
       implements SidecarSupervisor.Connection {
     private final AtomicBoolean open = new AtomicBoolean(true);
+    private final AtomicInteger closeCalls = new AtomicInteger();
     private final LocalSidecarClient.Transport transport = new LocalSidecarClient.Transport() {
       @Override
       public void write(byte[] canonicalFrame) throws IOException {
@@ -1693,6 +2339,7 @@ public final class SidecarSupervisorConformance {
 
     @Override
     public void close() {
+      closeCalls.incrementAndGet();
       open.set(false);
     }
   }
@@ -1970,6 +2617,7 @@ public final class SidecarSupervisorConformance {
     private final TransportPair pair = TransportPair.create();
     private final AtomicBoolean alive = new AtomicBoolean(true);
     private final AtomicBoolean endpointClosed = new AtomicBoolean();
+    private final AtomicInteger closeCalls = new AtomicInteger();
     private final CountDownLatch exited = new CountDownLatch(1);
 
     private FakeConnection(
@@ -2006,6 +2654,11 @@ public final class SidecarSupervisorConformance {
             "fake peer expected OPEN_REQUEST");
         require(open.payload().text(17).equals(context.durableDirectory().toString()),
             "OPEN durable directory changed");
+        if (context.identity().generation() > 1
+            && owner.errorReplacementOpen.compareAndSet(true, false)) {
+          pair.peerEndpoint.write(notAdmittedResponse(open, 2).canonicalBytes());
+          return;
+        }
         pair.peerEndpoint.write(openResponse(open, context.identity(), 2).canonicalBytes());
         if (context.identity().generation() > 1
             && owner.crashReplacementAfterOpen.compareAndSet(true, false)) {
@@ -2029,6 +2682,21 @@ public final class SidecarSupervisorConformance {
                     context.identity().sessionId(),
                     context.identity().generation(),
                     responseSequence).canonicalBytes());
+          } else if (request.messageType() == SidecarIpcV1.MessageType.VOTE_REQUEST) {
+            owner.votePayloads.add(request.payload().canonicalBytes());
+            if (owner.crashFirstVote.compareAndSet(true, false)) {
+              // Model a native-reachable durable VOTE whose response is lost with the process.
+              crashFromPeer();
+              return;
+            }
+            pair.peerEndpoint.write(
+                voteResponse(
+                    request,
+                    context.identity().sessionId(),
+                    context.identity().generation(),
+                    responseSequence,
+                    responseSequence - 1,
+                    owner.durableVoteReceipt).canonicalBytes());
           } else if (request.messageType() == SidecarIpcV1.MessageType.HEALTH_REQUEST) {
             pair.peerEndpoint.write(healthResponse(request, responseSequence).canonicalBytes());
           } else if (request.messageType() == SidecarIpcV1.MessageType.CLOSE_REQUEST) {
@@ -2170,9 +2838,15 @@ public final class SidecarSupervisorConformance {
     }
 
     @Override
-    public void close() {
-      pair.javaEndpoint.close();
-      endpointClosed.set(true);
+    public void close() throws IOException {
+      owner.cleanupAttempts.incrementAndGet();
+      if (owner.cleanupRelease != null && owner.cleanupRelease.getCount() != 0) {
+        throw new IOException("injected generation unmap failure");
+      }
+      if (endpointClosed.compareAndSet(false, true)) {
+        closeCalls.incrementAndGet();
+        pair.javaEndpoint.close();
+      }
     }
   }
 }

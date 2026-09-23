@@ -25,11 +25,15 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SymbolLookup;
 import java.lang.invoke.MethodHandle;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -83,9 +87,9 @@ public final class SidecarComparisonCapture {
       "NON_PRIMARY_RUNTIME_PROFILE_QUALIFICATION";
   private static final String RUN_TYPE = "FEATURE010_SIDECAR_PROFILE_RUN_RAW";
   private static final String DESIGN_RAW_SHA256 =
-      "sha256:d1e26d2a5b207fb0632f2d775598e8fdb0545bba0509c3012b3daed19909e04e";
+      "sha256:dc031e7fb413d9ef1ed33b2d4fe1fedb170100e2782f636e7162b40cabbeb4c8";
   private static final String DESIGN_CANONICAL_ID =
-      "sha256:204ff9dae0ed97684c18a947501217964cea63b82e44a4c4fade4f31cb6c642f";
+      "sha256:080074ff7de58d7ba025b8156ceafb0085937bb6ed74485d217af664d0ecf6ef";
   private static final String FORMAL_SEMANTICS_ID =
       "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6";
   private static final String BUILD_ID =
@@ -111,8 +115,10 @@ public final class SidecarComparisonCapture {
   private static final int ABI_DESCRIPTOR_SIZE = 64;
   private static final int ABI_OPEN_OPTIONS_SIZE = 128;
   private static final int ABI_OUTPUT_SIZE = 32;
+  private static final int ABI_VOTE_RECEIPT_V1_SIZE = 40;
+  private static final int ABI_SUBMIT_RECEIPT_V1_SIZE = 48;
+  private static final long ABI_FEATURE_SUBMIT_RECEIPT_V1 = 16L;
   private static final int ABI_OK = 0;
-  private static final long NO_NATIVE_SEQUENCE = -1L;
   private static final String ROUND_STATE_DOMAIN = "deltareduce:003:round-state:v1";
   private static final String EFFECT_BATCH_DOMAIN = "deltareduce:003:effect-batch:v1";
   private static final List<String> COPY_COUNTERS =
@@ -132,7 +138,8 @@ public final class SidecarComparisonCapture {
           "STATE_ROOTS",
           "WAL_RECEIPTS_AND_DURABLE_SEQUENCES",
           "REPLAY_EFFECT_IDENTITIES",
-          "PROJECTED_FORMAL_TRACE_BYTES_AFTER_STUTTER_ERASURE");
+          "PROJECTED_FORMAL_TRACE_BYTES_AFTER_STUTTER_ERASURE",
+          "CANONICAL_VOTE_RECEIPT_BYTES");
   private static final List<String> MEASUREMENT_IDS =
       List.of(
           "END_TO_END_LATENCY_NS",
@@ -150,6 +157,11 @@ public final class SidecarComparisonCapture {
   private static final MemoryLayout ABI_VIEW = MemoryLayout.structLayout(ADDRESS, JAVA_LONG);
   private static final MemoryLayout ABI_OUTPUT =
       MemoryLayout.structLayout(ADDRESS, JAVA_LONG, JAVA_LONG, JAVA_LONG);
+  private static final MemoryLayout ABI_VOTE_RECEIPT_V1 =
+      MemoryLayout.structLayout(JAVA_INT, JAVA_INT, ABI_OUTPUT);
+  private static final MemoryLayout ABI_SUBMIT_RECEIPT_V1 =
+      MemoryLayout.structLayout(
+          JAVA_INT, JAVA_INT, JAVA_LONG, ADDRESS, JAVA_LONG, JAVA_LONG, JAVA_LONG);
   private static final MemoryLayout ABI_DESCRIPTOR =
       MemoryLayout.structLayout(
           JAVA_INT,
@@ -188,6 +200,12 @@ public final class SidecarComparisonCapture {
     require(ABI_DESCRIPTOR.byteSize() == ABI_DESCRIPTOR_SIZE, "descriptor ABI size changed");
     require(ABI_OPEN_OPTIONS.byteSize() == ABI_OPEN_OPTIONS_SIZE, "open-options ABI size changed");
     require(ABI_OUTPUT.byteSize() == ABI_OUTPUT_SIZE, "output ABI size changed");
+    require(
+        ABI_VOTE_RECEIPT_V1.byteSize() == ABI_VOTE_RECEIPT_V1_SIZE,
+        "vote-receipt-v1 ABI size changed");
+    require(
+        ABI_SUBMIT_RECEIPT_V1.byteSize() == ABI_SUBMIT_RECEIPT_V1_SIZE,
+        "submit-receipt-v1 ABI size changed");
     require(
         sha256Id(new byte[0])
             .equals("sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"),
@@ -255,6 +273,582 @@ public final class SidecarComparisonCapture {
     } finally {
       Files.deleteIfExists(trace);
     }
+
+    var voteFixturePath = Files.createTempFile("delta-vote-fixture-snapshot-self-test-", ".json");
+    try {
+      var original =
+          Json.bytes(
+              Map.of(
+                  "expected_receipt_hex", "04",
+                  "formal_semantics_id", FORMAL_SEMANTICS_ID,
+                  "initial_state_hex", "01",
+                  "schema_version", SCHEMA_VERSION,
+                  "type_name", VoteFixture.TYPE_NAME,
+                  "vote_hex", "03",
+                  "vote_policy_hex", "02"));
+      Files.write(voteFixturePath, original);
+      var snapshot = FileSnapshot.read(voteFixturePath, "vote fixture snapshot self-test");
+      var record = new TreeMap<String, Object>();
+      record.put("artifact_id", "VOTE_FIXTURE");
+      record.put("path", voteFixturePath.toAbsolutePath().normalize().toString());
+      record.put("sha256", snapshot.sha256());
+      record.put("size_bytes", snapshot.sizeBytes());
+
+      Files.write(voteFixturePath, Json.bytes(Map.of("replacement", true)));
+      InputProvenance.verifyFileRecord(
+          record, voteFixturePath, "vote fixture snapshot self-test", snapshot);
+      var fixture = VoteFixture.load(snapshot);
+      require(
+          Arrays.equals(fixture.initialState(), new byte[] {1})
+              && Arrays.equals(fixture.votePolicy(), new byte[] {2})
+              && Arrays.equals(fixture.vote(), new byte[] {3})
+              && Arrays.equals(fixture.expectedReceipt(), new byte[] {4})
+              && fixture.sha256().equals(snapshot.sha256()),
+          "vote fixture execution bytes were not bound to the verified one-read snapshot");
+      require(
+          !sha256Id(Files.readAllBytes(voteFixturePath)).equals(snapshot.sha256()),
+          "vote fixture snapshot self-test did not replace the backing path");
+    } finally {
+      Files.deleteIfExists(voteFixturePath);
+    }
+  }
+
+  /** Runs one real embedded RECORD_VOTE, restarts, and proves exact durable replay. */
+  static void embeddedVoteConformance(
+      Path nativeLibrary, Path durableDirectory, Path voteFixturePath) throws Throwable {
+    var library = nativeLibrary.toAbsolutePath().normalize();
+    var durable = durableDirectory.toAbsolutePath().normalize();
+    var fixturePath = voteFixturePath.toAbsolutePath().normalize();
+    requireRegular(library, "embedded native library");
+    requireRegular(fixturePath, "native vote fixture");
+    require(!Files.exists(durable), "embedded vote durable directory already exists");
+    var parent = durable.getParent();
+    require(parent != null && Files.isDirectory(parent), "embedded vote durable parent is absent");
+    Files.createDirectory(durable);
+
+    var descriptor = RuntimeDescriptor.frozen();
+    var fixture = VoteFixture.load(fixturePath);
+    var wal = durable.resolve("runtime.wal");
+    byte[] accepted;
+    try (var adapter =
+        new EmbeddedAdapter(
+            library,
+            durable,
+            fixture.initialState(),
+            fixture.votePolicy(),
+            descriptor)) {
+      accepted = adapter.recordVote(fixture.vote());
+      require(
+          Arrays.equals(accepted, fixture.expectedReceipt()),
+          "embedded vote receipt differs from the frozen fixture");
+      requireRegular(wal, "embedded vote WAL");
+      require(Files.size(wal) > 0, "embedded vote returned before a non-empty WAL existed");
+    }
+    var acceptedWal = new WalArtifact(sha256Id(wal), Files.size(wal));
+
+    byte[] replay;
+    try (var adapter =
+        new EmbeddedAdapter(
+            library,
+            durable,
+            fixture.initialState(),
+            fixture.votePolicy(),
+            descriptor)) {
+      require(
+          new WalArtifact(sha256Id(wal), Files.size(wal)).equals(acceptedWal),
+          "embedded vote WAL changed while reopening recovered state");
+      replay = adapter.recordVote(fixture.vote());
+      require(
+          Arrays.equals(replay, fixture.expectedReceipt()),
+          "embedded vote replay differs from the frozen fixture");
+      require(
+          new WalArtifact(sha256Id(wal), Files.size(wal)).equals(acceptedWal),
+          "embedded vote replay appended or rewrote durable state");
+    }
+    require(Arrays.equals(replay, accepted), "embedded vote replay changed receipt bytes");
+    require(
+        new WalArtifact(sha256Id(wal), Files.size(wal)).equals(acceptedWal),
+        "embedded vote WAL changed while closing recovered state");
+  }
+
+  /** Executes the separately sealed, assembler-ineligible 100/s diagnostic lane. */
+  static void runDiagnostic(String[] arguments) throws Throwable {
+    new DiagnosticCapture(DiagnosticOptions.parse(arguments)).run();
+  }
+
+  static void diagnosticSelfTest() {
+    var root = Path.of(".").toAbsolutePath().normalize().toString();
+    var options =
+        DiagnosticOptions.parse(
+            new String[] {
+              "--profile", "EMBEDDED_FFM",
+              "--corpus", root + "/corpus.bin",
+              "--event-log", root + "/events.jsonl",
+              "--durable-directory", root + "/durable",
+              "--source-root", root,
+              "--duration-seconds", "60",
+              "--offers-per-second", "100",
+              "--native-library", root + "/libdelta_ffi.so"
+            });
+    require(options.offersPerSecond() == 100, "diagnostic self-test changed 100/s rate");
+    require(options.durationSeconds() == 60, "diagnostic self-test changed duration");
+    var rateRejected = false;
+    try {
+      DiagnosticOptions.parse(
+          new String[] {
+            "--profile", "EMBEDDED_FFM",
+            "--corpus", root + "/corpus.bin",
+            "--event-log", root + "/events.jsonl",
+            "--durable-directory", root + "/durable",
+            "--source-root", root,
+            "--duration-seconds", "60",
+            "--offers-per-second", "99",
+            "--native-library", root + "/libdelta_ffi.so"
+          });
+    } catch (CaptureException expected) {
+      rateRejected = true;
+    }
+    require(rateRejected, "diagnostic self-test admitted a lowered offer rate");
+    var delta = deltaValue(10L, 15L);
+    require(delta.get("status").equals("AVAILABLE"), "diagnostic CPU delta is unavailable");
+    require(delta.get("value").equals(5L), "diagnostic CPU delta is incorrect");
+  }
+
+  private record DiagnosticOptions(
+      Profile profile,
+      Path corpus,
+      Path eventLog,
+      Path durableDirectory,
+      Path sourceRoot,
+      int durationSeconds,
+      int offersPerSecond,
+      Path nativeLibrary,
+      Path sidecarExecutable) {
+    private static final Set<String> NAMES =
+        Set.of(
+            "--profile",
+            "--corpus",
+            "--event-log",
+            "--durable-directory",
+            "--source-root",
+            "--duration-seconds",
+            "--offers-per-second",
+            "--native-library",
+            "--sidecar-executable");
+
+    private DiagnosticOptions {
+      Objects.requireNonNull(profile, "profile");
+      Objects.requireNonNull(corpus, "corpus");
+      Objects.requireNonNull(eventLog, "eventLog");
+      Objects.requireNonNull(durableDirectory, "durableDirectory");
+      Objects.requireNonNull(sourceRoot, "sourceRoot");
+      require(durationSeconds > 0 && durationSeconds <= 3_600, "invalid diagnostic duration");
+      require(offersPerSecond == 100, "diagnostic offer rate must remain exactly 100/s");
+      if (profile == Profile.EMBEDDED_FFM) {
+        require(nativeLibrary != null, "EMBEDDED_FFM requires --native-library");
+        require(sidecarExecutable == null, "EMBEDDED_FFM forbids --sidecar-executable");
+      } else {
+        require(sidecarExecutable != null, "ISOLATED_SIDECAR requires --sidecar-executable");
+        require(nativeLibrary == null, "ISOLATED_SIDECAR forbids --native-library");
+      }
+    }
+
+    private static DiagnosticOptions parse(String[] arguments) {
+      require(arguments.length % 2 == 0, usage());
+      var values = new LinkedHashMap<String, String>();
+      for (var index = 0; index < arguments.length; index += 2) {
+        var name = arguments[index];
+        require(NAMES.contains(name), "unknown diagnostic option " + name + "\n" + usage());
+        require(!arguments[index + 1].isEmpty(), "empty diagnostic option " + name);
+        require(values.put(name, arguments[index + 1]) == null, "duplicate diagnostic option " + name);
+      }
+      for (var name : NAMES) {
+        if (!name.equals("--native-library") && !name.equals("--sidecar-executable")) {
+          require(values.containsKey(name), "missing diagnostic option " + name + "\n" + usage());
+        }
+      }
+      Profile profile;
+      try {
+        profile = Profile.valueOf(values.get("--profile"));
+      } catch (IllegalArgumentException error) {
+        throw new CaptureException("invalid diagnostic profile", error);
+      }
+      return new DiagnosticOptions(
+          profile,
+          Path.of(values.get("--corpus")).toAbsolutePath().normalize(),
+          Path.of(values.get("--event-log")).toAbsolutePath().normalize(),
+          Path.of(values.get("--durable-directory")).toAbsolutePath().normalize(),
+          Path.of(values.get("--source-root")).toAbsolutePath().normalize(),
+          parsePositiveInt(values.get("--duration-seconds"), "diagnostic duration"),
+          parsePositiveInt(values.get("--offers-per-second"), "diagnostic offer rate"),
+          optionalPath(values.get("--native-library")),
+          optionalPath(values.get("--sidecar-executable")));
+    }
+
+    private static int parsePositiveInt(String value, String label) {
+      try {
+        var parsed = Integer.parseInt(value);
+        require(parsed > 0, label + " is not positive");
+        return parsed;
+      } catch (NumberFormatException error) {
+        throw new CaptureException(label + " is not an integer", error);
+      }
+    }
+
+    private static Path optionalPath(String value) {
+      return value == null ? null : Path.of(value).toAbsolutePath().normalize();
+    }
+
+    private static String usage() {
+      return "usage: SidecarDiagnosticCapture --profile EMBEDDED_FFM|ISOLATED_SIDECAR "
+          + "--corpus FILE --event-log FILE --durable-directory DIR --source-root DIR "
+          + "--duration-seconds N --offers-per-second 100 "
+          + "(--native-library FILE | --sidecar-executable FILE)";
+    }
+  }
+
+  private static final class DiagnosticCapture {
+    private static final long NANOS_PER_SECOND = 1_000_000_000L;
+    private final DiagnosticOptions options;
+
+    private DiagnosticCapture(DiagnosticOptions options) {
+      this.options = options;
+    }
+
+    private void run() throws Throwable {
+      requireRegular(options.corpus(), "diagnostic corpus");
+      require(Files.isDirectory(options.sourceRoot()), "diagnostic source root is not a directory");
+      require(!Files.exists(options.eventLog()), "diagnostic event log already exists");
+      require(!Files.exists(options.durableDirectory()), "diagnostic durable directory already exists");
+      var parent = options.eventLog().getParent();
+      require(parent != null && Files.isDirectory(parent), "diagnostic event-log parent is absent");
+      Files.createDirectory(options.durableDirectory());
+      var operationCount = Math.multiplyExact(options.durationSeconds(), options.offersPerSecond());
+      var interval = NANOS_PER_SECOND / options.offersPerSecond();
+      require(
+          interval * options.offersPerSecond() == NANOS_PER_SECOND,
+          "diagnostic rate does not divide one second exactly");
+      var descriptor = RuntimeDescriptor.frozen();
+      try (var corpus = new Corpus(options.corpus());
+          var writer = new DiagnosticWriter(options.eventLog())) {
+        require(
+            corpus.operationCount() >= Math.addExact(WARMUP_OPERATIONS, operationCount),
+            "diagnostic corpus is too short");
+        var cursor =
+            new StateCursor(
+                contentId(ROUND_STATE_DOMAIN, corpus.initialState()), corpus.initialDurableSequence());
+        var adapter = openDiagnosticAdapter(descriptor, corpus.initialState());
+        try (adapter) {
+          executeWarmup(adapter, corpus, cursor);
+          writer.write(laneStartEvent(cursor));
+          executeSchedule(adapter, corpus, cursor, writer, operationCount, interval);
+          verifyState(adapter.state(), cursor);
+          writer.write(laneEndEvent(operationCount, cursor));
+        }
+      }
+    }
+
+    private void executeWarmup(Adapter adapter, Corpus corpus, StateCursor cursor) throws Throwable {
+      for (var index = 0; index < WARMUP_OPERATIONS; ++index) {
+        var command = corpus.next();
+        validateNewOperation(command, adapter.execute(command), cursor);
+      }
+    }
+
+    private Map<String, Object> laneStartEvent(StateCursor cursor) {
+      var monotonicAnchor = System.nanoTime();
+      var wallAnchor = wallTimeNanos();
+      var event = new TreeMap<String, Object>();
+      event.put("available_processors", (long) Runtime.getRuntime().availableProcessors());
+      event.put("duration_seconds", (long) options.durationSeconds());
+      event.put("event_type", "LANE_START");
+      event.put("initial_durable_sequence", cursor.durableSequence());
+      event.put("initial_state_root", cursor.stateRoot());
+      event.put("monotonic_anchor_ns", monotonicAnchor);
+      event.put("offers_per_second", (long) options.offersPerSecond());
+      event.put("process_id", ProcessHandle.current().pid());
+      event.put("profile_id", options.profile().name());
+      event.put("source_root", options.sourceRoot().toString());
+      event.put("wall_anchor_ns", wallAnchor);
+      event.put("warmup_completed_operations", (long) WARMUP_OPERATIONS);
+      return event;
+    }
+
+    private Map<String, Object> laneEndEvent(int operationCount, StateCursor cursor) {
+      var event = new TreeMap<String, Object>();
+      event.put("completed_operations", (long) operationCount);
+      event.put("event_type", "LANE_END");
+      event.put("final_durable_sequence", cursor.durableSequence());
+      event.put("final_state_root", cursor.stateRoot());
+      event.put("monotonic_ns", System.nanoTime());
+      event.put("profile_id", options.profile().name());
+      event.put("terminal_state_validated", true);
+      event.put("wall_time_ns", wallTimeNanos());
+      return event;
+    }
+
+    private Adapter openDiagnosticAdapter(RuntimeDescriptor descriptor, byte[] initialState)
+        throws Throwable {
+      return switch (options.profile()) {
+        case EMBEDDED_FFM ->
+            new EmbeddedAdapter(
+                Objects.requireNonNull(options.nativeLibrary()),
+                options.durableDirectory(),
+                initialState,
+                null,
+                descriptor);
+        case ISOLATED_SIDECAR ->
+            new IsolatedAdapter(
+                Objects.requireNonNull(options.sidecarExecutable()),
+                options.durableDirectory(),
+                initialState,
+                null,
+                descriptor);
+      };
+    }
+
+    private void executeSchedule(
+        Adapter adapter,
+        Corpus corpus,
+        StateCursor cursor,
+        DiagnosticWriter writer,
+        int operationCount,
+        long interval)
+        throws Throwable {
+      var pending = new ArrayList<DiagnosticPending>(operationCount);
+      var previousCpu = CpuObservation.capture();
+      var start = Math.addExact(System.nanoTime(), interval);
+      for (var ordinal = 0; ordinal < operationCount; ++ordinal) {
+        var scheduled = Math.addExact(start, Math.multiplyExact((long) ordinal, interval));
+        await(scheduled);
+        var wakeup = System.nanoTime();
+        var wakeupLateness = checkedElapsed(wakeup, scheduled, "diagnostic wake-up lateness");
+        var currentCpu = CpuObservation.capture();
+        var command = corpus.next();
+        var walBefore = WalObservation.capture(options.durableDirectory().resolve("runtime.wal"));
+        // Keep the adapter-offer timestamp adjacent to the real bounded-ingress call.  Everything
+        // above is diagnostic preparation and is reported separately so it cannot be hidden as
+        // runtime demand.
+        var actualWall = wallTimeNanos();
+        var actual = System.nanoTime();
+        var submission = adapter.tryExecute(command, actual);
+        var lateness = checkedElapsed(actual, scheduled, "diagnostic scheduler lateness");
+        var preparationLatency = checkedElapsed(actual, wakeup, "diagnostic preparation latency");
+        writer.write(
+            offerEvent(
+                ordinal,
+                command.requestId(),
+                scheduled,
+                wakeup,
+                actual,
+                actualWall,
+                lateness,
+                wakeupLateness,
+                preparationLatency,
+                interval,
+                previousCpu,
+                currentCpu,
+                walBefore,
+                submission.accepted()));
+        require(submission.accepted(), "diagnostic bounded ingress rejected an exact 100/s offer");
+        pending.add(
+            new DiagnosticPending(
+                ordinal, command, submission, scheduled, actual, lateness, walBefore));
+        previousCpu = currentCpu;
+      }
+      for (var item : pending) {
+        var timed = awaitSubmission(item.submission());
+        var result = validateNewOperation(item.command(), timed.operation(), cursor);
+        var walAfter = WalObservation.capture(options.durableDirectory().resolve("runtime.wal"));
+        writer.write(completionEvent(item, timed, result, walAfter));
+      }
+    }
+
+    private Map<String, Object> offerEvent(
+        int ordinal,
+        String requestId,
+        long scheduled,
+        long wakeup,
+        long actual,
+        long actualWall,
+        long lateness,
+        long wakeupLateness,
+        long preparationLatency,
+        long interval,
+        CpuObservation previousCpu,
+        CpuObservation currentCpu,
+        WalObservation walBefore,
+        boolean accepted) {
+      var event = new TreeMap<String, Object>();
+      event.put("actual_offer_ns", actual);
+      event.put("actual_wall_time_ns", actualWall);
+      event.put("admission_accepted", accepted);
+      event.put("event_type", "OFFER");
+      event.put(
+          "harness_preparation_overran_slot",
+          lateness >= interval && wakeupLateness < interval);
+      event.put("missed_slot", lateness >= interval);
+      event.put("offer_ordinal", (long) ordinal);
+      event.put("preparation_latency_ns", preparationLatency);
+      event.put("process_cpu_delta_ns", deltaValue(previousCpu.processCpu(), currentCpu.processCpu()));
+      event.put("profile_id", options.profile().name());
+      event.put("request_id", requestId);
+      event.put("scheduled_offer_ns", scheduled);
+      event.put("scheduler_lateness_ns", lateness);
+      event.put(
+          "scheduler_thread_cpu_delta_ns",
+          deltaValue(previousCpu.threadCpu(), currentCpu.threadCpu()));
+      event.put("schedstat_delta", schedstatDelta(previousCpu.schedstat(), currentCpu.schedstat()));
+      event.put("wal_before", walBefore.asEvidence());
+      event.put("wakeup_lateness_ns", wakeupLateness);
+      event.put("wakeup_ns", wakeup);
+      return event;
+    }
+
+    private Map<String, Object> completionEvent(
+        DiagnosticPending item,
+        TimedOperation timed,
+        ValidatedOperation result,
+        WalObservation walAfter) {
+      var event = new TreeMap<String, Object>();
+      event.put("completed_at_ns", timed.completedAtNanos());
+      event.put("completed_wall_time_ns", wallTimeNanos());
+      event.put("durable_sequence", result.durableSequence());
+      event.put("event_type", "COMPLETION");
+      event.put("native_phase_latency_ns", result.phaseLatencyNanos());
+      event.put("next_state_root", result.nextStateRoot());
+      event.put("offer_ordinal", (long) item.ordinal());
+      event.put("operation_latency_ns", result.totalLatencyNanos());
+      event.put("prior_state_root", result.priorStateRoot());
+      event.put("profile_id", options.profile().name());
+      event.put("request_id", item.command().requestId());
+      event.put("wal_after", walAfter.asEvidence());
+      return event;
+    }
+  }
+
+  private record DiagnosticPending(
+      int ordinal,
+      CorpusRecord command,
+      Submission submission,
+      long scheduledOfferNanos,
+      long actualOfferNanos,
+      long schedulerLatenessNanos,
+      WalObservation walBefore) {}
+
+  private record SchedstatObservation(long runningNanos, long waitingNanos, long timeslices) {
+    private static SchedstatObservation capture() {
+      if (!System.getProperty("os.name").toLowerCase(java.util.Locale.ROOT).contains("linux")) {
+        return null;
+      }
+      try {
+        var values = Files.readString(Path.of("/proc/self/schedstat"), StandardCharsets.US_ASCII)
+            .trim()
+            .split("\\s+");
+        require(values.length >= 3, "Linux schedstat has fewer than three counters");
+        return new SchedstatObservation(
+            Long.parseLong(values[0]), Long.parseLong(values[1]), Long.parseLong(values[2]));
+      } catch (IOException | NumberFormatException | CaptureException ignored) {
+        return null;
+      }
+    }
+  }
+
+  private record CpuObservation(Long processCpu, Long threadCpu, SchedstatObservation schedstat) {
+    private static CpuObservation capture() {
+      Long process =
+          ProcessHandle.current().info().totalCpuDuration().map(Duration::toNanos).orElse(null);
+      var bean = ManagementFactory.getThreadMXBean();
+      Long thread = null;
+      if (bean.isCurrentThreadCpuTimeSupported()) {
+        var value = bean.getCurrentThreadCpuTime();
+        if (value >= 0) {
+          thread = value;
+        }
+      }
+      return new CpuObservation(process, thread, SchedstatObservation.capture());
+    }
+  }
+
+  private record WalObservation(
+      boolean present, long sizeBytes, long modifiedTimeMillis, long observedAtNanos) {
+    private static WalObservation capture(Path path) {
+      try {
+        if (!Files.isRegularFile(path)) {
+          return new WalObservation(false, 0, 0, System.nanoTime());
+        }
+        return new WalObservation(
+            true, Files.size(path), Files.getLastModifiedTime(path).toMillis(), System.nanoTime());
+      } catch (IOException ignored) {
+        return new WalObservation(false, 0, 0, System.nanoTime());
+      }
+    }
+
+    private Map<String, Object> asEvidence() {
+      return Map.of(
+          "modified_time_millis", modifiedTimeMillis,
+          "observed_at_ns", observedAtNanos,
+          "present", present,
+          "size_bytes", sizeBytes);
+    }
+  }
+
+  private static final class DiagnosticWriter implements AutoCloseable {
+    private final FileChannel channel;
+    private final BufferedWriter writer;
+
+    private DiagnosticWriter(Path path) throws IOException {
+      channel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+      writer =
+          new BufferedWriter(
+              Channels.newWriter(channel, StandardCharsets.UTF_8),
+              64 * 1024);
+    }
+
+    private void write(Map<String, Object> event) throws IOException {
+      Json.write(event, writer);
+      writer.write('\n');
+    }
+
+    @Override
+    public void close() throws IOException {
+      writer.flush();
+      channel.force(true);
+      writer.close();
+    }
+  }
+
+  private static Map<String, Object> deltaValue(Long before, Long after) {
+    if (before == null || after == null || after < before) {
+      return Map.of(
+          "reason", "counter unavailable or non-monotonic",
+          "status", "NOT_AVAILABLE");
+    }
+    return Map.of("status", "AVAILABLE", "value", after - before);
+  }
+
+  private static Map<String, Object> schedstatDelta(
+      SchedstatObservation before, SchedstatObservation after) {
+    if (before == null
+        || after == null
+        || after.runningNanos() < before.runningNanos()
+        || after.waitingNanos() < before.waitingNanos()
+        || after.timeslices() < before.timeslices()) {
+      return Map.of("reason", "Linux schedstat unavailable", "status", "NOT_AVAILABLE");
+    }
+    return Map.of(
+        "status",
+        "AVAILABLE",
+        "value",
+        Map.of(
+            "running_ns", after.runningNanos() - before.runningNanos(),
+            "timeslices", after.timeslices() - before.timeslices(),
+            "waiting_ns", after.waitingNanos() - before.waitingNanos()));
+  }
+
+  private static long wallTimeNanos() {
+    var now = Instant.now();
+    return Math.addExact(Math.multiplyExact(now.getEpochSecond(), 1_000_000_000L), now.getNano());
   }
 
   private enum Profile {
@@ -276,6 +870,7 @@ public final class SidecarComparisonCapture {
       Path faultTrace,
       Path projectedFormalTrace,
       Path crashObservations,
+      Path voteFixture,
       Path inputProvenance,
       Path nativeLibrary,
       Path sidecarExecutable,
@@ -295,6 +890,7 @@ public final class SidecarComparisonCapture {
             "--fault-trace",
             "--projected-formal-trace",
             "--crash-observations",
+            "--vote-fixture",
             "--input-provenance",
             "--native-library",
             "--sidecar-executable");
@@ -313,6 +909,7 @@ public final class SidecarComparisonCapture {
       Objects.requireNonNull(faultTrace, "faultTrace");
       Objects.requireNonNull(projectedFormalTrace, "projectedFormalTrace");
       Objects.requireNonNull(crashObservations, "crashObservations");
+      Objects.requireNonNull(voteFixture, "voteFixture");
       Objects.requireNonNull(inputProvenance, "inputProvenance");
       rawArguments = List.copyOf(rawArguments);
       require(GIT_OBJECT.matcher(sourceCommit).matches(), "source commit is not lowercase Git SHA-1");
@@ -360,6 +957,7 @@ public final class SidecarComparisonCapture {
           Path.of(values.get("--fault-trace")).toAbsolutePath(),
           Path.of(values.get("--projected-formal-trace")).toAbsolutePath(),
           Path.of(values.get("--crash-observations")).toAbsolutePath(),
+          Path.of(values.get("--vote-fixture")).toAbsolutePath(),
           Path.of(values.get("--input-provenance")).toAbsolutePath(),
           optionalPath(values.get("--native-library")),
           optionalPath(values.get("--sidecar-executable")),
@@ -376,9 +974,136 @@ public final class SidecarComparisonCapture {
           + "--durable-directory <dir> --source-commit <sha1> --source-tree <sha1> "
           + "--hardware-allocation <artifact> --toolchains <artifact> --native-core <artifact> "
           + "--fault-trace <artifact> --projected-formal-trace <artifact> "
-          + "--crash-observations <canonical-json> --input-provenance <canonical-json> "
+          + "--crash-observations <canonical-json> --vote-fixture <canonical-json> "
+          + "--input-provenance <canonical-json> "
           + "(--native-library <delta-ffi> | --sidecar-executable <sidecar>)";
     }
+  }
+
+  /** One immutable file read shared by provenance verification and execution parsing. */
+  private record FileSnapshot(Path path, byte[] bytes, long sizeBytes, String sha256) {
+    private FileSnapshot {
+      path = Objects.requireNonNull(path, "path").toAbsolutePath().normalize();
+      bytes = Arrays.copyOf(Objects.requireNonNull(bytes, "bytes"), bytes.length);
+      require(sizeBytes == bytes.length, "file snapshot size differs from its bytes");
+      requireContentId(sha256, "file snapshot digest");
+      require(sha256Id(bytes).equals(sha256), "file snapshot digest differs from its bytes");
+    }
+
+    private static FileSnapshot read(Path path, String label) throws IOException {
+      var normalized = Objects.requireNonNull(path, "path").toAbsolutePath().normalize();
+      var raw = readRegularFile(normalized, label);
+      return new FileSnapshot(normalized, raw, raw.length, sha256Id(raw));
+    }
+
+    @Override
+    public byte[] bytes() {
+      return Arrays.copyOf(bytes, bytes.length);
+    }
+  }
+
+  /** Opaque native-generated RECORD_VOTE fixture used identically by both profiles. */
+  private record VoteFixture(
+      byte[] initialState,
+      byte[] votePolicy,
+      byte[] vote,
+      byte[] expectedReceipt,
+      String sha256) {
+    private static final String TYPE_NAME = "DELTA_RECORD_VOTE_V1_FIXTURE";
+    private static final Set<String> FIELDS =
+        Set.of(
+            "expected_receipt_hex",
+            "formal_semantics_id",
+            "initial_state_hex",
+            "schema_version",
+            "type_name",
+            "vote_hex",
+            "vote_policy_hex");
+
+    private VoteFixture {
+      initialState = Arrays.copyOf(initialState, initialState.length);
+      votePolicy = Arrays.copyOf(votePolicy, votePolicy.length);
+      vote = Arrays.copyOf(vote, vote.length);
+      expectedReceipt = Arrays.copyOf(expectedReceipt, expectedReceipt.length);
+      require(initialState.length > 0, "vote fixture initial state is empty");
+      require(
+          initialState.length <= SidecarIpcV1.MAX_CANONICAL_COMMAND_BYTES,
+          "vote fixture initial state exceeds the frozen bound");
+      require(
+          votePolicy.length > 0
+              && votePolicy.length <= SidecarIpcV1.MAX_CANONICAL_VOTE_POLICY_BYTES,
+          "vote fixture policy exceeds the frozen bound");
+      require(
+          vote.length > 0 && vote.length <= SidecarIpcV1.MAX_CANONICAL_VOTE_BYTES,
+          "vote fixture frame exceeds the frozen bound");
+      require(
+          expectedReceipt.length > 0
+              && expectedReceipt.length <= SidecarIpcV1.MAX_CANONICAL_VOTE_RECEIPT_BYTES,
+          "vote fixture accepted receipt exceeds the frozen bound");
+      requireContentId(sha256, "vote fixture digest");
+    }
+
+    private static VoteFixture load(Path path) throws IOException {
+      return load(FileSnapshot.read(path, "native vote fixture"));
+    }
+
+    private static VoteFixture load(FileSnapshot snapshot) {
+      var raw = snapshot.bytes();
+      var document = object(Json.parse(raw), "native vote fixture");
+      exactFields(document, FIELDS, "native vote fixture");
+      var canonical = Json.bytes(document);
+      require(
+          Arrays.equals(raw, canonical) || Arrays.equals(raw, appendNewline(canonical)),
+          "native vote fixture is not canonical JSON");
+      require(document.get("type_name").equals(TYPE_NAME), "native vote fixture type mismatch");
+      require(
+          document.get("schema_version").equals(SCHEMA_VERSION),
+          "native vote fixture schema mismatch");
+      require(
+          document.get("formal_semantics_id").equals(FORMAL_SEMANTICS_ID),
+          "native vote fixture formal semantics mismatch");
+      return new VoteFixture(
+          hexBytes(document.get("initial_state_hex"), "vote fixture initial state"),
+          hexBytes(document.get("vote_policy_hex"), "vote fixture policy"),
+          hexBytes(document.get("vote_hex"), "vote fixture frame"),
+          hexBytes(document.get("expected_receipt_hex"), "vote fixture accepted receipt"),
+          snapshot.sha256());
+    }
+
+    private static byte[] hexBytes(Object value, String label) {
+      var encoded = textValue(value, label);
+      require(
+          !encoded.isEmpty()
+              && encoded.length() % 2 == 0
+              && encoded.matches("[0-9a-f]+"),
+          label + " is not lowercase even-length hexadecimal");
+      try {
+        return HexFormat.of().parseHex(encoded);
+      } catch (IllegalArgumentException error) {
+        throw new CaptureException(label + " is not hexadecimal", error);
+      }
+    }
+
+    @Override
+    public byte[] initialState() {
+      return Arrays.copyOf(initialState, initialState.length);
+    }
+
+    @Override
+    public byte[] votePolicy() {
+      return Arrays.copyOf(votePolicy, votePolicy.length);
+    }
+
+    @Override
+    public byte[] vote() {
+      return Arrays.copyOf(vote, vote.length);
+    }
+
+    @Override
+    public byte[] expectedReceipt() {
+      return Arrays.copyOf(expectedReceipt, expectedReceipt.length);
+    }
+
   }
 
   private record FrozenDesign(
@@ -443,6 +1168,14 @@ public final class SidecarComparisonCapture {
           integer(bounds.get("max_canonical_effect_bytes"), "maximum effect")
               == SidecarIpcV1.MAX_CANONICAL_EFFECT_BYTES,
           "Java/native effect bound differs from frozen design");
+      require(
+          integer(bounds.get("max_canonical_vote_bytes"), "maximum vote")
+              == SidecarIpcV1.MAX_CANONICAL_VOTE_BYTES
+              && integer(bounds.get("max_canonical_vote_policy_bytes"), "maximum vote policy")
+                  == SidecarIpcV1.MAX_CANONICAL_VOTE_POLICY_BYTES
+              && integer(bounds.get("max_canonical_vote_receipt_bytes"), "maximum vote receipt")
+                  == SidecarIpcV1.MAX_CANONICAL_VOTE_RECEIPT_BYTES,
+          "Java/native vote bounds differ from frozen design");
       var copyCounters = strings(comparison.get("copy_accounting"), "copy counters");
       var measurementIds = strings(comparison.get("required_measurements"), "measurements");
       var transcriptIds =
@@ -544,8 +1277,7 @@ public final class SidecarComparisonCapture {
           integer(observations.get("qualification_case_count"), "qualification case count")
               == crashPoints.size(),
           "qualification case count mismatch");
-      var expectedNativeDeaths =
-          crashPoints.size() - (profile == Profile.ISOLATED_SIDECAR ? 1 : 0);
+      var expectedNativeDeaths = crashPoints.size();
       require(
           integer(observations.get("native_death_injection_count"), "death injection count")
               == expectedNativeDeaths,
@@ -601,7 +1333,8 @@ public final class SidecarComparisonCapture {
             "started_at_utc",
             "tool_id");
 
-    private static InputProvenance load(Options options) throws IOException {
+    private static InputProvenance load(Options options, FileSnapshot voteFixture)
+        throws IOException {
       var raw = readRegularFile(options.inputProvenance(), "input provenance manifest");
       var document = object(Json.parse(raw), "input provenance manifest");
       exactFields(document, ROOT_FIELDS, "input provenance manifest");
@@ -646,6 +1379,7 @@ public final class SidecarComparisonCapture {
       expectedArtifacts.put("PAIRED_CORE_FAULT_TRACE", options.faultTrace());
       expectedArtifacts.put("PROJECTED_FORMAL_TRACE", options.projectedFormalTrace());
       expectedArtifacts.put("TOOLCHAINS", options.toolchains());
+      expectedArtifacts.put("VOTE_FIXTURE", options.voteFixture());
       expectedArtifacts.put(
           options.profile() == Profile.EMBEDDED_FFM ? "NATIVE_LIBRARY" : "SIDECAR_EXECUTABLE",
           options.profile() == Profile.EMBEDDED_FFM
@@ -661,7 +1395,11 @@ public final class SidecarComparisonCapture {
         var record = object(artifactArray.get(artifactIndex++), "input artifact");
         exactFields(record, FILE_FIELDS, "input artifact");
         require(record.get("artifact_id").equals(expected.getKey()), "input artifact order mismatch");
-        verifyFileRecord(record, expected.getValue(), "input artifact " + expected.getKey());
+        verifyFileRecord(
+            record,
+            expected.getValue(),
+            "input artifact " + expected.getKey(),
+            expected.getKey().equals("VOTE_FIXTURE") ? voteFixture : null);
         verifiedArtifacts.put(expected.getKey(), Map.copyOf(record));
       }
 
@@ -773,19 +1511,39 @@ public final class SidecarComparisonCapture {
 
     private static Path verifyFileRecord(
         Map<String, Object> record, Path expectedPath, String label) throws IOException {
+      return verifyFileRecord(record, expectedPath, label, null);
+    }
+
+    private static Path verifyFileRecord(
+        Map<String, Object> record,
+        Path expectedPath,
+        String label,
+        FileSnapshot snapshot)
+        throws IOException {
       var path = normalizedPath(record.get("path"), label + " path");
       if (expectedPath != null) {
         require(
             path.equals(expectedPath.toAbsolutePath().normalize()),
             label + " path differs from the capture input");
       }
-      requireRegular(path, label);
-      require(
-          integer(record.get("size_bytes"), label + " size") == Files.size(path),
-          label + " size changed after preparation");
       var declaredSha256 = text(record, "sha256");
       requireContentId(declaredSha256, label + " digest");
-      require(sha256Id(path).equals(declaredSha256), label + " digest changed after preparation");
+      if (snapshot != null) {
+        require(path.equals(snapshot.path()), label + " snapshot path mismatch");
+        require(
+            integer(record.get("size_bytes"), label + " size") == snapshot.sizeBytes(),
+            label + " snapshot size differs from preparation");
+        require(
+            snapshot.sha256().equals(declaredSha256),
+            label + " snapshot digest differs from preparation");
+      } else {
+        requireRegular(path, label);
+        require(
+            integer(record.get("size_bytes"), label + " size") == Files.size(path),
+            label + " size changed after preparation");
+        require(
+            sha256Id(path).equals(declaredSha256), label + " digest changed after preparation");
+      }
       return path;
     }
 
@@ -824,8 +1582,10 @@ public final class SidecarComparisonCapture {
     }
 
     private void run() throws Throwable {
-      var provenance = InputProvenance.load(options);
+      var voteFixtureSnapshot = FileSnapshot.read(options.voteFixture(), "native vote fixture");
+      var provenance = InputProvenance.load(options, voteFixtureSnapshot);
       var design = FrozenDesign.load(options.design());
+      var voteFixture = VoteFixture.load(voteFixtureSnapshot);
       var crash =
           CrashObservations.load(
               options.crashObservations(),
@@ -845,6 +1605,8 @@ public final class SidecarComparisonCapture {
       var initialWalSha = hashFileOrEmpty(options.durableDirectory().resolve("runtime.wal"));
       var initialSnapshotSha =
           hashFileOrEmpty(options.durableDirectory().resolve("runtime.snapshot"));
+      var descriptor = RuntimeDescriptor.frozen();
+      var voteEvidence = captureVoteEvidence(descriptor, voteFixture);
       try (var corpus = new Corpus(options.corpus());
           var copies = new CopySpool(outputParent, design.copyCounters());
           var requestOrder = new RequestOrderSpool(options.corpus(), outputParent)) {
@@ -868,7 +1630,6 @@ public final class SidecarComparisonCapture {
                 corpus.initialProjection(),
                 corpus.operationCount(),
                 requestOrder);
-        var descriptor = RuntimeDescriptor.frozen();
         var initialArtifacts = new TreeMap<String, Object>();
         initialArtifacts.put("initial_state_sha256", sha256Id(corpus.initialState()));
         initialArtifacts.put("snapshot_sha256", initialSnapshotSha);
@@ -883,7 +1644,8 @@ public final class SidecarComparisonCapture {
                   copies,
                   initialStateRoot,
                   corpus.initialDurableSequence(),
-                  formalTrace);
+                  formalTrace,
+                  voteEvidence);
         }
         require(
             result.deterministicTerminalStateRoot().equals(formalTrace.terminalStateRoot()),
@@ -916,20 +1678,87 @@ public final class SidecarComparisonCapture {
 
     private Adapter openAdapter(
         Options selected, RuntimeDescriptor descriptor, byte[] initialState) throws Throwable {
+      return openAdapter(
+          selected, descriptor, selected.durableDirectory(), initialState, null);
+    }
+
+    private Adapter openAdapter(
+        Options selected,
+        RuntimeDescriptor descriptor,
+        Path durableDirectory,
+        byte[] initialState,
+        byte[] votePolicy)
+        throws Throwable {
       return switch (selected.profile()) {
         case EMBEDDED_FFM ->
             new EmbeddedAdapter(
                 Objects.requireNonNull(selected.nativeLibrary()),
-                selected.durableDirectory(),
+                durableDirectory,
                 initialState,
+                votePolicy,
                 descriptor);
         case ISOLATED_SIDECAR ->
             new IsolatedAdapter(
                 Objects.requireNonNull(selected.sidecarExecutable()),
-                selected.durableDirectory(),
+                durableDirectory,
                 initialState,
+                votePolicy,
                 descriptor);
       };
+    }
+
+    private VoteEvidence captureVoteEvidence(
+        RuntimeDescriptor descriptor, VoteFixture fixture) throws Throwable {
+      var captureRoot = options.durableDirectory().toAbsolutePath().normalize();
+      var voteDirectory = captureRoot.resolve("record-vote-v1").normalize();
+      require(
+          voteDirectory.getParent().equals(captureRoot),
+          "vote durable directory escaped the capture root");
+      require(!Files.exists(voteDirectory), "vote durable directory already exists");
+      Files.createDirectory(voteDirectory);
+      var wal = voteDirectory.resolve("runtime.wal");
+      require(!Files.exists(wal), "vote WAL existed before the accepted vote");
+
+      byte[] accepted;
+      try (var adapter =
+          openAdapter(
+              options,
+              descriptor,
+              voteDirectory,
+              fixture.initialState(),
+              fixture.votePolicy())) {
+        accepted = adapter.recordVote(fixture.vote());
+        require(
+            Arrays.equals(accepted, fixture.expectedReceipt()),
+            "native accepted-vote receipt differs from the frozen fixture");
+        requireRegular(wal, "accepted-vote WAL");
+        require(Files.size(wal) > 0, "accepted vote returned before a non-empty WAL existed");
+      }
+      var acceptedWal = new WalArtifact(sha256Id(wal), Files.size(wal));
+
+      byte[] replay;
+      try (var adapter =
+          openAdapter(
+              options,
+              descriptor,
+              voteDirectory,
+              fixture.initialState(),
+              fixture.votePolicy())) {
+        require(
+            new WalArtifact(sha256Id(wal), Files.size(wal)).equals(acceptedWal),
+            "vote WAL changed while reopening recovered durable state");
+        replay = adapter.recordVote(fixture.vote());
+        require(
+            Arrays.equals(replay, fixture.expectedReceipt()),
+            "native replay changed the canonical durable vote receipt");
+        require(
+            new WalArtifact(sha256Id(wal), Files.size(wal)).equals(acceptedWal),
+            "exact vote replay appended or rewrote durable state");
+      }
+      require(
+          new WalArtifact(sha256Id(wal), Files.size(wal)).equals(acceptedWal),
+          "vote WAL changed while closing the recovered runtime");
+      return new VoteEvidence(List.of(accepted, replay), acceptedWal);
     }
 
     private WorkloadResult executeWorkload(
@@ -938,12 +1767,16 @@ public final class SidecarComparisonCapture {
         CopySpool copies,
         String initialStateRoot,
         long initialDurableSequence,
-        ProjectedFormalTrace formalTrace)
+        ProjectedFormalTrace formalTrace,
+        VoteEvidence voteEvidence)
         throws Throwable {
       var fixed = new ArrayList<Object>();
       var saturation = new ArrayList<Object>();
       var replays = new ArrayList<ReplayTarget>();
       var transcripts = new TranscriptDigests();
+      for (var receipt : voteEvidence.receipts()) {
+        transcripts.addVoteReceipt(receipt);
+      }
       var cursor = new StateCursor(initialStateRoot, initialDurableSequence);
       var projection = formalTrace.executionVerifier();
 
@@ -1020,7 +1853,7 @@ public final class SidecarComparisonCapture {
       var deterministicTerminalStateRoot = cursor.stateRoot();
       var walPath = options.durableDirectory().resolve("runtime.wal");
       requireRegular(walPath, "fixed-prefix WAL");
-      var walTranscriptSha256 = sha256Id(walPath);
+      var runtimeWal = new WalArtifact(sha256Id(walPath), Files.size(walPath));
 
       for (var target : replays) {
         var replay = adapter.execute(target.command());
@@ -1088,10 +1921,15 @@ public final class SidecarComparisonCapture {
       }
       verifyState(adapter.state(), cursor);
       var stats = adapter.stats();
+      require(
+          new WalArtifact(sha256Id(walPath), Files.size(walPath)).equals(runtimeWal),
+          "exact replays appended or rewrote the runtime WAL");
+      var walArtifacts = new WalArtifacts(voteEvidence.walArtifact(), runtimeWal);
       return new WorkloadResult(
           List.copyOf(fixed),
           List.copyOf(saturation),
-          transcripts.finish(walTranscriptSha256, formalTrace.projectedTraceSha256()),
+          transcripts.finish(walArtifacts, formalTrace.projectedTraceSha256()),
+          walArtifacts,
           stats,
           Math.addExact((long) replays.size(), saturationRetryCount),
           corpus.consumedOperations(),
@@ -1145,6 +1983,7 @@ public final class SidecarComparisonCapture {
       root.put("timer_order", List.of());
       root.put("toolchains_sha256", sha256Id(options.toolchains()));
       root.put("type_name", RUN_TYPE);
+      root.put("wal_artifacts", result.walArtifacts().document());
       root.put("warmup_completed_operations", (long) WARMUP_OPERATIONS);
       return root;
     }
@@ -1316,9 +2155,7 @@ public final class SidecarComparisonCapture {
     var effectId = contentId(EFFECT_BATCH_DOMAIN, result.effectBytes());
     require(effectId.equals(result.effectId()), "native effect identity differs from effect bytes");
     var sequence = Math.addExact(cursor.durableSequence(), 1L);
-    if (result.durableSequence() != NO_NATIVE_SEQUENCE) {
-      require(result.durableSequence() == sequence, "native durable sequence is not contiguous");
-    }
+    require(result.durableSequence() == sequence, "native durable sequence is not contiguous");
     cursor.advance(next, sequence);
     return new ValidatedOperation(
         result.nativeStatus(),
@@ -1341,11 +2178,9 @@ public final class SidecarComparisonCapture {
         replay.priorStateRoot().equals(target.result().priorStateRoot())
             && replay.nextStateRoot().equals(target.result().nextStateRoot()),
         "replay state roots changed");
-    if (replay.durableSequence() != NO_NATIVE_SEQUENCE) {
-      require(
-          replay.durableSequence() == target.result().durableSequence(),
-          "replay durable sequence changed");
-    }
+    require(
+        replay.durableSequence() == target.result().durableSequence(),
+        "replay durable sequence changed");
     require(
         cursor.durableSequence() >= target.result().durableSequence(),
         "replay target is ahead of current durable state");
@@ -1423,9 +2258,7 @@ public final class SidecarComparisonCapture {
       requireContentId(effectId, "effect ID");
       requireContentId(priorStateRoot, "prior state root");
       requireContentId(nextStateRoot, "next state root");
-      require(
-          durableSequence == NO_NATIVE_SEQUENCE || durableSequence >= 0,
-          "invalid native durable sequence");
+      require(durableSequence >= 0, "invalid native durable sequence");
       require(totalLatencyNanos >= 0, "negative end-to-end latency");
       require(phaseLatencyNanos >= 0, "negative phase latency");
       Objects.requireNonNull(copyValues, "copyValues");
@@ -1516,6 +2349,7 @@ public final class SidecarComparisonCapture {
       List<Object> fixedLoadBlocks,
       List<Object> saturationBlocks,
       Map<String, String> transcriptSha256,
+      WalArtifacts walArtifacts,
       RuntimeStats stats,
       long retryCount,
       long consumedCorpusOperations,
@@ -1525,11 +2359,63 @@ public final class SidecarComparisonCapture {
     }
   }
 
+  private record WalArtifact(String sha256, long sizeBytes) {
+    private WalArtifact {
+      requireContentId(sha256, "WAL artifact digest");
+      require(sizeBytes > 0, "WAL artifact is empty");
+    }
+
+    private Map<String, Object> document() {
+      var result = new TreeMap<String, Object>();
+      result.put("sha256", sha256);
+      result.put("size_bytes", sizeBytes);
+      return result;
+    }
+  }
+
+  private record WalArtifacts(WalArtifact recordVote, WalArtifact runtime) {
+    private WalArtifacts {
+      Objects.requireNonNull(recordVote, "recordVote");
+      Objects.requireNonNull(runtime, "runtime");
+    }
+
+    private Map<String, Object> document() {
+      var result = new TreeMap<String, Object>();
+      result.put("record_vote", recordVote.document());
+      result.put("runtime", runtime.document());
+      return result;
+    }
+  }
+
+  private record VoteEvidence(List<byte[]> receipts, WalArtifact walArtifact) {
+    private VoteEvidence {
+      require(receipts.size() == 2, "vote evidence must contain accepted and replay receipts");
+      var copy = new ArrayList<byte[]>(receipts.size());
+      for (var receipt : receipts) {
+        require(receipt.length > 0, "vote evidence contains an empty receipt");
+        copy.add(Arrays.copyOf(receipt, receipt.length));
+      }
+      receipts = List.copyOf(copy);
+      Objects.requireNonNull(walArtifact, "walArtifact");
+    }
+
+    @Override
+    public List<byte[]> receipts() {
+      var copy = new ArrayList<byte[]>(receipts.size());
+      for (var receipt : receipts) {
+        copy.add(Arrays.copyOf(receipt, receipt.length));
+      }
+      return List.copyOf(copy);
+    }
+  }
+
   private static final class TranscriptDigests {
     private final MessageDigest statuses = newSha256();
     private final MessageDigest effects = newSha256();
     private final MessageDigest stateRoots = newSha256();
     private final MessageDigest replays = newSha256();
+    private final MessageDigest voteReceipts = newSha256();
+    private int voteReceiptCount;
     private boolean finished;
 
     private void addDeterministic(ValidatedOperation operation) {
@@ -1549,18 +2435,36 @@ public final class SidecarComparisonCapture {
       updateU64(replays, operation.durableSequence());
     }
 
-    private Map<String, String> finish(String walSha256, String formalTraceSha256) {
+    private void addVoteReceipt(byte[] receipt) {
+      require(!finished, "transcript digest is already finished");
+      require(
+          receipt.length > 0
+              && receipt.length <= SidecarIpcV1.MAX_CANONICAL_VOTE_RECEIPT_BYTES,
+          "canonical vote receipt is outside the frozen bound");
+      updateU32(voteReceipts, receipt.length);
+      voteReceipts.update(receipt);
+      voteReceiptCount = Math.addExact(voteReceiptCount, 1);
+    }
+
+    private Map<String, String> finish(
+        WalArtifacts walArtifacts, String formalTraceSha256) {
       require(!finished, "transcript digest was finished twice");
       finished = true;
-      requireContentId(walSha256, "WAL transcript hash");
+      Objects.requireNonNull(walArtifacts, "walArtifacts");
       requireContentId(formalTraceSha256, "formal trace hash");
+      require(
+          voteReceiptCount == 2,
+          "vote transcript must contain exactly one accepted receipt and one replay receipt");
       var result = new LinkedHashMap<String, String>();
       result.put("CANONICAL_STATUS_BYTES", digestId(statuses));
       result.put("CANONICAL_EFFECT_BYTES", digestId(effects));
       result.put("STATE_ROOTS", digestId(stateRoots));
-      result.put("WAL_RECEIPTS_AND_DURABLE_SEQUENCES", walSha256);
+      result.put(
+          "WAL_RECEIPTS_AND_DURABLE_SEQUENCES",
+          sha256Id(Json.bytes(walArtifacts.document())));
       result.put("REPLAY_EFFECT_IDENTITIES", digestId(replays));
       result.put("PROJECTED_FORMAL_TRACE_BYTES_AFTER_STUTTER_ERASURE", formalTraceSha256);
+      result.put("CANONICAL_VOTE_RECEIPT_BYTES", digestId(voteReceipts));
       return Map.copyOf(result);
     }
   }
@@ -2646,7 +3550,12 @@ public final class SidecarComparisonCapture {
       byte[] canonicalBytes) {
     private RuntimeDescriptor {
       require(abiMajor == 1 && abiMinor == 0, "unexpected ABI version");
-      require(featureBits == 7, "unexpected ABI feature bits");
+      require(
+          featureBits == SidecarIpcV1.NESTED_ABI_FEATURE_BITS,
+          "unexpected ABI feature bits");
+      require(
+          (featureBits & ABI_FEATURE_SUBMIT_RECEIPT_V1) != 0,
+          "native submit-receipt-v1 feature is absent");
       require(schemaVersion.equals(SCHEMA_VERSION), "unexpected schema version");
       require(protocolVersion.equals(PROTOCOL_VERSION), "unexpected protocol version");
       require(formalSemanticsId.equals(FORMAL_SEMANTICS_ID), "unexpected formal semantics ID");
@@ -2664,7 +3573,7 @@ public final class SidecarComparisonCapture {
               ABI_DESCRIPTOR_SIZE,
               1,
               0,
-              7,
+              SidecarIpcV1.NESTED_ABI_FEATURE_BITS,
               SCHEMA_VERSION,
               PROTOCOL_VERSION,
               FORMAL_SEMANTICS_ID,
@@ -2705,6 +3614,8 @@ public final class SidecarComparisonCapture {
   private interface Adapter extends AutoCloseable {
     Submission tryExecute(CorpusRecord command, long offeredAtNanos) throws Throwable;
 
+    byte[] recordVote(byte[] canonicalVote) throws Throwable;
+
     default OperationResult execute(CorpusRecord command) throws Throwable {
       var submission = tryExecute(command, System.nanoTime());
       require(submission.accepted(), "adapter rejected a blocking qualification request");
@@ -2727,6 +3638,7 @@ public final class SidecarComparisonCapture {
         Path executable,
         Path durableDirectory,
         byte[] initialState,
+        byte[] votePolicy,
         RuntimeDescriptor descriptor)
         throws Exception {
       requireRegular(executable, "sidecar executable");
@@ -2737,7 +3649,8 @@ public final class SidecarComparisonCapture {
               initialState,
               executableSha,
               descriptor.buildId(),
-              descriptor.canonicalBytes());
+              descriptor.canonicalBytes(),
+              votePolicy);
       supervisor =
           new SidecarSupervisor(
               config, new SidecarSupervisor.PipeProcessConnector(executable, List.of()));
@@ -2770,9 +3683,8 @@ public final class SidecarComparisonCapture {
                 try {
                   var completedAtNanos = System.nanoTime();
                   result.complete(
-                      new TimedOperation(
-                          decodeSubmitResponse(
-                              command, prepared, response, offeredAtNanos, completedAtNanos),
+                          new TimedOperation(
+                          decodeSubmitResponse(command, response, offeredAtNanos, completedAtNanos),
                           offeredAtNanos,
                           completedAtNanos));
                 } catch (Throwable failure) {
@@ -2784,7 +3696,6 @@ public final class SidecarComparisonCapture {
 
     private OperationResult decodeSubmitResponse(
         CorpusRecord command,
-        LocalSidecarClient.PreparedRequest prepared,
         LocalSidecarClient.Response response,
         long offeredAtNanos,
         long completedAtNanos) {
@@ -2797,19 +3708,18 @@ public final class SidecarComparisonCapture {
       var effect = payload.bytes(17);
       var effectId = ascii(payload.bytes(16), "sidecar effect identity");
       var timing = response.operationalTiming();
-      var ingressPayload = prepared.canonicalPayload().length;
-      var egressPayload = payload.canonicalBytes().length;
+      var measured = supervisor.operationCopy(response);
       var copies =
           new CopyValues(
               new long[] {
-                Math.addExact((long) SidecarIpcV1.HEADER_BYTES, ingressPayload),
-                Math.addExact((long) SidecarIpcV1.HEADER_BYTES, egressPayload),
-                0,
-                0,
-                ingressPayload,
-                egressPayload,
-                0,
-                0
+                measured.inlineIngressBytes(),
+                measured.inlineEgressBytes(),
+                measured.sharedMemoryIngressBytes(),
+                measured.sharedMemoryEgressBytes(),
+                measured.stagingFallbackIngressBytes(),
+                measured.stagingFallbackEgressBytes(),
+                measured.zeroCopyEligibleCount(),
+                measured.zeroCopyHitCount()
               });
       return new OperationResult(
           status,
@@ -2833,6 +3743,17 @@ public final class SidecarComparisonCapture {
           "sidecar state did not return STATE_RESPONSE");
       require(response.nativeStatus() == 0, "sidecar state returned a native failure");
       return response.payload().bytes(19);
+    }
+
+    @Override
+    public byte[] recordVote(byte[] canonicalVote) throws Exception {
+      var response =
+          submit(LocalSidecarClient.voteRequest(auxiliaryRequestId("vote"), canonicalVote));
+      require(
+          response.messageType() == SidecarIpcV1.MessageType.VOTE_RESPONSE,
+          "sidecar vote did not return VOTE_RESPONSE");
+      require(response.nativeStatus() == ABI_OK, "sidecar vote returned a native failure");
+      return response.payload().bytes(16);
     }
 
     private LocalSidecarClient.Response submit(LocalSidecarClient.PreparedRequest request)
@@ -2879,6 +3800,7 @@ public final class SidecarComparisonCapture {
     private final Arena arena;
     private final ThreadPoolExecutor executor;
     private final MethodHandle submit;
+    private final MethodHandle recordVote;
     private final MethodHandle state;
     private final MethodHandle release;
     private final MemorySegment handlePointer;
@@ -2887,12 +3809,15 @@ public final class SidecarComparisonCapture {
     private final MemorySegment commandView;
     private final MemorySegment responseBuffer;
     private final MemorySegment output;
+    private final MemorySegment voteReceipt;
+    private final MemorySegment submitReceipt;
     private boolean closed;
 
     private EmbeddedAdapter(
         Path library,
         Path durableDirectory,
         byte[] initialState,
+        byte[] votePolicy,
         RuntimeDescriptor expected)
         throws Throwable {
       requireRegular(library, "embedded native library");
@@ -2918,17 +3843,33 @@ public final class SidecarComparisonCapture {
               lookup,
               "delta_runtime_descriptor",
               FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS));
-      var open =
-          downcall(
-              linker,
-              lookup,
-              "delta_runtime_open",
-              FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+      MethodHandle open;
+      if (votePolicy == null) {
+        open =
+            downcall(
+                linker,
+                lookup,
+                "delta_runtime_open",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+      } else {
+        open =
+            downcall(
+                linker,
+                lookup,
+                "delta_runtime_open_with_vote_policy_v1",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ABI_VIEW, ADDRESS));
+      }
       submit =
           downcall(
               linker,
               lookup,
-              "delta_runtime_submit_borrowed",
+              "delta_runtime_submit_receipt_borrowed_v1",
+              FunctionDescriptor.of(JAVA_INT, ADDRESS, ABI_VIEW, ADDRESS));
+      recordVote =
+          downcall(
+              linker,
+              lookup,
+              "delta_runtime_record_vote_borrowed_v1",
               FunctionDescriptor.of(JAVA_INT, ADDRESS, ABI_VIEW, ADDRESS));
       state =
           downcall(
@@ -2946,7 +3887,14 @@ public final class SidecarComparisonCapture {
       var options = openOptions(arena, durableDirectory, initialState, expected);
       handlePointer = arena.allocate(ADDRESS);
       handlePointer.set(ADDRESS, 0, MemorySegment.NULL);
-      var status = (int) open.invoke(options, handlePointer);
+      int status;
+      if (votePolicy == null) {
+        status = (int) open.invoke(options, handlePointer);
+      } else {
+        var policyView = arena.allocate(ABI_VIEW);
+        setView(policyView, 0, bytes(arena, votePolicy));
+        status = (int) open.invoke(options, policyView, handlePointer);
+      }
       require(status == ABI_OK, "embedded runtime open failed with status " + status);
       handle = handlePointer.get(ADDRESS, 0);
       require(!handle.equals(MemorySegment.NULL), "embedded runtime returned a null handle");
@@ -2954,6 +3902,8 @@ public final class SidecarComparisonCapture {
       commandView = arena.allocate(ABI_VIEW);
       responseBuffer = arena.allocate(SidecarIpcV1.MAX_LOGICAL_PAYLOAD_BYTES, 8);
       output = arena.allocate(ABI_OUTPUT);
+      voteReceipt = arena.allocate(ABI_VOTE_RECEIPT_V1);
+      submitReceipt = arena.allocate(ABI_SUBMIT_RECEIPT_V1);
     }
 
     @Override
@@ -2983,13 +3933,18 @@ public final class SidecarComparisonCapture {
       require(bytes.length <= commandBuffer.byteSize(), "command exceeds preallocated input bound");
       commandBuffer.asSlice(0, bytes.length).copyFrom(MemorySegment.ofArray(bytes));
       setView(commandView, 0, commandBuffer.asSlice(0, bytes.length));
-      resetOutput();
+      resetSubmitReceipt();
       var phaseStarted = System.nanoTime();
-      var status = (int) submit.invoke(handle, commandView, output);
+      var status = (int) submit.invoke(handle, commandView, submitReceipt);
       var phaseFinished = System.nanoTime();
       require(status == ABI_OK, "embedded submit failed with status " + status);
-      var written = written();
+      var canonicalEffect = submitReceipt.asSlice(16, ABI_OUTPUT_SIZE);
+      var written = written(canonicalEffect);
       var effect = responseBuffer.asSlice(0, written).toArray(JAVA_BYTE);
+      var durableSequence = submitReceipt.get(JAVA_LONG, 8);
+      // The Java long carries the native uint64_t bits; high-bit sequences are
+      // valid and therefore must not be rejected as signed-negative values.
+      require(durableSequence != 0, "embedded native submit receipt has no durable sequence");
       var finished = System.nanoTime();
       var decoded = CanonicalEnvelope.decode(effect, 7);
       var effectId = contentId(EFFECT_BATCH_DOMAIN, effect);
@@ -2999,10 +3954,58 @@ public final class SidecarComparisonCapture {
           effectId,
           text(decoded, "prior_state_root"),
           text(decoded, "next_state_root"),
-          NO_NATIVE_SEQUENCE,
+          durableSequence,
           checkedElapsed(finished, offeredAtNanos, "embedded offered-to-completion"),
           checkedElapsed(phaseFinished, phaseStarted, "embedded native call"),
           new CopyValues(new long[] {0, 0, 0, 0, bytes.length, written, 0, 0}));
+    }
+
+    @Override
+    public byte[] recordVote(byte[] canonicalVote) throws Throwable {
+      var result = new CompletableFuture<byte[]>();
+      try {
+        executor.execute(
+            () -> {
+              try {
+                result.complete(recordVoteNative(canonicalVote));
+              } catch (Throwable failure) {
+                result.completeExceptionally(failure);
+              }
+            });
+      } catch (RejectedExecutionException rejected) {
+        throw new CaptureException("embedded vote reactor rejected the bounded operation", rejected);
+      }
+      try {
+        return result.get(
+            SidecarSupervisor.RECOVERY_READY_TIMEOUT.plusSeconds(5).toMillis(),
+            TimeUnit.MILLISECONDS);
+      } catch (ExecutionException error) {
+        throw error.getCause();
+      } catch (TimeoutException error) {
+        throw new CaptureException("embedded vote exceeded the hard wait bound", error);
+      } catch (InterruptedException error) {
+        Thread.currentThread().interrupt();
+        throw new CaptureException("embedded vote wait was interrupted", error);
+      }
+    }
+
+    private byte[] recordVoteNative(byte[] canonicalVote) throws Throwable {
+      require(
+          canonicalVote.length > 0 && canonicalVote.length <= commandBuffer.byteSize(),
+          "canonical vote exceeds the preallocated native input bound");
+      commandBuffer
+          .asSlice(0, canonicalVote.length)
+          .copyFrom(MemorySegment.ofArray(canonicalVote));
+      setView(commandView, 0, commandBuffer.asSlice(0, canonicalVote.length));
+      voteReceipt.set(JAVA_INT, 0, ABI_VOTE_RECEIPT_V1_SIZE);
+      voteReceipt.set(JAVA_INT, 4, 0);
+      resetOutput(voteReceipt.asSlice(8, ABI_OUTPUT_SIZE));
+      var status = (int) recordVote.invoke(handle, commandView, voteReceipt);
+      require(status == ABI_OK, "embedded vote failed with status " + status);
+      var canonicalReceipt = voteReceipt.asSlice(8, ABI_OUTPUT_SIZE);
+      return responseBuffer
+          .asSlice(0, written(canonicalReceipt))
+          .toArray(JAVA_BYTE);
     }
 
     @Override
@@ -3014,15 +4017,30 @@ public final class SidecarComparisonCapture {
     }
 
     private void resetOutput() {
-      output.set(ADDRESS, 0, responseBuffer);
-      output.set(JAVA_LONG, 8, responseBuffer.byteSize());
-      output.set(JAVA_LONG, 16, 0);
-      output.set(JAVA_LONG, 24, 0);
+      resetOutput(output);
     }
 
     private long written() {
-      var required = output.get(JAVA_LONG, 16);
-      var written = output.get(JAVA_LONG, 24);
+      return written(output);
+    }
+
+    private void resetSubmitReceipt() {
+      submitReceipt.set(JAVA_INT, 0, ABI_SUBMIT_RECEIPT_V1_SIZE);
+      submitReceipt.set(JAVA_INT, 4, 0);
+      submitReceipt.set(JAVA_LONG, 8, 0);
+      resetOutput(submitReceipt.asSlice(16, ABI_OUTPUT_SIZE));
+    }
+
+    private void resetOutput(MemorySegment target) {
+      target.set(ADDRESS, 0, responseBuffer);
+      target.set(JAVA_LONG, 8, responseBuffer.byteSize());
+      target.set(JAVA_LONG, 16, 0);
+      target.set(JAVA_LONG, 24, 0);
+    }
+
+    private long written(MemorySegment target) {
+      var required = target.get(JAVA_LONG, 16);
+      var written = target.get(JAVA_LONG, 24);
       require(
           required >= 0 && required <= responseBuffer.byteSize(),
           "embedded output required size exceeds frozen preallocation");

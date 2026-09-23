@@ -232,15 +232,17 @@ jobs:
             -DICU_INCLUDE_DIR="$icu/usr/include" \
             -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
           cmake --build "$build" --parallel 2 --target \
-            delta_runtime_sidecar \
-            delta_sidecar_protocol_test \
-            delta_sidecar_directory_lock_test \
-            delta_sidecar_fail_closed_test \
-            delta_sidecar_trace_generator \
-            delta_sidecar_qualification_fsync_interposer \
-            delta_sidecar_qualification_probe \
-            delta_sidecar_durable_inspector \
-            delta_sidecar_qualification_interposer_smoke
+             delta_runtime_sidecar \
+             delta_sidecar_protocol_test \
+             delta_sidecar_directory_lock_test \
+             delta_sidecar_fail_closed_test \
+             delta_sidecar_shared_memory_test \
+             delta_sidecar_trace_generator \
+             delta_sidecar_qualification_fsync_interposer \
+             delta_sidecar_qualification_probe \
+             delta_sidecar_durable_inspector \
+             delta_sidecar_qualification_interposer_smoke \
+             delta_sidecar_vote_qualification_interposer_smoke
           ctest --test-dir "$build" \
             --output-on-failure \
             --no-tests=error \
@@ -471,7 +473,7 @@ jobs:
           grep -F "$JDK_VERSION" "$evidence/java-version.txt"
 
           cmake -S "$GITHUB_WORKSPACE" -B "$build" \
-            -DBUILD_TESTING=OFF \
+            -DBUILD_TESTING=ON \
             -DDELTA_BUILD_ISOLATED_SIDECAR=ON \
             -DDELTA_BUILD_ISOLATED_SIDECAR_TESTS=OFF \
             -DDELTA_BUILD_SIDECAR_QUALIFICATION=ON \
@@ -485,11 +487,14 @@ jobs:
             -DICU_INCLUDE_DIR="$icu/usr/include" \
             -DICU_UC_LIBRARY_RELEASE="$icu/usr/lib/x86_64-linux-gnu/libicuuc.a"
           cmake --build "$build" --parallel 2 --target \
+            delta_ffi \
             delta_runtime_sidecar \
+            delta_vote_fixture_exporter \
             delta_sidecar_qualification_probe \
             delta_sidecar_durable_inspector \
             delta_sidecar_qualification_fsync_interposer
           sha256sum "$build/delta_runtime_sidecar" > "$evidence/sidecar-executable.sha256"
+          "$build/delta_vote_fixture_exporter" > "$evidence/native-vote-fixture.json"
 
           mapfile -d '' java_sources < <(
             find delta-node-java/src/main/java/io/deltareduce/node/sidecar \
@@ -509,11 +514,13 @@ jobs:
             SidecarSupervisorConformance \
             SidecarQualificationRawConformance \
             NativeSidecarConformance \
-            SidecarComparisonCaptureDryRun; do
+            EmbeddedVoteFfmConformance \
+            SidecarComparisonCaptureDryRun \
+            SidecarDiagnosticCaptureDryRun; do
             source="delta-node-java/src/test/java/io/deltareduce/node/sidecar/$conformance.java"
             if test ! -f "$source"; then
-              echo "$conformance=not-present" >> "$evidence/executed-classes.txt"
-              continue
+              echo "required conformance class is absent: $source" >&2
+              exit 1
             fi
             echo "$conformance=executed" >> "$evidence/executed-classes.txt"
             if test "$conformance" = NativeSidecarConformance; then
@@ -524,6 +531,18 @@ jobs:
                 "$build/delta_runtime_sidecar" \
                 delta-protocol/fixtures/003/cross-language/golden-v1.json \
                 "$durable" \
+                "$evidence/native-vote-fixture.json" \
+                2>&1 | tee "$evidence/$conformance.txt"
+            elif test "$conformance" = EmbeddedVoteFfmConformance; then
+              durable="$RUNNER_TEMP/embedded-vote-durable-$JDK_FEATURE"
+              test ! -e "$durable"
+              "$RUNNER_TEMP/jdk/bin/java" -ea \
+                --enable-native-access=ALL-UNNAMED \
+                --class-path "$classes" \
+                io.deltareduce.node.sidecar.EmbeddedVoteFfmConformance \
+                "$build/libdelta_ffi.so" \
+                "$durable" \
+                "$evidence/native-vote-fixture.json" \
                 2>&1 | tee "$evidence/$conformance.txt"
             else
               "$RUNNER_TEMP/jdk/bin/java" -ea --class-path "$classes" \

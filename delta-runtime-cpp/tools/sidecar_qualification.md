@@ -10,7 +10,8 @@ them explicitly with:
 The option is `OFF` by default. It produces:
 
 - `delta_sidecar_qualification_probe`, a shared library exposing only
-  `delta_sidecar_qualification_crash_v1` from
+  `delta_sidecar_qualification_crash_v1` and the vote-specific
+  `delta_sidecar_qualification_vote_pre_durability_crash_v1` from
   `sidecar_qualification_probe.h`. A child JVM may call the symbol through FFM
   to exercise the paired native cuts or the post-native-return/pre-Java-send
   cut. The call always terminates that child process; exit code 86 means the
@@ -50,8 +51,17 @@ submission. For an isolated-sidecar process, use the same environment and the
 create and synchronize the WAL name before the server arms the interposer at
 SUBMIT admission.
 
-This injection proves the process-order boundary after `fwrite` plus `fflush`
-and before entry to `fsync`; it is not a physical power-loss simulator. The
+The vote-specific hook first opens and recovers a runtime with the production
+bounded vote-policy codec, then arms the exact WAL inode immediately before
+`Runtime::record_vote`. This prevents startup I/O from satisfying the cut and
+proves that a complete `RECORD_VOTE` frame is written before the intercepted
+durability barrier. Its Linux CTest restarts with the same immutable policy,
+requires exactly one recovered vote at sequence one, and requires the exact
+retry to be classified as a native replay with a canonical receipt.
+
+This injection proves the process-order boundary after the WAL frame is written
+through the pinned descriptor and before entry to `fsync`; it is not a
+physical power-loss simulator. The
 complete unsynced frame normally remains visible in the kernel page cache after
 process exit and may be recovered on immediate restart.
 
@@ -64,3 +74,6 @@ With `BUILD_TESTING=ON` on Linux, the small
 `delta_sidecar.qualification_fsync_interposer` CTest launches point 3 under
 `LD_PRELOAD`, requires exit 86, then verifies that the complete frame recovers
 and the exact retry is reported as a native replay.
+`delta_sidecar.qualification_vote_fsync_interposer` performs the corresponding
+real-cut proof for `RECORD_VOTE` rather than relying on the legacy simulated
+crash-point bearing the same name.

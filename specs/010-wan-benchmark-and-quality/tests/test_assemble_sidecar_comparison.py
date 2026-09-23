@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,10 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPTS = ROOT / "specs/010-wan-benchmark-and-quality/scripts"
+JAVA_CRASH_QUALIFICATION = (
+    ROOT
+    / "delta-node-java/src/test/java/io/deltareduce/node/sidecar/SidecarCrashQualification.java"
+)
 sys.path.insert(0, str(SCRIPTS))
 import assemble_sidecar_comparison as assembler  # noqa: E402
 import sidecar_comparison_gate as gate  # noqa: E402
@@ -81,7 +86,7 @@ def raw_run(profile: str, design: dict[str, Any]) -> dict[str, object]:
     saturation_completed = 5
     measured_operations = 6 + 2 * saturation_completed
     samples = [
-        copy_sample(f"{profile}-operation-{index}", index == 0, not embedded)
+        copy_sample(f"{profile}-operation-{index}", index == 0, False)
         for index in range(measured_operations)
     ]
     totals = {
@@ -127,17 +132,30 @@ def raw_run(profile: str, design: dict[str, Any]) -> dict[str, object]:
         **evidence_record(
             f"{profile}:survival",
             {
-                "native_death_injection_count": len(restart_points)
-                - ("DURING_SHARED_MEMORY_PUBLICATION" in restart_points),
+                "native_death_injection_count": len(restart_points),
                 "profile_id": profile,
                 "qualification_case_count": len(restart_points),
                 "survived_all_native_deaths": survived,
             },
         ),
     }
+    wal_artifacts = {
+        "record_vote": {
+            "sha256": content_id("record-vote-wal"),
+            "size_bytes": 101,
+        },
+        "runtime": {
+            "sha256": content_id("runtime-wal"),
+            "size_bytes": 202,
+        },
+    }
     transcripts = []
     for equality_id in comparison["exact_cross_profile_equalities"]:
-        transcript_sha256 = content_id("transcript:" + equality_id)
+        transcript_sha256 = (
+            gate.sha256_id(gate.canonical_bytes(wal_artifacts))
+            if equality_id == "WAL_RECEIPTS_AND_DURABLE_SEQUENCES"
+            else content_id("transcript:" + equality_id)
+        )
         transcripts.append(
             {
                 "equality_id": equality_id,
@@ -272,6 +290,7 @@ def raw_run(profile: str, design: dict[str, Any]) -> dict[str, object]:
         "timer_order": [{"ordinal": 0, "timer_token_sha256": content_id("timer:0")}],
         "toolchains_sha256": content_id("toolchains"),
         "type_name": assembler.RUN_TYPE,
+        "wal_artifacts": wal_artifacts,
         "warmup_completed_operations": aggregation["warmup_operations"],
     }
     runtime_stats = {
@@ -369,6 +388,7 @@ def raw_run(profile: str, design: dict[str, Any]) -> dict[str, object]:
             f"C:/capture/{profile}/formal.json",
         ),
         "TOOLCHAINS": ("--toolchains", "C:/capture/toolchains.json"),
+        "VOTE_FIXTURE": ("--vote-fixture", "C:/capture/vote-fixture.bin"),
         native_artifact_id: (
             "--native-library" if embedded else "--sidecar-executable",
             f"C:/capture/{profile}/native.bin",
@@ -383,6 +403,7 @@ def raw_run(profile: str, design: dict[str, Any]) -> dict[str, object]:
         "PAIRED_CORE_FAULT_TRACE": run["fault_trace_sha256"],
         "PROJECTED_FORMAL_TRACE": content_id(f"{profile}:formal-receipt"),
         "TOOLCHAINS": run["toolchains_sha256"],
+        "VOTE_FIXTURE": content_id("canonical-vote-fixture"),
         native_artifact_id: content_id(f"{profile}:native-runtime"),
     }
     artifacts = [
@@ -439,6 +460,7 @@ def raw_run(profile: str, design: dict[str, Any]) -> dict[str, object]:
         "--source-tree": run["source"]["tree"],
         "--hardware-allocation": option_paths["HARDWARE_ALLOCATION"][1],
         "--toolchains": option_paths["TOOLCHAINS"][1],
+        "--vote-fixture": option_paths["VOTE_FIXTURE"][1],
         "--native-core": option_paths["NATIVE_CORE"][1],
         "--fault-trace": option_paths["PAIRED_CORE_FAULT_TRACE"][1],
         "--projected-formal-trace": option_paths["PROJECTED_FORMAL_TRACE"][1],
@@ -503,13 +525,21 @@ def raw_run(profile: str, design: dict[str, Any]) -> dict[str, object]:
     return run
 
 
-def rebind_input_artifact(run: dict[str, object], artifact_id: str, artifact_sha256: str) -> None:
+def rebind_input_artifact(
+    run: dict[str, object],
+    artifact_id: str,
+    artifact_sha256: str,
+    *,
+    size_bytes: int | None = None,
+) -> None:
     provenance = run["input_provenance"]
     assert isinstance(provenance, dict)
     artifacts = provenance["input_artifacts"]
     assert isinstance(artifacts, list)
     artifact = next(item for item in artifacts if item["artifact_id"] == artifact_id)
     artifact["sha256"] = artifact_sha256
+    if size_bytes is not None:
+        artifact["size_bytes"] = size_bytes
     if artifact_id == "HARDWARE_ALLOCATION":
         provenance["hardware_identity"]["allocation_artifact_sha256"] = artifact_sha256
 
@@ -521,6 +551,8 @@ def rebind_input_artifact(run: dict[str, object], artifact_id: str, artifact_sha
         node["provenance_sha256"] = provenance_sha256
         if node["node_id"] == f"INPUT:{artifact_id}":
             node["artifact_sha256"] = artifact_sha256
+            if size_bytes is not None:
+                node["size_bytes"] = size_bytes
 
 
 def rebind_crash_artifact(run: dict[str, object]) -> None:
@@ -555,6 +587,37 @@ def rebind_transcript_artifact(run: dict[str, object]) -> None:
     rehash(measurement)
 
 
+def rebind_wal_transcript(run: dict[str, object]) -> None:
+    transcript = next(
+        item
+        for item in run["output_transcripts"]
+        if item["equality_id"] == "WAL_RECEIPTS_AND_DURABLE_SEQUENCES"
+    )
+    transcript_sha256 = gate.sha256_id(gate.canonical_bytes(run["wal_artifacts"]))
+    transcript["transcript_sha256"] = transcript_sha256
+    transcript["evidence"]["artifact_sha256"] = transcript_sha256
+    transcript["evidence"]["observations"]["transcript_sha256"] = transcript_sha256
+    rehash(transcript)
+    rebind_transcript_artifact(run)
+
+
+def rebind_copy_accounting(run: dict[str, object]) -> None:
+    samples = run["operation_copy_samples"]
+    counters = run["copy_accounting"]
+    totals = {
+        record["counter_id"]: sum(int(sample[record["counter_id"]]) for sample in samples)
+        for record in counters
+    }
+    totals_artifact = gate.sha256_id(gate.canonical_bytes(totals))
+    for record in counters:
+        counter_id = record["counter_id"]
+        value = totals[counter_id]
+        record["value"] = value
+        record["evidence"]["artifact_sha256"] = totals_artifact
+        record["evidence"]["observations"]["value"] = value
+        rehash(record)
+
+
 def crash_evidence(profile: str, crash_point: str, survived: bool) -> dict[str, object]:
     observations: dict[str, object] = {
         "crash_point": crash_point,
@@ -567,25 +630,47 @@ def crash_evidence(profile: str, crash_point: str, survived: bool) -> dict[str, 
     }
     checks = None
     if crash_point == "DURING_SHARED_MEMORY_PUBLICATION":
-        transcript = content_id("disabled-shm-bounded-copy-transcript")
+        observations["failed_generation_stdout_bytes_after_submit"] = 256
         observations.update(
             {
-                "atomic_abi_probe_result": "UNSUPPORTED",
-                "atomic_abi_supported": False,
+                "atomic_abi_probe_result": "LOCK_FREE_JAVA_NATIVE_MAP_SHARED_U32_BIG_ENDIAN",
+                "atomic_abi_probe_scope": "EXACT_PATH_DEVICE_INODE_GENERATION_SLOT",
+                "atomic_abi_supported": True,
                 "bounded_copy_equivalence": "EXACT",
-                "bounded_copy_transcript_sha256": transcript,
-                "canonical_reference_transcript_sha256": transcript,
+                "crash_process_exit_code": 88,
                 "duration_ns": 1_000,
-                "fallback_transport": "BOUNDED_COPY",
-                "shared_memory_admission_state": "NOT_ADMITTED_PROVEN",
-                "shared_memory_admitted_sequence": 0,
-                "shared_memory_enabled": False,
-                "shared_memory_native_call_count": 0,
-                "shared_memory_native_status": 4_294_967_295,
-                "shared_memory_rejected_before_admission": True,
+                "fallback_transport": "NOT_USED",
+                "shared_memory_admission_state": "ADMITTED_OUTCOME_AVAILABLE",
+                "shared_memory_admitted_sequence": 2,
+                "shared_memory_admitted_sequence_derivation": (
+                    "OBSERVED_OPEN_ADMISSION_PLUS_FIRST_POST_OPEN_OPERATION"
+                ),
+                "shared_memory_control_frame_exposed": True,
+                "shared_memory_egress_bytes": 4096,
+                "shared_memory_enabled": True,
+                "shared_memory_failed_generation_egress_control_bytes": 256,
+                "shared_memory_failed_generation_operation_response_wire_bytes": 0,
+                "shared_memory_failed_generation_response_carrier_count": 0,
+                "shared_memory_failed_generation_response_frame_count": 0,
+                "shared_memory_ingress_bytes": 4096,
+                "shared_memory_ingress_ack_frame_count": 1,
+                "shared_memory_native_call_count": 1,
+                "shared_memory_native_status": 0,
+                "shared_memory_notification_ack_inline_only": True,
+                "shared_memory_operation_response_frame_exposed": False,
+                "shared_memory_open_admitted_sequence": 1,
+                "shared_memory_publication_completed": False,
+                "shared_memory_publication_started": True,
+                "shared_memory_region_id": "NATIVE_TO_JAVA",
+                "shared_memory_slot_state_at_native_death": "WRITING",
+                "shared_memory_status": "ENABLED_LOCK_FREE_U32_BIG_ENDIAN",
+                "shared_memory_telemetry_scope": "SUPERVISOR_ALL_GENERATIONS",
+                "validated_response_count_before_recovery": 0,
+                "zero_copy_eligible_count": 2,
+                "zero_copy_hit_count": 0,
             }
         )
-        checks = {check_id: True for check_id in assembler.SHM_DISABLED_CHECKS}
+        checks = {check_id: True for check_id in assembler.SHM_PUBLICATION_CHECKS}
     return evidence_record(f"{profile}:crash:{crash_point}", observations, checks)
 
 
@@ -727,6 +812,147 @@ def test_assembler_derives_nearest_rank_and_calls_compact_gate_last(
     assert all(item["status"] == "EXACT" for item in compact["pair_fields"])
     assert all(item["status"] == "EXACT" for item in compact["semantic_equalities"])
     assert "latency_ns" not in compact["profiles"][0]["fixed_load_blocks"][0]
+    for run in (embedded, sidecar):
+        artifacts = run["input_provenance"]["input_artifacts"]
+        artifact_ids = [item["artifact_id"] for item in artifacts]
+        assert artifact_ids[-3:-1] == ["TOOLCHAINS", "VOTE_FIXTURE"]
+        argv = run["input_provenance"]["capture_plan"]["argv"]
+        vote_option = argv.index("--vote-fixture")
+        assert argv[vote_option + 1] == next(
+            item["path"] for item in artifacts if item["artifact_id"] == "VOTE_FIXTURE"
+        )
+
+
+def test_vote_fixture_is_a_required_provenance_artifact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    provenance = sidecar["input_provenance"]
+    provenance["input_artifacts"] = [
+        item for item in provenance["input_artifacts"] if item["artifact_id"] != "VOTE_FIXTURE"
+    ]
+    provenance_sha256 = gate.sha256_id(gate.canonical_bytes(provenance))
+    sidecar["input_provenance_sha256"] = provenance_sha256
+    for node in sidecar["input_graph_nodes"]:
+        node["provenance_sha256"] = provenance_sha256
+
+    with pytest.raises(gate.ComparisonError, match="INPUT_ARTIFACT_COUNT"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+def test_vote_fixture_provenance_cannot_describe_empty_bytes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    provenance = sidecar["input_provenance"]
+    fixture = next(
+        item for item in provenance["input_artifacts"] if item["artifact_id"] == "VOTE_FIXTURE"
+    )
+    fixture["sha256"] = assembler.EMPTY_SHA256
+    fixture["size_bytes"] = 0
+    provenance_sha256 = gate.sha256_id(gate.canonical_bytes(provenance))
+    sidecar["input_provenance_sha256"] = provenance_sha256
+    for node in sidecar["input_graph_nodes"]:
+        node["provenance_sha256"] = provenance_sha256
+        if node["node_id"] == "INPUT:VOTE_FIXTURE":
+            node["artifact_sha256"] = assembler.EMPTY_SHA256
+            node["size_bytes"] = 0
+
+    with pytest.raises(gate.ComparisonError, match="VOTE_FIXTURE_EMPTY"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+@pytest.mark.parametrize("field", ["sha256", "size_bytes"])
+def test_vote_fixture_sha_and_size_are_exact_pair_inputs(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+) -> None:
+    design, embedded, sidecar, gates, _ = assembled_fixture(monkeypatch)
+    fixture = next(
+        item
+        for item in sidecar["input_provenance"]["input_artifacts"]
+        if item["artifact_id"] == "VOTE_FIXTURE"
+    )
+    if field == "sha256":
+        rebind_input_artifact(
+            sidecar,
+            "VOTE_FIXTURE",
+            content_id("different-vote-fixture"),
+        )
+    else:
+        rebind_input_artifact(
+            sidecar,
+            "VOTE_FIXTURE",
+            fixture["sha256"],
+            size_bytes=fixture["size_bytes"] + 1,
+        )
+
+    compact, _ = assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    canonical_input = next(
+        item for item in compact["pair_fields"] if item["field_id"] == "CANONICAL_INPUT_BYTES"
+    )
+    assert canonical_input["status"] == "MISMATCH"
+    assert canonical_input["embedded_sha256"] != canonical_input["sidecar_sha256"]
+
+
+def test_vote_receipt_transcript_cannot_be_sha256_empty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    for run in (embedded, sidecar):
+        transcript = next(
+            item
+            for item in run["output_transcripts"]
+            if item["equality_id"] == "CANONICAL_VOTE_RECEIPT_BYTES"
+        )
+        transcript["transcript_sha256"] = assembler.EMPTY_SHA256
+        transcript["evidence"]["artifact_sha256"] = assembler.EMPTY_SHA256
+        transcript["evidence"]["observations"]["transcript_sha256"] = assembler.EMPTY_SHA256
+        rehash(transcript)
+        rebind_transcript_artifact(run)
+
+    with pytest.raises(gate.ComparisonError, match="RAW_VOTE_RECEIPT_TRANSCRIPT_EMPTY"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+def test_vote_wal_record_is_bound_to_wal_transcript(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    sidecar["wal_artifacts"]["record_vote"]["sha256"] = content_id("mutated-vote-wal")
+
+    with pytest.raises(gate.ComparisonError, match="RAW_WAL_TRANSCRIPT_BINDING"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+def test_vote_wal_sha_and_size_participate_in_cross_profile_equality(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, _ = assembled_fixture(monkeypatch)
+    record_vote = sidecar["wal_artifacts"]["record_vote"]
+    record_vote["sha256"] = content_id("different-vote-wal")
+    record_vote["size_bytes"] += 1
+    rebind_wal_transcript(sidecar)
+
+    compact, _ = assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    equality = next(
+        item
+        for item in compact["semantic_equalities"]
+        if item["equality_id"] == "WAL_RECEIPTS_AND_DURABLE_SEQUENCES"
+    )
+    assert equality["status"] == "MISMATCH"
+    assert equality["embedded_sha256"] != equality["sidecar_sha256"]
+    assert compact["profiles"][1]["wal_artifacts"]["record_vote"] == record_vote
 
 
 def test_raw_latency_count_fails_before_compact_gate(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -892,15 +1118,140 @@ def test_measurement_and_crash_statuses_are_derived_from_evidence_checks(
     assert compact["crash_coverage"]["paired"][0]["status"] == "FAIL"
 
 
-def test_shared_memory_publication_requires_honest_disabled_path(
+def test_shared_memory_publication_requires_real_lock_free_path(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
     special = gates["crash_coverage"]["sidecar_supplemental"][1]
-    special["evidence"]["observations"]["atomic_abi_supported"] = True
+    special["evidence"]["observations"]["atomic_abi_supported"] = False
     rehash(special)
 
-    with pytest.raises(gate.ComparisonError, match="SHM_ATOMIC_ABI_MUST_BE_UNSUPPORTED"):
+    with pytest.raises(gate.ComparisonError, match="SHM_ATOMIC_ABI"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+def test_shared_memory_publication_accepts_mapped_copy_without_zero_copy_claim(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    special = gates["crash_coverage"]["sidecar_supplemental"][1]
+    assert special["evidence"]["observations"]["zero_copy_hit_count"] == 0
+
+    compact, _ = assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert compact["crash_coverage"]["sidecar_supplemental"][1]["status"] == "PASS"
+    assert len(calls) == 1
+
+
+def test_shared_memory_publication_rejects_zero_copy_hit_claim(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    special = gates["crash_coverage"]["sidecar_supplemental"][1]
+    special["evidence"]["observations"]["zero_copy_hit_count"] = 1
+    rehash(special)
+
+    with pytest.raises(gate.ComparisonError, match="SHM_ZERO_COPY_HIT_FORBIDDEN"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+def test_shared_memory_publication_accepts_production_admission_sequence_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    special = gates["crash_coverage"]["sidecar_supplemental"][1]
+    observations = special["evidence"]["observations"]
+    assert observations["shared_memory_open_admitted_sequence"] == 1
+    assert observations["shared_memory_admitted_sequence"] == 2
+    assert (
+        observations["shared_memory_admitted_sequence_derivation"]
+        == "OBSERVED_OPEN_ADMISSION_PLUS_FIRST_POST_OPEN_OPERATION"
+    )
+    assert observations["shared_memory_telemetry_scope"] == "SUPERVISOR_ALL_GENERATIONS"
+
+    compact, _ = assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert compact["crash_coverage"]["sidecar_supplemental"][1]["status"] == "PASS"
+    assert len(calls) == 1
+
+
+def test_shared_memory_assembler_contract_matches_production_capture_source() -> None:
+    source = JAVA_CRASH_QUALIFICATION.read_text(encoding="utf-8")
+    production_observations = set(re.findall(r'observations\.put\(\s*"([A-Za-z0-9_]+)"', source))
+    production_checks = set(re.findall(r'checks\.put\("([A-Z0-9_]+)"', source))
+
+    assert assembler.SHM_PUBLICATION_OBSERVATION_FIELDS <= production_observations
+    assert assembler.SHM_PUBLICATION_CHECKS <= production_checks
+    assert "failedGenerationOpenAdmissionSequence == 1L" in source
+    assert "failedGenerationSubmitAdmissionSequence == 2L" in source
+    assert "OBSERVED_OPEN_ADMISSION_PLUS_FIRST_POST_OPEN_OPERATION" in source
+    assert (
+        'observations.put("shared_memory_telemetry_scope", "SUPERVISOR_ALL_GENERATIONS")' in source
+    )
+
+
+def test_shared_memory_publication_requires_production_derivation_check(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    special = gates["crash_coverage"]["sidecar_supplemental"][1]
+    special["evidence"]["checks"].pop("SHARED_MEMORY_ADMISSION_SEQUENCE_DERIVED")
+    rehash(special)
+
+    with pytest.raises(gate.ComparisonError, match="SHM_PUBLICATION_CHECKS"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "error"),
+    [
+        ("shared_memory_admitted_sequence", 1, "SHM_ADMITTED_OUTCOME"),
+        ("shared_memory_open_admitted_sequence", 2, "SHM_ADMITTED_OUTCOME"),
+        ("shared_memory_admitted_sequence_derivation", "ASSUMED", "SHM_ADMITTED_OUTCOME"),
+        ("shared_memory_telemetry_scope", "FAILED_GENERATION_ONLY", "SHM_TELEMETRY_SCOPE"),
+    ],
+)
+def test_shared_memory_publication_rejects_nonproduction_sequence_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: object,
+    error: str,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    special = gates["crash_coverage"]["sidecar_supplemental"][1]
+    special["evidence"]["observations"][field] = value
+    rehash(special)
+
+    with pytest.raises(gate.ComparisonError, match=error):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
+@pytest.mark.parametrize(
+    ("field", "error"),
+    [
+        ("shared_memory_ingress_bytes", "SHM_INGRESS_BYTES"),
+        ("shared_memory_egress_bytes", "SHM_EGRESS_BYTES"),
+    ],
+)
+def test_shared_memory_publication_still_requires_positive_mapped_traffic(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    error: str,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    special = gates["crash_coverage"]["sidecar_supplemental"][1]
+    special["evidence"]["observations"][field] = 0
+    rehash(special)
+
+    with pytest.raises(gate.ComparisonError, match=error):
         assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
 
     assert calls == []
@@ -936,6 +1287,19 @@ def test_copy_counter_order_sums_and_restart_count_are_exact(
     assert calls == []
 
 
+def test_operation_copy_ledger_rejects_zero_copy_hit_claim(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
+    sidecar["operation_copy_samples"][0]["ZERO_COPY_HIT_COUNT"] = 1
+    rebind_copy_accounting(sidecar)
+
+    with pytest.raises(gate.ComparisonError, match="COPY_SAMPLE_ZERO_COPY_HIT_FORBIDDEN"):
+        assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
+
+    assert calls == []
+
+
 def test_survival_summary_must_equal_concrete_crash_observations(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -952,7 +1316,7 @@ def test_survival_summary_must_equal_concrete_crash_observations(
     assert calls == []
 
 
-def test_disabled_shm_case_is_not_counted_as_a_native_death(
+def test_shared_memory_publication_is_counted_as_a_native_death(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
@@ -966,7 +1330,7 @@ def test_disabled_shm_case_is_not_counted_as_a_native_death(
     assert calls == []
 
 
-def test_disabled_shm_manifest_retains_measured_duration(
+def test_shared_memory_publication_manifest_retains_measured_duration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     design, embedded, sidecar, gates, calls = assembled_fixture(monkeypatch)
@@ -974,7 +1338,7 @@ def test_disabled_shm_manifest_retains_measured_duration(
     special["evidence"]["observations"].pop("duration_ns")
     rehash(special)
 
-    with pytest.raises(gate.ComparisonError, match="SHM_DISABLED_OBSERVATIONS"):
+    with pytest.raises(gate.ComparisonError, match="SHM_PUBLICATION_OBSERVATIONS"):
         assembler.assemble_comparison(embedded, sidecar, gates, _design_override=design)
 
     assert calls == []

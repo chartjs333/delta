@@ -16,12 +16,15 @@ using Id128 = std::array<std::byte, 16>;
 using Digest = std::array<std::byte, 32>;
 
 inline constexpr std::uint16_t ipc_major = 1U;
-inline constexpr std::uint16_t ipc_minor = 0U;
+inline constexpr std::uint16_t ipc_minor = 1U;
 inline constexpr std::uint16_t header_bytes = 128U;
 inline constexpr std::uint64_t max_logical_payload_bytes = 16'785'408U;
 inline constexpr std::uint64_t max_control_envelope_bytes = 16'785'536U;
 inline constexpr std::uint64_t max_command_bytes = 16'777'216U;
 inline constexpr std::uint64_t max_effect_bytes = 16'777'216U;
+inline constexpr std::uint64_t max_vote_policy_bytes = 4'194'304U;
+inline constexpr std::uint64_t max_vote_bytes = 16'769'024U;
+inline constexpr std::uint64_t max_vote_receipt_bytes = 16'777'216U;
 inline constexpr std::uint64_t max_response_capacity = max_logical_payload_bytes;
 inline constexpr std::uint32_t max_submission_capacity = 64U;
 
@@ -34,17 +37,17 @@ inline constexpr std::string_view contract_name = "delta-local-sidecar-ipc";
 inline constexpr std::string_view canonical_encoding_id =
     "sha256:393cd207a2cd3fd4da366be56095a3467e3184c2c5db1d300d1c07d49cdd7aff";
 inline constexpr std::string_view frame_layout_sha256 =
-    "sha256:46fcc91280fc2c878cb176bf6e9d855f8e39ac9fffcf18709b1a6b80a30ce18e";
+    "sha256:b8d8a521133d4d5b41ab5035f2cfaa82594a4789c8b83ad0c81b77a67afbcb4b";
 inline constexpr std::string_view payload_schema_sha256 =
-    "sha256:31edfa48d707fb06cd24624d1790946981294bb093d74d44c202a5d15c5376c5";
+    "sha256:fdeb9e2607dfe2661fff8e99a9510ae1eb6658e516f1496ade6fd1dd6e7af7ce";
 inline constexpr std::string_view message_type_table_sha256 =
-    "sha256:dfa3fe65b946e6527b317168ef0ea000a4610bba1e9c1ed9ebd099adff71e64e";
+    "sha256:1581d40a12765ea54c1abf7f3c5434025f40d6718e639c9f9fbfcc1eb6e07950";
 inline constexpr std::string_view flag_table_sha256 =
-    "sha256:6aa94eb75b5b6af99132f71b2753d56988454be86a371b46f46241cf7a8e33d5";
+    "sha256:857da723287529fe38f3f6479decb962f435e21b541b38abe71b28489933b248";
 inline constexpr std::string_view bounds_sha256 =
-    "sha256:32d9e791ac35dc6bb061aaedb0a67ee28ad1a2662bbb0ffd1bfc9177b055d0f8";
+    "sha256:12259ada8ff8a14febf167b2631768911fefd9fd26c7298b7ff0f3d103837708";
 inline constexpr std::string_view shared_memory_layout_sha256 =
-    "sha256:0a48282fddae72060e9b93c02f97f174b56f8a20b07aabb88ee51f7ef03f5aa4";
+    "sha256:17ce8022d0075e715e8c699ba17c27d9901bf08727579ab977e74f169b205b78";
 
 enum class MessageType : std::uint16_t {
   client_hello = 1U,
@@ -53,6 +56,8 @@ enum class MessageType : std::uint16_t {
   open_response = 17U,
   submit_request = 32U,
   submit_response = 33U,
+  vote_request = 34U,
+  vote_response = 35U,
   state_request = 48U,
   state_response = 49U,
   snapshot_request = 64U,
@@ -105,8 +110,23 @@ struct Frame {
   bool operator==(const Frame&) const = default;
 };
 
+struct FrameHeader {
+  MessageType type;
+  std::uint32_t flags;
+  Id128 session_id;
+  std::uint64_t generation;
+  Id128 correlation_id;
+  std::uint64_t sequence;
+  std::uint64_t payload_length;
+  std::uint64_t response_capacity;
+  Digest payload_sha256;
+
+  bool operator==(const FrameHeader&) const = default;
+};
+
 [[nodiscard]] Bytes encode_frame(const Frame& frame);
 [[nodiscard]] Frame decode_frame(std::span<const std::byte> encoded);
+[[nodiscard]] FrameHeader decode_frame_header(std::span<const std::byte> encoded_header);
 [[nodiscard]] Bytes encode_payload(MessageType type, std::span<const Field> fields);
 [[nodiscard]] Payload decode_payload(std::span<const std::byte> encoded);
 [[nodiscard]] Bytes encode_fields(std::span<const Field> fields);
@@ -124,6 +144,9 @@ struct Frame {
 [[nodiscard]] Field field_digest(std::uint16_t id, const Digest& value);
 [[nodiscard]] Field field_bytes(std::uint16_t id, std::span<const std::byte> value);
 [[nodiscard]] Field field_text(std::uint16_t id, std::string_view value);
+[[nodiscard]] Field field_shared_memory_reference(
+    std::uint16_t id,
+    std::span<const std::byte> value);
 
 [[nodiscard]] const Field& require_field(
     const Payload& payload,
@@ -142,6 +165,10 @@ struct Frame {
 
 [[nodiscard]] bool is_request(MessageType type) noexcept;
 [[nodiscard]] bool is_response(MessageType type) noexcept;
+[[nodiscard]] bool is_notification(MessageType type) noexcept;
+[[nodiscard]] bool shared_memory_eligible(MessageType type) noexcept;
+[[nodiscard]] std::uint32_t inline_flags(MessageType type);
+[[nodiscard]] std::uint32_t shared_memory_flags(MessageType type);
 [[nodiscard]] std::uint32_t required_flags(MessageType type);
 
 }  // namespace delta::runtime::sidecar

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.example/schemas/feature010-sidecar-diagnostic-host-telemetry-v1.1.json",
+  "title": "Feature 010 sidecar diagnostic independent host telemetry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capture_ended_at_utc",
+    "capture_started_at_utc",
+    "collector_sha256",
+    "diagnostic_campaign_id",
+    "docker_wsl_events",
+    "lanes_complete_sha256",
+    "receipt_nonce",
+    "schema_version",
+    "type_name",
+    "windows_hardware_events"
+  ],
+  "properties": {
+    "capture_ended_at_utc": {"type": "string", "minLength": 1},
+    "capture_started_at_utc": {"type": "string", "minLength": 1},
+    "collector_sha256": {"$ref": "#/$defs/contentId"},
+    "diagnostic_campaign_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"},
+    "docker_wsl_events": {"$ref": "#/$defs/availability"},
+    "lanes_complete_sha256": {"$ref": "#/$defs/contentId"},
+    "receipt_nonce": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.1.0"},
+    "type_name": {"const": "FEATURE010_SIDECAR_DIAGNOSTIC_HOST_TELEMETRY"},
+    "windows_hardware_events": {"$ref": "#/$defs/availability"}
+  },
+  "$defs": {
+    "contentId": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "detail_sha256",
+        "end_wall_time_ns",
+        "event_id",
+        "provider",
+        "start_wall_time_ns"
+      ],
+      "properties": {
+        "category": {"type": "string", "minLength": 1},
+        "detail_sha256": {"$ref": "#/$defs/contentId"},
+        "end_wall_time_ns": {"type": "integer", "minimum": 1},
+        "event_id": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "integer"}]},
+        "provider": {"type": "string", "minLength": 1},
+        "start_wall_time_ns": {"type": "integer", "minimum": 1}
+      }
+    },
+    "availability": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "value"],
+          "properties": {
+            "status": {"const": "AVAILABLE"},
+            "value": {"type": "array", "items": {"$ref": "#/$defs/event"}}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reason", "status"],
+          "properties": {
+            "reason": {"type": "string", "minLength": 1, "maxLength": 1024},
+            "status": {"const": "NOT_AVAILABLE"}
+          }
+        }
+      ]
+    }
+  }
+}

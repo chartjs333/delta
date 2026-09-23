@@ -44,12 +44,14 @@ test "$(uname -m)" = "x86_64"
   delta-core-cpp/src/fixedpoint/scale.cpp \
   delta-core-cpp/src/certificates/contracts.cpp \
   delta-core-cpp/src/certificates/verifier.cpp \
+  delta-core-cpp/src/certificates/vote_admission.cpp \
   delta-core-cpp/src/robust/plan.cpp \
   delta-core-cpp/src/apply/engine.cpp \
   delta-core-cpp/src/reduce/hierarchy.cpp \
   delta-core-cpp/src/reduce/topology.cpp \
   delta-runtime-cpp/src/certificate_runtime.cpp \
   delta-runtime-cpp/src/runtime.cpp \
+  delta-runtime-cpp/src/vote_codec.cpp \
   delta-runtime-cpp/src/wal.cpp \
   specs/010-wan-benchmark-and-quality/qualification-harness/exactness_probe.cpp \
   -o "$probe_output"

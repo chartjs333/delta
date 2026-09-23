@@ -9,7 +9,8 @@ mkdir -p "$output"
 base_flags="-std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fno-fast-math -fno-omit-frame-pointer -pthread"
 includes="-I/workspace/delta-core-cpp/include -I/workspace/delta-runtime-cpp/include -I/workspace/delta-ffi/include"
 core_sources="/workspace/delta-core-cpp/src/arithmetic.cpp /workspace/delta-core-cpp/src/canonical.cpp /workspace/delta-core-cpp/src/consensus.cpp /workspace/delta-core-cpp/src/protocol.cpp /workspace/delta-core-cpp/src/sha256.cpp /workspace/delta-core-cpp/src/transition.cpp"
-runtime_sources="/workspace/delta-runtime-cpp/src/runtime.cpp /workspace/delta-runtime-cpp/src/wal.cpp"
+certificate_sources="/workspace/delta-core-cpp/src/certificates/contracts.cpp /workspace/delta-core-cpp/src/certificates/verifier.cpp /workspace/delta-core-cpp/src/certificates/vote_admission.cpp"
+runtime_sources="/workspace/delta-runtime-cpp/src/runtime.cpp /workspace/delta-runtime-cpp/src/vote_codec.cpp /workspace/delta-runtime-cpp/src/wal.cpp"
 
 if [ "$mode" = "address-undefined" ]; then
   sanitize_flags="-fsanitize=address,undefined -fno-sanitize-recover=all"
@@ -19,19 +20,21 @@ if [ "$mode" = "address-undefined" ]; then
     -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
     -o "$output/core-sanitized"
   # shellcheck disable=SC2086
-  "$compiler" $base_flags $sanitize_flags $includes $core_sources $runtime_sources \
+  "$compiler" $base_flags $sanitize_flags $includes $core_sources $certificate_sources $runtime_sources \
+    /workspace/delta-core-cpp/tests/vote_fixture.cpp \
     /workspace/delta-runtime-cpp/tests/runtime_test.cpp \
     -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
     -o "$output/runtime-sanitized"
   # shellcheck disable=SC2086
-  "$compiler" $base_flags $sanitize_flags $includes $core_sources $runtime_sources \
+  "$compiler" $base_flags $sanitize_flags $includes $core_sources $certificate_sources $runtime_sources \
+    /workspace/delta-core-cpp/tests/vote_fixture.cpp \
     /workspace/delta-ffi/src/delta_abi.cpp \
     /workspace/delta-ffi/tests/abi_test.cpp \
     -DDELTA_FFI_BUILD \
     -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
     -o "$output/abi-sanitized"
   # shellcheck disable=SC2086
-  "$compiler" $base_flags $sanitize_flags $includes $core_sources $runtime_sources \
+  "$compiler" $base_flags $sanitize_flags $includes $core_sources $certificate_sources $runtime_sources \
     /workspace/delta-ffi/src/delta_abi.cpp \
     /workspace/delta-ffi/tests/fuzz_smoke_test.cpp \
     -DDELTA_FFI_BUILD \
@@ -48,7 +51,8 @@ if [ "$mode" = "address-undefined" ]; then
 elif [ "$mode" = "thread" ]; then
   sanitize_flags="-fsanitize=thread -fno-sanitize-recover=all"
   # shellcheck disable=SC2086
-  "$compiler" $base_flags $sanitize_flags $includes $core_sources $runtime_sources \
+  "$compiler" $base_flags $sanitize_flags $includes $core_sources $certificate_sources $runtime_sources \
+    /workspace/delta-core-cpp/tests/vote_fixture.cpp \
     /workspace/delta-runtime-cpp/tests/runtime_test.cpp \
     -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
     -o "$output/runtime-tsan"

@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,7 +87,7 @@ public final class SidecarCrashQualification {
     DURING_IPC_RESPONSE_FRAME(
         "DURING_IPC_RESPONSE_FRAME", "during-ipc-response-frame", 0, false),
     DURING_SHARED_MEMORY_PUBLICATION(
-        "DURING_SHARED_MEMORY_PUBLICATION", "", 0, false);
+        "DURING_SHARED_MEMORY_PUBLICATION", "during-shared-memory-publication", 0, false);
 
     private final String id;
     private final String sidecarFault;
@@ -206,9 +204,7 @@ public final class SidecarCrashQualification {
       var survived = true;
       for (var cut : cuts) {
         CaseResult result;
-        if (cut == Cut.DURING_SHARED_MEMORY_PUBLICATION) {
-          result = disabledSharedMemory();
-        } else if (options.profile() == Profile.EMBEDDED_FFM) {
+        if (options.profile() == Profile.EMBEDDED_FFM) {
           result = embedded(cut);
         } else {
           result = sidecar(cut);
@@ -224,9 +220,7 @@ public final class SidecarCrashQualification {
       survivalObservations.put("profile_id", options.profile().name());
       survivalObservations.put("qualification_case_count", cuts.size());
       survivalObservations.put("survived_all_native_deaths", survived);
-      var expectedDeaths = (int) cuts.stream()
-          .filter(cut -> cut != Cut.DURING_SHARED_MEMORY_PUBLICATION)
-          .count();
+      var expectedDeaths = cuts.size();
       var survivalEvidence = SidecarQualificationRaw.evidence(
           Map.of(
               "CASE_COUNT_OBSERVED", records.size() == cuts.size(),
@@ -339,7 +333,6 @@ public final class SidecarCrashQualification {
     }
 
     private CaseResult sidecar(Cut cut) throws Exception {
-      require(cut != Cut.DURING_SHARED_MEMORY_PUBLICATION, "SHM uses local supplemental path");
       var directory = Files.createDirectory(runRoot.resolve("sidecar-" + cut.id.toLowerCase(Locale.ROOT)));
       var connector = new FaultConnector(
           options.sidecarExecutable(), cut, options.fsyncInterposer(), directory);
@@ -357,14 +350,27 @@ public final class SidecarCrashQualification {
       long duration;
       int exitCode;
       long partialWireBytes;
+      long validatedResponsesBeforeRecovery;
+      long failedGenerationOpenAdmissionSequence;
+      long failedGenerationSubmitAdmissionSequence;
+      List<WireFrameObservation> failedGenerationFrames;
       String firstGenerationStderrSha256;
       long firstGenerationStderrSize;
       WalObservation failedGenerationWal;
       boolean retryWasNativeReplay;
+      SidecarSupervisor.Telemetry transportTelemetry = null;
+      int nativeToJavaStateAtExit = Integer.MIN_VALUE;
       try {
         var firstClient = await(supervisor.start());
         var firstConnection = connector.first();
+        failedGenerationOpenAdmissionSequence = firstConnection.openAdmissionSequence();
+        failedGenerationSubmitAdmissionSequence = Math.addExact(
+            failedGenerationOpenAdmissionSequence, 1L);
+        require(failedGenerationOpenAdmissionSequence == 1L
+                && failedGenerationSubmitAdmissionSequence == 2L,
+            "failed generation OPEN/SUBMIT admission order differs from the frozen sequence");
         var bytesBefore = firstConnection.stdoutBytes();
+        var framesBefore = firstConnection.receivedFrameCount();
         var exact = LocalSidecarClient.submitRequest(ascii("request-001"), command);
         var firstAttempt = firstClient.tryEnqueue(exact);
         require(firstAttempt.accepted(), "sidecar first attempt was rejected locally");
@@ -383,6 +389,8 @@ public final class SidecarCrashQualification {
             exitCode == expectedSidecarExitCode(cut),
             "first sidecar generation exited with an unexpected code at " + cut.id);
         partialWireBytes = Math.max(0, firstConnection.stdoutBytes() - bytesBefore);
+        failedGenerationFrames = firstConnection.receivedFramesAfter(framesBefore);
+        validatedResponsesBeforeRecovery = firstClient.telemetry().completed();
 
         var stateRequest = LocalSidecarClient.stateRequest(
             ascii("qualification-state-" + cut.id.toLowerCase(Locale.ROOT)),
@@ -433,6 +441,8 @@ public final class SidecarCrashQualification {
         firstGenerationStderrSha256 = firstConnection.stderrSha256();
         firstGenerationStderrSize = firstConnection.stderrSize();
         failedGenerationWal = firstConnection.walAtConfirmedExit();
+        nativeToJavaStateAtExit = firstConnection.nativeToJavaStateAtExit();
+        transportTelemetry = supervisor.telemetry();
       } finally {
         supervisor.close();
       }
@@ -466,89 +476,115 @@ public final class SidecarCrashQualification {
           "RECOVERED_SEQUENCE_EQUALS_RESPONSE_DURABLE_SEQUENCE");
       observations.put("replacement_fault_injection_count", 0);
       observations.put("replacement_generation", 2);
-      observations.put("validated_response_count_before_recovery", 0);
+      observations.put(
+          "validated_response_count_before_recovery", validatedResponsesBeforeRecovery);
+      if (cut == Cut.DURING_SHARED_MEMORY_PUBLICATION) {
+        var ackFrames = failedGenerationFrames.stream()
+            .filter(frame -> frame.messageType() == SidecarIpcV1.MessageType.SHARED_MEMORY_ACK)
+            .toList();
+        var operationResponseFrames = failedGenerationFrames.stream()
+            .filter(frame -> frame.messageType() == SidecarIpcV1.MessageType.SUBMIT_RESPONSE
+                || frame.messageType() == SidecarIpcV1.MessageType.ERROR_RESPONSE)
+            .toList();
+        var responseCarriers = failedGenerationFrames.stream()
+            .filter(WireFrameObservation::sharedMemoryCarrier)
+            .toList();
+        var operationResponseWireBytes = operationResponseFrames.stream()
+            .mapToLong(WireFrameObservation::wireBytes)
+            .sum();
+        require(nativeToJavaStateAtExit == SidecarSharedMemory.WRITING,
+            "publication crash did not leave the native slot at WRITING");
+        require(failedGenerationFrames.size() == 1
+                && ackFrames.size() == 1
+                && !ackFrames.get(0).sharedMemoryCarrier(),
+            "publication crash exposed a frame other than the notification-only inline ACK");
+        require(operationResponseFrames.isEmpty(),
+            "publication crash exposed a SUBMIT_RESPONSE or ERROR_RESPONSE frame");
+        require(responseCarriers.isEmpty(),
+            "publication crash exposed a native-to-Java shared-memory response carrier");
+        require(validatedResponsesBeforeRecovery == 0,
+            "publication crash exposed a validated operation response");
+        require(partialWireBytes == ackFrames.get(0).wireBytes(),
+            "failed-generation stdout was not exactly the notification-only ACK frame");
+        require(transportTelemetry != null
+                && transportTelemetry.sharedMemoryIngressBytes() > 0
+                && transportTelemetry.sharedMemoryEgressBytes() > 0
+                && transportTelemetry.zeroCopyEligibleCount() > 0
+                && transportTelemetry.zeroCopyHitCount() == 0,
+            "shared-memory qualification did not account for copied mapped traffic truthfully");
+        observations.put(
+            "atomic_abi_probe_result",
+            "LOCK_FREE_JAVA_NATIVE_MAP_SHARED_U32_BIG_ENDIAN");
+        observations.put(
+            "atomic_abi_probe_scope",
+            "EXACT_PATH_DEVICE_INODE_GENERATION_SLOT");
+        observations.put("atomic_abi_supported", true);
+        observations.put("bounded_copy_equivalence", "EXACT");
+        observations.put("fallback_transport", "NOT_USED");
+        observations.put("shared_memory_admission_state", "ADMITTED_OUTCOME_AVAILABLE");
+        observations.put(
+            "shared_memory_admitted_sequence", failedGenerationSubmitAdmissionSequence);
+        observations.put(
+            "shared_memory_admitted_sequence_derivation",
+            "OBSERVED_OPEN_ADMISSION_PLUS_FIRST_POST_OPEN_OPERATION");
+        observations.put(
+            "shared_memory_open_admitted_sequence", failedGenerationOpenAdmissionSequence);
+        observations.put("shared_memory_control_frame_exposed", true);
+        observations.put("shared_memory_enabled", true);
+        observations.put("shared_memory_ingress_bytes",
+            transportTelemetry.sharedMemoryIngressBytes());
+        observations.put("shared_memory_egress_bytes",
+            transportTelemetry.sharedMemoryEgressBytes());
+        observations.put(
+            "shared_memory_failed_generation_egress_control_bytes",
+            partialWireBytes);
+        observations.put(
+            "shared_memory_failed_generation_operation_response_wire_bytes",
+            operationResponseWireBytes);
+        observations.put(
+            "shared_memory_failed_generation_response_carrier_count",
+            responseCarriers.size());
+        observations.put(
+            "shared_memory_failed_generation_response_frame_count",
+            operationResponseFrames.size());
+        observations.put("shared_memory_ingress_ack_frame_count", ackFrames.size());
+        observations.put("shared_memory_notification_ack_inline_only", true);
+        observations.put("shared_memory_operation_response_frame_exposed", false);
+        observations.put("shared_memory_native_call_count", 1);
+        observations.put("shared_memory_native_status", 0);
+        observations.put("shared_memory_publication_completed", false);
+        observations.put("shared_memory_publication_started", true);
+        observations.put("shared_memory_region_id", "NATIVE_TO_JAVA");
+        observations.put("shared_memory_slot_state_at_native_death", "WRITING");
+        observations.put("shared_memory_status", transportTelemetry.sharedMemoryStatus());
+        observations.put("shared_memory_telemetry_scope", "SUPERVISOR_ALL_GENERATIONS");
+        observations.put("zero_copy_eligible_count",
+            transportTelemetry.zeroCopyEligibleCount());
+        observations.put("zero_copy_hit_count", transportTelemetry.zeroCopyHitCount());
+      }
       if (cut.interposerRequired) {
         observations.put("fsync_interposer_sha256",
             SidecarQualificationRaw.sha256Id(options.fsyncInterposer()));
       }
-      var checks = Map.of(
-          "FIRST_GENERATION_EXIT_CONFIRMED", true,
-          "JAVA_PROCESS_SURVIVED_NATIVE_DEATH", true,
-          "NO_VALIDATED_PARTIAL_RESPONSE_EXPOSED", true,
-          "RECOVERY_READY_PRECEDED_RETRY", true,
-          "RETRY_DURABLE_RESULT_MATCHED_REFERENCE", true);
-      return new CaseResult(
-          cut,
-          duration,
-          true,
-          true,
-          SidecarQualificationRaw.evidence(checks, observations));
-    }
-
-    private CaseResult disabledSharedMemory() {
-      var cut = Cut.DURING_SHARED_MEMORY_PUBLICATION;
-      var request = LocalSidecarClient.submitRequest(ascii("request-001"), command);
-      var payload = SidecarIpcV1.decodePayload(request.type(), request.canonicalPayload());
-      var frame = SidecarIpcV1.frame(
-          request.type(), id(1), 1, id(2), 1, payload).canonicalBytes();
-      var boundedCopy = Arrays.copyOf(frame, frame.length);
-      var decodedCopy = SidecarIpcV1.decodeFrame(boundedCopy).canonicalBytes();
-      var copyExact = Arrays.equals(frame, decodedCopy);
-      require(copyExact, "bounded-copy transcript changed canonical bytes");
-      var shared = Arrays.copyOf(frame, frame.length);
-      ByteBuffer.wrap(shared).order(ByteOrder.BIG_ENDIAN).putInt(
-          16, SidecarIpcV1.FLAG_PAYLOAD_SHARED_MEMORY | SidecarIpcV1.FLAG_RESPONSE_EXPECTED);
-      var nativeCalls = new AtomicInteger();
-      var start = System.nanoTime();
-      var rejected = false;
-      try {
-        SidecarIpcV1.decodeFrame(shared);
-        nativeCalls.incrementAndGet();
-      } catch (SidecarIpcV1.ProtocolException expected) {
-        rejected = true;
+      var checks = new LinkedHashMap<String, Boolean>();
+      checks.put("FIRST_GENERATION_EXIT_CONFIRMED", true);
+      checks.put("JAVA_PROCESS_SURVIVED_NATIVE_DEATH", true);
+      checks.put("NO_VALIDATED_PARTIAL_RESPONSE_EXPOSED", true);
+      checks.put("RECOVERY_READY_PRECEDED_RETRY", true);
+      checks.put("RETRY_DURABLE_RESULT_MATCHED_REFERENCE", true);
+      if (cut == Cut.DURING_SHARED_MEMORY_PUBLICATION) {
+        checks.put("SHARED_MEMORY_ATOMIC_ABI_PROBED", true);
+        checks.put("SHARED_MEMORY_ADMISSION_SEQUENCE_DERIVED", true);
+        checks.put("SHARED_MEMORY_NOTIFICATION_ACK_ONLY", true);
+        checks.put("SHARED_MEMORY_OPERATION_RESPONSE_NOT_EXPOSED", true);
+        checks.put("SHARED_MEMORY_PUBLICATION_STARTED", true);
+        checks.put("SHARED_MEMORY_PUBLICATION_NOT_EXPOSED", true);
       }
-      var duration = positiveElapsed(System.nanoTime(), start);
-      var rejectedBeforeAdmission = rejected && nativeCalls.get() == 0;
-      require(rejectedBeforeAdmission,
-          "disabled shared-memory carrier reached native admission");
-      var sentinel = safePreparseSentinel();
-      require(sentinel.payload().u8(3)
-                  == SidecarIpcV1.AdmissionState.NOT_ADMITTED_PROVEN.code()
-              && sentinel.payload().u64Bits(4) == 0
-              && sentinel.payload().u32(5) == SidecarIpcV1.NATIVE_STATUS_UNAVAILABLE,
-          "local safe preparse sentinel is incoherent");
-      var referenceSha = SidecarQualificationRaw.sha256Id(frame);
-      var copySha = SidecarQualificationRaw.sha256Id(decodedCopy);
-      var observations = new LinkedHashMap<String, Object>();
-      observations.put("atomic_abi_probe_result", "UNSUPPORTED");
-      observations.put("atomic_abi_supported", false);
-      observations.put("bounded_copy_equivalence", "EXACT");
-      observations.put("bounded_copy_transcript_sha256", copySha);
-      observations.put("canonical_reference_transcript_sha256", referenceSha);
-      observations.put("crash_point", cut.id);
-      observations.put("duration_ns", duration);
-      observations.put("fallback_transport", "BOUNDED_COPY");
-      observations.put("java_process_survived", true);
-      observations.put("journal_recovered_before_admission", false);
-      observations.put("partial_response_exposed", false);
-      observations.put("persist_before_expose", nativeCalls.get() == 0);
-      observations.put("profile_id", Profile.ISOLATED_SIDECAR.name());
-      observations.put("replay_identity_exact", false);
-      observations.put("shared_memory_admission_state", "NOT_ADMITTED_PROVEN");
-      observations.put("shared_memory_admitted_sequence", 0);
-      observations.put("shared_memory_enabled", false);
-      observations.put("shared_memory_native_call_count", nativeCalls.get());
-      observations.put("shared_memory_native_status", SidecarIpcV1.NATIVE_STATUS_UNAVAILABLE);
-      observations.put("shared_memory_rejected_before_admission", rejectedBeforeAdmission);
-      var checks = Map.of(
-          "ATOMIC_ABI_UNSUPPORTED", true,
-          "BOUNDED_COPY_EQUIVALENCE_EXACT", copyExact,
-          "SHARED_MEMORY_REJECTED_BEFORE_ADMISSION", rejectedBeforeAdmission);
       return new CaseResult(
           cut,
           duration,
           true,
-          false,
+          true,
           SidecarQualificationRaw.evidence(checks, observations));
     }
 
@@ -775,12 +811,48 @@ public final class SidecarCrashQualification {
               context.identity().executableSha256()),
           "sidecar executable changed before launch");
       var launch = launches.incrementAndGet();
+      require(SidecarSharedMemory.atomicAbiSupported(),
+          "qualification requires lock-free big-endian shared-memory atomics");
+      var sharedMemory = SidecarSharedMemory.GenerationResources.create(
+          context.identity().generation());
+      try {
+        require(
+            SidecarSupervisor.PipeProcessConnector.mappedSharedMemoryAtomicAbiSupported(
+                executable, sharedMemory, readyTimeout)
+                && sharedMemory.mappedAtomicAbiProbed(),
+            "qualification requires the exact Java/native MAP_SHARED atomic ABI probe");
+      } catch (Throwable error) {
+        try {
+          sharedMemory.close();
+        } catch (IOException closeFailure) {
+          error.addSuppressed(closeFailure);
+        }
+        throw error;
+      }
       var command = new ArrayList<String>();
       command.add(executable.toString());
       command.add("--session");
       command.add(context.identity().sessionId().hex());
       command.add("--generation");
       command.add(Long.toUnsignedString(context.identity().generation()));
+      if (context.durableDirectoryIdentity() != null) {
+        command.add("--durable-device");
+        command.add(Long.toUnsignedString(context.durableDirectoryIdentity().device()));
+        command.add("--durable-inode");
+        command.add(Long.toUnsignedString(context.durableDirectoryIdentity().inode()));
+      }
+      command.add("--java-to-native-shm");
+      command.add(sharedMemory.javaToNativePath().toString());
+      command.add("--native-to-java-shm");
+      command.add(sharedMemory.nativeToJavaPath().toString());
+      command.add("--java-to-native-shm-device");
+      command.add(Long.toUnsignedString(sharedMemory.javaToNativeIdentity().device()));
+      command.add("--java-to-native-shm-inode");
+      command.add(Long.toUnsignedString(sharedMemory.javaToNativeIdentity().inode()));
+      command.add("--native-to-java-shm-device");
+      command.add(Long.toUnsignedString(sharedMemory.nativeToJavaIdentity().device()));
+      command.add("--native-to-java-shm-inode");
+      command.add(Long.toUnsignedString(sharedMemory.nativeToJavaIdentity().inode()));
       if (launch == 1) {
         faultLaunches.incrementAndGet();
         command.add("--fault");
@@ -796,12 +868,22 @@ public final class SidecarCrashQualification {
             FSYNC_TARGET,
             directory.resolve("runtime.wal").toAbsolutePath().normalize().toString());
       }
-      var process = builder.start();
-      var counted = new CountingInputStream(process.getInputStream());
-      var transport = new LocalSidecarClient.StreamTransport(counted, process.getOutputStream());
-      var connection = new TrackedConnection(process, transport, counted, stderr, directory);
-      connections.add(connection);
-      return connection;
+      try {
+        var process = builder.start();
+        var counted = new CountingInputStream(process.getInputStream());
+        LocalSidecarClient.Transport transport = new LocalSidecarClient.StreamTransport(
+            counted, process.getOutputStream());
+        transport = new SidecarSharedMemory.Transport(
+            transport, sharedMemory.javaToNative(), sharedMemory.nativeToJava());
+        var trackingTransport = new TrackingTransport(transport);
+        var connection = new TrackedConnection(
+            process, trackingTransport, counted, stderr, directory, sharedMemory);
+        connections.add(connection);
+        return connection;
+      } catch (Throwable error) {
+        sharedMemory.close();
+        throw error;
+      }
     }
 
     private synchronized TrackedConnection first() {
@@ -824,27 +906,32 @@ public final class SidecarCrashQualification {
 
   private static final class TrackedConnection implements SidecarSupervisor.Connection {
     private final Process process;
-    private final LocalSidecarClient.Transport transport;
+    private final TrackingTransport transport;
     private final CountingInputStream input;
     private final Path stderr;
     private final Path directory;
-    private final AtomicBoolean endpointClosed = new AtomicBoolean();
+    private final SidecarSharedMemory.GenerationResources sharedMemory;
+    private final SidecarSharedMemory.CleanupProgress cleanup =
+        new SidecarSharedMemory.CleanupProgress();
     private final AtomicLong confirmedExitNanos = new AtomicLong();
     private volatile int exitCode = Integer.MIN_VALUE;
     private volatile WalObservation walAtConfirmedExit;
     private volatile IOException walObservationFailure;
+    private volatile int nativeToJavaStateAtExit = Integer.MIN_VALUE;
 
     private TrackedConnection(
         Process process,
-        LocalSidecarClient.Transport transport,
+        TrackingTransport transport,
         CountingInputStream input,
         Path stderr,
-        Path directory) {
+        Path directory,
+        SidecarSharedMemory.GenerationResources sharedMemory) {
       this.process = process;
       this.transport = transport;
       this.input = input;
       this.stderr = stderr;
       this.directory = directory;
+      this.sharedMemory = sharedMemory;
     }
 
     @Override
@@ -884,19 +971,31 @@ public final class SidecarCrashQualification {
           }
         }
         confirmedExitNanos.compareAndSet(0, System.nanoTime());
+        nativeToJavaStateAtExit = sharedMemory.nativeToJava().rawState(0);
       }
       return exited;
     }
 
     @Override
     public boolean endpointClosed() {
-      return endpointClosed.get();
+      return cleanup.confirmed();
     }
 
     @Override
     public void close() throws IOException {
-      if (endpointClosed.compareAndSet(false, true)) {
+      cleanup.close(this::closeTransport, sharedMemory::close);
+    }
+
+    private void closeTransport() throws IOException {
+      try {
         transport.close();
+      } catch (IOException error) {
+        if (transport.isOpen()) {
+          throw error;
+        }
+      }
+      if (transport.isOpen()) {
+        throw new IOException("qualification transport close was not confirmed");
       }
     }
 
@@ -917,6 +1016,18 @@ public final class SidecarCrashQualification {
       return input.count();
     }
 
+    private int receivedFrameCount() {
+      return transport.receivedFrameCount();
+    }
+
+    private List<WireFrameObservation> receivedFramesAfter(int firstIndex) {
+      return transport.receivedFramesAfter(firstIndex);
+    }
+
+    private long openAdmissionSequence() {
+      return transport.openAdmissionSequence();
+    }
+
     private long stderrSize() throws IOException {
       var size = Files.size(stderr);
       require(size <= MAX_PROCESS_OUTPUT, "sidecar stderr exceeded 1 MiB");
@@ -934,6 +1045,112 @@ public final class SidecarCrashQualification {
       }
       require(walAtConfirmedExit != null, "failed-generation WAL was not captured at exit");
       return walAtConfirmedExit;
+    }
+
+    private int nativeToJavaStateAtExit() {
+      require(nativeToJavaStateAtExit != Integer.MIN_VALUE,
+          "native-to-Java shared-memory state at exit is unavailable");
+      return nativeToJavaStateAtExit;
+    }
+  }
+
+  private record WireFrameObservation(
+      SidecarIpcV1.MessageType messageType,
+      boolean sharedMemoryCarrier,
+      int wireBytes,
+      long admissionSequence) {}
+
+  /** Records only complete native-to-Java wire frames before any SHM carrier resolution. */
+  private static final class TrackingTransport implements LocalSidecarClient.Transport {
+    private final LocalSidecarClient.Transport delegate;
+    private final List<WireFrameObservation> receivedFrames = new ArrayList<>();
+
+    private TrackingTransport(LocalSidecarClient.Transport delegate) {
+      this.delegate = Objects.requireNonNull(delegate, "delegate");
+    }
+
+    @Override
+    public void write(byte[] canonicalFrame) throws IOException {
+      delegate.write(canonicalFrame);
+    }
+
+    @Override
+    public byte[] read() throws IOException {
+      var result = delegate.read();
+      SidecarIpcV1.MessageType messageType;
+      long admissionSequence = 0L;
+      var sharedMemoryCarrier = SidecarSharedMemory.isSharedMemoryCarrier(result);
+      if (sharedMemoryCarrier) {
+        messageType = SidecarSharedMemory.inspectCarrierHeader(result).messageType();
+      } else {
+        var frame = SidecarIpcV1.decodeFrame(result);
+        messageType = frame.messageType();
+        if (messageType == SidecarIpcV1.MessageType.OPEN_RESPONSE) {
+          admissionSequence = frame.payload().u64Bits(4);
+        }
+      }
+      synchronized (receivedFrames) {
+        receivedFrames.add(
+            new WireFrameObservation(
+                messageType, sharedMemoryCarrier, result.length, admissionSequence));
+      }
+      return result;
+    }
+
+    @Override
+    public byte[] resolveSharedMemoryCarrier(byte[] carrier) throws IOException {
+      return delegate.resolveSharedMemoryCarrier(carrier);
+    }
+
+    @Override
+    public boolean acceptSharedMemoryAck(SidecarIpcV1.Frame notification)
+        throws IOException {
+      return delegate.acceptSharedMemoryAck(notification);
+    }
+
+    @Override
+    public boolean sharedMemoryConfigured() {
+      return delegate.sharedMemoryConfigured();
+    }
+
+    @Override
+    public boolean lastWriteSharedMemory() {
+      return delegate.lastWriteSharedMemory();
+    }
+
+    @Override
+    public boolean isOpen() {
+      return delegate.isOpen();
+    }
+
+    @Override
+    public void close() throws IOException {
+      delegate.close();
+    }
+
+    private int receivedFrameCount() {
+      synchronized (receivedFrames) {
+        return receivedFrames.size();
+      }
+    }
+
+    private List<WireFrameObservation> receivedFramesAfter(int firstIndex) {
+      synchronized (receivedFrames) {
+        require(firstIndex >= 0 && firstIndex <= receivedFrames.size(),
+            "wire-frame observation index is outside bounds");
+        return List.copyOf(receivedFrames.subList(firstIndex, receivedFrames.size()));
+      }
+    }
+
+    private long openAdmissionSequence() {
+      synchronized (receivedFrames) {
+        var opens = receivedFrames.stream()
+            .filter(frame -> frame.messageType() == SidecarIpcV1.MessageType.OPEN_RESPONSE)
+            .toList();
+        require(opens.size() == 1 && opens.get(0).admissionSequence() != 0L,
+            "wire observations do not contain one admitted OPEN response");
+        return opens.get(0).admissionSequence();
+      }
     }
   }
 
@@ -967,25 +1184,11 @@ public final class SidecarCrashQualification {
     }
   }
 
-  private static SidecarIpcV1.Frame safePreparseSentinel() {
-    var payload = SidecarIpcV1.responsePayload(
-        SidecarIpcV1.MessageType.ERROR_RESPONSE,
-        new byte[0],
-        SidecarIpcV1.emptySha256(),
-        List.of(
-            SidecarIpcV1.u8(3, SidecarIpcV1.AdmissionState.NOT_ADMITTED_PROVEN.code()),
-            SidecarIpcV1.u64(4, 0),
-            SidecarIpcV1.u32(5, SidecarIpcV1.NATIVE_STATUS_UNAVAILABLE),
-            SidecarIpcV1.u32(16, SidecarIpcV1.LocalError.FRAME_INVALID.code()),
-            SidecarIpcV1.u16(17, SidecarIpcV1.MessageType.SUBMIT_REQUEST.code()),
-            SidecarIpcV1.u64(18, 0),
-            SidecarIpcV1.text(19, "shared-memory carrier disabled before admission")));
-    return SidecarIpcV1.frame(
-        SidecarIpcV1.MessageType.ERROR_RESPONSE, id(1), 1, id(2), 1, payload);
-  }
-
   private static int expectedSidecarExitCode(Cut cut) {
-    return cut == Cut.DURING_IPC_RESPONSE_FRAME ? 87 : 86;
+    if (cut == Cut.DURING_IPC_RESPONSE_FRAME) {
+      return 87;
+    }
+    return cut == Cut.DURING_SHARED_MEMORY_PUBLICATION ? 88 : 86;
   }
 
   private static byte[] nestedDescriptor() {
@@ -994,7 +1197,7 @@ public final class SidecarCrashQualification {
             64,
             1,
             0,
-            7,
+            SidecarIpcV1.NESTED_ABI_FEATURE_BITS,
             "1.0.0",
             "003.1.0",
             FORMAL_SEMANTICS_ID,

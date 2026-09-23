@@ -26,13 +26,13 @@ DESIGN_PATH: Final = FEATURE / "sidecar-refinement-design.json"
 DESIGN_MARKDOWN_PATH: Final = FEATURE / "isolated-sidecar-refinement.md"
 PROFILE_RISK_PATH: Final = FEATURE / "profile-risk-decision.json"
 EXPECTED_DESIGN_SHA256: Final = (
-    "sha256:d1e26d2a5b207fb0632f2d775598e8fdb0545bba0509c3012b3daed19909e04e"
+    "sha256:dc031e7fb413d9ef1ed33b2d4fe1fedb170100e2782f636e7162b40cabbeb4c8"
 )
 EXPECTED_MARKDOWN_SHA256: Final = (
-    "sha256:bccea898277be4fe011f1eb4cde507abe3614cb52f6624640e54104590fe152e"
+    "sha256:75f0ec2cf825db9940e2dd13f8ba81d46fd2aca40e63cbd8e424921963fbe368"
 )
 EXPECTED_CANONICAL_DESIGN_ID: Final = (
-    "sha256:204ff9dae0ed97684c18a947501217964cea63b82e44a4c4fade4f31cb6c642f"
+    "sha256:080074ff7de58d7ba025b8156ceafb0085937bb6ed74485d217af664d0ecf6ef"
 )
 HISTORICAL_FAIL_COMMIT: Final = "fc012861d8a1577f155abb94877102adef5cbf36"
 HISTORICAL_FAIL_TREE: Final = "deeb2bda4c0a7e68015843d2ebe6fe4396edfb7b"
@@ -97,6 +97,9 @@ EXPECTED_BOUNDS: Final = {
     "ingress_queue_requests": 64,
     "max_canonical_command_bytes": 16_777_216,
     "max_canonical_effect_bytes": 16_777_216,
+    "max_canonical_vote_bytes": 16_769_024,
+    "max_canonical_vote_policy_bytes": 4_194_304,
+    "max_canonical_vote_receipt_bytes": 16_777_216,
     "max_identity_text_bytes": 256,
     "max_inline_payload_bytes": 16_785_408,
     "max_logical_payload_bytes": 16_785_408,
@@ -116,6 +119,7 @@ EXPECTED_OPERATIONS: Final = [
     "DESCRIBE",
     "OPEN",
     "SUBMIT",
+    "VOTE",
     "STATE",
     "SNAPSHOT",
     "CLOSE",
@@ -201,6 +205,11 @@ EXPECTED_OPCODE_FLAG_REQUIREMENTS: Final = {
         "RESPONSE_EXPECTED",
     ],
     "SUBMIT_RESPONSE": ["ONE_OF_PAYLOAD_INLINE_OR_PAYLOAD_SHARED_MEMORY"],
+    "VOTE_REQUEST": [
+        "ONE_OF_PAYLOAD_INLINE_OR_PAYLOAD_SHARED_MEMORY",
+        "RESPONSE_EXPECTED",
+    ],
+    "VOTE_RESPONSE": ["ONE_OF_PAYLOAD_INLINE_OR_PAYLOAD_SHARED_MEMORY"],
 }
 EXPECTED_RESPONSE_CAPACITY_RULE: Final = (
     "REQUEST_WITH_RESPONSE_EXPECTED_INCLUDING_CLIENT_HELLO_MUST_SET_CAPACITY_EXACTLY_TO_"
@@ -227,24 +236,26 @@ EXPECTED_MESSAGE_TYPES: Final = {
     "STATE_RESPONSE": 49,
     "SUBMIT_REQUEST": 32,
     "SUBMIT_RESPONSE": 33,
+    "VOTE_REQUEST": 34,
+    "VOTE_RESPONSE": 35,
 }
 EXPECTED_FRAME_LAYOUT_ID: Final = (
-    "sha256:46fcc91280fc2c878cb176bf6e9d855f8e39ac9fffcf18709b1a6b80a30ce18e"
+    "sha256:b8d8a521133d4d5b41ab5035f2cfaa82594a4789c8b83ad0c81b77a67afbcb4b"
 )
 EXPECTED_BOUNDS_ID: Final = (
-    "sha256:32d9e791ac35dc6bb061aaedb0a67ee28ad1a2662bbb0ffd1bfc9177b055d0f8"
+    "sha256:12259ada8ff8a14febf167b2631768911fefd9fd26c7298b7ff0f3d103837708"
 )
 EXPECTED_FLAG_TABLE_ID: Final = (
-    "sha256:6aa94eb75b5b6af99132f71b2753d56988454be86a371b46f46241cf7a8e33d5"
+    "sha256:857da723287529fe38f3f6479decb962f435e21b541b38abe71b28489933b248"
 )
 EXPECTED_MESSAGE_TYPE_TABLE_ID: Final = (
-    "sha256:dfa3fe65b946e6527b317168ef0ea000a4610bba1e9c1ed9ebd099adff71e64e"
+    "sha256:1581d40a12765ea54c1abf7f3c5434025f40d6718e639c9f9fbfcc1eb6e07950"
 )
 EXPECTED_PAYLOAD_SCHEMA_ID: Final = (
-    "sha256:31edfa48d707fb06cd24624d1790946981294bb093d74d44c202a5d15c5376c5"
+    "sha256:fdeb9e2607dfe2661fff8e99a9510ae1eb6658e516f1496ade6fd1dd6e7af7ce"
 )
 EXPECTED_SHARED_MEMORY_ID: Final = (
-    "sha256:0a48282fddae72060e9b93c02f97f174b56f8a20b07aabb88ee51f7ef03f5aa4"
+    "sha256:17ce8022d0075e715e8c699ba17c27d9901bf08727579ab977e74f169b205b78"
 )
 EXPECTED_DESCRIPTOR_HANDSHAKE: Final = {
     "bound_fields": [
@@ -270,13 +281,13 @@ EXPECTED_DESCRIPTOR_HANDSHAKE: Final = {
     "canonical_encoding_id": (
         "sha256:393cd207a2cd3fd4da366be56095a3467e3184c2c5db1d300d1c07d49cdd7aff"
     ),
-    "bounds_rule": "V1_EXACT_FROZEN_BOUNDS_HASH_NO_NEGOTIATION_OR_LOWERING",
+    "bounds_rule": "V1_1_EXACT_FROZEN_BOUNDS_HASH_NO_NEGOTIATION_OR_LOWERING",
     "bounds_sha256": EXPECTED_BOUNDS_ID,
     "flag_table_sha256": EXPECTED_FLAG_TABLE_ID,
     "frame_layout_sha256": EXPECTED_FRAME_LAYOUT_ID,
     "initial_state": "DESCRIBE_ONLY",
     "major_version_rule": "EXACT_MATCH",
-    "minor_version_rule": "EVERY_REQUIRED_FIELD_OPERATION_FLAG_AND_BOUND_MUST_BE_SUPPORTED",
+    "minor_version_rule": "EXACT_1_1_NO_DOWNGRADE",
     "message_type_table_sha256": EXPECTED_MESSAGE_TYPE_TABLE_ID,
     "nested_c_abi_fields": [
         "STRUCT_SIZE",
@@ -303,10 +314,19 @@ EXPECTED_SHARED_MEMORY: Final = {
         "TERMINAL_CONTROL_STATE; LOST_OR_DUPLICATE_ACK_STUTTERS"
     ),
     "ack_frame_transport": (
-        "SHARED_MEMORY_ACK_INLINE_ONLY_AFTER_CONSUMER_RELEASE_STORES_ACKED_OR_REJECTED"
+        "OPTIONAL_SHARED_MEMORY_ACK_INLINE_ONLY_AFTER_CONSUMER_RELEASE_STORES_ACKED_OR_"
+        "REJECTED; ABSENCE_OR_DUPLICATE_STUTTERS"
+    ),
+    "ack_frame_validation": (
+        "CURRENT_SESSION_GENERATION_CORRELATION_REFERENCE_DIGEST_REQUEST_ID_REQUEST_DIGEST_"
+        "AND_DISPOSITION_EXACT; STALE_RECLAIMED_OR_DUPLICATE_NOTIFICATION_STUTTERS"
     ),
     "atomic_abi_requirement": (
         "ALIGNED_LOCK_FREE_INTERPROCESS_U32_BIG_ENDIAN_ATOMICS_OR_DISABLE_SHM_AND_USE_BOUNDED_COPY"
+    ),
+    "atomic_probe_rule": (
+        "PRELAUNCH_ALIGNED_MAP_SHARED_CROSS_PROCESS_U32_CAS_AND_RAW_BIG_ENDIAN_STATE_BYTES_"
+        "REQUIRED_BEFORE_ENABLEMENT; FAILURE_SELECTS_BOUNDED_COPY"
     ),
     "borrowed_pointer_lifetime": "SYNCHRONOUS_NATIVE_CALL_ONLY_NO_RETAIN_AFTER_RETURN",
     "bounded_copy_fallback": "MANDATORY_BYTE_AND_TRACE_IDENTICAL",
@@ -419,6 +439,8 @@ EXPECTED_CARRIER_ELIGIBILITY: Final = {
     "STATE_RESPONSE": "INLINE_OR_SHARED_MEMORY",
     "SUBMIT_REQUEST": "INLINE_OR_SHARED_MEMORY",
     "SUBMIT_RESPONSE": "INLINE_OR_SHARED_MEMORY",
+    "VOTE_REQUEST": "INLINE_OR_SHARED_MEMORY",
+    "VOTE_RESPONSE": "INLINE_OR_SHARED_MEMORY",
 }
 EXPECTED_ADMISSION_ENCODING_RULES: Final = [
     (
@@ -426,8 +448,8 @@ EXPECTED_ADMISSION_ENCODING_RULES: Final = [
         "ZERO_AND_NO_OPERATION_RESULT_AUTHORITY"
     ),
     (
-        "NOT_ADMITTED_PROVEN_REQUIRES_ADMITTED_SEQUENCE_ZERO_NATIVE_STATUS_UNAVAILABLE_"
-        "4294967295_AND_ERROR_RESPONSE"
+        "NOT_ADMITTED_PROVEN_REQUIRES_ADMITTED_SEQUENCE_ZERO_NONZERO_NATIVE_STATUS_AND_"
+        "ERROR_RESPONSE"
     ),
     (
         "ADMITTED_OUTCOME_AVAILABLE_REQUIRES_ADMITTED_SEQUENCE_NONZERO; SUCCESS_USES_"
@@ -460,6 +482,18 @@ EXPECTED_WIRE_TYPE_VALUES: Final = {
     "U32_BE": 3,
     "U64_BE": 4,
     "U8": 1,
+}
+EXPECTED_SHARED_MEMORY_DISPOSITION_VALUES: Final = {
+    "ACKED": 1,
+    "REJECTED_BOUNDS": 4,
+    "REJECTED_DIGEST": 2,
+    "REJECTED_STALE": 3,
+}
+EXPECTED_OPTIONAL_FIELD_RULES: Final = {
+    "OPEN_REQUEST_FIELD_20": (
+        "ABSENT_OR_EXACTLY_ONE_NONEMPTY_OPAQUE_CANONICAL_VOTE_POLICY_MAX_4194304_INCLUDED_"
+        "IN_REQUEST_DIGEST; ABSENT_IS_SUBMIT_ONLY"
+    )
 }
 EXPECTED_NESTED_C_ABI_DESCRIPTOR: Final = {
     "encoded_length_rule": "U32_BE_TOTAL_DESCRIPTOR_BYTES",
@@ -509,6 +543,40 @@ EXPECTED_RETRY_AND_STALE_RESPONSE: Final = {
     ),
     "session_reconnect_same_generation_forbidden": True,
     "stale_response": "DISCARD_NO_PEER_SEND_NO_STATE_CHANGE",
+}
+EXPECTED_VOTE_BOUNDARY: Final = {
+    "java_ownership": (
+        "OPAQUE_BYTES_ONLY_NO_VOTE_POLICY_OR_VOTE_OR_RECEIPT_PARSE_AND_NO_ACTION_CONTEXT_"
+        "PARENT_OR_GUARD_CHOICE"
+    ),
+    "native_authority": (
+        "NATIVE_PARSE_VALIDATE_ADMIT_JOURNAL_DURABILITY_REPLAY_AND_RECEIPT_AUTHORSHIP_ONLY"
+    ),
+    "open_policy_rule": (
+        "OPEN_FIELD_20_ABSENT_OR_EXACTLY_ONE_NONEMPTY_OPAQUE_CANONICAL_POLICY; ABSENT_"
+        "PRESERVES_SUBMIT_ONLY_RUNTIME"
+    ),
+    "persist_before_expose": (
+        "VALIDATE_VOTE_AND_POLICY_GUARDS_THEN_APPEND_VOTE_JOURNAL_THEN_DURABILITY_BARRIER_"
+        "THEN_COMMIT_NATIVE_VOTE_STATE_THEN_AUTHOR_CANONICAL_RECEIPT_THEN_FRAME_OR_PUBLISH_"
+        "RESPONSE"
+    ),
+    "request_rule": (
+        "VOTE_REQUEST_IS_REQUEST_ID_AND_REQUEST_DIGEST_PLUS_ONE_OPAQUE_CANONICAL_VOTE_AT_"
+        "MOST_16769024_BYTES"
+    ),
+    "response_reservation_rule": (
+        "RESERVE_MAX_LOGICAL_RESPONSE_CAPACITY_BEFORE_NATIVE_ADMISSION; RECEIPT_MAX_16777216_"
+        "PLUS_TLV_METADATA_MUST_FIT_16785408"
+    ),
+    "response_rule": (
+        "VOTE_RESPONSE_IS_STANDARD_ADMISSION_PROOF_PLUS_ONE_OPAQUE_NATIVE_AUTHORED_"
+        "CANONICAL_RECEIPT_AND_ITS_SHA256"
+    ),
+    "retry_rule": (
+        "EXACT_REQUEST_RETRY_DELEGATES_TO_NATIVE_DURABLE_VOTE_REPLAY; JAVA_CACHE_IS_NEVER_"
+        "REPLAY_AUTHORITY"
+    ),
 }
 EXPECTED_TIMEOUT_AND_CRASH_DETECTION: Final = {
     "alive_after_timeout_resolution": (
@@ -573,7 +641,7 @@ EXPECTED_TRACE_PROJECTION: Final = [
         "projection": "ACT-CRASH_ONCE_PER_GENERATION",
     },
     {
-        "concrete_events": ["SUBMIT_DISPATCH"],
+        "concrete_events": ["SUBMIT_OR_VOTE_DISPATCH"],
         "projection": "STUTTER_TRANSPORT_MECHANICS",
     },
     {
@@ -781,11 +849,12 @@ def validate_design(document: dict[str, Any]) -> None:
             "shared_memory",
             "timeout_and_crash_detection",
             "version",
+            "vote_boundary",
         },
         "SIDECAR_IPC_FIELDS",
     )
     require(contract["contract_name"] == "delta-local-sidecar-ipc", "SIDECAR_IPC_NAME")
-    require(contract["version"] == {"major": 1, "minor": 0}, "SIDECAR_IPC_VERSION")
+    require(contract["version"] == {"major": 1, "minor": 1}, "SIDECAR_IPC_VERSION")
     require(contract["operations"] == EXPECTED_OPERATIONS, "SIDECAR_IPC_OPERATIONS")
     require(contract["bounds"] == EXPECTED_BOUNDS, "SIDECAR_IPC_BOUNDS")
     require(
@@ -918,6 +987,14 @@ def validate_design(document: dict[str, Any]) -> None:
     )
     require(payload["wire_type_values"] == EXPECTED_WIRE_TYPE_VALUES, "SIDECAR_WIRE_TYPES")
     require(
+        payload["shared_memory_disposition_values"] == EXPECTED_SHARED_MEMORY_DISPOSITION_VALUES,
+        "SIDECAR_SHARED_MEMORY_DISPOSITIONS",
+    )
+    require(
+        payload["optional_field_rules"] == EXPECTED_OPTIONAL_FIELD_RULES,
+        "SIDECAR_OPTIONAL_FIELDS",
+    )
+    require(
         payload["nested_c_abi_descriptor"] == EXPECTED_NESTED_C_ABI_DESCRIPTOR,
         "SIDECAR_NESTED_ABI_DESCRIPTOR",
     )
@@ -963,6 +1040,7 @@ def validate_design(document: dict[str, Any]) -> None:
         contract["timeout_and_crash_detection"] == EXPECTED_TIMEOUT_AND_CRASH_DETECTION,
         "SIDECAR_TIMEOUT_CRASH_DETECTION",
     )
+    require(contract["vote_boundary"] == EXPECTED_VOTE_BOUNDARY, "SIDECAR_VOTE_BOUNDARY")
 
     comparison = document["comparison_plan"]
     require(
@@ -987,7 +1065,7 @@ def validate_design(document: dict[str, Any]) -> None:
     require(len(comparison["copy_accounting"]) == 8, "SIDECAR_COPY_ACCOUNTING")
     require(len(comparison["required_measurements"]) == 11, "SIDECAR_MEASUREMENTS")
     require(
-        len(comparison["exact_cross_profile_equalities"]) == 6,
+        len(comparison["exact_cross_profile_equalities"]) == 7,
         "SIDECAR_CROSS_PROFILE_EQUALITY",
     )
     require(len(comparison["hard_gates_common"]) == 12, "SIDECAR_COMMON_HARD_GATES")

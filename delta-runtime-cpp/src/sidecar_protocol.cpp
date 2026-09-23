@@ -72,6 +72,8 @@ bool known_type(MessageType type) noexcept {
     case MessageType::open_response:
     case MessageType::submit_request:
     case MessageType::submit_response:
+    case MessageType::vote_request:
+    case MessageType::vote_response:
     case MessageType::state_request:
     case MessageType::state_response:
     case MessageType::snapshot_request:
@@ -153,6 +155,7 @@ bool is_request(MessageType type) noexcept {
     case MessageType::client_hello:
     case MessageType::open_request:
     case MessageType::submit_request:
+    case MessageType::vote_request:
     case MessageType::state_request:
     case MessageType::snapshot_request:
     case MessageType::close_request:
@@ -168,6 +171,7 @@ bool is_response(MessageType type) noexcept {
     case MessageType::server_descriptor:
     case MessageType::open_response:
     case MessageType::submit_response:
+    case MessageType::vote_response:
     case MessageType::state_response:
     case MessageType::snapshot_response:
     case MessageType::close_response:
@@ -179,11 +183,31 @@ bool is_response(MessageType type) noexcept {
   }
 }
 
-std::uint32_t required_flags(MessageType type) {
+bool is_notification(MessageType type) noexcept {
+  return type == MessageType::shared_memory_ack;
+}
+
+bool shared_memory_eligible(MessageType type) noexcept {
+  switch (type) {
+    case MessageType::open_request:
+    case MessageType::submit_request:
+    case MessageType::submit_response:
+    case MessageType::vote_request:
+    case MessageType::vote_response:
+    case MessageType::state_response:
+    case MessageType::snapshot_response:
+      return true;
+    default:
+      return false;
+  }
+}
+
+std::uint32_t inline_flags(MessageType type) {
   switch (type) {
     case MessageType::client_hello:
     case MessageType::open_request:
     case MessageType::submit_request:
+    case MessageType::vote_request:
     case MessageType::snapshot_request:
     case MessageType::close_request:
       return flag_payload_inline | flag_response_expected;
@@ -193,6 +217,7 @@ std::uint32_t required_flags(MessageType type) {
     case MessageType::server_descriptor:
     case MessageType::open_response:
     case MessageType::submit_response:
+    case MessageType::vote_response:
     case MessageType::state_response:
     case MessageType::snapshot_response:
     case MessageType::close_response:
@@ -203,6 +228,13 @@ std::uint32_t required_flags(MessageType type) {
   }
   reject("unknown message type");
 }
+
+std::uint32_t shared_memory_flags(MessageType type) {
+  require(shared_memory_eligible(type), "message type is not shared-memory eligible");
+  return (inline_flags(type) & ~flag_payload_inline) | flag_payload_shared_memory;
+}
+
+std::uint32_t required_flags(MessageType type) { return inline_flags(type); }
 
 Digest sha256(std::span<const std::byte> bytes) {
   return digest_from_identity("sha256:" + delta::core::canonical::sha256_hex(bytes));
@@ -336,7 +368,7 @@ Payload decode_payload(std::span<const std::byte> encoded) {
 
 Bytes encode_frame(const Frame& frame) {
   require(known_type(frame.type), "unknown frame message type");
-  require(frame.flags == required_flags(frame.type), "frame flags differ from frozen table");
+  require(frame.flags == inline_flags(frame.type), "frame flags differ from frozen table");
   require(frame.generation != 0U && frame.sequence != 0U, "zero generation or sequence");
   require(!frame.payload.empty() && frame.payload.size() <= max_logical_payload_bytes, "invalid inline payload size");
   const auto expected_capacity = is_request(frame.type) ? max_response_capacity : 0U;
@@ -361,8 +393,8 @@ Bytes encode_frame(const Frame& frame) {
   return output;
 }
 
-Frame decode_frame(std::span<const std::byte> encoded) {
-  require(encoded.size() >= header_bytes && encoded.size() <= max_control_envelope_bytes, "invalid frame size");
+FrameHeader decode_frame_header(std::span<const std::byte> encoded) {
+  require(encoded.size() == header_bytes, "invalid frame header size");
   require(std::equal(magic.begin(), magic.end(), encoded.begin()), "bad frame magic");
   require(read_be<std::uint16_t>(encoded, 8U) == ipc_major, "unsupported IPC major");
   require(read_be<std::uint16_t>(encoded, 10U) == ipc_minor, "unsupported IPC minor");
@@ -370,30 +402,70 @@ Frame decode_frame(std::span<const std::byte> encoded) {
   const auto type = static_cast<MessageType>(read_be<std::uint16_t>(encoded, 14U));
   require(known_type(type), "unknown frame message type");
   const auto flags = read_be<std::uint32_t>(encoded, 16U);
-  require(flags == required_flags(type), "frame flags differ from frozen table");
+  constexpr auto known_flags = flag_payload_inline | flag_payload_shared_memory |
+                               flag_response_expected | flag_read_only;
+  require((flags & ~known_flags) == 0U, "unknown frame flag bit");
+  const auto inline_carrier = (flags & flag_payload_inline) != 0U;
+  const auto shared_carrier = (flags & flag_payload_shared_memory) != 0U;
+  require(inline_carrier != shared_carrier, "frame payload carrier is not exclusive");
+  if (shared_carrier) {
+    require(shared_memory_eligible(type), "message type is not shared-memory eligible");
+    require(flags == shared_memory_flags(type), "frame flags differ from frozen table");
+  } else {
+    require(flags == inline_flags(type), "frame flags differ from frozen table");
+  }
   const auto generation = read_be<std::uint64_t>(encoded, 36U);
   const auto sequence = read_be<std::uint64_t>(encoded, 60U);
   const auto payload_length = read_be<std::uint64_t>(encoded, 68U);
   const auto response_capacity = read_be<std::uint64_t>(encoded, 76U);
   require(generation != 0U && sequence != 0U, "zero generation or sequence");
-  require(payload_length != 0U && payload_length <= max_logical_payload_bytes, "invalid payload length");
-  require(payload_length == static_cast<std::uint64_t>(encoded.size() - header_bytes),
-          "frame length mismatch or trailing bytes");
-  require(response_capacity == (is_request(type) ? max_response_capacity : 0U), "invalid response capacity");
-  require(std::all_of(encoded.begin() + 116, encoded.begin() + 128, [](std::byte item) {
+  require(payload_length != 0U && payload_length <= max_logical_payload_bytes,
+          "invalid payload length");
+  require(response_capacity == (is_request(type) ? max_response_capacity : 0U),
+          "invalid response capacity");
+  require(std::all_of(encoded.begin() + 116, encoded.end(), [](std::byte item) {
     return item == std::byte{0};
   }), "nonzero reserved header byte");
   Id128 session{};
   Id128 correlation{};
-  Digest expected_digest{};
+  Digest digest{};
   std::copy_n(encoded.begin() + 20, session.size(), session.begin());
   std::copy_n(encoded.begin() + 44, correlation.size(), correlation.begin());
-  std::copy_n(encoded.begin() + 84, expected_digest.size(), expected_digest.begin());
+  std::copy_n(encoded.begin() + 84, digest.size(), digest.begin());
+  return FrameHeader{
+      type,
+      flags,
+      session,
+      generation,
+      correlation,
+      sequence,
+      payload_length,
+      response_capacity,
+      digest,
+  };
+}
+
+Frame decode_frame(std::span<const std::byte> encoded) {
+  require(encoded.size() >= header_bytes && encoded.size() <= max_control_envelope_bytes, "invalid frame size");
+  const auto header = decode_frame_header(encoded.first(header_bytes));
+  require(header.flags == inline_flags(header.type),
+          "decode_frame requires an inline carrier");
+  require(header.payload_length == static_cast<std::uint64_t>(encoded.size() - header_bytes),
+          "frame length mismatch or trailing bytes");
   Bytes payload(encoded.begin() + header_bytes, encoded.end());
-  require(sha256(payload) == expected_digest, "payload digest mismatch");
+  require(sha256(payload) == header.payload_sha256, "payload digest mismatch");
   const auto decoded_payload = decode_payload(payload);
-  require(decoded_payload.type == type, "frame and payload types differ");
-  return Frame{type, flags, session, generation, correlation, sequence, response_capacity, std::move(payload)};
+  require(decoded_payload.type == header.type, "frame and payload types differ");
+  return Frame{
+      header.type,
+      header.flags,
+      header.session_id,
+      header.generation,
+      header.correlation_id,
+      header.sequence,
+      header.response_capacity,
+      std::move(payload),
+  };
 }
 
 Digest request_digest(MessageType type, std::span<const Field> fields) {
@@ -461,6 +533,13 @@ Field field_text(std::uint16_t id, std::string_view value) {
   }
   require(canonical_utf8(bytes), "text is not canonical UTF-8");
   return Field{id, WireType::canonical_utf8, std::move(bytes)};
+}
+
+Field field_shared_memory_reference(
+    std::uint16_t id,
+    std::span<const std::byte> value) {
+  require(value.size() == 64U, "shared-memory reference has wrong size");
+  return Field{id, WireType::shm_reference_64, Bytes(value.begin(), value.end())};
 }
 
 const Field& require_field(

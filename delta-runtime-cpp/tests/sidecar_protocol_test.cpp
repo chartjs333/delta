@@ -191,6 +191,45 @@ void test_identity_and_bounds() {
                   "lowered response capacity was accepted");
 }
 
+void test_vote_opcode_and_opaque_digest() {
+  expect(static_cast<std::uint16_t>(sidecar::MessageType::vote_request) == 34U,
+         "vote request opcode changed");
+  expect(static_cast<std::uint16_t>(sidecar::MessageType::vote_response) == 35U,
+         "vote response opcode changed");
+  expect(sidecar::is_request(sidecar::MessageType::vote_request) &&
+             sidecar::is_response(sidecar::MessageType::vote_response),
+         "vote request/response classification changed");
+  expect(sidecar::shared_memory_eligible(sidecar::MessageType::vote_request) &&
+             sidecar::shared_memory_eligible(sidecar::MessageType::vote_response),
+         "vote carrier eligibility changed");
+
+  std::vector<sidecar::Field> operation{
+      sidecar::field_bytes(16U, std::as_bytes(std::span("opaque-vote", 11U))),
+  };
+  const auto digest = sidecar::request_digest(sidecar::MessageType::vote_request, operation);
+  const std::vector<sidecar::Field> fields{
+      sidecar::field_bytes(1U, std::as_bytes(std::span("vote-1", 6U))),
+      sidecar::field_digest(2U, digest),
+      operation.front(),
+  };
+  const sidecar::Frame frame{
+      sidecar::MessageType::vote_request,
+      sidecar::required_flags(sidecar::MessageType::vote_request),
+      id(7U),
+      9U,
+      id(41U),
+      1U,
+      sidecar::max_response_capacity,
+      sidecar::encode_payload(sidecar::MessageType::vote_request, fields),
+  };
+  expect(sidecar::decode_frame(sidecar::encode_frame(frame)) == frame,
+         "opaque vote frame round trip differs");
+  operation[0] = sidecar::field_bytes(
+      16U, std::as_bytes(std::span("opaque-votf", 11U)));
+  expect(sidecar::request_digest(sidecar::MessageType::vote_request, operation) != digest,
+         "opaque vote bytes were omitted from request digest");
+}
+
 }  // namespace
 
 int main() {
@@ -200,6 +239,7 @@ int main() {
     test_payload_mutations();
     test_text_and_scalar_contracts();
     test_identity_and_bounds();
+    test_vote_opcode_and_opaque_digest();
   } catch (const std::exception& error) {
     std::cerr << "sidecar protocol test failed: " << error.what() << '\n';
     return 1;

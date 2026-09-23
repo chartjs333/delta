@@ -1,12 +1,15 @@
 #pragma once
 
 #include <delta/core/canonical.hpp>
+#include <delta/core/consensus.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <future>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -22,6 +25,7 @@ enum class ErrorCode {
   sequence_invalid,
   request_conflict,
   recovery_mismatch,
+  durable_binding_lost,
   simulated_crash,
 };
 
@@ -35,6 +39,8 @@ class RuntimeError final : public std::runtime_error {
   ErrorCode code_;
 };
 
+[[nodiscard]] std::uint64_t checked_next_journal_sequence(std::uint64_t current);
+
 enum class CrashPoint {
   none,
   before_wal_append,
@@ -45,10 +51,30 @@ enum class CrashPoint {
   after_effect_copy_before_return,
 };
 
+// Optional startup binding supplied by an owner that has already opened and
+// validated the durable WAL. On POSIX this closes the pathname lookup gap
+// between sidecar preflight and Runtime recovery. Embedded runtimes may omit
+// it and let Wal establish its own identity.
+struct DurableFileIdentity {
+  std::uint64_t device;
+  std::uint64_t inode;
+
+  bool operator==(const DurableFileIdentity&) const = default;
+};
+
 struct Config {
   std::filesystem::path directory;
   core::canonical::Bytes initial_state_bytes;
   std::size_t submission_capacity = 64U;
+  // Invoked at every durable I/O and replay-exposure boundary. The sidecar
+  // supplies a fail-closed pathname-to-descriptor identity check; embedded
+  // runtimes may leave it empty.
+  std::function<void()> durable_binding_guard;
+  // A missing policy makes this a submit-only handle. record_vote() always
+  // fails closed unless the handle was opened with a validated immutable round
+  // contract and validator binding.
+  std::optional<core::consensus::VoteAdmissionPolicy> vote_policy;
+  std::optional<DurableFileIdentity> expected_wal_identity;
 };
 
 struct SubmitReceipt {
@@ -65,8 +91,13 @@ struct SubmitReceipt {
 };
 
 struct VoteReceipt {
+  core::canonical::Bytes frame;
   std::string vote_id;
   std::uint64_t journal_sequence;
+  core::consensus::VoteAction action;
+  std::string formal_action_id;
+  std::string context_id;
+  core::consensus::VoteParentState parents;
   bool replay = false;
 
   bool operator==(const VoteReceipt&) const = default;

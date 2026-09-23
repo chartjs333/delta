@@ -59,6 +59,25 @@ DELTA_SIDECAR_QUALIFICATION_API void delta_sidecar_qualification_crash_v1(
     delta_sidecar_qualification_crash_point_t crash_point)
     DELTA_SIDECAR_QUALIFICATION_NOEXCEPT;
 
+/*
+ * Opens a vote-enabled native runtime, then arms the exact runtime.wal
+ * interposer and records one opaque canonical vote. The process must terminate
+ * at the real post-append/pre-fsync cut with exit 86. The immutable policy and
+ * vote use the production bounded v1 codecs; no test-only vote semantics are
+ * introduced.
+ */
+DELTA_SIDECAR_QUALIFICATION_API void
+delta_sidecar_qualification_vote_pre_durability_crash_v1(
+    const uint8_t* directory_utf8,
+    uint64_t directory_utf8_length,
+    const uint8_t* initial_state,
+    uint64_t initial_state_length,
+    const uint8_t* canonical_vote_policy,
+    uint64_t canonical_vote_policy_length,
+    const uint8_t* canonical_vote,
+    uint64_t canonical_vote_length)
+    DELTA_SIDECAR_QUALIFICATION_NOEXCEPT;
+
 #if defined(__cplusplus)
 }
 #endif

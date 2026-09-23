@@ -190,6 +190,28 @@ void test_invalid_runtime_wal_rejection(const std::filesystem::path& root) {
 }
 
 #if !defined(_WIN32)
+void test_nested_parent_symlink_rejected_on_open(
+    const std::filesystem::path& root) {
+  const auto real_parent = root / "nested-parent-real";
+  const auto linked_parent = root / "nested-parent-link";
+  const auto durable = real_parent / "durable";
+  std::error_code error;
+  std::filesystem::create_directories(durable, error);
+  expect(!error, "cannot create nested-parent durable fixture");
+  std::filesystem::create_directory_symlink(real_parent, linked_parent, error);
+  expect(!error, "cannot create nested-parent symlink fixture");
+
+  const auto configured = linked_parent / "durable";
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_open_failed,
+      "sidecar durable directory lock open failed",
+      [&configured] { sidecar::DurableDirectoryLock lock(configured); });
+  expect(
+      !std::filesystem::exists(
+          durable / std::filesystem::path(sidecar::durable_directory_lock_filename)),
+      "nested-parent symlink open created a lock file in the symlink target");
+}
+
 void test_unlinked_lock_file_cannot_bypass_directory_lock(
     const std::filesystem::path& root) {
   const auto durable = root / "unlinked-lock-file";
@@ -209,6 +231,160 @@ void test_unlinked_lock_file_cannot_bypass_directory_lock(
       [&durable] { sidecar::DurableDirectoryLock second(durable); });
   expect(first.owns_lock(), "unlink contender released the directory lock");
 }
+
+void test_pathname_rebind_fails_closed_before_runtime_io(
+    const std::filesystem::path& root) {
+  const auto durable = root / "pathname-rebind";
+  const auto original = root / "pathname-rebind-original";
+  std::error_code error;
+  std::filesystem::create_directory(durable, error);
+  expect(!error, "cannot create pathname-rebind fixture");
+
+  sidecar::DurableDirectoryLock lock(durable);
+  const auto runtime_directory = lock.runtime_directory();
+  expect(runtime_directory != durable,
+         "POSIX runtime directory did not bind the locked descriptor");
+
+  std::filesystem::rename(durable, original, error);
+  expect(!error, "cannot rename locked durable directory fixture");
+  std::filesystem::create_directory(durable, error);
+  expect(!error, "cannot create replacement durable directory fixture");
+
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar durable directory pathname binding changed",
+      [&lock] { lock.verify_path_binding(); });
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar durable directory pathname binding changed",
+      [&lock] { lock.prepare_runtime_wal(); });
+  const auto original_wal =
+      original / std::filesystem::path(sidecar::runtime_wal_filename);
+  const auto replacement_wal =
+      durable / std::filesystem::path(sidecar::runtime_wal_filename);
+  expect(!std::filesystem::exists(original_wal),
+         "pathname rebind performed a post-rebind WAL write");
+  expect(!std::filesystem::exists(replacement_wal),
+         "pathname replacement received the locked runtime WAL");
+
+  expect(std::filesystem::is_directory(runtime_directory),
+         "locked descriptor no longer identifies the original directory inode");
+  expect(!std::filesystem::exists(replacement_wal),
+         "runtime write followed a rebound durable pathname");
+}
+
+void test_symlink_substitution_fails_closed(const std::filesystem::path& root) {
+  const auto durable = root / "symlink-substitution";
+  const auto original = root / "symlink-substitution-original";
+  const auto replacement = root / "symlink-substitution-replacement";
+  std::error_code error;
+  std::filesystem::create_directory(durable, error);
+  expect(!error, "cannot create symlink-substitution fixture");
+  std::filesystem::create_directory(replacement, error);
+  expect(!error, "cannot create symlink replacement fixture");
+
+  sidecar::DurableDirectoryLock lock(durable);
+  std::filesystem::rename(durable, original, error);
+  expect(!error, "cannot rename symlink-substitution directory");
+  std::filesystem::create_directory_symlink(replacement, durable, error);
+  expect(!error, "cannot create durable-directory symlink substitution");
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar durable directory pathname binding changed",
+      [&lock] { lock.verify_path_binding(); });
+}
+
+void test_same_inode_nested_parent_symlink_back_fails_closed(
+    const std::filesystem::path& root) {
+  const auto parent = root / "nested-parent-rebind";
+  const auto displaced_parent = root / "nested-parent-rebind-original";
+  const auto durable = parent / "durable";
+  std::error_code error;
+  std::filesystem::create_directories(durable, error);
+  expect(!error, "cannot create nested-parent rebind fixture");
+
+  sidecar::DurableDirectoryLock lock(durable);
+  std::filesystem::rename(parent, displaced_parent, error);
+  expect(!error, "cannot rename nested-parent rebind fixture");
+  std::filesystem::create_directory_symlink(displaced_parent, parent, error);
+  expect(!error, "cannot create same-inode nested-parent symlink-back fixture");
+
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar durable directory pathname binding changed",
+      [&lock] { lock.verify_path_binding(); });
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar durable directory pathname binding changed",
+      [&lock] { lock.prepare_runtime_wal(); });
+  expect(
+      !std::filesystem::exists(
+          displaced_parent / "durable" /
+          std::filesystem::path(sidecar::runtime_wal_filename)),
+      "same-inode nested-parent symlink-back received a runtime WAL write");
+}
+
+void test_expected_identity_rejects_restart_rebind(
+    const std::filesystem::path& root) {
+  const auto durable = root / "restart-rebind";
+  const auto original = root / "restart-rebind-original";
+  std::error_code error;
+  std::filesystem::create_directory(durable, error);
+  expect(!error, "cannot create restart-rebind fixture");
+
+  sidecar::DurableDirectoryIdentity expected{};
+  {
+    sidecar::DurableDirectoryLock first(durable);
+    expected = first.identity();
+  }
+  std::filesystem::rename(durable, original, error);
+  expect(!error, "cannot rename restart-rebind original");
+  std::filesystem::create_directory(durable, error);
+  expect(!error, "cannot create restart-rebind replacement");
+
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar durable directory identity mismatch",
+      [&durable, expected] {
+        sidecar::DurableDirectoryLock restarted(durable, expected);
+      });
+}
+
+void test_recovery_to_ready_wal_substitution_fails_closed(
+    const std::filesystem::path& root) {
+  const auto durable = root / "recovery-ready-wal-substitution";
+  const auto wal =
+      durable / std::filesystem::path(sidecar::runtime_wal_filename);
+  const auto preflighted = durable / "runtime.wal.preflighted";
+  std::error_code error;
+  std::filesystem::create_directory(durable, error);
+  expect(!error, "cannot create recovery-to-READY substitution fixture");
+
+  sidecar::DurableDirectoryLock lock(durable);
+  lock.prepare_runtime_wal();
+  const auto pinned_identity = lock.runtime_wal_identity();
+  expect(pinned_identity.has_value(), "POSIX preflight did not retain the WAL identity");
+
+  std::filesystem::rename(wal, preflighted, error);
+  expect(!error, "cannot displace recovered WAL before READY barrier");
+  {
+    std::ofstream replacement(wal, std::ios::binary | std::ios::trunc);
+    expect(replacement.good(), "cannot create replacement WAL before READY barrier");
+  }
+
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar runtime WAL binding changed",
+      [&lock] { lock.verify_runtime_wal_binding(); });
+  expect_lock_error(
+      sidecar::DurableDirectoryLockErrorCode::lock_operation_failed,
+      "sidecar runtime WAL binding changed",
+      [&lock] { lock.prepare_runtime_wal(); });
+  expect(
+      std::filesystem::file_size(wal) == 0U &&
+          std::filesystem::file_size(preflighted) == 0U,
+      "post-recovery barrier touched a substituted WAL inode");
+}
 #endif
 
 }  // namespace
@@ -222,7 +398,13 @@ int main() {
     test_runtime_wal_durability_preflight(root);
     test_invalid_runtime_wal_rejection(root);
 #if !defined(_WIN32)
+    test_nested_parent_symlink_rejected_on_open(root);
     test_unlinked_lock_file_cannot_bypass_directory_lock(root);
+    test_pathname_rebind_fails_closed_before_runtime_io(root);
+    test_symlink_substitution_fails_closed(root);
+    test_same_inode_nested_parent_symlink_back_fails_closed(root);
+    test_expected_identity_rejects_restart_rebind(root);
+    test_recovery_to_ready_wal_substitution_fails_closed(root);
 #endif
   } catch (const std::exception& error) {
     std::cerr << "sidecar directory lock test failed: " << error.what() << '\n';

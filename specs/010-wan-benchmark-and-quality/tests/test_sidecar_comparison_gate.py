@@ -46,7 +46,7 @@ def profile_document(profile_id: str, design: dict[str, object]) -> dict[str, ob
     copy_values["STAGING_FALLBACK_INGRESS_BYTES"] = 100
     copy_values["STAGING_FALLBACK_EGRESS_BYTES"] = 100
     copy_values["ZERO_COPY_ELIGIBLE_COUNT"] = 100
-    copy_values["ZERO_COPY_HIT_COUNT"] = 90
+    copy_values["ZERO_COPY_HIT_COUNT"] = 0
     restart_count = len(comparison["paired_crash_points"])
     if profile_id == "ISOLATED_SIDECAR":
         restart_count += len(comparison["sidecar_supplemental_crash_points"])
@@ -104,6 +104,16 @@ def profile_document(profile_id: str, design: dict[str, object]) -> dict[str, ob
             }
             for index in range(10)
         ],
+        "wal_artifacts": {
+            "record_vote": {
+                "sha256": content_id("record-vote-wal"),
+                "size_bytes": 101,
+            },
+            "runtime": {
+                "sha256": content_id("runtime-wal"),
+                "size_bytes": 202,
+            },
+        },
         "warmup_completed_operations": aggregation["warmup_operations"],
     }
 
@@ -111,6 +121,21 @@ def profile_document(profile_id: str, design: dict[str, object]) -> dict[str, ob
 def evidence_document() -> dict[str, object]:
     design = gate.load_frozen_design()
     comparison = design["comparison_plan"]
+    profiles = [
+        profile_document("EMBEDDED_FFM", design),
+        profile_document("ISOLATED_SIDECAR", design),
+    ]
+    semantic_equalities = [
+        marker(item, "equality_id", status="EXACT", paired=True)
+        for item in comparison["exact_cross_profile_equalities"]
+    ]
+    wal_equality = next(
+        item
+        for item in semantic_equalities
+        if item["equality_id"] == "WAL_RECEIPTS_AND_DURABLE_SEQUENCES"
+    )
+    for field, profile in zip(("embedded_sha256", "sidecar_sha256"), profiles, strict=True):
+        wal_equality[field] = gate.sha256_id(gate.canonical_bytes(profile["wal_artifacts"]))
     return {
         "authority": gate.expected_authority(design),
         "common_hard_gates": [marker(item, "gate_id") for item in comparison["hard_gates_common"]],
@@ -141,16 +166,10 @@ def evidence_document() -> dict[str, object]:
             marker(item, "field_id", status="EXACT", paired=True)
             for item in comparison["identical_pair_fields"]
         ],
-        "profiles": [
-            profile_document("EMBEDDED_FFM", design),
-            profile_document("ISOLATED_SIDECAR", design),
-        ],
+        "profiles": profiles,
         "risk_acceptance": None,
         "schema_version": "1.0.0",
-        "semantic_equalities": [
-            marker(item, "equality_id", status="EXACT", paired=True)
-            for item in comparison["exact_cross_profile_equalities"]
-        ],
+        "semantic_equalities": semantic_equalities,
         "sidecar_hard_gates": [
             marker(item, "gate_id") for item in comparison["hard_gates_sidecar"]
         ],
@@ -340,6 +359,45 @@ def test_fallback_sum_scan_count_and_zero_copy_relations_are_checked() -> None:
     sidecar = evidence["profiles"][1]
     copy_counter(sidecar, "ZERO_COPY_HIT_COUNT")["value"] = 101
     with pytest.raises(gate.ComparisonError, match="ZERO_COPY_COUNTS"):
+        gate.validate_evidence(evidence)
+
+    evidence = evidence_document()
+    sidecar = evidence["profiles"][1]
+    copy_counter(sidecar, "ZERO_COPY_HIT_COUNT")["value"] = 1
+    with pytest.raises(gate.ComparisonError, match="ZERO_COPY_HIT_FORBIDDEN"):
+        gate.validate_evidence(evidence)
+
+
+def test_wal_artifact_digest_and_size_are_validated() -> None:
+    evidence = evidence_document()
+    evidence["profiles"][1]["wal_artifacts"]["record_vote"]["size_bytes"] = 0
+    with pytest.raises(gate.ComparisonError, match="WAL_ARTIFACT_SIZE"):
+        gate.validate_evidence(evidence)
+
+    evidence = evidence_document()
+    evidence["profiles"][1]["wal_artifacts"]["runtime"]["sha256"] = "not-a-content-id"
+    with pytest.raises(gate.ComparisonError, match="WAL_ARTIFACT_SHA256"):
+        gate.validate_evidence(evidence)
+
+    evidence = evidence_document()
+    evidence["profiles"][1]["wal_artifacts"]["record_vote"]["sha256"] = content_id(
+        "different-record-vote-wal"
+    )
+    with pytest.raises(gate.ComparisonError, match="WAL_EQUALITY_BINDING"):
+        gate.validate_evidence(evidence)
+
+
+def test_compact_gate_rejects_empty_vote_receipt_transcript() -> None:
+    evidence = evidence_document()
+    equality = next(
+        item
+        for item in evidence["semantic_equalities"]
+        if item["equality_id"] == "CANONICAL_VOTE_RECEIPT_BYTES"
+    )
+    equality["embedded_sha256"] = gate.EMPTY_SHA256
+    equality["sidecar_sha256"] = gate.EMPTY_SHA256
+
+    with pytest.raises(gate.ComparisonError, match="VOTE_RECEIPT_TRANSCRIPT_EMPTY"):
         gate.validate_evidence(evidence)
 
 

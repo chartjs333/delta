@@ -1,10 +1,14 @@
 #include "fixture_support.hpp"
+#include "../src/sidecar_notification.hpp"
 
 #include <delta/runtime/sidecar_protocol.hpp>
 #include <delta/runtime/sidecar_server.hpp>
+#include <delta/runtime/vote_codec.hpp>
 
 #include <delta/core/protocol.hpp>
 #include <delta_abi.h>
+
+#include "../../delta-core-cpp/tests/vote_fixture.hpp"
 
 #include <algorithm>
 #include <array>
@@ -39,9 +43,13 @@
 #include <unistd.h>
 #endif
 
+namespace canonical = delta::core::canonical;
 namespace protocol = delta::core::protocol;
+namespace consensus = delta::core::consensus;
+namespace runtime = delta::runtime;
 namespace sidecar = delta::runtime::sidecar;
 namespace test = delta::test;
+namespace vote_fixture = delta::test::vote_fixture;
 
 namespace {
 
@@ -171,14 +179,18 @@ void append_be(sidecar::Bytes& output, Integer value) {
     const sidecar::Id128& session,
     std::uint64_t generation,
     const std::filesystem::path& directory,
-    std::span<const std::byte> initial_state) {
+    std::span<const std::byte> initial_state,
+    std::span<const std::byte> vote_policy = {}) {
   const auto descriptor = nested_descriptor();
-  const std::vector<sidecar::Field> operation{
+  std::vector<sidecar::Field> operation{
       sidecar::field_u32(16U, sidecar::max_submission_capacity),
       sidecar::field_text(17U, path_utf8(directory)),
       sidecar::field_bytes(18U, initial_state),
       sidecar::field_digest(19U, sidecar::sha256(descriptor)),
   };
+  if (!vote_policy.empty()) {
+    operation.push_back(sidecar::field_bytes(20U, vote_policy));
+  }
   std::vector<sidecar::Field> fields{
       sidecar::field_bytes(1U, text_bytes("open-io-fault")),
       sidecar::field_digest(
@@ -205,6 +217,29 @@ void append_be(sidecar::Bytes& output, Integer value) {
   };
   return request_frame(
       sidecar::MessageType::submit_request,
+      session,
+      generation,
+      correlation_seed,
+      sequence,
+      fields);
+}
+
+[[nodiscard]] sidecar::Frame vote_request(
+    const sidecar::Id128& session,
+    std::uint64_t generation,
+    std::uint64_t sequence,
+    std::uint8_t correlation_seed,
+    std::string_view request_id,
+    std::span<const std::byte> vote) {
+  const std::vector<sidecar::Field> operation{sidecar::field_bytes(16U, vote)};
+  const std::vector<sidecar::Field> fields{
+      sidecar::field_bytes(1U, text_bytes(request_id)),
+      sidecar::field_digest(
+          2U, sidecar::request_digest(sidecar::MessageType::vote_request, operation)),
+      operation.front(),
+  };
+  return request_frame(
+      sidecar::MessageType::vote_request,
       session,
       generation,
       correlation_seed,
@@ -309,12 +344,17 @@ class SabotageInputBuffer final : public std::streambuf {
     std::uint64_t generation,
     const std::filesystem::path& executable) {
   return sidecar::ServerConfig{
-      session,
-      generation,
-      executable,
+      .session_id = session,
+      .generation = generation,
+      .executable = executable,
 #if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
-      sidecar::FaultPoint::none,
+      .fault_point = sidecar::FaultPoint::none,
 #endif
+      .expected_durable_identity = std::nullopt,
+      .java_to_native_shared_memory = std::nullopt,
+      .native_to_java_shared_memory = std::nullopt,
+      .java_to_native_shared_memory_identity = std::nullopt,
+      .native_to_java_shared_memory_identity = std::nullopt,
   };
 }
 
@@ -502,6 +542,246 @@ void expect_not_admitted(const sidecar::Frame& frame, std::string_view context) 
                std::string(context) + " was not NOT_ADMITTED_PROVEN");
   test::expect(sidecar::field_as_u64(payload.fields[3]) == 0U,
                std::string(context) + " exposed a native admission sequence");
+}
+
+void expect_native_not_admitted(
+    const sidecar::Frame& frame,
+    std::uint32_t expected_status,
+    std::string_view context) {
+  expect_not_admitted(frame, context);
+  const auto payload = sidecar::decode_payload(frame.payload);
+  test::expect(sidecar::field_as_u32(payload.fields[4]) == expected_status,
+               std::string(context) + " did not preserve the C ABI native status");
+}
+
+void test_shared_memory_notification_owner_is_total_across_reuse() {
+  sidecar::SharedMemoryReference reference{
+      sidecar::SharedMemoryRegionId::native_to_java,
+      0U,
+      41U,
+      sidecar::shared_memory_control_prefix_bytes,
+      7U,
+      sidecar::sha256(text_bytes("payload")),
+  };
+  const auto current_correlation = id(240U);
+  const auto request_id = text_bytes("same-request");
+  const auto request_digest = sidecar::sha256(text_bytes("same-body"));
+  std::array<
+      std::optional<sidecar::detail::PublishedSharedMemoryNotification>,
+      sidecar::shared_memory_slot_count>
+      publications{};
+  publications[reference.slot] = sidecar::detail::PublishedSharedMemoryNotification{
+      reference,
+      current_correlation,
+      request_id,
+      request_digest,
+      false,
+      std::nullopt,
+  };
+
+  for (std::uint16_t seed = 1U; seed < 200U; ++seed) {
+    const auto stale_correlation = id(static_cast<std::uint8_t>(seed));
+    test::expect(
+        sidecar::detail::classify_notification_ownership(
+            publications,
+            reference,
+            stale_correlation,
+            request_id,
+            request_digest) ==
+            sidecar::detail::SharedMemoryNotificationOwnership::stale,
+        "delayed stale shared-memory ACK gained authority after repeated reference reuse");
+  }
+
+  auto wrong_reference = reference;
+  ++wrong_reference.offset;
+  test::expect(
+      sidecar::detail::classify_notification_ownership(
+          publications,
+          wrong_reference,
+          current_correlation,
+          request_id,
+          request_digest) ==
+          sidecar::detail::SharedMemoryNotificationOwnership::conflict,
+      "current shared-memory ACK correlation accepted a mismatched reference");
+  auto wrong_request_id = request_id;
+  wrong_request_id.back() ^= std::byte{1U};
+  test::expect(
+      sidecar::detail::classify_notification_ownership(
+          publications,
+          reference,
+          current_correlation,
+          wrong_request_id,
+          request_digest) ==
+          sidecar::detail::SharedMemoryNotificationOwnership::conflict,
+      "current shared-memory ACK correlation accepted a mismatched request owner");
+  test::expect(
+      sidecar::detail::classify_notification_ownership(
+          publications,
+          reference,
+          current_correlation,
+          request_id,
+          request_digest) ==
+          sidecar::detail::SharedMemoryNotificationOwnership::current,
+      "exact current shared-memory ACK owner was not recognized");
+}
+
+void test_vote_parse_and_no_policy_are_proven_pre_wal(
+    const std::filesystem::path& executable) {
+  const auto directory = std::filesystem::absolute(
+      test::fresh_directory("sidecar-vote-pre-wal"));
+  const auto initial = test::golden(DELTA_GOLDEN_FIXTURE_PATH, 5U);
+  const auto valid_vote = test::golden(DELTA_GOLDEN_FIXTURE_PATH, 3U);
+  const sidecar::Bytes malformed_vote{std::byte{0U}, std::byte{1U}, std::byte{2U}};
+  const auto state = protocol::parse_round_state(initial);
+  const auto durable_command = protocol::encode(test::command_for(
+      state,
+      "ACCEPT_COMMITMENT",
+      "sidecar-after-vote-rejections",
+      "sha256:abababababababababababababababababababababababababababababababab"));
+  const auto session = id(141U);
+  constexpr std::uint64_t generation = 21U;
+
+  std::string input;
+  append_frame(input, hello(session, generation, executable));
+  append_frame(input, open_request(session, generation, directory, initial));
+  append_frame(
+      input,
+      vote_request(
+          session, generation, 3U, 142U, "sidecar-malformed-vote", malformed_vote));
+  append_frame(
+      input,
+      vote_request(
+          session, generation, 4U, 143U, "sidecar-malformed-vote", malformed_vote));
+  append_frame(
+      input,
+      vote_request(
+          session, generation, 5U, 144U, "sidecar-no-policy-vote", valid_vote));
+  append_frame(
+      input,
+      vote_request(
+          session, generation, 6U, 145U, "sidecar-no-policy-vote", valid_vote));
+  append_frame(
+      input,
+      submit_request(
+          session,
+          generation,
+          7U,
+          146U,
+          "sidecar-after-vote-rejections",
+          durable_command));
+
+  const auto frames = run_server(session, generation, executable, input);
+  test::expect(frames.size() == 7U, "vote pre-WAL response count differs");
+  expect_native_not_admitted(
+      frames[2], DELTA_STATUS_INVALID_ARGUMENT, "malformed opaque vote");
+  expect_native_not_admitted(
+      frames[3], DELTA_STATUS_INVALID_ARGUMENT, "malformed opaque vote retry");
+  expect_native_not_admitted(
+      frames[4], DELTA_STATUS_INVALID_ARGUMENT, "submit-only vote");
+  expect_native_not_admitted(
+      frames[5], DELTA_STATUS_INVALID_ARGUMENT, "submit-only vote retry");
+  test::expect(frames[6].type == sidecar::MessageType::submit_response,
+               "same generation did not remain live after rejected votes");
+  const auto submit = sidecar::decode_payload(frames[6].payload);
+  test::expect(sidecar::field_as_u64(submit.fields[3]) == 2U,
+               "rejected vote consumed an admission sequence");
+  test::expect(sidecar::field_as_u64(submit.fields[8]) == 1U,
+               "rejected vote incremented the durable journal");
+}
+
+void test_accepted_vote_receipt_is_exact_across_retry_and_restart(
+    const std::filesystem::path& executable) {
+  const auto directory = std::filesystem::absolute(
+      test::fresh_directory("sidecar-vote-accepted"));
+  const auto initial = test::golden(DELTA_GOLDEN_FIXTURE_PATH, 5U);
+  const auto fixture = vote_fixture::full(
+      consensus::VoteAction::round_config,
+      protocol::parse_round_state(initial));
+  const auto policy = runtime::encode_vote_policy_v1(fixture.policy);
+  const auto vote = protocol::encode(fixture.vote);
+
+  const auto session = id(151U);
+  constexpr std::uint64_t generation = 31U;
+  std::string input;
+  append_frame(input, hello(session, generation, executable));
+  append_frame(
+      input,
+      open_request(session, generation, directory, initial, policy));
+  append_frame(
+      input,
+      vote_request(
+          session, generation, 3U, 152U, "sidecar-vote-first", vote));
+  append_frame(
+      input,
+      vote_request(
+          session, generation, 4U, 153U, "sidecar-vote-retry", vote));
+
+  const auto frames = run_server(session, generation, executable, input);
+  test::expect(frames.size() == 4U, "accepted vote response count differs");
+  test::expect(
+      frames[1].type == sidecar::MessageType::open_response &&
+          frames[2].type == sidecar::MessageType::vote_response &&
+          frames[3].type == sidecar::MessageType::vote_response,
+      "accepted vote response types differ");
+  const auto first = sidecar::decode_payload(frames[2].payload);
+  const auto retry = sidecar::decode_payload(frames[3].payload);
+  test::expect(
+      sidecar::field_as_u32(first.fields[4]) == DELTA_STATUS_OK &&
+          sidecar::field_as_u64(first.fields[3]) == 2U &&
+          sidecar::field_as_u64(retry.fields[3]) == 3U,
+      "accepted vote admission sequence or status differs");
+  test::expect(
+      first.fields[5].value == retry.fields[5].value,
+      "exact vote retry changed opaque receipt bytes");
+  test::expect(
+      sidecar::sha256(first.fields[5].value) ==
+              sidecar::field_as_digest(first.fields[6]) &&
+          sidecar::sha256(retry.fields[5].value) ==
+              sidecar::field_as_digest(retry.fields[6]),
+      "accepted vote response digest does not identify its receipt");
+  const auto decoded = runtime::parse_vote_receipt_v1(first.fields[5].value);
+  test::expect(
+      decoded.frame == vote && decoded.journal_sequence == 1U &&
+          decoded.vote_id == canonical::content_id(canonical::Type::vote, vote) &&
+          decoded.action == consensus::VoteAction::round_config &&
+          decoded.context_id == fixture.candidate.context_id,
+      "accepted sidecar vote receipt changed native identity or projection");
+
+  const auto restart_session = id(161U);
+  constexpr std::uint64_t restart_generation = 32U;
+  std::string restart_input;
+  append_frame(
+      restart_input,
+      hello(restart_session, restart_generation, executable));
+  append_frame(
+      restart_input,
+      open_request(
+          restart_session,
+          restart_generation,
+          directory,
+          initial,
+          policy));
+  append_frame(
+      restart_input,
+      vote_request(
+          restart_session,
+          restart_generation,
+          3U,
+          162U,
+          "sidecar-vote-restart-retry",
+          vote));
+  const auto restart_frames =
+      run_server(restart_session, restart_generation, executable, restart_input);
+  test::expect(
+      restart_frames.size() == 3U &&
+          restart_frames[2].type == sidecar::MessageType::vote_response,
+      "restarted sidecar did not return the recovered vote receipt");
+  const auto reopened = sidecar::decode_payload(restart_frames[1].payload);
+  const auto replay = sidecar::decode_payload(restart_frames[2].payload);
+  test::expect(
+      sidecar::field_as_u64(reopened.fields[6]) == 1U &&
+          replay.fields[5].value == first.fields[5].value,
+      "restart changed the durable vote sequence or original receipt bytes");
 }
 
 void test_pre_wal_rejections_do_not_consume_admission(
@@ -772,6 +1052,9 @@ int main(int argc, char** argv) {
     test::expect(argc == 1, "unexpected fail-closed test argument");
     test_wal_io_failure_is_fail_closed(executable);
     test_pre_wal_rejections_do_not_consume_admission(executable);
+    test_vote_parse_and_no_policy_are_proven_pre_wal(executable);
+    test_accepted_vote_receipt_is_exact_across_retry_and_restart(executable);
+    test_shared_memory_notification_owner_is_total_across_reuse();
   } catch (const std::exception& error) {
     std::cerr << "sidecar fail-closed test failed: " << error.what() << '\n';
     return 1;

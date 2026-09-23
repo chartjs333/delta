@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 namespace delta::runtime::detail {
@@ -31,19 +32,6 @@ struct RecoveryLog {
   bool torn_tail;
 };
 
-class Wal {
- public:
-  explicit Wal(std::filesystem::path path);
-
-  [[nodiscard]] RecoveryLog recover() const;
-  void truncate(std::uintmax_t size) const;
-  void append_and_sync(const JournalEntry& entry, bool partial);
-  [[nodiscard]] const std::filesystem::path& path() const noexcept;
-
- private:
-  std::filesystem::path path_;
-};
-
 struct Snapshot {
   std::uint64_t journal_sequence;
   core::canonical::Bytes state_bytes;
@@ -51,8 +39,52 @@ struct Snapshot {
   bool operator==(const Snapshot&) const = default;
 };
 
-[[nodiscard]] Snapshot read_snapshot(const std::filesystem::path& path);
-[[nodiscard]] bool snapshot_exists(const std::filesystem::path& path);
-void write_snapshot(const std::filesystem::path& path, const Snapshot& snapshot);
+struct WalFileIdentity {
+  std::uintmax_t device;
+  std::uintmax_t inode;
+
+  bool operator==(const WalFileIdentity&) const = default;
+};
+
+class Wal {
+ public:
+  explicit Wal(
+      std::filesystem::path path,
+      std::optional<WalFileIdentity> expected_identity = std::nullopt);
+  ~Wal();
+
+  Wal(const Wal&) = delete;
+  Wal& operator=(const Wal&) = delete;
+  Wal(Wal&&) = delete;
+  Wal& operator=(Wal&&) = delete;
+
+  [[nodiscard]] RecoveryLog recover() const;
+  void truncate(std::uintmax_t size) const;
+  void append_and_sync(const JournalEntry& entry, bool partial);
+  [[nodiscard]] bool snapshot_exists(const std::filesystem::path& path) const;
+  [[nodiscard]] Snapshot read_snapshot(const std::filesystem::path& path) const;
+  void write_snapshot(const std::filesystem::path& path, const Snapshot& snapshot) const;
+  [[nodiscard]] const std::filesystem::path& path() const noexcept;
+
+ private:
+#if !defined(_WIN32)
+  void initialize_for_recovery() const;
+  void ensure_file_for_append();
+  void verify_snapshot_parent(const std::filesystem::path& path) const;
+  void verify_pinned_file() const;
+#endif
+
+  std::filesystem::path path_;
+  std::optional<WalFileIdentity> expected_identity_;
+#if !defined(_WIN32)
+  mutable int directory_fd_ = -1;
+  mutable int file_fd_ = -1;
+  mutable std::uintmax_t directory_device_ = 0U;
+  mutable std::uintmax_t directory_inode_ = 0U;
+  mutable std::uintmax_t file_device_ = 0U;
+  mutable std::uintmax_t file_inode_ = 0U;
+  mutable bool recovery_initialized_ = false;
+#endif
+};
 
 }  // namespace delta::runtime::detail

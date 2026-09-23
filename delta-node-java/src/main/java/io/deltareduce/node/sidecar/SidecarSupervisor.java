@@ -2,9 +2,16 @@ package io.deltareduce.node.sidecar;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.SecureDirectoryStream;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -12,7 +19,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
@@ -44,6 +53,8 @@ public final class SidecarSupervisor implements AutoCloseable {
   private final GenerationConnector connector;
   private final Timing timing;
   private final Sleeper sleeper;
+  private final DurableDirectoryPin durableDirectoryPin;
+  private final DurableDirectoryIdentity durableDirectoryIdentity;
   private final SecureRandom random = new SecureRandom();
   private final AtomicLong generationCounter = new AtomicLong();
   private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
@@ -52,6 +63,8 @@ public final class SidecarSupervisor implements AutoCloseable {
   private final AtomicBoolean heartbeatOutstanding = new AtomicBoolean();
   private final Object lifecycleGate = new Object();
   private final Object recoveryGate = new Object();
+  private final Object quarantineGate = new Object();
+  private final List<Connection> quarantinedConnections = new ArrayList<>();
   private final ExecutorService lifecycle =
       Executors.newSingleThreadExecutor(operation -> daemon(operation, "delta-sidecar-supervisor"));
   private final ScheduledExecutorService heartbeat =
@@ -78,6 +91,9 @@ public final class SidecarSupervisor implements AutoCloseable {
     this.connector = Objects.requireNonNull(connector, "connector");
     this.timing = Objects.requireNonNull(timing, "timing");
     this.sleeper = Objects.requireNonNull(sleeper, "sleeper");
+    this.durableDirectoryPin = DurableDirectoryPin.open(config.durableDirectory);
+    this.durableDirectoryIdentity =
+        durableDirectoryPin == null ? null : durableDirectoryPin.identity();
   }
 
   /** Starts the first generation without blocking the caller or a Netty event loop. */
@@ -145,16 +161,34 @@ public final class SidecarSupervisor implements AutoCloseable {
         heartbeatMisses.get(),
         copyLedger.inlineIngressBytes.get(),
         copyLedger.inlineEgressBytes.get(),
-        0,
-        0,
+        copyLedger.sharedMemoryIngressBytes.get(),
+        copyLedger.sharedMemoryEgressBytes.get(),
         copyLedger.stagingFallbackIngressBytes.get(),
         copyLedger.stagingFallbackEgressBytes.get(),
-        0,
-        0,
-        "DISABLED_UNREACHABLE_COPY_FALLBACK",
+        copyLedger.zeroCopyEligibleCount.get(),
+        copyLedger.zeroCopyHitCount.get(),
+        copyLedger.sharedMemoryStatus(),
         copyLedger.maxSubmitStagingFallback(),
         current == null ? null : current.telemetry(),
         lastFailure == null ? "" : lastFailure.getClass().getSimpleName());
+  }
+
+  /** Returns the copy observation attached to this exact validated response. */
+  public OperationCopy operationCopy(LocalSidecarClient.Response response) {
+    Objects.requireNonNull(response, "response");
+    require(
+        response.responseEvidence() instanceof OperationCopy,
+        "response has no completed SUBMIT copy observation");
+    var measured = (OperationCopy) response.responseEvidence();
+    require(
+        measured.generation() == response.generation()
+            && measured.correlationId().equals(response.correlationId().hex()),
+        "response copy observation identity mismatch");
+    return measured;
+  }
+
+  int transientCopyObservationCount() {
+    return copyLedger.transientObservationCount();
   }
 
   @Override
@@ -170,10 +204,12 @@ public final class SidecarSupervisor implements AutoCloseable {
       currentClient = client;
       currentConnection = connection;
     }
+    closeDurablePins();
     cancelHeartbeat();
     if (currentClient != null) {
       currentClient.close();
     }
+    copyLedger.clearAllTransient();
     if (currentConnection != null) {
       if (previousState != State.READY && previousState != State.CLOSED) {
         forceExpiredGeneration(currentConnection);
@@ -219,8 +255,10 @@ public final class SidecarSupervisor implements AutoCloseable {
     Connection launched = null;
     CountingTransport transport = null;
     try {
+      verifyDurableBindingsForLaunch();
       launched = connector.connect(
-          new LaunchContext(identity, config.durableDirectory), timing.recoveryReadyTimeout);
+          new LaunchContext(identity, config.durableDirectory, durableDirectoryIdentity),
+          timing.recoveryReadyTimeout);
       boolean expiredAfterConnect;
       synchronized (readinessGate) {
         synchronized (lifecycleGate) {
@@ -237,7 +275,8 @@ public final class SidecarSupervisor implements AutoCloseable {
         throw new RecoveryReadyTimeoutException(
             "sidecar connection exceeded the recovery-ready deadline");
       }
-      transport = new CountingTransport(launched.transport(), copyLedger);
+      copyLedger.observeSharedMemoryStatus(launched.sharedMemoryStatus());
+      transport = new CountingTransport(launched.transport(), copyLedger, generation);
       var sendSequences = new SidecarIpcV1.SequenceCursor(1);
       var receiveSequences = new SidecarIpcV1.SequenceCursor(1);
       var helloCorrelation = randomId();
@@ -265,14 +304,18 @@ public final class SidecarSupervisor implements AutoCloseable {
         throw new IllegalStateException("supervisor closed during sidecar startup");
       }
       var openRequestId = randomId().bytes();
+      var openFields = new ArrayList<SidecarIpcV1.Field>();
+      openFields.add(SidecarIpcV1.u32(16, SidecarIpcV1.INGRESS_QUEUE_REQUESTS));
+      openFields.add(SidecarIpcV1.text(17, config.durableDirectory.toString()));
+      openFields.add(SidecarIpcV1.bytes(18, config.initialState));
+      openFields.add(SidecarIpcV1.sha256Field(19, identity.nestedDescriptorSha256()));
+      if (config.votePolicy != null) {
+        openFields.add(SidecarIpcV1.bytes(20, config.votePolicy));
+      }
       var openPayload = SidecarIpcV1.requestPayload(
           SidecarIpcV1.MessageType.OPEN_REQUEST,
           openRequestId,
-          List.of(
-              SidecarIpcV1.u32(16, SidecarIpcV1.INGRESS_QUEUE_REQUESTS),
-              SidecarIpcV1.text(17, config.durableDirectory.toString()),
-              SidecarIpcV1.bytes(18, config.initialState),
-              SidecarIpcV1.sha256Field(19, identity.nestedDescriptorSha256())));
+          openFields);
       var openCorrelation = randomId();
       transport.write(
           SidecarIpcV1.frame(
@@ -283,8 +326,23 @@ public final class SidecarSupervisor implements AutoCloseable {
                   sendSequences.claim(),
                   openPayload)
               .canonicalBytes());
-      var open = SidecarIpcV1.decodeFrame(transport.read());
-      receiveSequences.accept(open.sequence());
+      SidecarIpcV1.Frame open;
+      while (true) {
+        var candidate = SidecarIpcV1.decodeFrame(transport.read());
+        require(candidate.sessionId().equals(session), "OPEN response session mismatch");
+        require(candidate.generation() == generation, "OPEN response generation mismatch");
+        receiveSequences.accept(candidate.sequence());
+        if (candidate.messageType() != SidecarIpcV1.MessageType.SHARED_MEMORY_ACK) {
+          open = candidate;
+          break;
+        }
+        require(
+            candidate.correlationId().equals(openCorrelation),
+            "OPEN shared-memory ACK correlation mismatch");
+        require(
+            transport.acceptSharedMemoryAck(candidate),
+            "OPEN shared-memory ACK did not match its publication");
+      }
       SidecarIpcV1.requireResponseMatches(
           open,
           SidecarIpcV1.MessageType.OPEN_REQUEST,
@@ -300,6 +358,7 @@ public final class SidecarSupervisor implements AutoCloseable {
               == SidecarIpcV1.AdmissionState.ADMITTED_OUTCOME_AVAILABLE,
           "OPEN did not return an admitted native result");
       require(open.payload().u8(19) == 1, "OPEN completed without READY");
+      pinOrVerifyWal();
       runtimeInstanceId = open.payload().id128(16);
 
       LocalSidecarClient readyClient;
@@ -320,7 +379,7 @@ public final class SidecarSupervisor implements AutoCloseable {
               receiveSequences.nextValue(),
               requestIdentityLedger,
               this::onClientFailure,
-              copyLedger::recordValidatedResponse);
+              copyLedger);
           client = readyClient;
           heartbeatMisses.set(0);
           heartbeatOutstanding.set(false);
@@ -357,15 +416,13 @@ public final class SidecarSupervisor implements AutoCloseable {
     }
   }
 
-  private static void forceExpiredGeneration(Connection target) {
+  private void forceExpiredGeneration(Connection target) {
     try {
-      target.forceTermination();
-    } finally {
-      try {
-        target.close();
-      } catch (Exception ignored) {
-        // The generation is already expired and remains fail-closed.
+      synchronized (target) {
+        target.forceTermination();
       }
+    } finally {
+      quarantineConnection(target);
     }
   }
 
@@ -480,6 +537,7 @@ public final class SidecarSupervisor implements AutoCloseable {
         state.set(State.STOPPING);
         terminalConnection = connection;
       }
+      closeDurablePins();
       cancelHeartbeat();
       if (terminalConnection == null) {
         lastFailure = new RecoveryException(
@@ -580,6 +638,7 @@ public final class SidecarSupervisor implements AutoCloseable {
       currentClient = client;
       currentConnection = connection;
     }
+    closeDurablePins();
     synchronized (recoveryGate) {
       pendingRecoveryFailure = null;
     }
@@ -654,21 +713,102 @@ public final class SidecarSupervisor implements AutoCloseable {
   private boolean stopConnection(Connection target) {
     state.compareAndSet(State.FENCED, State.STOPPING);
     try {
-      target.requestShutdown();
-      var exited = target.awaitExit(timing.gracefulShutdownTimeout);
-      if (!exited) {
-        target.forceTermination();
-        exited = target.awaitExit(timing.gracefulShutdownTimeout);
+      synchronized (target) {
+        target.requestShutdown();
+        var exited = target.awaitExit(timing.gracefulShutdownTimeout);
+        if (!exited) {
+          target.forceTermination();
+          exited = target.awaitExit(timing.gracefulShutdownTimeout);
+        }
+        if (!exited) {
+          quarantineConnection(target);
+          return false;
+        }
+        target.close();
+        return target.endpointClosed();
       }
-      target.close();
-      return exited && target.endpointClosed();
     } catch (InterruptedException interrupted) {
       Thread.currentThread().interrupt();
       lastFailure = interrupted;
+      forceAndQuarantine(target, interrupted);
       return false;
     } catch (Exception error) {
       lastFailure = error;
+      forceAndQuarantine(target, error);
       return false;
+    }
+  }
+
+  private void forceAndQuarantine(Connection target, Throwable priorFailure) {
+    try {
+      synchronized (target) {
+        target.forceTermination();
+      }
+    } catch (RuntimeException forceFailure) {
+      priorFailure.addSuppressed(forceFailure);
+    } finally {
+      quarantineConnection(target);
+    }
+  }
+
+  private void quarantineConnection(Connection target) {
+    try {
+      target.transport().close();
+    } catch (IOException | RuntimeException ignored) {
+      // Closing the byte-stream endpoint is best effort. Mapping ownership is
+      // retained until awaitExit positively confirms peer death.
+    }
+    synchronized (quarantineGate) {
+      for (var existing : quarantinedConnections) {
+        if (existing == target) {
+          return;
+        }
+      }
+      quarantinedConnections.add(target);
+    }
+    daemon(
+            () -> reapQuarantinedConnection(target),
+            "delta-sidecar-generation-reaper")
+        .start();
+  }
+
+  private void reapQuarantinedConnection(Connection target) {
+    var cleaned = false;
+    try {
+      while (!cleaned) {
+        try {
+          synchronized (target) {
+            if (target.awaitExit(timing.gracefulShutdownTimeout)) {
+              target.close();
+              cleaned = target.endpointClosed();
+            }
+          }
+        } catch (InterruptedException interrupted) {
+          throw interrupted;
+        } catch (Exception cleanupFailure) {
+          // Keep ownership quarantined and retry the exact failed cleanup step. A close failure
+          // never confirms endpoint closure or mapping release.
+          lastFailure = cleanupFailure;
+        }
+        if (!cleaned) {
+          sleeper.sleep(timing.restartBackoff.toMillis());
+        }
+      }
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+      lastFailure = interrupted;
+    } finally {
+      if (cleaned) {
+        synchronized (quarantineGate) {
+          quarantinedConnections.removeIf(candidate -> candidate == target);
+        }
+      }
+    }
+  }
+
+  int quarantinedConnectionCount() {
+    synchronized (quarantineGate) {
+      return quarantinedConnections.size();
     }
   }
 
@@ -735,6 +875,7 @@ public final class SidecarSupervisor implements AutoCloseable {
     private final byte[] executableSha256;
     private final String sidecarBuildId;
     private final byte[] nestedDescriptor;
+    private final byte[] votePolicy;
 
     public Config(
         Path durableDirectory,
@@ -742,6 +883,22 @@ public final class SidecarSupervisor implements AutoCloseable {
         byte[] executableSha256,
         String sidecarBuildId,
         byte[] nestedDescriptor) {
+      this(
+          durableDirectory,
+          initialState,
+          executableSha256,
+          sidecarBuildId,
+          nestedDescriptor,
+          null);
+    }
+
+    public Config(
+        Path durableDirectory,
+        byte[] initialState,
+        byte[] executableSha256,
+        String sidecarBuildId,
+        byte[] nestedDescriptor,
+        byte[] votePolicy) {
       this.durableDirectory = Objects.requireNonNull(durableDirectory, "durableDirectory");
       this.initialState = Arrays.copyOf(Objects.requireNonNull(initialState, "initialState"),
           initialState.length);
@@ -756,6 +913,12 @@ public final class SidecarSupervisor implements AutoCloseable {
           Objects.requireNonNull(nestedDescriptor, "nestedDescriptor"),
           nestedDescriptor.length);
       SidecarIpcV1.parseNestedDescriptor(this.nestedDescriptor);
+      this.votePolicy = votePolicy == null ? null : Arrays.copyOf(votePolicy, votePolicy.length);
+      require(
+          this.votePolicy == null
+              || (this.votePolicy.length > 0
+                  && this.votePolicy.length <= SidecarIpcV1.MAX_CANONICAL_VOTE_POLICY_BYTES),
+          "vote policy is outside the frozen bound");
       // Exercise the exact descriptor validator, including canonical build text.
       new SidecarIpcV1.DescriptorIdentity(
           new SidecarIpcV1.Id128(new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
@@ -767,12 +930,17 @@ public final class SidecarSupervisor implements AutoCloseable {
   }
 
   public record LaunchContext(
-      SidecarIpcV1.DescriptorIdentity identity, Path durableDirectory) {
+      SidecarIpcV1.DescriptorIdentity identity,
+      Path durableDirectory,
+      DurableDirectoryIdentity durableDirectoryIdentity) {
     public LaunchContext {
       Objects.requireNonNull(identity, "identity");
       Objects.requireNonNull(durableDirectory, "durableDirectory");
     }
   }
+
+  /** POSIX directory identity pinned for the whole supervisor lifetime. */
+  public record DurableDirectoryIdentity(long device, long inode) {}
 
   @FunctionalInterface
   public interface GenerationConnector {
@@ -791,6 +959,12 @@ public final class SidecarSupervisor implements AutoCloseable {
     boolean awaitExit(Duration timeout) throws InterruptedException;
 
     boolean endpointClosed();
+
+    default String sharedMemoryStatus() {
+      return SidecarSharedMemory.atomicAbiSupported()
+          ? "AVAILABLE_NOT_CONFIGURED"
+          : "DISABLED_ATOMIC_ABI_UNAVAILABLE";
+    }
 
     void close() throws Exception;
   }
@@ -814,19 +988,100 @@ public final class SidecarSupervisor implements AutoCloseable {
       require(Files.isRegularFile(executable), "sidecar executable is not a regular file");
       require(Arrays.equals(fileSha256(executable), context.identity().executableSha256()),
           "sidecar executable changed before launch");
+      SidecarSharedMemory.GenerationResources sharedMemory = null;
+      var sharedMemoryStatus = SidecarSharedMemory.atomicAbiSupported()
+          ? "AVAILABLE_NOT_CONFIGURED"
+          : "DISABLED_ATOMIC_ABI_UNAVAILABLE";
+      if (SidecarSharedMemory.atomicAbiSupported()) {
+        SidecarSharedMemory.GenerationResources candidate = null;
+        try {
+          candidate = SidecarSharedMemory.GenerationResources.create(
+              context.identity().generation());
+          if (mappedSharedMemoryAtomicAbiSupported(executable, candidate, readyTimeout)) {
+            sharedMemory = candidate;
+            candidate = null;
+            sharedMemoryStatus = "ENABLED_LOCK_FREE_U32_BIG_ENDIAN";
+          } else {
+            var rejected = candidate;
+            candidate = null;
+            try {
+              rejected.close();
+            } catch (IOException cleanupFailure) {
+              throw new IllegalStateException(
+                  "failed mapped atomic probe resources could not be released",
+                  cleanupFailure);
+            }
+            sharedMemoryStatus = "DISABLED_MAPPED_ATOMIC_ABI_PROBE_FAILED";
+          }
+        } catch (InterruptedException interrupted) {
+          if (candidate != null) {
+            try {
+              candidate.close();
+            } catch (IOException closeFailure) {
+              interrupted.addSuppressed(closeFailure);
+            }
+          }
+          throw interrupted;
+        } catch (IOException unavailable) {
+          if (candidate != null) {
+            try {
+              candidate.close();
+            } catch (IOException closeFailure) {
+              unavailable.addSuppressed(closeFailure);
+              throw unavailable;
+            }
+          }
+          sharedMemoryStatus = "DISABLED_MAPPED_ATOMIC_ABI_PROBE_FAILED";
+        }
+      }
       var command = new ArrayList<String>();
       command.add(executable.toString());
       command.add("--session");
       command.add(context.identity().sessionId().hex());
       command.add("--generation");
       command.add(Long.toUnsignedString(context.identity().generation()));
+      if (context.durableDirectoryIdentity() != null) {
+        command.add("--durable-device");
+        command.add(Long.toUnsignedString(context.durableDirectoryIdentity().device()));
+        command.add("--durable-inode");
+        command.add(Long.toUnsignedString(context.durableDirectoryIdentity().inode()));
+      }
+      if (sharedMemory != null) {
+        command.add("--java-to-native-shm");
+        command.add(sharedMemory.javaToNativePath().toString());
+        command.add("--native-to-java-shm");
+        command.add(sharedMemory.nativeToJavaPath().toString());
+        command.add("--java-to-native-shm-device");
+        command.add(Long.toUnsignedString(sharedMemory.javaToNativeIdentity().device()));
+        command.add("--java-to-native-shm-inode");
+        command.add(Long.toUnsignedString(sharedMemory.javaToNativeIdentity().inode()));
+        command.add("--native-to-java-shm-device");
+        command.add(Long.toUnsignedString(sharedMemory.nativeToJavaIdentity().device()));
+        command.add("--native-to-java-shm-inode");
+        command.add(Long.toUnsignedString(sharedMemory.nativeToJavaIdentity().inode()));
+      }
       command.addAll(fixedArguments);
-      var process = new ProcessBuilder(command)
-          .redirectError(ProcessBuilder.Redirect.DISCARD)
-          .start();
-      var transport = new LocalSidecarClient.StreamTransport(
-          process.getInputStream(), process.getOutputStream());
-      return new PipeConnection(process, transport);
+      try {
+        var process = new ProcessBuilder(command)
+            .redirectError(ProcessBuilder.Redirect.DISCARD)
+            .start();
+        LocalSidecarClient.Transport transport = new LocalSidecarClient.StreamTransport(
+            process.getInputStream(), process.getOutputStream());
+        if (sharedMemory != null) {
+          transport = new SidecarSharedMemory.Transport(
+              transport, sharedMemory.javaToNative(), sharedMemory.nativeToJava());
+        }
+        return new PipeConnection(process, transport, sharedMemory, sharedMemoryStatus);
+      } catch (Throwable error) {
+        if (sharedMemory != null) {
+          try {
+            sharedMemory.close();
+          } catch (IOException closeFailure) {
+            error.addSuppressed(closeFailure);
+          }
+        }
+        throw error;
+      }
     }
 
     public static byte[] executableSha256(Path executable) throws IOException {
@@ -850,6 +1105,328 @@ public final class SidecarSupervisor implements AutoCloseable {
         throw new IllegalStateException("SHA-256 is unavailable", error);
       }
     }
+
+    static boolean mappedSharedMemoryAtomicAbiSupported(
+        Path executable,
+        SidecarSharedMemory.GenerationResources resources,
+        Duration timeout) throws InterruptedException {
+      Objects.requireNonNull(executable, "executable");
+      Objects.requireNonNull(resources, "resources");
+      Objects.requireNonNull(timeout, "timeout");
+      resources.prepareMappedAtomicAbiProbe();
+      Process process = null;
+      var interrupted = false;
+      try {
+        try {
+          process = new ProcessBuilder(
+                  executable.toString(),
+                  "--probe-mapped-shm-atomic",
+                  resources.javaToNativePath().toString(),
+                  "--region",
+                  Integer.toUnsignedString(resources.javaToNative().regionId()),
+                  "--generation",
+                  Long.toUnsignedString(resources.javaToNative().generation()),
+                  "--device",
+                  Long.toUnsignedString(resources.javaToNativeIdentity().device()),
+                  "--inode",
+                  Long.toUnsignedString(resources.javaToNativeIdentity().inode()),
+                  "--slot",
+                  "0")
+              .redirectError(ProcessBuilder.Redirect.DISCARD)
+              .start();
+        } catch (IOException unavailable) {
+          return false;
+        }
+        try {
+          if (!process.waitFor(timeout.toNanos(), TimeUnit.NANOSECONDS)) {
+            process.destroyForcibly();
+            while (true) {
+              try {
+                process.waitFor();
+                break;
+              } catch (InterruptedException delayed) {
+                interrupted = true;
+              }
+            }
+            return false;
+          }
+        } catch (InterruptedException delayed) {
+          interrupted = true;
+          process.destroyForcibly();
+          while (true) {
+            try {
+              process.waitFor();
+              break;
+            } catch (InterruptedException ignored) {
+              interrupted = true;
+            }
+          }
+        }
+        if (interrupted) {
+          throw new InterruptedException("mapped shared-memory atomic probe interrupted");
+        }
+        try {
+          var output = new String(
+              process.getInputStream().readAllBytes(), StandardCharsets.US_ASCII).trim();
+          return process.exitValue() == 0
+              && output.equals("LOCK_FREE_JAVA_NATIVE_MAP_SHARED_U32_BIG_ENDIAN")
+              && resources.completeMappedAtomicAbiProbe();
+        } catch (IOException unavailable) {
+          return false;
+        }
+      } finally {
+        resources.abortMappedAtomicAbiProbe();
+        if (interrupted) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
+  }
+
+  private void verifyDurableBindingsForLaunch() {
+    if (durableDirectoryPin != null) {
+      durableDirectoryPin.verifyForLaunch();
+    }
+  }
+
+  private void pinOrVerifyWal() {
+    if (durableDirectoryPin != null) {
+      durableDirectoryPin.pinOrVerifyWal();
+    }
+  }
+
+  private void closeDurablePins() {
+    if (durableDirectoryPin == null) {
+      return;
+    }
+    try {
+      durableDirectoryPin.close();
+    } catch (IOException closeFailure) {
+      var failure = new IllegalStateException("cannot release durable pathname pins", closeFailure);
+      var prior = lastFailure;
+      if (prior != null) {
+        prior.addSuppressed(failure);
+      } else {
+        lastFailure = failure;
+      }
+    }
+  }
+
+  private static final class DurableDirectoryPin implements AutoCloseable {
+    private static final Path WAL_PATH = Path.of("runtime.wal");
+    private static final Set<java.nio.file.OpenOption> WAL_OPEN_OPTIONS =
+        Set.of(StandardOpenOption.READ, LinkOption.NOFOLLOW_LINKS);
+
+    private final Path pathname;
+    private final SecureDirectoryStream<Path> directoryStream;
+    private final PosixFileIdentity pinnedIdentity;
+    private DurableWalPin walPin;
+    private boolean closed;
+
+    private DurableDirectoryPin(
+        Path pathname,
+        SecureDirectoryStream<Path> directoryStream,
+        PosixFileIdentity pinnedIdentity) {
+      this.pathname = pathname;
+      this.directoryStream = directoryStream;
+      this.pinnedIdentity = pinnedIdentity;
+    }
+
+    private static DurableDirectoryPin open(Path directory) {
+      var normalized = Objects.requireNonNull(directory, "directory").toAbsolutePath().normalize();
+      if (isWindows()) {
+        return null;
+      }
+      DirectoryStream<Path> opened = null;
+      try {
+        opened = Files.newDirectoryStream(normalized);
+        require(opened instanceof SecureDirectoryStream<?>,
+            "durable directory provider does not support retained secure handles");
+        @SuppressWarnings("unchecked")
+        var secure = (SecureDirectoryStream<Path>) opened;
+        var pinned = readPinnedDirectoryAttributes(secure);
+        var pathnameIdentity = readUnixIdentity(normalized, PosixFileType.DIRECTORY);
+        require(pinned.fileKey() != null
+                && pinned.fileKey().equals(pathnameIdentity.fileKey()),
+            "durable directory handle/pathname binding changed while pinning");
+        return new DurableDirectoryPin(normalized, secure, pathnameIdentity);
+      } catch (IOException | RuntimeException error) {
+        if (opened != null) {
+          try {
+            opened.close();
+          } catch (IOException closeFailure) {
+            error.addSuppressed(closeFailure);
+          }
+        }
+        throw new SidecarIpcV1.ProtocolException(
+            "cannot pin durable directory identity", error);
+      }
+    }
+
+    private synchronized DurableDirectoryIdentity identity() {
+      ensureOpen();
+      return new DurableDirectoryIdentity(pinnedIdentity.device(), pinnedIdentity.inode());
+    }
+
+    private synchronized void verifyForLaunch() {
+      ensureOpen();
+      verifyDirectoryPathname();
+      if (walPin != null) {
+        verifyWalPathname();
+      }
+    }
+
+    private synchronized void pinOrVerifyWal() {
+      ensureOpen();
+      verifyDirectoryPathname();
+      if (walPin != null) {
+        verifyWalPathname();
+        return;
+      }
+      SeekableByteChannel opened = null;
+      try {
+        opened = directoryStream.newByteChannel(WAL_PATH, WAL_OPEN_OPTIONS);
+        // Public Java NIO has no fstat/fileKey operation on an opened byte channel. The
+        // documented trusted-supervisor prerequisite excludes same-principal mutation in this
+        // first-pin window; retaining the channel then prevents inode-reuse ABA across restarts.
+        var pathnameIdentity = readUnixIdentity(pathname.resolve(WAL_PATH), PosixFileType.REGULAR);
+        walPin = new DurableWalPin(opened, pathnameIdentity);
+      } catch (IOException | RuntimeException error) {
+        if (opened != null) {
+          try {
+            opened.close();
+          } catch (IOException closeFailure) {
+            error.addSuppressed(closeFailure);
+          }
+        }
+        throw new SidecarIpcV1.ProtocolException("cannot pin runtime.wal identity", error);
+      }
+    }
+
+    private void verifyDirectoryPathname() {
+      try {
+        var pinned = readPinnedDirectoryAttributes(directoryStream);
+        require(pinned.fileKey() != null && pinned.fileKey().equals(pinnedIdentity.fileKey()),
+            "retained durable directory identity changed");
+        var current = readUnixIdentity(pathname, PosixFileType.DIRECTORY);
+        require(pinnedIdentity.equals(current),
+            "durable directory pathname binding changed");
+      } catch (IOException error) {
+        throw new SidecarIpcV1.ProtocolException(
+            "cannot verify durable directory pathname binding", error);
+      }
+    }
+
+    private void verifyWalPathname() {
+      require(walPin != null && walPin.channel().isOpen(),
+          "retained runtime.wal handle is closed");
+      try {
+        var current = readUnixIdentity(pathname.resolve(WAL_PATH), PosixFileType.REGULAR);
+        require(walPin.identity().equals(current), "runtime.wal pathname binding changed");
+      } catch (IOException error) {
+        throw new SidecarIpcV1.ProtocolException(
+            "cannot verify runtime.wal pathname binding", error);
+      }
+    }
+
+    private static BasicFileAttributes readPinnedDirectoryAttributes(
+        SecureDirectoryStream<Path> directory) throws IOException {
+      var view = directory.getFileAttributeView(BasicFileAttributeView.class);
+      require(view != null, "durable directory handle has no basic attribute view");
+      var attributes = view.readAttributes();
+      require(attributes.isDirectory() && !attributes.isSymbolicLink(),
+          "retained durable directory handle is not a directory");
+      return attributes;
+    }
+
+    private static PosixFileIdentity readUnixIdentity(Path path, PosixFileType expected)
+        throws IOException {
+      Map<String, Object> attributes =
+          Files.readAttributes(path, "unix:*", LinkOption.NOFOLLOW_LINKS);
+      require(!Boolean.TRUE.equals(attributes.get("isSymbolicLink")),
+          expected.description + " is a symbolic link");
+      require(expected.matches(attributes), expected.description + " has the wrong file type");
+      var fileKey = attributes.get("fileKey");
+      var device = attributes.get("dev");
+      var inode = attributes.get("ino");
+      require(fileKey != null && device instanceof Number && inode instanceof Number,
+          expected.description + " has no stable Unix identity");
+      return new PosixFileIdentity(
+          fileKey, ((Number) device).longValue(), ((Number) inode).longValue());
+    }
+
+    private void ensureOpen() {
+      require(!closed, "durable pathname pins are closed");
+    }
+
+    @Override
+    public synchronized void close() throws IOException {
+      if (closed) {
+        return;
+      }
+      closed = true;
+      IOException failure = null;
+      if (walPin != null) {
+        try {
+          walPin.channel().close();
+        } catch (IOException error) {
+          failure = error;
+        }
+      }
+      try {
+        directoryStream.close();
+      } catch (IOException error) {
+        if (failure == null) {
+          failure = error;
+        } else {
+          failure.addSuppressed(error);
+        }
+      }
+      if (failure != null) {
+        throw failure;
+      }
+    }
+  }
+
+  private enum PosixFileType {
+    DIRECTORY("durable directory") {
+      @Override
+      boolean matches(Map<String, Object> attributes) {
+        return Boolean.TRUE.equals(attributes.get("isDirectory"));
+      }
+    },
+    REGULAR("runtime.wal") {
+      @Override
+      boolean matches(Map<String, Object> attributes) {
+        return Boolean.TRUE.equals(attributes.get("isRegularFile"));
+      }
+    };
+
+    private final String description;
+
+    PosixFileType(String description) {
+      this.description = description;
+    }
+
+    abstract boolean matches(Map<String, Object> attributes);
+  }
+
+  private record PosixFileIdentity(Object fileKey, long device, long inode) {
+    private PosixFileIdentity {
+      Objects.requireNonNull(fileKey, "fileKey");
+    }
+  }
+
+  private record DurableWalPin(SeekableByteChannel channel, PosixFileIdentity identity) {
+    private DurableWalPin {
+      Objects.requireNonNull(channel, "channel");
+      Objects.requireNonNull(identity, "identity");
+    }
+  }
+
+  private static boolean isWindows() {
+    return System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT)
+        .contains("win");
   }
 
   public record Telemetry(
@@ -869,14 +1446,20 @@ public final class SidecarSupervisor implements AutoCloseable {
       LocalSidecarClient.Telemetry client,
       String lastFailureType) {}
 
-  /** Checked ingress+egress bounded-copy bytes for the largest completed SUBMIT operation. */
+  /** Exact carrier/copy evidence for one correlation-bound completed SUBMIT operation. */
   public record OperationCopy(
       SidecarIpcV1.MessageType requestType,
       long generation,
       String correlationId,
+      long inlineIngressBytes,
+      long inlineEgressBytes,
+      long sharedMemoryIngressBytes,
+      long sharedMemoryEgressBytes,
       long stagingFallbackIngressBytes,
       long stagingFallbackEgressBytes,
-      long stagingFallbackTotalBytes) {
+      long stagingFallbackTotalBytes,
+      long zeroCopyEligibleCount,
+      long zeroCopyHitCount) {
     public OperationCopy {
       Objects.requireNonNull(requestType, "requestType");
       Objects.requireNonNull(correlationId, "correlationId");
@@ -884,12 +1467,25 @@ public final class SidecarSupervisor implements AutoCloseable {
           "measured operation is not SUBMIT_REQUEST");
       require(generation != 0, "measured operation generation is zero");
       require(correlationId.length() == 32, "measured correlation ID is not ID128 hex");
-      require(stagingFallbackIngressBytes >= 0 && stagingFallbackEgressBytes >= 0,
+      require(
+          inlineIngressBytes >= 0
+              && inlineEgressBytes >= 0
+              && sharedMemoryIngressBytes >= 0
+              && sharedMemoryEgressBytes >= 0
+              && stagingFallbackIngressBytes >= 0
+              && stagingFallbackEgressBytes >= 0,
           "measured copy bytes are negative");
+      require(
+          (inlineIngressBytes == 0) != (sharedMemoryIngressBytes == 0)
+              && (inlineEgressBytes == 0) != (sharedMemoryEgressBytes == 0),
+          "measured operation does not identify exactly one carrier per direction");
       require(
           Math.addExact(stagingFallbackIngressBytes, stagingFallbackEgressBytes)
               == stagingFallbackTotalBytes,
           "measured copy-byte sum is inconsistent");
+      require(
+          zeroCopyEligibleCount == 1 && zeroCopyHitCount == 0,
+          "measured SUBMIT zero-copy evidence is inconsistent");
     }
   }
 
@@ -960,26 +1556,64 @@ public final class SidecarSupervisor implements AutoCloseable {
     }
   }
 
-  private static final class CountingTransport implements LocalSidecarClient.Transport {
+  static final class CountingTransport implements LocalSidecarClient.Transport {
     private final LocalSidecarClient.Transport delegate;
     private final CopyLedger ledger;
+    private final long generation;
+    private final Object observationGate = new Object();
+    private boolean transportClosed;
 
-    private CountingTransport(LocalSidecarClient.Transport delegate, CopyLedger ledger) {
+    CountingTransport(
+        LocalSidecarClient.Transport delegate, CopyLedger ledger, long generation) {
       this.delegate = delegate;
       this.ledger = ledger;
+      require(generation != 0, "counting transport generation is zero");
+      this.generation = generation;
+      if (delegate.sharedMemoryConfigured()) {
+        ledger.sharedMemoryConfigured.set(true);
+      }
     }
 
     @Override
     public void write(byte[] canonicalFrame) throws IOException {
-      delegate.write(canonicalFrame);
-      ledger.recordIngress(canonicalFrame);
+      synchronized (observationGate) {
+        if (transportClosed) {
+          throw new IOException("counting transport is closed");
+        }
+        delegate.write(canonicalFrame);
+        var shared = delegate.lastWriteSharedMemory();
+        ledger.recordIngress(canonicalFrame, shared);
+      }
     }
 
     @Override
     public byte[] read() throws IOException {
       var result = delegate.read();
-      ledger.recordEgress(result);
+      if (!SidecarSharedMemory.isSharedMemoryCarrier(result)) {
+        synchronized (observationGate) {
+          if (!transportClosed) {
+            ledger.recordEgress(result, false);
+          }
+        }
+      }
       return result;
+    }
+
+    @Override
+    public byte[] resolveSharedMemoryCarrier(byte[] carrier) throws IOException {
+      var resolved = delegate.resolveSharedMemoryCarrier(carrier);
+      synchronized (observationGate) {
+        if (!transportClosed) {
+          ledger.recordEgress(resolved, true);
+        }
+      }
+      return resolved;
+    }
+
+    @Override
+    public boolean acceptSharedMemoryAck(SidecarIpcV1.Frame notification)
+        throws IOException {
+      return delegate.acceptSharedMemoryAck(notification);
     }
 
     @Override
@@ -989,52 +1623,168 @@ public final class SidecarSupervisor implements AutoCloseable {
 
     @Override
     public void close() throws IOException {
-      delegate.close();
+      IOException failure = null;
+      try {
+        delegate.close();
+      } catch (IOException error) {
+        failure = error;
+      } finally {
+        synchronized (observationGate) {
+          transportClosed = true;
+          ledger.clearGeneration(generation);
+        }
+      }
+      if (failure != null) {
+        throw failure;
+      }
     }
   }
 
-  private static final class CopyLedger {
+  static final class CopyLedger
+      implements LocalSidecarClient.ValidatedResponseListener {
     private final AtomicLong inlineIngressBytes = new AtomicLong();
     private final AtomicLong inlineEgressBytes = new AtomicLong();
+    private final AtomicLong sharedMemoryIngressBytes = new AtomicLong();
+    private final AtomicLong sharedMemoryEgressBytes = new AtomicLong();
     private final AtomicLong stagingFallbackIngressBytes = new AtomicLong();
     private final AtomicLong stagingFallbackEgressBytes = new AtomicLong();
+    private final AtomicLong zeroCopyEligibleCount = new AtomicLong();
+    private final AtomicLong zeroCopyHitCount = new AtomicLong();
+    private final AtomicBoolean sharedMemoryConfigured = new AtomicBoolean();
+    private final AtomicReference<String> sharedMemoryCapabilityStatus =
+        new AtomicReference<>(
+            SidecarSharedMemory.atomicAbiSupported()
+                ? "AVAILABLE_NOT_CONFIGURED"
+                : "DISABLED_ATOMIC_ABI_UNAVAILABLE");
+    private final Map<CopyKey, CarrierObservation> ingressObservations =
+        new java.util.LinkedHashMap<>();
+    private final Map<CopyKey, CarrierObservation> egressObservations =
+        new java.util.LinkedHashMap<>();
     private OperationCopy maxSubmitStagingFallback;
 
-    private void recordIngress(byte[] frame) {
+    private synchronized void recordIngress(byte[] frame, boolean sharedMemory) {
       var logicalPayloadBytes = logicalPayloadLength(frame);
-      addExact(inlineIngressBytes, frame.length);
-      addExact(stagingFallbackIngressBytes, logicalPayloadBytes);
-    }
-
-    private void recordEgress(byte[] frame) {
-      var logicalPayloadBytes = logicalPayloadLength(frame);
-      addExact(inlineEgressBytes, frame.length);
-      addExact(stagingFallbackEgressBytes, logicalPayloadBytes);
-    }
-
-    private synchronized void recordValidatedResponse(
-        LocalSidecarClient.PreparedRequest request, SidecarIpcV1.Frame response) {
-      if (request.type() != SidecarIpcV1.MessageType.SUBMIT_REQUEST) {
-        return;
+      var type = messageType(frame);
+      var eligible = type.sharedMemoryEligible();
+      if (sharedMemory) {
+        addExact(sharedMemoryIngressBytes, logicalPayloadBytes);
+      } else {
+        addExact(inlineIngressBytes, frame.length);
       }
-      var ingress = request.canonicalPayloadLength();
-      var egress = response.payloadLength();
-      var total = Math.addExact(ingress, egress);
+      if (eligible) {
+        zeroCopyEligibleCount.incrementAndGet();
+        // The current SHM carrier copies logical bytes into and out of the
+        // mapped region.  Count mapped traffic separately, but do not report a
+        // zero-copy hit until a genuinely borrowed-buffer path exists.
+        if (!sharedMemory) {
+          addExact(stagingFallbackIngressBytes, logicalPayloadBytes);
+        }
+      }
+      if (type == SidecarIpcV1.MessageType.SUBMIT_REQUEST) {
+        putBounded(
+            ingressObservations,
+            copyKey(frame),
+            new CarrierObservation(sharedMemory, frame.length, logicalPayloadBytes));
+      }
+    }
+
+    private synchronized void recordEgress(byte[] frame, boolean sharedMemory) {
+      var logicalPayloadBytes = logicalPayloadLength(frame);
+      var type = messageType(frame);
+      var eligible = type.sharedMemoryEligible();
+      if (sharedMemory) {
+        addExact(sharedMemoryEgressBytes, logicalPayloadBytes);
+      } else {
+        addExact(inlineEgressBytes, frame.length);
+      }
+      if (eligible) {
+        zeroCopyEligibleCount.incrementAndGet();
+        // Native-to-Java carrier resolution also copies the logical payload.
+        if (!sharedMemory) {
+          addExact(stagingFallbackEgressBytes, logicalPayloadBytes);
+        }
+      }
+      if (type == SidecarIpcV1.MessageType.SUBMIT_RESPONSE
+          || type == SidecarIpcV1.MessageType.ERROR_RESPONSE) {
+        putBounded(
+            egressObservations,
+            copyKey(frame),
+            new CarrierObservation(sharedMemory, frame.length, logicalPayloadBytes));
+      }
+    }
+
+    @Override
+    public synchronized Object onValidated(
+        LocalSidecarClient.PreparedRequest request, SidecarIpcV1.Frame response) {
+      var key = new CopyKey(response.generation(), response.correlationId().hex());
+      var ingress = ingressObservations.remove(key);
+      var egress = egressObservations.remove(key);
+      if (request.type() != SidecarIpcV1.MessageType.SUBMIT_REQUEST) {
+        return null;
+      }
+      require(ingress != null, "validated SUBMIT lacks its exact ingress carrier observation");
+      require(egress != null, "validated SUBMIT lacks its exact egress carrier observation");
+      require(
+          ingress.logicalPayloadBytes() == request.canonicalPayloadLength()
+              && egress.logicalPayloadBytes() == response.payloadLength(),
+          "validated SUBMIT copy observation length mismatch");
+      var ingressFallback = ingress.sharedMemory() ? 0L : ingress.logicalPayloadBytes();
+      var egressEligible = response.messageType().sharedMemoryEligible();
+      var egressFallback = egressEligible && !egress.sharedMemory()
+          ? egress.logicalPayloadBytes()
+          : 0L;
+      var total = Math.addExact(ingressFallback, egressFallback);
       var measured = new OperationCopy(
           SidecarIpcV1.MessageType.SUBMIT_REQUEST,
           response.generation(),
           response.correlationId().hex(),
-          ingress,
-          egress,
-          total);
+          ingress.sharedMemory() ? 0L : ingress.frameBytes(),
+          egress.sharedMemory() ? 0L : egress.frameBytes(),
+          ingress.sharedMemory() ? ingress.logicalPayloadBytes() : 0L,
+          egress.sharedMemory() ? egress.logicalPayloadBytes() : 0L,
+          ingressFallback,
+          egressFallback,
+          total,
+          1,
+          0);
       if (maxSubmitStagingFallback == null
           || total > maxSubmitStagingFallback.stagingFallbackTotalBytes()) {
         maxSubmitStagingFallback = measured;
       }
+      return measured;
+    }
+
+    @Override
+    public synchronized void onResponseDiscarded(
+        long responseGeneration, SidecarIpcV1.Id128 correlationId) {
+      egressObservations.remove(new CopyKey(responseGeneration, correlationId.hex()));
+    }
+
+    @Override
+    public synchronized void onTransportClosed(long closedGeneration) {
+      clearGeneration(closedGeneration);
+    }
+
+    private synchronized void clearGeneration(long closedGeneration) {
+      ingressObservations.keySet().removeIf(key -> key.generation() == closedGeneration);
+      egressObservations.keySet().removeIf(key -> key.generation() == closedGeneration);
+    }
+
+    private synchronized void clearAllTransient() {
+      ingressObservations.clear();
+      egressObservations.clear();
     }
 
     private synchronized OperationCopy maxSubmitStagingFallback() {
       return maxSubmitStagingFallback;
+    }
+
+    synchronized int transientObservationCount() {
+      return Math.addExact(ingressObservations.size(), egressObservations.size());
+    }
+
+    private void observeSharedMemoryStatus(String status) {
+      sharedMemoryCapabilityStatus.set(Objects.requireNonNull(status, "status"));
     }
 
     private static long logicalPayloadLength(byte[] frame) {
@@ -1045,7 +1795,7 @@ public final class SidecarSupervisor implements AutoCloseable {
       var flags = header.getInt(16);
       require((flags & SidecarIpcV1.FLAG_PAYLOAD_INLINE) != 0
               && (flags & SidecarIpcV1.FLAG_PAYLOAD_SHARED_MEMORY) == 0,
-          "copy-only telemetry saw a shared-memory carrier");
+          "telemetry requires a resolved canonical inline frame");
       var length = header.getLong(68);
       require(length >= 0 && length <= SidecarIpcV1.MAX_LOGICAL_PAYLOAD_BYTES,
           "telemetry payload length is outside bounds");
@@ -1054,19 +1804,82 @@ public final class SidecarSupervisor implements AutoCloseable {
       return length;
     }
 
+    private static SidecarIpcV1.MessageType messageType(byte[] frame) {
+      return SidecarIpcV1.MessageType.fromCode(
+          Short.toUnsignedInt(
+              java.nio.ByteBuffer.wrap(frame)
+                  .order(java.nio.ByteOrder.BIG_ENDIAN)
+                  .getShort(14)));
+    }
+
+    private static CopyKey copyKey(byte[] frame) {
+      var header = java.nio.ByteBuffer.wrap(frame).order(java.nio.ByteOrder.BIG_ENDIAN);
+      var generation = header.getLong(36);
+      var correlation = java.util.HexFormat.of().formatHex(
+          java.util.Arrays.copyOfRange(frame, 44, 60));
+      return new CopyKey(generation, correlation);
+    }
+
+    private static <V> void putBounded(Map<CopyKey, V> target, CopyKey key, V value) {
+      require(
+          target.containsKey(key)
+              || target.size() < SidecarIpcV1.IN_FLIGHT_CORRELATIONS,
+          "copy observation ledger reached the frozen in-flight bound");
+      target.put(key, value);
+      require(
+          target.size() <= SidecarIpcV1.IN_FLIGHT_CORRELATIONS,
+          "copy observation ledger exceeded the frozen in-flight bound");
+    }
+
+    private String sharedMemoryStatus() {
+      if (sharedMemoryConfigured.get()) {
+        return "ENABLED_LOCK_FREE_U32_BIG_ENDIAN";
+      }
+      return sharedMemoryCapabilityStatus.get();
+    }
+
     private static void addExact(AtomicLong counter, long amount) {
       counter.updateAndGet(current -> Math.addExact(current, amount));
+    }
+
+    private record CopyKey(long generation, String correlationId) {
+      private CopyKey {
+        require(generation != 0, "copy observation generation is zero");
+        Objects.requireNonNull(correlationId, "correlationId");
+        require(correlationId.length() == 32, "copy observation correlation is not ID128 hex");
+      }
+    }
+
+    private record CarrierObservation(
+        boolean sharedMemory, long frameBytes, long logicalPayloadBytes) {
+      private CarrierObservation {
+        require(
+            frameBytes >= SidecarIpcV1.HEADER_BYTES && logicalPayloadBytes > 0,
+            "copy carrier observation is empty or truncated");
+        require(
+            frameBytes == Math.addExact(SidecarIpcV1.HEADER_BYTES, logicalPayloadBytes),
+            "copy carrier observation length mismatch");
+      }
     }
   }
 
   private static final class PipeConnection implements Connection {
     private final Process process;
     private final LocalSidecarClient.Transport transport;
-    private final AtomicBoolean endpointClosed = new AtomicBoolean();
+    private final SidecarSharedMemory.GenerationResources sharedMemory;
+    private final String sharedMemoryStatus;
+    private final SidecarSharedMemory.CleanupProgress cleanup =
+        new SidecarSharedMemory.CleanupProgress();
 
-    private PipeConnection(Process process, LocalSidecarClient.Transport transport) {
+    private PipeConnection(
+        Process process,
+        LocalSidecarClient.Transport transport,
+        SidecarSharedMemory.GenerationResources sharedMemory,
+        String sharedMemoryStatus) {
       this.process = process;
       this.transport = transport;
+      this.sharedMemory = sharedMemory;
+      this.sharedMemoryStatus = Objects.requireNonNull(sharedMemoryStatus, "sharedMemoryStatus");
     }
 
     @Override
@@ -1096,13 +1909,36 @@ public final class SidecarSupervisor implements AutoCloseable {
 
     @Override
     public boolean endpointClosed() {
-      return endpointClosed.get();
+      return cleanup.confirmed();
+    }
+
+    @Override
+    public String sharedMemoryStatus() {
+      return sharedMemoryStatus;
     }
 
     @Override
     public void close() throws IOException {
-      transport.close();
-      endpointClosed.set(true);
+      cleanup.close(this::closeTransport, this::closeSharedMemory);
+    }
+
+    private void closeTransport() throws IOException {
+      try {
+        transport.close();
+      } catch (IOException error) {
+        if (transport.isOpen()) {
+          throw error;
+        }
+      }
+      if (transport.isOpen()) {
+        throw new IOException("sidecar byte-stream endpoint close was not confirmed");
+      }
+    }
+
+    private void closeSharedMemory() throws IOException {
+      if (sharedMemory != null) {
+        sharedMemory.close();
+      }
     }
   }
 }

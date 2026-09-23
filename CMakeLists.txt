@@ -118,7 +118,8 @@ delta_target_defaults(delta_scheduling)
 
 add_library(delta_certificates STATIC
   delta-core-cpp/src/certificates/contracts.cpp
-  delta-core-cpp/src/certificates/verifier.cpp)
+  delta-core-cpp/src/certificates/verifier.cpp
+  delta-core-cpp/src/certificates/vote_admission.cpp)
 add_library(delta::certificates ALIAS delta_certificates)
 set_target_properties(delta_certificates PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(
@@ -162,6 +163,7 @@ delta_target_defaults(delta_qlora)
 add_library(delta_runtime STATIC
   delta-runtime-cpp/src/certificate_runtime.cpp
   delta-runtime-cpp/src/runtime.cpp
+  delta-runtime-cpp/src/vote_codec.cpp
   delta-runtime-cpp/src/wal.cpp)
 add_library(delta::runtime ALIAS delta_runtime)
 set_target_properties(delta_runtime PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -210,6 +212,15 @@ if(DELTA_BUILD_ISOLATED_SIDECAR)
   endif()
   delta_target_defaults(delta_sidecar_protocol)
 
+  add_library(delta_sidecar_shared_memory STATIC
+    delta-runtime-cpp/src/sidecar_shared_memory.cpp)
+  add_library(delta::sidecar_shared_memory ALIAS delta_sidecar_shared_memory)
+  target_include_directories(
+    delta_sidecar_shared_memory
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
+  target_link_libraries(delta_sidecar_shared_memory PUBLIC delta::sidecar_protocol)
+  delta_target_defaults(delta_sidecar_shared_memory)
+
   add_library(delta_sidecar_lock STATIC
     delta-runtime-cpp/src/sidecar_directory_lock.cpp)
   add_library(delta::sidecar_lock ALIAS delta_sidecar_lock)
@@ -227,7 +238,7 @@ if(DELTA_BUILD_ISOLATED_SIDECAR)
     PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include>)
   target_link_libraries(
     delta_sidecar_server
-    PUBLIC delta::sidecar_protocol delta::sidecar_lock delta::runtime)
+    PUBLIC delta::sidecar_protocol delta::sidecar_shared_memory delta::sidecar_lock delta::runtime)
   delta_target_defaults(delta_sidecar_server)
 
   add_executable(delta_runtime_sidecar delta-runtime-cpp/src/sidecar_main.cpp)
@@ -318,6 +329,28 @@ if(DELTA_BUILD_SIDECAR_QUALIFICATION)
 endif()
 
 if(BUILD_TESTING)
+  add_library(delta_vote_fixture STATIC delta-core-cpp/tests/vote_fixture.cpp)
+  target_link_libraries(delta_vote_fixture PUBLIC delta::certificates)
+  delta_target_defaults(delta_vote_fixture)
+
+  if(DELTA_BUILD_SIDECAR_QUALIFICATION AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_executable(
+      delta_sidecar_vote_qualification_interposer_smoke
+      delta-runtime-cpp/tests/sidecar_vote_qualification_interposer_smoke.cpp)
+    target_link_libraries(
+      delta_sidecar_vote_qualification_interposer_smoke
+      PRIVATE delta_sidecar_qualification_probe delta::runtime delta_vote_fixture)
+    delta_target_defaults(delta_sidecar_vote_qualification_interposer_smoke)
+    add_test(
+      NAME delta_sidecar.qualification_vote_fsync_interposer
+      COMMAND
+        ${CMAKE_COMMAND}
+        -DSMOKE_EXECUTABLE=$<TARGET_FILE:delta_sidecar_vote_qualification_interposer_smoke>
+        -DINTERPOSER_LIBRARY=$<TARGET_FILE:delta_sidecar_qualification_fsync_interposer>
+        -DSMOKE_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/qualification-vote-interposer-smoke
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/tests/sidecar_vote_qualification_interposer_smoke.cmake)
+  endif()
+
   if(DELTA_BUILD_ISOLATED_SIDECAR AND DELTA_BUILD_ISOLATED_SIDECAR_TESTS)
     add_executable(
       delta_sidecar_protocol_test
@@ -338,6 +371,16 @@ if(BUILD_TESTING)
       COMMAND delta_sidecar_directory_lock_test)
 
     add_executable(
+      delta_sidecar_shared_memory_test
+      delta-runtime-cpp/tests/sidecar_shared_memory_test.cpp)
+    target_link_libraries(
+      delta_sidecar_shared_memory_test PRIVATE delta::sidecar_shared_memory)
+    delta_target_defaults(delta_sidecar_shared_memory_test)
+    add_test(
+      NAME delta_sidecar.shared_memory
+      COMMAND delta_sidecar_shared_memory_test)
+
+    add_executable(
       delta_sidecar_fail_closed_test
       delta-runtime-cpp/tests/sidecar_fail_closed_test.cpp)
     target_include_directories(
@@ -345,7 +388,7 @@ if(BUILD_TESTING)
       PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/delta-ffi/include)
     target_link_libraries(
       delta_sidecar_fail_closed_test
-      PRIVATE delta::sidecar_server)
+      PRIVATE delta::sidecar_server delta_vote_fixture)
     target_compile_definitions(
       delta_sidecar_fail_closed_test
       PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
@@ -386,7 +429,8 @@ if(BUILD_TESTING)
     delta-core-cpp/tests/certificates_test.cpp)
   target_link_libraries(
     delta_certificates_test
-    PRIVATE delta::certificates delta::robust delta::apply delta::runtime delta::distribution)
+    PRIVATE delta::certificates delta::robust delta::apply delta::runtime delta::distribution
+            delta_vote_fixture)
   delta_target_defaults(delta_certificates_test)
   add_test(NAME delta_core.certificates COMMAND delta_certificates_test)
 
@@ -449,6 +493,7 @@ if(BUILD_TESTING)
   add_library(delta_current_apply_qc_mutant STATIC
     delta-runtime-cpp/src/certificate_runtime.cpp
     delta-runtime-cpp/src/runtime.cpp
+    delta-runtime-cpp/src/vote_codec.cpp
     delta-runtime-cpp/src/wal.cpp)
   target_include_directories(
     delta_current_apply_qc_mutant
@@ -657,7 +702,8 @@ if(BUILD_TESTING)
   add_test(NAME delta_core.hierarchy_parser_fuzz COMMAND delta_hierarchy_parser_fuzz)
 
   add_executable(delta_hierarchy_reduce_test delta-core-cpp/tests/hierarchy_reduce_test.cpp)
-  target_link_libraries(delta_hierarchy_reduce_test PRIVATE delta::hierarchy delta::runtime)
+  target_link_libraries(
+    delta_hierarchy_reduce_test PRIVATE delta::hierarchy delta::runtime delta_vote_fixture)
   target_compile_definitions(
     delta_hierarchy_reduce_test
     PRIVATE DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json"
@@ -682,7 +728,8 @@ if(BUILD_TESTING)
     target_compile_definitions(${mutant_library} PRIVATE "DELTA_HIERARCHY_MUTANT_${mutant}")
     delta_target_defaults(${mutant_library})
     add_executable(${mutant_test} delta-core-cpp/tests/hierarchy_reduce_test.cpp)
-    target_link_libraries(${mutant_test} PRIVATE ${mutant_library} delta::runtime)
+    target_link_libraries(
+      ${mutant_test} PRIVATE ${mutant_library} delta::runtime delta_vote_fixture)
     target_compile_definitions(
       ${mutant_test}
       PRIVATE DELTA_HIERARCHY_GOLDEN_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/006/cross-language/golden-v1.json"
@@ -793,7 +840,8 @@ if(BUILD_TESTING)
   add_test(NAME delta_core.transition COMMAND delta_core_transition_test)
 
   add_executable(delta_core_consensus_test delta-core-cpp/tests/consensus_test.cpp)
-  target_link_libraries(delta_core_consensus_test PRIVATE delta::core)
+  target_link_libraries(
+    delta_core_consensus_test PRIVATE delta::core delta::certificates delta_vote_fixture)
   target_compile_definitions(
     delta_core_consensus_test
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
@@ -825,15 +873,23 @@ if(BUILD_TESTING)
   add_test(NAME delta_runtime.target COMMAND delta_runtime_target_test)
 
   add_executable(delta_runtime_test delta-runtime-cpp/tests/runtime_test.cpp)
-  target_link_libraries(delta_runtime_test PRIVATE delta::runtime)
+  target_link_libraries(delta_runtime_test PRIVATE delta::runtime delta_vote_fixture)
   target_compile_definitions(
     delta_runtime_test
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
   delta_target_defaults(delta_runtime_test)
   add_test(NAME delta_runtime.behavior COMMAND delta_runtime_test)
 
+  add_executable(
+    delta_vote_fixture_exporter
+    delta-runtime-cpp/tests/vote_fixture_exporter.cpp)
+  target_link_libraries(
+    delta_vote_fixture_exporter PRIVATE delta::runtime delta_vote_fixture)
+  delta_target_defaults(delta_vote_fixture_exporter)
+  add_test(NAME delta_runtime.vote_fixture_export COMMAND delta_vote_fixture_exporter)
+
   add_executable(delta_runtime_trace_exporter delta-runtime-cpp/tests/trace_exporter.cpp)
-  target_link_libraries(delta_runtime_trace_exporter PRIVATE delta::runtime)
+  target_link_libraries(delta_runtime_trace_exporter PRIVATE delta::runtime delta_vote_fixture)
   target_compile_definitions(
     delta_runtime_trace_exporter
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
@@ -875,13 +931,15 @@ if(BUILD_TESTING)
   add_library(delta_runtime_durability_mutant STATIC
     EXCLUDE_FROM_ALL
     delta-runtime-cpp/src/runtime.cpp
+    delta-runtime-cpp/src/vote_codec.cpp
     delta-runtime-cpp/src/wal.cpp)
   target_include_directories(
     delta_runtime_durability_mutant
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
   target_compile_definitions(
     delta_runtime_durability_mutant PRIVATE DELTA_NATIVE_MUTANT_EXPOSE_BEFORE_DURABILITY)
-  target_link_libraries(delta_runtime_durability_mutant PUBLIC delta::core)
+  target_link_libraries(
+    delta_runtime_durability_mutant PUBLIC delta::core delta::certificates)
   if(NOT WIN32)
     target_compile_options(delta_runtime_durability_mutant PRIVATE -pthread)
     target_link_options(delta_runtime_durability_mutant PUBLIC -pthread)
@@ -898,13 +956,133 @@ if(BUILD_TESTING)
             DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json")
   delta_target_defaults(delta_runtime_durability_mutant_test)
 
+  add_library(delta_record_vote_conflict_mutant STATIC
+    delta-core-cpp/src/arithmetic.cpp
+    delta-core-cpp/src/canonical.cpp
+    delta-core-cpp/src/consensus.cpp
+    delta-core-cpp/src/protocol.cpp
+    delta-core-cpp/src/sha256.cpp
+    delta-core-cpp/src/transition.cpp)
+  target_include_directories(
+    delta_record_vote_conflict_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+  target_compile_definitions(
+    delta_record_vote_conflict_mutant PRIVATE DELTA_RECORD_VOTE_MUTANT_SKIP_CONFLICT)
+  delta_target_defaults(delta_record_vote_conflict_mutant)
+  add_executable(
+    delta_record_vote_conflict_mutant_test
+    delta-runtime-cpp/tests/record_vote_mutant_test.cpp)
+  target_link_libraries(
+    delta_record_vote_conflict_mutant_test PRIVATE delta_record_vote_conflict_mutant)
+  target_compile_definitions(
+    delta_record_vote_conflict_mutant_test
+    PRIVATE DELTA_EXPECT_RECORD_VOTE_CONFLICT_MUTANT)
+  delta_target_defaults(delta_record_vote_conflict_mutant_test)
+  add_test(
+    NAME delta_runtime.record_vote_mutant_conflict
+    COMMAND delta_record_vote_conflict_mutant_test)
+  set_tests_properties(
+    delta_runtime.record_vote_mutant_conflict PROPERTIES WILL_FAIL TRUE)
+
+  add_library(delta_record_vote_context_guard_mutant STATIC
+    delta-core-cpp/src/certificates/contracts.cpp
+    delta-core-cpp/src/certificates/verifier.cpp
+    delta-core-cpp/src/certificates/vote_admission.cpp)
+  target_include_directories(
+    delta_record_vote_context_guard_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+  target_compile_definitions(
+    delta_record_vote_context_guard_mutant
+    PRIVATE DELTA_RECORD_VOTE_MUTANT_SKIP_CONTEXT_GUARD)
+  target_link_libraries(delta_record_vote_context_guard_mutant PUBLIC delta::core)
+  delta_target_defaults(delta_record_vote_context_guard_mutant)
+  add_executable(
+    delta_record_vote_context_guard_mutant_test
+    delta-runtime-cpp/tests/record_vote_mutant_test.cpp
+    delta-core-cpp/tests/vote_fixture.cpp)
+  target_link_libraries(
+    delta_record_vote_context_guard_mutant_test
+    PRIVATE delta_record_vote_context_guard_mutant)
+  target_compile_definitions(
+    delta_record_vote_context_guard_mutant_test
+    PRIVATE DELTA_EXPECT_RECORD_VOTE_CONTEXT_GUARD_MUTANT)
+  delta_target_defaults(delta_record_vote_context_guard_mutant_test)
+  add_test(
+    NAME delta_runtime.record_vote_mutant_context_guard
+    COMMAND delta_record_vote_context_guard_mutant_test)
+  set_tests_properties(
+    delta_runtime.record_vote_mutant_context_guard PROPERTIES WILL_FAIL TRUE)
+
+  add_library(delta_record_vote_arithmetic_admission_mutant STATIC
+    delta-core-cpp/src/certificates/contracts.cpp
+    delta-core-cpp/src/certificates/verifier.cpp
+    delta-core-cpp/src/certificates/vote_admission.cpp)
+  target_include_directories(
+    delta_record_vote_arithmetic_admission_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-core-cpp/include>)
+  target_compile_definitions(
+    delta_record_vote_arithmetic_admission_mutant
+    PRIVATE DELTA_RECORD_VOTE_MUTANT_SKIP_ARITHMETIC_INPUT_GUARD)
+  target_link_libraries(
+    delta_record_vote_arithmetic_admission_mutant PUBLIC delta::core)
+  delta_target_defaults(delta_record_vote_arithmetic_admission_mutant)
+  add_executable(
+    delta_record_vote_arithmetic_admission_mutant_test
+    delta-runtime-cpp/tests/record_vote_mutant_test.cpp
+    delta-core-cpp/tests/vote_fixture.cpp)
+  target_link_libraries(
+    delta_record_vote_arithmetic_admission_mutant_test
+    PRIVATE delta_record_vote_arithmetic_admission_mutant)
+  target_compile_definitions(
+    delta_record_vote_arithmetic_admission_mutant_test
+    PRIVATE DELTA_EXPECT_RECORD_VOTE_ARITHMETIC_ADMISSION_MUTANT)
+  delta_target_defaults(delta_record_vote_arithmetic_admission_mutant_test)
+  add_test(
+    NAME delta_runtime.record_vote_mutant_arithmetic_admission
+    COMMAND delta_record_vote_arithmetic_admission_mutant_test)
+  set_tests_properties(
+    delta_runtime.record_vote_mutant_arithmetic_admission PROPERTIES WILL_FAIL TRUE)
+
+  add_library(delta_record_vote_durability_mutant STATIC
+    delta-runtime-cpp/src/runtime.cpp
+    delta-runtime-cpp/src/vote_codec.cpp
+    delta-runtime-cpp/src/wal.cpp)
+  target_include_directories(
+    delta_record_vote_durability_mutant
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/delta-runtime-cpp/include>)
+  target_compile_definitions(
+    delta_record_vote_durability_mutant
+    PRIVATE DELTA_RECORD_VOTE_MUTANT_EXPOSE_BEFORE_DURABILITY)
+  target_link_libraries(
+    delta_record_vote_durability_mutant PUBLIC delta::core delta::certificates)
+  if(NOT WIN32)
+    target_compile_options(delta_record_vote_durability_mutant PRIVATE -pthread)
+    target_link_options(delta_record_vote_durability_mutant PUBLIC -pthread)
+  endif()
+  delta_target_defaults(delta_record_vote_durability_mutant)
+  add_executable(
+    delta_record_vote_durability_mutant_test
+    delta-runtime-cpp/tests/record_vote_mutant_test.cpp)
+  target_link_libraries(
+    delta_record_vote_durability_mutant_test
+    PRIVATE delta_record_vote_durability_mutant delta_vote_fixture)
+  target_compile_definitions(
+    delta_record_vote_durability_mutant_test
+    PRIVATE DELTA_EXPECT_RECORD_VOTE_DURABILITY_MUTANT)
+  delta_target_defaults(delta_record_vote_durability_mutant_test)
+  add_test(
+    NAME delta_runtime.record_vote_mutant_durability
+    COMMAND delta_record_vote_durability_mutant_test)
+  set_tests_properties(
+    delta_runtime.record_vote_mutant_durability PROPERTIES WILL_FAIL TRUE)
+
   add_executable(delta_ffi_target_test delta-ffi/tests/target_smoke_test.cpp)
   target_link_libraries(delta_ffi_target_test PRIVATE delta::ffi)
   delta_target_defaults(delta_ffi_target_test)
   add_test(NAME delta_ffi.target COMMAND delta_ffi_target_test)
 
   add_executable(delta_ffi_abi_test delta-ffi/tests/abi_test.cpp)
-  target_link_libraries(delta_ffi_abi_test PRIVATE delta::ffi)
+  target_link_libraries(delta_ffi_abi_test PRIVATE delta::ffi delta_vote_fixture)
   target_compile_definitions(
     delta_ffi_abi_test
     PRIVATE DELTA_GOLDEN_FIXTURE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/delta-protocol/fixtures/003/cross-language/golden-v1.json"

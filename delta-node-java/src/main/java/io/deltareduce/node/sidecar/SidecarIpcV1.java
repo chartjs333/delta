@@ -19,15 +19,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Strict bounded-copy codec for {@code delta-local-sidecar-ipc/1.0}. */
+/** Strict bounded-copy codec for {@code delta-local-sidecar-ipc/1.1}. */
 public final class SidecarIpcV1 {
   public static final int IPC_MAJOR = 1;
-  public static final int IPC_MINOR = 0;
+  public static final int IPC_MINOR = 1;
   public static final int HEADER_BYTES = 128;
   public static final int MAX_LOGICAL_PAYLOAD_BYTES = 16_785_408;
   public static final int MAX_CONTROL_ENVELOPE_BYTES = 16_785_536;
   public static final int MAX_CANONICAL_COMMAND_BYTES = 16_777_216;
   public static final int MAX_CANONICAL_EFFECT_BYTES = 16_777_216;
+  public static final int MAX_CANONICAL_VOTE_POLICY_BYTES = 4_194_304;
+  public static final int MAX_CANONICAL_VOTE_BYTES = 16_769_024;
+  public static final int MAX_CANONICAL_VOTE_RECEIPT_BYTES = 16_777_216;
   public static final int MAX_REQUEST_ID_BYTES = 256;
   public static final int MAX_IDENTITY_TEXT_BYTES = 256;
   public static final int MAX_OPEN_DIRECTORY_UTF8_BYTES = 4_096;
@@ -36,7 +39,9 @@ public final class SidecarIpcV1 {
   public static final int INGRESS_QUEUE_REQUESTS = 64;
   public static final int IN_FLIGHT_CORRELATIONS = 64;
   public static final int TRACKED_TIMERS = 65_536;
+  public static final int SHARED_MEMORY_REFERENCE_BYTES = 64;
   public static final long NATIVE_STATUS_UNAVAILABLE = 4_294_967_295L;
+  public static final long NESTED_ABI_FEATURE_BITS = 31L;
 
   public static final int FLAG_PAYLOAD_INLINE = 0x01;
   public static final int FLAG_PAYLOAD_SHARED_MEMORY = 0x02;
@@ -47,17 +52,17 @@ public final class SidecarIpcV1 {
   public static final String CANONICAL_ENCODING_ID =
       "sha256:393cd207a2cd3fd4da366be56095a3467e3184c2c5db1d300d1c07d49cdd7aff";
   public static final String FRAME_LAYOUT_SHA256 =
-      "sha256:46fcc91280fc2c878cb176bf6e9d855f8e39ac9fffcf18709b1a6b80a30ce18e";
+      "sha256:b8d8a521133d4d5b41ab5035f2cfaa82594a4789c8b83ad0c81b77a67afbcb4b";
   public static final String PAYLOAD_SCHEMA_SHA256 =
-      "sha256:31edfa48d707fb06cd24624d1790946981294bb093d74d44c202a5d15c5376c5";
+      "sha256:fdeb9e2607dfe2661fff8e99a9510ae1eb6658e516f1496ade6fd1dd6e7af7ce";
   public static final String MESSAGE_TYPE_TABLE_SHA256 =
-      "sha256:dfa3fe65b946e6527b317168ef0ea000a4610bba1e9c1ed9ebd099adff71e64e";
+      "sha256:1581d40a12765ea54c1abf7f3c5434025f40d6718e639c9f9fbfcc1eb6e07950";
   public static final String FLAG_TABLE_SHA256 =
-      "sha256:6aa94eb75b5b6af99132f71b2753d56988454be86a371b46f46241cf7a8e33d5";
+      "sha256:857da723287529fe38f3f6479decb962f435e21b541b38abe71b28489933b248";
   public static final String BOUNDS_SHA256 =
-      "sha256:32d9e791ac35dc6bb061aaedb0a67ee28ad1a2662bbb0ffd1bfc9177b055d0f8";
+      "sha256:12259ada8ff8a14febf167b2631768911fefd9fd26c7298b7ff0f3d103837708";
   public static final String SHARED_MEMORY_LAYOUT_SHA256 =
-      "sha256:0a48282fddae72060e9b93c02f97f174b56f8a20b07aabb88ee51f7ef03f5aa4";
+      "sha256:17ce8022d0075e715e8c699ba17c27d9901bf08727579ab977e74f169b205b78";
 
   private static final byte[] MAGIC = "DELTAIPC".getBytes(StandardCharsets.US_ASCII);
   private static final byte[] ABI_MAGIC = "DELTABI1".getBytes(StandardCharsets.US_ASCII);
@@ -80,6 +85,8 @@ public final class SidecarIpcV1 {
     OPEN_RESPONSE(0x11, false, false, false),
     SUBMIT_REQUEST(0x20, true, false, true),
     SUBMIT_RESPONSE(0x21, false, false, true),
+    VOTE_REQUEST(0x22, true, false, true),
+    VOTE_RESPONSE(0x23, false, false, true),
     STATE_REQUEST(0x30, true, true, false),
     STATE_RESPONSE(0x31, false, false, true),
     SNAPSHOT_REQUEST(0x40, true, false, false),
@@ -138,6 +145,7 @@ public final class SidecarIpcV1 {
         case CLIENT_HELLO -> SERVER_DESCRIPTOR;
         case OPEN_REQUEST -> OPEN_RESPONSE;
         case SUBMIT_REQUEST -> SUBMIT_RESPONSE;
+        case VOTE_REQUEST -> VOTE_RESPONSE;
         case STATE_REQUEST -> STATE_RESPONSE;
         case SNAPSHOT_REQUEST -> SNAPSHOT_RESPONSE;
         case CLOSE_REQUEST -> CLOSE_RESPONSE;
@@ -203,6 +211,32 @@ public final class SidecarIpcV1 {
         }
       }
       throw invalid("unknown admission state: " + code);
+    }
+  }
+
+  public enum SharedMemoryDisposition {
+    ACKED(1),
+    REJECTED_DIGEST(2),
+    REJECTED_STALE(3),
+    REJECTED_BOUNDS(4);
+
+    private final int code;
+
+    SharedMemoryDisposition(int code) {
+      this.code = code;
+    }
+
+    public int code() {
+      return code;
+    }
+
+    public static SharedMemoryDisposition fromCode(int code) {
+      for (var value : values()) {
+        if (value.code == code) {
+          return value;
+        }
+      }
+      throw invalid("unknown shared-memory disposition: " + code);
     }
   }
 
@@ -1022,6 +1056,12 @@ public final class SidecarIpcV1 {
     return flags;
   }
 
+  public static int sharedMemoryFlags(MessageType type) {
+    Objects.requireNonNull(type, "type");
+    require(type.sharedMemoryEligible(), "message type is not shared-memory eligible");
+    return (inlineFlags(type) & ~FLAG_PAYLOAD_INLINE) | FLAG_PAYLOAD_SHARED_MEMORY;
+  }
+
   /**
    * Returns the strict unsigned successor. {@code 0xffffffffffffffff} is itself a valid frame
    * sequence, but asking for a successor after that frame permanently fences the generation.
@@ -1080,6 +1120,11 @@ public final class SidecarIpcV1 {
   private static void validateFields(MessageType type, List<Field> fields) {
     var rules = SCHEMAS.get(type);
     require(rules != null, "missing payload schema for " + type);
+    if (type == MessageType.OPEN_REQUEST && fields.size() == rules.size() + 1) {
+      var expanded = new ArrayList<FieldRule>(rules);
+      expanded.add(bytesRule(20, MAX_CANONICAL_VOTE_POLICY_BYTES));
+      rules = List.copyOf(expanded);
+    }
     require(fields.size() == rules.size(), "payload field count mismatch for " + type);
     for (var index = 0; index < rules.size(); ++index) {
       var field = fields.get(index);
@@ -1130,13 +1175,21 @@ public final class SidecarIpcV1 {
           "nested descriptor digest mismatch");
     }
     switch (type) {
-      case OPEN_REQUEST -> require(
-          u32Value(map.get(16)) == INGRESS_QUEUE_REQUESTS,
-          "submission capacity differs from frozen bound");
+      case OPEN_REQUEST -> {
+        require(
+            u32Value(map.get(16)) == INGRESS_QUEUE_REQUESTS,
+            "submission capacity differs from frozen bound");
+        if (map.containsKey(20)) {
+          require(map.get(20).value.length > 0, "present vote policy is empty");
+        }
+      }
       case OPEN_RESPONSE -> requireBoolean(map.get(19), "ready");
       case SUBMIT_RESPONSE -> require(
           Arrays.equals(map.get(18).value, sha256(map.get(17).value)),
           "effect digest mismatch");
+      case VOTE_RESPONSE -> require(
+          Arrays.equals(map.get(17).value, sha256(map.get(16).value)),
+          "vote receipt digest mismatch");
       case STATE_RESPONSE -> require(
           Arrays.equals(map.get(18).value, sha256(map.get(19).value)),
           "state digest mismatch");
@@ -1151,7 +1204,7 @@ public final class SidecarIpcV1 {
         requireBoolean(map.get(20), "durable lock held");
         requireBoolean(map.get(21), "ready");
       }
-      case SHARED_MEMORY_ACK -> requireRange(u8Value(map.get(17)), 1, 4, "SHM disposition");
+      case SHARED_MEMORY_ACK -> SharedMemoryDisposition.fromCode(u8Value(map.get(17)));
       case ERROR_RESPONSE -> {
         requireRange(u32Value(map.get(16)), 1, 6, "local error");
         MessageType.fromCode(u16Value(map.get(17)));
@@ -1181,7 +1234,7 @@ public final class SidecarIpcV1 {
             "NOT_APPLICABLE cannot carry an operation result");
       }
       case NOT_ADMITTED_PROVEN -> {
-        require(sequence == 0 && nativeStatus == NATIVE_STATUS_UNAVAILABLE,
+        require(sequence == 0 && nativeStatus != 0,
             "NOT_ADMITTED_PROVEN fields are incoherent");
         require(type == MessageType.ERROR_RESPONSE,
             "NOT_ADMITTED_PROVEN must use ERROR_RESPONSE");
@@ -1238,6 +1291,12 @@ public final class SidecarIpcV1 {
         bytesRule(16, MAX_REQUEST_ID_BYTES), bytesRule(17, MAX_CANONICAL_EFFECT_BYTES),
         fixed(18, WireType.SHA256), fixed(19, WireType.U64_BE),
         fixed(20, WireType.SHA256), fixed(21, WireType.SHA256)));
+    result.put(MessageType.VOTE_REQUEST, List.of(
+        bytesRule(1, MAX_REQUEST_ID_BYTES), fixed(2, WireType.SHA256),
+        bytesRule(16, MAX_CANONICAL_VOTE_BYTES)));
+    result.put(MessageType.VOTE_RESPONSE, responseRules(
+        bytesRule(16, MAX_CANONICAL_VOTE_RECEIPT_BYTES),
+        fixed(17, WireType.SHA256)));
     result.put(MessageType.STATE_REQUEST, simpleRuntimeRequest());
     result.put(MessageType.SNAPSHOT_REQUEST, simpleRuntimeRequest());
     result.put(MessageType.STATE_RESPONSE, responseRules(

@@ -1,11 +1,14 @@
 #pragma once
 
 #include <delta/runtime/sidecar_protocol.hpp>
+#include <delta/runtime/sidecar_directory_lock.hpp>
+#include <delta/runtime/sidecar_shared_memory.hpp>
 
 #include <cstdint>
 #include <filesystem>
 #include <iosfwd>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -22,6 +25,7 @@ enum class FaultPoint {
   after_effect_copy_before_return,
   after_native_return_before_response,
   during_ipc_response_frame,
+  during_shared_memory_publication,
 };
 #endif
 
@@ -32,6 +36,11 @@ struct ServerConfig {
 #if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
   FaultPoint fault_point = FaultPoint::none;
 #endif
+  std::optional<DurableDirectoryIdentity> expected_durable_identity;
+  std::optional<std::filesystem::path> java_to_native_shared_memory;
+  std::optional<std::filesystem::path> native_to_java_shared_memory;
+  std::optional<SharedMemoryFileIdentity> java_to_native_shared_memory_identity;
+  std::optional<SharedMemoryFileIdentity> native_to_java_shared_memory_identity;
 };
 
 class Server final {

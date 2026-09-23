@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.example/schemas/feature010-sidecar-diagnostic-allocation-plan-v1.1.json",
+  "title": "Feature 010 sidecar diagnostic allocation build plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "allocation_manifest_path",
+    "allocation_root",
+    "container",
+    "invocation",
+    "resources",
+    "schema_version",
+    "source",
+    "type_name"
+  ],
+  "properties": {
+    "allocation_manifest_path": {"$ref": "#/$defs/absolutePath"},
+    "allocation_root": {"$ref": "#/$defs/absolutePath"},
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image_digest", "runtime", "runtime_version"],
+      "properties": {
+        "image_digest": {"$ref": "#/$defs/contentId"},
+        "runtime": {"enum": ["docker", "podman"]},
+        "runtime_version": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["argv", "environment", "environment_mode", "working_directory"],
+      "properties": {
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment_mode": {"const": "REPLACE"},
+        "working_directory": {"$ref": "#/$defs/absolutePath"}
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "available_processors",
+        "cgroup_mode",
+        "cpu_max",
+        "cpuset_cpus_effective",
+        "memory_max"
+      ],
+      "properties": {
+        "available_processors": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "cgroup_mode": {"enum": ["V1", "V2"]},
+        "cpu_max": {"type": "string", "minLength": 1, "maxLength": 512},
+        "cpuset_cpus_effective": {"type": "string", "minLength": 1, "maxLength": 512},
+        "memory_max": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "schema_version": {"const": "1.1.0"},
+    "source": {"$ref": "#/$defs/source"},
+    "type_name": {"const": "FEATURE010_SIDECAR_DIAGNOSTIC_ALLOCATION_PLAN"}
+  },
+  "$defs": {
+    "absolutePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?:/|[A-Za-z]:[\\/]|\\\\).+"
+    },
+    "contentId": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "repository", "tree"],
+      "properties": {
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "repository": {"const": "https://github.com/chartjs333/delta.git"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    }
+  }
+}

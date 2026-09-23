@@ -153,9 +153,12 @@ int main(int argc, char** argv) {
     std::optional<delta::runtime::SubmitReceipt> retry;
     {
       delta::runtime::Runtime runtime(delta::runtime::Config{
-          arguments.directory,
-          std::move(initial_state),
-          64U,
+          .directory = arguments.directory,
+          .initial_state_bytes = std::move(initial_state),
+          .submission_capacity = 64U,
+          .durable_binding_guard = {},
+          .vote_policy = {},
+          .expected_wal_identity = {},
       });
       // Runtime recovery may legitimately truncate a torn WAL tail before these
       // observations are captured; this inspector is not filesystem-read-only.

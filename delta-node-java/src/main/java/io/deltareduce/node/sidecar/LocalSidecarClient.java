@@ -44,9 +44,11 @@ public final class LocalSidecarClient implements AutoCloseable {
   public static final Duration REQUEST_WATCHDOG_TIMEOUT = Duration.ofSeconds(30);
   private static final byte[] SUBMIT_RECOVERY_PROOF_DOMAIN =
       "DELTAIPCSUBMITRECOVERY1".getBytes(StandardCharsets.US_ASCII);
+  private static final byte[] VOTE_RECOVERY_PROOF_DOMAIN =
+      "DELTAIPCVOTERECOVERY1".getBytes(StandardCharsets.US_ASCII);
   private static final Duration WATCHDOG_SCAN_INTERVAL = Duration.ofSeconds(1);
   private static final ValidatedResponseListener NOOP_RESPONSE_LISTENER =
-      (request, response) -> {};
+      (request, response) -> null;
 
   private final Transport transport;
   private final SidecarIpcV1.Id128 sessionId;
@@ -231,6 +233,20 @@ public final class LocalSidecarClient implements AutoCloseable {
             List.of(SidecarIpcV1.bytes(16, canonicalCommand))));
   }
 
+  /** Opaque vote transport; native remains the sole parser and admission authority. */
+  public static PreparedRequest voteRequest(byte[] requestId, byte[] canonicalVote) {
+    Objects.requireNonNull(canonicalVote, "canonicalVote");
+    require(
+        canonicalVote.length > 0
+            && canonicalVote.length <= SidecarIpcV1.MAX_CANONICAL_VOTE_BYTES,
+        "canonical vote is outside the frozen sidecar bound");
+    return prepare(
+        SidecarIpcV1.requestPayload(
+            SidecarIpcV1.MessageType.VOTE_REQUEST,
+            requestId,
+            List.of(SidecarIpcV1.bytes(16, canonicalVote))));
+  }
+
   public static PreparedRequest stateRequest(
       byte[] requestId, SidecarIpcV1.Id128 runtimeInstanceId) {
     return runtimeRequest(SidecarIpcV1.MessageType.STATE_REQUEST, requestId, runtimeInstanceId);
@@ -377,6 +393,7 @@ public final class LocalSidecarClient implements AutoCloseable {
       recordUnknown(attempt);
       attempt.completion.completeExceptionally(failure);
     }
+    validatedResponseListener.onTransportClosed(generation);
     try {
       transport.close();
     } catch (IOException ignored) {
@@ -495,7 +512,21 @@ public final class LocalSidecarClient implements AutoCloseable {
     try {
       while (!closed.get() && !fenced.get()) {
         var canonical = transport.read();
+        byte[] consumedReference = null;
+        if (SidecarSharedMemory.isSharedMemoryCarrier(canonical)) {
+          var header = SidecarSharedMemory.inspectCarrierHeader(canonical);
+          requireTrustedSharedMemoryHeader(header);
+          consumedReference = SidecarSharedMemory.referenceBytes(canonical);
+          canonical = transport.resolveSharedMemoryCarrier(canonical);
+        }
         var response = SidecarIpcV1.decodeFrame(canonical);
+        if (response.messageType() == SidecarIpcV1.MessageType.SHARED_MEMORY_ACK) {
+          handleSharedMemoryAck(response);
+          continue;
+        }
+        if (consumedReference != null) {
+          writeSharedMemoryAck(response, consumedReference);
+        }
         handleResponse(response);
       }
     } catch (SidecarIpcV1.ProtocolException error) {
@@ -514,15 +545,76 @@ public final class LocalSidecarClient implements AutoCloseable {
     }
   }
 
+  private void handleSharedMemoryAck(SidecarIpcV1.Frame notification) throws IOException {
+    if (!notification.sessionId().equals(sessionId) || notification.generation() != generation) {
+      staleResponses.incrementAndGet();
+      return;
+    }
+    receiveSequences.accept(notification.sequence());
+    if (!transport.acceptSharedMemoryAck(notification)) {
+      throw new SidecarIpcV1.ProtocolException(
+          "shared-memory ACK does not match a current publication");
+    }
+  }
+
+  private void writeSharedMemoryAck(
+      SidecarIpcV1.Frame consumed,
+      byte[] encodedReference) throws IOException {
+    var payload = SidecarIpcV1.responsePayload(
+        SidecarIpcV1.MessageType.SHARED_MEMORY_ACK,
+        consumed.payload().bytes(1),
+        consumed.payload().bytes(2),
+        List.of(
+            SidecarIpcV1.sharedMemoryReference(16, encodedReference),
+            SidecarIpcV1.u8(
+                17, SidecarIpcV1.SharedMemoryDisposition.ACKED.code())));
+    transport.write(
+        SidecarIpcV1.frame(
+                SidecarIpcV1.MessageType.SHARED_MEMORY_ACK,
+                sessionId,
+                generation,
+                consumed.correlationId(),
+                sendSequences.claim(),
+                payload)
+            .canonicalBytes());
+  }
+
+  private void requireTrustedSharedMemoryHeader(
+      SidecarSharedMemory.CarrierHeader header) {
+    if (!header.sessionId().equals(sessionId) || header.generation() != generation) {
+      throw new SidecarIpcV1.ProtocolException(
+          "stale shared-memory response identity");
+    }
+    if (header.sequence() != receiveSequences.nextValue()) {
+      throw new SidecarIpcV1.ProtocolException(
+          "non-monotonic shared-memory response sequence");
+    }
+    var attempt = pending.get(header.correlationId());
+    if (attempt == null) {
+      throw new SidecarIpcV1.ProtocolException(
+          "uncorrelated shared-memory response");
+    }
+    var expected = attempt.request.type().expectedResponse();
+    if (header.messageType() != expected
+        && header.messageType() != SidecarIpcV1.MessageType.ERROR_RESPONSE) {
+      throw new SidecarIpcV1.ProtocolException(
+          "shared-memory response operation mismatch");
+    }
+  }
+
   private void handleResponse(SidecarIpcV1.Frame response) {
     if (!response.sessionId().equals(sessionId) || response.generation() != generation) {
       staleResponses.incrementAndGet();
+      validatedResponseListener.onResponseDiscarded(
+          response.generation(), response.correlationId());
       return;
     }
     receiveSequences.accept(response.sequence());
     var attempt = pending.get(response.correlationId());
     if (attempt == null) {
       duplicateResponses.incrementAndGet();
+      validatedResponseListener.onResponseDiscarded(
+          response.generation(), response.correlationId());
       return;
     }
     if (isTrustedPreparseSentinel(attempt.request.type(), response)) {
@@ -550,6 +642,8 @@ public final class LocalSidecarClient implements AutoCloseable {
     }
     if (!matches(attempt, response)) {
       staleResponses.incrementAndGet();
+      validatedResponseListener.onResponseDiscarded(
+          response.generation(), response.correlationId());
       return;
     }
     var admission = SidecarIpcV1.AdmissionState.fromCode(response.payload().u8(3));
@@ -570,17 +664,20 @@ public final class LocalSidecarClient implements AutoCloseable {
         ? resultProofSha256(attempt.request, response)
         : null;
     OperationalTiming timing;
+    Object responseEvidence;
     boolean accepted;
     GenerationFencedException expectedClose = null;
     Outstanding expectedCloseOutstanding = null;
     synchronized (stateLock) {
       if (!isAccepting()) {
+        validatedResponseListener.onResponseDiscarded(
+            response.generation(), response.correlationId());
         return;
       }
       if (resultProof != null) {
         attempt.identity.bindOrVerifyResultDigest(resultProof);
       }
-      validatedResponseListener.onValidated(attempt.request, response);
+      responseEvidence = validatedResponseListener.onValidated(attempt.request, response);
       accepted = pending.remove(response.correlationId(), attempt);
       if (!accepted) {
         return;
@@ -609,12 +706,12 @@ public final class LocalSidecarClient implements AutoCloseable {
       if (expectedClose != null) {
         finishExpectedClose(expectedClose, expectedCloseOutstanding);
       }
-      attempt.completion.complete(new Response(response, timing));
+      attempt.completion.complete(new Response(response, timing, responseEvidence));
     }
   }
 
   private void finishExpectedClose(
-    GenerationFencedException terminal, Outstanding outstanding) {
+      GenerationFencedException terminal, Outstanding outstanding) {
     for (var attempt : outstanding.queued) {
       requestIdentityLedger.rollback(attempt.request, attempt.registration);
       attempt.completion.completeExceptionally(terminal);
@@ -623,6 +720,7 @@ public final class LocalSidecarClient implements AutoCloseable {
       recordUnknown(attempt);
       attempt.completion.completeExceptionally(terminal);
     }
+    validatedResponseListener.onTransportClosed(generation);
     try {
       transport.close();
     } catch (IOException ignored) {
@@ -661,6 +759,10 @@ public final class LocalSidecarClient implements AutoCloseable {
     if (request.type() == SidecarIpcV1.MessageType.SUBMIT_REQUEST
         && response.messageType() == SidecarIpcV1.MessageType.SUBMIT_RESPONSE) {
       return submitRecoveryProofSha256(response);
+    }
+    if (request.type() == SidecarIpcV1.MessageType.VOTE_REQUEST
+        && response.messageType() == SidecarIpcV1.MessageType.VOTE_RESPONSE) {
+      return voteRecoveryProofSha256(response);
     }
     // Non-SUBMIT retries remain bound to the complete validated result. A later response that
     // differs even in an operational field therefore fences instead of being mistaken for an
@@ -701,6 +803,29 @@ public final class LocalSidecarClient implements AutoCloseable {
               .array());
       updateProofField(digest, 20, SidecarIpcV1.WireType.SHA256, payload.bytes(20));
       updateProofField(digest, 21, SidecarIpcV1.WireType.SHA256, payload.bytes(21));
+      return digest.digest();
+    } catch (NoSuchAlgorithmException error) {
+      throw new IllegalStateException("SHA-256 is unavailable", error);
+    }
+  }
+
+  static byte[] voteRecoveryProofSha256(SidecarIpcV1.Frame response) {
+    Objects.requireNonNull(response, "response");
+    require(
+        response.messageType() == SidecarIpcV1.MessageType.VOTE_RESPONSE,
+        "VOTE recovery proof requires VOTE_RESPONSE");
+    var payload = response.payload();
+    try {
+      var digest = MessageDigest.getInstance("SHA-256");
+      digest.update(VOTE_RECOVERY_PROOF_DOMAIN);
+      digest.update(
+          ByteBuffer.allocate(6)
+              .order(ByteOrder.BIG_ENDIAN)
+              .putShort((short) response.messageType().code())
+              .putInt((int) payload.u32(5))
+              .array());
+      updateProofField(digest, 16, SidecarIpcV1.WireType.BYTES, payload.bytes(16));
+      updateProofField(digest, 17, SidecarIpcV1.WireType.SHA256, payload.bytes(17));
       return digest.digest();
     } catch (NoSuchAlgorithmException error) {
       throw new IllegalStateException("SHA-256 is unavailable", error);
@@ -798,6 +923,7 @@ public final class LocalSidecarClient implements AutoCloseable {
       recordUnknown(attempt);
       attempt.completion.completeExceptionally(failure);
     }
+    validatedResponseListener.onTransportClosed(generation);
     try {
       transport.close();
     } catch (IOException ignored) {
@@ -916,10 +1042,13 @@ public final class LocalSidecarClient implements AutoCloseable {
   public static final class Response {
     private final SidecarIpcV1.Frame frame;
     private final OperationalTiming operationalTiming;
+    private final Object responseEvidence;
 
-    private Response(SidecarIpcV1.Frame frame, OperationalTiming operationalTiming) {
+    private Response(
+        SidecarIpcV1.Frame frame, OperationalTiming operationalTiming, Object responseEvidence) {
       this.frame = frame;
       this.operationalTiming = operationalTiming;
+      this.responseEvidence = responseEvidence;
     }
 
     public SidecarIpcV1.MessageType messageType() {
@@ -941,6 +1070,18 @@ public final class LocalSidecarClient implements AutoCloseable {
     /** Local operational timing only; these integer values never enter consensus state. */
     public OperationalTiming operationalTiming() {
       return operationalTiming;
+    }
+
+    long generation() {
+      return frame.generation();
+    }
+
+    SidecarIpcV1.Id128 correlationId() {
+      return frame.correlationId();
+    }
+
+    Object responseEvidence() {
+      return responseEvidence;
     }
   }
 
@@ -1017,7 +1158,12 @@ public final class LocalSidecarClient implements AutoCloseable {
 
   @FunctionalInterface
   interface ValidatedResponseListener {
-    void onValidated(PreparedRequest request, SidecarIpcV1.Frame response);
+    Object onValidated(PreparedRequest request, SidecarIpcV1.Frame response);
+
+    default void onResponseDiscarded(
+        long responseGeneration, SidecarIpcV1.Id128 correlationId) {}
+
+    default void onTransportClosed(long closedGeneration) {}
   }
 
   @FunctionalInterface
@@ -1035,6 +1181,24 @@ public final class LocalSidecarClient implements AutoCloseable {
     void write(byte[] canonicalFrame) throws IOException;
 
     byte[] read() throws IOException;
+
+    default byte[] resolveSharedMemoryCarrier(byte[] carrier) throws IOException {
+      throw new SidecarIpcV1.ProtocolException(
+          "transport cannot resolve a shared-memory carrier");
+    }
+
+    default boolean acceptSharedMemoryAck(SidecarIpcV1.Frame notification)
+        throws IOException {
+      return false;
+    }
+
+    default boolean sharedMemoryConfigured() {
+      return false;
+    }
+
+    default boolean lastWriteSharedMemory() {
+      return false;
+    }
 
     boolean isOpen();
 
@@ -1068,16 +1232,19 @@ public final class LocalSidecarClient implements AutoCloseable {
       var bytes = header.array();
       var view = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
       var flags = view.getInt(16);
-      if ((flags & SidecarIpcV1.FLAG_PAYLOAD_SHARED_MEMORY) != 0
-          || (flags & SidecarIpcV1.FLAG_PAYLOAD_INLINE) == 0) {
-        throw new SidecarIpcV1.ProtocolException(
-            "bounded-copy client received a non-inline carrier");
+      var shared = (flags & SidecarIpcV1.FLAG_PAYLOAD_SHARED_MEMORY) != 0;
+      var inline = (flags & SidecarIpcV1.FLAG_PAYLOAD_INLINE) != 0;
+      if (shared == inline) {
+        throw new SidecarIpcV1.ProtocolException("frame payload carrier is not exclusive");
       }
       var logicalLength = view.getLong(68);
       if (logicalLength < 0 || logicalLength > SidecarIpcV1.MAX_LOGICAL_PAYLOAD_BYTES) {
         throw new SidecarIpcV1.ProtocolException("frame payload length is outside bounds");
       }
-      var payload = ByteBuffer.allocate((int) logicalLength);
+      var physicalLength = shared
+          ? SidecarIpcV1.SHARED_MEMORY_REFERENCE_BYTES
+          : Math.toIntExact(logicalLength);
+      var payload = ByteBuffer.allocate(physicalLength);
       readFully(payload);
       var result = new byte[Math.addExact(SidecarIpcV1.HEADER_BYTES, payload.capacity())];
       System.arraycopy(bytes, 0, result, 0, bytes.length);
@@ -1133,17 +1300,20 @@ public final class LocalSidecarClient implements AutoCloseable {
       }
       var view = ByteBuffer.wrap(header).order(ByteOrder.BIG_ENDIAN);
       var flags = view.getInt(16);
-      if ((flags & SidecarIpcV1.FLAG_PAYLOAD_SHARED_MEMORY) != 0
-          || (flags & SidecarIpcV1.FLAG_PAYLOAD_INLINE) == 0) {
-        throw new SidecarIpcV1.ProtocolException(
-            "bounded-copy client received a non-inline carrier");
+      var shared = (flags & SidecarIpcV1.FLAG_PAYLOAD_SHARED_MEMORY) != 0;
+      var inline = (flags & SidecarIpcV1.FLAG_PAYLOAD_INLINE) != 0;
+      if (shared == inline) {
+        throw new SidecarIpcV1.ProtocolException("frame payload carrier is not exclusive");
       }
       var logicalLength = view.getLong(68);
       if (logicalLength < 0 || logicalLength > SidecarIpcV1.MAX_LOGICAL_PAYLOAD_BYTES) {
         throw new SidecarIpcV1.ProtocolException("frame payload length is outside bounds");
       }
-      var payload = input.readNBytes((int) logicalLength);
-      if (payload.length != (int) logicalLength) {
+      var physicalLength = shared
+          ? SidecarIpcV1.SHARED_MEMORY_REFERENCE_BYTES
+          : Math.toIntExact(logicalLength);
+      var payload = input.readNBytes(physicalLength);
+      if (payload.length != physicalLength) {
         throw new EOFException("sidecar process ended during frame payload");
       }
       var result = new byte[Math.addExact(header.length, payload.length)];

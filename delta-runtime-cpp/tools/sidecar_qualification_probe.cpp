@@ -2,6 +2,7 @@
 #include "sidecar_qualification_fsync_interposer.h"
 
 #include <delta/runtime/runtime.hpp>
+#include <delta/runtime/vote_codec.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -28,16 +29,33 @@ struct SelectedCrashPoint {
   return std::filesystem::absolute(directory / "runtime.wal").lexically_normal().u8string();
 }
 
-void require_exact_pre_durability_interposer(const std::filesystem::path& directory) {
+void require_exact_interposer_configuration(const std::filesystem::path& directory) {
 #if defined(__linux__)
-  if (delta_sidecar_qualification_fsync_interposer_arm_v1 == nullptr) {
+  if (delta_sidecar_qualification_fsync_interposer_armed_v1 == nullptr ||
+      delta_sidecar_qualification_fsync_interposer_arm_v1 == nullptr) {
     throw std::invalid_argument("qualification fsync interposer is not loaded");
   }
   const auto wal_path = absolute_wal_path(directory);
   const auto* bytes = reinterpret_cast<const std::uint8_t*>(wal_path.data());
+  if (delta_sidecar_qualification_fsync_interposer_armed_v1(bytes, wal_path.size()) != 1U) {
+    throw std::invalid_argument(
+        "qualification fsync interposer is not configured for this runtime.wal");
+  }
+#else
+  static_cast<void>(directory);
+  throw std::invalid_argument(
+      "qualification after-append-before-durability cut requires Linux LD_PRELOAD");
+#endif
+}
+
+void arm_exact_pre_durability_interposer(const std::filesystem::path& directory) {
+#if defined(__linux__)
+  require_exact_interposer_configuration(directory);
+  const auto wal_path = absolute_wal_path(directory);
+  const auto* bytes = reinterpret_cast<const std::uint8_t*>(wal_path.data());
   if (delta_sidecar_qualification_fsync_interposer_arm_v1(bytes, wal_path.size()) != 1U) {
     throw std::invalid_argument(
-        "qualification fsync interposer is not armed for this runtime.wal");
+        "qualification fsync interposer cannot arm this runtime.wal");
   }
 #else
   static_cast<void>(directory);
@@ -143,7 +161,7 @@ void require_exact_pre_durability_interposer(const std::filesystem::path& direct
     case DELTA_SIDECAR_QUALIFICATION_DURING_WAL_APPEND:
       return {CrashPoint::during_wal_append, false};
     case DELTA_SIDECAR_QUALIFICATION_AFTER_APPEND_BEFORE_DURABILITY:
-      require_exact_pre_durability_interposer(directory);
+      arm_exact_pre_durability_interposer(directory);
       return {CrashPoint::none, false};
     case DELTA_SIDECAR_QUALIFICATION_AFTER_DURABILITY_BEFORE_COMMIT:
       return {CrashPoint::after_durability_before_commit, false};
@@ -179,14 +197,59 @@ extern "C" void delta_sidecar_qualification_crash_v1(
         "qualification canonical command is out of bounds");
     const auto selected = select_crash_point(crash_point, directory);
     delta::runtime::Runtime runtime(delta::runtime::Config{
-        std::move(directory),
-        std::move(initial),
-        64U,
+        .directory = std::move(directory),
+        .initial_state_bytes = std::move(initial),
+        .submission_capacity = 64U,
+        .durable_binding_guard = {},
+        .vote_policy = {},
+        .expected_wal_identity = {},
     });
     static_cast<void>(runtime.submit(std::move(command), selected.runtime_point));
     exit_now(selected.after_native_return ? 86 : 88);
   } catch (const delta::runtime::RuntimeError& error) {
     exit_now(error.code() == delta::runtime::ErrorCode::simulated_crash ? 86 : 87);
+  } catch (...) {
+    exit_now(87);
+  }
+}
+
+extern "C" void delta_sidecar_qualification_vote_pre_durability_crash_v1(
+    const std::uint8_t* directory_utf8,
+    std::uint64_t directory_utf8_length,
+    const std::uint8_t* initial_state,
+    std::uint64_t initial_state_length,
+    const std::uint8_t* canonical_vote_policy,
+    std::uint64_t canonical_vote_policy_length,
+    const std::uint8_t* canonical_vote,
+    std::uint64_t canonical_vote_length) noexcept {
+  try {
+    auto directory = bounded_directory(directory_utf8, directory_utf8_length);
+    require_exact_interposer_configuration(directory);
+    auto initial = bounded_bytes(
+        initial_state,
+        initial_state_length,
+        "qualification initial state is out of bounds");
+    const auto policy_bytes = bounded_bytes(
+        canonical_vote_policy,
+        canonical_vote_policy_length,
+        "qualification canonical vote policy is out of bounds");
+    auto vote = bounded_bytes(
+        canonical_vote,
+        canonical_vote_length,
+        "qualification canonical vote is out of bounds");
+    delta::runtime::Runtime runtime(delta::runtime::Config{
+        .directory = directory,
+        .initial_state_bytes = std::move(initial),
+        .submission_capacity = 64U,
+        .durable_binding_guard = {},
+        .vote_policy = delta::runtime::parse_vote_policy_v1(policy_bytes),
+        .expected_wal_identity = {},
+    });
+    // Arm only after startup/recovery has completed so the next matching WAL
+    // barrier belongs to RECORD_VOTE, not WAL creation or recovery.
+    arm_exact_pre_durability_interposer(directory);
+    static_cast<void>(runtime.record_vote(std::move(vote), CrashPoint::none));
+    exit_now(88);
   } catch (...) {
     exit_now(87);
   }

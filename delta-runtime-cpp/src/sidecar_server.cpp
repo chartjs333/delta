@@ -1,13 +1,17 @@
 #include <delta/runtime/sidecar_server.hpp>
 
 #include <delta/runtime/sidecar_directory_lock.hpp>
+#include <delta/runtime/sidecar_shared_memory.hpp>
 
 #include <delta/core/canonical.hpp>
 #include <delta/core/consensus.hpp>
 #include <delta/core/protocol.hpp>
 #include <delta/core/transition.hpp>
 #include <delta/runtime/runtime.hpp>
+#include <delta/runtime/vote_codec.hpp>
 #include <delta_abi.h>
+
+#include "sidecar_notification.hpp"
 
 #if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
 #include "sidecar_qualification_fsync_interposer.h"
@@ -21,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <functional>
 #include <istream>
 #include <limits>
 #include <map>
@@ -28,6 +33,7 @@
 #include <optional>
 #include <ostream>
 #include <span>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -81,16 +87,12 @@ void append_be(Bytes& output, Integer value) {
   }
 }
 
-[[nodiscard]] std::uint64_t header_payload_length(std::span<const std::byte> header) {
-  require(header.size() == header_bytes, "sidecar header has wrong size");
-  std::uint64_t result = 0U;
-  for (std::size_t index = 68U; index < 76U; ++index) {
-    result = (result << 8U) | std::to_integer<std::uint8_t>(header[index]);
-  }
-  return result;
-}
+struct EncodedFrame {
+  FrameHeader header;
+  Bytes bytes;
+};
 
-[[nodiscard]] std::optional<Frame> read_frame(std::istream& input) {
+[[nodiscard]] std::optional<EncodedFrame> read_frame(std::istream& input) {
   std::array<std::byte, header_bytes> header{};
   input.read(reinterpret_cast<char*>(header.data()), static_cast<std::streamsize>(header.size()));
   const auto header_count = input.gcount();
@@ -98,18 +100,24 @@ void append_be(Bytes& output, Integer value) {
     return std::nullopt;
   }
   require(header_count == static_cast<std::streamsize>(header.size()), "truncated sidecar header");
-  const auto payload_length = header_payload_length(header);
+  const auto decoded_header = decode_frame_header(header);
+  const auto payload_length = decoded_header.payload_length;
   require(payload_length != 0U && payload_length <= max_logical_payload_bytes,
           "sidecar payload length exceeds bound");
   require(payload_length <= std::numeric_limits<std::size_t>::max() - header.size(),
           "sidecar frame size overflow");
+  const auto shared_carrier =
+      (decoded_header.flags & flag_payload_shared_memory) != 0U;
+  const auto body_length = shared_carrier
+                               ? shared_memory_reference_bytes
+                               : static_cast<std::size_t>(payload_length);
   Bytes encoded(header.begin(), header.end());
-  encoded.resize(header.size() + static_cast<std::size_t>(payload_length));
+  encoded.resize(header.size() + body_length);
   input.read(
       reinterpret_cast<char*>(encoded.data() + header.size()),
-      static_cast<std::streamsize>(payload_length));
-  require(input.gcount() == static_cast<std::streamsize>(payload_length), "truncated sidecar payload");
-  return decode_frame(encoded);
+      static_cast<std::streamsize>(body_length));
+  require(input.gcount() == static_cast<std::streamsize>(body_length), "truncated sidecar payload");
+  return EncodedFrame{decoded_header, std::move(encoded)};
 }
 
 void write_all(std::ostream& output, std::span<const std::byte> bytes) {
@@ -200,6 +208,7 @@ void write_all(std::ostream& output, std::span<const std::byte> bytes) {
     case ErrorCode::closed:
       return DELTA_STATUS_CLOSED;
     case ErrorCode::io_error:
+    case ErrorCode::durable_binding_lost:
       return DELTA_STATUS_IO_ERROR;
     case ErrorCode::wal_corrupt:
     case ErrorCode::snapshot_corrupt:
@@ -212,6 +221,35 @@ void write_all(std::ostream& output, std::span<const std::byte> bytes) {
       return DELTA_STATUS_INTERNAL_ERROR;
   }
   return DELTA_STATUS_INTERNAL_ERROR;
+}
+
+[[nodiscard]] std::uint32_t map_consensus_error(
+    core::consensus::ErrorCode code) noexcept {
+  switch (code) {
+    case core::consensus::ErrorCode::conflicting_vote:
+      return DELTA_STATUS_CONFLICT;
+    case core::consensus::ErrorCode::vote_admission_rejected:
+      return DELTA_STATUS_TRANSITION_REJECTED;
+    case core::consensus::ErrorCode::validator_set_invalid:
+    case core::consensus::ErrorCode::quorum_policy_mismatch:
+    case core::consensus::ErrorCode::unknown_signer:
+    case core::consensus::ErrorCode::signer_set_invalid:
+    case core::consensus::ErrorCode::vote_invalid:
+    case core::consensus::ErrorCode::identifier_invalid:
+    case core::consensus::ErrorCode::ticket_set_invalid:
+    case core::consensus::ErrorCode::unknown_ticket:
+    case core::consensus::ErrorCode::commitment_equivocation:
+    case core::consensus::ErrorCode::commitment_missing:
+    case core::consensus::ErrorCode::availability_commitment_mismatch:
+    case core::consensus::ErrorCode::availability_coverage_incomplete:
+    case core::consensus::ErrorCode::availability_attesters_invalid:
+    case core::consensus::ErrorCode::availability_conflict:
+    case core::consensus::ErrorCode::input_set_empty:
+    case core::consensus::ErrorCode::vote_action_invalid:
+    case core::consensus::ErrorCode::vote_policy_invalid:
+      return DELTA_STATUS_INVALID_ARGUMENT;
+  }
+  return DELTA_STATUS_INVALID_ARGUMENT;
 }
 
 #if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
@@ -235,6 +273,7 @@ void write_all(std::ostream& output, std::span<const std::byte> bytes) {
     case FaultPoint::none:
     case FaultPoint::after_native_return_before_response:
     case FaultPoint::during_ipc_response_frame:
+    case FaultPoint::during_shared_memory_publication:
       return CrashPoint::none;
   }
   return CrashPoint::none;
@@ -287,6 +326,32 @@ class Server::Impl final {
     });
     require(!all_zero, "zero sidecar session ID");
     require(!config_.executable.empty(), "sidecar executable path is empty");
+    require(
+        config_.java_to_native_shared_memory.has_value() ==
+            config_.native_to_java_shared_memory.has_value(),
+        "both shared-memory region paths must be supplied together");
+    require(
+        config_.java_to_native_shared_memory.has_value() ==
+                config_.java_to_native_shared_memory_identity.has_value() &&
+            config_.native_to_java_shared_memory.has_value() ==
+                config_.native_to_java_shared_memory_identity.has_value(),
+        "shared-memory paths require pinned file identities");
+    if (config_.java_to_native_shared_memory.has_value()) {
+      java_to_native_shared_memory_ = std::make_unique<SharedMemoryRegion>(
+          *config_.java_to_native_shared_memory,
+          SharedMemoryRegionId::java_to_native,
+          config_.generation,
+          config_.java_to_native_shared_memory_identity);
+      native_to_java_shared_memory_ = std::make_unique<SharedMemoryRegion>(
+          *config_.native_to_java_shared_memory,
+          SharedMemoryRegionId::native_to_java,
+          config_.generation,
+          config_.native_to_java_shared_memory_identity);
+      require(
+          java_to_native_shared_memory_->atomic_abi_supported() &&
+              native_to_java_shared_memory_->atomic_abi_supported(),
+          "shared-memory atomic ABI is not lock-free");
+    }
     const delta_runtime_descriptor_t descriptor{
         DELTA_ABI_DESCRIPTOR_SIZE,
         DELTA_ABI_MAJOR,
@@ -311,8 +376,33 @@ class Server::Impl final {
       if (!request_optional.has_value()) {
         return handshaken_ ? 0 : 2;
       }
-      const auto& request = *request_optional;
-      validate_transport(request);
+      const auto& encoded_request = *request_optional;
+      validate_transport(encoded_request.header);
+      const auto shared_carrier =
+          (encoded_request.header.flags & flag_payload_shared_memory) != 0U;
+      if (shared_carrier) {
+        require(
+            java_to_native_shared_memory_ != nullptr,
+            "shared-memory carrier is not configured");
+      }
+      std::optional<SharedMemoryReference> consumed_reference;
+      Bytes canonical_request;
+      if (shared_carrier) {
+        consumed_reference = decode_shared_memory_reference(
+            std::span<const std::byte>(encoded_request.bytes).subspan(header_bytes));
+        canonical_request = resolve_shared_memory_carrier(
+            encoded_request.bytes, *java_to_native_shared_memory_);
+      } else {
+        canonical_request = encoded_request.bytes;
+      }
+      const auto request = decode_frame(canonical_request);
+      if (is_notification(request.type)) {
+        handle_shared_memory_ack(request);
+        continue;
+      }
+      if (consumed_reference.has_value()) {
+        write_shared_memory_ack(output, request, *consumed_reference);
+      }
       current_admission_sequence_ = 0U;
       Frame response{};
       try {
@@ -338,7 +428,26 @@ class Server::Impl final {
             local_frame_invalid,
             error.what());
       }
-      const auto encoded = encode_frame(response);
+      verify_durable_binding_or_exit();
+      const auto canonical_inline = encode_frame(response);
+      Bytes encoded = canonical_inline;
+      if (native_to_java_shared_memory_ != nullptr &&
+          shared_memory_eligible(response.type)) {
+        std::function<void()> before_publish;
+#if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
+        if (crash_during_shared_memory_publication_) {
+          crash_during_shared_memory_publication_ = false;
+          before_publish = [] { std::_Exit(88); };
+        }
+#endif
+        const auto carrier = make_shared_memory_carrier(
+            canonical_inline, *native_to_java_shared_memory_, before_publish);
+        if (carrier.has_value()) {
+          encoded = *carrier;
+          remember_shared_memory_publication(response, encoded);
+        }
+      }
+      verify_durable_binding_or_exit();
 #if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
       if (crash_during_response_) {
         crash_during_response_ = false;
@@ -357,10 +466,21 @@ class Server::Impl final {
   }
 
  private:
-  void validate_transport(const Frame& request) {
-    require(is_request(request.type), "sidecar received a non-request frame");
+  void validate_transport(const FrameHeader& request) {
+    require(
+        is_request(request.type) || is_notification(request.type),
+        "sidecar received neither a request nor a transport notification");
     require(request.session_id == config_.session_id, "sidecar session mismatch");
     require(request.generation == config_.generation, "sidecar generation mismatch");
+    require(
+        !std::all_of(request.correlation_id.begin(), request.correlation_id.end(),
+                     [](std::byte value) { return value == std::byte{0}; }),
+        "sidecar correlation ID is zero");
+    if (!is_notification(request.type)) {
+      require(
+          seen_correlations_.insert(request.correlation_id).second,
+          "sidecar correlation ID was reused");
+    }
     require(!client_sequence_exhausted_, "sidecar request sequence is exhausted");
     require(request.sequence == next_client_sequence_, "sidecar request sequence is not exact");
     if (next_client_sequence_ == std::numeric_limits<std::uint64_t>::max()) {
@@ -429,13 +549,20 @@ class Server::Impl final {
     try {
       switch (request.type) {
         case MessageType::open_request:
-          common = validate_common(payload, 6U);
+          require(
+              payload.fields.size() == 6U || payload.fields.size() == 7U,
+              "OPEN field count mismatch");
+          common = validate_common(payload, payload.fields.size());
           bind_request_identity(payload.type, common);
           return handle_open(request, payload, common);
         case MessageType::submit_request:
           common = validate_common(payload, 3U);
           bind_request_identity(payload.type, common);
           return handle_submit(request, payload, common);
+        case MessageType::vote_request:
+          common = validate_common(payload, 3U);
+          bind_request_identity(payload.type, common);
+          return handle_vote(request, payload, common);
         case MessageType::state_request:
           common = validate_common(payload, 3U);
           bind_request_identity(payload.type, common);
@@ -465,15 +592,19 @@ class Server::Impl final {
       const auto request_conflict =
           current_admission_sequence_ == 0U && native_submit_outcome_uncertain_ &&
           error.code() == ErrorCode::request_conflict;
-      const auto deterministic_rejection = request_conflict ||
+      const auto vote_configuration_rejection =
+          request.type == MessageType::vote_request && current_admission_sequence_ == 0U &&
+          error.code() == ErrorCode::invalid_config;
+      const auto deterministic_rejection = request_conflict || vote_configuration_rejection ||
           (current_admission_sequence_ == 0U && !native_submit_outcome_uncertain_ &&
            error.code() == ErrorCode::invalid_config);
       if (!deterministic_rejection) {
         std::_Exit(86);
       }
-      if (request_conflict) {
+      if (request_conflict || vote_configuration_rejection) {
         // Runtime checks the durable request cache before constructing a WAL
-        // candidate, so this rejection cannot have mutated durable state.
+        // candidate, and vote-policy availability is checked before vote WAL
+        // construction, so these rejections cannot have mutated durable state.
         native_submit_outcome_uncertain_ = false;
       }
       return native_error(request, common, map_runtime_error(error.code()), error.what());
@@ -484,7 +615,7 @@ class Server::Impl final {
         throw;
       }
       native_submit_outcome_uncertain_ = false;
-      return native_error(request, common, DELTA_STATUS_CONFLICT, error.what());
+      return native_error(request, common, map_consensus_error(error.code()), error.what());
     } catch (const core::transition::TransitionError& error) {
       // Transition evaluation completes before Runtime constructs/appends a WAL
       // candidate. It is therefore a proven NOT_ADMITTED rejection.
@@ -494,16 +625,25 @@ class Server::Impl final {
       native_submit_outcome_uncertain_ = false;
       return native_error(request, common, DELTA_STATUS_TRANSITION_REJECTED, error.what());
     } catch (const core::protocol::ProtocolError& error) {
-      if (current_admission_sequence_ != 0U || native_submit_outcome_uncertain_) {
+      if (current_admission_sequence_ != 0U ||
+          (native_submit_outcome_uncertain_ && request.type != MessageType::vote_request)) {
         throw;
       }
+      // Runtime parses an opaque VOTE before constructing its WAL candidate.
+      // Match the C ABI's exact INVALID_ARGUMENT proof for that native parse.
+      native_submit_outcome_uncertain_ = false;
       return native_error(request, common, DELTA_STATUS_INVALID_ARGUMENT, error.what());
     } catch (const core::canonical::DecodeError& error) {
-      if (current_admission_sequence_ != 0U || native_submit_outcome_uncertain_) {
+      if (current_admission_sequence_ != 0U ||
+          (native_submit_outcome_uncertain_ && request.type != MessageType::vote_request)) {
         throw;
       }
+      native_submit_outcome_uncertain_ = false;
       return native_error(request, common, DELTA_STATUS_INVALID_ARGUMENT, error.what());
     } catch (const DurableDirectoryLockError& error) {
+      if (runtime_ != nullptr || directory_lock_ != nullptr) {
+        std::_Exit(86);
+      }
       return native_error(request, common, DELTA_STATUS_IO_ERROR, error.what());
     } catch (const LocalProtocolError& error) {
       if (current_admission_sequence_ != 0U || native_submit_outcome_uncertain_) {
@@ -535,12 +675,39 @@ class Server::Impl final {
         nested_hash == nested_descriptor_digest_,
         "OPEN nested ABI descriptor mismatch");
     const auto directory = utf8_path(directory_text);
-    auto candidate_lock = std::make_unique<DurableDirectoryLock>(directory);
+    auto candidate_lock = std::make_unique<DurableDirectoryLock>(
+        directory, config_.expected_durable_identity);
     candidate_lock->prepare_runtime_wal();
+    auto* const binding_guard = candidate_lock.get();
+    const auto pinned_wal_identity = candidate_lock->runtime_wal_identity();
+    std::optional<DurableFileIdentity> expected_wal_identity;
+    if (pinned_wal_identity.has_value()) {
+      expected_wal_identity = DurableFileIdentity{
+          pinned_wal_identity->device,
+          pinned_wal_identity->inode,
+      };
+    }
+    std::optional<core::consensus::VoteAdmissionPolicy> vote_policy;
+    if (payload.fields.size() == 7U) {
+      const auto& encoded_policy = require_field(
+          payload,
+          6U,
+          20U,
+          WireType::bytes,
+          1U,
+          static_cast<std::size_t>(max_vote_policy_bytes));
+      vote_policy = parse_vote_policy_v1(encoded_policy.value);
+    }
     auto candidate_runtime = std::make_unique<Runtime>(Config{
-        directory,
-        initial_state.value,
-        max_submission_capacity,
+        .directory = candidate_lock->runtime_directory(),
+        .initial_state_bytes = initial_state.value,
+        .submission_capacity = max_submission_capacity,
+        .durable_binding_guard = [binding_guard] {
+          binding_guard->verify_path_binding();
+          binding_guard->verify_runtime_wal_binding();
+        },
+        .vote_policy = std::move(vote_policy),
+        .expected_wal_identity = expected_wal_identity,
     });
     // Recovery may truncate a torn WAL tail. Re-run the sidecar-owned file and
     // directory durability barrier before assigning OPEN admission or exposing
@@ -552,6 +719,8 @@ class Server::Impl final {
       // durability uncertain. Do not answer or reuse this generation.
       std::_Exit(86);
     }
+    candidate_lock->verify_path_binding();
+    candidate_lock->verify_runtime_wal_binding();
     const auto candidate_instance_id = make_runtime_instance_id(directory_text);
     const auto state = candidate_runtime->state_bytes();
     const auto durable_sequence = candidate_runtime->journal_sequence();
@@ -572,6 +741,71 @@ class Server::Impl final {
         field_u8(19U, 1U),
     };
     return response_frame(request, MessageType::open_response, fields);
+  }
+
+  [[nodiscard]] Frame handle_vote(
+      const Frame& request,
+      const Payload& payload,
+      const CommonRequest& common) {
+    require_ready();
+    const auto& vote = require_field(
+        payload,
+        2U,
+        16U,
+        WireType::bytes,
+        1U,
+        static_cast<std::size_t>(max_vote_bytes));
+    // This allocation is transport-only. It reserves the complete frozen
+    // response capacity before native admission; native alone parses the vote
+    // and chooses its action, context, parents, and guards.
+    Bytes reserved_response_storage;
+    reserved_response_storage.reserve(static_cast<std::size_t>(max_response_capacity));
+#if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
+    const auto fault = fault_consumed_ ? FaultPoint::none : config_.fault_point;
+    if (fault == FaultPoint::after_wal_append_before_durability) {
+      require_exact_pre_durability_interposer(runtime_directory_);
+    }
+    fault_consumed_ = fault != FaultPoint::none;
+    native_submit_outcome_uncertain_ = true;
+    const auto receipt = runtime_->record_vote(vote.value, runtime_crash_point(fault));
+#else
+    native_submit_outcome_uncertain_ = true;
+    const auto receipt = runtime_->record_vote(vote.value);
+#endif
+    const auto admission_sequence = assign_admission();
+#if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
+    if (fault == FaultPoint::after_native_return_before_response) {
+      std::_Exit(86);
+    }
+    if (fault == FaultPoint::during_ipc_response_frame) {
+      crash_during_response_ = true;
+    }
+    if (fault == FaultPoint::during_shared_memory_publication) {
+      require(
+          native_to_java_shared_memory_ != nullptr,
+          "shared-memory publication fault requires an enabled region");
+      crash_during_shared_memory_publication_ = true;
+    }
+#endif
+    const auto encoded_receipt = encode_vote_receipt_v1(receipt);
+    require(
+        encoded_receipt.size() <= static_cast<std::size_t>(max_vote_receipt_bytes),
+        "native vote receipt exceeds the frozen sidecar bound");
+    native_submit_outcome_uncertain_ = false;
+    const std::vector<Field> fields{
+        field_bytes(1U, common.request_id),
+        field_digest(2U, common.digest),
+        field_u8(3U, admission_outcome_available),
+        field_u64(4U, admission_sequence),
+        field_u32(5U, DELTA_STATUS_OK),
+        field_bytes(16U, encoded_receipt),
+        field_digest(17U, sha256(encoded_receipt)),
+    };
+    auto response = response_frame(request, MessageType::vote_response, fields);
+    require(
+        response.payload.size() <= reserved_response_storage.capacity(),
+        "reserved vote response capacity was insufficient");
+    return response;
   }
 
   [[nodiscard]] Frame handle_submit(
@@ -611,6 +845,12 @@ class Server::Impl final {
     }
     if (fault == FaultPoint::during_ipc_response_frame) {
       crash_during_response_ = true;
+    }
+    if (fault == FaultPoint::during_shared_memory_publication) {
+      require(
+          native_to_java_shared_memory_ != nullptr,
+          "shared-memory publication fault requires an enabled region");
+      crash_during_shared_memory_publication_ = true;
     }
 #endif
     if (receipt.effect_batch_bytes.size() > static_cast<std::size_t>(max_effect_bytes)) {
@@ -733,6 +973,7 @@ class Server::Impl final {
       return value == std::byte{0};
     });
     if (runtime_ != nullptr) {
+      verify_durable_binding_or_exit();
       require_identity(supplied == runtime_instance_id_, "HEALTH runtime instance mismatch");
     } else {
       require_identity(zero, "pre-OPEN HEALTH requires zero runtime instance ID");
@@ -754,9 +995,145 @@ class Server::Impl final {
     return response_frame(request, MessageType::health_response, fields);
   }
 
+  void write_shared_memory_ack(
+      std::ostream& output,
+      const Frame& consumed,
+      const SharedMemoryReference& reference) {
+    const auto payload = decode_payload(consumed.payload);
+    const auto& request_id = require_field(
+        payload, 0U, 1U, WireType::bytes, 1U, 256U);
+    const auto request_digest = field_as_digest(
+        require_field(payload, 1U, 2U, WireType::sha256, 32U, 32U));
+    const auto encoded_reference = encode_shared_memory_reference(reference);
+    const std::vector<Field> fields{
+        field_bytes(1U, request_id.value),
+        field_digest(2U, request_digest),
+        field_shared_memory_reference(16U, encoded_reference),
+        field_u8(
+            17U,
+            static_cast<std::uint8_t>(SharedMemoryDisposition::acknowledged)),
+    };
+    write_all(
+        output,
+        encode_frame(response_frame(consumed, MessageType::shared_memory_ack, fields)));
+  }
+
+  void remember_shared_memory_publication(
+      const Frame& response,
+      std::span<const std::byte> carrier) {
+    require(
+        carrier.size() == header_bytes + shared_memory_reference_bytes,
+        "published shared-memory carrier has wrong size");
+    const auto reference = decode_shared_memory_reference(carrier.subspan(header_bytes));
+    require(
+        reference.region == SharedMemoryRegionId::native_to_java &&
+            reference.generation == config_.generation,
+        "published shared-memory reference has wrong identity");
+    const auto payload = decode_payload(response.payload);
+    const auto& request_id = require_field(
+        payload, 0U, 1U, WireType::bytes, 1U, 256U);
+    const auto request_digest = field_as_digest(
+        require_field(payload, 1U, 2U, WireType::sha256, 32U, 32U));
+    published_notifications_[reference.slot] = detail::PublishedSharedMemoryNotification{
+        reference,
+        response.correlation_id,
+        request_id.value,
+        request_digest,
+        false,
+        std::nullopt,
+    };
+  }
+
+  void handle_shared_memory_ack(const Frame& notification) {
+    require(
+        notification.type == MessageType::shared_memory_ack,
+        "unexpected transport notification");
+    require(
+        native_to_java_shared_memory_ != nullptr,
+        "shared-memory ACK received without configured regions");
+    const auto payload = decode_payload(notification.payload);
+    require(payload.fields.size() == 4U, "shared-memory ACK field count mismatch");
+    const auto& request_id = require_field(
+        payload, 0U, 1U, WireType::bytes, 1U, 256U);
+    const auto request_digest = field_as_digest(
+        require_field(payload, 1U, 2U, WireType::sha256, 32U, 32U));
+    const auto& encoded_reference = require_field(
+        payload,
+        2U,
+        16U,
+        WireType::shm_reference_64,
+        shared_memory_reference_bytes,
+        shared_memory_reference_bytes);
+    const auto reference = decode_shared_memory_reference(encoded_reference.value);
+    const auto disposition_value = field_as_u8(
+        require_field(payload, 3U, 17U, WireType::u8, 1U, 1U));
+    require(
+        disposition_value >=
+                static_cast<std::uint8_t>(SharedMemoryDisposition::acknowledged) &&
+            disposition_value <=
+                static_cast<std::uint8_t>(SharedMemoryDisposition::rejected_bounds),
+        "shared-memory ACK disposition is invalid");
+    require(
+        reference.region == SharedMemoryRegionId::native_to_java &&
+            reference.generation == config_.generation,
+        "shared-memory ACK reference has stale identity");
+    const auto ownership = detail::classify_notification_ownership(
+        published_notifications_,
+        reference,
+        notification.correlation_id,
+        request_id.value,
+        request_digest);
+    if (ownership == detail::SharedMemoryNotificationOwnership::stale) {
+      // Lost, duplicate, reclaimed, or superseded notifications are transport stutters. Session-
+      // unique correlation ownership keeps this total even after byte-identical slot reuse.
+      return;
+    }
+    require(
+        ownership == detail::SharedMemoryNotificationOwnership::current,
+        "shared-memory ACK does not match its publication");
+    auto& published = published_notifications_[reference.slot];
+    require(published.has_value(), "shared-memory ACK publication slot is absent");
+    const auto disposition = static_cast<SharedMemoryDisposition>(disposition_value);
+    if (published->notified) {
+      require(
+          published->disposition.has_value() &&
+              *published->disposition == disposition,
+          "duplicate shared-memory ACK changed disposition");
+      return;
+    }
+    const auto notification_match =
+        native_to_java_shared_memory_->classify_terminal_notification(
+            reference, disposition);
+    if (notification_match == SharedMemoryNotificationMatch::reclaimed) {
+      // A delayed notification whose exact control record was already
+      // reclaimed has no reuse authority and stutters.
+      return;
+    }
+    require(
+        notification_match == SharedMemoryNotificationMatch::matched,
+        "current shared-memory ACK disposition/state mismatch");
+    published->notified = true;
+    published->disposition = disposition;
+  }
+
   void require_ready() const {
+    verify_durable_binding_or_exit();
     require(runtime_ != nullptr && directory_lock_ != nullptr && runtime_->accepting(),
             "runtime is not READY");
+  }
+
+  void verify_durable_binding_or_exit() const {
+    if (directory_lock_ == nullptr) {
+      return;
+    }
+    try {
+      directory_lock_->verify_path_binding();
+      directory_lock_->verify_runtime_wal_binding();
+    } catch (...) {
+      // A pathname/descriptor mismatch permanently fences this generation.
+      // No response may expose an effect after the durable target changed.
+      std::_Exit(86);
+    }
   }
 
   void validate_runtime_id(const Payload& payload, std::size_t index, std::uint16_t id) const {
@@ -799,7 +1176,15 @@ class Server::Impl final {
       std::uint32_t native_status,
       std::string_view detail) {
     if (current_admission_sequence_ == 0U) {
-      return not_admitted_error(request, common, detail);
+      return error_response(
+          request,
+          common.request_id,
+          common.digest,
+          admission_not_admitted,
+          0U,
+          native_status,
+          local_internal_transport,
+          detail);
     }
     return error_response(
         request,
@@ -892,6 +1277,7 @@ class Server::Impl final {
 #if defined(DELTA_SIDECAR_QUALIFICATION_ENABLED)
   bool fault_consumed_ = false;
   bool crash_during_response_ = false;
+  bool crash_during_shared_memory_publication_ = false;
 #endif
   bool admission_sequence_exhausted_ = false;
   bool client_sequence_exhausted_ = false;
@@ -905,8 +1291,13 @@ class Server::Impl final {
   Id128 runtime_instance_id_{};
   std::filesystem::path runtime_directory_;
   std::map<std::string, std::pair<MessageType, Digest>> requests_;
+  std::set<Id128> seen_correlations_;
+  std::array<std::optional<detail::PublishedSharedMemoryNotification>, shared_memory_slot_count>
+      published_notifications_{};
   std::unique_ptr<DurableDirectoryLock> directory_lock_;
   std::unique_ptr<Runtime> runtime_;
+  std::unique_ptr<SharedMemoryRegion> java_to_native_shared_memory_;
+  std::unique_ptr<SharedMemoryRegion> native_to_java_shared_memory_;
 };
 
 Server::Server(ServerConfig config) : impl_(std::make_unique<Impl>(std::move(config))) {}
@@ -962,6 +1353,9 @@ FaultPoint parse_fault_point(std::string_view value) {
   }
   if (value == "during-ipc-response-frame") {
     return FaultPoint::during_ipc_response_frame;
+  }
+  if (value == "during-shared-memory-publication") {
+    return FaultPoint::during_shared_memory_publication;
   }
   reject("unknown sidecar fault point");
 }

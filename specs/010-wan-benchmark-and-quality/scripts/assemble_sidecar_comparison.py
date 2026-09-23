@@ -16,6 +16,7 @@ RUN_TYPE: Final = "FEATURE010_SIDECAR_PROFILE_RUN_RAW"
 MANIFEST_TYPE: Final = "FEATURE010_SIDECAR_GATE_CRASH_MANIFEST"
 SATURATION_OFFERS_PER_BLOCK: Final = 10_000_000
 GIT_OBJECT = re.compile(r"[0-9a-f]{40}\Z")
+EMPTY_SHA256: Final = gate.sha256_id(b"")
 
 RUN_FIELDS: Final = {
     "aggregation_rules",
@@ -50,6 +51,7 @@ RUN_FIELDS: Final = {
     "timer_order",
     "toolchains_sha256",
     "type_name",
+    "wal_artifacts",
     "warmup_completed_operations",
 }
 SOURCE_FIELDS: Final = {"commit", "tree"}
@@ -98,6 +100,8 @@ RUNTIME_STATS_FIELDS: Final = {
     "retry_count",
     "stale_response_count",
 }
+WAL_ARTIFACTS_FIELDS: Final = {"record_vote", "runtime"}
+WAL_ARTIFACT_FIELDS: Final = {"sha256", "size_bytes"}
 CAPTURE_OPTION_NAMES: Final = {
     "--crash-observations",
     "--corpus",
@@ -113,6 +117,7 @@ CAPTURE_OPTION_NAMES: Final = {
     "--source-commit",
     "--source-tree",
     "--toolchains",
+    "--vote-fixture",
 }
 RUNTIME_ID_FIELDS: Final = {
     "abi_sha256",
@@ -223,24 +228,54 @@ CRASH_OBSERVATION_FIELDS: Final = {
     "persist_before_expose",
     "replay_identity_exact",
 }
-SHM_DISABLED_OBSERVATION_FIELDS: Final = {
+SHM_PUBLICATION_OBSERVATION_FIELDS: Final = {
     "atomic_abi_probe_result",
+    "atomic_abi_probe_scope",
     "atomic_abi_supported",
     "bounded_copy_equivalence",
-    "bounded_copy_transcript_sha256",
-    "canonical_reference_transcript_sha256",
+    "crash_process_exit_code",
+    "duration_ns",
     "fallback_transport",
+    "failed_generation_stdout_bytes_after_submit",
     "shared_memory_admission_state",
     "shared_memory_admitted_sequence",
+    "shared_memory_admitted_sequence_derivation",
+    "shared_memory_control_frame_exposed",
     "shared_memory_enabled",
+    "shared_memory_ingress_bytes",
+    "shared_memory_egress_bytes",
+    "shared_memory_failed_generation_egress_control_bytes",
+    "shared_memory_failed_generation_operation_response_wire_bytes",
+    "shared_memory_failed_generation_response_carrier_count",
+    "shared_memory_failed_generation_response_frame_count",
+    "shared_memory_ingress_ack_frame_count",
     "shared_memory_native_call_count",
     "shared_memory_native_status",
-    "shared_memory_rejected_before_admission",
+    "shared_memory_notification_ack_inline_only",
+    "shared_memory_operation_response_frame_exposed",
+    "shared_memory_open_admitted_sequence",
+    "shared_memory_publication_completed",
+    "shared_memory_publication_started",
+    "shared_memory_region_id",
+    "shared_memory_slot_state_at_native_death",
+    "shared_memory_status",
+    "shared_memory_telemetry_scope",
+    "validated_response_count_before_recovery",
+    "zero_copy_eligible_count",
+    "zero_copy_hit_count",
 }
-SHM_DISABLED_CHECKS: Final = {
-    "ATOMIC_ABI_UNSUPPORTED",
-    "BOUNDED_COPY_EQUIVALENCE_EXACT",
-    "SHARED_MEMORY_REJECTED_BEFORE_ADMISSION",
+SHM_PUBLICATION_CHECKS: Final = {
+    "FIRST_GENERATION_EXIT_CONFIRMED",
+    "JAVA_PROCESS_SURVIVED_NATIVE_DEATH",
+    "NO_VALIDATED_PARTIAL_RESPONSE_EXPOSED",
+    "RECOVERY_READY_PRECEDED_RETRY",
+    "RETRY_DURABLE_RESULT_MATCHED_REFERENCE",
+    "SHARED_MEMORY_ATOMIC_ABI_PROBED",
+    "SHARED_MEMORY_ADMISSION_SEQUENCE_DERIVED",
+    "SHARED_MEMORY_NOTIFICATION_ACK_ONLY",
+    "SHARED_MEMORY_OPERATION_RESPONSE_NOT_EXPOSED",
+    "SHARED_MEMORY_PUBLICATION_NOT_EXPOSED",
+    "SHARED_MEMORY_PUBLICATION_STARTED",
 }
 
 
@@ -407,6 +442,7 @@ def validate_input_provenance(
         "PAIRED_CORE_FAULT_TRACE",
         "PROJECTED_FORMAL_TRACE",
         "TOOLCHAINS",
+        "VOTE_FIXTURE",
         "NATIVE_LIBRARY" if run["profile_id"] == "EMBEDDED_FFM" else "SIDECAR_EXECUTABLE",
     ]
     input_artifacts = provenance["input_artifacts"]
@@ -423,6 +459,11 @@ def validate_input_provenance(
             artifact_id,
             "INPUT_ARTIFACT_FIELDS",
         )
+    require(
+        artifacts["VOTE_FIXTURE"]["size_bytes"] > 0
+        and artifacts["VOTE_FIXTURE"]["sha256"] != EMPTY_SHA256,
+        "VOTE_FIXTURE_EMPTY",
+    )
 
     artifact_bindings = {
         "CORPUS": ("--corpus", run["canonical_input_trace_sha256"]),
@@ -433,6 +474,7 @@ def validate_input_provenance(
         "PAIRED_CORE_FAULT_TRACE": ("--fault-trace", run["fault_trace_sha256"]),
         "PROJECTED_FORMAL_TRACE": ("--projected-formal-trace", None),
         "TOOLCHAINS": ("--toolchains", run["toolchains_sha256"]),
+        "VOTE_FIXTURE": ("--vote-fixture", None),
         expected_artifact_ids[-1]: (native_option, None),
     }
     for artifact_id, (option, expected_sha256) in artifact_bindings.items():
@@ -964,6 +1006,10 @@ def validate_copy_ledger(
             record["ZERO_COPY_HIT_COUNT"] <= record["ZERO_COPY_ELIGIBLE_COUNT"],
             "COPY_SAMPLE_ZERO_COPY_RELATION",
         )
+        require(
+            record["ZERO_COPY_HIT_COUNT"] == 0,
+            "COPY_SAMPLE_ZERO_COPY_HIT_FORBIDDEN",
+        )
         ingress = record["STAGING_FALLBACK_INGRESS_BYTES"]
         egress = record["STAGING_FALLBACK_EGRESS_BYTES"]
         combined = gate.checked_add_u64(ingress, egress, "COPY_SAMPLE_FALLBACK_OVERFLOW")
@@ -1048,6 +1094,12 @@ def validate_transcripts(
         record = exact_object(value[index], TRANSCRIPT_FIELDS, "RAW_TRANSCRIPT_FIELDS")
         require(record["equality_id"] == equality_id, "RAW_TRANSCRIPT_ORDER", profile)
         transcript_sha256 = gate.content_id(record["transcript_sha256"], "RAW_TRANSCRIPT_SHA256")
+        if equality_id == "CANONICAL_VOTE_RECEIPT_BYTES":
+            require(
+                transcript_sha256 != EMPTY_SHA256,
+                "RAW_VOTE_RECEIPT_TRANSCRIPT_EMPTY",
+                profile,
+            )
         evidence, passed, evidence_sha256 = validate_evidence_object(
             record["evidence"], record["evidence_sha256"], "RAW_TRANSCRIPT_EVIDENCE"
         )
@@ -1157,8 +1209,7 @@ def validate_run(
     require_observations(
         survival_evidence,
         {
-            "native_death_injection_count": len(expected_restart_points)
-            - ("DURING_SHARED_MEMORY_PUBLICATION" in expected_restart_points),
+            "native_death_injection_count": len(expected_restart_points),
             "profile_id": expected_profile,
             "qualification_case_count": len(expected_restart_points),
             "survived_all_native_deaths": survived,
@@ -1171,6 +1222,25 @@ def validate_run(
     transcripts = validate_transcripts(
         run["output_transcripts"], comparison["exact_cross_profile_equalities"], expected_profile
     )
+    wal_artifacts = exact_object(
+        run["wal_artifacts"], WAL_ARTIFACTS_FIELDS, "RAW_WAL_ARTIFACTS_FIELDS"
+    )
+    compact_wal_artifacts: dict[str, dict[str, int | str]] = {}
+    for artifact_id in ("record_vote", "runtime"):
+        record = exact_object(
+            wal_artifacts[artifact_id], WAL_ARTIFACT_FIELDS, "RAW_WAL_ARTIFACT_FIELDS"
+        )
+        compact_wal_artifacts[artifact_id] = {
+            "sha256": gate.content_id(record["sha256"], "RAW_WAL_ARTIFACT_SHA256"),
+            "size_bytes": gate.strict_u64(
+                record["size_bytes"], "RAW_WAL_ARTIFACT_SIZE", positive=True
+            ),
+        }
+    require(
+        transcripts["WAL_RECEIPTS_AND_DURABLE_SEQUENCES"]["transcript_sha256"]
+        == gate.sha256_id(gate.canonical_bytes(compact_wal_artifacts)),
+        "RAW_WAL_TRANSCRIPT_BINDING",
+    )
     crash_document = {
         "java_process_survival": survival,
         "profile_id": expected_profile,
@@ -1180,6 +1250,15 @@ def validate_run(
     }
     crash_artifact = gate.sha256_id(gate.canonical_bytes(crash_document))
     provenance_sha256 = validate_input_provenance(run, crash_artifact_sha256=crash_artifact)
+    vote_fixture_node = next(
+        node for node in run["input_graph_nodes"] if node["node_id"] == "INPUT:VOTE_FIXTURE"
+    )
+    vote_fixture = {
+        "sha256": gate.content_id(vote_fixture_node["artifact_sha256"], "VOTE_FIXTURE_SHA256"),
+        "size_bytes": gate.strict_u64(
+            vote_fixture_node["size_bytes"], "VOTE_FIXTURE_SIZE", positive=True
+        ),
+    }
     runtime_stats = exact_object(run["runtime_stats"], RUNTIME_STATS_FIELDS, "RUNTIME_STATS")
     for field in RUNTIME_STATS_FIELDS:
         gate.strict_u64(runtime_stats[field], "RUNTIME_STATS_VALUE")
@@ -1297,7 +1376,10 @@ def validate_run(
         "HARDWARE_ALLOCATION": run["hardware_allocation_sha256"],
         "TOOLCHAINS": run["toolchains_sha256"],
         "INITIAL_WAL_AND_SNAPSHOT_HASHES": initial_artifacts,
-        "CANONICAL_INPUT_BYTES": run["canonical_input_trace_sha256"],
+        "CANONICAL_INPUT_BYTES": {
+            "corpus_sha256": run["canonical_input_trace_sha256"],
+            "vote_fixture": vote_fixture,
+        },
         "REQUEST_IDS_AND_ORDER": {
             "new_transition_order": request_order,
             "saturation_replay_schedule": saturation_request_schedule,
@@ -1331,6 +1413,7 @@ def validate_run(
         "raw_capture_sha256": gate.sha256_id(gate.canonical_bytes(run)),
         "restart_to_ready_ns": restart,
         "saturation_blocks": compact_saturation,
+        "wal_artifacts": compact_wal_artifacts,
         "warmup_completed_operations": warmup,
     }
     native_node_id = (
@@ -1389,44 +1472,119 @@ def crash_evidence_passes(
         require(type(observations[field]) is bool, "CRASH_OBSERVATION_TYPE", field)
     if special_shared_memory:
         require(
-            set(observations)
-            == CRASH_OBSERVATION_FIELDS
-            | SHM_DISABLED_OBSERVATION_FIELDS
-            | {"crash_point", "duration_ns", "profile_id"},
-            "SHM_DISABLED_OBSERVATIONS",
+            SHM_PUBLICATION_OBSERVATION_FIELDS <= set(observations),
+            "SHM_PUBLICATION_OBSERVATIONS",
         )
         checks = evidence["checks"]
-        require(set(checks) == SHM_DISABLED_CHECKS and all(checks.values()), "SHM_DISABLED_CHECKS")
-        bounded_copy = gate.content_id(
-            observations["bounded_copy_transcript_sha256"], "SHM_BOUNDED_COPY_SHA256"
-        )
-        reference = gate.content_id(
-            observations["canonical_reference_transcript_sha256"], "SHM_REFERENCE_SHA256"
+        require(
+            set(checks) == SHM_PUBLICATION_CHECKS and all(checks.values()),
+            "SHM_PUBLICATION_CHECKS",
         )
         require(
-            observations["atomic_abi_probe_result"] == "UNSUPPORTED",
-            "SHM_ATOMIC_ABI_MUST_BE_UNSUPPORTED",
+            observations["atomic_abi_probe_result"]
+            == "LOCK_FREE_JAVA_NATIVE_MAP_SHARED_U32_BIG_ENDIAN"
+            and observations["atomic_abi_probe_scope"] == "EXACT_PATH_DEVICE_INODE_GENERATION_SLOT",
+            "SHM_ATOMIC_ABI",
         )
-        require(observations["atomic_abi_supported"] is False, "SHM_ATOMIC_ABI_MUST_BE_UNSUPPORTED")
-        require(observations["shared_memory_enabled"] is False, "SHM_MUST_BE_DISABLED")
+        require(observations["atomic_abi_supported"] is True, "SHM_ATOMIC_ABI")
+        require(observations["shared_memory_enabled"] is True, "SHM_MUST_BE_ENABLED")
+        gate.strict_u64(observations["duration_ns"], "SHM_DURATION", positive=True)
+        open_admitted_sequence = gate.strict_u64(
+            observations["shared_memory_open_admitted_sequence"],
+            "SHM_OPEN_ADMITTED_SEQUENCE",
+            positive=True,
+        )
+        admitted_sequence = gate.strict_u64(
+            observations["shared_memory_admitted_sequence"],
+            "SHM_ADMITTED_SEQUENCE",
+            positive=True,
+        )
         require(
-            observations["shared_memory_admission_state"] == "NOT_ADMITTED_PROVEN"
-            and observations["shared_memory_admitted_sequence"] == 0
-            and observations["shared_memory_native_call_count"] == 0
-            and observations["shared_memory_native_status"] == 4_294_967_295,
-            "SHM_MUST_REJECT_BEFORE_ADMISSION",
+            observations["shared_memory_admission_state"] == "ADMITTED_OUTCOME_AVAILABLE"
+            and open_admitted_sequence == 1
+            and admitted_sequence == 2
+            and admitted_sequence == open_admitted_sequence + 1
+            and observations["shared_memory_admitted_sequence_derivation"]
+            == "OBSERVED_OPEN_ADMISSION_PLUS_FIRST_POST_OPEN_OPERATION"
+            and gate.strict_u64(
+                observations["shared_memory_native_call_count"], "SHM_NATIVE_CALL_COUNT"
+            )
+            == 1
+            and gate.strict_u64(observations["shared_memory_native_status"], "SHM_NATIVE_STATUS")
+            == 0,
+            "SHM_ADMITTED_OUTCOME",
         )
         require(
-            observations["shared_memory_rejected_before_admission"] is True,
-            "SHM_MUST_REJECT_BEFORE_ADMISSION",
+            observations["shared_memory_telemetry_scope"] == "SUPERVISOR_ALL_GENERATIONS",
+            "SHM_TELEMETRY_SCOPE",
         )
-        require(observations["fallback_transport"] == "BOUNDED_COPY", "SHM_FALLBACK_TRANSPORT")
+        require(
+            observations["shared_memory_publication_started"] is True
+            and observations["shared_memory_publication_completed"] is False
+            and observations["shared_memory_control_frame_exposed"] is True
+            and observations["shared_memory_operation_response_frame_exposed"] is False,
+            "SHM_PUBLICATION_CUT",
+        )
+        require(
+            gate.strict_u64(
+                observations["shared_memory_ingress_ack_frame_count"],
+                "SHM_INGRESS_ACK_FRAME_COUNT",
+            )
+            == 1
+            and observations["shared_memory_notification_ack_inline_only"] is True
+            and gate.strict_u64(
+                observations["shared_memory_failed_generation_response_frame_count"],
+                "SHM_FAILED_RESPONSE_FRAME_COUNT",
+            )
+            == 0
+            and gate.strict_u64(
+                observations["shared_memory_failed_generation_response_carrier_count"],
+                "SHM_FAILED_RESPONSE_CARRIER_COUNT",
+            )
+            == 0
+            and gate.strict_u64(
+                observations["shared_memory_failed_generation_egress_control_bytes"],
+                "SHM_FAILED_EGRESS_CONTROL_BYTES",
+            )
+            == gate.strict_u64(
+                observations["failed_generation_stdout_bytes_after_submit"],
+                "SHM_FAILED_STDOUT_BYTES",
+                positive=True,
+            )
+            and gate.strict_u64(
+                observations["shared_memory_failed_generation_operation_response_wire_bytes"],
+                "SHM_FAILED_OPERATION_RESPONSE_WIRE_BYTES",
+            )
+            == 0
+            and gate.strict_u64(
+                observations["validated_response_count_before_recovery"],
+                "SHM_VALIDATED_RESPONSE_COUNT",
+            )
+            == 0,
+            "SHM_NOTIFICATION_ONLY_ACK",
+        )
+        require(
+            observations["shared_memory_region_id"] == "NATIVE_TO_JAVA"
+            and observations["shared_memory_slot_state_at_native_death"] == "WRITING"
+            and observations["shared_memory_status"] == "ENABLED_LOCK_FREE_U32_BIG_ENDIAN",
+            "SHM_PUBLICATION_STATE",
+        )
+        require(observations["crash_process_exit_code"] == 88, "SHM_CRASH_EXIT_CODE")
+        require(observations["fallback_transport"] == "NOT_USED", "SHM_FALLBACK_TRANSPORT")
         require(observations["bounded_copy_equivalence"] == "EXACT", "SHM_COPY_EQUIVALENCE")
-        require(bounded_copy == reference, "SHM_COPY_EQUIVALENCE")
-        # This receipt proves the mandatory disabled-SHM bounded-copy path only. It cannot
-        # satisfy the separately named publication-crash gate because no SHM publication or
-        # native call occurred on this host.
-        derived = False
+        ingress = gate.strict_u64(
+            observations["shared_memory_ingress_bytes"], "SHM_INGRESS_BYTES", positive=True
+        )
+        egress = gate.strict_u64(
+            observations["shared_memory_egress_bytes"], "SHM_EGRESS_BYTES", positive=True
+        )
+        eligible = gate.strict_u64(
+            observations["zero_copy_eligible_count"], "SHM_ZERO_COPY_ELIGIBLE", positive=True
+        )
+        hits = gate.strict_u64(observations["zero_copy_hit_count"], "SHM_ZERO_COPY_HITS")
+        require(ingress > 0 and egress > 0, "SHM_TRAFFIC")
+        require(hits <= eligible, "SHM_ZERO_COPY_COUNTER_ORDER")
+        require(hits == 0, "SHM_ZERO_COPY_HIT_FORBIDDEN")
     return checks_pass and derived, evidence_sha256
 
 

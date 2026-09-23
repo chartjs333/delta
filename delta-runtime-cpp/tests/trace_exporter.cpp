@@ -1,7 +1,9 @@
 #include "fixture_support.hpp"
 #include "trace_support.hpp"
+#include "../../delta-core-cpp/tests/vote_fixture.hpp"
 
 #include <delta/core/canonical.hpp>
+#include <delta/core/consensus.hpp>
 #include <delta/core/protocol.hpp>
 #include <delta/runtime/runtime.hpp>
 
@@ -16,10 +18,12 @@
 #include <vector>
 
 namespace canonical = delta::core::canonical;
+namespace consensus = delta::core::consensus;
 namespace protocol = delta::core::protocol;
 namespace runtime = delta::runtime;
 namespace test = delta::test;
 namespace trace = delta::test::trace;
+namespace vote_fixture = delta::test::vote_fixture;
 
 namespace {
 
@@ -33,27 +37,67 @@ inline constexpr std::string_view config_hash =
 [[nodiscard]] runtime::Config config(
     const std::filesystem::path& directory,
     const canonical::Bytes& initial) {
-  return runtime::Config{directory, initial, 64U};
+  return runtime::Config{
+      .directory = directory,
+      .initial_state_bytes = initial,
+      .submission_capacity = 64U,
+      .durable_binding_guard = {},
+      .vote_policy = {},
+      .expected_wal_identity = {},
+  };
 }
 
 [[nodiscard]] protocol::Vote vote_for(
-    std::string kind,
-    std::string validator,
-    std::string context,
-    std::string body,
-    std::uint64_t view) {
+    const consensus::VoteAdmissionPolicy& policy,
+    const consensus::VoteCandidateBinding& candidate) {
   return protocol::Vote{
-      std::move(body),
-      std::move(context),
+      candidate.body_hash,
+      std::string(consensus::frozen_vote_context(candidate)),
       1U,
-      1U,
-      std::move(kind),
-      std::string(trace::round_id),
-      test::derived_id("signature:", validator),
-      std::string(trace::epoch_id),
-      std::move(validator),
-      view,
+      candidate.height,
+      std::string(consensus::vote_kind_name(candidate.action)),
+      policy.round_id,
+      test::derived_id("signature:", policy.local_validator_id),
+      policy.validator_epoch_id,
+      policy.local_validator_id,
+      candidate.view,
   };
+}
+
+[[nodiscard]] consensus::VoteAdmissionPolicy vote_policy(
+    std::string validator,
+    consensus::VoteAdmissionPolicy policy,
+    consensus::VoteCandidateBinding candidate,
+    std::uint64_t logical_tick) {
+  policy.local_validator_id = std::move(validator);
+  policy.initial_logical_tick = logical_tick;
+  policy.candidates = {std::move(candidate)};
+  return policy;
+}
+
+[[nodiscard]] std::vector<std::string> parent_hashes(
+    const consensus::VoteParentState& parents) {
+  std::vector<std::string> result;
+  const std::string* values[]{
+      &parents.round_config_id,
+      &parents.parent_checkpoint_id,
+      &parents.input_set_certificate_id,
+      &parents.seed_transcript_id,
+      &parents.norm_evidence_id,
+      &parents.eligibility_certificate_id,
+      &parents.aggregation_plan_certificate_id,
+      &parents.parameter_matrix_root,
+      &parents.aggregate_root_certificate_id,
+      &parents.apply_profile_id,
+      &parents.apply_candidate_id,
+      &parents.last_finalized_certificate_id,
+  };
+  for (const auto* value : values) {
+    if (!value->empty()) {
+      result.push_back(*value);
+    }
+  }
+  return result;
 }
 
 [[nodiscard]] trace::Event event(
@@ -81,45 +125,51 @@ inline constexpr std::string_view config_hash =
 
 void append_vote_events(
     std::vector<trace::Event>& events,
-    std::string_view action,
-    std::string_view context,
-    std::string_view body,
     std::string_view root,
     const std::vector<runtime::VoteReceipt>& receipts,
-    std::uint64_t logical_start,
-    std::uint64_t view) {
+    std::uint64_t logical_start) {
   for (std::size_t index = 0; index < receipts.size(); ++index) {
+    const auto vote = protocol::parse_vote(receipts[index].frame);
     auto item = event(
-        std::string(action),
-        "validator-" + std::to_string(index + 1U),
+        receipts[index].formal_action_id,
+        vote.validator_id,
         "VALIDATOR",
-        std::string(body),
+        vote.body_hash,
         receipts[index].journal_sequence,
         std::string(root),
         std::string(root),
         "ACCEPTED",
         logical_start + index);
-    item.request_id = "native-vote-" + std::to_string(index + 1U);
-    item.vote_context_id = std::string(context);
-    item.view = view;
+    item.request_id = receipts[index].vote_id;
+    item.vote_context_id = receipts[index].context_id;
+    item.parent_hashes = parent_hashes(receipts[index].parents);
+    item.height = vote.height;
+    item.round_id = vote.round_id;
+    item.validator_epoch = vote.validator_epoch_id;
+    item.view = vote.view;
     events.push_back(std::move(item));
   }
 }
 
 [[nodiscard]] std::vector<runtime::VoteReceipt> record_quorum(
-    runtime::Runtime& instance,
-    std::string_view kind,
-    std::string_view context,
-    std::string_view body,
-    std::uint64_t view) {
+    const std::filesystem::path& directory,
+    const canonical::Bytes& state_bytes,
+    const consensus::VoteAdmissionPolicy& policy_template,
+    const consensus::VoteCandidateBinding& candidate,
+    std::uint64_t logical_tick) {
   std::vector<runtime::VoteReceipt> receipts;
   for (std::uint64_t validator = 1U; validator <= 3U; ++validator) {
-    const auto value = vote_for(
-        std::string(kind),
-        "validator-" + std::to_string(validator),
-        std::string(context),
-        std::string(body),
-        view);
+    const auto policy = vote_policy(
+        "validator-" + std::to_string(validator), policy_template, candidate, logical_tick);
+    runtime::Runtime instance(runtime::Config{
+        .directory = directory / ("validator-" + std::to_string(validator)),
+        .initial_state_bytes = state_bytes,
+        .submission_capacity = 8U,
+        .durable_binding_guard = {},
+        .vote_policy = policy,
+        .expected_wal_identity = {},
+    });
+    const auto value = vote_for(policy, candidate);
     receipts.push_back(instance.record_vote(protocol::encode(value)));
   }
   return receipts;
@@ -140,9 +190,16 @@ void export_normal(const std::filesystem::path& output, const canonical::Bytes& 
       state, "ACCEPT_AVAILABILITY", "native-normal-availability", availability);
   const auto available = instance.submit(protocol::encode(availability_command));
   state = protocol::parse_round_state(available.next_state_bytes);
-  const auto isc_body = test::derived_id("isc-body:", "ticket-000");
-  const std::string context = "ISC:round-003-fixture:1:0";
-  const auto votes = record_quorum(instance, "INPUT_SET", context, isc_body, 0U);
+  auto fixture = vote_fixture::full(consensus::VoteAction::input_set, state);
+  const auto context = fixture.candidate.context_id;
+  fixture.policy.candidates = {fixture.candidate};
+  const auto isc_body = fixture.candidate.body_hash;
+  const auto votes = record_quorum(
+      directory / "votes",
+      available.next_state_bytes,
+      fixture.policy,
+      fixture.candidate,
+      2U);
   const auto freeze_command = test::command_for(
       state, "FINALIZE_INPUT_FREEZE", "native-normal-freeze", isc_body);
   const auto frozen = instance.submit(protocol::encode(freeze_command));
@@ -173,7 +230,7 @@ void export_normal(const std::filesystem::path& output, const canonical::Bytes& 
       1U);
   availability_event.request_id = availability_command.request_id;
   events.push_back(std::move(availability_event));
-  append_vote_events(events, "ACT-ISC-VOTE", context, isc_body, available.next_state_id, votes, 2U, 0U);
+  append_vote_events(events, available.next_state_id, votes, 2U);
   auto final = event(
       "ACT-ISC-FINALIZE",
       "validator-1",
@@ -202,15 +259,18 @@ void export_view_change(const std::filesystem::path& output, const canonical::By
   const auto directory = test::fresh_directory("trace-view");
   const auto initial_root = state_id(initial);
   runtime::Runtime instance(config(directory, initial));
-  const auto body = test::derived_id("view-change:", "view-1");
-  const std::string context = "VIEW-CHANGE:round-003-fixture:1";
-  const auto votes = record_quorum(instance, "VIEW_CHANGE", context, body, 0U);
-  auto state = protocol::parse_round_state(initial);
+  const auto state = protocol::parse_round_state(initial);
+  auto fixture = vote_fixture::full(consensus::VoteAction::view_change, state);
+  const auto context = fixture.candidate.context_id;
+  fixture.policy.candidates = {fixture.candidate};
+  const auto body = fixture.candidate.body_hash;
+  const auto votes = record_quorum(
+      directory / "votes", initial, fixture.policy, fixture.candidate, 50U);
   auto command = test::command_for(state, "ADVANCE_VIEW", "native-view-finalize", body);
   command.view = 1U;
   const auto changed = instance.submit(protocol::encode(command));
   std::vector<trace::Event> events;
-  append_vote_events(events, "ACT-VIEW-VOTE", context, body, initial_root, votes, 0U, 0U);
+  append_vote_events(events, initial_root, votes, 0U);
   auto final = event(
       "ACT-VIEW-FINALIZE",
       "validator-1",
@@ -238,14 +298,17 @@ void export_abort(const std::filesystem::path& output, const canonical::Bytes& i
   const auto directory = test::fresh_directory("trace-abort");
   const auto initial_root = state_id(initial);
   runtime::Runtime instance(config(directory, initial));
-  const auto body = test::derived_id("abort:", "hard-deadline");
-  const std::string context = "HARD-ABORT:round-003-fixture";
-  const auto votes = record_quorum(instance, "ABORT", context, body, 0U);
   const auto state = protocol::parse_round_state(initial);
+  auto fixture = vote_fixture::full(consensus::VoteAction::abort, state);
+  const auto context = fixture.candidate.context_id;
+  fixture.policy.candidates = {fixture.candidate};
+  const auto body = fixture.candidate.body_hash;
+  const auto votes = record_quorum(
+      directory / "votes", initial, fixture.policy, fixture.candidate, 100U);
   const auto command = test::command_for(state, "CERTIFY_ABORT", "native-abort-finalize", body);
   const auto aborted = instance.submit(protocol::encode(command));
   std::vector<trace::Event> events;
-  append_vote_events(events, "ACT-ABORT-VOTE", context, body, initial_root, votes, 0U, 0U);
+  append_vote_events(events, initial_root, votes, 0U);
   auto final = event(
       "ACT-ABORT-FINALIZE",
       "validator-1",
@@ -272,12 +335,23 @@ void export_abort(const std::filesystem::path& output, const canonical::Bytes& i
 void export_crash_recovery(const std::filesystem::path& output, const canonical::Bytes& initial) {
   const auto directory = test::fresh_directory("trace-crash-recovery");
   const auto initial_root = state_id(initial);
-  const std::string context = "ROUND_CONFIG:round-003-fixture:1:0";
-  const auto value = vote_for(
-      "ROUND_CONFIG", "validator-1", context, std::string(config_hash), 0U);
+  const auto state = protocol::parse_round_state(initial);
+  auto fixture = vote_fixture::full(consensus::VoteAction::round_config, state);
+  const auto policy = vote_policy("validator-1", fixture.policy, fixture.candidate, 0U);
+  const auto value = vote_for(policy, fixture.candidate);
   const auto vote_bytes = protocol::encode(value);
+  const auto crash_config = [&] {
+    return runtime::Config{
+        .directory = directory,
+        .initial_state_bytes = initial,
+        .submission_capacity = 8U,
+        .durable_binding_guard = {},
+        .vote_policy = policy,
+        .expected_wal_identity = {},
+    };
+  };
   {
-    runtime::Runtime instance(config(directory, initial));
+    runtime::Runtime instance(crash_config());
     try {
       static_cast<void>(instance.record_vote(
           vote_bytes, runtime::CrashPoint::after_durability_before_commit));
@@ -288,52 +362,50 @@ void export_crash_recovery(const std::filesystem::path& output, const canonical:
           "unexpected native crash error code");
     }
   }
-  runtime::Runtime recovered(config(directory, initial));
+  runtime::Runtime recovered(crash_config());
   test::expect(recovered.recovered_vote_count() == 1U, "durable vote was not recovered");
   const auto replay = recovered.record_vote(vote_bytes);
   test::expect(replay.replay && replay.journal_sequence == 1U, "recovered vote did not replay");
+  const auto recovered_vote = protocol::parse_vote(replay.frame);
 
   std::vector<trace::Event> events;
-  auto persisted = event(
-      "ACT-CONFIG-VOTE",
-      "validator-1",
-      "VALIDATOR",
-      std::string(config_hash),
-      1U,
-      initial_root,
-      initial_root,
-      "ACCEPTED",
-      0U);
-  persisted.vote_context_id = context;
-  events.push_back(std::move(persisted));
+  append_vote_events(events, initial_root, {replay}, 0U);
   auto crash = event(
       "ACT-CRASH",
-      "validator-1",
+      recovered_vote.validator_id,
       "VALIDATOR",
       std::nullopt,
-      1U,
+      replay.journal_sequence,
       initial_root,
       initial_root,
       "FAULT",
       1U);
   crash.error_code = "CRASH_AFTER_DURABILITY";
-  crash.vote_context_id = context;
+  crash.height = recovered_vote.height;
+  crash.round_id = recovered_vote.round_id;
+  crash.validator_epoch = recovered_vote.validator_epoch_id;
+  crash.view = recovered_vote.view;
+  crash.vote_context_id = replay.context_id;
   events.push_back(std::move(crash));
   auto restart = event(
       "ACT-RESTART",
-      "validator-1",
+      recovered_vote.validator_id,
       "VALIDATOR",
       std::nullopt,
-      1U,
+      replay.journal_sequence,
       initial_root,
       initial_root,
       "ACCEPTED",
       2U);
-  restart.vote_context_id = context;
+  restart.vote_context_id = replay.context_id;
+  restart.height = recovered_vote.height;
+  restart.round_id = recovered_vote.round_id;
+  restart.validator_epoch = recovered_vote.validator_epoch_id;
+  restart.view = recovered_vote.view;
   events.push_back(std::move(restart));
   auto recover = event(
       "ACT-JOURNAL-RECOVER",
-      "validator-1",
+      recovered_vote.validator_id,
       "VALIDATOR",
       replay.vote_id,
       replay.journal_sequence,
@@ -341,11 +413,17 @@ void export_crash_recovery(const std::filesystem::path& output, const canonical:
       initial_root,
       "ACCEPTED",
       3U);
-  recover.vote_context_id = context;
+  recover.request_id = replay.vote_id;
+  recover.height = recovered_vote.height;
+  recover.parent_hashes = parent_hashes(replay.parents);
+  recover.round_id = recovered_vote.round_id;
+  recover.validator_epoch = recovered_vote.validator_epoch_id;
+  recover.view = recovered_vote.view;
+  recover.vote_context_id = replay.context_id;
   events.push_back(std::move(recover));
   auto replay_event = event(
       "ACT-MESSAGE-REPLAY",
-      "validator-1",
+      recovered_vote.validator_id,
       "VALIDATOR",
       replay.vote_id,
       replay.journal_sequence,
@@ -353,8 +431,13 @@ void export_crash_recovery(const std::filesystem::path& output, const canonical:
       initial_root,
       "NO_OP",
       4U);
-  replay_event.request_id = "native-recovered-vote-replay";
-  replay_event.vote_context_id = context;
+  replay_event.request_id = replay.vote_id;
+  replay_event.height = recovered_vote.height;
+  replay_event.parent_hashes = parent_hashes(replay.parents);
+  replay_event.round_id = recovered_vote.round_id;
+  replay_event.validator_epoch = recovered_vote.validator_epoch_id;
+  replay_event.view = recovered_vote.view;
+  replay_event.vote_context_id = replay.context_id;
   events.push_back(std::move(replay_event));
   trace::write(
       output / "native-crash-recovery.json",
@@ -372,7 +455,10 @@ int main(int argc, char** argv) {
     if (argc != 2) {
       test::fail("expected exact trace output directory");
     }
-    const auto initial = test::golden(DELTA_GOLDEN_FIXTURE_PATH, 5U);
+    auto initial_state = protocol::parse_round_state(
+        test::golden(DELTA_GOLDEN_FIXTURE_PATH, 5U));
+    initial_state.config_id = std::string(config_hash);
+    const auto initial = protocol::encode(initial_state);
     const std::filesystem::path output(argv[1]);
     export_normal(output, initial);
     export_view_change(output, initial);

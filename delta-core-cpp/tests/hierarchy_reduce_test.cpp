@@ -4,6 +4,8 @@
 #include <delta/reduce/hierarchy.hpp>
 #include <delta/runtime/runtime.hpp>
 
+#include "vote_fixture.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -17,6 +19,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -26,6 +29,7 @@ namespace consensus = delta::core::consensus;
 namespace protocol = delta::core::protocol;
 namespace reduce = delta::reduce;
 namespace runtime = delta::runtime;
+namespace vote_fixture = delta::test::vote_fixture;
 
 namespace {
 
@@ -58,17 +62,6 @@ void expect_reduce_error(reduce::ErrorCode expected, Operation operation) {
 }
 
 template <typename Operation>
-void expect_runtime_error(runtime::ErrorCode expected, Operation operation) {
-  try {
-    operation();
-  } catch (const runtime::RuntimeError& error) {
-    expect(error.code() == expected, "unexpected hierarchy runtime error code");
-    return;
-  }
-  fail("hierarchy runtime failure was not reported");
-}
-
-template <typename Operation>
 void expect_consensus_error(consensus::ErrorCode expected, Operation operation) {
   try {
     operation();
@@ -77,6 +70,17 @@ void expect_consensus_error(consensus::ErrorCode expected, Operation operation) 
     return;
   }
   fail("conflicting hierarchy vote was accepted");
+}
+
+template <typename Operation>
+void expect_runtime_error(runtime::ErrorCode expected, Operation operation) {
+  try {
+    operation();
+  } catch (const runtime::RuntimeError& error) {
+    expect(error.code() == expected, "unexpected hierarchy runtime error code");
+    return;
+  }
+  fail("hierarchy runtime failure was not reported");
 }
 
 [[nodiscard]] std::string read_file(const std::filesystem::path& path) {
@@ -124,19 +128,6 @@ struct Fixture {
   auto topology = decode_hex(match[1].str());
   expect(std::regex_search(document, match, proof_pattern), "proof fixture is missing");
   return {std::move(topology), decode_hex(match[1].str())};
-}
-
-[[nodiscard]] canonical::Bytes core_golden(std::uint16_t type_code) {
-  const auto document = read_file(DELTA_CORE_GOLDEN_PATH);
-  const std::regex pattern(
-      R"REGEX("envelope_hex":"([0-9a-f]+)","envelope_sha256":"[0-9a-f]+","type_code":([0-9]+))REGEX");
-  for (auto cursor = std::sregex_iterator(document.begin(), document.end(), pattern);
-       cursor != std::sregex_iterator(); ++cursor) {
-    if (std::stoul((*cursor)[2].str()) == type_code) {
-      return decode_hex((*cursor)[1].str());
-    }
-  }
-  fail("core golden vector is absent");
 }
 
 [[nodiscard]] reduce::Context context() {
@@ -506,8 +497,8 @@ void test_complete_assembly(
 }
 
 struct RecoveryEvidence {
-  std::string global_vote_id;
-  std::string regional_vote_id;
+  std::string first_vote_id;
+  std::string second_vote_id;
   std::size_t recovered_vote_count;
 };
 
@@ -576,49 +567,109 @@ struct RecoveryEvidence {
   const auto regional_vote_bytes = protocol::encode(reduce::make_committee_vote(
       topology, proof, regional_intent, regional_intent.signer_ids.front(),
       "sha256:abababababababababababababababababababababababababababababababab", 2U));
-  const auto directory = case_directory("vote-recovery");
-  runtime::VoteReceipt first;
-  runtime::VoteReceipt regional_first;
+  expect(vote.kind == "GLOBAL_PARAMETER_RESULT",
+         "global committee-plane vote vocabulary changed");
+  const auto regional_vote = protocol::parse_vote(regional_vote_bytes);
+  expect(regional_vote.kind == "REGIONAL_SHARD_RESULT",
+         "regional committee-plane vote kind changed");
+  expect_consensus_error(consensus::ErrorCode::vote_action_invalid, [&] {
+    static_cast<void>(consensus::parse_vote_action(vote.kind));
+  });
+  expect_consensus_error(consensus::ErrorCode::vote_action_invalid, [&] {
+    static_cast<void>(consensus::parse_vote_action(regional_vote.kind));
+  });
+
+  auto formal = vote_fixture::full(consensus::VoteAction::round_config);
+  const auto view_fixture =
+      vote_fixture::full(consensus::VoteAction::view_change, formal.state);
+  formal.policy.initial_logical_tick = formal.policy.soft_deadline_tick;
+  formal.policy.snapshot.timeout_observations =
+      view_fixture.policy.snapshot.timeout_observations;
+  formal.policy.snapshot.view_change_bodies =
+      view_fixture.policy.snapshot.view_change_bodies;
+  const auto second_candidate = view_fixture.candidate;
+  formal.policy.candidates.push_back(second_candidate);
+  std::sort(
+      formal.policy.candidates.begin(),
+      formal.policy.candidates.end(),
+      [](const auto& left, const auto& right) {
+        return std::tuple{
+                   left.height,
+                   left.view,
+                   static_cast<std::uint32_t>(left.action),
+                   std::string_view(left.context_id)} <
+               std::tuple{
+                   right.height,
+                   right.view,
+                   static_cast<std::uint32_t>(right.action),
+                   std::string_view(right.context_id)};
+      });
+
+  const auto runtime_config = [&](const std::filesystem::path& directory) {
+    return runtime::Config{
+        .directory = directory,
+        .initial_state_bytes = protocol::encode(formal.state),
+        .submission_capacity = 8U,
+        .durable_binding_guard = {},
+        .vote_policy = formal.policy,
+        .expected_wal_identity = {},
+    };
+  };
+
   {
-    runtime::Runtime durable({directory, core_golden(5U), 8U});
-    first = durable.record_vote(vote_bytes);
-    regional_first = durable.record_vote(regional_vote_bytes);
-    expect(!first.replay && std::filesystem::file_size(directory / "runtime.wal") > 0U,
-           "committee vote became visible before durable WAL persistence");
-    expect(!regional_first.replay, "regional committee vote was classified as replay");
-  }
-  {
-    runtime::Runtime recovered({directory, core_golden(5U), 8U});
-    expect(recovered.recovered_vote_count() == 2U,
-           "regional/global vote journals were not recovered before admission");
-    const auto replay = recovered.record_vote(vote_bytes);
-    const auto regional_replay = recovered.record_vote(regional_vote_bytes);
-    expect(replay.replay && replay.vote_id == first.vote_id,
-           "durable committee vote replay changed identity");
-    expect(regional_replay.replay && regional_replay.vote_id == regional_first.vote_id,
-           "durable regional vote replay changed identity");
-    auto conflict = vote;
-    conflict.body_hash =
-        "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-    expect_consensus_error(consensus::ErrorCode::conflicting_vote, [&] {
-      static_cast<void>(recovered.record_vote(protocol::encode(conflict)));
+    runtime::Runtime formal_boundary(runtime_config(case_directory("committee-vote-boundary")));
+    expect_consensus_error(consensus::ErrorCode::vote_action_invalid, [&] {
+      static_cast<void>(formal_boundary.record_vote(vote_bytes));
     });
+    auto regional_at_next_slot = regional_vote;
+    regional_at_next_slot.durable_sequence = 1U;
+    expect_consensus_error(consensus::ErrorCode::vote_action_invalid, [&] {
+      static_cast<void>(formal_boundary.record_vote(protocol::encode(regional_at_next_slot)));
+    });
+    expect(
+        formal_boundary.journal_sequence() == 0U &&
+            formal_boundary.recovered_vote_count() == 0U,
+        "committee-plane vote crossed the closed formal RECORD_VOTE boundary");
   }
 
-  const auto crash_directory = case_directory("vote-crash-after-durability");
+  auto first_vote = formal.vote;
+  auto second_vote = view_fixture.vote;
+  second_vote.durable_sequence = 2U;
+  second_vote.signature_id = vote_fixture::id('d');
+  const auto first_bytes = protocol::encode(first_vote);
+  const auto second_bytes = protocol::encode(second_vote);
+  const auto second_vote_id = canonical::content_id(canonical::Type::vote, second_bytes);
+  const auto directory = case_directory("formal-vote-crash-recovery");
+  runtime::VoteReceipt first_receipt;
   {
-    runtime::Runtime crashing({crash_directory, core_golden(5U), 8U});
+    runtime::Runtime durable(runtime_config(directory));
+    first_receipt = durable.record_vote(first_bytes);
+    expect(
+        !first_receipt.replay && first_receipt.journal_sequence == 1U,
+        "first closed-formal vote was not durably admitted");
     expect_runtime_error(runtime::ErrorCode::simulated_crash, [&] {
-      static_cast<void>(crashing.record_vote(
-          vote_bytes, runtime::CrashPoint::after_durability_before_commit));
+      static_cast<void>(durable.record_vote(
+          second_bytes, runtime::CrashPoint::after_durability_before_commit));
     });
+    expect(
+        std::filesystem::file_size(directory / "runtime.wal") > 0U,
+        "closed-formal votes were exposed without a durable WAL");
   }
   {
-    runtime::Runtime recovered({crash_directory, core_golden(5U), 8U});
-    expect(recovered.recovered_vote_count() == 1U,
-           "durable committee vote was lost after proposer crash");
+    runtime::Runtime recovered(runtime_config(directory));
+    expect(
+        recovered.journal_sequence() == 2U && recovered.recovered_vote_count() == 2U,
+        "two closed-formal votes were not recovered after the durability cut");
+    const auto first_replay = recovered.record_vote(first_bytes);
+    const auto second_replay = recovered.record_vote(second_bytes);
+    expect(
+        first_replay.replay && first_replay.vote_id == first_receipt.vote_id,
+        "first recovered vote replay changed identity");
+    expect(
+        second_replay.replay && second_replay.vote_id == second_vote_id,
+        "second recovered vote replay changed identity");
   }
-  return {first.vote_id, regional_first.vote_id, 2U};
+  return {first_receipt.vote_id, second_vote_id, 2U};
 }
 
 void test_artifact_repair_and_quorum_loss(
@@ -716,8 +767,8 @@ void export_refinement_traces(
   write_trace(
       directory / "legal-crash-recovery.json",
       "{\"abstraction_version\":\"1.0.0\",\"events\":[{\"action\":\"PERSIST_VOTE\",\"vote_id\":" +
-          quote(recovery.regional_vote_id) +
-          "},{\"action\":\"PERSIST_VOTE\",\"vote_id\":" + quote(recovery.global_vote_id) +
+          quote(recovery.first_vote_id) +
+          "},{\"action\":\"PERSIST_VOTE\",\"vote_id\":" + quote(recovery.second_vote_id) +
           "},{\"action\":\"CRASH\"},{\"action\":\"RESTART\"},{\"action\":\"RECOVER_JOURNAL\",\"vote_count\":" +
           std::to_string(recovery.recovered_vote_count) +
           "},{\"action\":\"REPLAY_VOTE\",\"same_identity\":true}],\"formal_semantics_id\":" +
