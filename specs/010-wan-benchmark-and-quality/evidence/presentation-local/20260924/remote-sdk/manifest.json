@@ -1,27 +1,27 @@
 {
+  "schema_version": "1.0.0",
+  "mode": "SIMULATED_LOCAL",
+  "qualifying": false,
   "files": [
     {
-      "sha256": "c224849e2234f058fe6d5e4c37a29fec5886ae514e97c3aded068a5de6aaed68",
-      "path": "checks.json"
+      "path": "checks.json",
+      "sha256": "bfcbaee842c7e7d872a30688368b1b55194b312b421755743e8bdc4a90873610"
     },
     {
-      "sha256": "3ca22e4ee96221ed95069abc90e8e2305d5313687c388ae006c373e13b943dc6",
-      "path": "installed-admin-ui.json"
+      "path": "installed-admin-ui.json",
+      "sha256": "6263ea9c10cd7fb22f7f86f0a78a699a56b7e4e3bb13ced4d2bca2f9c83276e7"
     },
     {
-      "sha256": "91dbe2ff8ddee7b02c350b1d647c9e0348ae3377b31d7f1947f7d01931e623c1",
-      "path": "README.md"
+      "path": "README.md",
+      "sha256": "91dbe2ff8ddee7b02c350b1d647c9e0348ae3377b31d7f1947f7d01931e623c1"
     },
     {
-      "sha256": "ec715072b34d3add3e3cd7c191341e491e70866c40663752a91f7a5b6bf0230d",
-      "path": "receipt.json"
+      "path": "receipt.json",
+      "sha256": "ec715072b34d3add3e3cd7c191341e491e70866c40663752a91f7a5b6bf0230d"
     },
     {
-      "sha256": "afc5a6a0b76ef522cb581f940ccb534f12fe455dc138f7d0556acce7394f7be7",
-      "path": "remote-acceptance.json"
+      "path": "remote-acceptance.json",
+      "sha256": "9f626fd8e9ef034bd5b6492d3a8d2d37b6793bf7e350147b6fa18f587e5c7485"
     }
-  ],
-  "qualifying": false,
-  "schema_version": "1.0.0",
-  "mode": "SIMULATED_LOCAL"
+  ]
 }
