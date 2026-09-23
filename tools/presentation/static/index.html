@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DeltaReduce · Локальная лаборатория</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/"><span class="brand-mark">Δ</span><span>DeltaReduce<small>LOCAL LAB</small></span></a>
+  <div class="nav-label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+  <nav aria-label="Основная навигация">
+    <button class="nav active" data-page="overview"><span>◈</span> Обзор</button>
+    <button class="nav" data-page="runs"><span>↗</span> История запусков <b id="run-count">0</b></button>
+    <button class="nav" data-page="readiness"><span>▤</span> Готовность Feature010</button>
+  </nav>
+  <div class="sidebar-bottom"><span class="dot"></span> Локальный стенд<small>Один компьютер · SIMULATED_LOCAL</small></div>
+</aside>
+<main>
+  <header><div class="breadcrumb">Workspace <span>/</span> <b id="page-title">Обзор</b></div><span class="mode"><i></i> SIMULATED_LOCAL</span><span class="avatar">Δ</span></header>
+  <section id="page-overview" class="page">
+    <div class="page-heading"><div><div class="eyebrow">ОТ КОМАНДЫ ДО ПРОВЕРЯЕМОГО РЕЗУЛЬТАТА</div><h1>Система в действии<span>.</span></h1><p>Запускайте задания, проверяйте отказоустойчивость и сохраняйте результаты.</p></div><a id="advanced" class="button secondary" href="http://127.0.0.1:8865/" target="_blank" rel="noopener">Расширенный интерфейс ↗</a></div>
+    <div id="notice" class="notice" role="alert" hidden></div>
+    <div class="metrics">
+      <article class="metric"><div class="metric-label">Controller <span>◉</span></div><strong id="controller-state">Проверяем…</strong><small id="controller-detail">Проверка HTTP readiness</small></article>
+      <article class="metric"><div class="metric-label">Выполнено запусков <span>↗</span></div><strong id="completed-count">0</strong><small>Из последних 30 локальных запусков</small></article>
+      <article class="metric"><div class="metric-label">Физическая GPU <span>▦</span></div><strong id="gpu-memory">Проверяем…</strong><small id="gpu-name">Чтение nvidia-smi</small></article>
+      <article class="metric"><div class="metric-label">Среда <span>⌘</span></div><strong>Local + Docker</strong><small>Тестовые подписи · локальная сеть</small></article>
+    </div>
+    <div class="workspace-grid">
+      <section class="panel experiment"><div class="panel-kicker">01 / LIVE EXECUTION</div><h2>Запустить обучение</h2><p class="muted">Реальное задание через HTTP Controller и отдельный Python Worker.</p>
+        <div class="workload"><span class="workload-icon">⌘</span><div><b>10-Gene Phenotype</b><small>Классификатор по ближайшему центроиду</small></div><span class="chip">CPU</span></div>
+        <dl class="details"><div><dt>Датасет</dt><dd>Синтетический 10-gene cohort</dd></div><div><dt>Исполнение</dt><dd>Локальное обучение · PLUGIN_BOUNDARY</dd></div><div><dt>Результат</dt><dd>Проверяемый execution receipt</dd></div></dl>
+        <div class="flow"><span>Browser</span><i>→</i><span>Controller</span><i>→</i><span>Worker</span><i>→</i><span>Receipt</span></div>
+        <button id="train" class="button primary wide" disabled><span>▶</span> Запустить обучение</button>
+        <div class="fine-print">Измеренный результат локального плагина; scientific Gate B этим запуском не закрывается.</div>
+      </section>
+      <section class="panel experiment"><div class="panel-kicker teal">02 / FAILURE SIMULATION</div><h2>Проверить кворум</h2><p class="muted">Четыре Docker-процесса. Реальные тестовые подписи. Управляемые отказы.</p>
+        <div class="nodes" aria-label="Четыре контроллера"><div><span>◈</span><b>C1</b><small>controller</small></div><div><span>◈</span><b>C2</b><small>controller</small></div><div><span>◈</span><b>C3</b><small>controller</small></div><div><span>◈</span><b>C4</b><small>controller</small></div></div>
+        <div class="scenario"><span>4/4 online</span><i>→</i><span>3/4 quorum</span><i>→</i><span>2/4 blocked</span><i>→</i><span>restart</span></div>
+        <button id="simulate" class="button secondary wide" disabled><span>↻</span> Запустить сценарии в Docker</button>
+        <div class="fine-print">Один хост и один администратор. Подписи не независимы; Docker bridge не является real WAN.</div>
+      </section>
+    </div>
+    <section class="panel activity"><div class="panel-title"><div><h2>Журнал выполнения</h2><p class="muted">События реального процесса, без сгенерированных метрик.</p></div><span id="live-label" class="chip">ОЖИДАНИЕ</span></div><div id="activity-log" class="log"><div class="empty"><span>↗</span><b>Готово к первому запуску</b><p>Выберите обучение или Docker-сценарий выше.</p></div></div><div id="latest-result" hidden></div></section>
+    <footer>DeltaReduce / Presentation workspace <span>Локальный режим · Feature010 GO не выдан</span></footer>
+  </section>
+  <section id="page-runs" class="page" hidden><div class="page-heading"><div class="eyebrow">EXECUTION HISTORY</div><h1>История запусков<span>.</span></h1><p>Результаты сохранены на диске и доступны после перезапуска интерфейса.</p></div><div id="history" class="history"></div></section>
+  <section id="page-readiness" class="page" hidden><div class="page-heading"><div class="eyebrow">EVIDENCE & QUALIFICATION</div><h1>Готовность Feature010<span>.</span></h1><p>Работающее локальное приложение и статус полной квалификации.</p></div><section class="panel"><div class="readiness-intro"><span class="status warning">В РАЗРАБОТКЕ</span><h2>BenchmarkResultQC(GO) ещё не получен</h2><p class="muted">Демонстрация запускает существующий локальный Controller/Worker и отдельные Docker-сценарии. Полная цепочка Java/Netty → native C++/WAL → checkpoint зависит от нового Formal GO.</p></div><div id="gates"></div><details><summary>Проверенный отчёт formal-кандидата</summary><pre id="formal-detail"></pre></details></section></section>
+</main><script type="module" src="/app.js"></script>
+</body></html>
