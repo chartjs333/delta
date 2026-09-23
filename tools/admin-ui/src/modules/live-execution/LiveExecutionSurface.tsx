@@ -1,3 +1,4 @@
+import { message, t } from "../../i18n";
 import { useEffect, useMemo, useState } from "react";
 
 import { InertText } from "../../components/InertText";
@@ -54,7 +55,10 @@ export function LiveExecutionSurface({
         setStatuses(nextStatuses);
         setSelectedStatusId((current) => {
           if (preferredStatusId) return preferredStatusId;
-          if (current && nextStatuses.some((item) => item.statusId === current)) {
+          if (
+            current &&
+            nextStatuses.some((item) => item.statusId === current)
+          ) {
             return current;
           }
           return nextStatuses[0]?.statusId;
@@ -152,10 +156,13 @@ export function LiveExecutionSurface({
     >
       <header className="live-execution-header">
         <div>
-          <p className="eyebrow">Controlled execution boundary</p>
-          <h1 id="live-execution-heading">Live execution</h1>
+          <p className="eyebrow">{t("Controlled execution boundary")}</p>
+          <h1 id="live-execution-heading">{t("Live execution")}</h1>
         </div>
-        <div className="live-mode-panel" aria-label="Live execution source">
+        <div
+          className="live-mode-panel"
+          aria-label={t("Live execution source")}
+        >
           <span
             className={
               source?.mode === "HTTP_LIVE"
@@ -165,33 +172,37 @@ export function LiveExecutionSurface({
           >
             {source?.mode === "HTTP_LIVE" ? "HTTP LIVE" : "MOCK ONLY"}
           </span>
-          <span>{source?.label ?? "Loading source"}</span>
+          <span>{t(source?.label ?? "Loading source")}</span>
           <code>{source?.contractFreezeSha.slice(0, 12) ?? "pending"}</code>
         </div>
       </header>
 
-      <nav className="live-tab-nav" aria-label="Live execution views">
+      <nav className="live-tab-nav" aria-label={t("Live execution views")}>
         <button
           aria-current={activeTab === "STATUSES" ? "page" : undefined}
-          className={activeTab === "STATUSES" ? "tab-button active" : "tab-button"}
+          className={
+            activeTab === "STATUSES" ? "tab-button active" : "tab-button"
+          }
           type="button"
           onClick={() => setActiveTab("STATUSES")}
         >
-          Product states &amp; read model
+          {t("Product states & read model")}
         </button>
         <button
           aria-current={activeTab === "BUILDER" ? "page" : undefined}
-          className={activeTab === "BUILDER" ? "tab-button active" : "tab-button"}
+          className={
+            activeTab === "BUILDER" ? "tab-button active" : "tab-button"
+          }
           type="button"
           onClick={() => setActiveTab("BUILDER")}
         >
-          ExecutionIntent builder
+          {t("ExecutionIntent builder")}
         </button>
       </nav>
 
       {notice ? (
         <div className="capability-state state-available" role="status">
-          {notice}
+          {message(notice)}
         </div>
       ) : null}
 
@@ -212,8 +223,8 @@ export function LiveExecutionSurface({
           >
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Read model</p>
-                <h2 id="live-status-list-heading">Product states</h2>
+                <p className="eyebrow">{t("Read model")}</p>
+                <h2 id="live-status-list-heading">{t("Product states")}</h2>
               </div>
             </div>
             <div className="live-status-buttons" role="list">
@@ -232,7 +243,7 @@ export function LiveExecutionSurface({
                     setReceipt(undefined);
                   }}
                 >
-                  <span>{STATE_LABELS[status.state]}</span>
+                  <span>{t(STATE_LABELS[status.state])}</span>
                   <small>{status.operation}</small>
                 </button>
               ))}
@@ -247,9 +258,9 @@ export function LiveExecutionSurface({
               <>
                 <div className="section-heading">
                   <div>
-                    <p className="eyebrow">Selected state</p>
+                    <p className="eyebrow">{t("Selected state")}</p>
                     <h2 id="live-status-detail-heading">
-                      {STATE_LABELS[selectedStatus.state]}
+                      {t(STATE_LABELS[selectedStatus.state])}
                     </h2>
                   </div>
                   <span className={statusPillClass(selectedStatus.state)}>
@@ -258,54 +269,60 @@ export function LiveExecutionSurface({
                 </div>
 
                 <p className="live-status-summary">
-                  <InertText value={selectedStatus.summary} />
+                  <InertText value={message(selectedStatus.summary)} />
                 </p>
 
                 <dl className="live-status-grid">
                   <div>
-                    <dt>Status ID</dt>
+                    <dt>{t("Status ID")}</dt>
                     <dd>
                       <code>{selectedStatus.statusId}</code>
                     </dd>
                   </div>
                   <div>
-                    <dt>Operation</dt>
+                    <dt>{t("Operation")}</dt>
                     <dd>
                       <code>{selectedStatus.operation}</code>
                     </dd>
                   </div>
                   <div>
-                    <dt>Model plugin</dt>
+                    <dt>{t("Model plugin")}</dt>
                     <dd>
                       {selectedStatus.workload ? (
                         <code>{selectedStatus.workload.modelPluginId}</code>
                       ) : (
-                        <span className="muted-value">Not in status response</span>
+                        <span className="muted-value">
+                          {t("Not in status response")}
+                        </span>
                       )}
                     </dd>
                   </div>
                   <div>
-                    <dt>Dataset</dt>
+                    <dt>{t("Dataset")}</dt>
                     <dd>
                       {selectedStatus.workload ? (
                         <code>{selectedStatus.workload.datasetId}</code>
                       ) : (
-                        <span className="muted-value">Not in status response</span>
+                        <span className="muted-value">
+                          {t("Not in status response")}
+                        </span>
                       )}
                     </dd>
                   </div>
                   <div>
-                    <dt>Scope</dt>
+                    <dt>{t("Scope")}</dt>
                     <dd>
                       {selectedStatus.workload ? (
                         <code>{selectedStatus.workload.requestedScope}</code>
                       ) : (
-                        <span className="muted-value">Not in status response</span>
+                        <span className="muted-value">
+                          {t("Not in status response")}
+                        </span>
                       )}
                     </dd>
                   </div>
                   <div>
-                    <dt>Trust badge</dt>
+                    <dt>{t("Trust badge")}</dt>
                     <dd>
                       <code>{selectedStatus.trustBadge}</code>
                     </dd>
@@ -313,13 +330,16 @@ export function LiveExecutionSurface({
                 </dl>
 
                 {source?.mode === "HTTP_LIVE" ? (
-                  <div className="builder-actions" aria-label="Execution actions">
+                  <div
+                    className="builder-actions"
+                    aria-label={t("Execution actions")}
+                  >
                     <button
                       className="action-button secondary"
                       type="button"
                       onClick={() => void refreshSelectedStatus()}
                     >
-                      Refresh status
+                      {t("Refresh status")}
                     </button>
                     {activePort.cancelExecution &&
                     !isTerminalState(selectedStatus) ? (
@@ -328,7 +348,7 @@ export function LiveExecutionSurface({
                         type="button"
                         onClick={() => void cancelSelectedExecution()}
                       >
-                        Cancel execution
+                        {t("Cancel execution")}
                       </button>
                     ) : null}
                     {activePort.getReceipt &&
@@ -339,7 +359,7 @@ export function LiveExecutionSurface({
                         type="button"
                         onClick={() => void loadSelectedReceipt()}
                       >
-                        Load terminal receipt
+                        {t("Load terminal receipt")}
                       </button>
                     ) : null}
                   </div>
@@ -349,26 +369,26 @@ export function LiveExecutionSurface({
                   className="live-lineage-panel"
                   aria-labelledby="live-lineage-heading"
                 >
-                  <h3 id="live-lineage-heading">Lineage view</h3>
+                  <h3 id="live-lineage-heading">{t("Lineage view")}</h3>
                   <dl className="live-lineage-grid">
                     <LineageRow
-                      label="Intent ID"
+                      label={t("Intent ID")}
                       value={selectedStatus.lineage.intentId}
                     />
                     <LineageRow
-                      label="Intent digest"
+                      label={t("Intent digest")}
                       value={selectedStatus.lineage.intentDigest}
                     />
                     <LineageRow
-                      label="Admission ID"
+                      label={t("Admission ID")}
                       value={selectedStatus.lineage.admissionId}
                     />
                     <LineageRow
-                      label="Admission digest"
+                      label={t("Admission digest")}
                       value={selectedStatus.lineage.admissionDigest}
                     />
                     <LineageRow
-                      label="Execution ID"
+                      label={t("Execution ID")}
                       value={selectedStatus.lineage.executionId}
                     />
                   </dl>
@@ -380,30 +400,31 @@ export function LiveExecutionSurface({
                     aria-labelledby="live-receipt-heading"
                   >
                     <div className="section-heading">
-                      <h3 id="live-receipt-heading">Terminal receipt</h3>
+                      <h3 id="live-receipt-heading">{t("Terminal receipt")}</h3>
                       <span className="status-pill pill-smoke">
-                        UNATTESTED PLUGIN RECORD
+                        {t("UNATTESTED PLUGIN RECORD")}
                       </span>
                     </div>
                     <p>
-                      Controller-returned receipt with structural and lineage
-                      checks. It is not a consensus certificate.
+                      {t(
+                        "Controller-returned receipt with structural and lineage checks. It is not a consensus certificate.",
+                      )}
                     </p>
                     <dl className="live-lineage-grid">
                       <LineageRow
-                        label="Intent ID"
+                        label={t("Intent ID")}
                         value={receipt.provenance.intent_id}
                       />
                       <LineageRow
-                        label="Admission ID"
+                        label={t("Admission ID")}
                         value={receipt.provenance.admission_id}
                       />
                       <LineageRow
-                        label="Execution ID"
+                        label={t("Execution ID")}
                         value={receipt.provenance.execution_id}
                       />
                       <LineageRow
-                        label="Producer commit"
+                        label={t("Producer commit")}
                         value={receipt.provenance.producer_commit}
                       />
                     </dl>
@@ -412,9 +433,11 @@ export function LiveExecutionSurface({
               </>
             ) : (
               <div className="capability-state state-unavailable" role="status">
-                {source?.mode === "HTTP_LIVE"
-                  ? "No live execution has been submitted in this browser session."
-                  : "No mock execution status selected."}
+                {t(
+                  source?.mode === "HTTP_LIVE"
+                    ? "No live execution has been submitted in this browser session."
+                    : "No mock execution status selected.",
+                )}
               </div>
             )}
           </section>
@@ -422,12 +445,14 @@ export function LiveExecutionSurface({
       )}
 
       <footer className="live-boundary-note">
-        <span>Transport profile</span>
+        <span>{t("Transport profile")}</span>
         <strong>{source?.transportProfile ?? "NONE_PHASE_4"}</strong>
         <span>
-          {source?.mode === "HTTP_LIVE"
-            ? "Same-origin controller status is unattested and never a consensus claim."
-            : "Offline CSP connect-src 'none' remains authoritative."}
+          {t(
+            source?.mode === "HTTP_LIVE"
+              ? "Same-origin controller status is unattested and never a consensus claim."
+              : "Offline CSP connect-src 'none' remains authoritative.",
+          )}
         </span>
       </footer>
     </section>
@@ -443,9 +468,13 @@ function LineageRow({
 }) {
   return (
     <div>
-      <dt>{label}</dt>
+      <dt>{t(label)}</dt>
       <dd>
-        {value ? <code>{value}</code> : <span className="muted-value">Absent</span>}
+        {value ? (
+          <code>{value}</code>
+        ) : (
+          <span className="muted-value">{t("Absent")}</span>
+        )}
       </dd>
     </div>
   );

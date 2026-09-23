@@ -1,3 +1,4 @@
+import { message, t } from "../../i18n";
 import type { StructuralValidationResult } from "../../core/contracts";
 import type { ResultQuery } from "../../results/result-loader";
 import type { ControllerFormState } from "./ControllerRegistryForm";
@@ -18,16 +19,18 @@ export function structuralSummary(
   records: readonly PairwiseReviewDraft[],
   validation?: StructuralValidationResult,
 ): StructuralSummary {
-  const ids = controllers.map((controller) => controller.controllerId?.trim() ?? "");
+  const ids = controllers.map(
+    (controller) => controller.controllerId?.trim() ?? "",
+  );
   const duplicateIds = new Set(
-    ids.filter(
-      (id, index) => id !== "" && ids.indexOf(id) !== index,
-    ),
+    ids.filter((id, index) => id !== "" && ids.indexOf(id) !== index),
   );
   const controllerAttention = ids.filter(
     (id) => id === "" || duplicateIds.has(id),
   ).length;
-  const currentRecords = records.filter((record) => record.state !== "ORPHANED");
+  const currentRecords = records.filter(
+    (record) => record.state !== "ORPHANED",
+  );
   const filledPairCount = currentRecords.filter(
     (record) => record.state === "ACTIVE" && isPairwiseRecordFilled(record),
   ).length;
@@ -41,8 +44,7 @@ export function structuralSummary(
     controllerCount: controllers.length,
     filledPairCount,
     currentPairCount: currentRecords.length,
-    attentionCount:
-      controllerAttention + recordAttention + validationAttention,
+    attentionCount: controllerAttention + recordAttention + validationAttention,
   };
 }
 
@@ -80,36 +82,40 @@ export function ReadinessSummary({
     <section className="readiness-summary" aria-labelledby="summary-heading">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Structural completeness only</p>
-          <h2 id="summary-heading">Worksheet summary</h2>
+          <p className="eyebrow">{t("Structural completeness only")}</p>
+          <h2 id="summary-heading">{t("Worksheet summary")}</h2>
         </div>
       </div>
       <div className="summary-grid">
         <div>
           <strong>{summary.controllerCount}</strong>
-          <span>controllers in draft</span>
+          <span>{t("controllers in draft")}</span>
         </div>
         <div>
           <strong>
-            {summary.filledPairCount} of {summary.currentPairCount}
+            {summary.filledPairCount}
+            {t(" of ")}
+            {summary.currentPairCount}
           </strong>
-          <span>pairwise records filled</span>
+          <span>{t("pairwise records filled")}</span>
         </div>
         <div>
           <strong>{summary.attentionCount}</strong>
-          <span>attention items</span>
+          <span>{t("attention items")}</span>
         </div>
         <div>
-          <strong>{validationText}</strong>
-          <span>JSON Schema check</span>
+          <strong>{message(validationText)}</strong>
+          <span>{t("JSON Schema check")}</span>
         </div>
         <div>
-          <strong>{sourcedResultText(resultQuery)}</strong>
-          <span>external authority result</span>
+          <strong>{message(sourcedResultText(resultQuery))}</strong>
+          <span>{t("external authority result")}</span>
         </div>
       </div>
       <p className="summary-boundary">
-        Counts describe this local worksheet. No authority outcome is derived here.
+        {t(
+          "Counts describe this local worksheet. No authority outcome is derived here.",
+        )}
       </p>
     </section>
   );

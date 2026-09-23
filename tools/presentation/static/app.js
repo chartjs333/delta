@@ -122,7 +122,10 @@ function renderState() {
   $('controller-state').textContent = t(connectionFailed ? 'disconnected' : ready ? 'online' : 'unavailable');
   $('controller-state').className = ready && !connectionFailed ? 'good' : '';
   $('controller-detail').textContent = ready ? `HTTP ready · ${(current.controller.build_id || '').slice(0, 8)}` : t('startServer');
-  $('advanced').href = current.controller_url;
+  const adminUrl = new URL(current.controller_url);
+  adminUrl.searchParams.set('lang', language);
+  adminUrl.hash = '/live-execution';
+  $('advanced').href = adminUrl.href;
   const gpu = (current.gpu.observation || '').split(',').map((value) => value.trim());
   $('gpu-memory').textContent = current.gpu.state === 'VISIBLE' ? gpu[2] : t(current.gpu.state === 'CHECKING' ? 'checking' : 'unavailable');
   $('gpu-name').textContent = current.gpu.state === 'VISIBLE' ? gpu[0].replace('NVIDIA GeForce ', '') : t('gpuScope');

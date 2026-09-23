@@ -1,3 +1,4 @@
+import { message, t } from "../../i18n";
 import { useEffect, useMemo, useState } from "react";
 
 import type { DocumentEnvelope, JsonValue } from "../../core/contracts";
@@ -109,7 +110,10 @@ export function autofillSafeControllerDraft(
     }
   };
 
-  fill("controller_id", stableDraftIdentifier("controller", draftControllerKey));
+  fill(
+    "controller_id",
+    stableDraftIdentifier("controller", draftControllerKey),
+  );
   fill("signer_id", stableDraftIdentifier("signer", draftControllerKey));
   fill("status", "DRAFT");
 
@@ -176,25 +180,29 @@ export function ControllerRegistryForm({
   }
 
   return (
-    <section className="controller-form" aria-labelledby="controller-form-heading">
+    <section
+      className="controller-form"
+      aria-labelledby="controller-form-heading"
+    >
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Guided local draft</p>
-          <h2 id="controller-form-heading">Controller registry</h2>
+          <p className="eyebrow">{t("Guided local draft")}</p>
+          <h2 id="controller-form-heading">{t("Controller registry")}</h2>
         </div>
-        <span aria-label="Controller draft count" className="count-badge">
+        <span aria-label={t("Controller draft count")} className="count-badge">
           {controllers.length}
         </span>
       </div>
       <p className="field-help">
-        Edit known fields here. Unknown fields remain in the document and are
-        preserved when you download a new file.
+        {t(
+          "Edit known fields here. Unknown fields remain in the document and are preserved when you download a new file.",
+        )}
       </p>
 
       <label className="form-field">
-        <span>Document version</span>
+        <span>{t("Document version")}</span>
         <input
-          aria-label="Document version"
+          aria-label={t("Document version")}
           value={
             typeof root?.document_version === "string"
               ? root.document_version
@@ -215,13 +223,19 @@ export function ControllerRegistryForm({
               className="controller-form-card"
               key={draftControllerKey ?? arrayIndex}
             >
-              <legend>Controller {arrayIndex + 1}</legend>
+              <legend>
+                {t("Controller ")}
+                {arrayIndex + 1}
+              </legend>
               <div className="controller-fields">
                 {controllerFields.map(([field, label]) => (
                   <label className="form-field" key={field}>
-                    <span>{label}</span>
+                    <span>{t(label)}</span>
                     <input
-                      aria-label={`Controller ${arrayIndex + 1} ${label}`}
+                      aria-label={t("Controller {number} {field}", {
+                        number: arrayIndex + 1,
+                        field: t(label),
+                      })}
                       value={inputValue(controller[field])}
                       onChange={(event) =>
                         patch(
@@ -260,16 +274,21 @@ export function ControllerRegistryForm({
                     }
                   }}
                 >
-                  Autofill safe fields for controller {arrayIndex + 1}
+                  {t("Autofill safe fields for controller ")}
+                  {arrayIndex + 1}
                 </button>
                 <p className="field-help">
-                  Fills only blank draft Controller ID, Signer ID, and Status
-                  fields. It does not infer identity, custody, independence,
-                  governance, or protocol data.
+                  {t(
+                    "Fills only blank draft Controller ID, Signer ID, and Status fields. It does not infer identity, custody, independence, governance, or protocol data.",
+                  )}
                 </p>
                 {draftControllerKey && autofillNotices[draftControllerKey] ? (
-                  <p className="autofill-notice" role="status" aria-live="polite">
-                    {autofillNotices[draftControllerKey]}
+                  <p
+                    className="autofill-notice"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {message(autofillNotices[draftControllerKey])}
                   </p>
                 ) : null}
               </div>
@@ -283,7 +302,8 @@ export function ControllerRegistryForm({
                   )
                 }
               >
-                Remove controller {arrayIndex + 1}
+                {t("Remove controller ")}
+                {arrayIndex + 1}
               </button>
             </fieldset>
           );
@@ -291,33 +311,41 @@ export function ControllerRegistryForm({
       </div>
 
       {pageCount > 1 ? (
-        <div className="pagination" aria-label="Controller form pages">
+        <div className="pagination" aria-label={t("Controller form pages")}>
           <button
             disabled={page === 0}
             type="button"
             onClick={() => setPage((current) => current - 1)}
           >
-            Previous controller page
+            {t("Previous controller page")}
           </button>
-          <span aria-live="polite">Page {page + 1} of {pageCount}</span>
+          <span aria-live="polite">
+            {t("Page ")}
+            {page + 1}
+            {t(" of ")}
+            {pageCount}
+          </span>
           <button
             disabled={page >= pageCount - 1}
             type="button"
             onClick={() => setPage((current) => current + 1)}
           >
-            Next controller page
+            {t("Next controller page")}
           </button>
         </div>
       ) : null}
 
       {!controllersFieldAvailable ? (
         <div className="attention-box" role="alert">
-          The controllers field is not an array. Run structural validation for
-          technical details before using the guided controller controls.
+          {t(
+            "The controllers field is not an array. Run structural validation for technical details before using the guided controller controls.",
+          )}
         </div>
       ) : controllers.length === 0 ? (
         <div className="empty-state" role="status">
-          No controllers yet. Add the first controller to begin the register.
+          {t(
+            "No controllers yet. Add the first controller to begin the register.",
+          )}
         </div>
       ) : null}
 
@@ -334,7 +362,7 @@ export function ControllerRegistryForm({
           ]);
         }}
       >
-        Add controller
+        {t("Add controller")}
       </button>
     </section>
   );

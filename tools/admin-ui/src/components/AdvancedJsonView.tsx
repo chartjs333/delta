@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type { DocumentEnvelope } from "../core/contracts";
 
 export function AdvancedJsonView({
@@ -6,15 +7,16 @@ export function AdvancedJsonView({
   readonly draft: DocumentEnvelope;
 }) {
   return (
-    <section className="advanced-json" aria-label="Advanced JSON view">
+    <section className="advanced-json" aria-label={t("Advanced JSON view")}>
       <details>
-        <summary>Advanced JSON (read-only)</summary>
+        <summary>{t("Advanced JSON (read-only)")}</summary>
         <p className="field-help">
-          This is a read-only projection of the same local draft used by the form,
-          structural validation, and explicit export.
+          {t(
+            "This is a read-only projection of the same local draft used by the form, structural validation, and explicit export.",
+          )}
         </p>
         <textarea
-          aria-label="Read-only JSON document"
+          aria-label={t("Read-only JSON document")}
           readOnly
           rows={18}
           spellCheck={false}

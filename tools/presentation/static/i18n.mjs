@@ -13,7 +13,7 @@ const strings = {
   overviewEyebrow: ['FROM COMMAND TO VERIFIABLE RESULT', 'ОТ КОМАНДЫ ДО ПРОВЕРЯЕМОГО РЕЗУЛЬТАТА'],
   overviewHeading: ['The system in action', 'Система в действии'],
   overviewDescription: ['Run jobs, test resilience and save the results.', 'Запускайте задания, проверяйте отказоустойчивость и сохраняйте результаты.'],
-  advanced: ['Advanced interface ↗', 'Расширенный интерфейс ↗'],
+  advanced: ['Open Admin UI ↗', 'Открыть Admin UI ↗'],
   completedRuns: ['Completed runs', 'Выполнено запусков'],
   lastThirty: ['Of the last 30 local runs', 'Из последних 30 локальных запусков'],
   physicalGpu: ['Physical GPU', 'Физическая GPU'],

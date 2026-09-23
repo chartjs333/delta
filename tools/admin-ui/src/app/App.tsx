@@ -1,3 +1,11 @@
+import {
+  isLanguage,
+  languageLink,
+  message,
+  setLanguage,
+  t,
+  useLanguage,
+} from "../i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SchemaSelector } from "../components/SchemaSelector";
@@ -27,7 +35,10 @@ import {
   syncPairwiseReviewDrafts,
   type PairwiseReviewDraft,
 } from "../modules/controllers/pairwise-review-draft";
-import { querySourcedResults, type ResultQuery } from "../results/result-loader";
+import {
+  querySourcedResults,
+  type ResultQuery,
+} from "../results/result-loader";
 import { SourcedResultsPanel } from "../results/SourcedResultsPanel";
 import { extensionRegistry } from "./registry";
 
@@ -47,6 +58,10 @@ export interface AppProps {
 }
 
 export function App({ adapter = defaultAdapter }: AppProps) {
+  const language = useLanguage();
+  const presentationAddress = import.meta.env.VITE_PRESENTATION_URL as
+    | string
+    | undefined;
   const liveExecutionRuntime = useLiveExecutionRuntime();
   const [activeRoute, setActiveRoute] = useState(routeFromLocation);
   const [navigationOpen, setNavigationOpen] = useState(false);
@@ -208,11 +223,44 @@ export function App({ adapter = defaultAdapter }: AppProps) {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#/controllers" aria-label="Delta Admin UI home">
-          <span className="brand-mark" aria-hidden="true">Δ</span>
-          <span>Delta <strong>Admin</strong></span>
+        <a
+          className="brand"
+          href="#/controllers"
+          aria-label={t("Delta Admin UI home")}
+        >
+          <span className="brand-mark" aria-hidden="true">
+            Δ
+          </span>
+          <span>
+            {t("Delta ")}
+            <strong>{t("Admin")}</strong>
+          </span>
         </a>
         <div className="topbar-actions">
+          {presentationAddress ? (
+            <a
+              className="presentation-link"
+              href={languageLink(presentationAddress, language)}
+            >
+              {t("Presentation")} ↗
+            </a>
+          ) : null}
+          <select
+            className="language-picker"
+            aria-label={t("Interface language")}
+            value={language}
+            onChange={(event) => {
+              if (isLanguage(event.currentTarget.value))
+                setLanguage(event.currentTarget.value);
+            }}
+          >
+            <option value="en" lang="en">
+              English
+            </option>
+            <option value="ru" lang="ru">
+              Русский
+            </option>
+          </select>
           <button
             aria-controls="primary-sidebar"
             aria-expanded={navigationOpen}
@@ -221,12 +269,14 @@ export function App({ adapter = defaultAdapter }: AppProps) {
             onClick={() => setNavigationOpen((open) => !open)}
           >
             <span aria-hidden="true">☰</span>
-            <span>Menu</span>
+            <span>{t("Menu")}</span>
           </button>
           <div className="boundary-pill">
-            {liveExecutionRuntime.mode === "HTTP_LIVE"
-              ? "HTTP live · unattested"
-              : "Browser-local · offline"}
+            {t(
+              liveExecutionRuntime.mode === "HTTP_LIVE"
+                ? "HTTP live · unattested"
+                : "Browser-local · offline",
+            )}
           </div>
         </div>
       </header>
@@ -236,8 +286,8 @@ export function App({ adapter = defaultAdapter }: AppProps) {
           className={`sidebar${navigationOpen ? " sidebar-open" : ""}`}
           id="primary-sidebar"
         >
-          <nav aria-label="Primary navigation">
-            <p className="nav-label">Workspace</p>
+          <nav aria-label={t("Primary navigation")}>
+            <p className="nav-label">{t("Workspace")}</p>
             {extensionRegistry.navigation.map((item) => (
               <a
                 aria-current={activeRoute === item.route ? "page" : undefined}
@@ -248,120 +298,148 @@ export function App({ adapter = defaultAdapter }: AppProps) {
                   setNavigationOpen(false);
                 }}
               >
-                <span aria-hidden="true">◫</span> {item.label}
+                <span aria-hidden="true">◫</span> {t(item.label)}
               </a>
             ))}
           </nav>
-          {source ? <SourceSummary source={source} /> : <p role="status">Loading source…</p>}
+          {source ? (
+            <SourceSummary source={source} />
+          ) : (
+            <p role="status">{t("Loading source…")}</p>
+          )}
         </aside>
 
         <main id="workspace">
           {activeRoute === DEFAULT_ROUTE ? (
             <>
-          <section className="hero">
-            <div>
-              <p className="eyebrow">Local document workspace</p>
-              <h1>Inspect structure.<br />Keep authority outside the UI.</h1>
-              <p>
-                Open, edit, validate, and export JSON locally. Nothing here signs,
-                authorizes, computes quorum, or changes Delta state.
-              </p>
-            </div>
-            <div className="hero-actions">
-              <button className="primary" type="button" onClick={() => void openDocument()}>
-                Open JSON
-              </button>
-              <button type="button" onClick={createDocument}>New document</button>
-            </div>
-          </section>
-
-          {notice ? <div className="notice" role="status">{notice}</div> : null}
-
-          {!document ? (
-            <section className="welcome-card">
-              <p className="eyebrow">No document selected</p>
-              <h2>Start with a local file or a clean register.</h2>
-              <p>
-                Files remain in this browser session. The original is never
-                overwritten, and no URL is fetched automatically.
-              </p>
-            </section>
-          ) : (
-            <>
-              <section className="document-bar" aria-label="Open document">
+              <section className="hero">
                 <div>
-                  <span>Local draft</span>
-                  <strong>{document.origin.displayName}</strong>
+                  <p className="eyebrow">{t("Local document workspace")}</p>
+                  <h1>
+                    {t("Inspect structure.")}
+                    <br />
+                    {t("Keep authority outside the UI.")}
+                  </h1>
+                  <p>
+                    {t(
+                      "Open, edit, validate, and export JSON locally. Nothing here signs, authorizes, computes quorum, or changes Delta state.",
+                    )}
+                  </p>
                 </div>
-                <div className="document-actions">
-                  <button
-                    type="button"
-                    disabled={!document || !selectedSchema}
-                    onClick={() => void validateDocument()}
-                  >
-                    Validate structure
-                  </button>
+                <div className="hero-actions">
                   <button
                     className="primary"
                     type="button"
-                    disabled={!document}
-                    onClick={() => void exportDocument()}
+                    onClick={() => void openDocument()}
                   >
-                    Download new file
+                    {t("Open JSON")}
+                  </button>
+                  <button type="button" onClick={createDocument}>
+                    {t("New document")}
                   </button>
                 </div>
               </section>
 
-              <div className="workspace-grid">
-                {document ? (
-                  <ControllerRegistryForm
-                    draft={document}
-                    controllerKeys={controllerKeys}
-                    createControllerKey={createControllerKey}
-                    onChange={changeDraft}
-                  />
-                ) : null}
-                <SchemaSelector
-                  schemas={schemas}
-                  selected={selectedSchema}
-                  onSelect={(schema) => {
-                    setSelectedSchema(schema);
-                    setValidation(undefined);
-                  }}
-                />
-              </div>
-
-              {document ? <AdvancedJsonView draft={document} /> : null}
-
-              <ReadinessSummary
-                controllers={controllerDrafts}
-                records={pairwiseRecords}
-                validation={validation}
-                resultQuery={resultQuery}
-              />
-
-              <PairwiseReviewStep
-                controllers={controllerDrafts}
-                records={pairwiseRecords}
-                onChange={setPairwiseRecords}
-              />
-
-              {validation ? <FriendlyValidationPanel result={validation} /> : null}
-              {validation?.status === "VALID" ? (
-                <ControllerExplorer controllers={controllers} />
+              {notice ? (
+                <div className="notice" role="status">
+                  {message(notice)}
+                </div>
               ) : null}
-            </>
-          )}
 
-          <section className="results-section" aria-labelledby="results-heading">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">External authority only</p>
-                <h2 id="results-heading">Independence assessment</h2>
-              </div>
-            </div>
-            <SourcedResultsPanel query={resultQuery} />
-          </section>
+              {!document ? (
+                <section className="welcome-card">
+                  <p className="eyebrow">{t("No document selected")}</p>
+                  <h2>{t("Start with a local file or a clean register.")}</h2>
+                  <p>
+                    {t(
+                      "Files remain in this browser session. The original is never overwritten, and no URL is fetched automatically.",
+                    )}
+                  </p>
+                </section>
+              ) : (
+                <>
+                  <section
+                    className="document-bar"
+                    aria-label={t("Open document")}
+                  >
+                    <div>
+                      <span>{t("Local draft")}</span>
+                      <strong>{document.origin.displayName}</strong>
+                    </div>
+                    <div className="document-actions">
+                      <button
+                        type="button"
+                        disabled={!document || !selectedSchema}
+                        onClick={() => void validateDocument()}
+                      >
+                        {t("Validate structure")}
+                      </button>
+                      <button
+                        className="primary"
+                        type="button"
+                        disabled={!document}
+                        onClick={() => void exportDocument()}
+                      >
+                        {t("Download new file")}
+                      </button>
+                    </div>
+                  </section>
+
+                  <div className="workspace-grid">
+                    {document ? (
+                      <ControllerRegistryForm
+                        draft={document}
+                        controllerKeys={controllerKeys}
+                        createControllerKey={createControllerKey}
+                        onChange={changeDraft}
+                      />
+                    ) : null}
+                    <SchemaSelector
+                      schemas={schemas}
+                      selected={selectedSchema}
+                      onSelect={(schema) => {
+                        setSelectedSchema(schema);
+                        setValidation(undefined);
+                      }}
+                    />
+                  </div>
+
+                  {document ? <AdvancedJsonView draft={document} /> : null}
+
+                  <ReadinessSummary
+                    controllers={controllerDrafts}
+                    records={pairwiseRecords}
+                    validation={validation}
+                    resultQuery={resultQuery}
+                  />
+
+                  <PairwiseReviewStep
+                    controllers={controllerDrafts}
+                    records={pairwiseRecords}
+                    onChange={setPairwiseRecords}
+                  />
+
+                  {validation ? (
+                    <FriendlyValidationPanel result={validation} />
+                  ) : null}
+                  {validation?.status === "VALID" ? (
+                    <ControllerExplorer controllers={controllers} />
+                  ) : null}
+                </>
+              )}
+
+              <section
+                className="results-section"
+                aria-labelledby="results-heading"
+              >
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow">{t("External authority only")}</p>
+                    <h2 id="results-heading">{t("Independence assessment")}</h2>
+                  </div>
+                </div>
+                <SourcedResultsPanel query={resultQuery} />
+              </section>
             </>
           ) : ActiveDomainRoute ? (
             <div className="extension-route">
@@ -369,7 +447,7 @@ export function App({ adapter = defaultAdapter }: AppProps) {
             </div>
           ) : (
             <div className="capability-state state-error" role="alert">
-              Registered route unavailable.
+              {t("Registered route unavailable.")}
             </div>
           )}
         </main>

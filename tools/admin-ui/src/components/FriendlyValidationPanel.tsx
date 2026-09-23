@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type {
   StructuralValidationIssue,
   StructuralValidationResult,
@@ -32,24 +33,30 @@ function friendlyLocation(issue: StructuralValidationIssue): string {
   const controllerIndex = Number(segments[controllerOffset + 1]);
   const prefix =
     controllerOffset >= 0 && Number.isInteger(controllerIndex)
-      ? `Controller ${controllerIndex + 1} · `
+      ? t("Controller {number} · ", { number: controllerIndex + 1 })
       : "";
   const field = issueField(issue);
-  return `${prefix}${field ? fieldLabels[field] ?? field.replaceAll("_", " ") : "Document"}`;
+  return `${prefix}${t(field ? (fieldLabels[field] ?? field.replaceAll("_", " ")) : "Document")}`;
 }
 
 function friendlyMessage(issue: StructuralValidationIssue): string {
   const field = issueField(issue);
-  const label = field ? fieldLabels[field] ?? field.replaceAll("_", " ") : "value";
+  const label = field
+    ? (fieldLabels[field] ?? field.replaceAll("_", " "))
+    : "value";
   switch (issue.constraint) {
     case "required":
-      return `Add ${label.toLowerCase()}.`;
+      return t("Add {field}.", { field: t(label).toLowerCase() });
     case "type":
-      return `Use the expected value type for ${label.toLowerCase()}.`;
+      return t("Use the expected value type for {field}.", {
+        field: t(label).toLowerCase(),
+      });
     case "minLength":
-      return `${label} cannot be empty.`;
+      return t("{field} cannot be empty.", { field: t(label) });
     case "enum":
-      return `Choose one of the accepted values for ${label.toLowerCase()}.`;
+      return t("Choose one of the accepted values for {field}.", {
+        field: t(label).toLowerCase(),
+      });
     default:
       return issue.message;
   }
@@ -67,35 +74,55 @@ export function FriendlyValidationPanel({
     >
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Structural validation only</p>
+          <p className="eyebrow">{t("Structural validation only")}</p>
           <h2 id="validation-heading">{result.status}</h2>
         </div>
         <span className="authority-badge">STRUCTURAL_VALIDATION</span>
       </div>
       <p>
-        This checks JSON Schema structure only. Authority outcomes remain external
-        to this form.
+        {t(
+          "This checks JSON Schema structure only. Authority outcomes remain external to this form.",
+        )}
       </p>
       {result.issues.length ? (
-        <ol className="friendly-issue-list" aria-label="Structural validation issues">
+        <ol
+          className="friendly-issue-list"
+          aria-label={t("Structural validation issues")}
+        >
           {result.issues.map((issue, index) => (
             <li key={`${issue.instancePath}:${issue.schemaPath}:${index}`}>
-              <strong><InertText value={friendlyLocation(issue)} /></strong>
-              <p><InertText value={friendlyMessage(issue)} /></p>
+              <strong>
+                <InertText value={friendlyLocation(issue)} />
+              </strong>
+              <p>
+                <InertText value={friendlyMessage(issue)} />
+              </p>
               <details>
-                <summary>Technical schema details</summary>
+                <summary>{t("Technical schema details")}</summary>
                 <dl>
                   <div>
-                    <dt>Document path</dt>
-                    <dd><code><InertText value={issue.instancePath || "/"} /></code></dd>
+                    <dt>{t("Document path")}</dt>
+                    <dd>
+                      <code>
+                        <InertText value={issue.instancePath || "/"} />
+                      </code>
+                    </dd>
                   </div>
                   <div>
-                    <dt>Schema path</dt>
-                    <dd><code><InertText value={issue.schemaPath} /></code></dd>
+                    <dt>{t("Schema path")}</dt>
+                    <dd>
+                      <code>
+                        <InertText value={issue.schemaPath} />
+                      </code>
+                    </dd>
                   </div>
                   <div>
-                    <dt>Constraint</dt>
-                    <dd><code><InertText value={issue.constraint} /></code></dd>
+                    <dt>{t("Constraint")}</dt>
+                    <dd>
+                      <code>
+                        <InertText value={issue.constraint} />
+                      </code>
+                    </dd>
                   </div>
                 </dl>
               </details>
@@ -103,7 +130,7 @@ export function FriendlyValidationPanel({
           ))}
         </ol>
       ) : (
-        <p className="validation-success">No structural issues found.</p>
+        <p className="validation-success">{t("No structural issues found.")}</p>
       )}
     </section>
   );

@@ -1,3 +1,4 @@
+import { message, t } from "../../i18n";
 import { useId, useMemo, useState } from "react";
 
 import { InertText } from "../../components/InertText";
@@ -113,9 +114,7 @@ export function LiveIntentBuilder({
         checkpoint_coordinates: coords,
       };
     } else {
-      operation_payload = cacheKey.trim()
-        ? { cache_key: cacheKey.trim() }
-        : {};
+      operation_payload = cacheKey.trim() ? { cache_key: cacheKey.trim() } : {};
     }
 
     return {
@@ -148,8 +147,7 @@ export function LiveIntentBuilder({
 
   const compatibility = useMemo(() => {
     return CANONICAL_DESCRIPTOR_CATALOG.compatibility.find(
-      (c) =>
-        c.model_plugin_id === modelPluginId && c.dataset_id === datasetId,
+      (c) => c.model_plugin_id === modelPluginId && c.dataset_id === datasetId,
     );
   }, [modelPluginId, datasetId]);
 
@@ -178,21 +176,23 @@ export function LiveIntentBuilder({
     >
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Zone 1 — Untrusted drafting</p>
-          <h2 id={`${baseId}-builder-heading`}>ExecutionIntent builder</h2>
+          <p className="eyebrow">{t("Zone 1 — Untrusted drafting")}</p>
+          <h2 id={`${baseId}-builder-heading`}>
+            {t("ExecutionIntent builder")}
+          </h2>
         </div>
-        <span className="status-pill pill-smoke">FORM-FIRST DRAFT</span>
+        <span className="status-pill pill-smoke">{t("FORM-FIRST DRAFT")}</span>
       </div>
 
       <p className="intent-builder-intro">
-        Draft canonical Step 5C execution intents from the frozen catalog.
-        The browser performs RFC 8785 canonicalization and informational digest
-        preview only; gate recomputation remains authoritative.
+        {t(
+          "Draft canonical Step 5C execution intents from the frozen catalog. The browser performs RFC 8785 canonicalization and informational digest preview only; gate recomputation remains authoritative.",
+        )}
       </p>
 
       {exportedMessage ? (
         <div className="capability-state state-available" role="status">
-          {exportedMessage}
+          {message(exportedMessage)}
         </div>
       ) : null}
 
@@ -204,7 +204,7 @@ export function LiveIntentBuilder({
         }}
       >
         <fieldset className="intent-fieldset">
-          <legend>Operation selection</legend>
+          <legend>{t("Operation selection")}</legend>
           <div className="form-row radio-group" role="radiogroup">
             <label className="radio-label">
               <input
@@ -240,10 +240,10 @@ export function LiveIntentBuilder({
         </fieldset>
 
         <fieldset className="intent-fieldset">
-          <legend>Workload catalog binding</legend>
+          <legend>{t("Workload catalog binding")}</legend>
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor={`${baseId}-model`}>Model plugin</label>
+              <label htmlFor={`${baseId}-model`}>{t("Model plugin")}</label>
               <select
                 id={`${baseId}-model`}
                 value={modelPluginId}
@@ -251,14 +251,14 @@ export function LiveIntentBuilder({
               >
                 {CANONICAL_DESCRIPTOR_CATALOG.model_plugins.map((m) => (
                   <option key={m.plugin_id} value={m.plugin_id}>
-                    {m.display_name} ({m.plugin_id})
+                    {t(m.display_name)} ({m.plugin_id})
                   </option>
                 ))}
               </select>
             </div>
 
             <div className="form-group">
-              <label htmlFor={`${baseId}-dataset`}>Dataset</label>
+              <label htmlFor={`${baseId}-dataset`}>{t("Dataset")}</label>
               <select
                 id={`${baseId}-dataset`}
                 value={datasetId}
@@ -266,14 +266,14 @@ export function LiveIntentBuilder({
               >
                 {CANONICAL_DESCRIPTOR_CATALOG.datasets.map((d) => (
                   <option key={d.dataset_id} value={d.dataset_id}>
-                    {d.display_name} ({d.dataset_id})
+                    {t(d.display_name)} ({d.dataset_id})
                   </option>
                 ))}
               </select>
             </div>
 
             <div className="form-group">
-              <label htmlFor={`${baseId}-scope`}>Requested scope</label>
+              <label htmlFor={`${baseId}-scope`}>{t("Requested scope")}</label>
               <select
                 disabled={operation === "TRAIN_TICKET"}
                 id={`${baseId}-scope`}
@@ -289,40 +289,43 @@ export function LiveIntentBuilder({
               </select>
               {operation === "TRAIN_TICKET" ? (
                 <small className="field-hint">
-                  TRAIN_TICKET requires scope &lsquo;PLUGIN_BOUNDARY&rsquo;.
+                  {t("TRAIN_TICKET requires scope ‘PLUGIN_BOUNDARY’.")}
                 </small>
               ) : null}
             </div>
 
             <div className="form-group">
-              <label>Catalog backend reference</label>
+              <label>{t("Catalog backend reference")}</label>
               <input
                 readOnly
                 type="text"
                 value={CANONICAL_DESCRIPTOR_CATALOG.source.backend_ref}
               />
               <small className="field-hint">
-                Pinned frozen catalog commit (40-hex)
+                {t("Pinned frozen catalog commit (40-hex)")}
               </small>
             </div>
           </div>
 
           <div className="compatibility-indicator">
-            <span>Pair contract compatibility:</span>
+            <span>{t("Pair contract compatibility:")}</span>
             {compatibility?.contract_compatible ? (
-              <strong className="text-ok">COMPATIBLE</strong>
+              <strong className="text-ok">{t("COMPATIBLE")}</strong>
             ) : (
-              <strong className="text-warn">INCOMPATIBLE</strong>
+              <strong className="text-warn">{t("INCOMPATIBLE")}</strong>
             )}
           </div>
         </fieldset>
 
         <fieldset className="intent-fieldset">
-          <legend>Operation parameters ({operation})</legend>
+          <legend>
+            {t("Operation parameters (")}
+            {operation})
+          </legend>
           {operation === "TRAIN_TICKET" ? (
             <div className="form-grid">
               <div className="form-group">
-                <label htmlFor={`${baseId}-ticket-id`}>Ticket ID</label>
+                <label htmlFor={`${baseId}-ticket-id`}>{t("Ticket ID")}</label>
                 <input
                   id={`${baseId}-ticket-id`}
                   type="text"
@@ -330,11 +333,13 @@ export function LiveIntentBuilder({
                   onChange={(e) => setTicketId(e.target.value)}
                 />
                 <small className="field-hint">
-                  Pattern: ^[A-Za-z0-9_-]+$ (max 64 chars)
+                  {t("Pattern: ^[A-Za-z0-9_-]+$ (max 64 chars)")}
                 </small>
               </div>
               <div className="form-group">
-                <label htmlFor={`${baseId}-partition-id`}>Partition ID</label>
+                <label htmlFor={`${baseId}-partition-id`}>
+                  {t("Partition ID")}
+                </label>
                 <input
                   id={`${baseId}-partition-id`}
                   type="text"
@@ -342,7 +347,7 @@ export function LiveIntentBuilder({
                   onChange={(e) => setPartitionId(e.target.value)}
                 />
                 <small className="field-hint">
-                  Pattern: ^[A-Za-z0-9_-]+$ (max 64 chars)
+                  {t("Pattern: ^[A-Za-z0-9_-]+$ (max 64 chars)")}
                 </small>
               </div>
             </div>
@@ -351,7 +356,7 @@ export function LiveIntentBuilder({
           {operation === "EVALUATE_CHECKPOINT" ? (
             <div className="form-group">
               <label htmlFor={`${baseId}-coords`}>
-                Checkpoint coordinates (integers)
+                {t("Checkpoint coordinates (integers)")}
               </label>
               <input
                 id={`${baseId}-coords`}
@@ -360,7 +365,7 @@ export function LiveIntentBuilder({
                 onChange={(e) => setCheckpointCoords(e.target.value)}
               />
               <small className="field-hint">
-                Comma-separated 32-bit signed integers (1..4096 elements)
+                {t("Comma-separated 32-bit signed integers (1..4096 elements)")}
               </small>
             </div>
           ) : null}
@@ -368,7 +373,7 @@ export function LiveIntentBuilder({
           {operation === "MATERIALIZE_DATASET" ? (
             <div className="form-group">
               <label htmlFor={`${baseId}-cache-key`}>
-                Cache key (optional)
+                {t("Cache key (optional)")}
               </label>
               <input
                 id={`${baseId}-cache-key`}
@@ -377,21 +382,25 @@ export function LiveIntentBuilder({
                 onChange={(e) => setCacheKey(e.target.value)}
               />
               <small className="field-hint">
-                Optional alphanumeric/underscore identifier (max 64 chars)
+                {t(
+                  "Optional alphanumeric/underscore identifier (max 64 chars)",
+                )}
               </small>
             </div>
           ) : null}
         </fieldset>
 
         <fieldset className="intent-fieldset">
-          <legend>Declared operator &amp; constraints</legend>
+          <legend>{t("Declared operator & constraints")}</legend>
           <div className="form-grid">
             <div className="form-group">
-              <label htmlFor={`${baseId}-role`}>Operator role</label>
+              <label htmlFor={`${baseId}-role`}>{t("Operator role")}</label>
               <select
                 id={`${baseId}-role`}
                 value={operatorRole}
-                onChange={(e) => setOperatorRole(e.target.value as OperatorRole)}
+                onChange={(e) =>
+                  setOperatorRole(e.target.value as OperatorRole)
+                }
               >
                 <option value="OPERATOR">OPERATOR</option>
                 <option value="RESEARCHER">RESEARCHER</option>
@@ -399,7 +408,7 @@ export function LiveIntentBuilder({
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor={`${baseId}-subject`}>Subject ID</label>
+              <label htmlFor={`${baseId}-subject`}>{t("Subject ID")}</label>
               <input
                 id={`${baseId}-subject`}
                 type="text"
@@ -408,7 +417,9 @@ export function LiveIntentBuilder({
               />
             </div>
             <div className="form-group">
-              <label htmlFor={`${baseId}-timeout`}>Timeout (seconds)</label>
+              <label htmlFor={`${baseId}-timeout`}>
+                {t("Timeout (seconds)")}
+              </label>
               <input
                 id={`${baseId}-timeout`}
                 max={3600}
@@ -420,11 +431,11 @@ export function LiveIntentBuilder({
             </div>
             <div className="form-group">
               <label htmlFor={`${baseId}-retry`}>
-                Retry of intent ID (optional)
+                {t("Retry of intent ID (optional)")}
               </label>
               <input
                 id={`${baseId}-retry`}
-                placeholder="UUID if retrying a failed intent"
+                placeholder={t("UUID if retrying a failed intent")}
                 type="text"
                 value={retryOfIntentId}
                 onChange={(e) => setRetryOfIntentId(e.target.value)}
@@ -440,8 +451,9 @@ export function LiveIntentBuilder({
                 onChange={(e) => setAllowDownloads(e.target.checked)}
               />
               <span>
-                Request external downloads (Informational intent constraint;
-                controller policy and AdmissionRecord determine actual authority)
+                {t(
+                  "Request external downloads (Informational intent constraint; controller policy and AdmissionRecord determine actual authority)",
+                )}
               </span>
             </label>
           </div>
@@ -449,11 +461,14 @@ export function LiveIntentBuilder({
 
         {issues.length > 0 ? (
           <div className="capability-state state-error" role="alert">
-            <strong>Validation issues ({issues.length}):</strong>
+            <strong>
+              {t("Validation issues (")}
+              {issues.length}):
+            </strong>
             <ul>
               {issues.map((iss) => (
                 <li key={iss.field}>
-                  <code>{iss.field}</code>: {iss.message}
+                  <code>{iss.field}</code>: {message(iss.message)}
                 </li>
               ))}
             </ul>
@@ -465,14 +480,19 @@ export function LiveIntentBuilder({
           aria-labelledby={`${baseId}-digest-heading`}
         >
           <div className="digest-header">
-            <h3 id={`${baseId}-digest-heading`}>Informational digest preview</h3>
-            <span className="status-pill pill-smoke">INFORMATIONAL ONLY</span>
+            <h3 id={`${baseId}-digest-heading`}>
+              {t("Informational digest preview")}
+            </h3>
+            <span className="status-pill pill-smoke">
+              {t("INFORMATIONAL ONLY")}
+            </span>
           </div>
           <p className="digest-notice">
-            Computed locally via RFC 8785 JCS canonicalization over{" "}
-            <code>ExecutionIntent \ &#123;&quot;intent_digest&quot;&#125;</code>.
-            Local preview does not constitute admission or authority; gate
-            recomputes digest from canonical bytes.
+            {t("Computed locally via RFC 8785 JCS canonicalization over")}{" "}
+            <code>ExecutionIntent \ &#123;&quot;intent_digest&quot;&#125;</code>
+            {t(
+              ". Local preview does not constitute admission or authority; gate recomputes digest from canonical bytes.",
+            )}
           </p>
           <div className="digest-code-block">
             <code>{document.intent_digest}</code>
@@ -485,14 +505,14 @@ export function LiveIntentBuilder({
             disabled={issues.length > 0}
             type="submit"
           >
-            {submitLabel}
+            {t(submitLabel)}
           </button>
           <button
             className="action-button secondary"
             type="button"
             onClick={handleExport}
           >
-            Export Intent JSON
+            {t("Export Intent JSON")}
           </button>
           <button
             aria-expanded={showJson}
@@ -500,16 +520,16 @@ export function LiveIntentBuilder({
             type="button"
             onClick={() => setShowJson(!showJson)}
           >
-            {showJson ? "Hide Canonical JSON" : "View Canonical JSON"}
+            {t(showJson ? "Hide Canonical JSON" : "View Canonical JSON")}
           </button>
         </div>
 
         {showJson ? (
           <section
             className="canonical-json-preview"
-            aria-label="Canonical JSON preview"
+            aria-label={t("Canonical JSON preview")}
           >
-            <h4>RFC 8785 Canonical JSON</h4>
+            <h4>{t("RFC 8785 Canonical JSON")}</h4>
             <pre>
               <InertText value={canonicalJson} />
             </pre>

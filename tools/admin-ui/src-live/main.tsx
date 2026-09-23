@@ -12,7 +12,11 @@ if (!rootElement) {
 }
 
 if (!window.location.hash) {
-  window.history.replaceState(null, "", "#/live-execution");
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}${window.location.search}#/live-execution`,
+  );
 }
 
 const liveExecutionPort = new HttpLiveExecutionAdapter();

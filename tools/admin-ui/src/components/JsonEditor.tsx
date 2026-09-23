@@ -1,21 +1,26 @@
+import { t } from "../i18n";
 export interface JsonEditorProps {
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly invalidMessage?: string;
 }
 
-export function JsonEditor({ value, onChange, invalidMessage }: JsonEditorProps) {
+export function JsonEditor({
+  value,
+  onChange,
+  invalidMessage,
+}: JsonEditorProps) {
   return (
     <section aria-labelledby="json-editor-heading">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Local draft</p>
-          <h2 id="json-editor-heading">JSON editor</h2>
+          <p className="eyebrow">{t("Local draft")}</p>
+          <h2 id="json-editor-heading">{t("JSON editor")}</h2>
         </div>
-        <span className="local-only-badge">In memory</span>
+        <span className="local-only-badge">{t("In memory")}</span>
       </div>
       <label className="sr-only" htmlFor="json-editor">
-        JSON document text
+        {t("JSON document text")}
       </label>
       <textarea
         id="json-editor"
@@ -30,7 +35,9 @@ export function JsonEditor({ value, onChange, invalidMessage }: JsonEditorProps)
           {invalidMessage}
         </p>
       ) : (
-        <p className="field-help">Changes stay local until Download new file.</p>
+        <p className="field-help">
+          {t("Changes stay local until Download new file.")}
+        </p>
       )}
     </section>
   );

@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type { StructuralValidationResult } from "../core/contracts";
 import { InertText } from "./InertText";
 
@@ -13,22 +14,32 @@ export function ValidationPanel({
     >
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Structural validation only</p>
+          <p className="eyebrow">{t("Structural validation only")}</p>
           <h2 id="validation-heading">{result.status}</h2>
         </div>
         <span className="authority-badge">STRUCTURAL_VALIDATION</span>
       </div>
       <p>
-        This result checks JSON Schema structure. It is not governance approval,
-        signing readiness, execution authorization, or a Delta protocol verdict.
+        {t(
+          "This result checks JSON Schema structure. It is not governance approval, signing readiness, execution authorization, or a Delta protocol verdict.",
+        )}
       </p>
       {result.issues.length ? (
-        <ol className="issue-list" aria-label="Structural validation issues">
+        <ol
+          className="issue-list"
+          aria-label={t("Structural validation issues")}
+        >
           {result.issues.map((issue, index) => (
             <li key={`${issue.instancePath}:${issue.schemaPath}:${index}`}>
-              <code><InertText value={issue.instancePath || "/"} /></code>
-              <span><InertText value={issue.constraint} /></span>
-              <p><InertText value={issue.message} /></p>
+              <code>
+                <InertText value={issue.instancePath || "/"} />
+              </code>
+              <span>
+                <InertText value={issue.constraint} />
+              </span>
+              <p>
+                <InertText value={issue.message} />
+              </p>
             </li>
           ))}
         </ol>

@@ -1,11 +1,16 @@
+import { t } from "../../i18n";
 import type { ExtensionRegistration } from "../../app/extensions";
 
 function ControllersRoute() {
-  return <p>Open or create a local controller document to begin.</p>;
+  return <p>{t("Open or create a local controller document to begin.")}</p>;
 }
 
 function UnsupportedControllers() {
-  return <p role="status">Controller view unavailable for the active source.</p>;
+  return (
+    <p role="status">
+      {t("Controller view unavailable for the active source.")}
+    </p>
+  );
 }
 
 export const controllerModuleRegistration: ExtensionRegistration = {

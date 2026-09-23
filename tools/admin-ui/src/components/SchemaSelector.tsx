@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type { SchemaDescriptor } from "../core/contracts";
 import { schemaDescriptorKey } from "../data/local-json-adapter";
 import { InertText } from "./InertText";
@@ -16,8 +17,8 @@ export function SchemaSelector({
   const selectedKey = selected ? schemaDescriptorKey(selected) : "";
   return (
     <section aria-labelledby="schema-heading">
-      <h2 id="schema-heading">Structural schema</h2>
-      <label htmlFor="schema-select">Schema descriptor</label>
+      <h2 id="schema-heading">{t("Structural schema")}</h2>
+      <label htmlFor="schema-select">{t("Schema descriptor")}</label>
       <select
         id="schema-select"
         value={selectedKey}
@@ -31,26 +32,39 @@ export function SchemaSelector({
         }}
       >
         <option value="" disabled>
-          Select a schema
+          {t("Select a schema")}
         </option>
         {schemas.map((schema) => (
-          <option key={schemaDescriptorKey(schema)} value={schemaDescriptorKey(schema)}>
+          <option
+            key={schemaDescriptorKey(schema)}
+            value={schemaDescriptorKey(schema)}
+          >
             {schema.documentType} · {schema.authorityClass} · {schema.version}
           </option>
         ))}
       </select>
       {selected ? (
-        <dl aria-label="Selected schema provenance">
-          <dt>Schema ID</dt>
-          <dd><InertText value={selected.schemaId} /></dd>
-          <dt>Version</dt>
-          <dd><InertText value={selected.version} /></dd>
-          <dt>Authority</dt>
-          <dd><InertText value={selected.authorityClass} /></dd>
-          <dt>Document type</dt>
-          <dd><InertText value={selected.documentType} /></dd>
-          <dt>Source SHA-256</dt>
-          <dd><InertText value={selected.source.sha256} /></dd>
+        <dl aria-label={t("Selected schema provenance")}>
+          <dt>{t("Schema ID")}</dt>
+          <dd>
+            <InertText value={selected.schemaId} />
+          </dd>
+          <dt>{t("Version")}</dt>
+          <dd>
+            <InertText value={selected.version} />
+          </dd>
+          <dt>{t("Authority")}</dt>
+          <dd>
+            <InertText value={selected.authorityClass} />
+          </dd>
+          <dt>{t("Document type")}</dt>
+          <dd>
+            <InertText value={selected.documentType} />
+          </dd>
+          <dt>{t("Source SHA-256")}</dt>
+          <dd>
+            <InertText value={selected.source.sha256} />
+          </dd>
         </dl>
       ) : null}
     </section>

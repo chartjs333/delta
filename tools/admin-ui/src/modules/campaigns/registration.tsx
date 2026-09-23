@@ -1,14 +1,16 @@
+import { t } from "../../i18n";
 import type { ExtensionRegistration } from "../../app/extensions";
 import { CapabilityStateView } from "../../components/CapabilityStateView";
 
 export function CampaignsPlaceholderRoute() {
   return (
     <section aria-labelledby="campaigns-heading">
-      <p className="eyebrow">Placeholder domain module</p>
-      <h2 id="campaigns-heading">Campaigns</h2>
+      <p className="eyebrow">{t("Placeholder domain module")}</p>
+      <h2 id="campaigns-heading">{t("Campaigns")}</h2>
       <p>
-        This browser-local source does not expose campaign data. No runtime or
-        network fallback is attempted.
+        {t(
+          "This browser-local source does not expose campaign data. No runtime or network fallback is attempted.",
+        )}
       </p>
       <CapabilityStateView capability="campaign.read" state="UNAVAILABLE" />
     </section>

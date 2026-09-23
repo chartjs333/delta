@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import { useEffect, useMemo, useState } from "react";
 
 import { InertText } from "../../components/InertText";
@@ -24,7 +25,7 @@ const answers: readonly Exclude<PairwiseAnswer, "UNANSWERED">[] = [
 ];
 
 function displayId(value: string | null): string {
-  return value?.trim() ? value : "ID not provided";
+  return value?.trim() ? value : t("ID not provided");
 }
 
 export function PairwiseReviewStep({
@@ -59,52 +60,65 @@ export function PairwiseReviewStep({
     <section className="pairwise-step" aria-labelledby="pairwise-heading">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Local answer worksheet</p>
-          <h2 id="pairwise-heading">Pairwise records</h2>
+          <p className="eyebrow">{t("Local answer worksheet")}</p>
+          <h2 id="pairwise-heading">{t("Pairwise records")}</h2>
         </div>
-        <span className="count-badge" aria-label="Pairwise record count">
+        <span className="count-badge" aria-label={t("Pairwise record count")}>
           {records.length}
         </span>
       </div>
       <p>
-        Record answers and evidence references only. The UI does not calculate an
-        independence conclusion, approval, or protocol result.
+        {t(
+          "Record answers and evidence references only. The UI does not calculate an independence conclusion, approval, or protocol result.",
+        )}
       </p>
 
       {!current ? (
         <div className="empty-state" role="status">
-          Add at least two controllers to create a pairwise record.
+          {t("Add at least two controllers to create a pairwise record.")}
         </div>
       ) : (
         <div className="pairwise-wizard">
           <div className="pairwise-progress" aria-live="polite">
-            Record {recordIndex + 1} of {records.length}
+            {t("Record ")}
+            {recordIndex + 1}
+            {t(" of ")}
+            {records.length}
           </div>
-          <article className={`pairwise-card pairwise-${current.state.toLowerCase()}`}>
+          <article
+            className={`pairwise-card pairwise-${current.state.toLowerCase()}`}
+          >
             <header>
               <h3>
-                <InertText value={displayId(current.controllerIdSnapshots[0])} />
+                <InertText
+                  value={displayId(current.controllerIdSnapshots[0])}
+                />
                 {" ↔ "}
-                <InertText value={displayId(current.controllerIdSnapshots[1])} />
+                <InertText
+                  value={displayId(current.controllerIdSnapshots[1])}
+                />
               </h3>
               <span className="lifecycle-badge">{current.state}</span>
             </header>
 
             {current.state === "STALE" ? (
               <div className="attention-box" role="alert">
-                A controller ID changed. Existing answers and evidence remain bound
-                to the original draft keys.
+                {t(
+                  "A controller ID changed. Existing answers and evidence remain bound to the original draft keys.",
+                )}
                 <span>
-                  Current IDs: {" "}
+                  {t("Current IDs: ")}{" "}
                   <InertText
                     value={displayId(
-                      controllerByKey.get(current.memberKeys[0])?.controllerId ?? null,
+                      controllerByKey.get(current.memberKeys[0])
+                        ?.controllerId ?? null,
                     )}
                   />
                   {" ↔ "}
                   <InertText
                     value={displayId(
-                      controllerByKey.get(current.memberKeys[1])?.controllerId ?? null,
+                      controllerByKey.get(current.memberKeys[1])
+                        ?.controllerId ?? null,
                     )}
                   />
                 </span>
@@ -116,21 +130,24 @@ export function PairwiseReviewStep({
                     )
                   }
                 >
-                  Review and accept current IDs
+                  {t("Review and accept current IDs")}
                 </button>
               </div>
             ) : null}
             {current.state === "ORPHANED" ? (
               <div className="attention-box" role="alert">
-                A referenced controller was removed. This record is retained and is
-                not included as an active export record.
+                {t(
+                  "A referenced controller was removed. This record is retained and is not included as an active export record.",
+                )}
                 <button
                   type="button"
                   onClick={() =>
-                    onChange(records.filter((_, index) => index !== recordIndex))
+                    onChange(
+                      records.filter((_, index) => index !== recordIndex),
+                    )
                   }
                 >
-                  Explicitly discard orphaned record
+                  {t("Explicitly discard orphaned record")}
                 </button>
               </div>
             ) : null}
@@ -138,7 +155,7 @@ export function PairwiseReviewStep({
             <div className="pairwise-questions">
               {pairwiseQuestions.map((question) => (
                 <fieldset key={question.id}>
-                  <legend>{question.label}</legend>
+                  <legend>{t(question.label)}</legend>
                   <div className="answer-options">
                     {answers.map((answer) => (
                       <label key={answer}>
@@ -150,15 +167,19 @@ export function PairwiseReviewStep({
                           value={answer}
                           onChange={() =>
                             replaceCurrent(
-                              updatePairwiseAnswer(current, question.id, answer),
+                              updatePairwiseAnswer(
+                                current,
+                                question.id,
+                                answer,
+                              ),
                             )
                           }
                         />
                         {answer === "YES"
-                          ? "Yes"
+                          ? t("Yes")
                           : answer === "NO"
-                            ? "No"
-                            : "Unknown"}
+                            ? t("No")
+                            : t("Unknown")}
                       </label>
                     ))}
                   </div>
@@ -167,9 +188,9 @@ export function PairwiseReviewStep({
             </div>
 
             <label className="form-field">
-              <span>Evidence references, one per line</span>
+              <span>{t("Evidence references, one per line")}</span>
               <textarea
-                aria-label="Evidence references"
+                aria-label={t("Evidence references")}
                 disabled={current.state !== "ACTIVE"}
                 rows={3}
                 value={current.evidenceReferences.join("\n")}
@@ -182,25 +203,29 @@ export function PairwiseReviewStep({
             </label>
 
             <p className="field-help">
-              Session-local worksheet data is not added to exported JSON without a
-              reviewed mapping supported by the selected schema.
+              {t(
+                "Session-local worksheet data is not added to exported JSON without a reviewed mapping supported by the selected schema.",
+              )}
             </p>
           </article>
 
-          <div className="wizard-navigation" aria-label="Pairwise record navigation">
+          <div
+            className="wizard-navigation"
+            aria-label={t("Pairwise record navigation")}
+          >
             <button
               disabled={recordIndex === 0}
               type="button"
               onClick={() => setRecordIndex((index) => index - 1)}
             >
-              Previous pair
+              {t("Previous pair")}
             </button>
             <button
               disabled={recordIndex >= records.length - 1}
               type="button"
               onClick={() => setRecordIndex((index) => index + 1)}
             >
-              Next pair
+              {t("Next pair")}
             </button>
           </div>
         </div>

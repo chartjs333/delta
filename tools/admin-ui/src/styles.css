@@ -347,3 +347,7 @@ select { width: 100%; margin: 0.45rem 0 1rem; padding: 0.7rem; border: 1px solid
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Shared language choice; no remount of forms or live execution. */
+.language-picker{font:inherit;max-width:130px;padding:.45rem .65rem;border:1px solid var(--border,#ddd);border-radius:6px;background:var(--surface,#fff);color:inherit}.presentation-link{font-size:.8rem;text-decoration:none;white-space:nowrap}.topbar-actions{flex-wrap:wrap}.language-picker:focus-visible,.presentation-link:focus-visible{outline:3px solid #b6a8ff;outline-offset:3px}
+@media(max-width:600px){.topbar{gap:.6rem;flex-wrap:wrap}.topbar-actions{gap:.5rem}.language-picker{font-size:.8rem}.boundary-pill{font-size:.7rem}}

@@ -31,4 +31,21 @@ Language changes affect only its display in the application.
 
 If the computer has restarted, open Docker Desktop, then run
 `D:\delta-presentation\START.cmd`. Existing history is retained. The advanced
-Controller UI is at http://127.0.0.1:8865/.
+Controller UI is at http://127.0.0.1:8865/?lang=en#/live-execution.
+
+For the Admin UI segment, click **Open Admin UI**. The same language is carried
+over, and the top-right selector supports English and Russian without resetting
+the form. **Presentation** returns to the main application in the selected language.
+
+- **Workloads:** inspect the catalog and model/data compatibility. Sample receipt
+  buttons explicitly load examples; they are not fresh execution evidence.
+- **Live execution → ExecutionIntent builder:** keep the default synthetic
+  10-gene workload and `PLUGIN_BOUNDARY`, then **Submit to Controller**.
+  Use **Refresh status** to observe completion and **Load terminal receipt** to
+  show the intent/admission/execution lineage. This is actual CPU plugin execution.
+- **Controllers:** create a local document and inspect the registry form.
+  This is a local worksheet, not live membership or independent authority.
+- **Campaigns** is currently unavailable from the local source; it is not an
+  implemented campaign execution screen.
+
+Technical IDs, operation codes and original evidence retain their original values.
