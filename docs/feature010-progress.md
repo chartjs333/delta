@@ -1139,3 +1139,61 @@ all original bytes. Only then prove `nativeArithmeticRecoveryRefines`; a finite
 table adapter or assumed admission correctness is not that theorem. Concrete
 decoder/hash/exporter/WAL, arbitrary initial snapshots/failures/repair, contract
 freeze, clean reproduction and independent review remain required thereafter.
+
+## 2026-09-24 — Native-derived pre-WAL records (T044/T048/T049/T057/T060)
+
+Continued under the user's explicit instruction to proceed autonomously. Fourteen
+new helpers in `ArithmeticBinding.lean` connect independently anchored arithmetic
+to complete internal vote records. First PARAMETER body uniqueness is now derived
+across independent stores without an already certified aggregate. The checked
+preparer derives either PARAMETER or APPLY, exact command/body/envelope/effect/
+receipt bytes, independent authority and actor/context key, and native sequence
+from the prior vote count. It rechecks current checkpoint/model/optimizer, ready
+mode, validator/recovery flags, logical deadline, identifier/metadata/hash bounds,
+absence of an old record and exact canonical request equality before preparation.
+Missing graph, stale/unready state, mismatched bytes or an existing key reject.
+
+Receipt encoders implement the public diagnostic JSON spelling and domain-separated
+command/effect hash inputs. Full ASCII escaping matches Python, including control
+characters and DEL. These are internal pre-WAL bytes, not sendable effects or a
+new production WAL/C ABI. Native metadata provenance and sampled-time freshness
+remain named trust-boundary obligations. General replay adapter instantiation,
+complete record provenance and the initial-prefix relation are still open.
+`nativeArithmeticRecoveryRefines` is therefore still missing: mandatory coverage
+remains 44/45 and FormalVerificationReport remains NO_GO.
+
+Forty-six kernel examples compute two PARAMETER records with no aggregate anchor
+and one APPLY record from the actual pinned graph, match complete diagnostic
+records at sequences 5, 6 and 8, and pass each through the replay step. Negative
+cases cover changed command/current pointers, time/role/recovery, duplicates,
+missing authority, context/projection/hash/metadata/sequence bounds. The finite
+codec still accepts twelve input artifact strings; output hash samples now also
+cover the APPLY body and diagnostic commands/effects. Synthetic metadata trust,
+the finite replay adapter and earlier synthetic non-arithmetic prefix slots are
+not production execution or an independent authentication proof.
+
+Validation: full Lean build (970 jobs), fresh body/vector checks and axiom audit;
+156 tooling/38 oracle tests, 33 legal/112 illegal traces, targeted Ruff and exact
+regeneration of 296 JSON/five Lean files. The new layer audits fourteen helpers,
+eleven functions and 46 kernel examples. The full obligation check still fails
+for the missing native recovery conjunct. GNU make is unavailable; scoped checks
+do not replace aggregate formal-check. Phase0 remains failed for the unfrozen
+amendment. Nineteen TLA modules and public schema remain unchanged; no fresh TLC
+or production-mutant execution is claimed. Earlier finite results retain scope.
+
+Candidate semantics:
+`sha256:94d92399a456ccc7496d9d029d6efdb6108085dd779eacab6c6155636d0d7423`.
+Evidence: `formal/proposals/evidence/native-prewal.json`; detailed scope:
+`formal/proposals/native-prewal-proof.md`. Self-review is not independent review.
+No demo/runtime code or frozen demonstration ref was changed.
+
+Next: instantiate the general recovery adapter from these proof-producing native
+records, not a supplied `admitted` predicate or finite table. Bind the original
+authenticated event metadata and exact encoder functions to every journal entry;
+establish prefix provenance, ApplyQC current advancement and the public witness
+scan relation. Preserve historical exact retry after current advances while
+blocking fresh old-parent admission. Keep unknown/blocked scans unresolved until
+their verified presence/absence condition holds. Only a substantive general proof
+of this relation discharges `nativeArithmeticRecoveryRefines`. Concrete decoder/
+hash/exporter/WAL, arbitrary failures/snapshots/repair, contract freeze, clean
+reproduction and independent reviews still follow before merged Formal GO.

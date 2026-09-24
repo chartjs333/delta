@@ -1,6 +1,7 @@
 import Std
 import DeltaReduce.ParameterKernel
 import DeltaReduce.ApplyKernel
+import DeltaReduce.RecoveryKernel
 
 /-!
 PO-AB1 graph layer. Two independently supplied stores may not resolve different
@@ -1585,3 +1586,391 @@ theorem nativeApplyResultUnique {codec} (collisionFree : CollisionFree codec)
   exact hashAdapter.artifact bytes
 
 end DeltaReduce
+
+namespace DeltaReduce.NativeBinding
+
+theorem loadedRowUnique {codec} (collisionFree : CollisionFree codec)
+    {leftStore rightStore schema frame assignment width contribution}
+    (left : LoadedRow codec leftStore schema frame assignment width contribution)
+    (right : LoadedRow codec rightStore schema frame assignment width contribution) :
+    left.row = right.row := by
+  have payload := (resolvedBytesAndPayloadUnique collisionFree left.resolved right.resolved).2
+  have q := Payload.qShard.inj payload
+  simp only [LoadedRow.row, q]
+
+theorem rowsBoundUnique {codec} (collisionFree : CollisionFree codec)
+    {leftStore rightStore schema frame assignment width contributions leftRows rightRows}
+    (left : RowsBound codec leftStore schema frame assignment width contributions leftRows)
+    (right : RowsBound codec rightStore schema frame assignment width contributions rightRows) :
+    leftRows = rightRows := by
+  induction left generalizing rightRows with
+  | nil => cases right; rfl
+  | cons loaded tail ih =>
+      cases right with
+      | cons other rest => rw [loadedRowUnique collisionFree loaded other, ih rest]
+
+/-- Uncertified first PARAMETER admission derives its own unique complete body;
+it does not need an already certified aggregate or assume equal result rows. -/
+theorem derivedParameterBodyUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore domain shard}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : DerivedParameter leftBinding domain shard)
+    (right : DerivedParameter rightBinding domain shard) : left.body = right.body := by
+  obtain ⟨_, authority, _, _, profile⟩ :=
+    DeltaReduce.nativeArithmeticGraphUnique collisionFree leftBinding rightBinding
+  have origin := right.origin
+  rw [← authority] at origin
+  have frame := frameOriginUnique collisionFree left.origin origin
+  have planned := left.assignmentFound
+  rw [frame] at planned
+  have assignment := Option.some.inj (planned.symm.trans right.assignmentFound)
+  have partitioned := left.partitionFound
+  rw [frame] at partitioned
+  have partition := Option.some.inj (partitioned.symm.trans right.partitionFound)
+  have rows := right.boundRows
+  simp only [← authority, ← frame, ← assignment, ← partition] at rows
+  have sameRows := rowsBoundUnique collisionFree left.boundRows rows
+  have computed := left.computed
+  simp only [profile, assignment, partition, sameRows] at computed
+  have numerators := Option.some.inj (computed.symm.trans right.computed)
+  simp only [DerivedParameter.body, assignment, numerators]
+
+end DeltaReduce.NativeBinding
+
+namespace DeltaReduce.NativeBinding
+
+/- Public diagnostic encoding only. These are not C ABI/WAL wire formats. -/
+def hexDigit (n : Nat) : UInt8 := UInt8.ofNat (if n < 10 then 48 + n else 87 + n)
+
+def escapedASCII (n : Nat) : Bytes :=
+  if n = 34 then [92, 34] else if n = 92 then [92, 92]
+  else if n = 8 then [92, 98] else if n = 12 then [92, 102]
+  else if n = 10 then [92, 110] else if n = 13 then [92, 114]
+  else if n = 9 then [92, 116]
+  else if n < 32 ∨ n = 127 then [92, 117, 48, 48, hexDigit (n / 16), hexDigit (n % 16)]
+  else [UInt8.ofNat n]
+
+/-- Match the witness's ASCII JSON strings, including quote/backslash/control
+escaping. Metadata strings are not silently narrowed to identifier grammar. -/
+def jsonASCII (value : String) : Option Bytes :=
+  if value.toList.all (fun c => decide (c.toNat ≤ 127)) then
+    some (quotedBytes (value.toList.flatMap (fun c => escapedASCII c.toNat)))
+  else none
+
+inductive VoteKind where
+  | parameter (domain shard : String)
+  | apply
+  deriving DecidableEq, Repr
+
+def VoteKind.action : VoteKind → String
+  | .parameter _ _ => "ACT-PARAM-VOTE"
+  | .apply => "ACT-APPLY-VOTE"
+
+/-- Independently exported native metadata, never selected by the command.
+Authentication binds all these fields to the native anchor in NativeVoteTrust. -/
+structure VoteMetadata where
+  actor : String
+  kind : VoteKind
+  voteContext : String
+  parentCertificate : ContentId
+  projection : Ref
+  logicalTime : Nat
+  recovered : Bool
+  validator : Bool
+  deriving DecidableEq, Repr
+
+structure NativeVoteTrust where
+  authenticated : Anchor → VoteMetadata → Prop
+
+inductive VoteSource {codec store trust anchor} (binding : Binding codec trust anchor store) :
+    VoteKind → Type where
+  | parameter {domain shard} (result : DerivedParameter binding domain shard) :
+      VoteSource binding (.parameter domain shard)
+  | apply (result : NativeApply binding) : VoteSource binding .apply
+
+def deriveVoteSource {codec store trust anchor} (binding : Binding codec trust anchor store) :
+    (kind : VoteKind) → Option (VoteSource binding kind)
+  | .parameter domain shard => (deriveParameter binding domain shard).map VoteSource.parameter
+  | .apply => (deriveNativeApply binding).map VoteSource.apply
+
+def VoteSource.bodyBytes {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {kind} : VoteSource binding kind → Option Bytes
+  | .parameter result => encodeParameterBody result.body
+  | .apply result => some result.bytes
+
+def VoteSource.projection {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {kind} : VoteSource binding kind → Ref
+  | .parameter _ => binding.authority.apc
+  | .apply result => result.core.conversion.certified.aggregate
+
+def VoteSource.contextMatches {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {kind} : VoteSource binding kind → String → Bool
+  | .parameter result, context => decide (result.assignment.context = context)
+  | .apply _, _ => true
+
+def encodeNativeCommand (kind : VoteKind) (body : Bytes) : Bytes :=
+  asciiBytes "{\"action\":" ++ quotedBytes (asciiBytes kind.action) ++
+    asciiBytes ",\"payload\":" ++ body ++ [125]
+
+def encodeVoteContext (metadata : VoteMetadata) : Option Bytes := do
+  let actor ← jsonASCII metadata.actor
+  let context ← jsonASCII metadata.voteContext
+  some (arrayBytes [actor, context])
+
+def encodeVoteEnvelope (anchor : Anchor) (metadata : VoteMetadata) (bodyHash : ContentId) : Option Bytes := do
+  let actor ← jsonASCII metadata.actor
+  let round ← jsonASCII anchor.context.round
+  let epoch ← jsonASCII anchor.context.epoch
+  let context ← jsonASCII metadata.voteContext
+  if bodyHash.length = 32 ∧ metadata.parentCertificate.length = 32 then
+    some (asciiBytes "{\"action_id\":" ++ quotedBytes (asciiBytes metadata.kind.action) ++
+      asciiBytes ",\"actor_id\":" ++ actor ++ asciiBytes ",\"body_hash\":" ++
+      quotedBytes (idBytes bodyHash) ++ asciiBytes ",\"height\":" ++
+      asciiBytes (toString anchor.context.height) ++ asciiBytes ",\"parent_hashes\":" ++
+      arrayBytes [quotedBytes (idBytes metadata.parentCertificate)] ++ asciiBytes ",\"round_id\":" ++
+      round ++ asciiBytes ",\"validator_epoch\":" ++ epoch ++
+      asciiBytes ",\"vote_context_id\":" ++ context ++ [125])
+  else none
+
+def encodeDiagnosticEffect (envelope : Bytes) : Bytes :=
+  asciiBytes "{\"projection_version\":\"draft1\",\"vote\":" ++ envelope ++ [125]
+
+def encodeDiagnosticReceipt (codec : Codec) (command envelope effect : Bytes) (sequence : Nat) :
+    Option Bytes :=
+  if (codec.hash command).length = 32 ∧ (codec.hash effect).length = 32 ∧
+      0 < sequence ∧ sequence ≤ 9223372036854775807 then
+    some (asciiBytes "{\"command_id\":" ++ quotedBytes (idBytes (codec.hash command)) ++
+      asciiBytes ",\"effect_id\":" ++ quotedBytes (idBytes (codec.hash effect)) ++
+      asciiBytes ",\"projection_version\":\"draft1\",\"sequence\":" ++ asciiBytes (toString sequence) ++
+      asciiBytes ",\"vote\":" ++ envelope ++ [125])
+  else none
+
+structure ExpectedNativeVote {codec store trust anchor} (binding : Binding codec trust anchor store)
+    (metadata : VoteMetadata) where
+  source : VoteSource binding metadata.kind
+  body : Bytes
+  bodyEncoded : source.bodyBytes = some body
+  projectionBound : source.projection = metadata.projection
+  contextBound : source.contextMatches metadata.voteContext = true
+  context : Bytes
+  contextEncoded : encodeVoteContext metadata = some context
+  envelope : Bytes
+  envelopeEncoded : encodeVoteEnvelope anchor metadata (codec.hash body) = some envelope
+
+def ExpectedNativeVote.command {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {metadata} (vote : ExpectedNativeVote binding metadata) : Bytes := encodeNativeCommand metadata.kind vote.body
+
+def ExpectedNativeVote.effect {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {metadata} (vote : ExpectedNativeVote binding metadata) : Bytes := encodeDiagnosticEffect vote.envelope
+
+def ExpectedNativeVote.data {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {metadata} (vote : ExpectedNativeVote binding metadata) : RecoveryKernel.VoteData :=
+  ⟨vote.context, vote.command, idBytes anchor.authority.id, vote.body⟩
+
+def deriveExpectedNativeVote {codec store trust anchor} (binding : Binding codec trust anchor store)
+    (metadata : VoteMetadata) : Option (ExpectedNativeVote binding metadata) := do
+  let source ← deriveVoteSource binding metadata.kind
+  if bound : source.projection = metadata.projection ∧ source.contextMatches metadata.voteContext = true then
+    match bodyEncoded : source.bodyBytes with
+    | none => none
+    | some body =>
+        match contextEncoded : encodeVoteContext metadata with
+        | none => none
+        | some context =>
+            match envelopeEncoded : encodeVoteEnvelope anchor metadata (codec.hash body) with
+            | none => none
+            | some envelope =>
+                some ⟨source, body, bodyEncoded, bound.1, bound.2,
+                  context, contextEncoded, envelope, envelopeEncoded⟩
+  else none
+
+def nativeCurrent (anchor : Anchor) : RecoveryKernel.Current :=
+  ⟨asciiBytes anchor.context.parentCheckpoint, idBytes anchor.currentModelHash,
+    idBytes anchor.currentOptimizerHash⟩
+
+/-- Rechecked at first persistence, not when the candidate was constructed.
+Temporal metadata must be the authenticated native event snapshot for this call. -/
+def NativeFresh (anchor : Anchor) (metadata : VoteMetadata) (mode : RecoveryKernel.Mode)
+    (state : RecoveryKernel.State) : Prop :=
+  mode = .ready ∧ metadata.recovered = true ∧ metadata.validator = true ∧
+  state.current = nativeCurrent anchor ∧ metadata.logicalTime < anchor.context.hardDeadline ∧
+  (∀ number ∈ [anchor.context.height, anchor.context.view, metadata.logicalTime, anchor.context.hardDeadline],
+    number ≤ 9223372036854775807) ∧
+  (∀ name ∈ [anchor.context.round, anchor.context.epoch, anchor.context.parentCheckpoint],
+    validIdentifier name = true) ∧
+  (∀ name ∈ [metadata.actor, metadata.voteContext], 0 < name.toList.length ∧ name.toList.length ≤ 256) ∧
+  (∀ hash ∈ [anchor.authority.id, anchor.currentModelHash, anchor.currentOptimizerHash], hash.length = 32)
+
+instance (anchor metadata mode state) : Decidable (NativeFresh anchor metadata mode state) := by
+  unfold NativeFresh; infer_instance
+
+/-- A pre-WAL internal record with proof-producing arithmetic/encoding evidence.
+It is not an externally sendable receipt, native ABI result, or completed append. -/
+structure NativePrepared {codec store trust anchor} (binding : Binding codec trust anchor store)
+    (voteTrust : NativeVoteTrust) (metadata : VoteMetadata) (mode : RecoveryKernel.Mode)
+    (state : RecoveryKernel.State) (request : Bytes) where
+  expected : ExpectedNativeVote binding metadata
+  metadataAuthenticated : voteTrust.authenticated anchor metadata
+  fresh : NativeFresh anchor metadata mode state
+  first : RecoveryKernel.lookup state.votes expected.context = none
+  requestMatches : request = expected.command
+  commandBound : request.length ≤ 4194304
+  receipt : Bytes
+  receiptEncoded : encodeDiagnosticReceipt codec expected.command expected.envelope expected.effect
+    (state.votes.length + 1) = some receipt
+
+def NativePrepared.record {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {voteTrust metadata mode state request} (prepared : NativePrepared binding voteTrust metadata mode state request) :
+    RecoveryKernel.Record :=
+  ⟨prepared.expected.data, state.votes.length + 1, prepared.receipt, prepared.expected.effect⟩
+
+def prepareNativeFirst {codec store trust anchor} (binding : Binding codec trust anchor store)
+    (voteTrust : NativeVoteTrust) (metadata : VoteMetadata)
+    (authenticated : voteTrust.authenticated anchor metadata) (mode : RecoveryKernel.Mode)
+    (state : RecoveryKernel.State) (request : Bytes) :
+    Option (NativePrepared binding voteTrust metadata mode state request) := do
+  if fresh : NativeFresh anchor metadata mode state then
+    let expected ← deriveExpectedNativeVote binding metadata
+    if checked : RecoveryKernel.lookup state.votes expected.context = none ∧
+        request = expected.command ∧ request.length ≤ 4194304 then
+      match encoded : encodeDiagnosticReceipt codec expected.command expected.envelope expected.effect
+          (state.votes.length + 1) with
+      | none => none
+      | some receipt =>
+          some ⟨expected, authenticated, fresh, checked.1, checked.2.1, checked.2.2, receipt, encoded⟩
+    else none
+  else none
+
+theorem voteSourceBytesUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore kind}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : VoteSource leftBinding kind) (right : VoteSource rightBinding kind) :
+    left.bodyBytes = right.bodyBytes := by
+  cases left with
+  | parameter result =>
+      cases right with
+      | parameter other =>
+          simp only [VoteSource.bodyBytes, derivedParameterBodyUnique collisionFree result other]
+  | apply result =>
+      cases right with
+      | apply other =>
+          simp only [VoteSource.bodyBytes, (nativeApplyBodyAndBytesUnique collisionFree result other).2]
+
+theorem expectedVoteBytesUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore metadata}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : ExpectedNativeVote leftBinding metadata) (right : ExpectedNativeVote rightBinding metadata) :
+    left.body = right.body ∧ left.command = right.command ∧ left.context = right.context ∧
+    left.envelope = right.envelope ∧ left.effect = right.effect ∧ left.data = right.data := by
+  have sources := voteSourceBytesUnique collisionFree left.source right.source
+  have body := left.bodyEncoded
+  rw [sources] at body
+  have sameBody := Option.some.inj (body.symm.trans right.bodyEncoded)
+  have context := Option.some.inj (left.contextEncoded.symm.trans right.contextEncoded)
+  have envelope := left.envelopeEncoded
+  rw [sameBody] at envelope
+  have sameEnvelope := Option.some.inj (envelope.symm.trans right.envelopeEncoded)
+  exact ⟨sameBody, by simp [ExpectedNativeVote.command, sameBody], context, sameEnvelope,
+    by simp [ExpectedNativeVote.effect, sameEnvelope],
+    by simp [ExpectedNativeVote.data, ExpectedNativeVote.command, sameBody, context]⟩
+
+theorem nativePreparedIdentity {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {voteTrust metadata mode state request} (prepared : NativePrepared binding voteTrust metadata mode state request) :
+    prepared.record.data.command = request ∧ prepared.record.data.authority = idBytes anchor.authority.id ∧
+    prepared.record.sequence = state.votes.length + 1 ∧
+    prepared.record.effect = encodeDiagnosticEffect prepared.expected.envelope ∧
+    encodeDiagnosticReceipt codec request prepared.expected.envelope prepared.record.effect
+      prepared.record.sequence = some prepared.record.receipt := by
+  refine ⟨prepared.requestMatches.symm, rfl, rfl, rfl, ?_⟩
+  simpa only [prepared.requestMatches, NativePrepared.record] using prepared.receiptEncoded
+
+theorem nativePreparedFresh {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {voteTrust metadata mode state request} (prepared : NativePrepared binding voteTrust metadata mode state request) :
+    mode = .ready ∧ metadata.recovered = true ∧ metadata.validator = true ∧
+    state.current = nativeCurrent anchor ∧ metadata.logicalTime < anchor.context.hardDeadline := by
+  exact ⟨prepared.fresh.1, prepared.fresh.2.1, prepared.fresh.2.2.1,
+    prepared.fresh.2.2.2.1, prepared.fresh.2.2.2.2.1⟩
+
+theorem nativePreparedRecordUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore voteTrust metadata mode state request}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : NativePrepared leftBinding voteTrust metadata mode state request)
+    (right : NativePrepared rightBinding voteTrust metadata mode state request) : left.record = right.record := by
+  obtain ⟨_, command, _, envelope, effect, data⟩ :=
+    expectedVoteBytesUnique collisionFree left.expected right.expected
+  have encoded := left.receiptEncoded
+  rw [command, envelope, effect] at encoded
+  have receipt := Option.some.inj (encoded.symm.trans right.receiptEncoded)
+  simp only [NativePrepared.record, data, receipt, effect]
+
+theorem nativeFirstRejectsMismatch {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {voteTrust metadata mode state request} {expected : ExpectedNativeVote binding metadata}
+    (authenticated : voteTrust.authenticated anchor metadata)
+    (derived : deriveExpectedNativeVote binding metadata = some expected)
+    (different : request ≠ expected.command) :
+    prepareNativeFirst binding voteTrust metadata authenticated mode state request = none := by
+  simp [prepareNativeFirst, derived, different]
+
+theorem nativeFirstRejectsUnready {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {voteTrust metadata mode state request} (authenticated : voteTrust.authenticated anchor metadata)
+    (unready : ¬ NativeFresh anchor metadata mode state) :
+    prepareNativeFirst binding voteTrust metadata authenticated mode state request = none := by
+  simp [prepareNativeFirst, unready]
+
+theorem nativeFirstRejectsExisting {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {voteTrust metadata mode state request} {expected : ExpectedNativeVote binding metadata}
+    (authenticated : voteTrust.authenticated anchor metadata)
+    (derived : deriveExpectedNativeVote binding metadata = some expected)
+    (existing : RecoveryKernel.lookup state.votes expected.context ≠ none) :
+    prepareNativeFirst binding voteTrust metadata authenticated mode state request = none := by
+  simp [prepareNativeFirst, derived, existing]
+
+theorem nativePreparedHashPreimages {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (hashAdapter : HashAdapter codec) {voteTrust metadata mode state request}
+    (prepared : NativePrepared binding voteTrust metadata mode state request) :
+    codec.hash prepared.record.data.command =
+      hashAdapter.sha256 (artifactHashInput request) ∧
+    codec.hash prepared.record.effect = hashAdapter.sha256 (artifactHashInput prepared.expected.effect) := by
+  rw [(nativePreparedIdentity prepared).1]
+  exact ⟨hashAdapter.artifact _, hashAdapter.artifact _⟩
+
+/-- The checked native graph loader must produce a Binding before this path is
+available. No missing graph is replaced with an empty/default mathematical input. -/
+def prepareNativeAvailable {codec store trust anchor}
+    (available : Option (Binding codec trust anchor store)) (voteTrust : NativeVoteTrust)
+    (metadata : VoteMetadata) (authenticated : voteTrust.authenticated anchor metadata)
+    (mode : RecoveryKernel.Mode) (state : RecoveryKernel.State) (request : Bytes) :
+    Option RecoveryKernel.Record := do
+  let binding ← available
+  (prepareNativeFirst binding voteTrust metadata authenticated mode state request).map NativePrepared.record
+
+theorem nativeMissingAuthorityRejected {codec store trust anchor voteTrust metadata mode state request}
+    (authenticated : voteTrust.authenticated anchor metadata) :
+    prepareNativeAvailable (codec := codec) (store := store) (trust := trust)
+      none voteTrust metadata authenticated mode state request = none := rfl
+
+theorem nativeAvailableRecordHasDerivation {codec store trust anchor}
+    {available : Option (Binding codec trust anchor store)} {voteTrust metadata mode state request record}
+    (authenticated : voteTrust.authenticated anchor metadata)
+    (accepted : prepareNativeAvailable available voteTrust metadata authenticated mode state request = some record) :
+    ∃ binding, available = some binding ∧
+      ∃ prepared : NativePrepared binding voteTrust metadata mode state request,
+        prepareNativeFirst binding voteTrust metadata authenticated mode state request = some prepared ∧
+        record = prepared.record := by
+  cases supplied : available with
+  | none => simp [prepareNativeAvailable, supplied] at accepted
+  | some binding =>
+      simp only [prepareNativeAvailable, supplied] at accepted
+      change (prepareNativeFirst binding voteTrust metadata authenticated mode state request).map
+        NativePrepared.record = some record at accepted
+      cases prepared : prepareNativeFirst binding voteTrust metadata authenticated mode state request with
+      | none => simp [prepared] at accepted
+      | some result =>
+          rw [prepared] at accepted
+          exact ⟨binding, rfl, result, prepared, (Option.some.inj accepted).symm⟩
+
+end DeltaReduce.NativeBinding

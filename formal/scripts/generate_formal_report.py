@@ -445,6 +445,14 @@ def main() -> int:
             "receipt/effect bytes. No production parser/exporter/WAL run is claimed; "
             "the mandatory native recovery bridge, arbitrary snapshots and repair "
             "remain open.",
+            "The native pre-WAL layer derives first PARAMETER/APPLY records and exact "
+            "diagnostic command/effect/receipt bytes, proves independent-store identity "
+            "and checks current pointers, role, deadline, recovery and canonical equality. "
+            "Its 46 kernel examples compute three records from the anchored graph. "
+            "Metadata provenance, the general replay adapter, initial-prefix relation "
+            "and physical native WAL remain open; these preparation helpers do not "
+            "discharge nativeArithmeticRecoveryRefines. Input decoding is still a "
+            "twelve-string finite codec, with additional output hash samples only.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

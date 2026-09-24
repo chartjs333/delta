@@ -53,6 +53,14 @@ PARAMETER/APPLY inputs and public witnesses is still missing; these helpers do N
 discharge `nativeArithmeticRecoveryRefines`. See
 `formal/proposals/recovery-kernel-proof.md` for exact example and assumption scope.
 
+The native pre-WAL bridge now derives complete PARAMETER/APPLY records and exact
+diagnostic command/envelope/effect/receipt bytes from the authenticated graph,
+checks current pointers/role/time/readiness and rejects first-admission conflicts.
+Its independent-store PARAMETER identity does not require a later aggregate.
+These helpers still do not instantiate the general replay adapter or establish
+initial-prefix/native exporter provenance; `nativeArithmeticRecoveryRefines`
+remains OPEN. Scope: `formal/proposals/native-prewal-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

@@ -62,6 +62,19 @@ def generate(source=SOURCE, target=TARGET):
     )
     expected_bodies = [witness.expected_parameter(*key) for key in witness.assignments]
     expected_apply = witness.expected_apply(expected_bodies)
+    # Additional finite output-hash samples for the diagnostic receipt bridge.
+    # Input decoding/collision coverage remains the same twelve artifact strings.
+    output_bytes = [native.canonical(value) for value in [*expected_bodies, expected_apply]]
+    for observation in bundle["operations"].values():
+        command = observation["command_ascii"]
+        effect = observation["effect_ascii"]
+        if command is not None:
+            native.decode(command.encode("ascii"))
+            output_bytes.append(command.encode("ascii"))
+        if effect is not None:
+            native.decode(effect.encode("ascii"))
+            output_bytes.append(effect.encode("ascii"))
+    output_bytes = sorted(set(output_bytes))
     names = {key: "a" + str(index) for index, key in enumerate(sorted(artifacts))}
     refs = {
         key: {
@@ -297,20 +310,16 @@ def generate(source=SOURCE, target=TARGET):
     lines += [
         "-- Additional exact output-byte hashes; canonical input decoding "
         "still accepts only entries.",
-        "def parameterHashes : List (Bytes × ContentId) := ["  # noqa: RUF001 (Lean product)
+        "def outputHashes : List (Bytes × ContentId) := ["  # noqa: RUF001 (Lean product)
         + ", ".join(
-            "("
-            + array(native.canonical(value))
-            + ", "
-            + content_id(native.digest(native.canonical(value)))
-            + ")"
-            for value in expected_bodies
+            "(" + array(value) + ", " + content_id(native.digest(value)) + ")"
+            for value in output_bytes
         )
         + "]",
         "def codec : Codec := {",
         "  hash := fun bytes => "
         "((entries.find? (fun e => e.2.1 == bytes)).map (fun e => e.1.id)).getD "
-        "(((parameterHashes.find? (fun e => e.1 == bytes)).map Prod.snd).getD [])",
+        "(((outputHashes.find? (fun e => e.1 == bytes)).map Prod.snd).getD [])",
         "  canonical := fun bytes => entries.any (fun e => e.2.1 == bytes)",
         "  decode := fun bytes => (entries.find? (fun e => e.2.1 == bytes)).map (fun e => e.2.2)",
         f"  valueHash := fun kind values => if kind == .model && values == {array(model)} "
