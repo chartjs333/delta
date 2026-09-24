@@ -28,16 +28,18 @@ def require(condition: bool, message: str, errors: list[str]) -> None:
         errors.append(message)
 
 
-def verify_unique_ids(
-    registry: dict[str, Any], collection: str, errors: list[str]
-) -> int:
+def verify_unique_ids(registry: dict[str, Any], collection: str, errors: list[str]) -> int:
     values = registry.get(collection)
     require(isinstance(values, list) and bool(values), f"{collection} is empty", errors)
     if not isinstance(values, list):
         return 0
     ids = [value.get("id") for value in values if isinstance(value, dict)]
     require(len(ids) == len(values), f"{collection} contains a non-object entry", errors)
-    require(all(isinstance(item, str) and item for item in ids), f"{collection} has an invalid id", errors)
+    require(
+        all(isinstance(item, str) and item for item in ids),
+        f"{collection} has an invalid id",
+        errors,
+    )
     require(len(ids) == len(set(ids)), f"{collection} contains duplicate ids", errors)
     return len(values)
 
@@ -47,12 +49,10 @@ def main() -> int:
     baseline = read_json(REPORTS / "baseline-inputs.json")
     registry = read_json(REPORTS / "formal-id-registry.json")
     coverage = (REPORTS / "coverage-matrix.md").read_text(encoding="utf-8")
-    failure_semantics = (
-        ROOT / "specs" / "000-formal-tla-spec" / "failure-semantics.md"
-    ).read_text(encoding="utf-8")
-    feature_spec = (
-        ROOT / "specs" / "000-formal-tla-spec" / "spec.md"
-    ).read_text(encoding="utf-8")
+    failure_semantics = (ROOT / "specs" / "000-formal-tla-spec" / "failure-semantics.md").read_text(
+        encoding="utf-8"
+    )
+    feature_spec = (ROOT / "specs" / "000-formal-tla-spec" / "spec.md").read_text(encoding="utf-8")
 
     require(
         baseline.get("formal_semantics_version")
@@ -76,7 +76,9 @@ def main() -> int:
             if not isinstance(relative_path, str) or not isinstance(expected_hash, str):
                 errors.append("baseline input path/hash is invalid")
                 continue
-            require(relative_path not in seen_paths, f"duplicate input path: {relative_path}", errors)
+            require(
+                relative_path not in seen_paths, f"duplicate input path: {relative_path}", errors
+            )
             seen_paths.add(relative_path)
             source_path = ROOT / relative_path
             require(source_path.is_file(), f"missing input: {relative_path}", errors)
@@ -192,9 +194,7 @@ def main() -> int:
         "AllQCVotesPersisted",
     }
     registered_invariants = {
-        entry.get("name")
-        for entry in registry.get("invariants", [])
-        if isinstance(entry, dict)
+        entry.get("name") for entry in registry.get("invariants", []) if isinstance(entry, dict)
     }
     require(
         required_invariants == registered_invariants,
@@ -237,6 +237,7 @@ def main() -> int:
         "PO-A1",
         "PO-A2",
         "PO-A3",
+        "PO-A4",
         "PO-H1",
         "PO-H2",
         "PO-C1",

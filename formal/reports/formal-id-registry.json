@@ -448,6 +448,10 @@
       "name": "Rational common-denominator safety"
     },
     {
+      "id": "PO-A4",
+      "name": "Ordered checked arithmetic and asymmetric signed bounds"
+    },
+    {
       "id": "PO-H1",
       "name": "Exact partition"
     },

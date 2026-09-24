@@ -201,3 +201,50 @@ witness, heterogeneous arithmetic and parametric proofs listed above.
 The user additionally requested connected Admin/Presentation workflows with
 a shared disk-backed local profile (accounts later). That presentation work
 continues in the separate presentation worktree; keep baseline c8aea649 intact.
+
+## September 24: parametric ordered arithmetic kernel
+
+T044/T048/T049: added PO-A4 to the mandatory proof imports, registry, coverage,
+normative obligation and axiom audit. `ArithmeticKernel.lean` proves soundness,
+completeness and exact rejection of checked accumulation over arbitrary ordered
+integer lists. Product and accumulator widths are independent; quantum
+conversion separately checks intermediate and output widths. The kernel includes
+INT64_MIN, signed half ties, intermediate overflow hidden by cancellation and
+the per-domain-rounding counterexample. This is integer reasoning, not an
+artifact decoder, coefficient derivation or PO-AB1 discharge.
+
+All 13 registered statements compiled with pinned Lean 4.32.1/Std and only the
+declared standard axioms. Five source mutations fail the original proofs, and
+five separate concrete counterexample theorems compile. The runner verifies the
+locked compiler archive and that the executable matches its archive member.
+Evidence: `formal/proposals/evidence/arithmetic-kernel.json`. No new TLA action
+or production runtime was changed; the earlier finite-model evidence keeps its
+original scope.
+
+The 72 formal tooling tests and regenerated 9 legal / 31 illegal trace fixtures
+pass. The trace witnesses still do not establish arithmetic input binding.
+The full proof audit does not pass: PO-AB1's four production theorems remain
+absent, this worktree has no materialized mathlib/Lake package cache, and the
+default `lake` executable is not on PATH. The scoped check uses the explicit
+pinned executable and does not claim the full project was built. `make` is also
+not on PATH; its first mandatory `formal-phase0` command was run directly and
+still fails on the intentionally unfrozen amendment inputs. No baseline hashes
+were changed to hide that STOP.
+
+Report generation now runs phase zero before setting `baseline_inputs.verified`;
+previously it unconditionally wrote true. The new report must record false and
+NO_GO. Candidate semantics change with the imported proof source, so fixtures
+and the report receive a new ID; the historical cc98f15a authority remains
+inapplicable. No independent review, merged Formal GO, native guard removal,
+qualifying ResultQC or GO checkpoint is claimed.
+
+Next: bind concrete authoritative bytes and native pre-state into the public
+witness/schema and prove the remaining PO-AB1 conjuncts, extend heterogeneous
+TLA arithmetic, materialize/verify the pinned full proof environment, then
+refreeze only complete reviewed contracts and run the complete formal gate.
+The presentation services and current public tunnel were kept running unchanged.
+
+Current candidate semantics:
+`sha256:a9dafb262dd89c327272cc4a2376392c2f378cd3ce1deffa0c7153053ca56a34`.
+The report verifier accepts the canonical NO_GO report without errors; this
+verifies report integrity and its negative decision, not completion of the gates.

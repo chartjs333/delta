@@ -134,6 +134,21 @@ def main() -> int:
     commit, source_tree, source_clean = source_tree_status()
     registry = load_json_strict(REPORTS / "formal-id-registry.json")
     baseline = load_json_strict(REPORTS / "baseline-inputs.json")
+    phase0_run = subprocess.run(
+        [sys.executable, str(ROOT / "formal/scripts/verify_phase0.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+        timeout=60,
+    )
+    try:
+        phase0_verified = (
+            phase0_run.returncode == 0 and json.loads(phase0_run.stdout).get("status") == "PASS"
+        )
+    except (ValueError, AttributeError):
+        phase0_verified = False
     toolchains = load_json_strict(REPORTS / "toolchain-evidence.json")
     tlc = load_json_strict(REPORTS / "tlc-evidence.json")
     lean = load_json_strict(REPORTS / "lean-proof-report.json")
@@ -360,7 +375,7 @@ def main() -> int:
             "path": "formal/reports/baseline-inputs.json",
             "sha256": sha256_file(REPORTS / "baseline-inputs.json"),
             "input_bundle_sha256": baseline["input_bundle_sha256"],
-            "verified": True,
+            "verified": phase0_verified,
         },
         "toolchains": toolchain_checks,
         "model_checks": model_checks,

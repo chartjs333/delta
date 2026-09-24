@@ -154,6 +154,7 @@ configs.
 | `PO-A1` | signed product bound | parameter/apply multiply guards | `DeltaReduce/FixedPoint.lean` |
 | `PO-A2` | flat accumulator bound | parameter/APC/apply sum guards | `DeltaReduce/FixedPoint.lean` |
 | `PO-A3` | canonical reduced inputs, positive/divisible common denominator, numerator safety and all ADR-0002 rounding branches | APC/domain mixture/apply | nine named conjunct theorems in `DeltaReduce/FixedPoint.lean` |
+| `PO-A4` | ordered checked fold, independent product/output widths, quantum conversion and signed rounding | arithmetic operation graph only; native input relation remains PO-AB1 | 13 named conjuncts in `DeltaReduce/ArithmeticKernel.lean`; standalone kernel check and five guard mutants; full project build pending |
 | `PO-H1` | exact regional partition | topology and aggregate coverage preconditions | `DeltaReduce/Hierarchy.lean` |
 | `PO-H2` | hierarchical result equals flat | regional/global parameter results | `DeltaReduce/Hierarchy.lean` |
 | `PO-C1` | canonical complete coverage table | AggregateRootQC body/root | `DeltaReduce/Coverage.lean` |

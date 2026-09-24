@@ -11,13 +11,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 PROOFS = ROOT / "formal" / "proofs"
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
 from formal_artifacts import sha256_file, write_canonical_json  # noqa: E402
-
 
 OBLIGATIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
     "PO-AB1": (
@@ -51,6 +49,24 @@ OBLIGATIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
             ("round-at-or-above-half", "canonicalRoundAtOrAboveHalf"),
             ("round-half-tie-toward-positive", "canonicalRoundTieTowardPositive"),
             ("rounding-deterministic", "canonicalRoundDeterministic"),
+        ),
+    ),
+    "PO-A4": (
+        "DeltaReduce/ArithmeticKernel.lean",
+        (
+            ("ordered-accumulator-sound", "checkedAccumulateSound"),
+            ("ordered-accumulator-complete", "checkedAccumulateComplete"),
+            ("ordered-accumulator-rejects-exactly", "checkedAccumulateRejectsExactly"),
+            ("round-without-remainder-overflow", "roundWithoutDoubledRemainder"),
+            ("ordered-quantum-conversion", "checkedConvertSound"),
+            ("full-signed-minimum", "fullSignedMinimumAccepted"),
+            ("no-cancellation-around-overflow", "conversionCancellationDoesNotPermitOverflow"),
+            ("independent-conversion-output-width", "conversionOutputWidthIndependent"),
+            ("signed-half-ties", "positiveAndNegativeHalf"),
+            ("unsafe-product-rejected", "unsafeProductRejectedDespiteSafeSum"),
+            ("unsafe-prefix-rejected", "unsafePrefixRejectedDespiteSafeFinal"),
+            ("independent-product-width", "productAndAccumulatorWidthsIndependent"),
+            ("per-domain-rounding-placement", "perDomainRoundingCannotMoveAcrossMixture"),
         ),
     ),
     "PO-H1": ("DeltaReduce/Hierarchy.lean", (("exact-partition", "exactDomainShardPartition"),)),
@@ -110,9 +126,7 @@ def main() -> int:
         for conjunct_id, theorem in conjuncts:
             found = bool(re.search(rf"\btheorem\s+{re.escape(theorem)}\b", text))
             if not found:
-                errors.append(
-                    f"{proof_id} conjunct {conjunct_id} theorem {theorem} is missing"
-                )
+                errors.append(f"{proof_id} conjunct {conjunct_id} theorem {theorem} is missing")
             record: dict[str, object] = {
                 "id": f"{proof_id}:{conjunct_id}",
                 "proof_obligation_id": proof_id,
@@ -163,19 +177,13 @@ def main() -> int:
         r"'([^']+)' depends on axioms: \[([^\]]*)\]", output
     ):
         axiom_dependencies[theorem] = sorted(
-            dependency.strip()
-            for dependency in dependency_list.split(",")
-            if dependency.strip()
+            dependency.strip() for dependency in dependency_list.split(",") if dependency.strip()
         )
     for theorem in re.findall(r"'([^']+)' does not depend on any axioms", output):
         axiom_dependencies[theorem] = []
 
     reported_axioms = sorted(
-        {
-            dependency
-            for dependencies in axiom_dependencies.values()
-            for dependency in dependencies
-        }
+        {dependency for dependencies in axiom_dependencies.values() for dependency in dependencies}
     )
     unknown_axioms = sorted(set(reported_axioms) - ALLOWED_AXIOMS)
     if unknown_axioms:
@@ -195,15 +203,11 @@ def main() -> int:
             "PASS" if all(item["status"] == "PASS" for item in conjuncts) else "FAIL"
         )
         theorem_record["kernel_axioms"] = sorted(
-            {
-                axiom
-                for item in conjuncts
-                for axiom in item.get("kernel_axioms", [])
-            }
+            {axiom for item in conjuncts for axiom in item.get("kernel_axioms", [])}
         )
-    if "#print axioms" not in (
-        PROOFS / "DeltaReduce" / "AxiomAudit.lean"
-    ).read_text(encoding="utf-8"):
+    if "#print axioms" not in (PROOFS / "DeltaReduce" / "AxiomAudit.lean").read_text(
+        encoding="utf-8"
+    ):
         errors.append("axiom audit commands are missing")
 
     report = {
@@ -221,8 +225,7 @@ def main() -> int:
             "verified": sum(item["status"] == "PASS" for item in conjunct_records),
             "status": (
                 "PASS"
-                if conjunct_records
-                and all(item["status"] == "PASS" for item in conjunct_records)
+                if conjunct_records and all(item["status"] == "PASS" for item in conjunct_records)
                 else "FAIL"
             ),
         },

@@ -94,6 +94,33 @@ precondition.
 
 **Used by**: APC weights, domain mixture and ApplyArithmeticProfile.
 
+## PO-A4 — Ordered checked arithmetic and asymmetric signed bounds
+
+For any ordered list of integer `(coefficient, value)` pairs, initial accumulator
+and independent product/accumulator intervals, the checked fold accepts exactly
+when each product and each accumulator prefix (including the initial and final
+values) fits its declared interval. Acceptance yields the exact mathematical
+integer fold. This is parametric in list length, values and asymmetric bounds;
+it does not assume that a safe final value makes intermediate values safe.
+
+For rational-to-domain conversion, acceptance requires positive denominator and
+quantum components, and every product in `((N*u)*y) / ((L*v)*x)` must fit before
+rounding. The accepted result equals the specified Euclidean rounding and fits
+the signed output interval. The `r < d-r` comparison must agree with `2*r < d`
+over mathematical integers without requiring machine evaluation of `2*r`.
+
+Named kernel-checked counterexamples cover unsafe products/prefixes hidden by a
+safe final sum, independent product widths, cancellation around an overflowing
+conversion product, signed half ties, exact `INT64_MIN`, and moving per-domain
+rounding across mixture. All are mandatory axiom-audited conjuncts.
+
+**Artifact**: `formal/proofs/DeltaReduce/ArithmeticKernel.lean`.
+
+**Scope**: this integer operation graph does not establish input coefficient
+derivation, reduced fractions, canonical artifact decoding, native-state binding,
+the complete optimizer, or recovery. PO-AB1 still requires that concrete native
+admission refines these operations and satisfies all its other conjuncts.
+
 ## PO-H1 — Exact partition
 
 Let regional ticket sets `R_1 ... R_k` be pairwise disjoint and have union `J`. Prove each ticket belongs to exactly one region and every required ticket is covered.

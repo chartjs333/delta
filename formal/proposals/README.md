@@ -56,3 +56,30 @@ for its own merged source only; it cannot authorize this candidate. No independe
 reviewer attestations were fabricated. See `docs/feature010-progress.md` for the
 executed checks and remaining obligations. PR50's PARAMETER/APPLY guard remains
 until complete, reviewed and merged new formal authority exists.
+
+## September 24: ordered arithmetic kernel (T044, T048, T049)
+
+`formal/proofs/DeltaReduce/ArithmeticKernel.lean` is now imported by the mandatory
+project and registered as PO-A4 with 13 axiom-audited conjuncts. Unlike the earlier
+standalone helpers, the checked fold proves acceptance/rejection for arbitrary
+ordered lists, products and every prefix, with independent signed intervals.
+Quantum conversion checks the specified product order and a separate output
+interval. Concrete theorems include INT64_MIN and positive/negative half ties.
+
+The scoped offline runner compiles this exact module using Lean/Std, audits each
+theorem, then removes five guards/rounding rules from the same source. Original
+proofs reject every mutation; separately compiled concrete witness theorems show
+the resulting incorrect acceptance or rounding. Evidence is retained in
+`formal/proposals/evidence/arithmetic-kernel.json`.
+
+```powershell
+python formal/scripts/check_arithmetic_kernel.py `
+  --lean D:/delta/formal/toolchain/windows/lean-4.32.1-windows/bin/lean.exe `
+  --archive D:/delta/formal/toolchain/cache/lean-4.32.1-windows.zip `
+  --platform windows --output formal/proposals/evidence/arithmetic-kernel.json
+```
+
+This is not a successful full Lake/mathlib build. PO-AB1 remains open, including
+coefficient derivation and connection from authenticated bytes to this operation
+graph. TLA still has its documented uniform-input finite scope. No runtime guard,
+native decoder, certificate authority or benchmark qualification changed.
