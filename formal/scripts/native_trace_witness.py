@@ -44,7 +44,7 @@ class NativeEvidence:
         self.sha256 = expected_sha256
         # The evidence container uses the same strict canonical JSON profile.
         bundle = n.shape(n.decode(data), "schema_version snapshots artifacts operations")
-        n.require(bundle["schema_version"] == "1.2.0", "NATIVE_EVIDENCE_VERSION")
+        n.require(bundle["schema_version"] == "1.3.0", "NATIVE_EVIDENCE_VERSION")
         n.require(type(bundle["snapshots"]) is dict, "NATIVE_SNAPSHOTS")
         n.require(type(bundle["artifacts"]) is dict, "NATIVE_ARTIFACTS")
         from native_durability_witness import observation_id
@@ -70,7 +70,15 @@ class NativeEvidence:
                 value, {"$ref": "#/$defs/nativeSnapshot", "$defs": schema["$defs"]}
             )
 
-    def check(self, event: dict, contract: dict, available_parents: set[str]) -> None:
+    def check(
+        self,
+        event: dict,
+        contract: dict,
+        available_parents: set[str],
+        *,
+        prospective_sequence: int | None = None,
+        rejected: bool = False,
+    ) -> None:
         n.require(event["actor_role"] == "VALIDATOR", "NATIVE_EVENT_ROLE")
         proof = n.shape(event["arithmetic_witness"], "snapshot_id command_ascii")
         snapshot = self.snapshots.get(proof["snapshot_id"])
@@ -88,7 +96,13 @@ class NativeEvidence:
             "durable_sequence",
         ):
             n.require(
-                n.canonical(snapshot[field]) == n.canonical(event[field]), "NATIVE_EVENT_BINDING"
+                n.canonical(snapshot[field])
+                == n.canonical(
+                    prospective_sequence
+                    if field == "durable_sequence" and prospective_sequence is not None
+                    else event[field]
+                ),
+                "NATIVE_EVENT_BINDING",
             )
         n.require(snapshot["round_contract_id"] == contract["contract_id"], "NATIVE_ROUND_CONTRACT")
         n.integer(snapshot["durable_sequence"], 1)
@@ -141,6 +155,18 @@ class NativeEvidence:
         else:
             projection_id = anchor.aggregate_id
         n.require(projection_id == snapshot["projection_id"], "NATIVE_CERTIFICATE_PROJECTION")
+        if rejected:
+            try:
+                witness.admit(command.encode("ascii"))
+            except n.BindingError as error:
+                n.require(str(error) == "ARITHMETIC_RESULT_MISMATCH", "NATIVE_REJECTION_REASON")
+            else:
+                n.require(False, "NATIVE_REJECTION_NOT_JUSTIFIED")
+            n.require(
+                n.digest(n.canonical(decoded["payload"])) == event["body_hash"],
+                "NATIVE_REJECTED_BODY_HASH",
+            )
+            return
         result = witness.admit(command.encode("ascii"))
         n.require(n.digest(result) == event["body_hash"], "NATIVE_RESULT_BODY_HASH")
 
@@ -153,16 +179,33 @@ def check_native_trace(trace: dict, evidence: NativeEvidence | None) -> int:
     for event in trace["events"]:
         action = event["action_id"]
         accepted = event["outcome"] in {"ACCEPTED", "FINALIZED"}
-        if action in ACTIONS and accepted:
+        observation = evidence.operations.get(event.get("durability_witness")) if evidence else None
+        rejected = (
+            action in ACTIONS
+            and event["outcome"] == "REJECTED"
+            and isinstance(observation, dict)
+            and observation.get("stages") == ["VALIDATING", "REJECTED"]
+        )
+        interrupted = action in ACTIONS and event["outcome"] == "FAULT"
+        if action in ACTIONS and (accepted or rejected or interrupted):
             n.require(evidence is not None, "NATIVE_EVIDENCE_REQUIRED")
             n.require(event.get("arithmetic_witness") is not None, "NATIVE_WITNESS_REQUIRED")
             n.require(not current_advanced, "NATIVE_STALE_CURRENT")
-            evidence.check(event, trace["round_contract"], parents[action])
-            n.require(
-                event["durable_sequence"] > last_sequence.get(event["actor_id"], 0),
-                "NATIVE_SEQUENCE_REUSE",
+            evidence.check(
+                event,
+                trace["round_contract"],
+                parents[action],
+                prospective_sequence=(
+                    last_sequence.get(event["actor_id"], 0) + 1 if not accepted else None
+                ),
+                rejected=rejected,
             )
-            count += 1
+            if accepted:
+                n.require(
+                    event["durable_sequence"] > last_sequence.get(event["actor_id"], 0),
+                    "NATIVE_SEQUENCE_REUSE",
+                )
+                count += 1
         if accepted and action.endswith("-VOTE") and event["durable_sequence"] is not None:
             last_sequence[event["actor_id"]] = max(
                 last_sequence.get(event["actor_id"], 0), event["durable_sequence"]

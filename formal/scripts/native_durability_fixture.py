@@ -13,7 +13,7 @@ from native_durability_witness import (
 
 
 def attach_durability(trace: dict, bundle: dict) -> None:
-    bundle["schema_version"] = "1.2.0"
+    bundle["schema_version"] = "1.3.0"
     bundle["operations"] = {}
     journals, saved = {}, {}
     for event in trace["events"]:

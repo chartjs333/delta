@@ -32,7 +32,7 @@ public event body hash. Other actions retain their existing projection rules.
 The checker requires a separate `--native-evidence` file and independently
 supplied `--native-evidence-sha256`. It never reads a trusted source path or hash
 from the trace, nor synthesizes a native anchor from the command. Evidence uses
-`{schema_version,snapshots,artifacts,operations}` at evidence version `1.2.0`. Snapshot IDs hash the canonical object
+`{schema_version,snapshots,artifacts,operations}` at evidence version `1.3.0`. Snapshot IDs hash the canonical object
 under `deltareduce.native-snapshot-witness.v1` plus NUL. The public trace schema
 defines `nativeSnapshot`, `nativeAnchor` and `nativeArtifactRef`. Artifact values
 are exact canonical ASCII strings indexed by the amendment draft content ID.
@@ -114,6 +114,37 @@ record is a vote or that production WAL offsets equal this abstract sequence.
   A validated exact `NO_OP` replay with `LOOKUP,EXPOSED` makes the original vote
   available for its matching QC once; repeated replays do not add signer power.
   Delivery and certificate authentication remain explicit abstraction premises.
+- A first arithmetic-result mismatch may be observed as existing `REJECTED` with
+  `VALIDATING,REJECTED`. The graph, current anchor, contract and command envelope
+  must independently validate; recomputation must fail specifically with
+  `ARITHMETIC_RESULT_MISMATCH`. An invalid snapshot or an otherwise valid command
+  cannot justify this projection. State, journal and sequence stutter; receipt
+  and effect are null. The snapshot's sequence is the prospective next sequence,
+  while the rejected event reports the unchanged journal tip. This narrow case
+  does not yet cover every possible admission failure or malformed request.
+- A first admitted command interrupted during append may be observed as `FAULT`
+  with `VALIDATED,APPENDED,UNKNOWN`, optionally with `BARRIER_FAILED` before
+  `UNKNOWN`. It has no result, receipt or effect. Its public state root stutters;
+  its event sequence and observation's post-journal/sequence are **null**, not
+  an assertion of the old tip. The bound snapshot identifies the prospective
+  sequence from the last known prefix. Its owner's next action must be crash;
+  until resolution only crash, restart and recovery observations are supported.
+- After restart, `READ,VERIFIED_ABSENT,RECOVERED` with `ACCEPTED` resolves that
+  uncertainty to the exact old complete prefix. Only then can a fresh admitted
+  command allocate the next sequence. `READ,CORRUPT,BLOCKED` or
+  `READ,AMBIGUOUS,BLOCKED` keeps post-journal/sequence unknown and does not enable
+  any vote or retry. This bounded trace has no repair/truncation transition;
+  a blocked scan cannot later be relabeled as successful recovery. Ordinary
+  `READ,VERIFIED,RECOVERED` cannot silently resolve unknown presence to absence.
+  Complete surviving records use the retrospective unexposed-vote projection
+  above. An unresolved prefix is permitted and is counted explicitly by the
+  checker; a passing prefix never implies an absent record or successful run.
+  While unresolved, `journal_before` and `sequence_before` name the last known
+  verified prefix, not the complete physical journal at scan entry. Unknown
+  prefixes are incomplete diagnostic evidence, not a total concrete-state
+  abstraction or a discharged refinement proof. Complete surviving-record
+  projections must be separately verified and pinned; this format provides no
+  permission to rewrite previously published evidence or truncate durable data.
 - Identical canonical retry is `NO_OP`, with `LOOKUP,EXPOSED`, unchanged abstract
   state/journal/tip, original receipt/effect bytes and original receipt sequence.
   It resolves the prior admitted snapshot rather than re-admitting the old

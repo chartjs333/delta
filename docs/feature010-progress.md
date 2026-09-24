@@ -670,3 +670,51 @@ guards and Feature010 qualification remain unchanged.
 Presentation 8870, Controller 8865 and node-training 8872/node-training/ answered
 HTTP 200. Their idle instances and frozen Git snapshots were preserved. This was
 a read-only health check, not a fresh demo, GPU run or authenticated tunnel test.
+
+## September 24 continuation: unknown append outcomes and first-result rejection
+
+T053/T054/T055/T056/T057: evidence container 1.3.0 now distinguishes a rejected
+first arithmetic result from a valid command interrupted during append. A rejected
+result requires full native anchor/graph/contract binding and the specific
+ARITHMETIC_RESULT_MISMATCH from recomputation. It produces no append, receipt,
+effect or state change. A valid command or an invalid native snapshot cannot be
+used as the reason. A following correct command receives the original next
+sequence. Other first-admission failures remain outside this narrow projection.
+
+Interrupted append and failed-barrier observations keep the post-journal and
+sequence unknown (null). Missing output does not establish absence. The owner's
+next action must be crash; subsequent supported operations are restart/recovery.
+A verified absent scan binds the exact last known prefix before fresh admission.
+Corrupt and ambiguous scans remain unready, with no repair/truncation transition
+in this bounded scope. Incomplete traces preserve an explicit unresolved count.
+The old prefix at scan entry is the last verified prefix, not a claim about all
+physical bytes. A passing incomplete prefix is not a total concrete-state
+abstraction, successful run or completed refinement proof. Complete surviving
+records still require the separately pinned retrospective v1.2 projection.
+
+Validation: 127 formal tooling tests, 38 arithmetic/byte-oracle tests, 33 legal /
+112 illegal traces (81 native negative cases), Ruff and byte-exact regeneration
+of 292 fixture JSON files PASS. Twelve legal and fifteen negative cases are new.
+Three separate Python guard removals admit false rejection, false knowledge of
+the journal and promotion from a blocked scan; they are not TLA production mutants.
+All 28 TLA/Lean semantic inputs match 63510eb7fad1d5f06625b1d225e91a8e57c228b0;
+no new TLC/Lean run is claimed. Prior 28 safety/7 liveness/27 production-mutant
+results retain their original finite scope, and the Lean audit remains 41/45.
+The public schema changes the candidate semantics ID to
+`sha256:52b39ab5a70ac3cbe826b5a14558e7f7774b2c8ea1f69b874b3f7583d70b5a22`.
+Phase zero still fails for the unfrozen amendment; the report remains NO_GO.
+Evidence: `formal/proposals/evidence/uncertain-append.json`.
+
+Self-review retained explicit native provenance/certificate assumptions and
+checked that uncertainty cannot become ordinary successful recovery, blocked
+scans cannot become READY, a fresh admission is not mislabeled as replay, and
+invalid anchors cannot justify rejection. Runtime code, arithmetic guards,
+frozen demonstration refs and services are unchanged.
+
+Next substantive stage: construct the mandatory PO-AB1 graph/conversion/Apply/
+recovery proof layer, starting with independently anchored typed graph uniqueness.
+Do not count pure-function reflexivity, assumed result equality or an assumed
+uniqueness premise as the required proof. Complete native decoder/exporter/WAL
+refinement, arbitrary admission failures, initial snapshots, frozen contracts,
+clean offline reproduction and independent review remain open. No Feature010
+qualifying gate or GO checkpoint is authorized by these fixture results.

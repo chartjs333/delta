@@ -249,3 +249,27 @@ NO_GO. This is a bounded synthetic complete-record projection. Public binding
 for absent/torn/unknown outcomes, first-admission rejection without append,
 initial snapshots, native exporter provenance, physical WAL/fault execution and
 the four PO-AB1 proofs remain open.
+
+### Uncertain append and first-result rejection witnesses (T053-T057)
+
+Evidence container 1.3.0 extends the draft public checker with a first arithmetic
+result rejection over a valid, independently bound graph. Recomputing a different
+expected body is necessary; an invalid native anchor or a valid candidate cannot
+justify that rejection. It leaves state/journal/tip unchanged and returns no
+diagnostic receipt/effect. A following valid candidate receives the original next
+sequence. This does not cover every precondition/decoder failure.
+
+An interrupted append or failed barrier retains null post-journal/sequence, not
+an assertion of absence. The owning validator must crash and recover before any
+further operation. Verified absence binds the exact old prefix and permits fresh
+admission. Corrupt or ambiguous scans remain blocked; this bounded scope has no
+repair or truncation transition. Incomplete prefixes count unresolved outcomes
+explicitly. Complete surviving records retain the previous retrospective format.
+
+Twelve new legal and fifteen negative traces cover these cases for PARAMETER and
+APPLY. Three Python guard counterchecks remain separate from production TLA
+mutants. Evidence: `formal/proposals/evidence/uncertain-append.json`. This is a
+synthetic diagnostic projection, not native/fsync execution, a total abstraction
+of unknown disk bytes or independent attestation. TLA/Lean sources are unchanged;
+the four PO-AB1 conjuncts and complete native refinement remain open. Formal
+authority remains NO_GO.

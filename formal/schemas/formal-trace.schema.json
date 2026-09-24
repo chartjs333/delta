@@ -220,7 +220,7 @@
       "properties": {
         "schema_version": {"const": "1.0.0"},
         "durability_witness": {
-          "description": "Draft evidence projection v1.2: pinned journal/receipt/effect observations may record persisted but unexposed votes at durability or commit cuts. Complete unacknowledged writes require subsequent verified recovery. Such votes provide no quorum power until exact replay exposes them. Not a native WAL layout, fsync or provenance attestation.",
+          "description": "Draft evidence projection v1.3: pinned observations distinguish exposed and unexposed durable votes, pre-append arithmetic-result rejection, and unresolved append outcomes. Unknown post-journal/sequence is null; verified absence or complete surviving-record recovery is required before reuse. Corrupt/ambiguous scans remain blocked. Unexposed votes have no quorum power before exact replay. Not a native WAL layout, fsync or provenance attestation.",
           "$ref": "#/$defs/nullableContentId"
         },
         "arithmetic_witness": {

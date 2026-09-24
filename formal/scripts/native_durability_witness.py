@@ -3,6 +3,8 @@
 The receipt/effect encoding here is a versioned evidence projection, NOT the C
 ABI or production WAL format. Whole-prefix observations require a trace starting
 with an empty journal. Recovery authentication and physical crash execution are open.
+During uncertain recovery, "before" denotes the last verified prefix and unknown
+"after" fields remain null; passing an incomplete prefix does not resolve it.
 """
 
 from __future__ import annotations
@@ -25,6 +27,11 @@ UNACKNOWLEDGED_STAGES = [
     ["VALIDATED", "APPENDED", "BARRIER_FAILED", "SURVIVED_UNACKNOWLEDGED"],
 ]
 UNEXPOSED_STAGES = [PERSIST_STAGES[:3], PERSIST_STAGES[:4], *UNACKNOWLEDGED_STAGES]
+UNKNOWN_STAGES = [
+    ["VALIDATED", "APPENDED", "UNKNOWN"],
+    ["VALIDATED", "APPENDED", "BARRIER_FAILED", "UNKNOWN"],
+]
+BLOCKED_SCANS = [["READ", "CORRUPT", "BLOCKED"], ["READ", "AMBIGUOUS", "BLOCKED"]]
 
 
 def vote_exposed(event: dict, evidence) -> bool:
@@ -83,6 +90,8 @@ def check_durability_trace(trace: dict, evidence) -> dict:
     recovery: dict[str, str] = {}
     must_crash: set[str] = set()
     unacknowledged: set[str] = set()
+    # False: append outcome unknown; True: scan blocked, no repair in this scope.
+    pending: dict[str, bool] = {}
     counts = {
         "persisted": 0,
         "retried": 0,
@@ -90,6 +99,11 @@ def check_durability_trace(trace: dict, evidence) -> dict:
         "recovered": 0,
         "persisted_unexposed": 0,
         "unacknowledged": 0,
+        "admission_rejected": 0,
+        "uncertain": 0,
+        "absence_confirmed": 0,
+        "blocked_scans": 0,
+        "unresolved": 0,
     }
     for event in trace["events"]:
         action, actor, outcome = event["action_id"], event["actor_id"], event["outcome"]
@@ -100,16 +114,20 @@ def check_durability_trace(trace: dict, evidence) -> dict:
                 "DURABILITY_CRASH_REQUIRED",
             )
             must_crash.remove(actor)
+        if actor in pending:
+            n.require(
+                action in {"ACT-CRASH", "ACT-RESTART", "ACT-JOURNAL-RECOVER"},
+                "DURABILITY_UNRESOLVED_OPERATION",
+            )
         journal = journals.setdefault(actor, [])
         before = list(journal)
         key = (actor, event["vote_context_id"])
         first = saved.get(key)
         arith = action in ACTIONS
-        recovering = (
-            action == "ACT-JOURNAL-RECOVER"
-            and accepted
-            and any(owner == actor for owner, _ in saved)
+        recovering = action == "ACT-JOURNAL-RECOVER" and (
+            (accepted and any(owner == actor for owner, _ in saved)) or actor in pending
         )
+        unknown_after = False
         if arith or recovering:
             n.require(evidence is not None, "NATIVE_EVIDENCE_REQUIRED")
             observation = evidence.operations.get(event.get("durability_witness"))
@@ -151,7 +169,34 @@ def check_durability_trace(trace: dict, evidence) -> dict:
                     "DURABILITY_BODY_BINDING",
                 )
                 n.require(recovery.get(actor, "READY") == "READY", "DURABILITY_NOT_RECOVERED")
-                if accepted:
+                if outcome == "FAULT":
+                    n.require(first is None, "DURABILITY_INTERRUPTED_RETRY_UNSUPPORTED")
+                    n.require(observation["stages"] in UNKNOWN_STAGES, "DURABILITY_UNKNOWN_STAGES")
+                    n.require(
+                        event["next_state_root"] == event["prior_state_root"]
+                        and event["durable_sequence"] is None
+                        and observation["receipt_ascii"] is None
+                        and observation["effect_ascii"] is None,
+                        "DURABILITY_UNKNOWN_OUTPUT",
+                    )
+                    unknown_after = True
+                    pending[actor] = False
+                    must_crash.add(actor)
+                    counts["uncertain"] += 1
+                elif first is None and outcome == "REJECTED":
+                    n.require(
+                        observation["stages"] == ["VALIDATING", "REJECTED"],
+                        "DURABILITY_ADMISSION_REJECTION_STAGES",
+                    )
+                    n.require(
+                        event["next_state_root"] == event["prior_state_root"]
+                        and event["durable_sequence"] == len(before)
+                        and observation["receipt_ascii"] is None
+                        and observation["effect_ascii"] is None,
+                        "DURABILITY_ADMISSION_REJECTION_OUTPUT",
+                    )
+                    counts["admission_rejected"] += 1
+                elif accepted:
                     n.require(first is None, "DURABILITY_DUPLICATE_APPEND")
                     stages = observation["stages"]
                     unexposed = stages in UNEXPOSED_STAGES
@@ -218,6 +263,35 @@ def check_durability_trace(trace: dict, evidence) -> dict:
                             "DURABILITY_CONFLICT_EFFECT",
                         )
                         counts["conflicts"] += 1
+            elif actor in pending:
+                n.require(
+                    recovery.get(actor) == "RECOVERING"
+                    and proof is None
+                    and observation["receipt_ascii"] is None
+                    and observation["effect_ascii"] is None,
+                    "DURABILITY_UNKNOWN_RECOVERY_BINDING",
+                )
+                if accepted:
+                    n.require(not pending[actor], "DURABILITY_BLOCKED_SCAN_UNRESOLVED")
+                    n.require(
+                        observation["stages"] == ["READ", "VERIFIED_ABSENT", "RECOVERED"]
+                        and event["durable_sequence"] == len(before),
+                        "DURABILITY_ABSENCE_NOT_VERIFIED",
+                    )
+                    del pending[actor]
+                    counts["absence_confirmed"] += 1
+                    counts["recovered"] += 1
+                else:
+                    n.require(
+                        outcome == "BLOCKED"
+                        and observation["stages"] in BLOCKED_SCANS
+                        and event["durable_sequence"] is None
+                        and event["next_state_root"] == event["prior_state_root"],
+                        "DURABILITY_BLOCKED_SCAN_BINDING",
+                    )
+                    pending[actor] = True
+                    unknown_after = True
+                    counts["blocked_scans"] += 1
             else:
                 n.require(
                     recovery.get(actor) == "RECOVERING"
@@ -236,11 +310,17 @@ def check_durability_trace(trace: dict, evidence) -> dict:
             n.require(record_id not in journal, "DURABILITY_DUPLICATE_ENVELOPE")
             journal.append(record_id)
         if arith or recovering:
-            n.require(
-                n.canonical(observation["sequence_after"]) == n.canonical(len(journal))
-                and observation["journal_after"] == journal_root(journal),
-                "DURABILITY_JOURNAL_CHANGED",
-            )
+            if unknown_after:
+                n.require(
+                    observation["sequence_after"] is None and observation["journal_after"] is None,
+                    "DURABILITY_UNKNOWN_ASSERTS_JOURNAL",
+                )
+            else:
+                n.require(
+                    n.canonical(observation["sequence_after"]) == n.canonical(len(journal))
+                    and observation["journal_after"] == journal_root(journal),
+                    "DURABILITY_JOURNAL_CHANGED",
+                )
         if action == "ACT-CRASH" and (accepted or outcome == "FAULT"):
             recovery[actor] = "CRASHED"
         elif action == "ACT-RESTART" and accepted:
@@ -250,4 +330,5 @@ def check_durability_trace(trace: dict, evidence) -> dict:
     # An unacknowledged write cannot establish record presence on its own. The
     # retrospective projection needs the subsequent verified complete prefix.
     n.require(not unacknowledged, "DURABILITY_UNACKNOWLEDGED_UNVERIFIED")
+    counts["unresolved"] = len(pending)
     return counts

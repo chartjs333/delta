@@ -42,6 +42,11 @@ class NativeDurabilityTests(unittest.TestCase):
                 "recovered": 1,
                 "persisted_unexposed": 0,
                 "unacknowledged": 0,
+                "admission_rejected": 0,
+                "uncertain": 0,
+                "absence_confirmed": 0,
+                "blocked_scans": 0,
+                "unresolved": 0,
             },
         )
         first = next(e for e in trace["events"] if e["action_id"] == "ACT-PARAM-VOTE")
@@ -73,6 +78,11 @@ class NativeDurabilityTests(unittest.TestCase):
                 "recovered": 1,
                 "persisted_unexposed": 0,
                 "unacknowledged": 0,
+                "admission_rejected": 0,
+                "uncertain": 0,
+                "absence_confirmed": 0,
+                "blocked_scans": 0,
+                "unresolved": 0,
             },
         )
 
