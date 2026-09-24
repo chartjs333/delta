@@ -14,19 +14,23 @@ mandatory proof project and its axiom audit cover all conjuncts below.
 The mandatory project's `nativeArithmeticGraphUnique` now proves the graph
 conjunct conditional on its explicitly parameterized codec and trust boundary.
 It compares independent stores, exact bytes and complete ordered paths; it does
-not assume graph/result uniqueness. This does not discharge the other three
-conjuncts or the additional concrete decoder/refinement obligations below.
+not assume graph/result uniqueness. This does not discharge the arithmetic or
+recovery conjuncts or additional concrete decoder/refinement obligations below.
 See `formal/proposals/native-graph-proof.md` for assumptions and vector scope.
 
 `ParameterKernel.lean` additionally proves coefficient derivation, ordered
 vector/prefix safety and per-coordinate conversion for mathematical input rows.
 The checked extraction layer in `ArithmeticBinding.lean` now derives eligible
 committed rows, validates their metadata/shape, and constructs the full typed
-PARAMETER body. Certified aggregate conversion and final schema placement are
-still missing, so `nativeParameterConversionSound` remains OPEN. These helper
-proofs must not be counted as that complete conjunct. Scope:
+PARAMETER body. `nativeParameterConversionSound` now additionally proves checked
+ordered whole-body aggregate comparison, per-domain conversion with INT64 output
+under either accumulator width, complete schema placement and no extra cells.
+This conjunct is conditional on the named codec/anchor/certificate premises;
+concrete native decoder/serialization/authentication and admission refinement
+remain additional mandatory obligations. APPLY and recovery conjuncts remain OPEN. Scope:
 `formal/proposals/parameter-kernel-proof.md` and
-`formal/proposals/native-parameter-body-proof.md`.
+`formal/proposals/native-parameter-body-proof.md`, followed by
+`formal/proposals/native-parameter-conversion-proof.md`.
 
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,

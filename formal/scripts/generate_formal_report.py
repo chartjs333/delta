@@ -408,17 +408,20 @@ def main() -> int:
             "stores under named canonical-codec, hash-collision, anchor/recovery and "
             "certificate premises. Its source-linked Lean byte vectors use a finite "
             "lookup decoder and synthetic trust; they do not verify a general native "
-            "parser, SHA-256 or provenance. PARAMETER conversion, APPLY and recovery "
-            "conjuncts remain open, as does concrete decoder/exporter/WAL refinement.",
+            "parser, SHA-256 or provenance. APPLY and recovery conjuncts remain open, "
+            "as does concrete decoder/exporter/WAL refinement.",
             "The PARAMETER row kernel proves coefficient derivation, ordered vector "
             "and coefficient-sum prefixes, exact coordinate refinement and quantum "
             "conversion over mathematical inputs. Checked typed-graph extraction now "
             "derives eligible committed Q rows, validates metadata/shape and constructs "
-            "the full typed PARAMETER body. Certified aggregate comparison, conversion "
-            "and final schema placement remain open; no canonical body serialization "
-            "or full native PARAMETER conjunct follows from these helpers. Conversion "
-            "success is not an extra PARAMETER admission precondition. The audited "
-            "extraction helpers use only permitted propext, Quot.sound and Classical.choice.",
+            "the full typed PARAMETER body. Conditional nativeParameterConversionSound "
+            "additionally proves exact ordered certified-body comparison, per-domain "
+            "checked conversion, INT64 output bounds, full schema placement and no extra "
+            "cells. This is soundness of the checked mathematical program under the "
+            "named codec/trust premises, not native canonical serialization, parser "
+            "completeness or admission/availability refinement. Conversion success is "
+            "not an extra PARAMETER admission precondition. Audited proof dependencies "
+            "are limited to permitted propext, Quot.sound and Classical.choice.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

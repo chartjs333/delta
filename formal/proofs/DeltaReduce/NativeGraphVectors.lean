@@ -384,4 +384,47 @@ theorem assignmentOrderRejected :
 theorem duplicateContextRejected :
     ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
       fixtureBinding.model fixtureBinding.optimizer ({ parameterFrame with plan := { parameterFrame.plan with assignments := parameterFrame.plan.assignments.map (fun a => { a with context := "x" }) } }) := by decide
+def expectedBodies : List ParameterBody := [({ kind := "PARAMETER_EXPECTED", authorityId := [250,55,43,106,157,245,129,13,147,40,249,240,158,189,2,255,19,154,129,71,81,92,108,23,147,196,71,25,106,207,212,179], context := "NORMAL-PARAM-D1-S1:round-1", domain := "d1", shard := "s1", denominator := 1, numerators := [1], inputLeafIds := [[124,173,244,100,240,105,29,120,162,171,114,234,195,204,40,197,102,150,19,239,165,80,173,165,205,47,113,197,36,14,99,54]] } : ParameterBody), ({ kind := "PARAMETER_EXPECTED", authorityId := [250,55,43,106,157,245,129,13,147,40,249,240,158,189,2,255,19,154,129,71,81,92,108,23,147,196,71,25,106,207,212,179], context := "NORMAL-PARAM-D1-S2:round-1", domain := "d1", shard := "s2", denominator := 1, numerators := [-2], inputLeafIds := [[84,53,29,120,39,207,129,180,197,143,138,185,38,2,230,113,131,243,81,238,0,228,6,222,84,233,128,21,120,86,230,102]] } : ParameterBody)]
+theorem certifiedBodiesLoaded : (loadCertifiedParameters fixtureBinding).isSome = true := by decide
+theorem nativeConversionMatchesOracle :
+    (deriveNativeConversion fixtureBinding).map
+      (fun result => result.vectors.map (fun vector => (vector.domain, vector.values))) =
+      some [("d1", [1, -1])] := by decide
+-- Guard counterchecks use the exact same whole-payload comparison as the loader.
+theorem certificateSubsetRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate anchor.authority.id expectedBodies.tail) := by decide
+theorem certificateDuplicateRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate anchor.authority.id (expectedBodies ++ expectedBodies)) := by decide
+theorem certificateReorderedRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate anchor.authority.id expectedBodies.reverse) := by decide
+theorem certificateAuthorityRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate [] expectedBodies) := by decide
+theorem certificateDenominatorAliasRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate anchor.authority.id (expectedBodies.map (fun p => { p with denominator := p.denominator * 2, numerators := p.numerators.map (· * 2) }))) := by decide
+theorem certificateContextRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate anchor.authority.id (expectedBodies.map (fun p => { p with context := "other" }))) := by decide
+theorem certificateLeavesRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate anchor.authority.id (expectedBodies.map (fun p => { p with inputLeafIds := [] }))) := by decide
+theorem certificateNumeratorsRejected :
+    ¬ AggregateMatches anchor.authority.id expectedBodies (.aggregate anchor.authority.id (expectedBodies.map (fun p => { p with numerators := p.numerators.map (· + 1) }))) := by decide
+def shuffledCells : List PlacedCell := [⟨"d", 2, 30⟩, ⟨"d", 0, 10⟩, ⟨"d", 1, 20⟩]
+theorem placementUsesSchemaOrder :
+    (placeCoordinates shuffledCells "d" [0, 1, 2]).map Subtype.val = some [10, 20, 30] := by decide
+theorem missingCellRejected :
+    (placeCoordinates shuffledCells "d" [0, 1, 2, 3]).isNone = true := by decide
+theorem duplicateCellRejected :
+    (uniqueCell (shuffledCells ++ shuffledCells) "d" 0).isNone = true := by decide
+theorem wrongDomainCellRejected :
+    (uniqueCell shuffledCells "other" 0).isNone = true := by decide
+theorem int128ConversionOutputMustFitInt64 :
+    (convertParameterValues { fixtureBinding.profile with accumulatorBits := 128 }
+      { firstAssignment with quantum := ⟨2, 1⟩ } [9223372036854775807]).isNone = true := by decide
+theorem int128ConversionSignedMinimum :
+    (convertParameterValues { fixtureBinding.profile with accumulatorBits := 128 }
+      { firstAssignment with quantum := ⟨1, 1⟩ } [-9223372036854775808]).map Subtype.val =
+      some [-9223372036854775808] := by decide
+theorem conversionFailureDoesNotDisableParameter :
+    ParameterKernel.checkedParameter (-170141183460469231731687303715884105728)
+      170141183460469231731687303715884105727 minInput maxInput 1 1
+      [⟨1, 1, [9223372036854775807]⟩] = some [9223372036854775807] := by decide
 end DeltaReduce.NativeGraphVectors

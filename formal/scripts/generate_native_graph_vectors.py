@@ -615,6 +615,111 @@ def generate(source=SOURCE, target=TARGET):
             "    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile",
             f"      fixtureBinding.model fixtureBinding.optimizer ({frame_arg}) := by decide",
         ]
+    # Independent Python checks for the native INT64 output boundary under INT128
+    # accumulation; the PARAMETER numerator remains valid before conversion.
+    maximum = (1 << 63) - 1
+    assert native.arithmetic.parameter(
+        (("t", (1, 1), (maximum,)),), native_ticket_ids=("t",), denominator=1, bits=128
+    ) == (maximum,)
+    try:
+        native.arithmetic.domain_vector((maximum,), 1, q_quantum=(2, 1), bits=128)
+    except native.BindingError as error:
+        assert str(error) == "OVERFLOW"
+    else:
+        raise AssertionError("INT128 conversion output must still fit INT64")
+    assert native.arithmetic.domain_vector((-(1 << 63),), 1, bits=128) == (-(1 << 63),)
+    expected_bodies = [witness.expected_parameter(*key) for key in witness.assignments]
+    witness.expected_apply(expected_bodies)
+    domain_values = {domain: [0] * witness.size for domain in witness.domains}
+    for parameter_body in expected_bodies:
+        key = (parameter_body["domain"], parameter_body["shard"])
+        spec = witness.assignments[key]
+        values = native.arithmetic.domain_vector(
+            tuple(parameter_body["numerators"]),
+            parameter_body["denominator"],
+            q_quantum=tuple(spec["quantum"]),
+            apply_quantum=witness.quantum,
+            bits=witness.profile["accumulator_bits"],
+        )
+        offset, width = witness.shards[key[1]]
+        domain_values[key[0]][offset : offset + width] = values
+    expected_vectors = (
+        "["
+        + ", ".join(
+            "(" + string(domain) + ", " + array(values) + ")"
+            for domain, values in domain_values.items()
+        )
+        + "]"
+    )
+    lines += [
+        f"def expectedBodies : List ParameterBody := {array(expected_bodies, body)}",
+        "theorem certifiedBodiesLoaded : "
+        "(loadCertifiedParameters fixtureBinding).isSome = true := by decide",
+        "theorem nativeConversionMatchesOracle :",
+        "    (deriveNativeConversion fixtureBinding).map",
+        "      (fun result => result.vectors.map (fun vector => (vector.domain, vector.values))) =",
+        f"      some {expected_vectors} := by decide",
+        "-- Guard counterchecks use the exact same whole-payload comparison as the loader.",
+    ]
+    for name, changed in (
+        ("certificateSubset", ".aggregate anchor.authority.id expectedBodies.tail"),
+        (
+            "certificateDuplicate",
+            ".aggregate anchor.authority.id (expectedBodies ++ expectedBodies)",
+        ),
+        ("certificateReordered", ".aggregate anchor.authority.id expectedBodies.reverse"),
+        ("certificateAuthority", ".aggregate [] expectedBodies"),
+        (
+            "certificateDenominatorAlias",
+            ".aggregate anchor.authority.id (expectedBodies.map "
+            "(fun p => { p with denominator := p.denominator * 2, "
+            "numerators := p.numerators.map (· * 2) }))",
+        ),
+        (
+            "certificateContext",
+            ".aggregate anchor.authority.id (expectedBodies.map "
+            '(fun p => { p with context := "other" }))',
+        ),
+        (
+            "certificateLeaves",
+            ".aggregate anchor.authority.id (expectedBodies.map "
+            "(fun p => { p with inputLeafIds := [] }))",
+        ),
+        (
+            "certificateNumerators",
+            ".aggregate anchor.authority.id (expectedBodies.map "
+            "(fun p => { p with numerators := p.numerators.map (· + 1) }))",
+        ),
+    ):
+        lines += [
+            f"theorem {name}Rejected :",
+            f"    ¬ AggregateMatches anchor.authority.id expectedBodies ({changed}) := by decide",
+        ]
+    lines += [
+        'def shuffledCells : List PlacedCell := [⟨"d", 2, 30⟩, ⟨"d", 0, 10⟩, ⟨"d", 1, 20⟩]',
+        "theorem placementUsesSchemaOrder :",
+        '    (placeCoordinates shuffledCells "d" [0, 1, 2]).map Subtype.val '
+        "= some [10, 20, 30] := by decide",
+        "theorem missingCellRejected :",
+        '    (placeCoordinates shuffledCells "d" [0, 1, 2, 3]).isNone = true := by decide',
+        "theorem duplicateCellRejected :",
+        '    (uniqueCell (shuffledCells ++ shuffledCells) "d" 0).isNone = true := by decide',
+        "theorem wrongDomainCellRejected :",
+        '    (uniqueCell shuffledCells "other" 0).isNone = true := by decide',
+        "theorem int128ConversionOutputMustFitInt64 :",
+        "    (convertParameterValues { fixtureBinding.profile with accumulatorBits := 128 }",
+        "      { firstAssignment with quantum := ⟨2, 1⟩ } [9223372036854775807])"
+        ".isNone = true := by decide",
+        "theorem int128ConversionSignedMinimum :",
+        "    (convertParameterValues { fixtureBinding.profile with accumulatorBits := 128 }",
+        "      { firstAssignment with quantum := ⟨1, 1⟩ } [-9223372036854775808])"
+        ".map Subtype.val =",
+        "      some [-9223372036854775808] := by decide",
+        "theorem conversionFailureDoesNotDisableParameter :",
+        "    ParameterKernel.checkedParameter (-170141183460469231731687303715884105728)",
+        "      170141183460469231731687303715884105727 minInput maxInput 1 1",
+        "      [⟨1, 1, [9223372036854775807]⟩] = some [9223372036854775807] := by decide",
+    ]
     target.write_text(
         "\n".join([*lines, "end DeltaReduce.NativeGraphVectors", ""]),
         encoding="utf-8",

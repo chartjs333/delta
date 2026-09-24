@@ -710,3 +710,436 @@ theorem derivedParameterCoordinateRefines {codec store trust anchor}
     result.computed index within
 
 end DeltaReduce.NativeBinding
+
+namespace DeltaReduce.NativeBinding
+open DeltaReduce
+
+structure BoundParameter {codec store trust anchor} (binding : Binding codec trust anchor store) where
+  domain : String
+  shard : String
+  result : DerivedParameter binding domain shard
+
+def BoundParameter.key {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (entry : BoundParameter binding) : String × String := (entry.domain, entry.shard)
+
+def BoundParameter.body {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (entry : BoundParameter binding) : ParameterBody := entry.result.body
+
+inductive ParametersFor {codec store trust anchor} (binding : Binding codec trust anchor store)
+    (frame : ParameterFrame) : List (String × String) → List (BoundParameter binding) → Prop where
+  | nil : ParametersFor binding frame [] []
+  | cons (entry : BoundParameter binding) (sameFrame : entry.result.frame = frame)
+      {keys entries} (tail : ParametersFor binding frame keys entries) :
+      ParametersFor binding frame (entry.key :: keys) (entry :: entries)
+
+def deriveParametersFor {codec store trust anchor} (binding : Binding codec trust anchor store)
+    (frame : ParameterFrame) (keys : List (String × String)) :
+    Option {entries : List (BoundParameter binding) // ParametersFor binding frame keys entries} :=
+  match keys with
+  | [] => some ⟨[], .nil⟩
+  | (domain, shard) :: keys => do
+      let result ← deriveParameter binding domain shard
+      if same : result.frame = frame then
+        let tail ← deriveParametersFor binding frame keys
+        let entry : BoundParameter binding := ⟨domain, shard, result⟩
+        some ⟨entry :: tail.val, .cons entry same tail.property⟩
+      else none
+
+theorem parametersForSound {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {frame keys entries} (bound : ParametersFor binding frame keys entries) :
+    entries.map BoundParameter.key = keys ∧ ∀ entry ∈ entries, entry.result.frame = frame := by
+  induction bound with
+  | nil => exact ⟨rfl, by simp⟩
+  | cons entry same tail ih =>
+      refine ⟨by simp [ih.1], ?_⟩
+      intro other member
+      rcases List.mem_cons.mp member with equal | member
+      · subst other; exact same
+      · exact ih.2 other member
+
+structure ParameterCorpus {codec store trust anchor} (binding : Binding codec trust anchor store) where
+  frame : ParameterFrame
+  origin : FrameOrigin codec store binding.authority frame
+  validated : ParameterFrameValid binding.authority binding.profile binding.model binding.optimizer frame
+  entries : List (BoundParameter binding)
+  bound : ParametersFor binding frame (expectedKeys frame binding.profile) entries
+
+def deriveParameterCorpus {codec store trust anchor} (binding : Binding codec trust anchor store) :
+    Option (ParameterCorpus binding) := do
+  let source ← loadParameterFrame codec store binding.authority
+  if valid : ParameterFrameValid binding.authority binding.profile
+      binding.model binding.optimizer source.val then
+    let entries ← deriveParametersFor binding source.val (expectedKeys source.val binding.profile)
+    some ⟨source.val, source.property, valid, entries.val, entries.property⟩
+  else none
+
+structure CertifiedParameters {codec store trust anchor} (binding : Binding codec trust anchor store) where
+  corpus : ParameterCorpus binding
+  aggregate : Ref
+  anchored : anchor.aggregate = some aggregate
+  authenticated : trust.certificateAuthenticated aggregate
+  bytes : Bytes
+  resolved : Resolves codec store aggregate bytes
+    (.aggregate anchor.authority.id (corpus.entries.map BoundParameter.body))
+
+def AggregateMatches (authority : ContentId) (expected : List ParameterBody) (payload : Payload) : Prop :=
+  payload = .aggregate authority expected
+
+instance (authority : ContentId) (expected : List ParameterBody) (payload : Payload) :
+    Decidable (AggregateMatches authority expected payload) :=
+  inferInstanceAs (Decidable (payload = .aggregate authority expected))
+
+/-- Full ordered body comparison is checked against the authenticated aggregate;
+no caller-provided expected body or equality hypothesis is accepted. -/
+def loadCertifiedParameters {codec store trust anchor} (binding : Binding codec trust anchor store) :
+    Option (CertifiedParameters binding) := do
+  let corpus ← deriveParameterCorpus binding
+  match anchored : anchor.aggregate with
+  | none => none
+  | some aggregate =>
+      let loaded ← loadPayload codec store aggregate
+      if same : AggregateMatches anchor.authority.id
+          (corpus.entries.map BoundParameter.body) loaded.payload then
+        some ⟨corpus, aggregate, anchored, (binding.aggregateBound aggregate anchored).1,
+          loaded.bytes, by
+            change loaded.payload = .aggregate anchor.authority.id _ at same
+            simpa only [same] using loaded.resolved⟩
+      else none
+
+structure ConvertedParameter {codec store trust anchor} (binding : Binding codec trust anchor store) where
+  source : BoundParameter binding
+  values : List Int
+  computed : ParameterKernel.checkedDomainVector (accumulatorLo binding.profile)
+    (accumulatorHi binding.profile) minInput maxInput source.result.assignment.denominator
+    source.result.assignment.quantum.numerator source.result.assignment.quantum.denominator
+    binding.profile.applyQuantum.numerator binding.profile.applyQuantum.denominator
+    source.result.numerators = some values
+  outputBounds : ∀ value ∈ values, Fits minInput maxInput value
+
+/-- Intermediate arithmetic can be INT128, but native domain-vector output is
+FULL_SIGNED_INT64. This final check must not be widened to accumulator width. -/
+def convertParameterValues (profile : Profile) (assignment : Assignment) (numerators : List Int) :
+    Option {values : List Int //
+      ParameterKernel.checkedDomainVector (accumulatorLo profile) (accumulatorHi profile)
+        minInput maxInput assignment.denominator assignment.quantum.numerator
+        assignment.quantum.denominator profile.applyQuantum.numerator
+        profile.applyQuantum.denominator numerators = some values ∧
+      ∀ value ∈ values, Fits minInput maxInput value} :=
+  match _computed : ParameterKernel.checkedDomainVector (accumulatorLo profile) (accumulatorHi profile)
+      minInput maxInput assignment.denominator assignment.quantum.numerator
+      assignment.quantum.denominator profile.applyQuantum.numerator
+      profile.applyQuantum.denominator numerators with
+  | none => none
+  | some values =>
+      if bounded : ∀ value ∈ values, Fits minInput maxInput value then
+        some ⟨values, rfl, bounded⟩
+      else none
+
+def convertParameters {codec store trust anchor} (binding : Binding codec trust anchor store)
+    (sources : List (BoundParameter binding)) :
+    Option {entries : List (ConvertedParameter binding) // entries.map (·.source) = sources} :=
+  match sources with
+  | [] => some ⟨[], rfl⟩
+  | source :: sources => do
+      let values ← convertParameterValues binding.profile source.result.assignment source.result.numerators
+      let tail ← convertParameters binding sources
+      some ⟨⟨source, values.val, values.property.1, values.property.2⟩ :: tail.val,
+        by simp [tail.property]⟩
+
+theorem convertedParameterSound {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (entry : ConvertedParameter binding) :
+    entry.values.length = entry.source.result.partition.length ∧
+    ParameterKernel.ConversionTrace (accumulatorLo binding.profile) (accumulatorHi binding.profile)
+      entry.source.result.assignment.denominator entry.source.result.assignment.quantum.numerator
+      entry.source.result.assignment.quantum.denominator binding.profile.applyQuantum.numerator
+      binding.profile.applyQuantum.denominator entry.source.result.numerators entry.values ∧
+    entry.values = entry.source.result.numerators.map (fun n =>
+      round ((n * entry.source.result.assignment.quantum.numerator) * binding.profile.applyQuantum.denominator)
+        ((entry.source.result.assignment.denominator * entry.source.result.assignment.quantum.denominator) *
+          binding.profile.applyQuantum.numerator)) := by
+  obtain ⟨_, length, trace, exactValues⟩ := ParameterKernel.checkedDomainVectorSound
+    (accumulatorLo binding.profile) (accumulatorHi binding.profile) minInput maxInput
+    entry.source.result.assignment.denominator entry.source.result.assignment.quantum.numerator
+    entry.source.result.assignment.quantum.denominator binding.profile.applyQuantum.numerator
+    binding.profile.applyQuantum.denominator entry.source.result.numerators entry.values entry.computed
+  obtain ⟨_, _, shape, _⟩ := ParameterKernel.checkedParameterSound
+    (accumulatorLo binding.profile) (accumulatorHi binding.profile) minInput maxInput
+    entry.source.result.assignment.denominator entry.source.result.partition.length
+    entry.source.result.rows entry.source.result.numerators entry.source.result.computed
+  exact ⟨length.trans shape, trace, exactValues⟩
+
+structure PlacedCell where
+  domain : String
+  coordinate : Nat
+  value : Int
+  deriving DecidableEq, Repr
+
+def placeValues (domain : String) (offset : Nat) : List Int → List PlacedCell
+  | [] => []
+  | value :: values => ⟨domain, offset, value⟩ :: placeValues domain (offset + 1) values
+
+theorem placeValuesOrigin (domain : String) (offset : Nat) (values : List Int) (cell : PlacedCell) :
+    cell ∈ placeValues domain offset values ↔ cell.domain = domain ∧
+      ∃ index, values[index]? = some cell.value ∧ cell.coordinate = offset + index := by
+  induction values generalizing offset with
+  | nil => simp [placeValues]
+  | cons value values ih =>
+      constructor
+      · intro member
+        rcases List.mem_cons.mp member with equal | member
+        · subst cell; exact ⟨rfl, 0, rfl, by simp⟩
+        · obtain ⟨same, index, atIndex, coordinate⟩ := (ih (offset + 1)).mp member
+          exact ⟨same, index + 1, atIndex, by omega⟩
+      · rintro ⟨same, index, atIndex, coordinate⟩
+        cases index with
+        | zero =>
+            simp only [List.getElem?_cons_zero] at atIndex
+            have eq : cell = ⟨domain, offset, value⟩ := by
+              cases cell; simp_all
+            exact List.mem_cons.mpr (Or.inl eq)
+        | succ index =>
+            exact List.mem_cons.mpr (Or.inr ((ih (offset + 1)).mpr
+              ⟨same, index, atIndex, by omega⟩))
+
+def conversionCells {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (entries : List (ConvertedParameter binding)) : List PlacedCell :=
+  entries.flatMap (fun entry =>
+    placeValues entry.source.domain entry.source.result.partition.offset entry.values)
+
+def cellsAt (cells : List PlacedCell) (domain : String) (coordinate : Nat) : List PlacedCell :=
+  cells.filter (fun cell => cell.domain == domain && cell.coordinate == coordinate)
+
+/-- Missing or multiple placements reject. No padding or last-writer-wins. -/
+def uniqueCell (cells : List PlacedCell) (domain : String) (coordinate : Nat) :
+    Option {value : Int // cellsAt cells domain coordinate = [⟨domain, coordinate, value⟩]} :=
+  match observed : cellsAt cells domain coordinate with
+  | [cell] =>
+      if unique : cellsAt cells domain coordinate = [⟨domain, coordinate, cell.value⟩] then
+        some ⟨cell.value, by simpa only [observed] using unique⟩
+      else none
+  | _ => none
+
+inductive PlacedCoordinates (cells : List PlacedCell) (domain : String) :
+    List Nat → List Int → Prop where
+  | nil : PlacedCoordinates cells domain [] []
+  | cons {coordinate value coordinates values}
+      (unique : cellsAt cells domain coordinate = [⟨domain, coordinate, value⟩])
+      (tail : PlacedCoordinates cells domain coordinates values) :
+      PlacedCoordinates cells domain (coordinate :: coordinates) (value :: values)
+
+def placeCoordinates (cells : List PlacedCell) (domain : String) (coordinates : List Nat) :
+    Option {values : List Int // PlacedCoordinates cells domain coordinates values} :=
+  match coordinates with
+  | [] => some ⟨[], .nil⟩
+  | coordinate :: coordinates => do
+      let value ← uniqueCell cells domain coordinate
+      let tail ← placeCoordinates cells domain coordinates
+      some ⟨value.val :: tail.val, .cons value.property tail.property⟩
+
+theorem placedCoordinatesLength {cells domain coordinates values}
+    (placed : PlacedCoordinates cells domain coordinates values) : values.length = coordinates.length := by
+  induction placed with
+  | nil => rfl
+  | cons unique tail ih => simp [ih]
+
+theorem placedCoordinatesAt {cells domain coordinates values}
+    (placed : PlacedCoordinates cells domain coordinates values) (index coordinate : Nat)
+    (atIndex : coordinates[index]? = some coordinate) :
+    ∃ value, values[index]? = some value ∧
+      cellsAt cells domain coordinate = [⟨domain, coordinate, value⟩] := by
+  induction placed generalizing index with
+  | nil => simp at atIndex
+  | @cons c v cs vs unique tail ih =>
+      cases index with
+      | zero =>
+          simp only [List.getElem?_cons_zero] at atIndex
+          cases Option.some.inj atIndex
+          exact ⟨v, rfl, unique⟩
+      | succ index => exact ih index atIndex
+
+structure DomainVector (cells : List PlacedCell) (width : Nat) where
+  domain : String
+  values : List Int
+  placed : PlacedCoordinates cells domain (List.range width) values
+
+def assembleDomains (cells : List PlacedCell) (width : Nat) (names : List String) :
+    Option {vectors : List (DomainVector cells width) // vectors.map (·.domain) = names} :=
+  match names with
+  | [] => some ⟨[], rfl⟩
+  | domain :: names => do
+      let values ← placeCoordinates cells domain (List.range width)
+      let tail ← assembleDomains cells width names
+      some ⟨⟨domain, values.val, values.property⟩ :: tail.val, by simp [tail.property]⟩
+
+structure NativeConversion {codec store trust anchor} (binding : Binding codec trust anchor store) where
+  certified : CertifiedParameters binding
+  converted : List (ConvertedParameter binding)
+  convertedSources : converted.map (·.source) = certified.corpus.entries
+  vectors : List (DomainVector (conversionCells converted) certified.corpus.frame.coordinates.length)
+  vectorDomains : vectors.map (·.domain) = domains binding.profile
+
+/-- All certified bodies are checked before any conversion. Results have only
+mathematical meaning until the native decoder/admission/refinement gate closes. -/
+def deriveNativeConversion {codec store trust anchor} (binding : Binding codec trust anchor store) :
+    Option (NativeConversion binding) := do
+  let certified ← loadCertifiedParameters binding
+  let converted ← convertParameters binding certified.corpus.entries
+  let vectors ← assembleDomains (conversionCells converted.val)
+    certified.corpus.frame.coordinates.length (domains binding.profile)
+  some ⟨certified, converted.val, converted.property, vectors.val, vectors.property⟩
+
+end DeltaReduce.NativeBinding
+
+namespace DeltaReduce.NativeBinding
+open DeltaReduce
+
+theorem conversionCellOrigin {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {entries : List (ConvertedParameter binding)} {cell : PlacedCell}
+    (member : cell ∈ conversionCells entries) :
+    ∃ entry ∈ entries, entry.source.domain = cell.domain ∧
+      ∃ index, entry.values[index]? = some cell.value ∧
+        entry.source.result.partition.offset + index = cell.coordinate := by
+  obtain ⟨entry, entryMember, cellMember⟩ := List.mem_flatMap.mp member
+  obtain ⟨domain, index, value, coordinate⟩ :=
+    (placeValuesOrigin _ _ _ _).mp cellMember
+  exact ⟨entry, entryMember, domain.symm, index, value, coordinate.symm⟩
+
+theorem nativePlacementSound {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (result : NativeConversion binding)
+    (vector : DomainVector (conversionCells result.converted)
+      result.certified.corpus.frame.coordinates.length) :
+    vector.values.length = result.certified.corpus.frame.coordinates.length ∧
+    ∀ coordinate, coordinate < result.certified.corpus.frame.coordinates.length →
+      ∃ value, vector.values[coordinate]? = some value ∧
+        cellsAt (conversionCells result.converted) vector.domain coordinate =
+          [⟨vector.domain, coordinate, value⟩] ∧
+        ∃ entry ∈ result.converted, entry.source.domain = vector.domain ∧
+          ∃ index, entry.values[index]? = some value ∧
+            entry.source.result.partition.offset + index = coordinate := by
+  refine ⟨?_, ?_⟩
+  · simpa only [List.length_range] using placedCoordinatesLength vector.placed
+  · intro coordinate within
+    obtain ⟨value, atIndex, unique⟩ := placedCoordinatesAt vector.placed
+      coordinate coordinate (List.getElem?_range within)
+    have member : (⟨vector.domain, coordinate, value⟩ : PlacedCell) ∈
+        conversionCells result.converted := by
+      have filtered : (⟨vector.domain, coordinate, value⟩ : PlacedCell) ∈
+          cellsAt (conversionCells result.converted) vector.domain coordinate := by simp [unique]
+      exact (List.mem_filter.mp filtered).1
+    exact ⟨value, atIndex, unique, conversionCellOrigin member⟩
+
+/-- No hidden extra domain or out-of-schema coordinate survives conversion.
+This is derived from the corpus and partition checks, not a placement premise. -/
+theorem conversionCellsWithinSchema {codec store trust anchor}
+    {binding : Binding codec trust anchor store} (result : NativeConversion binding)
+    (cell : PlacedCell) (member : cell ∈ conversionCells result.converted) :
+    cell.domain ∈ domains binding.profile ∧
+      cell.coordinate < result.certified.corpus.frame.coordinates.length := by
+  obtain ⟨entry, entryMember, domain, index, atIndex, coordinate⟩ := conversionCellOrigin member
+  have sourceMember : entry.source ∈ result.certified.corpus.entries := by
+    rw [← result.convertedSources]
+    exact List.mem_map.mpr ⟨entry, entryMember, rfl⟩
+  have corpus := parametersForSound result.certified.corpus.bound
+  have sameFrame := corpus.2 entry.source sourceMember
+  have keyMember : entry.source.key ∈ expectedKeys result.certified.corpus.frame binding.profile := by
+    rw [← corpus.1]
+    exact List.mem_map.mpr ⟨entry.source, sourceMember, rfl⟩
+  obtain ⟨d, domainMember, shardMember⟩ := List.mem_flatMap.mp keyMember
+  obtain ⟨s, _, keyEq⟩ := List.mem_map.mp shardMember
+  have sameDomain : d = entry.source.domain := congrArg Prod.fst keyEq
+  have partitionMember := entry.source.result.partitionMember
+  rw [sameFrame] at partitionMember
+  have range := result.certified.corpus.validated.2.2.2.2.1
+    entry.source.result.partition partitionMember
+  have valueIndex := (List.getElem?_eq_some_iff.mp atIndex).1
+  have shape := (convertedParameterSound entry).1
+  refine ⟨?_, ?_⟩
+  · simpa only [sameDomain, domain] using domainMember
+  · omega
+
+/-- Soundness claims over the certified bytes and all computed/placed entries.
+The fields are proved below from the checked extraction/conversion algorithms. -/
+structure NativeConversionSound {codec store trust anchor}
+    {binding : Binding codec trust anchor store} (result : NativeConversion binding) : Prop where
+  origin : FrameOrigin codec store binding.authority result.certified.corpus.frame
+  frameValidated : ParameterFrameValid binding.authority binding.profile binding.model binding.optimizer
+    result.certified.corpus.frame
+  authenticated : trust.certificateAuthenticated result.certified.aggregate
+  anchored : anchor.aggregate = some result.certified.aggregate
+  certificate : Resolves codec store result.certified.aggregate result.certified.bytes
+    (.aggregate anchor.authority.id (result.certified.corpus.entries.map BoundParameter.body))
+  exactKeys : result.certified.corpus.entries.map BoundParameter.key =
+    expectedKeys result.certified.corpus.frame binding.profile
+  exactSources : result.converted.map (·.source) = result.certified.corpus.entries
+  exactDomains : result.vectors.map (·.domain) = domains binding.profile
+  inputBinding : ∀ entry ∈ result.certified.corpus.entries,
+    RowsBound codec store binding.authority.schema entry.result.frame entry.result.assignment
+      entry.result.partition.length entry.result.assignment.contributions entry.result.rows
+  outputBounds : ∀ entry ∈ result.converted, ∀ value ∈ entry.values, Fits minInput maxInput value
+  arithmetic : ∀ entry ∈ result.converted,
+    entry.source.result.frame = result.certified.corpus.frame ∧
+    entry.source.result.rows.length =
+      (eligibleDomainTickets result.certified.corpus.frame entry.source.domain).length ∧
+    entry.source.body.numerators = ParameterKernel.exactParameterRows
+      entry.source.result.assignment.denominator
+      (List.replicate entry.source.result.partition.length 0) entry.source.result.rows ∧
+    ParameterKernel.PrefixesSafe (accumulatorLo binding.profile) (accumulatorHi binding.profile)
+      minInput maxInput entry.source.result.assignment.denominator 0
+      (List.replicate entry.source.result.partition.length 0) entry.source.result.rows ∧
+    entry.values.length = entry.source.result.partition.length ∧
+    ParameterKernel.ConversionTrace (accumulatorLo binding.profile) (accumulatorHi binding.profile)
+      entry.source.result.assignment.denominator entry.source.result.assignment.quantum.numerator
+      entry.source.result.assignment.quantum.denominator binding.profile.applyQuantum.numerator
+      binding.profile.applyQuantum.denominator entry.source.result.numerators entry.values ∧
+    entry.values = entry.source.result.numerators.map (fun n =>
+      round ((n * entry.source.result.assignment.quantum.numerator) * binding.profile.applyQuantum.denominator)
+        ((entry.source.result.assignment.denominator * entry.source.result.assignment.quantum.denominator) *
+          binding.profile.applyQuantum.numerator))
+  placement : ∀ vector ∈ result.vectors,
+    vector.values.length = result.certified.corpus.frame.coordinates.length ∧
+    ∀ coordinate, coordinate < result.certified.corpus.frame.coordinates.length →
+      ∃ value, vector.values[coordinate]? = some value ∧
+        cellsAt (conversionCells result.converted) vector.domain coordinate =
+          [⟨vector.domain, coordinate, value⟩] ∧
+        ∃ entry ∈ result.converted, entry.source.domain = vector.domain ∧
+          ∃ index, entry.values[index]? = some value ∧
+            entry.source.result.partition.offset + index = coordinate
+  noExtras : ∀ cell ∈ conversionCells result.converted,
+    cell.domain ∈ domains binding.profile ∧
+      cell.coordinate < result.certified.corpus.frame.coordinates.length
+
+theorem conversionSound {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (result : NativeConversion binding) : NativeConversionSound result := by
+  have corpus := parametersForSound result.certified.corpus.bound
+  refine ⟨result.certified.corpus.origin, result.certified.corpus.validated,
+    result.certified.authenticated, result.certified.anchored, result.certified.resolved,
+    corpus.1, result.convertedSources, result.vectorDomains,
+    (fun entry _ => entry.result.boundRows), (fun entry _ => entry.outputBounds), ?_, ?_, ?_⟩
+  · intro entry member
+    have sourceMember : entry.source ∈ result.certified.corpus.entries := by
+      rw [← result.convertedSources]; exact List.mem_map.mpr ⟨entry, member, rfl⟩
+    have sameFrame := corpus.2 entry.source sourceMember
+    obtain ⟨_, _, _, _, _, _, _, count, _, exactRows, prefixes⟩ :=
+      derivedParameterBodySound entry.source.result
+    obtain ⟨shape, trace, exactValues⟩ := convertedParameterSound entry
+    rw [sameFrame] at count
+    exact ⟨sameFrame, count, exactRows, prefixes, shape, trace, exactValues⟩
+  · intro vector _; exact nativePlacementSound result vector
+  · exact conversionCellsWithinSchema result
+
+end DeltaReduce.NativeBinding
+
+namespace DeltaReduce
+open NativeBinding
+
+/-- Conditional PO-AB1 PARAMETER/conversion soundness. Actual success constructs
+all evidence by checking the independently anchored graph and certified bodies,
+then performing checked per-domain arithmetic and complete schema placement.
+Canonical native decoder/serialization and authentication instantiation remain
+additional mandatory refinement obligations; this does not authorize runtime GO. -/
+theorem nativeParameterConversionSound {codec store trust anchor}
+    (binding : Binding codec trust anchor store) (result : NativeConversion binding)
+    (_accepted : deriveNativeConversion binding = some result) : NativeConversionSound result :=
+  conversionSound result
+
+end DeltaReduce

@@ -60,3 +60,38 @@ class NativeGraphVectorTests(unittest.TestCase):
         key = next(iter(self.bundle["artifacts"]))
         self.bundle["artifacts"][key] += " "
         self.assert_rejected()
+
+    def replace_aggregate(self, change):
+        key = next(
+            key
+            for key, raw in self.bundle["artifacts"].items()
+            if n.decode(raw.encode("ascii"))["kind"] == "AGGREGATE_PROJECTION"
+        )
+        aggregate = n.decode(self.bundle["artifacts"].pop(key).encode("ascii"))
+        change(aggregate["payload"]["parameters"])
+        raw = n.canonical(aggregate)
+        new_key = n.digest(raw)
+        self.bundle["artifacts"][new_key] = raw.decode("ascii")
+        for snapshot in self.bundle["snapshots"].values():
+            if snapshot["anchor"].get("aggregate_id") == key:
+                snapshot["anchor"]["aggregate_id"] = new_key
+                snapshot["anchor"]["aggregate_length"] = len(raw)
+
+    def test_rehashed_certified_numerator_cannot_replace_native_computation(self):
+        def change(parameters):
+            parameters[0]["numerators"][0] += 1
+
+        self.replace_aggregate(change)
+        self.assert_rejected()
+
+    def test_equivalent_certified_fraction_is_not_a_canonical_alias(self):
+        def change(parameters):
+            parameters[0]["denominator"] *= 2
+            parameters[0]["numerators"] = [n * 2 for n in parameters[0]["numerators"]]
+
+        self.replace_aggregate(change)
+        self.assert_rejected()
+
+    def test_rehashed_certificate_order_cannot_replace_plan_order(self):
+        self.replace_aggregate(lambda parameters: parameters.reverse())
+        self.assert_rejected()

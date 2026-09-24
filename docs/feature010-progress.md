@@ -891,3 +891,59 @@ recovery, native decoder/exporter/WAL refinement, arbitrary admission failures,
 initial snapshots/repair, contract freeze, clean reproduction and independent
 review remain before new merged Formal GO. Feature010 qualification stays stopped
 and real authorities/WAN/evaluator quorum remain BLOCKED_EXTERNAL.
+
+## September 24 continuation: certified conversion and schema placement
+
+T044/T048/T049/T057/T060: `nativeParameterConversionSound` is now present in
+the mandatory Lean project and its axiom audit. Coverage advances from 42/45 to
+43/45. This is the conditional mathematical PARAMETER/conversion conjunct;
+`nativeApplyResultUnique` and `nativeArithmeticRecoveryRefines` are still missing,
+and actual native decoder/serialization/admission refinement remains mandatory.
+
+The pipeline derives every body in the exact native domain/shard matrix, resolves
+the anchored authenticated aggregate and compares its complete ordered body
+list before conversion. Each conversion preserves original quanta/denominator
+and checked product/rounding order. A separate guard retains FULL_SIGNED_INT64
+output even with INT128 accumulation. A valid PARAMETER can still precede a failed
+conversion; conversion success is not a new PARAMETER vote precondition.
+
+Placement uses source schema offsets and requires exactly one cell for every
+domain coordinate. General proofs establish source row/shard/index binding,
+prefix and conversion safety, exact vector shape/order, no gaps/duplicates and
+no cells outside the declared domains/schema. The top-level theorem packages
+these proved properties of the checked program; it does not assume expected
+results or valid rows. Its named codec/hash/anchor/certificate/recovery premises
+remain explicit. Scope: `formal/proposals/native-parameter-conversion-proof.md`.
+
+Validation: the full Lean build (965 jobs), fresh kernel/axiom checks and the new
+mandatory conjunct PASS. Overall Lean evidence remains FAIL for the two missing
+targets. New dependencies use only permitted propext/Quot.sound/Classical.choice.
+Seventeen additional finite kernel examples cover full certified conversion,
+whole-body mismatches, schema-order placement and INT128-to-INT64 boundaries.
+Three Python tests rehash incorrect certified numerators, fraction aliases and
+ordering and require rejection before generating Lean output. 139 tooling tests,
+38 oracle tests, 33 legal/112 illegal traces, Ruff and byte-exact regeneration of
+293 JSON/two Lean files PASS. Finite lookup codecs/synthetic trust remain distinct
+from actual native execution and TLA production-mutant qualification.
+
+Candidate semantics:
+`sha256:162412d26aa243bd034e04a0729f63cce15b12bc9798b8ea43cc2f7b6222f9cb`.
+Four Lean inputs changed; nineteen TLA modules and public schema are unchanged.
+No fresh TLC execution is claimed; retained 28 safety/7 liveness/27 production
+mutant results keep their finite scopes. Contract freeze, clean reproduction
+and independent reviews remain open, so the source-bound report is NO_GO.
+Evidence: `formal/proposals/evidence/native-parameter-conversion.json`.
+
+Self-review checked full body equality rather than numerator/hash-only matching,
+output-width separation, rounding before mixture, source offset placement and
+the distinction between mathematical soundness and native admission completeness.
+All three idle demos returned HTTP 200 without restart; frozen refs are unchanged.
+No native runtime, arithmetic guard or qualifying benchmark was modified.
+
+Next concrete stage: derive checked domain mixture and optimizer operations from
+these certified domain vectors and independently bound current model/optimizer,
+then prove full typed APPLY/model/optimizer result identity. Read the exact
+proposal/native operation widths and rounding sequence; do not silently widen
+outputs or reuse caller-supplied result hashes. Recovery and concrete native
+refinement, admission failures/initial snapshots/repair, contract freeze, clean
+offline reproduction and independent review still precede merged Formal GO.
