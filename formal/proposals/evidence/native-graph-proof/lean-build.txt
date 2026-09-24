@@ -1,0 +1,2 @@
+✔ [962/963] Built DeltaReduce (6.6s)
+Build completed successfully (963 jobs).

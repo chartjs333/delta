@@ -404,6 +404,12 @@ def main() -> int:
         ],
         "limitations": [
             "Finite TLC scopes do not prove unbounded state-space safety.",
+            "PO-AB1 typed graph uniqueness is proved for independently supplied complete "
+            "stores under named canonical-codec, hash-collision, anchor/recovery and "
+            "certificate premises. Its source-linked Lean byte vectors use a finite "
+            "lookup decoder and synthetic trust; they do not verify a general native "
+            "parser, SHA-256 or provenance. PARAMETER conversion, APPLY and recovery "
+            "conjuncts remain open, as does concrete decoder/exporter/WAL refinement.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

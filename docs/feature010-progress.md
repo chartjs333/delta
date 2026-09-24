@@ -718,3 +718,60 @@ uniqueness premise as the required proof. Complete native decoder/exporter/WAL
 refinement, arbitrary admission failures, initial snapshots, frozen contracts,
 clean offline reproduction and independent review remain open. No Feature010
 qualifying gate or GO checkpoint is authorized by these fixture results.
+
+## September 24 continuation: mandatory typed graph uniqueness proof
+
+T044/T048/T049/T057/T060: `formal/proofs/DeltaReduce/ArithmeticBinding.lean`
+now proves `nativeArithmeticGraphUnique`. Two independent stores resolving one
+authenticated authority have identical complete ordered path domains and exact
+bytes/typed payloads at every path. The proof covers recursively referenced Q
+shards and fixes the authority, schema, profile, plan, eligibility/contribution
+order, current model and optimizer by payload identity. It derives that result
+from lookup/content/canonical/kind checks and path induction, not from assumed
+graph/result equality or pure-function reflexivity.
+
+The codec, hash collision resistance, independent anchor/recovery authentication
+and parent certificate authentication are explicit premises. Concrete native
+parser, role/time admission, state production and cross-field arithmetic validity
+remain separate obligations. See `formal/proposals/native-graph-proof.md`.
+
+Source-linked Lean examples contain the actual twelve canonical artifact byte
+strings from the pinned synthetic native fixture, all eleven artifact kinds and
+a complete Binding. The finite lookup codec's collision premise is checked over
+its twelve accepted strings. Four kernel counterexamples reject missing Q data,
+its incomplete parent graph, wrong kinds and substituted Q bytes. These examples
+use synthetic trust and a finite decoder, not real certificates, general native
+decoding, SHA-256 verification or production TLA mutants.
+
+Validation: full Lean project build (963 jobs), fresh kernel checks and axiom
+audit PASS. The main graph theorem depends only on the permitted kernel axiom
+`propext`; named semantic/cryptographic premises remain theorem parameters.
+Mandatory conjunct coverage advances from 41/45 to 42/45. The audit correctly
+remains FAIL for PARAMETER conversion, APPLY uniqueness and recovery refinement.
+132 tooling tests, 38 oracle tests, 33 legal / 112 illegal traces, targeted Ruff,
+and byte-exact regeneration of 292 JSON files plus one Lean file PASS.
+
+Candidate semantics:
+`sha256:5497ab6e27349c75ab662338269ce77305959ab48018d135d7fd7b7243d6604b`.
+Nineteen TLA modules and the public trace schema are unchanged. No fresh TLC
+execution is claimed; retained 28 safety/7 liveness/27 production-mutant results
+keep their earlier finite scopes. The normative contract freeze still fails, so
+the source-bound report remains NO_GO. Machine evidence:
+`formal/proposals/evidence/native-graph-proof.json`.
+
+Self-review checked that graph identity is not confused with input validity,
+the independent store is not assumed equal, all referenced ordered children are
+required, and finite synthetic witnesses do not imply native authenticity.
+There is no runtime, arithmetic guard, qualifying benchmark or frozen demo ref
+change. Read-only health checks returned HTTP 200 for Presentation 8870,
+Controller 8865 and node-training 8872/node-training/; none was restarted.
+
+Next concrete stage: prove `nativeParameterConversionSound` over the typed
+authority/plan/Q inputs and the already checked integer operation graph. It must
+derive coefficients, ordered prefixes, exact domain/shard coverage and quantum
+rounding from inputs, without assuming the expected result. Then discharge APPLY
+and recovery, instantiate the native decoder/exporter/WAL relation, and complete
+arbitrary admission failure/initial snapshot/repair coverage, contract freeze,
+clean offline reproduction and independent review. Feature010 qualifying gates
+remain stopped until exact merged Formal GO; external authorities/WAN/evaluator
+quorum remain BLOCKED_EXTERNAL.

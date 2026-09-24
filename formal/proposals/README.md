@@ -273,3 +273,27 @@ synthetic diagnostic projection, not native/fsync execution, a total abstraction
 of unknown disk bytes or independent attestation. TLA/Lean sources are unchanged;
 the four PO-AB1 conjuncts and complete native refinement remain open. Formal
 authority remains NO_GO.
+
+### Mandatory typed graph proof (T044/T048/T049/T057/T060)
+
+`formal/proofs/DeltaReduce/ArithmeticBinding.lean` now proves the PO-AB1 graph
+conjunct across independent complete stores. Exact ordered paths and bytes agree,
+as do typed schema/plan/profile/current model/optimizer payloads. Hash collision
+resistance and authenticated native anchors/recovery/certificates are named
+premises; graph/result uniqueness is derived, not assumed.
+
+The source-linked `NativeGraphVectors.lean` constructs a complete twelve-node
+Binding, proves collision freedom over the finite codec's accepted byte strings,
+and rejects four corrupt/incomplete cases in the kernel. Its decoder is a lookup
+table and trust is synthetic. It is not native execution or a general parser/
+SHA-256 proof. Scope, assumptions and reproduction commands:
+`formal/proposals/native-graph-proof.md`.
+
+The full Lean project builds; fresh kernel/axiom checks verify 42/45 mandatory
+conjuncts. PARAMETER conversion, APPLY and recovery remain missing, so the audit
+and formal decision still fail closed. 132 tooling tests, 38 oracle tests,
+33 legal/112 illegal traces and stable JSON/Lean regeneration pass. TLA inputs
+are unchanged and retained TLC results are not relabeled as new executions.
+Evidence: `formal/proposals/evidence/native-graph-proof.json`. Concrete native
+refinement, frozen contracts, clean offline reproduction and independent reviews
+remain required before authority can change.

@@ -11,6 +11,13 @@ TLC explores finite behaviors. The obligations below cover claims parameterized 
 statements do not discharge this obligation. New Formal GO is blocked until the
 mandatory proof project and its axiom audit cover all conjuncts below.
 
+The mandatory project's `nativeArithmeticGraphUnique` now proves the graph
+conjunct conditional on its explicitly parameterized codec and trust boundary.
+It compares independent stores, exact bytes and complete ordered paths; it does
+not assume graph/result uniqueness. This does not discharge the other three
+conjuncts or the additional concrete decoder/refinement obligations below.
+See `formal/proposals/native-graph-proof.md` for assumptions and vector scope.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash
