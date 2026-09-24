@@ -462,6 +462,14 @@ def main() -> int:
             "Other vote kinds, full public prefix/root projection and actual metadata/"
             "QC/scan provenance remain open; nativeArithmeticRecoveryRefines is still "
             "missing. Failed effect/receipt encoding now rejects in the proof kernel.",
+            "PublicJournal adds all per-actor public vote slots, exact native arithmetic "
+            "sequences 5/6/8, computed envelope-ID prefix roots and checked append "
+            "observations. Its 41 kernel examples replay all eight original votes; "
+            "non-arithmetic native receipts remain unprojected. Other-action admission "
+            "is still an explicit premise, and the example hash adapter has 17 finite "
+            "samples. This is not the full public event/state-root/exposure/QC/crash/"
+            "scan lifecycle: nativeArithmeticRecoveryRefines remains OPEN. Admission-"
+            "only erasure of unprojected fields is not persisted receipt evidence.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

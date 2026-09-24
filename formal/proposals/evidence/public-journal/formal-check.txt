@@ -1,0 +1,1 @@
+NOT_EXECUTED: GNU make is unavailable on this host. Scoped Python/Lean/refinement checks are not the aggregate make formal-check gate. Phase0 and the missing mandatory native recovery conjunct remain failures.

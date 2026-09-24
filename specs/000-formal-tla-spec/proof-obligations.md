@@ -70,6 +70,15 @@ record. Full public trace/all-vote-prefix projection and exporter provenance are
 still missing: this bridge alone does not discharge the recovery conjunct.
 See `formal/proposals/native-replay-proof.md` for the exact assumptions and scope.
 
+`PublicJournal.lean` adds the complete ordered per-actor vote-slot projection,
+including intervening non-arithmetic envelopes, computed prefix roots and the
+original native arithmetic sequences/receipts. It derives native preparation
+for arithmetic slots and cannot admit them through its separate non-arithmetic
+authorization premise. It does not prove that premise or the full public event
+snapshot/exposure/QC/crash/scan lifecycle. Unprojected receipts remain absent.
+The recovery conjunct stays OPEN; this journal-only relation cannot replace it.
+See `formal/proposals/public-journal-proof.md` for exact scope and assumptions.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

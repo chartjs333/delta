@@ -1258,3 +1258,64 @@ recovery. The mandatory theorem must connect public vote admission and recovered
 state through the same checked native relation. Concrete input decoding/hash/
 exporter/WAL, arbitrary snapshots/failures/repair, contract freeze, clean offline
 reproduction and independent review still follow before merged Formal GO.
+
+## 2026-09-25 — Complete per-actor public vote journal (T044/T048/T049/T057/T060)
+
+`PublicJournal.lean` connects native arithmetic replay to every original vote
+slot, including CONFIG/ISC/EC/APC/ROOT. The normal validator-1 example replays all
+eight votes from an empty journal and preserves native PARAMETER/APPLY records
+at original sequences 5/6/8. It retains exact canonical envelopes, keys, order,
+receipt/effect bytes and computed public envelope-ID journal roots. No full
+public trace is renumbered. Current advancement leaves the journal unchanged.
+
+Sixteen general helpers establish checked slot admission, native preparation
+provenance, full-prefix sequence allocation, duplicate rejection, replay history,
+exact slot/key retention and computed before/after observation roots. Arithmetic
+admission rederives the bound result through NativeReplay; the other-action
+authorization callback cannot bypass it. Non-arithmetic native receipts remain
+absent because the current public witness does not project them. Their internal
+admission-only context/count view is not persisted or exposed receipt evidence.
+
+Forty-one kernel examples cover all eight encoded envelopes and nine prefix
+roots, the full vote-slot replay, original native observations, missing/renumbered
+prefixes, authorization bypass, missing graph, substituted bytes/body/actor,
+duplicate context, wrong roots, unknown tips and incorrect exposure bytes.
+Seventeen finite hash samples are not a general SHA implementation. Other-action
+authorization in examples is a finite set from a source trace first validated
+by the complete Python refinement checker; it is not a Lean phase/QC proof.
+Six generator tests require exact reproduction or reject history/epoch/sequence
+and rehashed root/receipt mutations before generating output.
+
+This is still a vote-journal projection, not the full public event lifecycle.
+Authenticated event snapshots/state roots, phase/role/QC availability, actual
+exposure/barrier ordering, crash/restart and unknown presence/absence scan
+reconstruction remain to be connected. `nativeArithmeticRecoveryRefines` stays
+OPEN (44/45 mandatory conjuncts); Formal authority is NO_GO. Unknown/null output
+must never be treated as proof that no durable vote exists.
+
+Validation: full Lean build (974 jobs), fresh public-journal/vector kernel and
+axiom checks; 167 tooling/38 oracle tests, 33 legal/112 illegal traces, targeted
+Ruff and byte-exact regeneration of 298 JSON/seven Lean files. Twenty executable
+functions, sixteen helpers and 41 examples are audited. Nineteen TLA modules and
+the public schema are unchanged; no fresh TLC or production mutant execution is
+claimed. Earlier 28 safety/7 liveness/27 production-mutant results retain their
+bounded scope. GNU make remains unavailable; scoped checks do not replace the
+aggregate formal-check. Phase0 remains failed for the unfrozen amendment.
+
+Candidate semantics:
+`sha256:7eec316735463e36bc7760ca844548a1faf6274482f6ff9d4304265cc78ef420`.
+Evidence: `formal/proposals/evidence/public-journal.json`; assumptions and exact
+scope: `formal/proposals/public-journal-proof.md`. All three demos returned HTTP
+200 without restart; frozen fallback refs are unchanged. Self-review is not an
+independent review, and no native runtime code or arithmetic guard changed.
+
+Next: extend the all-vote journal with the actual public execution lifecycle,
+preserving original per-actor sequences and independently authenticated event
+snapshots. Connect non-arithmetic phase/QC admission, canonical public state-root
+projection, exposure/SendVoteEnvelope, current advancement, crash/restart and
+exact authenticated presence/absence scans. Unknown append/barrier stays unknown
+until verified; corrupt/ambiguous scans remain blocked. Do not treat a supplied
+exposure flag, other-action admission callback or a finite fixture hash table as
+the missing proof. Then concrete bounded decoder/hash/exporter/WAL, admission
+completeness, arbitrary snapshots/failures/repair, contract freeze, clean offline
+reproduction and independent reviews remain before merged Formal GO.

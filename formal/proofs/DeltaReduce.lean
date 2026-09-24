@@ -12,6 +12,8 @@ import DeltaReduce.NativeGraphVectors
 import DeltaReduce.NativeVoteVectors
 import DeltaReduce.NativeReplay
 import DeltaReduce.NativeReplayVectors
+import DeltaReduce.PublicJournal
+import DeltaReduce.PublicJournalVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply
