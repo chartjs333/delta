@@ -27,6 +27,7 @@ All metrics below come from the checked-in deterministic config manifest and a v
 | CFG-LIVENESS-CONFIG-QC | liveness | 6 | 6 | 6 | none | 5 |
 | CFG-LIVENESS-ISC | liveness | 17 | 17 | 17 | none | 6 |
 | CFG-LIVENESS-PLAN | liveness | 26 | 26 | 26 | none | 5 |
+| CFG-LIVENESS-EVENTUAL-SYNCHRONY | liveness | 42 | 42 | 42 | APPLIED | 10 |
 | CFG-LIVENESS-VIEW-CHANGE | liveness | 7 | 7 | 7 | none | 6 |
 | CFG-LIVENESS-ABORT-QC | liveness | 7 | 7 | 7 | ABORTED | 5 |
 | CFG-NATIVE-ARITHMETIC-LIVENESS | liveness | 42 | 42 | 42 | APPLIED | 10 |
