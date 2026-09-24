@@ -5392,4 +5392,3 @@ End of statistics.
 The depth of the complete state graph search is 42.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 1 and the 95th percentile is 1).
 Finished in 19s at (2026-09-24 10:21:51)
-
