@@ -9,8 +9,8 @@ The formal model is useful only if later implementations can demonstrate that th
 canonical input bytes/IDs and the recomputed expected result. Current-state and
 certificate parentage cannot come solely from the candidate command. Recovery
 must reconstruct the same relation. The candidate public trace schema/checker
-has not yet incorporated this witness: passing existing fixtures demonstrates
-only their existing checks and cannot close amendment 0001 or authorize runtime.
+now incorporates a first-vote arithmetic witness as described below. This is
+scoped candidate evidence and cannot close amendment 0001 or authorize runtime.
 
 The required witness must describe the recovered current checkpoint at the vote
 persist boundary, not only the checkpoint used to create a candidate. A first
@@ -18,7 +18,49 @@ PARAMETER/APPLY vote after current advances must fail admission when its parent
 is stale. A replay of an already durable identical vote is distinguished from a
 new append and retains its original receipt/sequence. The focused current-binding
 TLC suffix covers this model rule before and after journal recovery; it is not
-evidence that the public trace checker already verifies the arithmetic witness.
+proof of complete arithmetic/recovery refinement.
+
+### Candidate native witness boundary (T053/T054/T056)
+
+Every event has `arithmetic_witness`, explicitly null where absent. Each accepted
+PARAMETER/APPLY first vote requires `{snapshot_id, command_ascii}`. The command
+is exact ASCII canonical draft JSON, with no whitespace, duplicate keys,
+floating-point values or alternative encodings. Its complete expected body is
+recomputed by the amendment oracle; its domain-separated hash must equal the
+public event body hash. Other actions retain their existing projection rules.
+
+The checker requires a separate `--native-evidence` file and independently
+supplied `--native-evidence-sha256`. It never reads a trusted source path or hash
+from the trace, nor synthesizes a native anchor from the command. Evidence uses
+`{schema_version,snapshots,artifacts}`. Snapshot IDs hash the canonical object
+under `deltareduce.native-snapshot-witness.v1` plus NUL. The public trace schema
+defines `nativeSnapshot`, `nativeAnchor` and `nativeArtifactRef`. Artifact values
+are exact canonical ASCII strings indexed by the amendment draft content ID.
+Bounds, kinds, byte lengths, IDs and graph edges are checked again on resolution.
+
+The snapshot binds actor, action, prior state root, immutable round-contract ID,
+vote context, native durable sequence, current checkpoint, recovered anchor,
+authority reference and certificate-to-projection mapping. Context, role,
+logical deadline, assignment coverage and current model/optimizer value hashes
+are checked independently of the request. The parent certificate must already
+be finalized in the trace. Newly accepted arithmetic votes cannot reuse an
+observed sequence or occur after current advances in this single-round trace.
+
+**Trust premise:** an actual exporter must authenticate the recovered snapshot
+and certificate/projection mapping outside the request. A digest proves bytes,
+not provenance, signatures, independent custody or durable recovery. The
+checked-in `formal/fixtures/traces/native/manifest.json` is a test registry only.
+`native_trace_fixture.py` constructs synthetic test snapshots; it is never called
+by the verifier for a supplied trace. Rehashing the whole input graph still must
+not override the separate current model/optimizer value hashes.
+
+**Remaining scope:** native snapshot production/authentication, the exact concrete
+schema-coordinate projection for arbitrary vector/domain layouts, accepted
+request-to-WAL/effect/receipt identity, exact persisted retries after current
+advance, rejected-event stutter and all crash cuts remain open. `NO_OP`/replay
+is not reclassified as a fresh vote; this checkpoint does not yet validate its
+receipt bytes/sequence. Four PO-AB1 proofs remain mandatory. Synthetic fixture
+success is neither native conformance nor a qualifying Feature010 gate.
 
 ## 2. Canonical trace event
 

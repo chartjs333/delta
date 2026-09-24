@@ -22,6 +22,7 @@ from formal_artifacts import (  # noqa: E402
     validate_trace_document,
     write_canonical_json,
 )
+from native_trace_witness import NativeEvidence, check_native_trace, n  # noqa: E402
 
 QUORUM = 3
 FINALIZE_TO_VOTE = {
@@ -179,7 +180,7 @@ def verify_quorum(
         )
 
 
-def check_trace(path: Path) -> dict[str, Any]:
+def check_trace(path: Path, native_evidence: NativeEvidence | None = None) -> dict[str, Any]:
     trace = load_json_strict(path)
     validate_trace_document(trace, ROOT)
     if path.read_bytes().removesuffix(b"\n") != canonical_json_bytes(trace):
@@ -366,11 +367,18 @@ def check_trace(path: Path) -> dict[str, Any]:
     if trace["terminal_outcome"] == "ABORTED" and not valid_abort:
         fail("ABORTED_WITHOUT_ABORT_QC", trace["trace_id"])
 
+    try:
+        native_votes = check_native_trace(trace, native_evidence)
+    except n.BindingError as error:
+        fail(str(error), trace["trace_id"])
+
     return {
         "trace_id": trace["trace_id"],
         "events": len(trace["events"]),
         "terminal_outcome": trace["terminal_outcome"],
         "required_parameter_key_count": len(required_parameter_contexts),
+        "native_arithmetic_votes_checked": native_votes,
+        "native_evidence_sha256": native_evidence.sha256 if native_evidence else None,
         "status": "PASS",
     }
 
@@ -383,12 +391,32 @@ def check_all_fixtures() -> dict[str, Any]:
     if len(illegal_paths) < 14:
         raise RuntimeError("all fourteen mandatory illegal fixtures are required")
 
-    legal = [check_trace(path) for path in legal_paths]
+    # This registry is a checked-in test input, not an independent attestation.
+    fixture_root = ROOT / "formal/fixtures/traces"
+    registry = load_json_strict(fixture_root / "native/manifest.json")
+    native_negatives = {
+        item["fixture"]: item["reason"]
+        for item in load_json_strict(fixture_root / "native/negative-expectations.json")
+    }
+    if len(native_negatives) < 21:
+        raise RuntimeError("all twenty-one native witness negative cases are required")
+
+    def check_fixture(path: Path) -> dict[str, Any]:
+        key = path.relative_to(fixture_root).as_posix()
+        record = registry[key]
+        evidence_path = fixture_root / "native" / (path.stem + ".json")
+        return check_trace(path, NativeEvidence(evidence_path, record["sha256"]))
+
+    legal = [check_fixture(path) for path in legal_paths]
     illegal: list[dict[str, Any]] = []
     for path in illegal_paths:
         try:
-            check_trace(path)
+            check_fixture(path)
         except RefinementError as error:
+            if path.name in native_negatives and error.reason != native_negatives[path.name]:
+                raise RuntimeError(
+                    f"native mutation failed for unrelated reason: {path.name}: {error.reason}"
+                ) from error
             illegal.append({"fixture": path.name, "reason": error.reason, "status": "PASS"})
         else:
             raise RuntimeError(f"illegal fixture unexpectedly refined: {path.name}")
@@ -412,12 +440,21 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("trace", nargs="?", type=Path)
     parser.add_argument("--all-fixtures", action="store_true")
+    parser.add_argument("--native-evidence", type=Path)
+    parser.add_argument("--native-evidence-sha256")
     arguments = parser.parse_args()
     if arguments.all_fixtures:
         result = check_all_fixtures()
         write_canonical_json(ROOT / "formal" / "reports" / "refinement-evidence.json", result)
     elif arguments.trace is not None:
-        result = check_trace(arguments.trace)
+        if bool(arguments.native_evidence) != bool(arguments.native_evidence_sha256):
+            parser.error("--native-evidence and --native-evidence-sha256 are required together")
+        evidence = (
+            NativeEvidence(arguments.native_evidence, arguments.native_evidence_sha256)
+            if arguments.native_evidence
+            else None
+        )
+        result = check_trace(arguments.trace, evidence)
     else:
         parser.error("provide TRACE or --all-fixtures")
     print(json.dumps(result, sort_keys=True, separators=(",", ":")))

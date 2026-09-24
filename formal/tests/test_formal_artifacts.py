@@ -217,6 +217,7 @@ def trace_document() -> dict[str, object]:
                 "outcome": "ACCEPTED",
                 "error_code": None,
                 "artifact_refs": [],
+                "arithmetic_witness": None,
             }
         ],
     }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import sys
 import tempfile
@@ -21,6 +22,8 @@ from generate_trace_fixtures import (  # noqa: E402
     qc_events,
     trace,
 )
+from native_trace_fixture import attach_fixture_witnesses  # noqa: E402
+from native_trace_witness import NativeEvidence  # noqa: E402
 
 SPEC = importlib.util.spec_from_file_location(
     "check_refinement", ROOT / "formal" / "scripts" / "check-refinement.py"
@@ -36,8 +39,15 @@ class RefinementAdmissionTests(unittest.TestCase):
     def check(self, events: list[dict[str, Any]]) -> dict[str, Any]:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "trace.json"
-            write_canonical_json(path, trace("TRACE-ADMISSION-REGRESSION", events))
-            return checker.check_trace(path)
+            document = trace("TRACE-ADMISSION-REGRESSION", events)
+            evidence = attach_fixture_witnesses(document)
+            native_path = Path(directory) / "native.json"
+            write_canonical_json(native_path, evidence)
+            native = NativeEvidence(
+                native_path, hashlib.sha256(native_path.read_bytes()).hexdigest()
+            )
+            write_canonical_json(path, document)
+            return checker.check_trace(path, native)
 
     def reject(self, events: list[dict[str, Any]], reason: str) -> None:
         with self.assertRaises(checker.RefinementError) as caught:

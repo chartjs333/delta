@@ -410,3 +410,54 @@ merged Formal GO can authorize PR50 native arithmetic admission.
 Presentation, Controller and node-training retained the same healthy process
 instances and the existing Cloudflare URL. Baseline c8aea649 and presentation
 worktree remained clean; saved results/receipts were not modified.
+
+## September 24, 11:07 UTC continuation: public native arithmetic witness
+
+T053/T054/T055/T056/T057: accepted PARAMETER/APPLY first votes now require an
+explicit public arithmetic witness. The verifier takes native snapshots and
+their SHA256 separately from the trace; it cannot construct authority from the
+vote command. Snapshot IDs bind actor, native pre-state root, round-contract ID,
+action/context, current checkpoint, sequence and recovered arithmetic anchor.
+The exact command and typed input artifact graph are decoded, rehashed and
+recomputed through the candidate byte oracle. Native context, role, deadline,
+domain/shard coverage, model/optimizer hashes and finalized parent projection
+are checked before accepting the public vote observation.
+
+Twenty-one new public negative cases reject missing bytes/witnesses, snapshot
+substitution, wrong actor/state/sequence/role/current/optimizer, rehashed parent
+model/optimizer, rehashed PARAMETER/APPLY results, altered certificate projection
+and malformed/noncanonical commands. Result mutations also recompute the model
+value hash and entire body hash, so self-consistent caller hashes are insufficient.
+Each negative must fail for its registered reason. The new positive recovered
+trace executes crash/restart/journal recovery before arithmetic votes. Self-review
+also caught reused sequence numbers in old synthetic fixtures: fixture votes now
+use increasing per-actor sequences and native admission rejects sequence reuse.
+
+Validation: 10 legal / 52 illegal public traces, 99 formal tooling tests, 38
+arithmetic/byte-oracle tests and targeted Ruff checks pass. Phase zero intentionally
+remains FAIL for unfrozen amendment contracts. The pinned liveness checkpoint's
+27 TLA/Lean semantic input hashes are unchanged; TLC/Lean were not rerun for this
+public-schema-only semantic change. Prior executed model/mutant/proof evidence
+retains that scope. Candidate semantics is now
+`sha256:f0f77dc58b60fe1a58075c87b3b0a22ad746a717bbcb49dfff3995c8b300da3c`.
+The new source-bound report remains NO_GO, with explicit native trust limitations.
+
+Scope remains first-vote offline projection, not authenticated native production.
+The separate evidence digest fixes bytes but does not prove where they came from.
+Checked-in native snapshots/manifest are synthetic fixtures, not attestations.
+Arbitrary schema-coordinate mapping, trusted real native export, exact durable
+receipt/effect/retry identity (including retry after current advances), rejected
+stutter and every crash cut still need binding. The four substantive PO-AB1
+proofs, frozen contracts, clean reproduction and independent reviews stay open.
+No native guard or implementation under 001-011 was changed.
+
+Next concrete stage: bind the concrete schema coordinates and the persist/retry
+receipt witness to the same public/native relation, with stale-current and
+post-recovery replay negatives; then prove the actual PO-AB1 conjuncts. Do not
+replace these obligations with a pure-function determinism helper or a green
+fixture count. Evidence: `formal/proposals/evidence/native-trace-witness.json`.
+
+Presentation 8870, Controller 8865 and node training 8872 retained their healthy
+instances. The same Cloudflare URL returns HTTP 200/access-code login. This is
+a read-only reachability check, not a fresh authenticated browser execution.
+The baseline/presentation worktrees and saved receipts/results remain unchanged.

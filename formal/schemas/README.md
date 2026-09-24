@@ -78,3 +78,19 @@ python formal/scripts/verify_formal_report.py REPORT --root REPOSITORY --require
 ```
 
 The verifier performs no network access and imports no production package.
+
+Candidate amendment 0001 adds `arithmetic_witness` to every trace event and
+public `nativeSnapshot`/`nativeAnchor` definitions. This changes the semantic
+compatibility ID even though the TLA transition relation is unchanged in this
+checkpoint. For an implementation trace containing accepted PARAMETER/APPLY votes:
+
+```text
+python formal/scripts/check-refinement.py TRACE --native-evidence SNAPSHOTS --native-evidence-sha256 HEX
+```
+
+`HEX` must be obtained independently of the trace/command. Native evidence is
+canonical ASCII JSON with `schema_version`, `snapshots` and `artifacts`; the
+whole file is bounded to 4 MiB in this candidate. Each snapshot and artifact is
+resolved and rehashed. See the refinement contract for the trust premise and
+the remaining receipt/recovery/schema-projection obligations. The synthetic
+fixture manifest is not an attestation of native provenance.

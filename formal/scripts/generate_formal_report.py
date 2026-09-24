@@ -392,6 +392,8 @@ def main() -> int:
             "At most f of 3f+1 configured validators are Byzantine.",
             "Liveness assumes eventual synchrony, an honest responsive quorum and weak fairness.",
             "Certified bytes needed after ISC remain available or repair succeeds before abort.",
+            "Native arithmetic snapshot provenance and certificate/projection mapping must be "
+            "authenticated independently; digest equality alone does not establish that premise.",
         ],
         "abstractions": [
             "Hashes and signatures are collision-resistant unforgeable identifiers, "
@@ -408,6 +410,10 @@ def main() -> int:
             "establish semantic completeness, liveness non-vacuity or theorem strength.",
             "A clean offline Linux reproduction and two independent technical reviews "
             "are required before Formal GO.",
+            "Candidate native arithmetic witnesses cover first-vote byte recomputation. "
+            "Arbitrary schema-coordinate projection, native snapshot production, exact "
+            "persisted receipt/retry identity and all recovery crash cuts remain open "
+            "under PO-AB1.",
         ],
         "review_attestations": reviews,
         "evidence_graph": {"nodes": nodes, "edges": []},

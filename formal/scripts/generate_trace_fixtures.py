@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import sys
 from pathlib import Path
@@ -18,6 +19,7 @@ from formal_artifacts import (  # noqa: E402
     load_json_strict,
     write_canonical_json,
 )
+from native_trace_fixture import attach_fixture_witnesses  # noqa: E402
 
 LEGAL = ROOT / "formal" / "fixtures" / "traces" / "legal"
 ILLEGAL = ROOT / "formal" / "fixtures" / "traces" / "illegal"
@@ -132,6 +134,7 @@ def make_event(
         "outcome": outcome,
         "error_code": error,
         "artifact_refs": artifacts or [],
+        "arithmetic_witness": None,
     }
 
 
@@ -225,6 +228,13 @@ def valid_apc(label: str = "apc") -> tuple[list[dict[str, Any]], str]:
 
 
 def write_fixture(directory: Path, name: str, document: dict[str, Any]) -> None:
+    # Arithmetic evidence is generated only for fixtures; the verifier never
+    # synthesizes a trusted pre-state from a supplied implementation trace.
+    evidence = attach_fixture_witnesses(document)
+    native_dir = LEGAL.parent / "native"
+    native_dir.mkdir(exist_ok=True)
+    data = canonical_json_bytes(evidence)
+    (native_dir / f"{name}.json").write_bytes(data)
     write_canonical_json(directory / f"{name}.json", document)
 
 
@@ -307,6 +317,18 @@ def generate_legal() -> None:
         LEGAL,
         "normal-apply",
         trace("TRACE-NORMAL-APPLY", events, "APPLIED"),
+    )
+    recovered = copy.deepcopy(events)
+    first_parameter = next(
+        i for i, event in enumerate(recovered) if event["action_id"] == "ACT-PARAM-VOTE"
+    )
+    recovered[first_parameter:first_parameter] = [
+        make_event("ACT-CRASH", outcome="FAULT"),
+        make_event("ACT-RESTART"),
+        make_event("ACT-JOURNAL-RECOVER"),
+    ]
+    write_fixture(
+        LEGAL, "native-recovered-votes", trace("TRACE-NATIVE-RECOVERED-VOTES", recovered, "APPLIED")
     )
 
     view_events = [make_event("ACT-TIMEOUT-SOFT", body=cid("timeout-observation"))]
@@ -408,7 +430,7 @@ def generate_legal() -> None:
         for event in document["events"]:
             if event["action_id"].startswith("ACT-CONFIG-"):
                 event["body_hash"] = ROUND_CONFIG_HASH
-        write_canonical_json(existing, document)
+        write_fixture(LEGAL, existing.stem, document)
 
 
 def generate_illegal() -> None:
@@ -754,6 +776,17 @@ def main() -> int:
     generate_legal()
     generate_illegal()
     generate_admission_regressions()
+    from generate_native_trace_mutations import generate
+
+    generate(LEGAL.parent)
+    manifest = {}
+    for directory in (LEGAL, ILLEGAL):
+        for path in sorted(directory.glob("*.json")):
+            evidence = LEGAL.parent / "native" / path.name
+            manifest[path.relative_to(LEGAL.parent).as_posix()] = {
+                "sha256": hashlib.sha256(evidence.read_bytes()).hexdigest(),
+            }
+    write_canonical_json(LEGAL.parent / "native/manifest.json", manifest)
     print(
         f"generated semantics={SEMANTICS_ID} "
         f"legal={len(list(LEGAL.glob('*.json')))} "

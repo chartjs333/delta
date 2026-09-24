@@ -116,6 +116,57 @@
         }
       }
     },
+    "nativeArtifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "length"],
+      "properties": {
+        "id": {"$ref": "#/$defs/contentId"},
+        "kind": {"const": "AUTHORITY"},
+        "length": {"type": "integer", "minimum": 1}
+      }
+    },
+    "nativeAnchor": {
+      "description": "Authenticated recovered native projection is an explicit external premise. The witness does not prove signatures or WAL recovery.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority_id", "current_model_hash", "current_optimizer_hash", "round_id", "height", "view", "epoch", "logical_time", "hard_deadline", "role", "recovered", "parent_checkpoint", "aggregate_id", "aggregate_length"],
+      "properties": {
+        "authority_id": {"$ref": "#/$defs/contentId"},
+        "current_model_hash": {"$ref": "#/$defs/contentId"},
+        "current_optimizer_hash": {"$ref": "#/$defs/contentId"},
+        "round_id": {"type": "string", "minLength": 1},
+        "height": {"type": "integer", "minimum": 0},
+        "view": {"type": "integer", "minimum": 0},
+        "epoch": {"type": "string", "minLength": 1},
+        "logical_time": {"type": "integer", "minimum": 0},
+        "hard_deadline": {"type": "integer", "minimum": 0},
+        "role": {"enum": ["PARAMETER", "APPLY"]},
+        "recovered": {"type": "boolean"},
+        "parent_checkpoint": {"type": "string", "minLength": 1},
+        "aggregate_id": {"$ref": "#/$defs/nullableContentId"},
+        "aggregate_length": {"type": "integer", "minimum": 0}
+      }
+    },
+    "nativeSnapshot": {
+      "description": "Content ID: SHA256(ASCII deltareduce.native-snapshot-witness.v1, NUL, canonical JSON). Entire evidence file must separately match the verifier-supplied SHA256. Certificate/projection mapping must come from authenticated native recovery, not from the vote command.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_id", "action_id", "prior_state_root", "round_contract_id", "vote_context_id", "durable_sequence", "current_checkpoint", "parent_certificate", "projection_id", "anchor", "authority"],
+      "properties": {
+        "actor_id": {"type": "string", "minLength": 1},
+        "action_id": {"enum": ["ACT-PARAM-VOTE", "ACT-APPLY-VOTE"]},
+        "prior_state_root": {"$ref": "#/$defs/contentId"},
+        "round_contract_id": {"$ref": "#/$defs/contentId"},
+        "vote_context_id": {"type": "string", "minLength": 1},
+        "durable_sequence": {"type": "integer", "minimum": 1},
+        "current_checkpoint": {"type": "string", "minLength": 1},
+        "parent_certificate": {"$ref": "#/$defs/contentId"},
+        "projection_id": {"$ref": "#/$defs/contentId"},
+        "anchor": {"$ref": "#/$defs/nativeAnchor"},
+        "authority": {"$ref": "#/$defs/nativeArtifactRef"}
+      }
+    },
     "event": {
       "type": "object",
       "additionalProperties": false,
@@ -139,10 +190,21 @@
         "logical_time",
         "outcome",
         "error_code",
-        "artifact_refs"
+        "artifact_refs",
+        "arithmetic_witness"
       ],
       "properties": {
         "schema_version": {"const": "1.0.0"},
+        "arithmetic_witness": {
+          "description": "Candidate amendment 0001. Snapshot must resolve from independently supplied digest-pinned native evidence; the command cannot establish authority. Required on accepted PARAMETER/APPLY votes.",
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["snapshot_id", "command_ascii"],
+          "properties": {
+            "snapshot_id": {"$ref": "#/$defs/contentId"},
+            "command_ascii": {"type": "string", "minLength": 1, "maxLength": 4194304, "pattern": "^[\\x00-\\x7f]*$"}
+          }
+        },
         "action_id": {
           "type": "string",
           "enum": [

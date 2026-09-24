@@ -133,3 +133,24 @@ against the unmodified configurations.
 The candidate remains NO_GO: PO-AB1, concrete byte/public witness refinement,
 frozen contracts, clean offline reproduction and independent reviews remain
 open. See `formal/proposals/evidence/liveness-recovery.json` and the progress log.
+
+## September 24: public first-vote arithmetic witnesses (T053-T057)
+
+The public trace schema and checker now require an arithmetic witness for every
+accepted PARAMETER/APPLY first vote. A separate native evidence file and its
+verifier-supplied SHA256 bind the recovered pre-state, authority graph and exact
+command bytes. The existing draft byte oracle recomputes the full candidate.
+Twenty-one new negative public traces cover missing/substituted/rehashed data,
+current model/optimizer, role, sequence and result changes. A positive trace
+executes crash/restart/recovery before arithmetic voting.
+
+The synthetic fixture exporter is isolated from the verifier. Its manifest is
+test input, never a native authenticity attestation. Certificate/projection
+authentication remains a named external premise. The core arithmetic source is
+still a candidate oracle: concrete schema-coordinate mapping, real native state
+export, WAL/receipt/retry identity and all crash cuts remain open with PO-AB1.
+This checkpoint does not promote the candidate into runtime authority.
+
+Evidence: `formal/proposals/evidence/native-trace-witness.json`. TLA and Lean
+sources are byte-identical to the retained liveness checkpoint; this stage runs
+the affected public-schema/refinement/tooling checks, not new TLC/Lean executions.
