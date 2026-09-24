@@ -19,7 +19,8 @@ This is the existing MNIST example from `D:/delta/worktree-c2` (Git root
 Its runs are deliberately separate from the saved campaigns/executions. Only its
 presentation is adapted; source training, native/Java adapters and report validation
 are unchanged. No profiles, receipts or evidence are silently converted between them.
-The source's existing uncommitted EN/RU updates are consumed without editing them.
+The source's existing EN/RU updates are preserved in the
+`demo/node-training-2026-09-24` Git snapshot without changing its working checkout.
 
 Scope stays **LOCAL_DEMO_ONLY**. It uses real MNIST and local processes, includes a
 synthetic EEG plugin illustration and clearly labels the historical QLoRA reference.

@@ -1,0 +1,216 @@
+{
+  "schema_version": "1.0.0",
+  "checkpoint": "demo/presentation-2026-09-24",
+  "presentation_date": "2026-09-25",
+  "scope": "PRESENTATION_ONLY",
+  "feature010_go": false,
+  "sources": {
+    "presentation": {
+      "commit": "6df5957068449c5ada0a7c7b92991be967ff7e59",
+      "tree": "39ccf8347360b09e1f34531deca4aeab6c75f116",
+      "tag": "demo/presentation-2026-09-24"
+    },
+    "node_training": {
+      "commit": "2f76e6993c50f3248487539d09597c233d634bf9",
+      "tree": "fa60a51368565feb299c44e99c7c291b90ffeb01",
+      "tag": "demo/node-training-2026-09-24",
+      "original_checkout_unchanged": true,
+      "existing_mnist_tests_passed": 14
+    },
+    "controller": {
+      "commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+      "tag": "demo/controller-2026-09-24"
+    },
+    "formal_candidate": {
+      "commit": "0d192cf7deb8ba7798b31b4380d0d08ba3bdf984",
+      "tag": "demo/formal-status-2026-09-24",
+      "decision": "NO_GO",
+      "report_sha256": "aed70273467f682ca879ca09baff0d131cc48d7049936f05540215146577abdd"
+    }
+  },
+  "installed_admin_ui": {
+    "admin_ui_source_commit": "7ee7bb87ebb475ed9155440baadd72d42079b356",
+    "installed_at": "2026-09-24T06:28:22.8753555Z",
+    "schema_version": "1.0.0",
+    "mode": "PRESENTATION_UI_ONLY",
+    "files": [
+      {
+        "path": "live.html",
+        "sha256": "eb889a7b309871186dcdde1f7e7d5fd485bd9775ada000bed6d403fd5df0a68e"
+      },
+      {
+        "path": "assets/live-CCDC2rDE.js",
+        "sha256": "4df6ff8a81d1a8b430939bb6d539bd86706b4dc86ba9c7fc7ad1d116757837b2"
+      },
+      {
+        "path": "assets/live-DzP9KhNF.css",
+        "sha256": "311982a300e6d21d48fa41900b80729f8accabb7c92cf497b3dafa1e9aa51610"
+      },
+      {
+        "path": "assets/slide-1-Ctcc81oZ.png",
+        "sha256": "00154ac488030f89acd46c09b5bc35a064c6e0ed0a1fdfc91b5d8529d5eb14d7"
+      },
+      {
+        "path": "assets/slide-2-B9VlhhHk.png",
+        "sha256": "ce7f4fa1e319276c5c102e1fdba3423a1d733e1b2c213e6b6452d77d916ea359"
+      },
+      {
+        "path": "assets/slide-3-D4pwEd5A.png",
+        "sha256": "bfbfaf6624757f1776f253a338c5f4a57d832824c6e75b7ccd060d4bfa136785"
+      },
+      {
+        "path": "assets/slide-4-0fBfcd9Y.png",
+        "sha256": "98924b677202cc323550833d5b0d9c74730b723ca4fc647bbe9f5b4e9da52f05"
+      },
+      {
+        "path": "assets/slide-5-B-OlhR5K.png",
+        "sha256": "8be5391a0f48411aa6584241ab2447c362502aa6e6a31e1d3d6c1731315b6abe"
+      },
+      {
+        "path": "assets/slide-6-HEPugfpg.png",
+        "sha256": "cd4e3c32f0f03752b3dd35b2c3c01cd887bff8018034c254a08c5f3a8fce007f"
+      },
+      {
+        "path": "assets/slide-7-C8dZ9QbZ.png",
+        "sha256": "41e59e6bb3cf02a214c0436fa7f3c5bde505f9c79a8b7df47c1beac002cd4b8d"
+      }
+    ],
+    "protocol_semantics_changed": false,
+    "qualifying_evidence": false,
+    "controller_source_commit": "c8aea64972f741060d1e527ebbb6f9a5a168a075"
+  },
+  "verification": {
+    "checked_at": "2026-09-24T12:59:50.248490+00:00",
+    "scope": "PRESENTATION_ONLY",
+    "feature010_qualifying": false,
+    "public_origin_at_check": "https://range-circumstances-josh-evening.trycloudflare.com",
+    "authenticated_https_checks": [
+      {
+        "path": "/?lang=en",
+        "http": 200
+      },
+      {
+        "path": "/?lang=ru",
+        "http": 200
+      },
+      {
+        "path": "/admin/?lang=en",
+        "http": 200
+      },
+      {
+        "path": "/admin/?lang=ru",
+        "http": 200
+      },
+      {
+        "path": "/node-training/?lang=en",
+        "http": 200
+      },
+      {
+        "path": "/node-training/?lang=ru",
+        "http": 200
+      }
+    ],
+    "fresh_training_executed": false,
+    "browser_interaction_verified": false,
+    "saved_node_report": {
+      "path": "D:\\delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-093418-4af12954\\mnist-demo-report.json",
+      "sha256": "46fdb3b1c85cfe2439005621104451705f40d958aa113fa02edb8a08ec522e32",
+      "validated": true
+    },
+    "saved_execution_receipt": {
+      "execution_id": "934a9d51-e5aa-46da-bbc3-963b9f409914",
+      "sha256": "ec715072b34d3add3e3cd7c191341e491e70866c40663752a91f7a5b6bf0230d"
+    },
+    "health": {
+      "presentation_instance": "94d6a311e1e544b080ee1b20f70f2341",
+      "controller_instance": "d7602a7b-f488-47eb-8ef3-220dea499291",
+      "node_instance": "83cd3ea0d1e342c1aa807f00e5684488"
+    }
+  },
+  "local_state_snapshot": {
+    "path": "D:\\delta-presentation\\checkpoints\\2026-09-24\\saved-state.zip",
+    "sha256": "3ac37feaeb8f53efd74a09dd92597e2735b4cc394069715b6f1b69d4a3193983",
+    "files": [
+      {
+        "path": "panel/workspace.json",
+        "bytes": 2918,
+        "sha256": "7da7cc0ad7ed9e4e83fccd558e60e5b9a7e3d5b74e1a6f12f544c5973d419b96"
+      },
+      {
+        "path": "node-training/last-view.json",
+        "bytes": 108296,
+        "sha256": "d9576aeab6752e4a444da814b2a50bdc8aef2cadf1784372e0d33cb4ba824d6d"
+      },
+      {
+        "path": "node-training/runs/run-20260924-093418-4af12954/mnist-demo-report.json",
+        "bytes": 195020,
+        "sha256": "46fdb3b1c85cfe2439005621104451705f40d958aa113fa02edb8a08ec522e32"
+      },
+      {
+        "path": "admin-ui/installed.json",
+        "bytes": 1786,
+        "sha256": "c68a60d5cbe9397fae353ef6d65b29df2ebf9fe08a9e22ee1316b99957df9cb1"
+      },
+      {
+        "path": "panel/jobs/0836507ffdfe4260825bfc2d190c1a30.json",
+        "bytes": 17686,
+        "sha256": "1b76a55ea483f90f2414ef64ccc717c6e777183b5d1a5085f67790d46599f087"
+      },
+      {
+        "path": "panel/jobs/1a8a76b0461e4118a187483deea4a2bb.json",
+        "bytes": 4966,
+        "sha256": "2a80b7229cc8136b8885ec9fcf3b9a266013d0bfe704fe73c77fd30d5483ee77"
+      },
+      {
+        "path": "panel/jobs/1d6c19e179694e94a5d4fc2a832cdbf8.json",
+        "bytes": 4966,
+        "sha256": "0956d6cc9dff59fa1914ac306df2ab09ce5f83f67f219731c3d95bfcd88aed61"
+      },
+      {
+        "path": "panel/jobs/25f4b942a3da49fd819fbd642667abc0.json",
+        "bytes": 4966,
+        "sha256": "4d210dbe2db417ea4a4193207b9a4879ffe192e583119850049e7a04b3ba3cdf"
+      },
+      {
+        "path": "panel/jobs/52e13b74fa014c39b638e13c28a96abb.json",
+        "bytes": 17686,
+        "sha256": "dcab52380baae9f29e708abefda3dfb4b87325ad180d52eeec794488a6993490"
+      },
+      {
+        "path": "panel/jobs/5f828620edca4723938e85f43d6542f7.json",
+        "bytes": 17686,
+        "sha256": "c7b462612bf8a62575c4299e98b58a91926e0f3a53dbd1ad1167b0f7fd8e774e"
+      },
+      {
+        "path": "panel/jobs/6b50d8294e51413ca8708439076aacb9.json",
+        "bytes": 4966,
+        "sha256": "d31ab5562415e3874bbeaad4b48ae2c03bda19648fd3184749886e068e4ed220"
+      },
+      {
+        "path": "panel/jobs/7cd6cff71d614f60af35b3907e65d9b4.json",
+        "bytes": 4966,
+        "sha256": "f043d60b8e6e4ae0b8556271d2b0c2386a46e02f423ac20451c2a6c16aebc1ee"
+      },
+      {
+        "path": "panel/jobs/9c9cf155bfed4ef9b79880a22da27354.json",
+        "bytes": 17686,
+        "sha256": "b75efd47b5be0f868ba03873b8b2cb2177d8c40e0ed5387eeebe32305f63844f"
+      },
+      {
+        "path": "panel/jobs/aae5a553b1be4a4f960873381268831b.json",
+        "bytes": 4966,
+        "sha256": "0b9ed74181cc5ea559b1ce6b3576ba70519eddcad92c2296815ef4c5377c507a"
+      }
+    ],
+    "complete_runtime_backup": false,
+    "credentials_included": false
+  },
+  "data_root": "D:\\delta-data\\presentation-20260924",
+  "launcher": "D:/delta-presentation/START-REMOTE.ps1",
+  "limitations": [
+    "Prepared runtime/dependency/model/dataset caches are outside Git.",
+    "State snapshot excludes credentials and is not a complete runtime backup.",
+    "Quick Tunnel URL is temporary; start/status prints the current address.",
+    "SIMULATED_LOCAL and LOCAL_DEMO_ONLY do not qualify Feature010."
+  ]
+}
