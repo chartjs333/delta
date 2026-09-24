@@ -412,9 +412,13 @@ def main() -> int:
             "conjuncts remain open, as does concrete decoder/exporter/WAL refinement.",
             "The PARAMETER row kernel proves coefficient derivation, ordered vector "
             "and coefficient-sum prefixes, exact coordinate refinement and quantum "
-            "conversion over mathematical inputs. Its native eligibility/commitment/"
-            "metadata/schema bridge remains unproved; the full native PARAMETER "
-            "conjunct must not be inferred from these helper proofs or finite vectors.",
+            "conversion over mathematical inputs. Checked typed-graph extraction now "
+            "derives eligible committed Q rows, validates metadata/shape and constructs "
+            "the full typed PARAMETER body. Certified aggregate comparison, conversion "
+            "and final schema placement remain open; no canonical body serialization "
+            "or full native PARAMETER conjunct follows from these helpers. Conversion "
+            "success is not an extra PARAMETER admission precondition. The audited "
+            "extraction helpers use only permitted propext, Quot.sound and Classical.choice.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

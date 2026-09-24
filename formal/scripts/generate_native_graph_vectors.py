@@ -57,7 +57,9 @@ def generate(source=SOURCE, target=TARGET):
         native.require(native.digest(raw) == key, "NATIVE_ARTIFACT_ID")
     artifacts = {key: native.decode(raw) for key, raw in store.items()}
     snapshot = next(v for v in bundle["snapshots"].values() if v["action_id"] == "ACT-APPLY-VOTE")
-    native.Witness(native.NativeAnchor(**snapshot["anchor"]), snapshot["authority"], store)
+    witness = native.Witness(
+        native.NativeAnchor(**snapshot["anchor"]), snapshot["authority"], store
+    )
     names = {key: "a" + str(index) for index, key in enumerate(sorted(artifacts))}
     refs = {
         key: {
@@ -458,6 +460,161 @@ def generate(source=SOURCE, target=TARGET):
         f"  have mismatch : codec.hash {substitute_q}Bytes ≠ {missing_q}Ref.id := by decide",
         "  exact mismatch resolved.content",
     ]
+    schema_value = artifacts[authority["schema"]["id"]]["payload"]
+    isc_value = artifacts[authority["parents"]["isc"]["id"]]["payload"]
+    ec_value = artifacts[authority["parents"]["ec"]["id"]]["payload"]
+    apc_value = artifacts[authority["parents"]["apc"]["id"]]["payload"]
+    shard_record = fields(
+        "Shard", {"id": ("id", string), "offset": ("offset", str), "length": ("length", str)}
+    )
+    lines += [
+        "-- Checked extraction examples; the codec and trust remain finite/synthetic.",
+        "def parameterFrame : ParameterFrame := {",
+        f"  coordinates := {array(schema_value['coordinates'], string)}",
+        f"  shards := {array(schema_value['shards'], shard_record)}",
+        f"  plan := {payload(artifacts[authority['plan']['id']]).removeprefix('.plan ')}",
+        f"  members := {array(isc_value['members'], string)}",
+        f"  commitments := {array(isc_value['commitments'], commitment)}",
+        f"  ecIsc := {ref(ec_value['isc'])}",
+        f"  eligible := {array(ec_value['eligible'], string)}",
+        f"  apcEc := {ref(apc_value['ec'])}",
+        f"  apcPlan := {ref(apc_value['plan'])}",
+        "}",
+        "theorem frameLoaded :",
+        "    (loadParameterFrame codec store fixtureBinding.authority).map Subtype.val =",
+        "      some parameterFrame := by decide",
+        "theorem frameValidated : ParameterFrameValid fixtureBinding.authority",
+        "    fixtureBinding.profile fixtureBinding.model fixtureBinding.optimizer",
+        "    parameterFrame := by decide",
+    ]
+    for index, (domain, shard) in enumerate(witness.assignments):
+        expected = witness.expected_parameter(domain, shard)
+        lines += [
+            f"theorem derivedParameter_{index} :",
+            f"    (deriveParameter fixtureBinding {string(domain)} {string(shard)}).map",
+            f"      DerivedParameter.body = some {body(expected)} := by decide",
+        ]
+    lines += [
+        "theorem unplannedParameterRejected :",
+        '    (deriveParameter fixtureBinding "unplanned" "s1").isNone = true := by decide',
+        "theorem missingPayloadRejected :",
+        f"    (loadPayload codec missingStore {missing_q}Ref).isNone = true := by decide",
+        "theorem substitutedPayloadRejected :",
+        f"    (loadPayload codec substitutedStore {missing_q}Ref).isNone = true := by decide",
+        "theorem incorrectPayloadLengthRejected :",
+        f"    (loadPayload codec store {{ {missing_q}Ref with length := 0 }}).isNone = true := by",
+        "  decide",
+        "theorem duplicateEligibilityRejected :",
+        "    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile",
+        "      fixtureBinding.model fixtureBinding.optimizer",
+        "      { parameterFrame with eligible := "
+        "parameterFrame.eligible ++ parameterFrame.eligible }",
+        "    := by decide",
+        "theorem subsetEligibilityRejected :",
+        "    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile",
+        "      fixtureBinding.model fixtureBinding.optimizer",
+        "      { parameterFrame with eligible := [] } := by decide",
+        "theorem wrongCertificateParentRejected :",
+        "    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile",
+        "      fixtureBinding.model fixtureBinding.optimizer",
+        "      { parameterFrame with ecIsc := fixtureBinding.authority.apc } := by decide",
+        "theorem incompleteAssignmentMatrixRejected :",
+        "    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile",
+        "      fixtureBinding.model fixtureBinding.optimizer",
+        "      { parameterFrame with plan := { parameterFrame.plan with assignments := [] } }",
+        "    := by decide",
+        'theorem invalidIdentifierRejected : validIdentifier "invalid name" = false := by decide',
+    ]
+    first_assignment = plan["assignments"][0]
+    first_contribution = first_assignment["contributions"][0]
+    lines += [
+        f"def firstAssignment : Assignment := {assignment(first_assignment)}",
+        f"def firstContribution : Contribution := {contribution(first_contribution)}",
+    ]
+    for name, schema_arg, frame_arg, assignment_arg, width, contribution_arg in (
+        (
+            "rowSchemaMismatch",
+            "fixtureBinding.authority.model",
+            "parameterFrame",
+            "firstAssignment",
+            1,
+            "firstContribution",
+        ),
+        (
+            "rowQuantumMismatch",
+            "fixtureBinding.authority.schema",
+            "parameterFrame",
+            "{ firstAssignment with quantum := ⟨2, 1⟩ }",
+            1,
+            "firstContribution",
+        ),
+        (
+            "rowTicketMismatch",
+            "fixtureBinding.authority.schema",
+            "parameterFrame",
+            "firstAssignment",
+            1,
+            '{ firstContribution with ticket := "other" }',
+        ),
+        (
+            "rowDomainMismatch",
+            "fixtureBinding.authority.schema",
+            "parameterFrame",
+            '{ firstAssignment with domain := "other" }',
+            1,
+            "firstContribution",
+        ),
+        (
+            "rowShardMismatch",
+            "fixtureBinding.authority.schema",
+            "parameterFrame",
+            '{ firstAssignment with shard := "s2" }',
+            1,
+            "firstContribution",
+        ),
+        (
+            "rowShapeMismatch",
+            "fixtureBinding.authority.schema",
+            "parameterFrame",
+            "firstAssignment",
+            2,
+            "firstContribution",
+        ),
+        (
+            "rowCommitmentMissing",
+            "fixtureBinding.authority.schema",
+            "{ parameterFrame with commitments := [] }",
+            "firstAssignment",
+            1,
+            "firstContribution",
+        ),
+    ):
+        lines += [
+            f"theorem {name}Rejected :",
+            f"    (loadRow codec store {schema_arg} ({frame_arg})",
+            f"      ({assignment_arg}) {width} ({contribution_arg})).isNone = true := by decide",
+        ]
+    for name, frame_arg in (
+        ("schemaGap", '{ parameterFrame with shards := [⟨"s1", 0, 1⟩] }'),
+        ("schemaOverlap", '{ parameterFrame with shards := [⟨"s1", 0, 1⟩, ⟨"s2", 0, 1⟩] }'),
+        ("schemaOverrun", '{ parameterFrame with shards := [⟨"s1", 0, 3⟩] }'),
+        (
+            "assignmentOrder",
+            "{ parameterFrame with plan := { parameterFrame.plan with "
+            "assignments := parameterFrame.plan.assignments.reverse } }",
+        ),
+        (
+            "duplicateContext",
+            "{ parameterFrame with plan := { parameterFrame.plan with "
+            "assignments := parameterFrame.plan.assignments.map "
+            '(fun a => { a with context := "x" }) } }',
+        ),
+    ):
+        lines += [
+            f"theorem {name}Rejected :",
+            "    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile",
+            f"      fixtureBinding.model fixtureBinding.optimizer ({frame_arg}) := by decide",
+        ]
     target.write_text(
         "\n".join([*lines, "end DeltaReduce.NativeGraphVectors", ""]),
         encoding="utf-8",

@@ -294,4 +294,94 @@ theorem substitutedQRejected (bytes payload) : ¬ Resolves codec substitutedStor
   rcases eq with ⟨rfl, rfl⟩
   have mismatch : codec.hash a3Bytes ≠ a4Ref.id := by decide
   exact mismatch resolved.content
+-- Checked extraction examples; the codec and trust remain finite/synthetic.
+def parameterFrame : ParameterFrame := {
+  coordinates := ["p0000", "p0001"]
+  shards := [({ id := "s1", offset := 0, length := 1 } : Shard), ({ id := "s2", offset := 1, length := 1 } : Shard)]
+  plan := ({ schema := a10Ref, profile := a7Ref, tickets := [({ id := "t0000", domain := "d1" } : Ticket)], assignments := [({ domain := "d1", shard := "s1", context := "NORMAL-PARAM-D1-S1:round-1", denominator := 1, quantum := ({ numerator := 1, denominator := 2 } : Rational), contributions := [({ ticket := "t0000", weight := ({ numerator := 1, denominator := 1 } : Rational), q := a4Ref } : Contribution)] } : Assignment), ({ domain := "d1", shard := "s2", context := "NORMAL-PARAM-D1-S2:round-1", denominator := 1, quantum := ({ numerator := 1, denominator := 2 } : Rational), contributions := [({ ticket := "t0000", weight := ({ numerator := 1, denominator := 1 } : Rational), q := a3Ref } : Contribution)] } : Assignment)] } : Plan)
+  members := ["t0000"]
+  commitments := [({ ticket := "t0000", domain := "d1", leaves := [({ shard := "s1", q := a4Ref } : Leaf), ({ shard := "s2", q := a3Ref } : Leaf)] } : Commitment)]
+  ecIsc := a8Ref
+  eligible := ["t0000"]
+  apcEc := a1Ref
+  apcPlan := a0Ref
+}
+theorem frameLoaded :
+    (loadParameterFrame codec store fixtureBinding.authority).map Subtype.val =
+      some parameterFrame := by decide
+theorem frameValidated : ParameterFrameValid fixtureBinding.authority
+    fixtureBinding.profile fixtureBinding.model fixtureBinding.optimizer
+    parameterFrame := by decide
+theorem derivedParameter_0 :
+    (deriveParameter fixtureBinding "d1" "s1").map
+      DerivedParameter.body = some ({ kind := "PARAMETER_EXPECTED", authorityId := [250,55,43,106,157,245,129,13,147,40,249,240,158,189,2,255,19,154,129,71,81,92,108,23,147,196,71,25,106,207,212,179], context := "NORMAL-PARAM-D1-S1:round-1", domain := "d1", shard := "s1", denominator := 1, numerators := [1], inputLeafIds := [[124,173,244,100,240,105,29,120,162,171,114,234,195,204,40,197,102,150,19,239,165,80,173,165,205,47,113,197,36,14,99,54]] } : ParameterBody) := by decide
+theorem derivedParameter_1 :
+    (deriveParameter fixtureBinding "d1" "s2").map
+      DerivedParameter.body = some ({ kind := "PARAMETER_EXPECTED", authorityId := [250,55,43,106,157,245,129,13,147,40,249,240,158,189,2,255,19,154,129,71,81,92,108,23,147,196,71,25,106,207,212,179], context := "NORMAL-PARAM-D1-S2:round-1", domain := "d1", shard := "s2", denominator := 1, numerators := [-2], inputLeafIds := [[84,53,29,120,39,207,129,180,197,143,138,185,38,2,230,113,131,243,81,238,0,228,6,222,84,233,128,21,120,86,230,102]] } : ParameterBody) := by decide
+theorem unplannedParameterRejected :
+    (deriveParameter fixtureBinding "unplanned" "s1").isNone = true := by decide
+theorem missingPayloadRejected :
+    (loadPayload codec missingStore a4Ref).isNone = true := by decide
+theorem substitutedPayloadRejected :
+    (loadPayload codec substitutedStore a4Ref).isNone = true := by decide
+theorem incorrectPayloadLengthRejected :
+    (loadPayload codec store { a4Ref with length := 0 }).isNone = true := by
+  decide
+theorem duplicateEligibilityRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer
+      { parameterFrame with eligible := parameterFrame.eligible ++ parameterFrame.eligible }
+    := by decide
+theorem subsetEligibilityRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer
+      { parameterFrame with eligible := [] } := by decide
+theorem wrongCertificateParentRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer
+      { parameterFrame with ecIsc := fixtureBinding.authority.apc } := by decide
+theorem incompleteAssignmentMatrixRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer
+      { parameterFrame with plan := { parameterFrame.plan with assignments := [] } }
+    := by decide
+theorem invalidIdentifierRejected : validIdentifier "invalid name" = false := by decide
+def firstAssignment : Assignment := ({ domain := "d1", shard := "s1", context := "NORMAL-PARAM-D1-S1:round-1", denominator := 1, quantum := ({ numerator := 1, denominator := 2 } : Rational), contributions := [({ ticket := "t0000", weight := ({ numerator := 1, denominator := 1 } : Rational), q := a4Ref } : Contribution)] } : Assignment)
+def firstContribution : Contribution := ({ ticket := "t0000", weight := ({ numerator := 1, denominator := 1 } : Rational), q := a4Ref } : Contribution)
+theorem rowSchemaMismatchRejected :
+    (loadRow codec store fixtureBinding.authority.model (parameterFrame)
+      (firstAssignment) 1 (firstContribution)).isNone = true := by decide
+theorem rowQuantumMismatchRejected :
+    (loadRow codec store fixtureBinding.authority.schema (parameterFrame)
+      ({ firstAssignment with quantum := ⟨2, 1⟩ }) 1 (firstContribution)).isNone = true := by decide
+theorem rowTicketMismatchRejected :
+    (loadRow codec store fixtureBinding.authority.schema (parameterFrame)
+      (firstAssignment) 1 ({ firstContribution with ticket := "other" })).isNone = true := by decide
+theorem rowDomainMismatchRejected :
+    (loadRow codec store fixtureBinding.authority.schema (parameterFrame)
+      ({ firstAssignment with domain := "other" }) 1 (firstContribution)).isNone = true := by decide
+theorem rowShardMismatchRejected :
+    (loadRow codec store fixtureBinding.authority.schema (parameterFrame)
+      ({ firstAssignment with shard := "s2" }) 1 (firstContribution)).isNone = true := by decide
+theorem rowShapeMismatchRejected :
+    (loadRow codec store fixtureBinding.authority.schema (parameterFrame)
+      (firstAssignment) 2 (firstContribution)).isNone = true := by decide
+theorem rowCommitmentMissingRejected :
+    (loadRow codec store fixtureBinding.authority.schema ({ parameterFrame with commitments := [] })
+      (firstAssignment) 1 (firstContribution)).isNone = true := by decide
+theorem schemaGapRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer ({ parameterFrame with shards := [⟨"s1", 0, 1⟩] }) := by decide
+theorem schemaOverlapRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer ({ parameterFrame with shards := [⟨"s1", 0, 1⟩, ⟨"s2", 0, 1⟩] }) := by decide
+theorem schemaOverrunRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer ({ parameterFrame with shards := [⟨"s1", 0, 3⟩] }) := by decide
+theorem assignmentOrderRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer ({ parameterFrame with plan := { parameterFrame.plan with assignments := parameterFrame.plan.assignments.reverse } }) := by decide
+theorem duplicateContextRejected :
+    ¬ ParameterFrameValid fixtureBinding.authority fixtureBinding.profile
+      fixtureBinding.model fixtureBinding.optimizer ({ parameterFrame with plan := { parameterFrame.plan with assignments := parameterFrame.plan.assignments.map (fun a => { a with context := "x" }) } }) := by decide
 end DeltaReduce.NativeGraphVectors

@@ -828,3 +828,66 @@ PARAMETER body metadata; then prove schema placement of conversion. Do not assum
 row validity or expected-result equality to obtain the missing native theorem.
 APPLY/recovery, native decoder/exporter/WAL refinement, contract freeze, clean
 offline reproduction and independent review still follow before Formal GO.
+
+## September 24 continuation: checked graph to PARAMETER body
+
+T044/T048/T049/T057/T060: the mandatory `ArithmeticBinding.lean` project now
+loads authority-bound schema/plan/ISC/EC/APC bytes and derives the selected
+PARAMETER input rows. The loaders construct proofs of content identity, length,
+canonical type, source origin and Q commitment/metadata/shape checks. They enforce
+exact eligible ticket order and the full ordered domain/shard assignment matrix.
+No command-supplied rows, expected body or repaired input is trusted.
+
+The checked extractor computes the numerator vector with `ParameterKernel`,
+retains the specific unreduced denominator and original leaf order, and derives
+every typed expected-body field. Four helper theorems prove positional source
+binding, no row omission/padding, body metadata/shape/prefix soundness and exact
+per-coordinate refinement to the checked scalar accumulator. They apply to
+arbitrary mathematical list lengths under the explicit codec/trust premises.
+
+This completes the checked body extraction sublayer, not the full PARAMETER
+conversion conjunct. Comparing all certified aggregate bodies, conversion and
+final schema placement, canonical body serialization and the concrete native
+decoder remain open. PARAMETER computation deliberately does not require later
+conversion success. Role/time/admission and physical WAL behavior are not supplied
+by a successful mathematical extractor. Mandatory coverage remains 42/45, with
+`nativeParameterConversionSound`, `nativeApplyResultUnique` and
+`nativeArithmeticRecoveryRefines` missing. Scope:
+`formal/proposals/native-parameter-body-proof.md`.
+
+Validation: full Lean build (965 jobs), fresh body/vector kernel checks and
+axiom audit PASS. New proof dependencies are limited to permitted `propext`,
+`Quot.sound` and `Classical.choice`; `loadPayload` has no axiom dependencies.
+The twelve original artifact byte strings instantiate the checked frame and two
+complete PARAMETER body comparisons against the proposal oracle. Twenty-one
+additional negative kernel examples cover malformed graph/row references,
+metadata, eligibility, schema coverage, assignment ordering and duplicate vote
+contexts. They are finite synthetic witnesses, not native C++ executions or TLA
+production-mutant results. The earlier four graph negatives and 36 PARAMETER/22
+conversion arithmetic vectors remain. 136 tooling tests, 38 oracle tests,
+33 legal/112 illegal traces, targeted Ruff and byte-exact regeneration of
+293 JSON/two Lean files PASS.
+
+Candidate semantics:
+`sha256:8b986d240324f06913c2b94774fe07c4806c5b31b6e173745e51aacd7dc8ccc8`.
+Only three Lean inputs changed; nineteen TLA modules and public schema are
+unchanged. No fresh TLC execution is claimed; the retained 28 safety/7 liveness/
+27 production-mutant results retain their finite scopes. Contract freeze and
+full proof gates remain failed; FormalVerificationReport remains NO_GO.
+Machine evidence: `formal/proposals/evidence/native-parameter-body.json`.
+
+Self-review checked exact metadata equality, non-reduced plan denominator,
+membership/ordering, current state/schema binding and separation of PARAMETER
+from conversion. No new runtime behavior or arithmetic guard change is made.
+All three idle demo services returned HTTP 200 without restart and their frozen
+Git refs remain unchanged. Self-review is not independent attestation.
+
+Next concrete stage: resolve the authenticated aggregate and check exact ordered
+equality of every certified body against these independently derived bodies.
+Connect their checked quantum conversions and prove exact schema-offset placement
+for every domain coordinate; then discharge the complete PARAMETER conjunct.
+Do not replace it with reflexive function equality or assumed valid rows. APPLY,
+recovery, native decoder/exporter/WAL refinement, arbitrary admission failures,
+initial snapshots/repair, contract freeze, clean reproduction and independent
+review remain before new merged Formal GO. Feature010 qualification stays stopped
+and real authorities/WAN/evaluator quorum remain BLOCKED_EXTERNAL.
