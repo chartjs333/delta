@@ -453,6 +453,15 @@ def main() -> int:
             "and physical native WAL remain open; these preparation helpers do not "
             "discharge nativeArithmeticRecoveryRefines. Input decoding is still a "
             "twelve-string finite codec, with additional output hash samples only.",
+            "NativeReplay instantiates arithmetic admission and exact partial encoders "
+            "from independently resolved native inputs, derives complete arithmetic "
+            "histories and checked APPLY current changes, and preserves original "
+            "records through authenticated presence/absence recovery. Its 42 kernel "
+            "examples are not full public traces: the empty-journal example renumbers "
+            "only three arithmetic votes, while original pinned records retain 5/6/8. "
+            "Other vote kinds, full public prefix/root projection and actual metadata/"
+            "QC/scan provenance remain open; nativeArithmeticRecoveryRefines is still "
+            "missing. Failed effect/receipt encoding now rejects in the proof kernel.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

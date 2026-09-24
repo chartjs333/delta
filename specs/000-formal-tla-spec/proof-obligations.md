@@ -61,6 +61,15 @@ These helpers still do not instantiate the general replay adapter or establish
 initial-prefix/native exporter provenance; `nativeArithmeticRecoveryRefines`
 remains OPEN. Scope: `formal/proposals/native-prewal-proof.md`.
 
+`NativeReplay.lean` now instantiates arithmetic admission and effect/receipt
+encoding from those proof-producing native inputs. Its checked sequential replay
+derives a native arithmetic history, complete record retention, computed APPLY
+current changes and authenticated presence/absence recovery from an empty
+arithmetic journal. Effect/receipt encoding is partial and failure disables a
+record. Full public trace/all-vote-prefix projection and exporter provenance are
+still missing: this bridge alone does not discharge the recovery conjunct.
+See `formal/proposals/native-replay-proof.md` for the exact assumptions and scope.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

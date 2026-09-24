@@ -1197,3 +1197,64 @@ their verified presence/absence condition holds. Only a substantive general proo
 of this relation discharges `nativeArithmeticRecoveryRefines`. Concrete decoder/
 hash/exporter/WAL, arbitrary failures/snapshots/repair, contract freeze, clean
 reproduction and independent reviews still follow before merged Formal GO.
+
+## 2026-09-24 — Native arithmetic replay adapter (T044/T048/T049/T057/T060)
+
+`NativeReplay.lean` now instantiates replay admission/effect/receipt from the
+native graph computations, rather than a Boolean arithmetic-admission predicate
+or finite accepted-record table. The independent context resolver supplies
+authenticated historical metadata and an optional graph; missing authority
+rejects. Whole context/authority/command/body equality and all original fresh
+state checks are enforced. Accepted replay yields a complete `NativePrepared`
+witness and exact record equality, with original receipt/effect/sequence.
+
+Checked ApplyQC replay recomputes the full APPLY body, compares the actual parent
+and next model/optimizer hashes, then requires a separate authenticator for the
+body/certificate/next-checkpoint tuple. Thirteen general helper theorems derive
+native transition histories by replay induction, exact records from an empty
+arithmetic journal, retry/conflict retention after current advance, stale first
+admission rejection, and verified unknown-append presence/absence reconstruction.
+The current-state equality is computed by replay, not an assumed recovered state.
+
+Self-review found an adapter gap: the generic replay kernel previously required
+total effect/receipt functions. Real encoder failure cannot safely be represented
+as empty bytes. Both return `Option Bytes` now; preparation and replay require
+successful exact encoding. Failure rejects without a pending record. Existing
+kernel proofs and examples are rechecked under this partial encoding interface.
+No protocol outcome, trace schema, TLA transition or production runtime changed.
+
+Forty-two kernel examples execute the native adapter. They preserve the three
+pinned records at original sequences 5/6/8 and separately replay an explicitly
+arithmetic-only journal from empty state with sequences 1/2/3. The latter is not
+the full public trace; its five non-arithmetic vote kinds remain unconnected.
+Tests cover mutated record fields, failed encoders (including empty output),
+QC current substitutions, stale parent, historical retry/conflict, unexposed
+survival, verified absence, truncated scans and unknown/blocked recovery.
+Input/hash samples and metadata/QC/scan trust remain finite/synthetic in examples.
+
+Validation: full Lean build (972 jobs), fresh native replay/vector checks and
+axiom audit; 161 tooling tests, 38 oracle tests, 33 legal/112 illegal traces,
+targeted Ruff and byte-exact regeneration of 297 JSON/six Lean files. Thirteen
+new helpers, six functions and 42 examples are axiom-audited. The full mandatory
+check still fails at 44/45 for `nativeArithmeticRecoveryRefines`. GNU make is
+unavailable; scoped checks do not replace `make formal-check`. Phase0 remains
+failed for the unfrozen amendment. Nineteen TLA modules/public schema are
+unchanged; no fresh TLC or new production-mutant execution is claimed.
+
+Candidate semantics:
+`sha256:ca0ce1437cd6aa3a41d6509df5b36d232cd7d2a36395410ef813557154987dc4`.
+Evidence: `formal/proposals/evidence/native-replay.json`; exact scope and named
+assumptions: `formal/proposals/native-replay-proof.md`. Formal authority remains
+NO_GO. Demo services and frozen fallback refs are preserved.
+
+Next concrete stage: connect this general arithmetic replay adapter to the full
+public journal/witness projection, including original per-actor sequence and
+every intervening non-arithmetic vote. Preserve action/context/envelope mapping,
+ordered envelope-ID journal roots, authenticated original event snapshots,
+current-advance/certificate exposure, unknown/null observations and exact scans.
+Do not renumber the full public trace, assume its prefix equality, supply an
+arithmetic admission flag or count the three-vote subhistory as complete native
+recovery. The mandatory theorem must connect public vote admission and recovered
+state through the same checked native relation. Concrete input decoding/hash/
+exporter/WAL, arbitrary snapshots/failures/repair, contract freeze, clean offline
+reproduction and independent review still follow before merged Formal GO.

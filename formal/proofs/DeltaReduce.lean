@@ -10,6 +10,8 @@ import DeltaReduce.ParameterKernelVectors
 import DeltaReduce.ArithmeticBinding
 import DeltaReduce.NativeGraphVectors
 import DeltaReduce.NativeVoteVectors
+import DeltaReduce.NativeReplay
+import DeltaReduce.NativeReplayVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

@@ -36,11 +36,11 @@ def finalState : State := ⟨records, nextCurrent⟩
 def adapter : Adapter where
   admitted current data := decide (current = oldCurrent ∧ data ∈ records.map Record.data)
   effect data := match lookup records data.context with
-    | some r => r.effect
-    | none => []
+    | some r => some r.effect
+    | none => none
   receipt data sequence effect := match lookup records data.context with
-    | some r => if sequence = r.sequence ∧ effect = r.effect then r.receipt else []
-    | none => []
+    | some r => if sequence = r.sequence ∧ effect = r.effect then some r.receipt else none
+    | none => none
   authenticated c := decide (c = certificate)
   scanAuthenticated _ _ _ _ := true -- Synthetic trust, not exporter authentication.
 theorem unauthenticatedScanRejected : resolveUnknown { adapter with scanAuthenticated := fun _ _ _ _ => false } (initial oldCurrent) prior record4 (.verifiedAbsent prior) = .blocked := by decide

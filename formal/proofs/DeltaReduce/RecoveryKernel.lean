@@ -59,8 +59,8 @@ inductive Scan where
 
 structure Adapter where
   admitted : Current → VoteData → Bool
-  effect : VoteData → Bytes
-  receipt : VoteData → Nat → Bytes → Bytes
+  effect : VoteData → Option Bytes
+  receipt : VoteData → Nat → Bytes → Option Bytes
   authenticated : Certificate → Bool
   scanAuthenticated : State → List Entry → Record → Scan → Bool
 
@@ -75,8 +75,8 @@ def validVote (adapter : Adapter) (state : State) (record : Record) : Prop :=
   adapter.admitted state.current record.data = true ∧
   record.sequence = state.votes.length + 1 ∧
   lookup state.votes record.data.context = none ∧
-  record.effect = adapter.effect record.data ∧
-  record.receipt = adapter.receipt record.data record.sequence record.effect
+  adapter.effect record.data = some record.effect ∧
+  adapter.receipt record.data record.sequence record.effect = some record.receipt
 
 instance (a : Adapter) (s : State) (r : Record) : Decidable (validVote a s r) :=
   inferInstanceAs (Decidable (_ ∧ _ ∧ _ ∧ _ ∧ _))
@@ -289,8 +289,12 @@ def prepare (adapter : Adapter) (mode : Mode) (state : State) (data : VoteData) 
     | none =>
         if adapter.admitted state.current data then
           let sequence := state.votes.length + 1
-          let effect := adapter.effect data
-          .pending ⟨data, sequence, adapter.receipt data sequence effect, effect⟩
+          match adapter.effect data with
+          | none => .rejected
+          | some effect =>
+              match adapter.receipt data sequence effect with
+              | none => .rejected
+              | some receipt => .pending ⟨data, sequence, receipt, effect⟩
         else .rejected
   else .unavailable
 
@@ -308,8 +312,16 @@ theorem preparationSound {a s data record} (prepared : prepare a .ready s data =
   | none =>
       simp only [found] at prepared
       split at prepared
-      · cases Preparation.pending.inj prepared
-        exact ⟨⟨‹_›, rfl, found, rfl, rfl⟩, rfl⟩
+      · cases effect : a.effect data with
+        | none => simp [effect] at prepared
+        | some bytes =>
+            simp only [effect] at prepared
+            cases receipt : a.receipt data (s.votes.length + 1) bytes with
+            | none => simp [receipt] at prepared
+            | some encoded =>
+                simp only [receipt] at prepared
+                cases Preparation.pending.inj prepared
+                exact ⟨⟨‹_›, rfl, found, effect, receipt⟩, rfl⟩
       · contradiction
 
 inductive Stage where
