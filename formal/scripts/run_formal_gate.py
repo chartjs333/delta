@@ -20,6 +20,7 @@ sys.path.insert(0, str(TOOLCHAIN))
 
 from formal_artifacts import canonical_json_bytes  # noqa: E402
 from prepare_cache import artifacts, verify  # noqa: E402
+from prepare_proof_cache import verify_packages  # noqa: E402
 from tlc_results import TlcResultError, successful_tlc_result  # noqa: E402
 
 GATES = ("parse", "safety", "liveness", "proofs", "mutants", "refinement", "report")
@@ -219,6 +220,9 @@ def run_proofs() -> None:
             "missing pinned formal/proofs/lake-manifest.json; "
             "implicit dependency resolution is forbidden"
         )
+    # Lake may clone a missing manifest dependency during an ordinary build.
+    # Verify the complete locked source cache first; fetching is explicit setup.
+    verify_packages(PROOFS)
     native_lake = TOOLCHAIN / "windows" / "lean-4.32.1-windows" / "bin" / "lake.exe"
     lake = os.environ.get(
         "LAKE",
@@ -229,7 +233,7 @@ def run_proofs() -> None:
     proof_environment = dict(os.environ)
     proof_environment["LAKE"] = lake
     run(
-        [lake, "build", "DeltaReduce"],
+        [lake, "--no-cache", "build", "DeltaReduce"],
         cwd=PROOFS,
         timeout=1200,
         environment=proof_environment,

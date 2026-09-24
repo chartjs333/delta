@@ -248,3 +248,35 @@ Current candidate semantics:
 `sha256:a9dafb262dd89c327272cc4a2376392c2f378cd3ce1deffa0c7153053ca56a34`.
 The report verifier accepts the canonical NO_GO report without errors; this
 verifies report integrity and its negative decision, not completion of the gates.
+
+## September 24: full project proof environment and fail-closed source cache
+
+T005/T006/T049: materialized all nine exact locked dependency source checkouts
+on C:, verified their clean trees, upstream URLs/revisions, license hashes,
+mathlib manifest and Lean toolchain. The source preparation command requires
+explicit `--download`; ordinary verification, the proof runner and the axiom
+audit reject missing or modified sources before Lake can fetch them. Existing
+checkouts are never reset or repaired. Lake runs with `--no-cache`.
+
+The first explicit mathlib cache attempt against the official master container
+found 0 of 937 entries; the official master/legacy chain then retrieved all 937.
+These upstream CI artifacts are not independently reproduced or authenticated
+by our source verifier. With pinned Lean/Lake 4.32.1, the complete current
+`DeltaReduce` import bundle built successfully (961 jobs). The real mandatory
+proof gate then verified 41 of 45 registered conjuncts using only the allowed
+kernel axioms. It still fails on the four missing PO-AB1 theorems: native byte
+graph uniqueness, PARAMETER conversion, APPLY result and admission/recovery
+refinement. No placeholder or waived obligation was added.
+
+Evidence: `formal/proposals/evidence/proof-environment.json` and retained setup,
+build, audit and test logs under `formal/proposals/evidence/proof-environment/`.
+The 84 formal tooling tests pass, including twelve cache-verification tests.
+This is connected Windows development evidence, not the required clean offline
+Linux reproduction or an independent review. Existing TLA/public witness and
+phase-zero gaps remain. Formal semantics bytes did not change in this tooling
+stage; candidate ID stays `a9dafb26...`. The regenerated report stays NO_GO.
+
+No native guard, application service or tunnel was changed. Next implement the
+production byte/witness contracts and the four missing PO-AB1 conjuncts, extend
+heterogeneous TLA arithmetic, and refreeze only the complete reviewed contracts.
+The missing local mathlib environment is no longer the reason for the proof STOP.

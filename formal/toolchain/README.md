@@ -22,6 +22,46 @@ For a fully offline build, the pinned base image from `container.lock` must alre
 
 Lean package sources/oleans are a separate dependency cache governed by `formal/proofs/dependencies.lock.json`. The proof invocation must use an already materialized `.lake/packages`/cache matching that lock when public network is disabled. T062 archives and verifies that materialized cache as clean-reproduction evidence; its absence must fail closed rather than trigger an implicit download.
 
+Materialize the exact dependency sources explicitly during connected setup:
+
+```text
+python formal/toolchain/prepare_proof_cache.py --download
+python formal/toolchain/prepare_proof_cache.py
+```
+
+The second invocation verifies offline. Both reject changed existing checkouts;
+neither resets or repairs them. Verification checks the pinned revisions, URLs,
+clean source trees, license hashes, upstream manifest and matching Lean version.
+The mandatory proof runner and axiom audit perform this check before invoking
+Lake with `--no-cache`, preventing implicit source clones and automatic Lake
+build-cache retrieval. This preflight does not prove compiled-cache provenance
+or replace the network isolation required by T062.
+
+An optional, separate connected setup command, run from `formal/proofs`, fetches
+the upstream mathlib build cache for the project's imported modules:
+
+```powershell
+$imports = Get-ChildItem DeltaReduce/*.lean |
+  Select-String '^import (Mathlib\.[A-Za-z0-9_.]+)$' |
+  ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique
+lake --no-cache exe cache get --repo=leanprover-community/mathlib4 '--cache-from=master,legacy' @imports
+```
+
+This PowerShell example restricts retrieval to the actual `Mathlib.*` imports
+and their dependencies. `MATHLIB_CACHE_DIR` can place the archive cache on a
+drive with enough space. The `master,legacy` names select cache containers, not source
+revisions; all sources stay at the exact locked commits. The explicit `cache`
+executable downloads despite Lake's `--no-cache` flag. These are upstream CI
+artifacts and are not independently reproduced or cryptographically attested
+by our source verifier. See the pinned mathlib `Cache/SECURITY.md` for its trust
+model. Never use a successful download or project build alone as Formal GO.
+
+On September 24 the locked Windows profile built all current project imports
+(961 jobs), and its axiom audit verified 41 of 45 registered conjuncts. The four
+missing PO-AB1 theorems still make the mandatory proof gate FAIL. This connected
+local result does not close the clean offline Linux reproduction requirement.
+Retained evidence: `formal/proposals/evidence/proof-environment.json`.
+
 From a clean checkout, create the complete tracked-source manifest outside the
 repository and run the retained reproduction in the prebuilt local image with
 networking disabled:

@@ -1,0 +1,74 @@
+Current branch: HEAD
+Using cache from origin: (some leanprover-community/mathlib4)
+Attempting to download 937 file(s) from leanprover-community/mathlib4 cache at https://lakecache.blob.core.windows.net/mathlib4-master
+
+Downloaded: 0 file(s) [attempted 1/937 = 0%, 0 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 8/937 = 0%, 0 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 40/937 = 4%, 0 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 79/937 = 8%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 121/937 = 12%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 164/937 = 17%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 197/937 = 21%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 240/937 = 25%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 285/937 = 30%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 325/937 = 34%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 363/937 = 38%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 406/937 = 43%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 446/937 = 47%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 487/937 = 51%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 529/937 = 56%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 565/937 = 60%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 612/937 = 65%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 657/937 = 70%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 700/937 = 74%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 740/937 = 78%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 769/937 = 82%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 816/937 = 87%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 863/937 = 92%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 908/937 = 96%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 932/937 = 99%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 937/937 = 100%, 1 KB/s], Decompressed: 0
+Attempting to download 937 file(s) from leanprover-community/mathlib4 cache at https://lakecache.blob.core.windows.net/mathlib4
+
+Downloaded: 1 file(s) [attempted 1/937 = 0%, 46 KB/s], Decompressed: 0
+Downloaded: 12 file(s) [attempted 12/937 = 1%, 16 KB/s], Decompressed: 0
+Downloaded: 25 file(s) [attempted 25/937 = 2%, 142 KB/s], Decompressed: 1
+Downloaded: 45 file(s) [attempted 45/937 = 4%, 51 KB/s], Decompressed: 24
+Downloaded: 62 file(s) [attempted 62/937 = 6%, 121 KB/s], Decompressed: 24
+Downloaded: 90 file(s) [attempted 90/937 = 9%, 107 KB/s], Decompressed: 45
+Downloaded: 117 file(s) [attempted 117/937 = 12%, 706 KB/s], Decompressed: 67
+Downloaded: 147 file(s) [attempted 147/937 = 15%, 410 KB/s], Decompressed: 94
+Downloaded: 175 file(s) [attempted 175/937 = 18%, 205 KB/s], Decompressed: 94
+Downloaded: 211 file(s) [attempted 211/937 = 22%, 420 KB/s], Decompressed: 140
+Downloaded: 237 file(s) [attempted 237/937 = 25%, 799 KB/s], Decompressed: 140
+Downloaded: 266 file(s) [attempted 266/937 = 28%, 364 KB/s], Decompressed: 140
+Downloaded: 292 file(s) [attempted 292/937 = 31%, 81 KB/s], Decompressed: 140
+Downloaded: 328 file(s) [attempted 328/937 = 35%, 543 KB/s], Decompressed: 140
+Downloaded: 353 file(s) [attempted 353/937 = 37%, 144 KB/s], Decompressed: 207
+Downloaded: 388 file(s) [attempted 388/937 = 41%, 955 KB/s], Decompressed: 207
+Downloaded: 414 file(s) [attempted 414/937 = 44%, 1423 KB/s], Decompressed: 207
+Downloaded: 447 file(s) [attempted 447/937 = 47%, 1576 KB/s], Decompressed: 207
+Downloaded: 476 file(s) [attempted 476/937 = 50%, 114 KB/s], Decompressed: 207
+Downloaded: 495 file(s) [attempted 495/937 = 52%, 399 KB/s], Decompressed: 207
+Downloaded: 524 file(s) [attempted 524/937 = 55%, 1000 KB/s], Decompressed: 345
+Downloaded: 548 file(s) [attempted 548/937 = 58%, 498 KB/s], Decompressed: 345
+Downloaded: 574 file(s) [attempted 574/937 = 61%, 947 KB/s], Decompressed: 345
+Downloaded: 622 file(s) [attempted 622/937 = 66%, 1365 KB/s], Decompressed: 345
+Downloaded: 653 file(s) [attempted 653/937 = 69%, 130 KB/s], Decompressed: 345
+Downloaded: 660 file(s) [attempted 660/937 = 70%, 16 KB/s], Decompressed: 517
+Downloaded: 691 file(s) [attempted 691/937 = 73%, 67 KB/s], Decompressed: 517
+Downloaded: 718 file(s) [attempted 718/937 = 76%, 113 KB/s], Decompressed: 517
+Downloaded: 732 file(s) [attempted 732/937 = 78%, 258 KB/s], Decompressed: 517
+Downloaded: 759 file(s) [attempted 759/937 = 81%, 572 KB/s], Decompressed: 517
+Downloaded: 777 file(s) [attempted 777/937 = 82%, 70 KB/s], Decompressed: 517
+Downloaded: 816 file(s) [attempted 816/937 = 87%, 246 KB/s], Decompressed: 660
+Downloaded: 825 file(s) [attempted 825/937 = 88%, 1046 KB/s], Decompressed: 660
+Downloaded: 870 file(s) [attempted 870/937 = 92%, 87 KB/s], Decompressed: 660
+Downloaded: 895 file(s) [attempted 895/937 = 95%, 75 KB/s], Decompressed: 660
+Downloaded: 921 file(s) [attempted 921/937 = 98%, 474 KB/s], Decompressed: 787
+Downloaded: 930 file(s) [attempted 930/937 = 99%, 39 KB/s], Decompressed: 787
+Downloaded: 933 file(s) [attempted 933/937 = 99%, 762 KB/s], Decompressed: 787
+Downloaded: 935 file(s) [attempted 935/937 = 99%, 755 KB/s], Decompressed: 916
+Downloaded: 937 file(s) [attempted 937/937 = 100%, 755 KB/s], Decompressed: 916
+Decompressed 937 file(s)
+Already decompressed 937 file(s)

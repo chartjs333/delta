@@ -1,0 +1,9 @@
+✔ [923/928] Built DeltaReduce.ArithmeticKernel (2.7s)
+✔ [925/934] Built DeltaReduce.Quorum (14s)
+✔ [954/961] Built DeltaReduce.FixedPoint (11s)
+✔ [956/961] Built DeltaReduce.Apply (5.5s)
+✔ [957/961] Built DeltaReduce.Hierarchy (5.6s)
+✔ [958/961] Built DeltaReduce.Coverage (5.1s)
+✔ [959/961] Built DeltaReduce.Examples (5.5s)
+✔ [960/961] Built DeltaReduce (4.8s)
+Build completed successfully (961 jobs).

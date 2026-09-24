@@ -1,0 +1,71 @@
+✔ [1/9] Built Cache.Cli (1.6s)
+✔ [3/10] Built Cache.Lean (1.6s)
+✔ [5/25] Built Cache.Infra (1.5s)
+✔ [6/25] Built Batteries.Tactic.OpenPrivate (2.7s)
+✔ [7/25] Built Cache.Cli:c.o (1.3s)
+✔ [8/25] Built Cache.Lean:c.o (219ms)
+✔ [9/25] Built Cache.Infra:c.o (281ms)
+✔ [10/25] Built Batteries.Tactic.OpenPrivate:c.o (1.5s)
+✔ [11/25] Built Cache.IO (3.4s)
+✔ [12/25] Built Cache.IO:c.o (2.6s)
+✔ [13/25] Built Cache.Hashing (2.6s)
+✔ [14/25] Built Cache.Hashing:c.o (3.5s)
+✔ [15/25] Built Cache.Requests (3.6s)
+✔ [16/25] Built Cache.Marker (2.3s)
+✔ [17/25] Built Cache.Marker:c.o (169ms)
+✔ [18/25] Built Cache.Requests:c.o (3.2s)
+✔ [19/25] Built Cache.Query (2.3s)
+✔ [20/25] Built Cache.Warning (2.2s)
+✔ [21/25] Built Cache.Query:c.o (2.2s)
+✔ [22/25] Built Cache.Main (3.2s)
+✔ [23/25] Built Cache.Warning:c.o (3.1s)
+✔ [24/25] Built Cache.Main:c.o (1.0s)
+✔ [25/25] Built cache:exe (4.5s)
+=================================================================
+SECURITY: reading cache at a non-default scope
+=================================================================
+You are reading cache artifacts at a scope outside the default trust
+boundary for this repo. The cache cannot verify the contents of these
+artifacts; you are choosing to trust whoever uploaded them.
+
+Repository: leanprover-community/mathlib4
+Reason: --cache-from=master (explicit container override)
+=================================================================
+Current branch: HEAD
+Using cache from origin: (some leanprover-community/mathlib4)
+Attempting to download 937 file(s) from leanprover-community/mathlib4 cache at https://lakecache.blob.core.windows.net/mathlib4-master
+
+Downloaded: 0 file(s) [attempted 1/937 = 0%, 0 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 5/937 = 0%, 0 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 40/937 = 4%, 0 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 79/937 = 8%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 126/937 = 13%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 176/937 = 18%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 223/937 = 23%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 252/937 = 26%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 302/937 = 32%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 351/937 = 37%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 401/937 = 42%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 451/937 = 48%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 498/937 = 53%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 539/937 = 57%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 577/937 = 61%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 607/937 = 64%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 657/937 = 70%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 707/937 = 75%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 757/937 = 80%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 804/937 = 85%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 847/937 = 90%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 871/937 = 92%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 916/937 = 97%, 1 KB/s], Decompressed: 0
+Downloaded: 0 file(s) [attempted 937/937 = 100%, 1 KB/s], Decompressed: 0
+Warning: some files were not found in the cache.
+This usually means that your local checkout of mathlib4 has diverged from upstream.
+
+  * If you push your commits to a PR to the mathlib4 repository
+    (use a draft PR if it is not ready for review),
+    then CI will build the oleans and they will be available later.
+  * If you have already opened a PR, this may mean
+    the CI build has failed part-way through building.
+Decompressed 0 file(s)
+No cache files to decompress

@@ -14,8 +14,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 PROOFS = ROOT / "formal" / "proofs"
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
+sys.path.insert(0, str(ROOT / "formal" / "toolchain"))
 
 from formal_artifacts import sha256_file, write_canonical_json  # noqa: E402
+from prepare_proof_cache import verify_packages  # noqa: E402
 
 OBLIGATIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
     "PO-AB1": (
@@ -153,13 +155,21 @@ def main() -> int:
             }
         )
 
+    try:
+        verify_packages(PROOFS)
+        source_cache_ready = True
+    except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:
+        errors.append(f"locked proof dependency sources unavailable: {error}")
+        source_cache_ready = False
     lake = os.environ.get("LAKE", "lake")
-    if shutil.which(lake) is None and not Path(lake).is_file():
+    if not source_cache_ready:
+        output = ""
+    elif shutil.which(lake) is None and not Path(lake).is_file():
         errors.append(f"Lake executable not found: {lake}")
         output = ""
     else:
         result = subprocess.run(
-            [lake, "env", "lean", "DeltaReduce/AxiomAudit.lean"],
+            [lake, "--no-cache", "env", "lean", "DeltaReduce/AxiomAudit.lean"],
             cwd=PROOFS,
             check=False,
             capture_output=True,
