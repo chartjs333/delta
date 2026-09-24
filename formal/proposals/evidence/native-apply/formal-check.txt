@@ -1,0 +1,3 @@
+NOT_EXECUTED: GNU make is unavailable in this Windows environment.
+Scoped Lean, tooling, oracle and refinement checks are recorded separately.
+Overall formal gate remains FAIL: nativeArithmeticRecoveryRefines is missing and phase0 contracts are unfrozen.

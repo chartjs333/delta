@@ -1,0 +1,4 @@
+✔ [964/967] Built DeltaReduce.ArithmeticBinding (6.9s)
+✔ [965/967] Built DeltaReduce.NativeGraphVectors (29s)
+✔ [966/967] Built DeltaReduce (5.5s)
+Build completed successfully (967 jobs).

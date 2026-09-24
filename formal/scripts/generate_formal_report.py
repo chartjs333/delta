@@ -408,7 +408,7 @@ def main() -> int:
             "stores under named canonical-codec, hash-collision, anchor/recovery and "
             "certificate premises. Its source-linked Lean byte vectors use a finite "
             "lookup decoder and synthetic trust; they do not verify a general native "
-            "parser, SHA-256 or provenance. APPLY and recovery conjuncts remain open, "
+            "parser, SHA-256 or provenance. The recovery conjunct remains open, "
             "as does concrete decoder/exporter/WAL refinement.",
             "The PARAMETER row kernel proves coefficient derivation, ordered vector "
             "and coefficient-sum prefixes, exact coordinate refinement and quantum "
@@ -427,9 +427,15 @@ def main() -> int:
             "full output shape/bounds and uniqueness for mathematical inputs. Its 32 "
             "INT64 oracle/Lean vectors include two pinned native-fixture input graphs; "
             "fixture authentication/conversion are evaluated by the proposal oracle. "
-            "The kernel does not bind rows/current state from independent native stores, "
-            "construct canonical full APPLY bytes/hashes, or establish native execution. "
-            "nativeApplyResultUnique and nativeArithmeticRecoveryRefines remain missing.",
+            "The separate native bridge now proves equality of certified bodies, converted "
+            "cells and aligned rows across independently anchored stores, then constructs "
+            "full typed and canonical APPLY bytes with fixed INT64 outputs. Conditional "
+            "nativeApplyResultUnique also binds artifact/model/optimizer hash preimages "
+            "under an explicit HashAdapter premise. Seventeen new kernel examples compare "
+            "the pinned full result/bytes and encoding boundaries. Input codec/hash lookup "
+            "tables remain finite/synthetic; general decoder completeness, native allocation "
+            "limits, cryptographic implementations and native admission/WAL execution are "
+            "not proved. nativeArithmeticRecoveryRefines remains missing.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

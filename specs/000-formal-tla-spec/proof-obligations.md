@@ -27,7 +27,7 @@ ordered whole-body aggregate comparison, per-domain conversion with INT64 output
 under either accumulator width, complete schema placement and no extra cells.
 This conjunct is conditional on the named codec/anchor/certificate premises;
 concrete native decoder/serialization/authentication and admission refinement
-remain additional mandatory obligations. APPLY and recovery conjuncts remain OPEN. Scope:
+remain additional mandatory obligations. Recovery remains OPEN. Scope:
 `formal/proposals/parameter-kernel-proof.md` and
 `formal/proposals/native-parameter-body-proof.md`, followed by
 `formal/proposals/native-parameter-conversion-proof.md`.
@@ -36,8 +36,13 @@ remain additional mandatory obligations. APPLY and recovery conjuncts remain OPE
 optimizer intermediate bounds, complete vector shape and mathematical output
 uniqueness from fixed input rows/model/optimizer. It does not derive those inputs
 from the native graph or bind full APPLY body bytes and next-state hashes.
-Consequently it does not discharge `nativeApplyResultUnique`; the native bridge
-and recovery conjunct remain OPEN. See `formal/proposals/apply-kernel-proof.md`.
+Consequently that helper alone does not discharge `nativeApplyResultUnique`.
+The checked native bridge now derives those inputs across independently anchored
+stores, constructs full typed/canonical APPLY bodies and proves result identity,
+output bounds and exact hash preimages under named codec/HashAdapter/trust
+premises. This discharges the conditional APPLY conjunct; recovery and concrete
+native decoder/admission/WAL refinement remain OPEN. See
+`formal/proposals/apply-kernel-proof.md` and `formal/proposals/native-apply-proof.md`.
 
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,

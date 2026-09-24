@@ -1,5 +1,6 @@
 import Std
 import DeltaReduce.ParameterKernel
+import DeltaReduce.ApplyKernel
 
 /-!
 PO-AB1 graph layer. Two independently supplied stores may not resolve different
@@ -13,7 +14,7 @@ separate refinement obligations. Collision freedom on accepted canonical bytes
 is a named cryptographic premise, not a proved property of SHA-256. Content IDs
 are byte lists; the native sha256:hex spelling needs its concrete adapter proof.
 The payloads mirror native_binding.py. The later checked extraction layer proves
-PARAMETER body soundness; certified conversion/Apply/recovery remain open.
+PARAMETER/conversion and full APPLY result identity; native recovery remains open.
 -/
 namespace DeltaReduce.NativeBinding
 
@@ -599,9 +600,12 @@ structure DerivedParameter {codec : Codec} {store : Store} {trust : Trust} {anch
   validated : ParameterFrameValid binding.authority binding.profile binding.model binding.optimizer frame
   assignment : Assignment
   planned : assignment ∈ frame.plan.assignments
+  assignmentFound : frame.plan.assignments.find?
+    (fun a => a.domain == domain && a.shard == shard) = some assignment
   key : assignment.domain = domain ∧ assignment.shard = shard
   partition : Shard
   partitionMember : partition ∈ frame.shards
+  partitionFound : frame.shards.find? (fun s => s.id == shard) = some partition
   partitionKey : partition.id = shard
   orderedCoverage : assignment.contributions.map (·.ticket) = eligibleDomainTickets frame domain
   rows : List ParameterKernel.Row
@@ -645,9 +649,9 @@ def deriveParameter {codec : Codec} {store : Store} {trust : Trust} {anchor : An
               | none => none
               | some numerators =>
                   some ⟨frame, source.property, valid, assignment,
-                    List.mem_of_find?_eq_some planned,
+                    List.mem_of_find?_eq_some planned, planned,
                     by simpa using List.find?_some planned,
-                    partition, List.mem_of_find?_eq_some partitioned,
+                    partition, List.mem_of_find?_eq_some partitioned, partitioned,
                     by simpa using List.find?_some partitioned,
                     ordered, loaded.val, loaded.property, numerators, computed⟩
             else none
@@ -1141,5 +1145,443 @@ theorem nativeParameterConversionSound {codec store trust anchor}
     (binding : Binding codec trust anchor store) (result : NativeConversion binding)
     (_accepted : deriveNativeConversion binding = some result) : NativeConversionSound result :=
   conversionSound result
+
+end DeltaReduce
+
+namespace DeltaReduce.NativeBinding
+
+/-- Independently resolved frame payloads agree at every native authority edge. -/
+theorem frameOriginUnique {codec} (collisionFree : CollisionFree codec)
+    {leftStore rightStore authority leftFrame rightFrame}
+    (left : FrameOrigin codec leftStore authority leftFrame)
+    (right : FrameOrigin codec rightStore authority rightFrame) : leftFrame = rightFrame := by
+  obtain ⟨lb, ls⟩ := left.schema
+  obtain ⟨rb, rs⟩ := right.schema
+  have schema := (resolvedBytesAndPayloadUnique collisionFree ls rs).2
+  obtain ⟨lb, ls⟩ := left.plan
+  obtain ⟨rb, rs⟩ := right.plan
+  have plan := (resolvedBytesAndPayloadUnique collisionFree ls rs).2
+  obtain ⟨lb, ls⟩ := left.isc
+  obtain ⟨rb, rs⟩ := right.isc
+  have isc := (resolvedBytesAndPayloadUnique collisionFree ls rs).2
+  obtain ⟨lb, ls⟩ := left.ec
+  obtain ⟨rb, rs⟩ := right.ec
+  have ec := (resolvedBytesAndPayloadUnique collisionFree ls rs).2
+  obtain ⟨lb, ls⟩ := left.apc
+  obtain ⟨rb, rs⟩ := right.apc
+  have apc := (resolvedBytesAndPayloadUnique collisionFree ls rs).2
+  cases leftFrame; cases rightFrame
+  simp_all
+
+/-- Certified whole-body equality is derived at the anchored aggregate; neither
+store supplies an expected-result equality premise. -/
+theorem certifiedFrameBodiesUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : CertifiedParameters leftBinding) (right : CertifiedParameters rightBinding) :
+    left.corpus.frame = right.corpus.frame ∧ left.aggregate = right.aggregate ∧
+    left.corpus.entries.map BoundParameter.body = right.corpus.entries.map BoundParameter.body := by
+  have authority := (DeltaReduce.nativeArithmeticGraphUnique collisionFree leftBinding rightBinding).2.1
+  have rightOrigin := right.corpus.origin
+  rw [← authority] at rightOrigin
+  have frame := frameOriginUnique collisionFree left.corpus.origin rightOrigin
+  have aggregate := Option.some.inj (left.anchored.symm.trans right.anchored)
+  have rightResolved := right.resolved
+  rw [← aggregate] at rightResolved
+  have bodies := (resolvedBytesAndPayloadUnique collisionFree left.resolved rightResolved).2
+  exact ⟨frame, aggregate, (Payload.aggregate.inj bodies).2⟩
+
+def ConvertedParameter.cells {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (entry : ConvertedParameter binding) : List PlacedCell :=
+  placeValues entry.source.domain entry.source.result.partition.offset entry.values
+
+/-- Matching certified bodies plus independently fixed frame/profile determine
+conversion values and placement. Stored find witnesses come from actual loading. -/
+theorem convertedParameterCellsUnique {codec trust anchor leftStore rightStore}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : ConvertedParameter leftBinding) (right : ConvertedParameter rightBinding)
+    (profile : leftBinding.profile = rightBinding.profile)
+    (frame : left.source.result.frame = right.source.result.frame)
+    (body : left.source.body = right.source.body) : left.cells = right.cells := by
+  have domain : left.source.domain = right.source.domain := congrArg ParameterBody.domain body
+  have shard : left.source.shard = right.source.shard := congrArg ParameterBody.shard body
+  have nums : left.source.result.numerators = right.source.result.numerators :=
+    congrArg ParameterBody.numerators body
+  have assignment := left.source.result.assignmentFound
+  simp only [frame, domain, shard] at assignment
+  have assignments := Option.some.inj (assignment.symm.trans right.source.result.assignmentFound)
+  have partition := left.source.result.partitionFound
+  simp only [frame, shard] at partition
+  have partitions := Option.some.inj (partition.symm.trans right.source.result.partitionFound)
+  have computed := left.computed
+  simp only [profile, assignments, nums] at computed
+  have values := Option.some.inj (computed.symm.trans right.computed)
+  simp only [ConvertedParameter.cells, domain, partitions, values]
+
+theorem convertedListCellsUnique {codec trust anchor leftStore rightStore}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (profile : leftBinding.profile = rightBinding.profile) (frame : ParameterFrame)
+    (left : List (ConvertedParameter leftBinding)) (right : List (ConvertedParameter rightBinding))
+    (leftFrames : ∀ entry ∈ left, entry.source.result.frame = frame)
+    (rightFrames : ∀ entry ∈ right, entry.source.result.frame = frame)
+    (bodies : left.map (fun e => e.source.body) = right.map (fun e => e.source.body)) :
+    conversionCells left = conversionCells right := by
+  induction left generalizing right with
+  | nil =>
+      cases right with
+      | nil => rfl
+      | cons r rs => simp at bodies
+  | cons l ls ih =>
+      cases right with
+      | nil => simp at bodies
+      | cons r rs =>
+          have equal := List.cons.inj bodies
+          have head := convertedParameterCellsUnique l r profile
+            ((leftFrames l (by simp)).trans (rightFrames r (by simp)).symm) equal.1
+          have tail := ih rs (fun e h => leftFrames e (by simp [h]))
+            (fun e h => rightFrames e (by simp [h])) equal.2
+          change l.cells ++ conversionCells ls = r.cells ++ conversionCells rs
+          rw [head, tail]
+
+theorem nativeConversionCellsUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : NativeConversion leftBinding) (right : NativeConversion rightBinding) :
+    left.certified.corpus.frame = right.certified.corpus.frame ∧
+    conversionCells left.converted = conversionCells right.converted ∧
+    left.certified.corpus.entries.map BoundParameter.body =
+      right.certified.corpus.entries.map BoundParameter.body := by
+  obtain ⟨frame, _, bodies⟩ := certifiedFrameBodiesUnique collisionFree left.certified right.certified
+  have profile := (DeltaReduce.nativeArithmeticGraphUnique collisionFree leftBinding rightBinding).2.2.2.2
+  have leftFrames := (parametersForSound left.certified.corpus.bound).2
+  have rightFrames := (parametersForSound right.certified.corpus.bound).2
+  have cells := convertedListCellsUnique profile left.certified.corpus.frame left.converted right.converted
+    (fun e h => leftFrames e.source (by
+      rw [← left.convertedSources]; exact List.mem_map.mpr ⟨e, h, rfl⟩))
+    (fun e h => (rightFrames e.source (by
+      rw [← right.convertedSources]; exact List.mem_map.mpr ⟨e, h, rfl⟩)).trans frame.symm)
+    (by
+      have l := congrArg (List.map BoundParameter.body) left.convertedSources
+      have r := congrArg (List.map BoundParameter.body) right.convertedSources
+      simpa only [List.map_map, Function.comp_def] using l.trans (bodies.trans r.symm))
+  exact ⟨frame, cells, bodies⟩
+
+theorem placedCoordinatesUnique {cells domain coordinates leftValues rightValues}
+    (left : PlacedCoordinates cells domain coordinates leftValues)
+    (right : PlacedCoordinates cells domain coordinates rightValues) : leftValues = rightValues := by
+  induction left generalizing rightValues with
+  | nil => cases right; rfl
+  | cons unique tail ih =>
+      cases right with
+      | cons otherUnique otherTail =>
+          have cell := (List.cons.inj (unique.symm.trans otherUnique)).1
+          have value := congrArg PlacedCell.value cell
+          dsimp at value
+          rw [value, ih otherTail]
+
+def domainValues {cells width} (vectors : List (DomainVector cells width)) : List (String × List Int) :=
+  vectors.map (fun vector => (vector.domain, vector.values))
+
+theorem domainVectorsUnique {leftCells rightCells leftWidth rightWidth}
+    (cells : leftCells = rightCells) (width : leftWidth = rightWidth)
+    (left : List (DomainVector leftCells leftWidth)) (right : List (DomainVector rightCells rightWidth))
+    (names : left.map (·.domain) = right.map (·.domain)) : domainValues left = domainValues right := by
+  subst rightCells; subst rightWidth
+  induction left generalizing right with
+  | nil =>
+      cases right with
+      | nil => rfl
+      | cons r rs => simp at names
+  | cons l ls ih =>
+      cases right with
+      | nil => simp at names
+      | cons r rs =>
+          have equal := List.cons.inj names
+          have placed := r.placed
+          have name : l.domain = r.domain := equal.1
+          simp only [← name] at placed
+          have values := placedCoordinatesUnique l.placed placed
+          change (l.domain, l.values) :: domainValues ls = (r.domain, r.values) :: domainValues rs
+          rw [name, values, ih rs equal.2]
+
+theorem nativeConversionVectorsUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : NativeConversion leftBinding) (right : NativeConversion rightBinding) :
+    domainValues left.vectors = domainValues right.vectors := by
+  obtain ⟨frame, cells, _⟩ := nativeConversionCellsUnique collisionFree left right
+  have profile := (DeltaReduce.nativeArithmeticGraphUnique collisionFree leftBinding rightBinding).2.2.2.2
+  apply domainVectorsUnique cells (congrArg (fun f => f.coordinates.length) frame)
+  rw [left.vectorDomains, right.vectorDomains, profile]
+
+end DeltaReduce.NativeBinding
+
+namespace DeltaReduce.NativeBinding
+
+def Rational.kernelWeight (value : Rational) : ApplyKernel.Weight :=
+  ⟨value.numerator, value.denominator⟩
+
+inductive ApplyRows : List DomainWeight → List (String × List Int) → List ApplyKernel.DomainRow → Prop where
+  | nil : ApplyRows [] [] []
+  | cons {weight weights vector vectors rows} (name : weight.domain = vector.1)
+      (tail : ApplyRows weights vectors rows) :
+      ApplyRows (weight :: weights) (vector :: vectors)
+        (⟨weight.weight.kernelWeight, vector.2⟩ :: rows)
+
+def alignApplyRows : (weights : List DomainWeight) → (vectors : List (String × List Int)) →
+    Option {rows : List ApplyKernel.DomainRow // ApplyRows weights vectors rows}
+  | [], [] => some ⟨[], .nil⟩
+  | weight :: weights, vector :: vectors => do
+      if name : weight.domain = vector.1 then
+        let tail ← alignApplyRows weights vectors
+        some ⟨⟨weight.weight.kernelWeight, vector.2⟩ :: tail.val, .cons name tail.property⟩
+      else none
+  | _, _ => none
+
+theorem applyRowsExact {weights vectors rows} (aligned : ApplyRows weights vectors rows) :
+    rows.map (·.weight) = weights.map (fun w => w.weight.kernelWeight) ∧
+    rows.map (·.values) = vectors.map Prod.snd ∧ weights.map (·.domain) = vectors.map Prod.fst := by
+  induction aligned with
+  | nil => exact ⟨rfl, rfl, rfl⟩
+  | cons name tail ih =>
+      exact ⟨by simp [ih.1], by simp [ih.2.1], by simp [name, ih.2.2]⟩
+
+theorem applyRowsUnique {weights vectors leftRows rightRows}
+    (left : ApplyRows weights vectors leftRows) (right : ApplyRows weights vectors rightRows) :
+    leftRows = rightRows := by
+  induction left generalizing rightRows with
+  | nil => cases right; rfl
+  | cons name tail ih =>
+      cases right with
+      | cons otherName otherTail => exact congrArg (_ :: ·) (ih otherTail)
+
+structure NativeApplyCore {codec store trust anchor} (binding : Binding codec trust anchor store) where
+  conversion : NativeConversion binding
+  rows : List ApplyKernel.DomainRow
+  aligned : ApplyRows binding.profile.domainWeights (domainValues conversion.vectors) rows
+  computation : ApplyKernel.ApplyComputation minInput maxInput binding.model.values binding.optimizer.values
+    rows binding.profile.learningRate.kernelWeight binding.profile.momentum.kernelWeight
+    binding.profile.weightDecay.kernelWeight
+
+def deriveNativeApplyCore {codec store trust anchor} (binding : Binding codec trust anchor store) :
+    Option (NativeApplyCore binding) := do
+  let conversion ← deriveNativeConversion binding
+  let rows ← alignApplyRows binding.profile.domainWeights (domainValues conversion.vectors)
+  let computation ← ApplyKernel.deriveApply minInput maxInput binding.model.values binding.optimizer.values
+    rows.val binding.profile.learningRate.kernelWeight binding.profile.momentum.kernelWeight
+    binding.profile.weightDecay.kernelWeight
+  some ⟨conversion, rows.val, rows.property, computation⟩
+
+/-- Purely mathematical transport helper; all equalities are derived from native
+anchors, certificates and checked placement by the native theorem below. -/
+theorem applyInputsUnique {leftModel rightModel leftOptimizer rightOptimizer leftRows rightRows
+    leftLr rightLr leftMu rightMu leftWd rightWd}
+    (model : leftModel = rightModel) (optimizer : leftOptimizer = rightOptimizer)
+    (rows : leftRows = rightRows) (lr : leftLr = rightLr) (mu : leftMu = rightMu) (wd : leftWd = rightWd)
+    (left : ApplyKernel.ApplyComputation minInput maxInput leftModel leftOptimizer leftRows leftLr leftMu leftWd)
+    (right : ApplyKernel.ApplyComputation minInput maxInput rightModel rightOptimizer rightRows rightLr rightMu rightWd) :
+    left.plan.denominator = right.plan.denominator ∧ left.gradients = right.gradients ∧
+    left.nextModel = right.nextModel ∧ left.nextOptimizer = right.nextOptimizer := by
+  subst rightModel; subst rightOptimizer; subst rightRows; subst rightLr; subst rightMu; subst rightWd
+  exact ApplyKernel.applyComputationUnique left right
+
+theorem nativeApplyCoreUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : NativeApplyCore leftBinding) (right : NativeApplyCore rightBinding) :
+    left.rows = right.rows ∧
+    left.computation.plan.denominator = right.computation.plan.denominator ∧
+    left.computation.gradients = right.computation.gradients ∧
+    left.computation.nextModel = right.computation.nextModel ∧
+    left.computation.nextOptimizer = right.computation.nextOptimizer := by
+  obtain ⟨_, _, model, optimizer, profile⟩ :=
+    DeltaReduce.nativeArithmeticGraphUnique collisionFree leftBinding rightBinding
+  have vectors := nativeConversionVectorsUnique collisionFree left.conversion right.conversion
+  have aligned := right.aligned
+  simp only [← profile, ← vectors] at aligned
+  have rows := applyRowsUnique left.aligned aligned
+  exact ⟨rows, applyInputsUnique (congrArg StateVector.values model)
+    (congrArg StateVector.values optimizer) rows
+    (congrArg (fun p => p.learningRate.kernelWeight) profile)
+    (congrArg (fun p => p.momentum.kernelWeight) profile)
+    (congrArg (fun p => p.weightDecay.kernelWeight) profile) left.computation right.computation⟩
+
+structure ApplyBody where
+  kind : String
+  authorityId : ContentId
+  aggregateId : ContentId
+  parameterBodyIds : List ContentId
+  nextModel : List Int
+  nextOptimizer : List Int
+  nextModelHash : ContentId
+  nextOptimizerHash : ContentId
+  deriving DecidableEq, Repr
+
+/- Encoders cover only the bounded ASCII identifier grammar already required
+by this amendment. Arbitrary strings are rejected, never escaped differently. -/
+/-- Used only after identifier checks or for fixed ASCII/decimal/hex spellings.
+This is not a general Unicode-to-UTF8 serializer. -/
+def asciiBytes (value : String) : Bytes := value.toList.map (fun ch => UInt8.ofNat ch.toNat)
+
+def quotedBytes (value : Bytes) : Bytes := [34] ++ value ++ [34]
+
+def arrayBytes (values : List Bytes) : Bytes := [91] ++ List.intercalate [44] values ++ [93]
+
+def idBytes (value : ContentId) : Bytes :=
+  asciiBytes "sha256:" ++ value.flatMap (fun byte =>
+    [UInt8.ofNat (let n := byte.toNat / 16; if n < 10 then 48 + n else 87 + n),
+     UInt8.ofNat (let n := byte.toNat % 16; if n < 10 then 48 + n else 87 + n)])
+
+def encodeParameterBody (body : ParameterBody) : Option Bytes :=
+  if body.kind = "PARAMETER_EXPECTED" ∧ body.authorityId.length = 32 ∧
+      (∀ id ∈ body.inputLeafIds, id.length = 32) ∧
+      (∀ name ∈ [body.context, body.domain, body.shard], validIdentifier name = true) then
+    some (asciiBytes "{\"authority_id\":" ++ quotedBytes (idBytes body.authorityId) ++
+      asciiBytes ",\"context\":" ++ quotedBytes (asciiBytes body.context) ++
+      asciiBytes ",\"denominator\":" ++ asciiBytes (toString body.denominator) ++
+      asciiBytes ",\"domain\":" ++ quotedBytes (asciiBytes body.domain) ++
+      asciiBytes ",\"input_leaf_ids\":" ++ arrayBytes (body.inputLeafIds.map (quotedBytes ∘ idBytes)) ++
+      asciiBytes ",\"kind\":\"PARAMETER_EXPECTED\",\"numerators\":" ++
+        arrayBytes (body.numerators.map (asciiBytes ∘ toString)) ++
+      asciiBytes ",\"shard\":" ++ quotedBytes (asciiBytes body.shard) ++ [125])
+  else none
+
+def encodeParameterBodies : List ParameterBody → Option (List Bytes)
+  | [] => some []
+  | body :: bodies => do
+      let bytes ← encodeParameterBody body
+      let tail ← encodeParameterBodies bodies
+      some (bytes :: tail)
+
+def encodeApplyBody (body : ApplyBody) : Option Bytes :=
+  if body.kind = "APPLY_EXPECTED" ∧
+      (∀ id ∈ [body.authorityId, body.aggregateId, body.nextModelHash, body.nextOptimizerHash] ++
+        body.parameterBodyIds, id.length = 32) then
+    some (asciiBytes "{\"aggregate_id\":" ++ quotedBytes (idBytes body.aggregateId) ++
+      asciiBytes ",\"authority_id\":" ++ quotedBytes (idBytes body.authorityId) ++
+      asciiBytes ",\"kind\":\"APPLY_EXPECTED\",\"next_model\":" ++
+        arrayBytes (body.nextModel.map (asciiBytes ∘ toString)) ++
+      asciiBytes ",\"next_model_hash\":" ++ quotedBytes (idBytes body.nextModelHash) ++
+      asciiBytes ",\"next_optimizer\":" ++ arrayBytes (body.nextOptimizer.map (asciiBytes ∘ toString)) ++
+      asciiBytes ",\"next_optimizer_hash\":" ++ quotedBytes (idBytes body.nextOptimizerHash) ++
+      asciiBytes ",\"parameter_body_ids\":" ++ arrayBytes (body.parameterBodyIds.map (quotedBytes ∘ idBytes)) ++ [125])
+  else none
+
+/-- Exact preimages for the separately verified cryptographic value-hash adapter. -/
+def valueHashInput (kind : Kind) (values : List Int) : Bytes :=
+  asciiBytes (if kind = .model then "deltareduce.008.model.v1" else "deltareduce.008.optimizer.v1") ++
+    [0] ++ values.flatMap (fun v => asciiBytes (toString v) ++ [59])
+
+def artifactHashInput (bytes : Bytes) : Bytes :=
+  asciiBytes "deltareduce.000.arithmetic-binding.draft1" ++ [0] ++ bytes
+
+/-- Named cryptographic adapter assumptions. This is not an implementation or
+proof of SHA-256; the exact domain-separated preimages are defined above. -/
+structure HashAdapter (codec : Codec) where
+  sha256 : Bytes → ContentId
+  artifact : ∀ bytes, codec.hash bytes = sha256 (artifactHashInput bytes)
+  model : ∀ values, codec.valueHash .model values = sha256 (valueHashInput .model values)
+  optimizer : ∀ values, codec.valueHash .optimizer values = sha256 (valueHashInput .optimizer values)
+
+def NativeApplyCore.body {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (core : NativeApplyCore binding) (parameterBytes : List Bytes) : ApplyBody :=
+  { kind := "APPLY_EXPECTED", authorityId := anchor.authority.id,
+    aggregateId := core.conversion.certified.aggregate.id,
+    parameterBodyIds := parameterBytes.map codec.hash,
+    nextModel := core.computation.nextModel, nextOptimizer := core.computation.nextOptimizer,
+    nextModelHash := codec.valueHash .model core.computation.nextModel,
+    nextOptimizerHash := codec.valueHash .optimizer core.computation.nextOptimizer }
+
+structure NativeApply {codec store trust anchor} (binding : Binding codec trust anchor store) where
+  core : NativeApplyCore binding
+  parameterBytes : List Bytes
+  parametersEncoded : encodeParameterBodies
+    (core.conversion.certified.corpus.entries.map BoundParameter.body) = some parameterBytes
+  bytes : Bytes
+  encoded : encodeApplyBody (core.body parameterBytes) = some bytes
+
+def NativeApply.body {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (result : NativeApply binding) : ApplyBody := result.core.body result.parameterBytes
+
+def deriveNativeApply {codec store trust anchor} (binding : Binding codec trust anchor store) :
+    Option (NativeApply binding) := do
+  let core ← deriveNativeApplyCore binding
+  match params : encodeParameterBodies (core.conversion.certified.corpus.entries.map BoundParameter.body) with
+  | none => none
+  | some parameterBytes =>
+      match encoded : encodeApplyBody (core.body parameterBytes) with
+      | none => none
+      | some bytes => some ⟨core, parameterBytes, params, bytes, encoded⟩
+
+theorem nativeApplyBodyAndBytesUnique {codec} (collisionFree : CollisionFree codec)
+    {trust anchor leftStore rightStore}
+    {leftBinding : Binding codec trust anchor leftStore}
+    {rightBinding : Binding codec trust anchor rightStore}
+    (left : NativeApply leftBinding) (right : NativeApply rightBinding) :
+    left.body = right.body ∧ left.bytes = right.bytes := by
+  obtain ⟨_, aggregate, bodies⟩ := certifiedFrameBodiesUnique collisionFree
+    left.core.conversion.certified right.core.conversion.certified
+  have l := left.parametersEncoded
+  rw [bodies] at l
+  have params := Option.some.inj (l.symm.trans right.parametersEncoded)
+  obtain ⟨_, _, _, model, optimizer⟩ := nativeApplyCoreUnique collisionFree left.core right.core
+  have body : left.body = right.body := by
+    simp only [NativeApply.body, NativeApplyCore.body, aggregate, params, model, optimizer]
+  have encoded := left.encoded
+  change encodeApplyBody left.body = some left.bytes at encoded
+  rw [body] at encoded
+  exact ⟨body, Option.some.inj (encoded.symm.trans right.encoded)⟩
+
+theorem nativeApplyOutputBounds {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (result : NativeApply binding) :
+    result.body.nextModel.length = binding.model.values.length ∧
+    result.body.nextOptimizer.length = binding.model.values.length ∧
+    (∀ value ∈ result.body.nextModel ++ result.body.nextOptimizer, Fits minInput maxInput value) := by
+  have bounds := ApplyKernel.applyComputationShapeAndBounds result.core.computation
+  refine ⟨bounds.2.1, bounds.2.2.1, ?_⟩
+  intro value member
+  rcases List.mem_append.mp member with model | optimizer
+  · exact bounds.2.2.2.2.1 value model
+  · exact bounds.2.2.2.2.2 value optimizer
+
+end DeltaReduce.NativeBinding
+
+namespace DeltaReduce
+open NativeBinding
+
+/-- Conditional full native APPLY result identity. The same authenticated anchor
+and collision-free canonical graph derive all inputs; no result/row equality is
+assumed. Canonical output bytes and value-hash preimages are fixed as well.
+The cryptographic adapter, actual native parser/admission and physical recovery
+remain separately audited premises/refinement gates, not consequences of this theorem. -/
+theorem nativeApplyResultUnique {codec} (collisionFree : CollisionFree codec)
+    (hashAdapter : HashAdapter codec) {trust anchor leftStore rightStore}
+    (leftBinding : Binding codec trust anchor leftStore) (rightBinding : Binding codec trust anchor rightStore)
+    (left : NativeApply leftBinding) (right : NativeApply rightBinding)
+    (_leftAccepted : deriveNativeApply leftBinding = some left)
+    (_rightAccepted : deriveNativeApply rightBinding = some right) :
+    left.body = right.body ∧ left.bytes = right.bytes ∧
+    left.body.nextModel.length = leftBinding.model.values.length ∧
+    left.body.nextOptimizer.length = leftBinding.model.values.length ∧
+    (∀ value ∈ left.body.nextModel ++ left.body.nextOptimizer, Fits minInput maxInput value) ∧
+    left.body.parameterBodyIds = left.parameterBytes.map
+      (fun bytes => hashAdapter.sha256 (artifactHashInput bytes)) ∧
+    codec.hash left.bytes = hashAdapter.sha256 (artifactHashInput left.bytes) ∧
+    left.body.nextModelHash = hashAdapter.sha256 (valueHashInput .model left.body.nextModel) ∧
+    left.body.nextOptimizerHash = hashAdapter.sha256 (valueHashInput .optimizer left.body.nextOptimizer) := by
+  obtain ⟨body, bytes⟩ := nativeApplyBodyAndBytesUnique collisionFree left right
+  obtain ⟨modelShape, optimizerShape, bounds⟩ := nativeApplyOutputBounds left
+  refine ⟨body, bytes, modelShape, optimizerShape, bounds, ?_, hashAdapter.artifact _,
+    hashAdapter.model _, hashAdapter.optimizer _⟩
+  change left.parameterBytes.map codec.hash = _
+  apply List.map_congr_left
+  intro bytes _
+  exact hashAdapter.artifact bytes
 
 end DeltaReduce

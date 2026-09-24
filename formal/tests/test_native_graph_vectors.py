@@ -56,6 +56,20 @@ class NativeGraphVectorTests(unittest.TestCase):
             snapshot["anchor"]["current_model_hash"] = "sha256:" + "0" * 64
         self.assert_rejected()
 
+    def test_stale_current_optimizer_anchor_is_rejected(self):
+        for snapshot in self.bundle["snapshots"].values():
+            snapshot["anchor"]["current_optimizer_hash"] = "sha256:" + "0" * 64
+        self.assert_rejected()
+
+    def test_missing_current_optimizer_cannot_emit_apply_proof(self):
+        key = next(
+            key
+            for key, raw in self.bundle["artifacts"].items()
+            if n.decode(raw.encode("ascii"))["kind"] == "OPTIMIZER"
+        )
+        del self.bundle["artifacts"][key]
+        self.assert_rejected()
+
     def test_noncanonical_artifact_is_rejected(self):
         key = next(iter(self.bundle["artifacts"]))
         self.bundle["artifacts"][key] += " "

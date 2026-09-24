@@ -1008,3 +1008,71 @@ native recovery and concrete decoder/exporter/WAL refinement. Arbitrary admissio
 failures, initial snapshots/repair, contract freeze, clean offline reproduction
 and independent review still precede merged Formal GO. Feature010 qualification
 remains stopped; real authorities/WAN/evaluator quorum remain BLOCKED_EXTERNAL.
+
+## September 24 continuation: native APPLY body/byte identity
+
+T044/T048/T049/T057/T060: the mandatory `nativeApplyResultUnique` conjunct now
+passes kernel and axiom checks. Lean coverage advances to 44/45; only
+`nativeArithmeticRecoveryRefines` is missing. This is the conditional formal
+result, not an executed native runtime or permission to remove the arithmetic
+guard. FormalVerificationReport remains NO_GO.
+
+The proof compares independently resolved schema/plan/certificate payloads,
+derives exact certified body equality at the anchored aggregate, then proves
+conversion and schema placement agree across independent stores. Assignment and
+partition lookup witnesses are retained from actual checked extraction; no new
+selection behavior is added. Checked alignment preserves all domain names,
+weights and coordinates before the existing INT64 APPLY kernel consumes the
+bound current model, optimizer and coefficients. Input or result equality is
+never supplied as a premise of the native theorem.
+
+The checked program constructs every APPLY body field, exact PARAMETER body IDs,
+next vectors and value hashes, then encodes the whole canonical body. Explicit
+ASCII/decimal/lowercase-hex byte encoders use sorted keys and exact separators;
+invalid identifier spelling or ID length rejects. The named `HashAdapter`
+premise binds artifact and model/optimizer domains, NUL separators and ordered
+decimal preimages. Actual SHA-256, canonical input decoder completeness and
+native limits/allocation/admission remain separate refinement obligations.
+
+Fourteen general helper theorems plus the mandatory conjunct are added, with
+seventeen kernel examples for full pinned body/byte equality, PARAMETER encoding,
+hash preimages, signed INT64/INT128 decimal endpoints and alignment/encoding
+rejections. The finite fixture codec adds hashes for two output PARAMETER bodies
+and the next-state vectors; input decoding/collision freedom remain scoped to
+the same twelve input byte strings. This does not turn the synthetic fixture
+into a native C++ or TLA production-mutant execution. The separate 32 APPLY and
+36 PARAMETER/22 conversion kernel cases remain.
+
+Validation: full Lean build (967 jobs), fresh body/vector kernel checks and axiom
+audit PASS, with only permitted propext/Quot.sound/Classical.choice dependencies.
+146 tooling tests, 38 oracle tests, 33 legal/112 illegal traces, targeted Ruff
+and byte-exact regeneration of 294 JSON/three Lean files PASS. The aggregate
+`make formal-check` is unavailable in this Windows environment; scoped checks
+are recorded individually and phase0 still fails for the unfrozen amendment.
+Two new tooling mutations require missing/stale optimizer input to reject
+before generating Lean.
+
+Candidate semantics:
+`sha256:5b5d490fd3e273768042c47c90df9219388402d5afd870279dccb8acc1df00a6`.
+ArithmeticBinding, NativeGraphVectors and AxiomAudit changed. The nineteen TLA
+modules and public schema are unchanged; no fresh TLC execution is claimed.
+Retained 28 safety/7 liveness/27 production-mutant results keep their finite
+scopes. Evidence: `formal/proposals/evidence/native-apply.json`; detailed proof
+scope and assumptions: `formal/proposals/native-apply-proof.md`.
+
+Self-review checked actual lookup witnesses, whole certified-body comparison,
+domain order, fixed INT64 mixture/optimizer operations, canonical field coverage
+and exact hash preimages. It is not independent review. All three idle demos
+returned HTTP 200 without restart and frozen tags remain unchanged.
+
+Next concrete stage: prove `nativeArithmeticRecoveryRefines` against the pinned
+public/native journal witnesses and persistence crash-cut semantics. Bind
+PARAMETER/APPLY authority and exact canonical bytes to first admission without
+append on rejection, persisted-but-unexposed receipt recovery, same-context retry
+and conflict, and unknown durability outcomes. Missing response must not imply
+absence of a durable vote; ambiguous/corrupt scans remain blocked. Do not assume
+recovered-state equality or replace recovery with a reflexive snapshot lemma.
+Then complete concrete native decoder/exporter/WAL refinement, arbitrary failures,
+initial snapshots/repair, contract freeze, clean offline reproduction and
+independent review before merged Formal GO. Feature010 qualification is still
+stopped and external authorities/WAN/evaluator quorum remain BLOCKED_EXTERNAL.

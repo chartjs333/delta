@@ -60,6 +60,8 @@ def generate(source=SOURCE, target=TARGET):
     witness = native.Witness(
         native.NativeAnchor(**snapshot["anchor"]), snapshot["authority"], store
     )
+    expected_bodies = [witness.expected_parameter(*key) for key in witness.assignments]
+    expected_apply = witness.expected_apply(expected_bodies)
     names = {key: "a" + str(index) for index, key in enumerate(sorted(artifacts))}
     refs = {
         key: {
@@ -293,15 +295,32 @@ def generate(source=SOURCE, target=TARGET):
     model = artifacts[authority["model"]["id"]]["payload"]["values"]
     optimizer = artifacts[authority["optimizer"]["id"]]["payload"]["values"]
     lines += [
+        "-- Additional exact output-byte hashes; canonical input decoding "
+        "still accepts only entries.",
+        "def parameterHashes : List (Bytes × ContentId) := ["  # noqa: RUF001 (Lean product)
+        + ", ".join(
+            "("
+            + array(native.canonical(value))
+            + ", "
+            + content_id(native.digest(native.canonical(value)))
+            + ")"
+            for value in expected_bodies
+        )
+        + "]",
         "def codec : Codec := {",
         "  hash := fun bytes => "
-        "((entries.find? (fun e => e.2.1 == bytes)).map (fun e => e.1.id)).getD []",
+        "((entries.find? (fun e => e.2.1 == bytes)).map (fun e => e.1.id)).getD "
+        "(((parameterHashes.find? (fun e => e.1 == bytes)).map Prod.snd).getD [])",
         "  canonical := fun bytes => entries.any (fun e => e.2.1 == bytes)",
         "  decode := fun bytes => (entries.find? (fun e => e.2.1 == bytes)).map (fun e => e.2.2)",
         f"  valueHash := fun kind values => if kind == .model && values == {array(model)} "
         f"then {content_id(snapshot['anchor']['current_model_hash'])}",
         f"    else if kind == .optimizer && values == {array(optimizer)} "
-        f"then {content_id(snapshot['anchor']['current_optimizer_hash'])} else []",
+        f"then {content_id(snapshot['anchor']['current_optimizer_hash'])}",
+        f"    else if kind == .model && values == {array(expected_apply['next_model'])} "
+        f"then {content_id(expected_apply['next_model_hash'])}",
+        f"    else if kind == .optimizer && values == {array(expected_apply['next_optimizer'])} "
+        f"then {content_id(expected_apply['next_optimizer_hash'])} else []",
         "}",
     ]
     lines += [
@@ -628,8 +647,6 @@ def generate(source=SOURCE, target=TARGET):
     else:
         raise AssertionError("INT128 conversion output must still fit INT64")
     assert native.arithmetic.domain_vector((-(1 << 63),), 1, bits=128) == (-(1 << 63),)
-    expected_bodies = [witness.expected_parameter(*key) for key in witness.assignments]
-    witness.expected_apply(expected_bodies)
     domain_values = {domain: [0] * witness.size for domain in witness.domains}
     for parameter_body in expected_bodies:
         key = (parameter_body["domain"], parameter_body["shard"])
@@ -719,6 +736,87 @@ def generate(source=SOURCE, target=TARGET):
         "    ParameterKernel.checkedParameter (-170141183460469231731687303715884105728)",
         "      170141183460469231731687303715884105727 minInput maxInput 1 1",
         "      [⟨1, 1, [9223372036854775807]⟩] = some [9223372036854775807] := by decide",
+    ]
+    apply_body = fields(
+        "ApplyBody",
+        {
+            "kind": ("kind", string),
+            "authority_id": ("authorityId", content_id),
+            "aggregate_id": ("aggregateId", content_id),
+            "parameter_body_ids": ("parameterBodyIds", lambda xs: array(xs, content_id)),
+            "next_model": ("nextModel", array),
+            "next_optimizer": ("nextOptimizer", array),
+            "next_model_hash": ("nextModelHash", content_id),
+            "next_optimizer_hash": ("nextOptimizerHash", content_id),
+        },
+    )
+    lines += [
+        f"def expectedApply : ApplyBody := {apply_body(expected_apply)}",
+        f"def expectedApplyBytes : Bytes := {array(native.canonical(expected_apply))}",
+        "theorem parameterBodyEncodingMatchesOracle :",
+        "    encodeParameterBodies expectedBodies = some "
+        + array([native.canonical(value) for value in expected_bodies], array)
+        + " := by decide",
+        "theorem applyBodyEncodingMatchesOracle :",
+        "    encodeApplyBody expectedApply = some expectedApplyBytes := by decide",
+        "theorem nativeApplyMatchesOracle :",
+        "    (deriveNativeApply fixtureBinding).map NativeApply.body = "
+        "some expectedApply := by decide",
+        "theorem nativeApplyBytesMatchOracle :",
+        "    (deriveNativeApply fixtureBinding).map (fun result => result.bytes) =",
+        "      some expectedApplyBytes := by decide",
+    ]
+    for kind in ("model", "optimizer"):
+        values = expected_apply["next_" + kind]
+        preimage = (
+            "deltareduce.008." + kind + ".v1\0" + "".join(str(v) + ";" for v in values)
+        ).encode("ascii")
+        lines += [
+            f"theorem {kind}HashPreimageMatchesOracle :",
+            f"    valueHashInput .{kind} {array(values)} = {array(preimage)} := by decide",
+        ]
+    endpoint_body = dict(expected_bodies[0])
+    endpoint_body["numerators"] = [-(1 << 127), (1 << 127) - 1, -(1 << 63), (1 << 63) - 1]
+    lines += [
+        "theorem artifactHashPreimageMatchesOracle :",
+        "    artifactHashInput expectedApplyBytes = "
+        + array(native.DOMAIN + native.canonical(expected_apply))
+        + " := by decide",
+        "theorem parameterSignedEndpointsEncodingMatchesOracle :",
+        "    encodeParameterBody " + body(endpoint_body) + " =",
+        "      some " + array(native.canonical(endpoint_body)) + " := by decide",
+    ]
+    lines += [
+        "theorem applyWrongKindEncodingRejected :",
+        "    (encodeApplyBody { expectedApply with kind := "
+        '"PARAMETER_EXPECTED" }).isNone = true := by decide',
+        "theorem applyShortHashEncodingRejected :",
+        "    (encodeApplyBody { expectedApply with nextModelHash := [] "
+        "}).isNone = true := by decide",
+        "theorem parameterShortAuthorityEncodingRejected :",
+        "    (encodeParameterBodies (expectedBodies.map (fun body => { "
+        "body with authorityId := [] })))"
+        ".isNone = true := by decide",
+        "theorem parameterQuotedIdentifierEncodingRejected :",
+        "    (encodeParameterBodies (expectedBodies.map (fun body => { body with context := "
+        + string('bad"name')
+        + " }))).isNone = true := by decide",
+        "theorem parameterUnicodeIdentifierEncodingRejected :",
+        "    (encodeParameterBodies (expectedBodies.map (fun body => { body with domain := "
+        + string("d\u00e9")
+        + " }))).isNone = true := by decide",
+        "theorem applyMissingDomainRejected :",
+        "    (alignApplyRows fixtureBinding.profile.domainWeights []).isNone = true := by decide",
+        "theorem applyWrongDomainRejected :",
+        "    (alignApplyRows fixtureBinding.profile.domainWeights "
+        '[("other", [1, -2])]).isNone = true := by decide',
+        "theorem applyExtraDomainRejected :",
+        '    (alignApplyRows fixtureBinding.profile.domainWeights [("d1", '
+        '[1, -2]), ("other", [1, -2])])'
+        ".isNone = true := by decide",
+        "theorem applyDomainOrderRejected :",
+        '    (alignApplyRows [⟨"a", ⟨1, 2⟩⟩, ⟨"b", ⟨1, 2⟩⟩] [("b", [1]), ("a", [2])])'
+        ".isNone = true := by decide",
     ]
     target.write_text(
         "\n".join([*lines, "end DeltaReduce.NativeGraphVectors", ""]),
