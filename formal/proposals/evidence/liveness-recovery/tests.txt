@@ -1,0 +1,136 @@
+test_canonicalization_ignores_insertion_order (test_formal_artifacts.ContractTest.test_canonicalization_ignores_insertion_order) ... ok
+test_canonicalization_rejects_float (test_formal_artifacts.ContractTest.test_canonicalization_rejects_float) ... ok
+test_legal_trace_fixtures_are_canonical_and_compatible (test_formal_artifacts.ContractTest.test_legal_trace_fixtures_are_canonical_and_compatible) ... ok
+test_liveness_applied_terminal_requires_executed_action (test_formal_artifacts.ContractTest.test_liveness_applied_terminal_requires_executed_action) ... ok
+test_phase0_text_hash_is_newline_independent (test_formal_artifacts.ContractTest.test_phase0_text_hash_is_newline_independent) ... ok
+test_registry_matches_both_schema_contracts (test_formal_artifacts.ContractTest.test_registry_matches_both_schema_contracts) ... ok
+test_review_payload_binding_is_fail_closed (test_formal_artifacts.ContractTest.test_review_payload_binding_is_fail_closed) ... ok
+test_sany_semantic_errors_are_fail_closed (test_formal_artifacts.ContractTest.test_sany_semantic_errors_are_fail_closed) ... ok
+test_semantic_artifact_discovery_is_checkout_eol_independent (test_formal_artifacts.ContractTest.test_semantic_artifact_discovery_is_checkout_eol_independent) ... ok
+test_semantics_id_is_input_order_independent (test_formal_artifacts.ContractTest.test_semantics_id_is_input_order_independent) ... ok
+test_strict_loader_rejects_duplicate_keys (test_formal_artifacts.ContractTest.test_strict_loader_rejects_duplicate_keys) ... ok
+test_tlc_action_coverage_is_fail_closed (test_formal_artifacts.ContractTest.test_tlc_action_coverage_is_fail_closed) ... ok
+test_trace_schema_accepts_explicit_absence (test_formal_artifacts.ContractTest.test_trace_schema_accepts_explicit_absence) ... ok
+test_trace_schema_rejects_extra_property (test_formal_artifacts.ContractTest.test_trace_schema_rejects_extra_property) ... ok
+test_trace_schema_rejects_omitted_field (test_formal_artifacts.ContractTest.test_trace_schema_rejects_omitted_field) ... ok
+test_trace_schema_rejects_unknown_action (test_formal_artifacts.ContractTest.test_trace_schema_rejects_unknown_action) ... ok
+test_trace_state_roots_must_form_one_chain (test_formal_artifacts.ContractTest.test_trace_state_roots_must_form_one_chain) ... ok
+test_ci_tee_pipelines_cannot_mask_gate_failures (test_formal_artifacts.ReportSourceBoundaryTests.test_ci_tee_pipelines_cannot_mask_gate_failures) ... ok
+test_clean_runner_removes_only_declared_generated_outputs (test_formal_artifacts.ReportSourceBoundaryTests.test_clean_runner_removes_only_declared_generated_outputs) ... ok
+test_contract_result_ignores_elapsed_time_but_binds_test_count (test_formal_artifacts.ReportSourceBoundaryTests.test_contract_result_ignores_elapsed_time_but_binds_test_count) ... ok
+test_evidence_overlay_preserves_non_report_source_identity (test_formal_artifacts.ReportSourceBoundaryTests.test_evidence_overlay_preserves_non_report_source_identity) ... ok
+test_formal_workflow_fetches_complete_git_history (test_formal_artifacts.ReportSourceBoundaryTests.test_formal_workflow_fetches_complete_git_history) ... ok
+test_formal_workflow_runs_two_complete_clean_reproductions (test_formal_artifacts.ReportSourceBoundaryTests.test_formal_workflow_runs_two_complete_clean_reproductions) ... ok
+test_generated_evidence_overlay_does_not_change_source_commit (test_formal_artifacts.ReportSourceBoundaryTests.test_generated_evidence_overlay_does_not_change_source_commit) ... ok
+test_offline_git_safe_directories_are_exact_and_non_wildcard (test_formal_artifacts.ReportSourceBoundaryTests.test_offline_git_safe_directories_are_exact_and_non_wildcard) ... ok
+test_offline_runner_finalizes_report_after_reproduction_receipt (test_formal_artifacts.ReportSourceBoundaryTests.test_offline_runner_finalizes_report_after_reproduction_receipt) ... ok
+test_offline_source_manifest_rejects_untracked_source_bytes (test_formal_artifacts.ReportSourceBoundaryTests.test_offline_source_manifest_rejects_untracked_source_bytes) ... ok
+test_reproduction_artifact_comparison_is_exact_and_fail_closed (test_formal_artifacts.ReportSourceBoundaryTests.test_reproduction_artifact_comparison_is_exact_and_fail_closed) ... ok
+test_reproduction_artifact_rejects_stale_reviews (test_formal_artifacts.ReportSourceBoundaryTests.test_reproduction_artifact_rejects_stale_reviews) ... ok
+test_reproduction_artifact_stages_only_exact_generated_outputs (test_formal_artifacts.ReportSourceBoundaryTests.test_reproduction_artifact_stages_only_exact_generated_outputs) ... ok
+test_reproduction_must_bind_exact_source_and_semantics (test_formal_artifacts.ReportSourceBoundaryTests.test_reproduction_must_bind_exact_source_and_semantics) ... ok
+test_reproduction_recomputes_receipts_and_registered_commands (test_formal_artifacts.ReportSourceBoundaryTests.test_reproduction_recomputes_receipts_and_registered_commands) ... ok
+test_reproduction_rejects_malformed_result_projection (test_formal_artifacts.ReportSourceBoundaryTests.test_reproduction_rejects_malformed_result_projection) ... ok
+test_reproduction_verifies_stage_artifact_hashes_when_root_is_available (test_formal_artifacts.ReportSourceBoundaryTests.test_reproduction_verifies_stage_artifact_hashes_when_root_is_available) ... ok
+test_verified_source_manifest_supplies_gitless_identity (test_formal_artifacts.ReportSourceBoundaryTests.test_verified_source_manifest_supplies_gitless_identity) ... ok
+test_cli_verifier_has_no_network_or_package_dependency (test_formal_artifacts.ReportVerifierTest.test_cli_verifier_has_no_network_or_package_dependency) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_complete_report_computes_go_and_verifies_offline (test_formal_artifacts.ReportVerifierTest.test_complete_report_computes_go_and_verifies_offline) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_consistent_no_go_is_valid_but_not_a_go_gate (test_formal_artifacts.ReportVerifierTest.test_consistent_no_go_is_valid_but_not_a_go_gate) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_current_regeneration_failure_set_is_stable (test_formal_artifacts.ReportVerifierTest.test_current_regeneration_failure_set_is_stable) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_evidence_mutation_invalidates_go (test_formal_artifacts.ReportVerifierTest.test_evidence_mutation_invalidates_go) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_manifest_git_tree_must_belong_to_source_commit (test_formal_artifacts.ReportVerifierTest.test_manifest_git_tree_must_belong_to_source_commit) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_noncanonical_report_bytes_are_rejected (test_formal_artifacts.ReportVerifierTest.test_noncanonical_report_bytes_are_rejected) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_report_schema_mutation_is_rejected (test_formal_artifacts.ReportVerifierTest.test_report_schema_mutation_is_rejected) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_reported_decision_cannot_override_computed_decision (test_formal_artifacts.ReportVerifierTest.test_reported_decision_cannot_override_computed_decision) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_review_projection_cannot_forge_a_valid_evidence_payload (test_formal_artifacts.ReportVerifierTest.test_review_projection_cannot_forge_a_valid_evidence_payload) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_semantic_identity_ignores_eol_but_exact_reproduction_does_not (test_formal_artifacts.ReportVerifierTest.test_semantic_identity_ignores_eol_but_exact_reproduction_does_not) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_stale_reproduction_cannot_relabel_the_report_source (test_formal_artifacts.ReportVerifierTest.test_stale_reproduction_cannot_relabel_the_report_source) ... warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_entire_gate_invalidated_before_first_process_can_fail (test_gate_log_freshness.GateLogFreshnessTests.test_entire_gate_invalidated_before_first_process_can_fail) ... ok
+formal-gate: java
+test_launch_failure_invalidates_old_pass (test_gate_log_freshness.GateLogFreshnessTests.test_launch_failure_invalidates_old_pass) ... ok
+formal-gate: java
+test_nonzero_exit_retains_diagnostic_and_cannot_be_reused_as_pass (test_gate_log_freshness.GateLogFreshnessTests.test_nonzero_exit_retains_diagnostic_and_cannot_be_reused_as_pass) ... ok
+formal-gate: java
+test_success_still_produces_valid_semantic_result (test_gate_log_freshness.GateLogFreshnessTests.test_success_still_produces_valid_semantic_result) ... ok
+formal-gate: java
+test_timeout_replaces_old_pass_even_when_partial_output_claims_success (test_gate_log_freshness.GateLogFreshnessTests.test_timeout_replaces_old_pass_even_when_partial_output_claims_success) ... ok
+test_exact_sources_verify_without_network_or_writes (test_proof_cache.ProofCacheTest.test_exact_sources_verify_without_network_or_writes) ... ok
+test_license_hash_is_verified (test_proof_cache.ProofCacheTest.test_license_hash_is_verified) ... ok
+test_manifest_cannot_redirect_package_configuration (test_proof_cache.ProofCacheTest.test_manifest_cannot_redirect_package_configuration) ... ok
+test_manifest_cannot_select_another_url (test_proof_cache.ProofCacheTest.test_manifest_cannot_select_another_url) ... ok
+test_missing_source_fails_before_lake_can_fetch (test_proof_cache.ProofCacheTest.test_missing_source_fails_before_lake_can_fetch) ... ok
+test_modified_sources_are_not_repaired_by_download (test_proof_cache.ProofCacheTest.test_modified_sources_are_not_repaired_by_download) ... ok
+test_package_name_cannot_escape_cache (test_proof_cache.ProofCacheTest.test_package_name_cannot_escape_cache) ... ok
+test_remote_substitution_is_rejected (test_proof_cache.ProofCacheTest.test_remote_substitution_is_rejected) ... ok
+test_revision_mismatch_is_rejected (test_proof_cache.ProofCacheTest.test_revision_mismatch_is_rejected) ... ok
+test_toolchain_mismatch_is_rejected (test_proof_cache.ProofCacheTest.test_toolchain_mismatch_is_rejected) ... ok
+test_untracked_import_is_rejected (test_proof_cache.ProofCacheTest.test_untracked_import_is_rejected) ... ok
+test_upstream_manifest_hash_is_verified (test_proof_cache.ProofCacheTest.test_upstream_manifest_hash_is_verified) ... ok
+test_crashed_validator_cannot_vote (test_refinement.RefinementAdmissionTests.test_crashed_validator_cannot_vote) ... ok
+test_duplicate_actor_does_not_make_quorum (test_refinement.RefinementAdmissionTests.test_duplicate_actor_does_not_make_quorum) ... ok
+test_every_qc_rejects_vote_from_another_height_or_epoch (test_refinement.RefinementAdmissionTests.test_every_qc_rejects_vote_from_another_height_or_epoch) ... ok
+test_finalizer_cannot_relabel_existing_quorum_height_or_epoch (test_refinement.RefinementAdmissionTests.test_finalizer_cannot_relabel_existing_quorum_height_or_epoch) ... ok
+test_matching_context_can_finalize_in_later_leader_view (test_refinement.RefinementAdmissionTests.test_matching_context_can_finalize_in_later_leader_view) ... ok
+test_recovery_does_not_erase_durable_conflict (test_refinement.RefinementAdmissionTests.test_recovery_does_not_erase_durable_conflict) ... ok
+test_rejected_vote_does_not_make_quorum (test_refinement.RefinementAdmissionTests.test_rejected_vote_does_not_make_quorum) ... ok
+test_successful_retry_of_recovery_enables_vote (test_refinement.RefinementAdmissionTests.test_successful_retry_of_recovery_enables_vote) ... ok
+test_unsuccessful_crash_does_not_disable_validator (test_refinement.RefinementAdmissionTests.test_unsuccessful_crash_does_not_disable_validator) ... ok
+test_unsuccessful_recovery_never_enables_vote (test_refinement.RefinementAdmissionTests.test_unsuccessful_recovery_never_enables_vote) ... ok
+test_unsuccessful_restart_never_enables_recovery (test_refinement.RefinementAdmissionTests.test_unsuccessful_restart_never_enables_recovery) ... ok
+test_runtime_paths_pid_time_and_duration_do_not_change_full_output_hash (test_tlc_results.MutantTlcResultTests.test_runtime_paths_pid_time_and_duration_do_not_change_full_output_hash) ... ok
+test_state_valuation_change_remains_hash_significant (test_tlc_results.MutantTlcResultTests.test_state_valuation_change_remains_hash_significant) ... ok
+test_wrong_exit_truncation_and_success_marker_reject (test_tlc_results.MutantTlcResultTests.test_wrong_exit_truncation_and_success_marker_reject) ... ok
+test_wrong_invariant_noncontiguous_trace_and_exception_reject (test_tlc_results.MutantTlcResultTests.test_wrong_invariant_noncontiguous_trace_and_exception_reject) ... ok
+test_cumulative_snapshot_regression_is_rejected (test_tlc_results.SuccessfulTlcResultTests.test_cumulative_snapshot_regression_is_rejected) ... ok
+test_duplicate_final_summary_rejects_progress_lookalikes_safely (test_tlc_results.SuccessfulTlcResultTests.test_duplicate_final_summary_rejects_progress_lookalikes_safely) ... ok
+test_duplicate_within_coverage_snapshot_is_rejected (test_tlc_results.SuccessfulTlcResultTests.test_duplicate_within_coverage_snapshot_is_rejected) ... ok
+test_incomplete_snapshot_is_rejected (test_tlc_results.SuccessfulTlcResultTests.test_incomplete_snapshot_is_rejected) ... ok
+test_locked_tlc_coverage_overhead_terminator_is_complete (test_tlc_results.SuccessfulTlcResultTests.test_locked_tlc_coverage_overhead_terminator_is_complete) ... ok
+test_missing_zero_duplicate_and_failure_markers_reject (test_tlc_results.SuccessfulTlcResultTests.test_missing_zero_duplicate_and_failure_markers_reject) ... ok
+test_periodic_coverage_uses_final_snapshot (test_tlc_results.SuccessfulTlcResultTests.test_periodic_coverage_uses_final_snapshot) ... ok
+test_periodic_snapshot_cannot_hide_missing_final_coverage (test_tlc_results.SuccessfulTlcResultTests.test_periodic_snapshot_cannot_hide_missing_final_coverage) ... ok
+test_runtime_noise_and_positive_coverage_counts_do_not_change_hash (test_tlc_results.SuccessfulTlcResultTests.test_runtime_noise_and_positive_coverage_counts_do_not_change_hash) ... ok
+test_semantic_metric_change_changes_hash (test_tlc_results.SuccessfulTlcResultTests.test_semantic_metric_change_changes_hash) ... ok
+test_short_or_wrong_tlc_revision_rejects (test_tlc_results.SuccessfulTlcResultTests.test_short_or_wrong_tlc_revision_rejects) ... ok
+test_truncated_coverage_overhead_terminator_rejects (test_tlc_results.SuccessfulTlcResultTests.test_truncated_coverage_overhead_terminator_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 91 tests in 30.218s
+
+OK

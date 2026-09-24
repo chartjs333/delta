@@ -136,7 +136,7 @@ ABMixtureChecked(values) ==
     /\ ABInRange(NativeArithmeticInputs.mixtureD)
     /\ ABInRange(ABMixture(values))
 
-ABApply(g, shard) ==
+ABApplyEvaluated(g, shard) ==
     LET p == NativeArithmeticInputs
         mProduct == p.optimizer[shard] * p.muN
         m == ABRound(mProduct, p.muD) + g
@@ -152,9 +152,17 @@ ABApply(g, shard) ==
         intermediates |-> <<mProduct, m, directionProduct, direction,
                             decayProduct, decay, stepInput, stepProduct, step, model>>]
 
+\* Singleton function application binds the already evaluated integer gradient.
+\* TLA identity: [value \in {g} |-> F(value)][g] = F(g). TLC's ENABLED
+\* expansion otherwise repeatedly evaluates the complete arithmetic lineage.
+ABApply(g, shard) ==
+    [value \in {g} |-> ABApplyEvaluated(value, shard)][g]
+
+\* The sole record is checked coordinate by coordinate exactly as before;
+\* binding it once avoids recalculating all intermediates for each index.
 ABApplyChecked(g, shard) ==
     /\ ABInRange(g)
-    /\ \A i \in DOMAIN ABApply(g, shard).intermediates :
-        ABInRange(ABApply(g, shard).intermediates[i])
+    /\ \A result \in {ABApply(g, shard)} :
+        \A i \in DOMAIN result.intermediates : ABInRange(result.intermediates[i])
 
 =============================================================================

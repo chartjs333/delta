@@ -96,11 +96,14 @@ is an unconditional STOP.
 
 ## Liveness coverage and claim boundaries
 
-**Current candidate:** the complete config-to-APPLIED fairness check timed out
-after 600 seconds. It is not a liveness PASS or a protocol counterexample.
-Earlier successful logs are historical only. The no-fairness countercheck
-still produces the expected temporal violation. See the retained current
-checkpoint for per-config outcomes; formal authority remains NO_GO.
+**Current candidate:** all seven mandatory liveness configurations pass,
+including the zero-input config-to-APPLIED case that previously timed out.
+The arithmetic evaluation rewrite preserves the operation graph, configured
+bounds, production transitions, WF assumptions and temporal properties.
+Independent before/after Init/Next graph dumps match byte-for-byte for both
+full-chain configurations (42 states each). This finite graph comparison does
+not substitute for the separately executed temporal checks. Evidence:
+`formal/proposals/evidence/liveness-recovery.json`.
 
 All positive liveness rows start from real empty `Init` before the named
 milestone and exclude timeout/HardAbort as progress. Each config applies `WF`
@@ -117,16 +120,16 @@ configs.
 | `LIVE-CONFIG-QC-REACHED` | config propose/persist/send/deliver/finalize | `CFG-LIVENESS-CONFIG-QC` | responsive quorum and fair transport | no-fairness model need not reach QC | EXECUTED PASS |
 | `LIVE-ISC-REACHED` | config through close/ISC transport/finalize | `CFG-LIVENESS-ISC` | complete required input and fair transport | abort is disabled as a witness | EXECUTED PASS |
 | `LIVE-PLAN-QC-REACHED` | config/ISC/seed/EC/APC full chain | `CFG-LIVENESS-PLAN` | valid norm/plan data and fair transport | abort is disabled as a witness | EXECUTED PASS |
-| `LIVE-APPLIED-REACHED` | complete configâ†’ISCâ†’EC/APCâ†’parameterâ†’rootâ†’ApplyQCâ†’current chain | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | all required quorums/artifacts and weak fairness | `NoFairnessSpec` violates `AppliedReached` | UNVERIFIED: CURRENT TLC TIMEOUT |
+| `LIVE-APPLIED-REACHED` | complete configâ†’ISCâ†’EC/APCâ†’parameterâ†’rootâ†’ApplyQCâ†’current chain | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | all required quorums/artifacts and weak fairness | `NoFairnessSpec` violates `AppliedReached` | EXECUTED PASS |
 | `LIVE-VIEW-QC-REACHED` | logical timeâ†’soft timeoutâ†’durable view votesâ†’ViewChangeQC | `CFG-LIVENESS-VIEW-CHANGE` | view quorum and fair transport | no abort action is available | EXECUTED PASS |
 | `LIVE-ABORT-QC-REACHED` | logical timeâ†’hard deadlineâ†’durable abort votesâ†’AbortQC | `CFG-LIVENESS-ABORT-QC` | abort quorum and fair transport | ordinary progress is absent after deadline | EXECUTED PASS |
-| `LIVE-ABORT-EXCLUDED-FROM-POSITIVE` | all positive milestone models | all four positive liveness configs | timeout/abort actions excluded | any ABORTED witness fails the property | UNVERIFIED: CURRENT TLC TIMEOUT |
+| `LIVE-ABORT-EXCLUDED-FROM-POSITIVE` | all positive milestone models | all four positive liveness configs | timeout/abort actions excluded | any ABORTED witness fails the property | EXECUTED PASS |
 | `LIVE-CONFIG-FINALIZE-OR-ABORT` | config votes/finalize; view/abort | `CFG-LIVENESS-CONFIG-QC` | config proposal eventually enabled | permanent quorum loss reaches BLOCKED, never fake QC | EXECUTED PASS |
 | `LIVE-COMMIT-AVAILABLE-OR-REJECT` | availability/close/abort | `CFG-LIVENESS-ISC` | required pre-ISC storage quorum or fixed close decision | unfair delivery is not claimed live | EXECUTED PASS |
 | `LIVE-FROZEN-PLAN-OR-ABORT` | seed/EC/APC/abort | `CFG-LIVENESS-PLAN` | seed source/fallback and exact ISC bytes available | unavailable seed permits only abort/block | EXECUTED PASS |
-| `LIVE-SHARD-QC-OR-ABORT` | parameter/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | parameter committee quorum and shard bytes | permanent shard loss never rewrites membership | UNVERIFIED: CURRENT TLC TIMEOUT |
-| `LIVE-AGGREGATE-APPLY-OR-ABORT` | root/apply/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | root/apply quorums and parent artifacts | apply quorum loss preserves parent | UNVERIFIED: CURRENT TLC TIMEOUT |
-| `LIVE-APPLY-QC-REPAIRS-CURRENT` | journal recover/current advance | `CFG-LIVENESS-EVENTUAL-SYNCHRONY`, `CFG-APPLY-RECOVERY` | durable ApplyQC and exact artifact available | artifact loss may remain BLOCKED | UNVERIFIED: CURRENT TLC TIMEOUT |
+| `LIVE-SHARD-QC-OR-ABORT` | parameter/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | parameter committee quorum and shard bytes | permanent shard loss never rewrites membership | EXECUTED PASS |
+| `LIVE-AGGREGATE-APPLY-OR-ABORT` | root/apply/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | root/apply quorums and parent artifacts | apply quorum loss preserves parent | EXECUTED PASS |
+| `LIVE-APPLY-QC-REPAIRS-CURRENT` | journal recover/current advance | `CFG-LIVENESS-EVENTUAL-SYNCHRONY`, `CFG-APPLY-RECOVERY` | durable ApplyQC and exact artifact available | artifact loss may remain BLOCKED | EXECUTED PASS |
 | `LIVE-SOFT-TIMEOUT-CHANGES-VIEW` | soft timeout/view vote/finalize | `CFG-LIVENESS-VIEW-CHANGE` | `2f+1` timeout votes and fairness | one timeout observer cannot change view | EXECUTED PASS |
 | `LIVE-HARD-DEADLINE-TERMINATES` | logical time/abort vote/finalize | `CFG-LIVENESS-ABORT-QC` | `2f+1` abort votes remain obtainable | without abort quorum hard deadline yields BLOCKED | EXECUTED PASS |
 

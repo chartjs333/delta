@@ -110,3 +110,26 @@ This remains one coordinate per shard and a serialized certified Phase6 suffix,
 not arbitrary vector/byte decoding, public arithmetic witness refinement,
 all interleavings/crash cuts, independent review or benchmark qualification.
 Evidence: `formal/proposals/evidence/heterogeneous-arithmetic.json`.
+
+
+## September 24: liveness evaluation regression resolved (T041, T059)
+
+The earlier 600-second timeout is now closed. `ABApply` binds its computed
+integer gradient through the identity `[v \in {g} |-> F(v)][g] = F(g)`.
+`ABApplyChecked` binds the sole calculated result before checking every
+intermediate. This avoids repeated evaluation during TLC's ENABLED expansion;
+the arithmetic formula and all range checks are unchanged. The production
+transition relation, fairness expression, temporal properties, configuration
+bounds and 600-second limit were not edited.
+
+All seven mandatory liveness configurations and the no-fairness countercheck
+pass. `check_arithmetic_evaluation.py --base-source 9a45110 --output <path>`
+compares full before/after finite state/transition dumps for both full-chain
+profiles, including every state value; the bytes match exactly (42 states each).
+That supplementary check removes temporal properties only from its diagnostic
+copies and cannot qualify liveness. Mandatory temporal checks run separately
+against the unmodified configurations.
+
+The candidate remains NO_GO: PO-AB1, concrete byte/public witness refinement,
+frozen contracts, clean offline reproduction and independent reviews remain
+open. See `formal/proposals/evidence/liveness-recovery.json` and the progress log.

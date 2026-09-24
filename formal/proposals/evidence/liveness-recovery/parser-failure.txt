@@ -1,0 +1,25 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 56 and seed 2026082420 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 21108] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceVoteLifecycleHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceLivenessHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+
+Fatal errors while parsing TLA+ spec in file DeltaReduceVoteLifecycleHarness
+
+java.lang.NullPointerException: Cannot invoke "String.length()" because "str" is null
+Starting... (2026-09-24 10:22:12)
+Error: Parsing or semantic analysis failed. Module-Table lookup failure for module name DeltaReduceVoteLifecycleHarness derived from DeltaReduceVoteLifecycleHarness file name.
+Finished in 00s at (2026-09-24 10:22:12)
+
+
+Error: process exited with status 150

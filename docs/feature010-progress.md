@@ -351,3 +351,62 @@ without reducing the required scope or changing the fairness assumption, rerun
 both complete liveness configurations, then continue production byte/witness
 contracts and the four PO-AB1 proofs. Only after complete reviewed formal authority
 may native arithmetic admission change.
+
+
+## September 24, 10:07 UTC continuation: full liveness restored
+
+T041/T042/T059/T057: resolved the zero-input full-chain TLC timeout without
+changing the production actions, formulas, checked bounds, fairness expression,
+temporal properties, configured populations or the 600-second limit. The old
+ABApply formula is now named ABApplyEvaluated. Its public wrapper uses singleton
+function application `[v \in {g} |-> F(v)][g] = F(g)` to bind the computed integer
+gradient. ABApplyChecked binds the sole complete result record before checking
+every intermediate index. This prevents repeated expansion of the arithmetic
+lineage by TLC ENABLED; no arithmetic guard or observable transition is removed.
+
+All 26 safety configurations, all 7 liveness configurations, the no-fairness
+countercheck, all 23 production mutants, pinned SANY parsing, 91 tooling tests
+and 9 legal / 31 illegal trace fixtures pass. The mandatory zero-input and
+nonzero full-chain temporal checks each reach 42 states; this execution took
+63 and 19 seconds respectively. These are diagnostic TLC durations, not runtime
+benchmark measurements. The earlier 600-second failure remains in its historical
+checkpoint and is superseded, not erased.
+
+Supplemental `check_arithmetic_evaluation.py` snapshots exact base source
+`9a45110891e06613bb9dd8426a4425e6e63ee796` and current TLA modules. It executes
+Init/Next plus invariants for both full-chain profiles and compares complete DOT
+state/transition dumps byte-for-byte. Both graphs are identical, including state
+values (42 states each); the only changed model module is DeltaReduceArithmetic.
+The diagnostic copies omit temporal properties, so this comparison cannot
+qualify liveness. Actual mandatory liveness is executed separately with unchanged
+WF and property declarations. The matched graphs are retained as lossless gzip
+artifacts with the original byte hashes. Evidence:
+`formal/proposals/evidence/arithmetic-evaluation.json` and
+`formal/proposals/evidence/liveness-recovery.json`.
+
+The first parallel safety attempt encountered a TLC parser NullPointerException
+while reading standard modules from the shared Windows temp directory. No
+protocol counterexample was produced. Concurrent module extraction is a suspected
+cause, not established proof of causality. That failed log is retained; the entire
+safety gate was rerun alone and passed. Until per-process temp isolation is added,
+run TLC gate families sequentially on this Windows development environment.
+
+The full pinned Lean project still builds (961 jobs); mandatory audit still stops
+at 41/45 conjuncts because four PO-AB1 theorems are absent. Phase zero still fails
+on intentionally unfrozen/incomplete amendment contracts. No independent review,
+clean offline Linux reproduction, concrete native byte graph or complete public
+arithmetic witness is claimed. No native guard, runtime source or demo service
+was changed. The new candidate ID is:
+`sha256:61b4b0553d044e09392979c59e5d497e4631a8c4f75d7127623e8444b14718f9`.
+The resulting FormalVerificationReport remains NO_GO.
+
+Next concrete stage: promote the draft canonical byte graph into explicit public
+trace/native-state witness contracts and the refinement checker, with mutation
+cases for substituted/missing/rehashed artifacts. Prove the actual four PO-AB1
+statements against those production contracts; do not replace them with trivial
+helpers. Then complete reviewed contract freezing and clean reproduction. Only
+merged Formal GO can authorize PR50 native arithmetic admission.
+
+Presentation, Controller and node-training retained the same healthy process
+instances and the existing Cloudflare URL. Baseline c8aea649 and presentation
+worktree remained clean; saved results/receipts were not modified.
