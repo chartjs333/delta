@@ -18,7 +18,8 @@ body { background: var(--bg); }
   color: #6f4a11; background: #fff7e6; border-bottom: 1px solid #eee0bd; }
 main { padding-top: 24px; }
 h1 { font-size: clamp(32px, 4.5vw, 54px); line-height: 1.08; }
-.hero { background: linear-gradient(125deg, #e7f0ff, #f2efff); border-color: var(--line); }
+.hero { background: linear-gradient(125deg, #e7f0ff, #f2efff); border-color: var(--line);
+  box-shadow: 0 8px 28px #19314f0c; }
 .panel, .kpi { background: white; box-shadow: 0 5px 20px #19314f05; }
 #run { color: white; background: #2866b1; box-shadow: 0 8px 22px #2866b124; }
 #run:hover { background: #1d559a; }

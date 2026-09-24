@@ -109,10 +109,17 @@ def main():
             if (
                 self.headers.get("Transfer-Encoding")
                 or len(self.headers.get_all("Content-Length", [])) > 1
-                or self.headers.get("Content-Length", "0") != "0"
+                or self.headers.get("Content-Length") != "2"
+                or self.headers.get("Content-Type") != "application/json"
             ):
-                self._json(HTTPStatus.BAD_REQUEST, {"error": "REQUEST_BODY_NOT_ALLOWED"})
+                self._json(HTTPStatus.BAD_REQUEST, {"error": "EMPTY_OBJECT_REQUIRED"})
                 return
+            if self.rfile.read(2) != b"{}":
+                self._json(HTTPStatus.BAD_REQUEST, {"error": "EMPTY_OBJECT_REQUIRED"})
+                return
+            # The gateway accepts an explicit empty JSON object so Cloudflare does
+            # not chunk an empty POST. The original runner still receives no body.
+            self.headers.replace_header("Content-Length", "0")
             self.path = "/api/run"
             super().do_POST()
 

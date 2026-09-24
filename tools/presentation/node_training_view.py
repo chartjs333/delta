@@ -1,6 +1,8 @@
 """Display-only adaptation of the existing MNIST demo; no training/protocol changes."""
 
 # Localized display copy intentionally uses Cyrillic.
+# ruff: noqa: RUF001
+import json
 import re
 from pathlib import Path
 
@@ -52,8 +54,42 @@ def adapt_page(page: str, language: str) -> str:
     page = re.sub(
         r'<p class="hero-note">.*?</p>', f'<p class="hero-note">{note}</p>', page, flags=re.DOTALL
     )
+    if language == "ru":
+        status_labels = {
+            "formal": "Формальная проверка",
+            "controllers": "Демо-контроллеры",
+            "dataset": "Набор данных",
+            "shards": "Разделение данных",
+            "central": "Централизованное обучение",
+            "distributed": "Обучение узлов",
+            "delta-path": "Путь Delta",
+            "stage-c": "Этап C",
+            "evaluation": "Оценка",
+            "recovery": "Восстановление",
+            "report": "Отчёт",
+            "complete": "Завершено",
+        }
+        page = page.replace(
+            "const statusTranslations = {};",
+            "const statusTranslations = " + json.dumps(status_labels) + ";",
+        )
+        page = page.replace("Delta terminal</div>", "Результат Delta</div>")
     return (
         page.replace("fetch('/api/", "fetch('/node-training/api/")
+        .replace("let currentReport = null;", "let currentReport = null; let revealResult = false;")
+        .replace(
+            "results.scrollIntoView({ behavior: 'smooth', block: 'start' });",
+            "if (revealResult) results.scrollIntoView({ behavior: 'smooth', block: 'start' });",
+        )
+        .replace(
+            "runButton.addEventListener('click', async () => {",
+            "runButton.addEventListener('click', async () => { revealResult = true;",
+        )
+        .replace(
+            "headers: { 'X-Demo-Token': demoToken },",
+            "headers: { 'X-Demo-Token': demoToken, 'Content-Type': 'application/json' },"
+            " body: '{}',",
+        )
         .replace("</head>", f"<style>{style}</style></head>")
         .replace("<body>", "<body>" + navigation)
     )

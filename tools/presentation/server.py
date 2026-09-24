@@ -582,9 +582,13 @@ class Handler(BaseHTTPRequestHandler):
             if (
                 self.headers.get("Transfer-Encoding")
                 or len(self.headers.get_all("Content-Length", [])) > 1
-                or self.headers.get("Content-Length", "0") != "0"
+                or self.headers.get("Content-Length") != "2"
+                or self.headers.get("Content-Type") != "application/json"
             ):
-                self.json(400, {"error": "REQUEST_BODY_NOT_ALLOWED"})
+                self.json(400, {"error": "EMPTY_OBJECT_REQUIRED"})
+                return
+            if self.rfile.read(2) != b"{}":
+                self.json(400, {"error": "EMPTY_OBJECT_REQUIRED"})
                 return
             self.node_proxy("POST")
             return
@@ -672,8 +676,11 @@ class Handler(BaseHTTPRequestHandler):
         headers = {"Origin": "http://127.0.0.1:8872"}
         if method == "POST":
             headers["X-Demo-Token"] = self.headers["X-Demo-Token"]
+            headers["Content-Type"] = "application/json"
         try:
-            connection.request(method, self.path, headers=headers)
+            connection.request(
+                method, self.path, body=b"{}" if method == "POST" else None, headers=headers
+            )
             response = connection.getresponse()
             data = response.read(8_000_001)
             if len(data) > 8_000_000:
