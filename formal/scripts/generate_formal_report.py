@@ -470,6 +470,15 @@ def main() -> int:
             "samples. This is not the full public event/state-root/exposure/QC/crash/"
             "scan lifecycle: nativeArithmeticRecoveryRefines remains OPEN. Admission-"
             "only erasure of unprojected fields is not persisted receipt evidence.",
+            "PublicRecovery checks exact stage-list exposure, crash/restart readiness, "
+            "historical retry and full-journal scan/replay. Twenty helpers derive "
+            "actual recovered history and reject inferred absence or early output. "
+            "Its 44 kernel examples use fourteen prevalidated public/native fixtures; "
+            "scan authentication remains synthetic. UNKNOWN-presence and explicit "
+            "incomplete scans are separately labeled mathematical cases. Full event/"
+            "snapshot/state-root and global quorum exposure binding, other-action "
+            "admission and production adapters remain open; the mandatory native "
+            "recovery conjunct is not discharged by this conditional lifecycle layer.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

@@ -14,6 +14,8 @@ import DeltaReduce.NativeReplay
 import DeltaReduce.NativeReplayVectors
 import DeltaReduce.PublicJournal
 import DeltaReduce.PublicJournalVectors
+import DeltaReduce.PublicRecovery
+import DeltaReduce.PublicRecoveryVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

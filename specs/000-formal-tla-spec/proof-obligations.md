@@ -79,6 +79,15 @@ snapshot/exposure/QC/crash/scan lifecycle. Unprojected receipts remain absent.
 The recovery conjunct stays OPEN; this journal-only relation cannot replace it.
 See `formal/proposals/public-journal-proof.md` for exact scope and assumptions.
 
+`PublicRecovery.lean` checks exact stage-list exposure, required crash/restart,
+historical retry and authenticated full-prefix presence/absence scans over that
+all-vote journal. Successful readiness derives actual replay/history and original
+records, not assumed recovered-state equality. Unknown writes retain the last
+known prefix and cannot be inferred absent; incomplete/corrupt/ambiguous scans
+do not enable votes. Event/snapshot/state-root binding, other-action phase/QC
+admission and production exporter/WAL remain open, so this layer still does not
+discharge the full recovery conjunct. Scope: `formal/proposals/public-recovery-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

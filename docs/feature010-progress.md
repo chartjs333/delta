@@ -1319,3 +1319,66 @@ exposure flag, other-action admission callback or a finite fixture hash table as
 the missing proof. Then concrete bounded decoder/hash/exporter/WAL, admission
 completeness, arbitrary snapshots/failures/repair, contract freeze, clean offline
 reproduction and independent reviews remain before merged Formal GO.
+
+## 2026-09-25 — All-vote persistence/recovery lifecycle (T044/T048/T049/T057/T060)
+
+`PublicRecovery.lean` now checks ordered diagnostic stages and recovery readiness
+on top of the complete public vote journal. First arithmetic observations still
+execute the native graph/metadata/body/receipt admission checks. Only the exact
+VALIDATED → APPENDED → DURABLE → COMMITTED → EXPOSED sequence can expose the first
+receipt. Known unexposed cuts retain the original record but require crash,
+restart and verified recovery before a retry can expose it. No vote or current
+advance is enabled in the intervening states.
+
+UNKNOWN/failed-barrier observations retain the candidate separately, preserve
+the last known log/journal and return null post-tip/output. Authenticated scans
+must bind the exact initial state, previous log, pending slot and scan. Verified
+presence replays the full prior log plus the exact pending record; verified
+absence replays exactly the previous log. An ordinary old-prefix scan cannot
+infer absence. Replayed native computations determine all records/current
+pointers; recovered-state equality is not supplied. Incomplete remains recovering,
+corrupt/ambiguous blocks, and no implicit repair can restore readiness.
+
+Twenty helpers and sixteen functions cover required crash/restart, exact stage
+classification, unchanged known prefix under uncertainty, all-vote replay/history,
+computed roots and no recovery output. Historical retry after current advance
+returns the same original receipt/sequence; different command bytes conflict
+without append. Forty-four kernel examples use fourteen independently checked
+whole public/native fixtures, original arithmetic sequences 5/6/8 and exact
+witness stage/root/output values. The normal four-vote prefix and full eight-vote
+journal are constructed from empty state. Six generator tests reject rehashed
+stage/output/root/absence/truncation mutations before producing new evidence.
+
+Scan authentication is synthetic in examples. General unknown-presence and
+explicit incomplete-scan examples are separately labeled mathematical cases:
+the current public witnesses use retrospective accepted/unexposed projection
+for complete surviving records and do not gain a new public UNKNOWN-to-presence
+transition. The new layer does not establish full live-state/log reachability
+against authenticated public snapshots, canonical public state roots or global
+SendVoteEnvelope/QC power. Other-action phase/QC admission, concrete bounded
+native decoder/hash/exporter/WAL, arbitrary initial snapshots/failures/repair,
+contract freeze, clean offline reproduction and independent reviews remain open.
+`nativeArithmeticRecoveryRefines` is still missing: mandatory 44/45, Formal NO_GO.
+
+Validation: full Lean build (976 jobs), fresh lifecycle/vector kernel and axiom
+checks; 173 tooling/38 oracle tests, 33 legal/112 illegal traces, targeted Ruff,
+and byte-exact regeneration of 299 JSON/eight Lean files. Nineteen TLA modules
+and the public schema are unchanged; no new TLC/production-mutant execution.
+Retained 28 safety/7 liveness/27 mutant results keep their finite scope. GNU make
+is unavailable, so scoped checks do not replace aggregate formal-check. Phase0
+still fails for the unfrozen amendment. Production runtime/guards are unchanged.
+
+Candidate semantics:
+`sha256:8994c0461799528cab8c37cbcdb1bf8ed5afa63108179799571e7660ac183d84`.
+Evidence: `formal/proposals/evidence/public-recovery.json`; exact scope:
+`formal/proposals/public-recovery-proof.md`. All three demos returned HTTP 200
+without restart, and frozen fallback refs remain unchanged. Self-review is not
+an independent attestation.
+
+Next: establish the reachable live-machine/log invariant from empty initialization
+through these checked operations, then bind it to independently authenticated
+public event snapshots and canonical state-root transitions. Connect existing
+non-arithmetic phase/QC admission and actual exposure/global quorum eligibility;
+retain original contexts/sequences and the separate known/unknown scan cases.
+Only the full native/public refinement relation discharges the remaining recovery
+conjunct; adapter booleans, fixture hashes or assumed state equality cannot do so.
