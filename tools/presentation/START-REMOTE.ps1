@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [Parameter(Position = 0)][ValidateSet('start', 'status', 'stop')][string]$Action = 'start',
+    [Parameter(Position = 0)][ValidateSet('start', 'status', 'stop', 'restart')][string]$Action = 'start',
     [string]$DataRoot = 'D:\delta-data\presentation-20260924',
     [string]$ControllerRepo = 'D:\delta-main-demo',
     [string]$Cloudflared = 'C:\Program Files (x86)\cloudflared\cloudflared.exe',
@@ -122,7 +122,7 @@ try {
     $Control = Read-Saved $ControlPath
     $Health = Read-Health $Control
     $Owned = Owned-Process $Metadata
-    if ($Action -eq 'stop') {
+    if ($Action -in @('stop', 'restart')) {
         if ($null -ne $Health) {
             Assert-Identity $Health $Metadata $Control
             Invoke-RestMethod "$LocalUrl/_tunnel/stop" -Method Post -Body '{}' -ContentType 'application/json' `
@@ -131,11 +131,21 @@ try {
         } elseif ($null -ne $Owned) { throw 'Owned gateway is unresponsive. Nothing was killed.' }
         if (Test-Path -LiteralPath $UrlPath) { [IO.File]::WriteAllText($UrlPath, 'STOPPED - run START-REMOTE.ps1 to obtain a new URL.') }
         Write-Output 'Remote access stopped. Local Presentation and Controller remain running.'
-        exit 0
+        if ($Action -eq 'stop') { exit 0 }
+        # Continue under the same launcher mutex. Only the verified gateway was
+        # stopped; startup below reuses the existing local application and code.
+        $Metadata = $null
+        $Control = $null
+        $Health = $null
+        $Owned = $null
     }
     if ($null -ne $Health) {
         Assert-Identity $Health $Metadata $Control
-        Show-Address $Health
+        try { Show-Address $Health }
+        catch {
+            [IO.File]::WriteAllText($UrlPath, 'UNVERIFIED - public access failed; run START-REMOTE.ps1 status or restart.')
+            throw "Public access could not be verified. Check the connection; if the Quick Tunnel address has expired, run START-REMOTE.ps1 restart to obtain a new URL. / Адрес не подтверждён: проверьте сеть; для нового адреса выполните START-REMOTE.ps1 restart. Details: $($_.Exception.Message)"
+        }
         exit 0
     }
     if ($null -ne $Owned) { throw 'Gateway is starting or unresponsive. Inspect gateway.stderr.txt; no duplicate was started.' }

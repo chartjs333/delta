@@ -31,6 +31,7 @@ This is a manual restart launcher; it does not install a Windows startup service
 ```powershell
 pwsh -NoProfile -File D:\delta-presentation\START-REMOTE.ps1 status
 pwsh -NoProfile -File D:\delta-presentation\START-REMOTE.ps1 stop
+pwsh -NoProfile -File D:\delta-presentation\START-REMOTE.ps1 restart
 ```
 
 `status` verifies the live process and external login before displaying a URL.
@@ -38,6 +39,19 @@ pwsh -NoProfile -File D:\delta-presentation\START-REMOTE.ps1 stop
 remain available. Stopped/dead processes never cause an old URL to be advertised
 by the launcher. `current-url.txt` is the last verified address, not a live monitor;
 run `status` to check it after an unexpected crash.
+
+If an existing Quick Tunnel hostname expires or public verification fails,
+`status` does not advertise it and marks `current-url.txt` UNVERIFIED. Check the
+network first; `restart` gracefully replaces only the owned gateway/tunnel under
+the launcher lock and prints its newly verified address. The application, saved
+runs and persistent access code are retained. This is an explicit command, not
+automatic rotation during a presentation. A current link may change even when
+the host has not rebooted; Quick Tunnel URLs are temporary.
+
+Если временное имя туннеля перестало работать, проверьте сеть и выполните
+`START-REMOTE.ps1 restart`: скрипт заменит только туннель и выдаст новый адрес.
+Приложение, результаты и код входа сохраняются. Автоматической смены ссылки во
+время показа нет. После неудачной проверки файл URL помечается UNVERIFIED.
 
 `status` проверяет процесс и внешний вход; `stop` закрывает только удалённый доступ.
 Локальные приложения и сохранённые данные остаются. При аварии файл URL может

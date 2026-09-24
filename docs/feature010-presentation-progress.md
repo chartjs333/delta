@@ -72,3 +72,7 @@ Controller instance is now d7602a7b-f488-47eb-8ef3-220dea499291; source stays
 c8aea649 and the previous exact canonical receipt remains available. Do not
 restart the currently working gateway needlessly. Use START-REMOTE.ps1 status
 for the current URL; old links from earlier in the conversation no longer work.
+
+## 2026-09-24 morning tunnel recovery [T051, HR010-001]
+Expired Quick Tunnel hostname replaced after authoritative NXDOMAIN. Public HTTPS login, EN/RU pages, slide bytes and exact persisted receipt verified; Controller instance unchanged. START-REMOTE now supports explicit restart; this branch is parsed/reviewed (live recovery used stop then start). status never silently rotates a URL. Evidence: specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260924/tunnel-recovery/http-acceptance.json. Non-qualifying local presentation only.
+

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "checked_at": "2026-09-24T06:12:48.986903+00:00",
+  "scope": "T051/HR010-001 morning Quick Tunnel recovery",
+  "status": "PASS",
+  "qualifying": false,
+  "mode": "SIMULATED_LOCAL",
+  "old_hostname": "wright-lid-gym-concepts.trycloudflare.com",
+  "old_hostname_dns": "NXDOMAIN: Cloudflare and Google DNS-over-HTTPS, both Status 3",
+  "public_url": "https://another-digital-portable-compiled.trycloudflare.com",
+  "normal_tls_validation": true,
+  "dns_resolution": "Cloudflare 1.1.1.1; host resolver unavailable",
+  "authenticated_admin_and_presentation": "PASS",
+  "login_referrer_policy": "same-origin",
+  "anonymous_png_status": 401,
+  "png_sha256": "00154ac488030f89acd46c09b5bc35a064c6e0ed0a1fdfc91b5d8529d5eb14d7",
+  "exact_public_local_receipt_sha256": "ec715072b34d3add3e3cd7c191341e491e70866c40663752a91f7a5b6bf0230d",
+  "controller_instance_preserved": true,
+  "controller_instance_id": "d7602a7b-f488-47eb-8ef3-220dea499291",
+  "controller_source": "c8aea64972f741060d1e527ebbb6f9a5a168a075",
+  "automated_browser_claim": false
+}
