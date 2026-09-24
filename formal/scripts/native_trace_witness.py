@@ -12,6 +12,7 @@ import re
 import sys
 from pathlib import Path
 
+from coordinate_projection import native_schema_projection
 from formal_artifacts import load_json_strict, validate_json_schema
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "proposals"))
@@ -107,6 +108,11 @@ class NativeEvidence:
         ):
             n.require(n.canonical(event[field]) == n.canonical(value), "NATIVE_EVENT_CONTEXT")
         witness = n.Witness(anchor, snapshot["authority"], self.store)
+        resolved_schema = n.resolve(self.store, witness.root["schema"], "SCHEMA")
+        n.require(
+            n.canonical(resolved_schema) == n.canonical(native_schema_projection(contract)),
+            "NATIVE_COORDINATE_SCHEMA_BINDING",
+        )
         assignments = sorted(
             (item["domain_id"], item["shard_id"], item["vote_context_id"])
             for item in contract["shard_plan"]["assignments"]

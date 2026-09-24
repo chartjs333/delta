@@ -179,6 +179,8 @@ def trace_document() -> dict[str, object]:
             "parameter_schema": {
                 "schema_hash": HASH_A,
                 "parameter_ids": ["parameter-1"],
+                "coordinates": ["p0"],
+                "ranges": [{"parameter_id": "parameter-1", "offset": 0, "length": 1}],
             },
             "shard_plan": {
                 "plan_hash": HASH_B,

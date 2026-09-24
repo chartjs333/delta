@@ -411,7 +411,8 @@ def main() -> int:
             "A clean offline Linux reproduction and two independent technical reviews "
             "are required before Formal GO.",
             "Candidate native arithmetic witnesses cover first-vote byte recomputation. "
-            "Arbitrary schema-coordinate projection, native snapshot production, exact "
+            "Unbounded vector proofs, tensor/adapter/frozen-base decoding, native snapshot "
+            "production, exact "
             "persisted receipt/retry identity and all recovery crash cuts remain open "
             "under PO-AB1.",
         ],

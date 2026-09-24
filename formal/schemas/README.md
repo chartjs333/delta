@@ -94,3 +94,10 @@ whole file is bounded to 4 MiB in this candidate. Each snapshot and artifact is
 resolved and rehashed. See the refinement contract for the trust premise and
 the remaining receipt/recovery/schema-projection obligations. The synthetic
 fixture manifest is not an attestation of native provenance.
+
+The candidate parameter-schema hash also covers the exact sorted `coordinates`
+and per-obligation `ranges`. The checker derives native SCHEMA bytes solely from
+this immutable contract, then compares the complete resolved native schema.
+Per-domain coverage is exact; shard IDs cannot alias different intervals across
+domains. See the candidate coordinate projection in the refinement contract for
+the bounded flattened-vector profile and the remaining proof/adapter obligations.

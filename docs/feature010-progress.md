@@ -461,3 +461,59 @@ Presentation 8870, Controller 8865 and node training 8872 retained their healthy
 instances. The same Cloudflare URL returns HTTP 200/access-code login. This is
 a read-only reachability check, not a fresh authenticated browser execution.
 The baseline/presentation worktrees and saved receipts/results remain unchanged.
+
+## September 24, 12:07 UTC continuation: concrete schema coordinates
+
+T053/T054/T055/T056/T057: the public parameter-schema hash now binds exact
+ordered scalar `coordinates` and `ranges` mapping every parameter obligation ID
+to its offset/length. The old parameter IDs are obligation labels; concrete
+scalar IDs are a separate shared vector. Every domain must partition that entire
+vector exactly once, with no gap/overlap, no duplicate domain/shard key and no
+shard ID aliasing different intervals across domains. Range checks use bounded
+integers and interval sweeps, not expansion of arbitrarily repeated ranges.
+
+`coordinate_projection.py` constructs the unique native SCHEMA payload from the
+immutable contract. Its complete canonical bytes must match the SCHEMA resolved
+from the separately pinned native authority graph. Parent model/optimizer and
+q-shard schema references remain checked by the byte oracle. Neither observed
+vote coverage nor rehashed caller metadata establishes coordinate authority.
+
+The new positive full public trace uses three domains, six parameter keys, two
+shards of lengths 2 and 3, five coordinates and 21 arithmetic votes. Its separately
+derived expected model is `[19,-20,19,-19,19]` and optimizer `[2,-1,2,-2,2]`.
+Eleven new negative public traces cover order, missing range, out-of-bounds,
+overlap/gap, cross-domain alias, duplicate domain/shard and native/public schema
+substitutions. Native substitutions rehash every graph edge and recompute all
+PARAMETER/APPLY bodies, dependent aggregates and result hashes. They fail the
+specific binding guard rather than an incidental stale hash. Three deliberate
+in-process removals of that production Python guard make those otherwise
+self-consistent traces pass, establishing this boundary check's non-vacuity.
+
+Validation: 11 legal / 63 illegal public traces, 106 formal tooling tests,
+38 arithmetic/byte-oracle tests, targeted Ruff and byte-exact fixture regeneration
+pass. Phase zero remains FAIL for the unfrozen amendment. All 27 TLA/Lean semantic
+artifact hashes match the previous checkpoint; those tools were not rerun for
+this public-schema/checker change. The previous finite TLC/mutant/proof evidence
+is retained with its original scope. Candidate semantics is now
+`sha256:8dd92208f268b51cce468b69b470ad054d7352f62d35ea8b05e6d2b9f9fd1924`.
+The new source-bound report remains NO_GO.
+
+This closes the executable coordinate projection for the candidate's flattened
+vectors under the existing 4096-item witness bound and contiguous shared shards.
+It does not prove arbitrary vector lengths, native framework/tensor/QLoRA adapter
+decoding or frozen-base identity. The TLC model still abstracts one coordinate
+per shard. Native snapshot provenance, WAL/effect/receipt/retry identity, rejected
+stutter, every crash cut, all four PO-AB1 conjuncts, contract freeze, clean offline
+reproduction and independent reviews remain open. No runtime implementation,
+arithmetic admission guard, benchmark gate or GO checkpoint changed.
+
+Next concrete stage: bind persist/retry receipt evidence to the same public/native
+relation, including identical retries after current advances and after recovery,
+conflicting canonical bytes and rejection without append/effect. Then discharge
+the actual PO-AB1 proof statements against these contracts, not a generic pure
+function determinism lemma. Evidence: `formal/proposals/evidence/coordinate-binding.json`.
+
+Presentation, baseline Controller and node-training retain the same healthy
+instances. The unchanged Cloudflare URL responds HTTP 200 with the access-code
+login page. Baseline/presentation repositories and saved receipts were untouched;
+no fresh authenticated demonstration execution is claimed for this heartbeat.

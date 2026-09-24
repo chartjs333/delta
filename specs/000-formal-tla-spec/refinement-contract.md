@@ -54,13 +54,52 @@ checked-in `formal/fixtures/traces/native/manifest.json` is a test registry only
 by the verifier for a supplied trace. Rehashing the whole input graph still must
 not override the separate current model/optimizer value hashes.
 
-**Remaining scope:** native snapshot production/authentication, the exact concrete
-schema-coordinate projection for arbitrary vector/domain layouts, accepted
+**Remaining scope:** native snapshot production/authentication, unbounded vector
+proofs and concrete tensor/adapter/frozen-base decoding, accepted
 request-to-WAL/effect/receipt identity, exact persisted retries after current
 advance, rejected-event stutter and all crash cuts remain open. `NO_OP`/replay
 is not reclassified as a fresh vote; this checkpoint does not yet validate its
 receipt bytes/sequence. Four PO-AB1 proofs remain mandatory. Synthetic fixture
 success is neither native conformance nor a qualifying Feature010 gate.
+
+### Candidate coordinate projection (T053/T054/T056)
+
+The hash-bound `parameter_schema` now includes `coordinates` and `ranges` in
+addition to `parameter_ids`. `coordinates` is the exact sorted unique ASCII
+sequence of scalar coordinate identifiers. Each range fixes one public parameter
+obligation ID and its `(offset,length)` into that sequence. The parameter IDs in
+this trace projection name domain/shard obligations; scalar coordinate IDs are
+separate and shared across domains. Range rows follow parameter-ID order and
+must cover exactly the immutable parameter-ID set.
+
+Every assignment resolves its range through its parameter ID. All ranges must
+be positive, within the vector, and use exact integer offsets/lengths. For each
+domain, sorting its intervals must form one contiguous partition from zero to
+the complete coordinate count: gaps, overlaps and observed-subset coverage fail.
+Every `(domain,shard)` occurs once; the same shard ID denotes the same interval
+in all domains, and the domain/shard product is complete. No observed vote or QC
+is used to derive these requirements.
+
+This determines one native SCHEMA payload: the exact coordinate sequence plus
+shards sorted by ID with their bound offsets/lengths. Its canonical bytes must
+equal the SCHEMA artifact resolved from the native authority graph. That graph
+in turn binds model, optimizer and q-shard schemas. Rehashing either the public
+contract or the entire native graph and recomputing all candidates cannot make
+different coordinate projections equivalent.
+
+This candidate profile supports canonical flattened vectors up to the existing
+4096-item witness bound, with contiguous shared shard intervals. The new positive
+fixture uses three domains, two shards of lengths 2 and 3, and five coordinates;
+its expected model/optimizer values are checked against an independent literal
+arithmetic derivation. Eleven new negative public traces cover range/order/gap/
+overlap/domain alias/substitution errors. Three guard-removal counterchecks prove
+that otherwise fully self-consistent substituted graphs become accepted when
+only the explicit cross-boundary schema check is disabled in that test.
+
+These are executable projection checks, not an arbitrary-vector theorem or native
+tensor/QLoRA adapter conformance. The production TLC model remains one coordinate
+per shard; PO-AB1 must connect the byte projection and full vector operation graph
+to the model/proofs before the candidate can grant runtime authority.
 
 ## 2. Canonical trace event
 
@@ -87,6 +126,7 @@ logical_time
 outcome
 error_code
 artifact_refs
+arithmetic_witness
 ```
 
 Fields not relevant to an action use an explicit canonical absence value, never omission with ambiguous semantics.

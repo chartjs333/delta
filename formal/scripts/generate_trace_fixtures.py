@@ -55,6 +55,8 @@ DEFAULT_ASSIGNMENTS = [
 
 def build_round_contract(
     assignments: list[dict[str, str]] | None = None,
+    *,
+    shard_lengths: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     exact_assignments = assignments or DEFAULT_ASSIGNMENTS
     exact_assignments = sorted(
@@ -68,11 +70,28 @@ def build_round_contract(
     )
     parameter_ids = sorted(item["parameter_id"] for item in exact_assignments)
     domain_ids = sorted({item["domain_id"] for item in exact_assignments})
-    schema_payload = {"parameter_ids": parameter_ids}
+    offsets = {}
+    width = 0
+    for shard in sorted({item["shard_id"] for item in exact_assignments}):
+        length = 1 if shard_lengths is None else shard_lengths[shard]
+        offsets[shard] = (width, length)
+        width += length
+    schema_payload = {
+        "parameter_ids": parameter_ids,
+        "coordinates": [f"p{i:04}" for i in range(width)],
+        "ranges": [
+            {
+                "parameter_id": item["parameter_id"],
+                "offset": offsets[item["shard_id"]][0],
+                "length": offsets[item["shard_id"]][1],
+            }
+            for item in exact_assignments
+        ],
+    }
     plan_payload = {"assignments": exact_assignments}
     parameter_schema = {
         "schema_hash": content_id(schema_payload),
-        "parameter_ids": parameter_ids,
+        **schema_payload,
     }
     shard_plan = {
         "plan_hash": content_id(plan_payload),
@@ -779,6 +798,9 @@ def main() -> int:
     from generate_native_trace_mutations import generate
 
     generate(LEGAL.parent)
+    from generate_coordinate_fixtures import generate as generate_coordinates
+
+    generate_coordinates()
     manifest = {}
     for directory in (LEGAL, ILLEGAL):
         for path in sorted(directory.glob("*.json")):

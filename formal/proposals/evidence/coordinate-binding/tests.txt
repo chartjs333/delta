@@ -1,0 +1,45 @@
+..........................................warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+formal-gate: java
+formal-gate: java
+formal-gate: java
+formal-gate: java
+.....................................................
+----------------------------------------------------------------------
+Ran 106 tests in 29.215s
+
+OK

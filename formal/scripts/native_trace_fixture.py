@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, replace
 
+from coordinate_projection import native_schema_projection
 from native_trace_witness import ACTIONS, n, snapshot_id
 
 
@@ -15,14 +16,9 @@ def attach_fixture_witnesses(trace: dict) -> dict:
     assignments = contract["shard_plan"]["assignments"]
     domains = contract["round_config"]["domain_ids"]
     shards = sorted({item["shard_id"] for item in assignments})
-    schema = n.put(
-        store,
-        "SCHEMA",
-        {
-            "coordinates": [f"p{i:04}" for i in range(len(shards))],
-            "shards": [{"id": shard, "offset": i, "length": 1} for i, shard in enumerate(shards)],
-        },
-    )
+    projection = native_schema_projection(contract)
+    schema = n.put(store, "SCHEMA", projection)
+    by_shard = {item["id"]: (item["offset"], item["length"]) for item in projection["shards"]}
     profile = n.put(
         store,
         "PROFILE",
@@ -38,8 +34,9 @@ def attach_fixture_witnesses(trace: dict) -> dict:
             "output_range": "FULL_SIGNED_INT64",
         },
     )
-    model_values = [20 if i % 2 == 0 else -20 for i in range(len(shards))]
-    optimizer_values = [2 if i % 2 == 0 else -2 for i in range(len(shards))]
+    width = len(projection["coordinates"])
+    model_values = [20 if i % 2 == 0 else -20 for i in range(width)]
+    optimizer_values = [2 if i % 2 == 0 else -2 for i in range(width)]
     model = n.put(store, "MODEL", {"schema": schema, "quantum": [1, 1], "values": model_values})
     optimizer = n.put(
         store, "OPTIMIZER", {"schema": schema, "quantum": [1, 1], "values": optimizer_values}
@@ -50,7 +47,8 @@ def attach_fixture_witnesses(trace: dict) -> dict:
         ticket = f"t{di:04}"
         tickets.append({"id": ticket, "domain": domain})
         leaves = []
-        for si, shard in enumerate(shards):
+        for shard in shards:
+            offset, length = by_shard[shard]
             q = n.put(
                 store,
                 "Q_SHARD",
@@ -60,7 +58,10 @@ def attach_fixture_witnesses(trace: dict) -> dict:
                     "shard": shard,
                     "schema": schema,
                     "quantum": [1, 2],
-                    "values": [1 if (di + si) % 2 == 0 else -1],
+                    "values": [
+                        (index + 1) * (1 if (di + index) % 2 == 0 else -1)
+                        for index in range(offset, offset + length)
+                    ],
                 },
             )
             leaves.append({"shard": shard, "q": q})

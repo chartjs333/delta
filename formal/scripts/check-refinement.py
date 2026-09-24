@@ -14,6 +14,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "formal" / "scripts"))
 
+from coordinate_projection import CoordinateError, native_schema_projection  # noqa: E402
 from formal_artifacts import (  # noqa: E402
     canonical_json_bytes,
     derive_formal_semantics_id,
@@ -108,7 +109,7 @@ def verify_round_contract(trace: dict[str, Any]) -> tuple[set[str], str]:
     if assignments != assignment_order:
         fail("NONCANONICAL_ROUND_CONTRACT", "shard assignments must be sorted")
 
-    schema_payload = {"parameter_ids": parameter_ids}
+    schema_payload = {key: value for key, value in parameter_schema.items() if key != "schema_hash"}
     if parameter_schema["schema_hash"] != content_id(schema_payload):
         fail("PARAMETER_SCHEMA_HASH_MISMATCH", trace["trace_id"])
     plan_payload = {"assignments": assignments}
@@ -126,6 +127,10 @@ def verify_round_contract(trace: dict[str, Any]) -> tuple[set[str], str]:
     required_contexts = {item["vote_context_id"] for item in assignments}
     if len(required_contexts) != len(assignments):
         fail("SHARD_PLAN_DUPLICATE_VOTE_CONTEXT", trace["trace_id"])
+    try:
+        native_schema_projection(contract)
+    except CoordinateError as error:
+        fail(str(error), trace["trace_id"])
 
     config_payload = {
         "domain_ids": domain_ids,
@@ -398,8 +403,8 @@ def check_all_fixtures() -> dict[str, Any]:
         item["fixture"]: item["reason"]
         for item in load_json_strict(fixture_root / "native/negative-expectations.json")
     }
-    if len(native_negatives) < 21:
-        raise RuntimeError("all twenty-one native witness negative cases are required")
+    if len(native_negatives) < 32:
+        raise RuntimeError("all thirty-two native witness negative cases are required")
 
     def check_fixture(path: Path) -> dict[str, Any]:
         key = path.relative_to(fixture_root).as_posix()

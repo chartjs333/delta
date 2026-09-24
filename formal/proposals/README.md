@@ -154,3 +154,26 @@ This checkpoint does not promote the candidate into runtime authority.
 Evidence: `formal/proposals/evidence/native-trace-witness.json`. TLA and Lean
 sources are byte-identical to the retained liveness checkpoint; this stage runs
 the affected public-schema/refinement/tooling checks, not new TLC/Lean executions.
+
+## September 24: concrete coordinate projection (T053-T057)
+
+The public contract now hashes the complete ordered coordinate list and explicit
+per-obligation offsets/lengths. Every domain covers the same whole vector exactly
+once, and each shard has one shared interval across domains. The checker derives
+native SCHEMA bytes from this contract and compares the resolved authority graph's
+SCHEMA bytes exactly; it never derives required coordinates from observed votes.
+
+The positive public fixture uses three domains and shards of lengths 2 and 3.
+Its five-coordinate expected model and optimizer vectors have a separate literal
+arithmetic derivation. Eleven additional negative fixtures include fully rehashed
+native graphs with recomputed candidates, aggregates and result hashes. Three
+production Python guard-removal counterchecks demonstrate that only the explicit
+schema-binding check prevents those self-consistent substitutions.
+
+Validation: 11 legal / 63 illegal traces, 106 tooling tests, 38 oracle tests,
+targeted Ruff and byte-exact fixture regeneration pass. Evidence is in
+`formal/proposals/evidence/coordinate-binding.json`. This is a bounded flattened
+vector projection (up to the existing 4096-item witness bound), not native tensor/
+adapter/frozen-base decoding or an unbounded vector proof. TLA/Lean are unchanged
+and were not rerun. Full WAL/receipt/retry refinement and all four PO-AB1 proofs
+remain open; the candidate report remains NO_GO and no runtime guard changed.
