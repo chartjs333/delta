@@ -144,8 +144,9 @@ try {
     if ($null -ne $Health) {
         Assert-Identity $Health $Metadata $Control
         if ($Action -eq 'start') {
-            & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'node-training-start.ps1') start -DataRoot $DataRoot
-            if ($LASTEXITCODE -ne 0) { Write-Warning 'Node training example unavailable; inspect its host.log.' }
+            & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'presentation-start.ps1') start `
+                -DataRoot $DataRoot -ControllerRepo $ControllerRepo -Port $PresentationPort
+            if ($LASTEXITCODE -ne 0) { throw 'Local application recovery failed; tunnel URL was not rotated.' }
         }
         try { Show-Address $Health }
         catch {
