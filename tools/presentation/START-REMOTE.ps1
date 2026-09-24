@@ -87,6 +87,8 @@ function Show-Address($Health) {
     Write-Output "Admin UI EN:     $($Health.url)/admin/?lang=en#/live-execution"
     Write-Output "Admin UI RU:     $($Health.url)/admin/?lang=ru#/live-execution"
     Write-Output "SDK:             $($Health.url)/admin/?lang=en#/sdk"
+    Write-Output "Node training EN: $($Health.url)/node-training/?lang=en"
+    Write-Output "Node training RU: $($Health.url)/node-training/?lang=ru"
     Write-Output "Visual guide EN: $($Health.url)/admin/?lang=en#/guide"
     Write-Output "Visual guide RU: $($Health.url)/admin/?lang=ru#/guide"
     Write-Output "Access code:     $((Get-Content -LiteralPath $CodePath -Raw).Trim())"
@@ -141,6 +143,10 @@ try {
     }
     if ($null -ne $Health) {
         Assert-Identity $Health $Metadata $Control
+        if ($Action -eq 'start') {
+            & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'node-training-start.ps1') start -DataRoot $DataRoot
+            if ($LASTEXITCODE -ne 0) { Write-Warning 'Node training example unavailable; inspect its host.log.' }
+        }
         try { Show-Address $Health }
         catch {
             [IO.File]::WriteAllText($UrlPath, 'UNVERIFIED - public access failed; run START-REMOTE.ps1 status or restart.')

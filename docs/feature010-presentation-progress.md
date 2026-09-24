@@ -76,3 +76,7 @@ for the current URL; old links from earlier in the conversation no longer work.
 ## 2026-09-24 morning tunnel recovery [T051, HR010-001]
 Expired Quick Tunnel hostname replaced after authoritative NXDOMAIN. Public HTTPS login, EN/RU pages, slide bytes and exact persisted receipt verified; Controller instance unchanged. START-REMOTE now supports explicit restart; this branch is parsed/reviewed (live recovery used stop then start). status never silently rotates a URL. Evidence: specs/010-wan-benchmark-and-quality/evidence/presentation-local/20260924/tunnel-recovery/http-acceptance.json. Non-qualifying local presentation only.
 
+
+## 2026-09-24 node training example [T051, HR010-001]
+Integrated the existing worktree-c2 MNIST UI through fixed /node-training/ routes: shared EN/RU navigation, app palette, original report validation, nonce/token and origin boundaries. Source demo worktree changes preserved. Local real run completed with four Python worker processes, 82.05% centralized/distributed accuracy, BYTE-EXACT and RECOVERED_AND_APPLIED. 266 Admin tests, build and boundary audits passed; 32 presentation/gateway tests passed. Original gateway stop test now waits for the asynchronous stopping event. UI/proxy integration only: no protocol changes or qualifying Feature010 claim. Deployment/public acceptance follows in its evidence commit.
+

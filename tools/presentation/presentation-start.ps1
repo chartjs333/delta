@@ -109,6 +109,10 @@ $ActualCommit = (& git -C $ControllerRepo rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0 -or $ActualCommit -cne $ExpectedControllerCommit) {
     throw 'Controller source differs from the reviewed presentation baseline.'
 }
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'node-training-start.ps1') start -DataRoot $DataRoot
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning 'MNIST example is unavailable; inspect node-training/host.log. Main application startup continues.'
+}
 New-Item -ItemType Directory -Path $PanelData -Force | Out-Null
 if (-not (Test-Path -LiteralPath $Config)) {
     $Descriptor = Get-Content (Join-Path $ControllerRepo 'configs/working-version/local.json') -Raw | ConvertFrom-Json

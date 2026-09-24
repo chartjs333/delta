@@ -24,6 +24,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit
 
+from node_training_view import GET_ROUTES as NODE_GET_ROUTES
+from node_training_view import RUN_ROUTE as NODE_RUN_ROUTE
+
 PUBLIC_URL = re.compile(r"https://[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com")
 UUID = r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}"
 COOKIE = "__Host-delta_demo"
@@ -33,32 +36,37 @@ MAX_BODY = 300_000
 
 def allowed(method: str, path: str) -> bool:
     if method == "GET":
-        return path in {
-            "/",
-            "/admin",
-            "/admin/",
-            "/app.js",
-            "/i18n.mjs",
-            "/style.css",
-            "/api/state",
-            "/api/health",
-            "/api/workspace",
-            "/readyz",
-        } or bool(
-            re.fullmatch(
-                r"/(?:admin/)?assets/[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:js|css|png)"
-                r"|/api/linked-execution/"
-                + UUID
-                + r"|/api/report/[0-9a-f]{32}|/api/v1/execution/"
-                + UUID
-                + r"/(?:status|receipt)",
-                path,
+        return (
+            path in NODE_GET_ROUTES
+            or path
+            in {
+                "/",
+                "/admin",
+                "/admin/",
+                "/app.js",
+                "/i18n.mjs",
+                "/style.css",
+                "/api/state",
+                "/api/health",
+                "/api/workspace",
+                "/readyz",
+            }
+            or bool(
+                re.fullmatch(
+                    r"/(?:admin/)?assets/[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:js|css|png)"
+                    r"|/api/linked-execution/"
+                    + UUID
+                    + r"|/api/report/[0-9a-f]{32}|/api/v1/execution/"
+                    + UUID
+                    + r"/(?:status|receipt)",
+                    path,
+                )
             )
         )
     if method == "PUT":
         return path == "/api/workspace"
     return method == "POST" and (
-        path in {"/api/train", "/api/simulate", "/api/v1/intent/submit"}
+        path in {"/api/train", "/api/simulate", "/api/v1/intent/submit", NODE_RUN_ROUTE}
         or bool(re.fullmatch(r"/api/v1/execution/" + UUID + r"/cancel", path))
     )
 
@@ -74,7 +82,7 @@ def safe_next(value: str) -> str:
         or value.startswith("//")
         or any(ord(c) < 32 for c in value)
         or len(value) > 2048
-        or parts.path not in {"/", "/admin", "/admin/"}
+        or parts.path not in {"/", "/admin", "/admin/", "/node-training/"}
     ):
         return "/?lang=en"
     return value
@@ -316,7 +324,12 @@ required maxlength="128" autocomplete="current-password" autofocus>
                 self.error(400, "INVALID_LOGIN")
             return
         if not self.server.authenticated(self.headers.get("Cookie", "")):
-            if self.command == "GET" and parts.path in {"/", "/admin", "/admin/"}:
+            if self.command == "GET" and parts.path in {
+                "/",
+                "/admin",
+                "/admin/",
+                "/node-training/",
+            }:
                 self.reply(
                     303,
                     headers={
@@ -332,7 +345,7 @@ required maxlength="128" autocomplete="current-password" autofocus>
             return
         origin = f"http://127.0.0.1:{self.server.upstream}"
         headers = {"Origin": origin}
-        for key in ("Content-Type", "X-Delta-Presentation", "X-Delta-Request"):
+        for key in ("Content-Type", "X-Delta-Presentation", "X-Delta-Request", "X-Demo-Token"):
             if key in self.headers:
                 headers[key] = self.headers[key]
         connection = HTTPConnection("127.0.0.1", self.server.upstream, timeout=15)

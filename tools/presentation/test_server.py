@@ -41,6 +41,29 @@ class PresentationTests(unittest.TestCase):
         except HTTPError as error:
             return error.code, error.read(), error.headers
 
+    def test_node_example_cannot_run_cross_origin_or_accept_arguments(self):
+        from http.client import HTTPConnection
+
+        def request(**overrides):
+            headers = {"Origin": self.base, "X-Demo-Token": "example-token", **overrides}
+            connection = HTTPConnection("127.0.0.1", self.http.server_port, timeout=3)
+            connection.request("POST", "/node-training/api/run", headers=headers)
+            response = connection.getresponse()
+            status = response.status
+            response.read()
+            connection.close()
+            return status
+
+        with patch.object(server.Handler, "node_proxy") as proxy:
+            self.assertEqual(request(Origin="https://evil.invalid"), 403)
+            self.assertEqual(request(Host="evil.invalid"), 403)
+            self.assertEqual(request(**{"X-Demo-Token": ""}), 403)
+            self.assertEqual(request(**{"Content-Length": "2"}), 400)
+            self.assertEqual(request(**{"Transfer-Encoding": "chunked"}), 400)
+            proxy.assert_not_called()
+        self.assertEqual(self.request("/node-training/api/shutdown", body=b"{}")[0], 404)
+        self.assertEqual(self.request("/node-training/api/health")[0], 404)
+
     def test_cross_origin_commands_and_dns_rebinding_rejected(self):
         with patch.object(self.app, "submit") as submit:
             for parameters in (

@@ -329,6 +329,11 @@ export function App({ adapter = defaultAdapter }: AppProps) {
                 <span aria-hidden="true">◫</span> {t(item.label)}
               </a>
             ))}
+            {presentationAddress ? (
+              <a href={languageLink(new URL('/node-training/', presentationAddress).href, language)}>
+                <span aria-hidden="true">◉</span> {t("Node training")}
+              </a>
+            ) : null}
           </nav>
           {source ? (
             liveExecutionRuntime.mode === "HTTP_LIVE" &&

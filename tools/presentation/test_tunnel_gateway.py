@@ -96,6 +96,44 @@ class RemoteTests(unittest.TestCase):
             self.assertEqual(headers["Referrer-Policy"], "same-origin")
         self.assertFalse(Upstream.calls)
 
+    def test_node_example_keeps_auth_origin_and_narrow_route_boundary(self):
+        self.assertEqual(self.request("/node-training/?lang=ru")[0], 303)
+        self.assertEqual(self.request("/node-training/api/status")[0], 401)
+        cookie = self.cookie()
+        for path in (
+            "/node-training/?lang=en",
+            "/node-training/api/status",
+            "/node-training/api/catalog",
+        ):
+            self.assertEqual(self.request(path, Cookie=cookie)[0], 200)
+        self.assertEqual(remote.safe_next("/node-training/?lang=ru"), "/node-training/?lang=ru")
+        for path in (
+            "/node-training/api/health",
+            "/node-training/api/shutdown",
+            "/node-training/../../server.py",
+            "/node-training/api/run?cmd=whoami",
+        ):
+            self.assertFalse(remote.allowed("GET", path))
+        self.assertEqual(
+            self.request(
+                "/node-training/api/run", "POST", b"", Cookie=cookie, Origin="https://evil.invalid"
+            )[0],
+            403,
+        )
+        self.assertEqual(
+            self.request(
+                "/node-training/api/run",
+                "POST",
+                b"",
+                Cookie=cookie,
+                Origin=self.gateway.public_url,
+                **{"X-Demo-Token": "example-token"},
+            )[0],
+            200,
+        )
+        self.assertEqual(Upstream.calls[-1][2]["X-Demo-Token"], "example-token")
+        self.assertNotIn("Cookie", Upstream.calls[-1][2])
+
     def test_authenticated_slide_assets_only_forward_allowed_paths(self):
         cookie = self.cookie()
         for path in ("/assets/slide-1-example.png", "/admin/assets/slide-1-example.png"):
@@ -177,7 +215,7 @@ class RemoteTests(unittest.TestCase):
         self.assertNotIn("control-secret", body.decode())
         self.assertNotIn("a" * 64, body.decode())
         self.assertEqual(self.request("/_tunnel/stop", "POST", b"{}", **headers)[0], 202)
-        self.assertTrue(self.gateway.stopping.is_set())
+        self.assertTrue(self.gateway.stopping.wait(timeout=1))
 
     def test_expired_tampered_and_previous_instance_sessions_rejected(self):
         cookie = self.cookie()

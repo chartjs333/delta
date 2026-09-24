@@ -1,0 +1,39 @@
+/* The demo keeps its original measured views; these overrides share the app palette. */
+:root {
+  color-scheme: light;
+  --bg: #f3f6fb; --panel: #fff; --panel-2: #f1f6fc; --line: #d8e2ef;
+  --text: #19314f; --muted: #566a82; --cyan: #236ab8; --green: #167957;
+  --amber: #986116; --red: #b62f4b;
+}
+body { background: var(--bg); }
+.delta-app-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 24px;
+  background: #132c49; color: white; padding: 16px max(24px, calc((100vw - 1220px)/2)); }
+.delta-app-bar a { color: #e3edff; text-decoration: none; }
+.delta-app-brand { font-size: 22px; white-space: nowrap; }
+.delta-app-bar nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.delta-app-bar nav a, .delta-app-bar nav span { padding: 9px 12px; border-radius: 8px; font-size: 14px; }
+.delta-app-bar nav a:hover { background: #254568; }
+.delta-app-bar nav span { background: #e3edff; color: #19314f; font-weight: 700; }
+.delta-example-scope { padding: 9px 24px; text-align: center; font-size: 12px;
+  color: #6f4a11; background: #fff7e6; border-bottom: 1px solid #eee0bd; }
+main { padding-top: 24px; }
+h1 { font-size: clamp(32px, 4.5vw, 54px); line-height: 1.08; }
+.hero { background: linear-gradient(125deg, #e7f0ff, #f2efff); border-color: var(--line); }
+.panel, .kpi { background: white; box-shadow: 0 5px 20px #19314f05; }
+#run { color: white; background: #2866b1; box-shadow: 0 8px 22px #2866b124; }
+#run:hover { background: #1d559a; }
+.mode { color: #765019; background: #fff7e6; border-color: #e4d2ae; }
+.node, .execution-step, .binding-item, .temporal-step, .observation-card,
+.model-observation { border-color: var(--line); background: var(--panel-2); }
+.aggregate { background: #e9f6ef; border-color: #aad3bc; }
+.progress, .bars, .switches button { background: #e6edf6; }
+.switches button.active { color: white; background: var(--cyan); }
+.digit-pill { color: white; background: var(--cyan); }
+.failure-note, .boundary { color: #765019; background: #fff7e6; border-color: #dfc58e; }
+.observation-note { color: #3c536c; background: #eaf0f8; }
+.error { color: #97233c; border-color: #e6a4b3; background: #fff0f3; }
+.sample.wrong { border-color: #c66e83; }
+footer { color: var(--muted); }
+a:focus-visible, button:focus-visible { outline: 3px solid #7358ed; outline-offset: 4px; }
+@media(max-width: 600px) { .delta-app-bar { padding: 14px 16px; gap: 12px; }
+  header, .header-actions { flex-wrap: wrap; } .delta-example-scope { text-align: left; } }

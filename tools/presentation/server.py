@@ -23,11 +23,14 @@ import time
 import uuid
 from contextlib import contextmanager
 from datetime import UTC, datetime
+from http.client import HTTPConnection, HTTPException
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
+from node_training_view import GET_ROUTES as NODE_GET_ROUTES
+from node_training_view import RUN_ROUTE as NODE_RUN_ROUTE
 from workspace_store import EXECUTION, UUID, default_profile, parse_json, read_profile, save_profile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -432,7 +435,15 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: Any) -> None:
         pass
 
-    def send(self, status: int, data: bytes, media: str, *, download: bool = False) -> None:
+    def send(
+        self,
+        status: int,
+        data: bytes,
+        media: str,
+        *,
+        download: bool = False,
+        csp: str | None = None,
+    ) -> None:
         self.send_response(status)
         self.send_header("Content-Type", media)
         self.send_header("Content-Length", str(len(data)))
@@ -440,8 +451,11 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; "
-            "object-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+            csp
+            or (
+                "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; "
+                "object-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+            ),
         )
         if download:
             self.send_header("Content-Disposition", 'attachment; filename="delta-run.json"')
@@ -467,7 +481,9 @@ class Handler(BaseHTTPRequestHandler):
             self.json(403, {"error": "HOST_FORBIDDEN"})
             return
         path = urlsplit(self.path).path
-        if path == "/api/workspace":
+        if path in NODE_GET_ROUTES:
+            self.node_proxy("GET")
+        elif path == "/api/workspace":
             try:
                 with self.server.application.lock:
                     self.json(200, read_profile(self.server.application.profile_path))
@@ -555,6 +571,23 @@ class Handler(BaseHTTPRequestHandler):
             self.json(404, {"error": "NOT_FOUND"})
 
     def do_POST(self) -> None:
+        if self.path == NODE_RUN_ROUTE:
+            if (
+                not self.valid_host()
+                or self.headers.get("Origin") != self.server.origin
+                or not self.headers.get("X-Demo-Token")
+            ):
+                self.reject_write()
+                return
+            if (
+                self.headers.get("Transfer-Encoding")
+                or len(self.headers.get_all("Content-Length", [])) > 1
+                or self.headers.get("Content-Length", "0") != "0"
+            ):
+                self.json(400, {"error": "REQUEST_BODY_NOT_ALLOWED"})
+                return
+            self.node_proxy("POST")
+            return
         if self.path == "/api/v1/intent/submit" or re.fullmatch(
             r"/api/v1/execution/" + UUID + r"/cancel", self.path
         ):
@@ -632,6 +665,33 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(value, dict):
             raise ValueError("OBJECT_REQUIRED")
         return value
+
+    def node_proxy(self, method: str) -> None:
+        """Fixed loopback demo only; no arbitrary destinations, files or commands."""
+        connection = HTTPConnection("127.0.0.1", 8872, timeout=10)
+        headers = {"Origin": "http://127.0.0.1:8872"}
+        if method == "POST":
+            headers["X-Demo-Token"] = self.headers["X-Demo-Token"]
+        try:
+            connection.request(method, self.path, headers=headers)
+            response = connection.getresponse()
+            data = response.read(8_000_001)
+            if len(data) > 8_000_000:
+                self.json(502, {"error": "NODE_EXAMPLE_RESPONSE_TOO_LARGE"})
+                return
+            csp = response.getheader("Content-Security-Policy")
+            self.send(
+                response.status,
+                data,
+                response.getheader("Content-Type", "application/json"),
+                csp=(csp + "; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
+                if csp
+                else None,
+            )
+        except (OSError, HTTPException):
+            self.json(503, {"error": "NODE_EXAMPLE_UNAVAILABLE"})
+        finally:
+            connection.close()
 
     def proxy(self, method: str, path: str, body=None) -> None:
         client = self.server.application.client
