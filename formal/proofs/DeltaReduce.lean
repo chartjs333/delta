@@ -1,6 +1,8 @@
 import DeltaReduce.Quorum
 import DeltaReduce.FixedPoint
 import DeltaReduce.ArithmeticKernel
+import DeltaReduce.ParameterKernel
+import DeltaReduce.ParameterKernelVectors
 import DeltaReduce.ArithmeticBinding
 import DeltaReduce.NativeGraphVectors
 import DeltaReduce.Hierarchy

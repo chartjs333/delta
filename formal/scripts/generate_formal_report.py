@@ -410,6 +410,11 @@ def main() -> int:
             "lookup decoder and synthetic trust; they do not verify a general native "
             "parser, SHA-256 or provenance. PARAMETER conversion, APPLY and recovery "
             "conjuncts remain open, as does concrete decoder/exporter/WAL refinement.",
+            "The PARAMETER row kernel proves coefficient derivation, ordered vector "
+            "and coefficient-sum prefixes, exact coordinate refinement and quantum "
+            "conversion over mathematical inputs. Its native eligibility/commitment/"
+            "metadata/schema bridge remains unproved; the full native PARAMETER "
+            "conjunct must not be inferred from these helper proofs or finite vectors.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

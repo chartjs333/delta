@@ -18,6 +18,12 @@ not assume graph/result uniqueness. This does not discharge the other three
 conjuncts or the additional concrete decoder/refinement obligations below.
 See `formal/proposals/native-graph-proof.md` for assumptions and vector scope.
 
+`ParameterKernel.lean` additionally proves coefficient derivation, ordered
+vector/prefix safety and per-coordinate conversion for mathematical input rows.
+Its native eligibility/commitment/metadata/schema bridge is still missing, so
+`nativeParameterConversionSound` remains OPEN. These helper proofs must not be
+counted as that complete conjunct. Scope: `formal/proposals/parameter-kernel-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

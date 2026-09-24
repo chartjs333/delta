@@ -297,3 +297,20 @@ are unchanged and retained TLC results are not relabeled as new executions.
 Evidence: `formal/proposals/evidence/native-graph-proof.json`. Concrete native
 refinement, frozen contracts, clean offline reproduction and independent reviews
 remain required before authority can change.
+
+### Checked PARAMETER vector arithmetic (T044/T048/T049/T057/T060)
+
+`ParameterKernel.lean` derives coefficients from reduced rational weights and
+the specific plan denominator, checks coefficient-sum and coordinate prefixes,
+preserves shape, and connects each accepted coordinate to the ordered scalar
+kernel. It also proves checked quantum conversion and exact rounding over
+arbitrary lists/bounds. Twelve helper proofs compile and their axiom audit uses
+only the permitted `propext`/`Quot.sound` dependencies.
+
+The source-linked oracle/Lean vector set adds 36 PARAMETER and 22 conversion
+cases for INT64/INT128, full signed endpoints and rejection boundaries.
+`formal/proposals/parameter-kernel-proof.md` states the scope. The native graph
+to eligible/committed rows, metadata and schema-placement bridge is still open;
+these helpers do not replace `nativeParameterConversionSound`. Registered
+coverage remains 42/45 and Formal NO_GO. Evidence:
+`formal/proposals/evidence/parameter-kernel.json`.

@@ -775,3 +775,56 @@ arbitrary admission failure/initial snapshot/repair coverage, contract freeze,
 clean offline reproduction and independent review. Feature010 qualifying gates
 remain stopped until exact merged Formal GO; external authorities/WAN/evaluator
 quorum remain BLOCKED_EXTERNAL.
+
+## September 24 continuation: checked PARAMETER vector arithmetic
+
+T044/T048/T049/T057/T060: `ParameterKernel.lean` now derives coefficients from
+raw reduced weights and the specific denominator, proves the exact division
+identity, and checks coefficient-sum prefixes independently of coordinate sums.
+It computes whole vectors in the original row order, rejecting shape mismatch,
+input/product/prefix overflow and empty top-level inputs. Twelve helper theorems
+prove accepted-result soundness, row-kernel completeness/rejection equivalence,
+and exact projection of every present coordinate into the existing checked
+scalar accumulator. Quantum conversion proves checked products, per-coordinate
+rounding and unchanged vector length. No expected-result equality is assumed.
+
+This is the arithmetic sublayer of PO-AB1, not the complete native PARAMETER
+theorem. It deliberately has no ticket, commitment, domain/shard or canonical
+body fields. The bridge from independently authenticated graph/plan/Q bytes to
+exact eligible rows, full PARAMETER metadata and schema placement remains open.
+The required `nativeParameterConversionSound` name is not supplied by a weaker
+helper. Mandatory coverage therefore honestly remains 42/45, with PARAMETER,
+APPLY and recovery targets still missing. Scope and commands:
+`formal/proposals/parameter-kernel-proof.md`.
+
+Validation: the full Lean project (965 jobs), fresh kernel checks, and axiom
+audit PASS. The twelve helpers use only permitted `propext`/`Quot.sound` kernel
+axioms. Kernel-checked oracle vectors cover 36 PARAMETER and 22 conversion cases,
+including two source-linked native-fixture assignments, signed INT64/INT128,
+nonunit quanta, noncanonical fractions, shape/empty inputs, unsafe prefixes with
+safe final sums, coefficient-sum overflow with zero coordinates, and conversion
+cancellation. These are not actual native runtime or TLA mutant executions.
+136 tooling tests, 38 oracle tests, 33 legal/112 illegal traces, targeted Ruff,
+and byte-exact regeneration of 293 JSON/two Lean files PASS.
+
+Candidate semantics:
+`sha256:8ad76fc75f5ba3e3b52f085774801c0307d873665b9be90fec67471ba7f869ae`.
+Nineteen TLA modules, the public trace schema and the graph proof are unchanged.
+No new TLC execution is claimed; retained 28 safety/7 liveness/27 production
+mutant results keep their earlier finite scopes. The contract-freeze and full
+proof gates remain failed, so the source-bound formal report remains NO_GO.
+Evidence: `formal/proposals/evidence/parameter-kernel.json`.
+
+Self-review checked asymmetric signed bounds, INT64 Q/weight limits under both
+accumulator profiles, every coefficient/product/prefix, exact shape preservation,
+the absence of fraction reduction after accumulation, and the separate native
+metadata/eligibility obligations. No runtime or arithmetic admission guard was
+changed. The three idle demos returned HTTP 200 and the frozen refs are unchanged.
+
+Next concrete stage: connect these kernels to checked extraction of typed
+authority/plan/eligible Q inputs in `ArithmeticBinding.lean`. Derive ticket order,
+commitment equality, domain/shard/schema/quantum/length checks and full canonical
+PARAMETER body metadata; then prove schema placement of conversion. Do not assume
+row validity or expected-result equality to obtain the missing native theorem.
+APPLY/recovery, native decoder/exporter/WAL refinement, contract freeze, clean
+offline reproduction and independent review still follow before Formal GO.
