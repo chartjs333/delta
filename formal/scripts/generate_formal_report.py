@@ -412,8 +412,11 @@ def main() -> int:
             "are required before Formal GO.",
             "Candidate native arithmetic witnesses cover first-vote byte recomputation. "
             "Unbounded vector proofs, tensor/adapter/frozen-base decoding, native snapshot "
-            "production/authentication, production WAL/receipt encoding and all recovery "
-            "crash cuts remain open. Draft complete-journal receipt/retry projections "
+            "production/authentication, production WAL/receipt encoding and native recovery "
+            "crash-cut refinement remain open. The candidate persistence harness explores "
+            "one validator/fault with no concurrent current change, abstract receipt tuples "
+            "and fail-closed corrupt recovery; it does not establish physical WAL behavior. "
+            "Draft complete-journal receipt/retry projections "
             "are synthetic evidence, not physical durability or native conformance, "
             "under PO-AB1.",
         ],

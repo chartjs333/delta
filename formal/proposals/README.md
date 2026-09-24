@@ -194,3 +194,33 @@ synthetic complete-journal traces, not torn writes, every crash cut, initial
 snapshot import or failed first admission. Public TLA/Lean sources are unchanged.
 All four PO-AB1 proofs and Formal GO remain open. Retained checks and limitations:
 `formal/proposals/evidence/durable-retry.json`.
+
+
+### Candidate persistence crash cuts (T015-T018, T042, T050-T052, T057-T061)
+
+`DeltaReducePersistenceHarness.tla` calls the production PARAMETER/APPLY vote,
+send, crash, restart and journal-recovery actions. Two registered mandatory
+safety configurations explore the same eight cut selections: uninterrupted,
+after validation, after append, after durability, after commit, after exposure,
+a failed barrier and a corrupt/torn append. Unacknowledged append and failed
+barrier each branch into absent and complete surviving records; neither can
+expose a result before recovery. A surviving record reuses the original vote
+and abstract receipt sequence. Corrupt recovery stays unready. Intentional
+DONE/BLOCKED terminal stages explicitly stutter; other deadlocks fail TLC.
+
+The module adds `PersistenceRecordSound` and `PersistenceRecoverySound` to the
+existing safety invariants. Every scheduled action has mandatory positive
+coverage. Four additional production-source mutations change sequence increment
+or omit volatile restoration in `RecoverJournal`, for both arithmetic vote kinds.
+`check_persistence_counterchecks.py --output <path>` separately tests early
+exposure and corrupt READY promotion by mutating only the candidate harness.
+Those supplementary counterchecks are explicitly not production-action mutants.
+
+This is a one-validator, one-fault, one-coordinate/shard, serialized certified
+suffix. It retains all existing protocol actions and introduces only internal
+stuttering stages. Receipts are tuples, not production bytes. Concurrent current
+changes, arbitrary initial journals, physical disk outcomes, native exporter
+provenance and concrete trace refinement for these cuts remain obligations.
+No fsync, native conformance, liveness or Formal GO is established by this model.
+The four PO-AB1 statements still require substantive proofs. Lean sources are
+unchanged; the previous proof audit remains scoped evidence, not a new execution.

@@ -362,6 +362,14 @@
     {
       "id": "INV-HETEROGENEOUS-ARITHMETIC",
       "name": "HeterogeneousExpected"
+    },
+    {
+      "id": "INV-PERSISTENCE-RECORD",
+      "name": "PersistenceRecordSound"
+    },
+    {
+      "id": "INV-PERSISTENCE-RECOVERY",
+      "name": "PersistenceRecoverySound"
     }
   ],
   "temporal_properties": [
@@ -790,6 +798,14 @@
     {
       "id": "CFG-HETEROGENEOUS-CONVERSION",
       "path": "formal/tla/cfg/heterogeneous-conversion.cfg"
+    },
+    {
+      "id": "CFG-PERSISTENCE-PARAMETER",
+      "path": "formal/tla/cfg/persistence-parameter.cfg"
+    },
+    {
+      "id": "CFG-PERSISTENCE-APPLY",
+      "path": "formal/tla/cfg/persistence-apply.cfg"
     }
   ],
   "report_fields": [

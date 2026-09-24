@@ -568,3 +568,54 @@ instances. The same Cloudflare origin responds HTTP 200 with the access-code
 login page. Both demo worktrees remain clean; saved receipts/results are intact.
 This read-only health check is not a fresh authenticated UI execution or a
 qualifying Feature010 run.
+
+
+## September 24 continuation: persistence crash-cut model
+
+T015/T016/T018/T042/T050/T051/T052/T057/T058/T059/T061: the candidate now has a
+persistence suffix using production PARAMETER/APPLY vote, send, crash, restart
+and recovery actions. The two new mandatory configurations explore uninterrupted
+execution and cuts after validation, append, durability, commit and exposure,
+plus barrier failure and a corrupt/torn append. An unacknowledged append or failed
+barrier may leave either no record or the original complete record. Both branches
+remain unable to expose a result before verified recovery. Surviving votes retain
+the original receipt tuple and sequence; replay allocates no second record.
+Corrupt recovery stays unready. Only DONE/BLOCKED local terminal stages explicitly
+stutter, so an accidental dead end elsewhere fails TLC.
+
+Validation: parser, all 28 safety and 7 liveness configurations (plus the existing
+no-fairness countercheck), all 27 production mutants, 115 formal tooling tests,
+38 arithmetic/byte-oracle tests, 13 legal / 88 illegal public traces, fixture
+regeneration and targeted Ruff PASS. Both new configurations reach all 21 required
+actions: PARAMETER has 100 distinct states, APPLY 276. Four new production mutations
+change sequence increments or remove volatile restoration in RecoverJournal.
+Two separate candidate-harness counterchecks detect exposure before commit and
+corrupt recovery becoming READY; these are not production-source mutations.
+
+All 27 prior TLA/Lean inputs and the public schema remain unchanged; the new
+harness adds one semantic input. Candidate semantics is now
+`sha256:eacc55df055cf3743d58604885334f06e4bb38af6c5f389ae15a2fc5064fbc87`.
+Nine Lean source files match the previous checkpoint; no new Lean execution is
+claimed. The retained proof audit still verifies 41/45 conjuncts, with all four
+PO-AB1 targets missing. Phase zero still fails for the unfrozen amendment/version
+and invariant registry. The report remains NO_GO. Evidence and exact limitations:
+`formal/proposals/evidence/persistence-crash-cuts.json`.
+
+Scope: one validator/fault, one scalar coordinate/shard, a serialized certified
+suffix and no concurrent current changes. Receipt tuples are an abstraction, not
+production bytes. This finite model does not establish disk/fsync behavior,
+physical crash injection, arbitrary initial snapshots, native exporter provenance
+or the public/native refinement for persisted-but-unexposed operations. No new
+protocol action/outcome, native runtime implementation, arithmetic admission guard,
+benchmark qualification or GO checkpoint was introduced.
+
+Next concrete stage: extend the pinned public/native witness to represent and
+verify incomplete operations and ambiguous durability outcomes against this model,
+without equating a missing response with a missing durable vote. Bind recovery
+of the exact persisted bytes and rejection without append, then discharge the
+substantive PO-AB1 graph/conversion/Apply/recovery proofs. Contract freeze, clean
+offline reproduction and independent review remain required for Formal GO.
+
+The user no longer needs a demonstration today. Frozen Git demo refs and saved
+receipts/results remain intact; the idle presentation services were left as a
+reserve. No new demonstration, training or external qualification run is claimed.

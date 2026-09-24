@@ -476,6 +476,43 @@ MUTATIONS = (
             ),
         ),
     ),
+    *(
+        Mutation(
+            f"MUT-{kind}-PERSISTENCE-SEQUENCE",
+            "PersistenceRecordSound",
+            "INV-PERSISTENCE-RECORD",
+            "DeltaReduceQuorums.tla",
+            "PersistVoteEnvelopeChanges",
+            "DeltaReducePersistenceHarness",
+            f"persistence-{kind.lower()}.cfg",
+            (
+                Replacement(
+                    "[durableSequence EXCEPT ![vote.validator] = @ + 1]",
+                    "[durableSequence EXCEPT ![vote.validator] = @ + 2]",
+                ),
+            ),
+        )
+        for kind in ("PARAMETER", "APPLY")
+    ),
+    *(
+        Mutation(
+            f"MUT-{kind}-PERSISTENCE-RECOVERY",
+            "PersistenceRecoverySound",
+            "INV-PERSISTENCE-RECOVERY",
+            "DeltaReduceFailures.tla",
+            "RecoverJournal",
+            "DeltaReducePersistenceHarness",
+            f"persistence-{kind.lower()}.cfg",
+            (
+                Replacement(
+                    "    /\\ volatileVotes' =\n"
+                    "        volatileVotes \\cup VotesBy(validator, durableVotes)\n",
+                    "    /\\ volatileVotes' = volatileVotes\n",
+                ),
+            ),
+        )
+        for kind in ("PARAMETER", "APPLY")
+    ),
 )
 
 

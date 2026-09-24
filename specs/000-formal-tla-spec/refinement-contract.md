@@ -233,6 +233,22 @@ pending arithmetic witness or a complete concrete-state abstraction.
 
 ## 4. State abstraction
 
+The candidate `DeltaReducePersistenceHarness` decomposes one arithmetic vote into
+internal admission/append/barrier/commit/exposure stages. Admission, append and
+commit map to protocol stuttering; the complete durable record maps to the
+production PARAMETER/APPLY vote action. Exposure maps to `SendVoteEnvelope` or an
+exact already-sent replay. Crash, restart and verified recovery use the production
+failure actions. An unacknowledged complete write may therefore have a durable
+vote even though no result was returned; an absent write has none. Both must be
+distinguished during recovery. Corrupt recovery stutters without becoming READY.
+
+The harness receipt is a tuple of vote and sequence, not a byte format. It is
+bounded to one validator, one injected fault, one coordinate/shard and a serialized
+certified suffix with no concurrent current change. Deadlock checking permits
+explicit stuttering only at DONE/BLOCKED; these are local harness stages, not new
+protocol outcomes. This model does not by itself bind concrete native operations
+or extend the public diagnostic receipt checker to physical crash-cut evidence.
+
 Concrete bytes/tensors are abstracted by canonical content IDs plus exact metadata/bound predicates. Concrete network connections are abstracted to message multiset and partition/delivery actions. Concrete clocks are abstracted to logical deadline transitions. Persistent stores are abstracted to durable maps/journals and atomic visibility.
 
 The abstraction function MUST be deterministic and versioned. It may not map two protocol-distinct concrete states to one formal state when that would hide an invariant violation.

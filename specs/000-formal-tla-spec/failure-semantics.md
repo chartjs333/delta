@@ -20,6 +20,17 @@ restart/recovery does not restore that permission. Existing durable votes and
 exact retry identities remain historical records. Failure of this precondition
 has the rejection/stutter behavior above, with no new WAL sequence or outcome.
 
+The pending amendment's persistence refinement distinguishes validated, appended,
+durable, committed and exposed internal stages. An unacknowledged append or failed
+durability barrier does not imply that a complete record is absent: recovery must
+allow either an absent record or the original complete record. Neither error path
+may expose an effect before verified recovery. A surviving record retains its
+original vote and sequence; recovery and exact replay allocate no second record.
+Corrupt or ambiguous bytes keep the validator unable to vote. This is the existing
+fail-closed recovery behavior, not a new round outcome or permission to truncate
+the journal. Physical integrity checks and the concrete WAL abstraction remain
+required refinement obligations.
+
 ## 1. Outcome classes
 
 Every protocol operation resolves into one of four abstract outcomes:

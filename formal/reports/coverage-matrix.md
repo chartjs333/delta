@@ -213,3 +213,19 @@ Five production-source mutants target prefix/product/conversion checks, domain
 mixture weights and domain rounding. They must trigger the literal fixture
 invariant, with complete nonempty TLC counterexamples. This finite suffix starts
 from certified Phase 6 parents and never claims independent upstream validation.
+
+
+### Current binding and persistence suffixes (amendment 0001)
+
+| ID | Candidate check | Remaining obligation |
+| --- | --- | --- |
+| `INV-NO-STALE-ARITHMETIC-VOTES` | late first PARAMETER/APPLY votes disabled after current advance, including restart/recovery | full native/current binding and concurrent execution |
+| `CFG-CURRENT-BINDING`, `CFG-CURRENT-BINDING-RECOVERY` | serialized certified suffix and four production guard-removal counterexamples | arbitrary concurrency and byte export |
+| `INV-PERSISTENCE-RECORD` | original vote/receipt sequence, exact replay, and no send before recorded exposure | concrete WAL/receipt encoding and initial snapshot import |
+| `INV-PERSISTENCE-RECOVERY` | restored volatile vote, no effect on failed barrier, corrupt recovery remains unready | physical journal integrity and native recovery mapping |
+| `CFG-PERSISTENCE-PARAMETER`, `CFG-PERSISTENCE-APPLY` | eight cut selections, absent/surviving unacknowledged records, mandatory action coverage and terminal-only stuttering | one fault/validator, scalar shard, serialized suffix only; no unbounded safety or liveness claim |
+
+Four additional production-source mutants change sequence increment or omit
+restoration in `RecoverJournal`. Two supplementary candidate-harness mutations
+check early exposure and corrupt READY promotion; they are not counted as
+production mutants. These rows remain amendment checks, not Formal GO authority.

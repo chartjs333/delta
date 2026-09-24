@@ -682,6 +682,72 @@
         "HeteroAggregateFinalize",
         "HeteroBlockedProbe"
       ]
+    },
+    {
+      "id": "CFG-PERSISTENCE-PARAMETER",
+      "kind": "safety",
+      "module": "DeltaReducePersistenceHarness.tla",
+      "config": "cfg/persistence-parameter.cfg",
+      "workers": 1,
+      "fingerprint_index": 42,
+      "seed": 2026092410,
+      "timeout_seconds": 300,
+      "required_action_coverage": [
+        "PersistPrefix",
+        "PersistAdmit",
+        "PersistAppend",
+        "PersistBarrier",
+        "PersistCommit",
+        "PersistExpose",
+        "PersistReplay",
+        "PersistCrashBefore",
+        "PersistCrashAfterDurable",
+        "PersistCrashAfterCommit",
+        "PersistCrashAfterExpose",
+        "PersistAppendLost",
+        "PersistAppendSurvived",
+        "PersistBarrierFailedAbsent",
+        "PersistBarrierFailedPresent",
+        "PersistStopOnError",
+        "PersistTornAppend",
+        "PersistRestart",
+        "PersistRecover",
+        "PersistCorruptRecovery",
+        "PersistTerminal"
+      ]
+    },
+    {
+      "id": "CFG-PERSISTENCE-APPLY",
+      "kind": "safety",
+      "module": "DeltaReducePersistenceHarness.tla",
+      "config": "cfg/persistence-apply.cfg",
+      "workers": 1,
+      "fingerprint_index": 43,
+      "seed": 2026092411,
+      "timeout_seconds": 300,
+      "required_action_coverage": [
+        "PersistPrefix",
+        "PersistAdmit",
+        "PersistAppend",
+        "PersistBarrier",
+        "PersistCommit",
+        "PersistExpose",
+        "PersistReplay",
+        "PersistCrashBefore",
+        "PersistCrashAfterDurable",
+        "PersistCrashAfterCommit",
+        "PersistCrashAfterExpose",
+        "PersistAppendLost",
+        "PersistAppendSurvived",
+        "PersistBarrierFailedAbsent",
+        "PersistBarrierFailedPresent",
+        "PersistStopOnError",
+        "PersistTornAppend",
+        "PersistRestart",
+        "PersistRecover",
+        "PersistCorruptRecovery",
+        "PersistTerminal"
+      ]
     }
   ]
 }
