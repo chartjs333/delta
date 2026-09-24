@@ -374,6 +374,9 @@ def check_trace(path: Path, native_evidence: NativeEvidence | None = None) -> di
 
     try:
         native_votes = check_native_trace(trace, native_evidence)
+        from native_durability_witness import check_durability_trace
+
+        durability = check_durability_trace(trace, native_evidence)
     except n.BindingError as error:
         fail(str(error), trace["trace_id"])
 
@@ -383,6 +386,7 @@ def check_trace(path: Path, native_evidence: NativeEvidence | None = None) -> di
         "terminal_outcome": trace["terminal_outcome"],
         "required_parameter_key_count": len(required_parameter_contexts),
         "native_arithmetic_votes_checked": native_votes,
+        "native_durability_observations_checked": durability,
         "native_evidence_sha256": native_evidence.sha256 if native_evidence else None,
         "status": "PASS",
     }
@@ -403,8 +407,8 @@ def check_all_fixtures() -> dict[str, Any]:
         item["fixture"]: item["reason"]
         for item in load_json_strict(fixture_root / "native/negative-expectations.json")
     }
-    if len(native_negatives) < 32:
-        raise RuntimeError("all thirty-two native witness negative cases are required")
+    if len(native_negatives) < 57:
+        raise RuntimeError("all fifty-seven native witness negative cases are required")
 
     def check_fixture(path: Path) -> dict[str, Any]:
         key = path.relative_to(fixture_root).as_posix()

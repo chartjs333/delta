@@ -89,7 +89,8 @@ python formal/scripts/check-refinement.py TRACE --native-evidence SNAPSHOTS --na
 ```
 
 `HEX` must be obtained independently of the trace/command. Native evidence is
-canonical ASCII JSON with `schema_version`, `snapshots` and `artifacts`; the
+canonical ASCII JSON version `1.1.0` with `schema_version`, `snapshots`,
+`artifacts` and `operations`; the
 whole file is bounded to 4 MiB in this candidate. Each snapshot and artifact is
 resolved and rehashed. See the refinement contract for the trust premise and
 the remaining receipt/recovery/schema-projection obligations. The synthetic
@@ -101,3 +102,12 @@ this immutable contract, then compares the complete resolved native schema.
 Per-domain coverage is exact; shard IDs cannot alias different intervals across
 domains. See the candidate coordinate projection in the refinement contract for
 the bounded flattened-vector profile and the remaining proof/adapter obligations.
+
+Candidate durability observations add the required nullable `durability_witness`
+event field and thus change the semantic compatibility ID. The referenced,
+separately pinned operation records bind canonical projected receipt/effect bytes,
+ordered persist stages and reconstructed per-actor journal prefixes. Exact retry
+uses the original admitted record even after current advance/recovery; conflict
+stutters without an append or sendable effect. The draft evidence encoding is
+not a native ABI/WAL/receipt serialization or physical durability proof. See the
+refinement contract for empty-journal scope, mapping and remaining crash cuts.

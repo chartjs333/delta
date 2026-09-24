@@ -177,3 +177,20 @@ vector projection (up to the existing 4096-item witness bound), not native tenso
 adapter/frozen-base decoding or an unbounded vector proof. TLA/Lean are unchanged
 and were not rerun. Full WAL/receipt/retry refinement and all four PO-AB1 proofs
 remain open; the candidate report remains NO_GO and no runtime guard changed.
+
+### Draft durable journal/receipt projection
+
+`native_durability_witness.py` checks separately pinned operation observations
+against admitted arithmetic commands and the complete per-actor vote prefix.
+Identical retries before/after current advance and recovery return exactly the
+old diagnostic receipt/effect/sequence. Conflicting canonical requests stutter
+without a new record or effect. All accepted vote kinds allocate consecutive
+abstract sequences; a repeated envelope cannot consume another sequence.
+
+The receipt/effect ASCII schema is explicitly a draft evidence projection, not
+the production WAL or C ABI. Stages are claimed observations, whose native
+provenance/authentication must still be established. This checkpoint covers
+synthetic complete-journal traces, not torn writes, every crash cut, initial
+snapshot import or failed first admission. Public TLA/Lean sources are unchanged.
+All four PO-AB1 proofs and Formal GO remain open. Retained checks and limitations:
+`formal/proposals/evidence/durable-retry.json`.

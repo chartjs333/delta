@@ -154,6 +154,7 @@ def make_event(
         "error_code": error,
         "artifact_refs": artifacts or [],
         "arithmetic_witness": None,
+        "durability_witness": None,
     }
 
 
@@ -801,6 +802,9 @@ def main() -> int:
     from generate_coordinate_fixtures import generate as generate_coordinates
 
     generate_coordinates()
+    from generate_durability_fixtures import generate as generate_durability
+
+    generate_durability()
     manifest = {}
     for directory in (LEGAL, ILLEGAL):
         for path in sorted(directory.glob("*.json")):

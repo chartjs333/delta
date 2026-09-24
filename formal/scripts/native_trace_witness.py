@@ -43,10 +43,16 @@ class NativeEvidence:
         n.require(hashlib.sha256(data).hexdigest() == expected_sha256, "NATIVE_EVIDENCE_DIGEST")
         self.sha256 = expected_sha256
         # The evidence container uses the same strict canonical JSON profile.
-        bundle = n.shape(n.decode(data), "schema_version snapshots artifacts")
-        n.require(bundle["schema_version"] == "1.0.0", "NATIVE_EVIDENCE_VERSION")
+        bundle = n.shape(n.decode(data), "schema_version snapshots artifacts operations")
+        n.require(bundle["schema_version"] == "1.1.0", "NATIVE_EVIDENCE_VERSION")
         n.require(type(bundle["snapshots"]) is dict, "NATIVE_SNAPSHOTS")
         n.require(type(bundle["artifacts"]) is dict, "NATIVE_ARTIFACTS")
+        from native_durability_witness import observation_id
+
+        n.require(type(bundle["operations"]) is dict, "NATIVE_OPERATIONS")
+        self.operations = bundle["operations"]
+        for key, value in self.operations.items():
+            n.require(observation_id(value) == key, "NATIVE_OBSERVATION_ID")
         self.snapshots = bundle["snapshots"]
         self.store = {}
         for key, value in bundle["artifacts"].items():

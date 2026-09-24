@@ -157,6 +157,9 @@ def generate():
 
                 replace_snapshot(event, bundle, change)
                 bodies[(event["action_id"], event["vote_context_id"])] = event["body_hash"]
+        from native_durability_fixture import attach_durability
+
+        attach_durability(document, bundle)
         filename = "coordinate-" + name
         document["trace_id"] = "TRACE-ILLEGAL-" + filename.upper()
         write_canonical_json(ILLEGAL / (filename + ".json"), document)

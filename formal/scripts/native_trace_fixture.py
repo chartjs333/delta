@@ -187,8 +187,13 @@ def attach_fixture_witnesses(trace: dict) -> dict:
             event["body_hash"] = rewritten.get(
                 (action.replace("FINALIZE", "VOTE"), event["vote_context_id"]), event["body_hash"]
             )
-    return {
+    bundle = {
         "schema_version": "1.0.0",
         "snapshots": snapshots,
         "artifacts": {key: value.decode("ascii") for key, value in sorted(store.items())},
     }
+
+    from native_durability_fixture import attach_durability
+
+    attach_durability(trace, bundle)
+    return bundle

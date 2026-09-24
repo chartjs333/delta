@@ -220,6 +220,7 @@ def trace_document() -> dict[str, object]:
                 "error_code": None,
                 "artifact_refs": [],
                 "arithmetic_witness": None,
+                "durability_witness": None,
             }
         ],
     }

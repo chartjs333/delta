@@ -517,3 +517,54 @@ Presentation, baseline Controller and node-training retain the same healthy
 instances. The unchanged Cloudflare URL responds HTTP 200 with the access-code
 login page. Baseline/presentation repositories and saved receipts were untouched;
 no fresh authenticated demonstration execution is claimed for this heartbeat.
+
+## September 24 continuation: draft durable receipt and retry projection
+
+T053/T054/T055/T056/T057: pinned evidence now includes content-addressed operation
+observations. The checker reconstructs each actor's observed vote prefix from an
+empty journal, checks exact sequence increments, rejects duplicate appends and
+binds validation/append/barrier/commit/expose ordering to canonical diagnostic
+receipt/effect bytes. A retry's original receipt sequence is distinct from the
+current journal tip (positive vector: 5 versus 8).
+
+Two new legal traces exercise PARAMETER retry before current advance and both
+PARAMETER/APPLY retry after advance, crash/restart/recovery, a conflicting
+canonical command and another successful exact retry. Replays preserve original
+receipt/effect bytes and allocate no new sequence. Conflict uses existing
+REJECTED plus state/journal stutter, with no receipt, effect, result or artifact.
+Rejected recovery cannot enable replay. Successful recovery binds the same
+complete observed journal prefix.
+
+Twenty-five new negative fixtures mutate ordering, receipts/effects, canonical
+bytes, prior/next prefixes, sequence, recovery readiness, stutter and conflict
+writes. Rehashed observations fail for their intended reason. Three deliberate
+Python guard removals admit otherwise-consistent mutants; these are not new TLA
+production mutants or independent attestations.
+
+Validation: 115 formal tooling tests, 38 arithmetic/byte-oracle tests, 13 legal /
+88 illegal traces (57 native negative cases), targeted Ruff and byte-exact
+fixture regeneration PASS. All 27 TLA/Lean semantic input hashes are unchanged
+from 95941efbf2f1ba263079506423c6c62f85068bab. No new TLC/Lean execution is claimed;
+prior finite model/proof evidence retains its scope. Candidate semantics is now
+`sha256:bef672fb02621f6a498889b051998c41ab8949e14fc70ac889b378c62e3c8056`.
+Phase zero still fails for the unfrozen amendment. The source-bound formal
+report remains NO_GO. Evidence: `formal/proposals/evidence/durable-retry.json`.
+
+The receipt/effect encoding is a draft diagnostic projection, not production
+WAL/C ABI. Stage observations do not prove fsync. Native exporter/provenance,
+initial snapshots, torn writes, failed barriers, persist-without-expose cuts,
+non-conflict first-admission rejections, and four PO-AB1 proofs remain open.
+No runtime implementation, arithmetic guard, qualifying gate or GO checkpoint
+was changed. Contract freeze, clean reproduction and independent review remain
+required; a fixture count cannot substitute for these obligations.
+
+Next concrete stage: model and bind crash cuts between arithmetic admission,
+append, durability, state commit and exposure, including failed barriers and
+recovery of persisted but unexposed receipts. Then prove the actual PO-AB1
+conjuncts against the complete contract.
+
+Presentation 8870, Controller 8865 and node-training 8872 retain their healthy
+instances. The same Cloudflare origin responds HTTP 200 with the access-code
+login page. Both demo worktrees remain clean; saved receipts/results are intact.
+This read-only health check is not a fresh authenticated UI execution or a
+qualifying Feature010 run.

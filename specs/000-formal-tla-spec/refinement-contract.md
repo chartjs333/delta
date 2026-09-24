@@ -32,7 +32,7 @@ public event body hash. Other actions retain their existing projection rules.
 The checker requires a separate `--native-evidence` file and independently
 supplied `--native-evidence-sha256`. It never reads a trusted source path or hash
 from the trace, nor synthesizes a native anchor from the command. Evidence uses
-`{schema_version,snapshots,artifacts}`. Snapshot IDs hash the canonical object
+`{schema_version,snapshots,artifacts,operations}` at evidence version `1.1.0`. Snapshot IDs hash the canonical object
 under `deltareduce.native-snapshot-witness.v1` plus NUL. The public trace schema
 defines `nativeSnapshot`, `nativeAnchor` and `nativeArtifactRef`. Artifact values
 are exact canonical ASCII strings indexed by the amendment draft content ID.
@@ -54,13 +54,77 @@ checked-in `formal/fixtures/traces/native/manifest.json` is a test registry only
 by the verifier for a supplied trace. Rehashing the whole input graph still must
 not override the separate current model/optimizer value hashes.
 
-**Remaining scope:** native snapshot production/authentication, unbounded vector
-proofs and concrete tensor/adapter/frozen-base decoding, accepted
-request-to-WAL/effect/receipt identity, exact persisted retries after current
-advance, rejected-event stutter and all crash cuts remain open. `NO_OP`/replay
-is not reclassified as a fresh vote; this checkpoint does not yet validate its
-receipt bytes/sequence. Four PO-AB1 proofs remain mandatory. Synthetic fixture
-success is neither native conformance nor a qualifying Feature010 gate.
+**Remaining scope:** native snapshot/observation production and authentication,
+unbounded vector proofs, concrete tensor/adapter/frozen-base decoding, actual
+native WAL/receipt serialization, initial journal snapshots, pre-admission
+rejections and all physical crash cuts remain open. The draft journal projection
+below checks first-persist and exact retry identities without claiming native
+conformance. Four PO-AB1 proofs remain mandatory. Synthetic fixture success is
+neither a qualifying Feature010 gate nor independent attestation.
+
+### Candidate durable retry projection (T053/T054/T056)
+
+Every event also has `durability_witness`, a nullable content ID of an observation
+in the separately pinned native evidence `operations` map. An operation hashes
+canonical ASCII JSON under `deltareduce.native-durability-observation.draft1`
+plus NUL. It includes every public event field except the witness references,
+the arithmetic snapshot ID and command bytes, sequence and journal roots before
+and after, receipt/effect ASCII bytes (or explicit null), and ordered stages.
+IDs and the whole evidence digest are independently checked, including when
+an attacker recomputes all altered observation IDs.
+
+This **diagnostic encoding is not a production C ABI, WAL or receipt format**.
+Its canonical effect is `{projection_version:"draft1",vote:envelope}`. Its
+receipt contains that version, envelope, original sequence, command ID and
+effect ID, under the same canonical JSON and draft content-ID rules as the
+arithmetic oracle. The envelope binds actor/action/round/height/epoch/formal
+vote context, parent certificate hashes and body hash. Transport request IDs,
+fresh observation time and leader view do not alter an already persisted
+receipt; they remain bound in the observation. A new arithmetic vote still
+undergoes every original native admission check before persistence.
+
+The checker starts from an **empty per-actor journal**, tracks all accepted
+vote kinds and requires each first append to consume exactly the next sequence.
+Repeated envelopes cannot allocate another sequence. Ordered envelope content
+IDs form a canonical JSON list hashed under
+`deltareduce.vote-journal-projection.draft1` plus NUL. Before/after roots and
+sequences must equal these reconstructed prefixes, not caller-selected values.
+This is a projected durable-vote journal, not a claim that every physical WAL
+record is a vote or that production WAL offsets equal this abstract sequence.
+
+- First arithmetic persist requires ordered stages
+  `VALIDATED,APPENDED,DURABLE,COMMITTED,EXPOSED`, exact projected receipt/effect
+  bytes and an admitted arithmetic witness. This refines
+  `CanPersistVoteEnvelope` / `PersistVoteEnvelopeChanges` and
+  `DurableSequenceExact` under the existing persist-before-expose contract.
+- Identical canonical retry is `NO_OP`, with `LOOKUP,EXPOSED`, unchanged abstract
+  state/journal/tip, original receipt/effect bytes and original receipt sequence.
+  It resolves the prior admitted snapshot rather than re-admitting the old
+  parent against the new current pointer. Neither a fresh request ID nor a
+  changed current checkpoint permits a second append.
+- Different canonical bytes in an already persisted actor/formal-context key
+  require the existing `REJECTED` outcome, `LOOKUP,REJECTED`, unchanged state
+  and journal, and no new receipt/effect/result/artifact. No new failure code or
+  terminal is introduced. The next identical retry still resolves the old record.
+- Successful journal recovery after an arithmetic persist requires
+  `READ,VERIFIED,RECOVERED` and the unchanged complete projected prefix. Crash
+  and restart preserve that durable prefix. Both first votes and retries remain
+  disabled until successful recovery. `RecoverJournal` changes readiness; retries
+  and conflict rejections map to `StutteringProjection`, not to new quorum votes.
+
+The legal traces exercise retry before current advance and both PARAMETER/APPLY
+retry after advance, crash/restart/recovery, an intervening conflict and another
+successful identical retry. Negative traces separately mutate ordering,
+receipt/effect bytes, prior/next journal prefixes, sequence, recovery readiness,
+state stutter and canonical encoding. Three Python guard-removal counterchecks
+admit the intended otherwise-consistent mutants; these are not TLA mutants.
+
+Observation ordering is an authenticated-export **premise**, not proof of actual
+fsync completion or write durability. No native exporter is supplied here.
+Torn writes, unsuccessful barriers, persist-without-expose cuts, arbitrary
+initial recovered snapshots and non-conflict first-admission failures still
+need concrete refinement. This schema/checker checkpoint leaves TLA/Lean
+transition and proof source bytes unchanged and does not discharge PO-AB1.
 
 ### Candidate coordinate projection (T053/T054/T056)
 

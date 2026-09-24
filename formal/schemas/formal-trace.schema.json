@@ -214,10 +214,15 @@
         "outcome",
         "error_code",
         "artifact_refs",
-        "arithmetic_witness"
+        "arithmetic_witness",
+        "durability_witness"
       ],
       "properties": {
         "schema_version": {"const": "1.0.0"},
+        "durability_witness": {
+          "description": "Draft evidence projection: independently pinned observation of exact journal prefix, receipt/effect bytes and order. Not a production WAL layout or fsync attestation.",
+          "$ref": "#/$defs/nullableContentId"
+        },
         "arithmetic_witness": {
           "description": "Candidate amendment 0001. Snapshot must resolve from independently supplied digest-pinned native evidence; the command cannot establish authority. Required on accepted PARAMETER/APPLY votes.",
           "type": ["object", "null"],
