@@ -422,6 +422,14 @@ def main() -> int:
             "completeness or admission/availability refinement. Conversion success is "
             "not an extra PARAMETER admission precondition. Audited proof dependencies "
             "are limited to permitted propext, Quot.sound and Classical.choice.",
+            "The checked APPLY kernel derives the least common denominator, validates "
+            "ordered mixture product/sum prefixes, and proves optimizer operation order, "
+            "full output shape/bounds and uniqueness for mathematical inputs. Its 32 "
+            "INT64 oracle/Lean vectors include two pinned native-fixture input graphs; "
+            "fixture authentication/conversion are evaluated by the proposal oracle. "
+            "The kernel does not bind rows/current state from independent native stores, "
+            "construct canonical full APPLY bytes/hashes, or establish native execution. "
+            "nativeApplyResultUnique and nativeArithmeticRecoveryRefines remain missing.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

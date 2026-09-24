@@ -32,6 +32,13 @@ remain additional mandatory obligations. APPLY and recovery conjuncts remain OPE
 `formal/proposals/native-parameter-body-proof.md`, followed by
 `formal/proposals/native-parameter-conversion-proof.md`.
 
+`ApplyKernel.lean` proves checked LCM construction, ordered domain mixture,
+optimizer intermediate bounds, complete vector shape and mathematical output
+uniqueness from fixed input rows/model/optimizer. It does not derive those inputs
+from the native graph or bind full APPLY body bytes and next-state hashes.
+Consequently it does not discharge `nativeApplyResultUnique`; the native bridge
+and recovery conjunct remain OPEN. See `formal/proposals/apply-kernel-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

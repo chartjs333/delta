@@ -1,0 +1,3 @@
+✔ [965/967] Built DeltaReduce.ApplyKernelVectors (2.8s)
+✔ [966/967] Built DeltaReduce (5.1s)
+Build completed successfully (967 jobs).

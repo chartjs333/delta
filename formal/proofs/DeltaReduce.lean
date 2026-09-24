@@ -2,6 +2,8 @@ import DeltaReduce.Quorum
 import DeltaReduce.FixedPoint
 import DeltaReduce.ArithmeticKernel
 import DeltaReduce.ParameterKernel
+import DeltaReduce.ApplyKernel
+import DeltaReduce.ApplyKernelVectors
 import DeltaReduce.ParameterKernelVectors
 import DeltaReduce.ArithmeticBinding
 import DeltaReduce.NativeGraphVectors

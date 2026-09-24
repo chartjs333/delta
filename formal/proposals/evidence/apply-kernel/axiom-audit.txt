@@ -1,0 +1,201 @@
+'DeltaReduce.quorumIntersection' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.conflictingQCImpossible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.signedProductBound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.flatAccumulatorBound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.commonDenominatorNumeratorSafe' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.commonDenominatorDivisionDeterministic' does not depend on any axioms
+'DeltaReduce.reducedRationalDenominatorPositive' does not depend on any axioms
+'DeltaReduce.reducedRationalIsCoprime' does not depend on any axioms
+'DeltaReduce.commonDenominatorPositive' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.eachDenominatorDividesCommon' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.canonicalRoundBelowHalf' depends on axioms: [propext]
+'DeltaReduce.canonicalRoundAtOrAboveHalf' depends on axioms: [propext]
+'DeltaReduce.canonicalRoundTieTowardPositive' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.canonicalRoundDeterministic' does not depend on any axioms
+'DeltaReduce.checkedAccumulateSound' does not depend on any axioms
+'DeltaReduce.ParameterKernel.checkedCoefficientSound' depends on axioms: [propext]
+'DeltaReduce.ParameterKernel.checkedAddVectorSound' depends on axioms: [propext]
+'DeltaReduce.ParameterKernel.checkedParameterRowsSound' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ParameterKernel.checkedParameterSound' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ParameterKernel.checkedAddVectorComplete' depends on axioms: [propext]
+'DeltaReduce.ParameterKernel.checkedParameterRowsComplete' depends on axioms: [propext]
+'DeltaReduce.ParameterKernel.checkedParameterRowsRejectsExactly' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ParameterKernel.stepSafeAt' depends on axioms: [propext]
+'DeltaReduce.ParameterKernel.parameterRowsCoordinateRefines' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ParameterKernel.checkedParameterCoordinateRefines' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ParameterKernel.checkedConvertRowsSound' depends on axioms: [propext]
+'DeltaReduce.ParameterKernel.checkedDomainVectorSound' depends on axioms: [propext]
+'DeltaReduce.nativeArithmeticGraphUnique' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.resolvedBytesAndPayloadUnique' does not depend on any axioms
+'DeltaReduce.NativeBinding.walkUnique' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.walkTransport' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.resolvedAtPresentBytes' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.fixtureBindingExists' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.fixtureCollisionFree' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.NativeGraphVectors.fixturePremises' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.NativeGraphVectors.missingQRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.incompleteAuthorityRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.wrongKindRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.substitutedQRejected' does not depend on any axioms
+'DeltaReduce.checkedAccumulateComplete' depends on axioms: [propext]
+'DeltaReduce.checkedAccumulateRejectsExactly' depends on axioms: [propext]
+'DeltaReduce.roundWithoutDoubledRemainder' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.checkedConvertSound' does not depend on any axioms
+'DeltaReduce.fullSignedMinimumAccepted' does not depend on any axioms
+'DeltaReduce.conversionCancellationDoesNotPermitOverflow' does not depend on any axioms
+'DeltaReduce.conversionOutputWidthIndependent' does not depend on any axioms
+'DeltaReduce.positiveAndNegativeHalf' does not depend on any axioms
+'DeltaReduce.unsafeProductRejectedDespiteSafeSum' does not depend on any axioms
+'DeltaReduce.unsafePrefixRejectedDespiteSafeFinal' does not depend on any axioms
+'DeltaReduce.productAndAccumulatorWidthsIndependent' does not depend on any axioms
+'DeltaReduce.perDomainRoundingCannotMoveAcrossMixture' does not depend on any axioms
+'DeltaReduce.exactDomainShardPartition' does not depend on any axioms
+'DeltaReduce.hierarchicalEqualsFlat' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.canonicalRootUnique' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.applyVoteUniqueness' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.advanceCurrentAccepted' depends on axioms: [propext]
+'DeltaReduce.advanceCurrentReplayIdempotent' depends on axioms: [propext]
+'DeltaReduce.currentStateUnique' does not depend on any axioms
+'DeltaReduce.applyQCUniqueness' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.currentStateUniqueFromQCIntersection' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.domainMixturePreserved' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.abortPreservesCurrent' does not depend on any axioms
+'DeltaReduce.nonApplyActionPreservesCurrent' does not depend on any axioms
+'DeltaReduce.replayRecordIdempotent' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.recoveryRestoresDurableVoteJournal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.recoveryRestoresCertificates' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.recoveryRestoresCurrentCheckpoint' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.fullRecoveryObservationalEquivalence' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.restartRecoveryIdempotent' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.NativeBinding.loadPayload' does not depend on any axioms
+'DeltaReduce.NativeBinding.loadParameterFrame' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.loadRow' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.loadRows' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.deriveParameter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.rowsBoundLength' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.NativeBinding.rowsBoundAt' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.derivedParameterBodySound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.derivedParameterCoordinateRefines' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.frameLoaded' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.frameValidated' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.derivedParameter_0' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.derivedParameter_1' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.unplannedParameterRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.missingPayloadRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.substitutedPayloadRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.incorrectPayloadLengthRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.duplicateEligibilityRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.subsetEligibilityRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.wrongCertificateParentRejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.NativeGraphVectors.incompleteAssignmentMatrixRejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.NativeGraphVectors.invalidIdentifierRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.rowSchemaMismatchRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.rowQuantumMismatchRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.rowTicketMismatchRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.rowDomainMismatchRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.rowShardMismatchRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.rowShapeMismatchRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.rowCommitmentMissingRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.schemaGapRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.schemaOverlapRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.schemaOverrunRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.assignmentOrderRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.duplicateContextRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.parametersForSound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.deriveParametersFor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.deriveParameterCorpus' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.loadCertifiedParameters' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.convertParameterValues' does not depend on any axioms
+'DeltaReduce.NativeBinding.convertParameters' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.convertedParameterSound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.placeValuesOrigin' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.NativeBinding.uniqueCell' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.placeCoordinates' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.placedCoordinatesLength' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.placedCoordinatesAt' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.assembleDomains' depends on axioms: [propext]
+'DeltaReduce.NativeBinding.deriveNativeConversion' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.conversionCellOrigin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.nativePlacementSound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.conversionCellsWithinSchema' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeBinding.conversionSound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.nativeParameterConversionSound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.certifiedBodiesLoaded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeGraphVectors.nativeConversionMatchesOracle' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.NativeGraphVectors.certificateSubsetRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.certificateDuplicateRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.certificateReorderedRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.certificateAuthorityRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.certificateDenominatorAliasRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.certificateContextRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.certificateLeavesRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.certificateNumeratorsRejected' does not depend on any axioms
+'DeltaReduce.NativeGraphVectors.placementUsesSchemaOrder' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.missingCellRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.duplicateCellRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.wrongDomainCellRejected' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.int128ConversionOutputMustFitInt64' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.int128ConversionSignedMinimum' depends on axioms: [propext]
+'DeltaReduce.NativeGraphVectors.conversionFailureDoesNotDisableParameter' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.foldLcmSpec' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.checkedLcmSound' does not depend on any axioms
+'DeltaReduce.ApplyKernel.lcmPrefixesWeights' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.weightPlanLeast' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.checkedMixSound' does not depend on any axioms
+'DeltaReduce.ApplyKernel.checkedMixComplete' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.checkedMixRejectsExactly' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.checkedOptimizerSound' does not depend on any axioms
+'DeltaReduce.ApplyKernel.checkedOptimizerRejectsExactly' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.checkedOptimizerVectorsSound' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.optimizerTraceShape' does not depend on any axioms
+'DeltaReduce.ApplyKernel.columnTermsExact' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.columnTermsPresent' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.derivedGradientSound' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.gradientTraceExact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.optimizerTraceUnique' does not depend on any axioms
+'DeltaReduce.ApplyKernel.applyComputationUnique' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.optimizerTraceBounds' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.applyComputationShapeAndBounds' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernel.deriveWeightPlan' does not depend on any axioms
+'DeltaReduce.ApplyKernel.extractColumn' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.deriveGradient' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.deriveGradients' depends on axioms: [propext]
+'DeltaReduce.ApplyKernel.deriveApply' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.native_0' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.native_1' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.signed_rounding' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.coprime_lcm' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.zero_weight_domain' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.minimum_survives' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.maximum_survives' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.zero_learning_rate' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.nonzero_decay' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.nonunit_learning_rate' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.not_normalized' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.over_normalized' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.noncanonical_weight' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.negative_weight' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.zero_denominator' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.empty_domains' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.empty_model' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.optimizer_shape' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.domain_shape' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.zero_weight_bad_value' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.lcm_overflow_zero_output' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.first_product_overflow_safe_rational' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.second_product_overflow' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.unsafe_prefix_safe_final' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.momentum_product_overflow' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.next_momentum_overflow' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.direction_overflow' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.decay_product_overflow' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.sum_overflow_before_zero_lr' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.step_product_overflow' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.model_subtraction_underflow' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ApplyKernelVectors.invalid_momentum_fraction' depends on axioms: [propext, Quot.sound]

@@ -947,3 +947,64 @@ proposal/native operation widths and rounding sequence; do not silently widen
 outputs or reuse caller-supplied result hashes. Recovery and concrete native
 refinement, admission failures/initial snapshots/repair, contract freeze, clean
 offline reproduction and independent review still precede merged Formal GO.
+
+## September 24 continuation: checked APPLY operation kernel
+
+T044/T048/T049/T057/T060: the mandatory Lean project now contains
+`ApplyKernel.lean` and `ApplyKernelVectors.lean`. Nineteen helper theorems prove
+least-common-denominator construction, ordered mixture products/prefixes,
+optimizer operation order, full vector shape/bounds and uniqueness of checked
+mathematical derivations. This does not discharge `nativeApplyResultUnique`:
+native graph extraction and full expected body/hash binding are still required.
+Mandatory coverage remains 43/45; APPLY and recovery conjuncts remain missing.
+
+The program derives the LCM from reduced nonnegative domain weights and requires
+exact normalization. It checks both product stages before each mixture prefix,
+rounds the mixture once, then checks all twelve optimizer intermediates in the
+frozen sequence. Original inputs, products, rounded values and both output
+vectors must fit INT64 in the native profile, even when PARAMETER used INT128.
+Zero learning rate does not bypass earlier overflow. Exact coordinate traversal
+and shape proofs exclude missing domain values and list truncation. The native
+bridge must independently derive the mathematical rows and current state; they
+are not yet supplied by a proved native APPLY loader.
+
+Thirty-two oracle/Lean cases include two complete pinned fixture computations,
+the five-coordinate/three-domain graph, coprime weights, signed rounding and
+endpoints, zero weights, noncanonical/unnormalized fractions, invalid shapes,
+LCM/product/prefix overflow and optimizer overflow before division or zero step.
+All execute with kernel `decide`. Five tooling tests verify exact reproduction
+and rejection before output of substituted bytes, missing/stale optimizer and
+a rehashed but incorrect certified aggregate. Fixture authentication/conversion
+is performed by the proposal oracle, not by this Lean module or native C++.
+
+Validation: full Lean build (967 jobs), fresh kernel checks and axiom audit PASS.
+New proofs and proof-producing functions use only permitted propext/Quot.sound;
+no new assumptions are declared. 144 tooling tests, 38 oracle tests, 33 legal and
+112 illegal traces, targeted Ruff and exact regeneration of 294 JSON/three Lean
+files PASS. Full formal authority is still blocked by the two missing native
+proofs, unfrozen amendment contracts, concrete refinement/reproduction and
+independent review. Self-review is not an independent attestation.
+
+Candidate semantics:
+`sha256:e2751f9ed6ee0a6bd26f14912e1a99ab6e09bfe9dbb9494153e96a6a92be3c8e`.
+Two new Lean sources plus the project imports and axiom audit changed. All
+nineteen TLA modules, the public schema and the previous native graph/conversion
+proofs remain unchanged. No fresh TLC execution is claimed; retained 28 safety,
+7 liveness and 27 production-mutant results retain their finite scopes. The new
+source-bound FormalVerificationReport remains NO_GO. Machine evidence:
+`formal/proposals/evidence/apply-kernel.json`; detailed scope and reproduction:
+`formal/proposals/apply-kernel-proof.md`.
+
+All three idle demo services returned HTTP 200 without restart. The frozen
+presentation/controller/node-training tags still resolve to their original
+commits. No native runtime, arithmetic guard or qualifying benchmark was changed.
+
+Next concrete stage: connect `NativeConversion` to the APPLY kernel using exact
+domain names/order and weights from the anchored profile, independently bound
+current model/optimizer and fixed INT64 bounds. Construct all expected APPLY body
+fields and next-state hashes from derived outputs and prove agreement across
+independently anchored stores; do not assume row/result identity. Then discharge
+native recovery and concrete decoder/exporter/WAL refinement. Arbitrary admission
+failures, initial snapshots/repair, contract freeze, clean offline reproduction
+and independent review still precede merged Formal GO. Feature010 qualification
+remains stopped; real authorities/WAN/evaluator quorum remain BLOCKED_EXTERNAL.
