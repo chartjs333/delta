@@ -1,0 +1,23 @@
+{
+  "head": "670b58f4c400f5c8904ca40ba9cf3a2072e98d78",
+  "original_dirty_status_preserved": [
+    " M delta-worker-python/src/deltatorrent/benchmark/mnist_demo_workspace.py",
+    " M docs/mnist-demo.md",
+    "?? delta-worker-python/src/deltatorrent/benchmark/mnist_demo_i18n.py"
+  ],
+  "files": [
+    {
+      "path": "delta-worker-python/src/deltatorrent/benchmark/mnist_demo_workspace.py",
+      "sha256": "c33e502f4a6eb96386ec954e5f0c575900c82d5ce561e48cbf604c673f6c18fe"
+    },
+    {
+      "path": "delta-worker-python/src/deltatorrent/benchmark/mnist_demo_i18n.py",
+      "sha256": "6daece4b55ae7a2305ccd45b29e1fa065f245d4ded49161ffd125e4387f1f9dc"
+    },
+    {
+      "path": "docs/mnist-demo.md",
+      "sha256": "932a67aca9fdb8ecb69c7cfd09958e4b29291a01335cbe9259b83be415951da1"
+    }
+  ],
+  "source_modified_by_integration": false
+}

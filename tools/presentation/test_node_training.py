@@ -10,7 +10,8 @@ class NodeViewTests(unittest.TestCase):
         page = (
             '<html><head></head><body><script nonce="abc">'
             "const demoToken=\"bound-token\";fetch('/api/status');"
-            "fetch('/api/run', {method: \"POST\"});</script></body></html>"
+            "fetch('/api/run', {method: \"POST\", headers: { 'X-Demo-Token': demoToken },"
+            "});</script></body></html>"
         )
         for lang, title in (("en", "Node training example"), ("ru", "Обучение узлов")):
             result = adapt_page(page, lang)
@@ -19,6 +20,8 @@ class NodeViewTests(unittest.TestCase):
             self.assertIn('nonce="abc"', result)
             self.assertIn('const demoToken="bound-token"', result)
             self.assertIn("fetch('/node-training/api/run'", result)
+            self.assertIn("'Content-Type': 'application/json'", result)
+            self.assertIn("body: '{}'", result)
             self.assertNotIn("fetch('/api/", result)
             self.assertIn("LOCAL_DEMO_ONLY", result)
 

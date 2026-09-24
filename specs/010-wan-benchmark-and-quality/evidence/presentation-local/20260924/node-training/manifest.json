@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "LOCAL_DEMO_ONLY",
+  "qualifying": false,
+  "files": [
+    {
+      "path": "checks.json",
+      "sha256": "1adf51ca9dec05dde763a8bffc830108a7615d5a504bbe40fbf1bbd23d17f667"
+    },
+    {
+      "path": "demo-source.json",
+      "sha256": "c555284094da67b8a3b2350b2aaecc930c0ffe664d931ce4649a3f355bcc9263"
+    },
+    {
+      "path": "installed-admin-ui.json",
+      "sha256": "97170323c2e8fb89e886f99f215e28032faae17ea2b094a761ea75dc7dc6b262"
+    },
+    {
+      "path": "mnist-demo-report.json",
+      "sha256": "23c3bcf369a2aafd3720288f93b6a1633c9c5a2843b22fc095229b979744393f"
+    },
+    {
+      "path": "public-acceptance.json",
+      "sha256": "914e3c6343229db3b9f450012f75302df07f7fe75ca61e68b865817f24e6e3f8"
+    },
+    {
+      "path": "README.md",
+      "sha256": "2db0ffe6b34a58fc8f7bf9f9dff96800dabd007d48be1ba6022cd69bd53514e5"
+    }
+  ]
+}

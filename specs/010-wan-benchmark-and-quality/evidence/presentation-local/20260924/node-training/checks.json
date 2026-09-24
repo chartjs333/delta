@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-09-24T06:39:31.223399+00:00",
+  "scope": "LOCAL_DEMO_ONLY",
+  "qualifying": false,
+  "implementation_commit": "6c3d13069ca865e4cf174ca9b0c1a7c2b6299cbb",
+  "admin_ui_tests": 266,
+  "presentation_gateway_tests": 32,
+  "admin_build_offline_live_and_boundary_audits": "PASS",
+  "python_ruff_and_format": "PASS",
+  "powershell_parse": "PASS",
+  "local_browser": [
+    "RU Admin navigation to Node training",
+    "EN/RU language changes during the same run",
+    "Complete 100% and four distinct worker PIDs",
+    "82.05% centralized and distributed; BYTE-EXACT",
+    "Failure and recovery selector shows RECOVERED_AND_APPLIED",
+    "Presentation return and EN node-training link"
+  ],
+  "owned_backend_restart_restored_previous_result": true,
+  "pre_restart_saved_view_sha256": "564210302088600408fcb02cf3d684b6a7fa93c00d796fdd3d0c17488da4daed",
+  "controller_instance_preserved": true,
+  "native_or_protocol_edits": false,
+  "review": "SELF_REVIEW_ONLY; no independent attestation",
+  "remaining_authority": "Feature010 qualifying GO remains blocked; demo is not mandatory-gate evidence"
+}

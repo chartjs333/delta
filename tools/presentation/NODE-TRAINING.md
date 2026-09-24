@@ -39,6 +39,9 @@ MNIST cache. It never replaces an unrelated listener. The fixed loopback backend
 is 8872; its health/management paths are not published. Only the page, status,
 registry catalog and empty run command are proxied, behind authentication and
 same-origin checks. Original nonce CSP and run-token validation remain active.
+The browser sends exactly `{}` as a JSON envelope; the adapter passes an empty
+command to the original runner. This avoids Cloudflare chunking a zero-length POST
+without accepting any caller-provided runner arguments.
 
 Data is stored under `D:/delta-data/presentation-20260924/node-training/`:
 `runs/` contains original reports/artifacts, `last-view.json` retains the last result,
