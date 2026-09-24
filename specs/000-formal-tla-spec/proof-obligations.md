@@ -44,6 +44,15 @@ premises. This discharges the conditional APPLY conjunct; recovery and concrete
 native decoder/admission/WAL refinement remain OPEN. See
 `formal/proposals/apply-kernel-proof.md` and `formal/proposals/native-apply-proof.md`.
 
+`RecoveryKernel.lean` now proves checked sequential replay against an independent
+history relation, complete record/order preservation, original receipt/sequence
+lookup after current advancement, conflict and recovery-mode fencing, and explicit
+presence/absence/unresolved scan handling. Admission, receipt encoders and scan/QC
+authentication are adapter parameters. The native bridge from independently bound
+PARAMETER/APPLY inputs and public witnesses is still missing; these helpers do NOT
+discharge `nativeArithmeticRecoveryRefines`. See
+`formal/proposals/recovery-kernel-proof.md` for exact example and assumption scope.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

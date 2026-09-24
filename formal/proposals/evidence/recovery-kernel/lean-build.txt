@@ -1,0 +1,4 @@
+✔ [966/969] Built DeltaReduce.RecoveryKernel (4.1s)
+✔ [967/969] Built DeltaReduce.RecoveryKernelVectors (25s)
+✔ [968/969] Built DeltaReduce (6.7s)
+Build completed successfully (969 jobs).

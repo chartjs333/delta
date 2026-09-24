@@ -1076,3 +1076,66 @@ Then complete concrete native decoder/exporter/WAL refinement, arbitrary failure
 initial snapshots/repair, contract freeze, clean offline reproduction and
 independent review before merged Formal GO. Feature010 qualification is still
 stopped and external authorities/WAN/evaluator quorum remain BLOCKED_EXTERNAL.
+
+## 2026-09-24 — Checked recovery replay kernel (T044/T048/T049/T057/T060)
+
+Added `RecoveryKernel.lean` to the mandatory project. Twenty-six helper theorems
+prove replay soundness/completeness against an independent history relation,
+exact ordered record preservation, fresh sequence/no-duplicate checks, original
+receipt/effect/sequence lookup after any accepted suffix, retry/conflict fencing,
+and authenticated current-pointer compare-and-set/idempotent replay. This is an
+actual recursive replay program; it does not assume a recovered snapshot equals
+the old state. All three current pointers are retained by vote entries.
+
+Pre-WAL preparation and exposure are separate: failed admission cannot produce
+a pending record, and exposure needs ready mode, committed stage and the exact
+saved record. One unknown append is resolved only by an authenticated, exact
+whole-prefix presence or explicit absence claim followed by replay. An ordinary
+old-prefix scan cannot imply absence; incomplete/corrupt/ambiguous recovery keeps
+unknown sequence or stays blocked. No silent repair/truncation is introduced.
+
+The adapter still supplies semantic admission, receipt/effect encoding and
+certificate/scan authentication. These parameters have NOT yet been connected
+to the full native binding and public witness encoders. Consequently this is
+not `nativeArithmeticRecoveryRefines`: mandatory coverage remains 44/45, with
+that conjunct missing. No runtime change or Formal GO is authorized.
+
+Thirty-seven kernel-decide cases use the pinned diagnostic bytes of two PARAMETER
+records (sequences 5/6) and one APPLY record (sequence 8), including replay after
+current advancement and receipt/sequence/body mutation rejection. The five other
+vote slots have explicitly synthetic empty receipt/effect bytes; Lean admission
+uses a finite table checked by the Python oracle before generation. This is not
+production native execution or general exporter authentication. Five tooling
+tests also reject rehashed receipt/sequence corruption, absent outputs and a
+missing current optimizer before emitting any proof/evidence output.
+
+Validation: full Lean build (969 jobs), fresh recovery/vector kernel checks and
+axiom audit PASS. The new helpers/examples use only permitted propext/Quot.sound;
+six executable functions are audited too. 151 tooling tests, 38 oracle tests,
+33 legal/112 illegal traces, targeted Ruff and byte-exact regeneration of 295 JSON
+and four Lean files PASS. The Lean obligation checker still correctly fails for
+the missing recovery conjunct. GNU make remains unavailable; these scoped checks
+are not aggregate `make formal-check`. Phase0 remains failed for the unfrozen
+amendment. Nineteen TLA modules and the public schema are unchanged; no fresh TLC
+execution or new production mutant result is claimed. Retained 28 safety/
+7 liveness/27 production-mutant results retain their previous bounded scopes.
+
+Candidate semantics:
+`sha256:444ae28886b5a8a18d14b4a71041a256f9a4e904ddaaaf68b87fee16536679d0`.
+Evidence: `formal/proposals/evidence/recovery-kernel.json`; assumptions and scope:
+`formal/proposals/recovery-kernel-proof.md`. Self-review inspected missing-response
+ambiguity, exact receipt retention, old-parent retry, counterfeit scan rejection
+and the explicit adapter gap; this is not independent review. All three demos
+responded HTTP 200 without restart, and frozen tags remain unchanged.
+
+Next concrete stage: connect the checked replay kernel to native PARAMETER/APPLY
+binding in `ArithmeticBinding.lean`. Construct command/context/authority/body
+data from independently anchored graph derivation, implement and bind the exact
+public diagnostic effect/receipt encoding, and instantiate admission at the
+then-current checkpoint/model/optimizer. Establish full record provenance and
+the initial-prefix relation before using the replay lemmas. Connect authenticated
+scan claims to the pinned public witnesses, retaining unknown/blocked modes and
+all original bytes. Only then prove `nativeArithmeticRecoveryRefines`; a finite
+table adapter or assumed admission correctness is not that theorem. Concrete
+decoder/hash/exporter/WAL, arbitrary initial snapshots/failures/repair, contract
+freeze, clean reproduction and independent review remain required thereafter.

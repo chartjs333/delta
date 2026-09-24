@@ -436,6 +436,15 @@ def main() -> int:
             "tables remain finite/synthetic; general decoder completeness, native allocation "
             "limits, cryptographic implementations and native admission/WAL execution are "
             "not proved. nativeArithmeticRecoveryRefines remains missing.",
+            "The checked recovery kernel proves sequential replay/history equivalence, "
+            "exact record retention and retry/conflict behavior, with explicit scan "
+            "presence/absence/unknown handling. Native arithmetic admission, receipt "
+            "encoders and authenticated scan/QC provenance are adapter inputs, not "
+            "discharged by this sublayer. Its 37 finite Lean examples pin three "
+            "arithmetic diagnostic records; five other vote slots use synthetic empty "
+            "receipt/effect bytes. No production parser/exporter/WAL run is claimed; "
+            "the mandatory native recovery bridge, arbitrary snapshots and repair "
+            "remain open.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
