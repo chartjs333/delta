@@ -14,6 +14,7 @@ $MetadataPath = Join-Path $RemoteData 'process.json'
 $ControlPath = Join-Path $RemoteData 'control.json'
 $CodePath = Join-Path $RemoteData 'access-code.txt'
 $UrlPath = Join-Path $RemoteData 'current-url.txt'
+$ReachabilityPath = Join-Path $RemoteData 'reachability.json'
 $LocalUrl = "http://127.0.0.1:$Port"
 $Python = Join-Path $ControllerRepo '.venv/Scripts/python.exe'
 
@@ -58,6 +59,17 @@ function Show-Address($Health) {
         throw 'Tunnel is not connected yet. No old URL will be displayed.'
     }
     # Verify the public edge, not just a line in cloudflared's startup log.
+    # On a newly allocated hostname, first let public DNS see the record. An
+    # immediate system-resolver lookup can cache NXDOMAIN upstream for 30 minutes.
+    $PublicHost = ([Uri]$Health.url).DnsSafeHost
+    $PreviousUrl = if (Test-Path -LiteralPath $UrlPath) {
+        (Get-Content -LiteralPath $UrlPath -Raw).Trim()
+    } else { '' }
+    if (-not $PreviousUrl.StartsWith($Health.url + '/', [StringComparison]::Ordinal)) {
+        $Published = @(Resolve-DnsName $PublicHost -Server 1.1.1.1 -Type A -DnsOnly -QuickTimeout |
+            Where-Object { $_.Type -eq 'A' })
+        if ($Published.Count -eq 0) { throw 'Public DNS has not published the new hostname yet.' }
+    }
     $PublicDnsFallback = $false
     try {
         $Page = Invoke-WebRequest "$($Health.url)/_access/login?lang=en" -TimeoutSec 10
@@ -68,7 +80,6 @@ function Show-Address($Health) {
         # Resolve this one hostname via Cloudflare DNS and verify normal HTTPS
         # with the same hostname/SNI/certificate. Never disable TLS checks or
         # change the computer's DNS settings/hosts file.
-        $PublicHost = ([Uri]$Health.url).DnsSafeHost
         $Addresses = @(Resolve-DnsName $PublicHost -Server 1.1.1.1 -Type A -DnsOnly -QuickTimeout |
             Where-Object { $_.Type -eq 'A' } | Select-Object -ExpandProperty IPAddress)
         if ($Addresses.Count -eq 0) { throw 'The new public hostname is not resolvable yet. Run status shortly.' }
@@ -81,7 +92,26 @@ function Show-Address($Health) {
     if (-not $PageText.Contains('DeltaReduce') -or
         -not $PageText.Contains('name="code"')) { throw 'Public login page did not pass verification.' }
     [IO.File]::WriteAllText($UrlPath, "$($Health.url)/?lang=en" + [Environment]::NewLine)
+    $Reachability = @{
+        checked_at = [DateTime]::UtcNow.ToString('o')
+        instance_id = $Health.instance_id
+        public_url = $Health.url
+        status = $(if ($PublicDnsFallback) { 'DNS_PENDING' } else { 'SYSTEM_DNS_HTTPS_OK' })
+        system_dns_https = -not $PublicDnsFallback
+        public_dns_fallback_used = $PublicDnsFallback
+        tls_certificate_validation = $true
+        browser_verified = $false
+    }
+    $Reachability | ConvertTo-Json | Set-Content -LiteralPath $ReachabilityPath -Encoding utf8
     Write-Output ''
+    if ($PublicDnsFallback) {
+        Write-Output 'DNS_PENDING: this host cannot open the URL using its normal resolver.'
+        Write-Output 'DNS_PENDING: браузер на этом компьютере может не открыть ссылку. Проверка HTTPS через публичный DNS прошла, но обычный DNS сети ещё не работает.'
+        Write-Output 'Keep this tunnel running and retry status after the network DNS cache expires. Restarting creates a new hostname and can prolong the wait.'
+    } else {
+        Write-Output 'SYSTEM_DNS_HTTPS_OK: ordinary HTTPS works on this host; browser interaction is not tested by this script.'
+        Write-Output 'Обычный HTTPS работает на этом компьютере. Скрипт не проверяет вход и действия в браузере.'
+    }
     Write-Output "Presentation EN: $($Health.url)/?lang=en"
     Write-Output "Presentation RU: $($Health.url)/?lang=ru"
     Write-Output "Admin UI EN:     $($Health.url)/admin/?lang=en#/live-execution"
@@ -93,10 +123,11 @@ function Show-Address($Health) {
     Write-Output "Visual guide RU: $($Health.url)/admin/?lang=ru#/guide"
     Write-Output "Access code:     $((Get-Content -LiteralPath $CodePath -Raw).Trim())"
     Write-Output "Current URL file: $UrlPath"
+    Write-Output "Reachability:     $ReachabilityPath"
     Write-Output 'Keep this host powered on and connected. Share the URL and code only with your audience.'
     Write-Output 'After a reboot, run START-REMOTE.ps1 again to obtain the new URL.'
     if ($PublicDnsFallback) {
-        Write-Output 'DNS note: HTTPS was verified using public DNS; the host DNS could not resolve this hostname. If the browser cannot open it, retry later or use a network whose DNS resolves trycloudflare.com.'
+        Write-Output 'DNS note: no system DNS or hosts changes were made; check access from the presentation computer before the show.'
     }
 }
 function Protect-Directory {

@@ -64,6 +64,20 @@ and the hosts file are not changed. A browser on the same failing resolver may
 still be unable to open the URL. Retry later or use another network that resolves
 the hostname; this fallback is verification, not a browser DNS reconfiguration.
 
+The launcher now prints **DNS_PENDING** before the URLs when this fallback is
+needed, and writes the timestamp, tunnel identity and checks to `tunnel/reachability.json`.
+**SYSTEM_DNS_HTTPS_OK** means an ordinary HTTPS request succeeded using the host's
+normal resolver. Neither status claims that a browser login or interaction was tested;
+`browser_verified` is always false for this script. Check the actual browser separately.
+For a new tunnel it waits for a public DNS A record before asking the system resolver,
+reducing the chance of caching a premature NXDOMAIN on the network DNS server.
+
+При **DNS_PENDING** оставьте текущий туннель запущенным и повторите `status`
+после истечения отрицательного кэша DNS сети. Новый tunnel создаёт новое имя и
+может продлить ожидание. Сброс кэша Windows не очищает кэш DNS-сервера сети.
+Состояние **SYSTEM_DNS_HTTPS_OK** подтверждает обычный HTTPS на этом компьютере,
+но не заменяет проверку входа в браузере и проверку с компьютера для показа.
+
 Если DNS текущей сети не разрешает новый адрес, скрипт проверяет HTTPS по записи
 публичного DNS Cloudflare с проверкой имени и сертификата и выводит предупреждение.
 DNS Windows и hosts не меняются. Браузер с тем же неисправным DNS может не открыть
