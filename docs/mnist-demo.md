@@ -28,6 +28,13 @@ four pinned Netty jars, compiles the Java relay, and opens a page bound only to
 `127.0.0.1`. The operator then presses
 **Запустить демо**; no paths, seeds, JSON documents, or protocol knobs are exposed.
 
+For the English presentation, open the **English:** URL printed by the launcher
+(the same local address with `?lang=en`), or select **EN** in the page header.
+Select **RU** to return to Russian. Both versions share the same run: switching
+languages resumes its progress or completed results without launching it again.
+Only display text changes; saved reports, protocol identifiers and API evidence
+remain unchanged. Restart an already running server after updating these files.
+
 Prepare the native/Java toolchain and dependency cache before the presentation:
 
 ```powershell

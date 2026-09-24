@@ -15,7 +15,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, ClassVar, cast
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from deltatorrent.benchmark.mnist_delta_nodes import (
     NODE_COUNT,
@@ -30,6 +30,7 @@ from deltatorrent.benchmark.mnist_demo import (
     _model_plugin_catalog,
     run_mnist_demo,
 )
+from deltatorrent.benchmark.mnist_demo_i18n import EN_COPY, EN_STATUS
 from deltatorrent.data.base import ContractCompatibilityError
 from deltatorrent.data.registry import get_default_dataset_registry
 from deltatorrent.model_plugins.registry import get_default_registry as get_default_model_registry
@@ -40,7 +41,7 @@ from deltatorrent.model_plugins.runner import (
 )
 
 WORKSPACE_HTML = r"""<!doctype html>
-<html lang="ru">
+<html lang="__LANGUAGE__">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -65,6 +66,11 @@ WORKSPACE_HTML = r"""<!doctype html>
     main { width: min(1220px, calc(100% - 32px)); margin: auto; padding: 28px 0 70px; }
     header { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 22px; }
     .brand { font-weight: 850; letter-spacing: .02em; }
+    .header-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
+    .languages { display: flex; gap: 6px; }
+    .languages a { color: var(--muted); padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 800; }
+    .languages a[aria-current="page"] { color: var(--green); border-color: var(--green); }
+    .languages a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
     .mode { padding: 7px 11px; border: 1px solid #256f72; border-radius: 999px; color: #7ff4df; background: #0b2b31; font-size: 12px; font-weight: 800; }
     .hero { display: grid; grid-template-columns: 1.7fr .8fr; gap: 20px; padding: 30px; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(135deg, #102942, #0c1826); box-shadow: 0 24px 80px #0007; }
     h1 { margin: 8px 0 12px; font-size: clamp(34px, 5vw, 62px); line-height: .98; letter-spacing: -.04em; }
@@ -171,7 +177,13 @@ WORKSPACE_HTML = r"""<!doctype html>
 <main>
   <header>
     <div class="brand">Δ DeltaReduce</div>
-    <div class="mode">LOCAL DEMO ONLY · НЕ GOVERNANCE</div>
+    <div class="header-actions">
+      <nav class="languages" aria-label="Language">
+        <a href="?lang=en" lang="en" aria-current="__EN_CURRENT__">EN</a>
+        <a href="?lang=ru" lang="ru" aria-current="__RU_CURRENT__">RU</a>
+      </nav>
+      <div class="mode">LOCAL DEMO ONLY · НЕ GOVERNANCE</div>
+    </div>
   </header>
   <section class="hero">
     <div>
@@ -377,6 +389,8 @@ WORKSPACE_HTML = r"""<!doctype html>
 </main>
 <script nonce="__CSP_NONCE__">
   const demoToken = __DEMO_TOKEN__;
+  const statusTranslations = __STATUS_TRANSLATIONS__;
+  const translateStatus = text => Object.hasOwn(statusTranslations, text) ? statusTranslations[text] : text;
   const runButton = document.getElementById('run');
   const statusPanel = document.getElementById('status-panel');
   const results = document.getElementById('results');
@@ -689,15 +703,15 @@ WORKSPACE_HTML = r"""<!doctype html>
 
   function updateStatus(snapshot) {
     statusPanel.hidden = false;
-    stage.textContent = snapshot.stage;
+    stage.textContent = translateStatus(snapshot.stage);
     percent.textContent = `${snapshot.percent}%`;
     progressBar.style.width = `${snapshot.percent}%`;
-    message.textContent = snapshot.message;
+    message.textContent = translateStatus(snapshot.message);
     events.replaceChildren();
     snapshot.events.slice(-5).forEach(text => {
       const item = document.createElement('div');
       item.className = 'event';
-      item.textContent = text;
+      item.textContent = translateStatus(text);
       events.appendChild(item);
     });
   }
@@ -705,7 +719,7 @@ WORKSPACE_HTML = r"""<!doctype html>
   async function poll() {
     const response = await fetch('/api/status', { cache: 'no-store' });
     const snapshot = await response.json();
-    updateStatus(snapshot);
+    if (snapshot.running || snapshot.result || snapshot.error) updateStatus(snapshot);
     if (snapshot.error) {
       statusPanel.classList.add('error');
       runButton.disabled = false;
@@ -713,11 +727,13 @@ WORKSPACE_HTML = r"""<!doctype html>
       return;
     }
     if (snapshot.running) {
+      runButton.disabled = true;
+      runButton.textContent = 'Демо выполняется…';
       setTimeout(poll, 450);
       return;
     }
     runButton.disabled = false;
-    runButton.textContent = 'Запустить ещё раз';
+    runButton.textContent = snapshot.result ? 'Запустить ещё раз' : 'Запустить демо';
     if (snapshot.result) renderResult(snapshot.result);
   }
 
@@ -752,10 +768,36 @@ WORKSPACE_HTML = r"""<!doctype html>
     renderChart(currentReport, true);
     renderGallery(currentReport, true);
   });
+  // A language switch reloads only the view and resumes the existing run/result.
+  // Never POST a new run merely because a page was opened or its language changed.
+  poll().catch(() => {
+    statusPanel.hidden = false;
+    statusPanel.classList.add('error');
+    message.textContent = 'Не удалось подключиться к локальному demo runner.';
+    runButton.disabled = false;
+  });
 </script>
 </body>
 </html>
 """
+
+
+def _localized_workspace_html(language: str) -> str:
+    """Select display copy only, leaving commands and run evidence language-neutral."""
+    language = "en" if language == "en" else "ru"
+    page = WORKSPACE_HTML
+    if language == "en":
+        for source in sorted(EN_COPY, key=len, reverse=True):
+            page = page.replace(source, EN_COPY[source])
+    return (
+        page.replace("__LANGUAGE__", language)
+        .replace("__EN_CURRENT__", "page" if language == "en" else "false")
+        .replace("__RU_CURRENT__", "page" if language == "ru" else "false")
+        .replace(
+            "__STATUS_TRANSLATIONS__",
+            json.dumps(EN_STATUS if language == "en" else {}, ensure_ascii=True),
+        )
+    )
 
 
 def _workspace_catalog() -> dict[str, object]:
@@ -1485,10 +1527,15 @@ class WorkspaceRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         path = urlsplit(self.path).path
         if path == "/":
-            page = WORKSPACE_HTML.replace(
-                "__DEMO_TOKEN__",
-                json.dumps(self.demo_token),
-            ).replace("__CSP_NONCE__", self.csp_nonce)
+            language = parse_qs(urlsplit(self.path).query).get("lang", ["ru"])[0]
+            page = (
+                _localized_workspace_html(language)
+                .replace(
+                    "__DEMO_TOKEN__",
+                    json.dumps(self.demo_token),
+                )
+                .replace("__CSP_NONCE__", self.csp_nonce)
+            )
             self._write(HTTPStatus.OK, page.encode("utf-8"), "text/html; charset=utf-8")
             return
         if path == "/api/status":
@@ -1567,6 +1614,7 @@ def serve_workspace(
     url = f"http://{host}:{actual_port}/"
     print("DeltaReduce MNIST workspace: LOCAL_DEMO_ONLY")
     print(f"Open: {url}")
+    print(f"English: {url}?lang=en")
     print("Stop: Ctrl+C")
     if open_browser:
         webbrowser.open(url)
