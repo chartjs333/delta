@@ -37,3 +37,5 @@ All metrics below come from the checked-in deterministic config manifest and a v
 | CFG-HETEROGENEOUS-PREFIX | safety | 2 | 2 | 2 | none | 1 |
 | CFG-HETEROGENEOUS-PRODUCT | safety | 2 | 2 | 2 | none | 1 |
 | CFG-HETEROGENEOUS-CONVERSION | safety | 57 | 57 | 57 | none | 5 |
+| CFG-PERSISTENCE-PARAMETER | safety | 142 | 100 | 14 | none | 21 |
+| CFG-PERSISTENCE-APPLY | safety | 318 | 276 | 36 | none | 21 |
