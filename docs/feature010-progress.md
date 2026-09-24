@@ -619,3 +619,54 @@ offline reproduction and independent review remain required for Formal GO.
 The user no longer needs a demonstration today. Frozen Git demo refs and saved
 receipts/results remain intact; the idle presentation services were left as a
 reserve. No new demonstration, training or external qualification run is claimed.
+
+## September 24 continuation: persisted-but-unexposed public witnesses
+
+T053/T054/T055/T056/T057: evidence container 1.2.0 now binds complete persisted
+arithmetic records whose receipt/effect has not yet been returned. PARAMETER and
+APPLY each have four synthetic legal cuts: DURABLE, COMMITTED, complete append
+without acknowledgement, and complete append surviving a failed barrier. The
+first accepted event represents the internal durable vote, not an API response.
+Its output is null. Crash/restart/verified recovery retains the original command,
+receipt/effect bytes and sequence; exact retry exposes them without another append.
+Unacknowledged presence requires subsequent verified recovery and is never
+inferred from a missing response alone. An acknowledged durable prefix may remain
+incomplete without being mistaken for an absent record.
+
+The public checker excludes unexposed votes from quorum counts. Validated exact
+replay can expose the old vote once; duplicate replays cannot add signer power.
+Nine additional negative traces check early output, invalid stages, premature
+quorum use, retry before crash, unverified surviving records, recovery truncation
+and modified replay bytes. Three deliberate Python guard removals admit otherwise
+consistent invalid traces. They are separately scoped checker counterchecks,
+not TLA production mutations or independent attestations.
+
+Validation: 121 formal tooling tests, 38 arithmetic/byte-oracle tests, 21 legal /
+97 illegal traces (66 native negative cases), targeted Ruff and byte-exact
+regeneration of 238 fixture files PASS. All 28 TLA/Lean semantic inputs match
+631d95ca8592f1a035042ec936b61878d2b52278. No new TLC/Lean execution is claimed;
+the retained 28 safety/7 liveness/27 production-mutant results keep their original
+finite scope. The retained Lean audit remains 41/45 with four PO-AB1 targets
+missing. The public schema changes the candidate semantics ID to
+`sha256:3b43d64af4833f7b315211f6bce4e16d4734e844948280e8f1411fd86006437b`.
+Phase zero still fails for the unfrozen amendment. The formal report remains
+NO_GO. Evidence: `formal/proposals/evidence/persisted-unexposed.json`.
+
+Self-review checked that observation identity alone supplies no authenticity,
+that only a fully checked replay can contribute signer power, and that an
+unacknowledged write cannot pass without recovery of the exact prefix. The
+diagnostic byte layout remains separate from production WAL/C ABI. This stage
+does not implement native recovery or prove physical fsync, and does not close
+the complete crash-cut refinement obligation or any PO-AB1 proof.
+
+Next concrete stage: bind absent/torn/unknown durability outcomes and rejected
+first admission to the public/native witness without inventing durable presence,
+absence or append. Preserve fail-closed recovery, then discharge the substantive
+PO-AB1 graph/conversion/Apply/recovery proofs. Native exporter provenance,
+production WAL bytes, initial snapshots, contract freeze, clean reproduction
+and independent review remain required before Formal GO. Runtime arithmetic
+guards and Feature010 qualification remain unchanged.
+
+Presentation 8870, Controller 8865 and node-training 8872/node-training/ answered
+HTTP 200. Their idle instances and frozen Git snapshots were preserved. This was
+a read-only health check, not a fresh demo, GPU run or authenticated tunnel test.

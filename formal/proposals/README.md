@@ -224,3 +224,28 @@ provenance and concrete trace refinement for these cuts remain obligations.
 No fsync, native conformance, liveness or Formal GO is established by this model.
 The four PO-AB1 statements still require substantive proofs. Lean sources are
 unchanged; the previous proof audit remains scoped evidence, not a new execution.
+
+### Persisted-but-unexposed public witnesses (T053-T057)
+
+Native evidence container 1.2.0 distinguishes an internal durable vote from
+exposure of its diagnostic receipt/effect. Eight synthetic legal traces cover
+PARAMETER and APPLY cuts at durability, commit, a complete unacknowledged append
+and a complete append surviving a failed barrier. All recover the original
+journal and replay the original canonical bytes/sequence without another append.
+Unacknowledged presence is retrospective: the trace must contain a later verified
+recovery. A missing response alone cannot establish presence or absence.
+
+An unexposed record has no signer power in the public quorum projection. Only
+validated exact replay can expose the old vote. Nine negative fixtures reject
+early output, invalid stage ordering, premature quorum use, replay before crash,
+unverified presence, recovery truncation and rewritten replay receipts. Three
+Python guard-removal counterchecks demonstrate their respective boundary checks;
+they are not additional TLA production mutants or independent reviews.
+
+Evidence: `formal/proposals/evidence/persisted-unexposed.json`. All 28 TLA/Lean
+inputs match the prior checkpoint; no new TLC/Lean execution is claimed. The
+public-schema semantics ID changes, and the new source-bound report remains
+NO_GO. This is a bounded synthetic complete-record projection. Public binding
+for absent/torn/unknown outcomes, first-admission rejection without append,
+initial snapshots, native exporter provenance, physical WAL/fault execution and
+the four PO-AB1 proofs remain open.

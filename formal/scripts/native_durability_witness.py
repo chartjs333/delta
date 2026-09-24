@@ -2,7 +2,7 @@
 
 The receipt/effect encoding here is a versioned evidence projection, NOT the C
 ABI or production WAL format. Whole-prefix observations require a trace starting
-with an empty journal. Recovery authentication and physical crash cuts are open.
+with an empty journal. Recovery authentication and physical crash execution are open.
 """
 
 from __future__ import annotations
@@ -20,6 +20,24 @@ ENVELOPE_FIELDS = (
     "actor_id action_id round_id height validator_epoch vote_context_id parent_hashes body_hash"
 ).split()
 PERSIST_STAGES = ["VALIDATED", "APPENDED", "DURABLE", "COMMITTED", "EXPOSED"]
+UNACKNOWLEDGED_STAGES = [
+    ["VALIDATED", "APPENDED", "SURVIVED_UNACKNOWLEDGED"],
+    ["VALIDATED", "APPENDED", "BARRIER_FAILED", "SURVIVED_UNACKNOWLEDGED"],
+]
+UNEXPOSED_STAGES = [PERSIST_STAGES[:3], PERSIST_STAGES[:4], *UNACKNOWLEDGED_STAGES]
+
+
+def vote_exposed(event: dict, evidence) -> bool:
+    """Quorum projection only; the complete observation is checked separately.
+
+    Malformed/missing observations retain the legacy projection so their precise
+    native validation error is not masked by a subsequent missing-quorum error.
+    No trace can pass without that independent full validation.
+    """
+    if event["action_id"] not in ACTIONS or evidence is None:
+        return True
+    observation = evidence.operations.get(event.get("durability_witness"))
+    return not isinstance(observation, dict) or observation.get("stages") not in UNEXPOSED_STAGES
 
 
 def observation_id(value: dict) -> str:
@@ -63,10 +81,25 @@ def check_durability_trace(trace: dict, evidence) -> dict:
     journals: dict[str, list[str]] = {}
     saved: dict[tuple[str, str], dict] = {}
     recovery: dict[str, str] = {}
-    counts = {"persisted": 0, "retried": 0, "conflicts": 0, "recovered": 0}
+    must_crash: set[str] = set()
+    unacknowledged: set[str] = set()
+    counts = {
+        "persisted": 0,
+        "retried": 0,
+        "conflicts": 0,
+        "recovered": 0,
+        "persisted_unexposed": 0,
+        "unacknowledged": 0,
+    }
     for event in trace["events"]:
         action, actor, outcome = event["action_id"], event["actor_id"], event["outcome"]
         accepted = outcome in {"ACCEPTED", "FINALIZED"}
+        if actor in must_crash:
+            n.require(
+                action == "ACT-CRASH" and (accepted or outcome == "FAULT"),
+                "DURABILITY_CRASH_REQUIRED",
+            )
+            must_crash.remove(actor)
         journal = journals.setdefault(actor, [])
         before = list(journal)
         key = (actor, event["vote_context_id"])
@@ -120,13 +153,21 @@ def check_durability_trace(trace: dict, evidence) -> dict:
                 n.require(recovery.get(actor, "READY") == "READY", "DURABILITY_NOT_RECOVERED")
                 if accepted:
                     n.require(first is None, "DURABILITY_DUPLICATE_APPEND")
-                    n.require(observation["stages"] == PERSIST_STAGES, "DURABILITY_EXPOSE_ORDER")
+                    stages = observation["stages"]
+                    unexposed = stages in UNEXPOSED_STAGES
+                    n.require(stages == PERSIST_STAGES or unexposed, "DURABILITY_EXPOSE_ORDER")
                     receipt, effect = persisted_bytes(event)
                     n.require(
                         (observation["receipt_ascii"], observation["effect_ascii"])
-                        == (receipt, effect),
+                        == ((None, None) if unexposed else (receipt, effect)),
                         "DURABILITY_PERSISTED_BYTES",
                     )
+                    if unexposed:
+                        must_crash.add(actor)
+                        counts["persisted_unexposed"] += 1
+                    if stages in UNACKNOWLEDGED_STAGES:
+                        unacknowledged.add(actor)
+                        counts["unacknowledged"] += 1
                     saved[key] = {
                         "command": raw,
                         "snapshot": proof["snapshot_id"],
@@ -188,6 +229,7 @@ def check_durability_trace(trace: dict, evidence) -> dict:
                     "DURABILITY_RECOVERY_BINDING",
                 )
                 counts["recovered"] += 1
+                unacknowledged.discard(actor)
         if accepted and action.endswith("-VOTE"):
             n.require(event["durable_sequence"] == len(journal) + 1, "DURABILITY_SEQUENCE_EXACT")
             record_id = n.digest(n.canonical(envelope(event)))
@@ -205,4 +247,7 @@ def check_durability_trace(trace: dict, evidence) -> dict:
             recovery[actor] = "RECOVERING"
         elif action == "ACT-JOURNAL-RECOVER" and accepted:
             recovery[actor] = "READY"
+    # An unacknowledged write cannot establish record presence on its own. The
+    # retrospective projection needs the subsequent verified complete prefix.
+    n.require(not unacknowledged, "DURABILITY_UNACKNOWLEDGED_UNVERIFIED")
     return counts

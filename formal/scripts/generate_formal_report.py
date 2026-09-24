@@ -416,6 +416,9 @@ def main() -> int:
             "crash-cut refinement remain open. The candidate persistence harness explores "
             "one validator/fault with no concurrent current change, abstract receipt tuples "
             "and fail-closed corrupt recovery; it does not establish physical WAL behavior. "
+            "The public witness now binds persisted-but-unexposed complete records and "
+            "requires verified recovery for surviving unacknowledged writes. Absent/torn/"
+            "unknown outcomes and first-admission rejection binding remain open. "
             "Draft complete-journal receipt/retry projections "
             "are synthetic evidence, not physical durability or native conformance, "
             "under PO-AB1.",

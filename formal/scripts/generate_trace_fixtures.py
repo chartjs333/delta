@@ -805,6 +805,9 @@ def main() -> int:
     from generate_durability_fixtures import generate as generate_durability
 
     generate_durability()
+    from generate_persistence_fixtures import generate as generate_persistence
+
+    generate_persistence()
     manifest = {}
     for directory in (LEGAL, ILLEGAL):
         for path in sorted(directory.glob("*.json")):

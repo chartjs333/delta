@@ -40,6 +40,8 @@ class NativeDurabilityTests(unittest.TestCase):
                 "retried": 5,
                 "conflicts": 1,
                 "recovered": 1,
+                "persisted_unexposed": 0,
+                "unacknowledged": 0,
             },
         )
         first = next(e for e in trace["events"] if e["action_id"] == "ACT-PARAM-VOTE")
@@ -69,6 +71,8 @@ class NativeDurabilityTests(unittest.TestCase):
                 "retried": 3,
                 "conflicts": 1,
                 "recovered": 1,
+                "persisted_unexposed": 0,
+                "unacknowledged": 0,
             },
         )
 

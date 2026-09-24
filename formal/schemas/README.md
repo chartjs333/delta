@@ -89,7 +89,7 @@ python formal/scripts/check-refinement.py TRACE --native-evidence SNAPSHOTS --na
 ```
 
 `HEX` must be obtained independently of the trace/command. Native evidence is
-canonical ASCII JSON version `1.1.0` with `schema_version`, `snapshots`,
+canonical ASCII JSON version `1.2.0` with `schema_version`, `snapshots`,
 `artifacts` and `operations`; the
 whole file is bounded to 4 MiB in this candidate. Each snapshot and artifact is
 resolved and rehashed. See the refinement contract for the trust premise and
@@ -111,3 +111,13 @@ uses the original admitted record even after current advance/recovery; conflict
 stutters without an append or sendable effect. The draft evidence encoding is
 not a native ABI/WAL/receipt serialization or physical durability proof. See the
 refinement contract for empty-journal scope, mapping and remaining crash cuts.
+
+Evidence v1.2 adds persisted-but-unexposed prefixes, including complete records
+surviving unacknowledged append or barrier failure. The public accepted vote
+projects a durable internal action; null receipt/effect fields mean no output
+was exposed. Exact replay after verified recovery exposes the original bytes
+without another append. Unexposed votes cannot supply QC signer power. Complete
+unacknowledged records require later verified recovery; absent/torn/unknown
+write outcomes and rejected first admission are still unsupported by this
+public witness extension. Native WAL decoding, fsync and provenance are not
+established by these synthetic, separately pinned projections.

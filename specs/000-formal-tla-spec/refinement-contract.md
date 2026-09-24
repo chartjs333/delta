@@ -32,7 +32,7 @@ public event body hash. Other actions retain their existing projection rules.
 The checker requires a separate `--native-evidence` file and independently
 supplied `--native-evidence-sha256`. It never reads a trusted source path or hash
 from the trace, nor synthesizes a native anchor from the command. Evidence uses
-`{schema_version,snapshots,artifacts,operations}` at evidence version `1.1.0`. Snapshot IDs hash the canonical object
+`{schema_version,snapshots,artifacts,operations}` at evidence version `1.2.0`. Snapshot IDs hash the canonical object
 under `deltareduce.native-snapshot-witness.v1` plus NUL. The public trace schema
 defines `nativeSnapshot`, `nativeAnchor` and `nativeArtifactRef`. Artifact values
 are exact canonical ASCII strings indexed by the amendment draft content ID.
@@ -92,11 +92,28 @@ sequences must equal these reconstructed prefixes, not caller-selected values.
 This is a projected durable-vote journal, not a claim that every physical WAL
 record is a vote or that production WAL offsets equal this abstract sequence.
 
-- First arithmetic persist requires ordered stages
+- First arithmetic persist with immediate output requires ordered stages
   `VALIDATED,APPENDED,DURABLE,COMMITTED,EXPOSED`, exact projected receipt/effect
   bytes and an admitted arithmetic witness. This refines
   `CanPersistVoteEnvelope` / `PersistVoteEnvelopeChanges` and
   `DurableSequenceExact` under the existing persist-before-expose contract.
+- A persisted but unexposed first vote may instead stop at `DURABLE` or
+  `COMMITTED`. Receipt/effect observations are null; the accepted event projects
+  the internal durable action, not a returned command response. The original
+  admitted command still determines the saved diagnostic receipt and sequence.
+  The next observed action of that validator must be a successful crash; after
+  restart and verified full-prefix recovery, only exact replay can expose it.
+- For an unacknowledged complete append, stages may be
+  `VALIDATED,APPENDED,SURVIVED_UNACKNOWLEDGED` or
+  `VALIDATED,APPENDED,BARRIER_FAILED,SURVIVED_UNACKNOWLEDGED`. These are retrospective
+  projections: a later verified recovery of that full prefix is mandatory before
+  the trace can pass. The missing response or failed barrier alone establishes
+  neither presence nor absence. No new protocol action, error or round outcome
+  is introduced by these internal observation markers.
+- Unexposed PARAMETER/APPLY votes provide no quorum power in the public checker.
+  A validated exact `NO_OP` replay with `LOOKUP,EXPOSED` makes the original vote
+  available for its matching QC once; repeated replays do not add signer power.
+  Delivery and certificate authentication remain explicit abstraction premises.
 - Identical canonical retry is `NO_OP`, with `LOOKUP,EXPOSED`, unchanged abstract
   state/journal/tip, original receipt/effect bytes and original receipt sequence.
   It resolves the prior admitted snapshot rather than re-admitting the old
@@ -109,8 +126,11 @@ record is a vote or that production WAL offsets equal this abstract sequence.
 - Successful journal recovery after an arithmetic persist requires
   `READ,VERIFIED,RECOVERED` and the unchanged complete projected prefix. Crash
   and restart preserve that durable prefix. Both first votes and retries remain
-  disabled until successful recovery. `RecoverJournal` changes readiness; retries
-  and conflict rejections map to `StutteringProjection`, not to new quorum votes.
+  disabled until successful recovery. `RecoverJournal` changes readiness. Conflict
+  rejections stutter. A replay creates no new durable vote; the first exposure of
+  an unsent recovered vote maps to `SendVoteEnvelope`. Subsequent identical output
+  uses the existing replay/stuttering relation. The public state root covers
+  replicated state, while the observation separately binds transport exposure.
 
 The legal traces exercise retry before current advance and both PARAMETER/APPLY
 retry after advance, crash/restart/recovery, an intervening conflict and another

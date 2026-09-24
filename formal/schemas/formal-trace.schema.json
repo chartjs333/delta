@@ -220,7 +220,7 @@
       "properties": {
         "schema_version": {"const": "1.0.0"},
         "durability_witness": {
-          "description": "Draft evidence projection: independently pinned observation of exact journal prefix, receipt/effect bytes and order. Not a production WAL layout or fsync attestation.",
+          "description": "Draft evidence projection v1.2: pinned journal/receipt/effect observations may record persisted but unexposed votes at durability or commit cuts. Complete unacknowledged writes require subsequent verified recovery. Such votes provide no quorum power until exact replay exposes them. Not a native WAL layout, fsync or provenance attestation.",
           "$ref": "#/$defs/nullableContentId"
         },
         "arithmetic_witness": {

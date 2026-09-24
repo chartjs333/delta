@@ -44,7 +44,7 @@ class NativeEvidence:
         self.sha256 = expected_sha256
         # The evidence container uses the same strict canonical JSON profile.
         bundle = n.shape(n.decode(data), "schema_version snapshots artifacts operations")
-        n.require(bundle["schema_version"] == "1.1.0", "NATIVE_EVIDENCE_VERSION")
+        n.require(bundle["schema_version"] == "1.2.0", "NATIVE_EVIDENCE_VERSION")
         n.require(type(bundle["snapshots"]) is dict, "NATIVE_SNAPSHOTS")
         n.require(type(bundle["artifacts"]) is dict, "NATIVE_ARTIFACTS")
         from native_durability_witness import observation_id

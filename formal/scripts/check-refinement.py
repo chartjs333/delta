@@ -23,6 +23,7 @@ from formal_artifacts import (  # noqa: E402
     validate_trace_document,
     write_canonical_json,
 )
+from native_durability_witness import ACTIONS, vote_exposed  # noqa: E402
 from native_trace_witness import NativeEvidence, check_native_trace, n  # noqa: E402
 
 QUORUM = 3
@@ -252,6 +253,12 @@ def check_trace(path: Path, native_evidence: NativeEvidence | None = None) -> di
             if prior_body is not None and prior_body != body:
                 fail("CONFLICTING_DURABLE_VOTE", f"{actor}:{context}")
             durable_votes[durable_key] = body
+            if vote_exposed(event, native_evidence):
+                votes[quorum_key(event, action)].add(actor)
+
+        # Exact replay can expose a previously persisted, unsent vote. Full
+        # native replay/receipt validation below prevents fabricated NO_OP power.
+        if action in ACTIONS and outcome == "NO_OP" and vote_exposed(event, native_evidence):
             votes[quorum_key(event, action)].add(actor)
 
         if action in FINALIZE_TO_VOTE and accepted:
