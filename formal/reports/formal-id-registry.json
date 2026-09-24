@@ -358,6 +358,10 @@
     {
       "id": "INV-NO-STALE-ARITHMETIC-VOTES",
       "name": "NoStaleArithmeticVotes"
+    },
+    {
+      "id": "INV-HETEROGENEOUS-ARITHMETIC",
+      "name": "HeterogeneousExpected"
     }
   ],
   "temporal_properties": [
@@ -770,6 +774,22 @@
     {
       "id": "CFG-CURRENT-BINDING-RECOVERY",
       "path": "formal/tla/cfg/current-binding-recovery.cfg"
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-POSITIVE",
+      "path": "formal/tla/cfg/heterogeneous-positive.cfg"
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-PREFIX",
+      "path": "formal/tla/cfg/heterogeneous-prefix.cfg"
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-PRODUCT",
+      "path": "formal/tla/cfg/heterogeneous-product.cfg"
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-CONVERSION",
+      "path": "formal/tla/cfg/heterogeneous-conversion.cfg"
     }
   ],
   "report_fields": [

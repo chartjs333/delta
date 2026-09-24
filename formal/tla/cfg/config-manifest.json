@@ -615,6 +615,73 @@
         "BindingRestart",
         "BindingRecover"
       ]
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-POSITIVE",
+      "kind": "safety",
+      "module": "DeltaReduceHeterogeneousHarness.tla",
+      "config": "cfg/heterogeneous-positive.cfg",
+      "workers": 1,
+      "fingerprint_index": 36,
+      "seed": 2026092401,
+      "timeout_seconds": 300,
+      "required_action_coverage": [
+        "HeteroParameters",
+        "HeteroAssemble",
+        "HeteroAggregateQuorum",
+        "HeteroAggregateFinalize",
+        "HeteroCompute",
+        "HeteroApplyQuorum",
+        "HeteroApplyFinalize",
+        "HeteroAdvance",
+        "HeteroCrash",
+        "HeteroRestart",
+        "HeteroRecover",
+        "HeteroReplay"
+      ]
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-PREFIX",
+      "kind": "safety",
+      "module": "DeltaReduceHeterogeneousHarness.tla",
+      "config": "cfg/heterogeneous-prefix.cfg",
+      "workers": 1,
+      "fingerprint_index": 37,
+      "seed": 2026092402,
+      "timeout_seconds": 300,
+      "required_action_coverage": [
+        "HeteroBlockedProbe"
+      ]
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-PRODUCT",
+      "kind": "safety",
+      "module": "DeltaReduceHeterogeneousHarness.tla",
+      "config": "cfg/heterogeneous-product.cfg",
+      "workers": 1,
+      "fingerprint_index": 38,
+      "seed": 2026092403,
+      "timeout_seconds": 300,
+      "required_action_coverage": [
+        "HeteroBlockedProbe"
+      ]
+    },
+    {
+      "id": "CFG-HETEROGENEOUS-CONVERSION",
+      "kind": "safety",
+      "module": "DeltaReduceHeterogeneousHarness.tla",
+      "config": "cfg/heterogeneous-conversion.cfg",
+      "workers": 1,
+      "fingerprint_index": 39,
+      "seed": 2026092404,
+      "timeout_seconds": 300,
+      "required_action_coverage": [
+        "HeteroParameters",
+        "HeteroAssemble",
+        "HeteroAggregateQuorum",
+        "HeteroAggregateFinalize",
+        "HeteroBlockedProbe"
+      ]
     }
   ]
 }

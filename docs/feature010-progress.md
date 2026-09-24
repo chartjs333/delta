@@ -280,3 +280,74 @@ No native guard, application service or tunnel was changed. Next implement the
 production byte/witness contracts and the four missing PO-AB1 conjuncts, extend
 heterogeneous TLA arithmetic, and refreeze only the complete reviewed contracts.
 The missing local mathlib environment is no longer the reason for the proof STOP.
+
+
+## September 24, 09:06 UTC continuation: heterogeneous arithmetic and liveness STOP
+
+T029/T031/T050/T057: generalized the production arithmetic abstraction from
+uniform scalar inputs to explicit ordered ticket/domain maps, rational weights,
+per-domain/per-shard quantum, unequal domain mixture weights and separate parent
+model/optimizer coordinates. Four new finite configurations use four validators,
+f=1, four tickets, two domains and two one-coordinate shards. The positive
+serialized Phase6 suffix persists/transports/finalizes four PARAMETER QCs plus
+root/APPLY QCs, advances current and executes crash/restart/recovery/replay.
+Independent expected literals are N=(3,16,-1,-3), model=(19,-22), optimizer=(2,1).
+Negative configurations reject product overflow, intermediate prefix overflow
+hidden by cancellation and conversion overflow before the forbidden state/vote.
+
+Pinned SANY parsing, all 26 safety configurations, 23 production-source mutants,
+91 tooling tests, 9 legal / 31 illegal public trace fixtures and the independent
+Python mathematical oracle pass. The five new production mutations remove the
+product/prefix/conversion checks, replace unequal mixture weights or change
+rounding order. A first fixture did not distinguish equal and unequal weights;
+the second coordinate was corrected and the actual mixture mutant then failed
+with the intended complete counterexample. The mutant runner needs an explicit
+16 MiB JVM stack to retain complete nested-record counterexample traces; partial
+trace output was correctly rejected, not counted as a kill.
+
+The complete config-to-APPLIED liveness configuration now times out after the
+unchanged 600-second limit. Fairness and required properties were not weakened.
+Diagnostics show expensive TLC ENABLED expansion of the full progress relation;
+this is an evaluation regression requiring investigation, not a proof that the
+protocol is live or a demonstrated protocol counterexample. The native-arithmetic
+full-chain case completed with 42 states in about five minutes. Six of seven
+liveness configurations pass; the zero-input full-chain case remains timed out. No-fairness removal still produces the intended temporal violation.
+This is an unconditional formal STOP. Do not claim all seven liveness configs pass.
+
+During failure review, the gate runner was found to retain an older PASS log if a
+new run timed out or failed before writing output. It now invalidates every log
+in the selected gate before the first process, captures nonzero/timeout output,
+and marks incomplete runs. Five regression tests cover old PASS reuse, partial
+success text followed by failure, launch failure and normal success. The report
+coverage calculation also requires the complete registered TLC config set and
+a successful aggregate status. Prior successful logs were removed from current
+candidate evidence; retained historical checkpoints keep their original scope.
+A separate log parser issue surfaced on the five-minute native run: the pinned
+TLC emits a two-line coverage-overhead terminator instead of the short form.
+The exact string was verified in the pinned jar's MP.class, and the parser now
+accepts that complete form while rejecting truncation (two additional tests).
+Reprocessing the retained actual output then validated its complete coverage.
+
+The complete pinned Lean project builds (961 jobs), but the proof audit still
+verifies only 41/45 conjuncts: four PO-AB1 binding/recovery theorems remain absent.
+The frozen phase-zero baseline was not rewritten to hide incomplete contracts.
+Byte graph decoding, arbitrary vector refinement, public arithmetic witnesses,
+all interleavings/crash cuts, clean offline Linux reproduction and independent
+review remain open. This finite model is not native conformance or Gate A/B/C/D.
+
+Evidence: `formal/proposals/evidence/heterogeneous-arithmetic.json` plus retained
+logs and counterexamples. New candidate semantics:
+`sha256:ec55655fc564a46108b7062a4ca9cb780fd96322a49fd0faf61f474a868b5866`.
+A canonical NO_GO report must bind the clean source checkpoint; old cc98f15a and
+a9dafb26 reports do not authorize this changed model. No native guard was removed.
+
+Presentation 8870, Controller 8865 and node training 8872 stayed on the same live
+instances. The current Cloudflare host still returns the access-code login page
+for Presentation, Admin and node-training routes. This read-only check is not a
+new authenticated browser run. No demonstration source, service or tunnel changed.
+
+Next concrete stage: resolve TLC's full-chain fairness evaluation regression
+without reducing the required scope or changing the fairness assumption, rerun
+both complete liveness configurations, then continue production byte/witness
+contracts and the four PO-AB1 proofs. Only after complete reviewed formal authority
+may native arithmetic admission change.

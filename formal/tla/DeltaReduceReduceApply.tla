@@ -38,35 +38,33 @@ NativeArithmeticAuthority(apc) ==
      inputs |-> NativeArithmeticInputs,
      isc |-> apc.isc, ec |-> apc.ec, apc |-> apc,
      model |-> [kind |-> "MODEL", schema |-> ConfiguredParameterSchema,
-                values |-> [shard \in Shards |-> NativeArithmeticInputs.model]],
+                values |-> NativeArithmeticInputs.model],
      optimizer |-> [kind |-> "OPTIMIZER", schema |-> ConfiguredParameterSchema,
-                    values |-> [shard \in Shards |-> NativeArithmeticInputs.optimizer]]]
+                    values |-> NativeArithmeticInputs.optimizer]]
 
-NativeParameterValue(apc, domain) == ABParameter(Cardinality(DomainMembers(apc, domain)))
+NativeParameterValue(apc, domain, shard) == ABParameter(DomainMembers(apc, domain), domain, shard)
 
 NativeDomainValue(root, domain, shard) ==
     LET leaf == CHOOSE item \in root.leaves :
                     item.domain = domain /\ item.shard = shard
-    IN ABDomain(leaf.value)
+    IN ABDomain(leaf.value, domain, shard)
 
 NativeGradient(root, shard) ==
-    ABRound(ABSum(Domains, [domain \in Domains |-> NativeDomainValue(root, domain, shard)]),
-            Cardinality(Domains))
+    ABMixture([domain \in Domains |-> NativeDomainValue(root, domain, shard)])
 
 NativeModelHash(root) ==
     [kind |-> "MODEL", schema |-> ConfiguredParameterSchema,
-     values |-> [shard \in Shards |-> ABApply(NativeGradient(root, shard)).model]]
+     values |-> [shard \in Shards |-> ABApply(NativeGradient(root, shard), shard).model]]
 
 NativeOptimizerHash(root) ==
     [kind |-> "OPTIMIZER", schema |-> ConfiguredParameterSchema,
-     values |-> [shard \in Shards |-> ABApply(NativeGradient(root, shard)).optimizer]]
+     values |-> [shard \in Shards |-> ABApply(NativeGradient(root, shard), shard).optimizer]]
 
 NativeApplyChecked(root) ==
-    /\ \A leaf \in root.leaves : ABDomainChecked(leaf.value)
+    /\ \A leaf \in root.leaves : ABDomainChecked(leaf.value, leaf.domain, leaf.shard)
     /\ \A shard \in Shards :
-        /\ ABInRange(ABSum(Domains,
-            [domain \in Domains |-> NativeDomainValue(root, domain, shard)]))
-        /\ ABApplyChecked(NativeGradient(root, shard))
+        /\ ABMixtureChecked([domain \in Domains |-> NativeDomainValue(root, domain, shard)])
+        /\ ABApplyChecked(NativeGradient(root, shard), shard)
 
 ParameterResultBody(apc, domain, shard, parent, schema,
                     arithmeticProfile, value, checked) ==
@@ -281,8 +279,8 @@ ValidParameterArithmetic(body) ==
     /\ body.checked = TRUE
     /\ CheckedParameterValue(body.value)
     /\ body.authority = NativeArithmeticAuthority(body.apc)
-    /\ ABParameterChecked(Cardinality(DomainMembers(body.apc, body.domain)))
-    /\ body.value = NativeParameterValue(body.apc, body.domain)
+    /\ ABParameterChecked(DomainMembers(body.apc, body.domain), body.domain, body.shard)
+    /\ body.value = NativeParameterValue(body.apc, body.domain, body.shard)
 
 ValidParameterResultBody(body) ==
     /\ IsParameterResultBody(body)
@@ -962,8 +960,8 @@ ProposeSubstitutedParameterAuthorityAction ==
         LET body == ParameterResultBody(
                 apc, domain, shard, ConfiguredParentCheckpoint,
                 ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                NativeParameterValue(apc, domain), TRUE)
-            wrongModel == [key \in Shards |-> NativeArithmeticInputs.model + 1]
+                NativeParameterValue(apc, domain, shard), TRUE)
+            wrongModel == [key \in Shards |-> NativeArithmeticInputs.model[key] + 1]
         IN ProposeParameterResult([body EXCEPT !.authority.model.values = wrongModel])
 
 VoteParameterAction ==
@@ -983,7 +981,7 @@ RejectParameterWrongParentAction ==
                 ParameterResultBody(
                     otherAPC, domain, shard, ConfiguredParentCheckpoint,
                     ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                    NativeParameterValue(apc, domain), TRUE))
+                    NativeParameterValue(apc, domain, shard), TRUE))
 
 RejectParameterUncheckedAction ==
     \E apc \in FinalizedAPCBodies, domain \in Domains,
@@ -992,7 +990,7 @@ RejectParameterUncheckedAction ==
             ParameterResultBody(
                 apc, domain, shard, ConfiguredParentCheckpoint,
                 ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                NativeParameterValue(apc, domain), FALSE))
+                NativeParameterValue(apc, domain, shard), FALSE))
 
 RejectParameterOverflowAction ==
     \E apc \in FinalizedAPCBodies, domain \in Domains,
@@ -1068,7 +1066,7 @@ ComputeSubstitutedApplyAuthorityAction ==
     /\ \E root \in FinalizedAggregateBodies :
         LET body == ApplyBody(root, root.parent, ConfiguredApplyProfile,
                     ExpectedNextCheckpoint, NativeModelHash(root), NativeOptimizerHash(root), TRUE)
-            wrongOptimizer == [shard \in Shards |-> NativeArithmeticInputs.optimizer + 1]
+            wrongOptimizer == [shard \in Shards |-> NativeArithmeticInputs.optimizer[shard] + 1]
         IN ComputeApplyCandidate([body EXCEPT !.authority.optimizer.values = wrongOptimizer])
 
 ComputeWrongApplyResultAction ==
@@ -1172,7 +1170,7 @@ ConsensusIntegerOnly ==
 ArithmeticBindingSound ==
     /\ \A body \in parameterResults :
         /\ body.authority = NativeArithmeticAuthority(body.apc)
-        /\ body.value = NativeParameterValue(body.apc, body.domain)
+        /\ body.value = NativeParameterValue(body.apc, body.domain, body.shard)
     /\ \A body \in applyCandidates :
         /\ body.authority = NativeArithmeticAuthority(body.aggregate.apc)
         /\ body.nextModelHash = NativeModelHash(body.aggregate)

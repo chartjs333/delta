@@ -111,7 +111,7 @@ PositiveProposeParameter ==
             ParameterResultBody(
                 apc, domain, shard, ConfiguredParentCheckpoint,
                 ConfiguredParameterSchema, ConfiguredArithmeticProfile,
-                NativeParameterValue(apc, domain), TRUE))
+                NativeParameterValue(apc, domain, shard), TRUE))
 
 PositiveVoteParameter ==
     \E validator \in Validators, body \in parameterResults :

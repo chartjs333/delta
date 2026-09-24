@@ -30,7 +30,13 @@ TOP_LEVEL_ACTION = re.compile(
     re.MULTILINE,
 )
 COVERAGE_START = re.compile(r"^The coverage statistics at [^\n]*\n", re.MULTILINE)
-COVERAGE_END = re.compile(r"^End of statistics\.$", re.MULTILINE)
+# Locked TLC MP.TLC_COVERAGE_END_OVERHEAD uses this two-line terminator.
+# Require the complete message; a truncated warning is not a finished snapshot.
+COVERAGE_END = re.compile(
+    r"^End of statistics(?:\.| \(please note that for performance reasons large models\n"
+    r"are best checked with coverage and cost statistics disabled\)\.)$",
+    re.MULTILINE,
+)
 SUCCESS = "Model checking completed. No error has been found."
 FAILURE_PATTERNS = (
     re.compile(r"^Error:", re.MULTILINE),
@@ -108,9 +114,9 @@ def top_level_action_counts(output: str) -> dict[str, int]:
                 raise TlcResultError("nested or unordered TLC coverage snapshots")
             if index + 1 < len(starts) and starts[index + 1].start() < end.end():
                 raise TlcResultError("nested TLC coverage snapshots")
-            if TOP_LEVEL_ACTION.search(output[cursor:start.start()]):
+            if TOP_LEVEL_ACTION.search(output[cursor : start.start()]):
                 raise TlcResultError("TLC coverage row outside a snapshot")
-            counts = top_level_action_counts(output[start.end():end.start()])
+            counts = top_level_action_counts(output[start.end() : end.start()])
             if any(counts.get(action, -1) < count for action, count in previous.items()):
                 raise TlcResultError("TLC cumulative action coverage regressed")
             previous = counts
@@ -174,7 +180,9 @@ def successful_tlc_result(
     if required_actions:
         starts = list(COVERAGE_START.finditer(output))
         ends = list(COVERAGE_END.finditer(output))
-        if not starts or not (success_offset < starts[-1].start() < ends[-1].end() < summary.start()):
+        if not starts or not (
+            success_offset < starts[-1].start() < ends[-1].end() < summary.start()
+        ):
             raise TlcResultError("missing final TLC coverage between success and summary")
     reached: dict[str, bool] = {}
     for action in sorted(required_actions):

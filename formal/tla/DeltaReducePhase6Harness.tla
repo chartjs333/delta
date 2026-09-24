@@ -26,7 +26,7 @@ HarnessConfigCertificate ==
 
 HarnessTicketPlan ==
     {[ticket |-> ticket,
-      domain |-> HarnessDomain,
+      domain |-> NativeArithmeticInputs.ticketDomain[ticket],
       data |-> HarnessData,
       batchBudget |-> HarnessBatch,
       stepBudget |-> HarnessSteps,

@@ -88,7 +88,9 @@ MUTATIONS = (
         "native-arithmetic-binding.cfg",
         (
             Replacement(
-                "\n    /\\ body.value = NativeParameterValue(body.apc, body.domain)\n", "", 1
+                "\n    /\\ body.value = NativeParameterValue(body.apc, body.domain, body.shard)\n",
+                "",
+                1,
             ),
         ),
     ),
@@ -278,7 +280,7 @@ MUTATIONS = (
                 "ProposeParameterResultAction ==\n"
                 "    \\E apc \\in FinalizedAPCBodies, domain \\in Domains,\n"
                 "       shard \\in Shards, parent \\in ParentCheckpoints :\n"
-                "        LET value == NativeParameterValue(apc, domain)\n"
+                "        LET value == NativeParameterValue(apc, domain, shard)\n"
                 "        IN\n"
                 "        ProposeParameterResult(\n"
                 "            ParameterResultBody(\n"
@@ -401,6 +403,79 @@ MUTATIONS = (
             ),
         ),
     ),
+    Mutation(
+        "MUT-ARITHMETIC-PREFIX-GUARD",
+        "HeterogeneousExpected",
+        "INV-HETEROGENEOUS-ARITHMETIC",
+        "DeltaReduceArithmetic.tla",
+        "ABCheckedSequence",
+        "DeltaReduceHeterogeneousHarness",
+        "heterogeneous-prefix.cfg",
+        (
+            Replacement(
+                "    /\\ \\A count \\in 0..Len(values) : "
+                "ABInRange(ABPrefix(TLCEval(values), count))",
+                "    /\\ ABInRange(ABTotal(values))",
+            ),
+        ),
+    ),
+    Mutation(
+        "MUT-ARITHMETIC-PRODUCT-GUARD",
+        "HeterogeneousExpected",
+        "INV-HETEROGENEOUS-ARITHMETIC",
+        "DeltaReduceArithmetic.tla",
+        "ABCheckedSequence",
+        "DeltaReduceHeterogeneousHarness",
+        "heterogeneous-product.cfg",
+        (Replacement("    /\\ \\A index \\in DOMAIN values : ABInRange(values[index])\n", ""),),
+    ),
+    Mutation(
+        "MUT-ARITHMETIC-CONVERSION-GUARD",
+        "HeterogeneousExpected",
+        "INV-HETEROGENEOUS-ARITHMETIC",
+        "DeltaReduceArithmetic.tla",
+        "ABDomainChecked",
+        "DeltaReduceHeterogeneousHarness",
+        "heterogeneous-conversion.cfg",
+        (
+            Replacement("    /\\ ABInRange(n * NativeArithmeticInputs.qN[domain][shard])\n", ""),
+            Replacement("    /\\ ABInRange(ABConversionNumerator(n, domain, shard))\n", ""),
+        ),
+    ),
+    Mutation(
+        "MUT-DOMAIN-MIXTURE-WEIGHTS",
+        "HeterogeneousExpected",
+        "INV-HETEROGENEOUS-ARITHMETIC",
+        "DeltaReduceReduceApply.tla",
+        "NativeGradient",
+        "DeltaReduceHeterogeneousHarness",
+        "heterogeneous-positive.cfg",
+        (
+            Replacement(
+                "    ABMixture([domain \\in Domains |-> NativeDomainValue(root, domain, shard)])",
+                "    ABRound(ABTotal([i \\in DOMAIN NativeArithmeticInputs.domainOrder "
+                "|-> NativeDomainValue(root, NativeArithmeticInputs.domainOrder[i], shard)]), "
+                "Cardinality(Domains))",
+            ),
+        ),
+    ),
+    Mutation(
+        "MUT-DOMAIN-ROUNDING",
+        "HeterogeneousExpected",
+        "INV-HETEROGENEOUS-ARITHMETIC",
+        "DeltaReduceArithmetic.tla",
+        "ABDomain",
+        "DeltaReduceHeterogeneousHarness",
+        "heterogeneous-positive.cfg",
+        (
+            Replacement(
+                "    ABRound(ABConversionNumerator(n, domain, shard), "
+                "ABConversionDenominator(domain, shard))",
+                "    ABConversionNumerator(n, domain, shard) "
+                "\\div ABConversionDenominator(domain, shard)",
+            ),
+        ),
+    ),
 )
 
 
@@ -485,6 +560,10 @@ def main() -> int:
             seed = 2026082500 + index
             command = [
                 java,
+                # Deep certificate/input records need more stack when TLC
+                # reconstructs and prints a complete counterexample. A missing
+                # trace is still rejected, even if an invariant violation prints.
+                "-Xss16m",
                 "-XX:+UseParallelGC",
                 "-Dfile.encoding=UTF-8",
                 "-Duser.language=en",
@@ -514,6 +593,9 @@ def main() -> int:
                 timeout=240,
             )
             output = f"{result.stdout}\n{result.stderr}"
+            diagnostics = ROOT / "formal" / "build" / "mutants"
+            diagnostics.mkdir(parents=True, exist_ok=True)
+            (diagnostics / f"{mutation.mutant_id.lower()}.log").write_text(output, encoding="utf-8")
             if "Finished computing initial states: 0 distinct states generated" in output:
                 raise RuntimeError(f"{mutation.mutant_id}: vacuous model has no initial states")
             try:

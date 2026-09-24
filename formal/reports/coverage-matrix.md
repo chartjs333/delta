@@ -17,13 +17,13 @@ is an unconditional STOP.
 
 | Requirement | Formal action or tooling boundary | Invariant / temporal property | Mandatory config or gate | Parametric proof / evidence |
 | --- | --- | --- | --- | --- |
-| FR-001 | Tooling boundary | N/A | `formal-parse`, `formal-proofs`, offline tool checksum gate | pinned lockfiles; T004–T006 |
-| FR-002 | All `ACT-*` partitioned by registry module | `INV-TYPE-OK` | `CFG-SAFETY-F1`; SANY module parse | module import graph; T013–T038 |
+| FR-001 | Tooling boundary | N/A | `formal-parse`, `formal-proofs`, offline tool checksum gate | pinned lockfiles; T004â€“T006 |
+| FR-002 | All `ACT-*` partitioned by registry module | `INV-TYPE-OK` | `CFG-SAFETY-F1`; SANY module parse | module import graph; T013â€“T038 |
 | FR-003 | All public `ACT-*` | all registered properties | registry uniqueness gate | `formal-id-registry.json`; T003 |
 | FR-004 | `Init`; disjunction of all public `ACT-*` | `INV-TYPE-OK` | `CFG-SAFETY-F1` | action reachability report; T038/T042 |
-| FR-005 | `ACT-LOGICAL-TIME-ADVANCE`, `ACT-SEED-GENERATE`, parameter/apply actions | `INV-SEED-AFTER-FREEZE`, `INV-CONSENSUS-INTEGER-ONLY` | `CFG-INPUT-FREEZE-SEED`, `CFG-ARITHMETIC-BOUNDARY` | `PO-A1`–`PO-A3` |
+| FR-005 | `ACT-LOGICAL-TIME-ADVANCE`, `ACT-SEED-GENERATE`, parameter/apply actions | `INV-SEED-AFTER-FREEZE`, `INV-CONSENSUS-INTEGER-ONLY` | `CFG-INPUT-FREEZE-SEED`, `CFG-ARITHMETIC-BOUNDARY` | `PO-A1`â€“`PO-A3` |
 | FR-006 | Constant/type initialization | `INV-TYPE-OK` | every TLC config | config constant inventory |
-| FR-007 | Config boundary | all mandatory safety invariants | `CFG-SAFETY-F1` | recorded scope: `f=1`, 4 validators, ≥3 tickets, 2 domains, 2 shards |
+| FR-007 | Config boundary | all mandatory safety invariants | `CFG-SAFETY-F1` | recorded scope: `f=1`, 4 validators, â‰¥3 tickets, 2 domains, 2 shards |
 | FR-008 | Config boundary | property-specific | all `CFG-*` in registry | coverage review; T042 |
 | FR-009 | Config boundary | property-specific | every config using symmetry/constraints | soundness rationale and reachability evidence |
 | FR-010 | Terminal predicate | `INV-ABORT-CERTIFIED`, `INV-CURRENT-CERTIFIED` | all safety configs | legal-terminal/deadlock classification |
@@ -36,15 +36,15 @@ is an unconditional STOP.
 | FR-017 | lease, commit and availability actions | `INV-TICKET-IMMUTABILITY`, `INV-LEASE-COMMIT-SAFETY`, `INV-COMMIT-UNIQUENESS`, `INV-AVAILABILITY-BEFORE-ISC` | `CFG-TICKET-LEASE-AVAILABILITY` | trace fixtures and duplicate-commit mutant |
 | FR-018 | `ACT-INPUT-CLOSE`, `ACT-ISC-VOTE`, `ACT-ISC-FINALIZE` | `INV-AVAILABILITY-BEFORE-ISC`, `INV-ISC-IMMUTABILITY` | `CFG-INPUT-FREEZE-SEED`, `CFG-AVAILABILITY-LOSS-REPAIR` | mutable-ISC mutant |
 | FR-019 | `ACT-SEED-GENERATE` | `INV-SEED-AFTER-FREEZE` | `CFG-INPUT-FREEZE-SEED` | early-seed mutant |
-| FR-020 | EC/APC vote/finalize actions | `INV-EC-SUBSET-ISC`, `INV-APC-PARENTAGE`, `INV-CONSENSUS-INTEGER-ONLY`, `INV-NO-OVERFLOW` | `CFG-CERTIFICATE-FRANKENSTEIN`, `CFG-ARITHMETIC-BOUNDARY` | `PO-A1`–`PO-A3`, `PO-D1` |
-| FR-021 | parameter propose/vote/finalize actions | `INV-NO-OVERFLOW`, `INV-SHARD-VIEW-ATOMICITY` | `CFG-ARITHMETIC-BOUNDARY`, `CFG-CERTIFICATE-FRANKENSTEIN` | `PO-A1`–`PO-A3`, `PO-H1`, `PO-H2` |
+| FR-020 | EC/APC vote/finalize actions | `INV-EC-SUBSET-ISC`, `INV-APC-PARENTAGE`, `INV-CONSENSUS-INTEGER-ONLY`, `INV-NO-OVERFLOW` | `CFG-CERTIFICATE-FRANKENSTEIN`, `CFG-ARITHMETIC-BOUNDARY` | `PO-A1`â€“`PO-A3`, `PO-D1` |
+| FR-021 | parameter propose/vote/finalize actions | `INV-NO-OVERFLOW`, `INV-SHARD-VIEW-ATOMICITY` | `CFG-ARITHMETIC-BOUNDARY`, `CFG-CERTIFICATE-FRANKENSTEIN` | `PO-A1`â€“`PO-A3`, `PO-H1`, `PO-H2` |
 | FR-022 | root assemble/vote/finalize actions | `INV-SHARD-VIEW-ATOMICITY`, `INV-AGGREGATE-COMPLETENESS` | `CFG-CERTIFICATE-FRANKENSTEIN`, `CFG-SAFETY-F1` | `PO-C1`, `PO-H1`, `PO-H2` |
 | FR-023 | apply compute/vote/finalize/current actions | `INV-APPLY-UNIQUENESS`, `INV-CURRENT-CERTIFIED`, `INV-NO-OVERFLOW` | `CFG-APPLY-RECOVERY`, `CFG-ARITHMETIC-BOUNDARY` | `PO-AP1`, `PO-AP2`, `PO-D1` |
 | FR-024 | artifact corrupt/lose/repair actions | `INV-ISC-IMMUTABILITY`, `INV-RECOVERY-IDEMPOTENCE`, `INV-ABORT-PRESERVES-PARENT` | `CFG-AVAILABILITY-LOSS-REPAIR` | `PO-R1`, `PO-R2` |
 | FR-025 | `ACT-PUBLISH` | `INV-PLANE-SEPARATION`, `INV-CERTIFIED-PUBLISH-ONLY` | `CFG-SAFETY-F1`, publication mutant | forbidden-media fixtures |
 | FR-026 | all public actions | all `INV-*` | safety config matrix below | safety result manifest |
 | FR-027 | fairness-enabled actions | all `LIVE-*` | phase-specific `CFG-LIVENESS-*` models | temporal result manifest |
-| FR-028 | theorem tooling boundary | N/A | `formal-proofs`, no-`sorry`/axiom gate | `PO-Q1`–`PO-R2` |
+| FR-028 | theorem tooling boundary | N/A | `formal-proofs`, no-`sorry`/axiom gate | `PO-Q1`â€“`PO-R2` |
 | FR-029 | N/A | `INV-QC-UNIQUENESS` theorem link | theorem gate | `PO-Q1`, `PO-Q2` |
 | FR-030 | parameter/apply arithmetic actions | `INV-CONSENSUS-INTEGER-ONLY`, `INV-NO-OVERFLOW` | `CFG-ARITHMETIC-BOUNDARY` | `PO-A1`, `PO-A2`, `PO-A3`, `PO-H2` |
 | FR-031 | parameter/root actions | `INV-AGGREGATE-COMPLETENESS` | `CFG-CERTIFICATE-FRANKENSTEIN` | `PO-H1`, `PO-H2` |
@@ -54,10 +54,10 @@ is an unconditional STOP.
 | FR-035 | mutant tooling boundary | expected failing invariant | `formal-mutants` | expected-counterexample manifest |
 | FR-036 | trace normalization boundary | N/A | `formal-mutants`, canonical JSON tests | normalized counterexample hash |
 | FR-037 | every public `ACT-*` emits trace event | trace schema validity | `formal-refinement` | `formal-trace.schema.json`; T009/T053 |
-| FR-038 | public action or documented stutter | all projected `INV-*` | `formal-refinement` legal/illegal fixtures | standalone checker; T054–T056 |
+| FR-038 | public action or documented stutter | all projected `INV-*` | `formal-refinement` legal/illegal fixtures | standalone checker; T054â€“T056 |
 | FR-039 | later-feature implementation traces | affected properties | compatibility/formal-impact gate | ownership map and `formal_semantics_id`; T057 |
 | FR-040 | report tooling boundary | all result classes | `formal-report` | report schema/evidence graph; T010/T063 |
-| FR-041 | deterministic decision function | all mandatory result classes | report verifier | missing/incompatible evidence → `NO_GO` |
+| FR-041 | deterministic decision function | all mandatory result classes | report verifier | missing/incompatible evidence â†’ `NO_GO` |
 | FR-042 | canonical hash tooling | `INV-RECOVERY-IDEMPOTENCE` where replayed | clean offline reproduction | evidence graph and SHA-256 fixtures |
 | FR-043 | CI boundary | all mandatory properties | aggregate `formal-check` | parser/model/proof/mutant/refinement/report jobs |
 | FR-044 | tool/environment boundary | N/A | offline clean environment | no secret/data/network dependency scan |
@@ -81,8 +81,8 @@ is an unconditional STOP.
 | `INV-SEED-AFTER-FREEZE` | seed generation | `CFG-INPUT-FREEZE-SEED` | none | early-seed mutant | EXECUTED PASS |
 | `INV-EC-SUBSET-ISC` | EC vote/finalize | `CFG-CERTIFICATE-FRANKENSTEIN` | none | EC-adds-ticket trace | EXECUTED PASS |
 | `INV-APC-PARENTAGE` | APC vote/finalize | `CFG-CERTIFICATE-FRANKENSTEIN` | none | missing-APC-parent mutant | EXECUTED PASS |
-| `INV-CONSENSUS-INTEGER-ONLY` | EC/APC/parameter/apply | `CFG-ARITHMETIC-BOUNDARY`, `CFG-SAFETY-F1` | `PO-A1`–`PO-A3`, `PO-D1` | float/invalid rational fixture | EXECUTED PASS |
-| `INV-NO-OVERFLOW` | EC/APC/parameter/apply | `CFG-ARITHMETIC-BOUNDARY`, `CFG-SAFETY-F1` | `PO-A1`–`PO-A3` | unchecked-overflow mutant | EXECUTED PASS |
+| `INV-CONSENSUS-INTEGER-ONLY` | EC/APC/parameter/apply | `CFG-ARITHMETIC-BOUNDARY`, `CFG-SAFETY-F1` | `PO-A1`â€“`PO-A3`, `PO-D1` | float/invalid rational fixture | EXECUTED PASS |
+| `INV-NO-OVERFLOW` | EC/APC/parameter/apply | `CFG-ARITHMETIC-BOUNDARY`, `CFG-SAFETY-F1` | `PO-A1`â€“`PO-A3` | unchecked-overflow mutant | EXECUTED PASS |
 | `INV-SHARD-VIEW-ATOMICITY` | parameter/root | `CFG-CERTIFICATE-FRANKENSTEIN` | `PO-C1` | mixed-parent mutant | EXECUTED PASS |
 | `INV-AGGREGATE-COMPLETENESS` | root assemble/finalize | `CFG-CERTIFICATE-FRANKENSTEIN`, `CFG-SAFETY-F1` | `PO-C1`, `PO-H1`, `PO-H2` | incomplete-root mutant | EXECUTED PASS |
 | `INV-APPLY-UNIQUENESS` | apply vote/finalize | `CFG-APPLY-RECOVERY`, `CFG-SPLIT-BRAIN-PARTITION` | `PO-Q1`, `PO-Q2`, `PO-AP1` | conflicting apply trace | EXECUTED PASS |
@@ -95,6 +95,12 @@ is an unconditional STOP.
 | `INV-CERTIFIED-PUBLISH-ONLY` | publish/current | `CFG-SAFETY-F1`, `CFG-APPLY-RECOVERY` | `PO-AP2` | weak/missing-certificate trace | EXECUTED PASS |
 
 ## Liveness coverage and claim boundaries
+
+**Current candidate:** the complete config-to-APPLIED fairness check timed out
+after 600 seconds. It is not a liveness PASS or a protocol counterexample.
+Earlier successful logs are historical only. The no-fairness countercheck
+still produces the expected temporal violation. See the retained current
+checkpoint for per-config outcomes; formal authority remains NO_GO.
 
 All positive liveness rows start from real empty `Init` before the named
 milestone and exclude timeout/HardAbort as progress. Each config applies `WF`
@@ -111,16 +117,16 @@ configs.
 | `LIVE-CONFIG-QC-REACHED` | config propose/persist/send/deliver/finalize | `CFG-LIVENESS-CONFIG-QC` | responsive quorum and fair transport | no-fairness model need not reach QC | EXECUTED PASS |
 | `LIVE-ISC-REACHED` | config through close/ISC transport/finalize | `CFG-LIVENESS-ISC` | complete required input and fair transport | abort is disabled as a witness | EXECUTED PASS |
 | `LIVE-PLAN-QC-REACHED` | config/ISC/seed/EC/APC full chain | `CFG-LIVENESS-PLAN` | valid norm/plan data and fair transport | abort is disabled as a witness | EXECUTED PASS |
-| `LIVE-APPLIED-REACHED` | complete config→ISC→EC/APC→parameter→root→ApplyQC→current chain | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | all required quorums/artifacts and weak fairness | `NoFairnessSpec` violates `AppliedReached` | EXECUTED PASS |
-| `LIVE-VIEW-QC-REACHED` | logical time→soft timeout→durable view votes→ViewChangeQC | `CFG-LIVENESS-VIEW-CHANGE` | view quorum and fair transport | no abort action is available | EXECUTED PASS |
-| `LIVE-ABORT-QC-REACHED` | logical time→hard deadline→durable abort votes→AbortQC | `CFG-LIVENESS-ABORT-QC` | abort quorum and fair transport | ordinary progress is absent after deadline | EXECUTED PASS |
-| `LIVE-ABORT-EXCLUDED-FROM-POSITIVE` | all positive milestone models | all four positive liveness configs | timeout/abort actions excluded | any ABORTED witness fails the property | EXECUTED PASS |
+| `LIVE-APPLIED-REACHED` | complete configâ†’ISCâ†’EC/APCâ†’parameterâ†’rootâ†’ApplyQCâ†’current chain | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | all required quorums/artifacts and weak fairness | `NoFairnessSpec` violates `AppliedReached` | UNVERIFIED: CURRENT TLC TIMEOUT |
+| `LIVE-VIEW-QC-REACHED` | logical timeâ†’soft timeoutâ†’durable view votesâ†’ViewChangeQC | `CFG-LIVENESS-VIEW-CHANGE` | view quorum and fair transport | no abort action is available | EXECUTED PASS |
+| `LIVE-ABORT-QC-REACHED` | logical timeâ†’hard deadlineâ†’durable abort votesâ†’AbortQC | `CFG-LIVENESS-ABORT-QC` | abort quorum and fair transport | ordinary progress is absent after deadline | EXECUTED PASS |
+| `LIVE-ABORT-EXCLUDED-FROM-POSITIVE` | all positive milestone models | all four positive liveness configs | timeout/abort actions excluded | any ABORTED witness fails the property | UNVERIFIED: CURRENT TLC TIMEOUT |
 | `LIVE-CONFIG-FINALIZE-OR-ABORT` | config votes/finalize; view/abort | `CFG-LIVENESS-CONFIG-QC` | config proposal eventually enabled | permanent quorum loss reaches BLOCKED, never fake QC | EXECUTED PASS |
 | `LIVE-COMMIT-AVAILABLE-OR-REJECT` | availability/close/abort | `CFG-LIVENESS-ISC` | required pre-ISC storage quorum or fixed close decision | unfair delivery is not claimed live | EXECUTED PASS |
 | `LIVE-FROZEN-PLAN-OR-ABORT` | seed/EC/APC/abort | `CFG-LIVENESS-PLAN` | seed source/fallback and exact ISC bytes available | unavailable seed permits only abort/block | EXECUTED PASS |
-| `LIVE-SHARD-QC-OR-ABORT` | parameter/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | parameter committee quorum and shard bytes | permanent shard loss never rewrites membership | EXECUTED PASS |
-| `LIVE-AGGREGATE-APPLY-OR-ABORT` | root/apply/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | root/apply quorums and parent artifacts | apply quorum loss preserves parent | EXECUTED PASS |
-| `LIVE-APPLY-QC-REPAIRS-CURRENT` | journal recover/current advance | `CFG-LIVENESS-EVENTUAL-SYNCHRONY`, `CFG-APPLY-RECOVERY` | durable ApplyQC and exact artifact available | artifact loss may remain BLOCKED | EXECUTED PASS |
+| `LIVE-SHARD-QC-OR-ABORT` | parameter/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | parameter committee quorum and shard bytes | permanent shard loss never rewrites membership | UNVERIFIED: CURRENT TLC TIMEOUT |
+| `LIVE-AGGREGATE-APPLY-OR-ABORT` | root/apply/view/abort | `CFG-LIVENESS-EVENTUAL-SYNCHRONY` | root/apply quorums and parent artifacts | apply quorum loss preserves parent | UNVERIFIED: CURRENT TLC TIMEOUT |
+| `LIVE-APPLY-QC-REPAIRS-CURRENT` | journal recover/current advance | `CFG-LIVENESS-EVENTUAL-SYNCHRONY`, `CFG-APPLY-RECOVERY` | durable ApplyQC and exact artifact available | artifact loss may remain BLOCKED | UNVERIFIED: CURRENT TLC TIMEOUT |
 | `LIVE-SOFT-TIMEOUT-CHANGES-VIEW` | soft timeout/view vote/finalize | `CFG-LIVENESS-VIEW-CHANGE` | `2f+1` timeout votes and fairness | one timeout observer cannot change view | EXECUTED PASS |
 | `LIVE-HARD-DEADLINE-TERMINATES` | logical time/abort vote/finalize | `CFG-LIVENESS-ABORT-QC` | `2f+1` abort votes remain obtainable | without abort quorum hard deadline yields BLOCKED | EXECUTED PASS |
 
@@ -154,7 +160,7 @@ configs.
 | `PO-A1` | signed product bound | parameter/apply multiply guards | `DeltaReduce/FixedPoint.lean` |
 | `PO-A2` | flat accumulator bound | parameter/APC/apply sum guards | `DeltaReduce/FixedPoint.lean` |
 | `PO-A3` | canonical reduced inputs, positive/divisible common denominator, numerator safety and all ADR-0002 rounding branches | APC/domain mixture/apply | nine named conjunct theorems in `DeltaReduce/FixedPoint.lean` |
-| `PO-A4` | ordered checked fold, independent product/output widths, quantum conversion and signed rounding | arithmetic operation graph only; native input relation remains PO-AB1 | 13 named conjuncts in `DeltaReduce/ArithmeticKernel.lean`; standalone kernel check and five guard mutants; full project build pending |
+| `PO-A4` | ordered checked fold, independent product/output widths, quantum conversion and signed rounding | arithmetic operation graph only; native input relation remains PO-AB1 | 13 named conjuncts in `DeltaReduce/ArithmeticKernel.lean`; standalone kernel check and five guard mutants; full project builds; 41/45 total conjuncts verified, PO-AB1 still absent |
 | `PO-H1` | exact regional partition | topology and aggregate coverage preconditions | `DeltaReduce/Hierarchy.lean` |
 | `PO-H2` | hierarchical result equals flat | regional/global parameter results | `DeltaReduce/Hierarchy.lean` |
 | `PO-C1` | canonical complete coverage table | AggregateRootQC body/root | `DeltaReduce/Coverage.lean` |
@@ -173,7 +179,7 @@ checks do not complete the amendment's public-byte refinement or parametric proo
 
 | ID | Candidate evidence | Remaining obligation | Status |
 | --- | --- | --- | --- |
-| `INV-ARITHMETIC-BINDING` | `ArithmeticBindingSound` in production TLA+, four source mutants | heterogeneous vectors/weights, concrete byte resolver and current-state/crash-cut relation | UNRESOLVED |
+| `INV-ARITHMETIC-BINDING` | `ArithmeticBindingSound` in production TLA+, four source mutants | arbitrary vector lengths, concrete byte resolver and full current-state/crash-cut relation | UNRESOLVED |
 | `CFG-NATIVE-ARITHMETIC-BINDING` | executed nonzero bounded scalar safety model | arbitrary vectors and independently authenticated input graph | FINITE CHECK PASS; AMENDMENT UNRESOLVED |
 | `CFG-NATIVE-ARITHMETIC-LIVENESS` | executed nonzero full positive chain, without abort as progress | actual byte availability/recovery refinement | FINITE CHECK PASS; AMENDMENT UNRESOLVED |
 | `PO-AB1` | 15 standalone helper statements; four mandatory production theorem targets registered | complete native graph, conversion, Apply and recovery/admission conjuncts | UNRESOLVED |
@@ -189,3 +195,18 @@ contradictory assumption or any mismatch between a proof statement and
 runtime/model preconditions changes the affected row to `UNRESOLVED` and stops
 implementation until corrected. Formal GO requires passing semantic gates,
 clean offline reproduction and both independent human review attestations.
+
+### Heterogeneous arithmetic finite suffix (amendment 0001)
+
+| ID | Executed boundary | Remaining obligation |
+| --- | --- | --- |
+| `INV-HETEROGENEOUS-ARITHMETIC` | independent literal outputs or empty rejected state for frozen inputs | arbitrary inputs and concrete byte graph |
+| `CFG-HETEROGENEOUS-POSITIVE` | four tickets, two domains/shards, unequal rational weights, signed halves, six 3-of-4 quorums, current advance/recovery/replay | arbitrary interleavings, pre-durability crash cuts, production byte witness |
+| `CFG-HETEROGENEOUS-PREFIX` | safe final sum 88 with unsafe prefix 128 in signed 8-bit profile; no PARAMETER/WAL append | production widths and parameter metadata |
+| `CFG-HETEROGENEOUS-PRODUCT` | safe prefixes -120 and 40 with unsafe product 160; no PARAMETER/WAL append | complete native input binding |
+| `CFG-HETEROGENEOUS-CONVERSION` | numerator product 150 overflows before a safe rounded output 25; no APPLY candidate/vote/current update | actual artifact decode and full vector conversion |
+
+Five production-source mutants target prefix/product/conversion checks, domain
+mixture weights and domain rounding. They must trigger the literal fixture
+invariant, with complete nonempty TLC counterexamples. This finite suffix starts
+from certified Phase 6 parents and never claims independent upstream validation.

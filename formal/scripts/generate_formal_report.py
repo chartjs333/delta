@@ -315,7 +315,12 @@ def main() -> int:
     )
     evidence_pass = {
         "EVIDENCE-TOOLCHAINS": all(item.get("status") == "PASS" for item in toolchains["checks"]),
-        "EVIDENCE-TLC": all(item.get("status") == "PASS" for item in tlc["models"]),
+        "EVIDENCE-TLC": (
+            tlc.get("status") == "PASS"
+            and {item["id"] for item in tlc["models"]}
+            == {item["id"] for item in registry["configs"]}
+            and all(item.get("status") == "PASS" for item in tlc["models"])
+        ),
         "EVIDENCE-LEAN": (
             lean.get("status") == "PASS"
             and lean.get("conjunct_completeness", {}).get("status") == "PASS"

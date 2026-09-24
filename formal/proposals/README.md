@@ -83,3 +83,30 @@ This is not a successful full Lake/mathlib build. PO-AB1 remains open, including
 coefficient derivation and connection from authenticated bytes to this operation
 graph. TLA still has its documented uniform-input finite scope. No runtime guard,
 native decoder, certificate authority or benchmark qualification changed.
+
+
+## September 24: heterogeneous finite arithmetic checkpoint (T029, T031, T050)
+
+This supersedes the earlier uniform-input scope above. The production arithmetic
+model now takes explicit ordered ticket/domain inputs, rational ticket weights,
+per-domain/per-shard quanta, unequal domain mixture weights and distinct parent
+model/optimizer coordinates. Four new finite configurations exercise positive
+3-of-4 PARAMETER/root/APPLY quorums and replay, product overflow, prefix overflow
+hidden by cancellation, and conversion overflow. Their expected results are
+literal independent oracles, checked separately by `check_heterogeneous_fixture.py`.
+Five additional production mutations detect removing these guards, ignoring
+mixture weights and moving rounding across the domain boundary.
+
+Parsing, 26 safety configurations and all 23 production mutants pass. The full
+config-to-APPLIED liveness check regressed to a 600-second TLC timeout: this is
+an unresolved evaluation/performance failure, not a successful liveness gate.
+Six other liveness configurations pass, including the nonzero arithmetic
+full chain (42 states). Fairness assumptions were not weakened. The gate now invalidates old logs
+before a new batch and preserves failures so stale PASS evidence cannot survive.
+The complete Lean project builds, but 4 of 45 mandatory conjuncts (PO-AB1) remain
+missing. Formal authority remains NO_GO, with the old frozen baseline unchanged.
+
+This remains one coordinate per shard and a serialized certified Phase6 suffix,
+not arbitrary vector/byte decoding, public arithmetic witness refinement,
+all interleavings/crash cuts, independent review or benchmark qualification.
+Evidence: `formal/proposals/evidence/heterogeneous-arithmetic.json`.

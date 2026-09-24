@@ -65,7 +65,10 @@ def observed_terminal_outcomes(properties: list[str], action_counts: dict[str, i
     terminals: list[str] = []
     if action_counts.get("HardAbortAction", 0) > 0:
         terminals.append("ABORTED")
-    if action_counts.get("AdvanceCurrentCheckpointAction", 0) > 0:
+    if (
+        action_counts.get("AdvanceCurrentCheckpointAction", 0) > 0
+        or action_counts.get("HeteroAdvance", 0) > 0
+    ):
         terminals.append("APPLIED")
     if (
         "LIVE-APPLIED-REACHED" in properties

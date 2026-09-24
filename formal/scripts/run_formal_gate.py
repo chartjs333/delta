@@ -48,26 +48,65 @@ def run(
     )
 
 
-def run_capture(command: list[str], *, cwd: Path, timeout: int, echo: bool = True) -> str:
+def run_capture(
+    command: list[str],
+    *,
+    cwd: Path,
+    timeout: int,
+    echo: bool = True,
+    output_path: Path | None = None,
+) -> str:
     rendered = " ".join(command)
     print(f"formal-gate: {rendered}", flush=True)
-    result = subprocess.run(
-        command,
-        cwd=cwd,
-        check=False,
-        timeout=timeout,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+    if output_path is not None:
+        output_path.write_text("NOT_COMPLETED\n", encoding="utf-8")
+    try:
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            check=False,
+            timeout=timeout,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except subprocess.TimeoutExpired as error:
+
+        def diagnostic_text(value: str | bytes | None) -> str:
+            return (
+                value.decode("utf-8", errors="replace") if isinstance(value, bytes) else value or ""
+            )
+
+        output = (
+            diagnostic_text(error.stdout)
+            + "\n"
+            + diagnostic_text(error.stderr)
+            + f"\nError: TLC process timeout after {timeout} seconds\n"
+        )
+        if output_path is not None:
+            output_path.write_text(output, encoding="utf-8")
+        raise
+    output = f"{result.stdout}\n{result.stderr}"
+    if result.returncode != 0:
+        output += f"\nError: process exited with status {result.returncode}\n"
+    if output_path is not None:
+        output_path.write_text(output, encoding="utf-8")
     if echo and result.stdout:
         print(result.stdout, end="")
     if echo and result.stderr:
         print(result.stderr, end="", file=sys.stderr)
     if result.returncode != 0:
-        raise subprocess.CalledProcessError(result.returncode, command)
-    return f"{result.stdout}\n{result.stderr}"
+        raise subprocess.CalledProcessError(result.returncode, command, output=output)
+    return output
+
+
+def invalidate_tlc_logs(configs: list[dict[str, Any]]) -> None:
+    """A failed early config must not leave prior PASS logs for the rest of this gate."""
+    for entry in configs:
+        metadata = ROOT / "formal" / "build" / "tlc" / entry["id"]
+        metadata.mkdir(parents=True, exist_ok=True)
+        (metadata / "tlc.log").write_text("NOT_RUN_IN_CURRENT_GATE\n", encoding="utf-8")
 
 
 def verify_action_coverage(output: str, required_actions: list[str]) -> None:
@@ -154,6 +193,7 @@ def run_tlc(kind: str) -> None:
     configs = [entry for entry in manifest.get("configs", []) if entry.get("kind") == kind]
     if not configs:
         fail(f"no {kind} configs registered; gate success cannot be vacuous")
+    invalidate_tlc_logs(configs)
     java, options, jar = tla_runtime()
     tla_lock = json.loads((TOOLCHAIN / "tla.lock").read_text(encoding="utf-8"))
     expected_version = tla_lock["tla_tools"]["reported_tlc_version"]
@@ -195,8 +235,13 @@ def run_tlc(kind: str) -> None:
         if required_coverage:
             command.extend(["-coverage", "1"])
         command.extend(["-config", str(config), str(module)])
-        output = run_capture(command, cwd=TLA_ROOT, timeout=timeout, echo=False)
-        (metadata / "tlc.log").write_text(output, encoding="utf-8")
+        output = run_capture(
+            command,
+            cwd=TLA_ROOT,
+            timeout=timeout,
+            echo=False,
+            output_path=metadata / "tlc.log",
+        )
         try:
             result = successful_tlc_result(
                 output,

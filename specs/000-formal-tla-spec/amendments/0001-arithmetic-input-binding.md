@@ -1,7 +1,7 @@
 # Candidate amendment 0001: native arithmetic input binding
 
 Status: `DRAFT_NOT_AUTHORITY`. Formal impact: `SEMANTIC`. This document is a
-concrete candidate for T029, T031, T044, T047 and T053–T066, not a completed task
+concrete candidate for T029, T031, T044, T047 and T053Ã¢â‚¬â€œT066, not a completed task
 or Formal GO. The merged `cc98f15a...` report remains authority only for its
 unchanged artifact set. This draft does not authorize removal of PR50's arithmetic
 input guard or a qualifying benchmark in either deployment mode.
@@ -34,7 +34,7 @@ arithmetic profile, context or sequence. That root binds:
 
 - certified RoundConfig, height, view, epoch, parent checkpoint and committee role;
 - parameter schema (including QLoRA frozen-base/schema identity where applicable),
-  complete domain×shard assignment, parameter offsets and lengths;
+  complete domainÃƒâ€”shard assignment, parameter offsets and lengths;
 - ISC/EC/APC canonical bytes and IDs, ordered eligible ticket/commitment/AC leaves,
   verified q-shard payloads, per-shard quantum and common-denominator proof;
 - current model artifact bytes/ID and current optimizer artifact bytes/ID;
@@ -185,4 +185,29 @@ inline/SHM cannot alter this rule.
    Only then update native runtime and recover PR50's best source.
 
 The current proposal oracle and its tests are design evidence only. They do not
-discharge items 1–6, satisfy native/cross-language conformance, or establish GO.
+discharge items 1Ã¢â‚¬â€œ6, satisfy native/cross-language conformance, or establish GO.
+
+## Heterogeneous finite input profile (September 24)
+
+The production arithmetic model now takes immutable functions for q values by
+ticket/shard, rational ticket weights, bound denominators by domain, q quantum
+by domain/shard, domain mixture weights, and parent model/optimizer coordinates.
+Ticket and domain orders are explicit profile inputs; the default profiles use
+a fixed finite enumeration. The model checks exact order coverage, reduced
+fractions, divisibility and the canonical mixture LCM. Connecting these modeled
+orders and values to canonical native bytes remains PO-AB1.
+
+PARAMETER walks the ordered eligible domain members, checking every coefficient,
+product and prefix. Conversion checks both specified products before rounding.
+APPLY checks ordered weighted mixture products/prefixes, then uses each shard's
+bound parent coordinates. All model q/current coordinates must fit the signed
+profile. The existing one-coordinate-per-shard abstraction remains explicit.
+
+The positive frozen suffix computes parameter numerators (3,16,-1,-3), model
+(19,-22) and optimizer (2,1). In its first coordinate, rounding the two domains
+first gives mixture R((2*1+0)/3)=1; mixing the exact fractions first would give
+R((2*(1/2)+(-1/2))/3)=0. They remain distinct semantics. Three separate negative
+profiles exercise product, prefix and conversion overflow with otherwise safe
+final values. Six real production 3-of-4 quorums and current recovery/replay are
+scheduled serially; arbitrary interleavings and every crash cut are not covered.
+No byte codec, native guard, production runtime or Formal GO is authorized here.

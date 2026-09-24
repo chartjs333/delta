@@ -19,7 +19,7 @@ BindingShard == CHOOSE shard \in Shards : TRUE
 BindingParameter ==
     ParameterResultBody(HarnessAPC, HarnessDomain, BindingShard,
         ConfiguredParentCheckpoint, ConfiguredParameterSchema,
-        ConfiguredArithmeticProfile, NativeParameterValue(HarnessAPC, HarnessDomain), TRUE)
+        ConfiguredArithmeticProfile, NativeParameterValue(HarnessAPC, HarnessDomain, BindingShard), TRUE)
 BindingRoot == AggregateRootBody(HarnessAPC, {BindingParameter})
 BindingApply == ApplyBody(BindingRoot, ConfiguredParentCheckpoint,
     ConfiguredApplyProfile, ExpectedNextCheckpoint,
