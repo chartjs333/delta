@@ -1,0 +1,10 @@
+{
+  "browser_verified": false,
+  "checked_at": "2026-09-24T06:59:57.7023724Z",
+  "status": "SYSTEM_DNS_HTTPS_OK",
+  "public_url": "https://range-circumstances-josh-evening.trycloudflare.com",
+  "system_dns_https": true,
+  "public_dns_fallback_used": false,
+  "tls_certificate_validation": true,
+  "instance_id": "7772226aa1d7426595c5452b0a50d8fe"
+}

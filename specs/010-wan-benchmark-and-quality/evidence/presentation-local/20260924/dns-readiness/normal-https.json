@@ -1,0 +1,12 @@
+{
+  "checked_at": "2026-09-24T06:59:59.7416936Z",
+  "explicit_ip_override": false,
+  "status": "SYSTEM_DNS_HTTPS_OK",
+  "public_url": "https://range-circumstances-josh-evening.trycloudflare.com",
+  "https_status": 200,
+  "browser_verified": false,
+  "default_dns_addresses": [
+    "104.16.231.132",
+    "104.16.230.132"
+  ]
+}

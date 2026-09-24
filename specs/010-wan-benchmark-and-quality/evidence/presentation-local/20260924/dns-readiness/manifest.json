@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "qualifying": false,
+  "files": [
+    {
+      "path": "before.json",
+      "sha256": "b1d2757a7b8d6792614e3a2f95c0552b0f658394311fef4d18a8818d291897dc"
+    },
+    {
+      "path": "browser-check.json",
+      "sha256": "5fa63da1b0a68f51d0aafe30b6b344b15a26beee123f6b9451c4ccedfbe89364"
+    },
+    {
+      "path": "launcher-reachability.json",
+      "sha256": "f343f6de27520b2a5132307c308185f3740694a550c477af9f0c6f7cfba13e46"
+    },
+    {
+      "path": "normal-https.json",
+      "sha256": "e51cf0f7773d6d14a300dccb2faa6a2b41ce2ec63dcdf218cb40b864a700df30"
+    },
+    {
+      "path": "README.md",
+      "sha256": "5d229f9529010ad33d2b6262767107549e5324846eb0fc3097e6c31a9f2bb42c"
+    }
+  ]
+}

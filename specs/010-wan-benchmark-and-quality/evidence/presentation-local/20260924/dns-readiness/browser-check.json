@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-09-24T07:01:21.646587+00:00",
+  "status": "PASS",
+  "scope": "PUBLIC_BROWSER_LOGIN_PAGE_ONLY",
+  "browser": "Codex in-app browser",
+  "requested_url": "https://range-circumstances-josh-evening.trycloudflare.com/node-training/?lang=en",
+  "observed_title": "DeltaReduce \u00b7 Presentation access",
+  "observed_heading": "Presentation access",
+  "observed_fields": [
+    "Access code",
+    "Open application"
+  ],
+  "browser_dns_error": false,
+  "browser_authenticated_application_verified": false,
+  "system_dns_or_hosts_changed": false,
+  "tunnel_restarted_or_url_rotated": false,
+  "launcher_unit_scenarios": [
+    "unpublished record",
+    "DNS_PENDING fallback",
+    "ordinary HTTPS",
+    "unreachable edge",
+    "TLS validation retained",
+    "no browser overclaim"
+  ],
+  "qualifying_feature010_evidence": false
+}

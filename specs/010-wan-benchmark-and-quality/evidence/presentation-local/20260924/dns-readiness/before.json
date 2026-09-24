@@ -1,0 +1,27 @@
+{
+  "checked_at": "2026-09-24T06:51:56.073852+00:00",
+  "public_url": "https://range-circumstances-josh-evening.trycloudflare.com",
+  "status": "DNS_PENDING",
+  "normal_resolver": "NXDOMAIN",
+  "cloudflare_1_1_1_1": [
+    "104.16.230.132",
+    "104.16.231.132"
+  ],
+  "google_8_8_8_8": [
+    "104.16.230.132",
+    "104.16.231.132"
+  ],
+  "authoritative_cloudflare": "same A records",
+  "negative_cache_observation": {
+    "observed_at": "2026-09-24T06:50:54+00:00",
+    "remaining_seconds": 519,
+    "expected_expiry_utc": "2026-09-24T06:59:33+00:00",
+    "soa": "kevin.ns.cloudflare.com",
+    "soa_minimum_seconds": 1800
+  },
+  "windows_cache_flushed": true,
+  "system_dns_or_hosts_changed": false,
+  "tunnel_rotated": false,
+  "browser_before": "ERR_NAME_NOT_RESOLVED",
+  "reference": "https://developers.cloudflare.com/dns/troubleshooting/dns-issues/#newly-created-record-still-does-not-resolve"
+}
