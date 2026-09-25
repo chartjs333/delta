@@ -1499,3 +1499,62 @@ modules/public schema unchanged. No new TLC/production mutants; retained finite
 unfrozen: scoped checks are not aggregate formal-check. Three demos HTTP 200,
 no restart, frozen refs unchanged. Candidate semantics:
 `sha256:b057047e8712df5159adc1a376a11e2e732e0ead07bdfac40ae52f842c33f94c`.
+
+### Complete public-state preimages and production-action replay
+
+T009/T011/T012/T044/T048/T049/T053/T054/T056/T057/T060, amendment 0001.
+Added the separate `deltareduce.full-public-state.v1-candidate` evidence profile.
+`DeltaReducePublicState.tla` explicitly maps all 64 ProtocolVariables, including
+transport multiplicity, delivered votes, intermediate certificates, repair,
+per-actor sequence/recovery, current pointers, phase/time and crash coverage.
+Inventory checks compare declarations, tuple, record and match clauses; no
+RoundState summary or per-actor journal stands for complete protocol state.
+Canonical tagged values distinguish booleans/integers/strings/model values/sets/
+functions. Records and sequences share their actual TLA function representation;
+sets/domains are ordered without duplicates. Full preimages bind source modules,
+formal semantics and the exact pinned finite configuration. Missing/unsupported
+values fail; unresolved durability cannot masquerade as a complete observation.
+
+Generated TLC replay checks actual production Init, TypeOK, Next and selected
+actions over every complete adjacent state. It does not use a Python action
+approval or a supplied state-equality predicate. A 16-state/15-step path covers
+three honest RoundConfig persist/send/delivery paths, crash/restart/recovery
+before exposure, quorum and stutter. Seven deliberately rehashed invalid paths
+produce expected TLC counterexamples: noninitial state, hidden clock side effect,
+wrong action label, erased durable vote, send-before-persist, QC before third
+delivery and a changed state called stutter. These are new finite replay checks,
+not additional production mutants or a replacement for the retained model suite.
+Exact generated modules/configurations/logs are retained for all eight cases.
+
+Sixteen Python tests cover regeneration, every field omission/change, aliases,
+ordering, source/config/root substitution, incomplete durability, action vocabulary,
+resource limits, inventory drift and fail-closed TLC transcript parsing. The
+existing v1 public trace root counterexample remains valid and honestly scoped:
+legacy label-root fixtures were NOT upgraded to full-state or native refinement.
+The new profile has no native exporter/provenance adapter and is not yet joined
+to the full arithmetic trace/Lean reachable-history relation. Mandatory Lean
+coverage remains 44/45; nativeArithmeticRecoveryRefines stays OPEN. No runtime
+arithmetic guard, baseline demo or native execution behavior was changed.
+
+Evidence: `formal/proposals/evidence/public-state.json`; specification/scope:
+`formal/proposals/public-state-projection.md`. Validation: 196 tooling/38 oracle
+tests, 33 legal/112 illegal legacy traces, full SANY parser, new TLC replay cases,
+Ruff, syntactic consistency and byte-exact regeneration of 301 JSON/nine generated
+Lean files. All Lean inputs unchanged; the checked audit retains 44/45 and the
+previous 980-job build, with no new mathematical proof claimed. Nineteen prior
+TLA modules and the existing public schema unchanged; one projection-only module
+added. Retained 28 safety/7 liveness/27 production mutants retain their prior
+bounded scope. GNU make unavailable; aggregate formal-check is not claimed.
+Phase0 remains unfrozen. Three demos stay HTTP 200, frozen refs unchanged.
+Candidate semantics:
+`sha256:413d169e8ebe06713aa33c8b355a94f71bd6361cc5dbf1261db4e7a265bc7832`.
+
+Next: extend this complete-state/action relation to the arithmetic public path,
+including all intervening vote/certificate/availability/phase actions, and bind
+its original snapshots/context/bytes/sequences (5/6/8) to PublicSnapshot and the
+reachable native journal. The finite config-only example cannot discharge the
+full recovery theorem. Retain distinct unknown/incomplete versus authenticated
+complete scans; source-linked original metadata/exposure/QC/current advancement
+must be derived, not assumed. Decoder/hash/exporter/WAL, arbitrary initial
+snapshots/availability/failures/repair, contract freeze, clean offline reproduction
+and independent review remain mandatory before native authority.

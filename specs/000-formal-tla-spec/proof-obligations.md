@@ -109,6 +109,15 @@ countercheck still passes the adjacency checker. A canonical complete-state
 preimage and its full action relation remain mandatory; snapshot hash identity
 alone cannot discharge them. See `formal/proposals/public-snapshot-proof.md`.
 
+The separate full-public-state candidate now encodes every one of the 64
+`ProtocolVariables` and checks state identities against complete preimages.
+Its generated TLC replay evaluates the production Init/TypeOK/Next and named
+actions for a finite RoundConfig/persist/send/delivery/crash/recovery/QC path;
+seven rehashed invalid paths are rejected. This closes neither the legacy
+trace's opaque-root gap nor native exporter provenance: the full arithmetic
+public history and Lean composition are still open. It is not the remaining
+mandatory theorem. See `formal/proposals/public-state-projection.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

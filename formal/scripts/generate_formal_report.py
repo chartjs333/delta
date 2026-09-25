@@ -492,12 +492,18 @@ def main() -> int:
             "registry provenance and native resolver metadata to first PARAMETER/APPLY "
             "events and reachable journal transitions. Its finite hash samples and "
             "synthetic export provenance are not production authentication or decoding. "
-            "Public state roots are still opaque: the existing checker verifies "
+            "Legacy public state roots are still opaque: the existing checker verifies "
             "adjacency and selected stutters, while fixture roots derive from labels. "
             "A retained countercheck relabels an initial root and keeps checker PASS; "
             "this demonstrates an OPEN full-state-hash obligation, not semantic "
-            "equivalence. Canonical complete-state preimages/actions and quorum/exposure "
-            "binding remain required; nativeArithmeticRecoveryRefines stays missing.",
+            "equivalence. The separate candidate full-public-state profile encodes all "
+            "64 ProtocolVariables, binds source/configuration identities, recomputes "
+            "preimages and replays a finite RoundConfig/crash/recovery path against "
+            "production Init/TypeOK/Next and named actions in TLC. Seven rehashed "
+            "invalid paths are rejected. It is not linked to a native exporter or the "
+            "full arithmetic public/Lean history, and does not upgrade legacy traces. "
+            "Complete native quorum/exposure binding remains required; "
+            "nativeArithmeticRecoveryRefines stays missing.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
