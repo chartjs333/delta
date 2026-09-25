@@ -38,6 +38,6 @@ test_unknown_command_fields_and_bool_result (test_native_binding.NativeBindingTe
 test_wrong_action_role (test_native_binding.NativeBindingTests.test_wrong_action_role) ... ok
 
 ----------------------------------------------------------------------
-Ran 38 tests in 0.253s
+Ran 38 tests in 0.222s
 
 OK

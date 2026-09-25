@@ -271,6 +271,6 @@ test_rejection_does_not_allocate_or_poison_first_admission (test_uncertain_witne
 test_removed_guards_admit_false_rejection_absence_and_readiness (test_uncertain_witness.UncertainWitnessTests.test_removed_guards_admit_false_rejection_absence_and_readiness) ... ok
 
 ----------------------------------------------------------------------
-Ran 231 tests in 202.498s
+Ran 231 tests in 205.871s
 
 OK

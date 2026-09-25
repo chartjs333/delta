@@ -155,7 +155,7 @@ def generate(target=TARGET, vectors=VECTORS):
             f":= checkFromComputed first{i} input{i} extracted{i} read{i} rows{i}",
         ]
     out += ["end DeltaReduce.PublicVoteEffectsCalculations"]
-    target.write_text("\n".join(out) + "\n", encoding="utf-8")
+    target.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":
