@@ -1,0 +1,4 @@
+✔ [1010/1013] Built DeltaReduce.NativeWalBytes (4.4s)
+✔ [1011/1013] Built DeltaReduce.NativeWalVectors (17s)
+✔ [1012/1013] Built DeltaReduce (8.5s)
+Build completed successfully (1013 jobs).

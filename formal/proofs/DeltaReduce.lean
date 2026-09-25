@@ -47,6 +47,8 @@ import DeltaReduce.NativeReceiptBytes
 import DeltaReduce.NativeReceiptVectors
 import DeltaReduce.NativeVoteBytes
 import DeltaReduce.NativeVoteCodecVectors
+import DeltaReduce.NativeWalBytes
+import DeltaReduce.NativeWalVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

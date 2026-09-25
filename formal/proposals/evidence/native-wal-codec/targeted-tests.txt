@@ -1,0 +1,13 @@
+test_corruption_and_truncation (test_native_wal_lean.NativeWalLeanTests.test_corruption_and_truncation) ... ok
+test_mandatory_project_and_audit (test_native_wal_lean.NativeWalLeanTests.test_mandatory_project_and_audit) ... ok
+test_missing_receipt_does_not_mean_absent_record (test_native_wal_lean.NativeWalLeanTests.test_missing_receipt_does_not_mean_absent_record) ... ok
+test_rehashed_policy_substitution (test_native_wal_lean.NativeWalLeanTests.test_rehashed_policy_substitution) ... ok
+test_rehashed_sequence_substitution (test_native_wal_lean.NativeWalLeanTests.test_rehashed_sequence_substitution) ... ok
+test_reproduction_and_honest_scope (test_native_wal_lean.NativeWalLeanTests.test_reproduction_and_honest_scope) ... ok
+test_retained_original_and_historical_receipt (test_native_wal_lean.NativeWalLeanTests.test_retained_original_and_historical_receipt) ... ok
+test_unchanged_source_evidence_pin (test_native_wal_lean.NativeWalLeanTests.test_unchanged_source_evidence_pin) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.050s
+
+OK

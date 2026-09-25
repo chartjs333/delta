@@ -671,6 +671,15 @@ def main() -> int:
             "native/public WAL recovery or authenticated export. Policy/WAL "
             "decoders/replay, source provenance, full public behavior and the "
             "mandatory recovery conjunct remain open; no formal/local GO follows.",
+            "The native DRW1 Lean codec derives exact entry/checksum preimages and "
+            "receipt/frame/sequence/startup-policy digest binding. Structural decoding, "
+            "single-frame scan bounds and all-entry sequence checks are separate; "
+            "state commands count alongside votes. Three retained native frames "
+            "compose with the original ISC semantic receipt using finite hash samples. "
+            "No new native run, full-file scan/replay, policy decoding/provenance, "
+            "physical durability, SHA proof or arithmetic admission is established. "
+            "Unknown outcomes and full native/public recovery remain open; this "
+            "conditional byte relation does not discharge PO-AB1 or authorize GO.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

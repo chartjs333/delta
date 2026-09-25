@@ -2540,3 +2540,71 @@ Mandatory44/45 still FAIL for nativeArithmeticRecoveryRefines; no fresh TLC/new
 mutants. Retained28safety/7liveness/27mutants and132state/131step path remain
 bounded. Phase0 remains unfrozen, make unavailable, aggregate formal-check not
 claimed. Three demos HTTP200/no restart, frozen refs unchanged. NO_GO persists.
+
+## 2026-09-25 — DRW1 entry and original receipt/policy binding
+
+T044/T048/T049/T053/T057/T060, amendment 0001. The candidate remains NO_GO.
+Scope: formal/proposals/native-wal-codec-proof.md. Evidence is recorded in
+formal/proposals/evidence/native-wal-codec.json after the final stable checks.
+
+NativeWalBytes.lean reads the actual DRW1 header, total length, uint64 sequence,
+record kind/reserved bytes and all four sections. General inverse, injectivity
+and successful-decode proofs retain the entire checksum preimage and exact
+canonical bytes. SHA remains an explicit adapter; implementation equivalence,
+cryptography and physical durability are not proved. Structural decoding,
+single-frame scanning and runtime sequence admission are deliberately separate.
+The structural native format permits sequence zero and an empty vote policy
+section. The scanner enforces 72-byte minimum and 64 MiB maximum, reports short
+headers/incomplete declared frames as torn, and rejects corrupt complete headers.
+The all-entry position theorem counts state commands as well as votes.
+
+The composed checker binds a parsed WAL entry to the actual semantic native
+receipt and original vote frame, sequence and startup-policy digest. Policy ID
+is 64 lowercase ASCII SHA hex bytes over the complete provided policy, with no
+vote-ID prefix. Policy decoding, initial producer provenance and runtime
+admission remain open. A valid checksum does not supply those premises.
+
+Generated examples reuse three actual retained native frames: the original ISC
+vote and the separately configured ISC-plus-state-command history. Both vote
+records remain at sequence 1, the command is sequence 2, and historical retry
+retains the original semantic receipt. No native frame is renumbered to the
+separate proposal history 5/6/8. Exact-preimage digest samples are finite; small
+structural counterchecks explicitly use synthetic hashes. Generator checks also
+retain three actual complete-but-unexposed records; missing response never
+implies absent durability. No new native execution, power-loss/OS-kill test,
+unknown-outcome resolution or arithmetic admission is claimed.
+
+Next: compose complete-file scanning and sequence validation, including exact
+validated-prefix bytes and unresolved torn tails, with native replay. Then bind
+state-command results/logical time/request deduplication, original vote admission
+and policy, snapshots and independently authenticated public histories. The
+single-frame/receipt relation does not reconstruct those states or discharge
+nativeArithmeticRecoveryRefines. Full CloseInput/configuration/availability/
+phase/send/delivery/QC/current/crash/unknown composition, contract freeze, clean
+offline reproduction and independent reviews remain required. Native arithmetic
+guards and the healthy demonstrations remain unchanged.
+
+Final stable-source verification: full Lean 1013 jobs, fresh generic kernel and
+113 explicit helper/function/example axiom audits PASS (16 general theorems,
+50 component/kernel proofs, 47 definitions). Only propext/Quot.sound/
+Classical.choice are permitted; no new axiom or proof hole. 326 tooling,
+38 oracle and 8 targeted tests; 33 legal/112 illegal legacy traces;
+Ruff/consistency PASS. All 328 generated files (308 JSON/18 Lean plus input TLA
+and config) reproduce byte-exact. New semantics: sha256:d369d4f6b36d10923f8f8cfb85b70b03b83cd7b1f8b23f5874ba664442e1fa14.
+All 21 TLA modules, public schema, runtime and 147 native witnesses are unchanged;
+145 legacy traces change only semantics ID. The 15 prior native component/WAL
+artifacts retain exact hashes. No fresh TLC/native run or new production mutant
+is claimed; retained 28 safety/7 liveness/27 mutants and the 132-state/131-step
+arithmetic path keep their finite scope. Mandatory coverage remains 44/45 FAIL
+for nativeArithmeticRecoveryRefines. Phase0 remains unfrozen; make is unavailable
+and aggregate formal-check was not executed. Formal/local GO remain absent.
+
+Maintenance during verification: Presentation8870 and Controller8865 were found
+stopped (connection refused); cause was not established. The existing launcher
+restored both on the same c8aea649 baseline without source/UI/training changes.
+Node8872 stayed online and was not restarted. All pages return HTTP200, including
+Verification RU. The saved job57af5edb42364e33ab6049a4a37a289e canonical report was
+rehash-verified against original SHA256
+91d612026a425e6d11b86c0d90c2d54c976dc8bfcd90f9127c9d845c2cfce861.
+Frozen refs remain unchanged. See native-wal-codec/demo-recovery.json; do not
+describe this run as having required no restart.
