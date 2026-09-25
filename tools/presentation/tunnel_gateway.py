@@ -26,6 +26,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 from node_training_view import GET_ROUTES as NODE_GET_ROUTES
 from node_training_view import RUN_ROUTE as NODE_RUN_ROUTE
+from verification_runner import SCENARIOS
 
 PUBLIC_URL = re.compile(r"https://[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com")
 UUID = r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}"
@@ -50,6 +51,10 @@ def allowed(method: str, path: str) -> bool:
                 "/api/health",
                 "/api/workspace",
                 "/readyz",
+                "/verification/",
+                "/verification/app.js",
+                "/verification/i18n.mjs",
+                "/verification/style.css",
             }
             or bool(
                 re.fullmatch(
@@ -67,6 +72,7 @@ def allowed(method: str, path: str) -> bool:
         return path == "/api/workspace"
     return method == "POST" and (
         path in {"/api/train", "/api/simulate", "/api/v1/intent/submit", NODE_RUN_ROUTE}
+        or path in {"/api/verify/" + item for item in ("all", *SCENARIOS)}
         or bool(re.fullmatch(r"/api/v1/execution/" + UUID + r"/cancel", path))
     )
 
@@ -82,7 +88,7 @@ def safe_next(value: str) -> str:
         or value.startswith("//")
         or any(ord(c) < 32 for c in value)
         or len(value) > 2048
-        or parts.path not in {"/", "/admin", "/admin/", "/node-training/"}
+        or parts.path not in {"/", "/admin", "/admin/", "/node-training/", "/verification/"}
     ):
         return "/?lang=en"
     return value
@@ -329,6 +335,7 @@ required maxlength="128" autocomplete="current-password" autofocus>
                 "/admin",
                 "/admin/",
                 "/node-training/",
+                "/verification/",
             }:
                 self.reply(
                     303,

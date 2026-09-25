@@ -96,6 +96,47 @@ class RemoteTests(unittest.TestCase):
             self.assertEqual(headers["Referrer-Policy"], "same-origin")
         self.assertFalse(Upstream.calls)
 
+    def test_verification_login_and_fixed_command_proxy(self):
+        self.assertEqual(self.request("/verification/?lang=ru")[0], 303)
+        self.assertEqual(self.request("/verification/app.js")[0], 401)
+        status, _, headers = self.login(next="/verification/?lang=en")
+        self.assertEqual(status, 303)
+        self.assertEqual(headers["Location"], "/verification/?lang=en")
+        cookie = headers["Set-Cookie"].split(";")[0]
+        self.assertEqual(self.request("/verification/?lang=en", Cookie=cookie)[0], 200)
+        self.assertEqual(
+            self.request(
+                "/api/verify/all", "POST", b"{}", Cookie=cookie, Origin="https://evil.invalid"
+            )[0],
+            403,
+        )
+        self.assertEqual(
+            self.request(
+                "/api/verify/all",
+                "POST",
+                b"{}",
+                Cookie=cookie,
+                Origin=self.gateway.public_url,
+                **{"Content-Type": "application/json", "X-Delta-Presentation": "1"},
+            )[0],
+            200,
+        )
+        self.assertEqual(Upstream.calls[-1][2]["X-Delta-Presentation"], "1")
+        self.assertEqual(
+            Upstream.calls[-1][2]["Origin"], f"http://127.0.0.1:{self.upstream.server_port}"
+        )
+        self.assertNotIn("Cookie", Upstream.calls[-1][2])
+        self.assertEqual(
+            self.request(
+                "/api/verify/arbitrary",
+                "POST",
+                b"{}",
+                Cookie=cookie,
+                Origin=self.gateway.public_url,
+            )[0],
+            404,
+        )
+
     def test_node_example_keeps_auth_origin_and_narrow_route_boundary(self):
         self.assertEqual(self.request("/node-training/?lang=ru")[0], 303)
         self.assertEqual(self.request("/node-training/api/status")[0], 401)

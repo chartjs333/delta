@@ -330,6 +330,11 @@ export function App({ adapter = defaultAdapter }: AppProps) {
               </a>
             ))}
             {presentationAddress ? (
+              <a href={languageLink(new URL('/verification/', presentationAddress).href, language)}>
+                <span aria-hidden="true">✓</span> {t("Verification lab")}
+              </a>
+            ) : null}
+            {presentationAddress ? (
               <a href={languageLink(new URL('/node-training/', presentationAddress).href, language)}>
                 <span aria-hidden="true">◉</span> {t("Node training")}
               </a>

@@ -1,0 +1,21 @@
+{
+  "files": {
+    "arithmetic_binding.py": {
+      "sha256": "1c4d42802d8abec7ef12640e54a9fcef3138b0af19f6c3c6ade4470bbd9b9573",
+      "source_path": "formal/proposals/arithmetic_binding.py"
+    },
+    "native_binding.py": {
+      "sha256": "213eae5f4285bf0e1f540045f1f7fcfef1dc0f9e2d378d602cd0d49efb428060",
+      "source_path": "formal/proposals/native_binding.py"
+    },
+    "normal-apply.json": {
+      "sha256": "a768ce4a038c3413d21a41df634a2c643e237e80855232820144a604258353fa",
+      "source_path": "formal/fixtures/traces/native/normal-apply.json"
+    }
+  },
+  "formal_decision": "NO_GO",
+  "scope": "SYNTHETIC_PINNED_FIXTURE_NOT_NATIVE_AUTHENTICATION",
+  "semantics_id": "sha256:70bea95f4288e579b1dae60ad3cf4ab76f15a1a533c560ec9b564c6ae4e23496",
+  "source_commit": "998866280cc4df4c8ef586a2ef023758b3262237",
+  "version": 1
+}

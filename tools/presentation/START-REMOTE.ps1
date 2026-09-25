@@ -114,6 +114,8 @@ function Show-Address($Health) {
     }
     Write-Output "Presentation EN: $($Health.url)/?lang=en"
     Write-Output "Presentation RU: $($Health.url)/?lang=ru"
+    Write-Output "Verification EN: $($Health.url)/verification/?lang=en"
+    Write-Output "Verification RU: $($Health.url)/verification/?lang=ru"
     Write-Output "Admin UI EN:     $($Health.url)/admin/?lang=en#/live-execution"
     Write-Output "Admin UI RU:     $($Health.url)/admin/?lang=ru#/live-execution"
     Write-Output "SDK:             $($Health.url)/admin/?lang=en#/sdk"

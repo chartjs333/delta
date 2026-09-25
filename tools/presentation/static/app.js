@@ -35,7 +35,7 @@ function renderNotice() {
 }
 function download(job) { const link = el("a", t('download'), "button secondary"); link.href = `/api/report/${job.id}`; link.download = "delta-run.json"; return link; }
 function badge(job) { return el("span", t(job.state), `status ${job.state === "COMPLETED" ? "success" : job.state === "FAILED" ? "failed" : "warning"}`); }
-function title(job) { return t(job.kind === "training" ? 'trainingTitle' : 'controllersTitle'); }
+function title(job) { return t(job.kind === "verification" ? 'verificationTitle' : job.kind === "training" ? 'trainingTitle' : 'controllersTitle'); }
 function applyLanguage() {
   document.documentElement.lang = language;
   document.title = t('documentTitle');
@@ -43,6 +43,7 @@ function applyLanguage() {
   $('advanced').href = adminLink('/live-execution', linkedId);
   $('visual-guide').href = adminLink('/guide');
   $('node-training').href = `/node-training/?lang=${language}`;
+  $('verification').href = `/verification/?lang=${language}`;
   document.querySelectorAll('[data-i18n]').forEach((node) => { node.textContent = t(node.dataset.i18n); });
   document.querySelectorAll('[data-i18n-aria]').forEach((node) => { node.setAttribute('aria-label', t(node.dataset.i18nAria)); });
   try { localStorage.setItem(preferenceKey, language); } catch { /* Keep the current in-memory selection. */ }
@@ -102,7 +103,7 @@ function renderJobs(state) {
   if (job.state === "COMPLETED") {
     const row = el("div", undefined, "result-row"); const text = el("div", undefined, "result-text");
     const duration = Number.isFinite(job.elapsed_ms) ? (job.elapsed_ms / 1000).toLocaleString(locales[language], {minimumFractionDigits: 1, maximumFractionDigits: 1}) : '…';
-    text.append(el("b", t(job.kind === "training" ? 'trainingSuccess' : 'simulationSuccess')), el("small", `${duration} ${t('seconds')} · ${job.id.slice(0, 12)}`));
+    text.append(el("b", t(job.kind === "verification" ? 'verificationSuccess' : job.kind === "training" ? 'trainingSuccess' : 'simulationSuccess')), el("small", `${duration} ${t('seconds')} · ${job.id.slice(0, 12)}`));
     row.append(text, download(job)); result.append(row);
     if (job.result?.phases) {
       const phases = el("div", undefined, "phase-results");

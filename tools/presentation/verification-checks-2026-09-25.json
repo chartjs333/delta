@@ -1,0 +1,48 @@
+{
+  "schema": "deltareduce.presentation-verification-checks.v1",
+  "checked_at": "2026-09-25T10:08:00Z",
+  "scope": "PRESENTATION_TOOLING_ONLY",
+  "semantic_impact": "NONE",
+  "formal_authority": "NO_GO",
+  "gate_eligible": false,
+  "independent_attestation": false,
+  "review": "SELF_REVIEW",
+  "task_references": [
+    "T013",
+    "T023",
+    "T051",
+    "HR010-001"
+  ],
+  "oracle_source_commit": "998866280cc4df4c8ef586a2ef023758b3262237",
+  "tests": {
+    "verification_python": 7,
+    "presentation_server_python": 12,
+    "gateway_python": 11,
+    "workspace_python": 6,
+    "admin_app_language_vitest": 8
+  },
+  "checks": {
+    "ruff_targeted": "PASS",
+    "admin_typecheck": "PASS",
+    "admin_build_live": "PASS",
+    "admin_audit_live": "PASS",
+    "javascript_syntax": "PASS",
+    "browser_en_all_seven": "PASS",
+    "browser_ru_negative_artifact": "PASS",
+    "browser_sha256": "PASS",
+    "browser_reload_retains_result": "PASS"
+  },
+  "computation_sha256": "3c1a423ea205a97027e1345f75fa1b9cd79924fadff844567b739124a1165c25",
+  "staging": {
+    "port": 8873,
+    "all_checks_job": "eda4e0a58f164f898564cfe185705fb9",
+    "all_report_sha256": "faafd6fc505738749a7784ee71174d40dbdc83d37526856eb1c2acf1e0dad5c2",
+    "artifact_negative_job": "6fa8ccd6a6b8411e86842738e77d0697"
+  },
+  "limits": [
+    "Synthetic pinned fixture and Python proposal only.",
+    "No native runtime, WAL, validator signatures or BenchmarkResultQC.",
+    "No formal or scientific qualification claimed.",
+    "Live deployment and remote interaction have a separate smoke record."
+  ]
+}

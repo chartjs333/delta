@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DeltaReduce · Verification lab</title><link rel="stylesheet" href="/verification/style.css"></head>
+<body>
+<aside class="sidebar">
+  <a class="brand" data-link="home" href="/?lang=en"><span class="brand-mark">Δ</span><span>DeltaReduce<small>LOCAL LAB</small></span></a>
+  <div class="nav-label" data-t="workspace">WORKSPACE</div>
+  <nav aria-label="Navigation">
+    <a data-link="home" href="/?lang=en"><span>◈</span><span data-t="overview">Overview</span></a>
+    <a data-link="admin" href="/admin/?lang=en#/live-execution"><span>▦</span><span data-t="execution">Live execution</span></a>
+    <a data-link="guide" href="/admin/?lang=en#/guide"><span>▧</span><span data-t="guide">How it works</span></a>
+    <a data-link="nodes" href="/node-training/?lang=en"><span>◉</span><span data-t="nodes">Node training</span></a>
+    <a class="active" aria-current="page" href="/verification/"><span>✓</span><span data-t="lab">Verification lab</span><b data-t="newBadge">NEW</b></a>
+  </nav>
+  <div class="sidebar-note"><span class="dot"></span><b data-t="reference">Formal reference</b><small data-t="localMode">Local example · SIMULATED_LOCAL</small></div>
+</aside>
+<main>
+  <header><div class="breadcrumb"><span data-t="workspace">Workspace</span> / <b data-t="lab">Verification lab</b></div><span class="pill">SIMULATED_LOCAL</span><label><span class="sr-only" data-t="language">Language</span><select id="language" aria-label="Language"><option value="en">English</option><option value="ru">Русский</option></select></label></header>
+  <div class="page">
+    <section class="hero">
+      <div><div class="eyebrow" data-t="eyebrow">FROM BOUND INPUTS TO A CHECKED RESULT</div><h1 data-t="heading">Same inputs. Verifiable result.</h1><p data-t="intro">Run the arithmetic reference, inspect the next model, then change an input and see why it is rejected.</p></div>
+      <div class="release"><span>25 SEP</span><b>2026</b><small data-t="newDemo">New interactive demo</small></div>
+    </section>
+    <p class="scope-line" data-t="scopeLine">Python formal reference · synthetic fixture · Feature010 qualification in progress</p>
+    <div id="error" class="error" role="alert" hidden></div>
+    <section class="launch panel">
+      <div><span class="kicker" data-t="experiment">THE EXPERIMENT</span><h2 data-t="launchTitle">Can a changed result get through?</h2><p data-t="launchText">One valid path, one repeat calculation, five deliberately invalid inputs. Every run starts a new Python process.</p></div>
+      <div class="launch-actions"><button id="run-all" class="button primary" data-t="runAll">Run all 7 checks</button><span id="connection" class="subtle" role="status" data-t="connecting">Connecting…</span></div>
+    </section>
+    <div class="section-title"><h2 data-t="pipeline">Follow the computation</h2><span id="result-label" class="subtle" data-t="awaiting">Run a check to see actual values</span></div>
+    <section class="pipeline" aria-label="Computation">
+      <article class="stage"><div class="stage-top"><span class="step">01</span><span data-t="boundInputs">Bound inputs</span><details class="hint"><summary aria-label="Help">?</summary><div data-t="inputHelp">The pinned example contains 12 content-addressed artifacts. Model, optimizer, schema, profile and ticket commitments are checked together.</div></details></div><div class="vector-block"><small data-t="parentModel">Parent model</small><strong id="parent-model">—</strong></div><dl><div><dt data-t="optimizer">Optimizer state</dt><dd id="parent-optimizer">—</dd></div><div><dt data-t="artifacts">Artifacts</dt><dd id="artifact-count">—</dd></div><div><dt data-t="domainsShards">Domains / shards</dt><dd id="domain-shards">—</dd></div></dl></article>
+      <article class="stage"><div class="stage-top"><span class="step">02</span><span>PARAMETER</span><details class="hint"><summary aria-label="Help">?</summary><div data-t="parameterHelp">Each shard derives exact integer numerators from committed contributions. Quantum conversion places the coordinates in the domain vector before APPLY.</div></details></div><div class="vector-block"><small data-t="numerators">Shard numerators</small><strong id="parameter-values">—</strong></div><dl><div><dt data-t="converted">Converted coordinates</dt><dd id="converted-values">—</dd></div><div><dt data-t="arithmetic">Arithmetic</dt><dd id="arithmetic">—</dd></div><div><dt data-t="quantum">Apply quantum</dt><dd id="quantum">—</dd></div></dl></article>
+      <article class="stage next"><div class="stage-top"><span class="step">03</span><span>APPLY</span><details class="hint"><summary aria-label="Help">?</summary><div data-t="applyHelp">APPLY checks the complete PARAMETER bodies and current model/optimizer, then computes the next vectors. These are reference outputs, not a published model checkpoint.</div></details></div><div class="vector-block"><small data-t="nextModel">Next model</small><strong id="next-model">—</strong></div><dl><div><dt data-t="nextOptimizer">Next optimizer</dt><dd id="next-optimizer">—</dd></div><div><dt data-t="change">Model change</dt><dd id="model-change">—</dd></div><div><dt data-t="learningRate">Learning rate</dt><dd id="learning-rate">—</dd></div></dl></article>
+    </section>
+    <section class="results panel">
+      <div class="section-title"><div><h2 data-t="checks">Try the checks</h2><p data-t="checksDescription">Choose any scenario to run it again. A deliberate rejection is the expected outcome.</p></div><span id="score" class="score">0 / 7</span></div>
+      <div id="cases" class="cases"></div>
+    </section>
+    <section class="report panel">
+      <div class="section-title"><div><h2 data-t="evidence">Take the evidence with you</h2><p data-t="evidenceText">Results stay on the host after refresh. The browser checks the downloaded report’s SHA-256.</p></div><a id="download" class="button secondary" hidden data-t="download">Download JSON ↓</a></div>
+      <div class="report-grid"><div><small data-t="reportHash">Report SHA-256</small><code id="report-hash">—</code><span id="integrity" class="subtle" role="status"></span></div><div><small data-t="computationHash">Computation SHA-256</small><code id="computation-hash">—</code><span class="subtle" data-t="hashHelp">Identical computed bodies have the same hash; time and scenario belong to the separate report.</span></div></div>
+      <details id="details"><summary data-t="technical">Inspect source, canonical bodies and scope</summary><div class="source-meta"><span data-t="pinnedSource">Pinned source commit</span><code id="source-commit">—</code></div><pre id="raw-report"></pre></details>
+    </section>
+    <section class="history panel"><div class="section-title"><h2 data-t="history">Recent verification runs</h2><span class="subtle" data-t="saved">Saved on this host</span></div><div id="history"></div></section>
+    <footer><b data-t="scopeTitle">What this demonstrates</b><p data-t="scope">A live run of the pinned Python formal proposal on a synthetic example. It emits no native WAL receipt, validator signatures or BenchmarkResultQC. Formal status remains NO_GO; Feature010 qualification is still in progress.</p><div><a data-link="admin" href="/admin/?lang=en#/live-execution" data-t="openAdmin">Open Admin UI →</a><a data-link="nodes" href="/node-training/?lang=en" data-t="openTraining">Show node training →</a></div></footer>
+  </div>
+</main><script type="module" src="/verification/app.js"></script>
+</body></html>

@@ -31,6 +31,7 @@ from urllib.parse import urlsplit
 
 from node_training_view import GET_ROUTES as NODE_GET_ROUTES
 from node_training_view import RUN_ROUTE as NODE_RUN_ROUTE
+from verification_runner import SCENARIOS, validate_result
 from workspace_store import EXECUTION, UUID, default_profile, parse_json, read_profile, save_profile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -189,9 +190,11 @@ class Presentation:
                 "jobs": [copy.deepcopy(job) for job in reversed(list(self.jobs.values()))][:30],
             }
 
-    def submit(self, kind: str) -> dict[str, Any]:
-        if kind not in {"training", "controllers"}:
+    def submit(self, kind: str, scenario: str = "all") -> dict[str, Any]:
+        if kind not in {"training", "controllers", "verification"}:
             raise ValueError("UNKNOWN_OPERATION")
+        if scenario not in ("all", *SCENARIOS):
+            raise ValueError("UNKNOWN_SCENARIO")
         with self.lock:
             if self.active is not None or self.stopping:
                 raise BusyError("Дождитесь завершения текущего запуска.")
@@ -199,6 +202,7 @@ class Presentation:
             job = {
                 "id": job_id,
                 "kind": kind,
+                "scenario": scenario,
                 "state": "QUEUED",
                 "created_at": now(),
                 "updated_at": now(),
@@ -219,6 +223,8 @@ class Presentation:
             self.update(job_id, state="RUNNING")
             if self.jobs[job_id]["kind"] == "training":
                 result = self._train(job_id)
+            elif self.jobs[job_id]["kind"] == "verification":
+                result = self._verification(job_id)
             else:
                 result = self._controllers(job_id)
             self.update(job_id, state="COMPLETED", result=result)
@@ -232,6 +238,33 @@ class Presentation:
             finally:
                 with self.lock:
                     self.active = None
+
+    def _verification(self, job_id: str) -> dict[str, Any]:
+        self.log(job_id, "Проверка закреплённых исходников формального Python-эталона.")
+        output = self.data / ("verification-" + job_id + ".json")
+        self.log(job_id, "Запуск отдельного процесса: расчёты PARAMETER/APPLY и проверки подмены.")
+        process = subprocess.run(
+            [
+                sys.executable,
+                str(Path(__file__).with_name("verification_runner.py")),
+                "--scenario",
+                self.jobs[job_id]["scenario"],
+                "--output",
+                str(output),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+        )
+        if process.returncode or not output.is_file() or output.stat().st_size > 500_000:
+            raise ValueError("REFERENCE_PROCESS_FAILED:" + process.stderr[-1500:])
+        result = validate_result(json.loads(output.read_bytes()))
+        self.log(
+            job_id, "Результаты проверены; отчёт и SHA-256 сохранены. Native WAL не запускался."
+        )
+        return result
 
     def _train(self, job_id: str) -> dict[str, Any]:
         self.log(job_id, "Отправка TRAIN_TICKET в существующий HTTP Controller.")
@@ -557,6 +590,21 @@ class Handler(BaseHTTPRequestHandler):
             with self.server.application.lock:
                 job = copy.deepcopy(self.server.application.jobs.get(path.rsplit("/", 1)[1]))
             self.json(200 if job else 404, job or {"error": "NOT_FOUND"}, download=True)
+        elif path in {
+            "/verification/",
+            "/verification/app.js",
+            "/verification/i18n.mjs",
+            "/verification/style.css",
+        }:
+            filename = "verification/index.html" if path == "/verification/" else path[1:]
+            media = (
+                "text/html"
+                if path.endswith("/")
+                else "text/css"
+                if path.endswith(".css")
+                else "text/javascript"
+            )
+            self.send(200, (STATIC / filename).read_bytes(), media + "; charset=utf-8")
         elif path in {"/", "/app.js", "/i18n.mjs", "/style.css"}:
             filename = "index.html" if path == "/" else path[1:]
             media = (
@@ -629,6 +677,13 @@ class Handler(BaseHTTPRequestHandler):
             threading.Thread(target=self.server.shutdown, daemon=True).start()
             return
         route = {"/api/train": "training", "/api/simulate": "controllers"}
+        scenario = self.path.removeprefix("/api/verify/")
+        if self.path.startswith("/api/verify/") and scenario in ("all", *SCENARIOS):
+            try:
+                self.json(202, self.server.application.submit("verification", scenario))
+            except BusyError as error:
+                self.json(409, {"error": str(error)})
+            return
         if self.path not in route:
             self.json(404, {"error": "NOT_FOUND"})
             return
