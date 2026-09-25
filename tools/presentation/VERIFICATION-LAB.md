@@ -87,6 +87,11 @@ and gateway; reinstall that source's Admin assets using `install-admin-ui.ps1`.
 Do not reset a dirty checkout or stop the Controller/Worker or node host during
 a showing. The checkpoint bundle is in `D:/delta-presentation/checkpoints/2026-09-24`.
 
+For future panel-only deployments, use `presentation-start.ps1 stop -KeepController`
+before starting the panel again. The historical default `stop` also stops the
+Controller. The September 25 first promotion used that default; the Controller
+was gracefully restarted on the same baseline commit and retained its data.
+
 ## Reproduce checks
 
 ```powershell

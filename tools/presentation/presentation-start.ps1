@@ -7,7 +7,8 @@ param(
     [string]$DataRoot = 'D:\delta-data\presentation-20260924',
     [string]$FormalReport = 'C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\reports\formal-verification-report.json',
     [int]$ControllerPort = 8865,
-    [int]$Port = 8870
+    [int]$Port = 8870,
+    [switch]$KeepController
 )
 
 Set-StrictMode -Version Latest
@@ -97,7 +98,7 @@ if ($Action -eq 'stop') {
     elseif ($null -ne (Get-OwnedProcess $Metadata)) {
         throw 'Owned process is unresponsive. It was not killed; inspect server.stderr.txt.'
     }
-    if (Test-Path -LiteralPath $Config) { Invoke-Controller 'stop' }
+    if (-not $KeepController -and (Test-Path -LiteralPath $Config)) { Invoke-Controller 'stop' }
     Write-Output 'Presentation stopped. Saved runs were retained.'
     exit 0
 }
