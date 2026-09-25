@@ -2090,3 +2090,66 @@ change only semantics ID. No fresh TLC or production mutants; previous finite
 Mandatory audit stays 44/45; Phase0 is unfrozen, make unavailable and aggregate
 formal-check not claimed. All three demos HTTP 200 without restart; frozen refs
 unchanged.
+
+### Exact actor-prefix checker and confirmed legacy body-preimage gap
+
+Tasks T044/T048/T049/T053/T057/T060. PublicDurablePrefix derives historical
+arithmetic body correspondence from the same independently resolved graph and
+original metadata, checking complete canonical envelopes, keys, records,
+sequences, receipts/effects and public actor/kind/context/parent/round identity.
+Historical correspondence does not reapply current first-vote freshness.
+Reachability separately supplies original admission. Induction over paired
+slots checks each original sequence and both directions of exact public-set
+coverage. Untrusted ordering evidence must be a duplicate-free permutation of
+the complete actor-filtered public state; equality of counts is insufficient.
+The new known-cut wrapper checks this prefix before actual persistence and
+composes its result with the existing reachable journal. UNKNOWN rejects.
+
+This is a fail-closed PARTIAL bridge. No accepting non-arithmetic body branch
+exists, and otherAuthorized cannot bypass it. The original four-slot prefix
+before the first PARAMETER and all eight original slots fail the stronger gate.
+The prior scoped APIs remain unchanged. No successful nonempty full-prefix
+native execution, full recovery theorem or new acceptance PASS is claimed.
+
+The separately pinned source audit confirms that ISC/EC/APC/ROOT vote bodies
+at original sequences 2/3/4/7 are hashes of four literal labels; their vote
+parent arrays are empty. They are not the different minimal arithmetic graph
+projection artifacts and cannot supply canonical native certificate fields.
+CONFIG at sequence 1 has a canonical round-contract projection preimage, which
+is not a native finalized configuration certificate. Actual arithmetic canonical
+body preimages at 5/6/8 remain unchanged. No old hash, command, receipt or root is
+rewritten. This is a fixture-provenance gap, not a SHA collision or a claimed
+production bug. The machine inventory reports
+MIXED_PREFIX_BODY_PROVENANCE_INCOMPLETE/full_prefix_bridge_pass=false.
+
+Next derive versioned non-arithmetic voted-body witnesses from exact native
+types/encoders and independently bound primitive inputs. PR50 source
+60c692f6e391f839829dfc64e93380db54cd507b distinguishes VoteInputSetBody and its
+body ID from finalized InputSetCertificate/QC IDs; preserve that distinction
+also for EC/APC/ROOT/VIEW/ABORT. Do not use QC signer lists as pre-quorum bodies,
+silently map labels to content IDs, or rewrite the original evidence. A new
+source/version/run registry and explicit projection are required. Then compose
+phase/send/delivery/QC/current/crash/unknown relations. Native bounded adapters,
+WAL/admission, arbitrary snapshots/failures/repair, freeze, clean reproduction
+and independent reviews remain open. Formal-first STOP and NO_GO remain.
+
+Two modules contain sixteen general helper proofs/eight executable definitions
+and nineteen small component/composition examples/seven definitions. All fifty
+names are axiom-audited. Positive alignment examples are mathematical records,
+not authenticated vote bodies; original-prefix negatives reuse actual slots.
+Scope: formal/proposals/public-durable-prefix-proof.md. Evidence:
+formal/proposals/evidence/public-durable-prefix.json.
+
+Final stable-source verification: full Lean build 1007 jobs; fresh generic and
+vector kernels and all fifty new axiom audits pass with only
+propext/Quot.sound/Classical.choice. 248 tooling/38 oracle tests,
+33 legal/112 illegal legacy traces, Ruff and syntactic consistency pass.
+Regeneration is byte-exact for 322 files (305 JSON, fifteen generated Lean and
+input TLA/config). Semantics:
+sha256:c0e7baa47535a52378158b2f28d8a1e138c5b020d698a537badc7f1a5b650795.
+All 21 TLA modules, schema/runtime and 147 native witnesses are unchanged;
+145 legacy traces change only semantics ID. No fresh TLC or production mutants;
+retained 28 safety/7 liveness/27 mutants and the 132-state/131-step arithmetic
+path keep their finite scopes. Mandatory 44/45, unfrozen Phase0 and unavailable
+make remain; aggregate formal-check is not claimed. Three demo services returned
+HTTP 200 without restart and all frozen refs were unchanged.

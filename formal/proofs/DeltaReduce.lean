@@ -41,6 +41,8 @@ import DeltaReduce.PublicApplyArithmetic
 import DeltaReduce.PublicApplyBody
 import DeltaReduce.PublicApplyJoin
 import DeltaReduce.PublicApplyBodyVectors
+import DeltaReduce.PublicDurablePrefix
+import DeltaReduce.PublicDurablePrefixVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

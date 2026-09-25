@@ -591,6 +591,16 @@ def main() -> int:
             "Full prior durable contents, phase/QC/global exposure/current and "
             "public/native recovery remain open. No new combined full-state/native "
             "execution or mandatory recovery proof is claimed.",
+            "PublicDurablePrefix checks exact actor-set coverage, original ordered "
+            "sequences and historical arithmetic bodies/records before known-cut "
+            "persistence. It has no accepting non-arithmetic branch; original mixed "
+            "prefixes fail even with otherAuthorized=true. Source inventory confirms "
+            "ISC/EC/APC/ROOT legacy body hashes are label preimages, not the distinct "
+            "minimal graph artifacts or full native certificate encodings. CONFIG "
+            "has a canonical round-contract projection only. Old envelopes/receipts "
+            "remain unchanged. A versioned typed non-arithmetic witness and its "
+            "provenance are required; this partial fail-closed gate is not full "
+            "native recovery, native execution, or a discharged mandatory theorem.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
