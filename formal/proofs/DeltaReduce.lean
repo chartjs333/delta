@@ -24,6 +24,10 @@ import DeltaReduce.PublicState
 import DeltaReduce.PublicStateVectors
 import DeltaReduce.PublicVoteEffects
 import DeltaReduce.PublicVoteEffectsExamples
+import DeltaReduce.NativeScalarProjection
+import DeltaReduce.NativeScalarProjectionVectors
+import DeltaReduce.PublicScalarNumbers
+import DeltaReduce.PublicScalarNumbersExamples
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

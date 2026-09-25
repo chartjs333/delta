@@ -1803,3 +1803,59 @@ a separate local acceptance scope. See
 `docs/feature010-local-acceptance-20260925.md`. A control report is due at 19:05 UTC
 on September 25. This agreement does not waive actual native arithmetic/WAL or
 formal-first STOP, issue a local PASS, or turn simulation into original GO.
+
+### Lossless scalar/vector correspondence and partial numeric join
+
+T044/T048/T049/T053/T057/T060, amendment 0001. The native vector and scalar-per-
+shard TLA representations now have an explicit checked numeric abstraction.
+`NativeScalarProjection.lean` derives the layout from the bound schema, checks
+exact coordinate coverage and reads by schema offset. Nineteen general helper
+theorems prove no lost/invented coordinates, injectivity, checked PARAMETER
+accumulation and paired model/optimizer projection. Vector shards have no scalar
+projection; this is a model limitation, not a new native admission restriction.
+
+`PublicScalarNumbers.lean` compares complete abstract numeric tables to actually
+derived native results, checks event frame and all-vote sequence, composes the
+complete public effect footprint with original native pre-WAL preparation, and
+preserves reachable journal execution for known persistence cuts. Its sixteen
+general helpers do not establish whole public body/authority/parent/QC identity
+or complete prior durable-prefix correspondence. Unknown append observations
+cannot enter this complete-state API; the earlier incomplete/verified-scan
+recovery layer remains responsible for them. No absence is inferred.
+
+Eighteen scalar-projection kernel examples include the existing pinned schema,
+two native PARAMETER derivations and native APPLY derivation, offsets, signed
+endpoints and rejected coverage/shape cases. Fifteen small public-table/record
+examples reject substituted or missing values and aliases. A deliberate scope
+countercheck accepts numerical records in a body missing authority/parent;
+numeric correctness alone therefore cannot stand for full body validity.
+No new combined full-state/native execution example is claimed. Resource-heavy
+draft reductions were removed; only final successful component/kernel checks
+are retained. The generic checked join and reachability composition compile.
+
+Four mandatory-project modules, seventeen general definitions and six example
+definitions add 91 audited names. Full Lean build (992 jobs), fresh generic
+kernels and axiom audit pass with only permitted propext/Quot.sound/Classical.choice.
+231 tooling/38 oracle tests, 33 legal/112 illegal legacy traces, Ruff and syntactic
+consistency pass. Regeneration is byte-exact for all 321 files (305 JSON,
+fourteen generated Lean files and input TLA/config). No further fixture expansion
+was introduced. All 21 TLA modules, schema, runtime and 147 native witnesses are
+unchanged; 145 legacy public traces change only semantics ID. Prior 28 safety,
+7 liveness, 27 production mutants and the 132-state/131-step arithmetic path
+retain their bounded scope, with no fresh TLC or mutant execution this stage.
+
+Evidence: `formal/proposals/evidence/native-scalar-projection.json`; exact scope:
+`formal/proposals/native-scalar-projection-proof.md`. Semantics:
+`sha256:1d71c93d8c5a09efda9dbe629a4ea15e70bc0968022af3e2967c6859b8ab6e3e`.
+Mandatory coverage remains 44/45: `nativeArithmeticRecoveryRefines` is missing.
+Phase0 remains unfrozen and GNU make unavailable; aggregate formal-check is not
+claimed. Frozen demos and native guards remain unchanged. This is NO_GO and not
+Feature010 completion or local Docker acceptance.
+
+Next: derive the complete public authority/input/body/parent projection from the
+bound native graph and configured identity relation, including denominator,
+quantum and domain/shard identity. Match the entire prior public durable vote set
+to the reachable native all-vote journal instead of only its size. Then compose
+actual phase/send/delivery/QC/current and crash/unknown transitions. General
+bounded adapters/admission, arbitrary snapshots/availability/failures/repair,
+contract freeze, clean offline reproduction and independent review remain open.

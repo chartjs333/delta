@@ -150,9 +150,21 @@ the remaining recovery theorem stay open. See
 preserves the other sixty state fields. The composed checker rejects the prior
 message mutation and hidden current/other-actor sequence changes. Kernel examples
 reuse all nine original arithmetic votes and three loaded full-state pairs.
-This closes the effect-footprint gap, not the full action guards, native
-preparation/history composition or `nativeArithmeticRecoveryRefines`.
+This closes the effect-footprint gap, not full action guards or native recovery.
 Scope: `formal/proposals/public-vote-effects-proof.md`.
+
+`NativeScalarProjection.lean` adds a lossless scalar-shard numeric abstraction
+of actually derived native PARAMETER/APPLY vectors. Exact schema coverage and
+offset lookup retain every coordinate; equal projections imply equal vectors.
+Vector shards have no scalar representation, without altering native admission.
+`PublicScalarNumbers.lean` composes this numeric check, complete effect footprint,
+event frame, all-vote sequence and original native preparation with known-cut
+journal reachability. This is a partial relation: whole body/authority/parent,
+denominator/quantum/domain/shard identity and complete prior journal contents
+still require correspondence proofs. Numeric agreement alone is insufficient;
+a checked counterexample has correct numbers but absent authority/parent.
+See `formal/proposals/native-scalar-projection-proof.md`. The remaining
+`nativeArithmeticRecoveryRefines` conjunct is not discharged by these helpers.
 
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,

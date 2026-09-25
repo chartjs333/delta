@@ -1,0 +1,4 @@
+✔ [989/992] Built DeltaReduce.PublicScalarNumbersExamples (4.0s)
+✔ [990/992] Built DeltaReduce.NativeScalarProjectionVectors (9.1s)
+✔ [991/992] Built DeltaReduce (12s)
+Build completed successfully (992 jobs).

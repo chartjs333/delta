@@ -538,6 +538,17 @@ def main() -> int:
             "all arithmetic/phase/QC/committee/admission guards, reachable TLA Next, "
             "native exporter provenance or physical WAL. Those relations remain to be "
             "joined; nativeArithmeticRecoveryRefines is still missing.",
+            "NativeScalarProjection proves a lossless, injective numeric projection "
+            "only for complete scalar-shard layouts loaded from the native schema. "
+            "Multi-coordinate shards are unrepresentable in this scalar model; this "
+            "does not change native admission. PublicScalarNumbers checks all computed "
+            "numeric cells, event frame, sequence and full effect footprint against "
+            "actual native preparation and composes known-cut journal reachability. "
+            "Whole authority/parent/body/denominator/quantum identity, complete prior "
+            "journal correspondence and phase/QC/exporter/recovery remain open. "
+            "Small kernel cases include a body missing authority/parent that passes "
+            "numeric checks, explicitly demonstrating their limited scope. No new "
+            "full-state/native execution example or full recovery proof is claimed.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
