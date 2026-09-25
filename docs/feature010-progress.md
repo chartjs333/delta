@@ -1859,3 +1859,58 @@ to the reachable native all-vote journal instead of only its size. Then compose
 actual phase/send/delivery/QC/current and crash/unknown transitions. General
 bounded adapters/admission, arbitrary snapshots/availability/failures/repair,
 contract freeze, clean offline reproduction and independent review remain open.
+
+### Complete scalar arithmetic inputs from the bound native graph
+
+Tasks T044/T048/T049/T053/T057/T060. `NativeInputProjection.lean` now loads the
+complete native input plan and committed Q bytes before result computation.
+The loader does not require a later aggregate or successful PARAMETER/APPLY.
+Twenty-five general helpers connect exact ticket order, every assignment and
+each scalar Q cell to its checked canonical artifact and commitment. Ticket
+weights must agree across shards, and domain denominators across assignments;
+inconsistent or missing data cannot silently become a scalar model input.
+Native profile fractions, schema-offset current model/optimizer and checked
+mixture LCM determine the remaining input values.
+
+`PublicArithmeticInputs.lean` adds fourteen general helpers and constructs all
+23 canonical `NativeArithmeticInputs` fields. It preserves all function entries,
+checks lengths before zipping, checks the complete configured namespaces and
+compares the whole derived record. A configured ticket without corresponding
+eligible native Q cells is unrepresentable, rather than assigned invented zero
+values. Scalar width and limit 127 remain explicit finite-model restrictions,
+not changes to native admission or proofs of full-width guard equivalence.
+
+Nineteen native input examples include the original checked input blocks and
+projection, plus separate multi-ticket/domain and rejection cases. Fourteen
+public codec cases and 38 component/encoding proofs check exact full record
+bytes, all 23 field names, alias/namespace/shape failures, changed fraction or
+current values and canonical sequence keys above nine. The generated fixture
+uses the same independently pinned twelve-artifact source and retains its
+synthetic trust/finite codec scope. No new complete native execution or public
+recovery trace is claimed. Component proofs replace superseded resource-heavy
+draft reductions; only final checked files count as evidence.
+
+The four mandatory-project modules add 200 audited declarations. Scope and
+reproduction: `formal/proposals/native-input-projection-proof.md`; evidence:
+`formal/proposals/evidence/native-input-projection.json`. Semantics:
+`sha256:afdbae063a439fe5d37265083d9462ffb15f9cfcf9da585b7a60b94116d2ba1d`.
+
+Final full Lean build (996 jobs), fresh generic kernels and axiom audit pass
+with only propext/Quot.sound/Classical.choice. 235 tooling/38 oracle tests,
+33 legal/112 illegal legacy traces, Ruff and syntactic consistency pass.
+Regeneration is byte-exact for 322 files: 305 JSON, fifteen generated Lean
+files and input TLA/config. All 21 TLA modules, public schema, runtime and 147
+native witnesses remain unchanged; 145 legacy traces change only semantics ID.
+No fresh TLC or production mutant is claimed: retained 28 safety/7 liveness/
+27 mutant results and the 132-state/131-step arithmetic replay keep their
+previous finite scope. Mandatory coverage stays 44/45; Phase0 is unfrozen and
+GNU make unavailable, so aggregate formal-check is not claimed. All three demo
+services returned HTTP 200 without restart, and frozen refs stayed unchanged.
+
+This layer is not the complete authority or PARAMETER/APPLY body. Next: derive
+the authority/ISC/EC/APC/parent/certificate identity chain and compare the entire
+body, then bind the entire prior public durable vote set to the reachable native
+journal. Actual phase/send/delivery/QC/current and crash/unknown composition,
+bounded adapters/admission, arbitrary snapshots/failures/repair, contract freeze,
+offline reproduction and independent review remain open. Mandatory recovery is
+still missing; this is NO_GO, not Feature010 completion or Docker acceptance.

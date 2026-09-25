@@ -166,6 +166,17 @@ a checked counterexample has correct numbers but absent authority/parent.
 See `formal/proposals/native-scalar-projection-proof.md`. The remaining
 `nativeArithmeticRecoveryRefines` conjunct is not discharged by these helpers.
 
+`NativeInputProjection.lean` additionally loads every scalar input assignment
+from bound canonical Q bytes without a later aggregate or result-success premise.
+It checks uniform ticket weights/domain denominators, exact Q/quantum origin,
+model/optimizer coordinates and checked mixture LCM. `PublicArithmeticInputs.lean`
+constructs all 23 canonical scalar input fields with exact configured namespaces;
+the configured universe may not silently add unprovided ticket Q cells. These
+representability restrictions do not change native admission or equate finite
+TLA limits with native arithmetic widths. Complete authority/parent/certificate
+bodies and joined public/native recovery remain open. Scope:
+`formal/proposals/native-input-projection-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

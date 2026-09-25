@@ -549,6 +549,15 @@ def main() -> int:
             "Small kernel cases include a body missing authority/parent that passes "
             "numeric checks, explicitly demonstrating their limited scope. No new "
             "full-state/native execution example or full recovery proof is claimed.",
+            "NativeInputProjection loads complete source-bound scalar input blocks "
+            "without later aggregate/result success and checks ticket-weight/domain-"
+            "denominator representability. PublicArithmeticInputs constructs and "
+            "compares all 23 canonical input fields, with exact configured namespaces, "
+            "Q/quantum/profile/current values and checked mixture LCM. Finite symbols "
+            "and limit 127 do not establish native authentication or full-width "
+            "admission equivalence. Complete authority/parent/certificate bodies, "
+            "prior journal contents, phase/QC/recovery and native adapters remain "
+            "open; nativeArithmeticRecoveryRefines is not discharged.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

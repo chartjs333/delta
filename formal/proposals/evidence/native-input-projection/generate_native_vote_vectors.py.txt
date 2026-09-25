@@ -1,0 +1,1 @@
+native vote vectors: 46 kernel examples, three computed pre-WAL records

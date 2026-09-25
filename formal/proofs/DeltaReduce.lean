@@ -28,6 +28,10 @@ import DeltaReduce.NativeScalarProjection
 import DeltaReduce.NativeScalarProjectionVectors
 import DeltaReduce.PublicScalarNumbers
 import DeltaReduce.PublicScalarNumbersExamples
+import DeltaReduce.NativeInputProjection
+import DeltaReduce.NativeInputProjectionVectors
+import DeltaReduce.PublicArithmeticInputs
+import DeltaReduce.PublicArithmeticInputsVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply
