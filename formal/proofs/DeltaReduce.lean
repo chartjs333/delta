@@ -18,6 +18,8 @@ import DeltaReduce.PublicRecovery
 import DeltaReduce.PublicRecoveryVectors
 import DeltaReduce.PublicReachability
 import DeltaReduce.PublicReachabilityExamples
+import DeltaReduce.PublicSnapshot
+import DeltaReduce.PublicSnapshotVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

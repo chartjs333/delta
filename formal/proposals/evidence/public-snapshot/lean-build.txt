@@ -1,0 +1,2 @@
+✔ [979/980] Built DeltaReduce (5.5s)
+Build completed successfully (980 jobs).

@@ -1442,3 +1442,60 @@ lookup adapters or assumed snapshot equality into authority. Concrete bounded
 native decoder/hash/exporter/WAL, admission completeness, arbitrary snapshots,
 availability/failures/repair, contract freeze, clean offline reproduction and
 independent reviews remain mandatory before merged Formal GO and PR50 work.
+
+## 2026-09-25 — Exact native snapshot/first-event binding (T044/T048/T049/T053/T054/T056/T057/T060)
+
+`PublicSnapshot.lean` now encodes the complete existing v1 native snapshot and
+its exact domain-separated SHA preimage, then checks the separately resolved
+registry entry against the original native anchor/metadata, contract, finalized
+parent, event and all-vote journal. The first event preserves actor/action/round/
+height/epoch/context/body/parents, view/time/validator role, exact command and
+prospective sequence. UNKNOWN retains a null sequence and public-root stutter.
+The executor calls the existing checked persistence operation; successful
+execution derives the previously proved reachable journal invariant.
+
+Thirteen general helper theorems and fifteen functions are audited. Fifty-two
+kernel-decide cases use the three pinned original snapshots/bytes/hash preimages
+at arithmetic sequences 5/6/8. They cover first execution, unknown append and
+field/byte/identity/context substitutions. Four re-encoded snapshots with
+synthetic matching hashes load but fail binding to independent native inputs.
+One additional composition theorem links execution to the reachable four-vote
+prefix. Seven Python tests cover exact generation, five rehashed substitutions
+rejected before output, and the explicit root-scope counterexample below.
+
+A material refinement gap was confirmed: current fixture state roots hash
+`trace_id:state:index` labels; `validate_trace_document` checks adjacency, not a
+full-state preimage. Replacing the initial root and first prior root preserves
+checker PASS without supplying any state preimage. Retained evidence explicitly
+marks FULL_PUBLIC_STATE_ROOT_NOT_VERIFIED. Exact snapshot bytes bind an opaque
+producer root; they do not prove the full public state or its transition hash.
+
+The snapshot registry still needs genuine producer provenance; examples use
+synthetic trust and three finite snapshot hash samples, not a general decoder/
+SHA proof or native exporter. Non-arithmetic phase/QC admission, global delivery/
+quorum eligibility, arbitrary snapshots/failures/repair and production WAL remain
+open. No public schema, TLA transition or runtime arithmetic guard was changed.
+`nativeArithmeticRecoveryRefines` remains OPEN (mandatory 44/45, Formal NO_GO).
+
+Evidence: `formal/proposals/evidence/public-snapshot.json`; exact scope:
+`formal/proposals/public-snapshot-proof.md`. Next: define and check the complete
+canonical public-state preimage and allowed action relation. Inspect
+`formal/tla/DeltaReduceTypes.tla:ProtocolVariables`, `DeltaReduce.tla:Init/Next`,
+`formal/scripts/formal_artifacts.py:validate_trace_document`, and production
+round-state encoding/exporter boundaries before choosing the abstraction.
+Do not substitute per-actor journal roots or legacy RoundState summaries for a
+full state when that hides protocol distinctions. Existing frozen fixtures must
+retain their honest adjacency-only scope. Then compose real phase/QC/exposure
+rules, concrete bounded native adapters, freeze, offline reproduction and reviews.
+
+Validation: mandatory Lean build 980 jobs, fresh snapshot body kernel and fresh
+snapshot vector compilation PASS; all 81 new theorem/function declarations use
+only permitted propext/Quot.sound/Classical.choice. 180 tooling/38 oracle tests,
+33 legal/112 illegal traces, targeted Ruff and byte-exact regeneration of 300
+JSON/nine generated Lean files PASS. Four Lean semantic artifacts changed;
+145 public traces change only semantics ID; native witness bytes and 19 TLA
+modules/public schema unchanged. No new TLC/production mutants; retained finite
+28 safety/7 liveness/27 mutant scope unchanged. GNU make unavailable and Phase0
+unfrozen: scoped checks are not aggregate formal-check. Three demos HTTP 200,
+no restart, frozen refs unchanged. Candidate semantics:
+`sha256:b057047e8712df5159adc1a376a11e2e732e0ead07bdfac40ae52f842c33f94c`.

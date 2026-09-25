@@ -1,0 +1,4 @@
+Command: lake --no-cache build DeltaReduce.PublicSnapshot DeltaReduce.PublicSnapshotVectors
+✔ [18/19] Built DeltaReduce.PublicSnapshot (3.3s)
+✔ [19/19] Built DeltaReduce.PublicSnapshotVectors (351s)
+Build completed successfully (19 jobs).

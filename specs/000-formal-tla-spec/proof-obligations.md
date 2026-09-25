@@ -99,6 +99,16 @@ phase/QC/global exposure and concrete native execution remains open. This is a
 sublayer, not `nativeArithmeticRecoveryRefines`. Scope:
 `formal/proposals/public-reachability-proof.md`.
 
+`PublicSnapshot.lean` adds exact existing v1 snapshot byte/preimage encoding and
+checks independently resolved snapshot/anchor/metadata against the original
+first arithmetic event, all-vote sequence, finalized parent and native arithmetic
+record. Successful execution preserves the proved reachable journal relation.
+This is not full public state-root verification: existing trace roots are opaque
+and fixture roots are hashes of labels. A retained initial-root relabeling
+countercheck still passes the adjacency checker. A canonical complete-state
+preimage and its full action relation remain mandatory; snapshot hash identity
+alone cannot discharge them. See `formal/proposals/public-snapshot-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

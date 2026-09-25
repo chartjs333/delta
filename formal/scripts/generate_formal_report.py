@@ -488,6 +488,16 @@ def main() -> int:
             "Authenticated full public snapshots/state roots, non-arithmetic phase/QC "
             "and global SendVoteEnvelope eligibility and concrete native adapters "
             "remain open; this invariant does not close nativeArithmeticRecoveryRefines.",
+            "PublicSnapshot binds exact v1 snapshot encoding/hash preimages, independent "
+            "registry provenance and native resolver metadata to first PARAMETER/APPLY "
+            "events and reachable journal transitions. Its finite hash samples and "
+            "synthetic export provenance are not production authentication or decoding. "
+            "Public state roots are still opaque: the existing checker verifies "
+            "adjacency and selected stutters, while fixture roots derive from labels. "
+            "A retained countercheck relabels an initial root and keeps checker PASS; "
+            "this demonstrates an OPEN full-state-hash obligation, not semantic "
+            "equivalence. Canonical complete-state preimages/actions and quorum/exposure "
+            "binding remain required; nativeArithmeticRecoveryRefines stays missing.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
