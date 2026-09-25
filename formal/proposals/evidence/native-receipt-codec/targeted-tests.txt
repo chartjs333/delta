@@ -1,0 +1,11 @@
+test_every_decl_in_mandatory_import_and_axiom_audit (test_native_receipt_codec.NativeReceiptTests.test_every_decl_in_mandatory_import_and_axiom_audit) ... ok
+test_exact_generator_and_source_pins (test_native_receipt_codec.NativeReceiptTests.test_exact_generator_and_source_pins) ... ok
+test_native_codec_all_actions_not_admission (test_native_receipt_codec.NativeReceiptTests.test_native_codec_all_actions_not_admission) ... ok
+test_native_hash_counterchecks_are_distinct_from_container_shape (test_native_receipt_codec.NativeReceiptTests.test_native_hash_counterchecks_are_distinct_from_container_shape) ... ok
+test_native_original_frames_retain_context_sequence_id (test_native_receipt_codec.NativeReceiptTests.test_native_original_frames_retain_context_sequence_id) ... ok
+test_observation_mutations_reject (test_native_receipt_codec.NativeReceiptTests.test_observation_mutations_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.104s
+
+OK

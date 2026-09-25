@@ -650,6 +650,15 @@ def main() -> int:
             "Initial policy provenance, complete public state/action and Lean/native "
             "WAL refinement, general adapters and arithmetic execution remain open. "
             "These actual local non-arithmetic runs are not full Feature010 GO.",
+            "The native receipt container layer proves general big-endian and sized "
+            "section inversion, DVREC001 structural roundtrip/injectivity and exact "
+            "receipt fields independent of operational replay. Nine unchanged native "
+            "codec fixtures and 27 malformed/hash counterchecks retain actual binary "
+            "outputs. The Lean structural decoder deliberately does not prove DRC1 "
+            "frame semantics or ID-to-frame SHA binding; an unauthenticated container "
+            "countercheck documents that gap. Codec examples for PARAMETER/APPLY "
+            "are not admitted native votes. Policy/WAL/public recovery and native "
+            "arithmetic authority remain open; this layer does not discharge PO-AB1.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

@@ -43,6 +43,8 @@ import DeltaReduce.PublicApplyJoin
 import DeltaReduce.PublicApplyBodyVectors
 import DeltaReduce.PublicDurablePrefix
 import DeltaReduce.PublicDurablePrefixVectors
+import DeltaReduce.NativeReceiptBytes
+import DeltaReduce.NativeReceiptVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

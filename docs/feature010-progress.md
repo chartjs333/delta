@@ -2425,3 +2425,55 @@ commitment-content-availability/root relation, phase/send/delivery/QC/current,
 arbitrary snapshots/failures/repair and unknown outcomes remain open. The general
 nativeArithmeticRecoveryRefines, contract freeze, clean offline reproduction,
 independent reviews and joined runtime/profile/GPU/Docker evidence remain required.
+
+
+## 2026-09-25 native DVREC001 structural inverse and byte identity
+
+T044/T048/T049/T053/T057/T060. Continued from643bbf3 / NO_GO overlay47e81ab.
+NativeReceiptBytes.lean implements actual binary receipt-container fields and
+proves general bounded big-endian/length-section inversion, complete roundtrip,
+encoding injectivity, canonical decoded bytes and exact field preservation.
+Operational replay does not alter bytes. The native16MiB/frame/71byteID/4096text
+bounds and complete consumption are explicit; encoded length is derived.
+
+This is STRUCTURAL container validity, not full native semantic receipt parsing:
+DRC1 frame fields, native domain-separated SHA/ID-to-frame relation and admission
+remain open. An explicit kernel countercheck accepts unauthenticated frame/ID
+bytes with valid structure. Do not treat this as parser equivalence or authority.
+NativeReceiptVectors retain nine original native frames/exact receipts; full
+encoding proofs use components and decoder results use the general inverse.
+Reserved-byte rejection uses a general theorem. Small edge/counterexamples cover
+sequence/action/text/section limits and UINT64 maximum. All declarations audited.
+
+Nine unchanged PR50 translation units execute nine operational codec cases and
+27 negative checks (reserved/trailing/hash mismatch). All replay bytes identical.
+Native hash mismatch rejects despite valid container shape. PARAMETER/APPLY are
+CODEC-only cases, not admitted votes; no nativeRuntime/WAL/arithmetic/network run
+is newly claimed. Prior62 runtime/WAL observations stay separate and unchanged.
+Scope formal/proposals/native-receipt-codec-proof.md; source-bound evidence
+formal/proposals/evidence/native-receipt-codec.json. No full recovery theorem or
+GO/local PASS. Full formal tests/build/refinement/reproduction and their exact
+counts are retained in that machine-readable evidence. Semantics changes because
+mandatory Lean inputs change, not because runtime/TLA transitions were edited.
+
+Next bind complete DRC1 vote field parsing/canonical encoding and actual vote-ID
+hash preimage to this container, then connect original canonical receipt and
+policy identity to native WAL decoding/replay and the reachable public history.
+Do not assume an expected receipt/whole-body translation or accept an approval
+Boolean. Initial policy provenance, full public CloseInput/configuration/phase/
+send/QC/current/unknown composition and nativeArithmeticRecoveryRefines remain
+open. Contract freeze/offline reproduction/independent reviews and joined native
+profile/GPU/Docker evidence are still required. Healthy demos remain reserved.
+
+Final frozen-source verification: full Lean1009 jobs, fresh receipt/vector kernels,
+115 declaration audits (propext/Quot.sound only),19 general helpers/52 examples;
+311tooling/38oracle/6targeted,33legal/112illegal legacy,Ruff/consistency PASS.
+324 files (306JSON/16generatedLean/inputTLA/config) reproduce byte-exact;15prior
+native component/WAL artifacts unchanged. All21TLA/schema/runtime/147native
+witnesses unchanged;145legacy traces change only semanticID. New semantics:
+sha256:2baf77eb5d992dd403e1c5de86660da993be337024f86720ffac3218d06b70fd.
+Mandatory44/45 remains FAIL for nativeArithmeticRecoveryRefines. No fresh TLC or
+production mutants; earlier28safety/7liveness/27mutants and132state/131steppath
+retain finite scope. Phase0 unfrozen, make unavailable; aggregate formal-check
+not claimed. DemosHTTP200, no restart, frozenrefs unchanged. Only final successful
+source checks count; draft recursion/syntax/source-selector failures superseded.
