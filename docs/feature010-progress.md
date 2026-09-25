@@ -2201,3 +2201,63 @@ No new Lean build/TLC/production mutant is claimed; the prior 1007-job build,
 44/45 audit, 28 safety/7 liveness/27 mutants and 132-state/131-step path retain
 their old scope. Phase0 remains unfrozen and make unavailable. Three demo
 services returned HTTP 200 without restart; frozen refs remain unchanged.
+
+### Complete native certificate bytes and ISC/EC/APC/ROOT voted-body components
+
+Tasks T044/T048/T049/T053/T057/T060. A separate versioned fixture constructs
+seven exact native certificates (ISC/seed/norm/EC/APC/PARAMETER QC/ROOT QC),
+retaining their distinct QC IDs and four pre-quorum body IDs. The checker resolves
+the exact anchored bytes and complete shared parent/leaf chain. EC's seed parent
+is separately supplied under the exact EC ID and checked against APC; it is not
+present in the native EC certificate. Missing/substituted/extra/duplicate leaf
+records, wrong contexts/parents and malformed canonical bytes reject.
+
+Unmodified PR50 canonical/SHA/certificate translation units and headers, plus
+four body structs and twenty exact consensus functions, compiled with MSVC
+19.29.30146 x64 C++20/W4/WX. Seven certificate byte strings/content IDs and four
+voted-body IDs match independent Python construction. Four Merkle cases include
+odd-leaf promotion. Five actual native shape rejections and three identity
+variants pass; changed signers change QC ID but retain the pre-quorum body ID.
+Ten native Git source blobs and all twenty-four extracted spans are pinned to
+60c692f6e391f839829dfc64e93380db54cd507b. This is native component execution,
+not reactor/admission/WAL/exporter execution or a native arithmetic benchmark.
+
+Native certificate bytes keep their ORIGINAL cc98f15a semantic ID. They are not
+rehashed under the candidate amendment and do not provide compatible formal
+authority. Synthetic signers, primitive input/availability/norm/seed roots,
+configuration IDs and EC seed metadata still lack independent provenance.
+PARAMETER QC result 1 is the old component fixture, not the candidate vector
+computation. An explicit countercheck rehashes a structural chain around another
+opaque ISC root: original-anchor verification rejects it, while a caller-supplied
+new anchor passes only the structural checks and still reports no authenticated
+export/admission. Threshold/list shape is not signature or committee verification.
+
+Scope: formal/proposals/native-certificate-chain.md. Evidence:
+formal/proposals/evidence/native-certificate-chain.json. Sixteen new tests cover
+exact source/output reproduction, every certificate substitution/removal,
+rehashed parent/context/leaf changes, metadata and signer/body separation,
+Merkle order/coverage, strict types/fractions/resources/versions, fixed-anchor
+counterchecks and fail-closed C++ result parsing. Proposal ASCII/list/size/depth
+bounds are explicit restrictions, not native parser/admission equivalence.
+
+Verification: 275 tooling/38 oracle tests, 33 legal/112 illegal legacy traces,
+Ruff and syntactic consistency pass. New fixture/harness/component results
+regenerate byte-exactly; all preceding 322 generated files plus the previous
+three ISC artifacts remain unchanged. No Lean/TLA/runtime/schema/legacy/native
+witness input changed. Semantics remains
+sha256:c0e7baa47535a52378158b2f28d8a1e138c5b020d698a537badc7f1a5b650795.
+No new Lean/TLC/production-mutant run is claimed; retained 1007-job build,
+44/45 audit, 28 safety/7 liveness/27 mutants and 132-state/131-step path keep
+their bounded scope. Phase0 remains unfrozen, make unavailable. The three demo
+services remain HTTP 200 without restart and frozen refs are unchanged.
+
+The stronger mixed-prefix gate still rejects the old label-body history. No
+receipt, sequence 5/6/8 or journal root was rewritten. Next bind actual complete
+configuration, commitment/availability and closed-input snapshot primitives to
+these typed bodies and their public fields; derive supported non-arithmetic
+branches in the mandatory Lean prefix bridge. Then compose phase/send/delivery/
+QC/current/crash/unknown relations. CONFIG/VIEW/ABORT, native bounded adapters,
+WAL/admission/recovery, arbitrary snapshots/failures/repair, contract freeze,
+clean reproduction and independent reviews remain open. Mandatory
+nativeArithmeticRecoveryRefines is still missing. Formal and local acceptance
+remain NO_GO/unissued; Docker/synthetic participants do not waive these gates.

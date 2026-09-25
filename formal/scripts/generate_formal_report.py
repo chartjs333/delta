@@ -611,6 +611,16 @@ def main() -> int:
             "closed-input authority projection remain unproved; legacy labels and "
             "receipts are not rewritten. No new Lean/TLC recovery proof or local "
             "acceptance is established by these synthetic source fixtures.",
+            "The separate native certificate-chain proposal compiles unchanged PR50 "
+            "canonical, SHA and certificate translation units plus extracted body "
+            "projections. Seven certificate encodings/content IDs, four ISC/EC/APC/ROOT "
+            "body IDs and Merkle cases match Python. Its exact parent/leaf checker "
+            "requires an externally fixed root and separate EC-to-seed metadata. "
+            "The old native formal semantics is retained, not upgraded to candidate "
+            "authority. Synthetic signer lists and input roots are not authenticated; "
+            "shape checks do not establish availability, phase/QC or arithmetic "
+            "admission. This is component execution only, with no new runtime/WAL, "
+            "public/Lean prefix bridge, recovery theorem or local acceptance.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
