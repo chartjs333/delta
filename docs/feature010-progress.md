@@ -1914,3 +1914,50 @@ journal. Actual phase/send/delivery/QC/current and crash/unknown composition,
 bounded adapters/admission, arbitrary snapshots/failures/repair, contract freeze,
 offline reproduction and independent review remain open. Mandatory recovery is
 still missing; this is NO_GO, not Feature010 completion or Docker acceptance.
+
+
+### Conditional complete public authority and parent construction
+
+Tasks T044/T048/T049/T053/T057/T060. `PublicAuthority.lean` constructs the ten
+public arithmetic authority fields from actual checked native input projection.
+All 23 arithmetic-input fields and schema-offset current values are retained.
+ISC, seed, EC and APC records are built from the original commitments, eligible
+members and checked native parent-reference edges; no whole translated parent
+or authority body is supplied. The complete candidate and canonical tagged-value
+shape are checked. Twenty-seven general helpers establish original metadata
+keys, entry count/order/provenance, exact parent links, full inputs and current
+model/optimizer fields. Sorting retains entries; canonical validation rejects
+duplicates. Thirty-eight component/kernel cases include actual pinned native
+header/commitment references and separately constructed complete public values.
+
+Configuration, seed, norm evidence, coefficient symbols and close policy are
+not present in the minimal native parent payloads. The new named MetadataTrust
+premise must independently authenticate those primitive values. Context/ref/Q
+substitutions cannot reuse the same lookup key. Fixture metadata is synthetic,
+and arbitrary alias injectivity/native exporter authentication remains open.
+This is a conditional construction, not authenticated production certificates,
+phase/quorum admission, a full PARAMETER/APPLY body or recovery proof. No new
+combined full-state/native execution trace is claimed. Original artifact bytes
+and native sequences 5/6/8 stay unchanged.
+
+Scope: `formal/proposals/public-authority-proof.md`; final evidence:
+`formal/proposals/evidence/public-authority.json`. Native arithmetic guard and
+formal-first STOP remain active. The next substantive stage constructs and
+compares the entire PARAMETER/APPLY body using these parents and the actual
+native computations, then binds the full prior durable set and phase/QC/current
+and crash/unknown transitions. The mandatory native recovery theorem, general
+bounded adapters/admission, arbitrary snapshots/failures/repair, contract freeze,
+clean reproduction and independent review remain open. NO_GO is unchanged;
+Docker/synthetic acceptance is not issued by these proofs.
+
+Final stable-source checks: full Lean build 998 jobs, fresh generic/vector kernels
+and all 106 new declaration audits pass with only propext/Quot.sound/Classical.choice.
+238 tooling/38 oracle tests, 33 legal/112 illegal legacy traces, Ruff and syntactic
+consistency pass. Mandatory audit remains 44/45 (nativeArithmeticRecoveryRefines
+missing); Phase0 remains unfrozen and aggregate formal-check is not claimed.
+Semantics: `sha256:9fa840076d8943d1987352a4959bd5827c7cf9424834ff7cf7dc87ad90b15ae5`.
+Byte-exact regeneration covers 322 files (305 JSON, fifteen generated Lean,
+input TLA/config). All 21 TLA modules, public schema, runtime and 147 native
+witnesses are unchanged; 145 legacy traces change only semantics ID. No fresh
+TLC or production mutants are claimed. Three demo services returned HTTP 200
+without restart and all frozen refs remain unchanged.

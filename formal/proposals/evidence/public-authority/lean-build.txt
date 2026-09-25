@@ -1,0 +1,3 @@
+✔ [996/998] Built DeltaReduce.PublicAuthorityVectors (5.4s)
+✔ [997/998] Built DeltaReduce (7.4s)
+Build completed successfully (998 jobs).

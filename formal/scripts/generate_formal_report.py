@@ -558,6 +558,15 @@ def main() -> int:
             "admission equivalence. Complete authority/parent/certificate bodies, "
             "prior journal contents, phase/QC/recovery and native adapters remain "
             "open; nativeArithmeticRecoveryRefines is not discharged.",
+            "PublicAuthority constructs the ten-field arithmetic authority and exact "
+            "ISC/seed/EC/APC parent records from checked native inputs and separately "
+            "resolved primitive metadata. Keys retain complete original context, "
+            "native references and ordered Q commitments; whole translated bodies "
+            "are not supplied. Metadata authenticity is an explicit unresolved "
+            "premise, with synthetic fixture trust; aliases are not cryptographic "
+            "identity. Complete PARAMETER/APPLY bodies, phase/quorum/delivery "
+            "admission, prior journal correspondence and native recovery remain "
+            "open. Authority construction does not discharge the recovery conjunct.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

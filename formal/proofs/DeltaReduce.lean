@@ -32,6 +32,8 @@ import DeltaReduce.NativeInputProjection
 import DeltaReduce.NativeInputProjectionVectors
 import DeltaReduce.PublicArithmeticInputs
 import DeltaReduce.PublicArithmeticInputsVectors
+import DeltaReduce.PublicAuthority
+import DeltaReduce.PublicAuthorityVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply
