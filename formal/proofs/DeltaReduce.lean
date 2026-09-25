@@ -34,6 +34,9 @@ import DeltaReduce.PublicArithmeticInputs
 import DeltaReduce.PublicArithmeticInputsVectors
 import DeltaReduce.PublicAuthority
 import DeltaReduce.PublicAuthorityVectors
+import DeltaReduce.PublicParameterBody
+import DeltaReduce.PublicParameterJoin
+import DeltaReduce.PublicParameterBodyVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

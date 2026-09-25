@@ -1961,3 +1961,66 @@ input TLA/config). All 21 TLA modules, public schema, runtime and 147 native
 witnesses are unchanged; 145 legacy traces change only semantics ID. No fresh
 TLC or production mutants are claimed. Three demo services returned HTTP 200
 without restart and all frozen refs remain unchanged.
+
+
+### Complete PARAMETER body and checked native-preparation composition
+
+Tasks T044/T048/T049/T053/T057/T060. PublicParameterBody constructs all fifteen
+public PARAMETER fields from actual DerivedParameter rows and the checked
+PublicAuthority/input corpus. It compares the whole canonical body, including
+all authority and parent records. Frame, assignment, original ordered rows,
+weights, Q cells, denominator and quantum remain bound to native inputs. The
+former numeric-only body without authority now has a general rejection proof.
+No later aggregate or conversion is needed for PARAMETER construction.
+
+Narrow arithmetic is recomputed from the original rows; equal output at native
+and model widths follows from their exact recurrence. Coefficients, products
+and every prefix are checked. The separate public result bound is symmetric,
+whereas arithmetic permits -limit-1: at limit 127, -128 passes raw arithmetic
+but fails the result guard. The supported projection uses equal model/result
+bounds; binding that equality to the actual configuration remains required.
+Denominator fitting adds a representability restriction absent from the TLA
+parameter guard. These are not new native admission restrictions or a proof
+that native INT64/INT128 success implies bounded model success.
+
+PublicParameterJoin loads these source-bound bodies together with actual
+original NativePrepared records, complete PublicVoteEffects and original
+all-vote sequence, then composes successful known-cut persistence with
+PublicReachability. UNKNOWN and APPLY reject at this new complete-body API.
+The entire prior public durable set, shared alias/configuration identity,
+phase/committee/availability/QC/send/current guards and complete recovery remain
+open. MetadataTrust remains independently required and synthetic in fixtures.
+This stage is not native execution or a new full-state/native trace.
+
+The three modules contain 23 general helpers, 14 executable definitions and
+33 component/kernel proofs plus five small fixture definitions: 75 names are
+axiom-audited. Native examples reuse original two PARAMETER computations; other
+cases separate body components and arithmetic-width failures. Scope and
+reproduction: formal/proposals/public-parameter-body-proof.md; final evidence:
+formal/proposals/evidence/public-parameter-body.json. Semantics:
+sha256:9bdb3c2ab80b5815b3bd75c599c8d5ea294e31977d57898a37a65c987a16ffff.
+
+Next: construct the entire certified PARAMETER leaf corpus and aggregate/APPLY
+body, including narrow conversion/mixture/optimizer guards. Check nextCheckpoint
+against the actual command/current-advance contract: read-only production
+CurrentPointerStore::advance requires next_checkpoint_id == apply_qc.next_model_hash,
+while the present native APPLY_EXPECTED body contains next vector hashes but no
+independent nextCheckpoint field. NativeReplay currently delegates the checkpoint
+edge to named QC authentication. Do not invent a new checkpoint name or claim
+this relation without checking the contract and public identity mapping. Then
+match the full prior durable prefix and compose actual phase/QC/crash/unknown
+behavior. The mandatory recovery theorem and full native/benchmark gates remain
+open; NO_GO and formal-first STOP stay active.
+
+Final stable-source verification: full Lean build 1001 jobs, fresh body/join/vector
+kernels and all 75 axiom audits pass with only propext/Quot.sound/Classical.choice.
+241 tooling/38 oracle tests, 33 legal/112 illegal legacy traces, targeted Ruff
+and syntactic consistency pass. A report-text line-length warning was corrected
+without changing its string value; final Ruff checks pass. Mandatory audit stays
+44/45, Phase0 is unfrozen and GNU make unavailable; aggregate formal-check is not
+claimed. Byte-exact regeneration covers 322 files (305 JSON, fifteen generated
+Lean and input TLA/config). All 21 TLA modules, schema, runtime and 147 native
+witnesses remain unchanged; 145 legacy traces change only semantics ID. No fresh
+TLC or production mutant is claimed. The previous bounded 28 safety/7 liveness/
+27 mutant results and 132-state/131-step replay retain their scope. All three
+demos returned HTTP 200 without restart and frozen refs remained unchanged.

@@ -1,0 +1,3 @@
+✔ [999/1001] Built DeltaReduce.PublicParameterBodyVectors (8.5s)
+✔ [1000/1001] Built DeltaReduce (6.3s)
+Build completed successfully (1001 jobs).

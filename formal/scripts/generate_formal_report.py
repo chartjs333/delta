@@ -564,9 +564,21 @@ def main() -> int:
             "native references and ordered Q commitments; whole translated bodies "
             "are not supplied. Metadata authenticity is an explicit unresolved "
             "premise, with synthetic fixture trust; aliases are not cryptographic "
-            "identity. Complete PARAMETER/APPLY bodies, phase/quorum/delivery "
+            "identity. This authority layer alone does not establish complete bodies, "
+            "phase/quorum/delivery "
             "admission, prior journal correspondence and native recovery remain "
             "open. Authority construction does not discharge the recovery conjunct.",
+            "PublicParameterBody constructs and compares all fifteen PARAMETER fields "
+            "from actual checked native rows and the complete constructed authority. "
+            "The narrow accumulator is recomputed, with a separate symmetric result "
+            "guard for the supported equal-bound configuration. Wide success alone "
+            "is insufficient; denominator fitting adds a projection restriction. "
+            "PublicParameterJoin composes this body with original native preparation, "
+            "full effect footprint and actual known-cut journal execution. UNKNOWN "
+            "and APPLY are not accepted by this complete-body API. Full prior durable "
+            "contents, unified alias/configuration authentication, phase/QC/global "
+            "exposure and joined recovery remain unproved; nativeArithmeticRecoveryRefines "
+            "is still missing. Component fixtures are not a new native execution.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
