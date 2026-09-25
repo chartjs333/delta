@@ -520,6 +520,15 @@ def main() -> int:
             "It is a finite completed-trace correspondence, not general PARAMETER "
             "admission, unknown-durability recovery or Lean history composition. "
             "No new mandatory theorem or native authority is claimed.",
+            "PublicState.lean now represents all 64 tagged finite public-state fields, "
+            "checks complete canonical preimages and derives first arithmetic envelopes, "
+            "all-vote sequences and original parent/actor/time metadata. The native "
+            "identity map and SHA adapter remain explicit boundaries. This typed-input "
+            "sublayer does not prove byte decoding, encoding injectivity, native "
+            "authentication, all after-state effects or production Init/Next/QC behavior. "
+            "Its source-linked full-state kernel examples use a synthetic zero semantic "
+            "ID to avoid a semantic self-hash cycle; finite SHA samples are not crypto "
+            "authority. It does not discharge nativeArithmeticRecoveryRefines.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

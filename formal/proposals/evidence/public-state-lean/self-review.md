@@ -1,0 +1,16 @@
+# Self-review — complete public-state proof layer
+
+This is a self-review, not an independent attestation.
+
+- Reviewed all 64 names against production `ProtocolVariables`; extraction keeps the complete state object and preimage, while its scalar frame has a deliberately narrower claim.
+- Checked that the loader uses a separately provided expected semantic/source/configuration identity and never upgrades the opaque legacy snapshot root.
+- Checked all-vote sequence counting, actor, proposed body, parent, fresh context and retained durable envelopes. Full after-state effects and TLA Next are intentionally not inferred; the message-set counterexample records that limitation.
+- Checked the identity-map/SHA boundaries: neither establishes native authentication. Full model/optimizer/arithmetic/QC provenance remains in the prior separate layers and has not been joined into the mandatory recovery theorem.
+- Inspected generated-byte construction: literal fragments are emitted from independently canonicalized Python tagged values; no fields or bytes are omitted. The zero semantic ID avoids a generated semantic-source self-hash cycle and is explicitly synthetic.
+- Generated constant data is marked `noncomputable` only to skip native code emission. Byte equalities are checked by kernel reduction, and other finite examples by `decide +kernel`; no native-decide or new axiom is used. General checker functions remain executable.
+- Early whole-document elaboration exhausted memory. Encoding, canonicality, depth and node-count proofs are composed from checked component equations; a proved common-byte-prefix lemma avoids expanding large identical certificates during ordering comparisons. Sequential elaboration and avoiding native compilation of proof-only data further limit resource use. Direct simplification of full byte-list lengths remained too expensive; the final generator instead composes generic append/intercalation length lemmas from checked child lengths, preserving the full byte comparisons. Only final successful build/audit results are accepted as proof evidence; failed diagnostic attempts are not counted as passing cases.
+- Unknown/incomplete observations have no invented total-state fallback; this layer does not add crash recovery or change native/runtime code.
+- Corrected two draft vector defects before acceptance: a dependent native-frame result cannot be flattened with ordinary Option.bind, so the example now maps its checked isSome result; clearing the original empty message set was not a mutation, so the scope countercheck now inserts an actual earlier nonempty source message set and asserts the difference before generation. Neither failed draft was accepted as a proof or a protocol transition.
+- The imported foundation did not provide the draft's binary-congruence lemma. The final foundation proves its own helper by equality elimination. Header and document equations compose checked literal fragments; failed draft elaboration and its resource failures are not evidence of successful proof checking.
+
+The missing full public/native recovered-state relation, concrete producer provenance, bounded native decoder/hash/WAL/admission, arbitrary initial snapshots/failures/repair, contract freeze, offline reproduction and independent review remain open. No qualifying GO is granted by this review.

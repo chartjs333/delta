@@ -1682,3 +1682,64 @@ sufficient. Compose this with PublicSnapshot/PublicReachability and production
 vote/send/QC/current behavior, then arithmetic crash/unknown recovery. General
 decoder/hash/exporter/WAL/admission, arbitrary snapshots/failures/repair, contract
 freeze, clean offline reproduction and independent reviews remain mandatory.
+
+### Complete tagged public state and native metadata extraction in Lean
+
+T009/T011/T012/T044/T048/T049/T053/T054/T056/T057/T060, amendment 0001.
+Added the mandatory `PublicState` representation/extraction layer and its four
+generated example modules. The state retains all 64 production variable names,
+tagged finite values, canonical complete bytes and independently supplied
+semantic/module/configuration identity. Checked loading verifies every field,
+canonical ordering, resource bounds and the exact domain-separated preimage.
+It consumes typed values; it does not prove a byte parser or native allocation
+safety. SHA and native identity mappings remain explicit assumption boundaries.
+
+Forty general helpers and fifty named executable definitions retain complete
+rows and derive actor, original current parent, time/view, all-vote sequence,
+one new arithmetic envelope, proposed body, fresh context and preservation of
+old durable votes. The optional native frame binder checks selected original
+anchor/metadata fields; it does not authenticate the mapping or join the full
+arithmetic graph/body/QC/pre-WAL/recovery relation.
+
+The source-linked examples contain 18 complete states, nine first arithmetic
+votes retaining original sequences 5/6/8, and three complete loaded/projected
+state pairs. Fifty-eight kernel cases include exact bytes, native metadata,
+structural/mapping/clock/sequence/readiness rejection and a deliberate scope
+countercheck: inserting an earlier nonempty message set still passes extraction.
+Thus extraction is not production Next or a check of all after-state effects.
+The generator verifies the countercheck actually changes the source state.
+Finite SHA samples and the explicitly synthetic zero example semantic ID are
+not authenticated native observations. The zero avoids a semantic self-hash.
+
+Complete byte equalities, canonicality, ordering, depth, node counts and lengths
+are composed from checked component lemmas. Earlier draft errors and expensive
+whole-list simplification were corrected before acceptance. Exact hash-sample
+branch proofs avoid evaluating unrelated multi-megabyte byte comparisons; every
+selected sample still requires exact bytes. No native-decide oracle, assumed
+result equality or additional axiom was introduced. Full Lean build (985 jobs),
+fresh generic kernel and all declaration axiom checks pass. Only the permitted
+propext/Quot.sound/Classical.choice dependencies occur. Mandatory coverage stays
+44/45; `nativeArithmeticRecoveryRefines` is still missing.
+
+Evidence: `formal/proposals/evidence/public-state-lean.json`; exact scope and
+reproduction: `formal/proposals/public-state-lean-proof.md`. Final tooling/oracle,
+byte-exact regeneration and unchanged-demo/source checks are retained with this
+evidence. All 21 TLA modules, public schema and 147 native witness files remain
+unchanged; the 145 legacy public traces change only their semantics ID. No fresh
+TLC or new production mutant execution is claimed. Prior 28 safety/7 liveness/27
+mutant and 132-state/131-step arithmetic-path results retain their bounded scope.
+New semantics:
+`sha256:259e5008ced76aac948a3be1a8baed17bc1c6b205e7b659be5c67124a7690aca`.
+The candidate remains NO_GO; Phase0 is unfrozen and GNU make is unavailable.
+Self-review is not independent attestation. Runtime guards and frozen demos are
+unchanged; this proof sublayer is not Feature010 completion.
+
+Next: check the complete allowed PARAMETER/APPLY after-state footprint, preserving
+every unchanged variable and deriving every changed vote/journal field. Reject
+the demonstrated message-set counterexample. Then join complete native graph,
+body, metadata and pre-WAL preparation with the reachable all-vote journal and
+actual phase/send/QC/current transitions, including crash/unknown recovery.
+The footprint alone cannot discharge the full recovery theorem. Concrete bounded
+decoder/hash/exporter/WAL/admission, arbitrary initial snapshots/availability/
+failures/repair, contract freeze, clean offline reproduction and independent
+review remain required before native authority and qualifying Feature010 gates.

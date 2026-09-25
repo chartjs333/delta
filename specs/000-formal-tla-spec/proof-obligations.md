@@ -133,6 +133,19 @@ not a new Lean proof, generic admission rule or the remaining recovery theorem.
 See `formal/proposals/public-native-projection.md` for the unresolved exporter,
 general identity abstraction and reachable-history composition obligations.
 
+`PublicState.lean` adds a mandatory-project complete tagged finite-value state,
+canonical document/preimage loader and checked first arithmetic envelope
+extraction. General helpers retain all 64 fields and derive original actor,
+parent, fresh context and all-vote sequence. A separately supplied native
+identity map binds selected original metadata; it is not native authentication.
+Source-linked full-state kernel cases use an explicitly synthetic zero semantic
+ID to avoid hashing the generated Lean source into its own literals. Neither
+typed loading nor extraction proves all after-state effects or production Next;
+a kernel countercheck demonstrates that extraction alone accepts a changed
+message set. Byte decoding, the full native graph/body/QC/history connection and
+the remaining recovery theorem stay open. See
+`formal/proposals/public-state-lean-proof.md` for exact assumptions and scope.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash
