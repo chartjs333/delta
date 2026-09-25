@@ -529,6 +529,15 @@ def main() -> int:
             "Its source-linked full-state kernel examples use a synthetic zero semantic "
             "ID to avoid a semantic self-hash cycle; finite SHA samples are not crypto "
             "authority. It does not discharge nativeArithmeticRecoveryRefines.",
+            "PublicVoteEffects computes all four PARAMETER/APPLY first-vote assignments "
+            "and preserves the other sixty complete-state fields. General proofs "
+            "reject hidden message/current effects and other-actor sequence changes; "
+            "source-linked kernel examples reuse nine original votes and three loaded "
+            "state pairs. The former extraction-only message counterexample now rejects "
+            "under the composed checker. This effect-footprint proof does not establish "
+            "all arithmetic/phase/QC/committee/admission guards, reachable TLA Next, "
+            "native exporter provenance or physical WAL. Those relations remain to be "
+            "joined; nativeArithmeticRecoveryRefines is still missing.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

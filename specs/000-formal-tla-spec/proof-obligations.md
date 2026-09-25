@@ -146,6 +146,14 @@ message set. Byte decoding, the full native graph/body/QC/history connection and
 the remaining recovery theorem stay open. See
 `formal/proposals/public-state-lean-proof.md` for exact assumptions and scope.
 
+`PublicVoteEffects.lean` derives the four complete first-vote assignments and
+preserves the other sixty state fields. The composed checker rejects the prior
+message mutation and hidden current/other-actor sequence changes. Kernel examples
+reuse all nine original arithmetic votes and three loaded full-state pairs.
+This closes the effect-footprint gap, not the full action guards, native
+preparation/history composition or `nativeArithmeticRecoveryRefines`.
+Scope: `formal/proposals/public-vote-effects-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

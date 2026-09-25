@@ -22,6 +22,8 @@ import DeltaReduce.PublicSnapshot
 import DeltaReduce.PublicSnapshotVectors
 import DeltaReduce.PublicState
 import DeltaReduce.PublicStateVectors
+import DeltaReduce.PublicVoteEffects
+import DeltaReduce.PublicVoteEffectsExamples
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

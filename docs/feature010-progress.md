@@ -1743,3 +1743,63 @@ The footprint alone cannot discharge the full recovery theorem. Concrete bounded
 decoder/hash/exporter/WAL/admission, arbitrary initial snapshots/availability/
 failures/repair, contract freeze, clean offline reproduction and independent
 review remain required before native authority and qualifying Feature010 gates.
+
+### Complete arithmetic first-vote after-state footprint
+
+T009/T011/T012/T044/T048/T049/T053/T054/T056/T057/T060, amendment 0001.
+`PublicVoteEffects.lean` derives the four assigned fields from the preceding
+complete state and the extracted PARAMETER/APPLY envelope, then checks all 64
+after-state fields. Thirty-seven general helpers establish exact set insertion,
+the actor sequence increment, preservation of other actors' sequences and all
+sixty unassigned fields. Message exposure, delivery and current advancement
+cannot be hidden inside the checked vote step. The preceding layer's unchanged
+message countercheck is now rejected by the composed checker; extraction alone
+still accepts it and remains explicitly insufficient.
+
+Eleven executable definitions, eighteen calculation definitions, fifty-four
+component calculation proofs and twenty-nine example/composition proofs are
+included in the mandatory project. All 149 new named declarations pass the
+axiom audit, using only permitted propext/Quot.sound/Classical.choice. Nine
+original first votes and three loaded state pairs retain the original sequences
+5/6/8. Existing eighteen full states and component ordering lemmas are reused.
+This avoids introducing larger fixtures or normalizing the complete byte graphs
+inside each dependent proof. Draft resource-heavy proof attempts were replaced
+with component proofs; only the final frozen-source successful checks count.
+
+Full Lean build (988 jobs), fresh generic kernel, 231 tooling and 38 oracle
+tests, 33 legal/112 illegal legacy refinement traces, Ruff and syntactic
+consistency pass. Byte-exact regeneration covers 305 JSON, fourteen generated
+Lean files and the input TLA/config (321 files). A new syntactic correspondence
+test expands both actual production vote actions into four assignments and
+sixty preserved variables; omissions and substituted assignments reject. This
+is not a proof of all TLA guards or a new production mutant execution.
+
+Evidence: `formal/proposals/evidence/public-vote-effects.json`; scope:
+`formal/proposals/public-vote-effects-proof.md`. New semantics:
+`sha256:fbd646eb8aab4443a13a3f2e959cf0c942116b076b147374225bd2c7a5c51034`.
+All 21 TLA modules, public schema and 147 native witnesses remain unchanged;
+the 145 legacy public traces change only semantics ID. No fresh TLC or new
+production mutants; retained 28 safety/7 liveness/27 mutants and the 132-state,
+131-step arithmetic path retain their bounded scope. Mandatory coverage remains
+44/45, with `nativeArithmeticRecoveryRefines` absent. Phase0 remains unfrozen;
+GNU make is unavailable and aggregate formal-check is not claimed. Native guards
+and frozen demonstration references remain unchanged.
+
+This closes the complete-effect footprint gap, not full admission or recovery.
+Next, join these full effects to independently anchored native arithmetic/body/
+metadata and original pre-WAL preparation, with the actual reachable all-vote
+journal. Preserve complete parent/QC/phase guards and global send/delivery/
+current transitions, then crash and unknown outcomes. Do not assume a whole-body
+translation, supplied state equality or finite authorization table. The finite
+scalar TLA path and general native vector proofs must not silently be treated as
+the same identity relation. Unknown/incomplete observations remain incomplete;
+exact presence/absence must be authenticated and blocked scans stay blocked.
+Concrete adapters, arbitrary snapshots/availability/failures/repair, contract
+freeze, offline reproduction and independent review remain mandatory.
+
+The user has allowed four hours plus the night and accepted synthetic
+participants/Docker networking instead of independent authorities/real WAN for
+a separate local acceptance scope. See
+`docs/feature010-local-acceptance-20260925.md`. A control report is due at 19:05 UTC
+on September 25. This agreement does not waive actual native arithmetic/WAL or
+formal-first STOP, issue a local PASS, or turn simulation into original GO.
