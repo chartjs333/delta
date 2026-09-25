@@ -2370,3 +2370,58 @@ PublicDurablePrefix; unavailable provenance remains explicit. Full phase/send/
 delivery/QC/current/crash/unknown composition and nativeArithmeticRecoveryRefines
 remain open, plus general bounded adapters/WAL/admission, arbitrary snapshots/
 failures/repair, contract freeze, clean reproduction and independent review.
+
+
+## 2026-09-25 exact native policy/WAL identity and local replay
+
+T044/T048/T049/T053/T057/T060. Continued from 6cee903 / NO_GO overlay925faca.
+Twelve unchanged PR50 translation units execute62 codec/runtime observations in
+fresh isolated Windows directories. Native policy DVPOL001 bytes are retained,
+nine action fixtures roundtrip; all1920 ISC truncated prefixes and five malformed
+cases reject. A syntactic inventory covers all33 snapshot fields in declaration/
+encoder/decoder order, not general injectivity.28native Git blobs pinned.
+
+Actual native Runtime/WAL persists full-policy SHA256 as64ASCIIhex in each vote
+entry, independently of native state_id. Eight valid changed policies reject
+reopen against existing vote WAL; the same policies can open empty directories,
+which authenticates no producer. Missing policy also rejects durable votes.
+Caller mutation after open leaves runtime's by-value policy unchanged. Record,
+retry, conflict, snapshot and reopen preserve exact original DRC1 vote and native
+DVREC001 receipt; replay is separate metadata and encoded replay byte stayszero.
+A separate ISC+FINALIZE_INPUT_FREEZE history preserves historical receipt through
+state command/reopen and rejects a fresh vote without append. This is not ApplyQC
+current advancement or the original public trace; old5/6/8 bytes remain untouched.
+
+Six native exception crash hooks: before/partial/named-prebarrier recover0votes;
+durable-before-commit and both pre-return hooks recover1vote with identical retry
+receipt. Missing receipt therefore does not imply absent vote. IMPORTANT actual
+source: named after_wal_append_before_durability throws BEFORE append_and_sync,
+not a real uncertain barrier; after_effect_copy_before_return shares the same
+pre-return branch, not a tested transport-copy failure. Partial diagnostics stay
+incomplete until actual native recovery scans/truncates. Corrupt WAL/snapshot
+reject. Both arithmetic record_vote calls reject under unchanged guard, noappend.
+Actual Windows fflush/_commit/snapshot calls ran; noOSkill/powerloss/POSIXcustody,
+FFM/sidecar/network/full-public recovery claims. Producer inspection is read-only:
+FFI/sidecar accept configured opaque policy bytes; Java copies them; fixture
+exporter produces test policies. Complete authenticated public-source derivation
+remains missing. Native old semantics is not candidate authority.
+
+Scope formal/proposals/native-policy-wal.md; evidence formal/proposals/evidence/
+native-policy-wal.json. Eleven new tooling tests;305tooling/38oracle,
+33legal/112illegallegacy,Ruff/consistency PASS. New fixture/harness/full native
+results reproduce byte-exact; previous322generated+12componentartifacts unchanged.
+NoLean/21TLA/schema/runtime/old native/publicfixture changes; semantics remains
+sha256:c0e7baa47535a52378158b2f28d8a1e138c5b020d698a537badc7f1a5b650795.
+No freshLean/TLC/productionmutants: retained1007build/audit44of45 andbounded
+28safety/7liveness/27mutants,132state/131steppath keep their scope. Phase0unfrozen;
+makeunavailable, aggregateformal-check notclaimed. DemosHTTP200 no restart and
+frozenrefs unchanged. No originalGO or SIMULATED_LOCAL PASS.
+
+Next compose the actual policy/WAL/receipt relation with mandatory Lean/public
+recovery using explicit DVPOL001/DRW1/DVREC001 adapters; begin with durable policy
+identity and original canonical receipt binding, not proposal JSON renamed as
+native bytes. Initial policy producer, full public CloseInput/configuration/
+commitment-content-availability/root relation, phase/send/delivery/QC/current,
+arbitrary snapshots/failures/repair and unknown outcomes remain open. The general
+nativeArithmeticRecoveryRefines, contract freeze, clean offline reproduction,
+independent reviews and joined runtime/profile/GPU/Docker evidence remain required.

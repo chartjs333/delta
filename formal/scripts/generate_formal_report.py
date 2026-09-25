@@ -639,6 +639,17 @@ def main() -> int:
             "premise, not full-pipeline vulnerabilities. Native policy identity, "
             "complete public state/CloseInput provenance and actual WAL/recovery "
             "remain unproved. This is not authenticated export or local acceptance.",
+            "The native policy/WAL proposal executes twelve unchanged PR50 translation "
+            "units on isolated Windows files. Nine policy codecs, full-policy digest "
+            "binding, record/retry/conflict, snapshot/reopen, eight policy changes, "
+            "six injected exception cuts and corrupt files are checked across 62 "
+            "observations. Canonical receipts retain exact bytes across retry and a "
+            "state command; PARAMETER/APPLY still reject without append. The named "
+            "pre-barrier hook actually throws before append; injected exceptions "
+            "are not OS/power-loss or unknown transport-outcome qualification. "
+            "Initial policy provenance, complete public state/action and Lean/native "
+            "WAL refinement, general adapters and arithmetic execution remain open. "
+            "These actual local non-arithmetic runs are not full Feature010 GO.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
