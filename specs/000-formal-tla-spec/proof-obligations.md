@@ -88,6 +88,17 @@ do not enable votes. Event/snapshot/state-root binding, other-action phase/QC
 admission and production exporter/WAL remain open, so this layer still does not
 discharge the full recovery conjunct. Scope: `formal/proposals/public-recovery-proof.md`.
 
+`PublicReachability.lean` now establishes the common live-machine invariant from
+empty initialization by induction on successful executable operations. It derives
+exact replay/log equality, immutable initial state, original all-vote slots,
+checked pending candidates, sent-slot storage and native preparation provenance.
+The invariant is a conclusion, not a reachability constructor assumption. Named
+scan/metadata/hash/other-action adapters retain their previous scope. Binding to
+independently authenticated full public snapshots, canonical public state roots,
+phase/QC/global exposure and concrete native execution remains open. This is a
+sublayer, not `nativeArithmeticRecoveryRefines`. Scope:
+`formal/proposals/public-reachability-proof.md`.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

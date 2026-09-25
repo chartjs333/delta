@@ -16,6 +16,8 @@ import DeltaReduce.PublicJournal
 import DeltaReduce.PublicJournalVectors
 import DeltaReduce.PublicRecovery
 import DeltaReduce.PublicRecoveryVectors
+import DeltaReduce.PublicReachability
+import DeltaReduce.PublicReachabilityExamples
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

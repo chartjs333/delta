@@ -1382,3 +1382,63 @@ non-arithmetic phase/QC admission and actual exposure/global quorum eligibility;
 retain original contexts/sequences and the separate known/unknown scan cases.
 Only the full native/public refinement relation discharges the remaining recovery
 conjunct; adapter booleans, fixture hashes or assumed state equality cannot do so.
+
+## 2026-09-25 — Reachable live-machine/all-vote invariant (T044/T048/T049/T057/T060)
+
+`PublicReachability.lean` derives one invariant from empty initialization through
+actual successful persistence, other-vote, current-advance, crash, restart,
+recovery and historical-retry calls. No invariant, recovered-state equality,
+prefix equality or arithmetic-admission Boolean is a reachability premise.
+The initial actor/current remains unchanged. Replaying the entire ordered log
+produces exactly the current journal, including original all-vote slots,
+arithmetic records and current pointers.
+
+Thirty general helpers establish checked transition composition, exact slot
+projection/provenance and native arithmetic preparation of every stored
+arithmetic record, with its original receipt/effect and sequence. Every pending
+candidate remains checked against the known journal and excludes ready mode.
+Every exposed arithmetic slot is stored with a native record. Authenticated
+presence/absence recovery is proven to extend the known log and preserve earlier
+records; missing responses still do not imply absence. Incomplete/corrupt/ambiguous
+scans keep the known prefix and cannot silently restore readiness.
+
+Thirty additional example/composition proofs include two sequence helpers,
+four kernel-decide crash/restart facts, full eight-vote/current-advance and
+historical retry, known unexposed crash/recovery/retry, unknown presence/absence,
+incomplete and blocked histories. Five unreachable-state counterchecks reject
+ready-with-pending, early receipt, invented non-arithmetic native receipt,
+deleted log and rewritten nonempty initial state. These reuse previous fixture
+adapters and original sequences 5/6/8; no new native/public trace is claimed.
+Unknown-to-presence and explicit incomplete scans remain mathematical cases.
+
+All sixty new declarations pass the kernel axiom audit with only permitted
+propext/Quot.sound/Classical.choice. Full Lean build: 978 jobs; fresh invariant
+and composition checks PASS. 173 tooling/38 oracle tests, 33 legal/112 illegal
+traces, targeted Ruff and byte-exact regeneration of 299 JSON/eight generated
+Lean sources PASS. The two new Lean files are hand-authored proof sources.
+Nineteen TLA modules/public schema and native witness bytes are unchanged;
+145 public traces only change semantic ID. No fresh TLC/production-mutant run;
+retained 28 safety/7 liveness/27 mutant results keep their bounded scope. GNU make
+is unavailable; scoped checks do not replace aggregate formal-check. Phase0
+remains failed for the unfrozen amendment.
+
+Candidate semantics:
+`sha256:dc71cd7e8d31e5d77384de0ec68ef69cd026c0f267a3453cb45bc42f8a33a2df`.
+Evidence: `formal/proposals/evidence/public-reachability.json`; scope:
+`formal/proposals/public-reachability-proof.md`. All three demos HTTP 200 without
+restart; frozen fallback refs unchanged. Native runtime/arithmetic guard unchanged.
+
+The environment/resolver is fixed for each reachable history. Initial actor/current
+authentication, real scan completeness, finite hash/codec and metadata/QC trust
+retain their previous assumptions. This is the general reachable-machine/log
+sublayer, not `nativeArithmeticRecoveryRefines`: mandatory coverage still 44/45,
+Formal NO_GO. Self-review is not an independent attestation.
+
+Next: bind reachable operations to independently authenticated original public
+event snapshots and canonical public state-root transitions, preserving actor,
+context, sequence, exposure and original bytes. Connect non-arithmetic phase/QC
+admission and global SendVoteEnvelope/QC eligibility. Do not promote fixture
+lookup adapters or assumed snapshot equality into authority. Concrete bounded
+native decoder/hash/exporter/WAL, admission completeness, arbitrary snapshots,
+availability/failures/repair, contract freeze, clean offline reproduction and
+independent reviews remain mandatory before merged Formal GO and PR50 work.

@@ -479,6 +479,15 @@ def main() -> int:
             "snapshot/state-root and global quorum exposure binding, other-action "
             "admission and production adapters remain open; the mandatory native "
             "recovery conjunct is not discharged by this conditional lifecycle layer.",
+            "PublicReachability derives a replay/log invariant for every successful "
+            "live-machine operation from empty initialization, including unknown "
+            "append resolution, exact historical retry and blocked scans. Initial "
+            "state is preserved; every sent arithmetic slot is stored and every "
+            "stored arithmetic record has checked native preparation provenance. "
+            "Its composed examples reuse the same synthetic fixture adapters. "
+            "Authenticated full public snapshots/state roots, non-arithmetic phase/QC "
+            "and global SendVoteEnvelope eligibility and concrete native adapters "
+            "remain open; this invariant does not close nativeArithmeticRecoveryRefines.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
