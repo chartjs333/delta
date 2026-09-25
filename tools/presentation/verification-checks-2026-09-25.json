@@ -1,6 +1,5 @@
 {
   "schema": "deltareduce.presentation-verification-checks.v1",
-  "checked_at": "2026-09-25T10:08:00Z",
   "scope": "PRESENTATION_TOOLING_ONLY",
   "semantic_impact": "NONE",
   "formal_authority": "NO_GO",
@@ -30,7 +29,9 @@
     "browser_en_all_seven": "PASS",
     "browser_ru_negative_artifact": "PASS",
     "browser_sha256": "PASS",
-    "browser_reload_retains_result": "PASS"
+    "browser_reload_retains_result": "PASS",
+    "powershell_tunnel_readiness_regression": "PASS",
+    "powershell_launcher_parse": "PASS"
   },
   "computation_sha256": "3c1a423ea205a97027e1345f75fa1b9cd79924fadff844567b739124a1165c25",
   "staging": {
@@ -44,5 +45,6 @@
     "No native runtime, WAL, validator signatures or BenchmarkResultQC.",
     "No formal or scientific qualification claimed.",
     "Live deployment and remote interaction have a separate smoke record."
-  ]
+  ],
+  "recorded_at": "2026-09-25T10:14:14.232690+00:00"
 }
