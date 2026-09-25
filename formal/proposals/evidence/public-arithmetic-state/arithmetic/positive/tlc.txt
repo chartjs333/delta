@@ -1,0 +1,47 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 0 and seed 1 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 33244] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\FullStateReplay.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReducePublicState.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceFixtureInputs.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-replay\positive\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReducePublicState
+Semantic processing of module DeltaReduceFixtureInputs
+Semantic processing of module FullStateReplay
+Starting... (2026-09-25 03:18:32)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-09-25 03:18:32.
+Model checking completed. No error has been found.
+  Estimates of the probability that TLC did not check all reachable states
+  because two distinct states had the same fingerprint:
+  calculated (optimistic):  val = 0.0
+132 states generated, 132 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 132.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 1 and the 95th percentile is 1).
+Finished in 02s at (2026-09-25 03:18:33)

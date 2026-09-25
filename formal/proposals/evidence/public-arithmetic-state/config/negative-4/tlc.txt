@@ -1,0 +1,255 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 0 and seed 1 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 1188] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\FullStateReplay.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReducePublicState.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\build\public-arithmetic-config-replay\negative-4\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReducePublicState
+Semantic processing of module FullStateReplay
+Starting... (2026-09-25 03:25:48)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-09-25 03:25:48.
+Error: Action property WitnessAllowed is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ applyVotes = {}
+/\ aggregateVotes = {}
+/\ aggregationPlanCertificates = {}
+/\ finalizedCertificates = {}
+/\ timeoutVotes = {}
+/\ abortReason = "NO_ABORT"
+/\ repairAttempts = (content1 :> 0)
+/\ availableTickets = {}
+/\ materializedArtifacts = {}
+/\ viewChangeQCs = {}
+/\ availabilityShortfalls = {}
+/\ availabilityAttestations = {}
+/\ pendingPointerRecoveries = {}
+/\ crashCoverage = {}
+/\ availabilityCertificates = {}
+/\ partition = {}
+/\ witnessIndex = 1
+/\ rejectedPublications = {}
+/\ volatileVotes = {}
+/\ currentCheckpoint = parent1
+/\ apcVotes = {}
+/\ rejectedCommitments = {}
+/\ recoveryState = (v1 :> "READY" @@ v2 :> "READY" @@ v3 :> "READY" @@ v4 :> "READY")
+/\ abortRequests = {}
+/\ currentAdvanceReceipts = {}
+/\ lateAvailabilityEvidence = {}
+/\ phase = "ACTIVE"
+/\ closedInputBodies = {}
+/\ parameterResults = {}
+/\ durableSequence = (v1 :> 0 @@ v2 :> 0 @@ v3 :> 0 @@ v4 :> 0)
+/\ leaseOwner = (t1 :> "NO_WORKER")
+/\ alive = {v1, v2, v3, v4}
+/\ publishedObjects = {}
+/\ commitments = {}
+/\ abortQCs = {}
+/\ ticketPlan = {}
+/\ availableArtifacts = {}
+/\ corruptArtifacts = {}
+/\ parameterQCs = {}
+/\ abortVotes = {}
+/\ receivedVotes = {}
+/\ seedTranscripts = {}
+/\ iscVotes = {}
+/\ messages = {}
+/\ messageMultiplicity = {}
+/\ inputSetCertificates = {}
+/\ aggregateRootQCs = {}
+/\ certificateRejections = {}
+/\ leaseActive = {}
+/\ applyCandidates = {}
+/\ aggregateCandidates = {}
+/\ leaseEpoch = (t1 :> 0)
+/\ currentReplayReceipts = {}
+/\ parameterVotes = {}
+/\ applyQCs = {}
+/\ proposals = {}
+/\ ecVotes = {}
+/\ logicalTime = 0
+/\ reduceApplyRejections = {}
+/\ byzantine = {v4}
+/\ timeoutObservations = {}
+/\ certificateReplayReceipts = {}
+/\ durableVotes = {}
+/\ eligibilityCertificates = {}
+/\ view = 0
+
+State 2: <WitnessNext line 239, col 16 to line 304, col 79 of module FullStateReplay>
+/\ applyVotes = {}
+/\ aggregateVotes = {}
+/\ aggregationPlanCertificates = {}
+/\ finalizedCertificates = {}
+/\ timeoutVotes = {}
+/\ abortReason = "NO_ABORT"
+/\ repairAttempts = (content1 :> 0)
+/\ availableTickets = {}
+/\ materializedArtifacts = {}
+/\ viewChangeQCs = {}
+/\ availabilityShortfalls = {}
+/\ availabilityAttestations = {}
+/\ pendingPointerRecoveries = {}
+/\ crashCoverage = {}
+/\ availabilityCertificates = {}
+/\ partition = {}
+/\ witnessIndex = 2
+/\ rejectedPublications = {}
+/\ volatileVotes = {}
+/\ currentCheckpoint = parent1
+/\ apcVotes = {}
+/\ rejectedCommitments = {}
+/\ recoveryState = (v1 :> "READY" @@ v2 :> "READY" @@ v3 :> "READY" @@ v4 :> "READY")
+/\ abortRequests = {}
+/\ currentAdvanceReceipts = {}
+/\ lateAvailabilityEvidence = {}
+/\ phase = "ACTIVE"
+/\ closedInputBodies = {}
+/\ parameterResults = {}
+/\ durableSequence = (v1 :> 0 @@ v2 :> 0 @@ v3 :> 0 @@ v4 :> 0)
+/\ leaseOwner = (t1 :> "NO_WORKER")
+/\ alive = {v1, v2, v3, v4}
+/\ publishedObjects = {}
+/\ commitments = {}
+/\ abortQCs = {}
+/\ ticketPlan = {}
+/\ availableArtifacts = {}
+/\ corruptArtifacts = {}
+/\ parameterQCs = {}
+/\ abortVotes = {}
+/\ receivedVotes = {}
+/\ seedTranscripts = {}
+/\ iscVotes = {}
+/\ messages = {}
+/\ messageMultiplicity = {}
+/\ inputSetCertificates = {}
+/\ aggregateRootQCs = {}
+/\ certificateRejections = {}
+/\ leaseActive = {}
+/\ applyCandidates = {}
+/\ aggregateCandidates = {}
+/\ leaseEpoch = (t1 :> 0)
+/\ currentReplayReceipts = {}
+/\ parameterVotes = {}
+/\ applyQCs = {}
+/\ proposals = { [ body |-> configA,
+    context |-> [kind |-> "ROUND_CONFIG", height |-> h1, epoch |-> epoch1] ] }
+/\ ecVotes = {}
+/\ logicalTime = 0
+/\ reduceApplyRejections = {}
+/\ byzantine = {v4}
+/\ timeoutObservations = {}
+/\ certificateReplayReceipts = {}
+/\ durableVotes = {}
+/\ eligibilityCertificates = {}
+/\ view = 0
+
+State 3: <WitnessNext line 239, col 16 to line 304, col 79 of module FullStateReplay>
+/\ applyVotes = {}
+/\ aggregateVotes = {}
+/\ aggregationPlanCertificates = {}
+/\ finalizedCertificates = {}
+/\ timeoutVotes = {}
+/\ abortReason = "NO_ABORT"
+/\ repairAttempts = (content1 :> 0)
+/\ availableTickets = {}
+/\ materializedArtifacts = {}
+/\ viewChangeQCs = {}
+/\ availabilityShortfalls = {}
+/\ availabilityAttestations = {}
+/\ pendingPointerRecoveries = {}
+/\ crashCoverage = {}
+/\ availabilityCertificates = {}
+/\ partition = {}
+/\ witnessIndex = 3
+/\ rejectedPublications = {}
+/\ volatileVotes = {}
+/\ currentCheckpoint = parent1
+/\ apcVotes = {}
+/\ rejectedCommitments = {}
+/\ recoveryState = (v1 :> "READY" @@ v2 :> "READY" @@ v3 :> "READY" @@ v4 :> "READY")
+/\ abortRequests = {}
+/\ currentAdvanceReceipts = {}
+/\ lateAvailabilityEvidence = {}
+/\ phase = "ACTIVE"
+/\ closedInputBodies = {}
+/\ parameterResults = {}
+/\ durableSequence = (v1 :> 0 @@ v2 :> 0 @@ v3 :> 0 @@ v4 :> 0)
+/\ leaseOwner = (t1 :> "NO_WORKER")
+/\ alive = {v1, v2, v3, v4}
+/\ publishedObjects = {}
+/\ commitments = {}
+/\ abortQCs = {}
+/\ ticketPlan = {}
+/\ availableArtifacts = {}
+/\ corruptArtifacts = {}
+/\ parameterQCs = {}
+/\ abortVotes = {}
+/\ receivedVotes = {}
+/\ seedTranscripts = {}
+/\ iscVotes = {}
+/\ messages = { [ body |-> configA,
+    validator |-> v1,
+    kind |-> "ROUND_CONFIG",
+    context |-> [kind |-> "ROUND_CONFIG", height |-> h1, epoch |-> epoch1] ] }
+/\ messageMultiplicity = { [ vote |->
+        [ body |-> configA,
+          validator |-> v1,
+          kind |-> "ROUND_CONFIG",
+          context |->
+              [kind |-> "ROUND_CONFIG", height |-> h1, epoch |-> epoch1] ],
+    copy |-> 1 ] }
+/\ inputSetCertificates = {}
+/\ aggregateRootQCs = {}
+/\ certificateRejections = {}
+/\ leaseActive = {}
+/\ applyCandidates = {}
+/\ aggregateCandidates = {}
+/\ leaseEpoch = (t1 :> 0)
+/\ currentReplayReceipts = {}
+/\ parameterVotes = {}
+/\ applyQCs = {}
+/\ proposals = { [ body |-> configA,
+    context |-> [kind |-> "ROUND_CONFIG", height |-> h1, epoch |-> epoch1] ] }
+/\ ecVotes = {}
+/\ logicalTime = 0
+/\ reduceApplyRejections = {}
+/\ byzantine = {v4}
+/\ timeoutObservations = {}
+/\ certificateReplayReceipts = {}
+/\ durableVotes = {}
+/\ eligibilityCertificates = {}
+/\ view = 0
+
+3 states generated, 3 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 3.
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 01s at (2026-09-25 03:25:48)

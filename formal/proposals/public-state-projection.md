@@ -61,6 +61,10 @@ delivery paths, crash/restart/recovery before exposure, QC formation and stutter
 This tests global delivered-vote quorum power in the actual model for that path.
 It does not yet cover the complete arithmetic public event trace. Deliberately
 rehashed invalid full states must fail the TLA relation, even with valid roots.
+The additional registered native-fixture arithmetic configuration and its full
+path are specified in `public-arithmetic-state.md`. They preserve this state
+preimage format while adding an explicitly bounded input embedding and lossless
+storage pooling. They do not upgrade the old public/native snapshot roots.
 
 ## Remaining integration obligations
 

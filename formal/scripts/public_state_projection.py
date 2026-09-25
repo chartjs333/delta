@@ -34,7 +34,7 @@ MODULES = (
 )
 MODEL_VALUES = frozenset(
     "v1 v2 v3 v4 h1 epoch1 configA configB w1 t1 d1 data1 parent1 schema1 profile1 "
-    "s1 shard1 content1 seed1 norm1 coeff1 apply1 next1 model1 optimizer1".split()
+    "s1 shard1 shard2 content1 seed1 norm1 coeff1 apply1 next1 model1 optimizer1".split()
 )
 ACTIONS = frozenset(
     (
@@ -50,8 +50,37 @@ ACTIONS = frozenset(
     )
 )
 MAX_BYTES = 4 * 1024 * 1024
-MAX_ITEMS = 100_000
+MAX_ITEMS = 250_000
 MAX_DEPTH = 64
+ARITHMETIC_ACTIONS = frozenset(
+    (
+        "IssueTicketAction",
+        "LeaseTicketAction",
+        "CommitTicketAction",
+        "UploadArtifactAction",
+        "AttestAvailabilityAction",
+        "FinalizeAvailabilityAction",
+        "CloseInputAction",
+        "VoteISCAction",
+        "FinalizeISCAction",
+        "GenerateSeedAction",
+        "VoteECAction",
+        "FinalizeECAction",
+        "VoteAPCAction",
+        "FinalizeAPCAction",
+        "ProposeParameterResultAction",
+        "VoteParameterAction",
+        "FinalizeParameterQCAction",
+        "AssembleAggregateRootAction",
+        "VoteAggregateRootAction",
+        "FinalizeAggregateRootQCAction",
+        "ComputeApplyCandidateAction",
+        "VoteApplyAction",
+        "FinalizeApplyQCAction",
+        "AdvanceCurrentCheckpointAction",
+        "AdvanceLogicalTime",
+    )
+)
 
 
 def require(condition: bool, reason: str) -> None:
@@ -78,15 +107,24 @@ def inventory(root: Path = ROOT) -> tuple[str, ...]:
     return tuple(sorted(names))
 
 
-def model_identity() -> dict[str, Any]:
+def configuration_sources(configuration: str):
+    if configuration == "round-config":
+        return CONFIG, ()
+    require(configuration == "native-arithmetic", "CONFIGURATION_PROFILE")
+    return ROOT / "formal/proposals/public-arithmetic-replay.cfg", ("DeltaReduceFixtureInputs",)
+
+
+def model_identity(configuration: str = "round-config") -> dict[str, Any]:
+    config, extra = configuration_sources(configuration)
     registry = load_json_strict(ROOT / "formal/reports/formal-id-registry.json")
     return {
         "formal_semantics_id": derive_formal_semantics_id(
             registry["formal_semantics_version"], discover_semantic_artifacts(ROOT)
         ),
-        "configuration_sha256": sha256_file(CONFIG),
+        "configuration_sha256": sha256_file(config),
         "modules": {
-            name: semantic_text_sha256(ROOT / f"formal/tla/{name}.tla") for name in MODULES
+            name: semantic_text_sha256(ROOT / f"formal/tla/{name}.tla")
+            for name in (*MODULES, *extra)
         },
     }
 
@@ -182,17 +220,39 @@ def tla_value(value: Any) -> str:
     return "(" + " @@ ".join(f"({tla_value(k)} :> {tla_value(v)})" for k, v in content) + ")"
 
 
-def replay_sources(trace: Any) -> tuple[str, str]:
+def replay_sources(trace: Any, configuration: str = "round-config") -> tuple[str, str]:
+    config, extra = configuration_sources(configuration)
     require(type(trace) is dict and set(trace) == {"profile", "states", "actions"}, "TRACE_FIELDS")
     require(trace["profile"] == PROFILE, "TRACE_PROFILE")
     states, actions = trace["states"], trace["actions"]
-    require(type(states) is list and 1 <= len(states) <= 64, "TRACE_SIZE")
+    require(type(states) is list and 1 <= len(states) <= 256, "TRACE_SIZE")
     require(type(actions) is list and len(actions) == len(states) - 1, "ACTION_COUNT")
-    require(all(type(a) is str and a in ACTIONS for a in actions), "ACTION_VOCABULARY")
-    identity = model_identity()
+    allowed = ACTIONS | (ARITHMETIC_ACTIONS if extra else frozenset())
+    require(all(type(a) is str and a in allowed for a in actions), "ACTION_VOCABULARY")
+    identity = model_identity(configuration)
     checked = [check_observation(s, identity) for s in states]
+    values, definitions = {}, []
+
+    def intern(value):
+        key = canonical_json_bytes(value)
+        if key in values:
+            return values[key]
+        tag, content = value
+        if tag == "set":
+            expression = "{" + ", ".join(intern(v) for v in content) + "}"
+        elif tag == "fun" and content:
+            expression = (
+                "(" + " @@ ".join(f"({intern(k)} :> {intern(v)})" for k, v in content) + ")"
+            )
+        else:
+            expression = tla_value(value)
+        name = f"ReplayValue{len(definitions)}"
+        values[key] = name
+        definitions.append(f"{name} == {expression}\n")
+        return name
+
     records = [
-        "[" + ",\n".join(f"{name} |-> {tla_value(s[name])}" for name in inventory()) + "]"
+        "[" + ",\n".join(f"{name} |-> {intern(s[name])}" for name in inventory()) + "]"
         for s in checked
     ]
     selected = [
@@ -201,9 +261,13 @@ def replay_sources(trace: Any) -> tuple[str, str]:
     ]
     selected.append("OTHER -> UNCHANGED ProtocolVariables")
     module = (
-        "---- MODULE FullStateReplay ----\nEXTENDS DeltaReducePublicState\nCONSTANTS "
+        "---- MODULE FullStateReplay ----\nEXTENDS "
+        + ", ".join(("DeltaReducePublicState", *extra))
+        + "\nCONSTANTS "
         + ", ".join("witnessValue_" + name for name in sorted(MODEL_VALUES))
-        + "\nVARIABLE witnessIndex\nReplayStates == <<\n"
+        + "\nVARIABLE witnessIndex\n"
+        + "".join(definitions)
+        + "ReplayStates == <<\n"
         + ",\n".join(records)
         + ">>\n"
         "WitnessInit == witnessIndex = 1 /\\ MatchesPublicState(ReplayStates[1])\n"
@@ -220,7 +284,7 @@ def replay_sources(trace: Any) -> tuple[str, str]:
         "WitnessLabelled == [][WitnessSelected]_<<ProtocolVariables, witnessIndex>>\n====\n"
     )
     # This registered config is reviewed source, not supplied executable TLA.
-    cfg = CONFIG.read_text(encoding="utf-8")
+    cfg = config.read_text(encoding="utf-8")
     require(cfg.startswith("CONSTANTS\n"), "CONFIG_PROFILE")
     require(
         not re.search(

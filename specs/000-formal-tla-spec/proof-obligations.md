@@ -114,8 +114,12 @@ The separate full-public-state candidate now encodes every one of the 64
 Its generated TLC replay evaluates the production Init/TypeOK/Next and named
 actions for a finite RoundConfig/persist/send/delivery/crash/recovery/QC path;
 seven rehashed invalid paths are rejected. This closes neither the legacy
-trace's opaque-root gap nor native exporter provenance: the full arithmetic
-public history and Lean composition are still open. It is not the remaining
+trace's opaque-root gap nor native exporter provenance. A second, independently
+pinned two-shard configuration now checks a 132-state arithmetic path against
+the production actions, retaining the 36 original event positions/times and
+per-actor vote sequences 5/6/8. Its finite limit 127 is not native INT64 coverage;
+legacy snapshot roots are explicitly incompatible with the new state preimages.
+Native snapshot/history binding and Lean composition are still open. It is not the remaining
 mandatory theorem. See `formal/proposals/public-state-projection.md`.
 
 - An independently authenticated native anchor and canonical typed byte graph

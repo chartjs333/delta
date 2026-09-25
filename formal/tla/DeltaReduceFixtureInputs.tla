@@ -1,0 +1,9 @@
+---- MODULE DeltaReduceFixtureInputs ----
+EXTENDS DeltaReducePublicState
+\* Generated finite embedding from separately pinned native artifact bytes.
+\* Source SHA256: a768ce4a038c3413d21a41df634a2c643e237e80855232820144a604258353fa
+\* Limit 127 is a finite TLC restriction, NOT a native arithmetic profile.
+CONSTANTS fixtureValue_apply1, fixtureValue_coeff1, fixtureValue_configA, fixtureValue_configB, fixtureValue_content1, fixtureValue_d1, fixtureValue_data1, fixtureValue_epoch1, fixtureValue_h1, fixtureValue_model1, fixtureValue_next1, fixtureValue_norm1, fixtureValue_optimizer1, fixtureValue_parent1, fixtureValue_profile1, fixtureValue_s1, fixtureValue_schema1, fixtureValue_seed1, fixtureValue_shard1, fixtureValue_shard2, fixtureValue_t1, fixtureValue_v1, fixtureValue_v2, fixtureValue_v3, fixtureValue_v4, fixtureValue_w1
+FixtureArithmeticInputs == (("applyD" :> 1) @@ ("applyN" :> 1) @@ ("denominator" :> ((fixtureValue_d1 :> 1))) @@ ("domainOrder" :> ((1 :> fixtureValue_d1))) @@ ("limit" :> 127) @@ ("lrD" :> 2) @@ ("lrN" :> 1) @@ ("mixtureD" :> 1) @@ ("model" :> ((fixtureValue_shard1 :> 20) @@ (fixtureValue_shard2 :> -20))) @@ ("muD" :> 2) @@ ("muN" :> 1) @@ ("optimizer" :> ((fixtureValue_shard1 :> 2) @@ (fixtureValue_shard2 :> -2))) @@ ("piD" :> ((fixtureValue_d1 :> 1))) @@ ("piN" :> ((fixtureValue_d1 :> 1))) @@ ("q" :> ((fixtureValue_t1 :> ((fixtureValue_shard1 :> 1) @@ (fixtureValue_shard2 :> -2))))) @@ ("qD" :> ((fixtureValue_d1 :> ((fixtureValue_shard1 :> 2) @@ (fixtureValue_shard2 :> 2))))) @@ ("qN" :> ((fixtureValue_d1 :> ((fixtureValue_shard1 :> 1) @@ (fixtureValue_shard2 :> 1))))) @@ ("ticketDomain" :> ((fixtureValue_t1 :> fixtureValue_d1))) @@ ("ticketOrder" :> ((1 :> fixtureValue_t1))) @@ ("wdD" :> 1) @@ ("wdN" :> 0) @@ ("weightD" :> ((fixtureValue_t1 :> 1))) @@ ("weightN" :> ((fixtureValue_t1 :> 1))))
+FixtureParameterValues == {1, -2}
+====

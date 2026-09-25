@@ -1,0 +1,630 @@
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -version
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceConfigHarness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceConfigHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReduceConfigHarness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCurrentBindingHarness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCurrentBindingHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePhase6Harness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReducePhase6Harness
+Semantic processing of module DeltaReduceCurrentBindingHarness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceF1Harness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceF1Harness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReduceF1Harness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFixtureInputs.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFixtureInputs.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePublicState.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReducePublicState
+Semantic processing of module DeltaReduceFixtureInputs
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceHeterogeneousHarness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceHeterogeneousHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePhase6Harness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReducePhase6Harness
+Semantic processing of module DeltaReduceHeterogeneousHarness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceLivenessHarness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceLivenessHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReduceLivenessHarness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePartitionHarness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePartitionHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReducePartitionHarness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePersistenceHarness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePersistenceHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCurrentBindingHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePhase6Harness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReducePhase6Harness
+Semantic processing of module DeltaReduceCurrentBindingHarness
+Semantic processing of module DeltaReducePersistenceHarness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePhase6Harness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePhase6Harness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReducePhase6Harness
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePublicState.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReducePublicState.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReducePublicState
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceRefinement.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceRefinement.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReduceRefinement
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+formal-gate: D:/delta/formal/toolchain/windows/tla-runtime-17.0.20.1/java/bin/java.exe -XX:+UseParallelGC -Dfile.encoding=UTF-8 -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp D:\delta\formal\toolchain\cache\tla2tools.jar tla2sany.SANY C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceVoteLifecycleHarness.tla
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceVoteLifecycleHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceLivenessHarness.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduce.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceFailures.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceReduceApply.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceCertificates.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceAvailability.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTickets.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceQuorums.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceTypes.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Integers.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\FiniteSets.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\TLC.tla
+Parsing file C:\Users\madoev\.codex\worktrees\feature000-binding-candidate\delta\formal\tla\DeltaReduceArithmetic.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Naturals.tla
+Parsing file C:\Users\madoev\AppData\Local\Temp\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module DeltaReduceArithmetic
+Semantic processing of module DeltaReduceTypes
+Semantic processing of module DeltaReduceQuorums
+Semantic processing of module DeltaReduceTickets
+Semantic processing of module DeltaReduceAvailability
+Semantic processing of module DeltaReduceCertificates
+Semantic processing of module DeltaReduceReduceApply
+Semantic processing of module DeltaReduceFailures
+Semantic processing of module DeltaReduce
+Semantic processing of module DeltaReduceLivenessHarness
+Semantic processing of module DeltaReduceVoteLifecycleHarness
+{"gate":"parse","schema_version":"1.0.0","status":"PASS"}

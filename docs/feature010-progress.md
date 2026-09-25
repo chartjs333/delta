@@ -1558,3 +1558,61 @@ complete scans; source-linked original metadata/exposure/QC/current advancement
 must be derived, not assumed. Decoder/hash/exporter/WAL, arbitrary initial
 snapshots/availability/failures/repair, contract freeze, clean offline reproduction
 and independent review remain mandatory before native authority.
+
+### Complete arithmetic public-state path from pinned artifact inputs
+
+T009/T011/T012/T044/T048/T049/T053/T054/T056/T057/T060, amendment 0001.
+The complete-state replay now includes the arithmetic path from actual production
+Init through ticket/availability/ISC/seed/EC/APC, both PARAMETER QCs, aggregate QC,
+APPLY QC and current advancement. The checked path contains 132 complete states
+and 131 steps, with all 64 protocol variables in every canonical preimage.
+It preserves all 36 original public event positions/times, every actor's sequence
+1..8 and original arithmetic sequences 5/6/8. All 24 votes have explicit production
+send and delivery; 35 clock steps preserve the original event times.
+
+A new generated TLA input module binds the exact twelve-artifact native fixture
+via a separately pinned bundle hash and typed graph validation. The manifest
+retains artifact IDs, Q/schema/shard placement, weights/quanta, current model and
+optimizer, coefficients and full expected native bodies. The two PARAMETER values
+are 1 and -2; APPLY gives model [19,-19] and optimizer [2,-2]. Production TLA
+arithmetic checks these results against the actual configured input functions.
+The TLA model/source/configuration are immutable inputs to each state identity.
+Limit 127 is explicitly finite and does not claim native INT64-wide admission.
+
+Three rehashed invalid full paths fail the production action relation: wrong
+PARAMETER numerator, wrong next optimizer and current advance without ApplyQC.
+The earlier RoundConfig/crash/recovery path and its seven negative cases were
+rechecked after introducing shared TLA value operators. These checks are finite
+replays, not new production mutants or native executions. Lossless field pooling
+keeps the arithmetic vector file manageable; expansion checks every reference,
+preimage and root. No variable is summarized or erased. Full negative TLC logs
+are retained as deterministic gzip with decompressed byte hashes.
+
+The 36-event correspondence explicitly records that legacy snapshot roots are
+incompatible opaque labels. Original snapshot bytes/roots were not rewritten.
+This is not authenticated native exporter provenance or Lean reachable-history
+composition; nativeArithmeticRecoveryRefines remains open, mandatory 44/45.
+No arithmetic crash/unknown-append path is newly claimed. General admission,
+bounded decoder/hash/exporter/WAL, initial snapshots, failures/repair, contract
+freeze, clean offline reproduction and independent review still block authority.
+
+Evidence: `formal/proposals/evidence/public-arithmetic-state.json`; scope and
+reproduction: `formal/proposals/public-arithmetic-state.md`. Validation: 204 tooling
+tests, 38 oracle tests, 33 legal/112 illegal legacy traces, full SANY parser,
+Ruff, syntactic consistency and byte-exact regeneration of 303 JSON/nine generated
+Lean files plus the new input TLA/configuration. All Lean inputs remain unchanged;
+the audit was rechecked at 44/45, retaining the previous 980-job build. Twenty prior
+TLA modules and public schema unchanged; only the new fixture input module added.
+Retained 28 safety/7 liveness/27 production mutants retain their prior bounded
+scope. GNU make unavailable; aggregate formal-check is not claimed. Phase0 remains
+unfrozen. Demos remain HTTP 200 without restart and frozen refs are unchanged.
+Candidate semantics:
+`sha256:70bea95f4288e579b1dae60ad3cf4ab76f15a1a533c560ec9b564c6ae4e23496`.
+
+Next: derive and check a complete-state/native-event binding with explicit original
+actor/context/bytes/sequence and native current/model/optimizer/authority mappings.
+An incompatible v1 snapshot must reject; do not merely replace its root with a new
+hash and claim exporter authentication. Specify the new projection/provenance
+boundary, compose it with PublicSnapshot/PublicReachability, and extend to arithmetic
+crash/unknown recovery and global exposure/QC/current advancement. Only that full
+general relation can discharge the remaining mandatory recovery conjunct.

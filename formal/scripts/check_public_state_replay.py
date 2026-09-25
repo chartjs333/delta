@@ -7,7 +7,8 @@ import subprocess
 from pathlib import Path
 
 from formal_artifacts import load_json_strict, sha256_file, write_canonical_json
-from public_state_projection import MODULES, ROOT, replay_sources, require
+from public_state_projection import MODULES, ROOT, configuration_sources, replay_sources, require
+from public_state_storage import unpack
 from run_formal_gate import tla_runtime
 from tlc_results import FINISHED, INITIAL_STATES, successful_tlc_result
 
@@ -34,10 +35,10 @@ def validate_success(output: str, return_code: int, state_count: int):
     return parsed
 
 
-def run_case(trace, target: Path, runtime, expected_failure=None):
-    module, config = replay_sources(trace)
+def run_case(trace, target: Path, runtime, expected_failure=None, configuration="round-config"):
+    module, config = replay_sources(trace, configuration)
     target.mkdir(parents=True, exist_ok=True)
-    for name in MODULES:
+    for name in (*MODULES, *configuration_sources(configuration)[1]):
         shutil.copyfile(ROOT / f"formal/tla/{name}.tla", target / f"{name}.tla")
     source = target / "FullStateReplay.tla"
     cfg = target / "FullStateReplay.cfg"
@@ -101,13 +102,30 @@ def main():
         "--vectors", type=Path, default=ROOT / "formal/proposals/public-state-vectors.json"
     )
     parser.add_argument("--output", type=Path, default=ROOT / "formal/build/public-state-replay")
+    parser.add_argument(
+        "--configuration", choices=["round-config", "native-arithmetic"], default="round-config"
+    )
     args = parser.parse_args()
     vectors = load_json_strict(args.vectors)
+    if args.configuration == "native-arithmetic":
+        from generate_public_arithmetic_vectors import NEGATIVE_RECIPES, counterexamples
+
+        vectors["positive"] = unpack(vectors["positive"])
+        require(vectors["negative"] == NEGATIVE_RECIPES, "NEGATIVE_RECIPE_MANIFEST")
+        vectors["negative"] = counterexamples(vectors["positive"])
     runtime = tla_runtime()
-    records = {"positive": run_case(vectors["positive"], args.output / "positive", runtime)}
+    records = {
+        "positive": run_case(
+            vectors["positive"], args.output / "positive", runtime, configuration=args.configuration
+        )
+    }
     for index, case in enumerate(vectors["negative"]):
         records[case["name"]] = run_case(
-            case["trace"], args.output / f"negative-{index}", runtime, case["expected_failure"]
+            case["trace"],
+            args.output / f"negative-{index}",
+            runtime,
+            case["expected_failure"],
+            args.configuration,
         )
     document = {
         "status": "PASS",
