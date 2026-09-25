@@ -509,6 +509,17 @@ def main() -> int:
             "and does not upgrade legacy traces. "
             "Complete native quorum/exposure binding remains required; "
             "nativeArithmeticRecoveryRefines stays missing.",
+            "The separate full-public-native v2 candidate checker derives nine "
+            "first arithmetic vote correspondences from complete states and pinned "
+            "native source fixtures, preserving original snapshot/command/receipt "
+            "bytes and sequences 5/6/8. Whole-body native recomputation, current "
+            "model/optimizer, context/time/readiness, vote-effect fields and modeled "
+            "delivered parent-QC support are checked. Old snapshot roots are not "
+            "upgraded. The source registry is explicitly synthetic; source pins "
+            "and rehashed wrappers cannot establish native exporter authentication. "
+            "It is a finite completed-trace correspondence, not general PARAMETER "
+            "admission, unknown-durability recovery or Lean history composition. "
+            "No new mandatory theorem or native authority is claimed.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

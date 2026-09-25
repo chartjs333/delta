@@ -122,6 +122,17 @@ legacy snapshot roots are explicitly incompatible with the new state preimages.
 Native snapshot/history binding and Lean composition are still open. It is not the remaining
 mandatory theorem. See `formal/proposals/public-state-projection.md`.
 
+The separate `full-public-native.v2-candidate` checker now derives nine first-vote
+correspondences from complete preimages and independently pinned native fixture
+inputs. It checks original actor/time/context/sequence, exact modeled vote changes,
+delivered parent-QC support, bound model/optimizer and full recomputed arithmetic
+bodies/command/receipt bytes. Old v1 snapshots stay unchanged and cannot masquerade
+as v2 complete-state witnesses. The source registry is explicitly synthetic; its
+pins are not producer authentication. This is finite executable correspondence,
+not a new Lean proof, generic admission rule or the remaining recovery theorem.
+See `formal/proposals/public-native-projection.md` for the unresolved exporter,
+general identity abstraction and reachable-history composition obligations.
+
 - An independently authenticated native anchor and canonical typed byte graph
   determine exactly one parameter schema, eligible ordered contribution set,
   domain/shard placement, profile, current model and current optimizer. Hash

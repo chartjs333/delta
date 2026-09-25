@@ -1616,3 +1616,69 @@ hash and claim exporter authentication. Specify the new projection/provenance
 boundary, compose it with PublicSnapshot/PublicReachability, and extend to arithmetic
 crash/unknown recovery and global exposure/QC/current advancement. Only that full
 general relation can discharge the remaining mandatory recovery conjunct.
+
+### Checked complete-state/native first-vote correspondence
+
+T009/T011/T012/T044/T048/T049/T053/T054/T056/T057/T060, amendment 0001.
+Added the separate `deltareduce.full-public-native.v2-candidate` projection with
+an explicit synthetic source-registry boundary. Nine first PARAMETER/APPLY votes
+are checked against complete prior/next preimages, immutable source/configuration
+identity, independently pinned original native metadata and the twelve-artifact
+graph. Actor, role, context, height/epoch/view/time/deadline, parent/readiness and
+original per-actor sequence 5/6/8 are checked. The single appended envelope and
+complete vote-effect field changes are derived from actual before/after states.
+
+Actual modeled parent certificates must have matching durable and delivered
+signer envelopes. Whole PARAMETER/APPLY bodies, authority inputs, schema/shard
+placement, bound model/optimizer, conversions and next vectors are independently
+reconstructed by the native artifact oracle and compared against the modeled
+bodies. Original command/envelope/receipt/effect bytes and snapshot ASCII bytes
+are retained exactly; no native record or new runtime receipt is written.
+
+The v2 wrapper keeps old opaque snapshot roots as source observations and binds
+complete roots separately. Old v1 snapshots cannot masquerade as v2 evidence;
+rehashing a changed result, state or provenance label cannot bypass derivation.
+The registry pins are integrity checks, not native producer authentication.
+Every result remains `SYNTHETIC_PINNED_FIXTURE_NOT_NATIVE_AUTHENTICATION` with
+`native_export_authenticated=false`. The required independent producer/run/source/
+position/native-snapshot/full-state tuple is specified as a still-open premise.
+No authentication Boolean or supplied expected-result equality discharges it.
+
+Sixteen new tests cover exact generation, all original bytes/sequences, legacy
+versions/roots, incomplete states, changed current/readiness/phase/time/view,
+sequence/actor/action, hidden side effects, missing/undelivered QCs, rehashed
+PARAMETER/APPLY arithmetic, complete ISC/EC/APC identities, parent model/optimizer/
+profile inputs and forged claim/provenance fields. The complete tooling suite has 220 passing tests plus
+38 oracle tests; 33 legal/112 illegal legacy traces retain their scope. The
+132-state/131-step production TLC path was rerun with byte-identical harness and
+configuration, and its finite scope is unchanged. All 304 generated JSON files,
+nine Lean files and the existing input TLA/config reproduce byte-for-byte.
+Targeted Ruff and syntactic consistency pass. The audit still reports 44/45;
+no new Lean theorem is claimed and the prior 980-job build is retained.
+
+Evidence: `formal/proposals/evidence/public-native-projection.json`; scope and
+reproduction: `formal/proposals/public-native-projection.md`. All 21 TLA modules,
+Lean sources, public schema and original native/complete-state vectors remain
+unchanged. Formal semantics stays
+`sha256:70bea95f4288e579b1dae60ad3cf4ab76f15a1a533c560ec9b564c6ae4e23496`;
+the new NO_GO report binds the new tool/source commit. Retained 28 safety/7
+liveness/27 production-mutant results keep their previous finite scopes. GNU make
+unavailable; aggregate formal-check is not claimed. Phase0 is still unfrozen.
+All three demos remain HTTP 200, with no restart or frozen-ref movement.
+
+This is a finite completed-trace correspondence, not production authentication,
+general admission or a new requirement that PARAMETER wait for a later aggregate.
+The structural vote check does not replace production Next. No arithmetic crash,
+unknown-durability, historical retry or general initial-snapshot relation is
+newly claimed. Native arithmetic guards remain unchanged; qualifying runtime work
+stays blocked by Formal NO_GO.
+
+Next: represent the complete public state and its native identity projection in
+the mandatory proof layer. Derive actor/current/sequence/parent/body bindings
+through checked extraction of all relevant fields from that complete object;
+retain the whole preimage/source/configuration/provenance boundary. A summarized
+RoundState, finite approval table or assumed recovered-state equality is not
+sufficient. Compose this with PublicSnapshot/PublicReachability and production
+vote/send/QC/current behavior, then arithmetic crash/unknown recovery. General
+decoder/hash/exporter/WAL/admission, arbitrary snapshots/failures/repair, contract
+freeze, clean offline reproduction and independent reviews remain mandatory.
