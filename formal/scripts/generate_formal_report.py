@@ -630,6 +630,15 @@ def main() -> int:
             "native snapshot provenance. The proposal coverage/tuple checks are "
             "necessary relations only; they do not establish production CloseInput, "
             "full private-state equality, WAL or the missing recovery theorem.",
+            "The native admission-snapshot component executes 66 cases against eight "
+            "unchanged PR50 translation units. Exact DRC1 state bytes bind state_id; "
+            "stale state, closed-body, context, sequence and readiness/deadline "
+            "substitutions reject. PARAMETER/APPLY remain guarded in live/recovery. "
+            "Rebound synthetic closed bodies at the same state_id and a rebound "
+            "inner state_root expose the required independent snapshot-origin "
+            "premise, not full-pipeline vulnerabilities. Native policy identity, "
+            "complete public state/CloseInput provenance and actual WAL/recovery "
+            "remain unproved. This is not authenticated export or local acceptance.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

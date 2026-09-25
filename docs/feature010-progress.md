@@ -2324,3 +2324,49 @@ unknown composition and nativeArithmeticRecoveryRefines remain open. Native
 bounded adapters/WAL/admission, arbitrary snapshots/failures/repair, freeze, clean
 reproduction and independent reviews remain mandatory. No original GO or local
 SIMULATED_LOCAL PASS has been issued.
+
+
+## 2026-09-25 native admission snapshot component boundary
+
+T044/T048/T049/T053/T057/T060. Continued from source f49e5fe / report 978551d.
+Compiled eight unchanged PR50 translation units and executed 66 native
+policy/admission cases. Exact DRC1 RoundState/Vote bytes and ISC body identities
+are retained and independently checked; these are binary core envelopes, not
+certificate JSON or a full 64-variable public state. Eleven stale-state cases,
+closed-set/body/context/config/epoch/schema/profile substitutions and live
+sequence/readiness/parent/deadline violations reject. Both PARAMETER and APPLY
+pass fixture policy validation and reject at the authoritative arithmetic-input
+guard in live and recovery. No mutant macro or runtime edit was used.
+
+Counterchecks precisely bound the missing producer relation: a rehashed inner
+state root changes state_id but supplies no complete public preimage; rebound
+ISC root/commitment/AC plus candidate/closed IDs can pass at the same state_id.
+The synthetic ISC fixture also passes without a finalized-config assertion.
+The component consumes trusted prepared authority; these findings are not a
+claim of attacks on the complete production pipeline. Native runtime separately
+serializes/binds policy identity and invalidates it after state commands; that
+origin/WAL contract remains to be connected and is not executed here.
+
+Scope formal/proposals/native-admission-snapshot.md; evidence
+formal/proposals/evidence/native-admission-snapshot.json. Ten new tests cover
+actual responses, exact original bytes/hash inputs and strict bounded flat
+DRC1 decoding, including all truncated state prefixes and changed diagnostics.
+Full checks: 294 tooling/38 oracle, 33 legal/112 illegal legacy traces, targeted
+Ruff/consistency; new fixture/harness/native results byte-exact. All prior 322
+files plus nine prior component artifacts unchanged. No Lean/TLA/schema/runtime
+or old native/public fixture changes; no fresh Lean/TLC/production mutants.
+Semantics stays sha256:c0e7baa47535a52378158b2f28d8a1e138c5b020d698a537badc7f1a5b650795.
+Retained build1007/audit44of45 and bounded28safety/7liveness/27mutants plus
+132state/131step path remain their prior scope. Phase0 is unfrozen, make is
+unavailable, aggregate formal-check is not claimed. Demos remain healthy without
+restart; frozen refs unchanged. Formal and local acceptance remain NO_GO.
+
+Next bind the actual complete policy serialization/identity at runtime open and
+replay, and locate its independently authenticated producer. Preserve exact
+native state/config/candidate/closed-body identities without claiming that a
+policy hash proves public CloseInput or all64 state fields. Establish the actual
+root/commitment/content/live-availability bridge before enabling non-arithmetic
+PublicDurablePrefix; unavailable provenance remains explicit. Full phase/send/
+delivery/QC/current/crash/unknown composition and nativeArithmeticRecoveryRefines
+remain open, plus general bounded adapters/WAL/admission, arbitrary snapshots/
+failures/repair, contract freeze, clean reproduction and independent review.
