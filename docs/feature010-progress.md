@@ -2261,3 +2261,66 @@ WAL/admission/recovery, arbitrary snapshots/failures/repair, contract freeze,
 clean reproduction and independent reviews remain open. Mandatory
 nativeArithmeticRecoveryRefines is still missing. Formal and local acceptance
 remain NO_GO/unissued; Docker/synthetic participants do not waive these gates.
+
+### Native InputLedger execution and the frozen-input closure boundary
+
+Tasks T044/T048/T049/T053/T057/T060. Complete unmodified PR50 consensus,
+canonical, SHA and certificate translation units now execute the actual native
+InputLedger in a proposal harness. Thirty-six ordered operations retain exact
+active commitment/availability rows, frozen rows and late counts through reversed
+arrival, retry, conflict, invalid coverage/attesters/threshold, freeze and late
+evidence. Every actual disposition and before/after accessor projection matches
+independent expected frames. This is not a full private-state snapshot: late
+payloads have no accessor and remain represented only by counts.
+
+A separate native ISC is constructed from EVERY actual frozen row plus explicit
+fixture domain metadata. Its exact canonical ASCII, QC ID and pre-quorum body
+ID match Python. The necessary tuple relation derives fields from the frozen
+rows and rejects missing/extra/duplicate/reordered/substituted rows or wrong
+metadata. The preceding singleton ISC rejects against the full two-row list and
+is unchanged. No original label, receipt, journal root or sequence is rewritten.
+
+Confirmed boundary: native freeze accepts a partial permitted set and has no
+close-policy parameter. The named coverage conjunct accepts this subset for
+OMIT_UNAVAILABLE and rejects it for ABORT_ON_INCOMPLETE. Native empty freeze
+rejects, whereas TLA's OMIT_UNAVAILABLE coverage conjunct permits empty entries.
+InputLedger does not compute input_root or prove actual current per-shard storage
+availability; its proof/threshold/leaf parameters still need independent origin.
+The typed ISC admission snapshot separately checks closed-body membership and
+context; constructing/authenticating that snapshot from complete public state
+remains open. These are component/adapter boundaries, not a demonstrated full
+runtime admission defect.
+
+Scope: formal/proposals/native-input-ledger.md. Evidence:
+formal/proposals/evidence/native-input-ledger.json. Twelve native source blobs
+are pinned to 60c692f6e391f839829dfc64e93380db54cd507b; actual MSVC19.29.30146
+x64 C++20/W4/WX compile/run passed. Nine new tests cover all operation frames,
+full frozen/ISC binding, metadata and exact-set mutations, policy/root
+counterchecks, strict native output parsing and source reproduction. Signatures,
+content/root preimages, domain/configuration metadata and native exporter
+authentication remain unproved. Native cc98f15a certificate semantics is retained.
+Component execution is not reactor/WAL/recovery, complete public CloseInput or
+Feature010 acceptance.
+
+Verification: 284 tooling/38 oracle, 33 legal/112 illegal legacy traces, Ruff and
+syntactic consistency pass. New fixture/harness/component results are byte-exact;
+all preceding 322 generated files plus six prior ISC/certificate-chain artifacts
+are unchanged. Lean, all 21 TLA modules, schema/runtime/native/public fixtures are
+unchanged. Semantics remains
+sha256:c0e7baa47535a52378158b2f28d8a1e138c5b020d698a537badc7f1a5b650795.
+No fresh Lean/TLC/production mutants; retained 1007-job build, 44/45 audit,
+28 safety/7 liveness/27 mutants and 132-state/131-step path retain bounded scope.
+Phase0 remains unfrozen; make unavailable; aggregate formal-check is not claimed.
+Three demos returned HTTP200 without restart and frozen refs remain unchanged.
+
+Next derive/check the actual immutable native admission snapshot's state/config/
+closed-input binding against complete public pre-state, preserving distinct
+commitment/content/AC/root identities and explicit provenance. Do not equate the
+native RoundState summary with all 64 public variables or infer live availability
+from a flat historical attester list. Establish missing root/closed-set contracts
+before accepting non-arithmetic PublicDurablePrefix branches; keep the mixed
+legacy prefix fail-closed. CONFIG/VIEW/ABORT, phase/send/delivery/QC/current/crash/
+unknown composition and nativeArithmeticRecoveryRefines remain open. Native
+bounded adapters/WAL/admission, arbitrary snapshots/failures/repair, freeze, clean
+reproduction and independent reviews remain mandatory. No original GO or local
+SIMULATED_LOCAL PASS has been issued.

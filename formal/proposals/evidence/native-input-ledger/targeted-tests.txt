@@ -1,0 +1,14 @@
+test_all_native_operation_results_and_accessor_snapshots_match (test_native_input_ledger.NativeInputLedgerTests.test_all_native_operation_results_and_accessor_snapshots_match) ... ok
+test_complete_frozen_rows_derive_new_native_isc_and_body_ids (test_native_input_ledger.NativeInputLedgerTests.test_complete_frozen_rows_derive_new_native_isc_and_body_ids) ... ok
+test_component_parser_rejects_missing_duplicate_reordered_and_typed_substitution (test_native_input_ledger.NativeInputLedgerTests.test_component_parser_rejects_missing_duplicate_reordered_and_typed_substitution) ... ok
+test_domain_metadata_cannot_be_omitted_changed_or_inferred_from_hash (test_native_input_ledger.NativeInputLedgerTests.test_domain_metadata_cannot_be_omitted_changed_or_inferred_from_hash) ... ok
+test_errors_retries_and_late_evidence_preserve_frozen_rows (test_native_input_ledger.NativeInputLedgerTests.test_errors_retries_and_late_evidence_preserve_frozen_rows) ... ok
+test_exact_source_and_diagnostic_fixture_reproduction (test_native_input_ledger.NativeInputLedgerTests.test_exact_source_and_diagnostic_fixture_reproduction) ... ok
+test_freeze_does_not_discharge_required_ticket_policy (test_native_input_ledger.NativeInputLedgerTests.test_freeze_does_not_discharge_required_ticket_policy) ... ok
+test_frozen_missing_extra_duplicate_reordered_and_substituted_reject (test_native_input_ledger.NativeInputLedgerTests.test_frozen_missing_extra_duplicate_reordered_and_substituted_reject) ... ok
+test_root_provenance_is_not_invented_from_exact_frozen_rows (test_native_input_ledger.NativeInputLedgerTests.test_root_provenance_is_not_invented_from_exact_frozen_rows) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.318s
+
+OK

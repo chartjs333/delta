@@ -621,6 +621,15 @@ def main() -> int:
             "shape checks do not establish availability, phase/QC or arithmetic "
             "admission. This is component execution only, with no new runtime/WAL, "
             "public/Lean prefix bridge, recovery theorem or local acceptance.",
+            "The native InputLedger component executes 36 ordered operations using "
+            "unchanged consensus/canonical/SHA/certificate translation units. It "
+            "retains exact active/frozen rows and late counts through rejection, "
+            "retry and late input, and constructs a separate ISC from the complete "
+            "frozen list. freeze accepts a partial permitted ticket set and does "
+            "not check close policy, current availability, root preimages or "
+            "native snapshot provenance. The proposal coverage/tuple checks are "
+            "necessary relations only; they do not establish production CloseInput, "
+            "full private-state equality, WAL or the missing recovery theorem.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
