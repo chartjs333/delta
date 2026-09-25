@@ -37,6 +37,10 @@ import DeltaReduce.PublicAuthorityVectors
 import DeltaReduce.PublicParameterBody
 import DeltaReduce.PublicParameterJoin
 import DeltaReduce.PublicParameterBodyVectors
+import DeltaReduce.PublicApplyArithmetic
+import DeltaReduce.PublicApplyBody
+import DeltaReduce.PublicApplyJoin
+import DeltaReduce.PublicApplyBodyVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply

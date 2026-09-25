@@ -579,6 +579,18 @@ def main() -> int:
             "contents, unified alias/configuration authentication, phase/QC/global "
             "exposure and joined recovery remain unproved; nativeArithmeticRecoveryRefines "
             "is still missing. Component fixtures are not a new native execution.",
+            "PublicApplyArithmetic rechecks every original certified conversion and "
+            "all mixture/optimizer intermediates at the projected width, deriving "
+            "native output identity by cross-width trace proofs. PublicApplyBody "
+            "constructs every complete PARAMETER leaf, all twelve aggregate fields "
+            "and ten APPLY fields. The separate configured checkpoint symbol must "
+            "map to the computed native model hash under the existing runtime "
+            "convention; configuration/identity authentication and the full current "
+            "command/QC contract remain unproved. PublicApplyJoin supports both "
+            "complete bodies and composes actual known-cut journal operations. "
+            "Full prior durable contents, phase/QC/global exposure/current and "
+            "public/native recovery remain open. No new combined full-state/native "
+            "execution or mandatory recovery proof is claimed.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

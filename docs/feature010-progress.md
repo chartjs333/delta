@@ -2024,3 +2024,69 @@ witnesses remain unchanged; 145 legacy traces change only semantics ID. No fresh
 TLC or production mutant is claimed. The previous bounded 28 safety/7 liveness/
 27 mutant results and 132-state/131-step replay retain their scope. All three
 demos returned HTTP 200 without restart and frozen refs remained unchanged.
+
+
+### Complete aggregate/APPLY body and narrow arithmetic rechecks
+
+Tasks T044/T048/T049/T053/T057/T060. PublicApplyArithmetic rechecks every actual
+native certified conversion, preserves every source entry and derives output
+identity by the exact conversion formula. It recomputes mixture and optimizer
+at projected bounds from the actual NativeApply rows/current vectors/profile.
+General cross-width proofs derive denominator, gradient and both next-vector
+identities; coefficients/products/prefixes and optimizer intermediates cannot
+be bypassed by wide native success or a zero learning rate.
+
+PublicApplyBody constructs every complete public PARAMETER leaf from the exact
+native certified corpus, with original ordered source, frame/row/coverage and
+shared-parent checks. It constructs all twelve aggregate and ten APPLY fields,
+complete authority and schema-tagged next-vector tables, then compares the whole
+canonical candidate. The native aggregate remains independently anchored and
+its full ordered body list is retained. Canonical public leaf sets retain all
+values and reject duplicates. Numeric-only missing-authority bodies reject.
+
+The separate configured next-checkpoint model symbol must map, through the
+independent IdentityMap, to the exact sha256 spelling of the computed native
+next-model hash. This checks the existing runtime convention observed in
+CurrentPointerStore::advance; the native APPLY_EXPECTED has no separate checkpoint
+field. It does not authenticate the configuration/map or prove the entire
+normative ApplyQC/current-pointer edge. Structured public vector values are
+not silently equated with cryptographic content IDs. Those identity/configuration
+premises, including native exporter provenance, remain explicit and unresolved.
+
+PublicApplyJoin now offers a source-bound complete-body API for both PARAMETER
+and APPLY. It preserves original NativePrepared records, full before/after vote
+effects and sequences, then composes actual successful known-cut persistence
+with reachable journal operations. UNKNOWN still cannot enter this complete-state
+API. The entire preceding public durable set beyond count, unified aliases,
+non-arithmetic phase/QC/send/delivery/current and full crash/unknown composition
+are still open. The old PARAMETER-only API retains its explicit APPLY rejection.
+
+Four modules contain 31 general helpers/21 definitions and 34 component/kernel
+examples/eleven definitions: 97 names are axiom-audited. One example rechecks the
+actual pinned native APPLY arithmetic; another uses its prior kernel-checked
+result for checkpoint mapping. Other examples separate complete body components
+and arithmetic guard failures. No new combined full-state/native execution,
+production mutant or authenticated exporter is claimed. Scope/reproduction:
+formal/proposals/public-apply-body-proof.md; evidence:
+formal/proposals/evidence/public-apply-body.json. Semantics: sha256:a314b03b877a03a63946a70bfc3bcc064b2ca8349d91b053b317427d021b3911.
+
+Remaining mandatory recovery, native bounded adapters/WAL/admission, arbitrary
+snapshots/availability/failures/repair, contract freeze, clean reproduction and
+independent reviews are not waived. Formal-first STOP stays active; this is
+NO_GO and not local Docker/synthetic acceptance. Next bind the ENTIRE previous
+public durable vote set to the reachable all-vote journal with checked original
+action/context/body identity for each slot; count equality is insufficient.
+Do not introduce a whole-body approval mapping or rename otherAuthorized as a
+phase proof. Then compose actual protocol send/QC/current/crash recovery.
+
+Final stable-source verification: full Lean build 1005 jobs, fresh arithmetic,
+body/join/vector kernels and 97 axiom audits pass with only propext/Quot.sound/
+Classical.choice. 244 tooling/38 oracle tests, 33 legal/112 illegal legacy traces,
+Ruff and syntactic consistency pass. Regeneration is byte-exact for 322 files
+(305 JSON, fifteen generated Lean and input TLA/config). All 21 TLA modules,
+schema/runtime and 147 native witnesses remain unchanged; 145 legacy traces
+change only semantics ID. No fresh TLC or production mutants; previous finite
+28 safety/7 liveness/27 mutants and 132-state/131-step replay keep their scope.
+Mandatory audit stays 44/45; Phase0 is unfrozen, make unavailable and aggregate
+formal-check not claimed. All three demos HTTP 200 without restart; frozen refs
+unchanged.
