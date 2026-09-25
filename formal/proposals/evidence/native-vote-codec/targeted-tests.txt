@@ -1,0 +1,12 @@
+test_actual_parser_and_sha_cases (test_native_vote_codec.NativeVoteCodecTests.test_actual_parser_and_sha_cases) ... ok
+test_all_named_declarations_audited (test_native_vote_codec.NativeVoteCodecTests.test_all_named_declarations_audited) ... ok
+test_exact_source_and_harness (test_native_vote_codec.NativeVoteCodecTests.test_exact_source_and_harness) ... ok
+test_native_fields_and_explicit_adapter_scope (test_native_vote_codec.NativeVoteCodecTests.test_native_fields_and_explicit_adapter_scope) ... ok
+test_native_hash_and_status_mutations_reject (test_native_vote_codec.NativeVoteCodecTests.test_native_hash_and_status_mutations_reject) ... ok
+test_original_frames_and_receipt_content_ids (test_native_vote_codec.NativeVoteCodecTests.test_original_frames_and_receipt_content_ids) ... ok
+test_reproduction (test_native_vote_codec.NativeVoteCodecTests.test_reproduction) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 2.139s
+
+OK

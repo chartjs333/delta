@@ -659,6 +659,18 @@ def main() -> int:
             "countercheck documents that gap. Codec examples for PARAMETER/APPLY "
             "are not admitted native votes. Policy/WAL/public recovery and native "
             "arithmetic authority remain open; this layer does not discharge PO-AB1.",
+            "The native DRC1 vote layer reads all thirteen fixed fields and checks "
+            "canonical decimals/content IDs/default text limits, deriving exact "
+            "frame bytes and sequence/context/action/ID receipt binding. The ID "
+            "adapter receives the exact native domain, NUL and complete frame; "
+            "SHA-256 and signature/authentication are not proved. Nine original "
+            "receipts use finite exact-preimage digest samples. Three unchanged "
+            "native translation units execute 49 codec cases (12 accepted and "
+            "37 rejected), including native-accepted unknown nonempty kind and "
+            "uint64 endpoints. This is codec evidence, not arithmetic admission, "
+            "native/public WAL recovery or authenticated export. Policy/WAL "
+            "decoders/replay, source provenance, full public behavior and the "
+            "mandatory recovery conjunct remain open; no formal/local GO follows.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

@@ -2477,3 +2477,66 @@ production mutants; earlier28safety/7liveness/27mutants and132state/131steppath
 retain finite scope. Phase0 unfrozen, make unavailable; aggregate formal-check
 not claimed. DemosHTTP200, no restart, frozenrefs unchanged. Only final successful
 source checks count; draft recursion/syntax/source-selector failures superseded.
+
+
+## 2026-09-25 native DRC1 vote and semantic receipt binding
+
+T044/T048/T049/T053/T057/T060. Continued from51dd421 / NO_GO overlay85312de.
+NativeVoteBytes.lean reads the actual binary VOTE header and all13 ordered fields,
+checks default native text/envelope limits, canonical uint64 decimals, content IDs,
+nonempty printable identifiers and exact common constants. It retains the old
+native accepted semantics; candidate semantics are not silently substituted.
+Frame inverse/injectivity and soundness derive all fields and numeric bounds.
+The complete DVREC001 decoder now checks actual frame/sequence/context/action
+and the domain+NUL+full-frame SHA input. Digest width/hex spelling are computed;
+SHA itself and signatures/admission remain explicit outside this proof.
+
+The nine original native receipts are reused unchanged. Finite exact-preimage
+SHA lookups are fixture adapters only, not general SHA/native authentication.
+Each complete receipt is composed through generic checked component lemmas;
+modified sequence/context/action/ID rejects. The prior structurally accepted
+unauthenticated container now fails the semantic decoder. Small text/decimal
+boundary checks include uint64 maximum, overflow, leading zero and bad tags.
+
+Three unchanged native units execute49 parser/SHA cases:12 accepted/37 rejected.
+The native VOTE parser accepts nonempty unknown kind; DVREC action binding is the
+separate closed nine-kind rule. All accepted native frames re-encode exactly.
+This is new codec execution, not Runtime/WAL, arithmetic admission, TLC or new
+production mutants. Prior native component/WAL evidence stays unchanged.
+Scope formal/proposals/native-vote-codec-proof.md and source-bound machine evidence
+formal/proposals/evidence/native-vote-codec.json retain final checks and counts.
+
+Next connect these original semantic receipts to actual DVPOL001 policy and DRW1
+WAL entry parsing/replay. Preserve initial policy provenance and complete public
+state/phase/CloseInput/send/delivery/QC/current/crash/unknown relation as open until
+proved. Do not confuse parsed receipt with authorized vote, response exposure,
+network delivery or durable recovery; missing response does not prove absence.
+The remaining nativeArithmeticRecoveryRefines theorem stays mandatory and OPEN.
+Contract freeze/offline reproduction/independent review and joined runtime/GPU/
+Docker gates are still required. No formal GO or separate local PASS is issued.
+
+Use explicit typed computation witnesses in future kernel examples. A metavariable
+argument to a theorem about decode can trigger evaluation of the entire closed
+parser during unification. Generic transport lemmas and explicit arguments avoid
+that redundant reduction. Earlier unfinished UTF8/namespace/implicit-argument
+and tactic-scope drafts are not passing evidence; only final stable logs count.
+
+The nine actual PR50 codec fixtures are separate sequence1 examples, not one
+combined nine-vote execution or the legacy proposal5/6/8 history. Actual Runtime
+WAL sequence counts BOTH state transitions and votes; its recovered vote-count
+and protocol state durable-sequence are different quantities. The next bridge
+must preserve these distinctions when deriving original DVREC sequences.
+
+Final stable-source verification: full Lean1011 jobs, fresh generic kernel and
+270 named declaration audits PASS (25 general helpers,182 component/kernel
+proofs,63 executable/sample definitions). The standalone final vector kernel
+also passed before the mandatory build. 318tooling/38oracle/7targeted,
+33legal/112illegal legacy,Ruff/consistency PASS.326files (307JSON/17Lean plus
+inputTLA/config) reproduce byte-exact. All21TLA/schema/runtime/147native witnesses
+are unchanged;145legacy traces only semanticID.15prior native component/WAL
+artifacts retain exact hashes. New semantics:
+sha256:30153d01cc15ebcacfbcb8786ef2f6e48f09921dbc2bd1a2f33ae07f649c8ed2.
+Mandatory44/45 still FAIL for nativeArithmeticRecoveryRefines; no fresh TLC/new
+mutants. Retained28safety/7liveness/27mutants and132state/131step path remain
+bounded. Phase0 remains unfrozen, make unavailable, aggregate formal-check not
+claimed. Three demos HTTP200/no restart, frozen refs unchanged. NO_GO persists.

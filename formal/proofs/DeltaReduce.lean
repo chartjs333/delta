@@ -45,6 +45,8 @@ import DeltaReduce.PublicDurablePrefix
 import DeltaReduce.PublicDurablePrefixVectors
 import DeltaReduce.NativeReceiptBytes
 import DeltaReduce.NativeReceiptVectors
+import DeltaReduce.NativeVoteBytes
+import DeltaReduce.NativeVoteCodecVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply
