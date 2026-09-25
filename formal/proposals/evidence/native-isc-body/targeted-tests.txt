@@ -1,0 +1,16 @@
+test_actual_fixture_id_and_exact_native_component_bytes (test_native_isc_body.NativeIscBodyTests.test_actual_fixture_id_and_exact_native_component_bytes) ... ok
+test_all_cases_decode_exactly_and_remain_nonqualifying (test_native_isc_body.NativeIscBodyTests.test_all_cases_decode_exactly_and_remain_nonqualifying) ... ok
+test_every_truncated_prefix_and_trailing_bytes_reject (test_native_isc_body.NativeIscBodyTests.test_every_truncated_prefix_and_trailing_bytes_reject) ... ok
+test_exact_source_spans_sha_and_fixture_reproduction (test_native_isc_body.NativeIscBodyTests.test_exact_source_spans_sha_and_fixture_reproduction) ... ok
+test_forged_provenance_qc_fields_and_version_reject (test_native_isc_body.NativeIscBodyTests.test_forged_provenance_qc_fields_and_version_reject) ... ok
+test_full_supported_tuple_bound_roundtrips (test_native_isc_body.NativeIscBodyTests.test_full_supported_tuple_bound_roundtrips) ... ok
+test_lengths_counts_nonascii_and_resource_limits_reject (test_native_isc_body.NativeIscBodyTests.test_lengths_counts_nonascii_and_resource_limits_reject) ... ok
+test_order_duplicates_and_empty_are_not_silently_rewritten (test_native_isc_body.NativeIscBodyTests.test_order_duplicates_and_empty_are_not_silently_rewritten) ... ok
+test_rehashed_field_substitutions_do_not_override_original_source (test_native_isc_body.NativeIscBodyTests.test_rehashed_field_substitutions_do_not_override_original_source) ... ok
+test_uint64_endianness_and_invalid_typed_values (test_native_isc_body.NativeIscBodyTests.test_uint64_endianness_and_invalid_typed_values) ... ok
+test_unknown_fields_bool_integer_alias_and_byte_substitution_reject (test_native_isc_body.NativeIscBodyTests.test_unknown_fields_bool_integer_alias_and_byte_substitution_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.946s
+
+OK

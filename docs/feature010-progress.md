@@ -2153,3 +2153,51 @@ retained 28 safety/7 liveness/27 mutants and the 132-state/131-step arithmetic
 path keep their finite scopes. Mandatory 44/45, unfrozen Phase0 and unavailable
 make remain; aggregate formal-check is not claimed. Three demo services returned
 HTTP 200 without restart and all frozen refs were unchanged.
+
+### Versioned ISC voted-body preimages and native encoder/SHA component execution
+
+Tasks T044/T048/T049/T053/T057/T060. A new separately versioned proposal witness
+retains the complete native VoteInputSetBody typed fields, exact binary hash
+payload/preimage and body ID. It is bound to PR50 source
+60c692f6e391f839829dfc64e93380db54cd507b; it is not a replacement for any legacy
+label hash, envelope, receipt or original sequence. The pre-quorum body has no
+QC signer/quorum fields. Its root/availability/configuration primitives still
+require independent native-state provenance and field-level public projection.
+
+The bounded Python hash-payload encoder/decoder was cross-checked against ten
+unmodified extracted C++ type/function definitions, plus the entire unmodified
+native SHA source. MSVC 19.29.30146 x64 with C++20/W4/WX compiled the proposal
+harness; 21 exact byte strings and SHA IDs agree. The pinned base body is 635
+bytes. Other cases change each context/tuple/root field and cover uint64/text,
+empty/duplicate/reversed-list boundaries. These encoding cases are not admission
+tests: native hash encoding preserves typed order and does not itself validate
+IDs, availability, phase, roots or quorum. The full native reactor/fixture
+admission constructor/WAL/exporter is not executed. Generated binaries are ignored.
+
+Eleven new tooling tests include all 635 truncated prefixes, trailing bytes,
+length/count/resource checks and the supported 4096-tuple boundary, exact source
+span/fixture reproduction, rehashed substitutions and forged provenance/QC fields.
+The comparison preserves JSON type identity rather than accepting Boolean/integer
+aliases. ASCII<=128/4096 tuples/4MiB are proposal profile restrictions, not new
+native admission rules or the native wire/C ABI/WAL decoder contract.
+
+Scope: formal/proposals/native-isc-body-codec.md. Evidence:
+formal/proposals/evidence/native-isc-body.json. The source/hash registry is still
+synthetic; native_export_authenticated=false and gate_eligible=false throughout.
+Full config/policy/content/AC/root/closed-input authority, EC/APC/ROOT body
+projection and the Lean journal/phase/QC/recovery relation remain open. The
+stronger mixed-prefix checker still rejects the old incomplete history.
+nativeArithmeticRecoveryRefines remains missing; NO_GO and formal-first STOP
+are unchanged. No local Docker/synthetic acceptance has been issued.
+
+Verification: 259 tooling tests, 38 oracle tests and the final eleven targeted
+codec tests pass, as do 33 legal/112 illegal legacy traces, Ruff and syntactic
+consistency. New fixture, extracted harness and C++ result regeneration is
+byte-exact; every one of the preceding 322 generated files is unchanged. Lean,
+all 21 TLA modules, public schema, runtime and old native/public fixtures are
+unchanged. Semantics remains
+sha256:c0e7baa47535a52378158b2f28d8a1e138c5b020d698a537badc7f1a5b650795.
+No new Lean build/TLC/production mutant is claimed; the prior 1007-job build,
+44/45 audit, 28 safety/7 liveness/27 mutants and 132-state/131-step path retain
+their old scope. Phase0 remains unfrozen and make unavailable. Three demo
+services returned HTTP 200 without restart; frozen refs remain unchanged.

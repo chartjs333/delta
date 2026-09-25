@@ -601,6 +601,16 @@ def main() -> int:
             "remain unchanged. A versioned typed non-arithmetic witness and its "
             "provenance are required; this partial fail-closed gate is not full "
             "native recovery, native execution, or a discharged mandatory theorem.",
+            "A separately versioned native ISC voted-body fixture checks exact binary "
+            "hash payloads against ten extracted PR50 C++ definitions and unmodified "
+            "native SHA source on 21 cases. The bounded proposal decoder and source "
+            "witness verifier reject truncated/substituted evidence. This is native "
+            "encoder/SHA component execution only, not reactor/admission/WAL/exporter "
+            "execution. Empty/duplicate/invalid-ID encoding cases are not admitted "
+            "votes. Public configuration, commitment/content, availability/root and "
+            "closed-input authority projection remain unproved; legacy labels and "
+            "receipts are not rewritten. No new Lean/TLC recovery proof or local "
+            "acceptance is established by these synthetic source fixtures.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "
