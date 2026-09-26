@@ -1,0 +1,12 @@
+test_actual_parent_guard_scope_is_explicit (test_native_plan.PlanTests.test_actual_parent_guard_scope_is_explicit) ... ok
+test_all_declarations_audited (test_native_plan.PlanTests.test_all_declarations_audited) ... ok
+test_complete_fields_and_original_parent_ids (test_native_plan.PlanTests.test_complete_fields_and_original_parent_ids) ... ok
+test_generated_bytes (test_native_plan.PlanTests.test_generated_bytes) ... ok
+test_ordered_coverage_and_iteration_wire_width (test_native_plan.PlanTests.test_ordered_coverage_and_iteration_wire_width) ... ok
+test_original_policy_pin_rejects (test_native_plan.PlanTests.test_original_policy_pin_rejects) ... ok
+test_rehashed_original_apc_substitutions_reject (test_native_plan.PlanTests.test_rehashed_original_apc_substitutions_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 3.675s
+
+OK

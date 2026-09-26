@@ -1,0 +1,1 @@
+Checked in the fresh full Lean build; duplicate standalone invocation interrupted. No standalone vector completion claimed. See lean-build.txt.

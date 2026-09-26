@@ -838,6 +838,16 @@ def main() -> int:
         "Original norm spelling failure, Q/robust derivation and physical recovery "
         "remain open; no native repair or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativePlan/Lineage/Section compute all original APC fields, distinct body/QC "
+        "identities, complete accepted-ticket assignment/weight coverage and actual "
+        "checked ISC/EC/seed sections. Native APC checks do not repeat EC/ISC "
+        "cross-parent equality; the isolated predicate example is not an accepted "
+        "whole native snapshot or exploit. Bucket/alpha/transcript/accumulator "
+        "preimages, full PARAMETER/root/apply admission/replay, general codec/SHA "
+        "equivalence and nativeArithmeticRecoveryRefines remain open. Finite SHA "
+        "components are not authentication; no native repair, execution or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

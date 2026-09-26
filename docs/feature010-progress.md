@@ -3343,3 +3343,47 @@ identity remain unproved. Semantics sha256:e7a7a99bc593e3eb214c7f453a7cc03abdad1
 Mandatory44/45 FAIL; phase0 unfrozen; make unavailable, aggregate formal-check
 not claimed. Three demosHTTP200 without restart, frozenrefs unchanged. Source-bound
 report stays NO_GO; no local PASS, independent attestation or runtime repair.
+
+## 2026-09-26 — Complete native APC coverage and original parent section in Lean
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-plan-proof.md; evidence: formal/proposals/evidence/native-plan.json.
+NO_GO remains. NativePlan derives all20 APC JSON fields and distinct complete
+body/policy wire; checks original context, integer alpha/gcd, both strict ordered
+nonempty arrays, iteration bounds and configured signer/quorum. Coverage compares
+all accepted EC tickets with sorted assignments and original weights; count/position
+and impossible all-rejected nonempty plan follow generally.
+
+NativePlanLineage resolves original ISC/EC/seed and required accumulator; section
+executes actual earlier checks, both entire APC lists and finalized subset. The
+observed native APC predicate does not repeat EC.isc=plan.isc equality. Its isolated
+countercheck does not demonstrate any accepted complete native mixed-parent snapshot.
+No fabricated equality is added. Alpha/bucket/transcript/accumulator derivation,
+crypto signatures/provenance and full later graph/admission/replay remain open.
+
+Two new finite SHA samples extend prior six checked parent samples. Original
+codec-APC/codec-PARAMETER observations stay exact. Component and separate multi-ticket
+kernel cases are not new native/TLC/mutant executions or whole policy acceptance.
+Closed admission modes, runtime/guard, healthy demos and frozen refs stay unchanged.
+Next native PARAMETER original decimal results/leaf/denominator/parents, then full
+graph/replay/recovery/nativeArithmeticRecoveryRefines. Contractfreeze, offline
+reproduction, independent review and exact merged formal authority still required.
+Final stable-source validation follows in retained evidence.
+
+Final stable-source checks: full Lean1056jobs, including fresh vector compilation;
+standalone APC/lineage/section kernels and axiom audit PASS.448tooling/38oracle/7targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.343generated files(310JSON/31Lean/inputTLA/config)
+byte-exact. All228new names audited:45generalhelpers/47definitions,
+110vectorproofs/26definitions. Onlypropext/Quot.sound/Classical.choice;
+no new warnings/holes, five pre-existing unused-simp warnings remain. Earlier
+resource-heavy structural/vector reductions were replaced by component lemmas;
+only final stable-source logs are evidence. Duplicate standalone vector invocation
+was interrupted after full build passed; no second vector completion is claimed. All21TLA/schema/runtime/147native
+witnesses unchanged;145legacytraces onlysemanticsID. No fresh native/TLC/new
+productionmutants; retained62decimal/32mixednativecases,28safety/7liveness/
+27mutants and132state/131step path keep previous bounded scopes. Native decimal
+canonicality still FAIL; norm/Q/robust derivation and general native language
+identity remain unproved. Semantics sha256:c8a1dff20ffc29f7cf7fa856b6759577ea9f22e5c40be29b2126aca6f637dcca.
+Mandatory44/45 FAIL; phase0 unfrozen; make unavailable, aggregate formal-check
+not claimed. Three demosHTTP200 without restart, frozenrefs unchanged. Source-bound
+report stays NO_GO; no local PASS, independent attestation or runtime repair.

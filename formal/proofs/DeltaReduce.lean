@@ -1,3 +1,7 @@
+import DeltaReduce.NativePlanVectors
+import DeltaReduce.NativePlanSection
+import DeltaReduce.NativePlanLineage
+import DeltaReduce.NativePlan
 import DeltaReduce.NativeEligibility
 import DeltaReduce.NativeEligibilityLineage
 import DeltaReduce.NativeEligibilitySection
