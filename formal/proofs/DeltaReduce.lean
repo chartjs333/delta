@@ -1,3 +1,6 @@
+import DeltaReduce.NativeNormEvidenceVectors
+import DeltaReduce.NativeNormSection
+import DeltaReduce.NativeNormEvidence
 import DeltaReduce.NativeReplayAdmission
 import DeltaReduce.NativeMixedPolicyVectors
 import DeltaReduce.NativeMixedReplayVectors

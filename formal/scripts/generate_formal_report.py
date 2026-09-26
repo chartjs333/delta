@@ -818,6 +818,18 @@ def main() -> int:
         "full native/public recovery, physical provenance and nativeArithmeticRecoveryRefines "
         "remain open. No native runtime execution or original/local GO is claimed."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeNormEvidence retains all original norm fields, complete wire and "
+        "decimal spellings, including native accepted -00; it computes the actual "
+        "ISC QC edge. NativeNormSection checks the entire original norm vector "
+        "after the finalized-ISC section and derives checked parent witnesses. "
+        "Norm values/root are not recomputed from Q and no norm membership rule "
+        "is inferred from parent identity. Alternate root/ticket counterchecks "
+        "make this limit explicit. Native spelling canonicality remains FAIL; "
+        "general C++/JSON/SHA equivalence, EC/APC/full admission/recovery and "
+        "source/finalization authenticity remain open. No native runtime repair, "
+        "new execution, local acceptance PASS or formal GO is claimed."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

@@ -3249,3 +3249,48 @@ line endings were normalized to LF after full regression; all6 targeted tests an
 Ruff/format were repeated on that final archiver. Canonical payload bytes unchanged. Three demosHTTP200 without
 restart, frozenrefs unchanged. Source-bound report remains NO_GO; no local PASS,
 independent attestation, native repair or guard change.
+
+
+## 2026-09-26 — Original complete norm evidence and finalized ISC edge in Lean
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-norm-evidence-proof.md; evidence:
+formal/proposals/evidence/native-norm-evidence.json. NO_GO remains.
+
+NativeNormEvidence derives all13 native JSON fields and complete original wire,
+checking original context, ordered full entry list, positive u64 scales and the
+source-preserving int64 decimal rule. Original -00 is retained, not normalized;
+the native canonicality failure remains open. General proofs derive original
+entry provenance, nonnegative parsed values and actual computed ISC QC parent.
+NativeNormSection composes the finalized-ISC section with the entire original
+norm vector and derives parent certificate witnesses and original list/count.
+It does not widen closed CONFIG/proposed-ISC admission/replay modes.
+
+Original native norm JSON and codec-EC section stay byte-exact; three finiteSHA
+samples compose the actual original ISC/body/norm identity edge. Separate cases
+reject malformed/empty/duplicate/reordered/overflowing values and demonstrate
+that -00/0 have equal values but distinct JSON. Alternate norm-root/ticket cases
+still pass shape, explicitly retaining absent Q recomputation/membership proof.
+No fresh native execution or whole policy acceptance fixture is claimed.
+
+Next exact EC body/certificate membership and separate seed metadata, then APC
+and complete shared admission/replay. Root/randomness/exporter/finalization
+provenance, general native codec/hash equivalence, full public/native recovery,
+nativeArithmeticRecoveryRefines, contractfreeze, offline reproduction and
+independent review remain required. Runtime/demo/frozenrefs unchanged.
+Final stable-source validation follows in the retained evidence.
+
+Final stable-source checks: full Lean1048jobs; fresh norm/section/vector
+kernels and axiom audit PASS.434tooling/38oracle/6targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.341generated files(310JSON/29Lean/inputTLA/config)
+byte-exact. All123new names audited:28generalhelpers/21definitions,
+62vectorproofs/12definitions. Onlypropext/Quot.sound/Classical.choice;
+no new warnings/holes, five pre-existing unused-simp warnings remain.
+All21TLA/schema/runtime/147nativewitnesses unchanged;145legacytraces onlysemanticsID.
+No fresh native/TLC/productionmutant execution; retained62decimal/32mixednative
+cases,28safety/7liveness/27mutants and132state/131step path keep earlier scopes.
+Native decimal canonicality still FAIL; norm value/root/member authenticity and
+general native language equivalence remain unproved. Semantics sha256:cea4c97a3496b449bbad0180d88cfc01c87506800447f4f9c4e354b229ea20d9.
+Mandatory44/45 FAIL; phase0 unfrozen; make unavailable, aggregate formal-check
+not claimed. Three demosHTTP200 without restart, frozenrefs unchanged. Source-bound
+report stays NO_GO; no local PASS, independent attestation or runtime repair.

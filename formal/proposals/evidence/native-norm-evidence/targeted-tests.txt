@@ -1,0 +1,11 @@
+test_all_named_declarations_are_audited (test_native_norm_evidence.NormEvidenceTests.test_all_named_declarations_are_audited) ... ok
+test_complete_canonical_field_inventory (test_native_norm_evidence.NormEvidenceTests.test_complete_canonical_field_inventory) ... ok
+test_exact_generated_bytes_and_proofs (test_native_norm_evidence.NormEvidenceTests.test_exact_generated_bytes_and_proofs) ... ok
+test_full_original_policy_pin_rejects_substitution (test_native_norm_evidence.NormEvidenceTests.test_full_original_policy_pin_rejects_substitution) ... ok
+test_rehashed_norm_substitution_rejects (test_native_norm_evidence.NormEvidenceTests.test_rehashed_norm_substitution_rejects) ... ok
+test_source_projection_does_not_normalize_decimal_spelling (test_native_norm_evidence.NormEvidenceTests.test_source_projection_does_not_normalize_decimal_spelling) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.778s
+
+OK
