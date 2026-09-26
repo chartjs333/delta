@@ -1,0 +1,4 @@
+✔ [1012/1015] Built DeltaReduce.NativeWalScan (3.5s)
+✔ [1013/1015] Built DeltaReduce.NativeWalScanVectors (25s)
+✔ [1014/1015] Built DeltaReduce (7.2s)
+Build completed successfully (1015 jobs).

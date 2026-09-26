@@ -1,0 +1,8 @@
+test_actual_partial_bytes_are_retained_exactly (test_native_wal_scan.NativeWalScanTests.test_actual_partial_bytes_are_retained_exactly) ... ok
+test_mandatory_modules_and_audit (test_native_wal_scan.NativeWalScanTests.test_mandatory_modules_and_audit) ... ok
+test_original_complete_stream_and_offsets (test_native_wal_scan.NativeWalScanTests.test_original_complete_stream_and_offsets) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.020s
+
+OK

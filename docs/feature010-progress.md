@@ -2608,3 +2608,56 @@ rehash-verified against original SHA256
 91d612026a425e6d11b86c0d90c2d54c976dc8bfcd90f9127c9d845c2cfce861.
 Frozen refs remain unchanged. See native-wal-codec/demo-recovery.json; do not
 describe this run as having required no restart.
+
+## 2026-09-26 — complete observed-byte WAL scan and original sequence
+
+T044/T048/T049/T053/T057/T060, amendment 0001. NO_GO remains in force.
+Scope: formal/proposals/native-wal-scan-proof.md. Final evidence is retained in
+formal/proposals/evidence/native-wal-scan.json after stable checks.
+
+NativeWalScan.lean composes the DRW1 reader over all supplied bytes, starting
+from an empty prefix. Actual checked scan steps derive exact original frames,
+their order, the consumed byte prefix and unresolved tail. The input-length
+recursion budget is proved sufficient; failure derives a reachable corrupt
+frame rather than fuel exhaustion. A corrupt later complete frame rejects the
+whole scan. Torn bytes remain explicit; nothing is truncated or exposed.
+
+A separate checker validates every native WAL sequence from 1, counting both
+votes and state commands. It derives original sequence at each position and
+uniqueness. Its indexed receipt theorem composes the actual semantic receipt/
+policy checker to retain original frame, receipt and WAL bytes. It does not
+prove vote admission, policy semantics/provenance or runtime replay readiness.
+Omitting an interior entry fails sequence checking; omitting an entire suffix
+cannot be detected from the remaining bytes alone. Complete means complete for
+the supplied observation, not an authenticated complete physical WAL.
+
+Examples retain the exact prior native 3546-byte ISC-plus-command history
+(823+2723 bytes, original all-entry sequences 1/2) and actual 411-byte partial
+write. Existing original receipts are unchanged. These are not new native runs
+and are not the separate proposal arithmetic sequence 5/6/8. Small corruption,
+sequence and tail counterchecks use a separately labeled synthetic digest.
+Finite native hash samples do not prove SHA or the C++ implementation.
+
+Next compose these parsed original entries with actual native state-command,
+logical-time, request/vote-cache, policy/admission and snapshot reconstruction,
+then independently authenticated public histories. Physical scan provenance,
+crash/unknown presence/absence, complete public phase/send/delivery/QC/current
+composition and nativeArithmeticRecoveryRefines remain OPEN. Contract freeze,
+clean offline reproduction, independent review and joined profile/GPU/Docker
+gates remain required. No formal GO or local acceptance PASS is issued.
+
+Final stable-source verification: full Lean1015 jobs, fresh generic kernel and
+75 explicit helper/function/example audits PASS (24 general theorems,32
+component/kernel proofs,19 definitions). Only propext/Quot.sound/Classical.choice
+are permitted; no proof hole or new axiom. 329tooling/38oracle/3targeted,
+33legal/112illegal legacy,Ruff/consistency PASS. All328 generated files
+(308JSON/18Lean plus inputTLA/config) reproduce byte-exact. New semantics:
+sha256:8d31089d613753beb158307a9b4de0b463798e5ae2449c6f6bf9328b8e76bf4e.
+All21TLA/public schema/runtime/147native witnesses are unchanged;145legacy
+traces only change semanticsID.15prior native component artifacts retain exact
+hashes. No freshTLC/native run or production mutant is claimed; retained
+28safety/7liveness/27mutants and132state/131step path keep bounded scopes.
+Mandatory44/45 still FAIL: nativeArithmeticRecoveryRefines remains missing.
+Phase0 remains unfrozen; make unavailable/aggregate formal-check not executed.
+All three demos HTTP200 without restart in this stage; frozen refs unchanged.
+The previous stage's recorded service restoration is not erased by this check.
