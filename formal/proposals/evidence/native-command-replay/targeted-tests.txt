@@ -1,0 +1,13 @@
+test_clock_and_incomplete_observations (test_native_command_replay.CommandReplayTests.test_clock_and_incomplete_observations) ... ok
+test_exact_computed_cache_and_retry (test_native_command_replay.CommandReplayTests.test_exact_computed_cache_and_retry) ... ok
+test_mandatory_audit_and_no_proof_holes (test_native_command_replay.CommandReplayTests.test_mandatory_audit_and_no_proof_holes) ... ok
+test_native_matrix (test_native_command_replay.CommandReplayTests.test_native_matrix) ... ok
+test_rehashed_all_output_substitutions (test_native_command_replay.CommandReplayTests.test_rehashed_all_output_substitutions) ... ok
+test_sequence_duplicates_and_full_vote_reject (test_native_command_replay.CommandReplayTests.test_sequence_duplicates_and_full_vote_reject) ... ok
+test_snapshot_exact_and_zero_scope (test_native_command_replay.CommandReplayTests.test_snapshot_exact_and_zero_scope) ... ok
+test_source_scope_and_response_mutations (test_native_command_replay.CommandReplayTests.test_source_scope_and_response_mutations) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 18.275s
+
+OK

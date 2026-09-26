@@ -1,3 +1,5 @@
+import DeltaReduce.NativeCommandReplay
+import DeltaReduce.NativeCommandReplayVectors
 import DeltaReduce.NativeTransition
 import DeltaReduce.NativeTransitionVectors
 import DeltaReduce.Quorum

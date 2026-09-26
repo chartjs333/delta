@@ -2771,3 +2771,58 @@ Mandatory44/45 still FAIL: nativeArithmeticRecoveryRefines remains missing.
 Phase0 remains unfrozen; make unavailable/aggregate formal-check not executed.
 All three demos HTTP200 without restart in this stage; frozen refs unchanged.
 Earlier recorded service restoration remains retained; no restart in this stage.
+
+
+## 2026-09-26 — computed command recovery, cached receipts and typed snapshots
+
+T044/T048/T049/T053/T057/T060, amendment0001. NO_GO remains. Scope:
+formal/proposals/native-command-replay-proof.md; machine evidence:
+formal/proposals/evidence/native-command-replay.json.
+
+NativeCommandReplay derives actual command-only execution from parsed initial
+state and an empty request cache at outer sequence0. Every entry is checked at
+its next position, decoded and computed through NativeTransition; all three
+stored outputs must match. Induction proves cache extension and origin,
+sequence/count, unique request IDs, original receipt fields and monotonic
+policy-clock updates. Retry uses saved command ID before fresh state/time
+admission and returns the original receipt with replay=true, without append.
+No caller-supplied transition result or recovered-state equality is assumed.
+
+Positive snapshots compare exact replayed state at their own position; a
+general theorem extracts that entry. Sequence-zero snapshots are parsed but
+not required by actual runtime to equal initial/final state. Final state is
+always replayed. The observed-byte API rejects torn/incomplete input, grants
+no truncation/absence/readiness/exposure, and requires separate physical-file
+authentication. DRS1 snapshot metadata and optional policy initial clock are
+typed inputs here, not decoded/authenticated native policy authority.
+
+Votes explicitly reject; the original mixed ISC1/freeze2 example is not claimed
+as a recovered command-only log. One step keeps originalsequence2; a separately
+mathematical single-command sequence1 case reuses checked native components.
+Original native bytes and proposal arithmetic5/6/8 are unchanged. A fresh local
+Windows runtime/WAL harness compiled12 unchanged pinned units and ran22cases:
+11accept/11reject. A separate live freeze/view/abort journal has actual1/2/3,
+snapshot2 and exact first receipt retry after movement/reopen. Rehashed output,
+order/gap/duplicate, backwards-time and snapshot substitutions reject. Native
+empty effect/record cases reject structurally; Python also substitutes nonempty
+sections to test semantic recomputation. No OS power-loss, native arithmetic,
+mixed vote recovery, authenticated exporter or new production mutant claim.
+
+Final stable-source checks: fullLean1021 jobs, fresh generic kernel, all86names
+(31general helpers,33component/kernel proofs,22definitions) axiom-audited with
+only propext/Quot.sound/Classical.choice. New modules have no warnings/holes;
+three earlier NativeTransitionVectors unused-simp warnings are retained.
+353tooling/38oracle/8targeted,33legal/112illegal legacy,Ruff/consistency PASS.
+All332files(310JSON/20generatedLean/inputTLA/config) reproduce byte-exact; the two
+new Lean modules are hand-authored. Semantics sha256:f08d975cb2fe36f0b943f79d3756610b8574bc4cfc98a4b001e8a7297fa7bb89.
+All21TLA/schema/runtime/147native witnesses unchanged;145legacy traces only
+semanticsID. No new TLC/mutant suite; prior28safety/7liveness/27mutants and132state/
+131step path retain bounded scopes. Mandatory44/45 still FAIL with
+nativeArithmeticRecoveryRefines missing. Phase0 unfrozen; make unavailable,
+aggregate formal-check not executed. All3demos HTTP200/no restart/frozenrefs
+unchanged this stage; earlier recorded service restoration remains retained.
+
+Next derive full native policy codec/admission for intervening votes, compose
+mixed replay and actual snapshot/scan provenance, then join the complete public
+protocol relation. Contract freeze/offline reproduction/independent reviews and
+runtime/profile/GPU/Docker acceptance remain mandatory; no local PASS or GO.

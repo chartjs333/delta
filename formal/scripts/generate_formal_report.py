@@ -739,6 +739,12 @@ def main() -> int:
         "or nativeArithmeticRecoveryRefines. SHA and implementation equivalence "
         "remain explicit boundaries; 59 finite native core cases do not grant GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeCommandReplay computes command-only history, request/receipt caches, "
+        "clock and typed snapshot checks; mixed votes reject. Native policy/DRS1 "
+        "decoding, independent initialization/physical scan provenance and joined "
+        "public recovery remain open. 22 local runtime cases do not grant GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
