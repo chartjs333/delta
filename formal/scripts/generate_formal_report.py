@@ -887,6 +887,21 @@ def main() -> int:
         "general native/public recovery refinement remain open. Native decimal "
         "canonicality still fails; no runtime repair, local PASS or formal GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeApplyProfile/Certificate/Lineage/Section compute complete original "
+        "profile/candidate/QC canonical JSON and bounded IDs, resolve actual "
+        "finalized ROOT/profile/current-parent and compose the checked ROOT section. "
+        "Original rational wire bits and signed decimal spellings are retained. "
+        "Both modes check certified candidate/next hashes and structural signers; "
+        "the finalized example is synthetic from the native proposed-QC rule, "
+        "not an observed finalized QC. Source vectors reuse original policy bytes; "
+        "no fresh native run. This source snapshot relation does not recompute "
+        "next values or compare parent optimizer with current optimizer; explicit "
+        "counterchecks keep these arithmetic/current joins open. Full shared "
+        "admission/replay, current command, public/native recovery, physical WAL, "
+        "provenance and native decimal canonicality remain unresolved. No local "
+        "PASS, independent review, runtime repair, guard change or formal GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

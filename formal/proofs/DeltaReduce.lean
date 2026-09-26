@@ -1,3 +1,8 @@
+import DeltaReduce.NativeApplyProfile
+import DeltaReduce.NativeApplyCertificate
+import DeltaReduce.NativeApplyLineage
+import DeltaReduce.NativeApplySection
+import DeltaReduce.NativeApplyCertificateVectors
 import DeltaReduce.NativeAggregateMerkle
 import DeltaReduce.NativeAggregateRoot
 import DeltaReduce.NativeAggregateLineage

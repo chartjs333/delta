@@ -3519,3 +3519,44 @@ physical WAL/unknown scans/repair and provenance remain open. Contract freeze,
 offline reproduction and independent review remain required. Source-bound NO_GO;
 no localPASS, runtime repair, native guard change or independent attestation.
 Three demo servicesHTTP200 without restart; frozen refs unchanged.
+
+
+## 2026-09-26 — Complete original native APPLY structural certificates and ROOT join
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-apply-certificate-proof.md; evidence native-apply-certificate.json.
+NativeApplyProfile checks original rational wire bits/reduced nonnegative values,
+all domain weights, rounding/nesterov and all10 JSON fields. NativeApplyCertificate
+retains original full candidate vectors/signed strings and all18candidate/18QC
+fields; all3 canonical hashes have inclusive4MiB bounds. The known negative-zero/
+leading-zero defect is preserved. APPLY body identity is the actual candidateID.
+NativeApplyLineage computes original candidateID, checks proposed/full-committee
+or finalized candidate+QC, exact finalizedROOT/profile/currentparent, both contexts
+and certified hashes/structural signers. NativeApplySection executes the actual
+bounded ROOT section, checks complete original lists/order/finalizedsubset and
+derives ROOT/profile provenance and retained sources/counts from successful results.
+
+Five modules; 42generalhelpers/45defs;
+91kernel/componentproofs/24defs.
+All202names axiom-audited, onlypropext/Quot.sound/Classical.choice.
+Original codec-APPLY/guard-APPLY policy bytes are pinned; profile/candidate components
+reproduce exactly. The original observation has NO finalizedApplyQC: the finalmode
+example is explicitly synthetic via native as_apply_certificate. Three finiteSHA
+preimages/JSON are Python-derived, not new native observations or authentication.
+Kernel counterchecks retain missing arithmetic/current joins: changed model999
+passes candidate structural validity; changed parentoptimizer leaves link checks
+true. These are partial-checker limits, not complete accepted-runtime exploits.
+
+FullLean1073jobs,3generic standalone kernels, axiom audit,
+482tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.346generatedfiles=310JSON/
+34Lean/inputTLA/config byte-exact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacytraces onlysemanticID. No fresh C++/TLC/productionmutants. Earlier
+32mixed/62decimal cases,28safety7liveness27mutants and132state131step remain bounded.
+Semantics sha256:7fcdc2a24f052e4a455667d5731073a6461968b803114d8f3055a7037b8bfd49. Mandatory44/45FAIL nativeArithmeticRecoveryRefines missing;
+Phase0 unfrozen; make unavailable, aggregateformal-check notclaimed. Native decimal
+canonicality stillFAIL. Timeout/view/abort/current, fullsharedadmission/replay,
+separate proposedISC size, actualarithmetic/source/nativepublicrecovery, codecs/
+JSON/SHA/physicalWAL/provenance, freeze/offline/independentreview remainopen.
+No localPASS, nativeguardchange, runtime repair or independentattestation.
+Three demosHTTP200 without restart; frozenrefs unchanged.

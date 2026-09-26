@@ -1,0 +1,13 @@
+test_bounded_shared_prior_and_source_membership (test_native_apply_certificate.NativeApplyCertificateTests.test_bounded_shared_prior_and_source_membership) ... ok
+test_byte_reproduction (test_native_apply_certificate.NativeApplyCertificateTests.test_byte_reproduction) ... ok
+test_complete_canonical_fields (test_native_apply_certificate.NativeApplyCertificateTests.test_complete_canonical_fields) ... ok
+test_every_original_vector_and_parent_affects_candidate_id (test_native_apply_certificate.NativeApplyCertificateTests.test_every_original_vector_and_parent_affects_candidate_id) ... ok
+test_explicit_counterchecks_and_all_axiom_audits (test_native_apply_certificate.NativeApplyCertificateTests.test_explicit_counterchecks_and_all_axiom_audits) ... ok
+test_original_policy_pin_rejects_changes (test_native_apply_certificate.NativeApplyCertificateTests.test_original_policy_pin_rejects_changes) ... ok
+test_original_wire_components_and_synthetic_qc (test_native_apply_certificate.NativeApplyCertificateTests.test_original_wire_components_and_synthetic_qc) ... ok
+test_rehashed_parent_substitution_rejects (test_native_apply_certificate.NativeApplyCertificateTests.test_rehashed_parent_substitution_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.390s
+
+OK
