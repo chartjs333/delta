@@ -1,3 +1,8 @@
+import DeltaReduce.NativeAggregateMerkle
+import DeltaReduce.NativeAggregateRoot
+import DeltaReduce.NativeAggregateLineage
+import DeltaReduce.NativeAggregateSection
+import DeltaReduce.NativeAggregateVectors
 import DeltaReduce.NativeContractSize
 import DeltaReduce.NativeSizedParameterSection
 import DeltaReduce.NativeContractSizeExamples

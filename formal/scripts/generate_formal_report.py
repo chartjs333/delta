@@ -874,6 +874,19 @@ def main() -> int:
         "Decimal canonicality and nativeArithmeticRecoveryRefines remain open; "
         "no runtime repair, local PASS or formal GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeAggregateMerkle/Root/Lineage/Section compute the original odd-carry "
+        "Merkle tree and all18-field ROOT JSON/body identities; exact ordered "
+        "finalized PARAMETER coverage and three parents are checked in both modes. "
+        "The actual bounded prior section executes, ROOT certificates also check "
+        "the4MiB JSON guard, and original lists/provenance are retained. Original "
+        "ROOT and four retained native Merkle components are reused; no fresh "
+        "native/runtime run, TLA run or production mutant. Finite SHA is not "
+        "authentication, and strict decoding is scoped to generated lowercase IDs. "
+        "APPLY/current, complete shared admission/replay, source arithmetic and "
+        "general native/public recovery refinement remain open. Native decimal "
+        "canonicality still fails; no runtime repair, local PASS or formal GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

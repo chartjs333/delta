@@ -1,0 +1,15 @@
+test_all_declarations_audited (test_native_aggregate.AggregateTests.test_all_declarations_audited) ... ok
+test_complete_original_fields (test_native_aggregate.AggregateTests.test_complete_original_fields) ... ok
+test_each_leaf_order_and_parent_affects_body (test_native_aggregate.AggregateTests.test_each_leaf_order_and_parent_affects_body) ... ok
+test_full_leaf_matrix_and_native_parents (test_native_aggregate.AggregateTests.test_full_leaf_matrix_and_native_parents) ... ok
+test_generated_bytes (test_native_aggregate.AggregateTests.test_generated_bytes) ... ok
+test_odd_carry_differs_from_duplicate_last (test_native_aggregate.AggregateTests.test_odd_carry_differs_from_duplicate_last) ... ok
+test_original_policy_pin_rejects (test_native_aggregate.AggregateTests.test_original_policy_pin_rejects) ... ok
+test_rehashed_original_body_substitutions_reject (test_native_aggregate.AggregateTests.test_rehashed_original_body_substitutions_reject) ... ok
+test_retained_native_merkle_cases (test_native_aggregate.AggregateTests.test_retained_native_merkle_cases) ... ok
+test_sized_prior_section_and_root_both_modes (test_native_aggregate.AggregateTests.test_sized_prior_section_and_root_both_modes) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 6.149s
+
+OK

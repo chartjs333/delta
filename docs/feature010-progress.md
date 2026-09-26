@@ -3474,3 +3474,48 @@ or new production mutants.21TLA/schema/runtime/147nativewitness unchanged;
 Native decimal canonicality still FAIL. Mandatory44/45 FAIL, phase0 unfrozen,
 make unavailable; aggregateformal-check not claimed. No localPASS or GO.
 Semantics sha256:9c22be13bef75212335ec0759673353aae133e39ef705d938bb88410fbaa73c8. Three demosHTTP200 without restart; frozenrefs unchanged.
+
+
+## 2026-09-26 — Complete native ROOT/Merkle and bounded prior-section composition
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-aggregate-proof.md; evidence native-aggregate.json.
+NativeAggregateMerkle computes exact canonical leaf hashes and decoded-digest
+pair hashes with odd carry;256-byte generic round trips bind the produced
+lowercase IDs to the original native nibble/shift/or arithmetic. Empty/over100000
+reject; original Python4096 tool bound is not silently used as native admission.
+NativeAggregateRoot retains all18 JSON fields, full body/policy bytes, and applies
+the4MiB JSON guard to both original and synthetic proposed certificates.
+NativeAggregateLineage resolves all three finalized parents and every exact
+original finalized PARAMETER leaf, rechecks context/signers/parents/hash/bound,
+and derives full required-matrix coverage, record count/order/position.
+NativeAggregateSection executes the actual sized previous section and checks
+both complete ROOT lists and finalized subset. No supplied body translation,
+Merkle equality adapter or arithmetic approval table is accepted.
+
+Five modules; 52generalhelpers/52defs,
+120kernel/componentproofs/33defs;
+all257names axiom-audited, onlypropext/Quot.sound/Classical.choice.
+Examples reuse original ROOT JSON/QC/body, actual PARAMETER/parents and four
+retained native Merkle observations(counts1..4), including odd carry. Both modes
+compose actual checked component results. No complete native policy/runtime
+execution, exporter authentication or new C++ run. Proposed synthetic QC SHA is
+explicitly Python-derived. Strict decoder equivalence is for generated lowercase
+IDs, not arbitrary malformed values. Earlier development-only interrupted builds
+are superseded by the final stable-source run; they are not evidence.
+
+FullLean1068jobs, three generic standalone kernels, axiom audit,
+474tooling/38oracle/10targeted,
+33legal/112illegallegacy,Ruff/format/consistency PASS.345files(310JSON/33generatedLean/
+inputTLA/config) byte-exact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacytraces onlysemanticID. No fresh native/TLC/new production mutants;
+retained62decimal/32mixednativecases,28safety/7liveness/27mutants and132state/131step
+path remain bounded. Original decimal canonicality still FAILS.
+Semantics sha256:7b4f69d8753912275cc6e775ed9f5b89d18e4d55f0e5f1100957cea7554fa719. Mandatory44/45 FAIL; nativeArithmeticRecoveryRefines missing;
+Phase0 unfrozen; make unavailable, aggregateformal-check not claimed.
+APPLY/current, separate proposedISC size calls, full shared admission/replay,
+arithmetic/source binding, full native/public recovery, general codecs/JSON/SHA,
+physical WAL/unknown scans/repair and provenance remain open. Contract freeze,
+offline reproduction and independent review remain required. Source-bound NO_GO;
+no localPASS, runtime repair, native guard change or independent attestation.
+Three demo servicesHTTP200 without restart; frozen refs unchanged.
