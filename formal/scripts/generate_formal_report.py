@@ -776,8 +776,9 @@ def main() -> int:
     )
     report["coverage"]["unresolved"].append(
         "NativeProposalAdmission checks every original CONFIG/ISC candidate "
-        "and computed proposal body; Python mixed replay preserves original "
-        "ISC1/freeze2 policy and receipts, but general Lean mixed recovery remains open. "
+        "and computed proposal body. Closed computed admission modes now share "
+        "one general Lean replay/history fold and original ISC1/freeze2 recovery; "
+        "finalized graph, full native/public recovery and physical provenance remain open. "
         "NativeInputSetBody/NativeIscAdmission derive complete proposed ISC bodies "
         "and source-bound startup/vote checks from actual policy/state/vote bytes. "
         "All tuple pairs, expected context, computed body IDs and closed-set membership "

@@ -154,7 +154,7 @@ class ConfigReplayTests(unittest.TestCase):
             self.assertIn("import DeltaReduce." + module, imports)
             names = re.findall(r"^(?:def|theorem) (\w+)", code, re.M)
             for name in names:
-                self.assertIn(f"#print axioms DeltaReduce.{module}.{name}", audit)
+                self.assertIn(f"#print axioms DeltaReduce.{module}.{name}", audit.splitlines())
             stripped = re.sub(r"/\-.*?\-/|--[^\n]*", "", code, flags=re.S)
             self.assertNotRegex(stripped, r"\b(?:sorry|admit|native_decide)\b|^axiom\b")
 

@@ -1,0 +1,9 @@
+test_exact_generated_original_policy_and_hash_components (test_native_mixed_lean.MixedLeanTests.test_exact_generated_original_policy_and_hash_components) ... ok
+test_full_audit_inventory_uses_exact_declarations (test_native_mixed_lean.MixedLeanTests.test_full_audit_inventory_uses_exact_declarations) ... ok
+test_original_wal_substitutions_reject_before_generation (test_native_mixed_lean.MixedLeanTests.test_original_wal_substitutions_reject_before_generation) ... ok
+test_untrusted_native_document_rejects (test_native_mixed_lean.MixedLeanTests.test_untrusted_native_document_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 15.005s
+
+OK

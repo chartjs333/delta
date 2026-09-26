@@ -178,6 +178,22 @@ def bind (sha : Bytes → Bytes) (p : Policy) (s : State) : Option Bound := do
   let candidates ← checkCandidates sha g p.candidates
   some ⟨g,candidates⟩
 
+theorem graphFromComponents {sha p s g} (h : GraphSource sha p s g) :
+    bindGraph sha p s = some g := by
+  rcases h with ⟨rfl,rfl,id,hash,valid,schema,arithmetic,accumulator,
+    proposed,finalized,closed,trees,bodies,checks⟩
+  unfold bindGraph
+  rw [id,hash,schema,arithmetic,accumulator,proposed,finalized,closed,trees]
+  dsimp only [Bind.bind,Option.bind]
+  rw [bodies]
+  dsimp only [Bind.bind,Option.bind]
+  exact if_pos ⟨rfl,valid,checks⟩
+
+theorem bindFromComponents {sha p s b} (graph : GraphSource sha p s b.graph)
+    (candidates : checkCandidates sha b.graph p.candidates = some b.candidates) :
+    bind sha p s = some b := by
+  simp only [bind,graphFromComponents graph,candidates,Bind.bind,Option.bind]
+
 theorem bindSource {sha p s b} (ok : bind sha p s = some b) :
     GraphSource sha p s b.graph ∧ checkCandidates sha b.graph p.candidates = some b.candidates := by
   unfold bind at ok
@@ -190,6 +206,13 @@ def prepare (sha : Bytes → Bytes) (policyRaw stateRaw : Bytes) : Option Bound 
   let (_,p) ← NativePolicyBytes.decodePolicy policyRaw
   let s ← NativeStateBytes.decodeState stateRaw
   bind sha p s
+
+theorem prepareFromComponents {sha policyRaw stateRaw tree p s b}
+    (policy : NativePolicyBytes.decodePolicy policyRaw = some (tree,p))
+    (state : NativeStateBytes.decodeState stateRaw = some s)
+    (bound : bind sha p s = some b) : prepare sha policyRaw stateRaw = some b := by
+  simp only [prepare,policy,state,Bind.bind,Option.bind]
+  exact bound
 
 theorem prepareSource {sha policyRaw stateRaw b} (ok : prepare sha policyRaw stateRaw = some b) :
     ∃ tree, NativePolicyBytes.decodePolicy policyRaw = some (tree,b.graph.policy) ∧

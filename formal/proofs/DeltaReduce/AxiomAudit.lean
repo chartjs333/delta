@@ -1,3 +1,8 @@
+import DeltaReduce.NativeMixedReplayVectors
+import DeltaReduce.NativeMixedPolicyVectors
+import DeltaReduce.NativeConfigReplayVectors
+import DeltaReduce.NativeConfigReplay
+import DeltaReduce.NativeReplayAdmission
 import DeltaReduce.NativeProposalAdmission
 import DeltaReduce.NativeProposalAdmissionVectors
 import DeltaReduce
@@ -6514,3 +6519,223 @@ import DeltaReduce
 #print axioms DeltaReduce.NativeProposalAdmissionVectors.reversedPolicy
 #print axioms DeltaReduce.NativeProposalAdmissionVectors.repeatedPolicy
 #print axioms DeltaReduce.NativeProposalAdmissionVectors.emptyPolicy
+
+#print axioms DeltaReduce.NativeReplayAdmission.Startup
+
+#print axioms DeltaReduce.NativeReplayAdmission.Selected
+
+#print axioms DeltaReduce.NativeReplayAdmission.prepare
+
+#print axioms DeltaReduce.NativeReplayAdmission.initialTick
+
+#print axioms DeltaReduce.NativeReplayAdmission.fromBytes
+
+#print axioms DeltaReduce.NativeReplayAdmission.parents
+
+#print axioms DeltaReduce.NativeReplayAdmission.action
+
+#print axioms DeltaReduce.NativeReplayAdmission.configExact
+
+#print axioms DeltaReduce.NativeReplayAdmission.proposalExact
+
+#print axioms DeltaReduce.NativeReplayAdmission.proposalFromComponents
+
+#print axioms DeltaReduce.NativeReplayAdmission.byteIdentity
+
+#print axioms DeltaReduce.NativeReplayAdmission.originalSequence
+
+#print axioms DeltaReduce.NativeReplayAdmission.proposalOriginalSource
+
+#print axioms DeltaReduce.NativeReplayAdmission.proposalIscBody
+
+#print axioms DeltaReduce.NativeReplayAdmission.actionMatches
+
+#print axioms DeltaReduce.NativeConfigReplay.wrongPositionRejected
+
+#print axioms DeltaReduce.NativeConfigReplay.wrongPolicyRejected
+
+#print axioms DeltaReduce.NativeConfigReplay.startupRejected
+
+#print axioms DeltaReduce.NativeConfigReplay.recoveryFromComponents
+
+#print axioms DeltaReduce.NativeConfigReplay.recoveryVoteOrigin
+
+#print axioms DeltaReduce.NativeConfigReplay.recoveryCommandOrigin
+
+#print axioms DeltaReduce.NativeConfigReplay.recoveryProposalOrigin
+
+#print axioms DeltaReduce.NativeProposalAdmission.graphFromComponents
+
+#print axioms DeltaReduce.NativeProposalAdmission.bindFromComponents
+
+#print axioms DeltaReduce.NativeProposalAdmission.prepareFromComponents
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.tree
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.policy
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.extracted
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.encoding0
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.encoding1
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.policyBody
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.policyRaw
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.encoded
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.canonical
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.parsed
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.originalPolicyBytes
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage0
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage1
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage2
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage3
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage4
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage5
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage6
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage7
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage8
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.preimage9
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.sha
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash0
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash1
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash2
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash3
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash4
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash5
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash6
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash7
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash8
+
+#print axioms DeltaReduce.NativeMixedPolicyVectors.hash9
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.graph
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.bound
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.selected
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.initial
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.hashContent
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.hashVote
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.hashPolicy
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.hashConfig
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.hashIsc
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.priorHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.commandHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.nextHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.effectsHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.recordHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.policyHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.voteHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.configContext
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.iscContext
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.inputHash
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.inputChecked
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.graphSource
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.configChecked
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.iscChecked
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.candidatesChecked
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.policyPrepared
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.initialCore
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.selectedVote
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.admittedVote
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.entryChecked
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.first
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.stored
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.voteStep
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.originalReceipt
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.exactVoteCache
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.nativeBuilt
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.nativeExecuted
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.freezeComputed
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.final
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.freezeStep
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.originalRun
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.originalRecovery
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.history
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.originalCounters
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.commandReceiptSequence
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.actualVoteRetry
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.actualCommandRetry
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.invalidatedAfterFreeze
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.freshAfterFreezeRejected
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.noRenumbering
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.missingVoteCannotStart
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.repeatedVoteCannotAppend
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.reorderedRunRejects
+
+#print axioms DeltaReduce.NativeMixedReplayVectors.substitutedPolicyRecordRejects

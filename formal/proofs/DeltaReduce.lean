@@ -1,3 +1,6 @@
+import DeltaReduce.NativeReplayAdmission
+import DeltaReduce.NativeMixedPolicyVectors
+import DeltaReduce.NativeMixedReplayVectors
 import DeltaReduce.NativeProposalAdmission
 import DeltaReduce.NativeProposalAdmissionVectors
 import DeltaReduce.NativeInputSetBody

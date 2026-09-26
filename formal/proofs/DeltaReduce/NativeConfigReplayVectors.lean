@@ -65,14 +65,14 @@ theorem actualAdmission : NativeConfigAdmission.fromBytes sha NativeConfigAdmiss
     some (NativeConfigAdmissionVectors.bound,NativeVoteCodecVectors.vote1) :=
   NativeConfigAdmission.fromComponents sourcePrepared NativeVoteCodecVectors.parsed1 recoveryFacts
 
-theorem entryChecked : VoteEntry sha NativeConfigAdmissionVectors.policyRaw (some snap) initial
+theorem entryChecked : VoteEntry .config sha NativeConfigAdmissionVectors.policyRaw (some snap) initial
     entry NativeConfigAdmissionVectors.bound NativeVoteCodecVectors.vote1 NativeReceiptVectors.receipt1.voteId := by
   exact ⟨rfl,rfl,by decide,rfl,rfl,policyHash,actualAdmission,voteHash,NativeReceiptVectors.valid1,by simp [fresh,initial],by simp [NativeCommandReplay.snapshotGuard,atVote,snap,entry,initial]⟩
 
-def first : Machine := added (some snap) initial entry NativeConfigAdmissionVectors.bound
+def first : Machine := added .config (some snap) initial entry NativeConfigAdmissionVectors.bound
   NativeVoteCodecVectors.vote1 NativeReceiptVectors.receipt1.voteId
 
-theorem actualVoteStep : NativeConfigReplay.step sha NativeConfigAdmissionVectors.policyRaw
+theorem actualVoteStep : NativeConfigReplay.step .config sha NativeConfigAdmissionVectors.policyRaw
     (some snap) initial entry = some first := voteFromComponents entryChecked
 
 theorem firstCache : first.votes = [stored] ∧ first.core.sequence = 1 ∧
@@ -111,7 +111,7 @@ theorem oldISCRejected : (NativeConfigAdmission.checkVote NativeConfigAdmissionV
 theorem mixedComposition {e core}
     (command : NativeCommandReplay.step sha (some 0) (some snap) first.core e = some core)
     (kind : e.kind = 1) :
-    run sha NativeConfigAdmissionVectors.policyRaw (some snap) initial [entry,e] = some ⟨core,first.votes⟩ := by
+    run .config sha NativeConfigAdmissionVectors.policyRaw (some snap) initial [entry,e] = some ⟨core,first.votes⟩ := by
   simp only [run,actualVoteStep,commandFromComponents kind command,bind,Option.bind]
 
 end DeltaReduce.NativeConfigReplayVectors

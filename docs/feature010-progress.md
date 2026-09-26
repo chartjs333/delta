@@ -3061,3 +3061,52 @@ Semantics sha256:e98cca9a7d16d233a9af4729b92494da1e5bc6cf17bd7e94c8a16a6450b9299
 phase0 unfrozen; make unavailable, aggregate formal-check not claimed. Three
 demosHTTP200 with no restart thisstage, frozenrefs unchanged. Source-bound
 report stays NO_GO; no local acceptance PASS or native guard change.
+
+
+## 2026-09-26 — Shared computed CONFIG/ISC native recovery in Lean
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-mixed-replay-proof.md; evidence:
+formal/proposals/evidence/native-mixed-replay.json. NO_GO remains.
+
+NativeReplayAdmission defines closed computed CONFIG-only and CONFIG/ISC modes.
+The existing NativeConfigReplay now uses one mode-indexed executable fold and
+one inductive history, preserving full startup, positions, policy ID, computed
+command state/effects, time, unique caches and exact snapshot matching. Selected
+parents and CONFIG1/ISC2 receipt action are derived from actual admission.
+Recovered vote and command caches have original checked log provenance, and
+proposal cache entries retain complete original candidate/source/phase checks.
+No external admission callback, recovered-state equality or renumbering.
+
+A new generated module proves exact original TWO-candidate policy bytes using
+existing byte components. Ten finite SHA preimages bind this original policy,
+vote, contexts, ISC body and command state/effect/record outputs; not general
+SHA or authentication. Small component proofs derive the original ISC1/freeze2
+history and recovery, preserving both receipts/retries after invalidation.
+Missing, repeated, reordered and wrong-policy records reject; fresh stale votes
+reject while historical retries retain their bytes. Old CONFIG vectors pass in
+explicit config mode. The prior32-case native execution remains retained evidence,
+not a fresh native run. No combined new raw physical scan example is claimed.
+
+Expensive concrete hash/recovery reductions were replaced with small general
+component lemmas. Discarded draft resource failures are not final evidence.
+Finalized certificate graphs, general DRS1 decoding, authenticated initialization/
+ledger/root/physical-scan/export provenance, arbitrary failures/repair, complete
+public/native recovery, nativeArithmeticRecoveryRefines, contract freeze,
+offline reproduction and independent review remain OPEN. Unknown or missing
+response never proves absence. Runtime/demo/frozen refs remain unchanged.
+Final stable-source validation follows in the evidence record.
+
+Final stable-source checks: full Lean1037jobs, fresh admission/replay/vector
+kernels and axiom audit PASS.411tooling/38oracle/4targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.337generated files(310JSON/25Lean/inputTLA/config)
+byte-exact. All206 named definitions/proofs in six affected/new modules audited,
+including110new declarations; onlypropext/Quot.sound/Classical.choice. New modules
+have no proof holes or warnings; five pre-existing unused-simp warnings remain.
+All21TLA/schema/runtime/147nativewitnesses unchanged;145legacytraces onlysemanticsID.
+No freshTLC/native execution/productionmutants; retained32nativecases(14accept/
+18reject),28safety/7liveness/27mutants and132state/131step path keep earlier scopes.
+Semantics sha256:2cd020e87c4d859d084e22bc7d866a6fe32ab13a12f0b062bc9f4013920176ca. Mandatory44/45 FAIL; phase0 unfrozen;
+make unavailable, aggregate formal-check not claimed. Three demosHTTP200 with
+no restart thisstage, frozenrefs unchanged. Source-bound report stays NO_GO;
+no local acceptance PASS, independent attestation or native guard change.

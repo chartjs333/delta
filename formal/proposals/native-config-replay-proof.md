@@ -1,5 +1,9 @@
 # Computed CONFIG/command native replay candidate
 
+Historical stage scope: the current API selects this lane with explicit
+`config` mode. The subsequent shared CONFIG/ISC fold and its separate evidence
+are described in `native-mixed-replay-proof.md`; counts below retain this stage.
+
 T044/T048/T049/T053/T057/T060; amendment0001. **NO_GO**. This is a
 singleton CONFIG / empty certificate graph subdomain of the native runtime.
 It does not discharge `nativeArithmeticRecoveryRefines` or authorize runtime edits.
