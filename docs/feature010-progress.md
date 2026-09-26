@@ -3601,3 +3601,49 @@ replay, separate proposedISC size, actualarithmetic/source/publicnative recovery
 physicalWAL/codecs/SHA/provenance/freeze/offline/independentreview remainopen.
 No localPASS, runtime repair, native guard change or independentattestation.
 Three demo servicesHTTP200 without restart; frozen refs unchanged.
+
+
+## 2026-09-26 — Original native failure candidate and selected-vote guards
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-failure-authority-proof.md; evidence native-failure-authority.json.
+NativeFailureAuthority computes original VIEW/ABORT contexts and checks all15
+parent slots, actual source body/timeout membership, current coordinates,
+no-overflow view increment/deadline and empty finalized APPLY for ABORT.
+NativeFailureVote decodes original policy/state/VOTE bytes, selects the actual
+original candidate, executes the prior section and checks identity/body/current
+parent/sequence, live/replay readiness, invalidation, phase and exact request/time
+windows. Successful checks retain original vote bytes. SHA and runtime facts
+remain explicit boundaries; this is not full shared admission or journal recovery.
+
+Source review corrected an overrestriction in the previous timeout/request
+predicate: native require_id only rejects empty strings, whereas policy wire
+separately bounds printable ASCII to4096 bytes. WireId replaces certificate Label
+at that exact use. Kernel examples retain spaces, punctuation and129-character
+IDs; this is a formal projection fix, not a measured native runtime repair.
+Existing header/config/certificate Label uses require their own source review.
+
+Three new modules: 29generalhelpers/22defs,
+79vectorproofs/12defs;
+142new-module names audited. Including the updated
+prior payload module, 182definitions/theorems were audited,
+onlypropext/Quot.sound/Classical.choice. Original policy and DRC1 vote observations
+are pinned; two context SHA samples plus two retained body samples. Both original
+candidate and selected-vote component examples pass. No new wholefromBytes fixture,
+nativeexecution or authenticatedexporter. Negatives cover all12 forbidden parent
+slots, timeout/body/coordinates, uint64wrap, finalizedAPPLY, request/timeendpoints,
+foreignrequest/live/replay/readiness/invalidation/sequence/phase and wireIDs.
+
+FullLean1079jobs,3generic standalonekernels/axiomaudit,
+498tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.348generatedfiles=310JSON/
+36Lean/inputTLA/config byteexact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacytraces onlysemanticID. No fresh native/TLC/newproductionmutants;
+retained32mixed/62decimal/28safety7liveness27mutants/132state131step keep prior scope.
+Semantics sha256:b4fa03f68a7c767f77098bb0721d8aac90e221822f367a985814ce13fe85c534. Mandatory44/45FAIL nativeArithmeticRecoveryRefines missing;
+Phase0unfrozen;make unavailable,aggregateformal-check notclaimed. Native decimal
+canonicality stillFAIL. Complete shared policy/all-candidate closure, current
+command, sourcearithmetic, journalretry/unknown/recovery, physicalWAL/codecs/SHA/
+provenance/freeze/offline/independentreview remainopen. No localPASS, runtime repair,
+nativeguardchange or independentattestation. Three demosHTTP200 withoutrestart;
+frozenrefs unchanged.

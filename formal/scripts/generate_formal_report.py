@@ -915,6 +915,25 @@ def main() -> int:
         "WAL, provenance and native/public recovery remain open. Native decimal "
         "canonicality still fails. No runtime repair, local PASS or formal GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeFailureAuthority/Vote additionally compute original selected VIEW/ABORT "
+        "contexts, all15 parent slots, actual body/timeout membership, no-overflow "
+        "view increment and empty finalized APPLY for ABORT. Actual candidate selection "
+        "and original bounded policy/state/vote decoding compose the prior section; "
+        "live/replay identities, phase, request/deadline, readiness, invalidation "
+        "and sequence checks retain the original vote bytes. This is a selected "
+        "subrelation, not complete shared policy admission or journal retry/recovery. "
+        "The prior timeout/request Label predicate was too restrictive: actual native "
+        "require_id only rejects empty IDs, and the policy wire separately bounds "
+        "printable text to4096 bytes. That formal predicate is corrected to WireId; "
+        "other existing header/certificate restrictions require separate review. "
+        "Four finite SHA samples and original VIEW/ABORT components are reused; "
+        "no fresh native execution, whole fromBytes fixture or authenticated exporter. "
+        "Runtime facts and SHA remain explicit boundaries. Shared configuration/all "
+        "candidate validation, current transition, actual source arithmetic, physical "
+        "WAL and full public/native recovery remain open. Native decimal canonicality "
+        "still fails; no runtime repair, local PASS, independent review or formal GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

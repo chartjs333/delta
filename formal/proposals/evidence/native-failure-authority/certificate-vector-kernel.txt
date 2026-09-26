@@ -1,0 +1,1 @@
+Checked in the fresh full Lean build; no second standalone vector compilation claimed. See lean-build.txt.

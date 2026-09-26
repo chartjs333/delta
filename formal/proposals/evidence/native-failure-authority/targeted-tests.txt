@@ -1,0 +1,13 @@
+test_all_named_definitions_and_theorems_audited (test_native_failure_authority.NativeFailureAuthorityTests.test_all_named_definitions_and_theorems_audited) ... ok
+test_contexts_derive_from_original_bodies_and_vote_bytes (test_native_failure_authority.NativeFailureAuthorityTests.test_contexts_derive_from_original_bodies_and_vote_bytes) ... ok
+test_every_parent_slot_has_a_kernel_countercheck (test_native_failure_authority.NativeFailureAuthorityTests.test_every_parent_slot_has_a_kernel_countercheck) ... ok
+test_guard_boundaries_and_scope_are_explicit (test_native_failure_authority.NativeFailureAuthorityTests.test_guard_boundaries_and_scope_are_explicit) ... ok
+test_native_wire_ids_are_not_certificate_labels (test_native_failure_authority.NativeFailureAuthorityTests.test_native_wire_ids_are_not_certificate_labels) ... ok
+test_original_candidate_membership_actual_prior_and_bytes (test_native_failure_authority.NativeFailureAuthorityTests.test_original_candidate_membership_actual_prior_and_bytes) ... ok
+test_original_vote_pin_rejects_changes (test_native_failure_authority.NativeFailureAuthorityTests.test_original_vote_pin_rejects_changes) ... ok
+test_reproduction (test_native_failure_authority.NativeFailureAuthorityTests.test_reproduction) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.066s
+
+OK

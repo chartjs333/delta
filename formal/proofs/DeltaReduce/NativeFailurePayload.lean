@@ -5,7 +5,6 @@ Hashing has no invented certificate-JSON size bound; policy wire guards remain. 
 namespace DeltaReduce.NativeFailurePayload
 open NativeReceiptBytes NativePolicyCodec NativePolicySchema
 open NativeIscCertificate (readTexts)
-open NativeConfigAdmission (Label)
 open NativeInputSetBody (text64)
 structure Timeout where
   round : Bytes
@@ -110,9 +109,12 @@ theorem readAllRoundTrip {α : Type} {read : Value → Option α} {value : α �
   | nil => rfl
   | cons a as ih => simp only [List.map_cons,readAll,roundTrip,ih,bind,Option.bind]
 
-def TimeoutValid (t : Timeout) : Prop := Label t.round ∧ t.height < 256^8 ∧ t.view < 256^8
+def WireId (b : Bytes) : Prop := b ≠ [] ∧ b.length ≤ 4096 ∧ printable b
+instance (b) : Decidable (WireId b) := by unfold WireId; infer_instance
+
+def TimeoutValid (t : Timeout) : Prop := WireId t.round ∧ t.height < 256^8 ∧ t.view < 256^8
 instance (t) : Decidable (TimeoutValid t) := by unfold TimeoutValid; infer_instance
-def RequestValid (r : Request) : Prop := Label r.round ∧
+def RequestValid (r : Request) : Prop := WireId r.round ∧
   (r.reason = NativeVoteBytes.ascii "INCOMPLETE_INPUT" ∨ r.reason = NativeVoteBytes.ascii "UNSAFE_COEFFICIENTS")
 instance (r) : Decidable (RequestValid r) := by unfold RequestValid; infer_instance
 

@@ -1,3 +1,6 @@
+import DeltaReduce.NativeFailureAuthority
+import DeltaReduce.NativeFailureVote
+import DeltaReduce.NativeFailureAuthorityVectors
 import DeltaReduce.NativeFailurePayload
 import DeltaReduce.NativeFailureSection
 import DeltaReduce.NativeFailureVectors
