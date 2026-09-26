@@ -1,0 +1,13 @@
+test_all_declarations_audited (test_native_parameter.ParameterTests.test_all_declarations_audited) ... ok
+test_assignment_context_is_retained_but_not_hashed (test_native_parameter.ParameterTests.test_assignment_context_is_retained_but_not_hashed) ... ok
+test_full_original_fields_and_parents (test_native_parameter.ParameterTests.test_full_original_fields_and_parents) ... ok
+test_generated_bytes (test_native_parameter.ParameterTests.test_generated_bytes) ... ok
+test_original_body_substitutions_reject (test_native_parameter.ParameterTests.test_original_body_substitutions_reject) ... ok
+test_original_policy_pin_rejects (test_native_parameter.ParameterTests.test_original_policy_pin_rejects) ... ok
+test_original_signed_spelling_not_normalized (test_native_parameter.ParameterTests.test_original_signed_spelling_not_normalized) ... ok
+test_proposed_finalized_scope_and_whole_section (test_native_parameter.ParameterTests.test_proposed_finalized_scope_and_whole_section) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.354s
+
+OK

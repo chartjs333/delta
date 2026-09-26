@@ -1,3 +1,7 @@
+import DeltaReduce.NativeParameter
+import DeltaReduce.NativeParameterLineage
+import DeltaReduce.NativeParameterSection
+import DeltaReduce.NativeParameterVectors
 import DeltaReduce.NativePlanVectors
 import DeltaReduce.NativePlanSection
 import DeltaReduce.NativePlanLineage

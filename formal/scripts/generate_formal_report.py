@@ -848,6 +848,19 @@ def main() -> int:
         "equivalence and nativeArithmeticRecoveryRefines remain open. Finite SHA "
         "components are not authentication; no native repair, execution or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeParameter/Lineage/Section now preserve all original20-field PARAMETER "
+        "JSON, signed-decimal spellings, policy/body bytes and actual checked "
+        "ISC/EC/APC witnesses. Proposed assignment context/map/set, required "
+        "matrix/domain and parent guards remain distinct from finalized guards. "
+        "Assignment context is retained in policy but omitted from the native body "
+        "hash; this is not a collision or complete exploit. Native verify_shard "
+        "does not derive result/denominator/Q coverage. Body-hash samples are "
+        "source-derived, not new C++ observations. Finite SHA is not authentication. "
+        "Original decimal canonicality still FAILS; aggregate/APPLY/current, full "
+        "admission/replay/public recovery/nativeArithmeticRecoveryRefines and "
+        "general native equivalence remain open. No runtime repair or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

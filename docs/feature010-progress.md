@@ -3387,3 +3387,47 @@ identity remain unproved. Semantics sha256:c8a1dff20ffc29f7cf7fa856b6759577ea9f2
 Mandatory44/45 FAIL; phase0 unfrozen; make unavailable, aggregate formal-check
 not claimed. Three demosHTTP200 without restart, frozenrefs unchanged. Source-bound
 report stays NO_GO; no local PASS, independent attestation or runtime repair.
+
+## 2026-09-26 — Complete original native PARAMETER section
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-parameter-proof.md; evidence: native-parameter.json.
+NO_GO remains. Complete original JSON/policy/body and signed-decimal strings
+are retained; no normalization or replacement with arithmetic outputs.
+Actual checked ISC/EC/APC sections compose with both PARAMETER modes. Proposed
+assignment map/set, required matrix and domain/parent guards are preserved;
+finalized guards retain their original distinct scope. General list induction
+proves distinct assignment keys/contexts. Every original matrix/body/QC record
+and finalized subset is checked, not only counts.
+
+Separate assignment vote_context_id is in policy but omitted by native body hash;
+a general lemma and component checks preserve this source convention. It is not
+a collision or complete runtime exploit. Source require_id means nonempty only.
+Native verify_shard does not compute result/denominator/Q coverage. Earlier true
+arithmetic and whole original admission/replay must still be joined. PARAMETER
+body-hash examples are source-derived, not fresh C++ observations. Original
+certificate/policy observations are pinned. No native repair/execution or GO.
+
+Next aggregate exact leaf/Merkle matrix, APPLY/current and complete shared
+admission/replay; mandatory recovery/public binding, general codec/hash/physical
+WAL/unknown scans, contractfreeze/offline reproduction/independent review remain.
+Final stable-source checks follow in retained evidence.
+
+Final stable-source checks: full Lean1060jobs; original new vector
+compiled in the component build, then full stable-source build and standalone
+PARAMETER/lineage/section kernels and axiom audit PASS.
+456tooling/38oracle/8targeted,
+33legal/112illegallegacy,Ruff/format/consistency PASS.344generated files
+(310JSON/32Lean/inputTLA/config) byte-exact. All198new names
+audited:41generalhelpers/39definitions,
+99vector/componentproofs/19definitions.
+Onlypropext/Quot.sound/Classical.choice. Final evidence uses stable source;
+an earlier interleaved refresh/build was superseded, not claimed as final evidence.
+No new proof holes; five pre-existing unused-simp warnings remain. All21TLA/schema/
+runtime/147nativewitness unchanged;145legacytraces onlysemanticsID. No fresh native/
+TLC/newmutants; retained62decimal/32mixednativecases,28safety/7liveness/27mutants and
+132state/131step path keep prior bounded scopes. Native decimal canonicality FAIL;
+arithmetic/provenance/full native language identity remain unproved.
+Semantics sha256:cdb7d08c2892364725fc091a8a1cd83f05c352d4e65628c904912bfc24f376da. Mandatory44/45 FAIL; phase0 unfrozen; make unavailable,
+aggregateformal-check not claimed. Three demosHTTP200 without restart, frozenrefs
+unchanged. Source-bound NO_GO; no localPASS/independentattestation/runtime repair.

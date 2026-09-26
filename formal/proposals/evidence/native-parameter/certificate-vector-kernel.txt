@@ -1,0 +1,1 @@
+Checked by the stable-source full Lean build; no additional standalone vector compilation claimed. See lean-build.txt. Earlier component/draft builds are not counted separately.
