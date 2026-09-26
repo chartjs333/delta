@@ -902,6 +902,19 @@ def main() -> int:
         "provenance and native decimal canonicality remain unresolved. No local "
         "PASS, independent review, runtime repair, guard change or formal GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeFailurePayload/Section retain complete original timeout/view/abort "
+        "snapshot trees, exact binary body hashes and every abort current field "
+        "and all seven finalized lists, composing actual NativeApplySection. "
+        "Strict tuple/computed-ID order and request reasons are checked. Original "
+        "VIEW/ABORT policy components are pinned, with two finite SHA samples; "
+        "no fresh native observation. This snapshot subrelation does not prove "
+        "candidate timeout authority, no-overflow view increment, empty finalized "
+        "APPLY for selected ABORT, live/replay phase/deadlines/readiness, QC or "
+        "current transitions. Full shared admission, source arithmetic, physical "
+        "WAL, provenance and native/public recovery remain open. Native decimal "
+        "canonicality still fails. No runtime repair, local PASS or formal GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

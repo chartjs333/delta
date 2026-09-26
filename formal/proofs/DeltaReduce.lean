@@ -1,3 +1,6 @@
+import DeltaReduce.NativeFailurePayload
+import DeltaReduce.NativeFailureSection
+import DeltaReduce.NativeFailureVectors
 import DeltaReduce.NativeApplyProfile
 import DeltaReduce.NativeApplyCertificate
 import DeltaReduce.NativeApplyLineage

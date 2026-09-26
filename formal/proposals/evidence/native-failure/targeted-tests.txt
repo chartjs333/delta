@@ -1,0 +1,13 @@
+test_all_declarations_audited_and_scope_counterchecks (test_native_failure.NativeFailureTests.test_all_declarations_audited_and_scope_counterchecks) ... ok
+test_all_seven_lists_preserve_order_multiplicity_and_u64_count (test_native_failure.NativeFailureTests.test_all_seven_lists_preserve_order_multiplicity_and_u64_count) ... ok
+test_every_abort_field_changes_binary_preimage (test_native_failure.NativeFailureTests.test_every_abort_field_changes_binary_preimage) ... ok
+test_original_binary_hash_scope_not_certificate_json (test_native_failure.NativeFailureTests.test_original_binary_hash_scope_not_certificate_json) ... ok
+test_original_observation_pin (test_native_failure.NativeFailureTests.test_original_observation_pin) ... ok
+test_reproduction (test_native_failure.NativeFailureTests.test_reproduction) ... ok
+test_snapshot_field_inventory (test_native_failure.NativeFailureTests.test_snapshot_field_inventory) ... ok
+test_wire_components_reproduce_and_differ_from_hash_preimages (test_native_failure.NativeFailureTests.test_wire_components_reproduce_and_differ_from_hash_preimages) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.079s
+
+OK

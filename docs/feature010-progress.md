@@ -3560,3 +3560,44 @@ separate proposedISC size, actualarithmetic/source/nativepublicrecovery, codecs/
 JSON/SHA/physicalWAL/provenance, freeze/offline/independentreview remainopen.
 No localPASS, nativeguardchange, runtime repair or independentattestation.
 Three demosHTTP200 without restart; frozenrefs unchanged.
+
+
+## 2026-09-26 — Original native timeout/view/abort snapshot tail
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-failure-proof.md; evidence native-failure.json.
+NativeFailurePayload reads exact original timeout/view/request/abort trees and
+retains canonical policy wire bytes. VIEW/ABORT IDs derive original binary
+uint64-length/count preimages, distinct from policy uint32 encoding; no invented
+certificate-JSON4MiB hash guard. NativeFailureSection checks exact tuple order,
+request reasons and computed body-ID order, every abort current field and all
+seven original finalized lists. Successful results retain original sources and
+all fourteen field relationships. bindSection executes NativeApplySection;
+prepare uses actual bounded policy/state decoders. No caller approval/translation.
+
+Three modules; 28generalhelpers/31defs,
+69kernel/componentproofs/30defs;
+all158names audited, onlypropext/Quot.sound/Classical.choice.
+Original codec-VIEW_CHANGE/codec-ABORT policy bytes and body IDs pinned. Two finite
+SHA samples and two complete checkTail kernel compositions reuse the original
+CONFIG fixture state. These are component proofs, not new native execution.
+Every abort field substitution, list order/multiplicity, duplicate/reversed keys,
+request vocabulary, uint64 overflow and malformed shapes are checked. Counterchecks
+on standalone TailChecks/AbortExact preserve the missing candidate enabling scope:
+VIEW next-view freshness is not a snapshot check; a matching finalizedApply list
+is not prohibited here. No complete policy admission or native exploit claimed.
+
+FullLean1076jobs,2generic standalonekernels/axiomaudit,
+490tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.347generatedfiles=310JSON/
+35Lean/inputTLA/config byte-exact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacytraces onlysemanticID. No fresh native/TLC/newproductionmutants;
+retained32mixed/62decimal/28safety7liveness27mutants/132state131step keep prior scope.
+Semantics sha256:66ab27677e172084d536901c6f1bbacb90557782f94455c6ed2dec4425dfbaad. Mandatory44/45FAIL nativeArithmeticRecoveryRefines missing;
+Phase0 unfrozen; make unavailable, aggregateformal-check notclaimed. Native decimal
+canonicality stillFAIL. Candidate VIEW/ABORT parents/context/timeout/increment,
+request/deadline/phase/readiness, CurrentPointerCommand, complete sharedadmission/
+replay, separate proposedISC size, actualarithmetic/source/publicnative recovery,
+physicalWAL/codecs/SHA/provenance/freeze/offline/independentreview remainopen.
+No localPASS, runtime repair, native guard change or independentattestation.
+Three demo servicesHTTP200 without restart; frozen refs unchanged.
