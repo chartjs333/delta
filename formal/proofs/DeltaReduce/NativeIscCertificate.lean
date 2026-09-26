@@ -63,7 +63,9 @@ def quorum (committee : List Bytes) : Nat := 2 * ((committee.length - 1) / 3) + 
 def CommitteeValid (committee : List Bytes) : Prop :=
   committee ≠ [] ∧ committee.length ≤ 4096 ∧ committee.length % 3 = 1 ∧
   NativePolicyBytes.strictly NativePolicyBytes.bytesLT committee = true ∧
-  ∀ id ∈ committee, Label id
+  -- Policy identifiers need only be nonempty here. Certificate content_id
+  -- checks Label on actual signers, not on unused configured validators.
+  ∀ id ∈ committee, id ≠ []
 instance (committee) : Decidable (CommitteeValid committee) := by
   unfold CommitteeValid; infer_instance
 

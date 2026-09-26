@@ -3647,3 +3647,53 @@ command, sourcearithmetic, journalretry/unknown/recovery, physicalWAL/codecs/SHA
 provenance/freeze/offline/independentreview remainopen. No localPASS, runtime repair,
 nativeguardchange or independentattestation. Three demosHTTP200 withoutrestart;
 frozenrefs unchanged.
+
+
+## 2026-09-27 — Shared snapshot base and bounded proposed ISC expansion
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-snapshot-base-proof.md; evidence native-snapshot-base.json.
+NativeProposedIsc parses actual original bodies, derives complete certificates
+with every configured validator and computed2f+1, and checks original context,
+ordered tuples, binary body ID and separate inclusive4MiB JSON certificate hash.
+List proofs retain every source/count/position. NativeSnapshotBase checks the
+original configuration sets, optional accumulator ID, full expected constructor
+context, ordered proposed bodies and exact closed-body membership. Its wrapper
+executes all existing typed snapshot sections via NativeFailureSection on the
+same original policy/state. prepare reuses actual bounded policy/state decoding
+and Canonical role/action/order/count/globalcontext checks. No graph/candidate
+replacement, whole-body translation or approval Boolean is supplied.
+
+Source review corrects another formal overrestriction: configured validator IDs
+need only be nonempty (wire bounds remain separate); actual certificate signers
+retain Label. A finalized subset may omit a configured non-Label ID, while
+proposed certificates use all validators and reject it. Header round Label is
+retained: ChainVerifier constructor unconditionally validates expected context,
+even with empty graph. This is a formal predicate correction, not runtime repair.
+
+Three newmodules: 27generalhelpers/7defs,
+48vectorproofs/14defs;
+96new-module names. Including updated original
+NativeIscCertificate, 135names axiom-audited, onlypropext/
+Quot.sound/Classical.choice. Original codec-ISC policy/body and separately pinned
+ISC certificate are checked. One newly derived four-signer SHA sample plus the
+prior three finite cases; not new native observation/authentication. Kernel
+examples execute actual proposed-body and checkBase components. No complete
+bindSnapshot/prepare fixture or full native execution is newly claimed.
+Negatives cover configuration/accumulator/closed-body versusQC, omission,
+duplicate/order/context/committee/signers. A mathematical JSON expansion exceeds
+4MiB while body wire fits; its duplicated tuples are not an admitted nativepolicy.
+General oversized rejection uses the exact computed JSON, not caller size.
+
+FullLean1082jobs,3genericstandalonekernels/axiomaudit,
+506tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.349regeneratedfiles=310JSON/
+37Lean/inputTLA/config byteexact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacyonlysemanticID. No freshnative/TLC/productionmutants; retained32mixed/
+62decimal/28safety7liveness27mutants/132state131step keep their prior boundedscope.
+Semantics sha256:ec2dd83efc8122628183dcb92d7b1998eacbd93128b1254107572f9b956110d9. Mandatory44/45FAIL/nativeArithmeticRecoveryRefines missing;
+Phase0unfrozen;makeabsent,notaggregateformal-check. Native decimalcanonicality
+stillFAIL. All actual candidate authorities/sharedpolicy, CurrentPointerCommand,
+sourcearithmetic, journalretry/unknown/recovery, physicalWAL/SHA/exporter,
+freeze/offline/independentreview remainopen. No localPASS, GO or nativeguardchange.
+Three demosHTTP200 withoutrestart; frozenrefsunchanged.

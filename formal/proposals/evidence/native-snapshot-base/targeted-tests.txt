@@ -1,0 +1,13 @@
+test_actual_composition_and_original_sources (test_native_snapshot_base.NativeSnapshotBaseTests.test_actual_composition_and_original_sources) ... ok
+test_actual_json_limit_is_independent_of_wire (test_native_snapshot_base.NativeSnapshotBaseTests.test_actual_json_limit_is_independent_of_wire) ... ok
+test_all_named_declarations_audited (test_native_snapshot_base.NativeSnapshotBaseTests.test_all_named_declarations_audited) ... ok
+test_complete_proposal_certificate_is_derived (test_native_snapshot_base.NativeSnapshotBaseTests.test_complete_proposal_certificate_is_derived) ... ok
+test_missing_base_checks_have_kernel_negatives (test_native_snapshot_base.NativeSnapshotBaseTests.test_missing_base_checks_have_kernel_negatives) ... ok
+test_native_constructor_scope (test_native_snapshot_base.NativeSnapshotBaseTests.test_native_constructor_scope) ... ok
+test_original_policy_pin (test_native_snapshot_base.NativeSnapshotBaseTests.test_original_policy_pin) ... ok
+test_reproduction (test_native_snapshot_base.NativeSnapshotBaseTests.test_reproduction) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 34.863s
+
+OK

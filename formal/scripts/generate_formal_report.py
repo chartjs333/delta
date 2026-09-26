@@ -934,6 +934,21 @@ def main() -> int:
         "WAL and full public/native recovery remain open. Native decimal canonicality "
         "still fails; no runtime repair, local PASS, independent review or formal GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeProposedIsc/SnapshotBase now derive every proposed ISC certificate "
+        "from its original body and full configured committee, enforcing its separate "
+        "4MiB JSON hash bound, original closed-body identity and exact config/accumulator "
+        "base checks. The executable wrapper composes all existing typed snapshot "
+        "sections on the original policy/state. Configured unused validators need "
+        "only nonempty IDs; actual certificate signers retain Label checks, and the "
+        "expected round Label remains required by the ChainVerifier constructor. "
+        "This corrects a formal overrestriction, not native runtime code. Original "
+        "ISC/base components and one newly derived finite SHA sample are checked; "
+        "no new whole snapshot wrapper fixture or native observation. Full candidate "
+        "admission, current command, native arithmetic, journal retry/unknown/recovery, "
+        "physical WAL, SHA/exporter authentication, freeze and independent review "
+        "remain open. Native decimal canonicality still fails. No local PASS or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

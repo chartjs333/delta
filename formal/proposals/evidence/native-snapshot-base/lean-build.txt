@@ -1,0 +1,64 @@
+⚠ [9/129] Replayed DeltaReduce.NativeConfigAdmission
+warning: DeltaReduce/NativeConfigAdmission.lean:173:13: This simp argument is unused:
+  bind
+
+Hint: Omit it from the simp argument list.
+  simp only [b̵i̵n̵d̵,̵Option.bind]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DeltaReduce/NativeConfigAdmission.lean:173:18: This simp argument is unused:
+  Option.bind
+
+Hint: Omit it from the simp argument list.
+  simp only [bind,̵O̵p̵t̵i̵o̵n̵.̵b̵i̵n̵d̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [45/129] Replayed DeltaReduce.NativeTransitionVectors
+warning: DeltaReduce/NativeTransitionVectors.lean:491:219: This simp argument is unused:
+  text9
+
+Hint: Omit it from the simp argument list.
+  simp only [effectPayload, ̲persistFields, ̲publishFields, ̲effectFields, ̲effectId, ̲effectTail,
+  ̲ ̲ ̲ ̲ ̲NativeStateBytes.payload, ̲NativeStateBytes.encodeFields, ̲scalarBytes, ̲nativeSemantics, ̲c0,
+  ̲ ̲ ̲ ̲ ̲priorId, ̲nextId, ̲text1, ̲text2, ̲text3, ̲text4, ̲text7, ̲text9̵,̵t̵e̵x̵t̵10, ̲text12, ̲text13, ̲text14, ̲text15,
+  ̲ ̲ ̲ ̲ ̲text16, ̲text17, ̲text18, ̲text20, ̲text21, ̲text22, ̲text23, ̲text25, ̲text26, ̲text28, ̲text29, ̲text31,
+  ̲ ̲ ̲ ̲ ̲text32, ̲text33, ̲text34]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DeltaReduce/NativeTransitionVectors.lean:491:225: This simp argument is unused:
+  text10
+
+Hint: Omit it from the simp argument list.
+  simp only [effectPayload, ̲persistFields, ̲publishFields, ̲effectFields, ̲effectId, ̲effectTail,
+  ̲ ̲ ̲ ̲ ̲NativeStateBytes.payload, ̲NativeStateBytes.encodeFields, ̲scalarBytes, ̲nativeSemantics, ̲c0,
+  ̲ ̲ ̲ ̲ ̲priorId, ̲nextId, ̲text1, ̲text2, ̲text3, ̲text4, ̲text7, ̲text9, ̲text10̵,̵t̵e̵x̵t̵1̵2, ̲text13, ̲text14, ̲text15,
+  ̲ ̲ ̲ ̲ ̲text16, ̲text17, ̲text18, ̲text20, ̲text21, ̲text22, ̲text23, ̲text25, ̲text26, ̲text28, ̲text29, ̲text31,
+  ̲ ̲ ̲ ̲ ̲text32, ̲text33, ̲text34]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: DeltaReduce/NativeTransitionVectors.lean:501:152: This simp argument is unused:
+  text0
+
+Hint: Omit it from the simp argument list.
+  simp only [NativeStateBytes.payload, ̲walFields, ̲c0, ̲decimal, ̲NativeStateBytes.encodeFields,
+  ̲ ̲ ̲ ̲ ̲scalarBytes, ̲nativeSemantics, ̲priorId, ̲commandId, ̲nextId, ̲effectsId, ̲text0̵,̵t̵e̵x̵t̵1, ̲text5, ̲text6, ̲text8,
+  ̲ ̲ ̲ ̲ ̲text11, ̲text14, ̲text17, ̲text18, ̲text19, ̲text21, ̲text22, ̲text23, ̲text24, ̲text25, ̲text26, ̲text27,
+  ̲ ̲ ̲ ̲ ̲text28, ̲text30, ̲text32]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+✔ [1067/1082] Built DeltaReduce.NativeFailureAuthority (78s)
+✔ [1068/1082] Built DeltaReduce.NativeFailureVectors (78s)
+✔ [1069/1082] Built DeltaReduce.NativeFailureVote (3.2s)
+✔ [1070/1082] Built DeltaReduce.NativeSeedSection (116s)
+✔ [1071/1082] Built DeltaReduce.NativeNormEvidenceVectors (117s)
+✔ [1072/1082] Built DeltaReduce.NativeContractSizeExamples (4.1s)
+✔ [1073/1082] Built DeltaReduce.NativeFailureAuthorityVectors (68s)
+✔ [1074/1082] Built DeltaReduce.NativeSnapshotBaseVectors (151s)
+✔ [1075/1082] Built DeltaReduce.NativeSeedTranscriptVectors (100s)
+✔ [1076/1082] Built DeltaReduce.NativeEligibilityVectors (138s)
+✔ [1077/1082] Built DeltaReduce.NativePlanVectors (171s)
+✔ [1078/1082] Built DeltaReduce.NativeParameterVectors (140s)
+✔ [1079/1082] Built DeltaReduce.NativeAggregateVectors (154s)
+✔ [1080/1082] Built DeltaReduce.NativeApplyCertificateVectors (135s)
+✔ [1081/1082] Built DeltaReduce (11s)
+Build completed successfully (1082 jobs).

@@ -120,6 +120,9 @@ import DeltaReduce.NativeSeedSection
 import DeltaReduce.NativeSeedTranscriptVectors
 import DeltaReduce.NativeCertificateDecimal
 import DeltaReduce.NativeCertificateDecimalVectors
+import DeltaReduce.NativeProposedIsc
+import DeltaReduce.NativeSnapshotBase
+import DeltaReduce.NativeSnapshotBaseVectors
 /-!
 # DeltaReduce v1 parametric proof bundle
 
