@@ -1,0 +1,43 @@
+harness.cpp
+consensus.cpp
+canonical.cpp
+sha256.cpp
+protocol.cpp
+contracts.cpp
+verifier.cpp
+vote_admission.cpp
+vote_fixture.cpp
+transition.cpp
+runtime.cpp
+vote_codec.cpp
+wal.cpp
+Generating Code...
+Microsoft (R) Incremental Linker Version 14.29.30146.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:policy-codec.exe
+harness.obj
+consensus.obj
+canonical.obj
+sha256.obj
+protocol.obj
+contracts.obj
+verifier.obj
+vote_admission.obj
+vote_fixture.obj
+transition.obj
+runtime.obj
+vote_codec.obj
+wal.obj
+Microsoft (R) C/C++ Optimizing Compiler Version 19.29.30146 for x64
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+Compiler Passes:
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\cl.exe:        Version 19.29.30146.0
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\c1.dll:        Version 19.29.30146.0
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\c1xx.dll:      Version 19.29.30146.0
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\c2.dll:        Version 19.29.30146.0
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\c1xx.dll:      Version 19.29.30146.0
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\link.exe:      Version 14.29.30146.0
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\mspdb140.dll:  Version 14.29.30146.0
+ C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30133\bin\HostX64\x64\1033\clui.dll: Version 19.29.30146.0

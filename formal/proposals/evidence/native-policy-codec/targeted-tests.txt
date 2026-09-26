@@ -1,0 +1,14 @@
+test_all_truncated_prefixes_minimal_original (test_native_policy_codec.PolicyCodecTests.test_all_truncated_prefixes_minimal_original) ... ok
+test_bounds_and_sign (test_native_policy_codec.PolicyCodecTests.test_bounds_and_sign) ... ok
+test_byte_exact_generated_modules (test_native_policy_codec.PolicyCodecTests.test_byte_exact_generated_modules) ... ok
+test_codec_does_not_claim_admission (test_native_policy_codec.PolicyCodecTests.test_codec_does_not_claim_admission) ... ok
+test_mandatory_imports_and_all_named_audits (test_native_policy_codec.PolicyCodecTests.test_mandatory_imports_and_all_named_audits) ... ok
+test_native_all_primitive_projection (test_native_policy_codec.PolicyCodecTests.test_native_all_primitive_projection) ... ok
+test_rehashed_native_value_substitution (test_native_policy_codec.PolicyCodecTests.test_rehashed_native_value_substitution) ... ok
+test_roundtrip_every_subrecord_and_field_omissions (test_native_policy_codec.PolicyCodecTests.test_roundtrip_every_subrecord_and_field_omissions) ... ok
+test_source_inventory (test_native_policy_codec.PolicyCodecTests.test_source_inventory) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 8.997s
+
+OK

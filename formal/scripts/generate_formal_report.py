@@ -741,9 +741,17 @@ def main() -> int:
     )
     report["coverage"]["unresolved"].append(
         "NativeCommandReplay computes command-only history, request/receipt caches, "
-        "clock and typed snapshot checks; mixed votes reject. Native policy/DRS1 "
+        "clock and typed snapshot checks; mixed votes reject. Startup policy admission/DRS1 "
         "decoding, independent initialization/physical scan provenance and joined "
         "public recovery remain open. 22 local runtime cases do not grant GO."
+    )
+    report["coverage"]["unresolved"].append(
+        "NativePolicyCodec/NativePolicyBytes implement the complete DVPOL001 "
+        "structural grammar and canonical shape, with general codec inverse and "
+        "injectivity. This is not startup state/certificate authority or vote "
+        "admission. 51 unchanged native codec cases compare every decoded primitive; "
+        "allocation equivalence, authenticated exporter, mixed recovery and "
+        "nativeArithmeticRecoveryRefines remain open."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

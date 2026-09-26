@@ -1,3 +1,7 @@
+import DeltaReduce.NativePolicyCodec
+import DeltaReduce.NativePolicySchema
+import DeltaReduce.NativePolicyBytes
+import DeltaReduce.NativePolicyCodecVectors
 import DeltaReduce.NativeCommandReplay
 import DeltaReduce.NativeCommandReplayVectors
 import DeltaReduce.NativeTransition
