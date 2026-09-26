@@ -1,0 +1,133 @@
+{
+  "checked_at": "2026-09-26T12:43:07.634632+02:00",
+  "status": "PASS",
+  "source_files_byte_exact": 22,
+  "public_origin": "https://venture-associate-witnesses-transportation.trycloudflare.com",
+  "authenticated_https": [
+    {
+      "path": "/?lang=ru",
+      "status": 200,
+      "sha256": "ebd833de989c13625766ff761d823540e101306dd1ce06bddb281e75b544be1d"
+    },
+    {
+      "path": "/?lang=en",
+      "status": 200,
+      "sha256": "22ba25471853a664a463073e67f46126c13ee8bbbe3a9b31d745082c2f9a3340"
+    },
+    {
+      "path": "/assets/admin_campaigns.png",
+      "status": 200,
+      "sha256": "1c62d9c4c17add8a1c866b2a3adb78da465571eb1d516f20c6a221e82a3b04f1"
+    },
+    {
+      "path": "/assets/admin_live_execution.png",
+      "status": 200,
+      "sha256": "aebf29036bab3f1621b09e3c141fde57e048d53410a55489b16a004cfcbb2d0e"
+    },
+    {
+      "path": "/assets/admin_sdk_plugin_dev.png",
+      "status": 200,
+      "sha256": "b270c2f7639f3efb67c9de0ffac074888a47de0e199f827632dc1331f3d3325b"
+    },
+    {
+      "path": "/assets/admin_workloads.png",
+      "status": 200,
+      "sha256": "547cd329b44f08a31816a210d062a453b8ce55d8f612c7b3ab40b64eb1688e4c"
+    },
+    {
+      "path": "/assets/lab_initial_state.png",
+      "status": 200,
+      "sha256": "97357025e64e91d0ce9effe20b9f506cf0a14d216ecaeedb3bdd2399583cc8c9"
+    },
+    {
+      "path": "/assets/lab_rejection_tamper_bytes.png",
+      "status": 200,
+      "sha256": "c217bdc3b3ac87dc8713451756d7f14b4d375bd2d5885c77ee8b7a03c4b826a1"
+    },
+    {
+      "path": "/assets/lab_verification_7_of_7.png",
+      "status": 200,
+      "sha256": "7683fdc935e65d3023ab4095165981ff67877b9e71680de8ba51dfa4c8403110"
+    },
+    {
+      "path": "/assets/node_training_mnist_byte_exact.png",
+      "status": 200,
+      "sha256": "fe2fa3f77e4ef58108ae9bb47b598a80560bca3a98548386149fd699b15d78a6"
+    },
+    {
+      "path": "/assets/node_training_recovery_contracts.png",
+      "status": 200,
+      "sha256": "694dea9463ca974546452d6f915f221ee49e4677ea7fb5336af07a7397e22837"
+    },
+    {
+      "path": "/assets/slide1_overview_arch.png",
+      "status": 200,
+      "sha256": "82e97a29c2be9897bae68027aa4ba112140653735f28d5779daa7996744f8f30"
+    },
+    {
+      "path": "/assets/slide2_roles_and_tickets.png",
+      "status": 200,
+      "sha256": "575dd267a6841f102ee75d4fcffc0aa62aa0fd8fee522fa0e03059af77dafd19"
+    },
+    {
+      "path": "/assets/slide3_ticket_parent_roundconfig.png",
+      "status": 200,
+      "sha256": "accfb70f90c48c62d35296f012cf5746942de960554d93ffd31f0325c4623535"
+    },
+    {
+      "path": "/assets/slide4_bft_quorum_math.png",
+      "status": 200,
+      "sha256": "7716226971f859a8099332d6bd309ffaeb3b5f2588bd794a21f75ad00fa032b8"
+    },
+    {
+      "path": "/assets/slide5_shard_aggregation_math.png",
+      "status": 200,
+      "sha256": "43e4c60e63d481c661e05622737806571d3215a6d45a5d7994341b3665bd811b"
+    },
+    {
+      "path": "/assets/slide6_quorum_intersection.png",
+      "status": 200,
+      "sha256": "3ad559dcdc1ecb4d3adeca2c38136ec09053f3374ba26874418e8b0680faa760"
+    },
+    {
+      "path": "/assets/slide7_domain_sharding_allocation.png",
+      "status": 200,
+      "sha256": "0eb50ef32aaa437cbec5041b4fda510808dc65fe73c243873d78a02c2657aba2"
+    },
+    {
+      "path": "/assets/system_overview_dashboard.png",
+      "status": 200,
+      "sha256": "74b8a23fadb4dad6fb80c90b5ad01c6ac3e6ceeeb9a3030c088940ddafc90681"
+    },
+    {
+      "path": "/assets/system_readiness_status.png",
+      "status": 200,
+      "sha256": "626981487efe1c4047fe9bd8678b2e97e983bae87f7682ee40db128d12786afa"
+    }
+  ],
+  "invalid_routes_rejected": 4,
+  "main_menu_asset": "PASS",
+  "main_demo_origin": "https://appliance-tank-female-anti.trycloudflare.com",
+  "scope": "Static presentation publication; not Feature010 authority",
+  "browser_checks": [
+    "Local RU page rendered",
+    "RU to EN navigation",
+    "English slide 3 via keyboard",
+    "Image lightbox rendered",
+    "Main demo RU and EN menu links visible"
+  ],
+  "unchanged_demo_pids": [
+    {
+      "port": 8865,
+      "pid": 50872
+    },
+    {
+      "port": 8870,
+      "pid": 35736
+    },
+    {
+      "port": 8872,
+      "pid": 24836
+    }
+  ]
+}
