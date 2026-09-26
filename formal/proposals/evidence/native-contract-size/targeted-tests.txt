@@ -1,0 +1,13 @@
+test_all_new_declarations_audited (test_native_contract_size.NativeContractSizeTests.test_all_new_declarations_audited) ... ok
+test_json_and_wire_are_different_bounds (test_native_contract_size.NativeContractSizeTests.test_json_and_wire_are_different_bounds) ... ok
+test_native_output_is_complete_and_ordered (test_native_contract_size.NativeContractSizeTests.test_native_output_is_complete_and_ordered) ... ok
+test_no_runtime_or_authentication_promotion (test_native_contract_size.NativeContractSizeTests.test_no_runtime_or_authentication_promotion) ... ok
+test_rehashed_changed_outcome_rejects (test_native_contract_size.NativeContractSizeTests.test_rehashed_changed_outcome_rejects) ... ok
+test_retained_cpp_boundary (test_native_contract_size.NativeContractSizeTests.test_retained_cpp_boundary) ... ok
+test_source_constant_and_all_prior_certificate_families (test_native_contract_size.NativeContractSizeTests.test_source_constant_and_all_prior_certificate_families) ... ok
+test_source_substitution_rejects (test_native_contract_size.NativeContractSizeTests.test_source_substitution_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 7.438s
+
+OK

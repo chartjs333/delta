@@ -3431,3 +3431,46 @@ arithmetic/provenance/full native language identity remain unproved.
 Semantics sha256:cdb7d08c2892364725fc091a8a1cd83f05c352d4e65628c904912bfc24f376da. Mandatory44/45 FAIL; phase0 unfrozen; make unavailable,
 aggregateformal-check not claimed. Three demosHTTP200 without restart, frozenrefs
 unchanged. Source-bound NO_GO; no localPASS/independentattestation/runtime repair.
+
+
+## 2026-09-26 — Separate native certificate JSON bounds
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-contract-size-proof.md; evidence native-contract-size.json.
+Source review for ROOT found that old Lean certificate helpers omitted the native
+4MiB whole-JSON guard; policy wire bounds do not imply expanded JSON bounds.
+Unchanged native NormEvidence checks now confirm four cases, including exactly
+4194303/4194304/4194305 JSON bytes and ACCEPT/ACCEPT/limit_exceeded. Native already
+rejects overlimit; this is a formal-model correction, not a native runtime repair.
+The overlimit certificate has65523 entries and a separately encoded1507572-byte
+norm wire component, not a demonstrated complete accepted policy.
+
+NativeContractSize derives the inclusive bound and original hash/bytes from
+success. NativeSizedParameterSection runs actual prior checks and checks all nine
+ISC/norm/seed/EC/APC/PARAMETER certificate groups with computed canonical JSON,
+original records, finalized identities, complete list count/order/position.
+Earlier raw section remains a lower layer; future ROOT composition uses the
+sized entry point. ProposedISC/laterROOT/APPLY/current/full policy and native
+error-order/resource-use equivalence remain open. Boundary proofs avoid reducing
+multi-megabyte lists. One original norm composes its existing actual source checks
+with the size guard; synthetic hash examples retain explicit scope.
+No full public/native recovery, authentication, local PASS or GO. Original decimal
+canonicality failure remains. Runtime/guard, healthy demos and frozen refs unchanged.
+Final stable-source checks follow in evidence.
+
+Final stable-source checks: full Lean1063jobs, two generic standalone
+kernels, standalone example kernel and all62new declarations
+axiom-audited. 29generalhelpers/14defs;
+16kernel/componentproofs/3defs.
+Only permitted propext/Quot.sound/Classical.choice. 464tooling/
+38oracle/8targeted tests,33legal/112illegallegacy,
+Ruff/format/consistency PASS. Full tooling suite passed before a test-only RUF005
+list-notation fix; the eight affected-module tests were rerun after that fix.
+No generator/Lean/production source changed in the fix.344generated files(310JSON/32Lean/inputTLA/config)
+byte-exact. Four fresh unchanged-native component cases, not runtime execution
+or new production mutants.21TLA/schema/runtime/147nativewitness unchanged;
+145legacytraces onlysemanticID. Retained62decimal/32mixednativecases,
+28safety/7liveness/27mutants and132state/131step path keep previous finite scopes.
+Native decimal canonicality still FAIL. Mandatory44/45 FAIL, phase0 unfrozen,
+make unavailable; aggregateformal-check not claimed. No localPASS or GO.
+Semantics sha256:9c22be13bef75212335ec0759673353aae133e39ef705d938bb88410fbaa73c8. Three demosHTTP200 without restart; frozenrefs unchanged.

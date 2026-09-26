@@ -1,3 +1,6 @@
+import DeltaReduce.NativeContractSize
+import DeltaReduce.NativeSizedParameterSection
+import DeltaReduce.NativeContractSizeExamples
 import DeltaReduce.NativeParameter
 import DeltaReduce.NativeParameterLineage
 import DeltaReduce.NativeParameterSection

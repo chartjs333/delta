@@ -3,6 +3,13 @@
 T044/T048/T049/T053/T057/T060; amendment0001. **NO_GO remains.** No runtime,
 native arithmetic guard, closed CONFIG/proposed-ISC admission/replay or demo change.
 
+Follow-up scope correction: the original native certificate macro also limits
+expanded canonical JSON to4MiB, independently of bounded policy wire. The raw
+helpers below omit that guard. Use NativeSizedParameterSection for subsequent
+composition; native-contract-size-proof.md records the confirmed boundary and
+checked integration. This does not change the earlier retained stage evidence
+or claim that the raw section alone establishes full native acceptance.
+
 NativeParameter retains every original PARAMETER field, all20 canonical JSON
 fields, the complete bounded positive-u64 denominator, ordered nonempty content-ID
 leaf list, nonempty original signed-decimal results, domain/shard, exact context,

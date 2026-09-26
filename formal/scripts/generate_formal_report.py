@@ -861,6 +861,19 @@ def main() -> int:
         "admission/replay/public recovery/nativeArithmeticRecoveryRefines and "
         "general native equivalence remain open. No runtime repair or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeContractSize/NativeSizedParameterSection add the original inclusive "
+        "4MiB canonical-certificate-JSON guard, independently of policy wire bounds. "
+        "Four fresh unchanged native NormEvidence component cases confirm exact "
+        "limit-1/limit/limit+1 outcomes; native already enforces this bound. Prior "
+        "raw certificate helpers omit it and remain lower layers. The new entry "
+        "point constructs and checks every payload in nine existing ISC/norm/seed/"
+        "EC/APC/PARAMETER groups, retaining original identities and records. "
+        "This is not full policy/runtime execution, error-order/resource equivalence, "
+        "native authentication, complete ROOT/APPLY/current or recovery refinement. "
+        "Decimal canonicality and nativeArithmeticRecoveryRefines remain open; "
+        "no runtime repair, local PASS or formal GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
