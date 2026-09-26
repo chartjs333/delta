@@ -1,0 +1,16 @@
+test_all_non_config_actions_reject (test_native_config_admission.ConfigAdmissionTests.test_all_non_config_actions_reject) ... ok
+test_context_does_not_encode_view_but_admission_checks_it (test_native_config_admission.ConfigAdmissionTests.test_context_does_not_encode_view_but_admission_checks_it) ... ok
+test_evidence_forgery_rejects (test_native_config_admission.ConfigAdmissionTests.test_evidence_forgery_rejects) ... ok
+test_incomplete_bytes_reject (test_native_config_admission.ConfigAdmissionTests.test_incomplete_bytes_reject) ... ok
+test_native_replay (test_native_config_admission.ConfigAdmissionTests.test_native_replay) ... ok
+test_nonempty_graph_explicitly_unsupported (test_native_config_admission.ConfigAdmissionTests.test_nonempty_graph_explicitly_unsupported) ... ok
+test_omitted_or_extra_policy_field_rejects (test_native_config_admission.ConfigAdmissionTests.test_omitted_or_extra_policy_field_rejects) ... ok
+test_parent_checked_at_vote_not_startup (test_native_config_admission.ConfigAdmissionTests.test_parent_checked_at_vote_not_startup) ... ok
+test_recovery_never_bypasses_invalidation_or_deadline (test_native_config_admission.ConfigAdmissionTests.test_recovery_never_bypasses_invalidation_or_deadline) ... ok
+test_source_rehash_is_not_authentication (test_native_config_admission.ConfigAdmissionTests.test_source_rehash_is_not_authentication) ... ok
+test_untrusted_runtime_shapes_reject (test_native_config_admission.ConfigAdmissionTests.test_untrusted_runtime_shapes_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 8.418s
+
+OK

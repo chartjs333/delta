@@ -2836,3 +2836,60 @@ runtime/profile/GPU/Docker acceptance remain mandatory; no local PASS or GO.
 - Fresh unchanged C++ codec execution:51cases (22accept/29reject),12pinned translation units/28blobs from60c692f6e391f839829dfc64e93380db54cd507b, MSVC19.29.30146 strictflags. Nine original native action policies plus a separately populated complete synthetic snapshot; every named native primitive and ordered list is compared with Python, not only re-encoded bytes. Distinct path-derived scalars test field order; signed/unsigned endpoints and malformed sizes/bytes/order/context cases retained. No Runtime handle/WAL/network/arithmetic execution or production-mutant suite is newly claimed.
 - Nine tooling tests cover every238-field omission/extra key, exact native field inventory, full primitive comparison, all1920 original ISC truncated prefixes, bounds/signs, malformed/rehashed evidence and byte-exact generated schemas/examples. 362tooling/38oracle,33legal/112illegal legacy, Ruff/format/consistency PASS; full Lean1025jobs and fresh generic kernel/axiom audit PASS. 334files (310JSON/22generatedLean/inputTLA/config) regenerate byte-exact. All21TLA/public schema/runtime/147native witnesses unchanged;145legacy traces only semanticID. No fresh TLC/new mutants; earlier bounded scopes retained.
 - Semantics sha256:a7dd77c9401efcf948a8df4ed03496a66eec5bc79ce3d3a96b599a75cc74784c. Evidence formal/proposals/evidence/native-policy-codec.json; scope formal/proposals/native-policy-codec-proof.md. Full policy startup state/certificate/committee/context authority and actual live/recovery admission remain next; mixed vote/command recovery still rejects in NativeCommandReplay. DRS1 decoder/physical provenance/repair, full public refinement, exporter authentication and independent review remain open. Mandatory44/45 still FAIL/nativeArithmeticRecoveryRefines missing; Phase0 unfrozen and GNU make unavailable, so aggregate formal-check is not claimed. No Formal GO/local acceptance PASS. Healthy demo/frozen refs preserved (machine evidence); previous restoration history retained.
+
+
+## 2026-09-26 — computed CONFIG startup/admission from native bytes
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-config-admission-proof.md; evidence:
+formal/proposals/evidence/native-config-admission.json. NO_GO remains.
+
+NativeConfigAdmission checks a singleton CONFIG candidate with an empty
+certificate graph, using complete DVPOL001 and actual DRC1 state/vote decoders.
+It derives source lookups, initial-state content preimage, schema/profile IDs,
+3f+1/local validator membership, candidate body/proposed membership, all15
+parent fields, context/height/view and deadline checks. All27 non-config
+snapshot vectors must be empty. SourceChecks is derived from successful
+execution, not a supplied approval flag or recovered-state equality.
+
+The vote gate retains original bytes and checks actor/epoch/round/current,
+parent/body/context and sequence. Live admission requires ready; recovery can
+run before ready but still rejects invalidation, wrong phase and hard-deadline
+expiry. The configured initial tick is distinct from actual admission time.
+A different candidate checkpoint can pass startup but fails vote admission.
+A rehashed native summary root can pass supplied-state consistency; this is
+explicitly not initialization authentication or complete public-state binding.
+
+General helpers compose successful byte decoding and computed startup/vote
+results; a complete original CONFIG example reuses the prior native vote and
+kernel-checks its exact policy/state components. Two finite SHA samples remain
+explicit. The low-level typed checkVote alone is not startup authority; only
+fromBytes composes the full new gate. This is a strict subdomain, not admission
+completeness for all CONFIG policies, certificates or the remaining8actions.
+
+Fresh unchanged C++ comparison:54cases,29startup accepts/25rejects and8vote
+accepts/46rejects.53supported cases agree with computed Python checks; a separate
+nonempty abort graph accepts native startup but intentionally rejects this
+subset.12unchanged units/28sourceblobs,MSVC19.29.30146,strictflags; no Runtime/WAL
+or native arithmetic execution. Original native fixture bytes remain unchanged.
+
+Final checks are recorded in the machine evidence: fullLean1027jobs,
+20generalhelpers/109componentkernelproofs/35definitions,164audited names,
+only propext/Quot.sound/Classical.choice;373tooling/38oracle/11targeted,
+33legal/112illegal legacy,Ruff/consistency and335generatedfiles
+(310JSON/23Lean/inputTLA/config) byte-exact. Two harmless unused-simp warnings
+in bindConfigComplete and three earlier transition-vector warnings are retained.
+Semantics sha256:eee605ca96b305530fcac0f8de8d5f157b66ccd611b0498326e0af062017e169.
+No new TLC/production mutants; prior bounded scopes remain. All21TLA/schema/
+runtime/147native witnesses unchanged;145legacytraces onlysemanticsID.
+Mandatory44/45 still FAIL; nativeArithmeticRecoveryRefines missing, Phase0
+unfrozen, make unavailable/aggregate formal-check not claimed. No local PASS.
+Three demos healthy without restart this stage; frozen refs unchanged; earlier
+service-restoration history retained.
+
+Next compose this computed CONFIG gate with actual mixed command/vote replay,
+full policy identity, original receipt/context/outer sequence and request cache;
+then extend native graph/certificate admission and complete public refinement.
+DRS1 decoding, independently authenticated startup/physical scans, unknown
+outcomes/repair, arbitrary failures, contract freeze, clean offline reproduction,
+independent reviews and runtime/profile/GPU/Docker acceptance remain mandatory.

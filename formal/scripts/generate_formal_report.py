@@ -753,6 +753,15 @@ def main() -> int:
         "allocation equivalence, authenticated exporter, mixed recovery and "
         "nativeArithmeticRecoveryRefines remain open."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeConfigAdmission computes startup/vote checks from complete decoded "
+        "policy/state/vote bytes only for a singleton CONFIG candidate with an empty "
+        "certificate graph. Successful binding derives exact sources, snapshot/context "
+        "preimages, committee/deadline/current/parent/sequence and live/recovery guards. "
+        "54 finite unchanged native comparisons are not general implementation "
+        "equivalence. Nonempty graphs/other actions, mixed replay, SHA/signature/export "
+        "authentication and nativeArithmeticRecoveryRefines remain open."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
