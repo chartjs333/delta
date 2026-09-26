@@ -4,6 +4,7 @@ This does not grant readiness, physical durability, network exposure or GO.
 """
 
 import native_config_admission as admission
+import native_proposal_admission as proposals
 from generate_native_state_vectors import decode_command, decode_state
 from generate_native_transition_vectors import identifier, outputs
 from native_admission_snapshot import decode_flat, require
@@ -18,7 +19,9 @@ def key(vote):
 def receipt_bytes(frame, vote, vote_id):
     fields = [frame, vote_id.encode("ascii"), vote["context_id"].encode("ascii")]
     raw = b"DVREC001\x00\x01" + b"\0" * 6
-    raw += (1).to_bytes(4, "big") + b"\0" * 4
+    action = {"ROUND_CONFIG": 1, "ISC": 2}.get(vote["kind"])
+    require(action is not None, "supported native receipt action")
+    raw += action.to_bytes(4, "big") + b"\0" * 4
     raw += int(vote["durable_sequence"]).to_bytes(8, "big")
     raw += b"".join(len(f).to_bytes(4, "big") + f for f in fields)
     require(len(frame) <= 16 * 1024 * 1024 - 8192, "receipt frame bound")
@@ -26,8 +29,11 @@ def receipt_bytes(frame, vote, vote_id):
     return raw
 
 
-def replay(policy, initial, wal, snap=b""):
-    p, state = admission.prepare(policy, initial)
+def _replay(policy, initial, wal, snap, proposal_scope):
+    require(type(proposal_scope) is bool, "closed computed replay scope")
+    p, state = (
+        proposals.prepare(policy, initial) if proposal_scope else admission.prepare(policy, initial)
+    )
     current, tick, invalidated = initial, p["initial_logical_tick"], False
     requests, votes = {}, {}
     checkpoint = snapshot(snap) if snap else None
@@ -55,18 +61,18 @@ def replay(policy, initial, wal, snap=b""):
             current, tick, invalidated = entry["state"], int(command["logical_tick"]), True
         else:
             bind_vote_entry(entry, policy)
-            v = admission.check(
-                policy,
-                current,
-                entry["command"],
-                dict(
-                    tick=tick,
-                    ready=False,
-                    invalidated=invalidated,
-                    recovery=True,
-                    expected=entry["sequence"],
-                ),
+            facts = dict(
+                tick=tick,
+                ready=False,
+                invalidated=invalidated,
+                recovery=True,
+                expected=entry["sequence"],
             )
+            if proposal_scope:
+                v, candidate = proposals.check_selected(policy, current, entry["command"], facts)
+            else:
+                v = admission.check(policy, current, entry["command"], facts)
+                candidate = p["candidates"][0]
             require(key(v) not in votes, "duplicate/conflicting vote context")
             vote_id = identifier("vote", entry["command"])
             votes[key(v)] = {
@@ -74,7 +80,7 @@ def replay(policy, initial, wal, snap=b""):
                 "frame_hex": entry["command"].hex(),
                 "vote_id": vote_id,
                 "sequence": entry["sequence"],
-                "parents": p["candidates"][0]["parents"],
+                "parents": candidate["parents"],
                 "receipt_hex": receipt_bytes(entry["command"], v, vote_id).hex(),
             }
         if checkpoint and checkpoint["sequence"] == entry["sequence"]:
@@ -93,6 +99,16 @@ def replay(policy, initial, wal, snap=b""):
     )
 
 
+def replay(policy, initial, wal, snap=b""):
+    """Preserve the original singleton CONFIG-only API."""
+    return _replay(policy, initial, wal, snap, False)
+
+
+def replay_proposals(policy, initial, wal, snap=b""):
+    """Actual whole-policy CONFIG/ISC gate; no external admission callback."""
+    return _replay(policy, initial, wal, snap, True)
+
+
 def retry_vote(machine, raw):
     vote = decode_flat(raw, 3)
     old = machine["votes"].get(key(vote))
@@ -102,4 +118,4 @@ def retry_vote(machine, raw):
     return {**old, "replay": True}
 
 
-__all__ = ["replay", "retry_command", "retry_vote"]
+__all__ = ["replay", "replay_proposals", "retry_command", "retry_vote"]

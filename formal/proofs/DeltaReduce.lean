@@ -1,3 +1,5 @@
+import DeltaReduce.NativeProposalAdmission
+import DeltaReduce.NativeProposalAdmissionVectors
 import DeltaReduce.NativeInputSetBody
 import DeltaReduce.NativeIscAdmission
 import DeltaReduce.NativeIscAdmissionVectors

@@ -71,10 +71,9 @@ def checked_bodies(p, s):
     return ids
 
 
-def prepare(policy_raw, state_raw):
+def prepare_graph(policy_raw, state_raw):
     p = codec.decode(policy_raw)
     s = decode_state(state_raw)
-    require(len(p["candidates"]) == 1, "supported singleton candidate")
     snap = p["snapshot"]
     require(
         all(
@@ -113,8 +112,15 @@ def prepare(policy_raw, state_raw):
         require(
             ids == sorted(set(ids)) and all(x == p["round_config_id"] for x in ids), "config sets"
         )
-    c = p["candidates"][0]
     checked_bodies(p, s)
+    return p, s
+
+
+def prepare(policy_raw, state_raw):
+    p, s = prepare_graph(policy_raw, state_raw)
+    require(len(p["candidates"]) == 1, "supported singleton candidate")
+    snap = p["snapshot"]
+    c = p["candidates"][0]
     require(c["action"] == 2 and c["body_hash"] in snap["closed_input_set_ids"], "ISC candidate")
     require(
         c["height"] == int(s["height"]) and c["view"] == int(s["view"]), "candidate coordinates"

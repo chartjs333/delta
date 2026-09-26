@@ -3004,3 +3004,60 @@ onlysemanticsID. No fresh TLC/productionmutants; retained28safety/7liveness/
 FAIL, Phase0 amendment unfrozen, GNU make unavailable; aggregate formal-check
 not claimed. All3demos HTTP200, no restart thisstage, frozenrefs unchanged.
 Source-bound report remains NO_GO; no local acceptance PASS or guard change.
+
+
+## 2026-09-26 — Whole CONFIG/ISC candidate admission and original mixed WAL
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-proposal-replay-proof.md; evidence:
+formal/proposals/evidence/native-proposal-replay.json. NO_GO remains.
+
+Original ISC1/freeze2 uses a TWO-candidate CONFIG/ISC policy. The new general
+NativeProposalAdmission checks the whole original canonical policy/list, every
+candidate, all proposed ISC bodies and the exact original graph/state/body/
+context/parent links. It derives original list/order/count and per-candidate
+source provenance. Actual complete policy/state/vote decoders compose fresh
+admission. No singleton policy is substituted under the old WAL policy ID.
+Fourteen general helpers and15definitions;21 small component/kernel examples
+and8fixture definitions reuse the existing original candidates and ISC graph.
+All58names are audited. Component cases are not a new full-policy byte or Lean
+mixed-history proof. Four inherited finite hash samples are not general SHA.
+
+The shared Python fold has fixed computed CONFIG-only or CONFIG/ISC gates.
+Historical receipt/cache lookup remains separate from fresh admission. Selected
+parents and receipt action come from the actual selected vote, including ISC2.
+Fresh unchanged C++ runs32cases(14accept/18reject) with both vote and command
+receipts. Its first two entries and policy bytes equal the earlier original
+ISC1/freeze2 observation exactly; subsequent view/abort are explicit3/4.
+Both receipts survive current movement and reopening. No renumbering, filtering,
+assumed recovered-state equality, changed runtime source or guard override.
+
+Draft comparison caught a CONFIG-only action tag in the expanded Python receipt
+encoder; final ISC receipt now matches native exactly. Repeated freeze reaches
+native's AVAILABLE guard before the duplicate-cache check, so its retained
+error category is core rather than the earlier CONFIG-case category8. These
+are final corrected checker results, not production protocol changes.
+
+The general Lean mixed replay join remains OPEN: NativeConfigReplay.lean still
+has its original CONFIG-only gate. Next reuse one typed fold with a closed
+computed admission result, compose both modes and kernel-check the actual
+original ISC1/freeze2. Do not replace admission with callbacks or duplicate the
+whole history proof. No full nativeArithmeticRecoveryRefines, all-graph/action
+admission, authenticated snapshot/ledger/root/export/physical scan, unknown
+resolution/repair, complete public refinement or Feature010 GO is claimed.
+Contract freeze, offline reproduction, independent reviews and runtime/profile/
+GPU/Docker gates remain mandatory. Diagnostic Python resource limits remain
+smaller than native/Lean. Final validation details follow after stable checks.
+
+Final stable-source checks: full Lean1034jobs, fresh general/vector kernels
+and axiom audit PASS.407tooling/38oracle/12targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.336generated files(310JSON/24Lean/inputTLA/config)
+byte-exact; the two new Lean modules are hand-authored. All58new names use only
+propext/Quot.sound/Classical.choice; no new proof holes or warnings. Prior five
+unused-simp warnings remain. All21TLA/schema/runtime/147nativewitnesses unchanged;
+145legacy traces onlysemanticsID. No new TLC/productionmutants; previous bounded
+28safety/7liveness/27mutants and132state/131step arithmetic path retained.
+Semantics sha256:e98cca9a7d16d233a9af4729b92494da1e5bc6cf17bd7e94c8a16a6450b92992. Mandatory44/45 still FAIL;
+phase0 unfrozen; make unavailable, aggregate formal-check not claimed. Three
+demosHTTP200 with no restart thisstage, frozenrefs unchanged. Source-bound
+report stays NO_GO; no local acceptance PASS or native guard change.

@@ -1,3 +1,5 @@
+import DeltaReduce.NativeProposalAdmission
+import DeltaReduce.NativeProposalAdmissionVectors
 import DeltaReduce
 
 /-! Machine-readable source for the T049 axiom dependency audit. -/
@@ -6453,3 +6455,62 @@ import DeltaReduce
 #print axioms DeltaReduce.NativeIscAdmissionVectors.emptyTuples
 #print axioms DeltaReduce.NativeIscAdmissionVectors.duplicateTuples
 #print axioms DeltaReduce.NativeIscAdmissionVectors.sameTicketDifferentCommitmentAllowed
+
+#print axioms DeltaReduce.NativeProposalAdmission.GraphChecks
+#print axioms DeltaReduce.NativeProposalAdmission.kind
+#print axioms DeltaReduce.NativeProposalAdmission.phase
+#print axioms DeltaReduce.NativeProposalAdmission.context
+#print axioms DeltaReduce.NativeProposalAdmission.CandidateChecks
+#print axioms DeltaReduce.NativeProposalAdmission.checkCandidate
+#print axioms DeltaReduce.NativeProposalAdmission.CandidateSource
+#print axioms DeltaReduce.NativeProposalAdmission.candidateSource
+#print axioms DeltaReduce.NativeProposalAdmission.candidateFromComponents
+#print axioms DeltaReduce.NativeProposalAdmission.checkCandidates
+#print axioms DeltaReduce.NativeProposalAdmission.allOriginalCandidates
+#print axioms DeltaReduce.NativeProposalAdmission.allCandidateChecks
+#print axioms DeltaReduce.NativeProposalAdmission.candidateCount
+#print axioms DeltaReduce.NativeProposalAdmission.bindGraph
+#print axioms DeltaReduce.NativeProposalAdmission.GraphSource
+#print axioms DeltaReduce.NativeProposalAdmission.graphSource
+#print axioms DeltaReduce.NativeProposalAdmission.bind
+#print axioms DeltaReduce.NativeProposalAdmission.bindSource
+#print axioms DeltaReduce.NativeProposalAdmission.prepare
+#print axioms DeltaReduce.NativeProposalAdmission.prepareSource
+#print axioms DeltaReduce.NativeProposalAdmission.VoteChecks
+#print axioms DeltaReduce.NativeProposalAdmission.select
+#print axioms DeltaReduce.NativeProposalAdmission.selectSource
+#print axioms DeltaReduce.NativeProposalAdmission.fromBytes
+#print axioms DeltaReduce.NativeProposalAdmission.fromBytesSource
+#print axioms DeltaReduce.NativeProposalAdmission.originalPolicyList
+#print axioms DeltaReduce.NativeProposalAdmission.originalVoteBytes
+#print axioms DeltaReduce.NativeProposalAdmission.selectedOriginalCandidate
+#print axioms DeltaReduce.NativeProposalAdmission.selectedIscBody
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.config
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.isc
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.policy
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.graph
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.sha
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.configPrepared
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.iscPrepared
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.bound
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.entirePolicyCanonical
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.completeGraphChecks
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.configChecked
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.iscChecked
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.entireListChecked
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.bothOriginalCandidates
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.originalIscVoteChecks
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.selectedSecond
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.readyFalseLive
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.recoveryNotReady
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.invalidated
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.wrongSequence
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.atDeadline
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.changedUnselectedConfig
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.changedIsc
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.wrongContext
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.wrongHeight
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.unsupportedAction
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.reversedPolicy
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.repeatedPolicy
+#print axioms DeltaReduce.NativeProposalAdmissionVectors.emptyPolicy
