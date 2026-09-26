@@ -3201,3 +3201,51 @@ Semantics sha256:2c8071714b460df716846964c03db9dd71acf170a4b99fdc8889adcf732fbf5
 make unavailable, aggregate formal-check not claimed. Three demosHTTP200 with
 no restart thisstage, frozenrefs unchanged. Source-bound report stays NO_GO;
 no local acceptance PASS, independent attestation or native guard change.
+
+
+## 2026-09-26 — Confirmed native decimal canonicality gap and exact lexical model
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-certificate-decimal-proof.md; evidence:
+formal/proposals/evidence/native-certificate-decimal.json. NO_GO remains.
+
+A fresh build of unchanged pinned native certificate components confirms acceptance
+of noncanonical -00/-000 norm values and signed -01/-0001 numerators. Native JSON
+retains each original spelling and produces distinct content IDs; these findings
+must not be normalized away or mistaken for complete runtime safety violations.
+31 strings across two actual certificate types give62 cases, including9 accepted
+spellings rejected by the separate strict Python proposal profile. Runtime/native
+arithmetic guard is unchanged. This is component execution, not a new WAL/trace run.
+
+NativeCertificateDecimal explicitly models the lexical/INT64/nonnegative checks
+and retains original bytes. General helpers prove result bounds, digits and exact
+source retention; negative-spelled nonnegative output is zero. Separate Canonical
+counterexamples refute the inference that every accepted string is canonical.
+62 generated kernel cases match retained native outcomes and6 additional proofs
+show the discrepancy and byte distinction. General std::from_chars/native language
+equivalence is NOT proved. The strict prior tooling profile remains unchanged.
+
+The planned norm/EC proof must use the observed source behavior, not an assumed
+canonical parser. Next all13 norm fields and actual finalized ISC parent; then
+complete EC/APC and shared admission/replay. Native repair requires formal/contract
+compatibility review and exact authority. Full nativeArithmeticRecoveryRefines,
+physical recovery, contract freeze, offline reproduction and independent reviews
+remain mandatory. Final stable-source validation follows in retained evidence.
+
+Final checks: full Lean1045jobs, fresh lexical/vector kernels and
+axiom audit PASS.428tooling/38oracle/6targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.340generated files(310JSON/28Lean/inputTLA/config)
+byte-exact. All90 new named declarations audited:13 general helpers/9 definitions,
+68 vector proofs; only propext/Quot.sound/Classical.choice. New modules have no
+warnings/holes; five pre-existing unused-simp warnings remain.
+Fresh unchanged MSVC certificate components:62 cases(17accept/45reject),9 accepted
+noncanonical spellings; native canonicality FAIL is preserved explicitly. No
+whole native runtime/WAL/recovery run or production mutant is claimed. All21TLA/
+schema/runtime/147nativewitnesses unchanged;145legacytraces onlysemanticsID.
+Retained32mixednativecases,28safety/7liveness/27mutants and132state/131step path
+keep earlier finite scopes. Semantics sha256:8d3565b23399725912fdfa3f42f195496d1f2a2def82d3c9cf9a90a5e268df26. Mandatory44/45 FAIL; phase0 unfrozen,
+make unavailable, aggregate formal-check not claimed. Native stdout archive
+line endings were normalized to LF after full regression; all6 targeted tests and
+Ruff/format were repeated on that final archiver. Canonical payload bytes unchanged. Three demosHTTP200 without
+restart, frozenrefs unchanged. Source-bound report remains NO_GO; no local PASS,
+independent attestation, native repair or guard change.

@@ -84,6 +84,8 @@ import DeltaReduce.NativeIscCertificateVectors
 import DeltaReduce.NativeSeedTranscript
 import DeltaReduce.NativeSeedSection
 import DeltaReduce.NativeSeedTranscriptVectors
+import DeltaReduce.NativeCertificateDecimal
+import DeltaReduce.NativeCertificateDecimalVectors
 /-!
 # DeltaReduce v1 parametric proof bundle
 

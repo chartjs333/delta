@@ -1,0 +1,11 @@
+test_actual_spelling_gap_is_not_silently_normalized (test_native_certificate_decimal.CertificateDecimalTests.test_actual_spelling_gap_is_not_silently_normalized) ... ok
+test_all_named_declarations_are_audited (test_native_certificate_decimal.CertificateDecimalTests.test_all_named_declarations_are_audited) ... ok
+test_complete_lean_regeneration (test_native_certificate_decimal.CertificateDecimalTests.test_complete_lean_regeneration) ... ok
+test_outcome_parser_fails_closed (test_native_certificate_decimal.CertificateDecimalTests.test_outcome_parser_fails_closed) ... ok
+test_rehashed_evidence_substitutions_reject (test_native_certificate_decimal.CertificateDecimalTests.test_rehashed_evidence_substitutions_reject) ... ok
+test_retained_source_and_native_outputs (test_native_certificate_decimal.CertificateDecimalTests.test_retained_source_and_native_outputs) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 6.039s
+
+OK
