@@ -1,3 +1,7 @@
+import DeltaReduce.NativeEligibility
+import DeltaReduce.NativeEligibilityLineage
+import DeltaReduce.NativeEligibilitySection
+import DeltaReduce.NativeEligibilityVectors
 import DeltaReduce.NativeNormEvidenceVectors
 import DeltaReduce.NativeNormSection
 import DeltaReduce.NativeNormEvidence

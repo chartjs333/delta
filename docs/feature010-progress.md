@@ -3294,3 +3294,52 @@ general native language equivalence remain unproved. Semantics sha256:cea4c97a34
 Mandatory44/45 FAIL; phase0 unfrozen; make unavailable, aggregate formal-check
 not claimed. Three demosHTTP200 without restart, frozenrefs unchanged. Source-bound
 report stays NO_GO; no local PASS, independent attestation or runtime repair.
+
+
+## 2026-09-26 — Complete native EC membership and original parent sections in Lean
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-eligibility-proof.md; evidence:
+formal/proposals/evidence/native-eligibility.json. NO_GO remains.
+
+NativeEligibility constructs all16 certificate JSON fields and exact separate
+proposed-body/wire bytes, retaining actual integer gamma bits and checking
+nonnegative int64, u64 denominator and reduction. Complete ordered ticket/domain
+membership is compared to the actual checked ISC; exact count/position follows.
+NativeEligibilityLineage resolves original ISC/norm/seed records. Proposed EC
+uses configured synthetic signers only for validation; finalized QC retains
+its actual signers and independent seed metadata. No signature authority inferred.
+NativeEligibilitySection executes actual earlier parent checks, both complete
+EC lists, strict computed identity ordering and the finalized-QC subset; derives
+original source lists and actual checked parent witnesses.
+
+The native proposed loop checks norm.isc equality, but finalized loop does not
+repeat that equality. Both require seed.isc and original checked norm records.
+The model preserves this distinction; the guard countercheck alone is not a
+complete mixed-parent snapshot or runtime exploit. Gamma/accepted/reason/robust
+selection and norms are not derived from Q. Original norm decimal defect remains.
+Six synthetic finite SHA samples bind original retained ISC/norm/seed/EC identities;
+component proofs are not new native execution or a complete policy/run example.
+
+Next complete APC accepted-ticket/assignment/weight/seed/accumulator lineage,
+then remaining graph and shared admission/replay. Complete native/public recovery,
+nativeArithmeticRecoveryRefines, authentication, contractfreeze/offline reproduction
+and independent review remain open. Runtime/demos/guard/frozenrefs unchanged.
+Final stable-source validation follows in retained evidence.
+
+Final stable-source checks: full Lean1052jobs; fresh EC/lineage/section/vector
+kernels and axiom audit PASS.441tooling/38oracle/7targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.342generated files(310JSON/30Lean/inputTLA/config)
+byte-exact. All192new names audited:33generalhelpers/38definitions,
+96vectorproofs/25definitions. Onlypropext/Quot.sound/Classical.choice;
+no new warnings/holes, five pre-existing unused-simp warnings remain. Earlier
+resource-heavy combined vector proof was replaced by checked component lemmas;
+only final stable-source logs are evidence. All21TLA/schema/runtime/147native
+witnesses unchanged;145legacytraces onlysemanticsID. No fresh native/TLC/new
+productionmutants; retained62decimal/32mixednativecases,28safety/7liveness/
+27mutants and132state/131step path keep previous bounded scopes. Native decimal
+canonicality still FAIL; norm/Q/robust derivation and general native language
+identity remain unproved. Semantics sha256:e7a7a99bc593e3eb214c7f453a7cc03abdad1864a8af92b56a84ab0701a54878.
+Mandatory44/45 FAIL; phase0 unfrozen; make unavailable, aggregate formal-check
+not claimed. Three demosHTTP200 without restart, frozenrefs unchanged. Source-bound
+report stays NO_GO; no local PASS, independent attestation or runtime repair.

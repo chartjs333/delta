@@ -829,6 +829,14 @@ def main() -> int:
         "general C++/JSON/SHA equivalence, EC/APC/full admission/recovery and "
         "source/finalization authenticity remain open. No native runtime repair, "
         "new execution, local acceptance PASS or formal GO is claimed."
+        " NativeEligibility/Lineage/Section now check complete original EC membership, "
+        "integer gamma, distinct QC/body IDs and actual ISC/norm/seed sections. "
+        "Proposed-only norm/ISC equality is not invented for the finalized loop; "
+        "the isolated guard countercheck is not a complete native exploit. "
+        "Finite SHA and component vectors do not authenticate a producer or "
+        "prove APC/full admission/replay or nativeArithmeticRecoveryRefines. "
+        "Original norm spelling failure, Q/robust derivation and physical recovery "
+        "remain open; no native repair or GO."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

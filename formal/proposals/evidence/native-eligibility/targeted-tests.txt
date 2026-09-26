@@ -1,0 +1,12 @@
+test_all_declarations_audited (test_native_eligibility.EligibilityTests.test_all_declarations_audited) ... ok
+test_complete_field_inventory_and_native_ids (test_native_eligibility.EligibilityTests.test_complete_field_inventory_and_native_ids) ... ok
+test_generated_bytes (test_native_eligibility.EligibilityTests.test_generated_bytes) ... ok
+test_integer_gamma_preserves_wire_type (test_native_eligibility.EligibilityTests.test_integer_gamma_preserves_wire_type) ... ok
+test_native_parent_asymmetry_is_explicit (test_native_eligibility.EligibilityTests.test_native_parent_asymmetry_is_explicit) ... ok
+test_original_policy_pin_rejects (test_native_eligibility.EligibilityTests.test_original_policy_pin_rejects) ... ok
+test_rehashed_original_ec_substitutions_reject (test_native_eligibility.EligibilityTests.test_rehashed_original_ec_substitutions_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 2.849s
+
+OK
