@@ -7,6 +7,9 @@ import DeltaReduce.NativeProposalAdmission
 import DeltaReduce.NativeProposalAdmissionVectors
 import DeltaReduce
 
+import DeltaReduce.NativeIscCertificate
+import DeltaReduce.NativeFinalizedIscSection
+import DeltaReduce.NativeIscCertificateVectors
 /-! Machine-readable source for the T049 axiom dependency audit. -/
 
 #print axioms DeltaReduce.quorumIntersection
@@ -6739,3 +6742,128 @@ import DeltaReduce
 #print axioms DeltaReduce.NativeMixedReplayVectors.reorderedRunRejects
 
 #print axioms DeltaReduce.NativeMixedReplayVectors.substitutedPolicyRecordRejects
+
+#print axioms DeltaReduce.NativeIscCertificate.value
+#print axioms DeltaReduce.NativeIscCertificate.readTexts
+#print axioms DeltaReduce.NativeIscCertificate.read
+#print axioms DeltaReduce.NativeIscCertificate.textsRead
+#print axioms DeltaReduce.NativeIscCertificate.textsOriginal
+#print axioms DeltaReduce.NativeIscCertificate.valueRead
+#print axioms DeltaReduce.NativeIscCertificate.readOriginal
+#print axioms DeltaReduce.NativeIscCertificate.quorum
+#print axioms DeltaReduce.NativeIscCertificate.CommitteeValid
+#print axioms DeltaReduce.NativeIscCertificate.SignersValid
+#print axioms DeltaReduce.NativeIscCertificate.Valid
+#print axioms DeltaReduce.NativeIscCertificate.quoted
+#print axioms DeltaReduce.NativeIscCertificate.comma
+#print axioms DeltaReduce.NativeIscCertificate.array
+#print axioms DeltaReduce.NativeIscCertificate.object
+#print axioms DeltaReduce.NativeIscCertificate.number
+#print axioms DeltaReduce.NativeIscCertificate.tupleJSON
+#print axioms DeltaReduce.NativeIscCertificate.fields
+#print axioms DeltaReduce.NativeIscCertificate.json
+#print axioms DeltaReduce.NativeIscCertificate.domain
+#print axioms DeltaReduce.NativeIscCertificate.id
+#print axioms DeltaReduce.NativeIscCertificate.check
+#print axioms DeltaReduce.NativeIscCertificate.Source
+#print axioms DeltaReduce.NativeIscCertificate.checkedSource
+#print axioms DeltaReduce.NativeIscCertificate.fromComponents
+#print axioms DeltaReduce.NativeIscCertificate.wrongShapeRejected
+#print axioms DeltaReduce.NativeIscCertificate.checkedQuorum
+#print axioms DeltaReduce.NativeIscCertificate.checkedContext
+#print axioms DeltaReduce.NativeIscCertificate.checkedBody
+#print axioms DeltaReduce.NativeIscCertificate.bodyIgnoresSigners
+#print axioms DeltaReduce.NativeIscCertificate.missingHashRejected
+#print axioms DeltaReduce.NativeIscCertificate.checkAll
+#print axioms DeltaReduce.NativeIscCertificate.listFromComponents
+#print axioms DeltaReduce.NativeIscCertificate.allSources
+#print axioms DeltaReduce.NativeIscCertificate.allChecked
+#print axioms DeltaReduce.NativeIscCertificate.allCount
+#print axioms DeltaReduce.NativeIscCertificate.fromBytes
+#print axioms DeltaReduce.NativeIscCertificate.bytesSource
+#print axioms DeltaReduce.NativeIscCertificate.bytesFromComponents
+
+#print axioms DeltaReduce.NativeFinalizedIscSection.SetChecks
+#print axioms DeltaReduce.NativeFinalizedIscSection.bindSection
+#print axioms DeltaReduce.NativeFinalizedIscSection.Source
+#print axioms DeltaReduce.NativeFinalizedIscSection.checkedSource
+#print axioms DeltaReduce.NativeFinalizedIscSection.fromComponents
+#print axioms DeltaReduce.NativeFinalizedIscSection.originalCertificateList
+#print axioms DeltaReduce.NativeFinalizedIscSection.certificateCount
+#print axioms DeltaReduce.NativeFinalizedIscSection.finalizedCertificate
+#print axioms DeltaReduce.NativeFinalizedIscSection.prepare
+#print axioms DeltaReduce.NativeFinalizedIscSection.preparedSource
+#print axioms DeltaReduce.NativeFinalizedIscSection.noInventedFinalized
+
+#print axioms DeltaReduce.NativeIscCertificateVectors.certificate
+#print axioms DeltaReduce.NativeIscCertificateVectors.committee
+#print axioms DeltaReduce.NativeIscCertificateVectors.tree
+#print axioms DeltaReduce.NativeIscCertificateVectors.parsed
+#print axioms DeltaReduce.NativeIscCertificateVectors.valid
+#print axioms DeltaReduce.NativeIscCertificateVectors.originalJSON
+#print axioms DeltaReduce.NativeIscCertificateVectors.exactJSON
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding0
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding1
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding2
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding3
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding4
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding5
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding6
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding7
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding8
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding9
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding10
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding11
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding12
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding13
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding14
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding15
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding16
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding17
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding18
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding19
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoding20
+#print axioms DeltaReduce.NativeIscCertificateVectors.wire
+#print axioms DeltaReduce.NativeIscCertificateVectors.encoded
+#print axioms DeltaReduce.NativeIscCertificateVectors.decoded
+#print axioms DeltaReduce.NativeIscCertificateVectors.alternative
+#print axioms DeltaReduce.NativeIscCertificateVectors.preimage0
+#print axioms DeltaReduce.NativeIscCertificateVectors.preimage1
+#print axioms DeltaReduce.NativeIscCertificateVectors.preimage2
+#print axioms DeltaReduce.NativeIscCertificateVectors.sha
+#print axioms DeltaReduce.NativeIscCertificateVectors.hash0
+#print axioms DeltaReduce.NativeIscCertificateVectors.hash1
+#print axioms DeltaReduce.NativeIscCertificateVectors.hash2
+#print axioms DeltaReduce.NativeIscCertificateVectors.qc
+#print axioms DeltaReduce.NativeIscCertificateVectors.alternativeQc
+#print axioms DeltaReduce.NativeIscCertificateVectors.bodyId
+#print axioms DeltaReduce.NativeIscCertificateVectors.contentFromHash
+#print axioms DeltaReduce.NativeIscCertificateVectors.qcComputed
+#print axioms DeltaReduce.NativeIscCertificateVectors.bodyComputed
+#print axioms DeltaReduce.NativeIscCertificateVectors.alternativeComputed
+#print axioms DeltaReduce.NativeIscCertificateVectors.checked
+#print axioms DeltaReduce.NativeIscCertificateVectors.originalChecked
+#print axioms DeltaReduce.NativeIscCertificateVectors.originalByteChecked
+#print axioms DeltaReduce.NativeIscCertificateVectors.distinctIds
+#print axioms DeltaReduce.NativeIscCertificateVectors.changedSignersChangeQc
+#print axioms DeltaReduce.NativeIscCertificateVectors.changedSignersKeepBody
+#print axioms DeltaReduce.NativeIscCertificateVectors.unknownSigner
+#print axioms DeltaReduce.NativeIscCertificateVectors.duplicateSigner
+#print axioms DeltaReduce.NativeIscCertificateVectors.reversedSigners
+#print axioms DeltaReduce.NativeIscCertificateVectors.belowQuorum
+#print axioms DeltaReduce.NativeIscCertificateVectors.wrongThreshold
+#print axioms DeltaReduce.NativeIscCertificateVectors.wrongContext
+#print axioms DeltaReduce.NativeIscCertificateVectors.emptyTuples
+#print axioms DeltaReduce.NativeIscCertificateVectors.duplicateTuples
+#print axioms DeltaReduce.NativeIscCertificateVectors.malformedRoot
+#print axioms DeltaReduce.NativeIscCertificateVectors.emptyCommittee
+#print axioms DeltaReduce.NativeIscCertificateVectors.wrongCommitteeSize
+#print axioms DeltaReduce.NativeIscCertificateVectors.duplicateCommittee
+#print axioms DeltaReduce.NativeIscCertificateVectors.hashFailure
+#print axioms DeltaReduce.NativeIscCertificateVectors.singletonList
+#print axioms DeltaReduce.NativeIscCertificateVectors.sectionFixture
+#print axioms DeltaReduce.NativeIscCertificateVectors.sectionSets
+#print axioms DeltaReduce.NativeIscCertificateVectors.missingCertificate
+#print axioms DeltaReduce.NativeIscCertificateVectors.duplicateCertificate
+#print axioms DeltaReduce.NativeIscCertificateVectors.duplicateFinalized
+#print axioms DeltaReduce.NativeIscCertificateVectors.bodyIdIsNotFinalizedQc

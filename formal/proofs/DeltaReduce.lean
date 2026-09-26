@@ -78,6 +78,9 @@ import DeltaReduce.Coverage
 import DeltaReduce.Apply
 import DeltaReduce.Examples
 
+import DeltaReduce.NativeIscCertificate
+import DeltaReduce.NativeFinalizedIscSection
+import DeltaReduce.NativeIscCertificateVectors
 /-!
 # DeltaReduce v1 parametric proof bundle
 

@@ -3110,3 +3110,47 @@ Semantics sha256:2cd020e87c4d859d084e22bc7d866a6fe32ab13a12f0b062bc9f4013920176c
 make unavailable, aggregate formal-check not claimed. Three demosHTTP200 with
 no restart thisstage, frozenrefs unchanged. Source-bound report stays NO_GO;
 no local acceptance PASS, independent attestation or native guard change.
+
+
+## 2026-09-26 — Complete native ISC certificate and finalized section in Lean
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-isc-certificate-proof.md; evidence:
+formal/proposals/evidence/native-isc-certificate.json. NO_GO remains.
+
+NativeIscCertificate reads the original complete certificate tree/wire, checks
+configured context/3f+1 committee/2f+1 ordered signer membership, derives all14
+canonical native JSON fields and separate QC/body content IDs. General helpers
+retain original bytes/tree, exact fields and quorum provenance; failed hashing
+rejects. NativeFinalizedIscSection checks the whole original certificate vector,
+strict QC ordering and finalized-ID subset with actual policy/state readers and
+recomputed state ID. This is an isolated section, not full graph/vote admission.
+CONFIG/proposed-ISC replay modes were not widened. No fabricated proposal-membership
+rule or callback substitutes for the native certificate relation.
+
+Original native certificate and its exact section in retained codec-EC policy
+are independently pinned and compared before generation. Kernel examples retain
+actual JSON/wire and separate QC/body IDs; changed signer set changes this sampled
+QC ID while preserving its body. Three finite SHA samples are not a general hash.
+Separate mathematical set cases reject absent/duplicate/invented finalized IDs,
+including substitution of the body ID. They do not claim a new whole policy/state
+acceptance proof. Source provenance/crypto signatures/ledger/root/availability,
+seed/EC/APC, full admission/recovery and nativeArithmeticRecoveryRefines remain open.
+Contractfreeze, offline reproduction and independent review still required.
+No fresh native/TLC/production-mutant run; original witnesses/runtime/demo preserved.
+Final stable-source validation follows in the retained evidence.
+
+Final stable-source checks: full Lean1040jobs, fresh certificate/section/vector
+kernels and axiom audit PASS.417tooling/38oracle/6targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.338generated files(310JSON/26Lean/inputTLA/config)
+byte-exact. All122 new named definitions/proofs in three modules audited:
+25 general helpers/25 definitions and57 vector proofs/15 definitions; only
+propext/Quot.sound/Classical.choice. New modules
+have no proof holes or warnings; five pre-existing unused-simp warnings remain.
+All21TLA/schema/runtime/147nativewitnesses unchanged;145legacytraces onlysemanticsID.
+No freshTLC/native execution/productionmutants; retained32nativecases(14accept/
+18reject),28safety/7liveness/27mutants and132state/131step path keep earlier scopes.
+Semantics sha256:c706d14c8df4914973fc9dcaed6286f39a6bc145c13b294204e3f3435a69bbe2. Mandatory44/45 FAIL; phase0 unfrozen;
+make unavailable, aggregate formal-check not claimed. Three demosHTTP200 with
+no restart thisstage, frozenrefs unchanged. Source-bound report stays NO_GO;
+no local acceptance PASS, independent attestation or native guard change.

@@ -790,6 +790,18 @@ def main() -> int:
         "is claimed. SHA/source authentication, all-policy admission, finalized "
         "certificates, recovery/repair and full GO remain open."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeIscCertificate now derives all 14 canonical ISC JSON fields and the "
+        "separate QC/body content IDs from actual bounded policy-section bytes. "
+        "NativeFinalizedIscSection checks every original ISC certificate, configured "
+        "context/committee/quorum, ordered QC IDs and exact finalized-ID subset. "
+        "This isolated section does not widen the CONFIG/ISC-proposal replay gate "
+        "or check later graph vectors. Signer labels are not signature authentication; "
+        "primitive root/config/ledger and exporter origin, general SHA/JSON equivalence, "
+        "seed/EC/APC admission, full public/native recovery and "
+        "nativeArithmeticRecoveryRefines remain open. No new native execution, "
+        "physical failure claim, local acceptance PASS or formal GO is issued."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

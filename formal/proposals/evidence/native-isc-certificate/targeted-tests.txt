@@ -1,0 +1,11 @@
+test_all_named_declarations_are_audited (test_native_isc_certificate.IscCertificateTests.test_all_named_declarations_are_audited) ... ok
+test_exact_generated_native_certificate_components (test_native_isc_certificate.IscCertificateTests.test_exact_generated_native_certificate_components) ... ok
+test_full_canonical_field_and_identity_inventory (test_native_isc_certificate.IscCertificateTests.test_full_canonical_field_and_identity_inventory) ... ok
+test_original_full_policy_pin_rejects_changed_section (test_native_isc_certificate.IscCertificateTests.test_original_full_policy_pin_rejects_changed_section) ... ok
+test_rehashed_observed_certificate_substitution_rejects (test_native_isc_certificate.IscCertificateTests.test_rehashed_observed_certificate_substitution_rejects) ... ok
+test_source_and_provenance_substitutions_reject (test_native_isc_certificate.IscCertificateTests.test_source_and_provenance_substitutions_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 6.842s
+
+OK
