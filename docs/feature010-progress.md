@@ -2661,3 +2661,59 @@ Mandatory44/45 still FAIL: nativeArithmeticRecoveryRefines remains missing.
 Phase0 remains unfrozen; make unavailable/aggregate formal-check not executed.
 All three demos HTTP200 without restart in this stage; frozen refs unchanged.
 The previous stage's recorded service restoration is not erased by this check.
+
+## 2026-09-26 — native state/command codecs and original scanned fields
+
+T044/T048/T049/T053/T057/T060, amendment 0001. NO_GO remains in force.
+Scope: formal/proposals/native-state-codec-proof.md; final machine-readable
+evidence: formal/proposals/evidence/native-state-codec.json.
+
+NativeStateBytes.lean parses all11 native COMMAND and all14 ROUND_STATE fields,
+retaining exact original canonical bytes. General inverse/success/injectivity
+proofs cover both concrete layouts. Ticket counts use unsigned64 binary tags
+with semantic uint32 bounds and ordered counts; sequence/height/view/logical
+tick use canonical uint64 decimal text. Actual native phase names, identifier
+syntax, fixed schema/native semantics and default text/envelope bounds are
+checked. The native summary state is not the complete64-variable public model.
+
+The new inspector derives the command and recorded next-state from actual DRW1
+entry sections and composes with the whole-byte scanner to retain original
+bytes and all-entry sequence. Effects and inner-WAL sections stay opaque here.
+This is not transition recomputation or recovered-state equality. The actual
+retained journal command is entry2, while the encoded state transition count is
+1. The preceding vote and original receipt retain sequence1; proposal5/6/8 is
+separate. Domain/NUL/frame hash preimages are bound, with SHA still explicit.
+
+A fresh isolated harness executes55 native codec cases against three unchanged
+translation units from pinned60c692f6:12accept/43reject, exact re-encoding and
+content-ID comparison. No Runtime/crash/arithmetic admission run or production
+mutant is claimed. Examples reuse original configured state/command/next-state
+bytes and finite hash samples. Known unknown-command and substituted-valid-root
+acceptance is preserved explicitly: these pass parsing but confer no transition
+authorization. Self-run source-pinned native logs are not independent attestation.
+
+Next reconstruct the actual native transition/effects/inner-WAL, then logical
+time, request and vote caches, startup policy/admission and snapshots. Preserve
+independently authenticated input/file provenance and distinguish known records
+from missing responses and unknown/incomplete diagnostics. Full public/native
+state/action/send/QC/current/recovery composition and nativeArithmeticRecoveryRefines
+remain open, with contract freeze/offline reproduction/independent review and
+joined runtime/profile/GPU/Docker gates still required. Healthy demos and native
+arithmetic guards remain unchanged; no formal or local GO follows.
+
+Final stable-source verification: full Lean1017 jobs, fresh generic kernel and
+165 explicit helper/function/example audits PASS (28 general theorems,90
+component/kernel proofs,47 definitions). Only propext/Quot.sound/Classical.choice
+are permitted; no proof hole or new axiom. 337tooling/38oracle/8targeted,
+33legal/112illegal legacy,Ruff/consistency PASS. All330 generated files
+(309JSON/19Lean plus inputTLA/config) reproduce byte-exact. New semantics:
+sha256:63eacbf671e2ecb489a2fc18f51a21f952b3e674a0a0120f01cbc6e14644a25f.
+All21TLA/public schema/runtime/147native witnesses are unchanged;145legacy
+traces only change semanticsID.15prior native component artifacts retain exact
+hashes. A fresh55-case codec harness (12accepted/43rejected) compiled three unchanged
+native translation units; no fresh Runtime/crash/TLC/production mutant is claimed; retained
+28safety/7liveness/27mutants and132state/131step path keep bounded scopes.
+Mandatory44/45 still FAIL: nativeArithmeticRecoveryRefines remains missing.
+Phase0 remains unfrozen; make unavailable/aggregate formal-check not executed.
+All three demos HTTP200 without restart in this stage; frozen refs unchanged.
+The previous stage's recorded service restoration is not erased by this check.

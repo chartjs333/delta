@@ -1,0 +1,13 @@
+test_command_bounds_and_constants (test_native_state_codec.NativeStateCodecTests.test_command_bounds_and_constants) ... ok
+test_exact_reproduction (test_native_state_codec.NativeStateCodecTests.test_exact_reproduction) ... ok
+test_forged_source_metadata_rejects (test_native_state_codec.NativeStateCodecTests.test_forged_source_metadata_rejects) ... ok
+test_mandatory_modules_and_native_field_inventory (test_native_state_codec.NativeStateCodecTests.test_mandatory_modules_and_native_field_inventory) ... ok
+test_native_observations (test_native_state_codec.NativeStateCodecTests.test_native_observations) ... ok
+test_original_wal_fields_and_sequences (test_native_state_codec.NativeStateCodecTests.test_original_wal_fields_and_sequences) ... ok
+test_state_bounds_and_admission_gap (test_native_state_codec.NativeStateCodecTests.test_state_bounds_and_admission_gap) ... ok
+test_substituted_original_rejects_before_output (test_native_state_codec.NativeStateCodecTests.test_substituted_original_rejects_before_output) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.675s
+
+OK

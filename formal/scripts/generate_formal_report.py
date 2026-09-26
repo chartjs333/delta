@@ -690,6 +690,17 @@ def main() -> int:
             "does not authenticate a physical file or establish readiness, "
             "native admission/state-command/snapshot replay, SHA implementation "
             "or the full public recovery relation. PO-AB1 remains open.",
+            "Concrete native COMMAND/ROUND_STATE readers now derive original "
+            "canonical bytes, all fixed fields, native integer/text bounds, "
+            "phase/count constraints and domain-separated hash preimages. Their "
+            "composition with scanned DRW1 entries retains the original all-entry "
+            "sequence, distinct from the state's transition counter. Three unchanged "
+            "native translation units execute 55 codec cases, with 12 accepted and "
+            "43 rejected. Unknown nonempty commands and substituted valid state roots "
+            "can parse; admission/transition recomputation, effect/inner-WAL encoding, "
+            "startup policy, logical time/caches/snapshots and full public recovery "
+            "remain open. This is codec execution, not native arithmetic authority, "
+            "a new Runtime crash run, SHA proof, independent authentication or GO.",
             "Lean arithmetic and quorum theorems do not prove cryptographic libraries, "
             "worker honesty, convergence or model quality.",
             "The cross-artifact analyzer is a syntactic traceability gate and does not "

@@ -1,0 +1,4 @@
+✔ [1014/1017] Built DeltaReduce.NativeStateBytes (6.2s)
+✔ [1015/1017] Built DeltaReduce.NativeStateCodecVectors (106s)
+✔ [1016/1017] Built DeltaReduce (7.1s)
+Build completed successfully (1017 jobs).

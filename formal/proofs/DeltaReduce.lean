@@ -51,6 +51,8 @@ import DeltaReduce.NativeWalBytes
 import DeltaReduce.NativeWalVectors
 import DeltaReduce.NativeWalScan
 import DeltaReduce.NativeWalScanVectors
+import DeltaReduce.NativeStateBytes
+import DeltaReduce.NativeStateCodecVectors
 import DeltaReduce.Hierarchy
 import DeltaReduce.Coverage
 import DeltaReduce.Apply
