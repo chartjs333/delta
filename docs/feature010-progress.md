@@ -2950,3 +2950,57 @@ HTTP200 without restart thisstage; frozenrefs unchanged. Earlier restoration
 history remains retained. Continuation automation now references the durable
 current instruction file; saved configuration was verified, stale Sep24 date
 removed. No schedule or acceptance-scope change.
+
+
+## 2026-09-26 — Computed native ISC proposal admission
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-isc-admission-proof.md; evidence:
+formal/proposals/evidence/native-isc-admission.json. NO_GO remains.
+
+NativeInputSetBody and NativeIscAdmission derive complete proposed ISC bodies
+from decoded DVPOL trees and compare the entire expected context, ordered tuple
+pairs, computed native body IDs and closed membership. Actual complete policy /
+state / vote byte decoders compose startup and live/recovery checks; original
+candidate parents, actor/epoch/current coordinates and sequence are retained.
+General helpers retain exact body source trees/count/order and derive selected
+body provenance. This subdomain has one ISC candidate and no finalized ISC or
+later graph; it does not accept an admission Boolean or translated body table.
+
+Three modules:28 general helpers,137 component/kernel proofs,50 definitions,
+215 audited names. The original complete ISC policy/state/vote is composed using
+three explicitly finite SHA samples and component byte/guard proofs. Actual
+native body preimage is distinct from DVPOL bytes, certificate JSON and QC ID.
+A source-backed kernel countercheck permits same ticket/different ordered
+commitments, as native tuple shape does; ledger uniqueness remains separate.
+
+Fresh unchanged C++ comparison:60cases,26startup accepts/34rejects,14vote accepts/
+46rejects.59supported cases match computed Python; a valid native abort-request
+graph explicitly rejects this subset. Rehashed root/tuple primitive and inner
+state-root substitutions can pass supplied-snapshot consistency; authentication,
+root preimage and live availability are not inferred.11tooling tests retain
+these boundaries, original byte identities, full context/shape negatives and
+strict result/scope checking. No new Runtime/WAL, arithmetic, network, TLC or
+production-mutant execution is claimed. Original ISC1/freeze2 remains unsupported
+by CONFIG-only mixed replay; no filtering or renumbering and original5/6/8 retained.
+
+Next compose actual CONFIG/ISC admission with mixed WAL/receipt/snapshot replay,
+then finalized certificate graphs and full public state/actions. DRS1 decoding,
+physical scan/initialization/export authentication, unknown outcomes/repair,
+full nativeArithmeticRecoveryRefines, contract freeze, offline reproduction and
+independent review remain mandatory. Full Feature010 and local acceptance are
+not complete. Final validation/source identity is recorded in machine evidence.
+
+Final stable-source checks: full Lean1032jobs, fresh generic body/admission
+kernels and axiom audit PASS.395tooling/38oracle/11targeted,33legal/112illegal
+legacy,Ruff/format/consistency PASS.336files(310JSON/24generatedLean/inputTLA/
+config) reproduce byte-exact. Only permitted propext/Quot.sound/Classical.choice;
+all215new declarations audited. New modules have no proof holes or warnings;
+five pre-existing unused-simp warnings retain their earlier scope.
+Semantics sha256:4ab02965dff1e75c073a1d56b6a938cfc7f9f56abbd9bbcaa535ad46cee1bdd6.
+All21TLA/schema/runtime/147nativewitnesses unchanged;145legacytraces changed
+onlysemanticsID. No fresh TLC/productionmutants; retained28safety/7liveness/
+27mutants and132state/131step arithmetic path remain bounded. Mandatory44/45
+FAIL, Phase0 amendment unfrozen, GNU make unavailable; aggregate formal-check
+not claimed. All3demos HTTP200, no restart thisstage, frozenrefs unchanged.
+Source-bound report remains NO_GO; no local acceptance PASS or guard change.

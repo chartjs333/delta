@@ -774,6 +774,18 @@ def main() -> int:
         "nativeArithmeticRecoveryRefines remain open. No readiness, exposure or GO "
         "follows from accepting an observed byte stream."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeInputSetBody/NativeIscAdmission derive complete proposed ISC bodies "
+        "and source-bound startup/vote checks from actual policy/state/vote bytes. "
+        "All tuple pairs, expected context, computed body IDs and closed-set membership "
+        "are checked for one ISC candidate; finalized ISC and later graph vectors "
+        "remain unsupported. 60 unchanged native comparisons retain primitive-root "
+        "rebinding and same-ticket/different-commitment counterchecks: this is not "
+        "ledger uniqueness, root provenance, availability or authenticated CloseInput. "
+        "No new mixed ISC replay, full public relation or nativeArithmeticRecoveryRefines "
+        "is claimed. SHA/source authentication, all-policy admission, finalized "
+        "certificates, recovery/repair and full GO remain open."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

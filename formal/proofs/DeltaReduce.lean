@@ -1,3 +1,6 @@
+import DeltaReduce.NativeInputSetBody
+import DeltaReduce.NativeIscAdmission
+import DeltaReduce.NativeIscAdmissionVectors
 import DeltaReduce.NativeConfigReplay
 import DeltaReduce.NativeConfigReplayVectors
 import DeltaReduce.NativeConfigAdmission

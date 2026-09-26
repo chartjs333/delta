@@ -1,0 +1,16 @@
+test_all_native_cases (test_native_isc_admission.IscAdmissionTests.test_all_native_cases) ... ok
+test_complete_context_rejects_after_rehash (test_native_isc_admission.IscAdmissionTests.test_complete_context_rejects_after_rehash) ... ok
+test_every_retained_input_recomputed (test_native_isc_admission.IscAdmissionTests.test_every_retained_input_recomputed) ... ok
+test_full_policy_fields_not_optional (test_native_isc_admission.IscAdmissionTests.test_full_policy_fields_not_optional) ... ok
+test_missing_finalized_config_is_not_invented (test_native_isc_admission.IscAdmissionTests.test_missing_finalized_config_is_not_invented) ... ok
+test_native_tuple_order_is_pair_not_ticket_uniqueness (test_native_isc_admission.IscAdmissionTests.test_native_tuple_order_is_pair_not_ticket_uniqueness) ... ok
+test_proposed_body_id_uses_original_preimage (test_native_isc_admission.IscAdmissionTests.test_proposed_body_id_uses_original_preimage) ... ok
+test_readiness_and_sequence (test_native_isc_admission.IscAdmissionTests.test_readiness_and_sequence) ... ok
+test_result_and_scope_substitution_reject (test_native_isc_admission.IscAdmissionTests.test_result_and_scope_substitution_reject) ... ok
+test_root_and_source_provenance_are_not_inferred (test_native_isc_admission.IscAdmissionTests.test_root_and_source_provenance_are_not_inferred) ... ok
+test_vectors_byte_exact (test_native_isc_admission.IscAdmissionTests.test_vectors_byte_exact) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 12.527s
+
+OK
