@@ -731,6 +731,14 @@ def main() -> int:
     }
     if not evidence_pass["EVIDENCE-CROSS-ARTIFACT"]:
         report["coverage"]["unresolved"].append("CROSS_ARTIFACT_ANALYSIS_FAILED")
+    report["coverage"]["unresolved"].append(
+        "NativeTransition reconstructs seven pinned native summary commands and exact "
+        "state/effect/inner-WAL outputs; scanned-entry composition retains original "
+        "bytes/sequence. It does not prove mixed runtime time/request/vote-policy/"
+        "snapshot replay, independent initialization/export, full public refinement "
+        "or nativeArithmeticRecoveryRefines. SHA and implementation equivalence "
+        "remain explicit boundaries; 59 finite native core cases do not grant GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

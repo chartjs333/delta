@@ -1,0 +1,1 @@
+16 complete states; 7 rehashed invalid paths

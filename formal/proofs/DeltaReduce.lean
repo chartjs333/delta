@@ -1,3 +1,5 @@
+import DeltaReduce.NativeTransition
+import DeltaReduce.NativeTransitionVectors
 import DeltaReduce.Quorum
 import DeltaReduce.FixedPoint
 import DeltaReduce.ArithmeticKernel

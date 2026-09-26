@@ -2717,3 +2717,57 @@ Mandatory44/45 still FAIL: nativeArithmeticRecoveryRefines remains missing.
 Phase0 remains unfrozen; make unavailable/aggregate formal-check not executed.
 All three demos HTTP200 without restart in this stage; frozen refs unchanged.
 The previous stage's recorded service restoration is not erased by this check.
+
+## 2026-09-26 — computed native command transitions and exact stored outputs
+
+T044/T048/T049/T053/T057/T060, amendment 0001. NO_GO remains in force.
+Scope: formal/proposals/native-transition-proof.md; final machine-readable
+checks: formal/proposals/evidence/native-transition.json.
+
+NativeTransition reconstructs all seven pinned summary commands from parsed
+prior state and command. Exact phase/context/count/view/sequence guards precede
+computed updates. Config replay retains its counter; other commands check and
+increment it. Dynamic decimal/output encoding is validated. General helpers
+derive enabled guards, original context, immutable fields, exact sequence,
+computed state and complete effect/inner-WAL construction with actual hash
+preimages. No caller-provided result predicate or recovered-state equality.
+
+replayEntry recomputes all three stored output sections. scannedExecution
+composes actual entry execution with byte-scan sequence/frame provenance.
+Initial state remains an explicit input; full mixed native vote/command replay
+and complete public protocol refinement are not claimed. SHA remains explicit;
+fixture samples and self-run logs do not authenticate native export/custody.
+
+A fresh source-pinned native core harness executes59 cases (21accept/38reject),
+covering all42 phase/command combinations, context/count/view/sequence limits
+and all ten native transition error categories. Exact three byte outputs/five
+content IDs match Python reconstruction. Lean also reuses the original freeze
+entry's full outputs, WALsequence2 versus statecounter1; prior vote sequence1
+and separate arithmetic proposal5/6/8 remain unchanged. No new Runtime/crash/
+arithmetic-admission run or production mutant is claimed.
+
+The explicit old-clock and aggregate-without-QC counterchecks distinguish this
+pure core from runtime policy and public certificate authority. Next derive
+mixed replay time/request/receipt caches, policy/authority invalidation and
+snapshot checks, then independently authenticated public histories and unknown
+recovery. Contract freeze/offline reproduction/independent reviews and joined
+runtime/profile/GPU/Docker gates still block GO. Healthy demos/native guards
+remain unchanged.
+
+Final stable-source verification: full Lean1019 jobs, fresh generic kernel and
+317 explicit helper/function/example audits PASS (24 general theorems,119
+component/kernel proofs,174 definitions). Only propext/Quot.sound/Classical.choice
+are permitted; no proof hole or new axiom. Three generated-vector unused-simp
+warnings remain informational. 345tooling/38oracle/8targeted,
+33legal/112illegal legacy,Ruff/consistency PASS. All332 generated files
+(310JSON/20Lean plus inputTLA/config) reproduce byte-exact. New semantics:
+sha256:f4b40752107e38cc96254a11badbb4144b062efad28c4e79e80b315b9c73ee88.
+All21TLA/public schema/runtime/147native witnesses are unchanged;145legacy
+traces only change semanticsID.15prior native component artifacts retain exact
+hashes. A fresh59-case core harness (21accepted/38rejected) compiled four unchanged
+native translation units; no fresh Runtime/crash/TLC/production mutant is claimed; retained
+28safety/7liveness/27mutants and132state/131step path keep bounded scopes.
+Mandatory44/45 still FAIL: nativeArithmeticRecoveryRefines remains missing.
+Phase0 remains unfrozen; make unavailable/aggregate formal-check not executed.
+All three demos HTTP200 without restart in this stage; frozen refs unchanged.
+Earlier recorded service restoration remains retained; no restart in this stage.

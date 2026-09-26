@@ -1,0 +1,13 @@
+test_all_observed_fields_and_error_codes (test_native_transition.NativeTransitionTests.test_all_observed_fields_and_error_codes) ... ok
+test_context_and_bound_guards (test_native_transition.NativeTransitionTests.test_context_and_bound_guards) ... ok
+test_core_is_not_runtime_clock_or_qc_admission (test_native_transition.NativeTransitionTests.test_core_is_not_runtime_clock_or_qc_admission) ... ok
+test_missing_or_forged_source_and_scope (test_native_transition.NativeTransitionTests.test_missing_or_forged_source_and_scope) ... ok
+test_original_three_outputs_and_sequence (test_native_transition.NativeTransitionTests.test_original_three_outputs_and_sequence) ... ok
+test_primitive_encoding_tags_and_all_effect_fields (test_native_transition.NativeTransitionTests.test_primitive_encoding_tags_and_all_effect_fields) ... ok
+test_project_import_and_explicit_axiom_audit (test_native_transition.NativeTransitionTests.test_project_import_and_explicit_axiom_audit) ... ok
+test_reproduction (test_native_transition.NativeTransitionTests.test_reproduction) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.855s
+
+OK
