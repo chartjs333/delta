@@ -1,3 +1,6 @@
+import DeltaReduce.NativeCandidateShape
+import DeltaReduce.NativeCandidateAuthority
+import DeltaReduce.NativeCandidateAuthorityVectors
 import DeltaReduce.NativeFailureAuthority
 import DeltaReduce.NativeFailureVote
 import DeltaReduce.NativeFailureAuthorityVectors

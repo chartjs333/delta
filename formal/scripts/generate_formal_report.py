@@ -935,6 +935,18 @@ def main() -> int:
         "still fails; no runtime repair, local PASS, independent review or formal GO."
     )
     report["coverage"]["unresolved"].append(
+        "NativeCandidateShape/Authority now check all15 parent slots and all9 native "
+        "candidate authorities on the SAME computed shared original snapshot. Exact "
+        "first body/parent lookups, finalized membership, contexts and coordinates "
+        "retain original candidate count/order; PARAMETER context stays its assignment. "
+        "One original CONFIG full snapshot/candidate byte-wrapper example is checked; "
+        "other original row examples use an explicitly synthetic mixed component "
+        "snapshot, not a new complete native policy execution. Native selected live "
+        "guards, source arithmetic, current command, retry/unknown/recovery, physical "
+        "WAL, general SHA/exporter authentication, freeze and independent review "
+        "remain open. Native decimal canonicality still fails. No local PASS or GO."
+    )
+    report["coverage"]["unresolved"].append(
         "NativeProposedIsc/SnapshotBase now derive every proposed ISC certificate "
         "from its original body and full configured committee, enforcing its separate "
         "4MiB JSON hash bound, original closed-body identity and exact config/accumulator "

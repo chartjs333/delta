@@ -3697,3 +3697,49 @@ stillFAIL. All actual candidate authorities/sharedpolicy, CurrentPointerCommand,
 sourcearithmetic, journalretry/unknown/recovery, physicalWAL/SHA/exporter,
 freeze/offline/independentreview remainopen. No localPASS, GO or nativeguardchange.
 Three demosHTTP200 withoutrestart; frozenrefsunchanged.
+
+## 2026-09-27 — All original candidate authorities on the shared snapshot
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-candidate-authority-proof.md; evidence native-candidate-authority.json.
+NativeCandidateShape checks all15 original parent slots with exact per-action
+content-ID/nonempty/empty requirements. NativeCandidateAuthority derives all9
+original candidate authorities using actual first proposed-body and finalized
+parent lookups, original domain-separated contexts, exact heights/views and
+individual parent links. PARAMETER keeps its original assignment context.
+APC resolves finalizedEC.norm, PARAMETER/ROOT resolve finalizedplan.seed, and APPLY
+retains the computed original candidate identity and body current checkpoint.
+VIEW/ABORT use the same original checked failure tail. A general CONFIG checkpoint
+is not prematurely forced to current before the later selected-vote guard.
+
+bindPolicy actually executes NativeSnapshotBase.bindSnapshot on the SAME original
+policy/state, then checks every original candidate in order. List proofs retain
+original records/count/positions/all-members; byte preparation retains canonical
+role/reason/action/count/order/globalcontext. No candidate replacement, emptygraph
+proxy, supplied wholebody translation or approval Boolean. Source section and
+ISC/EC/failure source lemmas retain the actual previously computed rows.
+
+Three modules: 36generalhelpers/23defs,
+89vectorproofs/46defs;
+194names audited, onlypropext/Quot.sound/Classical.choice.
+One original CONFIG full snapshot/candidate wrapper and original byte wrapper
+pass the kernel. Other action examples reuse original individually checked rows
+inside an EXPLICITLY SYNTHETIC mixed component snapshot; no new whole nonempty
+mixed native execution or wrapper fixture claimed. All9 original candidate
+records and8 contextSHA samples are pinned. Negatives cover each parent, all
+context/height mismatches, body/finalized/config/closed/timeout omissions, norm/
+seed/Merkle/apply/current substitutions, abort after APPLY and invalidsecondslot.
+Global duplicate contexts/reversed candidate order remain canonicality failures.
+
+FullLean1085jobs,2genericstandalonekernels/axiomaudit,
+514tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.350regeneratedfiles=310JSON/
+38Lean/inputTLA/config byteexact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacyonlysemanticID. No freshnative/TLC/productionmutants; retained32mixed/
+62decimal/28safety7liveness27mutants/132state131step keep earlier boundedscope.
+Semantics sha256:2927b3521bd0a2f79ca84e754816ba8f7314d9f36f054b1d551fb3536650df88. Mandatory44/45FAIL/nativeArithmeticRecoveryRefines missing;
+Phase0unfrozen;makeabsent,notaggregateformal-check. Native decimalcanonicality
+stillFAIL. Selected livevote enabling on sharedsnapshot, currentcommand,
+sourcearithmetic, journalretry/unknown/recovery, physicalWAL/SHA/exporter,
+freeze/offline/independentreview remainopen. No localPASS, GO or nativeguardchange.
+Three demosHTTP200 withoutrestart; frozenrefsunchanged.

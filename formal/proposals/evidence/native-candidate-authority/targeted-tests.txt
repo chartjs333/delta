@@ -1,0 +1,13 @@
+test_all_actions_and_parents_have_kernel_cases (test_native_candidate_authority.NativeCandidateAuthorityTests.test_all_actions_and_parents_have_kernel_cases) ... ok
+test_all_named_declarations_audited (test_native_candidate_authority.NativeCandidateAuthorityTests.test_all_named_declarations_audited) ... ok
+test_original_observation_pin (test_native_candidate_authority.NativeCandidateAuthorityTests.test_original_observation_pin) ... ok
+test_original_parent_inventory (test_native_candidate_authority.NativeCandidateAuthorityTests.test_original_parent_inventory) ... ok
+test_reproduction (test_native_candidate_authority.NativeCandidateAuthorityTests.test_reproduction) ... ok
+test_source_checkpoint_guard_scope (test_native_candidate_authority.NativeCandidateAuthorityTests.test_source_checkpoint_guard_scope) ... ok
+test_source_composition_and_scope (test_native_candidate_authority.NativeCandidateAuthorityTests.test_source_composition_and_scope) ... ok
+test_source_contexts_and_assignment (test_native_candidate_authority.NativeCandidateAuthorityTests.test_source_contexts_and_assignment) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.433s
+
+OK
