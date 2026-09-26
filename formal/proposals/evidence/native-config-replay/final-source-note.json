@@ -1,0 +1,1 @@
+{"change_after_full_suite":"Only compiler diagnostic whitespace normalization and Python formatting; native harness and replay logic unchanged.","formal_semantic_inputs_unchanged":true,"native_cases_reverified":32,"ruff":"PASS","status":"PASS","targeted_tests_rerun":11}

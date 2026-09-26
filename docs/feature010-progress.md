@@ -2893,3 +2893,60 @@ then extend native graph/certificate admission and complete public refinement.
 DRS1 decoding, independently authenticated startup/physical scans, unknown
 outcomes/repair, arbitrary failures, contract freeze, clean offline reproduction,
 independent reviews and runtime/profile/GPU/Docker acceptance remain mandatory.
+
+
+## 2026-09-26 — Computed mixed CONFIG/command native WAL replay
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-config-replay-proof.md; evidence:
+formal/proposals/evidence/native-config-replay.json. NO_GO remains.
+
+NativeConfigReplay derives startup from the complete native policy/state bytes,
+then folds actual CONFIG admission and NativeCommandReplay results in the same
+outer journal. Complete policy digest, original vote/frame/receipt/parents,
+command outputs and per-entry sequence are checked. Histories derive both cache
+provenances, uniqueness, outer position and total command+vote cache count.
+Positive snapshots compare the exact replay state at the chosen position;
+for votes this is current state, not the empty WAL state section. Zero-position
+snapshots retain the native parse-only comparison scope. Historical retries keep
+original bytes/sequence after movement, while fresh invalidated votes reject.
+Observed scans grant neither physical completeness nor READY/exposure.
+
+Two Lean modules reuse original CONFIG components with four finite hash samples:
+26 general helpers,21 component/kernel/composition proofs,20 definitions,67
+axiom-audited declarations. The general next-command composition uses an actual
+checked result; there is no new kernel-evaluated complete mixed native trace.
+Original ISC1/freeze2 still rejects in this CONFIG-only gate; no filtering or
+renumbering. All arithmetic/native fixture bytes and original5/6/8 remain.
+
+Fresh native Runtime/WAL execution compiled12unchanged units/28sourceblobs at
+60c692f6e391f839829dfc64e93380db54cd507b:32cases,14accept/18reject. A separate actual
+CONFIG1/config-command2/view-command3/abort-command4 journal preserves original
+vote and command receipts after movement and reopen. Wrong policy/outputs/order/
+sequences/duplicates/snapshots/time reject. This is finite CONFIG/empty-graph
+scope, not native arithmetic, all-vote recovery, physical power-loss, network,
+production mutants or authenticated export. Final stable-source validation is
+recorded in machine evidence; earlier draft failures do not count.
+
+Next extend computed admission to actual nonempty certificate graphs and other
+vote kinds, preserving original policy/current/body/provenance and mixed journal
+ordering. DRS1 decoding/physical scan authentication/unknown resolution/repair,
+full public protocol binding and nativeArithmeticRecoveryRefines remain open.
+Mandatory44/45 is not completion of Feature010. Contract freeze, offline
+reproduction, independent reviews and native/profile/GPU/Docker gates remain.
+No local acceptance PASS or Formal GO; no runtime guard change.
+
+Final stable-source checks: fullLean1029jobs, fresh generic kernel/axiom audit;
+384tooling/38oracle/11targeted,33legal/112illegallegacy,Ruff/consistency PASS.
+335files(310JSON/23generatedLean/inputTLA/config) reproduce byte-exact. New Lean
+modules are hand-authored. All21TLA/schema/runtime/147nativewitnesses unchanged;
+145legacytraces changed onlysemanticsID. No new TLC/productionmutants; previous
+28safety/7liveness/27mutants and132state/131step path retain bounded scopes.
+Semantics sha256:9343f18876b34e619f2f5e9273d0f14f204fd99393c0701d620805751453986b.
+Only propext/Quot.sound/Classical.choice; new modules have no warnings/holes,
+prior five unused-simp warnings retained. Mandatory44/45 still FAIL, Phase0
+unfrozen; GNU make unavailable, aggregate formal-check not claimed. All3demos
+HTTP200 without restart thisstage; frozenrefs unchanged. Earlier restoration
+history remains retained. Continuation automation now references the durable
+current instruction file; saved configuration was verified, stale Sep24 date
+removed. No schedule or acceptance-scope change.

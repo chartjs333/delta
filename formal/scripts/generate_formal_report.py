@@ -759,8 +759,20 @@ def main() -> int:
         "certificate graph. Successful binding derives exact sources, snapshot/context "
         "preimages, committee/deadline/current/parent/sequence and live/recovery guards. "
         "54 finite unchanged native comparisons are not general implementation "
-        "equivalence. Nonempty graphs/other actions, mixed replay, SHA/signature/export "
+        "equivalence. Nonempty graphs/other actions, general mixed replay, SHA/signature/export "
         "authentication and nativeArithmeticRecoveryRefines remain open."
+    )
+    report["coverage"]["unresolved"].append(
+        "NativeConfigReplay composes computed singleton/empty-graph CONFIG admission "
+        "with actual command replay, full policy identity, outer sequence, distinct "
+        "request/vote caches and exact snapshot-position state. General history proofs "
+        "derive both original record sources, cache uniqueness/counts and historical "
+        "receipt retention. 32 unchanged native CONFIG/command WAL cases are finite "
+        "execution, not all-policy/native/public recovery equivalence. Other vote "
+        "kinds, DRS1 byte decoding in Lean, authenticated initialization/export/physical "
+        "scan completeness, unknown outcomes/repair, full public composition and "
+        "nativeArithmeticRecoveryRefines remain open. No readiness, exposure or GO "
+        "follows from accepting an observed byte stream."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

@@ -1,3 +1,5 @@
+import DeltaReduce.NativeConfigReplay
+import DeltaReduce.NativeConfigReplayVectors
 import DeltaReduce.NativeConfigAdmission
 import DeltaReduce.NativeConfigAdmissionVectors
 import DeltaReduce.NativePolicyCodec

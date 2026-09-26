@@ -1,0 +1,16 @@
+test_complete_mandatory_audit_inventory (test_native_config_replay.ConfigReplayTests.test_complete_mandatory_audit_inventory) ... ok
+test_evidence_substitutions_reject (test_native_config_replay.ConfigReplayTests.test_evidence_substitutions_reject) ... ok
+test_exact_disjoint_caches_and_outer_sequences (test_native_config_replay.ConfigReplayTests.test_exact_disjoint_caches_and_outer_sequences) ... ok
+test_historical_receipts_after_movement (test_native_config_replay.ConfigReplayTests.test_historical_receipts_after_movement) ... ok
+test_incomplete_and_corrupt_observation_rejects (test_native_config_replay.ConfigReplayTests.test_incomplete_and_corrupt_observation_rejects) ... ok
+test_native_matrix (test_native_config_replay.ConfigReplayTests.test_native_matrix) ... ok
+test_order_duplicates_and_authority_invalidation (test_native_config_replay.ConfigReplayTests.test_order_duplicates_and_authority_invalidation) ... ok
+test_rehashed_output_policy_and_shape_substitutions (test_native_config_replay.ConfigReplayTests.test_rehashed_output_policy_and_shape_substitutions) ... ok
+test_snapshot_at_vote_uses_current_not_empty_section (test_native_config_replay.ConfigReplayTests.test_snapshot_at_vote_uses_current_not_empty_section) ... ok
+test_startup_empty_log_still_requires_computed_authority (test_native_config_replay.ConfigReplayTests.test_startup_empty_log_still_requires_computed_authority) ... ok
+test_unsupported_old_isc_is_not_filtered (test_native_config_replay.ConfigReplayTests.test_unsupported_old_isc_is_not_filtered) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 14.068s
+
+OK
