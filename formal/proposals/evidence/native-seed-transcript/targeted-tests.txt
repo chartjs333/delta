@@ -1,0 +1,10 @@
+test_all_named_declarations_are_audited (test_native_seed_transcript.SeedTranscriptTests.test_all_named_declarations_are_audited) ... ok
+test_canonical_fields_and_two_distinct_identity_edges (test_native_seed_transcript.SeedTranscriptTests.test_canonical_fields_and_two_distinct_identity_edges) ... ok
+test_exact_generated_bytes_and_proofs (test_native_seed_transcript.SeedTranscriptTests.test_exact_generated_bytes_and_proofs) ... ok
+test_full_original_policy_pin_rejects_substitution (test_native_seed_transcript.SeedTranscriptTests.test_full_original_policy_pin_rejects_substitution) ... ok
+test_rehashed_seed_parent_share_profile_substitution_rejects (test_native_seed_transcript.SeedTranscriptTests.test_rehashed_seed_parent_share_profile_substitution_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.764s
+
+OK

@@ -802,6 +802,16 @@ def main() -> int:
         "nativeArithmeticRecoveryRefines remain open. No new native execution, "
         "physical failure claim, local acceptance PASS or formal GO is issued."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeSeedTranscript derives exact original seed JSON/wire/content identity "
+        "and computes its exact ISC QC edge. NativeSeedSection checks the whole seed "
+        "vector after the actual finalized-ISC section and derives a checked original "
+        "certificate witness for every seed parent. This is section composition, "
+        "not whole graph admission or finalization/event provenance. Primitive seed, "
+        "share and profile IDs do not authenticate randomness or signatures; norm/EC/APC, "
+        "full native/public recovery, physical provenance and nativeArithmeticRecoveryRefines "
+        "remain open. No native runtime execution or original/local GO is claimed."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

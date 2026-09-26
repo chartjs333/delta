@@ -10,6 +10,9 @@ import DeltaReduce
 import DeltaReduce.NativeIscCertificate
 import DeltaReduce.NativeFinalizedIscSection
 import DeltaReduce.NativeIscCertificateVectors
+import DeltaReduce.NativeSeedTranscript
+import DeltaReduce.NativeSeedSection
+import DeltaReduce.NativeSeedTranscriptVectors
 /-! Machine-readable source for the T049 axiom dependency audit. -/
 
 #print axioms DeltaReduce.quorumIntersection
@@ -6867,3 +6870,101 @@ import DeltaReduce.NativeIscCertificateVectors
 #print axioms DeltaReduce.NativeIscCertificateVectors.duplicateCertificate
 #print axioms DeltaReduce.NativeIscCertificateVectors.duplicateFinalized
 #print axioms DeltaReduce.NativeIscCertificateVectors.bodyIdIsNotFinalizedQc
+
+#print axioms DeltaReduce.NativeSeedTranscript.value
+#print axioms DeltaReduce.NativeSeedTranscript.read
+#print axioms DeltaReduce.NativeSeedTranscript.valueRead
+#print axioms DeltaReduce.NativeSeedTranscript.readOriginal
+#print axioms DeltaReduce.NativeSeedTranscript.Valid
+#print axioms DeltaReduce.NativeSeedTranscript.fields
+#print axioms DeltaReduce.NativeSeedTranscript.json
+#print axioms DeltaReduce.NativeSeedTranscript.domain
+#print axioms DeltaReduce.NativeSeedTranscript.id
+#print axioms DeltaReduce.NativeSeedTranscript.check
+#print axioms DeltaReduce.NativeSeedTranscript.Source
+#print axioms DeltaReduce.NativeSeedTranscript.checkedSource
+#print axioms DeltaReduce.NativeSeedTranscript.fromComponents
+#print axioms DeltaReduce.NativeSeedTranscript.wrongParentRejected
+#print axioms DeltaReduce.NativeSeedTranscript.wrongShapeRejected
+#print axioms DeltaReduce.NativeSeedTranscript.missingHashRejected
+#print axioms DeltaReduce.NativeSeedTranscript.checkAll
+#print axioms DeltaReduce.NativeSeedTranscript.listFromComponents
+#print axioms DeltaReduce.NativeSeedTranscript.allSources
+#print axioms DeltaReduce.NativeSeedTranscript.allChecked
+#print axioms DeltaReduce.NativeSeedTranscript.fromBytes
+#print axioms DeltaReduce.NativeSeedTranscript.bytesSource
+#print axioms DeltaReduce.NativeSeedTranscript.bytesFromComponents
+#print axioms DeltaReduce.NativeSeedTranscript.linked
+#print axioms DeltaReduce.NativeSeedTranscript.linkedFromComponents
+#print axioms DeltaReduce.NativeSeedTranscript.linkedSources
+
+#print axioms DeltaReduce.NativeSeedSection.Ordered
+#print axioms DeltaReduce.NativeSeedSection.bindSection
+#print axioms DeltaReduce.NativeSeedSection.Source
+#print axioms DeltaReduce.NativeSeedSection.checkedSource
+#print axioms DeltaReduce.NativeSeedSection.fromComponents
+#print axioms DeltaReduce.NativeSeedSection.originalSeedList
+#print axioms DeltaReduce.NativeSeedSection.seedCount
+#print axioms DeltaReduce.NativeSeedSection.seedSource
+#print axioms DeltaReduce.NativeSeedSection.finalizedParent
+#print axioms DeltaReduce.NativeSeedSection.noUnfinalizedParent
+#print axioms DeltaReduce.NativeSeedSection.prepare
+#print axioms DeltaReduce.NativeSeedSection.preparedSource
+
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.transcript
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.tree
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.parsed
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.valid
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.originalJSON
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.exactJSON
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding0
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding1
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding2
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding3
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding4
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding5
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding6
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding7
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding8
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding9
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding10
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding11
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding12
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoding13
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.wire
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.encoded
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.decoded
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.preimage0
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.preimage1
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.preimage2
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.sha
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.hash0
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.hash1
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.hash2
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.transcriptId
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.contentFromHash
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.qcComputed
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.bodyComputed
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.transcriptComputed
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.checked
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.parentIdentity
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.certificateChecked
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.seedChecked
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.originalEdge
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.originalByteChecked
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.primitiveIsNotTranscript
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.missingFinalizedParent
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.bodyIsNotQcParent
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.transcriptIsNotQcParent
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.changedIscParent
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.emptyShares
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.duplicateShares
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.invalidShare
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.wrongContext
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.wrongSeedShape
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.wrongProfileShape
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.failedHash
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.singletonSeeds
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.uniqueTranscriptSet
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.duplicateTranscriptSet
+#print axioms DeltaReduce.NativeSeedTranscriptVectors.alternateSeedStillShapeValid

@@ -3154,3 +3154,50 @@ Semantics sha256:c706d14c8df4914973fc9dcaed6286f39a6bc145c13b294204e3f3435a69bbe
 make unavailable, aggregate formal-check not claimed. Three demosHTTP200 with
 no restart thisstage, frozenrefs unchanged. Source-bound report stays NO_GO;
 no local acceptance PASS, independent attestation or native guard change.
+
+
+## 2026-09-26 — Exact seed transcript and finalized ISC edge in Lean
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope:
+formal/proposals/native-seed-transcript-proof.md; evidence:
+formal/proposals/evidence/native-seed-transcript.json. NO_GO remains.
+
+NativeSeedTranscript reads exact original seed fields/wire and derives all14
+canonical JSON fields and the separate transcript ID. It checks exact expected
+context, primitive ID shape and complete ordered nonempty share IDs. Its linked
+component computes the actual ISC certificate and exact QC parent relationship.
+NativeSeedSection first runs the actual finalized-ISC section, then checks every
+original seed against its actual finalized IDs, with strict transcript order.
+General helpers derive original list/count and checked parent certificate witnesses.
+Whole graph/admission/recovery and finalization provenance are not supplied.
+
+Original native seed JSON and codec-EC wire section remain byte-exact. Three finite
+SHA samples bind original ISC QC/body and seed transcript, composing their actual
+component edge. Missing/wrong/unfinalized parent and malformed fields/hash reject.
+A deliberate countercheck changes the primitive seed and still passes shape: this
+explicitly demonstrates missing randomness authentication. No new whole-policy/state
+acceptance fixture, native execution or production phase/history claim is made.
+Finalization/committee/seed shares/ledger/root/export origin remains unauthenticated.
+CONFIG/proposed-ISC replay modes remain unchanged and reject later graphs.
+
+Next norm/EC/APC and full checked graph/recovery composition. Native EC certificate
+has no seed field; its finalized metadata supplies that separate edge. Preserve
+original payload/ID distinctions and unknown/incomplete fail-closed behavior.
+Full nativeArithmeticRecoveryRefines, contractfreeze, offline reproduction,
+independent reviews and exact merged GO remain mandatory. Runtime/demo untouched.
+Final stable-source validation follows in retained evidence.
+
+Final stable-source checks: full Lean1043jobs, fresh certificate/section/vector
+kernels and axiom audit PASS.422tooling/38oracle/5targeted,33legal/112illegallegacy,
+Ruff/format/consistency PASS.339generated files(310JSON/27Lean/inputTLA/config)
+byte-exact. All95 new named definitions/proofs in three modules audited:
+22 general helpers/16 definitions and47 vector proofs/10 definitions; only
+propext/Quot.sound/Classical.choice. New modules
+have no proof holes or warnings; five pre-existing unused-simp warnings remain.
+All21TLA/schema/runtime/147nativewitnesses unchanged;145legacytraces onlysemanticsID.
+No freshTLC/native execution/productionmutants; retained32nativecases(14accept/
+18reject),28safety/7liveness/27mutants and132state/131step path keep earlier scopes.
+Semantics sha256:2c8071714b460df716846964c03db9dd71acf170a4b99fdc8889adcf732fbf57. Mandatory44/45 FAIL; phase0 unfrozen;
+make unavailable, aggregate formal-check not claimed. Three demosHTTP200 with
+no restart thisstage, frozenrefs unchanged. Source-bound report stays NO_GO;
+no local acceptance PASS, independent attestation or native guard change.
