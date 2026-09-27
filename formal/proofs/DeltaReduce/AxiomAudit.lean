@@ -1,3 +1,4 @@
+import DeltaReduce.NativeVectorDerivation
 import DeltaReduce.NativeVectorCorpusVectors
 import DeltaReduce.NativeVectorSourceVectors
 import DeltaReduce.NativeSourceRefusal
@@ -12451,3 +12452,45 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativePlanQCorpus.extraSingleInput
 
 #print axioms DeltaReduce.NativeVectorJoin.runFromContext
+
+#print axioms DeltaReduce.NativeVectorDerivation.payloadComplete
+
+#print axioms DeltaReduce.NativeVectorDerivation.rowComplete
+
+#print axioms DeltaReduce.NativeVectorDerivation.rowsComplete
+
+#print axioms DeltaReduce.NativeVectorDerivation.frameComplete
+
+#print axioms DeltaReduce.NativeVectorDerivation.parameterComplete
+
+#print axioms DeltaReduce.NativeVectorDerivation.Inputs
+
+#print axioms DeltaReduce.NativeVectorDerivation.originalComputation
+
+#print axioms DeltaReduce.NativeVectorDerivation.derive
+
+#print axioms DeltaReduce.NativeVectorDerivation.actualExtraction
+
+#print axioms DeltaReduce.NativeVectorDerivation.bodyComputed
+
+#print axioms DeltaReduce.NativeVectorDerivation.originalRows
+
+#print axioms DeltaReduce.NativeVectorDerivation.bodyLeafCount
+
+#print axioms DeltaReduce.NativeVectorDerivation.bodyLeafAt
+
+#print axioms DeltaReduce.NativeVectorDerivation.noMissingBodyLeaf
+
+#print axioms DeltaReduce.NativeVectorDerivation.noOmittedContribution
+
+#print axioms DeltaReduce.NativeVectorDerivation.wrongDecodedQuantumRejected
+
+#print axioms DeltaReduce.NativeVectorDerivation.originalCoordinate
+
+#print axioms DeltaReduce.NativeVectorDerivation.joinFromParts
+
+#print axioms DeltaReduce.NativeVectorDerivation.joinChecks
+
+#print axioms DeltaReduce.NativeVectorDerivation.actualJoin
+
+#print axioms DeltaReduce.NativeVectorDerivation.actualRawRun

@@ -1,3 +1,4 @@
+import DeltaReduce.NativeVectorDerivation
 import DeltaReduce.NativeVectorCorpusVectors
 import DeltaReduce.NativeVectorSourceVectors
 import DeltaReduce.NativeSourceRefusal

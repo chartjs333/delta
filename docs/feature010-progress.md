@@ -4767,3 +4767,55 @@ arbitrary snapshots, phase/QC/send/delivery/journal/current/crash/unknown/torn/
 repair/physical-WAL refinement, decimal compatibility, amendment freeze, clean
 offline reproduction and independent review remain mandatory. No helper discharges
 nativeArithmeticRecoveryRefines. Source-bound semantics: sha256:9a37056ab6320dbd4f2c29a175d4b690bcac0bd90de4721ed027d35ee21b7e64.
+
+
+## 27 September 2026 — constructive vector source to actual PARAMETER extraction
+
+T044/T048/T053/T054/T056/T057. Formal proposal; NO_GO. Scope
+formal/proposals/native-vector-derivation-proof.md; evidence
+formal/proposals/evidence/native-vector-derivation.json. NativeVectorDerivation
+adds the constructive direction: actual Resolves/LoadedRow/RowsBound/FrameOrigin
+witnesses imply the corresponding executable loader succeeds; an internally
+checked DerivedParameter implies actual deriveParameter returns it.
+
+The new Inputs relation carries checked layout/schema, actual resolved and fully
+validated draft frame, selected assignment/partition, full eligible order, actual
+original vector reduction, successful loadImages, exact contributions, denominator,
+widths, source schema bytes and selected-assignment resource bounds. It contains
+no expected body/numerators, successful draft derive equation or approval Boolean.
+The constructor derives all eight typed PARAMETER_EXPECTED fields from these
+inputs. General theorems prove actual extraction, existing join and complete raw
+run success under these checked input witnesses. Every original slice position
+retains the exact generated Q bytes/store presence/leaf ID/source weight; omitted
+contributions and missing leaves are impossible under the relation. A different
+decoded quantum rejects even if numerical rows could match.
+
+One new generic module:19 general theorems,one definition,one structure; all21
+explicit top-level declarations axiom-audited, onlypropext/Quot.sound/Classical.choice.
+Full Lean1136jobs/freshgeneric kernel,723tooling/38oracle,33legal112illegal,
+Ruff/format/consistency and387file byte-exact regeneration PASS. No fixture expansion
+or new concrete complete raw-run instantiation. Only final stable-source logs count.
+21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.
+No freshTLC/productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines
+missing;native decimal -00/-01FAIL,Phase0unfrozen,make absent/noaggregateformal-check.
+Three demosHTTP200withoutrestart/frozenrefsunchanged. No nativeguard/localPASS/GO.
+
+The relation retains actual loadImages deliberately: an arbitrary RowsImage
+structure alone does not separately establish each decoder payload/quantum check.
+This is a general conditional construction, not proof that the previous synthetic
+raw fixture or a native capture supplies the required complete Inputs/Binding.
+Output context comes from the decoded draft assignment; original source config,
+vote contexts/deadlines, current model/optimizer and APPLY profile identity remain
+OPEN. Codec/exporter/anchor authentication remains external. It is not the missing
+nativeArithmeticRecoveryRefines theorem.
+
+Next: derive/check original source configuration/context/parent/ISC/EC/APC fields
+against the independently loaded draft frame, including complete membership,
+domain-shard coverage and assignment-context identity; then instantiate Inputs
+from that checked relation. Do not obtain a claimed native bridge by filling
+dummy model/optimizer/profile/current/authority values into a synthetic wrapper.
+Missing original008 proof/base/current preimages remain explicit. Preserve actual
+bytes and all per-actor sequences. General codecs/hash/exporter, full-batch resources,
+arbitrary snapshots, phase/QC/send/delivery/journal/current/crash/unknown/torn/repair/
+physicalWAL, decimal compatibility, contract freeze/offline reproduction and
+independent review remain required. Source-bound semantics: sha256:77a0edb93e2cd9286ff8f670cd659d1891b73e88123241b247a78a115e2659e8.

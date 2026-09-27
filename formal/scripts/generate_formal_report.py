@@ -1269,6 +1269,20 @@ def main() -> int:
         "arbitrary snapshots and nativeArithmeticRecoveryRefines remain OPEN. "
         "No runtime change, native execution, local PASS, GO or attestation."
     )
+    report["coverage"]["unresolved"].append(
+        "General constructive vector derivation now proves that resolved payloads, "
+        "full checked frame/rows and the original vector reduction imply actual "
+        "draft PARAMETER extraction, complete join and raw run. No expected "
+        "numerators/body or successful draft derive equation is supplied. Exact "
+        "ordered generated Q bytes/leaf references and contribution weights "
+        "are retained; missing leaves and mismatched decoded quantum cannot "
+        "bypass the actual image loader. These are GENERAL CONDITIONAL proofs, "
+        "not a newly instantiated full synthetic/native raw execution. Original "
+        "source-to-draft configuration/context/current/profile identity, anchor "
+        "and codec/exporter authentication, APPLY and complete recovery remain "
+        "OPEN. nativeArithmeticRecoveryRefines is missing; no runtime guard, "
+        "local PASS, GO or independent attestation is authorized."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

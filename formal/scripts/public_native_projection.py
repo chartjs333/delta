@@ -32,7 +32,7 @@ from public_state_projection import (
 
 VERSION = "deltareduce.full-public-native.v2-candidate"
 PUBLIC = ROOT / "formal/fixtures/traces/legal/normal-apply.json"
-PUBLIC_SHA256 = "fc0562acfbb6017f146ef3c9676fbb68424a46b3f4976e9330ec2a4f4ee0b0d0"
+PUBLIC_SHA256 = "21fbf1f65d251bbd662e7925b280b56fe1d0acec4b31637d085518e438ce4c21"
 
 
 def fields(value):
