@@ -1,3 +1,7 @@
+import DeltaReduce.NativeJsonSequence
+import DeltaReduce.NativeSchemaBytes
+import DeltaReduce.NativeSchemaBinding
+import DeltaReduce.NativeSchemaVectors
 import DeltaReduce.NativeScaleBytes
 import DeltaReduce.NativeScaleBinding
 import DeltaReduce.NativeScaleVectors

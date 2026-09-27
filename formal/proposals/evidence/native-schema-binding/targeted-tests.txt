@@ -1,0 +1,12 @@
+test_complete_schema_does_not_authenticate_q_payload (test_native_schema_binding.NativeSchemaBindingTests.test_complete_schema_does_not_authenticate_q_payload) ... ok
+test_generator_byte_exact (test_native_schema_binding.NativeSchemaBindingTests.test_generator_byte_exact) ... ok
+test_mandatory_build_and_dotted_declaration_audit (test_native_schema_binding.NativeSchemaBindingTests.test_mandatory_build_and_dotted_declaration_audit) ... ok
+test_missing_schema_is_not_inferred_from_scale_counts (test_native_schema_binding.NativeSchemaBindingTests.test_missing_schema_is_not_inferred_from_scale_counts) ... ok
+test_original_schema_preimage_and_included_segments (test_native_schema_binding.NativeSchemaBindingTests.test_original_schema_preimage_and_included_segments) ... ok
+test_policy_shapes_aliases_and_name_boundary (test_native_schema_binding.NativeSchemaBindingTests.test_policy_shapes_aliases_and_name_boundary) ... ok
+test_source_substitution_rejects_before_generator_output (test_native_schema_binding.NativeSchemaBindingTests.test_source_substitution_rejects_before_generator_output) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.077s
+
+OK

@@ -1139,6 +1139,21 @@ def main() -> int:
         "and general nativeArithmeticRecoveryRefines remain OPEN. No native "
         "execution, runtime change, local PASS, GO or independent attestation."
     )
+    report["coverage"]["unresolved"].append(
+        "Original parameter-schema bytes now have a mandatory Lean nested "
+        "decoder preserving all parameters, shapes, trainable flags and aliases. "
+        "Checked dimensions/omission/order/alias-owner rules derive the exact "
+        "complete scale-segment list and prefix offsets. All five original Q "
+        "blocks compose with this schema/scale/header/vector relation. The "
+        "schema hash preimage has no domain/NUL; scale identity retains its "
+        "separate domain. Both still use an UNVERIFIED adapter whose fixture "
+        "recognizes two preimages, not a proved SHA implementation or source "
+        "authentication. Original shard-plan/manifest coverage, configuration/"
+        "proof/APC authority, source-to-draft LoadedRow/RowsBound/DerivedParameter "
+        "and full nativeArithmeticRecoveryRefines remain OPEN. Changed Q with "
+        "its old SHA header still passes this Lean relation and fails Python "
+        "PAYLOAD_HASH. No native execution, runtime change, local PASS or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

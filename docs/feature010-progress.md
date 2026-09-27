@@ -4281,3 +4281,46 @@ nativeArithmeticRecoveryRefines missing; separate native certificate -00/-01
 canonicalityFAIL unchanged, Phase0unfrozen, makeabsent/notaggregateformal-check.
 DemosHTTP200/no restart; frozenrefs unchanged. No localPASS/GO/guardchange or
 independent attestation. Source-bound semantics: sha256:d019f4d958204f080e90ba84af62d3623e4ba115db1c17a633d90b59214065e1.
+
+
+## 27 September 2026 — original schema shapes, omission and exact scale coverage in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-schema-binding-proof.md; evidence
+formal/proposals/evidence/native-schema-binding.json. NativeJsonSequence and
+NativeSchemaBytes parse the actual complete original schema bytes: every parameter,
+shape, dtype, trainable flag and alias/owner. General bounded-list roundtrip,
+canonical preimage and uniqueness proofs retain order/multiplicity until checking;
+no decoded schema or whole translated body is supplied. NativeSchemaBinding derives
+positive bounded shape products (scalar empty shape=1), exact inclusion by omission
+policy, unique ordered names and valid ordered alias ownership. Original256-character
+schema names versus included255-character native tokens are explicitly checked.
+All frozen parameters and aliases remain in the original source bytes.
+
+Complete ordered segment names/counts/ordinals/prefix starts and total are derived
+from the included parameters and compared with the actually decoded scale table.
+General indexed placement and original dimension lemmas retain exact source data.
+bindQ composes schema/scale/header/vector parsing and retains selected schema-row
+membership and actual coordinate ranges. Full shard-plan/manifest partition and
+source-to-draft LoadedRow/RowsBound/DerivedParameter are still OPEN; an arbitrary
+Q corpus has not been proved complete/nonoverlapping by this per-block relation.
+
+All three original parameters, the omitted frozen scalar, alias, both segments,
+five original Q blocks and36coordinates compose using component lemmas. The exact
+schema preimage is376bytes (fixture file's terminalLF excluded per originalfingerprint).
+Schema hash uses raw canonical bytes, no domain/NUL; scale has a separate original004
+domain. The two-preimage fixture adapter is SYNTHETIC/UNVERIFIED, not SHA256 or producer
+source/exporter authority.35small cases distinguish byte parser checks and typed
+shape/policy/alias/list guards. Changed first Q with old payloadSHA still joins in
+Lean and fails Python PAYLOAD_HASH. Native admission/recovery is not established.
+
+47generaltheorems/46defs+10types;78component/kerneltheorems/20fixturedefs,201newnames
+axiomaudited including dotted helpers, standardkernelaxiomsonly. FullLean1107jobs,
+fourfreshkernels PASS; final670tooling/38oracle/7targeted,Ruff/format/consistency and
+33legal112illegal PASS;368generatedfiles byte-exact. Original fixtures reused,
+no new giant native/state corpus. Only final stable logs count.21TLA/schema/runtime/
+147nativewitnesses unchanged;145legacy onlysemanticsID. No newnative/TLC/mutants;
+retained bounded scopes unchanged. Mandatory44/45/nativeArithmeticRecoveryRefines
+missing; separate nativecertificate-00/-01canonicalityFAIL unchanged,Phase0unfrozen,
+makeabsent/notaggregateformal-check. DemosHTTP200/no restart;frozenrefs unchanged.
+No localPASS/GO/guardchange/independentattestation. Source-bound semantics: sha256:d44c5573892eb1da5ec4207ccfa0f1afb2a254092f85962a286bb7a84a3f4e50.
