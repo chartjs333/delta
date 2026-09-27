@@ -127,35 +127,34 @@ try {
 } finally { $Probe.Dispose() }
 
 $InstanceId = [Guid]::NewGuid().ToString('N')
-$Arguments = @((Join-Path $PSScriptRoot 'server.py'), '--data-dir', $PanelData,
-    '--controller-port', [string]$ControllerPort, '--port', [string]$Port,
-    '--node-port', [string]$NodePort,
-    '--instance-id', $InstanceId)
-if (Test-Path -LiteralPath $FormalReport) { $Arguments += @('--formal-report', $FormalReport) }
-
-$QuotedArguments = foreach ($Argument in $Arguments) {
-    if ($Argument.Contains('"')) { throw 'An argument contains an unsupported quote.' }
-    '"' + $Argument.TrimEnd('\') + '"'
+$StdOut = Join-Path $PanelData 'candidate-server.stdout.txt'
+$StdErr = Join-Path $PanelData 'candidate-server.stderr.txt'
+$CmdLine = "cmd.exe /c `"`"$Python`" `"$PSScriptRoot\server.py`" --data-dir `"$PanelData`" --controller-port $ControllerPort --port $Port --node-port $NodePort --instance-id $InstanceId"
+if (Test-Path -LiteralPath $FormalReport) {
+    $CmdLine += " --formal-report `"$FormalReport`""
 }
+$CmdLine += " 1>`"$StdOut`" 2>`"$StdErr`"`""
 
-$Process = Start-Process -FilePath $Python -ArgumentList ($QuotedArguments -join ' ') `
-    -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru `
-    -RedirectStandardOutput (Join-Path $PanelData 'candidate-server.stdout.txt') `
-    -RedirectStandardError (Join-Path $PanelData 'candidate-server.stderr.txt')
+$Startup = New-CimInstance -ClassName Win32_ProcessStartup -ClientOnly -Property @{ShowWindow=[uint16]0}
+$Started = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{
+    CommandLine=$CmdLine; CurrentDirectory=$PSScriptRoot; ProcessStartupInformation=$Startup
+}
+if ($Started.ReturnValue -ne 0) { throw "Candidate presentation launch failed: $($Started.ReturnValue)" }
 
-@{pid = $Process.Id; start_ticks = $Process.StartTime.ToUniversalTime().Ticks;
-    instance_id = $InstanceId; url = $Url; source = $PSScriptRoot;
-    port = $Port; node_port = $NodePort} |
-    ConvertTo-Json | Set-Content -LiteralPath $MetadataPath -Encoding utf8
-
-for ($Attempt = 0; $Attempt -lt 30; $Attempt++) {
+for ($Attempt = 0; $Attempt -lt 40; $Attempt++) {
     $Health = Read-Health
     if ($null -ne $Health) {
-        Assert-Identity $Health (Read-Metadata)
+        $ProcId = if ($null -ne $Health.PSObject.Properties['pid']) { $Health.pid } else { $Started.ProcessId }
+        $Owned = Get-Process -Id $ProcId -ErrorAction SilentlyContinue
+        if ($null -ne $Owned) {
+            @{pid = $ProcId; start_ticks = $Owned.StartTime.ToUniversalTime().Ticks;
+                instance_id = $InstanceId; url = $Url; source = $PSScriptRoot;
+                port = $Port; node_port = $NodePort} |
+                ConvertTo-Json | Set-Content -LiteralPath $MetadataPath -Encoding utf8
+        }
         Write-Output "Candidate presentation READY: $Url (Node Training: http://127.0.0.1:$NodePort/node-training/)"
         exit 0
     }
-    if ($Process.HasExited) { throw "Candidate presentation exited unexpectedly. Inspect $PanelData\candidate-server.stderr.txt." }
     Start-Sleep -Milliseconds 300
 }
 

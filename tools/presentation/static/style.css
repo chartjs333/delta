@@ -74,5 +74,34 @@
 .qlora-evidence code { background: #1e293b; color: #a5b4fc; padding: 1px 4px; border-radius: 4px; font-size: 10px; }
 .chip.purple { background: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
 .chip.green { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
-.model-actions { margin-top: auto; padding-top: 8px; }
+.model-actions { margin-top: auto; padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+
+/* Mini-stepper inside model cards */
+.card-stepper { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 7px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 10px; font-weight: 600; color: #64748b; flex-wrap: wrap; }
+.card-stepper .step-dot { padding: 2px 6px; border-radius: 4px; background: #edeef3; }
+.card-stepper .step-dot.active { background: #e0f2fe; color: #0284c7; font-weight: 700; }
+.card-stepper .step-dot.completed { background: #dcfce7; color: #16a34a; font-weight: 700; }
+.card-stepper .step-arr { color: #cbd5e1; font-weight: bold; }
+
+/* Crypto Meta Bar */
+.crypto-meta-bar { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; background: #1e293b; border-radius: 6px; font-family: ui-monospace,Consolas,monospace; font-size: 10px; color: #94a3b8; }
+.crypto-meta-bar .crypto-line { display: flex; justify-content: space-between; gap: 6px; }
+.crypto-meta-bar code { color: #38bdf8; overflow-wrap: anywhere; }
+
+/* Receipt Dialog */
+.receipt-dialog { border: 1px solid #cbd5e1; border-radius: 12px; padding: 0; box-shadow: 0 12px 36px rgba(0,0,0,0.3); max-width: 800px; width: 92vw; background: #ffffff; color: var(--ink); }
+.receipt-dialog::backdrop { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(3px); }
+.receipt-modal-content { display: flex; flex-direction: column; max-height: 88vh; }
+.receipt-modal-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 22px; border-bottom: 1px solid #e2e8f0; }
+.receipt-modal-header h2 { margin: 6px 0 2px; font-size: 18px; }
+.receipt-modal-body { padding: 18px 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.receipt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 11px; }
+.receipt-grid dt { font-weight: 600; color: #64748b; margin-bottom: 2px; }
+.receipt-grid dd { margin: 0; }
+.receipt-grid code { background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 10px; word-break: break-all; }
+.receipt-json-wrap { display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; border: 1px solid #334155; }
+.receipt-json-header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px; }
+.receipt-json { margin: 0; padding: 12px; background: #0f172a; color: #38bdf8; font-family: ui-monospace,Consolas,monospace; font-size: 10px; line-height: 1.45; max-height: 280px; overflow-y: auto; border-radius: 0; }
+.receipt-modal-footer { display: flex; justify-content: flex-end; padding: 14px 22px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-radius: 0 0 12px 12px; }
+
 

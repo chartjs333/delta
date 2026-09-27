@@ -1,4 +1,4 @@
-import {locales, supportedLanguage, translate, translateLog} from './i18n.mjs';
+import {locales, supportedLanguage, translate, translateLog} from './i18n.mjs?v=consensus4w';
 
 const $ = (id) => document.getElementById(id);
 const pages = ['overview', 'models', 'runs', 'readiness'];
@@ -320,12 +320,64 @@ async function submit(path) {
 $("train").addEventListener("click", () => submit("/api/train"));
 $("simulate").addEventListener("click", () => submit("/api/simulate"));
 
+let activeReceipt = null;
+
+function showReceipt(receipt) {
+  if (!receipt) return;
+  activeReceipt = receipt;
+  const modal = $("receipt-modal");
+  if (!modal) return;
+  $("rm-exec-id").textContent = receipt.execution_id;
+  $("rm-workers-count").textContent = `${receipt.participant_count} Sharded Workers (${receipt.model_name})`;
+  $("rm-param-root").textContent = receipt.parameter_root;
+  $("rm-apply-digest").textContent = receipt.apply_digest;
+  $("rm-next-state").textContent = receipt.next_model_hash || receipt.next_adapter_hash || "—";
+  $("receipt-subtitle").textContent = `${receipt.workload_type} · ${receipt.formal_semantics_id}`;
+  $("receipt-json-text").textContent = JSON.stringify(receipt, null, 2);
+  $("copy-btn-text").textContent = t("copyReceipt");
+  modal.showModal();
+}
+
+const modalClose = $("btn-close-receipt");
+if (modalClose) modalClose.addEventListener("click", () => $("receipt-modal").close());
+const modalCloseX = $("btn-close-receipt-x");
+if (modalCloseX) modalCloseX.addEventListener("click", () => $("receipt-modal").close());
+
+const copyBtn = $("btn-copy-receipt");
+if (copyBtn) {
+  copyBtn.addEventListener("click", async () => {
+    if (!activeReceipt) return;
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(activeReceipt, null, 2));
+      $("copy-btn-text").textContent = t("copied");
+      setTimeout(() => { $("copy-btn-text").textContent = t("copyReceipt"); }, 2000);
+    } catch {
+      $("copy-btn-text").textContent = "Copied!";
+    }
+  });
+}
+
+let causalReceipt = null;
 const btnCausal = $("btn-run-causal");
+const btnInspectCausal = $("btn-inspect-causal");
+
+if (btnInspectCausal) {
+  btnInspectCausal.addEventListener("click", () => {
+    if (causalReceipt) showReceipt(causalReceipt);
+  });
+}
+
 if (btnCausal) {
   btnCausal.addEventListener("click", async () => {
     btnCausal.disabled = true;
     const badge = $("causal-status-badge");
-    if (badge) { badge.textContent = "RUNNING…"; badge.className = "chip warning"; }
+    if (badge) { badge.textContent = "CONSENSUS RUNNING…"; badge.className = "chip warning"; }
+
+    for (let i = 1; i <= 5; i++) {
+      const elStep = $(`causal-step-${i}`);
+      if (elStep) elStep.className = i === 1 ? "step-dot active" : "step-dot";
+    }
+
     try {
       const response = await fetch("/api/models/causal-run", {
         method: "POST",
@@ -334,23 +386,43 @@ if (btnCausal) {
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
+      causalReceipt = data.receipt;
+
       $("causal-init-loss").textContent = Number(data.initial_loss).toFixed(4);
       $("causal-final-loss").textContent = Number(data.final_loss).toFixed(4);
-      $("causal-reduction").textContent = (data.loss_reduction > 0 ? "-" : "") + Math.abs(data.loss_reduction).toFixed(4);
+      $("causal-reduction").textContent = (data.loss_reduction >= 0 ? "+" : "") + Number(data.loss_reduction).toFixed(4);
+
+      for (let i = 1; i <= 5; i++) {
+        const elStep = $(`causal-step-${i}`);
+        if (elStep) elStep.className = "step-dot completed";
+      }
+
       const list = $("causal-steps-list");
       if (list && data.steps) {
         list.replaceChildren();
         for (const st of data.steps) {
           const row = el("div", undefined, "step-row");
+          const wId = st.worker_id.replace("demo-causal-", "");
           row.append(
-            el("span", `Step ${st.optimizer_step}`, "step-num"),
-            el("span", `Loss: ${Number(st.loss).toFixed(4)}`, "step-loss"),
-            el("span", `${st.processed_tokens} tokens (${st.throughput} tok/s)`, "step-tok")
+            el("span", `${wId}`, "step-num"),
+            el("span", `Loss: ${Number(st.loss).toFixed(4)} (${st.processed_tokens} tok)`, "step-loss"),
+            el("span", `commit: ${st.commitment_root.slice(0, 16)}…`, "step-tok")
           );
           list.append(row);
         }
       }
-      if (badge) { badge.textContent = `COMPLETED (${data.elapsed_ms}ms)`; badge.className = "chip success"; }
+
+      const cryptoBox = $("causal-crypto-box");
+      if (cryptoBox) {
+        cryptoBox.hidden = false;
+        $("causal-exec-id").textContent = data.execution_id;
+        $("causal-param-root").textContent = (data.receipt.parameter_root || "").slice(0, 24) + "…";
+        $("causal-apply-digest").textContent = (data.receipt.apply_digest || "").slice(0, 24) + "…";
+        $("causal-next-model").textContent = (data.receipt.next_model_hash || "").slice(0, 24) + "…";
+      }
+
+      if (btnInspectCausal) btnInspectCausal.hidden = false;
+      if (badge) { badge.textContent = `APPLIED (${data.elapsed_ms}ms)`; badge.className = "chip success"; }
     } catch (err) {
       if (badge) { badge.textContent = "FAILED"; badge.className = "chip failed"; }
       operationError = err.message;
@@ -361,10 +433,27 @@ if (btnCausal) {
   });
 }
 
+let qloraReceipt = null;
 const btnQlora = $("btn-run-qlora-step");
+const btnInspectQlora = $("btn-inspect-qlora");
+
+if (btnInspectQlora) {
+  btnInspectQlora.addEventListener("click", () => {
+    if (qloraReceipt) showReceipt(qloraReceipt);
+  });
+}
+
 if (btnQlora) {
   btnQlora.addEventListener("click", async () => {
     btnQlora.disabled = true;
+    const badge = $("qlora-status-badge");
+    if (badge) { badge.textContent = "CONSENSUS RUNNING…"; badge.className = "chip warning"; }
+
+    for (let i = 1; i <= 5; i++) {
+      const elStep = $(`qlora-step-${i}`);
+      if (elStep) elStep.className = i === 1 ? "step-dot active" : "step-dot";
+    }
+
     try {
       const response = await fetch("/api/models/qlora-step", {
         method: "POST",
@@ -373,18 +462,41 @@ if (btnQlora) {
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      const container = $("qlora-qual-details");
-      if (container) {
-        container.replaceChildren();
-        const d1 = el("div");
-        d1.append(el("span", "Live Ticket: "), el("code", data.ticket_id));
-        const d2 = el("div");
-        d2.append(el("span", "Extracted Adapter: "), el("code", `Flat Tensor shape [${data.adapter_tensor_shape.join(",")}]`));
-        const d3 = el("div");
-        d3.append(el("span", "Status / Tokens: "), el("code", `${data.status} · ${data.processed_tokens} tokens · ${data.elapsed_ms}ms`));
-        container.append(d1, d2, d3);
+      qloraReceipt = data.receipt;
+
+      for (let i = 1; i <= 5; i++) {
+        const elStep = $(`qlora-step-${i}`);
+        if (elStep) elStep.className = "step-dot completed";
       }
+
+      const container = $("qlora-qual-details");
+      if (container && data.workers) {
+        container.replaceChildren();
+        for (const w of data.workers) {
+          const row = el("div", undefined, "step-row");
+          const wId = w.worker_id.replace("demo-qlora-", "");
+          row.append(
+            el("span", `${wId} (${w.shard_index})`, "step-num"),
+            el("span", `Loss: ${w.losses.join(", ")} (${w.sample_count} samples)`, "step-loss"),
+            el("span", `commit: ${w.commitment_root.slice(0, 16)}…`, "step-tok")
+          );
+          container.append(row);
+        }
+      }
+
+      const cryptoBox = $("qlora-crypto-box");
+      if (cryptoBox) {
+        cryptoBox.hidden = false;
+        $("qlora-exec-id").textContent = data.execution_id;
+        $("qlora-param-root").textContent = (data.parameter_root || "").slice(0, 24) + "…";
+        $("qlora-apply-digest").textContent = (data.apply_digest || "").slice(0, 24) + "…";
+        $("qlora-next-adapter").textContent = (data.next_adapter_hash || "").slice(0, 24) + "…";
+      }
+
+      if (btnInspectQlora) btnInspectQlora.hidden = false;
+      if (badge) { badge.textContent = `APPLIED (${data.elapsed_ms}ms)`; badge.className = "chip success"; }
     } catch (err) {
+      if (badge) { badge.textContent = "FAILED"; badge.className = "chip failed"; }
       operationError = err.message;
       renderNotice();
     } finally {

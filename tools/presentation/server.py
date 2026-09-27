@@ -32,6 +32,7 @@ from urllib.parse import urlsplit
 from node_training_view import GET_ROUTES as NODE_GET_ROUTES
 from node_training_view import RUN_ROUTE as NODE_RUN_ROUTE
 from model_examples import (
+    get_execution_receipt,
     get_mnist_summary,
     get_qlora_qualification,
     run_causal_lm_step,
@@ -596,6 +597,7 @@ class Handler(BaseHTTPRequestHandler):
                     "status": "STOPPING" if self.server.application.stopping else "READY",
                     "active_job": self.server.application.active,
                     "mode": "SIMULATED_LOCAL",
+                    "pid": os.getpid(),
                 },
             )
         elif path == "/api/state":
@@ -624,18 +626,18 @@ class Handler(BaseHTTPRequestHandler):
                             "id": "tiny-causal-lm",
                             "name": "TinyCausalLM Pre-training",
                             "type": "Causal Language Modeling",
-                            "framework": "PyTorch CPU float32",
-                            "participants": 1,
-                            "mode": "LIVE_RUN_REPRODUCIBLE",
-                            "tokens": 64,
+                            "framework": "PyTorch CPU (4 Sharded Workers)",
+                            "participants": 4,
+                            "mode": "4_WORKERS_DELTAREDUCE_CONSENSUS",
+                            "tokens": 44,
                         },
                         {
                             "id": "qlora-8gb-adapter",
                             "name": "QLoRA Quantized Adapter (2B Base + 12.5M)",
                             "type": "Quantized PEFT Fine-Tuning",
-                            "framework": "PyTorch / bitsandbytes",
+                            "framework": "PyTorch / bitsandbytes (4 Sharded Partitions)",
                             "participants": 4,
-                            "mode": "RECORDED_8GB_QUALIFIED_AND_LIVE_DELTA",
+                            "mode": "RECORDED_8GB_QUALIFIED_AND_4_WORKER_CONSENSUS",
                             "memory_bound": "<= 8 GB",
                         },
                     ]
@@ -651,6 +653,13 @@ class Handler(BaseHTTPRequestHandler):
                 self.json(200, get_qlora_qualification())
             except Exception as error:
                 self.json(500, {"error": str(error)})
+        elif path.startswith("/api/models/receipt/"):
+            exec_id = path.removeprefix("/api/models/receipt/")
+            receipt = get_execution_receipt(exec_id)
+            if receipt:
+                self.json(200, receipt)
+            else:
+                self.json(404, {"error": "RECEIPT_NOT_FOUND"})
         elif path in {
             "/verification/",
             "/verification/app.js",
@@ -753,7 +762,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if self.path == "/api/models/qlora-step":
             try:
-                self.json(200, run_qlora_live_step())
+                self.json(200, run_qlora_live_step(self.server.application.data))
             except Exception as error:
                 self.json(500, {"error": str(error)})
             return

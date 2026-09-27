@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from unittest.mock import MagicMock
-
-import pytest
 
 from model_examples import (
+    get_execution_receipt,
     get_mnist_summary,
     get_qlora_qualification,
     run_causal_lm_step,
@@ -25,6 +22,8 @@ def test_mnist_summary_contents():
     assert summary["accuracy"]["distributed_percent"] == 82.05
     assert summary["failure_simulation"]["status"] == "RECOVERED_AND_APPLIED"
     assert summary["failure_simulation"]["failed_node_id"] == "validator-04"
+    assert summary["consensus_pipeline"]["aggregation_owner"] == "delta::robust::reduce_parameter_shard"
+    assert len(summary["consensus_pipeline"]["stages"]) == 5
 
 
 def test_qlora_qualification_contents():
@@ -38,22 +37,42 @@ def test_qlora_qualification_contents():
     assert len(qual["training_performance"]["losses"]) == 8
 
 
-def test_qlora_live_step():
-    step = run_qlora_live_step()
-    assert step["status"] == "COMPLETE"
-    assert step["badge"] == "LIVE_STEP_MEASURED"
-    assert step["worker_partition"] == "demo-qlora-worker-01"
-    assert len(step["adapter_tensor_shape"]) > 0
-    assert step["elapsed_ms"] >= 0
+def test_qlora_deltareduce_pipeline():
+    result = run_qlora_live_step()
+    assert result["status"] == "COMPLETE"
+    assert result["badge"] == "CONSENSUS_APPLIED_4_WORKERS"
+    assert result["participant_count"] == 4
+    assert len(result["workers"]) == 4
+    assert len(result["adapter_tensor_shape"]) > 0
+    assert result["parameter_root"].startswith("sha256:")
+    assert result["apply_digest"].startswith("sha256:")
+    assert result["next_adapter_hash"].startswith("sha256:")
+
+    # Verify cryptographic receipt
+    receipt = result["receipt"]
+    assert receipt["consensus_status"] == "APPLIED"
+    assert len(receipt["stages"]) == 5
+    assert receipt["stages"][1]["name"] == "PARAMETER_AGGREGATION"
+    assert receipt["stages"][3]["name"] == "APPLY_CONSENSUS"
+    assert get_execution_receipt(result["execution_id"]) is not None
 
 
-def test_causal_lm_step(tmp_path: Path):
+def test_causal_lm_deltareduce_pipeline(tmp_path: Path):
     result = run_causal_lm_step(tmp_path)
     assert result["model_name"] == "TinyCausalLM"
     assert result["status"] == "COMPLETED"
-    assert result["badge"] == "LIVE_RUN_MEASURED"
+    assert result["badge"] == "CONSENSUS_APPLIED_4_WORKERS"
     assert result["steps_count"] == 4
     assert result["initial_loss"] > 0
     assert result["final_loss"] > 0
-    assert result["total_tokens_processed"] == 64
+    assert result["total_tokens_processed"] > 0
     assert result["checkpoint_manifest"].startswith("sha256:")
+
+    # Verify cryptographic receipt
+    receipt = result["receipt"]
+    assert receipt["consensus_status"] == "APPLIED"
+    assert receipt["participant_count"] == 4
+    assert len(receipt["workers"]) == 4
+    assert receipt["parameter_root"].startswith("sha256:")
+    assert receipt["apply_digest"].startswith("sha256:")
+    assert (tmp_path / "receipts" / f"{result['execution_id']}.json").is_file()
