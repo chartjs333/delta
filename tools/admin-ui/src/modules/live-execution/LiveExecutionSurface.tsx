@@ -185,6 +185,9 @@ export function LiveExecutionSurface({
                 : "Live execution",
             )}
           </h1>
+          <p className="section-purpose-lead">
+            {t("Trigger distributed execution intents against the runtime Controller, monitor live lifecycle stages, and inspect verified terminal receipts.")}
+          </p>
         </div>
         <div
           className="live-mode-panel"
@@ -520,12 +523,34 @@ function LineageRow({
   readonly label: string;
   readonly value?: string;
 }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Fallback
+    }
+  };
+
   return (
     <div>
       <dt>{t(label)}</dt>
       <dd>
         {value ? (
-          <code>{value}</code>
+          <span className="truncated-hash-container" title={value}>
+            <code className="truncated-hash">{value}</code>
+            <button
+              type="button"
+              className="copy-hash-btn"
+              aria-label={copied ? t("Copied") : t("Copy")}
+              title={copied ? t("Copied") : t("Copy full value")}
+              onClick={() => void copy(value)}
+            >
+              {copied ? "✓" : "📋"}
+            </button>
+          </span>
         ) : (
           <span className="muted-value">{t("Absent")}</span>
         )}

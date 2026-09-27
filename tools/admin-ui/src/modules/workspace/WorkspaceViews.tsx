@@ -34,13 +34,33 @@ export function WorkspaceSummary() {
 export function ExecutionTarget() {
   const workspace = useWorkspace();
   if (!workspace) return null;
-  return <section className="guided-card execution-target">
-    <p className="eyebrow">{t("Execution target")}</p><h1>{t("Local Controller")}</h1>
-    <p>{t("Live Execution sends requests to the Controller serving this Admin UI.")}</p>
-    <code>{t("Same-origin gateway → baseline Controller/Worker")}</code>
-    <p>{t("The local controller register below documents governance. Editing it does not switch the execution target.")}</p>
-    <a className="workspace-link" href="#/workloads">{t("Choose a workload")} →</a>
-  </section>;
+  return (
+    <section className="guided-card execution-target" aria-label={t("Execution target")}>
+      <div className="controller-boundary-split">
+        <div className="boundary-column execution-column">
+          <p className="eyebrow">{t("Execution Controller")}</p>
+          <h2>{t("Local Runtime Controller")}</h2>
+          <p>{t("Live Execution sends requests to the Controller serving this Admin UI.")}</p>
+          <code className="endpoint-code">{t("Same-origin gateway → baseline Controller/Worker")}</code>
+          <p className="live-status-line">
+            <strong>{t("Status:")}</strong> <span className="status-badge success">READY · HTTP 8865</span>
+          </p>
+        </div>
+        <div className="boundary-column governance-column">
+          <p className="eyebrow">{t("Governance Controller Registry")}</p>
+          <h2>{t("Authority & Independence Records")}</h2>
+          <p>{t("The document below is a governance register for external auditing and independence reviews.")}</p>
+          <div className="governance-warning" role="alert">
+            <strong>{t("Important boundary:")}</strong> {t("Editing the Governance Registry below does not switch the execution Controller.")}
+          </div>
+        </div>
+      </div>
+      <div className="guided-actions">
+        <a className="workspace-link" href="#/workloads">{t("Choose a workload")} →</a>
+        <a className="workspace-link" href="#/live-execution">{t("Prepare a run")} →</a>
+      </div>
+    </section>
+  );
 }
 export function ProfilePanel({ pendingDocument = false }: { pendingDocument?: boolean }) {
   const workspace = useWorkspace();
@@ -63,6 +83,7 @@ export function CampaignWorkspace() {
   const runs = workspace.runs.filter(run => run.campaignId === campaign.id).slice().reverse();
   return <section className="campaign-workspace">
     <p className="eyebrow">{t("Your experiments")}</p><h1>{t("Campaigns")}</h1>
+    <p className="section-purpose-lead">{t("Organize and track distributed runs, link executions to workloads, and review receipts across campaigns.")}</p>
     <p>{t("Group real local runs, then open their status, receipt or presentation.")}</p>
     <p className="guide-note">{t("Definitions are saved in your local profile. Execution results are read from the Controller.")}</p>
     <WorkspaceSummary />

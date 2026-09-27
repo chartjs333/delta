@@ -11,6 +11,9 @@ export interface ControllerExplorerProps {
 }
 
 function displayValue(value: JsonValue): string {
+  if (value === null || value === undefined || (typeof value === "string" && !value.trim())) {
+    return t("Not provided");
+  }
   if (typeof value === "string") {
     return value;
   }
@@ -93,7 +96,7 @@ export function ControllerExplorer({
                       <span className="raw-status">
                         <InertText
                           value={
-                            typeof status === "string" ? status : "Not provided"
+                            typeof status === "string" && status.trim() !== "" ? status : t("Not provided")
                           }
                         />
                       </span>

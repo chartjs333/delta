@@ -68,15 +68,20 @@ export function PairwiseReviewStep({
           {records.length}
         </span>
       </div>
-      <p>
-        {t(
-          "Record answers and evidence references only. The UI does not calculate an independence conclusion, approval, or protocol result.",
-        )}
-      </p>
+      <div className="pairwise-narrative-box">
+        <p>
+          <strong>{t("Pairwise Review Protocol:")}</strong>{" "}
+          {t("For each pair of controllers (Controller A ↔ Controller B), record the answer to the independence question and provide external evidence.")}
+        </p>
+        <p className="evidence-definition-note">
+          <strong>{t("What is Evidence?")}</strong>{" "}
+          {t("Evidence is an identifier or link to supporting materials (legal registry, governance charter, certification). The UI does not determine independence or calculate authority.")}
+        </p>
+      </div>
 
       {!current ? (
         <div className="empty-state" role="status">
-          {t("Add at least two controllers to create a pairwise record.")}
+          {t("No pairwise reviews recorded. Add at least two controllers to create a pairwise review.")}
         </div>
       ) : (
         <div className="pairwise-wizard">

@@ -368,6 +368,9 @@ export function App({ adapter = defaultAdapter }: AppProps) {
                     <br />
                     {t("Keep authority outside the UI.")}
                   </h1>
+                  <p className="section-purpose-lead">
+                    {t("Manage Governance Controller Registry documents, validate structural schemas, and record external pairwise independence evidence.")}
+                  </p>
                   <p>
                     {t(
                       "Open, edit, validate, and export JSON locally. Nothing here signs, authorizes, computes quorum, or changes Delta state.",

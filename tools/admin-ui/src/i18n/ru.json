@@ -510,5 +510,12 @@
   "Profile needs attention": "Проверьте сохранение профиля",
   "Unsaved changes": "Есть несохранённые изменения",
   "How it works": "Как это работает",
-  "The campaign and workload come from your shared local profile. Controller registry entries document governance; the existing local Controller executes this run.": "Кампания и задача взяты из общего локального профиля. Реестр документирует данные для проверки полномочий; этот запуск выполняет подключённый локальный Controller."
+  "The campaign and workload come from your shared local profile. Controller registry entries document governance; the existing local Controller executes this run.": "Кампания и задача взяты из общего локального профиля. Реестр документирует данные для проверки полномочий; этот запуск выполняет подключённый локальный Controller.",
+  "Not provided": "Не указано",
+  "No pairwise reviews recorded. Add at least two controllers to create a pairwise review.": "Нет записанных попарных проверок. Добавьте не менее двух контроллеров для создания попарной проверки.",
+  "Manage Governance Controller Registry documents, validate structural schemas, and record external pairwise independence evidence.": "Управление документами реестра контроллеров (Governance Registry), проверка структурных схем и фиксация внешних свидетельств независимости.",
+  "Organize and track distributed runs, link executions to workloads, and review receipts across campaigns.": "Организация и отслеживание распределённых запусков, привязка к задачам (workloads) и просмотр чеков (receipts).",
+  "Select and configure model and dataset combinations for campaign runs, or inspect binding receipts against the frozen descriptor catalog.": "Выбор и настройка комбинаций моделей и датасетов для запусков, либо проверка чеков связывания по каталогу дескрипторов.",
+  "Trigger distributed execution intents against the runtime Controller, monitor live lifecycle stages, and inspect verified terminal receipts.": "Отправка намерений на исполнение в runtime Controller, мониторинг этапов жизненного цикла и просмотр проверенных чеков (receipts).",
+  "Copy full value": "Скопировать значение полностью"
 }

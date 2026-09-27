@@ -378,3 +378,53 @@ main { width: min(1440px, 100%); padding: 2rem clamp(1rem, 2.5vw, 3rem) 4rem; }
 main:has(.guided-run) { padding-top: 1.2rem; }
 .guided-intro p { max-width: none; }
 .example-facts { margin-top: 1.2rem; }
+
+/* Section purpose leads across Admin UI */
+.section-purpose-lead {
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #24466b;
+  margin: 0.4rem 0 1rem;
+  max-width: 80ch;
+}
+
+/* Truncated hashes and identifiers with copy button */
+.truncated-hash-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5fa;
+  border: 1px solid #d4e0ee;
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+.truncated-hash {
+  display: inline-block;
+  max-width: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88em;
+  color: #19314f;
+  background: transparent;
+  padding: 0;
+}
+.copy-hash-btn {
+  min-height: auto;
+  padding: 1px 5px;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  border: 1px solid #c8d7e6;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #3b5775;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.copy-hash-btn:hover {
+  background: #e4edf8;
+  border-color: #236ab8;
+}

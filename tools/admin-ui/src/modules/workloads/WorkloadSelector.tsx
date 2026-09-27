@@ -156,6 +156,9 @@ export function WorkloadSelector({
       <header className="workloads-header">
         <p className="eyebrow">{t("Descriptor-Driven Execution Selector")}</p>
         <h1 id="workloads-heading">{t("Workloads")}</h1>
+        <p className="section-purpose-lead">
+          {t("Select and configure model and dataset combinations for campaign runs, or inspect binding receipts against the frozen descriptor catalog.")}
+        </p>
         <p>
           {t(
             "Configure and inspect candidate model and dataset combinations against the frozen descriptor catalog. Pre-flight capabilities are verified from frozen catalog snapshot derived from registry descriptors; execution evidence is strictly isolated.",

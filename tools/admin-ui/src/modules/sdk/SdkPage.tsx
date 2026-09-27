@@ -8,7 +8,7 @@ const root = `https://github.com/chartjs333/delta/blob/${baseline}/`;
 const sections = ["start", "dataset", "model", "register", "reference"] as const;
 type Section = typeof sections[number];
 const en = {
-  title: "Build your first plugin", eyebrow: "DEVELOPER SDK", intro: "Bring your own model and data. Start with a small Python example, understand the contracts, then integrate a reviewed plugin into your deployment.",
+  title: "Build your first plugin", eyebrow: "DEVELOPER SDK", purposeLead: "Learn Python plugin contracts, test local model and dataset providers, and understand integration requirements.", intro: "Bring your own model and data. Start with a small Python example, understand the contracts, then integrate a reviewed plugin into your deployment.",
   start: "Quick start", dataset: "Dataset provider", model: "Model plugin", register: "Register & test", reference: "API reference",
   download: "Download full example", copy: "Copy code", copied: "Copied", failed: "Copy unavailable. Select the code or download the example.", source: "Source contracts", version: "Documented baseline", language: "Descriptions follow your selected language. Python names and code stay identical.",
   overview: "A complete, runnable example", overviewText: "Two classes, one feature and a nearest-centroid classifier. Four points are used for training and four different points for evaluation. The example uses the real registries and ModelPluginRunner on your CPU.",
@@ -28,7 +28,7 @@ const en = {
   boundary: "Local development example", boundaryText: "The SDK page documents existing Python contracts. It does not change protocol semantics or enable Stage C, Feature010 GO or production plugin loading from the browser.", browse: "Browse workload catalog →",
 };
 const ru: typeof en = {
-  title: "Создайте свой первый плагин", eyebrow: "SDK ДЛЯ РАЗРАБОТЧИКОВ", intro: "Подключите свою модель и данные. Начните с небольшого примера на Python, изучите контракты, затем добавьте проверенный плагин в свою сборку.",
+  title: "Создайте свой первый плагин", eyebrow: "SDK ДЛЯ РАЗРАБОТЧИКОВ", purposeLead: "Изучение контрактов Python-плагинов, локальное тестирование моделей и источников данных, подготовка к интеграции.", intro: "Подключите свою модель и данные. Начните с небольшого примера на Python, изучите контракты, затем добавьте проверенный плагин в свою сборку.",
   start: "Быстрый старт", dataset: "Источник данных", model: "Плагин модели", register: "Регистрация и тесты", reference: "Справочник API",
   download: "Скачать полный пример", copy: "Копировать код", copied: "Скопировано", failed: "Копирование недоступно. Выделите код или скачайте пример.", source: "Исходные контракты", version: "Описанная версия", language: "Описания используют выбранный язык. Имена Python и код остаются одинаковыми.",
   overview: "Полный запускаемый пример", overviewText: "Два класса, один признак и классификатор по ближайшему центроиду. Четыре точки используются для обучения, четыре другие — для оценки. Пример использует реальные реестры и ModelPluginRunner на CPU.",
@@ -100,7 +100,7 @@ export function SdkPage() {
     </tbody></table></div>;
   }
   return <article className="sdk-page" aria-labelledby="sdk-heading">
-    <header className="sdk-hero"><div><p className="eyebrow">{copy.eyebrow}</p><h1 id="sdk-heading">{copy.title}</h1><p>{copy.intro}</p></div>
+    <header className="sdk-hero"><div><p className="eyebrow">{copy.eyebrow}</p><h1 id="sdk-heading">{copy.title}</h1><p className="section-purpose-lead">{copy.purposeLead}</p><p>{copy.intro}</p></div>
       <div className="sdk-hero-actions"><span className="sdk-badge">Python 3.12 · CPU</span><button className="primary" type="button" onClick={download}>{copy.download} ↓</button></div></header>
     <nav className="sdk-tabs" aria-label={language === "ru" ? "Разделы SDK" : "SDK sections"}>
       {sections.map(key => <button key={key} type="button" aria-pressed={section === key} onClick={() => setSection(key)}>{copy[key]}</button>)}
