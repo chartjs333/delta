@@ -27,6 +27,48 @@
       <div><span class="kicker" data-t="experiment">THE EXPERIMENT</span><h2 data-t="launchTitle">Can a changed result get through?</h2><p data-t="launchText">One valid path, one repeat calculation, five deliberately invalid inputs. Every run starts a new Python process.</p></div>
       <div class="launch-actions"><button id="run-all" class="button primary" data-t="runAll">Run all 7 checks</button><span id="connection" class="subtle" role="status" data-t="connecting">Connecting…</span></div>
     </section>
+    <section class="simple-flow panel" aria-label="Verification Summary">
+      <div class="flow-header">
+        <div>
+          <span class="kicker" data-t="simpleViewTitle">VERIFICATION NARRATIVE · 20-SECOND OVERVIEW</span>
+          <h2 data-t="simpleFlowHeading">How DeltaReduce Proves Computational Integrity</h2>
+        </div>
+        <span class="flow-badge">✓ ORACLE_VERIFIED</span>
+      </div>
+      <div class="simple-steps">
+        <div class="simple-step">
+          <span class="step-num">1</span>
+          <div>
+            <strong data-t="stepInput">Bound Inputs</strong>
+            <small data-t="stepInputDesc">12 immutable content-addressed artifacts</small>
+          </div>
+        </div>
+        <div class="step-arrow" aria-hidden="true">→</div>
+        <div class="simple-step">
+          <span class="step-num">2</span>
+          <div>
+            <strong data-t="stepCalc">Independent Oracle</strong>
+            <small data-t="stepCalcDesc">Separate Python oracle recalculates exact arithmetic</small>
+          </div>
+        </div>
+        <div class="step-arrow" aria-hidden="true">→</div>
+        <div class="simple-step">
+          <span class="step-num">3</span>
+          <div>
+            <strong data-t="stepExpected">Expected vs Actual</strong>
+            <small data-t="stepExpectedDesc">Valid path accepted · 5 tampering attacks rejected</small>
+          </div>
+        </div>
+        <div class="step-arrow" aria-hidden="true">→</div>
+        <div class="simple-step highlight">
+          <span class="step-num">4</span>
+          <div>
+            <strong data-t="stepVerdict">Integrity Verdict</strong>
+            <small data-t="stepVerdictDesc">Cryptographically checked report digest</small>
+          </div>
+        </div>
+      </div>
+    </section>
     <div class="section-title"><h2 data-t="pipeline">Follow the computation</h2><span id="result-label" class="subtle" data-t="awaiting">Run a check to see actual values</span></div>
     <section class="pipeline" aria-label="Computation">
       <article class="stage"><div class="stage-top"><span class="step">01</span><span data-t="boundInputs">Bound inputs</span><details class="hint"><summary aria-label="Help">?</summary><div data-t="inputHelp">The pinned example contains 12 content-addressed artifacts. Model, optimizer, schema, profile and ticket commitments are checked together.</div></details></div><div class="vector-block"><small data-t="parentModel">Parent model</small><strong id="parent-model">—</strong></div><dl><div><dt data-t="optimizer">Optimizer state</dt><dd id="parent-optimizer">—</dd></div><div><dt data-t="artifacts">Artifacts</dt><dd id="artifact-count">—</dd></div><div><dt data-t="domainsShards">Domains / shards</dt><dd id="domain-shards">—</dd></div></dl></article>

@@ -80,6 +80,36 @@ function reason(code) {
   return t(({ACCEPTED:'reasonAccept',IDENTICAL:'reasonRepeat',ARITHMETIC_RESULT_MISMATCH:'reasonResult',ARTIFACT_BYTES:'reasonBytes',ARTIFACT_MISSING:'reasonMissing',PARENT_MODEL:'reasonParent'})[code] || code);
 }
 
+function setHashWithCopy(id, hash) {
+  const container = $(id);
+  container.replaceChildren();
+  if (!hash || hash === '—') {
+    container.textContent = '—';
+    return;
+  }
+  const isLong = hash.length > 20;
+  const shortText = isLong ? `${hash.slice(0, 10)}…${hash.slice(-8)}` : hash;
+  const code = el('span', shortText, 'hash-val');
+  code.title = hash;
+  const copyBtn = el('button', t('copyHash'), 'copy-btn');
+  copyBtn.type = 'button';
+  copyBtn.setAttribute('aria-label', `${t('copyHash')}: ${hash}`);
+  copyBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(hash).then(() => {
+        copyBtn.textContent = t('copied');
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = t('copyHash');
+          copyBtn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+  });
+  container.append(code, copyBtn);
+}
+
 function renderCases(report) {
   $('cases').replaceChildren();
   for (const [id, title, description] of scenarios) {
@@ -89,20 +119,66 @@ function renderCases(report) {
     const icon = el('span', result ? result.matches_expectation ? '✓' : '!' : '◇', 'case-icon');
     icon.setAttribute('aria-hidden','true');
     const content = el('div', undefined, 'case-content');
-    content.append(el('h3',t(title)),el('p',t(description)));
-    const outcome = el('div', undefined, 'case-result');
-    outcome.append(el('span',result ? t(result.matches_expectation ? result.outcome === 'REJECTED' ? 'rejected' : result.outcome === 'IDENTICAL' ? 'identical' : 'accepted' : 'mismatch') : t('pending')));
+
+    const cardHeader = el('div', undefined, 'case-header');
+    cardHeader.append(el('h3', t(title)));
+
+    let badgeText = t('pending');
+    let badgeClass = 'badge-pending';
     if (result) {
-      const details = el('details'); details.append(el('summary',t('details')),el('p',reason(result.observed)),el('code',result.observed),el('pre',JSON.stringify(result.detail,null,2)));
-      content.append(outcome,details);
-    } else content.append(outcome);
-    const run = el('button',t('run'),'button secondary');
+      if (result.matches_expectation) {
+        if (result.outcome === 'REJECTED') {
+          badgeText = t('passTamperBadge');
+          badgeClass = 'badge-pass-tamper';
+        } else if (result.outcome === 'IDENTICAL') {
+          badgeText = t('passIdenticalBadge');
+          badgeClass = 'badge-pass-valid';
+        } else {
+          badgeText = t('passValidBadge');
+          badgeClass = 'badge-pass-valid';
+        }
+      } else {
+        badgeText = t('verdictFail');
+        badgeClass = 'badge-fail';
+      }
+    }
+    const badge = el('span', badgeText, `case-badge ${badgeClass}`);
+    cardHeader.append(badge);
+    content.append(cardHeader, el('p', t(description), 'case-desc'));
+
+    if (result) {
+      const summaryGrid = el('div', undefined, 'case-summary-grid');
+      const expBox = el('div', undefined, 'summary-box');
+      expBox.append(el('small', t('expectedLabel')), el('b', result.expected));
+      const obsBox = el('div', undefined, 'summary-box');
+      obsBox.append(el('small', t('actualLabel')), el('b', result.observed));
+      const verdictBox = el('div', undefined, `summary-box ${result.matches_expectation ? 'verdict-pass' : 'verdict-fail'}`);
+      verdictBox.append(el('small', t('verdictLabel')), el('b', result.matches_expectation ? t('verdictPass') : t('verdictFail')));
+      summaryGrid.append(expBox, obsBox, verdictBox);
+      content.append(summaryGrid);
+
+      const details = el('details', undefined, 'case-details');
+      details.append(
+        el('summary', t('technicalDetails')),
+        el('p', reason(result.observed), 'reason-text'),
+        el('code', result.observed, 'code-tag'),
+        el('pre', JSON.stringify(result.detail, null, 2))
+      );
+      content.append(details);
+    } else {
+      const outcome = el('div', undefined, 'case-result');
+      outcome.append(el('span', t('pending')));
+      content.append(outcome);
+    }
+
+    const run = el('button', t('run'), 'button secondary');
     run.disabled = busy() || !connected;
-    run.setAttribute('aria-label',`${t('run')}: ${t(title)}`);
-    run.addEventListener('click',()=>start(id));
-    card.append(icon,content,run); $('cases').append(card);
+    run.setAttribute('aria-label', `${t('run')}: ${t(title)}`);
+    run.addEventListener('click', () => start(id));
+    card.append(icon, content, run);
+    $('cases').append(card);
   }
-  $('score').textContent = report ? `${report.cases.filter(item=>item.matches_expectation).length} / ${report.cases.length}` : '0 / 7';
+  $('score').textContent = report ? `${report.cases.filter(item=>item.matches_expectation).length} / ${report.cases.length} PASS` : '0 / 7';
 }
 
 function renderReport(job, report) {
@@ -122,7 +198,9 @@ function renderReport(job, report) {
   set('next-model',vector(computation.apply.next_model)); set('next-optimizer',vector(computation.apply.next_optimizer));
   set('model-change',vector(computation.apply.next_model.map((value,index)=>value-inputs.parent_model[index])));
   set('learning-rate',inputs.profile.learning_rate.join(' / '));
-  set('report-hash',job.result.report_sha256); set('computation-hash',report.computation_sha256); set('source-commit',report.source.source_commit);
+  setHashWithCopy('report-hash', job.result.report_sha256);
+  setHashWithCopy('computation-hash', report.computation_sha256);
+  setHashWithCopy('source-commit', report.source.source_commit);
   $('download').href = `/api/report/${job.id}`; $('download').download = `delta-verification-${job.id}.json`;
 }
 
