@@ -1,0 +1,11 @@
+test_all_original_fields_and_payload_coordinates (test_native_q_header.NativeQHeaderTests.test_all_original_fields_and_payload_coordinates) ... ok
+test_generator_byte_exact (test_native_q_header.NativeQHeaderTests.test_generator_byte_exact) ... ok
+test_header_parsing_is_not_payload_sha_admission (test_native_q_header.NativeQHeaderTests.test_header_parsing_is_not_payload_sha_admission) ... ok
+test_mandatory_build_and_axiom_inventory (test_native_q_header.NativeQHeaderTests.test_mandatory_build_and_axiom_inventory) ... ok
+test_native_declaration_pin_rejects_substitution (test_native_q_header.NativeQHeaderTests.test_native_declaration_pin_rejects_substitution) ... ok
+test_substituted_header_preimage_rejects_before_output (test_native_q_header.NativeQHeaderTests.test_substituted_header_preimage_rejects_before_output) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.060s
+
+OK

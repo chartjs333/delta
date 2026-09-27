@@ -1,3 +1,6 @@
+import DeltaReduce.NativeQJson
+import DeltaReduce.NativeQHeader
+import DeltaReduce.NativeQHeaderVectors
 import DeltaReduce.NativeQBytes
 import DeltaReduce.NativeQBytesVectors
 import DeltaReduce.NativeApplyResult

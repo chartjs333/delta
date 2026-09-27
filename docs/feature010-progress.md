@@ -4203,3 +4203,42 @@ Mandatory44/45/nativeArithmeticRecoveryRefines still missing, Native decimal
 -00/-01 canonicalityFAIL, Phase0unfrozen, makeabsent/notaggregateformal-check.
 DemosHTTP200 withoutrestart, frozenrefs unchanged. No localPASS/GO/guardchange
 or independent attestation. New source-bound semantics: sha256:e54304e6bd3febec04d3eb5f22b8825303025dc2a10e6fae0234eeb7f438d842.
+
+
+## 27 September 2026 — original canonical DRQ1 header bytes in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-q-header-proof.md; evidence
+formal/proposals/evidence/native-q-header.json. NativeQJson/NativeQHeader consume
+actual original header bytes with exact sixteen keys, unsigned canonical decimal
+and unescaped ASCII text. All values are derived, not supplied as a decoded
+header/approval. General lemmas retain ordered fields and exact complete preimage,
+parse/encode roundtrip and uniqueness, numeric ranges and uint64 segment offset.
+The composed join compares header element_count with actual decoded Q length,
+retaining payload relation/two-byte positions and global coordinate bounds.
+Historical semantics/profile IDs and content-ID spelling are not current authority.
+
+All five original004 headers/frames and36coordinates remain exact. Shared primitive
+byte proofs plus general parser/frame lemmas prove all five joined results;
+28small cases include malformed numeric/text/key/constants and the SHA boundary.
+Non-JSON framing countercheck now rejects in the composed header API. Changed Q
+with the original SHA header still passes this Lean layer and fails the existing
+Python PAYLOAD_HASH check. SHA/source graph/expected-header authentication and
+original schema/plan/quanta/weights to LoadedRow/RowsBound/DerivedParameter remain
+OPEN. No native execution/equivalence, machine-memory or general JSON proof.
+Exact native Header declaration is independently source-pinned; original payloads
+and receipts are not rewritten. uint64 offset+count/actual plan intervals remain
+separate checks, not implied by the header's global element_start+count bound.
+
+26general helpers/25definitions plus five type declarations;108component/kernel
+proofs/38fixturedefs,202new named declarations axiom-audited, standard kernel
+axioms only. FullLean1100jobs, three fresh standalone kernels PASS. Final657tooling/
+38oracle/6targeted,Ruff/format/consistency,33legal112illegal PASS;364generatedfiles
+byte-exact. Earlier expensive rcases/whole-header draft was discarded; final pool
+of primitive byte proofs avoids repeating large reductions. Only stable final
+sources/logs count.21TLA/schema/runtime/147native witnesses unchanged;145legacy
+traces only semanticsID. No fresh native/TLC/productionmutants; old bounded scopes
+retained. Mandatory44/45/nativeArithmeticRecoveryRefines missing; native certificate
+-00/-01canonicalityFAIL unaffected, Phase0unfrozen, makeabsent/notaggregateformal-check.
+DemosHTTP200/no restart, frozenrefs unchanged. No localPASS/GO/guardchange or
+independent attestation. Source-bound semantics: sha256:8ac0cf149236e348f94afd4e35aeecdee98245fac419e0ccfe287a281b3a91a3.

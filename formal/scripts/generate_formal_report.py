@@ -1096,7 +1096,8 @@ def main() -> int:
         "Original DRQ1 framing and ordered signed INT16 payloads now have a "
         "general Lean decoder relation, length/range/position and frame "
         "roundtrip proofs. Five pinned original004 blocks retain all36 "
-        "coordinates and exact header/payload bytes. The header remains opaque; "
+        "coordinates and exact header/payload bytes. In that framing-only layer "
+        "the header remains opaque; "
         "JSON/canonical field interpretation, payload SHA and source authentication "
         "are NOT established. Kernel counterchecks accept non-JSON header bytes "
         "and a changed payload with an unchanged original SHA header, showing "
@@ -1104,6 +1105,23 @@ def main() -> int:
         "checker rejects the hash mismatch. Connecting decoded original vectors "
         "to source metadata, NativeBinding.LoadedRow and general admission/recovery "
         "remains mandatory. No native execution, runtime change, local PASS or GO."
+    )
+    report["coverage"]["unresolved"].append(
+        "The subsequent mandatory Lean NativeQJson/NativeQHeader decoder now "
+        "parses actual original004 canonical header bytes with all16 fixed "
+        "fields, unsigned decimal/token/content-ID syntax and original "
+        "semantics/profile checks. General proofs retain ordered fields and "
+        "exact preimages, numeric bounds, roundtrip/uniqueness and join the "
+        "parsed count to actual decoded INT16 vectors. All five original "
+        "blocks/36coordinates compose in the kernel; non-JSON headers reject. "
+        "This is fixed-schema unescaped ASCII JSON, not a general JSON or "
+        "native machine-memory proof. Payload SHA, leaf/manifest identity, "
+        "independent expected-header/source/exporter authority, plan/quantum/"
+        "weights and LoadedRow/RowsBound/DerivedParameter composition remain "
+        "OPEN. A changed payload with its old SHA header still passes this "
+        "Lean join and fails the separate Python source checker. No full "
+        "native recovery theorem, native execution, runtime change, GO or "
+        "independent attestation is claimed."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
