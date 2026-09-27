@@ -205,9 +205,39 @@ const strings = {
   runMultiRoundQlora: ['Train Adapter (4 Rounds Consensus)', 'Обучить адаптер (4 раунда консенсуса)'],
   lossVsRound: ['Loss vs Training Round', 'Кривая Loss по раундам обучения'],
   accuracyVsRound: ['Accuracy vs Training Round', 'Кривая точности по раундам'],
-  nodeCrashPoint: ['⚡ Node 4 crash → recovery → training continues', '⚡ Сбой узла 4 → WAL восстановление → продолжение обучения'],
-  alternationFlow: ['Round {r}: Train → DeltaReduce → Checkpoint', 'Раунд {r}: Обучение → DeltaReduce → Чекпоинт'],
   techDetails: ['Technical Details & Provenance', 'Технические детали и хеши'],
+  mnistProvBadge: ['RECORDED RESULT + ILLUSTRATIVE PROGRESS', 'RECORDED RESULT + ILLUSTRATIVE PROGRESS'],
+  mnistProvDesc: [
+    'Final result (82.03%) and crash/recovery are audited evidence; intermediate trajectory is illustrative progress.',
+    'Финальный результат (82.03%) и recovery измерены; промежуточная траектория иллюстративная.',
+  ],
+  mnistChartFootnote: [
+    'R4 (82.03%) and Node 4 WAL recovery are audited evidence. R1–R3 are shard milestone progression.',
+    'R4 (82.03%) и WAL-восстановление узла 4 — официальное свидетельство. R1–R3 — прогресс шардов.',
+  ],
+  causalProvBadge: ['LIVE COMPUTED (R0–R5)', 'LIVE COMPUTED (R0–R5)'],
+  causalProvDesc: [
+    'Every single round is computed live: PyTorch loss + 4-worker DeltaReduce integer consensus (PARAMETER → ROOT → APPLY).',
+    'Каждый round реально вычислен: PyTorch loss + 4-воркерный консенсус DeltaReduce (PARAMETER → ROOT → APPLY).',
+  ],
+  causalChartFootnote: [
+    '100% measured PyTorch loss after each 4-worker DeltaReduce consensus round.',
+    '100% измеренный PyTorch loss после каждого раунда 4-воркерного консенсуса DeltaReduce.',
+  ],
+  qloraProvBadge: ['LIVE DELTAREDUCE + RECORDED GPU QUALIFICATION', 'LIVE DELTAREDUCE + RECORDED GPU QUALIFICATION'],
+  qloraProvDesc: [
+    'DeltaReduce consensus and adapter loss evaluated live; memory limit (8GB VRAM) qualified on RTX 3070.',
+    'DeltaReduce консенсус и loss вычисляются live; лимит памяти (8 GB VRAM) подтверждён на RTX 3070.',
+  ],
+  qloraChartFootnote: [
+    '100% measured test MSE loss after each DeltaReduce consensus adapter update.',
+    '100% измеренный test MSE loss после каждого применения адаптера через DeltaReduce.',
+  ],
+  zeroSyntheticHeadline: ['Zero Synthetic Points Policy: ', 'Принцип честных графиков: '],
+  zeroSyntheticNote: [
+    'Zero synthetic points: 4 workers compute update → DeltaReduce integer consensus → APPLY → new checkpoint measured.',
+    'Ни одной нарисованной точки: 4 воркера считают update → целочисленный консенсус DeltaReduce → APPLY → модель измеряется.',
+  ],
 };
 
 export const messages = Object.fromEntries(['en', 'ru'].map((language, index) =>

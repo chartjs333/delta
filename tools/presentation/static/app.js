@@ -1,4 +1,4 @@
-import {locales, supportedLanguage, translate, translateLog} from './i18n.mjs?v=consensus4w';
+import {locales, supportedLanguage, translate, translateLog} from './i18n.mjs?v=provenanceHonest';
 
 const $ = (id) => document.getElementById(id);
 const pages = ['overview', 'models', 'runs', 'readiness'];
@@ -475,8 +475,8 @@ function initModelCharts() {
   if (qloraChartEl) {
     drawSvgLineChart(qloraChartEl, {
       metric: "loss",
-      labels: ["R1", "R2", "R3", "R4"],
-      values: [1.5234, 1.4784, 1.4334, 1.3884]
+      labels: ["R0", "R1", "R2", "R3", "R4"],
+      values: [1.1375, 1.1360, 1.1312, 1.1143, 1.0449]
     }, { color: "#c084fc" });
   }
 }

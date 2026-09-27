@@ -119,4 +119,95 @@
 .chart-wrapper { position: relative; width: 100%; height: 130px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(51, 65, 85, 0.6); border-radius: 6px; overflow: hidden; }
 .model-chart { width: 100%; height: 100%; display: block; }
 
+/* Provenance & Evidence Classification Banners */
+.provenance-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  transition: all 0.2s ease;
+}
+.provenance-banner.live {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-left: 3px solid #22c55e;
+}
+.provenance-banner.live .prov-tag {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+}
+.provenance-banner.live .prov-desc {
+  color: #15803d;
+  font-size: 11px;
+}
+.provenance-banner.recorded {
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-left: 3px solid #0284c7;
+}
+.provenance-banner.recorded .prov-tag {
+  color: #0284c7;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+}
+.provenance-banner.recorded .prov-desc {
+  color: #0369a1;
+  font-size: 11px;
+}
+.provenance-banner.live-measured {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-left: 3px solid #9333ea;
+}
+.provenance-banner.live-measured .prov-tag {
+  color: #7e22ce;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+}
+.provenance-banner.live-measured .prov-desc {
+  color: #6b21a8;
+  font-size: 11px;
+}
+
+.chart-footnote {
+  font-size: 10.5px;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 4px 6px;
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 4px;
+  border-left: 2px solid #475569;
+}
+
+.zero-synthetic-callout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.5;
+}
+.zero-synthetic-callout strong {
+  color: #0f172a;
+}
+.zero-synthetic-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+
 

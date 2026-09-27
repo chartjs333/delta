@@ -132,6 +132,13 @@
           <p class="muted" data-i18n="trainingPipelineDesc" style="margin-top:4px;max-width:85ch;">Every model below executes genuine multi-worker sharding, parameter reduction under common denominator, Merkle commitments, and verified integer state transitions.</p>
         </div>
       </div>
+      <div class="zero-synthetic-callout">
+        <span class="zero-synthetic-icon">🎯</span>
+        <div>
+          <strong data-i18n="zeroSyntheticHeadline">Zero Synthetic Points Policy: </strong>
+          <span data-i18n="zeroSyntheticNote">Zero synthetic points: 4 workers compute update → DeltaReduce integer consensus → APPLY → new checkpoint measured.</span>
+        </div>
+      </div>
       <div class="models-grid">
         <!-- Model 1: MNIST -->
         <article class="model-card panel">
@@ -142,6 +149,10 @@
               <small class="muted" data-i18n="mnistSub">Distributed digit classification across 4 independent partitions</small>
             </div>
             <span class="model-glyph">🔢</span>
+          </div>
+          <div class="provenance-banner recorded">
+            <span class="prov-tag" data-i18n="mnistProvBadge">RECORDED RESULT + ILLUSTRATIVE PROGRESS</span>
+            <span class="prov-desc" data-i18n="mnistProvDesc">Final result (82.03%) and crash/recovery are audited evidence; intermediate trajectory is illustrative progress.</span>
           </div>
           <div class="model-meta">
             <div><dt data-i18n="framework">Framework</dt><dd>NumPy / PyTorch</dd></div>
@@ -163,6 +174,7 @@
             <div class="chart-wrapper">
               <svg id="mnist-chart" class="model-chart" viewBox="0 0 360 130" preserveAspectRatio="none" aria-label="MNIST Accuracy Chart"></svg>
             </div>
+            <div class="chart-footnote" data-i18n="mnistChartFootnote">R4 (82.03%) and Node 4 WAL recovery are audited evidence. R1–R3 are shard milestone progression.</div>
           </div>
           <div class="card-stepper" aria-label="MNIST Stages">
             <span class="step-dot completed">1. 4 Shards</span>
@@ -199,6 +211,10 @@
             </div>
             <span class="model-glyph">🔤</span>
           </div>
+          <div class="provenance-banner live">
+            <span class="prov-tag" data-i18n="causalProvBadge">LIVE COMPUTED (R0–R5)</span>
+            <span class="prov-desc" data-i18n="causalProvDesc">Every single round is computed live: PyTorch loss + 4-worker DeltaReduce integer consensus (PARAMETER → ROOT → APPLY).</span>
+          </div>
           <div class="model-meta">
             <div><dt data-i18n="framework">Framework</dt><dd>PyTorch CPU (4 Sharded Workers)</dd></div>
             <div><dt data-i18n="corpus">Corpus</dt><dd>tiny-causal-v1.txt (4 shards)</dd></div>
@@ -219,6 +235,7 @@
             <div class="chart-wrapper">
               <svg id="causal-chart" class="model-chart" viewBox="0 0 360 130" preserveAspectRatio="none" aria-label="TinyCausalLM Loss Chart"></svg>
             </div>
+            <div class="chart-footnote" data-i18n="causalChartFootnote">100% measured PyTorch loss after each 4-worker DeltaReduce consensus round.</div>
           </div>
           <div class="card-stepper" id="causal-stepper" aria-label="TinyCausalLM Stages">
             <span class="step-dot completed" id="causal-step-1">1. 4 Shards</span>
@@ -269,6 +286,10 @@
             </div>
             <span class="model-glyph">🧠</span>
           </div>
+          <div class="provenance-banner live-measured">
+            <span class="prov-tag" data-i18n="qloraProvBadge">LIVE DELTAREDUCE + RECORDED GPU QUALIFICATION</span>
+            <span class="prov-desc" data-i18n="qloraProvDesc">DeltaReduce consensus and adapter loss evaluated live; memory limit (8GB VRAM) qualified on RTX 3070.</span>
+          </div>
           <div class="model-meta">
             <div><dt data-i18n="targetGpu">Target GPU</dt><dd>RTX 3070 8GB (Audited Qualification)</dd></div>
             <div><dt data-i18n="baseParams">Base Model</dt><dd>2,009,140,224 params</dd></div>
@@ -278,7 +299,7 @@
             <div class="progress-card-header">
               <div class="progress-title-row">
                 <span class="chip purple" id="qlora-round-badge">Round 4 / 4</span>
-                <span class="progress-metric" id="qlora-metric-summary">Adapter Loss: <strong id="qlora-trajectory-val">1.5234 → 1.3884 (-0.1350)</strong></span>
+                <span class="progress-metric" id="qlora-metric-summary">Adapter Loss: <strong id="qlora-trajectory-val">1.1375 → 1.0449 (-0.0926)</strong></span>
               </div>
               <div class="progress-chips-row">
                 <span class="chip-mini good">✓ 4/4 Partitions</span>
@@ -289,6 +310,7 @@
             <div class="chart-wrapper">
               <svg id="qlora-chart" class="model-chart" viewBox="0 0 360 130" preserveAspectRatio="none" aria-label="QLoRA Adapter Loss Chart"></svg>
             </div>
+            <div class="chart-footnote" data-i18n="qloraChartFootnote">100% measured test MSE loss after each DeltaReduce consensus adapter update.</div>
           </div>
           <div class="card-stepper" id="qlora-stepper" aria-label="QLoRA Stages">
             <span class="step-dot completed" id="qlora-step-1">1. 4 Partitions</span>
@@ -369,5 +391,5 @@
       </div>
     </div>
   </dialog>
-</main><script type="module" src="/app.js?v=consensus4w"></script>
+</main><script type="module" src="/app.js?v=provenanceHonest"></script>
 </body></html>

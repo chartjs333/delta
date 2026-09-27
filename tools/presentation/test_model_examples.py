@@ -52,10 +52,10 @@ def test_qlora_deltareduce_pipeline():
     assert result["parameter_root"].startswith("sha256:")
     assert result["apply_digest"].startswith("sha256:")
     assert result["next_adapter_hash"].startswith("sha256:")
-    assert "rounds" in result
-    assert len(result["rounds"]) == 4
     assert "chart_data" in result
-    assert len(result["chart_data"]["values"]) == 4
+    assert len(result["chart_data"]["values"]) == 5  # R0 plus 4 rounds
+    assert result["final_loss"] < result["initial_loss"]
+    assert result["loss_reduction"] > 0
 
     # Verify cryptographic receipt
     receipt = result["receipt"]

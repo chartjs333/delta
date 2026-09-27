@@ -494,15 +494,19 @@ def run_qlora_deltareduce(
     started = time.perf_counter()
     plugin = QloraModelPlugin()
     provider = TinyQloraDatasetProvider()
+    cur_model = plugin.create_model()
 
     schema_id = "schema-qlora-adapter-v1"
     adapter_len = 8
     parent_int = tuple(0 for _ in range(adapter_len))
     parent_mom = tuple(0 for _ in range(adapter_len))
 
+    initial_eval = plugin.evaluate(cur_model)
+    initial_loss = round(float(initial_eval.loss), 4)
+
     rounds_records: list[dict[str, Any]] = []
-    chart_losses: list[float] = []
-    chart_labels: list[str] = []
+    chart_losses: list[float] = [initial_loss]
+    chart_labels: list[str] = ["R0"]
     latest_worker_records: list[dict[str, Any]] = []
     total_samples_all = 0
     final_param_root = ""
@@ -519,7 +523,11 @@ def run_qlora_deltareduce(
             part = provider.training_partition(partition_id)
             total_samples_all += len(part.samples)
             ticket_id = f"ticket-r{r_idx}-{partition_id}-{uuid.uuid4().hex[:4]}"
-            res = plugin.train_ticket(ticket_id=ticket_id, data=(part.samples, part.targets))
+            res = plugin.train_ticket(
+                ticket_id=ticket_id,
+                data=(part.samples, part.targets),
+                parent_model=cur_model,
+            )
 
             t = torch.from_numpy(res.tensors["qlora.adapter.flat"]).float()
             adapter_len = t.numel()
@@ -533,9 +541,8 @@ def run_qlora_deltareduce(
 
             q_vals = contrib.ordered_shards[0].q_values
             worker_contributions.append((partition_id, (1, 4), q_vals))
-            raw_loss = float(res.metadata.get("losses", [1.5234])[-1])
-            # Account for learning progress across rounds
-            w_loss = round(max(0.8, raw_loss - (r_idx - 1) * 0.045), 4)
+            raw_loss = float(res.metadata.get("losses", [1.0])[-1])
+            w_loss = round(raw_loss, 4)
             round_losses.append(w_loss)
 
             round_worker_records.append({
@@ -591,6 +598,11 @@ def run_qlora_deltareduce(
         next_adapter_hash = apply_result["next_model_hash"]
         next_optimizer_hash = apply_result["next_optimizer_hash"]
 
+        # Materialize consensus adapter state and evaluate actual test loss
+        cur_model = plugin.load_applied_checkpoint(parent_int)
+        round_eval = plugin.evaluate(cur_model)
+        round_loss = round(float(round_eval.loss), 4)
+
         apply_digest = "sha256:" + hashlib.sha256(
             f"apply:{schema_id}:{r_idx}:{parameter_root}:{next_adapter_hash}:{next_optimizer_hash}".encode("ascii")
         ).hexdigest()
@@ -600,13 +612,12 @@ def run_qlora_deltareduce(
         final_adapter_hash = next_adapter_hash
         final_optimizer_hash = next_optimizer_hash
 
-        avg_loss = round(sum(round_losses) / len(round_losses), 4)
-        chart_losses.append(avg_loss)
+        chart_losses.append(round_loss)
         chart_labels.append(f"R{r_idx}")
 
         rounds_records.append({
             "round": r_idx,
-            "adapter_loss": avg_loss,
+            "adapter_loss": round_loss,
             "workers": round_worker_records,
             "parameter_root": parameter_root,
             "apply_digest": apply_digest,
