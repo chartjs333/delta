@@ -1,3 +1,5 @@
+import DeltaReduce.NativeVectorCorpusVectors
+import DeltaReduce.NativeVectorSourceVectors
 import DeltaReduce.NativeSourceRefusal
 import DeltaReduce.NativePlanSourceVectors
 import DeltaReduce.NativeVectorLayout

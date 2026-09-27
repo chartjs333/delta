@@ -134,6 +134,23 @@ def bind (sha : Bytes → Bytes) (policyRaw stateRaw apcId configRaw proofRaw pr
   let rows ← loadRows sha configRaw proofRaw profileRaw p permission p.coefficients inputs
   some ⟨p,rows⟩
 
+theorem bindFromSources {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs p rows}
+    (plan : NativePlanCoefficients.bind sha policyRaw stateRaw apcId configRaw proofRaw profileRaw = some p)
+    (loaded : loadRows sha configRaw proofRaw profileRaw p permission p.coefficients inputs = some rows) :
+    bind sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs = some ⟨p,rows⟩ := by
+  simp only [bind,plan,loaded,Bind.bind,Option.bind]
+
+theorem bindFromAbsentRows {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs p}
+    (plan : NativePlanCoefficients.bind sha policyRaw stateRaw apcId configRaw proofRaw profileRaw = some p)
+    (absent : loadRows sha configRaw proofRaw profileRaw p permission p.coefficients inputs = none) :
+    bind sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs = none := by
+  simp only [bind,plan,absent,Bind.bind,Option.bind]
+
+theorem extraSingleInput {sha config proof profile p permission t i extra row}
+    (first : loadRow sha config proof profile p permission t i = some row) :
+    loadRows sha config proof profile p permission [t] [i,extra] = none := by
+  simp only [loadRows,first,Bind.bind,Option.bind]
+
 theorem boundSource {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs b}
     (h : bind sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs = some b) :
     NativePlanCoefficients.bind sha policyRaw stateRaw apcId configRaw proofRaw profileRaw = some b.plan ∧

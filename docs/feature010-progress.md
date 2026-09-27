@@ -4722,3 +4722,48 @@ phase/QC/send/delivery/journal/current/crash/unknown/torn/repair/WAL relation, n
 decimal compatibility, amendment freeze, offline reproduction and independent
 review remain required. No helper discharges nativeArithmeticRecoveryRefines.
 Source-bound semantics: sha256:c91af44224ba718bf965120bcf580b91a580b9cb74be2fdb057fd6ed96b9149d.
+
+
+## 27 September 2026 — synthetic raw source to complete original Q arithmetic
+
+T044/T048/T053/T054/T056/T057. Formal proposal; NO_GO. Scope
+formal/proposals/native-vector-source-proof.md; evidence
+formal/proposals/evidence/native-vector-source.json. A separately versioned
+synthetic4598-byte policy and674-byte state now instantiate actual source section,
+membership, accumulator, complete Q corpus and NativeVectorContext.bind checks.
+The original004 schema/scale/plan/config/proof/profile/manifest/five DRQ1 preimages
+remain unchanged. New certificates/state use their actual newly computed IDs;
+original008's absent proof is not repaired. All36 coordinates across five vector
+reductions are computed from the loaded source rows. Missing/extra input lists
+reject at the raw corpus entry. Python negatives reject corrupt Q or missing proof.
+
+Two new modules and four general composition helpers:222 component/helper/kernel theorems and93 definitions,315 explicitly
+axiom-audited names, onlypropext/Quot.sound/Classical.choice. Forty-two new policy
+encoding lemmas reuse prior components. Thirty exact-preimage SHA samples share
+one synthetic adapter; no SHA implementation or exporter authentication is proved.
+Full Lean1135jobs/fourfreshkernels,723tooling/38oracle/6targeted,33legal112illegal,
+Ruff/format/consistency and387file byte-exact regeneration PASS. Only final stable
+source logs count; resource-heavy draft reductions were superseded by component
+proofs.21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.
+No newTLC/productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines missing;
+native decimal -00/-01FAIL,Phase0unfrozen,make absent/noaggregateformal-check.
+Three demosHTTP200withoutrestart/frozenrefsunchanged. No nativeguard/localPASS/GO.
+
+The nonempty candidate required by the policy grammar is explicitly STRUCTURAL-ONLY,
+with an opaque body ID and empty parents; it is NOT admitted. The synthetic inner
+state root and signer/seed/norm/availability observations remain primitive and
+unauthenticated. Parent checkpoint equality does not supply current vectors, and
+worker quantization profile is distinct from certificate APPLY profile. The new
+full-run equation reaches the remaining draft join but does not instantiate a
+complete draft Binding or successful NativeVectorJoin.run.
+
+Next: compose source-derived artifact store/RowsBound/DerivedParameter through
+the remaining draft join, while deriving/checking the full source configuration,
+vote context and current/model/optimizer/APPLY relation. Avoid another isolated
+numeric example or re-proving absent008 proof. Use component equations, not giant
+decide over dependent complete contexts. Missing original base/current/proof
+captures stay explicit. General codecs/hash/exporter, full-batch resources,
+arbitrary snapshots, phase/QC/send/delivery/journal/current/crash/unknown/torn/
+repair/physical-WAL refinement, decimal compatibility, amendment freeze, clean
+offline reproduction and independent review remain mandatory. No helper discharges
+nativeArithmeticRecoveryRefines. Source-bound semantics: sha256:9a37056ab6320dbd4f2c29a175d4b690bcac0bd90de4721ed027d35ee21b7e64.

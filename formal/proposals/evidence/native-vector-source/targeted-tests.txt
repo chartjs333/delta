@@ -1,0 +1,11 @@
+test_corrupt_original_q_and_missing_proof_reject (test_native_vector_source.NativeVectorSourceTests.test_corrupt_original_q_and_missing_proof_reject) ... ok
+test_missing_or_duplicate_q_observations_reject (test_native_vector_source.NativeVectorSourceTests.test_missing_or_duplicate_q_observations_reject) ... ok
+test_no_candidate_or_current_admission_claim (test_native_vector_source.NativeVectorSourceTests.test_no_candidate_or_current_admission_claim) ... ok
+test_original_artifacts_unchanged_and_original008_not_repaired (test_native_vector_source.NativeVectorSourceTests.test_original_artifacts_unchanged_and_original008_not_repaired) ... ok
+test_raw_policy_state_and_every_parent_match (test_native_vector_source.NativeVectorSourceTests.test_raw_policy_state_and_every_parent_match) ... ok
+test_reproduction_and_mandatory_axiom_inventory (test_native_vector_source.NativeVectorSourceTests.test_reproduction_and_mandatory_axiom_inventory) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 3.768s
+
+OK

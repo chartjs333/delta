@@ -1,3 +1,5 @@
+import DeltaReduce.NativeVectorCorpusVectors
+import DeltaReduce.NativeVectorSourceVectors
 import DeltaReduce.NativeSourceRefusal
 import DeltaReduce.NativePlanSourceVectors
 import DeltaReduce.NativeVectorLayout
@@ -11819,3 +11821,633 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativePlanSourceVectors.rawJoinRejectsSubstitution
 #print axioms DeltaReduce.NativePlanSourceVectors.missingProofRejected
 #print axioms DeltaReduce.NativePlanSourceVectors.rawJoinRejectsMissing
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.context
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.committee
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscBody
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.isc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.norm
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ec
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscTree
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscParsed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscValid
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscId
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscJSON
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscJSONExact
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normTree
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normParsed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normValid
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normId
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normJSON
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normJSONExact
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedTree
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedParsed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedValid
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedId
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedJSON
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedJSONExact
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecTree
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecParsed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecValid
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecId
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecJSON
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecJSONExact
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcTree
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcParsed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcValid
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcId
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcJSON
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcJSONExact
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecFinalTree
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.tree
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.snapshot
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.candidate
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.policy
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.extracted
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding0
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding1
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding2
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding3
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding4
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding5
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding6
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding7
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding8
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding9
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding10
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding11
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding12
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding13
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding14
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding15
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding16
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding17
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding18
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding19
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding20
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding21
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding22
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding23
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding24
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding25
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding26
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding27
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding28
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding29
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding30
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding31
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding32
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding33
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding34
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding35
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding36
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding37
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding38
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding39
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding40
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoding41
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.policyBody
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.policyRaw
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.encoded
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.canonical
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.policyLength
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.policyParsed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.stateWire
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.state
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.stateRaw
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.stateValid
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.stateEncoded
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.stateParsed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.snapshotId
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preisc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthisc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.prenorm
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthnorm
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preseed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthseed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preec
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthec
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preapc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthapc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preiscBody
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthiscBody
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.prestate
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthstate
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preconfig
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthconfig
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preproof
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthproof
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.preprofile
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthprofile
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest0
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest0
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest1
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest1
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest2
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest2
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest3
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest3
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest4
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest4
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest5
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest5
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest6
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest6
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest7
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest7
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest8
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest8
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest9
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest9
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest10
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest10
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest11
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest11
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest12
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest12
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest13
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest13
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest14
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest14
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest15
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest15
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest16
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest16
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest17
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest17
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest18
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest18
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.premanifest19
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.lengthmanifest19
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.sha
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashisc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashnorm
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashseed
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashec
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashapc
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashiscBody
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashstate
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashconfig
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashproof
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashprofile
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest0
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest1
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest2
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest3
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest4
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest5
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest6
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest7
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest8
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest9
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest10
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest11
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest12
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest13
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest14
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest15
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest16
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest17
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest18
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.hashmanifest19
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.contentFromHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.contentAdapter
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscBodyId
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscBodyHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.stateHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscResult
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normResult
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedResult
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecResult
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcResult
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.seedChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.apcChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscSection
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.iscSectionChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normSection
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.normSectionChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecSection
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.ecSectionChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.planSection
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.planSectionChecked
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.rawPlanPrepared
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.sourceRow
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.members
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.derivedMembers
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.rawMembersPrepared
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.configHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.proofHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.profileHash
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.accumulatorLoaded
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.coefficients
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.rawCoefficients
+
+#print axioms DeltaReduce.NativeVectorSourceVectors.original008NotRepaired
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked0
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked1
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked2
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked3
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked4
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked5
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked6
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked7
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked8
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked9
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked10
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked11
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked12
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked13
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked14
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked15
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked16
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked17
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked18
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.hashChecked19
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.pairChecked14
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.pairChecked15
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.pairChecked16
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.pairChecked17
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.pairChecked18
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.pairChecked19
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.levelChecked0
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.levelChecked1
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.levelChecked2
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.planBound
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.boundPlan
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.scaleQ0
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.leafLinks0
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.scaleQ1
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.leafLinks1
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.scaleQ2
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.leafLinks2
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.scaleQ3
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.leafLinks3
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.scaleQ4
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.leafLinks4
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.raws
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.blocks
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.corpusChecked
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.manifestLinks
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.rootChecked
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.bound
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.wholeManifest
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.input
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.available
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.availableLoaded
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.row
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.rowLoaded
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.corpusBound
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.corpusLoaded
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.vectorContext
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.contextLoaded
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.completeRawInputs
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.originalCurrentParentOnly
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.candidateRetainedOnly
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.missingInputsRejected
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.extraInputsRejected
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.result0
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.computed0
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.reduced0
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.result1
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.computed1
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.reduced1
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.result2
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.computed2
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.reduced2
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.result3
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.computed3
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.reduced3
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.result4
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.computed4
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.reduced4
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.originalCoefficientCoordinate
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.allCoordinatesRetained
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.sourceEntryReachesDraftJoin
+
+#print axioms DeltaReduce.NativeVectorCorpusVectors.sourceHash
+
+#print axioms DeltaReduce.NativePlanQCorpus.bindFromSources
+
+#print axioms DeltaReduce.NativePlanQCorpus.bindFromAbsentRows
+
+#print axioms DeltaReduce.NativePlanQCorpus.extraSingleInput
+
+#print axioms DeltaReduce.NativeVectorJoin.runFromContext

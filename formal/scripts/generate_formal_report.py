@@ -1254,6 +1254,21 @@ def main() -> int:
         "but not checked by plan preparation. No source authentication, runtime "
         "guard change, local PASS, GO or independent attestation is claimed."
     )
+    report["coverage"]["unresolved"].append(
+        "A separately versioned SYNTHETIC raw policy/state now composes actual "
+        "ISC/norm/seed/EC/APC sections, original004 proof/config/profile and the "
+        "complete five-block Q corpus through NativeVectorContext.bind. All36 "
+        "coordinates are checked from loaded source rows. Thirty finite SHA "
+        "samples, inner root, availability and certificate metadata remain "
+        "synthetic/unauthenticated. The grammar-required STRUCTURAL-ONLY "
+        "candidate is NOT admitted; its body/parents are not supplied by this "
+        "source-section proof. Original008 proof is not repaired. The full "
+        "NativeVectorJoin.run source prefix reaches the remaining draft join, "
+        "but no complete draft Binding/current/APPLY/recovery execution is "
+        "instantiated. General codecs/hash/exporter, phase/QC/journal/WAL, "
+        "arbitrary snapshots and nativeArithmeticRecoveryRefines remain OPEN. "
+        "No runtime change, native execution, local PASS, GO or attestation."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

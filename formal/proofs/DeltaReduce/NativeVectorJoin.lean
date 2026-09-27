@@ -122,4 +122,13 @@ theorem runSource {codec store trust anchor} {binding : Binding codec trust anch
   cases Option.some.inj last
   exact hb
 
+theorem runFromContext {codec store trust anchor} (binding : Binding codec trust anchor store)
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs b}
+    (loaded : NativeVectorContext.bind sha policyRaw stateRaw apcId configRaw proofRaw profileRaw
+      permission inputs = some b) (domain : Bytes) (index : Nat) :
+    run binding sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs domain index =
+      (join binding b domain index).map (fun j => ⟨b,j⟩) := by
+  simp only [run,loaded,Bind.bind,Option.bind]
+  cases join binding b domain index <;> rfl
+
 end DeltaReduce.NativeVectorJoin
