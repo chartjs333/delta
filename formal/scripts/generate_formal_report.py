@@ -975,6 +975,22 @@ def main() -> int:
         "public refinement, decimal compatibility, freeze/offline/independent review "
         "remain open. No native guard change, local PASS or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeWholeReplay adds a closed computed whole-policy mode to the existing "
+        "mixed WAL fold. Startup and each recovered vote use actual decoded original "
+        "policy/state and every candidate; runtime tick/invalidation/global sequence "
+        "come from the executed prefix. The complete original CONFIG/ISC policy with "
+        "nonempty ISC body, original ISC1/freeze2 records, caches and exact historical "
+        "vote/command retries now compose in Lean using eleven finite SHA samples. "
+        "Duplicates, altered policy IDs, reordered positions and invalidated fresh "
+        "votes reject. Current PARAMETER/APPLY guard remains; this cannot discharge "
+        "arithmetic recovery by vacuity. The byte scan composition is conditional on "
+        "its computed scan and does not authenticate physical completeness/durability. "
+        "No fresh native/TLC/mutant run. CurrentPointerCommand, source arithmetic, "
+        "full public/native refinement, unknown/repair/arbitrary snapshots, physical "
+        "WAL, SHA/exporter/signatures, decimal compatibility, freeze/offline and "
+        "independent reviews remain open. No local PASS, runtime change or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

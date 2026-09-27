@@ -1,8 +1,9 @@
 import DeltaReduce.NativeCommandReplay
 import DeltaReduce.NativeReplayAdmission
 
-/-! One computed journal fold with closed CONFIG-only or CONFIG/ISC proposal modes.
-The former retains its singleton/empty-graph scope; the latter checks the whole original policy. The ordered cache represents
+/-! One computed journal fold with closed CONFIG-only, CONFIG/ISC proposal and
+complete original policy modes. The older modes retain their restricted domains;
+whole invokes NativeSelectedVote and retains the CURRENT arithmetic STOP. The ordered cache represents
 journal order, not the native sorted VoteJournal storage layout. Byte scans and
 typed snapshots are observations, not authenticated physical durability. -/
 namespace DeltaReduce.NativeConfigReplay

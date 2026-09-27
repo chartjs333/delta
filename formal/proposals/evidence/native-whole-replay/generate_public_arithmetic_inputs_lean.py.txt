@@ -1,0 +1,1 @@
+Canonical 23-field arithmetic-input Lean fixture generated

@@ -1,3 +1,5 @@
+import DeltaReduce.NativeWholeReplay
+import DeltaReduce.NativeWholeReplayVectors
 import DeltaReduce.NativeSelectedVote
 import DeltaReduce.NativeSelectedVoteVectors
 import DeltaReduce.NativeCandidateShape

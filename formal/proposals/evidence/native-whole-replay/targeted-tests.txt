@@ -1,0 +1,13 @@
+test_actual_initial_tick_and_scan_facts (test_native_whole_replay.NativeWholeReplayTests.test_actual_initial_tick_and_scan_facts) ... ok
+test_closed_mode_computes_original_policy (test_native_whole_replay.NativeWholeReplayTests.test_closed_mode_computes_original_policy) ... ok
+test_command_recompute_before_state_and_invalidation (test_native_whole_replay.NativeWholeReplayTests.test_command_recompute_before_state_and_invalidation) ... ok
+test_named_declarations_in_axiom_audit (test_native_whole_replay.NativeWholeReplayTests.test_named_declarations_in_axiom_audit) ... ok
+test_original_cache_retry_is_before_fresh_admission (test_native_whole_replay.NativeWholeReplayTests.test_original_cache_retry_is_before_fresh_admission) ... ok
+test_original_nonempty_policy_and_exact_two_record_prefix (test_native_whole_replay.NativeWholeReplayTests.test_original_nonempty_policy_and_exact_two_record_prefix) ... ok
+test_recovery_uses_executed_prefix_and_historical_cache (test_native_whole_replay.NativeWholeReplayTests.test_recovery_uses_executed_prefix_and_historical_cache) ... ok
+test_snapshot_and_torn_scope_are_explicit (test_native_whole_replay.NativeWholeReplayTests.test_snapshot_and_torn_scope_are_explicit) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.188s
+
+OK

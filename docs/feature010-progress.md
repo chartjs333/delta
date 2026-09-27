@@ -3789,3 +3789,52 @@ stillFAIL. Current command/sourcearithmetic/full journal retry/unknown/recovery,
 physicalWAL/SHA/exporter, full publicrefinement/arbitrarysnapshots/availability,
 freeze/offline/independentreview remainopen. No localPASS, GO or nativeguardchange.
 Three demosHTTP200 withoutrestart; frozenrefsunchanged.
+
+
+## 2026-09-27 — Complete original-policy admission joined with computed WAL history
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-whole-replay-proof.md; evidence native-whole-replay.json.
+NativeReplayAdmission now has a closed whole mode: original policy/state decoding,
+complete source snapshot and ALL original candidates, original initial tick,
+then NativeSelectedVote on the actual fold state. Older config/proposals domains
+remain restricted. NativeWholeReplay proves an executable prefix/suffix for every
+stored vote, global position including commands, original policy ID and exact
+vote/receipt/parent cache. Tick/invalidation/expected sequence come from that
+actual history. Historical retry keeps original bytes without fresh deadline or
+current checks; duplicate scans reject. CURRENT PARAMETER/APPLY guard remains;
+no vacuous arithmetic recovery theorem is added.
+
+The ORIGINAL nonempty two-candidate CONFIG/ISC policy now composes all snapshot
+sections, proposed ISC and separately bounded committee expansion, both candidate
+contexts, original ISC1/freeze2 transition and vote/command cache retries. These
+are the exact two-record prefix of the four-record no-snapshot capture, also
+retained in the earlier native WAL evidence; not a new whole four-record run.
+Eleven finite actual SHA samples, no synthetic assembled snapshot proxy. The
+result is identical to the earlier original mixed replay through the now complete
+policy gate. No native bytes or original positions/5/6/8 were rewritten.
+
+Two general modules (including modified mode module) audit 29
+helpers/8defs; handwritten vectors 59
+proofs/19defs. All115 named declarations
+audited, onlypropext/Quot.sound/Classical.choice. Negatives cover missing/reordered/
+repeated positions, altered policy ID, independent duplicate key, invalidated
+fresh vote; original retry survives arbitrary core changes. Generic byte-scan
+composition rejects incomplete observations. The new fixture uses original typed
+WAL entries whose byte decoders remain separate; no unified outer-WAL/admission
+hash fixture is newly claimed. Torn-tail rejection is explicitly narrower than
+native truncation, not full repair/failure equivalence. Physical completeness,
+SHA/signature/export authentication and arbitrary snapshots remain open.
+
+FullLean1089jobs,2fresh generic kernels/axiom audit,
+530tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.351regeneratedfiles=310JSON/
+39Lean/inputTLA/config byteexact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacyonlysemanticID. No freshnative/TLC/productionmutants; retained32mixed/
+62decimal/28safety7liveness27mutants/132state131step retain previous finite scope.
+Semantics sha256:2a08f65ef39412fef59f57640476c59527e8cfdbe7a4b97169013812bc9cdb82. Mandatory44/45FAIL/nativeArithmeticRecoveryRefines missing;
+Phase0unfrozen;makeabsent,notaggregateformal-check. Native decimalcanonicality
+stillFAIL. CurrentPointerCommand/sourcearithmetic, complete public/native
+phase/QC/current/unknown/repair, physicalWAL/SHA/exporter, freeze/offline and
+independent reviews remain required. No localPASS, GO or nativeguard change.
+Three demosHTTP200 withoutrestart; frozenrefsunchanged.
