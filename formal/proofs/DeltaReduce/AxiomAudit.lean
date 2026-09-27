@@ -1,3 +1,5 @@
+import DeltaReduce.NativeQBytes
+import DeltaReduce.NativeQBytesVectors
 import DeltaReduce.NativeCurrentPointer
 import DeltaReduce.NativePointerWal
 import DeltaReduce.NativeCurrentPointerVectors
@@ -9661,3 +9663,110 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeApplyResultVectors.scaledFractionNotEqual
 
 #print axioms DeltaReduce.NativeApplyResultVectors.missingSourceLeavesStillNumeric
+
+#print axioms DeltaReduce.NativeQBytes.le
+#print axioms DeltaReduce.NativeQBytes.readLE
+#print axioms DeltaReduce.NativeQBytes.leLength
+#print axioms DeltaReduce.NativeQBytes.readLeBounded
+#print axioms DeltaReduce.NativeQBytes.readLENat
+#print axioms DeltaReduce.NativeQBytes.readLENatEncoded
+#print axioms DeltaReduce.NativeQBytes.word
+#print axioms DeltaReduce.NativeQBytes.signed
+#print axioms DeltaReduce.NativeQBytes.wordBound
+#print axioms DeltaReduce.NativeQBytes.signedRange
+#print axioms DeltaReduce.NativeQBytes.decodePayload
+#print axioms DeltaReduce.NativeQBytes.payloadDecoded
+#print axioms DeltaReduce.NativeQBytes.payloadComplete
+#print axioms DeltaReduce.NativeQBytes.payloadLength
+#print axioms DeltaReduce.NativeQBytes.payloadRange
+#print axioms DeltaReduce.NativeQBytes.payloadAt
+#print axioms DeltaReduce.NativeQBytes.payloadUnique
+#print axioms DeltaReduce.NativeQBytes.magic
+#print axioms DeltaReduce.NativeQBytes.maxHeader
+#print axioms DeltaReduce.NativeQBytes.maxPayload
+#print axioms DeltaReduce.NativeQBytes.encodeFrame
+#print axioms DeltaReduce.NativeQBytes.decodeFields
+#print axioms DeltaReduce.NativeQBytes.decode
+#print axioms DeltaReduce.NativeQBytes.decodedFields
+#print axioms DeltaReduce.NativeQBytes.fieldsPayload
+#print axioms DeltaReduce.NativeQBytes.decodedPayload
+#print axioms DeltaReduce.NativeQBytes.decodedLength
+#print axioms DeltaReduce.NativeQBytes.decodedRange
+#print axioms DeltaReduce.NativeQBytes.encodeLength
+#print axioms DeltaReduce.NativeQBytes.fieldsEncoded
+#print axioms DeltaReduce.NativeQBytes.frameEncoded
+#print axioms DeltaReduce.NativeQBytes.frameFromRelation
+#print axioms DeltaReduce.NativeQBytes.decodedNonempty
+#print axioms DeltaReduce.NativeQBytes.decodedExactSize
+#print axioms DeltaReduce.NativeQBytes.payloadAppend
+#print axioms DeltaReduce.NativeQBytes.oddPayloadRejected
+#print axioms DeltaReduce.NativeQBytes.invalidPairRejected
+
+#print axioms DeltaReduce.NativeQBytesVectors.header0
+#print axioms DeltaReduce.NativeQBytesVectors.payload0
+#print axioms DeltaReduce.NativeQBytesVectors.frame0
+#print axioms DeltaReduce.NativeQBytesVectors.headerLength0
+#print axioms DeltaReduce.NativeQBytesVectors.payloadLength0
+#print axioms DeltaReduce.NativeQBytesVectors.values0
+#print axioms DeltaReduce.NativeQBytesVectors.originalEncoding0
+#print axioms DeltaReduce.NativeQBytesVectors.originalDecoded0
+#print axioms DeltaReduce.NativeQBytesVectors.header1
+#print axioms DeltaReduce.NativeQBytesVectors.payload1
+#print axioms DeltaReduce.NativeQBytesVectors.frame1
+#print axioms DeltaReduce.NativeQBytesVectors.headerLength1
+#print axioms DeltaReduce.NativeQBytesVectors.payloadLength1
+#print axioms DeltaReduce.NativeQBytesVectors.values1
+#print axioms DeltaReduce.NativeQBytesVectors.originalEncoding1
+#print axioms DeltaReduce.NativeQBytesVectors.originalDecoded1
+#print axioms DeltaReduce.NativeQBytesVectors.header2
+#print axioms DeltaReduce.NativeQBytesVectors.payload2
+#print axioms DeltaReduce.NativeQBytesVectors.frame2
+#print axioms DeltaReduce.NativeQBytesVectors.headerLength2
+#print axioms DeltaReduce.NativeQBytesVectors.payloadLength2
+#print axioms DeltaReduce.NativeQBytesVectors.values2
+#print axioms DeltaReduce.NativeQBytesVectors.originalEncoding2
+#print axioms DeltaReduce.NativeQBytesVectors.originalDecoded2
+#print axioms DeltaReduce.NativeQBytesVectors.header3
+#print axioms DeltaReduce.NativeQBytesVectors.payload3
+#print axioms DeltaReduce.NativeQBytesVectors.frame3
+#print axioms DeltaReduce.NativeQBytesVectors.headerLength3
+#print axioms DeltaReduce.NativeQBytesVectors.payloadLength3
+#print axioms DeltaReduce.NativeQBytesVectors.values3
+#print axioms DeltaReduce.NativeQBytesVectors.originalEncoding3
+#print axioms DeltaReduce.NativeQBytesVectors.originalDecoded3
+#print axioms DeltaReduce.NativeQBytesVectors.header4
+#print axioms DeltaReduce.NativeQBytesVectors.payload4
+#print axioms DeltaReduce.NativeQBytesVectors.frame4
+#print axioms DeltaReduce.NativeQBytesVectors.headerLength4
+#print axioms DeltaReduce.NativeQBytesVectors.payloadLength4
+#print axioms DeltaReduce.NativeQBytesVectors.values4
+#print axioms DeltaReduce.NativeQBytesVectors.originalEncoding4
+#print axioms DeltaReduce.NativeQBytesVectors.originalDecoded4
+#print axioms DeltaReduce.NativeQBytesVectors.signedEndpoints
+#print axioms DeltaReduce.NativeQBytesVectors.littleEndianOrder
+#print axioms DeltaReduce.NativeQBytesVectors.zeroDuplicateRetention
+#print axioms DeltaReduce.NativeQBytesVectors.emptyLowLevel
+#print axioms DeltaReduce.NativeQBytesVectors.forbiddenMinus32768
+#print axioms DeltaReduce.NativeQBytesVectors.forbiddenLater
+#print axioms DeltaReduce.NativeQBytesVectors.oddPayload
+#print axioms DeltaReduce.NativeQBytesVectors.emptyFrame
+#print axioms DeltaReduce.NativeQBytesVectors.emptyHeader
+#print axioms DeltaReduce.NativeQBytesVectors.emptyPayload
+#print axioms DeltaReduce.NativeQBytesVectors.oddFrame
+#print axioms DeltaReduce.NativeQBytesVectors.trailingByte
+#print axioms DeltaReduce.NativeQBytesVectors.truncatedPayload
+#print axioms DeltaReduce.NativeQBytesVectors.truncatedLength
+#print axioms DeltaReduce.NativeQBytesVectors.wrongVersion
+#print axioms DeltaReduce.NativeQBytesVectors.wrongMagic
+#print axioms DeltaReduce.NativeQBytesVectors.headerOverBound
+#print axioms DeltaReduce.NativeQBytesVectors.payloadOverBound
+#print axioms DeltaReduce.NativeQBytesVectors.opaqueHeaderNotJson
+#print axioms DeltaReduce.NativeQBytesVectors.changedPayloadWithOldHeaderAccepted
+
+#print axioms DeltaReduce.NativeQBytes.pairLittleEndian
+
+#print axioms DeltaReduce.NativeQBytes.PayloadRelation
+
+#print axioms DeltaReduce.NativeQBytes.Frame
+
+#print axioms DeltaReduce.NativeQBytes.decodedAt

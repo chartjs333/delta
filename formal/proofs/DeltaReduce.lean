@@ -1,3 +1,5 @@
+import DeltaReduce.NativeQBytes
+import DeltaReduce.NativeQBytesVectors
 import DeltaReduce.NativeApplyResult
 import DeltaReduce.NativeApplyResultJoin
 import DeltaReduce.NativeApplyResultVectors

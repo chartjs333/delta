@@ -1,0 +1,43 @@
+test_missing_or_reordered_ticket_rejected (test_arithmetic_binding.BindingProposalTests.test_missing_or_reordered_ticket_rejected) ... ok
+test_model_optimizer_and_schema_substitutions_rejected (test_arithmetic_binding.BindingProposalTests.test_model_optimizer_and_schema_substitutions_rejected) ... ok
+test_negative_non_ties (test_arithmetic_binding.BindingProposalTests.test_negative_non_ties) ... ok
+test_noncanonical_weight_rejected (test_arithmetic_binding.BindingProposalTests.test_noncanonical_weight_rejected) ... ok
+test_overflow_before_cancellation_is_rejected (test_arithmetic_binding.BindingProposalTests.test_overflow_before_cancellation_is_rejected) ... ok
+test_quantum_is_bound_not_assumed_one (test_arithmetic_binding.BindingProposalTests.test_quantum_is_bound_not_assumed_one) ... ok
+test_rounding_cannot_move_across_mixture (test_arithmetic_binding.BindingProposalTests.test_rounding_cannot_move_across_mixture) ... ok
+test_rounding_negative_and_positive_ties (test_arithmetic_binding.BindingProposalTests.test_rounding_negative_and_positive_ties) ... ok
+test_signed_minimum_is_explicit (test_arithmetic_binding.BindingProposalTests.test_signed_minimum_is_explicit) ... ok
+test_unsafe_prefix_sum_rejected (test_arithmetic_binding.BindingProposalTests.test_unsafe_prefix_sum_rejected) ... ok
+test_value_bytes_and_hash_domains_are_distinct (test_arithmetic_binding.BindingProposalTests.test_value_bytes_and_hash_domains_are_distinct) ... ok
+test_weighted_sum_and_candidate (test_arithmetic_binding.BindingProposalTests.test_weighted_sum_and_candidate) ... ok
+test_zero_denominator_and_float_rejected (test_arithmetic_binding.BindingProposalTests.test_zero_denominator_and_float_rejected) ... ok
+test_bool_is_not_context_integer (test_native_binding.NativeBindingTests.test_bool_is_not_context_integer) ... ok
+test_canonical_bytes (test_native_binding.NativeBindingTests.test_canonical_bytes) ... ok
+test_current_aggregate_is_mandatory (test_native_binding.NativeBindingTests.test_current_aggregate_is_mandatory) ... ok
+test_ec_cannot_add_non_isc_member (test_native_binding.NativeBindingTests.test_ec_cannot_add_non_isc_member) ... ok
+test_exact_parameter_and_apply_commands (test_native_binding.NativeBindingTests.test_exact_parameter_and_apply_commands) ... ok
+test_forged_authority_root (test_native_binding.NativeBindingTests.test_forged_authority_root) ... ok
+test_joined_arithmetic (test_native_binding.NativeBindingTests.test_joined_arithmetic) ... ok
+test_malformed_parameter_keys_reject_without_host_exception (test_native_binding.NativeBindingTests.test_malformed_parameter_keys_reject_without_host_exception) ... ok
+test_metadata_substitution (test_native_binding.NativeBindingTests.test_metadata_substitution) ... ok
+test_missing_and_duplicate_shard_partition (test_native_binding.NativeBindingTests.test_missing_and_duplicate_shard_partition) ... ok
+test_missing_duplicate_reordered_parameter_coverage (test_native_binding.NativeBindingTests.test_missing_duplicate_reordered_parameter_coverage) ... ok
+test_missing_or_corrupt_each_artifact (test_native_binding.NativeBindingTests.test_missing_or_corrupt_each_artifact) ... ok
+test_native_context_role_recovery_deadline (test_native_binding.NativeBindingTests.test_native_context_role_recovery_deadline) ... ok
+test_no_writes_on_bad_candidate (test_native_binding.NativeBindingTests.test_no_writes_on_bad_candidate) ... ok
+test_oversized_json_integer_rejects_at_boundary (test_native_binding.NativeBindingTests.test_oversized_json_integer_rejects_at_boundary) ... ok
+test_profile_mutations (test_native_binding.NativeBindingTests.test_profile_mutations) ... ok
+test_q_context_and_quantum (test_native_binding.NativeBindingTests.test_q_context_and_quantum) ... ok
+test_recovery_reconstructs_same_expected_bytes (test_native_binding.NativeBindingTests.test_recovery_reconstructs_same_expected_bytes) ... ok
+test_rehashed_bad_certified_parameter (test_native_binding.NativeBindingTests.test_rehashed_bad_certified_parameter) ... ok
+test_rehashed_inconsistent_plan (test_native_binding.NativeBindingTests.test_rehashed_inconsistent_plan) ... ok
+test_rehashed_parent_model_and_optimizer (test_native_binding.NativeBindingTests.test_rehashed_parent_model_and_optimizer) ... ok
+test_rehashed_unhashable_assignment_key (test_native_binding.NativeBindingTests.test_rehashed_unhashable_assignment_key) ... ok
+test_rehashed_wrong_result (test_native_binding.NativeBindingTests.test_rehashed_wrong_result) ... ok
+test_unknown_command_fields_and_bool_result (test_native_binding.NativeBindingTests.test_unknown_command_fields_and_bool_result) ... ok
+test_wrong_action_role (test_native_binding.NativeBindingTests.test_wrong_action_role) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 0.214s
+
+OK

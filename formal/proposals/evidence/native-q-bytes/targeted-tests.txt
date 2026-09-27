@@ -1,0 +1,10 @@
+test_generator_byte_exact (test_native_q_bytes.NativeQBytesTests.test_generator_byte_exact) ... ok
+test_generator_retains_source_preimage_pin (test_native_q_bytes.NativeQBytesTests.test_generator_retains_source_preimage_pin) ... ok
+test_mandatory_build_and_axiom_inventory (test_native_q_bytes.NativeQBytesTests.test_mandatory_build_and_axiom_inventory) ... ok
+test_old_header_payload_countercheck_requires_separate_hash (test_native_q_bytes.NativeQBytesTests.test_old_header_payload_countercheck_requires_separate_hash) ... ok
+test_original_full_byte_splits_and_coordinate_order (test_native_q_bytes.NativeQBytesTests.test_original_full_byte_splits_and_coordinate_order) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.042s
+
+OK

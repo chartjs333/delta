@@ -1,0 +1,1 @@
+current-pointer original golden and synthetic WAL regenerated

@@ -4167,3 +4167,39 @@ DemosHTTP200 withoutrestart/frozenrefsverified. Original/draft current/profile/
 authority provenance, kernel composition and full nativeArithmeticRecoveryRefines,
 phase/send/QC/current/unknown/repair, generalcodec/SHA/WAL/exporter/arbitrarysnapshots,
 freeze/offline/independentreview remain mandatory. No localPASS/GO/guardchange.
+
+
+## 27 September 2026 — original DRQ1 framing and vector byte decoding in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-q-bytes-proof.md; evidence
+formal/proposals/evidence/native-q-bytes.json. NativeQBytes computes original
+DRQ1 version/length framing and ordered little-endian signed INT16 vectors from
+bytes without a supplied decoded list or approval flag. General proofs retain
+byte pairs/positions, range[-32767,32767], exact length2*n, order/zeros/duplicates,
+uniqueness, append composition and bounded frame roundtrip/exact whole preimage.
+Odd/truncated/trailing/invalidversion/forbidden-32768 inputs reject. Framing
+bounds are header1..65536 and payload1..1048576; this is not complete native
+read_shard validation or a machine-memory execution proof.
+
+Five original004 blocks retain exact original header/payload/envelope bytes and
+all36 coordinates (4,8,8,8,8). Original source boundary remains independently
+pinned, not native producer authentication. Twenty small kernel cases and
+compositional original-byte proofs avoid whole-state/dependent reductions.
+Header JSON and SHA remain OPEN: non-JSON header bytes and changed Q with the
+unchanged original header both pass this framing layer. The separate Python
+source checker rejects the latter with PAYLOAD_HASH. This countercheck prevents
+misrepresenting byte parsing as source admission. Schema/ranges/quanta/weights,
+source-to-draft LoadedRow/RowsBound/DerivedParameter and full recovery remain open.
+
+27general helpers/12definitions plus Frame/PayloadRelation;45component/kernel
+proof declarations/15fixture definitions. All101new named declarations audited,
+only allowed standard kernel axioms. Fresh fullLean1097jobs and both standalone
+kernels PASS. Final651tooling/38oracle/5targeted,Ruff/format/consistency and
+33legal112illegal PASS;362generatedfiles byte-exact. All21TLA modules/public
+schema/runtime/147native witnesses unchanged;145legacy traces only semanticsID.
+No new native/TLC/productionmutants; earlier bounded scopes retained.
+Mandatory44/45/nativeArithmeticRecoveryRefines still missing, Native decimal
+-00/-01 canonicalityFAIL, Phase0unfrozen, makeabsent/notaggregateformal-check.
+DemosHTTP200 withoutrestart, frozenrefs unchanged. No localPASS/GO/guardchange
+or independent attestation. New source-bound semantics: sha256:e54304e6bd3febec04d3eb5f22b8825303025dc2a10e6fae0234eeb7f438d842.

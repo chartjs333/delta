@@ -1092,6 +1092,19 @@ def main() -> int:
         "model or learning rate pass this INPUT-ONLY layer. No new Lean proof, "
         "native execution, TLA scalar representability, runtime change or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Original DRQ1 framing and ordered signed INT16 payloads now have a "
+        "general Lean decoder relation, length/range/position and frame "
+        "roundtrip proofs. Five pinned original004 blocks retain all36 "
+        "coordinates and exact header/payload bytes. The header remains opaque; "
+        "JSON/canonical field interpretation, payload SHA and source authentication "
+        "are NOT established. Kernel counterchecks accept non-JSON header bytes "
+        "and a changed payload with an unchanged original SHA header, showing "
+        "this is not native shard admission. The separate existing Python source "
+        "checker rejects the hash mismatch. Connecting decoded original vectors "
+        "to source metadata, NativeBinding.LoadedRow and general admission/recovery "
+        "remains mandatory. No native execution, runtime change, local PASS or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
