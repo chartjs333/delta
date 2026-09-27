@@ -991,6 +991,20 @@ def main() -> int:
         "WAL, SHA/exporter/signatures, decimal compatibility, freeze/offline and "
         "independent reviews remain open. No local PASS, runtime change or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeCurrentPointer computes all14 original command fields, bounded IDs, "
+        "actual ApplyQC relationships and replay-before-CAS. Its separate finalized "
+        "bridge executes the original APPLY section, but the low-level store only "
+        "checks structural signer shape. NativePointerWal models the distinct text "
+        "journal, complete line checks, retained torn suffix, computed history and "
+        "known cuts. Unknown is not a known empty log. Four finite SHA samples use "
+        "original008 golden contracts and synthetic source-derived WAL, no native "
+        "execution. Unconfigured signer shape and rehashed unauthenticated recovery "
+        "counterchecks expose unresolved caller/physical provenance. Full arithmetic "
+        "admission/recovery, public phase/QC/current, physical WAL/SHA/exporter, "
+        "decimal compatibility, contract freeze/offline/independent reviews remain "
+        "required; no runtime change, local PASS or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

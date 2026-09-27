@@ -1,3 +1,6 @@
+import DeltaReduce.NativeCurrentPointer
+import DeltaReduce.NativePointerWal
+import DeltaReduce.NativeCurrentPointerVectors
 import DeltaReduce.NativeWholeReplay
 import DeltaReduce.NativeWholeReplayVectors
 import DeltaReduce.NativeSelectedVote
@@ -9194,3 +9197,249 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeWholeReplayVectors.emptyVoteBytesNotState
 #print axioms DeltaReduce.NativeWholeReplayVectors.allOriginalCandidatesRetained
 #print axioms DeltaReduce.NativeWholeReplayVectors.originalNonemptyInput
+
+#print axioms DeltaReduce.NativeCurrentPointer.StateValid
+
+#print axioms DeltaReduce.NativeCurrentPointer.CommandValid
+
+#print axioms DeltaReduce.NativeCurrentPointer.QcShape
+
+#print axioms DeltaReduce.NativeCurrentPointer.fields
+
+#print axioms DeltaReduce.NativeCurrentPointer.json
+
+#print axioms DeltaReduce.NativeCurrentPointer.domain
+
+#print axioms DeltaReduce.NativeCurrentPointer.commandId
+
+#print axioms DeltaReduce.NativeCurrentPointer.qcId
+
+#print axioms DeltaReduce.NativeCurrentPointer.Links
+
+#print axioms DeltaReduce.NativeCurrentPointer.prepare
+
+#print axioms DeltaReduce.NativeCurrentPointer.preparedSource
+
+#print axioms DeltaReduce.NativeCurrentPointer.fromComponents
+
+#print axioms DeltaReduce.NativeCurrentPointer.commandChecked
+
+#print axioms DeltaReduce.NativeCurrentPointer.qcChecked
+
+#print axioms DeltaReduce.NativeCurrentPointer.certificateImpliesShape
+
+#print axioms DeltaReduce.NativeCurrentPointer.next
+
+#print axioms DeltaReduce.NativeCurrentPointer.ReplayMatches
+
+#print axioms DeltaReduce.NativeCurrentPointer.Extends
+
+#print axioms DeltaReduce.NativeCurrentPointer.choose
+
+#print axioms DeltaReduce.NativeCurrentPointer.replayBeforeCas
+
+#print axioms DeltaReduce.NativeCurrentPointer.replayExact
+
+#print axioms DeltaReduce.NativeCurrentPointer.freshExact
+
+#print axioms DeltaReduce.NativeCurrentPointer.freshFromComponents
+
+#print axioms DeltaReduce.NativeCurrentPointer.replayAfterAdvance
+
+#print axioms DeltaReduce.NativeCurrentPointer.nextValid
+
+#print axioms DeltaReduce.NativeCurrentPointer.fromFinalized
+
+#print axioms DeltaReduce.NativeCurrentPointer.finalizedSource
+
+#print axioms DeltaReduce.NativeCurrentPointer.finalizedCandidate
+
+#print axioms DeltaReduce.NativePointerWal.record
+
+#print axioms DeltaReduce.NativePointerWal.result
+
+#print axioms DeltaReduce.NativePointerWal.joined
+
+#print axioms DeltaReduce.NativePointerWal.payload
+
+#print axioms DeltaReduce.NativePointerWal.checksum
+
+#print axioms DeltaReduce.NativePointerWal.line
+
+#print axioms DeltaReduce.NativePointerWal.split
+
+#print axioms DeltaReduce.NativePointerWal.RowValid
+
+#print axioms DeltaReduce.NativePointerWal.readFields
+
+#print axioms DeltaReduce.NativePointerWal.readLine
+
+#print axioms DeltaReduce.NativePointerWal.readFieldsSource
+
+#print axioms DeltaReduce.NativePointerWal.Extend
+
+#print axioms DeltaReduce.NativePointerWal.step
+
+#print axioms DeltaReduce.NativePointerWal.stepExact
+
+#print axioms DeltaReduce.NativePointerWal.stepValid
+
+#print axioms DeltaReduce.NativePointerWal.heightIncreases
+
+#print axioms DeltaReduce.NativePointerWal.replay
+
+#print axioms DeltaReduce.NativePointerWal.replayHistory
+
+#print axioms DeltaReduce.NativePointerWal.historyPreservesValid
+
+#print axioms DeltaReduce.NativePointerWal.historyHeight
+
+#print axioms DeltaReduce.NativePointerWal.historyRecord
+
+#print axioms DeltaReduce.NativePointerWal.recover
+
+#print axioms DeltaReduce.NativePointerWal.unknownRejected
+
+#print axioms DeltaReduce.NativePointerWal.recoveredHistory
+
+#print axioms DeltaReduce.NativePointerWal.recoveredValid
+
+#print axioms DeltaReduce.NativePointerWal.commitCut
+
+#print axioms DeltaReduce.NativePointerWal.execute
+
+#print axioms DeltaReduce.NativePointerWal.returnedRequiresAppend
+
+#print axioms DeltaReduce.NativePointerWal.exactReplayNoAppend
+
+#print axioms DeltaReduce.NativePointerWal.unacknowledgedDurable
+
+#print axioms DeltaReduce.NativePointerWal.uncertainCut
+
+#print axioms DeltaReduce.NativePointerWal.freshRecordExtends
+
+#print axioms DeltaReduce.NativePointerWal.durableReplayRepair
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.command
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.certificate
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.cid
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.qid
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.pre0
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.digest0
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.pre1
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.digest1
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.pre2
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.digest2
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.pre3
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.digest3
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.sha
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.hash0
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.hash1
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.hash2
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.hash3
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.commandValid
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.qcValid
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.commandPreimage
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.qcPreimage
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.commandHash
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.certificateHash
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.prepared
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.preparedExact
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.initial
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.initialValid
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.firstAdvance
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.payloadExact
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.lineBytes
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.lineExact
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.originalLineParsed
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.exactRecovery
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.replayRecovered
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.replayDoesNotExtend
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.afterDurabilityExact
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.returnedExact
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.replayHasNoWrite
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.unknownFresh
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.tornRetained
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.onlyTornNoAdvance
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.emptyKnown
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.unknownNotEmpty
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.checksumSubstitution
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.doubleRecord
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.emptyCompleteLine
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.crlfRejected
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.parentMismatch
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.nonIncreasingHeight
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.badReplayState
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.wrongQcLink
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.wrongContext
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.wrongModel
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.wrongOptimizer
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.wrongParent
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.noSigners
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.duplicateSigners
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.heightOverflow
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.heightLeadingZero
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.unconfiguredSignerShape
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.fakeLine
+
+#print axioms DeltaReduce.NativeCurrentPointerVectors.rehashedUncertifiedRecovery

@@ -1,3 +1,6 @@
+import DeltaReduce.NativeCurrentPointer
+import DeltaReduce.NativePointerWal
+import DeltaReduce.NativeCurrentPointerVectors
 import DeltaReduce.NativeWholeReplay
 import DeltaReduce.NativeWholeReplayVectors
 import DeltaReduce.NativeSelectedVote

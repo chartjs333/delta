@@ -3838,3 +3838,50 @@ stillFAIL. CurrentPointerCommand/sourcearithmetic, complete public/native
 phase/QC/current/unknown/repair, physicalWAL/SHA/exporter, freeze/offline and
 independent reviews remain required. No localPASS, GO or nativeguard change.
 Three demosHTTP200 withoutrestart; frozenrefsunchanged.
+
+
+## 2026-09-27 — Original current-pointer command and separate text WAL recovery
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-current-pointer-proof.md; evidence native-current-pointer.json.
+NativeCurrentPointer checks all14 original canonical command fields, bounded
+command/QC JSON IDs and all5 exact context/parent/model/optimizer relationships.
+It models exact replay before parent/height CAS and strictly increasing fresh
+height. The optional finalized-source bridge computes the original complete APPLY
+section and selected finalized certificate/candidate/ROOT/profile links, not a
+caller approval Boolean. This stronger bridge is not claimed inside the actual
+low-level pointer store and has no new full-policy combined fixture.
+
+NativePointerWal uses actual separate text lines, checksum over original payload,
+canonical uint64 height, parent extension and exact stored IDs; it is not DRW1.
+Computed history retains all complete records and the actual unterminated suffix.
+Unknown remains distinct from known empty bytes. Native truncation is represented
+as retained discarded bytes, not physically executed/authenticated repair. The
+actual before/after-append-before-durability labels both throw before append;
+during-append writes literal truncated. Complete durable/unacknowledged and
+committed/unreturned outcomes remain distinct. Exact replay writes nothing.
+
+Explicit scope counterchecks: a single unconfigured signer passes native QC
+shape checks; rehashed fabricated stored IDs pass pointer recovery, which never
+reloads an ApplyQC body. These expose caller/physical provenance requirements,
+not a new full-runtime exploit or proof of certificate authentication. Four
+finite actual SHA samples bind original008 golden command/QC and SYNTHETIC
+source-derived WAL lines. No new native capture/run, vote sequence rewrite,
+general SHA/JSON/stdlib/physical durability proof or public current relation.
+
+Two generic modules: 30helpers/31defs;
+45vector proofs/17defs;
+all123names axiom-audited, onlypropext/Quot.sound/Classical.choice.
+FullLean1092jobs,2fresh generic kernels/audit,
+538tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.353regeneratedfiles=311JSON/
+40Lean/inputTLA/config byteexact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacyonlysemanticID. No freshnative/TLC/productionmutants; retained32mixed/
+62decimal/28safety7liveness27mutants/132state131step keep earlier finite scope.
+Semantics sha256:ff5918705a66c52ec737da856084c52ba1acae661dda4f34d7345b615b01349d. Mandatory44/45FAIL/nativeArithmeticRecoveryRefines missing;
+Phase0unfrozen;makeabsent,notaggregateformal-check. Native decimalcanonicality
+stillFAIL. Full source arithmetic/result/current binding, public/native phase/QC/
+unknown/repair, physicalWAL/SHA/exporter, freeze/offline/independent reviews remain
+required. No localPASS, GO or nativeguard change. Three demosHTTP200 withoutrestart;
+frozenrefsunchanged. Earlier expensive ASCII-string draft reductions were stopped;
+final byte-literal/component proofs and final stable checks alone count.

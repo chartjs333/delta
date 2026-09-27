@@ -1,0 +1,13 @@
+test_actual_crash_order_and_distinct_text_wal (test_native_current_pointer.NativeCurrentPointerTests.test_actual_crash_order_and_distinct_text_wal) ... ok
+test_actual_pointer_checks_and_replay_before_cas (test_native_current_pointer.NativeCurrentPointerTests.test_actual_pointer_checks_and_replay_before_cas) ... ok
+test_finalized_bridge_computes_original_section (test_native_current_pointer.NativeCurrentPointerTests.test_finalized_bridge_computes_original_section) ... ok
+test_generated_bytes_exact_and_finite_hashes_real (test_native_current_pointer.NativeCurrentPointerTests.test_generated_bytes_exact_and_finite_hashes_real) ... ok
+test_named_declarations_audited (test_native_current_pointer.NativeCurrentPointerTests.test_named_declarations_audited) ... ok
+test_original_command_and_qc_identity (test_native_current_pointer.NativeCurrentPointerTests.test_original_command_and_qc_identity) ... ok
+test_recovery_limits_not_silent_qc_authentication (test_native_current_pointer.NativeCurrentPointerTests.test_recovery_limits_not_silent_qc_authentication) ... ok
+test_source_copies_are_exact_pinned_git_blobs (test_native_current_pointer.NativeCurrentPointerTests.test_source_copies_are_exact_pinned_git_blobs) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.413s
+
+OK
