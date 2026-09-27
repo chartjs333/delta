@@ -1,7 +1,7 @@
 import {locales, supportedLanguage, translate, translateLog} from './i18n.mjs';
 
 const $ = (id) => document.getElementById(id);
-const pages = ['overview', 'runs', 'readiness'];
+const pages = ['overview', 'models', 'runs', 'readiness'];
 const preferenceKey = 'delta-presentation-language';
 let storedLanguage;
 try { storedLanguage = localStorage.getItem(preferenceKey); } catch { /* Storage may be disabled. */ }
@@ -24,7 +24,7 @@ function navigate(page) {
   if (!pages.includes(page)) page = "overview";
   for (const name of pages) $(`page-${name}`).hidden = name !== page;
   document.querySelectorAll(".nav").forEach((button) => button.classList.toggle("active", button.dataset.page === page));
-  $("page-title").textContent = t(page === 'runs' ? 'runs' : page);
+  $("page-title").textContent = t(page === 'runs' ? 'runs' : page === 'models' ? 'models' : page);
   location.hash = page;
 }
 document.querySelectorAll(".nav[data-page]").forEach((button) => button.addEventListener("click", () => navigate(button.dataset.page)));
@@ -44,6 +44,7 @@ function applyLanguage() {
   $('visual-guide').href = adminLink('/guide');
   $('node-training').href = `/node-training/?lang=${language}`;
   $('verification').href = `/verification/?lang=${language}`;
+  if ($('mnist-open-dashboard')) $('mnist-open-dashboard').href = `/node-training/?lang=${language}`;
   document.querySelectorAll('[data-i18n]').forEach((node) => { node.textContent = t(node.dataset.i18n); });
   document.querySelectorAll('[data-i18n-aria]').forEach((node) => { node.setAttribute('aria-label', t(node.dataset.i18nAria)); });
   try { localStorage.setItem(preferenceKey, language); } catch { /* Keep the current in-memory selection. */ }
@@ -318,6 +319,80 @@ async function submit(path) {
 }
 $("train").addEventListener("click", () => submit("/api/train"));
 $("simulate").addEventListener("click", () => submit("/api/simulate"));
+
+const btnCausal = $("btn-run-causal");
+if (btnCausal) {
+  btnCausal.addEventListener("click", async () => {
+    btnCausal.disabled = true;
+    const badge = $("causal-status-badge");
+    if (badge) { badge.textContent = "RUNNING…"; badge.className = "chip warning"; }
+    try {
+      const response = await fetch("/api/models/causal-run", {
+        method: "POST",
+        headers: {"Content-Type": "application/json", "X-Delta-Presentation": "1"},
+        body: "{}"
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      $("causal-init-loss").textContent = Number(data.initial_loss).toFixed(4);
+      $("causal-final-loss").textContent = Number(data.final_loss).toFixed(4);
+      $("causal-reduction").textContent = (data.loss_reduction > 0 ? "-" : "") + Math.abs(data.loss_reduction).toFixed(4);
+      const list = $("causal-steps-list");
+      if (list && data.steps) {
+        list.replaceChildren();
+        for (const st of data.steps) {
+          const row = el("div", undefined, "step-row");
+          row.append(
+            el("span", `Step ${st.optimizer_step}`, "step-num"),
+            el("span", `Loss: ${Number(st.loss).toFixed(4)}`, "step-loss"),
+            el("span", `${st.processed_tokens} tokens (${st.throughput} tok/s)`, "step-tok")
+          );
+          list.append(row);
+        }
+      }
+      if (badge) { badge.textContent = `COMPLETED (${data.elapsed_ms}ms)`; badge.className = "chip success"; }
+    } catch (err) {
+      if (badge) { badge.textContent = "FAILED"; badge.className = "chip failed"; }
+      operationError = err.message;
+      renderNotice();
+    } finally {
+      btnCausal.disabled = false;
+    }
+  });
+}
+
+const btnQlora = $("btn-run-qlora-step");
+if (btnQlora) {
+  btnQlora.addEventListener("click", async () => {
+    btnQlora.disabled = true;
+    try {
+      const response = await fetch("/api/models/qlora-step", {
+        method: "POST",
+        headers: {"Content-Type": "application/json", "X-Delta-Presentation": "1"},
+        body: "{}"
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      const container = $("qlora-qual-details");
+      if (container) {
+        container.replaceChildren();
+        const d1 = el("div");
+        d1.append(el("span", "Live Ticket: "), el("code", data.ticket_id));
+        const d2 = el("div");
+        d2.append(el("span", "Extracted Adapter: "), el("code", `Flat Tensor shape [${data.adapter_tensor_shape.join(",")}]`));
+        const d3 = el("div");
+        d3.append(el("span", "Status / Tokens: "), el("code", `${data.status} · ${data.processed_tokens} tokens · ${data.elapsed_ms}ms`));
+        container.append(d1, d2, d3);
+      }
+    } catch (err) {
+      operationError = err.message;
+      renderNotice();
+    } finally {
+      btnQlora.disabled = false;
+    }
+  });
+}
+
 applyLanguage();
 await refresh();
 setInterval(refresh, 1500);

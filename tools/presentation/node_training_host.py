@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--instance", required=True)
+    parser.add_argument("--port", type=int, default=8872)
     args = parser.parse_args()
     source = args.source.resolve(strict=True)
     args.data.mkdir(parents=True, exist_ok=True)
@@ -74,7 +75,7 @@ def main():
 
     class MountedHandler(workspace.WorkspaceRequestHandler):
         def valid_host(self):
-            return self.headers.get("Host") == "127.0.0.1:8872"
+            return self.headers.get("Host") in {f"127.0.0.1:{args.port}", f"localhost:{args.port}"}
 
         def do_GET(self):
             if not self.valid_host():
@@ -100,7 +101,10 @@ def main():
                 self._json(HTTPStatus.NOT_FOUND, {"error": "NOT_FOUND"})
 
         def do_POST(self):
-            if not self.valid_host() or self.headers.get("Origin") != "http://127.0.0.1:8872":
+            if (
+                not self.valid_host()
+                or self.headers.get("Origin") not in {f"http://127.0.0.1:{args.port}", f"http://localhost:{args.port}"}
+            ):
                 self._json(HTTPStatus.FORBIDDEN, {"error": "ORIGIN_FORBIDDEN"})
                 return
             if self.path != RUN_ROUTE:
@@ -130,7 +134,7 @@ def main():
         source / "artifacts/local/mnist-cache",
         args.data / "runs",
         allow_download=False,
-        port=8872,
+        port=args.port,
         open_browser=False,
     )
 

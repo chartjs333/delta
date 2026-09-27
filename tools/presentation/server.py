@@ -31,6 +31,12 @@ from urllib.parse import urlsplit
 
 from node_training_view import GET_ROUTES as NODE_GET_ROUTES
 from node_training_view import RUN_ROUTE as NODE_RUN_ROUTE
+from model_examples import (
+    get_mnist_summary,
+    get_qlora_qualification,
+    run_causal_lm_step,
+    run_qlora_live_step,
+)
 from verification_runner import SCENARIOS, validate_result
 from workspace_store import EXECUTION, UUID, default_profile, parse_json, read_profile, save_profile
 
@@ -86,14 +92,24 @@ def exclusive_data(data: Path):
 
 
 class Presentation:
-    def __init__(self, data: Path, controller_port: int, formal_report: Path | None = None):
+    def __init__(
+        self,
+        data: Path,
+        controller_port: int,
+        formal_report: Path | None = None,
+        node_port: int = 8872,
+    ):
         self.data = data.resolve()
         self.data.mkdir(parents=True, exist_ok=True)
         self.jobs_dir = self.data / "jobs"
         self.jobs_dir.mkdir(exist_ok=True)
         self.controller_url = f"http://127.0.0.1:{controller_port}"
+        self.node_port = node_port
+        local_admin = ROOT / "tools/admin-ui/dist-live"
         self.admin_root = (
-            Path("D:/delta-main-demo/tools/admin-ui/dist-live")
+            local_admin
+            if local_admin.is_dir()
+            else Path("D:/delta-main-demo/tools/admin-ui/dist-live")
             if os.name == "nt"
             else ROOT / "tools/admin-ui/dist-live"
         )
@@ -590,6 +606,51 @@ class Handler(BaseHTTPRequestHandler):
             with self.server.application.lock:
                 job = copy.deepcopy(self.server.application.jobs.get(path.rsplit("/", 1)[1]))
             self.json(200 if job else 404, job or {"error": "NOT_FOUND"}, download=True)
+        elif path == "/api/models/catalog":
+            self.json(
+                200,
+                {
+                    "models": [
+                        {
+                            "id": "mnist-centroid",
+                            "name": "MNIST Centroid Classification",
+                            "type": "Image Classification",
+                            "framework": "NumPy / PyTorch",
+                            "participants": 4,
+                            "mode": "AUDITED_CONSENSUS_AND_RECOVERY",
+                            "accuracy": "82.05%",
+                        },
+                        {
+                            "id": "tiny-causal-lm",
+                            "name": "TinyCausalLM Pre-training",
+                            "type": "Causal Language Modeling",
+                            "framework": "PyTorch CPU float32",
+                            "participants": 1,
+                            "mode": "LIVE_RUN_REPRODUCIBLE",
+                            "tokens": 64,
+                        },
+                        {
+                            "id": "qlora-8gb-adapter",
+                            "name": "QLoRA Quantized Adapter (2B Base + 12.5M)",
+                            "type": "Quantized PEFT Fine-Tuning",
+                            "framework": "PyTorch / bitsandbytes",
+                            "participants": 4,
+                            "mode": "RECORDED_8GB_QUALIFIED_AND_LIVE_DELTA",
+                            "memory_bound": "<= 8 GB",
+                        },
+                    ]
+                },
+            )
+        elif path == "/api/models/mnist":
+            try:
+                self.json(200, get_mnist_summary())
+            except Exception as error:
+                self.json(500, {"error": str(error)})
+        elif path == "/api/models/qlora-qualification":
+            try:
+                self.json(200, get_qlora_qualification())
+            except Exception as error:
+                self.json(500, {"error": str(error)})
         elif path in {
             "/verification/",
             "/verification/app.js",
@@ -684,6 +745,18 @@ class Handler(BaseHTTPRequestHandler):
             except BusyError as error:
                 self.json(409, {"error": str(error)})
             return
+        if self.path == "/api/models/causal-run":
+            try:
+                self.json(200, run_causal_lm_step(self.server.application.data))
+            except Exception as error:
+                self.json(500, {"error": str(error)})
+            return
+        if self.path == "/api/models/qlora-step":
+            try:
+                self.json(200, run_qlora_live_step())
+            except Exception as error:
+                self.json(500, {"error": str(error)})
+            return
         if self.path not in route:
             self.json(404, {"error": "NOT_FOUND"})
             return
@@ -727,8 +800,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def node_proxy(self, method: str) -> None:
         """Fixed loopback demo only; no arbitrary destinations, files or commands."""
-        connection = HTTPConnection("127.0.0.1", 8872, timeout=10)
-        headers = {"Origin": "http://127.0.0.1:8872"}
+        node_port = self.server.application.node_port
+        connection = HTTPConnection("127.0.0.1", node_port, timeout=10)
+        headers = {"Origin": f"http://127.0.0.1:{node_port}"}
         if method == "POST":
             headers["X-Demo-Token"] = self.headers["X-Demo-Token"]
             headers["Content-Type"] = "application/json"
@@ -789,6 +863,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8870)
     parser.add_argument("--controller-port", type=int, default=8865)
+    parser.add_argument("--node-port", type=int, default=8872)
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--formal-report", type=Path)
     parser.add_argument("--instance-id", default=uuid.uuid4().hex)
@@ -796,7 +871,9 @@ def main() -> None:
     if not JOB_ID.fullmatch(args.instance_id):
         parser.error("instance-id must be a lowercase UUID hex value")
     with exclusive_data(args.data_dir):
-        application = Presentation(args.data_dir, args.controller_port, args.formal_report)
+        application = Presentation(
+            args.data_dir, args.controller_port, args.formal_report, node_port=args.node_port
+        )
         application.instance_id = args.instance_id
         with Server(args.port, application) as server:
             threading.Thread(target=application.inspect_gpu, daemon=True).start()

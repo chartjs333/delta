@@ -45,3 +45,34 @@
 .copy-btn:hover { background: #e3daf7; }
 .copy-btn.copied { background: #daf3e7; color: #1e754e; border-color: #bce5d2; }
 
+/* Model Training & PEFT Showcase */
+.models-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-top: 18px; }
+.model-card { display: flex; flex-direction: column; gap: 14px; padding: 20px; background: #ffffff; border: 1px solid #e1e4ec; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); transition: transform 0.15s, box-shadow 0.15s; }
+.model-card:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
+.model-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.model-card-header h3 { margin: 6px 0 2px; font-size: 16px; font-weight: 700; color: #1e2229; }
+.model-glyph { font-size: 26px; }
+.model-meta { display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 12px; background: #f8f9fc; padding: 10px 12px; border-radius: 8px; border: 1px solid #e8ecf4; }
+.model-meta dt { font-weight: 600; color: #64748b; }
+.model-meta dd { margin: 0; color: #1e293b; font-weight: 500; }
+.model-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; }
+.stat-box.highlight { background: #f0fdf4; border-color: #bbf7d0; }
+.stat-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.3px; margin-bottom: 2px; }
+.stat-val { font-size: 15px; font-weight: 700; color: #0f172a; }
+.stat-box.highlight .stat-val { color: #166534; }
+.recovery-box { padding: 10px 12px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; font-size: 12px; }
+.rec-title { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: #92400e; font-weight: 600; }
+.recovery-box p { margin: 0; color: #78350f; line-height: 1.4; }
+.live-steps-box { background: #0f172a; color: #f8fafc; border-radius: 8px; padding: 12px; font-family: ui-monospace,Consolas,monospace; font-size: 11px; }
+.steps-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 6px; margin-bottom: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; }
+.steps-list { display: flex; flex-direction: column; gap: 4px; }
+.step-row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px dashed #1e293b; }
+.step-loss { color: #38bdf8; font-weight: 600; }
+.step-tok { color: #94a3b8; }
+.qlora-evidence { display: flex; flex-direction: column; gap: 4px; color: #cbd5e1; font-size: 11px; }
+.qlora-evidence code { background: #1e293b; color: #a5b4fc; padding: 1px 4px; border-radius: 4px; font-size: 10px; }
+.chip.purple { background: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
+.chip.green { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+.model-actions { margin-top: auto; padding-top: 8px; }
+

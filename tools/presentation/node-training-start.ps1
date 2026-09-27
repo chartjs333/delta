@@ -2,7 +2,8 @@
 param(
     [ValidateSet('start', 'status')][string]$Action = 'start',
     [string]$Source = 'D:/delta/worktree-c2',
-    [string]$DataRoot = 'D:/delta-data/presentation-20260924'
+    [string]$DataRoot = 'D:/delta-data/presentation-20260924',
+    [int]$Port = 8872
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -10,7 +11,7 @@ $Source = (& git -C $Source rev-parse --show-toplevel).Trim()
 if ($LASTEXITCODE -ne 0) { throw 'The configured MNIST demo checkout is unavailable.' }
 $Data = Join-Path ([IO.Path]::GetFullPath($DataRoot)) 'node-training'
 $MetadataPath = Join-Path $Data 'process.json'
-$Base = 'http://127.0.0.1:8872/node-training'
+$Base = "http://127.0.0.1:$Port/node-training"
 function Read-Health {
     try { Invoke-RestMethod "$Base/api/health" -TimeoutSec 2 } catch { $null }
 }
@@ -23,14 +24,14 @@ function Assert-Owned($Health, $Metadata) {
         throw 'The node training listener ownership could not be verified.'
     }
 }
-$Mutex = [Threading.Mutex]::new($false, 'Local\DeltaNodeTrainingExample-8872')
+$Mutex = [Threading.Mutex]::new($false, "Local\DeltaNodeTrainingExample-$Port")
 $Held = $false
 try {
     try { $Held = $Mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $Held = $true }
     if (-not $Held) { throw 'Node training startup is already running.' }
     $Health = Read-Health
     if ($null -ne $Health) {
-        if (-not (Test-Path -LiteralPath $MetadataPath)) { throw 'Unverified listener on 8872.' }
+        if (-not (Test-Path -LiteralPath $MetadataPath)) { throw "Unverified listener on $Port." }
         Assert-Owned $Health (Get-Content -LiteralPath $MetadataPath -Raw | ConvertFrom-Json)
         Write-Output "Node training example: READY ($Base/)"
         exit 0
@@ -38,14 +39,14 @@ try {
     if ($Action -eq 'status') { Write-Output 'Node training example: STOPPED'; exit 1 }
     $Probe = [Net.Sockets.TcpClient]::new()
     try {
-        try { $Probe.Connect('127.0.0.1', 8872) } catch [Net.Sockets.SocketException] { }
-        if ($Probe.Connected) { throw 'Port 8872 is occupied. No process was stopped.' }
+        try { $Probe.Connect('127.0.0.1', $Port) } catch [Net.Sockets.SocketException] { }
+        if ($Probe.Connected) { throw "Port $Port is occupied. No process was stopped." }
     } finally { $Probe.Dispose() }
     New-Item -ItemType Directory -Path $Data -Force | Out-Null
     $Instance = [Guid]::NewGuid().ToString('N')
     $Arguments = @((Get-Command pwsh).Source, '-NoProfile', '-File',
         (Join-Path $PSScriptRoot 'node-training-host.ps1'), '-Source', $Source,
-        '-Data', $Data, '-Instance', $Instance)
+        '-Data', $Data, '-Instance', $Instance, '-Port', [string]$Port)
     $Quoted = $Arguments | ForEach-Object {
         if ($_.Contains('"')) { throw 'Embedded quotes are unsupported in launcher paths.' }
         '"' + $_ + '"'
@@ -60,7 +61,7 @@ try {
     for ($Attempt = 0; $Attempt -lt 180; $Attempt++) {
         $Health = Read-Health
         if ($null -ne $Health) {
-            if ($Health.instance_id -cne $Instance) { throw 'An unexpected listener appeared on 8872.' }
+            if ($Health.instance_id -cne $Instance) { throw "An unexpected listener appeared on $Port." }
             $Owned = Get-Process -Id $Health.pid -ErrorAction Stop
             $Metadata = @{pid=$Health.pid; start_ticks=$Owned.StartTime.ToUniversalTime().Ticks; instance_id=$Instance}
             Assert-Owned $Health $Metadata

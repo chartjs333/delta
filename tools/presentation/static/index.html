@@ -10,6 +10,7 @@
     <a id="visual-guide" class="nav" href="/admin/?lang=en#/guide" aria-label="How it works" data-i18n-aria="howItWorks"><span>▧</span><span class="nav-text" data-i18n="howItWorks">How it works</span></a>
     <a id="node-training" class="nav" href="/node-training/?lang=en" aria-label="Node training" data-i18n-aria="nodeTraining"><span>◉</span><span class="nav-text" data-i18n="nodeTraining">Node training</span></a>
     <a id="verification" class="nav" href="/verification/?lang=en" data-i18n-aria="verificationTitle"><span>✓</span><span class="nav-text" data-i18n="verificationTitle">Verification lab</span></a>
+    <button class="nav" data-page="models" aria-label="Model training examples" data-i18n-aria="modelsNav"><span>⚙</span><span class="nav-text" data-i18n="modelsNav">Training examples</span><b id="models-count">3</b></button>
     <button class="nav" data-page="runs" aria-label="Run history" data-i18n-aria="runs"><span>↗</span><span class="nav-text" data-i18n="runs">Run history</span><b id="run-count">0</b></button>
     <button class="nav" data-page="readiness" aria-label="Feature010 readiness" data-i18n-aria="readiness"><span>▤</span><span class="nav-text" data-i18n="readiness">Feature010 readiness</span></button>
   </nav>
@@ -114,6 +115,162 @@
     </div>
     <section class="panel activity"><div class="panel-title"><div><h2 data-i18n="activity">Execution log</h2><p class="muted" data-i18n="activityDescription">Events from the actual process, without generated metrics.</p></div><span id="live-label" class="chip">IDLE</span></div><div id="activity-log" class="log"><div class="empty"><span>↗</span><b data-i18n="emptyTitle">Ready for your first run</b><p data-i18n="emptyDescription">Choose training or a Docker scenario above.</p></div></div><div id="latest-result" hidden></div></section>
     <footer>DeltaReduce / Presentation workspace <span data-i18n="footerBoundary">Local mode · Feature010 GO has not been issued</span></footer>
+  </section>
+  <section id="page-models" class="page" hidden>
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow" data-i18n="modelsEyebrow">REAL REPRODUCIBLE MODEL RUNS · SHARDING & AGGREGATION</div>
+        <h1><span data-i18n="modelsHeading">Model training & fine-tuning</span><span>.</span></h1>
+        <p data-i18n="modelsDescription">Three distinct workloads demonstrating multi-node consensus, causal language modeling, and 8GB QLoRA fine-tuning.</p>
+      </div>
+    </div>
+    <section class="demo-narrative-panel panel" aria-label="Training Architecture Pathway">
+      <div class="narrative-header">
+        <div>
+          <div class="eyebrow" data-i18n="trainingPipelineKicker">END-TO-END TRAINING WORKFLOW</div>
+          <h2 data-i18n="trainingPipelineTitle">Model Architecture → Sharded Data → Local Steps → DeltaReduce Consensus → Verifiable Checkpoint</h2>
+        </div>
+      </div>
+      <div class="models-grid">
+        <!-- Model 1: MNIST -->
+        <article class="model-card panel">
+          <div class="model-card-header">
+            <div>
+              <span class="chip teal" data-i18n="mnistBadge">4 NODES · BFT CONSENSUS</span>
+              <h3>MNIST Centroid Classification</h3>
+              <small class="muted" data-i18n="mnistSub">Distributed digit classification across 4 independent partitions</small>
+            </div>
+            <span class="model-glyph">🔢</span>
+          </div>
+          <div class="model-meta">
+            <div><dt data-i18n="framework">Framework</dt><dd>NumPy / PyTorch</dd></div>
+            <div><dt data-i18n="dataset">Dataset</dt><dd>MNIST Test Set (10k samples)</dd></div>
+            <div><dt data-i18n="participants">Participants</dt><dd>4 Sharded Workers (0-3)</dd></div>
+          </div>
+          <div class="model-stats">
+            <div class="stat-box">
+              <span class="stat-lbl" data-i18n="centralizedAcc">Centralized</span>
+              <strong class="stat-val">82.05%</strong>
+            </div>
+            <div class="stat-box highlight">
+              <span class="stat-lbl" data-i18n="distributedAcc">DeltaReduce</span>
+              <strong class="stat-val">82.03%</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-lbl" data-i18n="agreement">Agreement</span>
+              <strong class="stat-val">100.0%</strong>
+            </div>
+          </div>
+          <div class="recovery-box">
+            <div class="rec-title">
+              <span class="rec-icon">⚡</span>
+              <strong data-i18n="recoveryTitle">Injected Failure & Durable Recovery</strong>
+            </div>
+            <p class="muted" data-i18n="recoveryDesc">Node 4 crashed at <code>AFTER_DURABLE_APPLY_VOTE_BEFORE_EXPOSE</code> (exit code 75). Replayed from <code>votes/runtime.wal</code>, recovered 6 votes, 0 loss of consistency.</p>
+          </div>
+          <div class="model-actions">
+            <a id="mnist-open-dashboard" class="button secondary wide" href="/node-training/?lang=en" target="_blank" rel="noopener">
+              <span data-i18n="openMnistDashboard">Open Node Training Dashboard ↗</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Model 2: TinyCausalLM -->
+        <article class="model-card panel">
+          <div class="model-card-header">
+            <div>
+              <span class="chip green" data-i18n="causalBadge">LIVE RUN · PYTORCH CPU</span>
+              <h3>TinyCausalLM Pre-training</h3>
+              <small class="muted" data-i18n="causalSub">Deterministic bigram autoregressive language model</small>
+            </div>
+            <span class="model-glyph">🔤</span>
+          </div>
+          <div class="model-meta">
+            <div><dt data-i18n="framework">Framework</dt><dd>PyTorch CPU (float32)</dd></div>
+            <div><dt data-i18n="corpus">Corpus</dt><dd>tiny-causal-v1.txt</dd></div>
+            <div><dt data-i18n="tokens">Tokens / Step</dt><dd>16 tokens (64 total)</dd></div>
+          </div>
+          <div class="model-stats">
+            <div class="stat-box">
+              <span class="stat-lbl" data-i18n="initialLoss">Initial Loss</span>
+              <strong id="causal-init-loss" class="stat-val">2.8902</strong>
+            </div>
+            <div class="stat-box highlight">
+              <span class="stat-lbl" data-i18n="finalLoss">Final Loss</span>
+              <strong id="causal-final-loss" class="stat-val">2.8714</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-lbl" data-i18n="reduction">Loss Reduction</span>
+              <strong id="causal-reduction" class="stat-val">-0.0188</strong>
+            </div>
+          </div>
+          <div id="causal-live-box" class="live-steps-box">
+            <div class="steps-header">
+              <span data-i18n="stepProgress">Step Progress (PyTorch float32)</span>
+              <span id="causal-status-badge" class="chip">READY</span>
+            </div>
+            <div id="causal-steps-list" class="steps-list">
+              <div class="step-row"><span class="step-num">Step 1</span><span class="step-loss">Loss: 2.8902</span><span class="step-tok">16 tokens</span></div>
+              <div class="step-row"><span class="step-num">Step 2</span><span class="step-loss">Loss: 2.8884</span><span class="step-tok">32 tokens</span></div>
+              <div class="step-row"><span class="step-num">Step 3</span><span class="step-loss">Loss: 2.8937</span><span class="step-tok">48 tokens</span></div>
+              <div class="step-row"><span class="step-num">Step 4</span><span class="step-loss">Loss: 2.8714</span><span class="step-tok">64 tokens</span></div>
+            </div>
+          </div>
+          <div class="model-actions">
+            <button id="btn-run-causal" class="button primary wide">
+              <span>▶</span> <span data-i18n="runCausalStep">Run Live Causal LM Step</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- Model 3: QLoRA 8GB -->
+        <article class="model-card panel">
+          <div class="model-card-header">
+            <div>
+              <span class="chip purple" data-i18n="qloraBadge">RECORDED RUN / 8GB QUALIFIED</span>
+              <h3>QLoRA Quantized Fine-Tuning</h3>
+              <small class="muted" data-i18n="qloraSub">2B parameter base model with 12.5M adapter on 8GB GPU</small>
+            </div>
+            <span class="model-glyph">🧠</span>
+          </div>
+          <div class="model-meta">
+            <div><dt data-i18n="targetGpu">Target GPU</dt><dd>RTX 3070 8GB</dd></div>
+            <div><dt data-i18n="baseParams">Base Model</dt><dd>2,009,140,224 params</dd></div>
+            <div><dt data-i18n="adapterParams">Adapter</dt><dd>12,582,912 (0.62%)</dd></div>
+          </div>
+          <div class="model-stats">
+            <div class="stat-box">
+              <span class="stat-lbl" data-i18n="peakMemory">Peak Memory</span>
+              <strong class="stat-val">3.41 GB</strong>
+            </div>
+            <div class="stat-box highlight">
+              <span class="stat-lbl" data-i18n="memoryLimit">Hard Limit</span>
+              <strong class="stat-val">&le; 8.00 GB</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-lbl" data-i18n="headroom">Headroom</span>
+              <strong class="stat-val">5.18 GB</strong>
+            </div>
+          </div>
+          <div id="qlora-qual-box" class="live-steps-box">
+            <div class="steps-header">
+              <span data-i18n="qloraProvenace">Physical Qualification (144.9s)</span>
+              <span class="chip success">PASS</span>
+            </div>
+            <div id="qlora-qual-details" class="qlora-evidence">
+              <div><span>Commitment Root:</span> <code>sha256:8556ae7c...9d00</code></div>
+              <div><span>Base Hash:</span> <code>sha256:aefa0b68...5a4c</code></div>
+              <div><span>Loss Trajectory:</span> <code>2.692 → 2.708 → 2.664 → 2.663</code></div>
+            </div>
+          </div>
+          <div class="model-actions">
+            <button id="btn-run-qlora-step" class="button secondary wide">
+              <span>▶</span> <span data-i18n="runQloraStep">Run Live Adapter Delta Step</span>
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
   </section>
   <section id="page-runs" class="page" hidden><div class="page-heading"><div class="eyebrow" data-i18n="historyEyebrow">EXECUTION HISTORY</div><h1><span data-i18n="runs">Run history</span><span>.</span></h1><p data-i18n="historyDescription">Results are saved on disk and remain available after restarting the interface.</p></div><div id="history" class="history"></div></section>
   <section id="page-readiness" class="page" hidden><div class="page-heading"><div class="eyebrow" data-i18n="readinessEyebrow">EVIDENCE & QUALIFICATION</div><h1><span data-i18n="readiness">Feature010 readiness</span><span>.</span></h1><p data-i18n="readinessDescription">The working local application and the status of full qualification.</p></div><section class="panel"><div class="readiness-intro"><span class="status warning" data-i18n="inDevelopment">IN DEVELOPMENT</span><h2 data-i18n="noGo">BenchmarkResultQC(GO) has not been obtained</h2><p class="muted" data-i18n="readinessBoundary">This demo runs the existing local Controller/Worker and separate Docker scenarios. The full Java/Netty → native C++/WAL → checkpoint pipeline depends on a new Formal GO.</p></div><div id="gates"></div><details><summary data-i18n="formalReport">Reviewed formal candidate report</summary><pre id="formal-detail"></pre></details></section></section>
