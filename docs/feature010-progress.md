@@ -4121,3 +4121,49 @@ DemosHTTP200 withoutrestart/frozenrefsverified. Commitment/manifest/AC/config/
 current provenance, original-to-draft projection, full nativeArithmeticRecoveryRefines,
 public phase/QC/current/unknown/repair, physicalWAL/codecs/SHA/exporter, arbitrary
 snapshots, freeze/offline/independentreview remain required. No localPASS/GO/guardchange.
+
+
+## 27 September 2026 — original vector inputs and draft arithmetic correspondence
+
+T044/T048/T053/T054/T056/T057. Formal tooling only; NO_GO remains. Scope
+formal/proposals/native-vector-projection.md; evidence
+formal/proposals/evidence/native-vector-projection.json. New versioned projection
+loads complete original APC/Q preimages itself, checks shared schema/profile/
+proof/config/scale/plan/parent and derives every included coordinate and original
+shard interval. Explicit name:ten-digit-flat-offset and shard-ordinal profile
+preserves original values/ranges; names over117chars or non-order-preserving
+prefix names reject as projection limits, not native admission changes. Complete
+original dtype/dimensions/frozen/alias metadata remains in source bytes; the draft
+SCHEMA alone is not injective over that metadata or a frozen-model proof.
+
+Every full vector Q_SHARD and complete domain-by-shard assignment is derived
+from original values/quanta/final APC weights and specific proof denominator.
+Every product/prefix rechecked at original separate widths; existing draft
+parameter oracle independently recomputes results. No scalar127 generalization,
+minimal-LCM substitution, extra EC-gamma multiplication or zero-weight deletion.
+Source-bound fields are compared against an independently supplied actual draft
+Witness graph, original round/height/view/epoch/parent checkpoint and proof width.
+Rehashed internally valid target schema/Q/weight/quantum/denominator substitutions
+reject. Per-assignment vote contexts, current vectors, complete APPLY profile,
+deadline/parent-QC projection and source authentication remain explicitly OPEN.
+Positive counterchecks change learning rate/current model/context and still pass
+this input-only layer; NativeAnchor validity is not established by construction.
+
+First example retains original004 12objects/5DRQ1leaves/36coordinates with lengths
+4,8,8,8,8; APC/draft authority are synthetic. Second NEW source graph has3tickets,
+2domains,36coordinates per ticket, finalalpha1/3,1/2,0 and ECgamma1/7; denominator12
+produces coefficients4,6,0, first-domain -2Q from Q/-Q and second-domain zeros.
+All coordinates crosschecked with Fraction; original008/sequences5/6/8 unchanged.
+24new tests cover source/target preimages, whole rehashed graph substitutions,
+all ranges, naming/resources, contexts/shared parent and the remaining boundaries.
+
+Final646tooling/38oracle/24targeted,Ruff/format/consistency,33legal112illegal PASS.
+NewJSON byteexact;359priorgeneratedfiles unchanged, oldgenerators notrerun.
+AllLean/TLA/schema/runtime/native/legacy fixtures unchanged; semantics remains
+sha256:2d95a8132c9c0475c70a49f14f6c691dbefe292cb28a839317d18923db29a165.
+Mandatory44/45; prior1095-job build retained, no newLean/native/TLC/mutant claim.
+Native-00/-01 canonicalityFAIL;Phase0unfrozen;makeabsent,notaggregateformal-check.
+DemosHTTP200 withoutrestart/frozenrefsverified. Original/draft current/profile/
+authority provenance, kernel composition and full nativeArithmeticRecoveryRefines,
+phase/send/QC/current/unknown/repair, generalcodec/SHA/WAL/exporter/arbitrarysnapshots,
+freeze/offline/independentreview remain mandatory. No localPASS/GO/guardchange.

@@ -1076,6 +1076,22 @@ def main() -> int:
         "source-to-draft/full public recovery theorem. No new Lean proof, "
         "production mutant, runtime change, local PASS or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Original vector-input projection now derives complete draft SCHEMA/Q "
+        "artifacts and APC-weighted vector assignments from checked original "
+        "preimages, with explicit flat-coordinate naming/range restrictions. "
+        "It preserves vector widths, original quanta, specific denominator, all "
+        "eligible tickets and separate product/prefix bounds, then compares the "
+        "derived inputs with an independently supplied draft Witness graph. "
+        "Rehashed valid but changed Q/schema/weight inputs reject. The retained "
+        "examples use original004 Q with a synthetic APC/draft authority and a "
+        "separate multi-ticket graph; neither authenticates original history. "
+        "Original current vectors, full APPLY profile, vote contexts, deadline, "
+        "parent-certificate projection and producer/config/exporter provenance "
+        "remain independent unresolved relations. Counterchecks changing current "
+        "model or learning rate pass this INPUT-ONLY layer. No new Lean proof, "
+        "native execution, TLA scalar representability, runtime change or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
