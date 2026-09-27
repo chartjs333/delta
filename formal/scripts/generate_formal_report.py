@@ -1027,9 +1027,24 @@ def main() -> int:
         "bounded Python content relation, not native execution or authentication. "
         "Original008 references16 unavailable source identities, including12 "
         "label-hashed input leaves, within the retained fixture store. Replacing "
-        "those IDs is not original provenance. Accumulator proof authority/bounds, "
+        "those IDs is not original provenance. Accumulator proof authority, "
         "draft-graph identity and full native/public admission/recovery remain open. "
         "No new Lean proof, runtime change, local PASS or GO."
+    )
+    report["coverage"]["unresolved"].append(
+        "Original accumulator-source tooling now recomputes exact004 product, "
+        "prefix, final and separate product/accumulator widths from original "
+        "proof/config/profile bytes and composes with all original Q preimages. "
+        "Final-minus-prefix reconstructs the unique admissible headroom; that "
+        "field is absent from serialized proof bytes and actual native request "
+        "provenance is not established. Historical formal/Lean IDs and theorem "
+        "names are metadata matches, not current authority. The exact positive "
+        "denominator is retained but its certified ticket-weight link is open. "
+        "Original008 profile/proof resolution rejects the missing accumulator "
+        "preimage; a separately synthetic replacement cannot authenticate it. "
+        "Worker quantization and APPLY rounding are separate stages; apply "
+        "quantum is absent from that original profile. No new Lean proof, native "
+        "run, source-to-draft graph admission/recovery, local PASS or GO."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

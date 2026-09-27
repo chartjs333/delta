@@ -3978,3 +3978,48 @@ unfrozen; make unavailable, not aggregate formal-check. Three demosHTTP200
 withoutrestart and allfrozenrefs verified. Full original source/graph/admission,
 public/native phase/QC/current/unknown/repair, physicalWAL/exporter/SHA, freeze,
 offline and independentreview remain open. No localPASS, GO or guardchange.
+
+
+## 27 September 2026 — original accumulator proof/config and Q-source composition
+
+T044/T048/T053/T054/T056/T057. Formal-only tooling; NO_GO remains.
+Scope formal/proposals/native-accumulator-source.md; evidence
+formal/proposals/evidence/native-accumulator-source.json. The new original004
+relation resolves proof/config/profile bytes, checks all18 proof/12config fields
+and exact shared source links, then recomputes coefficient/count/Q product,
+canonical prefix and separate product/accumulator widths. Every declared bound
+must match; PASS/theorem names cannot approve incorrect arithmetic. Exact
+positive common denominator is retained without choosing/reducing another one.
+The composed entry resolves the entire original Q graph and retains all12objects,
+5DRQ1 leaves and36coordinates. No supplied decoded QSource or expected values.
+
+Original canonical proof has NO headroom field. Final-minus-prefix derives the
+unique admissible request headroom, including nonzero values; it does not prove
+what an actual native call supplied. A separate primitive comparison rejects
+mismatched observed headroom but does not authenticate that observation. Original
+native test explicitly supplies0 and agrees. Historical formal/Lean IDs and exact
+theorem groups are metadata checks, not a new authority or Lean proof.
+
+Original008 APPLY profile's complete10field codec and actual accumulator edge
+are checked. The source still lacks the referenced sha256:222... proof preimage;
+substituting004bytes fails. A changed/rehashed profile example is synthetic only.
+Worker ties-even and APPLY half-positive remain separate stages. APPLY quantum
+is absent from original008profile; certified weights/common denominator/count,
+conversion/mixture/optimizer bounds and original-to-draft identity remain open.
+Native008 labels use128chars/colon, distinct from004segment255/slash; checked.
+
+Nineteen new targeted tests cover rehashed arithmetic/metadata/source changes,
+allfield omissions, exact INT64/INT128 limits, nonzero/negative headroom, separate
+widths, count/coefficient/Q ranges, denominator retention and full rehashed Q
+graphs with invalid proofs. Eleven native source files pinned; four reuse prior
+exact copies. Final581tooling/38oracle/19targeted tests,Ruff/format/consistency,
+33legal112illegal legacy PASS. NewJSON regeneration byteexact;356priorgenerated
+files unchanged, oldgenerators notrerun. AllLean/TLA/schema/runtime/legacy/native
+traces unchanged. Semantics unchanged
+sha256:2d95a8132c9c0475c70a49f14f6c691dbefe292cb28a839317d18923db29a165.
+Mandatory audit44/45; retained1095-job build, no newLean proof/build, TLC/native
+execution or productionmutants. Phase0unfrozen;makeabsent,notaggregateformal-check.
+Native decimal -00/-01 stillFAIL. DemosHTTP200 withoutrestart/frozenrefsverified.
+Full source/graph admission, nativeArithmeticRecoveryRefines/public phase/QC/
+current/unknown/repair, physicalWAL/SHA/exporter, arbitrarysnapshots, freeze,
+offline and independentreview remain required. No localPASS, GO or guardchange.

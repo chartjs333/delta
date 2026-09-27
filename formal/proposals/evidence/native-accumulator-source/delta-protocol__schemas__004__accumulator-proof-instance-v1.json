@@ -1,0 +1,41 @@
+{
+  "$defs": {
+    "contentId": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+    "decimal": {"pattern": "^(0|-?[1-9][0-9]*)$", "type": "string"},
+    "theorem": {
+      "additionalProperties": false,
+      "properties": {
+        "obligation_id": {"enum": ["PO-A1", "PO-A2", "PO-A3"], "type": "string"},
+        "theorem_names": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"}
+      },
+      "required": ["obligation_id", "theorem_names"],
+      "type": "object"
+    }
+  },
+  "$id": "urn:deltareduce:schema:accumulator-proof-instance:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "coefficient_abs_max": {"$ref": "#/$defs/decimal"},
+    "common_denominator": {"$ref": "#/$defs/decimal"},
+    "config_id": {"$ref": "#/$defs/contentId"},
+    "final_abs_bound": {"$ref": "#/$defs/decimal"},
+    "formal_semantics_id": {"$ref": "#/$defs/contentId"},
+    "lean_artifact_sha256": {"$ref": "#/$defs/contentId"},
+    "max_eligible_contributions": {"$ref": "#/$defs/decimal"},
+    "max_incremental_prefix_abs": {"$ref": "#/$defs/decimal"},
+    "product_abs_bound": {"$ref": "#/$defs/decimal"},
+    "product_width_bits": {"enum": [64, 128]},
+    "profile_id": {"$ref": "#/$defs/contentId"},
+    "q_abs_max": {"const": "32767"},
+    "result": {"enum": ["PASS", "REJECT"]},
+    "scale_table_id": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.0.0"},
+    "selected_accumulator_width_bits": {"enum": [64, 128]},
+    "theorems": {"items": {"$ref": "#/$defs/theorem"}, "minItems": 3, "type": "array"},
+    "type_name": {"const": "ACCUMULATOR_PROOF_INSTANCE"}
+  },
+  "required": ["coefficient_abs_max", "common_denominator", "config_id", "final_abs_bound", "formal_semantics_id", "lean_artifact_sha256", "max_eligible_contributions", "max_incremental_prefix_abs", "product_abs_bound", "product_width_bits", "profile_id", "q_abs_max", "result", "scale_table_id", "schema_version", "selected_accumulator_width_bits", "theorems", "type_name"],
+  "title": "DeltaReduce concrete accumulator proof instance v1",
+  "type": "object"
+}
