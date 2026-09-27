@@ -1283,6 +1283,19 @@ def main() -> int:
         "OPEN. nativeArithmeticRecoveryRefines is missing; no runtime guard, "
         "local PASS, GO or independent attestation is authorized."
     )
+    report["coverage"]["unresolved"].append(
+        "Original vector authority checking now derives source policy/state context "
+        "and full membership, executes original PARAMETER proposal lineage, checks "
+        "the complete assignment matrix and whole original body coverage, and "
+        "compares the selected proposal numerators/Q leaf list against actual "
+        "source computations. Vote context is checked separately from body hashes; "
+        "original decimal strings and contribution order are retained. No new "
+        "complete raw/native run is instantiated. Draft/native artifact mapping, "
+        "all original commitments, current vectors/APPLY profile, concrete "
+        "authentication and full recovery remain OPEN. Native negative-zero "
+        "compatibility and the explicit shard-label projection restriction remain. "
+        "No runtime guard, local PASS, GO or independent attestation is authorized."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

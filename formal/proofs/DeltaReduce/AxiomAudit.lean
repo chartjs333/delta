@@ -1,3 +1,5 @@
+import DeltaReduce.NativeVectorAuthority
+import DeltaReduce.NativeVectorAuthorityVectors
 import DeltaReduce.NativeVectorDerivation
 import DeltaReduce.NativeVectorCorpusVectors
 import DeltaReduce.NativeVectorSourceVectors
@@ -12494,3 +12496,73 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeVectorDerivation.actualJoin
 
 #print axioms DeltaReduce.NativeVectorDerivation.actualRawRun
+
+#print axioms DeltaReduce.NativeVectorAuthority.base
+#print axioms DeltaReduce.NativeVectorAuthority.policy
+#print axioms DeltaReduce.NativeVectorAuthority.state
+#print axioms DeltaReduce.NativeVectorAuthority.plan
+#print axioms DeltaReduce.NativeVectorAuthority.context
+#print axioms DeltaReduce.NativeVectorAuthority.members
+#print axioms DeltaReduce.NativeVectorAuthority.eligible
+#print axioms DeltaReduce.NativeVectorAuthority.tickets
+#print axioms DeltaReduce.NativeVectorAuthority.rawSource
+#print axioms DeltaReduce.NativeVectorAuthority.originalContext
+#print axioms DeltaReduce.NativeVectorAuthority.completeMembers
+#print axioms DeltaReduce.NativeVectorAuthority.ticketAt
+#print axioms DeltaReduce.NativeVectorAuthority.FrameChecks
+#print axioms DeltaReduce.NativeVectorAuthority.assignmentKey
+#print axioms DeltaReduce.NativeVectorAuthority.selectedBodies
+#print axioms DeltaReduce.NativeVectorAuthority.findBody
+#print axioms DeltaReduce.NativeVectorAuthority.AssignmentChecks
+#print axioms DeltaReduce.NativeVectorAuthority.Link
+#print axioms DeltaReduce.NativeVectorAuthority.link
+#print axioms DeltaReduce.NativeVectorAuthority.linked
+#print axioms DeltaReduce.NativeVectorAuthority.bodyMembership
+#print axioms DeltaReduce.NativeVectorAuthority.links
+#print axioms DeltaReduce.NativeVectorAuthority.allAssignments
+#print axioms DeltaReduce.NativeVectorAuthority.allLinked
+#print axioms DeltaReduce.NativeVectorAuthority.linkAt
+#print axioms DeltaReduce.NativeVectorAuthority.Coverage
+#print axioms DeltaReduce.NativeVectorAuthority.OriginalCoverage
+#print axioms DeltaReduce.NativeVectorAuthority.Checked
+#print axioms DeltaReduce.NativeVectorAuthority.check
+#print axioms DeltaReduce.NativeVectorAuthority.Source
+#print axioms DeltaReduce.NativeVectorAuthority.checked
+#print axioms DeltaReduce.NativeVectorAuthority.fromSource
+#print axioms DeltaReduce.NativeVectorAuthority.originalAssignment
+#print axioms DeltaReduce.NativeVectorAuthority.originalPayload
+#print axioms DeltaReduce.NativeVectorAuthority.exactVoteContext
+#print axioms DeltaReduce.NativeVectorAuthority.completeMatrix
+#print axioms DeltaReduce.NativeVectorAuthority.completeOriginalBodies
+#print axioms DeltaReduce.NativeVectorAuthority.completeOriginalPayloads
+#print axioms DeltaReduce.NativeVectorAuthority.missingBodyRejected
+#print axioms DeltaReduce.NativeVectorAuthority.changedVoteContextRejected
+#print axioms DeltaReduce.NativeVectorAuthority.changedFrameRejected
+#print axioms DeltaReduce.NativeVectorAuthority.emptyMatrixRejected
+#print axioms DeltaReduce.NativeVectorAuthority.join
+#print axioms DeltaReduce.NativeVectorAuthority.joined
+#print axioms DeltaReduce.NativeVectorAuthority.joinedFromInputs
+#print axioms DeltaReduce.NativeVectorAuthority.sourceLeaves
+#print axioms DeltaReduce.NativeVectorAuthority.sourceLeafCount
+#print axioms DeltaReduce.NativeVectorAuthority.sourceLeafAt
+#print axioms DeltaReduce.NativeVectorAuthority.bodyMatches
+#print axioms DeltaReduce.NativeVectorAuthority.matchedBody
+#print axioms DeltaReduce.NativeVectorAuthority.Verified
+#print axioms DeltaReduce.NativeVectorAuthority.verify
+#print axioms DeltaReduce.NativeVectorAuthority.VerifiedSource
+#print axioms DeltaReduce.NativeVectorAuthority.verifiedSource
+#print axioms DeltaReduce.NativeVectorAuthority.verifiedNumbers
+#print axioms DeltaReduce.NativeVectorAuthority.verifiedLeaves
+#print axioms DeltaReduce.NativeVectorAuthority.verifiedContext
+#print axioms DeltaReduce.NativeVectorAuthority.invalidBodyRejected
+#print axioms DeltaReduce.NativeVectorAuthority.run
+#print axioms DeltaReduce.NativeVectorAuthority.runSource
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.sample
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.exactNumbers
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.sourceOrderRetained
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.changedNumber
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.missingLeaf
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.extraLeaf
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.duplicateLeaf
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.originalNegativeZeroPreserved
+#print axioms DeltaReduce.NativeVectorAuthorityVectors.numericOnlyIsInsufficient

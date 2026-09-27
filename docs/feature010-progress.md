@@ -4819,3 +4819,52 @@ bytes and all per-actor sequences. General codecs/hash/exporter, full-batch reso
 arbitrary snapshots, phase/QC/send/delivery/journal/current/crash/unknown/torn/repair/
 physicalWAL, decimal compatibility, contract freeze/offline reproduction and
 independent review remain required. Source-bound semantics: sha256:77a0edb93e2cd9286ff8f670cd659d1891b73e88123241b247a78a115e2659e8.
+
+
+## 27 September 2026 — original vector authority and selected PARAMETER body checks
+
+T044/T048/T053/T054/T056/T057. Formal proposal; NO_GO. Scope
+formal/proposals/native-vector-authority-proof.md; evidence
+formal/proposals/evidence/native-vector-authority.json. NativeVectorAuthority
+follows raw source loaders to the original policy/state and computes all six
+context fields, complete ISC/eligible membership and ticket/domain order.
+The executable join now runs original proposed PARAMETER lineage, separately
+checks vote context, full source certificate context, exact ISC/EC/APC and
+denominator, complete configured assignment keys, and a permutation of whole
+original typed bodies/payloads. It does not substitute equal counts or body IDs.
+
+The stronger verify/run entry compares the selected proposal numerators and
+all original manifest Q leaf references with actual vector computation and
+exact shard-position lookups. Source contribution order stays intact; only the
+native certificate leaf list is sorted, preserving every multiplicity. Missing,
+extra, duplicate or numerically substituted entries reject. Original strings
+are retained, including the unresolved -00/-01 compatibility boundary.
+
+Two modules:32 general theorems,23 definitions,five structures; eight small
+comparator kernel cases/one fixture definition. All69 explicit top-level names
+axiom-audited with onlypropext/Quot.sound/Classical.choice. Full Lean1138jobs,
+two fresh kernels,723tooling/38oracle,33legal112illegal,Ruff/format/consistency
+and387files byte-exact PASS. All final source/evidence hashes match Git blobs.
+21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.
+No freshTLC/productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines
+missing;Phase0unfrozen;make absent/noaggregateformal-check. Three demosHTTP200
+without restart and frozenrefs unchanged. Only final stable-source evidence counts.
+
+No new complete Inputs/Binding or successful full raw/native run is instantiated.
+Small comparator examples deliberately have invalid authority/tiny leaf labels;
+a numeric-only positive is not protocol admission. Exact native shard-label to
+draft-label equality is a representability restriction. Draft/native schema,
+profile and ISC/EC/APC artifact mappings, every original ISC commitment, current
+vectors and APPLY profile remain OPEN. No parent checkpoint string proves them.
+General codec/hash/exporter authentication and full-batch resources remain open.
+
+Next: construct source-derived ISC/EC/APC artifact payloads with independently
+anchored original-to-draft Q/manifest correspondence for every member, including
+rejected members, and derive the configured shard-label mapping from real source
+contracts. Do not invent missing current/model/optimizer/APPLY profile payloads
+or populate a synthetic wrapper to claim a native bridge. Then instantiate the
+full Inputs relation and joined original/draft run. Full arbitrary snapshot,
+phase/QC/send/delivery/journal/current/crash/unknown/torn/repair/physical-WAL
+recovery, decimal compatibility, contract freeze/offline reproduction and
+independent review remain mandatory. Original008 proof/base/current preimages
+remain absent. Source-bound semantics: sha256:cca88293f7943266b07d7fa3c200563f77fd4224564d0352288c9af75e19f865.

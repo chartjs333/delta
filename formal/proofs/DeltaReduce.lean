@@ -1,3 +1,5 @@
+import DeltaReduce.NativeVectorAuthority
+import DeltaReduce.NativeVectorAuthorityVectors
 import DeltaReduce.NativeVectorDerivation
 import DeltaReduce.NativeVectorCorpusVectors
 import DeltaReduce.NativeVectorSourceVectors
