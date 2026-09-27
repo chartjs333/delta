@@ -1,3 +1,5 @@
+import DeltaReduce.NativeSourceRefusal
+import DeltaReduce.NativePlanSourceVectors
 import DeltaReduce.NativeVectorLayout
 import DeltaReduce.NativeVectorArtifacts
 import DeltaReduce.NativeVectorJoin
@@ -11729,3 +11731,91 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeVectorArtifactVectors.emptyVector
 #print axioms DeltaReduce.NativeVectorArtifactVectors.int64Overflow
 #print axioms DeltaReduce.NativeVectorArtifactVectors.rawBodyChanges
+
+#print axioms DeltaReduce.NativeSourceRefusal.sectionFromSources
+#print axioms DeltaReduce.NativeSourceRefusal.accumulatorIdentityUnavailable
+#print axioms DeltaReduce.NativeSourceRefusal.proofBytesUnavailable
+#print axioms DeltaReduce.NativeSourceRefusal.coefficientsUnavailable
+#print axioms DeltaReduce.NativeSourceRefusal.corpusUnavailable
+#print axioms DeltaReduce.NativeSourceRefusal.contextUnavailable
+#print axioms DeltaReduce.NativeSourceRefusal.runUnavailable
+
+#print axioms DeltaReduce.NativePlanSourceVectors.tree
+#print axioms DeltaReduce.NativePlanSourceVectors.snapshot
+#print axioms DeltaReduce.NativePlanSourceVectors.candidate0
+#print axioms DeltaReduce.NativePlanSourceVectors.policy
+#print axioms DeltaReduce.NativePlanSourceVectors.extracted
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding0
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding1
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding2
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding3
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding4
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding5
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding6
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding7
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding8
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding9
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding10
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding11
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding12
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding13
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding14
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding15
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding16
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding17
+#print axioms DeltaReduce.NativePlanSourceVectors.encoding18
+#print axioms DeltaReduce.NativePlanSourceVectors.policyBody
+#print axioms DeltaReduce.NativePlanSourceVectors.policyRaw
+#print axioms DeltaReduce.NativePlanSourceVectors.encoded
+#print axioms DeltaReduce.NativePlanSourceVectors.canonical
+#print axioms DeltaReduce.NativePlanSourceVectors.policyLength
+#print axioms DeltaReduce.NativePlanSourceVectors.policyParsed
+#print axioms DeltaReduce.NativePlanSourceVectors.stateWire
+#print axioms DeltaReduce.NativePlanSourceVectors.state
+#print axioms DeltaReduce.NativePlanSourceVectors.stateRaw
+#print axioms DeltaReduce.NativePlanSourceVectors.stateValid
+#print axioms DeltaReduce.NativePlanSourceVectors.stateEncoded
+#print axioms DeltaReduce.NativePlanSourceVectors.stateParsed
+#print axioms DeltaReduce.NativePlanSourceVectors.statePreimage
+#print axioms DeltaReduce.NativePlanSourceVectors.stateDigest
+#print axioms DeltaReduce.NativePlanSourceVectors.snapshotId
+#print axioms DeltaReduce.NativePlanSourceVectors.proofDigest
+#print axioms DeltaReduce.NativePlanSourceVectors.proofPreimage
+#print axioms DeltaReduce.NativePlanSourceVectors.sha
+#print axioms DeltaReduce.NativePlanSourceVectors.stateHash
+#print axioms DeltaReduce.NativePlanSourceVectors.fallback
+#print axioms DeltaReduce.NativePlanSourceVectors.iscHash
+#print axioms DeltaReduce.NativePlanSourceVectors.iscBodyHash
+#print axioms DeltaReduce.NativePlanSourceVectors.normHash
+#print axioms DeltaReduce.NativePlanSourceVectors.seedHash
+#print axioms DeltaReduce.NativePlanSourceVectors.ecHash
+#print axioms DeltaReduce.NativePlanSourceVectors.apcHash
+#print axioms DeltaReduce.NativePlanSourceVectors.context
+#print axioms DeltaReduce.NativePlanSourceVectors.committee
+#print axioms DeltaReduce.NativePlanSourceVectors.iscChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.normChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.seedChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.ecChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.apcChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.iscSection
+#print axioms DeltaReduce.NativePlanSourceVectors.iscSectionChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.normSection
+#print axioms DeltaReduce.NativePlanSourceVectors.normSectionChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.eligibilitySection
+#print axioms DeltaReduce.NativePlanSourceVectors.eligibilitySectionChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.planSection
+#print axioms DeltaReduce.NativePlanSourceVectors.planSectionChecked
+#print axioms DeltaReduce.NativePlanSourceVectors.rawPlanPrepared
+#print axioms DeltaReduce.NativePlanSourceVectors.originalRow
+#print axioms DeltaReduce.NativePlanSourceVectors.members
+#print axioms DeltaReduce.NativePlanSourceVectors.originalRows
+#print axioms DeltaReduce.NativePlanSourceVectors.rawMembersPrepared
+#print axioms DeltaReduce.NativePlanSourceVectors.originalCoverage
+#print axioms DeltaReduce.NativePlanSourceVectors.requiredProofRetained
+#print axioms DeltaReduce.NativePlanSourceVectors.supplied004ProofHash
+#print axioms DeltaReduce.NativePlanSourceVectors.supplied004IsNotRequired
+#print axioms DeltaReduce.NativePlanSourceVectors.substitutedProofRejected
+#print axioms DeltaReduce.NativePlanSourceVectors.originalCannotUse004Proof
+#print axioms DeltaReduce.NativePlanSourceVectors.rawJoinRejectsSubstitution
+#print axioms DeltaReduce.NativePlanSourceVectors.missingProofRejected
+#print axioms DeltaReduce.NativePlanSourceVectors.rawJoinRejectsMissing

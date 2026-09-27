@@ -1241,6 +1241,19 @@ def main() -> int:
         "nativeArithmeticRecoveryRefines remain OPEN. No runtime change, native "
         "execution, local PASS, GO or independent attestation is claimed."
     )
+    report["coverage"]["unresolved"].append(
+        "Whole original008 policy/state to ISC/norm/seed/EC/APC membership now "
+        "has a mandatory kernel composition over retained raw5849/674-byte "
+        "inputs. Exact source lists and parent identities compose; finite SHA "
+        "samples remain synthetic. The required original008 accumulator proof "
+        "is still missing. General refusal propagates absent or wrong-ID proof "
+        "inputs through Q corpus/context and NativeVectorJoin.run, even with "
+        "a valid separate draft Binding. The concrete case rejects original004 "
+        "proof substitution. This is not a successful full vector join or full "
+        "phase/candidate/current/WAL admission; later PARAMETER data is retained "
+        "but not checked by plan preparation. No source authentication, runtime "
+        "guard change, local PASS, GO or independent attestation is claimed."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

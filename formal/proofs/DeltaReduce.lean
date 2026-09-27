@@ -1,3 +1,5 @@
+import DeltaReduce.NativeSourceRefusal
+import DeltaReduce.NativePlanSourceVectors
 import DeltaReduce.NativeVectorLayout
 import DeltaReduce.NativeVectorArtifacts
 import DeltaReduce.NativeVectorJoin

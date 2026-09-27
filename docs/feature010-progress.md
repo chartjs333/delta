@@ -4677,3 +4677,48 @@ crash/unknown/torn/repair/WAL, arbitrary snapshots, full-batch resources, native
 decimal compatibility, freeze/offline reproduction and independent reviews remain.
 No localPASS, runtime guard change, independentattestation or GO.
 Source-bound semantics: sha256:12954f785fc8726b3b53c580805a624eefda5700f3eb0ecfb158fc13b855d5d7.
+
+
+## 27 September 2026 — whole original policy/state APC membership and proof refusal
+
+T044/T048/T053/T054/T056/T057. Formal proposal; NO_GO. Scope
+formal/proposals/native-plan-source-proof.md; evidence
+formal/proposals/evidence/native-plan-source.json. NativePlanSourceVectors composes
+the retained5849-byte codec-PARAMETER policy and674-byte state matching its snapshot
+ID through actual raw decoders, finalized ISC, norm, seed, EC, APC and eligible-member
+extraction. All original lists, parent IDs, final alpha/bucket and unused later
+PARAMETER fields are retained. The latter are not admitted by this plan parser.
+
+The attempted positive whole-vector example exposed incompatible existing sources:
+original008 requires sha256:ffff...ffff; available004 proof has a different actual
+content ID. This was not repaired by rewriting the source. NativeSourceRefusal
+proves missing/incorrect proof refusal through coefficients, Q corpus, context and
+the complete NativeVectorJoin.run for arbitrary permissions/Q inputs and separate
+draft Binding. Concrete raw-source cases reject missing and substituted004 proof.
+Finite SHA samples remain explicitly synthetic and do not authenticate the source.
+
+Two modules:7 general refusal/composition theorems,56 component/kernel theorems and
+23 fixture definitions. All86 names audited onlypropext/Quot.sound/Classical.choice.
+Existing component encodings/certificate lemmas reused;19 new encoding lemmas.
+Full Lean1133jobs/twofreshkernels,717tooling/38oracle/5targeted,33legal112illegal,
+Ruff/format/consistency and384file byte-exact regeneration PASS. Only final stable
+source counts; draft failures superseded.21TLA/schema/runtime/147nativewitnesses
+unchanged;145legacytraces onlysemanticsID. No freshTLC/productionmutants.
+Mandatory44/45/nativeArithmeticRecoveryRefines missing;native certificate -00/-01
+FAIL remains;Phase0unfrozen;make absent/noaggregateformal-check. Three demosHTTP200
+withoutrestart/frozenrefsunchanged. No native guard/localPASS/GO/attestation.
+
+This is a complete raw-source plan membership example and end-to-end refusal, not
+a successful original-source arithmetic/draft join. Original008 proof/base/current
+captures remain missing. Next: construct a separately versioned synthetic whole
+policy/state wrapper for the already available004 graph and joined_fixture source
+documents, with new identities and explicit primitive provenance, then instantiate
+actual raw source bind/vector join through checked component lemmas. Do not reuse
+the incompatible original008 proof/context or call the new wrapper a native capture.
+Advance full source configuration/context/current/model/optimizer/APPLY binding;
+do not spend another stage only rediscovering the same missing original proof.
+General codecs/hash/exporter, arbitrary snapshots, full-batch resources, complete
+phase/QC/send/delivery/journal/current/crash/unknown/torn/repair/WAL relation, native
+decimal compatibility, amendment freeze, offline reproduction and independent
+review remain required. No helper discharges nativeArithmeticRecoveryRefines.
+Source-bound semantics: sha256:c91af44224ba718bf965120bcf580b91a580b9cb74be2fdb057fd6ed96b9149d.

@@ -1,0 +1,10 @@
+test_actual004_store_does_not_repair_original008_proof (test_native_plan_source.NativePlanSourceTests.test_actual004_store_does_not_repair_original008_proof) ... ok
+test_original_state_is_exact_policy_preimage (test_native_plan_source.NativePlanSourceTests.test_original_state_is_exact_policy_preimage) ... ok
+test_reproduction_and_kernel_inventory (test_native_plan_source.NativePlanSourceTests.test_reproduction_and_kernel_inventory) ... ok
+test_retained_source_substitution_is_rejected (test_native_plan_source.NativePlanSourceTests.test_retained_source_substitution_is_rejected) ... ok
+test_whole_snapshot_retains_original_plan_and_parent (test_native_plan_source.NativePlanSourceTests.test_whole_snapshot_retains_original_plan_and_parent) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.459s
+
+OK
