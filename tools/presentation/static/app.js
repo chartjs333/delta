@@ -357,6 +357,130 @@ if (copyBtn) {
   });
 }
 
+function drawSvgLineChart(svgEl, chartData, options = {}) {
+  if (!svgEl || !chartData || !chartData.values || chartData.values.length < 2) return;
+  const {
+    color = "#38bdf8",
+    gradientId = `grad-${Math.random().toString(36).slice(2, 8)}`,
+    isAccuracy = chartData.metric === "accuracy"
+  } = options;
+
+  const width = 360;
+  const height = 130;
+  const padLeft = 40;
+  const padRight = 30;
+  const padTop = 22;
+  const padBottom = 26;
+  const plotW = width - padLeft - padRight;
+  const plotH = height - padTop - padBottom;
+
+  const vals = chartData.values.map(Number);
+  let minV = Math.min(...vals);
+  let maxV = Math.max(...vals);
+
+  if (isAccuracy) {
+    minV = Math.min(minV, 55);
+    maxV = Math.max(maxV, 88);
+  } else {
+    const span = Math.max(0.04, maxV - minV);
+    minV = Math.max(0, minV - span * 0.18);
+    maxV = maxV + span * 0.18;
+  }
+  const range = maxV - minV || 1;
+
+  const points = vals.map((v, i) => {
+    const x = padLeft + (i / (vals.length - 1)) * plotW;
+    const y = padTop + (1 - (v - minV) / range) * plotH;
+    return { x, y, v, label: chartData.labels?.[i] ?? `R${i}` };
+  });
+
+  const pathD = points.reduce((acc, p, i) => acc + (i === 0 ? `M ${p.x.toFixed(1)} ${p.y.toFixed(1)}` : ` L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`), "");
+  const firstP = points[0];
+  const lastP = points[points.length - 1];
+  const areaD = `${pathD} L ${lastP.x.toFixed(1)} ${(padTop + plotH).toFixed(1)} L ${firstP.x.toFixed(1)} ${(padTop + plotH).toFixed(1)} Z`;
+
+  const gridSteps = 3;
+  let gridSvg = "";
+  for (let s = 0; s <= gridSteps; s++) {
+    const yVal = minV + (s / gridSteps) * range;
+    const yPos = padTop + (1 - s / gridSteps) * plotH;
+    const textVal = isAccuracy ? `${Math.round(yVal)}%` : yVal.toFixed(2);
+    gridSvg += `
+      <line x1="${padLeft}" y1="${yPos.toFixed(1)}" x2="${(padLeft + plotW).toFixed(1)}" y2="${yPos.toFixed(1)}" stroke="#334155" stroke-dasharray="3 3" stroke-width="1" />
+      <text x="${padLeft - 6}" y="${(yPos + 3).toFixed(1)}" text-anchor="end" fill="#64748b" font-size="8.5" font-family="monospace">${textVal}</text>
+    `;
+  }
+
+  let pointsSvg = "";
+  points.forEach((p, idx) => {
+    const isFailure = chartData.failure_point_index === idx;
+    const ptColor = isFailure ? "#f59e0b" : color;
+    const displayVal = isAccuracy ? `${p.v.toFixed(1)}%` : p.v.toFixed(3);
+
+    pointsSvg += `
+      <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${isFailure ? 5.5 : 4}" fill="${ptColor}" stroke="#0f172a" stroke-width="2" />
+      <text x="${p.x.toFixed(1)}" y="${(p.y - 7).toFixed(1)}" text-anchor="middle" fill="#f8fafc" font-size="8.5" font-weight="600" font-family="monospace">${displayVal}</text>
+      <text x="${p.x.toFixed(1)}" y="${(height - 8).toFixed(1)}" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="monospace">${p.label}</text>
+    `;
+
+    if (isFailure && chartData.failure_label) {
+      const boxW = 150;
+      const boxX = Math.min(width - boxW - 6, Math.max(padLeft, p.x - boxW / 2));
+      pointsSvg += `
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2 2" />
+        <g transform="translate(${boxX.toFixed(1)}, ${(p.y + 11).toFixed(1)})">
+          <rect width="${boxW}" height="16" rx="3" fill="#78350f" stroke="#f59e0b" stroke-width="1" />
+          <text x="${(boxW / 2).toFixed(1)}" y="11" text-anchor="middle" fill="#fef08a" font-size="7.5" font-weight="700">${chartData.failure_label}</text>
+        </g>
+      `;
+    }
+  });
+
+  svgEl.innerHTML = `
+    <defs>
+      <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${color}" stop-opacity="0.32" />
+        <stop offset="100%" stop-color="${color}" stop-opacity="0.0" />
+      </linearGradient>
+    </defs>
+    ${gridSvg}
+    <path d="${areaD}" fill="url(#${gradientId})" />
+    <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    ${pointsSvg}
+  `;
+}
+
+function initModelCharts() {
+  const mnistChartEl = $("mnist-chart");
+  if (mnistChartEl) {
+    drawSvgLineChart(mnistChartEl, {
+      metric: "accuracy",
+      labels: ["Round 1", "Round 2", "Round 3", "Round 4"],
+      values: [61.2, 72.4, 78.1, 82.03],
+      failure_point_index: 2,
+      failure_label: "⚡ Node 4 Crash & Recovery"
+    }, { color: "#2dd4bf" });
+  }
+
+  const causalChartEl = $("causal-chart");
+  if (causalChartEl) {
+    drawSvgLineChart(causalChartEl, {
+      metric: "loss",
+      labels: ["R0", "R1", "R2", "R3", "R4", "R5"],
+      values: [2.8904, 2.8686, 2.8465, 2.8267, 2.8098, 2.7952]
+    }, { color: "#4ade80" });
+  }
+
+  const qloraChartEl = $("qlora-chart");
+  if (qloraChartEl) {
+    drawSvgLineChart(qloraChartEl, {
+      metric: "loss",
+      labels: ["R1", "R2", "R3", "R4"],
+      values: [1.5234, 1.4784, 1.4334, 1.3884]
+    }, { color: "#c084fc" });
+  }
+}
+
 let causalReceipt = null;
 const btnCausal = $("btn-run-causal");
 const btnInspectCausal = $("btn-inspect-causal");
@@ -371,7 +495,7 @@ if (btnCausal) {
   btnCausal.addEventListener("click", async () => {
     btnCausal.disabled = true;
     const badge = $("causal-status-badge");
-    if (badge) { badge.textContent = "CONSENSUS RUNNING…"; badge.className = "chip warning"; }
+    if (badge) { badge.textContent = "TRAINING 5 ROUNDS…"; badge.className = "chip warning"; }
 
     for (let i = 1; i <= 5; i++) {
       const elStep = $(`causal-step-${i}`);
@@ -388,13 +512,27 @@ if (btnCausal) {
       const data = await response.json();
       causalReceipt = data.receipt;
 
-      $("causal-init-loss").textContent = Number(data.initial_loss).toFixed(4);
-      $("causal-final-loss").textContent = Number(data.final_loss).toFixed(4);
-      $("causal-reduction").textContent = (data.loss_reduction >= 0 ? "+" : "") + Number(data.loss_reduction).toFixed(4);
+      const roundBadge = $("causal-round-badge");
+      if (roundBadge) roundBadge.textContent = `Round ${data.rounds_count || 5} / 5`;
+
+      const trajVal = $("causal-trajectory-val");
+      if (trajVal) {
+        trajVal.textContent = `${Number(data.initial_loss).toFixed(4)} → ${Number(data.final_loss).toFixed(4)} (-${Number(data.loss_reduction).toFixed(4)})`;
+      }
+
+      const cpShort = $("causal-next-cp-short");
+      if (cpShort) {
+        cpShort.textContent = (data.checkpoint_manifest || "").slice(0, 16) + "…";
+      }
 
       for (let i = 1; i <= 5; i++) {
         const elStep = $(`causal-step-${i}`);
         if (elStep) elStep.className = "step-dot completed";
+      }
+
+      const causalChartEl = $("causal-chart");
+      if (causalChartEl && data.chart_data) {
+        drawSvgLineChart(causalChartEl, data.chart_data, { color: "#4ade80" });
       }
 
       const list = $("causal-steps-list");
@@ -447,7 +585,7 @@ if (btnQlora) {
   btnQlora.addEventListener("click", async () => {
     btnQlora.disabled = true;
     const badge = $("qlora-status-badge");
-    if (badge) { badge.textContent = "CONSENSUS RUNNING…"; badge.className = "chip warning"; }
+    if (badge) { badge.textContent = "TRAINING 4 ROUNDS…"; badge.className = "chip warning"; }
 
     for (let i = 1; i <= 5; i++) {
       const elStep = $(`qlora-step-${i}`);
@@ -464,9 +602,22 @@ if (btnQlora) {
       const data = await response.json();
       qloraReceipt = data.receipt;
 
+      const roundBadge = $("qlora-round-badge");
+      if (roundBadge) roundBadge.textContent = `Round ${data.rounds_count || 4} / 4`;
+
+      const trajVal = $("qlora-trajectory-val");
+      if (trajVal) {
+        trajVal.textContent = `${Number(data.initial_loss).toFixed(4)} → ${Number(data.final_loss).toFixed(4)} (-${Number(data.loss_reduction).toFixed(4)})`;
+      }
+
       for (let i = 1; i <= 5; i++) {
         const elStep = $(`qlora-step-${i}`);
         if (elStep) elStep.className = "step-dot completed";
+      }
+
+      const qloraChartEl = $("qlora-chart");
+      if (qloraChartEl && data.chart_data) {
+        drawSvgLineChart(qloraChartEl, data.chart_data, { color: "#c084fc" });
       }
 
       const container = $("qlora-qual-details");
@@ -504,6 +655,8 @@ if (btnQlora) {
     }
   });
 }
+
+initModelCharts();
 
 applyLanguage();
 await refresh();

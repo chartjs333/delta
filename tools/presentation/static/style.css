@@ -104,4 +104,19 @@
 .receipt-json { margin: 0; padding: 12px; background: #0f172a; color: #38bdf8; font-family: ui-monospace,Consolas,monospace; font-size: 10px; line-height: 1.45; max-height: 280px; overflow-y: auto; border-radius: 0; }
 .receipt-modal-footer { display: flex; justify-content: flex-end; padding: 14px 22px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-radius: 0 0 12px 12px; }
 
+/* Model Training Progress & Charts */
+.model-progress-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; color: #f8fafc; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
+.progress-card-header { display: flex; flex-direction: column; gap: 8px; }
+.progress-title-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.progress-metric { font-size: 13px; font-weight: 500; color: #cbd5e1; }
+.progress-metric strong { color: #38bdf8; font-weight: 700; }
+.progress-chips-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chip-mini { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 4px; }
+.chip-mini.good { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+.chip-mini.primary { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.chip-mini.warning { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); }
+.chip-mini.neutral { background: rgba(148, 163, 184, 0.12); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.25); }
+.chart-wrapper { position: relative; width: 100%; height: 130px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(51, 65, 85, 0.6); border-radius: 6px; overflow: hidden; }
+.model-chart { width: 100%; height: 100%; display: block; }
+
 

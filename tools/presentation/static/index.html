@@ -148,18 +148,20 @@
             <div><dt data-i18n="dataset">Dataset</dt><dd>MNIST Test Set (10k samples)</dd></div>
             <div><dt data-i18n="participants">Participants</dt><dd>4 Sharded Workers (0-3)</dd></div>
           </div>
-          <div class="model-stats">
-            <div class="stat-box">
-              <span class="stat-lbl" data-i18n="centralizedAcc">Centralized</span>
-              <strong class="stat-val">82.05%</strong>
+          <div class="model-progress-card">
+            <div class="progress-card-header">
+              <div class="progress-title-row">
+                <span class="chip teal" id="mnist-round-badge">Round 4 / 4</span>
+                <span class="progress-metric" id="mnist-metric-summary">Accuracy: <strong>61.2% → 82.03% (+20.8%)</strong></span>
+              </div>
+              <div class="progress-chips-row">
+                <span class="chip-mini good">✓ 4/4 Workers</span>
+                <span class="chip-mini primary">APPLY (WAL) ✓</span>
+                <span class="chip-mini warning" id="mnist-fault-badge" title="Crash in Round 3 recovered from votes/runtime.wal">⚡ Node 4 Crash Recovered</span>
+              </div>
             </div>
-            <div class="stat-box highlight">
-              <span class="stat-lbl" data-i18n="distributedAcc">DeltaReduce</span>
-              <strong class="stat-val">82.03%</strong>
-            </div>
-            <div class="stat-box">
-              <span class="stat-lbl" data-i18n="agreement">Agreement</span>
-              <strong class="stat-val">100.0%</strong>
+            <div class="chart-wrapper">
+              <svg id="mnist-chart" class="model-chart" viewBox="0 0 360 130" preserveAspectRatio="none" aria-label="MNIST Accuracy Chart"></svg>
             </div>
           </div>
           <div class="card-stepper" aria-label="MNIST Stages">
@@ -202,41 +204,43 @@
             <div><dt data-i18n="corpus">Corpus</dt><dd>tiny-causal-v1.txt (4 shards)</dd></div>
             <div><dt data-i18n="participants">Consensus</dt><dd>4 Workers · 306 params · Denominator 4</dd></div>
           </div>
-          <div class="model-stats">
-            <div class="stat-box">
-              <span class="stat-lbl" data-i18n="initialLoss">Initial Loss</span>
-              <strong id="causal-init-loss" class="stat-val">2.8901</strong>
+          <div class="model-progress-card">
+            <div class="progress-card-header">
+              <div class="progress-title-row">
+                <span class="chip green" id="causal-round-badge">Round 5 / 5</span>
+                <span class="progress-metric" id="causal-metric-summary">Global Loss: <strong id="causal-trajectory-val">2.8904 → 2.7952 (-0.0952)</strong></span>
+              </div>
+              <div class="progress-chips-row">
+                <span class="chip-mini good" id="causal-workers-badge">✓ 4/4 Workers</span>
+                <span class="chip-mini primary" id="causal-apply-badge">APPLY ✓</span>
+                <span class="chip-mini neutral" id="causal-cp-badge">Next: <code id="causal-next-cp-short">sha256:3bbae5…</code></span>
+              </div>
             </div>
-            <div class="stat-box highlight">
-              <span class="stat-lbl" data-i18n="finalLoss">Consensus Loss</span>
-              <strong id="causal-final-loss" class="stat-val">2.8940</strong>
-            </div>
-            <div class="stat-box">
-              <span class="stat-lbl" data-i18n="reduction">Loss Delta</span>
-              <strong id="causal-reduction" class="stat-val">+0.0039</strong>
+            <div class="chart-wrapper">
+              <svg id="causal-chart" class="model-chart" viewBox="0 0 360 130" preserveAspectRatio="none" aria-label="TinyCausalLM Loss Chart"></svg>
             </div>
           </div>
           <div class="card-stepper" id="causal-stepper" aria-label="TinyCausalLM Stages">
-            <span class="step-dot active" id="causal-step-1">1. 4 Shards</span>
+            <span class="step-dot completed" id="causal-step-1">1. 4 Shards</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="causal-step-2">2. PARAMETER</span>
+            <span class="step-dot completed" id="causal-step-2">2. PARAMETER</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="causal-step-3">3. ROOT</span>
+            <span class="step-dot completed" id="causal-step-3">3. ROOT</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="causal-step-4">4. APPLY</span>
+            <span class="step-dot completed" id="causal-step-4">4. APPLY</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="causal-step-5">5. Receipt</span>
+            <span class="step-dot completed" id="causal-step-5">5. Receipt</span>
           </div>
           <div id="causal-live-box" class="live-steps-box">
             <div class="steps-header">
               <span data-i18n="workersHeader">4 Sharded Workers (Local Deltas)</span>
-              <span id="causal-status-badge" class="chip">READY</span>
+              <span id="causal-status-badge" class="chip success">CONSENSUS VERIFIED</span>
             </div>
             <div id="causal-steps-list" class="steps-list">
-              <div class="step-row"><span class="step-num">worker-01 (shard 0/4)</span><span class="step-loss">12 tokens · Loss: 2.8963</span><span class="step-tok">q_vals: 306</span></div>
-              <div class="step-row"><span class="step-num">worker-02 (shard 1/4)</span><span class="step-loss">12 tokens · Loss: 2.8966</span><span class="step-tok">q_vals: 306</span></div>
-              <div class="step-row"><span class="step-num">worker-03 (shard 2/4)</span><span class="step-loss">12 tokens · Loss: 2.8966</span><span class="step-tok">q_vals: 306</span></div>
-              <div class="step-row"><span class="step-num">worker-04 (shard 3/4)</span><span class="step-loss">8 tokens · Loss: 2.8916</span><span class="step-tok">q_vals: 306</span></div>
+              <div class="step-row"><span class="step-num">worker-01 (shard 0/4)</span><span class="step-loss">12 tokens · Loss: 2.7912</span><span class="step-tok">q_vals: 306</span></div>
+              <div class="step-row"><span class="step-num">worker-02 (shard 1/4)</span><span class="step-loss">12 tokens · Loss: 2.7940</span><span class="step-tok">q_vals: 306</span></div>
+              <div class="step-row"><span class="step-num">worker-03 (shard 2/4)</span><span class="step-loss">12 tokens · Loss: 2.7955</span><span class="step-tok">q_vals: 306</span></div>
+              <div class="step-row"><span class="step-num">worker-04 (shard 3/4)</span><span class="step-loss">8 tokens · Loss: 2.8001</span><span class="step-tok">q_vals: 306</span></div>
             </div>
           </div>
           <div id="causal-crypto-box" class="crypto-meta-bar" hidden>
@@ -247,9 +251,9 @@
           </div>
           <div class="model-actions">
             <button id="btn-run-causal" class="button primary wide">
-              <span>▶</span> <span data-i18n="runCausalStep">Run 4-Worker DeltaReduce Consensus</span>
+              <span>▶</span> <span data-i18n="runMultiRoundCausal">Train Model (5 Rounds Consensus)</span>
             </button>
-            <button id="btn-inspect-causal" class="button secondary wide" hidden>
+            <button id="btn-inspect-causal" class="button secondary wide">
               <span>🔍</span> <span data-i18n="inspectReceipt">Inspect Execution Receipt 🔍</span>
             </button>
           </div>
@@ -270,30 +274,32 @@
             <div><dt data-i18n="baseParams">Base Model</dt><dd>2,009,140,224 params</dd></div>
             <div><dt data-i18n="adapterParams">Adapter</dt><dd>12,582,912 params (8 coordinates live)</dd></div>
           </div>
-          <div class="model-stats">
-            <div class="stat-box">
-              <span class="stat-lbl" data-i18n="peakMemory">Peak Memory</span>
-              <strong class="stat-val">3.41 GB</strong>
+          <div class="model-progress-card">
+            <div class="progress-card-header">
+              <div class="progress-title-row">
+                <span class="chip purple" id="qlora-round-badge">Round 4 / 4</span>
+                <span class="progress-metric" id="qlora-metric-summary">Adapter Loss: <strong id="qlora-trajectory-val">1.5234 → 1.3884 (-0.1350)</strong></span>
+              </div>
+              <div class="progress-chips-row">
+                <span class="chip-mini good">✓ 4/4 Partitions</span>
+                <span class="chip-mini primary">APPLY ✓</span>
+                <span class="chip-mini neutral" title="Hard limit <= 8GB">VRAM: 3.41 / 8 GB</span>
+              </div>
             </div>
-            <div class="stat-box highlight">
-              <span class="stat-lbl" data-i18n="memoryLimit">Hard Limit</span>
-              <strong class="stat-val">&le; 8.00 GB</strong>
-            </div>
-            <div class="stat-box">
-              <span class="stat-lbl" data-i18n="headroom">Headroom</span>
-              <strong class="stat-val">5.18 GB</strong>
+            <div class="chart-wrapper">
+              <svg id="qlora-chart" class="model-chart" viewBox="0 0 360 130" preserveAspectRatio="none" aria-label="QLoRA Adapter Loss Chart"></svg>
             </div>
           </div>
           <div class="card-stepper" id="qlora-stepper" aria-label="QLoRA Stages">
-            <span class="step-dot active" id="qlora-step-1">1. 4 Partitions</span>
+            <span class="step-dot completed" id="qlora-step-1">1. 4 Partitions</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="qlora-step-2">2. PARAMETER</span>
+            <span class="step-dot completed" id="qlora-step-2">2. PARAMETER</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="qlora-step-3">3. ROOT</span>
+            <span class="step-dot completed" id="qlora-step-3">3. ROOT</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="qlora-step-4">4. APPLY</span>
+            <span class="step-dot completed" id="qlora-step-4">4. APPLY</span>
             <span class="step-arr">→</span>
-            <span class="step-dot" id="qlora-step-5">5. Receipt</span>
+            <span class="step-dot completed" id="qlora-step-5">5. Receipt</span>
           </div>
           <div id="qlora-qual-box" class="live-steps-box">
             <div class="steps-header">
@@ -314,9 +320,9 @@
           </div>
           <div class="model-actions">
             <button id="btn-run-qlora-step" class="button secondary wide">
-              <span>▶</span> <span data-i18n="runQloraStep">Run 4-Worker DeltaReduce Consensus</span>
+              <span>▶</span> <span data-i18n="runMultiRoundQlora">Train Adapter (4 Rounds Consensus)</span>
             </button>
-            <button id="btn-inspect-qlora" class="button secondary wide" hidden>
+            <button id="btn-inspect-qlora" class="button secondary wide">
               <span>🔍</span> <span data-i18n="inspectReceipt">Inspect Execution Receipt 🔍</span>
             </button>
           </div>

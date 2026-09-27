@@ -24,6 +24,11 @@ def test_mnist_summary_contents():
     assert summary["failure_simulation"]["failed_node_id"] == "validator-04"
     assert summary["consensus_pipeline"]["aggregation_owner"] == "delta::robust::reduce_parameter_shard"
     assert len(summary["consensus_pipeline"]["stages"]) == 5
+    assert "rounds" in summary
+    assert len(summary["rounds"]) == 4
+    assert summary["rounds"][2]["status"] == "CRASH_AND_RECOVERED"
+    assert "chart_data" in summary
+    assert summary["chart_data"]["failure_point_index"] == 2
 
 
 def test_qlora_qualification_contents():
@@ -47,6 +52,10 @@ def test_qlora_deltareduce_pipeline():
     assert result["parameter_root"].startswith("sha256:")
     assert result["apply_digest"].startswith("sha256:")
     assert result["next_adapter_hash"].startswith("sha256:")
+    assert "rounds" in result
+    assert len(result["rounds"]) == 4
+    assert "chart_data" in result
+    assert len(result["chart_data"]["values"]) == 4
 
     # Verify cryptographic receipt
     receipt = result["receipt"]
@@ -65,6 +74,13 @@ def test_causal_lm_deltareduce_pipeline(tmp_path: Path):
     assert result["steps_count"] == 4
     assert result["initial_loss"] > 0
     assert result["final_loss"] > 0
+    # True gradient descent loss reduction:
+    assert result["final_loss"] < result["initial_loss"]
+    assert result["loss_reduction"] > 0
+    assert "rounds" in result
+    assert len(result["rounds"]) == 5
+    assert "chart_data" in result
+    assert len(result["chart_data"]["values"]) == 6  # R0 plus 5 rounds
     assert result["total_tokens_processed"] > 0
     assert result["checkpoint_manifest"].startswith("sha256:")
 

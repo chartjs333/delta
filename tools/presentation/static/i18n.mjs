@@ -194,6 +194,20 @@ const strings = {
   applyDigest: ['Apply Digest', 'Дайджест Apply'],
   nextStateHash: ['Next State Hash', 'Хеш следующего состояния'],
   statusApplied: ['CONSENSUS APPLIED', 'КОНСЕНСУС ПРИМЕНЁН'],
+  trainingProgress: ['Training Progress', 'Прогресс обучения'],
+  roundStatus: ['Round {current} / {total}', 'Раунд {current} / {total}'],
+  workersComplete: ['Workers: 4/4 complete', 'Воркеры: 4/4 завершено'],
+  globalLossChange: ['Global loss: {from} → {to}', 'Глобальный loss: {from} → {to}'],
+  accuracyChange: ['Accuracy: {from} → {to}', 'Точность: {from} → {to}'],
+  applyCompleted: ['DeltaReduce: APPLY completed', 'DeltaReduce: APPLY выполнен'],
+  nextCheckpoint: ['Next checkpoint: {hash}', 'Следующий чекпоинт: {hash}'],
+  runMultiRoundCausal: ['Train Model (5 Rounds Consensus)', 'Обучить модель (5 раундов консенсуса)'],
+  runMultiRoundQlora: ['Train Adapter (4 Rounds Consensus)', 'Обучить адаптер (4 раунда консенсуса)'],
+  lossVsRound: ['Loss vs Training Round', 'Кривая Loss по раундам обучения'],
+  accuracyVsRound: ['Accuracy vs Training Round', 'Кривая точности по раундам'],
+  nodeCrashPoint: ['⚡ Node 4 crash → recovery → training continues', '⚡ Сбой узла 4 → WAL восстановление → продолжение обучения'],
+  alternationFlow: ['Round {r}: Train → DeltaReduce → Checkpoint', 'Раунд {r}: Обучение → DeltaReduce → Чекпоинт'],
+  techDetails: ['Technical Details & Provenance', 'Технические детали и хеши'],
 };
 
 export const messages = Object.fromEntries(['en', 'ru'].map((language, index) =>
