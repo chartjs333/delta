@@ -1154,6 +1154,17 @@ def main() -> int:
         "its old SHA header still passes this Lean relation and fails Python "
         "PAYLOAD_HASH. No native execution, runtime change, local PASS or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Original004 shard-plan bytes now have a mandatory Lean decoder and "
+        "a computed greedy partition from the decoded complete schema. General "
+        "coverage/nonoverlap/order/count/payload proofs and exact ordered entry "
+        "comparison bind all five original Q blocks to their precise plan slots. "
+        "The three-preimage fixture hash adapter remains SYNTHETIC/UNVERIFIED. "
+        "Complete manifest/corpus availability, config/proof authority, SHA, "
+        "source-to-draft arithmetic composition and native recovery remain OPEN. "
+        "A changed Q with its old payload hash still passes this Lean relation. "
+        "No native execution, guard change, local PASS, GO or attestation."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

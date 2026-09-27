@@ -1,0 +1,12 @@
+test_full_partition_mutations_after_document_resolution (test_native_shard_plan.NativeShardPlanTests.test_full_partition_mutations_after_document_resolution) ... ok
+test_generator_is_byte_exact (test_native_shard_plan.NativeShardPlanTests.test_generator_is_byte_exact) ... ok
+test_kernel_limits_are_not_authority (test_native_shard_plan.NativeShardPlanTests.test_kernel_limits_are_not_authority) ... ok
+test_mandatory_modules_and_axiom_inventory (test_native_shard_plan.NativeShardPlanTests.test_mandatory_modules_and_axiom_inventory) ... ok
+test_missing_plan_not_reconstructed_as_original (test_native_shard_plan.NativeShardPlanTests.test_missing_plan_not_reconstructed_as_original) ... ok
+test_original_bytes_domain_and_five_slots (test_native_shard_plan.NativeShardPlanTests.test_original_bytes_domain_and_five_slots) ... ok
+test_original_plan_substitution_rejected_before_generation (test_native_shard_plan.NativeShardPlanTests.test_original_plan_substitution_rejected_before_generation) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.073s
+
+OK

@@ -1,3 +1,7 @@
+import DeltaReduce.NativeShardPartition
+import DeltaReduce.NativeShardPlanBytes
+import DeltaReduce.NativeShardPlanBinding
+import DeltaReduce.NativeShardPlanVectors
 import DeltaReduce.NativeJsonSequence
 import DeltaReduce.NativeSchemaBytes
 import DeltaReduce.NativeSchemaBinding

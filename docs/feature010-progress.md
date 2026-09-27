@@ -4324,3 +4324,48 @@ retained bounded scopes unchanged. Mandatory44/45/nativeArithmeticRecoveryRefine
 missing; separate nativecertificate-00/-01canonicalityFAIL unchanged,Phase0unfrozen,
 makeabsent/notaggregateformal-check. DemosHTTP200/no restart;frozenrefs unchanged.
 No localPASS/GO/guardchange/independentattestation. Source-bound semantics: sha256:d44c5573892eb1da5ec4207ccfa0f1afb2a254092f85962a286bb7a84a3f4e50.
+
+
+## 27 September 2026 — original shard-plan bytes and exact derived partition in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope:
+formal/proposals/native-shard-plan-proof.md; evidence:
+formal/proposals/evidence/native-shard-plan.json. NativeShardPartition computes
+the original004 greedy partition from the full decoded schema. General kernel
+proofs establish exact total, coordinate coverage, ordered nonoverlapping
+intervals, increasing ordinals and bounded counts/payloads. The target must be
+even 2..1048576 bytes; global fuel is4096 shards. Exhaustion rejects rather than
+returning a partial plan. Counts use min(target/2,remaining), offsets and starts
+come from the schema, and every payload has exactly two bytes per coordinate.
+
+NativeShardPlanBytes decodes all nine top-level fields and every ordered six-field
+entry from original canonical bytes. NativeShardPlanBinding retains every numeric
+field/name/position, computes the entire expected plan, compares the whole ordered
+list, and checks semantics/profile/schema/scale/version/type/total. The per-Q join
+retains the whole decoded scale and requires the exact plan slot at the parsed
+header ordinal. This proves a complete plan and individual block membership,
+not full manifest/corpus availability or producer authentication.
+
+All five original Q blocks and36coordinates compose with the unchanged1079-byte
+plan. Its preimage is original004 shard-plan domain + NUL + original canonical
+bytes, separately from schema/scale domains. The three-preimage fixture adapter
+is SYNTHETIC/UNVERIFIED, not SHA/source/exporter authority.23small kernel cases
+separate byte grammar, computed partition, metadata and remaining hash scopes.
+Changed Q with old payload SHA still joins in Lean and fails Python PAYLOAD_HASH.
+Python mutation tests deliberately bypass only resolved plan documents to reach
+partition checks; separate source substitution fails SOURCE_HASH before writing.
+
+35 general theorems/23 definitions/10 types;72 component/kernel theorems/32 fixture
+definitions.172 new named declarations audited, standard kernel axioms only.
+Full Lean1111 jobs and four fresh kernels PASS. Final677 tooling/38 oracle/7 new
+targeted tests,33 legal/112 illegal traces, Ruff/format/consistency PASS;
+370 generated files byte-exact. Only final stable logs count.21 TLA modules,
+public schema, runtime and147 native witnesses unchanged;145 legacy traces only
+semanticsID. No fresh native/TLC/mutants, prior finite scopes retained.
+Mandatory44/45/nativeArithmeticRecoveryRefines still missing; native certificate
+-00/-01 canonicality FAIL unchanged. Phase0 unfrozen; make absent, aggregate
+formal-check not claimed. Three demos HTTP200 without restart, frozen refs unchanged.
+No native guard change/local PASS/GO/independent attestation. Next: complete
+original manifest/leaf/header list and byte totals, config/proof/availability
+and SHA/source authority, then source-to-draft arithmetic and full recovery.
+Source-bound semantics: sha256:df97e6a9107ae243e4a3f555404384745acb1f781860329e6391a3c8107fe8a0.
