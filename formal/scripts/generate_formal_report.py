@@ -1020,6 +1020,17 @@ def main() -> int:
         "freeze/offline and independent review remain required. No runtime change "
         "or local PASS/GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Original Q-source tooling resolves exact source004 schema/profile/config/"
+        "scale/plan/proof preimages and five DRQ1 leaves, derives complete ranges, "
+        "quanta and36 coordinates, and preserves all original bytes. This is a "
+        "bounded Python content relation, not native execution or authentication. "
+        "Original008 references16 unavailable source identities, including12 "
+        "label-hashed input leaves, within the retained fixture store. Replacing "
+        "those IDs is not original provenance. Accumulator proof authority/bounds, "
+        "draft-graph identity and full native/public admission/recovery remain open. "
+        "No new Lean proof, runtime change, local PASS or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

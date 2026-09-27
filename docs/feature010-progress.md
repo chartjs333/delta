@@ -3933,3 +3933,48 @@ Phase0unfrozen;makeabsent,notaggregateformal-check. Full source-identity binding
 public/native phase/QC/current/unknown/repair, physicalWAL/SHA/exporter,
 freeze/offline/independent reviews remain required. No localPASS, GO or guard
 change. Three demosHTTP200 withoutrestart; frozenrefsunchanged.
+
+
+## 27 September 2026 — original Q-source preimages and explicit missing certificate inputs
+
+T044/T048/T053/T054/T056/T057. Formal-only tooling; NO_GO remains.
+Scope formal/proposals/native-source-artifacts.md; evidence
+formal/proposals/evidence/native-source-artifacts.json. The versioned original
+Q-source relation resolves exact manifest/config/profile/schema/scale/plan/proof
+bytes and complete DRQ1 leaves. It derives tensor inclusion/ranges and shard
+partition from original metadata, checks every expected header, ordered coverage,
+source-domain hashes, payload hashes, Merkle root, byte totals and signed INT16
+Q values. No expected whole header/body, value equality or approval Boolean is
+supplied. Duplicate/noncanonical JSON, mismatched links, substitutions, omitted/
+extra/reordered leaves, bad prefix/length/endian range and incomplete sources fail.
+
+Seventeen source/fixture files are pinned byte-exact to native60c692f. Original004
+contains12 resolvable objects, including5 DRQ1 shards and all36 Q coordinates.
+Original008 still lacks16 selected source preimages in that retained store:
+schema/arithmetic-profile/config/accumulator plus12 input leaves. The12 leaves
+are hashes of generator labels, not supplied DRQ1 bytes. Their exact original
+IDs/labels are retained. Original004 baseconfig/parent preimages are absent too.
+This is a fixture scope gap, not a new native execution failure or a claim of
+global nonexistence. Neither fixture nor source identity is rewritten.
+
+Proof bytes/input links/selected width are retained; mathematical declared
+bounds/headroom/theorem authority are NOT validated here. Schema-to-draft
+coordinate/shard names and original certificate-to-draft graph identity remain
+OPEN. Rehashed changed Q can form a different content-valid manifest, explicitly
+not the same independent authority. The named future provenance boundary needs
+original snapshot/config/source/build/run/position and complete original
+preimages; digest equality is not exporter authentication. All output labels
+retain fixture-only scope. No native execution, public transition, WAL or
+recovery proof is inferred from this Python source decoder.
+
+Final562 tooling/38oracle/17newtargeted tests, Ruff/format, consistency and
+33legal112illegal legacy refinement PASS. New JSON generator byte-exact; all355
+prior generated files unchanged (not rerun). All Lean/TLA/public-schema/runtime
+and legacy/native traces unchanged. Semantics unchanged
+sha256:2d95a8132c9c0475c70a49f14f6c691dbefe292cb28a839317d18923db29a165.
+Mandatory audit rechecked44/45; no fresh Lean build/proof claimed, retained1095-job
+build remains prior evidence. No fresh TLC/native/productionmutants. Phase0
+unfrozen; make unavailable, not aggregate formal-check. Three demosHTTP200
+withoutrestart and allfrozenrefs verified. Full original source/graph/admission,
+public/native phase/QC/current/unknown/repair, physicalWAL/exporter/SHA, freeze,
+offline and independentreview remain open. No localPASS, GO or guardchange.

@@ -1,0 +1,22 @@
+test_all_envelope_prefix_corruption_rejects (test_native_source_artifacts.NativeSourceArtifactTests.test_all_envelope_prefix_corruption_rejects) ... ok
+test_commitment_and_totals_are_recomputed (test_native_source_artifacts.NativeSourceArtifactTests.test_commitment_and_totals_are_recomputed) ... ok
+test_every_source_must_be_present_and_hash_match (test_native_source_artifacts.NativeSourceArtifactTests.test_every_source_must_be_present_and_hash_match) ... ok
+test_exact_hash_domain_is_not_interchangeable (test_native_source_artifacts.NativeSourceArtifactTests.test_exact_hash_domain_is_not_interchangeable) ... ok
+test_exact_regeneration_and_all_original_coordinates (test_native_source_artifacts.NativeSourceArtifactTests.test_exact_regeneration_and_all_original_coordinates) ... ok
+test_header_json_canonicality_and_duplicate_keys (test_native_source_artifacts.NativeSourceArtifactTests.test_header_json_canonicality_and_duplicate_keys) ... ok
+test_header_omission_extra_and_boolean_not_integer (test_native_source_artifacts.NativeSourceArtifactTests.test_header_omission_extra_and_boolean_not_integer) ... ok
+test_json_depth_and_total_resource_limits (test_native_source_artifacts.NativeSourceArtifactTests.test_json_depth_and_total_resource_limits) ... ok
+test_manifest_missing_extra_duplicate_reordered_ranges (test_native_source_artifacts.NativeSourceArtifactTests.test_manifest_missing_extra_duplicate_reordered_ranges) ... ok
+test_old008_ids_and_label_leaves_do_not_resolve_as004 (test_native_source_artifacts.NativeSourceArtifactTests.test_old008_ids_and_label_leaves_do_not_resolve_as004) ... ok
+test_proof_metadata_is_retained_not_an_admission_boolean (test_native_source_artifacts.NativeSourceArtifactTests.test_proof_metadata_is_retained_not_an_admission_boolean) ... ok
+test_q_endpoints_odd_length_payload_hash_and_forbidden_minimum (test_native_source_artifacts.NativeSourceArtifactTests.test_q_endpoints_odd_length_payload_hash_and_forbidden_minimum) ... ok
+test_rehashed_changed_q_is_new_source_not_same_authority (test_native_source_artifacts.NativeSourceArtifactTests.test_rehashed_changed_q_is_new_source_not_same_authority) ... ok
+test_rehashed_every_header_field_substitution_rejects (test_native_source_artifacts.NativeSourceArtifactTests.test_rehashed_every_header_field_substitution_rejects) ... ok
+test_rehashed_scale_plan_config_proof_links_and_omissions_reject (test_native_source_artifacts.NativeSourceArtifactTests.test_rehashed_scale_plan_config_proof_links_and_omissions_reject) ... ok
+test_schema_omission_alias_and_layout_preserve_all_metadata (test_native_source_artifacts.NativeSourceArtifactTests.test_schema_omission_alias_and_layout_preserve_all_metadata) ... ok
+test_source_copies_are_exact_pinned_git_blobs (test_native_source_artifacts.NativeSourceArtifactTests.test_source_copies_are_exact_pinned_git_blobs) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 1.039s
+
+OK
