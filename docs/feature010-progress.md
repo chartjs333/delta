@@ -4461,3 +4461,57 @@ again), then join every actual Q vector and native/draft assignment. Missing
 original proof/preimages must stay missing; synthetic examples do not authenticate
 history. Contract freeze/offline reproduction/independent reviews still required.
 Source-bound semantics: sha256:32609e9e3f8b4b2dec130c993e4b7f8c5c06db7ffda8ea97b23ece3b446dd57e.
+
+
+## 27 September 2026 — original APC membership and proof-bound coefficients in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-plan-coefficients-proof.md; evidence
+formal/proposals/evidence/native-plan-coefficients.json. NativePlanMembers
+executes actual original policy/state decoding and selects the exact finalized
+APC with its checked ISC/EC/norm/seed source edges. It checks every common context,
+parent and primitive EC-seed edge, unique ISC tickets and full norm membership,
+then aligns all ordered ISC/EC entries including rejected members. Complete
+accepted rows retain original commitments, ACs, domains, final alpha, gamma and
+buckets; no missing/extra tail or supplied coverage table is accepted. The prior
+cross-ISC counterexample now rejects in this stronger projection relation.
+
+NativePlanCoefficients loads the actual APC-referenced config/proof/profile and
+checks schema/base-config identity. From the specific loaded denominator L and
+each reduced final alpha a/b it checks b|L and computes c=a*(L/b), proving c*b=a*L.
+No minimal-LCM substitution or second gamma multiplication. Global count includes
+zero weights. Generic product/domain-prefix/subset proofs compose the decoded
+proof limits with actual derived coefficients. Positions preserve every term;
+Q-value bounds remain explicit premises pending full original raw-vector join.
+Stronger cross-parent/4096/global-count restrictions are not native admission
+equivalence. Shared raw hash adapter, source policy/finality/signers/EC-seed and
+availability provenance remain unauthenticated, with no approval Boolean.
+
+Original APC components and its missing proof identity are retained. Separate
+synthetic components have four ISC/EC members, three accepted weights0,1/3,1/2,
+gamma1/7, L12 and coefficients0,4,6.32 small kernel cases cover full coverage,
+order/domain/parent/duplicate failures, count and denominator/weight bounds.
+The count-negative retains a valid internally computed two-term proof before
+rejecting three actual rows. No new whole-policy/proof kernel execution or
+native run. All original native bytes/sequences5/6/8 unchanged.
+
+Three modules:25 general theorems/17 definitions/8 structures;32 kernel examples/
+8 fixture definitions.90 names axiom-audited with only standard propext,
+Quot.sound,Classical.choice. Full Lean1121jobs/three fresh kernels,695tooling/
+38oracle/5targeted,33legal112illegal,Ruff/format/consistency and376 generated
+files byte-exact PASS. Only final stable-source evidence counts.21TLA/schema/
+runtime/147nativewitnesses unchanged;145legacy onlysemanticsID. No freshTLC or
+productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines missing;
+nativecertificate-00/-01canonicalityFAIL unchanged. Phase0unfrozen;make absent,
+aggregateformal-check not claimed. Three demosHTTP200withoutrestart/frozenrefs
+unchanged. No runtime guard/localPASS/GO/independentattestation.
+
+Next: every complete original Q manifest/DRQ1/schema/scale/plan/config/proof
+preimage matched to the derived accepted APC rows and native availability inputs,
+then full original-to-draft vector assignments and arithmetic. Native commitment
+and AC IDs have no invented equality to manifest/Merkle IDs; retain unauthenticated
+primitive mapping and require its real source provenance. Missing original008
+proof/base/current/model/optimizer/APPLY preimages remain missing. General
+phase/QC/send/current/crash/unknown/torn/repair/WAL relation, hash/codecs/exporter,
+freeze/offline reproduction/independent reviews and merged authority remain open.
+Source-bound semantics: sha256:ded966cc2a667de9dcddbf7fc8ba82ba3d431fe40f150c1d1d69e0efdbecdbaf.

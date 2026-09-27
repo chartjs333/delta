@@ -1065,6 +1065,22 @@ def main() -> int:
     )
 
     report["coverage"]["unresolved"].append(
+        "NativePlanMembers/NativePlanCoefficients now execute original policy/state "
+        "decoding and complete finalized APC/ISC/EC/norm/seed membership joins, then "
+        "load the actual APC-referenced config/proof and derive final alpha coefficients "
+        "from its specific denominator. General divisibility/product/domain-prefix "
+        "proofs retain actual Q-value bounds as explicit premises; zero weights count "
+        "and EC gamma is not multiplied again. Cross-parent and global-count guards "
+        "are stronger sufficient projection restrictions, not native admission "
+        "equivalence. Original008's missing proof stays missing; reused original "
+        "components and separate synthetic row examples are not a new whole-policy "
+        "execution, native run or authenticated authority. Full Q/source-to-draft, "
+        "availability, current/model/optimizer/APPLY, physical WAL/general recovery, "
+        "certificate decimal compatibility, freeze/offline/reviews remain open. "
+        "nativeArithmeticRecoveryRefines is not discharged; no runtime/local PASS/GO."
+    )
+
+    report["coverage"]["unresolved"].append(
         "Original APC weight tooling now resolves complete ISC/EC/seed/norm/APC "
         "bytes, retains exact eligible ticket/domain/commitment/bucket membership, "
         "and derives coefficients from final APC alpha using its actual proof's "

@@ -1,3 +1,6 @@
+import DeltaReduce.NativePlanMembers
+import DeltaReduce.NativePlanCoefficients
+import DeltaReduce.NativePlanCoefficientVectors
 import DeltaReduce.NativeAccumulatorBytes
 import DeltaReduce.NativeAccumulatorBinding
 import DeltaReduce.NativeAccumulatorVectors

@@ -1,0 +1,10 @@
+test_all_kernel_cases_are_mandatory_and_audited (test_native_plan_coefficients.NativePlanCoefficientTests.test_all_kernel_cases_are_mandatory_and_audited) ... ok
+test_exact_fraction_scaling_and_final_alpha (test_native_plan_coefficients.NativePlanCoefficientTests.test_exact_fraction_scaling_and_final_alpha) ... ok
+test_generator_byte_exact (test_native_plan_coefficients.NativePlanCoefficientTests.test_generator_byte_exact) ... ok
+test_missing_original_proof_is_retained (test_native_plan_coefficients.NativePlanCoefficientTests.test_missing_original_proof_is_retained) ... ok
+test_substituted_source_cannot_write_vectors (test_native_plan_coefficients.NativePlanCoefficientTests.test_substituted_source_cannot_write_vectors) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.649s
+
+OK
