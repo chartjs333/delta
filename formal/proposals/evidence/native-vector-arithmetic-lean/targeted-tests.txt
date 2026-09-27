@@ -1,0 +1,11 @@
+test_all_coordinates_against_rational_arithmetic (test_native_vector_arithmetic_lean.NativeVectorArithmeticLeanTests.test_all_coordinates_against_rational_arithmetic) ... ok
+test_generator_byte_exact (test_native_vector_arithmetic_lean.NativeVectorArithmeticLeanTests.test_generator_byte_exact) ... ok
+test_mandatory_kernel_inventory (test_native_vector_arithmetic_lean.NativeVectorArithmeticLeanTests.test_mandatory_kernel_inventory) ... ok
+test_pinned_cross_source_scope (test_native_vector_arithmetic_lean.NativeVectorArithmeticLeanTests.test_pinned_cross_source_scope) ... ok
+test_substituted_original_sources_cannot_generate (test_native_vector_arithmetic_lean.NativeVectorArithmeticLeanTests.test_substituted_original_sources_cannot_generate) ... ok
+test_zero_weight_and_specific_denominator_retained (test_native_vector_arithmetic_lean.NativeVectorArithmeticLeanTests.test_zero_weight_and_specific_denominator_retained) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.662s
+
+OK

@@ -1,3 +1,6 @@
+import DeltaReduce.NativeVectorContext
+import DeltaReduce.NativeVectorArithmetic
+import DeltaReduce.NativeVectorArithmeticVectors
 import DeltaReduce.NativeAvailableQ
 import DeltaReduce.NativePlanQCorpus
 import DeltaReduce.NativeAvailableQVectors

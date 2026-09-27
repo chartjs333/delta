@@ -1072,10 +1072,26 @@ def main() -> int:
         "No assumed Q bound or decoded whole-corpus input is accepted. Primitive "
         "permission/observations are UNAUTHENTICATED_COMPONENT_INPUT, not decoded "
         "native commitment/AC preimages, signatures or physical availability. "
-        "The commitment/manifest identity gap, original missing008 proof, cross-ticket "
-        "range/quantum/parent and full source-to-draft vector/current/APPLY/recovery "
+        "The commitment/manifest identity gap, original missing008 proof and full "
+        "source-to-draft byte graph/current/APPLY/recovery "
         "remain open. Component examples reuse original blocks and prior native "
         "observations; no new whole-policy/corpus execution or native run is claimed."
+    )
+
+    report["coverage"]["unresolved"].append(
+        "NativeVectorContext/NativeVectorArithmetic now load the complete original "
+        "APC/Q corpus, compare all shared context/decoded plan/ordered ranges/quanta, "
+        "and compute every domain/shard full vector with original final alpha and "
+        "the specific proof denominator. General source/coefficient/coordinate "
+        "theorems bind original bytes to ordered checked vector accumulation; "
+        "draft fraction/denominator/coefficient-sum restrictions are rechecked. "
+        "This is not yet exact draft SCHEMA/Q_SHARD encoding, coordinate-name "
+        "representability, LoadedRow/DerivedParameter or native recovery refinement. "
+        "Kernel examples reuse original layout and separately synthetic vector "
+        "components, not a new complete raw-source run or native execution. "
+        "Source authority, primitive observations, missing008 proof/current/APPLY, "
+        "hash/codecs/exporter/WAL, certificate decimal failure, freeze/offline and "
+        "independent review remain open. No runtime authority or local PASS/GO."
     )
 
     report["coverage"]["unresolved"].append(

@@ -4577,3 +4577,56 @@ Full phase/QC/send/delivery/current/crash/unknown/torn/repair/WAL relation,
 codecs/hash/exporter/arbitrary snapshots, contract freeze/offline reproduction
 and independent reviews remain mandatory before merged formal authority.
 Source-bound semantics: sha256:0ee83e8c3d30190a8d518c9069175f3e26d22c5c1cd86263e3f4aeb09df563f5.
+
+
+## 27 September 2026 — aligned original full-vector arithmetic in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-vector-arithmetic-lean-proof.md; evidence
+formal/proposals/evidence/native-vector-arithmetic-lean.json. NativeVectorContext
+loads the entire original policy/APC/Q byte corpus through NativePlanQCorpus,
+then compares all seven shared manifest identities, complete decoded schema/
+scale/plan and every ordered block range/quantum. Actual loader equations derive
+same original preimages; neither hash injectivity nor caller-supplied decoded
+corpus/expected-body equality is assumed. Same parent identity is not current
+model authority. Full source records and rejected EC members remain retained.
+
+NativeVectorArithmetic.run derives every domain/shard key and computes complete
+vectors from original APC final alpha, exact proof denominator and actual Q
+payloads. Within-domain member order and zero weights remain. General theorems
+bind each output coordinate to checked accumulation over the original derived
+coefficients, with exact original slice frames and no coordinate lookup fallback.
+Original product-width bounds compose actual byte/plan loaders. Separate kernel
+fraction/denominator/coefficient-sum and every prefix guard are rechecked; these
+are explicit stronger draft restrictions, not original native admission changes.
+No second gamma, minimum-LCM replacement, supplied result or scalar reduction.
+
+Three modules:31 general theorems/15definitions/fourstructures,51component kernel
+cases/16fixturedefinitions; all117explicitnames axiom-audited onlypropext,
+Quot.sound,Classical.choice. Original five-block36-coordinate layout, widths
+4/8/8/8/8 and quanta are reused. Ten vector cases from the pinned synthetic
+multi-ticket example cover two domains, alpha1/3,1/2,0,L12,Q/-Q; Fraction checks
+every coordinate/prefix independently. One kernel case directly reuses an original
+loaded block with a separately synthetic weight. Context/range/order/quantum,
+shape/fraction/denominator and overflow negatives pass. No new complete raw-source
+run example or native execution; original bytes/sequences5/6/8 remain unchanged.
+
+Full Lean1127jobs/three fresh kernels,706tooling/38oracle/6targeted,
+33legal112illegal,Ruff/format/consistency and380file byte-exact regeneration PASS.
+Only final stable-source logs count.21TLA/schema/runtime/147nativewitnesses
+unchanged;145legacy traces onlysemanticsID. No freshTLC/productionmutants.
+Mandatory44/45/nativeArithmeticRecoveryRefines missing; nativecertificate decimal
+-00/-01FAIL unchanged;Phase0unfrozen;make absent/noaggregateformal-check.
+Three demo servicesHTTP200withoutrestart/frozenrefsunchanged. No runtime guard,
+localPASS, independentattestation or GO.
+
+Next: complete original-to-draft SCHEMA/Q_SHARD byte constructors, explicit
+coordinate naming/range/size representability and distinct original/draft hash
+preimages; join actual draft LoadedRow/RowsBound/DerivedParameter to this checked
+source arithmetic. This stage does not yet prove that codec/graph relation.
+Missing original008proof/base/current preimages and unauthenticated primitive
+availability/configuration/EC-seed remain missing. Full current/model/optimizer/
+APPLY,phase/QC/send/delivery/journal/crash/unknown/torn/repair/WAL,arbitrarysnapshots,
+codecs/hash/exporter,native decimal compatibility,freeze/offline reproduction and
+independent reviews remain mandatory before merged formal authority.
+Source-bound semantics: sha256:90dc0a6911746969c8cbbb6dc7377788ecfafa04cdd552174a12e2191a70bd7d.
