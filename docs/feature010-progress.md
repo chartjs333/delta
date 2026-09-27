@@ -4515,3 +4515,65 @@ proof/base/current/model/optimizer/APPLY preimages remain missing. General
 phase/QC/send/current/crash/unknown/torn/repair/WAL relation, hash/codecs/exporter,
 freeze/offline reproduction/independent reviews and merged authority remain open.
 Source-bound semantics: sha256:ded966cc2a667de9dcddbf7fc8ba82ba3d431fe40f150c1d1d69e0efdbecdbaf.
+
+
+## 27 September 2026 — original Q corpus and source-derived coefficient bounds in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-available-q-lean-proof.md; evidence
+formal/proposals/evidence/native-available-q-lean.json. NativePlanQCorpus.bind
+executes original policy/state/APC coefficient loading, then every accepted row's
+complete original manifest/schema/scale/plan/config/proof/profile/DRQ1 loader.
+Exact ordered ticket/domain/commitment/AC/schema/proof/config links retain every
+eligible term, including zero weights; missing/extra input tails reject. Rejected
+EC members remain in original certificate source. Shared decoded accumulator
+identity is derived from actual loader equations and proof-ID equality, not
+assumed for caller-supplied whole bodies/snapshots. Original bytes/sequences stay.
+
+NativeAvailableQ checks typed native first-insert availability primitives,
+ordered unique required/covered sets and distinct configured attesters/threshold.
+Exact manifest permutation checks full leaf multiplicities without changing
+schema/range order. An equal but incomplete required/covered pair fails the new
+source relation despite passing the old native component. Native commitment ID,
+manifest ID, Merkle root and AC ID remain distinct. Typed permissions/observations
+are UNAUTHENTICATED_COMPONENT_INPUT; their source provenance, JSON-envelope
+codec, signatures and actual availability are NOT proved. Opaque-ID positive
+counterchecks explicitly retain this gap; original ISC identity alone does not
+authenticate an entirely substituted synthetic history.
+
+Generic original frame/payload lemmas derive signed16 Q range from actual bytes.
+Successful full source binding now gives product and every domain subset/prefix
+bound using actual coordinate lookup equations, with no assumed Q-value bound.
+The selector may vary coordinates between tickets: this is a bound, not yet
+aligned vector reduction equality. No second gamma or minimum-LCM substitution.
+Proof/config/schema are shared; cross-ticket scale/plan/parent/range/quantum and
+full original-to-draft assignments remain next. Existing per-parser resources
+retain their scope; no aggregate allocation or native failure-order equivalence.
+
+Three modules:24 general theorems/10 definitions/five structures/one inductive
+relation;55 component kernel theorems/40 fixture definitions. All135 names
+axiom-audited with only propext/Quot.sound/Classical.choice. Twenty primitive and
+coverage pairs reuse all17 retained native component cases plus three mutations.
+Five original block range proofs reuse the preceding complete manifest; one
+product example combines actual payload with a separately synthetic coefficient.
+No new combined whole-policy/manifest/proof kernel example or native run claimed.
+Membership drafts that unnecessarily evaluated full structures were replaced by
+explicit position witnesses; only final stable-source logs/evidence count.
+
+Full Lean1124jobs/three fresh kernels,700tooling/38oracle/5targeted,33legal112illegal,
+Ruff/format/consistency and378file byte-exact regeneration PASS.21TLA/schema/runtime/
+147nativewitnesses unchanged;145legacy changes onlysemanticsID. No freshTLC or
+productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines missing;
+nativecertificate decimal -00/-01 FAIL unchanged; Phase0unfrozen;make unavailable,
+aggregate formal-check not claimed. All3demosHTTP200withoutrestart/frozenrefs
+unchanged. No nativeguard/localPASS/GO/independentattestation.
+
+Next: derive cross-ticket shared original vector/range/quantum context, construct
+source-to-draft SCHEMA/Q_SHARD and full LoadedRow/RowsBound/DerivedParameter.
+Native commitment/AC/config/current source authority and original008 proof/base/
+current preimages remain missing. Do not fabricate authenticated mappings, model/
+optimizer/APPLY quantum or silently identify original and draft content IDs.
+Full phase/QC/send/delivery/current/crash/unknown/torn/repair/WAL relation,
+codecs/hash/exporter/arbitrary snapshots, contract freeze/offline reproduction
+and independent reviews remain mandatory before merged formal authority.
+Source-bound semantics: sha256:0ee83e8c3d30190a8d518c9069175f3e26d22c5c1cd86263e3f4aeb09df563f5.

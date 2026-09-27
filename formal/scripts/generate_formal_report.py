@@ -1065,6 +1065,20 @@ def main() -> int:
     )
 
     report["coverage"]["unresolved"].append(
+        "NativeAvailableQ/NativePlanQCorpus now execute complete original APC and Q "
+        "corpus loaders, check exact original tuple/schema/proof/config and native "
+        "typed availability primitives against all manifest leaves, then derive "
+        "product/domain-prefix bounds from actual signed16 coordinate lookups. "
+        "No assumed Q bound or decoded whole-corpus input is accepted. Primitive "
+        "permission/observations are UNAUTHENTICATED_COMPONENT_INPUT, not decoded "
+        "native commitment/AC preimages, signatures or physical availability. "
+        "The commitment/manifest identity gap, original missing008 proof, cross-ticket "
+        "range/quantum/parent and full source-to-draft vector/current/APPLY/recovery "
+        "remain open. Component examples reuse original blocks and prior native "
+        "observations; no new whole-policy/corpus execution or native run is claimed."
+    )
+
+    report["coverage"]["unresolved"].append(
         "NativePlanMembers/NativePlanCoefficients now execute original policy/state "
         "decoding and complete finalized APC/ISC/EC/norm/seed membership joins, then "
         "load the actual APC-referenced config/proof and derive final alpha coefficients "

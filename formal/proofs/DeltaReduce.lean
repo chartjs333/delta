@@ -1,3 +1,6 @@
+import DeltaReduce.NativeAvailableQ
+import DeltaReduce.NativePlanQCorpus
+import DeltaReduce.NativeAvailableQVectors
 import DeltaReduce.NativePlanMembers
 import DeltaReduce.NativePlanCoefficients
 import DeltaReduce.NativePlanCoefficientVectors

@@ -1,0 +1,10 @@
+test_complete_source_coverage_and_authority_gap (test_native_available_q_lean.NativeAvailableQLeanTests.test_complete_source_coverage_and_authority_gap) ... ok
+test_generator_byte_exact (test_native_available_q_lean.NativeAvailableQLeanTests.test_generator_byte_exact) ... ok
+test_kernel_inventory_and_actual_byte_loader (test_native_available_q_lean.NativeAvailableQLeanTests.test_kernel_inventory_and_actual_byte_loader) ... ok
+test_prior_native_component_observations (test_native_available_q_lean.NativeAvailableQLeanTests.test_prior_native_component_observations) ... ok
+test_substituted_native_boundary_cannot_write (test_native_available_q_lean.NativeAvailableQLeanTests.test_substituted_native_boundary_cannot_write) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.064s
+
+OK
