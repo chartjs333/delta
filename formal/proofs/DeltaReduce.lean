@@ -1,3 +1,6 @@
+import DeltaReduce.NativeApplyResult
+import DeltaReduce.NativeApplyResultJoin
+import DeltaReduce.NativeApplyResultVectors
 import DeltaReduce.NativeCurrentPointer
 import DeltaReduce.NativePointerWal
 import DeltaReduce.NativeCurrentPointerVectors

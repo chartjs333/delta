@@ -9443,3 +9443,221 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeCurrentPointerVectors.fakeLine
 
 #print axioms DeltaReduce.NativeCurrentPointerVectors.rehashedUncertifiedRecovery
+
+#print axioms DeltaReduce.NativeApplyResult.decimalValues
+
+#print axioms DeltaReduce.NativeApplyResult.rawValueInput
+
+#print axioms DeltaReduce.NativeApplyResult.exactValueInput
+
+#print axioms DeltaReduce.NativeApplyResult.exactValueCount
+
+#print axioms DeltaReduce.NativeApplyResult.exactValuePosition
+
+#print axioms DeltaReduce.NativeApplyResult.digests
+
+#print axioms DeltaReduce.NativeApplyResult.DigestsValid
+
+#print axioms DeltaReduce.NativeApplyResult.ValueMatches
+
+#print axioms DeltaReduce.NativeApplyResult.checkValues
+
+#print axioms DeltaReduce.NativeApplyResult.checkedValues
+
+#print axioms DeltaReduce.NativeApplyResult.valuesFromComponents
+
+#print axioms DeltaReduce.NativeApplyResult.valuePreimages
+
+#print axioms DeltaReduce.NativeApplyResult.valueLengths
+
+#print axioms DeltaReduce.NativeApplyResult.changedValuesReject
+
+#print axioms DeltaReduce.NativeApplyResult.changedParentOptimizerReject
+
+#print axioms DeltaReduce.NativeApplyResult.fraction
+
+#print axioms DeltaReduce.NativeApplyResult.weights
+
+#print axioms DeltaReduce.NativeApplyResult.ProfileMatches
+
+#print axioms DeltaReduce.NativeApplyResult.profileWeightPosition
+
+#print axioms DeltaReduce.NativeApplyResult.SharedContext
+
+#print axioms DeltaReduce.NativeApplyResult.originalLeaf
+
+#print axioms DeltaReduce.NativeApplyResult.derivedLeaf
+
+#print axioms DeltaReduce.NativeApplyResult.LeafMatches
+
+#print axioms DeltaReduce.NativeApplyResult.leafCounts
+
+#print axioms DeltaReduce.NativeApplyResult.leafPosition
+
+#print axioms DeltaReduce.NativeApplyResult.nativeValues
+
+#print axioms DeltaReduce.NativeApplyResult.AnchorMatches
+
+#print axioms DeltaReduce.NativeApplyResult.SharedMatches
+
+#print axioms DeltaReduce.NativeApplyResult.fromComputed
+
+#print axioms DeltaReduce.NativeApplyResult.check
+
+#print axioms DeltaReduce.NativeApplyResult.computedSource
+
+#print axioms DeltaReduce.NativeApplyResult.checkedSource
+
+#print axioms DeltaReduce.NativeApplyResult.checkFromComponents
+
+#print axioms DeltaReduce.NativeApplyResult.exactComputedValues
+
+#print axioms DeltaReduce.NativeApplyResult.exactComputedHashes
+
+#print axioms DeltaReduce.NativeApplyResult.outputBounds
+
+#print axioms DeltaReduce.NativeApplyResultJoin.entries
+
+#print axioms DeltaReduce.NativeApplyResultJoin.select
+
+#print axioms DeltaReduce.NativeApplyResultJoin.selectedSource
+
+#print axioms DeltaReduce.NativeApplyResultJoin.selectedLineage
+
+#print axioms DeltaReduce.NativeApplyResultJoin.originalCandidateAndQc
+
+#print axioms DeltaReduce.NativeApplyResultJoin.selectedProfile
+
+#print axioms DeltaReduce.NativeApplyResultJoin.selectedComputed
+
+#print axioms DeltaReduce.NativeApplyResultJoin.certifiedComputedHashes
+
+#print axioms DeltaReduce.NativeApplyResultJoin.pointer
+
+#print axioms DeltaReduce.NativeApplyResultJoin.pointerSource
+
+#print axioms DeltaReduce.NativeApplyResultJoin.exactCommandOutput
+
+#print axioms DeltaReduce.NativeApplyResultJoin.nextComputed
+
+#print axioms DeltaReduce.NativeApplyResultJoin.FreshAnchor
+
+#print axioms DeltaReduce.NativeApplyResultJoin.fresh
+
+#print axioms DeltaReduce.NativeApplyResultJoin.freshSource
+
+#print axioms DeltaReduce.NativeApplyResultJoin.freshRecoveredRecord
+
+#print axioms DeltaReduce.NativeApplyResultVectors.pre0
+
+#print axioms DeltaReduce.NativeApplyResultVectors.hash0
+
+#print axioms DeltaReduce.NativeApplyResultVectors.pre1
+
+#print axioms DeltaReduce.NativeApplyResultVectors.hash1
+
+#print axioms DeltaReduce.NativeApplyResultVectors.pre2
+
+#print axioms DeltaReduce.NativeApplyResultVectors.hash2
+
+#print axioms DeltaReduce.NativeApplyResultVectors.sha
+
+#print axioms DeltaReduce.NativeApplyResultVectors.sample0
+
+#print axioms DeltaReduce.NativeApplyResultVectors.sample1
+
+#print axioms DeltaReduce.NativeApplyResultVectors.sample2
+
+#print axioms DeltaReduce.NativeApplyResultVectors.values
+
+#print axioms DeltaReduce.NativeApplyResultVectors.expectedHashes
+
+#print axioms DeltaReduce.NativeApplyResultVectors.candidate
+
+#print axioms DeltaReduce.NativeApplyResultVectors.computedDigests
+
+#print axioms DeltaReduce.NativeApplyResultVectors.accepted
+
+#print axioms DeltaReduce.NativeApplyResultVectors.exactPreimages
+
+#print axioms DeltaReduce.NativeApplyResultVectors.originalGraphResult
+
+#print axioms DeltaReduce.NativeApplyResultVectors.missingCoordinate
+
+#print axioms DeltaReduce.NativeApplyResultVectors.reordered
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongNumber
+
+#print axioms DeltaReduce.NativeApplyResultVectors.extraCoordinate
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongOptimizer
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongModelHash
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongOptimizerHash
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongParentModel
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongParentOptimizer
+
+#print axioms DeltaReduce.NativeApplyResultVectors.changedPreimageNotApproved
+
+#print axioms DeltaReduce.NativeApplyResultVectors.unavailableHash
+
+#print axioms DeltaReduce.NativeApplyResultVectors.shortHash
+
+#print axioms DeltaReduce.NativeApplyResultVectors.originalLabelHashesNotRewritten
+
+#print axioms DeltaReduce.NativeApplyResultVectors.signedEndpoints
+
+#print axioms DeltaReduce.NativeApplyResultVectors.oldNegativeZeroStillAccepted
+
+#print axioms DeltaReduce.NativeApplyResultVectors.oldNegativeAliasStillAccepted
+
+#print axioms DeltaReduce.NativeApplyResultVectors.negativeZeroNotComputed
+
+#print axioms DeltaReduce.NativeApplyResultVectors.negativeAliasNotComputed
+
+#print axioms DeltaReduce.NativeApplyResultVectors.sourceProfile
+
+#print axioms DeltaReduce.NativeApplyResultVectors.numericProfile
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongLearning
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongMomentum
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongDecay
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongDomain
+
+#print axioms DeltaReduce.NativeApplyResultVectors.missingWeight
+
+#print axioms DeltaReduce.NativeApplyResultVectors.duplicateWeight
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongRounding
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongNesterov
+
+#print axioms DeltaReduce.NativeApplyResultVectors.numericGateDoesNotAuthenticateMetadata
+
+#print axioms DeltaReduce.NativeApplyResultVectors.numericProfileDoesNotAuthenticateAccumulator
+
+#print axioms DeltaReduce.NativeApplyResultVectors.opaqueAnchorCheckpointNotValueIdentity
+
+#print axioms DeltaReduce.NativeApplyResultVectors.leaf
+
+#print axioms DeltaReduce.NativeApplyResultVectors.leaves
+
+#print axioms DeltaReduce.NativeApplyResultVectors.allLeafNumbers
+
+#print axioms DeltaReduce.NativeApplyResultVectors.missingLeaf
+
+#print axioms DeltaReduce.NativeApplyResultVectors.extraLeaf
+
+#print axioms DeltaReduce.NativeApplyResultVectors.reorderedLeaves
+
+#print axioms DeltaReduce.NativeApplyResultVectors.wrongNumerator
+
+#print axioms DeltaReduce.NativeApplyResultVectors.scaledFractionNotEqual
+
+#print axioms DeltaReduce.NativeApplyResultVectors.missingSourceLeavesStillNumeric

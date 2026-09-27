@@ -1,0 +1,12 @@
+test_all_new_declarations_imported_and_audited (test_native_apply_result.NativeApplyResultTests.test_all_new_declarations_imported_and_audited) ... ok
+test_byte_exact_regeneration_and_real_hash_samples (test_native_apply_result.NativeApplyResultTests.test_byte_exact_regeneration_and_real_hash_samples) ... ok
+test_join_computes_source_and_arithmetic (test_native_apply_result.NativeApplyResultTests.test_join_computes_source_and_arithmetic) ... ok
+test_kernel_cases_keep_unclosed_boundaries_visible (test_native_apply_result.NativeApplyResultTests.test_kernel_cases_keep_unclosed_boundaries_visible) ... ok
+test_native_engine_hash_preimage_and_candidate_fields (test_native_apply_result.NativeApplyResultTests.test_native_engine_hash_preimage_and_candidate_fields) ... ok
+test_original_candidate_is_not_rewritten (test_native_apply_result.NativeApplyResultTests.test_original_candidate_is_not_rewritten) ... ok
+test_pinned_source_copies (test_native_apply_result.NativeApplyResultTests.test_pinned_source_copies) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.322s
+
+OK

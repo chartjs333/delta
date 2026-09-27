@@ -3885,3 +3885,51 @@ unknown/repair, physicalWAL/SHA/exporter, freeze/offline/independent reviews rem
 required. No localPASS, GO or nativeguard change. Three demosHTTP200 withoutrestart;
 frozenrefsunchanged. Earlier expensive ASCII-string draft reductions were stopped;
 final byte-literal/component proofs and final stable checks alone count.
+
+
+## 2026-09-27 — Computed APPLY values, exact hashes and partial original-source pointer relation
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-apply-result-proof.md; evidence native-apply-result.json.
+NativeApplyResult uses actual deriveNativeApply and independently hashes every
+next/parent model and optimizer coordinate with the original engine's exact
+value preimages. Original decimal spellings, vector order and both parent IDs
+must match; full signed output bounds follow from the existing computation.
+Shared profile coefficients/domain weights, round/height/view/epoch and every
+ordered ROOT leaf's domain/shard/denominator/numerators are checked. The join
+computes the original complete APPLY snapshot/selected candidate or finalized QC,
+retains original canonical IDs and composes a fresh pointer command with the
+modeled recovered record and exact replay. No physical WAL or public current
+refinement is inferred; historical retries are not re-admitted by this fresh API.
+
+The native configuration/schema/arithmetic-profile/accumulator/ISC/EC/APC/Q-artifact
+identity bridge to the draft graph remains OPEN. Different native contract and
+draft artifact IDs are not equated. Component counterchecks show missing metadata,
+accumulator identity and Q leaves can pass the respective numeric-only checks;
+these are not accepted whole-runtime counterexamples. Original label-root graphs
+are unchanged: parent1 is not the model value hash, so no successful full original
+source/arithmetic/pointer example is newly claimed. Three real SHA samples and
+a synthetic candidate reuse the existing pinned kernel graph result.
+
+NEW confirmed contract-fixture scope gap: original008 golden next_model_hash and
+next_optimizer_hash are SHA of next-model/next-optimizer LABELS, not their shown
+101/-49 and11/-4 vector preimages. Both stored/computed IDs, actual engine preimages
+and pinned generator source are retained in machine evidence. This is not a new
+native execution failure. Original bytes are not rewritten. Native -00/-01
+canonicality remains FAIL; the computed exact-spelling relation rejects those
+aliases rather than normalizing accepted native strings.
+
+Two generic modules: 29helpers/23defs;
+44vector proofs/13defs;
+all109names axiom-audited, onlypropext/Quot.sound/Classical.choice.
+FullLean1095jobs,2fresh generic kernels/audit,
+545tooling/38oracle/7targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.355regeneratedfiles=312JSON/
+41Lean/inputTLA/config byteexact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacyonlysemanticID. No freshnative/TLC/productionmutants; retained32mixed/
+62decimal/28safety7liveness27mutants/132state131step retain earlier finite scope.
+Semantics sha256:2d95a8132c9c0475c70a49f14f6c691dbefe292cb28a839317d18923db29a165. Mandatory44/45FAIL/nativeArithmeticRecoveryRefines missing;
+Phase0unfrozen;makeabsent,notaggregateformal-check. Full source-identity binding,
+public/native phase/QC/current/unknown/repair, physicalWAL/SHA/exporter,
+freeze/offline/independent reviews remain required. No localPASS, GO or guard
+change. Three demosHTTP200 withoutrestart; frozenrefsunchanged.

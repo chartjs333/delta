@@ -1005,6 +1005,21 @@ def main() -> int:
         "decimal compatibility, contract freeze/offline/independent reviews remain "
         "required; no runtime change, local PASS or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "NativeApplyResult computes complete value spellings and four value hashes "
+        "from actual bound NativeApply results and parent vectors, compares shared "
+        "context/profile and all ordered numeric ROOT leaves, then joins the "
+        "original APPLY snapshot and fresh pointer record. This is a partial "
+        "relation: configuration/schema/profile-proof and ISC/EC/APC/Q-artifact "
+        "identity bridges to the draft graph remain open. No new accepted full "
+        "source-join fixture. Three finite SHA samples and existing kernel graph "
+        "use a synthetic constructed candidate. Original008 golden output IDs "
+        "hash fixture labels, not displayed coordinates; their bytes are retained "
+        "and mismatch evidence is explicit. Decimal -00/-01 compatibility still "
+        "fails. General native/public admission/recovery, physical WAL, SHA/exporter, "
+        "freeze/offline and independent review remain required. No runtime change "
+        "or local PASS/GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
