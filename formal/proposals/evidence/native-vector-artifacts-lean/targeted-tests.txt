@@ -1,0 +1,11 @@
+test_every_original_coordinate_and_range (test_native_vector_artifacts_lean.NativeVectorArtifactsLeanTests.test_every_original_coordinate_and_range) ... ok
+test_full_bytes_and_hash_domain (test_native_vector_artifacts_lean.NativeVectorArtifactsLeanTests.test_full_bytes_and_hash_domain) ... ok
+test_generator_byte_exact (test_native_vector_artifacts_lean.NativeVectorArtifactsLeanTests.test_generator_byte_exact) ... ok
+test_mandatory_kernel_inventory_and_source_entry (test_native_vector_artifacts_lean.NativeVectorArtifactsLeanTests.test_mandatory_kernel_inventory_and_source_entry) ... ok
+test_scope_and_component_kernel_inventory (test_native_vector_artifacts_lean.NativeVectorArtifactsLeanTests.test_scope_and_component_kernel_inventory) ... ok
+test_substituted_original_bytes_block_generation (test_native_vector_artifacts_lean.NativeVectorArtifactsLeanTests.test_substituted_original_bytes_block_generation) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.656s
+
+OK

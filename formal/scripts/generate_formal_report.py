@@ -1079,19 +1079,18 @@ def main() -> int:
     )
 
     report["coverage"]["unresolved"].append(
-        "NativeVectorContext/NativeVectorArithmetic now load the complete original "
-        "APC/Q corpus, compare all shared context/decoded plan/ordered ranges/quanta, "
-        "and compute every domain/shard full vector with original final alpha and "
-        "the specific proof denominator. General source/coefficient/coordinate "
-        "theorems bind original bytes to ordered checked vector accumulation; "
-        "draft fraction/denominator/coefficient-sum restrictions are rechecked. "
-        "This is not yet exact draft SCHEMA/Q_SHARD encoding, coordinate-name "
-        "representability, LoadedRow/DerivedParameter or native recovery refinement. "
-        "Kernel examples reuse original layout and separately synthetic vector "
-        "components, not a new complete raw-source run or native execution. "
-        "Source authority, primitive observations, missing008 proof/current/APPLY, "
-        "hash/codecs/exporter/WAL, certificate decimal failure, freeze/offline and "
-        "independent review remain open. No runtime authority or local PASS/GO."
+        "NativeVectorLayout/Artifacts/Join now construct complete original-derived "
+        "draft SCHEMA/Q_SHARD bytes with checked coordinate naming/coverage and "
+        "original vector values, then load exact bytes through real LoadedRow/RowsBound "
+        "and invoke actual deriveParameter. General theorems derive numerator identity "
+        "from the checked computations and compose original coefficient coordinates. "
+        "The source entry loads original bytes; hash/codec and draft Binding authority "
+        "remain explicit unproved boundaries. This joins one selected assignment; "
+        "no full-batch byte cap, full original authority/current/APPLY provenance, "
+        "whole-source kernel execution, native run or recovery theorem is claimed. "
+        "Source primitives, missing008 proof/current, hash/codecs/exporter/WAL, "
+        "certificate decimal failure, freeze/offline and independent reviews remain "
+        "open. No runtime authority or local PASS/GO."
     )
 
     report["coverage"]["unresolved"].append(

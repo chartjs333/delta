@@ -1,3 +1,7 @@
+import DeltaReduce.NativeVectorLayout
+import DeltaReduce.NativeVectorArtifacts
+import DeltaReduce.NativeVectorJoin
+import DeltaReduce.NativeVectorArtifactVectors
 import DeltaReduce.NativeVectorContext
 import DeltaReduce.NativeVectorArithmetic
 import DeltaReduce.NativeVectorArithmeticVectors

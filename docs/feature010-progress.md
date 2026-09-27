@@ -4630,3 +4630,50 @@ APPLY,phase/QC/send/delivery/journal/crash/unknown/torn/repair/WAL,arbitrarysnap
 codecs/hash/exporter,native decimal compatibility,freeze/offline reproduction and
 independent reviews remain mandatory before merged formal authority.
 Source-bound semantics: sha256:90dc0a6911746969c8cbbb6dc7377788ecfafa04cdd552174a12e2191a70bd7d.
+
+
+## 27 September 2026 — exact original vector draft artifacts and PARAMETER join in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-vector-artifacts-lean-proof.md; evidence
+formal/proposals/evidence/native-vector-artifacts-lean.json. NativeVectorLayout
+constructs every original coordinate/shard label with complete ordered local/global
+coverage and representability checks. Original schema/plan metadata remains;
+long names and a/a.b conflicts reject this profile without changing native admission.
+
+NativeVectorArtifacts constructs entire canonical SCHEMA/Q_SHARD byte images,
+distinct draft hash preimages and original full-vector contributions. Actual
+loadRow/loadImages check stored byte and typed-payload equality, original committed
+Q/frame fields and complete RowsBound with original weights/order/values.
+NativeVectorJoin.run calls original source bind and actual deriveParameter, checks
+exact stored SCHEMA bytes, full frame, contribution/row lists, specific denominator
+and accumulator width, then derives numerator identity from the checked computations.
+The original coefficient/coordinate theorem composes; no supplied expected result.
+
+Four modules:27 generic theorems/27definitions/sixstructures;92component/kernel
+proofs/19fixturedefinitions. All171explicitnames audited onlypropext/Quot.sound/
+Classical.choice. Original36coordinates/five full vectors and1338-byte SCHEMA plus
+five complete Q bytes match Python. Layout/name/range/order/hash-kind/vector/byte
+negatives are checked. Component row metadata is explicitly constructed; no new
+complete raw-source run or authenticated native history. Original bytes/5/6/8 stay.
+
+Full Lean1131jobs/four fresh kernels,712tooling/38oracle/6targeted,
+33legal112illegal,Ruff/format/consistency and382file byte-exact regeneration PASS.
+21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.
+No freshTLC/productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines missing;
+nativecertificate decimal-00/-01FAIL remains,Phase0unfrozen,make absent and aggregate
+formal-check not claimed. DemosHTTP200withoutrestart/frozenrefsunchanged.
+
+This joins one selected domain/shard under existing codec/hash/draft Binding
+premises. The8MiB cap is per selected assignment, not the full-batch Python cap;
+allocation/time equivalence is not proved. Full original context/certificate/current/
+model/optimizer/APPLY authority and source provenance remain open. Original008proof/
+base/current preimages remain missing. Next: instantiate a complete original-source
+and draft PARAMETER join example through component lemmas, then derive the full
+original configuration/context and current/model/optimizer/APPLY profile relation;
+do not infer them from matching parent strings or invent absent captures.
+General bounded codecs/hash/exporter, full phase/QC/send/delivery/journal/current/
+crash/unknown/torn/repair/WAL, arbitrary snapshots, full-batch resources, native
+decimal compatibility, freeze/offline reproduction and independent reviews remain.
+No localPASS, runtime guard change, independentattestation or GO.
+Source-bound semantics: sha256:12954f785fc8726b3b53c580805a624eefda5700f3eb0ecfb158fc13b855d5d7.
