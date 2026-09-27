@@ -4924,3 +4924,71 @@ General arbitrary-snapshot phase/QC/send/delivery/journal/current/crash/unknown/
 torn/repair/physicalWAL recovery, native decimal compatibility, amendment freeze,
 clean offline reproduction and independent review remain mandatory.
 Source-bound semantics: sha256:d0da28582d27b85325fd8d60892f94d72c9770b43be79fa15eda2c4996780555.
+
+
+## 27 September 2026 — complete PLAN/APC from original prepared assignments
+
+T044/T048/T053/T054/T056/T057. Formal proposal; NO_GO. Scope
+formal/proposals/native-plan-projection-proof.md; evidence
+formal/proposals/evidence/native-plan-projection.json. NativePlanAssignments
+derives every contribution from original finalized APC rational weights, whole
+eligible member/manifest identity and exact original Q position. It retains every
+domain row, decoded quantum/vector shape and actual proof denominator. Assignment
+contexts and full original bodies come from NativeSizedParameterSection; the
+original expanded-certificate 4MiB guards apply. No later aggregate or APPLY is
+required. Full required-key matrix and entire selected body multiset are checked.
+
+NativePlanProjection constructs canonical complete PLAN/APC and checks actual
+store bytes/hash/length/typed payloads, reusing complete SCHEMA/Q/ISC/EC provenance.
+Its joinedFrameOrigin theorem constructs all five FrameOrigin resolve relations
+for the same existing checked PARAMETER frame. No caller-supplied whole translated
+PLAN/APC or arithmetic approval flag is used. The APPLY-profile reference remains
+an explicit shape-checked primitive; it is not derived or authenticated.
+
+Three modules:32 general helper theorems/24 definitions/five structures,
+23 kernel/component cases/12 definitions. All96 explicit top-level names
+axiom-audited with only propext/Quot.sound/Classical.choice. Full Lean1144jobs,
+three fresh kernels,727tooling/38oracle,33legal112illegal,Ruff/format/consistency
+and387generated files byte-exact PASS. All final source/evidence hashes match
+Git blobs. 21TLA/schema/runtime/147native witnesses unchanged;145legacyonly
+semanticsID. No freshTLC/productionmutants. Mandatory44/45,
+nativeArithmeticRecoveryRefines missing;Phase0unfrozen;make absent/noaggregate
+formal-check. All3demosHTTP200withoutrestart/frozenrefsunchanged.
+
+Existing source components retain actual ticket/weight/Q bytes and first-block
+quantum1/4. A deliberately partial member image is not a full checker example.
+Four short invalid-ID encoding cases match independent Python canonical JSON.
+Draft context/contributions key order and local recursion-limit failures were
+fixed before freezing; only final evidence counts. No new full original/draft
+Binding, joined native execution or native exporter authority is instantiated.
+Pinned original contract sources are separately hashed at e94fb08ad75d0693d566f1761cac8cc992bb4e42;
+they are not the current-checkout runtime files and were not edited.
+
+Native shard-name/ASCII context restrictions are explicit projection restrictions.
+The native preparation accepts assignment context separately; APC alone does not
+supply it. Original commitment/availability authority, current model/optimizer/
+APPLY profile, full-batch resources and concrete hash/codec/exporter remain open.
+Worker004 profile and checkpoint labels are not substitutes. Original008
+proof/base/current captures remain absent; decimal -00/-01 compatibility still
+fails. Conditional FrameOrigin is not the full admission/recovery relation.
+
+The existing NativeApplyProfile module already checks original optimizer
+coefficients and canonical original profile ID. Original ApplyArithmeticProfile
+has an accumulator-proof reference but no explicit applyQuantum/outputRange;
+these draft fields need an independently justified mapping. compute_candidate
+receives parent values and parent IDs separately; its local content-ID shape
+check alone cannot establish their hash equality. Inspect the caller/snapshot
+provenance before composing current identity. Do not write a duplicate profile
+decoder without checking the existing source module.
+
+Next: bind current model/optimizer and actual APPLY profile from independently
+anchored original preimages, then construct complete Inputs/Binding and instantiate
+the joined original/draft computation. Inspect normative current-pointer/snapshot/
+profile contracts first; preserve original preparation context and every canonical
+record. Missing captures must remain missing, not be replaced with synthetic
+fixture model/optimizer/deadline/profile values. Reuse component proofs and avoid
+large new numeric fixtures. General arbitrary-snapshot phase/QC/send/delivery/
+journal/current/crash/unknown/torn/repair/physicalWAL recovery, concrete bounded
+hash/codec/exporter, native decimal compatibility, contract freeze, clean offline
+reproduction and independent review remain mandatory.
+Source-bound semantics: sha256:bdb9f2259277ac391e3b8f7a8905e14d6b841b83ee170292a7580497c1487b53.

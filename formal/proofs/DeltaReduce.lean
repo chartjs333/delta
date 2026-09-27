@@ -1,3 +1,6 @@
+import DeltaReduce.NativePlanAssignments
+import DeltaReduce.NativePlanProjection
+import DeltaReduce.NativePlanProjectionVectors
 import DeltaReduce.NativeIscCorpus
 import DeltaReduce.NativeIscProjection
 import DeltaReduce.NativeIscProjectionVectors

@@ -1303,11 +1303,27 @@ def main() -> int:
         "checker resolves computed bytes in the store and joins the same checked "
         "PARAMETER frame. An existing raw one-member fixture instantiates the complete "
         "source corpus, not a new full native/draft Binding or joined execution. "
-        "Source-derived PLAN/APC, shard naming authority, current vectors/APPLY "
+        "At this ISC-only layer, source-derived PLAN/APC, shard naming authority, "
+        "current vectors/APPLY "
         "profile and authentication of original commitment/availability observations "
         "remain OPEN. Hash/codec/exporter and full-batch resource boundaries, native "
         "decimal compatibility and full nativeArithmeticRecoveryRefines remain "
         "unproved. No runtime guard, local PASS, GO or independent attestation."
+    )
+    report["coverage"]["unresolved"].append(
+        "Complete PLAN/APC construction now retains original prepared PARAMETER "
+        "contexts, finalized APC rational weights, complete domain/shard/member "
+        "coverage and decoded Q quantum. Sized original section checks apply. "
+        "Computed canonical PLAN/APC resolve in the actual store; the joined "
+        "checker derives all five FrameOrigin records for the same checked frame. "
+        "The APPLY profile reference remains an explicit shape-checked primitive, "
+        "not an authenticated profile preimage. Ordinal naming and ASCII context "
+        "restrictions are not general native admission equivalence. Small encoding "
+        "and source-component cases do not instantiate a complete original/draft "
+        "Binding or execution. Current vectors/profile, commitment authority, "
+        "general codec/hash/exporter/resource bounds, native decimal compatibility "
+        "and full nativeArithmeticRecoveryRefines remain OPEN. No runtime guard, "
+        "local PASS, GO or independent attestation is authorized."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
