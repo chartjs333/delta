@@ -25,6 +25,70 @@
   <section id="page-overview" class="page">
     <div class="page-heading"><div><div class="eyebrow" data-i18n="overviewEyebrow">FROM COMMAND TO VERIFIABLE RESULT</div><h1><span data-i18n="overviewHeading">The system in action</span><span>.</span></h1><p data-i18n="overviewDescription">Run jobs, test resilience and save the results.</p></div><a id="advanced" class="button secondary" href="/admin/?lang=en#/live-execution" target="_blank" rel="noopener" data-i18n="advanced">Open Admin UI ↗</a></div>
     <div id="notice" class="notice" role="alert" hidden></div>
+    <section class="demo-narrative-panel panel" aria-label="Demonstration Pathway">
+      <div class="narrative-header">
+        <div>
+          <div class="eyebrow" data-i18n="demoFlowKicker">DEMONSTRATION PATHWAY · WHAT HAPPENS & WHY TO TRUST IT</div>
+          <h2 data-i18n="demoFlowTitle">From Workload to Cryptographic Verification</h2>
+        </div>
+        <span class="mode-pill" title="Local single-computer emulation"><i></i> SIMULATED_LOCAL</span>
+      </div>
+      <div class="narrative-steps">
+        <div class="narrative-step">
+          <span class="n-num">1</span>
+          <div>
+            <strong data-i18n="stepTaskTitle">1. Workload</strong>
+            <span id="nv-task" class="nv-val">10-Gene Phenotype</span>
+            <small data-i18n="stepTaskDesc">Synthetic 10-gene cohort</small>
+          </div>
+        </div>
+        <div class="n-arrow" aria-hidden="true">→</div>
+        <div class="narrative-step">
+          <span class="n-num">2</span>
+          <div>
+            <strong data-i18n="stepParticipantsTitle">2. Participants</strong>
+            <span id="nv-participants" class="nv-val">1 Controller + 1 Worker</span>
+            <small data-i18n="stepParticipantsDesc">Local processes</small>
+          </div>
+        </div>
+        <div class="n-arrow" aria-hidden="true">→</div>
+        <div class="narrative-step">
+          <span class="n-num">3</span>
+          <div>
+            <strong data-i18n="stepExecTitle">3. Execution</strong>
+            <span id="nv-execution" class="nv-val">Ready · IDLE</span>
+            <small data-i18n="stepExecDesc">TRAIN_TICKET protocol lifecycle</small>
+          </div>
+        </div>
+        <div class="n-arrow" aria-hidden="true">→</div>
+        <div class="narrative-step">
+          <span class="n-num">4</span>
+          <div>
+            <strong data-i18n="stepResultTitle">4. Result</strong>
+            <span id="nv-result" class="nv-val">—</span>
+            <small data-i18n="stepResultDesc">Loss, duration and weights</small>
+          </div>
+        </div>
+        <div class="n-arrow" aria-hidden="true">→</div>
+        <div class="narrative-step">
+          <span class="n-num">5</span>
+          <div>
+            <strong data-i18n="stepReceiptTitle">5. Receipt & Lineage</strong>
+            <span id="nv-receipt" class="nv-val">—</span>
+            <small data-i18n="stepReceiptDesc">Cryptographic execution lineage</small>
+          </div>
+        </div>
+        <div class="n-arrow" aria-hidden="true">→</div>
+        <div class="narrative-step highlight">
+          <span class="n-num">6</span>
+          <div>
+            <strong data-i18n="stepVerificationTitle">6. Verification</strong>
+            <span id="nv-verification" class="nv-val">Candidate · NO_GO</span>
+            <small data-i18n="stepVerificationDesc">Formal reference oracle</small>
+          </div>
+        </div>
+      </div>
+    </section>
     <div class="metrics">
       <article class="metric"><div class="metric-label">Controller <span>◉</span></div><strong id="controller-state">Checking…</strong><small id="controller-detail">Checking HTTP readiness</small></article>
       <article class="metric"><div class="metric-label"><span class="metric-name" data-i18n="completedRuns">Completed runs</span><span>↗</span></div><strong id="completed-count">0</strong><small data-i18n="lastThirty">Of the last 30 local runs</small></article>

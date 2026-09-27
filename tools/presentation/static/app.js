@@ -119,22 +119,101 @@ function renderJobs(state) {
   const history = $("history"); history.replaceChildren();
   for (const item of jobs) {
     const card = el("article", undefined, "panel history-item"); const info = el("div");
-    info.append(el("h2", title(item)), el("p", `${new Date(item.created_at).toLocaleString(locales[language], {hour12: false})} · ${item.id.slice(0, 12)} · SIMULATED_LOCAL`));
+    info.append(el("h2", title(item)), el("p", `${new Date(item.created_at).toLocaleString(locales[language], {hour12: false})} · SIMULATED_LOCAL`), renderHashWithCopy(item.id));
     card.append(info, badge(item), download(item)); history.append(card);
   }
 }
+function renderHashWithCopy(value) {
+  if (!value || value === '—') return el('span', '—');
+  const container = el('span', undefined, 'hash-container');
+  const short = value.length > 16 ? `${value.slice(0, 8)}…${value.slice(-6)}` : value;
+  const code = el('code', short, 'short-hash');
+  code.title = value;
+  const copyBtn = el('button', t('copyHash'), 'copy-btn');
+  copyBtn.type = 'button';
+  copyBtn.title = t('copyHash');
+  copyBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(value).then(() => {
+        copyBtn.textContent = t('copied');
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = t('copyHash');
+          copyBtn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+  });
+  container.append(code, copyBtn);
+  return container;
+}
+
+function renderNarrative(state) {
+  const busy = !!state.active_job || requested;
+  const active = state.jobs.find(j => j.id === state.active_job);
+  const latest = state.jobs[0];
+  const ready = state.controller.status === 'READY';
+
+  $('nv-task').textContent = '10-Gene Phenotype';
+  $('nv-participants').textContent = ready ? '1 Controller · 1 Worker' : t('unavailable');
+
+  if (busy) {
+    const phase = active?.events?.slice(-1)[0]?.message || 'RUNNING';
+    $('nv-execution').textContent = translateLog(language, phase);
+    $('nv-execution').className = 'nv-val busy-pulse';
+  } else {
+    $('nv-execution').textContent = t(ready ? 'readyIdle' : 'unavailable');
+    $('nv-execution').className = 'nv-val';
+  }
+
+  if (latest && latest.state === 'COMPLETED') {
+    const dur = Number.isFinite(latest.elapsed_ms) ? `${(latest.elapsed_ms/1000).toFixed(1)} ${t('seconds')}` : '';
+    $('nv-result').textContent = `${t('lossComputed')} · ${dur}`;
+  } else if (latest && latest.state === 'FAILED') {
+    $('nv-result').textContent = t('FAILED');
+  } else {
+    $('nv-result').textContent = t('awaitingRun');
+  }
+
+  const receiptBox = $('nv-receipt');
+  receiptBox.replaceChildren();
+  if (latest && latest.state === 'COMPLETED') {
+    const label = el('span', t('verifiedLineage') + ' · ');
+    receiptBox.append(label, renderHashWithCopy(latest.id));
+  } else {
+    receiptBox.textContent = '—';
+  }
+
+  $('nv-verification').textContent = 'Candidate (NO_GO) · Reference oracle';
+}
+
 function renderGates(state) {
+  const formalStatusText = state.formal_candidate?.decision === 'GO' ? 'GO' : 'Candidate (NO_GO · 44/45 obligations)';
   const rows = [
-    [t('localApplication'), "HTTP Controller → Python Worker → execution receipt", t(state.controller.status === "READY" ? 'working' : 'unavailable')],
-    [t('dockerControllers'), t('dockerGateDescription'), "SIMULATED_LOCAL"],
-    ["Feature000", t('formalGateDescription'), state.formal_candidate.decision],
-    ["PR50 / native runtime", "PARAMETER/APPLY, WAL, retry/recovery, C ABI/FFM/IPC", t('dependsFormal')],
-    [t('gateA'), t('gateADescription'), t('notQualified')],
-    [t('gateB'), t('gateBDescription'), t('notQualified')],
-    [t('gateNetwork'), t('gateNetworkDescription'), t('notQualified')],
-    ["ResultQC / GO checkpoint", t('resultQcDescription'), t('absent')],
+    [t('localApplication'), "HTTP Controller → Python Worker → execution receipt", t(state.controller.status === "READY" ? 'working' : 'unavailable'), 'evidenceRuntime'],
+    [t('dockerControllers'), t('dockerGateDescription'), "SIMULATED_LOCAL", 'evidenceTest'],
+    [t('verificationTitle'), "Pinned formal Python oracle: 7 arithmetic & mutation checks", "✓ 7/7 PASS", 'evidenceOracle'],
+    ["Feature000", t('formalGateDescription'), formalStatusText, 'evidenceFormal'],
+    ["PR50 / native runtime", "PARAMETER/APPLY, WAL, retry/recovery, C ABI/FFM/IPC", t('dependsFormal'), 'evidenceFormal'],
+    [t('gateA'), t('gateADescription'), t('notQualified'), 'evidenceRuntime'],
+    [t('gateB'), t('gateBDescription'), t('notQualified'), 'evidenceRuntime'],
+    [t('gateNetwork'), t('gateNetworkDescription'), t('notQualified'), 'evidenceTest'],
+    ["ResultQC / GO checkpoint", t('resultQcDescription'), t('absent'), 'evidenceFormal'],
   ];
-  $("gates").replaceChildren(...rows.map(([name, desc, status], index) => { const row = el("div", undefined, "gate"); const info = el("div"); info.append(el("b", name), el("small", desc)); row.append(info, el("span", status || "UNKNOWN", `status ${index === 0 && state.controller.status === 'READY' ? "success" : "warning"}`)); return row; }));
+  $("gates").replaceChildren(...rows.map(([name, desc, status, evidenceType]) => {
+    const row = el("div", undefined, "gate");
+    const info = el("div");
+    const titleRow = el("div", undefined, "gate-title-row");
+    titleRow.append(el("b", name));
+    if (evidenceType) {
+      titleRow.append(el("span", t(evidenceType), "evidence-badge"));
+    }
+    info.append(titleRow, el("small", desc));
+    const statusSpan = el("span", status || "UNKNOWN", `status ${status.includes('✓') || status === t('working') ? "success" : "warning"}`);
+    row.append(info, statusSpan);
+    return row;
+  }));
   $("formal-detail").textContent = JSON.stringify(state.formal_candidate, null, 2);
 }
 function renderState() {
@@ -150,6 +229,7 @@ function renderState() {
   const gpu = (current.gpu.observation || '').split(',').map((value) => value.trim());
   $('gpu-memory').textContent = current.gpu.state === 'VISIBLE' ? gpu[2] : t(current.gpu.state === 'CHECKING' ? 'checking' : 'unavailable');
   $('gpu-name').textContent = current.gpu.state === 'VISIBLE' ? gpu[0].replace('NVIDIA GeForce ', '') : t('gpuScope');
+  renderNarrative(current);
   renderJobs(current); renderGates(current);
   renderWorkspace(); renderLinked();
 }

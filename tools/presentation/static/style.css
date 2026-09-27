@@ -11,3 +11,37 @@
 .language-help { position:relative; }
 .language-help summary { width:28px; height:28px; display:grid; place-items:center; border-radius:50%; border:1px solid #b7cbe2; background:#f0f6ff; color:#20538f; cursor:pointer; list-style:none; }
 .language-help>div { position:absolute; right:0; top:35px; z-index:30; width:min(320px,72vw); padding:18px; border:1px solid #bccfe4; border-radius:12px; box-shadow:0 8px 28px #18365726; background:#fff; font-size:14px; line-height:1.55; }
+
+/* Demonstration Pathway Stepper */
+.demo-narrative-panel { background: #faf9fe; border-color: #ddd4f5; margin-bottom: 25px; padding: 20px 24px; }
+.narrative-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+.mode-pill { font-size: 10px; font-weight: 700; color: #6f51be; background: #f1edfb; border: 1px solid #d9d0f2; border-radius: 6px; padding: 5px 10px; letter-spacing: 0.5px; display: inline-flex; align-items: center; }
+.narrative-steps { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr auto 1fr; align-items: center; gap: 8px; }
+.narrative-step { background: #fff; border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.narrative-step.highlight { border-color: #c7b8f2; background: #fbfaff; box-shadow: 0 2px 6px #7358ed10; }
+.n-num { display: grid; place-items: center; width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%; background: #ede8fb; color: #6c4fce; font-size: 10px; font-weight: 700; }
+.narrative-step strong { display: block; font-size: 11px; color: #2d3648; font-weight: 650; }
+.nv-val { display: block; font-size: 11px; color: #1e7855; font-weight: 600; margin: 2px 0; overflow-wrap: anywhere; }
+.nv-val.busy-pulse { color: #8e62d4; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.narrative-step small { display: block; font-size: 9px; color: #808b9e; }
+.n-arrow { color: #b1a9c8; font-size: 14px; font-weight: bold; }
+@media(max-width: 1200px) {
+  .narrative-steps { grid-template-columns: repeat(2, 1fr); }
+  .n-arrow { display: none; }
+}
+@media(max-width: 600px) {
+  .narrative-steps { grid-template-columns: 1fr; }
+}
+
+/* Evidence Badges in Feature010 gates */
+.gate-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.evidence-badge { font-size: 9px; font-weight: 700; color: #53457a; background: #eeeafb; border: 1px solid #dcd4f5; border-radius: 4px; padding: 2px 6px; letter-spacing: 0.4px; }
+
+/* Hash formatting & copy button */
+.hash-container { display: inline-flex; align-items: center; gap: 6px; }
+.short-hash { font-family: ui-monospace,Consolas,monospace; font-size: 11px; background: #f3f4f8; padding: 2px 5px; border-radius: 4px; color: #4b5568; }
+.copy-btn { font-size: 10px; font-weight: 600; background: #eee9fb; color: #6347c0; border: 1px solid #ddd5f6; border-radius: 4px; padding: 2px 7px; cursor: pointer; transition: all .15s; }
+.copy-btn:hover { background: #e3daf7; }
+.copy-btn.copied { background: #daf3e7; color: #1e754e; border-color: #bce5d2; }
+
