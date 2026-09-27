@@ -4369,3 +4369,45 @@ No native guard change/local PASS/GO/independent attestation. Next: complete
 original manifest/leaf/header list and byte totals, config/proof/availability
 and SHA/source authority, then source-to-draft arithmetic and full recovery.
 Source-bound semantics: sha256:df97e6a9107ae243e4a3f555404384745acb1f781860329e6391a3c8107fe8a0.
+
+
+## 27 September 2026 — complete original manifest and ordered raw Q corpus in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-manifest-proof.md; evidence formal/proposals/evidence/native-manifest.json.
+NativeManifestBytes decodes all18 fields and each ordered8-field reference from
+original bytes, with complete canonical preimage/roundtrip/uniqueness and bounded
+list guards. NativeManifestBinding actually decodes schema/scale/plan, derives
+the entire partition and matches all reference entries and actual raw blocks in
+order. Each complete expected header comes from original manifest/ref fields and
+the actual payload hash adapter. Unmatched tails reject. Every original numeric
+field, leaf identity, payload, vector and envelope remains linked to its position.
+General corpus proofs derive exact counts, full coordinate coverage and both
+byte totals; source lemmas preserve original complete frame/payload preimages.
+
+NativeManifestMerkle decodes content-ID hex to32 raw bytes, hashes each ordered
+pair with the original domain andNUL, duplicates an odd final node and preserves
+a singleton. General Layer/Tree lemmas retain the exact recurrence, pair digest
+sizes and level lengths. The complete original2198-byte manifest, five blocks,
+36coordinates,72payloadbytes and4798envelopebytes compose from checked components.
+This is local complete corpus correspondence under UNVERIFIED hash, not remote
+availability, cryptographic identity, exporter authority or protocol admission.
+Original parent checkpoint preimage is still absent. Config/proof/parent/AC/ISC/
+EC/APC authority, general native resources/codecs and source-to-draft arithmetic
+remain open. The synthetic exact-preimage hash adapter is NOT SHA verification.
+
+Large whole-document byte reduction was replaced by source-component preimage
+lemmas; hash witnesses use explicit branch proofs and Merkle layers compose from
+checked pair facts. Only final stable-source results count; discarded draft
+resource/compile failures are not evidence. Full Lean1115jobs, four fresh kernels,
+axiom audit,685tooling/38oracle/8targeted,33legal112illegal,Ruff/format/consistency
+and372file byte-exact regeneration PASS. Declaration inventory and exact counts
+are recorded in machine-readable evidence.21TLA/schema/runtime/147nativewitnesses
+unchanged;145legacy onlysemanticsID. No fresh native/TLC/production mutants.
+Mandatory44/45/nativeArithmeticRecoveryRefines missing; separate nativecertificate
+-00/-01canonicalityFAIL unchanged. Phase0 unfrozen,make unavailable, no aggregate
+formal-check claim. Stopped Controller/Presentation restored; nodePID unchanged; saved verification hash and baseline receipt reverified. All3HTTP200/frozenrefs unchanged. No guard
+change/localPASS/GO/independentattestation. Next: checked original config/proof
+bodies and their actual source links, verified hashes/authority, then full-vector
+source-to-draft/current/arithmetic and general phase/journal/QC/recovery relation.
+Source-bound semantics: sha256:031ac06b84d94541b8579e19e0b49f7f5fa724380314cdff2c285fc3dba518bb.

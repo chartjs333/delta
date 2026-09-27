@@ -1165,6 +1165,19 @@ def main() -> int:
         "A changed Q with its old payload hash still passes this Lean relation. "
         "No native execution, guard change, local PASS, GO or attestation."
     )
+    report["coverage"]["unresolved"].append(
+        "The newest original004 manifest layer supersedes the earlier per-Q "
+        "coverage gap: it decodes all18 fields and ordered8-field refs, binds the "
+        "entire actual Q corpus to the computed plan, derives complete headers "
+        "and exact byte/coordinate totals, and checks ordered Merkle recurrence "
+        "over raw32-byte digests with odd-tail duplication. All five original "
+        "blocks compose. The hash function remains UNVERIFIED; finite exact "
+        "preimage fixtures are synthetic witnesses, not SHA or source authority. "
+        "Configuration/proof/parent/availability authentication, general native "
+        "resource/codec equivalence, source-to-draft arithmetic and complete "
+        "nativeArithmeticRecoveryRefines remain OPEN. No runtime change, native "
+        "execution, local PASS, GO or independent attestation is claimed."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

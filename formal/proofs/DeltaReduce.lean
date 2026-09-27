@@ -1,3 +1,7 @@
+import DeltaReduce.NativeManifestBytes
+import DeltaReduce.NativeManifestMerkle
+import DeltaReduce.NativeManifestBinding
+import DeltaReduce.NativeManifestVectors
 import DeltaReduce.NativeShardPartition
 import DeltaReduce.NativeShardPlanBytes
 import DeltaReduce.NativeShardPlanBinding
