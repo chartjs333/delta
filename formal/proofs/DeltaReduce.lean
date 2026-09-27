@@ -1,3 +1,6 @@
+import DeltaReduce.NativeIscCorpus
+import DeltaReduce.NativeIscProjection
+import DeltaReduce.NativeIscProjectionVectors
 import DeltaReduce.NativeVectorAuthority
 import DeltaReduce.NativeVectorAuthorityVectors
 import DeltaReduce.NativeVectorDerivation

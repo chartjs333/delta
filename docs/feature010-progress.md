@@ -4868,3 +4868,59 @@ phase/QC/send/delivery/journal/current/crash/unknown/torn/repair/physical-WAL
 recovery, decimal compatibility, contract freeze/offline reproduction and
 independent review remain mandatory. Original008 proof/base/current preimages
 remain absent. Source-bound semantics: sha256:cca88293f7943266b07d7fa3c200563f77fd4224564d0352288c9af75e19f865.
+
+
+## 27 September 2026 — complete original ISC corpus and computed ISC/EC graph
+
+T044/T048/T053/T054/T056/T057. Formal proposal; NO_GO. Scope
+formal/proposals/native-isc-projection-proof.md; evidence
+formal/proposals/evidence/native-isc-projection.json. NativeIscCorpus loads all
+original ISC members and their complete manifests/Q preimages, including rejected
+EC members. It preserves exact tuple/EC entry order, native context, original
+commitment/availability identifiers and every original shard reference. Missing
+or extra inputs reject. The full eligible member/manifest list must equal the
+actual checked arithmetic corpus, not only its count or values.
+
+NativeIscProjection computes canonical Q, full ISC and EC records, retaining all
+original-to-projected leaf positions. Eligible Q encoding is definitionally the
+same as the existing arithmetic projection. The store checker resolves the exact
+computed schema/ISC/EC and every Q preimage, then joins the same previously
+checked PARAMETER frame/body with those complete authority/parent contents.
+No external whole translated body or arithmetic approval Boolean is supplied.
+
+Three modules:40 general theorems,31 definitions,seven structures/one inductive;
+27 kernel/component cases and five fixture definitions. All111 explicit top-level
+names axiom-audited with only propext/Quot.sound/Classical.choice. Full Lean1141
+jobs,three fresh kernels,725tooling/38oracle,33legal112illegal,Ruff/format/consistency
+and387generated files byte-exact PASS. All final source/evidence hashes match Git
+blobs. 21TLA/schema/runtime/147native witnesses unchanged;145legacyonlysemanticsID.
+No freshTLC/productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines
+missing;Phase0unfrozen;make absent/noaggregateformal-check. All3demosHTTP200
+without restart and frozenrefs unchanged. Only final stable-source evidence counts.
+
+The actual all-member raw load is instantiated using the existing one-member
+synthetic raw source and original004 Q preimages. A separate rejected-member
+component changes only the eligibility bit; it is not a newly finalized EC.
+Tiny encoding cases use deliberately invalid IDs and agree with independent
+Python canonical JSON expectations. There is no new successful complete
+original/draft Binding, joined PARAMETER execution or native exporter evidence.
+
+Original commitment/availability observations remain explicit unauthenticated
+primitive inputs. Current InputLedger receives required leaf IDs separately;
+the ISC tuple alone cannot authenticate their derivation. Source-derived PLAN/APC,
+native shard naming, current model/optimizer/APPLY profile, general codec/hash/
+exporter and full-batch resource bounds remain open. Individual artifacts retain
+the4MiB projection cap. Original008 proof/base/current captures remain absent.
+No checkpoint label or worker quantization profile supplies current/APPLY vectors.
+
+Next: derive actual PLAN assignments and APC payload from original finalized APC
+weights/buckets and the complete checked ISC/EC corpus. Resolve the original
+required_parameter_keys versus ordinal shard-label projection explicitly; preserve
+every original assignment/member/quantum and reject missing or ambiguous mappings.
+Then instantiate complete Inputs and the joined original/draft computation from
+real available preimages. Do not fill missing authority/current/profile data with
+dummy fixture values or equate structured TLA values with native content hashes.
+General arbitrary-snapshot phase/QC/send/delivery/journal/current/crash/unknown/
+torn/repair/physicalWAL recovery, native decimal compatibility, amendment freeze,
+clean offline reproduction and independent review remain mandatory.
+Source-bound semantics: sha256:d0da28582d27b85325fd8d60892f94d72c9770b43be79fa15eda2c4996780555.

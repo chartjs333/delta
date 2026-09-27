@@ -1296,6 +1296,19 @@ def main() -> int:
         "compatibility and the explicit shard-label projection restriction remain. "
         "No runtime guard, local PASS, GO or independent attestation is authorized."
     )
+    report["coverage"]["unresolved"].append(
+        "Complete ISC projection now loads every original member manifest, including "
+        "rejected members, and derives canonical ISC/EC payloads and all Q references. "
+        "Eligible manifests must exactly match the actual arithmetic corpus; the "
+        "checker resolves computed bytes in the store and joins the same checked "
+        "PARAMETER frame. An existing raw one-member fixture instantiates the complete "
+        "source corpus, not a new full native/draft Binding or joined execution. "
+        "Source-derived PLAN/APC, shard naming authority, current vectors/APPLY "
+        "profile and authentication of original commitment/availability observations "
+        "remain OPEN. Hash/codec/exporter and full-batch resource boundaries, native "
+        "decimal compatibility and full nativeArithmeticRecoveryRefines remain "
+        "unproved. No runtime guard, local PASS, GO or independent attestation."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
