@@ -1,3 +1,7 @@
+import DeltaReduce.NativeGraphClosure
+import DeltaReduce.NativeAuthorityProjection
+import DeltaReduce.NativeBindingConstruction
+import DeltaReduce.NativeBindingConstructionVectors
 import DeltaReduce.NativeStateArtifacts
 import DeltaReduce.NativeStateProjection
 import DeltaReduce.NativeStateProjectionVectors

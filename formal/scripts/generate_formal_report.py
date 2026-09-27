@@ -1355,6 +1355,21 @@ def main() -> int:
         "not a full history/preparation execution or authenticated UnitSource. "
         "No runtime guard, local PASS, GO or independent attestation follows."
     )
+    report["coverage"]["unresolved"].append(
+        "The full AUTHORITY root is now computed from checked original context "
+        "and all eight projected artifact references. Executable finite-depth "
+        "store traversal derives recursive Complete and ordered paths; no "
+        "caller-supplied graph-completeness proof is consumed. A pre-aggregate "
+        "Binding and its PARAMETER arithmetic composition are constructed from "
+        "source executions with a mandatory common HashAdapter, conditional on "
+        "explicit native anchor/recovery and "
+        "ISC/EC/APC Trust premises. Closure does not authenticate a computed root, "
+        "UnitSource or configured profile. Aggregate certification, a full raw "
+        "original/draft execution instance, concrete bounded codec/hash/exporter "
+        "and nativeArithmeticRecoveryRefines remain OPEN. Traversal depth is "
+        "not a bound on total graph work. Small synthetic traversal and canonical "
+        "encoding cases are not native custody, signatures or a GO decision."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

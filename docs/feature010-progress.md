@@ -5126,3 +5126,73 @@ native decimal -00/-01 compatibility, arbitrary phase/QC/send/delivery/journal/
 current/crash/unknown/torn/repair/physicalWAL, bounded hash/codec/exporter/resources,
 contract freeze, clean offline reproduction and independent review remain open.
 Source-bound semantics: sha256:c16981d6c0b5e90838aaa5f4b3649ffdbb10f54335cc0a3d262d111a003e491d.
+
+
+## 27 September 2026 — computed authority graph and conditional Binding
+
+T044/T048/T053/T054/T056/T057. NO_GO. Scope
+formal/proposals/native-binding-construction-proof.md; evidence
+formal/proposals/evidence/native-binding-construction.json.
+NativeGraphClosure executes the actual store/decoder at every reference and
+recurses over all decoded children in exact field/list order. Successful finite
+depth checks derive the inductive Complete relation and ordered paths. Missing
+nodes, wrong bytes/kinds/lengths/edge types, noncanonical data and exhausted depth
+reject. DAG sharing is supported; no finite approval table or caller Complete
+proof defines the general relation. Depth bounds path length, not total work.
+
+NativeAuthorityProjection computes all eight artifact references and complete
+source context into the canonical AUTHORITY payload, including its full parents
+object. Original round/epoch/parent byte identity and identifier checks retain
+the source context. Actual root bytes/hash/length/decoded payload and full
+recursive closure are checked. The raw API composes NativeStateProjection.run
+on original preparation/history; no whole translated authority is accepted.
+
+NativeBindingConstruction derives a pre-aggregate Anchor and constructs Binding
+from those successful executions, deriving Complete and model/optimizer/profile
+Walk paths at exact positions. Original values, bytes, schema and quantum remain
+the computed artifacts. Native current value hashes follow under the named
+common HashAdapter, mandatory for all Binding construction entry points.
+PARAMETER composition uses the existing original/draft
+arithmetic verifier with this constructed Binding and exact source leaf coverage.
+
+This remains CONDITIONAL: Premises independently require native anchor/recovery
+and ISC/EC/APC certificate authentication. No instance of them is created or
+proved. A computed self-consistent root is not native pre-state custody or unit
+provenance. UnitSource/configured profile/initial/current authority remain OPEN.
+Aggregate is explicitly none; certified APPLY aggregate, full raw original/draft
+Inputs/execution and nativeArithmeticRecoveryRefines are not established.
+
+Four modules:26 general helper theorems/12 definitions/one premise structure;
+27 kernel/component proofs/29 small fixture definitions. All95 explicit names
+axiom-audited with only propext/Quot.sound/Classical.choice. Full Lean1154jobs,
+four fresh kernels,733tooling/38oracle,33legal112illegal,Ruff/format/consistency,
+387generatedfiles byte-exact PASS. All final source/evidence raw hashes match
+committed Git blobs. Only final frozen-source/logs count. Small draft elaboration
+errors were corrected without changing runtime or increasing heartbeat limits.
+One interrupted draft final-run was superseded after self-review made the common
+HashAdapter mandatory; only the subsequent complete stable-source run counts.
+
+Examples use a synthetic one-byte codec to check a shared ten-artifact graph and
+missing/changed inputs. It is not canonical JSON, SHA or native authentication.
+Separate short canonical context/reference proofs compose full authority bytes
+and agree with independent Python JSON. No large full native history reduction,
+new native capture or positive authenticated native/draft execution is claimed.
+21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.
+No freshTLC/newproductionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines
+missing;Phase0unfrozen;make absent/noaggregateformal-check. All3demosHTTP200without
+restart/frozenrefsunchanged. Native -00/-01 compatibility FAIL remains.
+
+Next: extend the constructed source Binding through actual certified aggregate
+and APPLY computation, deriving the aggregate root/full ParameterShardQC corpus
+instead of accepting supplied expected bodies. Preserve pre-aggregate PARAMETER
+admission and exact original schema/profile/context/denominator/quantum/parent
+and current vectors. Independently authenticate source UnitSource/configuration/
+native root/current/certificates; do not turn named premises into constant true.
+Existing original008 proof/base/current captures stay absent. Construct an actual
+original/draft Inputs instance only where source evidence suffices. Keep unknown
+observations incomplete and join complete journals/arbitrary-snapshot phase/QC/
+send/delivery/current/crash/torn/repair/physicalWAL. Concrete bounded codecs/hash/
+exporter/resources, native compatibility, contract freeze, clean offline
+reproduction and independent review remain mandatory. No helper discharges the
+full nativeArithmeticRecoveryRefines by renaming or assuming its conclusion.
+Source-bound semantics: sha256:a34c0502332c36f3ccfe15f5dad25818aec483cc7e117a31e6cd17a6da088f76.
