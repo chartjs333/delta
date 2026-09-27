@@ -1,0 +1,1 @@
+9 first arithmetic bindings; native export authentication remains false

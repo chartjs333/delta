@@ -1047,6 +1047,24 @@ def main() -> int:
         "run, source-to-draft graph admission/recovery, local PASS or GO."
     )
     report["coverage"]["unresolved"].append(
+        "NativeAccumulatorBytes/Binding now decode complete original004 config/proof "
+        "bytes and the exact immutable worker profile, recompute product/prefix and "
+        "separate product/accumulator widths, and compose their actual hash/metadata "
+        "edges with the complete manifest corpus. General signed product/prefix "
+        "bounds retain explicit actual coefficient/Q/count premises. F-S is the "
+        "unique admissible headroom, not a serialized native-call observation. "
+        "Exact denominator is not a proof of certified weight divisibility. "
+        "Kernel component examples use original config/proof bytes and three "
+        "SYNTHETIC exact-preimage hashes, not verified SHA or native/exporter "
+        "authentication; no new combined whole-corpus execution example. Missing "
+        "base/parent/008proof preimages, source-to-draft vectors/weights/current/"
+        "optimizer/APPLY, general native/public recovery, certificate decimal "
+        "failure, hash/codecs/WAL, contract freeze/offline and independent review "
+        "remain open. This does not discharge nativeArithmeticRecoveryRefines, "
+        "authorize runtime changes or issue local PASS/GO."
+    )
+
+    report["coverage"]["unresolved"].append(
         "Original APC weight tooling now resolves complete ISC/EC/seed/norm/APC "
         "bytes, retains exact eligible ticket/domain/commitment/bucket membership, "
         "and derives coefficients from final APC alpha using its actual proof's "

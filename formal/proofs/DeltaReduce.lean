@@ -1,3 +1,6 @@
+import DeltaReduce.NativeAccumulatorBytes
+import DeltaReduce.NativeAccumulatorBinding
+import DeltaReduce.NativeAccumulatorVectors
 import DeltaReduce.NativeManifestBytes
 import DeltaReduce.NativeManifestMerkle
 import DeltaReduce.NativeManifestBinding

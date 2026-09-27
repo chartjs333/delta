@@ -1,0 +1,10 @@
+test_every_named_case_and_general_declaration_is_audited (test_native_accumulator_lean.NativeAccumulatorLeanTests.test_every_named_case_and_general_declaration_is_audited) ... ok
+test_generator_is_byte_exact (test_native_accumulator_lean.NativeAccumulatorLeanTests.test_generator_is_byte_exact) ... ok
+test_hashes_are_exact_preimages_but_not_authority (test_native_accumulator_lean.NativeAccumulatorLeanTests.test_hashes_are_exact_preimages_but_not_authority) ... ok
+test_original_documents_full_fields_and_bytes (test_native_accumulator_lean.NativeAccumulatorLeanTests.test_original_documents_full_fields_and_bytes) ... ok
+test_source_boundary_substitution_stops_before_output (test_native_accumulator_lean.NativeAccumulatorLeanTests.test_source_boundary_substitution_stops_before_output) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.073s
+
+OK

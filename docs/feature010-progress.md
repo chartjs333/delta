@@ -4411,3 +4411,53 @@ change/localPASS/GO/independentattestation. Next: checked original config/proof
 bodies and their actual source links, verified hashes/authority, then full-vector
 source-to-draft/current/arithmetic and general phase/journal/QC/recovery relation.
 Source-bound semantics: sha256:031ac06b84d94541b8579e19e0b49f7f5fa724380314cdff2c285fc3dba518bb.
+
+
+## 27 September 2026 — original configuration/proof bytes and accumulator bounds in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-accumulator-lean-proof.md; evidence
+formal/proposals/evidence/native-accumulator-lean.json. NativeAccumulatorBytes
+decodes all12 config and18 proof fields, including fixed ordered theorem-name
+metadata, from canonical original bytes. General roundtrip/preimage/uniqueness
+proofs do not treat historical IDs, theorem names or PASS as proof authority.
+NativeAccumulatorBinding parses exact canonical decimals up to positive INT128,
+recomputes P=32767*A and S=P*N and checks separate product/accumulator widths,
+declared bounds and S<=F<=selected maximum. General FixedPoint composition proves
+every bounded signed product and subset/prefix sum under explicit actual
+coefficient/Q/count premises. The exact denominator remains independently bound;
+no LCM, quantum or certified-weight divisibility is inferred. F-S is proved the
+unique admissible headroom, not an observation of an actual native call.
+
+The loader compares the complete immutable004 worker profile and original
+config/proof metadata/hash-domain preimages. bindCorpus executes the complete
+original manifest/schema/scale/plan/raw-Q relation and uses its actual proof and
+config/schema/plan/scale/profile edges. General composition preserves every
+original block; it accepts no caller-approved whole corpus. Original config/proof
+examples compose checked byte components/numeric fields. Three finite hashes
+remain SYNTHETIC/UNVERIFIED, not verified SHA/native authentication.29 small cases
+separate positive endpoints, width errors, product/prefix substitutions, canonical
+decimals and metadata. No new combined full-corpus example or native execution.
+
+Three modules:22 general theorems/28 definitions/7 structures and138 fixture
+theorems/71 definitions;266 new declarations axiom-audited with only standard
+propext/Quot.sound/Classical.choice. Large string-to-byte length reduction caused
+a discarded draft resource failure; explicit identical byte constants remove
+that cost. Only final stable-source build/tests/logs count. Full Lean1118jobs,
+three fresh kernels,690 tooling/38 oracle/5 new targeted tests,33 legal/112 illegal,
+Ruff/format/consistency and374-file byte-exact regeneration PASS.21TLA/schema/
+runtime/147native witnesses unchanged;145 legacy changes onlysemanticsID. No fresh
+TLC or mutants. Mandatory44/45/nativeArithmeticRecoveryRefines missing; original
+native certificate decimal canonicality FAIL unchanged. Phase0 unfrozen;make
+unavailable, aggregate formal-check not claimed. Three demos HTTP200 without
+restart; frozen refs unchanged. No guard change/local acceptance PASS/GO.
+
+BaseRoundConfig/parent/008proof source bytes, authenticated authority/hash/exporter,
+actual source-to-draft vector/weight/current/model/optimizer/APPLY relation and
+full phase/QC/journal/crash/unknown/torn/repair recovery remain open. Next: derive
+actual original APC coefficients from the specific loaded proof denominator and
+complete eligible membership, preserving final alpha (do not multiply EC gamma
+again), then join every actual Q vector and native/draft assignment. Missing
+original proof/preimages must stay missing; synthetic examples do not authenticate
+history. Contract freeze/offline reproduction/independent reviews still required.
+Source-bound semantics: sha256:32609e9e3f8b4b2dec130c993e4b7f8c5c06db7ffda8ea97b23ece3b446dd57e.
