@@ -1325,6 +1325,21 @@ def main() -> int:
         "and full nativeArithmeticRecoveryRefines remain OPEN. No runtime guard, "
         "local PASS, GO or independent attestation is authorized."
     )
+    report["coverage"]["unresolved"].append(
+        "Current-value source checking now joins every observed pointer-WAL record "
+        "to original decoded policy/state, a selected finalized APPLY certificate "
+        "and exact candidate decimal preimages with computed native value hashes. "
+        "Ordered complete evidence, adjacent parent model/optimizer and final "
+        "state are derived from executions. Unknown, empty history and missing "
+        "evidence cannot invent current vectors. This is a stronger candidate "
+        "checker, not existing native recovery equivalence or authenticated "
+        "historical reachability. Native -00/-01 compatibility still fails. "
+        "Initial/current authority, schema/quantum/profile artifact mapping, "
+        "complete original/draft Binding, physical observation/WAL/repair, "
+        "concrete hash/codec/exporter and full nativeArithmeticRecoveryRefines "
+        "remain OPEN. Small reused synthetic components do not instantiate a "
+        "complete checked history or native execution. No runtime/local PASS/GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

@@ -4992,3 +4992,72 @@ journal/current/crash/unknown/torn/repair/physicalWAL recovery, concrete bounded
 hash/codec/exporter, native decimal compatibility, contract freeze, clean offline
 reproduction and independent review remain mandatory.
 Source-bound semantics: sha256:bdb9f2259277ac391e3b8f7a8905e14d6b841b83ee170292a7580497c1487b53.
+
+## 27 September 2026 — original pointer history and canonical current values
+
+T044/T048/T053/T054/T056/T057. Formal proposal; NO_GO. Scope
+formal/proposals/native-current-history-proof.md; evidence
+formal/proposals/evidence/native-current-history.json. NativeCurrentValues derives
+every model/optimizer integer from the original finalized candidate decimal
+spellings, retains exact order/count/bytes and signed64 bounds, and computes both
+native value-hash preimages/IDs. The canonical round-trip requirement is a stronger
+projection restriction; old native -00/-01 acceptance is unchanged.
+
+NativeCurrentHistory checks every complete original pointer-WAL record against
+one original policy/state byte pair, executing complete decoders/APPLY section,
+selecting an actually listed finalized QC, constructing its command and comparing
+the whole pointer record. Candidate parent model/optimizer match the previous
+pointer. Exact next vectors/hashes are derived from the original candidate, not
+supplied as a translation. Adjacent states, increasing heights and final pointer
+are proved by checked execution/induction. Whole decoded-WAL and joined-history
+final state equality is derived, not a premise. All source pairs and records
+are retained in exact order; missing/extra evidence rejects.
+
+Current vectors come only from the final checked candidate. Known empty or
+torn-only history cannot invent initial values. Unknown stays incomplete.
+Corrupt checksum, duplicate record and CRLF line rejection is preserved using
+existing component proofs. The original torn suffix is retained, not claimed to
+be physically truncated or authenticated. Existing rehashed-uncertified-WAL
+counterexample still passes old recovery but cannot enter this API without
+historical evidence. Parent-optimizer/canonical-value checks are additional
+restrictions, not runtime recovery equivalence or a runtime fix.
+
+Three modules:40 general helper theorems/11 definitions/eight structures,
+34 kernel/component cases/two definitions. All95 explicit names axiom-audited,
+only propext/Quot.sound/Classical.choice. Full Lean1147jobs,three fresh kernels,
+729tooling/38oracle,33legal112illegal,Ruff/format/consistency and387generatedfiles
+byte-exact PASS. Final source/evidence hashes match committed Git blobs.
+21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.
+No freshTLC/productionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines
+missing;Phase0unfrozen;makeabsent/noaggregateformal-check. All3demosHTTP200without
+restart/frozenrefsunchanged.
+
+Small cases reuse prior separately synthetic candidate vectors[19,-19]/[2,-2]
+and finite SHA samples, plus synthetic existing pointer-WAL components. Original
+golden candidate placeholder hashes reject. No new positive full history,
+original native capture, full original/draft Binding or joined execution is
+instantiated. Initial draft names/default recursion errors are superseded by
+the final stable run; local2048 recursion only for two prior small WAL negatives.
+
+Original contracts separately pinned at e94fb08ad75d0693d566f1761cac8cc992bb4e42:
+current-pointer next checkpoint equals QC next model hash; recovery does not
+reload certificates/vectors. Original DomainAggregate and parent State types do
+not contain quantum/schema; QLoRA forwards their values/IDs. Runtime is unchanged.
+Whole observation completeness,
+initial pointer provenance, independently authenticated policy/state and historical
+APPLY arithmetic are not proved by this structural history checker.
+
+Next: source-derived current MODEL/OPTIMIZER and actual APPLY PROFILE artifact
+projection, preserving the distinction between native value-hash domains and
+draft artifact domains. Schema/quantum/round configuration must come from an
+independently bound source. Original ApplyArithmeticProfile has no explicit
+applyQuantum/outputRange; do not fill these from synthetic fixtures. Reuse the
+existing NativeApplyProfile and NativeApplyResult relations, checked original
+current-history preimages and complete SCHEMA/PLAN/ISC/EC/APC derivation to build
+complete Inputs/Binding where source permits. Missing original008 proof/base/
+current captures remain missing. No later APPLY result may stand in for earlier
+preparation. Full arbitrary-snapshot phase/QC/send/delivery/journal/current/crash/
+unknown/torn/repair/physicalWAL, concrete bounded codecs/hash/exporter/resources,
+decimal compatibility, contract freeze, clean offline reproduction and independent
+review remain mandatory.
+Source-bound semantics: sha256:5b3b0b0ddc51fe478ab47bf096d240d16d74f6a7c35e674cfa03ab8f6f7b4973.

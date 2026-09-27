@@ -1,3 +1,6 @@
+import DeltaReduce.NativeCurrentValues
+import DeltaReduce.NativeCurrentHistory
+import DeltaReduce.NativeCurrentHistoryVectors
 import DeltaReduce.NativePlanAssignments
 import DeltaReduce.NativePlanProjection
 import DeltaReduce.NativePlanProjectionVectors
