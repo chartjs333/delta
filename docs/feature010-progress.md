@@ -4023,3 +4023,53 @@ Native decimal -00/-01 stillFAIL. DemosHTTP200 withoutrestart/frozenrefsverified
 Full source/graph admission, nativeArithmeticRecoveryRefines/public phase/QC/
 current/unknown/repair, physicalWAL/SHA/exporter, arbitrarysnapshots, freeze,
 offline and independentreview remain required. No localPASS, GO or guardchange.
+
+
+## 27 September 2026 — original APC membership and actual coefficient bound relation
+
+T044/T048/T053/T054/T056/T057. Formal-only tooling; NO_GO remains.
+Scope formal/proposals/native-plan-weights.md; evidence
+formal/proposals/evidence/native-plan-weights.json. resolve_members loads original
+APC/EC/ISC/seed/norm bytes and checks all contexts, exact full ticket/domain lists
+including rejected entries, and full accepted APC weights/buckets. Duplicate ISC
+tickets cannot collapse through an associative lookup. Original commitments, AC
+identities, final alpha, gamma and every source byte are retained. EC seed is a
+separately keyed primitive because absent from the EC wire; provenance remains
+independent. Stronger cross-parent/norm membership and resource restrictions
+are not native predicate/error-order equivalence or authenticated admission.
+
+resolve_plan_weights resolves the APC's exact original proof/config/profile and
+recomputes its bounds. It derives c_j=a_j*(L/b_j) using that SPECIFIC denominator,
+requires divisibility and c_j<=A, and global accepted count<=N including zero
+coefficients. Global count is a sufficient projection restriction. It checks
+source config schema/base-config identities and derives complete ordered
+per-domain rows and worst absolute Q-prefix bounds. No LCM substitution, rounding,
+expected whole body or approval Boolean; EC gamma is NOT multiplied into final
+APC alpha again. Q values/manifest/availability/source-draft identity remain open.
+No later PARAMETER/aggregate/APPLY dependency is introduced.
+
+Original pinned native policy/certificate membership passes, but its required
+sha256:ffff... proof preimage is absent; full numeric join rejects without
+rewriting that original capture. Independent004 bytes under that ID reject.
+A separate versioned synthetic test graph has four tickets/three eligible/two
+domains, alpha0,1/3,1/2, gamma1/7 and denominator12 (not minimalLCM6), deriving
+coefficients0,4,6. Eight exact objects retained. A deliberate unconfigured-signer
+countercheck passes this numeric helper: signer/finality/policy provenance is
+not authenticated. Existing typed Lean section relations are not newly composed
+with this Python relation into a kernel theorem.
+
+Twenty-two new tests include exact rational scaling against Fraction, zero
+weights/counts, coefficient limits, rehashed invalid proof, full-field omissions,
+source/canonical/resource failures, mixed contexts/parents and full membership.
+Final603tooling/38oracle/22targeted,Ruff/format/consistency,33legal112illegal PASS.
+NewJSON byteexact;357priorgenerated files unchanged, oldgenerators notrerun.
+Four native source pins plus a fifth separately retained verifier at60c692f;
+current candidate verifier differs and was NOT substituted for those bytes.
+AllLean/TLA/schema/runtime/legacy/native traces unchanged; semantics unchanged
+sha256:2d95a8132c9c0475c70a49f14f6c691dbefe292cb28a839317d18923db29a165.
+Mandatory44/45; prior1095-job build retained, no newLean build/proof/native/TLC/
+productionmutants. Phase0unfrozen;makeabsent,notaggregateformal-check. Native
+decimal-00/-01 stillFAIL. DemosHTTP200 withoutrestart/frozenrefsverified.
+Full Q/commitment/schema/draft identity and nativeArithmeticRecoveryRefines,
+public phase/QC/current/unknown/repair, physicalWAL/SHA/exporter, arbitrary
+snapshots, freeze/offline/independentreview remain open. No localPASS/GO/guardchange.

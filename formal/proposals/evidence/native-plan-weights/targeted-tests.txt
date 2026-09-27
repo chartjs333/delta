@@ -1,0 +1,27 @@
+test_all_context_fields_bound (test_native_plan_weights.NativePlanWeightsTests.test_all_context_fields_bound) ... ok
+test_all_members_norm_coverage_including_rejected (test_native_plan_weights.NativePlanWeightsTests.test_all_members_norm_coverage_including_rejected) ... ok
+test_changed_eligible_set_rejects_even_equal_count (test_native_plan_weights.NativePlanWeightsTests.test_changed_eligible_set_rejects_even_equal_count) ... ok
+test_config_schema_and_base_config_identity (test_native_plan_weights.NativePlanWeightsTests.test_config_schema_and_base_config_identity) ... ok
+test_content_relation_does_not_authenticate_signer_names (test_native_plan_weights.NativePlanWeightsTests.test_content_relation_does_not_authenticate_signer_names) ... ok
+test_every_apc_field_and_extra_rejects (test_native_plan_weights.NativePlanWeightsTests.test_every_apc_field_and_extra_rejects) ... ok
+test_every_resolved_preimage_missing_or_corrupt (test_native_plan_weights.NativePlanWeightsTests.test_every_resolved_preimage_missing_or_corrupt) ... ok
+test_exact_rational_scaling_grid_against_fraction (test_native_plan_weights.NativePlanWeightsTests.test_exact_rational_scaling_grid_against_fraction) ... ok
+test_fraction_canonicality_sign_and_integer_aliases (test_native_plan_weights.NativePlanWeightsTests.test_fraction_canonicality_sign_and_integer_aliases) ... ok
+test_gamma_is_retained_not_multiplied_into_final_alpha (test_native_plan_weights.NativePlanWeightsTests.test_gamma_is_retained_not_multiplied_into_final_alpha) ... ok
+test_global_count_includes_zero_coefficients_and_rejected_not_counted (test_native_plan_weights.NativePlanWeightsTests.test_global_count_includes_zero_coefficients_and_rejected_not_counted) ... ok
+test_independently_bound_ec_seed_missing_wrong_and_boolean (test_native_plan_weights.NativePlanWeightsTests.test_independently_bound_ec_seed_missing_wrong_and_boolean) ... ok
+test_isc_ec_domain_identity_and_duplicate_ticket (test_native_plan_weights.NativePlanWeightsTests.test_isc_ec_domain_identity_and_duplicate_ticket) ... ok
+test_no_aggregate_parameter_or_apply_dependency (test_native_plan_weights.NativePlanWeightsTests.test_no_aggregate_parameter_or_apply_dependency) ... ok
+test_nonminimal_specific_denominator_and_exact_per_domain_rows (test_native_plan_weights.NativePlanWeightsTests.test_nonminimal_specific_denominator_and_exact_per_domain_rows) ... ok
+test_original_members_preserved_and_missing_proof_rejects (test_native_plan_weights.NativePlanWeightsTests.test_original_members_preserved_and_missing_proof_rejects) ... ok
+test_rehashed_cross_parent_rejects (test_native_plan_weights.NativePlanWeightsTests.test_rehashed_cross_parent_rejects) ... ok
+test_rehashed_invalid_proof_cannot_pass_via_certificate_bytes (test_native_plan_weights.NativePlanWeightsTests.test_rehashed_invalid_proof_cannot_pass_via_certificate_bytes) ... ok
+test_resources_and_canonical_predecode (test_native_plan_weights.NativePlanWeightsTests.test_resources_and_canonical_predecode) ... ok
+test_scaled_coefficient_bound_inclusive_and_one_past (test_native_plan_weights.NativePlanWeightsTests.test_scaled_coefficient_bound_inclusive_and_one_past) ... ok
+test_source_boundary_and_exact_regeneration (test_native_plan_weights.NativePlanWeightsTests.test_source_boundary_and_exact_regeneration) ... ok
+test_weight_and_bucket_complete_coverage (test_native_plan_weights.NativePlanWeightsTests.test_weight_and_bucket_complete_coverage) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 15.390s
+
+OK

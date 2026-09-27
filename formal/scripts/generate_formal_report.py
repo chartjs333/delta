@@ -1046,6 +1046,20 @@ def main() -> int:
         "quantum is absent from that original profile. No new Lean proof, native "
         "run, source-to-draft graph admission/recovery, local PASS or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Original APC weight tooling now resolves complete ISC/EC/seed/norm/APC "
+        "bytes, retains exact eligible ticket/domain/commitment/bucket membership, "
+        "and derives coefficients from final APC alpha using its actual proof's "
+        "specific denominator. Divisibility, coefficient and global count bounds "
+        "including zero weights, schema/base-config identity and per-domain "
+        "worst absolute prefixes are checked. EC gamma is not multiplied again. "
+        "The original observed APC still has an unavailable proof preimage; its "
+        "complete numeric join rejects. A separate versioned synthetic example "
+        "does not authenticate original history. Primitive EC-seed metadata, "
+        "signers/finality, commitment/availability/Q preimages, original-to-draft "
+        "identity and general admission/recovery remain open. No new Lean proof, "
+        "native execution, runtime change, local PASS or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
