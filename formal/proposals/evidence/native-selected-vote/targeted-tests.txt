@@ -1,0 +1,13 @@
+test_all_names_audited (test_native_selected_vote.NativeSelectedVoteTests.test_all_names_audited) ... ok
+test_historical_retry_precedes_fresh_admission (test_native_selected_vote.NativeSelectedVoteTests.test_historical_retry_precedes_fresh_admission) ... ok
+test_native_arithmetic_guard_is_unconditional_in_normal_build (test_native_selected_vote.NativeSelectedVoteTests.test_native_arithmetic_guard_is_unconditional_in_normal_build) ... ok
+test_native_deadline_and_exact_request_guards (test_native_selected_vote.NativeSelectedVoteTests.test_native_deadline_and_exact_request_guards) ... ok
+test_native_phase_inventory (test_native_selected_vote.NativeSelectedVoteTests.test_native_phase_inventory) ... ok
+test_reproduction (test_native_selected_vote.NativeSelectedVoteTests.test_reproduction) ... ok
+test_scan_recovery_rechecks_then_rejects_duplicate (test_native_selected_vote.NativeSelectedVoteTests.test_scan_recovery_rechecks_then_rejects_duplicate) ... ok
+test_whole_policy_selection_and_scope (test_native_selected_vote.NativeSelectedVoteTests.test_whole_policy_selection_and_scope) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.230s
+
+OK

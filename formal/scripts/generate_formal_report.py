@@ -941,8 +941,8 @@ def main() -> int:
         "retain original candidate count/order; PARAMETER context stays its assignment. "
         "One original CONFIG full snapshot/candidate byte-wrapper example is checked; "
         "other original row examples use an explicitly synthetic mixed component "
-        "snapshot, not a new complete native policy execution. Native selected live "
-        "guards, source arithmetic, current command, retry/unknown/recovery, physical "
+        "snapshot, not a new complete native policy execution. Source arithmetic, "
+        "current command, retry/unknown/recovery, physical "
         "WAL, general SHA/exporter authentication, freeze and independent review "
         "remain open. Native decimal canonicality still fails. No local PASS or GO."
     )
@@ -960,6 +960,20 @@ def main() -> int:
         "admission, current command, native arithmetic, journal retry/unknown/recovery, "
         "physical WAL, SHA/exporter authentication, freeze and independent review "
         "remain open. Native decimal canonicality still fails. No local PASS or GO."
+    )
+    report["coverage"]["unresolved"].append(
+        "NativeSelectedVote composes all original policy/snapshot/candidate checks "
+        "with first original VOTE selection, exact identities/current/sequence, "
+        "phase and deadline/request guards. Current PARAMETER/APPLY admission "
+        "remains rejected in live and recovery modes; recovery bypasses only readiness. "
+        "Historical retry is a different earlier native branch, not this fresh/scan "
+        "predicate. One original CONFIG full byte wrapper and seven component action "
+        "checks pass; no new nonempty mixed-policy wrapper or native execution. "
+        "A signature substitution still passes syntactic checks and demonstrates "
+        "missing authentication. Runtime facts/provenance, CurrentPointerCommand, "
+        "source arithmetic, physical WAL and joined retry/unknown/recovery, full "
+        "public refinement, decimal compatibility, freeze/offline/independent review "
+        "remain open. No native guard change, local PASS or GO."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

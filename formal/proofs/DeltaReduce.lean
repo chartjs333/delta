@@ -1,3 +1,5 @@
+import DeltaReduce.NativeSelectedVote
+import DeltaReduce.NativeSelectedVoteVectors
 import DeltaReduce.NativeCandidateShape
 import DeltaReduce.NativeCandidateAuthority
 import DeltaReduce.NativeCandidateAuthorityVectors

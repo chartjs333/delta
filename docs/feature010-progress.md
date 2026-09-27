@@ -3743,3 +3743,49 @@ stillFAIL. Selected livevote enabling on sharedsnapshot, currentcommand,
 sourcearithmetic, journalretry/unknown/recovery, physicalWAL/SHA/exporter,
 freeze/offline/independentreview remainopen. No localPASS, GO or nativeguardchange.
 Three demosHTTP200 withoutrestart; frozenrefsunchanged.
+
+
+## 2026-09-27 — Selected VOTE on the complete original native policy
+
+T044/T048/T049/T053/T057/T060; amendment0001. Scope
+formal/proposals/native-selected-vote-proof.md; evidence native-selected-vote.json.
+NativeSelectedVote first executes the full shared original policy/snapshot and
+all original candidates, then derives first-match selection and checks exact
+actor/epoch/round/height/view/context/body/current parent/all-vote sequence,
+readiness/invalidation/phase and exact deadline/request predicates. No substitute
+policy, whole-body translation or supplied approval. The CURRENT native arithmetic
+input guard remains explicit: PARAMETER/APPLY reject in live AND recovery modes.
+Recovery bypasses only readiness; it does not bypass any other guard. RuntimeFacts
+are still inputs, not authenticated physical observations. Original canonical
+policy/state/VOTE bytes and selected record identity are retained by general lemmas.
+
+Read-only source inspection/tests preserve the separate native order: historical
+exact journal retry precedes fresh admission and returns original caches; WAL scan
+rechecks policy identity/admission with recovered state, then rejects duplicate
+records. This stage does not newly compose that complete journal/WAL theorem.
+Raw guard APIs consume supplied bounds; only checkAdmission/fromBytes compute whole policy.
+
+Two modules: 33generalhelpers/12defs,
+67vectorproofs/18defs;
+130names audited, onlypropext/Quot.sound/Classical.choice.
+Seven non-arithmetic selected component checks, live/recovery arithmetic refusals,
+all54 action/phase combinations, deadline endpoints, exact request/bodyreason,
+current/identity/sequence/readiness/invalidation negatives. Original CONFIG whole
+policy/state/VOTE byte wrapper passes. Other assembled state/tail examples remain
+synthetic components; no new original nonempty mixed-policy wrapper/native run.
+Signature-substitution deliberately passes syntactic checks, exposing the remaining
+cryptographic authentication premise. Request-only altered-body examples are not
+new authenticated body/source fixtures. Original native bytes/sequences unchanged.
+
+FullLean1087jobs,1genericstandalonekernel/axiomaudit,
+522tooling/38oracle/8targeted,
+33legal112illegallegacy,Ruff/format/consistency PASS.351regeneratedfiles=310JSON/
+39Lean/inputTLA/config byteexact.21TLA/schema/runtime/147nativewitness unchanged;
+145legacyonlysemanticID. No freshnative/TLC/productionmutants; retained32mixed/
+62decimal/28safety7liveness27mutants/132state131step retain previous finite scope.
+Semantics sha256:51677e685057e66f8ecb150cf3a09b2a5f9a6b2c3b1a386750b52ceb1c48d640. Mandatory44/45FAIL/nativeArithmeticRecoveryRefines missing;
+Phase0unfrozen;makeabsent,notaggregateformal-check. Native decimalcanonicality
+stillFAIL. Current command/sourcearithmetic/full journal retry/unknown/recovery,
+physicalWAL/SHA/exporter, full publicrefinement/arbitrarysnapshots/availability,
+freeze/offline/independentreview remainopen. No localPASS, GO or nativeguardchange.
+Three demosHTTP200 withoutrestart; frozenrefsunchanged.
