@@ -4073,3 +4073,51 @@ decimal-00/-01 stillFAIL. DemosHTTP200 withoutrestart/frozenrefsverified.
 Full Q/commitment/schema/draft identity and nativeArithmeticRecoveryRefines,
 public phase/QC/current/unknown/repair, physicalWAL/SHA/exporter, arbitrary
 snapshots, freeze/offline/independentreview remain open. No localPASS/GO/guardchange.
+
+
+## 27 September 2026 — original Q coverage, native availability and eligible APC inputs
+
+T044/T048/T053/T054/T056/T057. Formal-only relation plus unchanged native component
+verification; NO_GO remains. Scope formal/proposals/native-available-q.md; evidence
+formal/proposals/evidence/native-available-q.json. New candidate observation
+version explicitly allows only UNAUTHENTICATED_COMPONENT_INPUT, not a native
+export/snapshot/authority format. Exact native primitives and selected manifest
+ID are preserved; no approval Boolean or invented commitment hash convention.
+
+The relation resolves all original004 manifest/schema/scale/plan/config/profile/
+proof/DRQ1 preimages, checks actual ticket, and derives the full lexicographic
+leaf set while preserving original schema/range order. Missing/extra/reordered/
+duplicate lists reject even if native caller-required and covered lists agree.
+Composed APC API retains every eligible row and checks original ticket/domain/
+commitment/AC/schema/proof/config identities, full order/count and source byte
+limits. Rejected ISC members remain in complete certificate preimages but their
+Q payloads are outside this accepted arithmetic corpus. No later aggregate is
+required. This is not the complete native frozen history or authenticated source.
+
+The original InputLedger has no manifest-ID/commitment preimage or AC signature
+decoder. It accepts arbitrary well-shaped opaque commitment/AC IDs if its input
+primitives agree. The composed API rejects substitutions against unchanged ISC
+rows, but a wholly new rehashed history is still unauthenticated. No equality of
+commitmentID/manifestID/Merkle-root is invented. The example retains original004
+12objects/5DRQ1leaves/36coordinates and constructs a separate synthetic APC and
+component inputs; original008 history and original5/6/8 are unchanged. A second
+two-ticket test constructs distinct new source bytes to check order/duplication.
+
+Ten source files pinned at60c692f. Seventeen fresh cases execute four WHOLE
+unmodified C++ translation units (consensus/canonical/SHA/contracts), not patched
+functions or runtime/WAL. Exact frozen triples and accept/reject match. Native
+accepts mutually consistent nonempty incomplete caller-leaf lists; source Q
+relation rejects. Native empty sets reject. Initial draft empty-set assumption
+and shared-list negative fixture were corrected before final stable checks; only
+final corrected source/results count. No production-mutant claim.
+
+Final622tooling/38oracle/19targeted,Ruff/format/consistency,33legal112illegal PASS.
+NewJSONbyteexact;358priorgenerated files unchanged; oldgenerators notrerun. All
+Lean/TLA/publicschema/runtime/native/legacy fixtures unchanged; semantics stays
+sha256:2d95a8132c9c0475c70a49f14f6c691dbefe292cb28a839317d18923db29a165.
+Mandatory44/45; prior1095-job build retained, no newLean proof/build orTLC.
+Native-00/-01 canonicalityFAIL;Phase0unfrozen;makeabsent,notaggregateformal-check.
+DemosHTTP200 withoutrestart/frozenrefsverified. Commitment/manifest/AC/config/
+current provenance, original-to-draft projection, full nativeArithmeticRecoveryRefines,
+public phase/QC/current/unknown/repair, physicalWAL/codecs/SHA/exporter, arbitrary
+snapshots, freeze/offline/independentreview remain required. No localPASS/GO/guardchange.

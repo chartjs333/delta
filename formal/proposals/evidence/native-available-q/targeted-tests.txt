@@ -1,0 +1,24 @@
+test_all_source_objects_missing_and_corrupt (test_native_available_q.NativeAvailableQTests.test_all_source_objects_missing_and_corrupt) ... ok
+test_case_mutations_do_not_share_required_and_covered_lists (test_native_available_q.NativeAvailableQTests.test_case_mutations_do_not_share_required_and_covered_lists) ... ok
+test_complete_input_count (test_native_available_q.NativeAvailableQTests.test_complete_input_count) ... ok
+test_composed_domain_and_proof_identity (test_native_available_q.NativeAvailableQTests.test_composed_domain_and_proof_identity) ... ok
+test_composed_original_id_edges_cannot_be_substituted (test_native_available_q.NativeAvailableQTests.test_composed_original_id_edges_cannot_be_substituted) ... ok
+test_composed_plan_source_relation_and_no_later_aggregate (test_native_available_q.NativeAvailableQTests.test_composed_plan_source_relation_and_no_later_aggregate) ... ok
+test_every_observation_field_and_unknown_auth_flag_rejects (test_native_available_q.NativeAvailableQTests.test_every_observation_field_and_unknown_auth_flag_rejects) ... ok
+test_manifest_ticket_cannot_be_replaced_by_consistent_native_alias (test_native_available_q.NativeAvailableQTests.test_manifest_ticket_cannot_be_replaced_by_consistent_native_alias) ... ok
+test_matched_extra_native_leaf_rejects_at_source (test_native_available_q.NativeAvailableQTests.test_matched_extra_native_leaf_rejects_at_source) ... ok
+test_matched_incomplete_native_leaf_sets_do_not_supply_source_coverage (test_native_available_q.NativeAvailableQTests.test_matched_incomplete_native_leaf_sets_do_not_supply_source_coverage) ... ok
+test_native_shapes_coverage_order_quorum_and_empty_sets (test_native_available_q.NativeAvailableQTests.test_native_shapes_coverage_order_quorum_and_empty_sets) ... ok
+test_nested_record_fields_exact (test_native_available_q.NativeAvailableQTests.test_nested_record_fields_exact) ... ok
+test_observation_hash_and_canonical_preimage (test_native_available_q.NativeAvailableQTests.test_observation_hash_and_canonical_preimage) ... ok
+test_opaque_ids_do_not_establish_manifest_or_root_identity (test_native_available_q.NativeAvailableQTests.test_opaque_ids_do_not_establish_manifest_or_root_identity) ... ok
+test_original_q_preimages_and_both_distinct_orders (test_native_available_q.NativeAvailableQTests.test_original_q_preimages_and_both_distinct_orders) ... ok
+test_pinned_native_sources_and_exact_generated_evidence (test_native_available_q.NativeAvailableQTests.test_pinned_native_sources_and_exact_generated_evidence) ... ok
+test_threshold_types_ranges_and_resources (test_native_available_q.NativeAvailableQTests.test_threshold_types_ranges_and_resources) ... ok
+test_two_ticket_order_and_no_duplicate_substitution (test_native_available_q.NativeAvailableQTests.test_two_ticket_order_and_no_duplicate_substitution) ... ok
+test_version_source_and_forged_provenance (test_native_available_q.NativeAvailableQTests.test_version_source_and_forged_provenance) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 4.695s
+
+OK

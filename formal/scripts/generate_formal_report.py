@@ -1060,6 +1060,22 @@ def main() -> int:
         "identity and general admission/recovery remain open. No new Lean proof, "
         "native execution, runtime change, local PASS or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Original available-Q tooling derives the exact native lexicographic "
+        "leaf set from every original004 manifest/DRQ1 preimage and joins all "
+        "eligible APC rows by original ticket/domain/commitment/AC/proof/config "
+        "identity. A separate synthetic APC uses the original004 Q bytes. "
+        "Seventeen fresh unchanged native InputLedger component cases agree "
+        "on first-insert/freeze checks; the component accepts a consistent but "
+        "incomplete caller-selected required list, which the Q source relation "
+        "rejects. Native empty lists reject. Opaque commitment/AC IDs are not "
+        "derived from manifest preimages or authenticated signatures here; "
+        "that counterexample remains visible. The new observation envelope "
+        "explicitly permits only unauthenticated component input. This is not "
+        "a native exporter, complete ledger history, WAL/runtime execution or "
+        "source-to-draft/full public recovery theorem. No new Lean proof, "
+        "production mutant, runtime change, local PASS or GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
