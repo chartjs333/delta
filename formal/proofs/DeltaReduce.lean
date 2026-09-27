@@ -1,3 +1,6 @@
+import DeltaReduce.NativeScaleBytes
+import DeltaReduce.NativeScaleBinding
+import DeltaReduce.NativeScaleVectors
 import DeltaReduce.NativeQJson
 import DeltaReduce.NativeQHeader
 import DeltaReduce.NativeQHeaderVectors

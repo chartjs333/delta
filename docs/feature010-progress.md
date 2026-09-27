@@ -4242,3 +4242,42 @@ retained. Mandatory44/45/nativeArithmeticRecoveryRefines missing; native certifi
 -00/-01canonicalityFAIL unaffected, Phase0unfrozen, makeabsent/notaggregateformal-check.
 DemosHTTP200/no restart, frozenrefs unchanged. No localPASS/GO/guardchange or
 independent attestation. Source-bound semantics: sha256:8ac0cf149236e348f94afd4e35aeecdee98245fac419e0ccfe287a281b3a91a3.
+
+
+## 27 September 2026 — original scale bytes and parsed Q quantum in Lean
+
+T044/T048/T053/T054/T056/T057. Formal proposal only; NO_GO. Scope
+formal/proposals/native-scale-binding-proof.md; evidence
+formal/proposals/evidence/native-scale-binding.json. NativeScaleBytes parses the
+actual original004 nested scale-table JSON with exact keys/types/order, bounded
+segment array and complete canonical preimage. General roundtrip/uniqueness and
+ordered-list lemmas retain numerator-as-string and denominator-as-number.
+NativeScaleBinding derives positive reduced uint32 quantum, actual segment
+name/start/count/ordinal and contiguous total from decoded bytes. Its composed
+bind runs the actual DRQ1 header/vector decoder, selects the exact source segment
+and checks shared source IDs, offset+count and global coordinate placement.
+General lemmas retain every original coordinate, parsed quantum and payload.
+Internal scale layout does not establish referenced schema/shape/omission/plan.
+
+Hash adapter remains UNVERIFIED. Its exact domain-separated canonical preimage
+is retained, but the fixture recognizes one pinned preimage and is not SHA256,
+source authentication or a native exporter. All five original blocks and all36
+coordinates compose with the exact643-byte scale table/two original segments.
+Thirty-two small cases expose their scope: byte grammar, typed quantum/layout/
+range guards and a changed-payload countercheck. Changed first Q with the old SHA
+header STILL PASSES the Lean scale join and fails Python PAYLOAD_HASH. No payload
+hash/native admission proof is claimed. Source-to-draft LoadedRow/RowsBound/
+DerivedParameter, complete source graph and arithmetic recovery remain OPEN.
+
+30general theorems/23definitions plus seven type declarations;74component/kernel
+theorems/33fixturedefs,167new named declarations audited including Bound.quantum,
+standard kernel axioms only. FullLean1103jobs and three fresh standalone kernels
+PASS. Final663tooling/38oracle/6targeted,Ruff/format/consistency,33legal112illegal
+PASS;366generatedfiles byte-exact. Original fixtures were reused; no giant new
+combined native/state reduction. Only final stable sources/logs count.
+21TLA/schema/runtime/147native witnesses unchanged;145legacy only semanticsID.
+No new native/TLC/mutants; retained bounded scopes unchanged. Mandatory44/45,
+nativeArithmeticRecoveryRefines missing; separate native certificate -00/-01
+canonicalityFAIL unchanged, Phase0unfrozen, makeabsent/notaggregateformal-check.
+DemosHTTP200/no restart; frozenrefs unchanged. No localPASS/GO/guardchange or
+independent attestation. Source-bound semantics: sha256:d019f4d958204f080e90ba84af62d3623e4ba115db1c17a633d90b59214065e1.

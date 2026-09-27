@@ -1123,6 +1123,22 @@ def main() -> int:
         "native recovery theorem, native execution, runtime change, GO or "
         "independent attestation is claimed."
     )
+    report["coverage"]["unresolved"].append(
+        "Original scale-table nested JSON now has mandatory Lean byte decoding "
+        "and exact canonical preimage/list retention. Parsed segment ranges "
+        "and positive reduced uint32 quanta compose with all five original "
+        "DRQ1 header/vector decodes and all36 coordinates. General lemmas "
+        "retain actual source segment membership, offset+count bounds and "
+        "coordinate placement. The scale identity check still takes an "
+        "UNVERIFIED hash adapter; its fixture is a one-preimage synthetic map, "
+        "not SHA256 or native exporter authentication. Internal scale layout "
+        "does not establish referenced schema/plan/manifest/proof/APC authority. "
+        "A changed payload with its old SHA header still passes this Lean "
+        "quantum join and fails the Python hash checker. Source-to-draft "
+        "LoadedRow/RowsBound/DerivedParameter, original current/APPLY identity "
+        "and general nativeArithmeticRecoveryRefines remain OPEN. No native "
+        "execution, runtime change, local PASS, GO or independent attestation."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

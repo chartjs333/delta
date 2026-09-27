@@ -1,0 +1,11 @@
+test_generator_byte_exact (test_native_scale_binding.NativeScaleBindingTests.test_generator_byte_exact) ... ok
+test_mandatory_build_and_complete_named_axiom_inventory (test_native_scale_binding.NativeScaleBindingTests.test_mandatory_build_and_complete_named_axiom_inventory) ... ok
+test_original_preimage_quantum_and_every_coordinate (test_native_scale_binding.NativeScaleBindingTests.test_original_preimage_quantum_and_every_coordinate) ... ok
+test_parsed_quantum_does_not_authenticate_payload_or_source (test_native_scale_binding.NativeScaleBindingTests.test_parsed_quantum_does_not_authenticate_payload_or_source) ... ok
+test_source_resolver_requires_original_scale_preimage (test_native_scale_binding.NativeScaleBindingTests.test_source_resolver_requires_original_scale_preimage) ... ok
+test_substituted_scale_preimage_rejects_before_output (test_native_scale_binding.NativeScaleBindingTests.test_substituted_scale_preimage_rejects_before_output) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.067s
+
+OK
