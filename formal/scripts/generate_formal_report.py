@@ -1340,6 +1340,21 @@ def main() -> int:
         "remain OPEN. Small reused synthetic components do not instantiate a "
         "complete checked history or native execution. No runtime/local PASS/GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Complete draft PROFILE/MODEL/OPTIMIZER bytes now derive from an actual "
+        "source-policy APPLY profile, checked accumulator width, recovered "
+        "original current values and the existing complete SCHEMA/PLAN/ISC/EC/APC "
+        "graph. All new artifact store bytes/hash/length/payloads are checked. "
+        "Quantum remains a named UnitSource primitive keyed by original context, "
+        "APC/profile/proof and complete current pointer; absent metadata rejects. "
+        "The same original numeric profile admits two distinct quanta, so its "
+        "bytes alone cannot determine the complete draft profile. Source metadata "
+        "authentication, configured profile selection, initial/current authority, "
+        "complete Binding/authority walks, concrete codecs/hash/exporter and full "
+        "nativeArithmeticRecoveryRefines remain OPEN. Small encoding cases are "
+        "not a full history/preparation execution or authenticated UnitSource. "
+        "No runtime guard, local PASS, GO or independent attestation follows."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

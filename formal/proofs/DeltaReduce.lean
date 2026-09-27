@@ -1,3 +1,6 @@
+import DeltaReduce.NativeStateArtifacts
+import DeltaReduce.NativeStateProjection
+import DeltaReduce.NativeStateProjectionVectors
 import DeltaReduce.NativeCurrentValues
 import DeltaReduce.NativeCurrentHistory
 import DeltaReduce.NativeCurrentHistoryVectors

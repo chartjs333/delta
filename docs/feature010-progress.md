@@ -5061,3 +5061,68 @@ unknown/torn/repair/physicalWAL, concrete bounded codecs/hash/exporter/resources
 decimal compatibility, contract freeze, clean offline reproduction and independent
 review remain mandatory.
 Source-bound semantics: sha256:5b3b0b0ddc51fe478ab47bf096d240d16d74f6a7c35e674cfa03ab8f6f7b4973.
+
+
+## 27 September 2026 — complete current-state and profile artifact projection
+
+T044/T048/T053/T054/T056/T057. NO_GO. Scope
+formal/proposals/native-state-projection-proof.md; evidence
+formal/proposals/evidence/native-state-projection.json. NativeStateArtifacts
+computes all draft PROFILE fields from original coefficients/domain order,
+actual checked accumulator width and an explicit quantum input. Complete
+MODEL/OPTIMIZER encodings retain original current values and the actual computed
+schema reference. Native value hashes and draft artifact hashes remain distinct.
+
+NativeStateProjection checks the full original policy APPLY-profile list, exact
+selected original profile ID and accumulator proof edge, then composes the
+original checked pointer history with complete NativePlanProjection graph.
+Current checkpoint must match the preceding preparation parent, current height
+must be earlier and original schema must match. These are explicit projection
+restrictions. Both complete vector lengths match source schema coordinates.
+All three artifacts are packed canonically, bounded to4MiB and checked against
+actual store bytes/hash/length/decoded typed payloads. General exact-byte/Resolves
+theorems and a named common HashAdapter current-value relation are proved.
+The raw run API executes original NativeVectorContext.bind before construction.
+
+UnitSource is a named UNRESOLVED primitive, returning only quantum for complete
+original context/APC/profile/proof/current-pointer identity. Missing metadata
+rejects; no whole translated profile/state or arithmetic approval is supplied.
+Presence is not authentication or configured-profile authority. A general
+theorem proves no function of the original profile alone can return two distinct
+quantum projections; two positive numeric-profile cases at1/4 and1/2 expose
+that ambiguity. Original native State/DomainAggregate/profile formats lack the
+unit field. No default quantum or fixture value fills this source gap.
+
+Three modules:19 general helper theorems/13 definitions/five structures/one alias,
+16 kernel/component cases/seven definitions. All61 explicit names audited with
+only propext/Quot.sound/Classical.choice. Full Lean1150jobs,three fresh kernels,
+731tooling/38oracle,33legal112illegal,Ruff/format/consistency,387generatedfiles
+byte-exact PASS. All final source/evidence raw hashes match Git blobs.
+21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.
+No freshTLC/newproductionmutants. Mandatory44/45/nativeArithmeticRecoveryRefines
+missing;Phase0unfrozen;make absent/noaggregateformal-check. All3demosHTTP200without
+restart/frozenrefsunchanged.
+
+Examples reuse a separately constructed prior numeric original profile and
+synthetic vectors[19,-19]/[2,-2]. Three short complete JSON encodings use invalid
+short schema IDs and match independent Python canonical JSON. No positive full
+raw history/preparation/store, native run, authenticated UnitSource or full
+Binding instance is claimed. Prior layout4096 and extra fraction/current-height/
+schema checks retain bounded representation scope, not native restrictions.
+Resource-heavy draft generic proof attempts were discarded; local irreducibility
+of checker definitions, separate assembly and explicit branch proofs avoid deep
+native graph reduction. The final generic projection compiles without an
+increased heartbeat limit. Only final evidence counts.
+
+Next: construct the complete authority root and source-derived Inputs/Binding
+from the computed graph/state/profile, deriving Complete/Walk relations instead
+of accepting a caller's whole translated authority or state equality. Keep
+UnitSource/configured-profile and independent certificate/current/recovery trust
+as named unresolved source boundaries; a conditional constructed Binding is not
+nativeArithmeticRecoveryRefines. Investigate actual source configuration for
+quantum and schema rather than inventing a contract or reusing later APPLY data.
+Initial no-history snapshots, missing original008 proof/base/current captures,
+native decimal -00/-01 compatibility, arbitrary phase/QC/send/delivery/journal/
+current/crash/unknown/torn/repair/physicalWAL, bounded hash/codec/exporter/resources,
+contract freeze, clean offline reproduction and independent review remain open.
+Source-bound semantics: sha256:c16981d6c0b5e90838aaa5f4b3649ffdbb10f54335cc0a3d262d111a003e491d.
