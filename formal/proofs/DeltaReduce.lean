@@ -1,3 +1,5 @@
+import DeltaReduce.NativeCertifiedCurrent
+import DeltaReduce.NativeCertifiedCurrentVectors
 import DeltaReduce.NativeCertifiedCorpus
 import DeltaReduce.NativeAggregateBinding
 import DeltaReduce.NativeAggregateBindingVectors

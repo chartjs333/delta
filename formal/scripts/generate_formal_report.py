@@ -1385,6 +1385,20 @@ def main() -> int:
         "and independent review remain OPEN; nativeArithmeticRecoveryRefines is "
         "still missing. No runtime guard change, local PASS or GO follows."
     )
+    report["coverage"]["unresolved"].append(
+        "Finalized APPLY/current now composes original full ROOT/profile identity, "
+        "actual NativeApply computation and original CurrentPointerCommand/QC "
+        "hashes with exact five-field pointer-WAL records. Both current parents "
+        "are checked at fresh advancement; historical exact replay allocates no "
+        "second record. Known observed bytes must contain exactly the selected "
+        "record; UNKNOWN stays incomplete and a retained torn suffix cannot pass "
+        "the complete-observation gate. This is conditional source composition, "
+        "not authenticated physical recovery or a complete native execution. "
+        "Source trust, UnitSource, initial custody, arithmetic vote admission, "
+        "mixed journal/phase/send/QC transitions, arbitrary snapshots and repair, "
+        "concrete codec/hash/exporter resources, native compatibility, freeze and "
+        "independent review remain OPEN. No runtime guard change or formal GO."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
