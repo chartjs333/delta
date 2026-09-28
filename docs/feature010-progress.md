@@ -6441,6 +6441,8 @@ source-bound evidence is `formal/proposals/evidence/b-family-constructors.json`.
    family input and authority loading on that checked domain. Thus executable
    acceptance of an existing checked input is derived; existence and canonicality
    over every original source, including omitted inputs, remain open.
+   The complete PARAMETER/APPLY body gates are now composed with those exact
+   input loads, without a further successful-loader or whole-body equality premise.
 2. **Native widths to existing public guards — PARTIAL.** Numeric implications
    cover checked coefficients/products/prefixes, conversions, mixture and optimizer
    intermediates at the relevant native widths, with a separate symmetric result

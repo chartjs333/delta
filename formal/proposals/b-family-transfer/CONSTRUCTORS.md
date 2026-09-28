@@ -36,6 +36,12 @@ executable loaders, not extra successful-loader assumptions. They do not supply
 missing source artifacts or establish that every originally admitted source
 has such a complete input image. In particular, OMIT_UNAVAILABLE coverage and
 general input-encoding canonicality from primitive configuration remain open.
+`parameterBodyConstructorTotal` and `applyBodyFromConstructed` then connect this
+same source/input loading directly to the complete PARAMETER and APPLY body
+gates. The constructed candidate is the checked result, not a supplied whole
+body equality. For APPLY, `applyConstructorTotal` supplies the preceding
+construction from the same native result and the existing checkpoint boundary;
+primitive canonical names and exact encoded-leaf uniqueness remain explicit.
 
 `FamilyAuthority.checkedAuthorityFromConstructed` also removes the premise that
 the complete authority value is already canonical. It reconstructs the original

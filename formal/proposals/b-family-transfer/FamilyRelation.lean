@@ -131,6 +131,29 @@ def loadParameterBody {domain shard} (native : DerivedParameter binding domain s
   | none => none
   | some checked => some ⟨inputs,checked,FamilyParameter.computedWholeBody inputs.authority configuration.resultBound native accepted⟩
 
+theorem parameterBodyConstructorTotal
+    (inputs : Inputs (binding := binding) vocabulary source configuration indices)
+    (authorityCanonical : canonical vocabulary.models inputs.authority.value = true)
+    (names : ∀ n ∈ vocabulary.domains ++ vocabulary.shards, canonical vocabulary.models (.model n) = true)
+    {domain shard} (native : DerivedParameter binding domain shard) :
+    ∃ candidate body, loadParameterBody vocabulary source configuration indices native candidate = some body := by
+  cases configuration with
+  | mk limit resultBound expectedCheckpoint =>
+    have widths := inputs.widths
+    change limit = accumulatorHi binding.profile ∧ resultBound = accumulatorHi binding.profile + 1 at widths
+    rcases widths with ⟨rfl,rfl⟩
+    obtain ⟨candidate,checked,accepted⟩ :=
+      FamilyParameter.checkedParameterFromAuthority ⟨inputs.authority,authorityCanonical⟩ names native
+    refine ⟨candidate,?_⟩
+    unfold loadParameterBody
+    rw [inputsLoaderComplete vocabulary source _ indices inputs]
+    simp only [bind,Option.bind]
+    split
+    · rename_i absent
+      rw [accepted] at absent
+      contradiction
+    · exact ⟨_,rfl⟩
+
 theorem parameterCandidateUsesOwnInputs {domain shard} {native : DerivedParameter binding domain shard}
     {candidate : Value} (body : ParameterBody vocabulary source configuration indices native candidate) :
     FamilyInputs.InputNumericGuards (FamilyInputs.image body.inputs.input) ∧
@@ -160,6 +183,29 @@ def loadApplyBody (native : NativeApply binding) (candidate : Value) :
   | none => none
   | some checked => some ⟨inputs,checked,FamilyApply.computedWholeBody inputs.authority configuration.resultBound mapping
       configuration.expectedCheckpoint native accepted⟩
+
+theorem applyBodyFromConstructed
+    (inputs : Inputs (binding := binding) vocabulary source configuration indices)
+    (native : NativeApply binding)
+    (projection : FamilyApply.Projection inputs.authority configuration.resultBound mapping
+      configuration.expectedCheckpoint native)
+    (constructed : FamilyApply.project inputs.authority configuration.resultBound mapping
+      configuration.expectedCheckpoint native = some projection)
+    (authorityCanonical : canonical vocabulary.models inputs.authority.value = true)
+    (names : ∀ n ∈ vocabulary.domains ++ vocabulary.shards, canonical vocabulary.models (.model n) = true)
+    (uniqueBytes : (projection.leaves.map PublicState.encode).Nodup)
+    (checkpointCanonical : canonical vocabulary.models configuration.expectedCheckpoint = true) :
+    ∃ body, loadApplyBody vocabulary source configuration mapping indices native projection.value = some body := by
+  obtain ⟨checked,accepted,_⟩ := FamilyApply.checkedFromConstructed inputs.authority configuration.resultBound
+    mapping configuration.expectedCheckpoint native projection constructed authorityCanonical names uniqueBytes checkpointCanonical
+  unfold loadApplyBody
+  rw [inputsLoaderComplete vocabulary source configuration indices inputs]
+  simp only [bind,Option.bind]
+  split
+  · rename_i absent
+    rw [accepted] at absent
+    contradiction
+  · exact ⟨_,rfl⟩
 
 def SourceBody {kind} (native : VoteSource binding kind) (candidate : Value) : Type :=
   match native with

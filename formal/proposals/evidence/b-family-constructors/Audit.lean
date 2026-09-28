@@ -414,9 +414,11 @@ import Checks
 #print axioms DeltaReduce.FamilyRelation.loadedInputsHaveNumericGuards
 #print axioms DeltaReduce.FamilyRelation.ParameterBody
 #print axioms DeltaReduce.FamilyRelation.loadParameterBody
+#print axioms DeltaReduce.FamilyRelation.parameterBodyConstructorTotal
 #print axioms DeltaReduce.FamilyRelation.parameterCandidateUsesOwnInputs
 #print axioms DeltaReduce.FamilyRelation.ApplyBody
 #print axioms DeltaReduce.FamilyRelation.loadApplyBody
+#print axioms DeltaReduce.FamilyRelation.applyBodyFromConstructed
 #print axioms DeltaReduce.FamilyRelation.SourceBody
 #print axioms DeltaReduce.FamilyRelation.loadSourceBody
 #print axioms DeltaReduce.FamilyRelation.Historical

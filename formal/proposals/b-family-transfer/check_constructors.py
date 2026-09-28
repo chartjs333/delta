@@ -283,6 +283,8 @@ def run() -> None:
                     "full authority canonicality and executable acceptance derived from "
                     "original atom/header/commitment loaders, primitive canonical metadata "
                     "and exact encoded-set uniqueness",
+                    "exact block/corpus/family/authority source loading on the checked input "
+                    "domain, composed directly with complete PARAMETER/APPLY body gates",
                 ],
                 "remaining": [
                     "full configured ticket input coverage for OMIT_UNAVAILABLE",
