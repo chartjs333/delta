@@ -1442,6 +1442,23 @@ def main() -> int:
         "phase/send/QC/current/repair, bounded resources, native compatibility, "
         "freeze/offline/independent review remain OPEN. NO_GO and guard remain."
     )
+    report["coverage"]["unresolved"].append(
+        "The complete source-bearing native vote cache is now derived from every "
+        "executed candidate step, with soundness and completeness for finite runs "
+        "and complete observed recovery. Original ordinary checked snapshots and "
+        "arithmetic computations, bytes, parents and positions are retained. "
+        "Entire ordered native cache equality and the exact all-vote ordinal plus "
+        "preceding-command relation to original WAL positions are proved. "
+        "Arithmetic diagnostic projection re-derives expected data and encodes "
+        "new diagnostic receipts; unsupported ordinary rows reject the entire "
+        "list, never disappear. This is not authenticated NativeReplay resolution, "
+        "NativePrepared or completed recovery, and scan flags remain unchanged. "
+        "Non-arithmetic public bodies, full public/draft durable correspondence, "
+        "all-actor sequence abstraction, authority/live transitions, physical "
+        "recovery, native compatibility, bounded resources, freeze/offline and "
+        "independent review remain OPEN. No new successful nonempty joined "
+        "arithmetic projection or physical capture is claimed. NO_GO remains."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

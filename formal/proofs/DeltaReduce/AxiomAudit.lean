@@ -1,3 +1,7 @@
+import DeltaReduce.NativeVoteCache
+import DeltaReduce.NativeCacheHistory
+import DeltaReduce.NativeCacheProjection
+import DeltaReduce.NativeVoteCacheVectors
 import DeltaReduce.NativeArithmeticJournal
 import DeltaReduce.NativeArithmeticHistory
 import DeltaReduce.NativeArithmeticHistoryVectors
@@ -13442,3 +13446,84 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeArithmeticHistoryVectors.duplicatedRejected
 #print axioms DeltaReduce.NativeArithmeticHistoryVectors.exactHistoricalRetry
 #print axioms DeltaReduce.NativeArithmeticHistoryVectors.originalGuardWithoutSource
+
+#print axioms DeltaReduce.NativeVoteCache.Payload
+#print axioms DeltaReduce.NativeVoteCache.Row
+#print axioms DeltaReduce.NativeVoteCache.native
+#print axioms DeltaReduce.NativeVoteCache.Result
+#print axioms DeltaReduce.NativeVoteCache.ordinaryRow
+#print axioms DeltaReduce.NativeVoteCache.arithmeticRow
+#print axioms DeltaReduce.NativeVoteCache.capture
+#print axioms DeltaReduce.NativeVoteCache.RowSource
+#print axioms DeltaReduce.NativeVoteCache.commandCapture
+#print axioms DeltaReduce.NativeVoteCache.ordinaryCapture
+#print axioms DeltaReduce.NativeVoteCache.arithmeticCapture
+#print axioms DeltaReduce.NativeVoteCache.stepCapture
+#print axioms DeltaReduce.NativeVoteCache.captured
+#print axioms DeltaReduce.NativeVoteCache.rowOriginal
+#print axioms DeltaReduce.NativeVoteCache.ordinaryOriginalAuthority
+#print axioms DeltaReduce.NativeVoteCache.arithmeticOriginalSource
+#print axioms DeltaReduce.NativeVoteCache.lookup
+#print axioms DeltaReduce.NativeVoteCache.lookupExact
+#print axioms DeltaReduce.NativeVoteCache.ambiguousLookup
+#print axioms DeltaReduce.NativeCacheHistory.run
+#print axioms DeltaReduce.NativeCacheHistory.consParts
+#print axioms DeltaReduce.NativeCacheHistory.runOriginal
+#print axioms DeltaReduce.NativeCacheHistory.complete
+#print axioms DeltaReduce.NativeCacheHistory.exactCache
+#print axioms DeltaReduce.NativeCacheHistory.captureOrdinals
+#print axioms DeltaReduce.NativeCacheHistory.ordinals
+#print axioms DeltaReduce.NativeCacheHistory.rowPosition
+#print axioms DeltaReduce.NativeCacheHistory.recover
+#print axioms DeltaReduce.NativeCacheHistory.recoveryComputed
+#print axioms DeltaReduce.NativeCacheHistory.recoveredOriginal
+#print axioms DeltaReduce.NativeCacheHistory.recoveryComplete
+#print axioms DeltaReduce.NativeCacheHistory.recoveredCache
+#print axioms DeltaReduce.NativeCacheHistory.positionMapping
+#print axioms DeltaReduce.NativeCacheHistory.recoverObserved
+#print axioms DeltaReduce.NativeCacheHistory.observed
+#print axioms DeltaReduce.NativeCacheHistory.observedOriginal
+#print axioms DeltaReduce.NativeCacheHistory.unknownRejects
+#print axioms DeltaReduce.NativeCacheHistory.observedComplete
+#print axioms DeltaReduce.NativeCacheProjection.project
+#print axioms DeltaReduce.NativeCacheProjection.projected
+#print axioms DeltaReduce.NativeCacheProjection.recordOrdinal
+#print axioms DeltaReduce.NativeCacheProjection.ordinaryRejects
+#print axioms DeltaReduce.NativeCacheProjection.projectFromComponents
+#print axioms DeltaReduce.NativeCacheProjection.all
+#print axioms DeltaReduce.NativeCacheProjection.allPairs
+#print axioms DeltaReduce.NativeCacheProjection.pairsComplete
+#print axioms DeltaReduce.NativeCacheProjection.allOrdinals
+#print axioms DeltaReduce.NativeCacheProjection.everyOriginal
+#print axioms DeltaReduce.NativeCacheProjection.everyProjected
+#print axioms DeltaReduce.NativeCacheProjection.ordinaryBlocksAll
+#print axioms DeltaReduce.NativeCacheProjection.Projection
+#print axioms DeltaReduce.NativeCacheProjection.recoverObserved
+#print axioms DeltaReduce.NativeCacheProjection.recoveryComputed
+#print axioms DeltaReduce.NativeCacheProjection.recoveryCoverage
+#print axioms DeltaReduce.NativeCacheProjection.projectedScanNotFresh
+#print axioms DeltaReduce.NativeCacheProjection.unknownRejects
+#print axioms DeltaReduce.NativeVoteCacheVectors.firstRow
+#print axioms DeltaReduce.NativeVoteCacheVectors.exactOriginalCache
+#print axioms DeltaReduce.NativeVoteCacheVectors.originalReceipt
+#print axioms DeltaReduce.NativeVoteCacheVectors.originalParents
+#print axioms DeltaReduce.NativeVoteCacheVectors.originalPosition
+#print axioms DeltaReduce.NativeVoteCacheVectors.originalState
+#print axioms DeltaReduce.NativeVoteCacheVectors.uniqueLookup
+#print axioms DeltaReduce.NativeVoteCacheVectors.duplicateLookup
+#print axioms DeltaReduce.NativeVoteCacheVectors.alteredOrdinalStillAmbiguous
+#print axioms DeltaReduce.NativeVoteCacheVectors.absentLookup
+#print axioms DeltaReduce.NativeVoteCacheVectors.ordinaryProjectRejects
+#print axioms DeltaReduce.NativeVoteCacheVectors.ordinaryListRejects
+#print axioms DeltaReduce.NativeVoteCacheVectors.ordinaryBlocksTail
+#print axioms DeltaReduce.NativeVoteCacheVectors.ordinaryBlocksPrefix
+#print axioms DeltaReduce.NativeVoteCacheVectors.emptyDiagnosticProjection
+#print axioms DeltaReduce.NativeVoteCacheVectors.unknownCache
+#print axioms DeltaReduce.NativeVoteCacheVectors.unknownProjection
+#print axioms DeltaReduce.NativeVoteCacheVectors.capturedVote
+#print axioms DeltaReduce.NativeVoteCacheVectors.capturedCommand
+#print axioms DeltaReduce.NativeVoteCacheVectors.fullCapturedRun
+#print axioms DeltaReduce.NativeVoteCacheVectors.completeOriginalRows
+#print axioms DeltaReduce.NativeVoteCacheVectors.finalGlobalDifferentFromVoteOrdinal
+#print axioms DeltaReduce.NativeVoteCacheVectors.capturedSource
+#print axioms DeltaReduce.NativeVoteCacheVectors.originalAuthority

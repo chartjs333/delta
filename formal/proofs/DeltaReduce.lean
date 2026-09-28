@@ -1,3 +1,7 @@
+import DeltaReduce.NativeVoteCache
+import DeltaReduce.NativeCacheHistory
+import DeltaReduce.NativeCacheProjection
+import DeltaReduce.NativeVoteCacheVectors
 import DeltaReduce.NativeArithmeticJournal
 import DeltaReduce.NativeArithmeticHistory
 import DeltaReduce.NativeArithmeticHistoryVectors
