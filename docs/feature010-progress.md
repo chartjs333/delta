@@ -6180,3 +6180,43 @@ restrictions remain. Runtime/native guard unchanged; no local PASS, GO,
 BenchmarkResultQC or independent attestation is claimed.
 
 Validation: Full Lean1201jobs,four fresh kernels,98 explicit declarations audited (49 general helpers,27 kernel/component cases,18 definitions,4 structures),only propext/Quot.sound/Classical.choice.768tooling/38oracle,33legal/112illegal,Ruff/format/consistency and387 generatedfiles byte-exact PASS. Original individual certificate lookup components and separate synthetic public ancestors only; no joined nonempty raw native ABORT/corpus execution or new native capture.21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID.No freshTLC/newmutants.Mandatory44/45/nativeArithmeticRecoveryRefines missing;Phase0 sameerrors/unfrozen;makeabsent/noaggregateformal-check.All3demosHTTP200withoutrestart/frozenrefsunchanged. Source-bound semantics: sha256:b96d22536c196d778dc3643149d4180a44a14993ac6d50d89845967627d420ad.
+
+
+## 28 September 2026 — accepted R1–R7 scope; R1 candidate freeze
+
+Tasks T000–T003. The user accepted the exact frozen R1–R7 Definition of Done
+and authorized only R1–R3. R4–R7 are deferred, not waived. Control reporting is
+required after 12 active hours or earlier upon closing R1/R2, an architectural
+blocker or transition to BLOCKED_EXTERNAL. Reports describe the residual delta,
+not counts of tests or helpers. No new standalone ABORT-body layer is required.
+
+R1: the accepted residual document is preserved byte-for-byte in the feature
+specification, with its original hash. candidate-contract.md fixes the existing
+arithmetic domain, allowed named assumptions, required source/body correspondence,
+and R2/R3 transition/initial-state obligations without widening the DoD. Finite
+scalar/alias/fixture restrictions are not native admission equivalence. Independent
+metadata provenance may be a named trust boundary; whole-body/recovery equality
+may not be supplied as the desired conclusion.
+
+The previously mixed 1.0.0 baseline and 1.1.0 registry are now one candidate
+snapshot. The phase-0 verifier retains all existing amendment harness invariants,
+checks the complete normative input inventory and accepted residual hash, and
+recomputes compatibility from the actual semantic artifacts. Stale nested IDs and
+published-looking candidate metadata are rejected. Scope deletion, rehashed input
+omission and unknown semantic-version substitution are rejected as well.
+
+R1 input/compatibility checks pass for this snapshot. The contract is frozen;
+future source changes still require refreshed compatibility bindings without
+changing its requirements. Existing semantic source bytes and semantics ID are
+unchanged. The historical merged authority is explicitly separate, and this freeze
+is CANDIDATE_NOT_FORMAL_GO. The previous NO_GO report remains evidence only for its
+own source tree; final report/reproduction/review work was not started.
+
+Residual delta: R1 OPEN -> CLOSED (contract/input freeze), R2 OPEN, R3 OPEN.
+R2 must establish the faithful existing native/public data/admission mapping,
+including sufficient ABORT projection and the stated width/vector domain.
+R3 must preserve that mapping through the existing persistence, exposure,
+QC/current and crash/recovery/replay relation with complete prior state.
+The target statements are finite and fixed by PO-AB1, PO-R1/R2 and the accepted
+refinement contract; helper-module count is not a completion criterion.
+No proof or runtime implementation was changed in this R1 checkpoint.

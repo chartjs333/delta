@@ -830,7 +830,7 @@
   ],
   "compatibility": {
     "id_derivation_status": "candidate_pending_formal_go",
-    "formal_semantics_id": "sha256:f57b27a2feae0328e1ecf0c8d14b0a041eef260231a26958647af41303caedda",
+    "formal_semantics_id": "sha256:b96d22536c196d778dc3643149d4180a44a14993ac6d50d89845967627d420ad",
     "hash_algorithm": "sha256",
     "domain": "deltareduce.formal-semantics.v1",
     "canonicalization": "formal/scripts/formal_artifacts.py:canonical_json_bytes",

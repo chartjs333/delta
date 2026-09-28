@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0.0",
-  "formal_semantics_version": "1.0.0",
-  "formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
-  "formal_semantics_id_status": "published_T057",
-  "feature_branch": "000-formal-tla-spec",
-  "branch_head_at_freeze": "050ceb1eca6f55ff665a37b9f907003aa0833c59",
+  "formal_semantics_version": "1.1.0",
+  "formal_semantics_id": "sha256:b96d22536c196d778dc3643149d4180a44a14993ac6d50d89845967627d420ad",
+  "formal_semantics_id_status": "candidate_frozen_T000_T003",
+  "feature_branch": "codex/feature000-binding-candidate",
+  "branch_head_at_freeze": "fac669c1812ca4ee98a91fd133b4f2e884e78644",
   "declared_base_commit": "e40e697cb67d94a6bc6bc0be9b395e58252c3d19",
   "hash_algorithm": "sha256",
   "input_bundle_canonicalization": "Normalize each UTF-8 text input CRLF/CR to LF before SHA-256; sort paths by ordinal repository-relative path; for each input encode path, one TAB, lowercase SHA-256, one LF as UTF-8; concatenate records and SHA-256 the result.",
-  "input_bundle_sha256": "2242dec223d2683b1d34c82a2365ff954f56c9d85013fed4911f431dd9a2bee6",
+  "input_bundle_sha256": "340b2636677ccbf0f95a362711a6dc531b3b78dc9269148ea500d546512d508a",
   "inputs": [
     {
       "role": "execution_contract",
@@ -43,17 +43,17 @@
     {
       "role": "normative_failure_recovery_contract",
       "path": "specs/000-formal-tla-spec/failure-semantics.md",
-      "sha256": "abc6a7999b8258fac915405c8e446be3cd57d50c81c0b8504f6757f489d49cab"
+      "sha256": "375b09aaec41ca84a4959f0c5a65c8f0382356187297c5f7a3171bebff00e72e"
     },
     {
       "role": "normative_parametric_proof_contract",
       "path": "specs/000-formal-tla-spec/proof-obligations.md",
-      "sha256": "942488fb0d88cb299c0c23f3b414c51258780a2290402b3e3439c6ff20c795f0"
+      "sha256": "e93d31266eac996412cd48d25c8b5a1558a5742068444cdd64cc8d67637faf8f"
     },
     {
       "role": "normative_refinement_contract",
       "path": "specs/000-formal-tla-spec/refinement-contract.md",
-      "sha256": "42ddfc4675b667744236f0eacd5bd35c55ba5957eaa59b7e2b8e87172be029fe"
+      "sha256": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c"
     },
     {
       "role": "feature_specification",
@@ -73,7 +73,37 @@
     {
       "role": "stable_formal_id_registry",
       "path": "formal/reports/formal-id-registry.json",
-      "sha256": "093dec75225cbec157fb7ca696f417e6dc594165c21e951ded662815568ab798"
+      "sha256": "ef855fbe752294e6b01ee4e0ad0f2659fa7db5e9db303456bbe9acc663a0f6cc"
+    },
+    {
+      "role": "hybrid_runtime_boundary",
+      "path": "docs/adr/0010-hybrid-runtime-boundary.md",
+      "sha256": "051b4836318f288256b4402943a6792d98df239f3a54b25dab11da1b29217875"
+    },
+    {
+      "role": "hybrid_runtime_ownership",
+      "path": "specs/HYBRID-RUNTIME-MAP.md",
+      "sha256": "911b09b5aa83cc913af4ef82c547022617cbc90062842b4e0430350b7002332d"
+    },
+    {
+      "role": "pending_arithmetic_amendment",
+      "path": "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
+      "sha256": "45fef1b1d23604d8774d90086b46431fe7c73a16a481079d62a257dccf9f22e8"
+    },
+    {
+      "role": "candidate_scope_and_assumption_contract",
+      "path": "specs/000-formal-tla-spec/candidate-contract.md",
+      "sha256": "2cd9be46dcda84c8f1cf17b176ee8ebe9ead0fe405a5407490b556161bc795b4"
+    },
+    {
+      "role": "user_accepted_definition_of_done",
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6"
+    },
+    {
+      "role": "mandatory_coverage_mapping",
+      "path": "formal/reports/coverage-matrix.md",
+      "sha256": "7a5f28d28a47c2d7a140b202fa0109e4add7ef6561d0c85c35888c5bbfde8460"
     }
   ],
   "cross_branch_contract_validation": {
@@ -186,5 +216,22 @@
     "Hashes, signatures, identities and canonical encodings satisfy the named abstractions.",
     "Liveness is claimed only per config under explicit eventual synchrony, honest responsive quorum, artifact availability or repairability, bounded computation and declared fairness.",
     "Every theorem-backed runtime transition separately validates and content-addresses the concrete theorem preconditions."
-  ]
+  ],
+  "authority_status": "CANDIDATE_NOT_FORMAL_GO",
+  "scope_freeze": {
+    "residual_ids": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5",
+      "R6",
+      "R7"
+    ],
+    "accepted_residual_sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+    "historical_merged_formal_semantics_id": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6",
+    "source_base_commit": "fac669c1812ca4ee98a91fd133b4f2e884e78644",
+    "contract": "specs/000-formal-tla-spec/candidate-contract.md",
+    "note": "The accepted contract is frozen. This is a current candidate source binding, not a merged authority, successful recovery proof or final R4-R7 evidence."
+  }
 }

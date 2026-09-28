@@ -9,17 +9,45 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from formal_artifacts import semantic_text_sha256
+from formal_artifacts import (
+    derive_formal_semantics_id,
+    discover_semantic_artifacts,
+    load_json_strict,
+    semantic_text_sha256,
+    validate_contract_registry,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
-REPORTS = ROOT / "formal" / "reports"
+CANDIDATE_VERSION = "1.1.0"
+HISTORICAL_GO = "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+ACCEPTED_RESIDUAL_SHA256 = "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6"
+REQUIRED_INPUTS = {
+    "AGENTS.md",
+    ".specify/memory/constitution.md",
+    "docs/adr/0000-formal-verification-gate.md",
+    "docs/adr/0001-deltareduce-v1.md",
+    "docs/adr/0002-canonical-rational-rounding.md",
+    "docs/adr/0010-hybrid-runtime-boundary.md",
+    "specs/ROADMAP.md",
+    "specs/HYBRID-RUNTIME-MAP.md",
+    "specs/000-formal-tla-spec/failure-semantics.md",
+    "specs/000-formal-tla-spec/proof-obligations.md",
+    "specs/000-formal-tla-spec/refinement-contract.md",
+    "specs/000-formal-tla-spec/spec.md",
+    "specs/000-formal-tla-spec/plan.md",
+    "specs/000-formal-tla-spec/tasks.md",
+    "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
+    "specs/000-formal-tla-spec/candidate-contract.md",
+    "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+    "formal/reports/formal-id-registry.json",
+    "formal/reports/coverage-matrix.md",
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as stream:
-        value = json.load(stream)
+    value = load_json_strict(path)
     if not isinstance(value, dict):
-        raise ValueError(f"{path.relative_to(ROOT)} must contain a JSON object")
+        raise ValueError(f"{path} must contain a JSON object")
     return value
 
 
@@ -44,23 +72,71 @@ def verify_unique_ids(registry: dict[str, Any], collection: str, errors: list[st
     return len(values)
 
 
-def main() -> int:
+def verify(root: Path = ROOT) -> dict[str, Any]:
     errors: list[str] = []
-    baseline = read_json(REPORTS / "baseline-inputs.json")
-    registry = read_json(REPORTS / "formal-id-registry.json")
-    coverage = (REPORTS / "coverage-matrix.md").read_text(encoding="utf-8")
-    failure_semantics = (ROOT / "specs" / "000-formal-tla-spec" / "failure-semantics.md").read_text(
+    reports = root / "formal" / "reports"
+    baseline = read_json(reports / "baseline-inputs.json")
+    registry = read_json(reports / "formal-id-registry.json")
+    coverage = (reports / "coverage-matrix.md").read_text(encoding="utf-8")
+    failure_semantics = (root / "specs" / "000-formal-tla-spec" / "failure-semantics.md").read_text(
         encoding="utf-8"
     )
-    feature_spec = (ROOT / "specs" / "000-formal-tla-spec" / "spec.md").read_text(encoding="utf-8")
+    feature_spec = (root / "specs" / "000-formal-tla-spec" / "spec.md").read_text(encoding="utf-8")
 
     require(
         baseline.get("formal_semantics_version")
         == registry.get("formal_semantics_version")
-        == "1.0.0",
+        == CANDIDATE_VERSION,
         "formal semantics version mismatch",
         errors,
     )
+
+    scope = baseline.get("scope_freeze", {})
+    require(
+        isinstance(scope, dict)
+        and scope.get("residual_ids") == [f"R{i}" for i in range(1, 8)]
+        and scope.get("accepted_residual_sha256") == ACCEPTED_RESIDUAL_SHA256
+        and scope.get("historical_merged_formal_semantics_id") == HISTORICAL_GO,
+        "accepted residual or historical authority mismatch",
+        errors,
+    )
+    residual_path = root / "specs/000-formal-tla-spec/accepted-residual-20260928.md"
+    require(
+        residual_path.is_file() and semantic_text_sha256(residual_path) == ACCEPTED_RESIDUAL_SHA256,
+        "accepted residual document changed",
+        errors,
+    )
+    require(
+        baseline.get("formal_semantics_id_status") == "candidate_frozen_T000_T003"
+        and baseline.get("authority_status") == "CANDIDATE_NOT_FORMAL_GO",
+        "candidate freeze must not claim merged Formal GO",
+        errors,
+    )
+    compatibility = registry.get("compatibility", {})
+    semantics = read_json(reports / "formal-semantics.json")
+    current_artifacts = discover_semantic_artifacts(root)
+    derived_id = derive_formal_semantics_id(CANDIDATE_VERSION, current_artifacts)
+    require(
+        baseline.get("formal_semantics_id")
+        == compatibility.get("formal_semantics_id")
+        == semantics.get("formal_semantics_id")
+        == derived_id,
+        "candidate compatibility identity mismatch",
+        errors,
+    )
+    require(
+        compatibility.get("id_derivation_status") == "candidate_pending_formal_go"
+        and semantics.get("formal_semantics_version") == CANDIDATE_VERSION
+        and semantics.get("status") == "candidate_pending_formal_go"
+        and semantics.get("compatibility") == compatibility
+        and semantics.get("semantic_artifacts") == current_artifacts,
+        "candidate compatibility manifest is stale or claims publication",
+        errors,
+    )
+    try:
+        validate_contract_registry(root)
+    except (KeyError, TypeError, ValueError) as error:
+        errors.append(f"contract registry mismatch: {error}")
 
     hash_records: list[tuple[str, str]] = []
     inputs = baseline.get("inputs")
@@ -80,7 +156,7 @@ def main() -> int:
                 relative_path not in seen_paths, f"duplicate input path: {relative_path}", errors
             )
             seen_paths.add(relative_path)
-            source_path = ROOT / relative_path
+            source_path = root / relative_path
             require(source_path.is_file(), f"missing input: {relative_path}", errors)
             if source_path.is_file():
                 actual_hash = semantic_text_sha256(source_path)
@@ -90,6 +166,11 @@ def main() -> int:
                     errors,
                 )
                 hash_records.append((relative_path, actual_hash))
+        require(
+            seen_paths == REQUIRED_INPUTS,
+            "baseline normative input inventory mismatch",
+            errors,
+        )
 
     canonical_bundle = "".join(
         f"{path}\t{digest}\n" for path, digest in sorted(hash_records)
@@ -180,6 +261,11 @@ def main() -> int:
         "APCParentage",
         "ConsensusIntegerOnly",
         "ArithmeticBindingSound",
+        # Existing amendment harness checks, each limited to its registered scope.
+        "NoStaleArithmeticVotes",
+        "HeterogeneousExpected",
+        "PersistenceRecordSound",
+        "PersistenceRecoverySound",
         "NoOverflow",
         "ShardViewAtomicity",
         "AggregateCompleteness",
@@ -324,8 +410,13 @@ def main() -> int:
         "counts": counts,
         "errors": errors,
     }
+    return result
+
+
+def main() -> int:
+    result = verify()
     print(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
-    return 0 if not errors else 1
+    return 0 if result["status"] == "PASS" else 1
 
 
 if __name__ == "__main__":

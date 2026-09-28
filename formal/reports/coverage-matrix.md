@@ -1,7 +1,7 @@
 # Formal coverage matrix
 
 **Task**: T001  
-**Formal semantics version**: `1.0.0`  
+**Formal semantics version**: `1.1.0`
 **Registry**: `formal/reports/formal-id-registry.json`  
 **Coverage status**: machine gates must be regenerated for the current semantic
 source; independent human review gate pending
@@ -12,6 +12,15 @@ counts only. Semantic status comes from separately executed TLC, Lean,
 production-mutation and refinement evidence; clean offline reproduction and two
 independent human reviews remain fail-closed requirements. Any `UNRESOLVED` cell
 is an unconditional STOP.
+
+## Accepted residual scope (28 September 2026)
+
+The frozen R1–R7 Definition of Done and assumptions are pinned in
+`specs/000-formal-tla-spec/candidate-contract.md`. Only R1–R3 are currently
+authorized work. The existing rows below retain their historical evidence scopes;
+old progress counts are not current closure claims. PO-AB1 native/public admission
+and recovery remain UNRESOLVED until the substantive general relation is proved.
+No additional universal ABORT constructor or arbitrary helper-layer count is a gate.
 
 ## Functional requirement mapping
 
