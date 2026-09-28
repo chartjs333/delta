@@ -1,6 +1,6 @@
 # ADR-0011 — Представление vector shard в R2
 
-**Статус:** PROPOSED / AWAITING USER CHOICE, не formal authority.
+**Статус:** ACCEPTED AS ARCHITECTURAL FORK / IMPLEMENTATION NOT AUTHORIZED, не formal authority.
 **Дата:** 28 сентября 2026. **Основание:** `c666f62b4989fb1fd0306a2af7e02ccc6e649427`.
 **Scope:** выбор представления внутри замороженного R2. Код, schemas, proofs и DoD R1–R7 не меняются.
 
@@ -70,7 +70,7 @@ acceptance. Полный recovery ещё не доказан; он остаёт�
 
 Включение A или B в mandatory Lean/TLA/schema изменит `formal_semantics_id` и
 потребует совместимого evidence по прежним R4–R7. Это не обязательно изменение
-native protocol. Данный proposed ADR не меняет mandatory artifacts и не выдаёт GO.
+native protocol. Принятие архитектурной развилки не меняет mandatory artifacts и не выдаёт GO.
 
 ## Рекомендация, не принятое решение
 
@@ -80,7 +80,9 @@ native protocol. Данный proposed ADR не меняет mandatory artifacts
 изменений контрактов, не установленный минимум трудозатрат: синхронизация в B
 нетривиальна. A прямее представляет whole body, но затрагивает больше schemas.
 
-**Решение A/B ожидается. Реализация и новые proof layers остановлены.**
+**Развилка принята пользователем; реализация A/B не разрешена.**
+Для B отдельно подготовлен [impact estimate](0011-r2-b-impact-estimate.md).
+Запрос этой оценки не является выбором B для реализации. Новые proof layers остановлены.
 
 Основания: [замороженный контракт](../../specs/000-formal-tla-spec/candidate-contract.md),
 [refinement contract](../../specs/000-formal-tla-spec/refinement-contract.md),

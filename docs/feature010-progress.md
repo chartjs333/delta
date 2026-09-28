@@ -6324,3 +6324,29 @@ Neither option was selected or implemented. No code/schema/proof/fixture,
 mandatory semantic artifact, accepted DoD or GO report was changed in this step.
 R1 CLOSED; R2/R3 OPEN. STOP remains in effect pending a direct option decision
 and authorization; no new proof layer follows this documentation checkpoint.
+
+## 28 September 2026 — option B impact estimate only
+
+Tasks T044/T047/T053–T057. The user accepted ADR-0011 as an architectural fork
+and requested an implementation-free impact estimate for B, not authorization
+to implement either option. docs/adr/0011-r2-b-impact-estimate.md records exact
+existing TLA actions, Lean entry points, schema/checker and fixture families with
+UNCHANGED / PROOF REUSE / MODIFICATION / RE-RUN ONLY / INVALIDATED classifications.
+The estimate preserves original shard/vote/certificate/WAL identity, keeps scalar
+leaf specifications, and identifies the required common family/state composition.
+The current nativeSnapshot.projection_id is already an APC/aggregate binding and
+must not be repurposed as a family ID. The existing full-width/ModelLimit guard
+gap remains part of frozen R2, not an extra requirement or assumed equivalence.
+
+Remaining R2 is estimated at 32–56 active hours and R3 at an additional 28–52,
+conditional on the representation-only design being sufficient. These ranges
+exclude final R4–R7 acceptance and all runtime/demo/benchmark work; they are not
+a delivery promise. The former R2 estimate assumed unchanged scalar constructors
+could be composed, which the later diagnostic ruled out for the accepted vectors.
+Old scalar/native component theorems remain valid in scope. Old source-bound
+aggregate evidence cannot automatically qualify a future changed family target.
+
+Residual delta: none closed; R1 remains CLOSED and R2/R3 OPEN. Frozen DoD R1–R7
+unchanged. This step edits documentation only; no implementation, mandatory
+semantic/proof/schema/fixture artifact, report or runtime is changed and no new
+proof layer or gate is run. STOP remains pending direct implementation permission.
