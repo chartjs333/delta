@@ -6386,3 +6386,36 @@ production/TLA/schema/fixture/runtime/guard or GO report is changed. Healthy dem
 8870/8865/8872 were checked read-only. Full R2 implementation is **not authorized**:
 STOP after this checkpoint, keep the automation present and quiet, await a new
 direct user decision.
+
+## 28 September 2026 — selected B / general original-shard family transfer
+
+Tasks T044/T047/T053–T057. The user selected B for R2 with a maximum of twelve
+active hours, frozen R1–R7 and no automatic R3 continuation. See
+`formal/proposals/b-family-transfer/README.md` for the checkpoint and exact residual.
+
+R2 residual reduced: heterogeneous positive shard lengths now have a general
+selector-family relation, two-sided ordered reconstruction and locality. It is
+instantiated directly from the unchanged original 4/8/8/8/8 manifest and its byte
+loader, preserving all five objects, offsets and 36 Q values. The source-loader
+theorem covers every admitted layout within existing bounds, not only those five
+sizes. Complete native PARAMETER families derive from actual ordered rows and
+NativePrepared.source; their complete bodies/bytes/envelopes/sequence reconstruct.
+NativeApply's whole vector state reconstructs through its actual schema's original
+shard ranges, retaining next-model/optimizer hash preimages. Common original
+signer/certificate/record objects cannot gain coordinate-level protocol identities.
+
+This closes the representation/length-one obstruction, not the full R2 mapping.
+The remaining fixed work is the family integration into full public input/body
+constructors, native/public bound and admission compatibility, shared source/config/
+alias/certificate/state correspondence, and general relation composition/review.
+Existing scalar APIs are not claimed migrated. Named authentication boundaries and
+the absent joined original004 vector vote/QC/WAL capture remain explicit; original008
+scalar identities were not substituted. No new exporter or universal ABORT gate.
+
+Fresh isolated kernels, axiom audit, read-only original source reproduction and
+protected-source comparison are recorded in `formal/proposals/evidence/b-family-transfer.json`.
+No production Init/Next, mandatory proof/schema/fixture, certificate semantics,
+WAL identity, runtime guard, semantics registry or GO report changes. No fresh TLC
+or complete formal gate is claimed. R1 CLOSED; R2 OPEN (remaining estimate 28–48
+active hours); R3 not started by this task; R4–R7 untouched. Evidence is local
+self-review, not independent attestation or Formal GO.

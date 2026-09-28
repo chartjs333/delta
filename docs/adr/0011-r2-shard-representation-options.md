@@ -1,18 +1,23 @@
 # ADR-0011 — Представление vector shard в R2
 
-**Статус:** ACCEPTED AS ARCHITECTURAL FORK / B CONDITIONAL SPIKE COMPLETE;
-полная реализация не разрешена, не formal authority.
+**Статус:** B SELECTED FOR R2 BY USER; не formal authority.
 **Дата:** 28 сентября 2026. **Основание:** `c666f62b4989fb1fd0306a2af7e02ccc6e649427`.
 **Scope:** выбор представления внутри замороженного R2. Production-код,
 mandatory schemas/proofs и DoD R1–R7 не меняются.
 
-**Последующее ограниченное разрешение:** пользователь условно выбрал B только для
-feasibility spike с бюджетом восемь активных часов. Изолированный
+**Текущее ограниченное разрешение:** после spike пользователь выбрал B для R2,
+не меняя DoD R1–R7. Разрешён перенос relation на исходные 4/8/8/8/8 с бюджетом
+12 активных часов, без R3 и без изменения production Init/Next, certificate
+semantics или WAL identity. [Контрольная точка переноса](../../formal/proposals/b-family-transfer/README.md)
+фиксирует общее lossless representation и точный остаток R2.
+
+**Предыдущий этап:** пользователь условно выбрал B только для feasibility spike
+с бюджетом восемь активных часов. Изолированный
 [spike](../../formal/proposals/b-feasibility/README.md) дал **FEASIBLE** для
 центральной композиции на одном исходном диагностическом vector shard.
-Mandatory artifacts и protocol semantics не изменены. Это не окончательное
-принятие B, не закрытие R2/R3 и не разрешение продолжить их реализацию.
-После checkpoint действует STOP. Исходное сравнение A/B ниже сохранено.
+Mandatory artifacts и protocol semantics не изменены. На том этапе окончательного
+принятия B и разрешения полной реализации не было; последующий выбор описан выше.
+R2/R3 не закрыты. Исходное сравнение A/B ниже сохранено.
 
 ## Граница решения
 
