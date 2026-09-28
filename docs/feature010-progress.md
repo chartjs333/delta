@@ -6308,3 +6308,19 @@ not discharge nativeArithmeticRecoveryRefines. Candidate semantic/runtime and
 accepted-contract bytes remain unchanged. No full formal gate, final report,
 new native capture, exporter authentication, independent review or GO is claimed.
 All three local demo endpoints remain HTTP200 without service restarts.
+
+
+## 28 September 2026 — R2 architecture options, documentation only
+
+The user requested an ADR comparing vector-aware public representation (A)
+with a synchronized scalar projection family over one original vector object
+(B), and explicitly prohibited implementation before choosing an option.
+docs/adr/0011-r2-shard-representation-options.md is PROPOSED/AWAITING USER CHOICE.
+It records affected TLA/Lean/public-schema/fixture contracts, reusable proofs,
+required bridge changes and the distinction between formal representation and
+native protocol semantics. B is recommended for scalar-contract reuse, not
+claimed to minimize proof effort or to have established whole-state equivalence.
+Neither option was selected or implemented. No code/schema/proof/fixture,
+mandatory semantic artifact, accepted DoD or GO report was changed in this step.
+R1 CLOSED; R2/R3 OPEN. STOP remains in effect pending a direct option decision
+and authorization; no new proof layer follows this documentation checkpoint.
