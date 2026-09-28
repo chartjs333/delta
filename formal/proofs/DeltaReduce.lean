@@ -1,3 +1,6 @@
+import DeltaReduce.NativeCertifiedCorpus
+import DeltaReduce.NativeAggregateBinding
+import DeltaReduce.NativeAggregateBindingVectors
 import DeltaReduce.NativeGraphClosure
 import DeltaReduce.NativeAuthorityProjection
 import DeltaReduce.NativeBindingConstruction

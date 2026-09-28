@@ -1370,6 +1370,21 @@ def main() -> int:
         "not a bound on total graph work. Small synthetic traversal and canonical "
         "encoding cases are not native custody, signatures or a GO decision."
     )
+    report["coverage"]["unresolved"].append(
+        "The complete original finalized PARAMETER corpus is now checked in order "
+        "against source-bound vector computations, exact Q leaves, context, "
+        "parents and decimal spelling. Full aggregate bytes and an extended "
+        "Binding are constructed with the same HashAdapter, conditional on NEW "
+        "anchor/recovery/certificate and original-to-projected custody premises. "
+        "APPLY reloads its original candidate and checks the exact ROOT certificate, "
+        "selected profile, computed values and native hashes. The raw-source "
+        "composition remains conditional: no full authenticated original/draft "
+        "instance, original008 captures or UnitSource authority is fabricated. "
+        "Arbitrary journal/phase/QC/send/current/crash/unknown/repair/physical WAL, "
+        "concrete codec/hash/exporter bounds, native compatibility, contract freeze "
+        "and independent review remain OPEN; nativeArithmeticRecoveryRefines is "
+        "still missing. No runtime guard change, local PASS or GO follows."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
