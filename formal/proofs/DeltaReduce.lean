@@ -1,3 +1,7 @@
+import DeltaReduce.NativeRootSource
+import DeltaReduce.NativeRootCorpus
+import DeltaReduce.PublicRootBody
+import DeltaReduce.PublicRootBodyVectors
 import DeltaReduce.NativeFinalizedAssignmentVectors
 import DeltaReduce.NativeFinalizedAssignment
 import DeltaReduce.NativeFailureSource

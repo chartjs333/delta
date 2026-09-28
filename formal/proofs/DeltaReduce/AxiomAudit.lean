@@ -1,3 +1,7 @@
+import DeltaReduce.NativeRootSource
+import DeltaReduce.NativeRootCorpus
+import DeltaReduce.PublicRootBody
+import DeltaReduce.PublicRootBodyVectors
 import DeltaReduce.NativeFinalizedAssignmentVectors
 import DeltaReduce.NativeCertifiedCorpus
 import DeltaReduce.NativeFinalizedAssignment
@@ -13978,3 +13982,72 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeFinalizedAssignmentVectors.certificateIdUnchanged
 
 #print axioms DeltaReduce.NativeFinalizedAssignmentVectors.proposalAndCertificateRemainDifferent
+
+#print axioms DeltaReduce.NativeRootSource.sectionOf
+#print axioms DeltaReduce.NativeRootSource.rootMatches
+#print axioms DeltaReduce.NativeRootSource.Root
+#print axioms DeltaReduce.NativeRootSource.loadRoot
+#print axioms DeltaReduce.NativeRootSource.original
+#print axioms DeltaReduce.NativeRootSource.fromComponents
+#print axioms DeltaReduce.NativeRootSource.wrongAction
+#print axioms DeltaReduce.NativeRootSource.ambiguousRejected
+#print axioms DeltaReduce.NativeRootSource.missingRejected
+#print axioms DeltaReduce.NativeRootSource.checkedSection
+#print axioms DeltaReduce.NativeRootSource.checked
+#print axioms DeltaReduce.NativeRootSource.originalShard
+#print axioms DeltaReduce.NativeRootSource.finalizedContext
+#print axioms DeltaReduce.NativeRootSource.completeLeaves
+#print axioms DeltaReduce.NativeRootSource.identity
+#print axioms DeltaReduce.NativeRootSource.originalPreimage
+#print axioms DeltaReduce.NativeRootSource.leafFinalizedAndHashed
+#print axioms DeltaReduce.NativeRootCorpus.SameSnapshot
+#print axioms DeltaReduce.NativeRootCorpus.Image
+#print axioms DeltaReduce.NativeRootCorpus.compute
+#print axioms DeltaReduce.NativeRootCorpus.Source
+#print axioms DeltaReduce.NativeRootCorpus.computed
+#print axioms DeltaReduce.NativeRootCorpus.fromComponents
+#print axioms DeltaReduce.NativeRootCorpus.Checked
+#print axioms DeltaReduce.NativeRootCorpus.check
+#print axioms DeltaReduce.NativeRootCorpus.sameOriginalSnapshot
+#print axioms DeltaReduce.NativeRootCorpus.completeOrder
+#print axioms DeltaReduce.NativeRootCorpus.originalPosition
+#print axioms DeltaReduce.NativeRootCorpus.originalRows
+#print axioms DeltaReduce.NativeRootCorpus.exactKeys
+#print axioms DeltaReduce.PublicRootBody.Projection
+#print axioms DeltaReduce.PublicRootBody.project
+#print axioms DeltaReduce.PublicRootBody.Projection.fields
+#print axioms DeltaReduce.PublicRootBody.Projection.value
+#print axioms DeltaReduce.PublicRootBody.Checked
+#print axioms DeltaReduce.PublicRootBody.check
+#print axioms DeltaReduce.PublicRootBody.wholeBody
+#print axioms DeltaReduce.PublicRootBody.entireFieldInventory
+#print axioms DeltaReduce.PublicRootBody.nativeLeafCount
+#print axioms DeltaReduce.PublicRootBody.nativeLeafAt
+#print axioms DeltaReduce.PublicRootBody.completeParents
+#print axioms DeltaReduce.PublicRootBody.originalVoteIdentity
+#print axioms DeltaReduce.PublicRootBody.leavesKeepWholeAuthority
+#print axioms DeltaReduce.PublicRootBody.leafSetPreservesOrderWitness
+#print axioms DeltaReduce.PublicRootBody.missingLeavesRejected
+#print axioms DeltaReduce.PublicRootBodyVectors.originalProposalHasCompleteLeafOrder
+#print axioms DeltaReduce.PublicRootBodyVectors.originalRootContainsFinalizedParameter
+#print axioms DeltaReduce.PublicRootBodyVectors.originalLeafHasNoProposedContext
+#print axioms DeltaReduce.PublicRootBodyVectors.originalRootProposalPreimage
+#print axioms DeltaReduce.PublicRootBodyVectors.originalLeafCertificatePreimage
+#print axioms DeltaReduce.PublicRootBodyVectors.originalLeafIsFinalized
+#print axioms DeltaReduce.PublicRootBodyVectors.missingCertificateRejects
+#print axioms DeltaReduce.PublicRootBodyVectors.unfinalizedCertificateRejects
+#print axioms DeltaReduce.PublicRootBodyVectors.duplicateOriginalKeysReject
+#print axioms DeltaReduce.PublicRootBodyVectors.sourceShardNameRequiresExplicitProjection
+#print axioms DeltaReduce.PublicRootBodyVectors.bodyFields
+#print axioms DeltaReduce.PublicRootBodyVectors.body
+#print axioms DeltaReduce.PublicRootBodyVectors.completeFieldInventory
+#print axioms DeltaReduce.PublicRootBodyVectors.constructedBodyCanonical
+#print axioms DeltaReduce.PublicRootBodyVectors.missingLeafChangesBody
+#print axioms DeltaReduce.PublicRootBodyVectors.changedNumberChangesBody
+#print axioms DeltaReduce.PublicRootBodyVectors.nativeOpaqueQcIsNotPublicLeaf
+#print axioms DeltaReduce.PublicRootBodyVectors.duplicatePublicLeafRejects
+#print axioms DeltaReduce.PublicRootBodyVectors.aggregateIsCanonicalSet
+#print axioms DeltaReduce.PublicRootBodyVectors.authorityPreservedInsideEachLeaf
+#print axioms DeltaReduce.PublicRootBodyVectors.noInventedRootAuthorityField
+
+#print axioms DeltaReduce.PublicRootBody.originalScalarAt

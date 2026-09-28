@@ -1,0 +1,1 @@
+{"segments": 2, "rows": 5, "small_cases": 32}

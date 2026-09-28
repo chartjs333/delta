@@ -1528,6 +1528,22 @@ def main() -> int:
         "source/configuration authentication and nativeArithmeticRecoveryRefines "
         "remain OPEN. No runtime/native guard change, local PASS or GO."
     )
+    report["coverage"]["unresolved"].append(
+        "Proposed ROOT now has conditional complete public body construction: "
+        "the original selected proposal and finalized PARAMETER certificates "
+        "are checked against every actual ordered native computation; shared "
+        "policy/state follows from parsing the same original bytes with the "
+        "Binding's HashAdapter. No future ROOT QC or APPLY is required. All "
+        "twelve public ROOT fields and full scalar PARAMETER leaves are "
+        "computed and compared, preserving ordered source witnesses. Original "
+        "ROOT policy has empty ROOT QC/finalized/APPLY lists and finalized "
+        "PARAMETER; component checks do not instantiate a complete positive "
+        "raw arithmetic corpus. Common primitive metadata/configuration/alias "
+        "and original versus projected structured parent identities remain "
+        "OPEN, as do the full public envelope/durable/QC/recovery relation, "
+        "nonempty ABORT and nativeArithmeticRecoveryRefines. No local PASS, "
+        "runtime guard change or GO is implied by this construction."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
