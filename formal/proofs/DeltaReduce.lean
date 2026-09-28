@@ -1,3 +1,7 @@
+import DeltaReduce.NativeRootParents
+import DeltaReduce.PublicParentNames
+import DeltaReduce.PublicRootParents
+import DeltaReduce.PublicRootParentsVectors
 import DeltaReduce.NativeRootSource
 import DeltaReduce.NativeRootCorpus
 import DeltaReduce.PublicRootBody

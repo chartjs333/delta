@@ -1,3 +1,7 @@
+import DeltaReduce.NativeRootParents
+import DeltaReduce.PublicParentNames
+import DeltaReduce.PublicRootParents
+import DeltaReduce.PublicRootParentsVectors
 import DeltaReduce.NativeRootSource
 import DeltaReduce.NativeRootCorpus
 import DeltaReduce.PublicRootBody
@@ -14051,3 +14055,68 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.PublicRootBodyVectors.noInventedRootAuthorityField
 
 #print axioms DeltaReduce.PublicRootBody.originalScalarAt
+
+#print axioms DeltaReduce.NativeRootParents.samePlanSection
+#print axioms DeltaReduce.NativeRootParents.samePlan
+#print axioms DeltaReduce.NativeRootParents.planChecked
+#print axioms DeltaReduce.NativeRootParents.sameIsc
+#print axioms DeltaReduce.NativeRootParents.sameEc
+#print axioms DeltaReduce.NativeRootParents.Complete
+#print axioms DeltaReduce.NativeRootParents.complete
+#print axioms DeltaReduce.NativeRootParents.everyOriginalTuple
+#print axioms DeltaReduce.NativeRootParents.everyOriginalEligibility
+#print axioms DeltaReduce.NativeRootParents.originalTupleAt
+#print axioms DeltaReduce.NativeRootParents.exactCommitments
+#print axioms DeltaReduce.NativeRootParents.originalCommitmentAt
+#print axioms DeltaReduce.NativeRootParents.iscSource
+#print axioms DeltaReduce.NativeRootParents.ecSource
+#print axioms DeltaReduce.NativeRootParents.missingArtifactRejects
+#print axioms DeltaReduce.PublicParentNames.entriesAgree
+#print axioms DeltaReduce.PublicParentNames.entryValue
+#print axioms DeltaReduce.PublicParentNames.completeEntries
+#print axioms DeltaReduce.PublicParentNames.membersAgree
+#print axioms DeltaReduce.PublicParentNames.completeMembers
+#print axioms DeltaReduce.PublicParentNames.extraEntryRejects
+#print axioms DeltaReduce.PublicParentNames.missingEntryRejects
+#print axioms DeltaReduce.PublicParentNames.missingContentRejects
+#print axioms DeltaReduce.PublicRootParents.PrimitiveChecks
+#print axioms DeltaReduce.PublicRootParents.Checked
+#print axioms DeltaReduce.PublicRootParents.check
+#print axioms DeltaReduce.PublicRootParents.roundIdentity
+#print axioms DeltaReduce.PublicRootParents.fullEntryIdentity
+#print axioms DeltaReduce.PublicRootParents.fullMemberIdentity
+#print axioms DeltaReduce.PublicRootParents.iscIdentity
+#print axioms DeltaReduce.PublicRootParents.seedIdentity
+#print axioms DeltaReduce.PublicRootParents.ecIdentity
+#print axioms DeltaReduce.PublicRootParents.apcIdentity
+#print axioms DeltaReduce.PublicRootParents.originalEntrySources
+#print axioms DeltaReduce.PublicRootParents.sameFullIscOrder
+#print axioms DeltaReduce.PublicRootParents.completeBodyParents
+#print axioms DeltaReduce.PublicRootParents.actualCommitmentAt
+#print axioms DeltaReduce.PublicRootParents.missingOriginalParentRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.commitment
+#print axioms DeltaReduce.PublicRootParentsVectors.source
+#print axioms DeltaReduce.PublicRootParentsVectors.vocabulary
+#print axioms DeltaReduce.PublicRootParentsVectors.second
+#print axioms DeltaReduce.PublicRootParentsVectors.exactNamesAgree
+#print axioms DeltaReduce.PublicRootParentsVectors.completePublicEntry
+#print axioms DeltaReduce.PublicRootParentsVectors.droppedEntryRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.extraEntryRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.extraCommitmentRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.substitutedOriginalTicketRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.missingAliasRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.changedAliasRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.changedIscReferenceRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.changedDomainRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.deletedQReferenceRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.changedQReferenceRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.originalMemberAgrees
+#print axioms DeltaReduce.PublicRootParentsVectors.missingMemberRejects
+#print axioms DeltaReduce.PublicRootParentsVectors.duplicateMembersRetained
+#print axioms DeltaReduce.PublicRootParentsVectors.duplicateSetRejectedSeparately
+#print axioms DeltaReduce.PublicRootParentsVectors.originalRootPlanParents
+#print axioms DeltaReduce.PublicRootParentsVectors.originalRootIscCertificate
+#print axioms DeltaReduce.NativeRootParents.crossParents
+#print axioms DeltaReduce.NativeRootParents.sameEcIsc
+#print axioms DeltaReduce.NativeRootParents.sameEcSeed
+#print axioms DeltaReduce.PublicRootParents.originalParentChecksDerived
