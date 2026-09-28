@@ -1414,6 +1414,18 @@ def main() -> int:
         "phase/send/QC/current/crash/repair, concrete resources, compatibility, "
         "freeze/offline/independent review remain OPEN. NO_GO remains."
     )
+    report["coverage"]["unresolved"].append(
+        "Source-derived VoteMetadata and ExpectedNativeVote now accompany "
+        "complete original PARAMETER/APPLY votes, parents and mixed-prefix WAL "
+        "entries. Actual source bodies, parent digest roundtrips and anchor "
+        "context are checked; native and projected hash preimages remain distinct. "
+        "Recovery-scan flags cannot produce NativePrepared even with independent "
+        "metadata authentication. A completed live event, complete prior durable "
+        "set and distinct draft-vote versus mixed-WAL sequence relation remain "
+        "OPEN, as do repeated arithmetic history, physical persistence/export, "
+        "full recovery, compatibility, freeze/offline and independent review. "
+        "No runtime guard change or formal GO follows."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)

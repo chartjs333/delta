@@ -1,3 +1,5 @@
+import DeltaReduce.NativeVoteMetadata
+import DeltaReduce.NativeVoteMetadataVectors
 import DeltaReduce.NativePlanAssignments
 import DeltaReduce.NativePlanProjection
 import DeltaReduce.NativePlanProjectionVectors
@@ -13277,3 +13279,73 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeArithmeticVoteVectors.unknownPrefix
 #print axioms DeltaReduce.NativeArithmeticVoteVectors.tornPrefix
 #print axioms DeltaReduce.NativeArithmeticVoteVectors.corruptPrefix
+
+#print axioms DeltaReduce.NativeVoteMetadata.readText
+#print axioms DeltaReduce.NativeVoteMetadata.textRetained
+#print axioms DeltaReduce.NativeVoteMetadata.readDigest
+#print axioms DeltaReduce.NativeVoteMetadata.digestRetained
+#print axioms DeltaReduce.NativeVoteMetadata.Header
+#print axioms DeltaReduce.NativeVoteMetadata.Fields
+#print axioms DeltaReduce.NativeVoteMetadata.fields
+#print axioms DeltaReduce.NativeVoteMetadata.fieldsRetained
+#print axioms DeltaReduce.NativeVoteMetadata.completed
+#print axioms DeltaReduce.NativeVoteMetadata.metadata
+#print axioms DeltaReduce.NativeVoteMetadata.metadataFields
+#print axioms DeltaReduce.NativeVoteMetadata.scanningNotCompleted
+#print axioms DeltaReduce.NativeVoteMetadata.validatorMembership
+#print axioms DeltaReduce.NativeVoteMetadata.Image
+#print axioms DeltaReduce.NativeVoteMetadata.encode
+#print axioms DeltaReduce.NativeVoteMetadata.encoded
+#print axioms DeltaReduce.NativeVoteMetadata.originalMetadata
+#print axioms DeltaReduce.NativeVoteMetadata.originalHeader
+#print axioms DeltaReduce.NativeVoteMetadata.completeOriginal
+#print axioms DeltaReduce.NativeVoteMetadata.projectedHashPreimage
+#print axioms DeltaReduce.NativeVoteMetadata.wrongHeaderRejects
+#print axioms DeltaReduce.NativeVoteMetadata.scanCannotPrepare
+#print axioms DeltaReduce.NativeVoteMetadata.Parameter
+#print axioms DeltaReduce.NativeVoteMetadata.parameter
+#print axioms DeltaReduce.NativeVoteMetadata.parameterSource
+#print axioms DeltaReduce.NativeVoteMetadata.parameterBodies
+#print axioms DeltaReduce.NativeVoteMetadata.parameterMetadata
+#print axioms DeltaReduce.NativeVoteMetadata.Applied
+#print axioms DeltaReduce.NativeVoteMetadata.applyVote
+#print axioms DeltaReduce.NativeVoteMetadata.applySource
+#print axioms DeltaReduce.NativeVoteMetadata.applyBodies
+#print axioms DeltaReduce.NativeVoteMetadata.applyMetadata
+#print axioms DeltaReduce.NativeVoteMetadata.nextImage
+#print axioms DeltaReduce.NativeVoteMetadata.nextRetained
+#print axioms DeltaReduce.NativeVoteMetadata.Next
+#print axioms DeltaReduce.NativeVoteMetadata.checkNext
+#print axioms DeltaReduce.NativeVoteMetadata.checkedNext
+#print axioms DeltaReduce.NativeVoteMetadata.nextCannotPrepare
+#print axioms DeltaReduce.NativeVoteMetadata.nextOriginalBytes
+
+#print axioms DeltaReduce.NativeVoteMetadataVectors.parameterFields
+#print axioms DeltaReduce.NativeVoteMetadataVectors.applyFields
+#print axioms DeltaReduce.NativeVoteMetadataVectors.parameterOriginalFields
+#print axioms DeltaReduce.NativeVoteMetadataVectors.applyOriginalFields
+#print axioms DeltaReduce.NativeVoteMetadataVectors.originalParameterParent
+#print axioms DeltaReduce.NativeVoteMetadataVectors.originalApplyParent
+#print axioms DeltaReduce.NativeVoteMetadataVectors.rawDigestNotText
+#print axioms DeltaReduce.NativeVoteMetadataVectors.differentParents
+#print axioms DeltaReduce.NativeVoteMetadataVectors.wrongDigestTag
+#print axioms DeltaReduce.NativeVoteMetadataVectors.shortDigest
+#print axioms DeltaReduce.NativeVoteMetadataVectors.upperDigest
+#print axioms DeltaReduce.NativeVoteMetadataVectors.rawDigestRejected
+#print axioms DeltaReduce.NativeVoteMetadataVectors.unicodeRejected
+#print axioms DeltaReduce.NativeVoteMetadataVectors.asciiEscapedRetained
+#print axioms DeltaReduce.NativeVoteMetadataVectors.projection
+#print axioms DeltaReduce.NativeVoteMetadataVectors.liveMetadata
+#print axioms DeltaReduce.NativeVoteMetadataVectors.liveFlags
+#print axioms DeltaReduce.NativeVoteMetadataVectors.exactTime
+#print axioms DeltaReduce.NativeVoteMetadataVectors.unreadyFlag
+#print axioms DeltaReduce.NativeVoteMetadataVectors.recoveryOverridesReady
+#print axioms DeltaReduce.NativeVoteMetadataVectors.invalidationOverridesReady
+#print axioms DeltaReduce.NativeVoteMetadataVectors.absentCommittee
+#print axioms DeltaReduce.NativeVoteMetadataVectors.wrongLocalActor
+#print axioms DeltaReduce.NativeVoteMetadataVectors.originalRecoveryNotComplete
+#print axioms DeltaReduce.NativeVoteMetadataVectors.metadataNoGlobalSequence
+#print axioms DeltaReduce.NativeVoteMetadataVectors.metadataNoSignature
+#print axioms DeltaReduce.NativeVoteMetadataVectors.metadataNoView
+#print axioms DeltaReduce.NativeVoteMetadataVectors.entireFrameRetainsSignature
+#print axioms DeltaReduce.NativeVoteMetadataVectors.entireFrameRetainsSemantics

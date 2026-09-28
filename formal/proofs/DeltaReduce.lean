@@ -1,3 +1,5 @@
+import DeltaReduce.NativeVoteMetadata
+import DeltaReduce.NativeVoteMetadataVectors
 import DeltaReduce.NativeArithmeticVote
 import DeltaReduce.NativeArithmeticPrefix
 import DeltaReduce.NativeArithmeticVoteVectors
