@@ -6255,3 +6255,56 @@ The diagnostic is outside the mandatory registry and semantic artifact inventory
 its source/dependency hashes are separately recorded in evidence/r2-domain-audit.json.
 No production semantic/proof/runtime source, frozen contract, gate or GO report
 was changed. The previous formal report remains historical NO_GO for its own tree.
+
+
+## 28 September 2026 — requested minimal vector relation checkpoint
+
+Tasks T044/T053–T057. The latest direct user instruction narrows this turn to
+one representation relation and two proofs, followed by a checkpoint and STOP.
+The accepted R1–R7 Definition of Done is unchanged; no further R2/R3 layer is
+authorized automatically after this checkpoint.
+
+The new proposal represents a shard as one original identity and one unchanged
+manifest entry with an indexed vector. The relation equates the original
+identity, full entry and entire ordered value list. It constructs the image
+directly; it does not accept a translated body, arithmetic approval table or
+desired output equality. Every original shard/vote/certificate identity accessor
+is preserved. The actual existing manifest remains five objects of lengths
+4/8/8/8/8, with starts 0/4/12/20/28 and all 36 original coordinates. Coordinate
+views do not allocate new shards, votes or certificates. The instantiated source
+is the original Q/manifest component, not a new joined vote/QC execution.
+
+General kernel proofs show that successful vector PARAMETER computations project
+to successful existing scalar checked computations at the SAME bounds and with
+the original member order, coefficient checks, products and all prefixes. The
+existing source reducer's own output constructs the image; width-one scalar
+results remain unchanged. Conversion, mixture and optimizer project to their
+existing checked scalar calls with the same intermediate guards and rounding.
+The APPLY arithmetic composition uses the same gradient coordinate, and the
+global slice theorem retains the original manifest position. There is no claim
+that native wide success implies narrow-model admission.
+
+Checkpoint: REQUIRES MODEL/ARCHITECTURE CHANGE for the current scalar public
+bridge. The requested lossless numeric representation and scalar-coordinate
+statements are proved, but the unchanged complete public body APIs still require
+length one. They cannot accept this image for the original vector partition.
+Connecting it requires a vector-valued public representation or a synchronized
+coordinate-family lifting with one original vote and atomic admission. Neither
+next layer is implemented here. This does not establish impossibility of all
+alternative refinements and does not require changing native identities.
+
+Residual delta: the two requested local statements are discharged; no top-level
+R item closes. R1 CLOSED; R2 OPEN; R3 OPEN; R4–R7 deferred. The same finite
+source/body/state and transition obligations remain; there is no new standalone
+ABORT obligation or scope extension. Stop proof work pending a new direct user
+instruction. Automation remains present and must not resume older broader work.
+
+Reproduction and limitations: formal/proposals/vector-shard-representation.md
+and .lean; source-linked evidence in evidence/vector-shard-representation.json.
+Targeted dependencies, fresh kernel/explicit axiom audit and unchanged phase-0
+contract check pass; only propext/Classical.choice/Quot.sound are used. The
+proposal is outside the mandatory theorem registry/semantic inventory and does
+not discharge nativeArithmeticRecoveryRefines. Candidate semantic/runtime and
+accepted-contract bytes remain unchanged. No full formal gate, final report,
+new native capture, exporter authentication, independent review or GO is claimed.
+All three local demo endpoints remain HTTP200 without service restarts.
