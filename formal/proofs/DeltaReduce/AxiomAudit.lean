@@ -1,3 +1,7 @@
+import DeltaReduce.NativeFailureSource
+import DeltaReduce.PublicFailureBody
+import DeltaReduce.PublicFailureHistory
+import DeltaReduce.PublicFailureBodyVectors
 import DeltaReduce.NativePlanningSource
 import DeltaReduce.PublicPlanningBody
 import DeltaReduce.PublicPlanningHistory
@@ -13788,3 +13792,124 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.PublicPlanningBodyVectors.wrongEcVoteContext
 #print axioms DeltaReduce.PublicPlanningBodyVectors.wrongApcVoteContext
 #print axioms DeltaReduce.PublicPlanningBodyVectors.changedApcProfile
+
+#print axioms DeltaReduce.NativeFailureSource.tail
+#print axioms DeltaReduce.NativeFailureSource.View
+#print axioms DeltaReduce.NativeFailureSource.Abort
+#print axioms DeltaReduce.NativeFailureSource.loadView
+#print axioms DeltaReduce.NativeFailureSource.loadAbort
+#print axioms DeltaReduce.NativeFailureSource.checkedTail
+#print axioms DeltaReduce.NativeFailureSource.viewSource
+#print axioms DeltaReduce.NativeFailureSource.abortSource
+#print axioms DeltaReduce.NativeFailureSource.viewOriginalRow
+#print axioms DeltaReduce.NativeFailureSource.abortOriginalRow
+#print axioms DeltaReduce.NativeFailureSource.viewSelectedIdentity
+#print axioms DeltaReduce.NativeFailureSource.abortSelectedIdentity
+#print axioms DeltaReduce.NativeFailureSource.exactTimeout
+#print axioms DeltaReduce.NativeFailureSource.viewNumbers
+#print axioms DeltaReduce.NativeFailureSource.allSevenAbortLists
+#print axioms DeltaReduce.NativeFailureSource.noFinalizedApply
+#print axioms DeltaReduce.NativeFailureSource.originalEnvironment
+#print axioms DeltaReduce.NativeFailureSource.viewEnabled
+#print axioms DeltaReduce.NativeFailureSource.loadViewFromComponents
+#print axioms DeltaReduce.NativeFailureSource.loadAbortFromComponents
+#print axioms DeltaReduce.NativeFailureSource.wrongViewKind
+#print axioms DeltaReduce.NativeFailureSource.wrongAbortKind
+
+#print axioms DeltaReduce.PublicFailureBody.Limits
+#print axioms DeltaReduce.PublicFailureBody.ViewFits
+#print axioms DeltaReduce.PublicFailureBody.AbortFits
+#print axioms DeltaReduce.PublicFailureBody.EmptyLineage
+#print axioms DeltaReduce.PublicFailureBody.reason
+#print axioms DeltaReduce.PublicFailureBody.Trust
+#print axioms DeltaReduce.PublicFailureBody.Metadata
+#print axioms DeltaReduce.PublicFailureBody.Config
+#print axioms DeltaReduce.PublicFailureBody.loadConfigs
+#print axioms DeltaReduce.PublicFailureBody.Config.value
+#print axioms DeltaReduce.PublicFailureBody.configsOriginal
+#print axioms DeltaReduce.PublicFailureBody.ViewImage
+#print axioms DeltaReduce.PublicFailureBody.loadViewBody
+#print axioms DeltaReduce.PublicFailureBody.ViewImage.value
+#print axioms DeltaReduce.PublicFailureBody.ViewImage.context
+#print axioms DeltaReduce.PublicFailureBody.ViewImage.vote
+#print axioms DeltaReduce.PublicFailureBody.ViewImage.observation
+#print axioms DeltaReduce.PublicFailureBody.AbortImage
+#print axioms DeltaReduce.PublicFailureBody.loadAbortBody
+#print axioms DeltaReduce.PublicFailureBody.emptyLineageValue
+#print axioms DeltaReduce.PublicFailureBody.AbortImage.value
+#print axioms DeltaReduce.PublicFailureBody.AbortImage.vote
+#print axioms DeltaReduce.PublicFailureBody.Image
+#print axioms DeltaReduce.PublicFailureBody.Image.vote
+#print axioms DeltaReduce.PublicFailureBody.Image.Separated
+#print axioms DeltaReduce.PublicFailureBody.project
+#print axioms DeltaReduce.PublicFailureBody.ConfigurationFits
+#print axioms DeltaReduce.PublicFailureBody.Checked
+#print axioms DeltaReduce.PublicFailureBody.check
+#print axioms DeltaReduce.PublicFailureBody.viewExactNumbers
+#print axioms DeltaReduce.PublicFailureBody.abortAllConfigs
+#print axioms DeltaReduce.PublicFailureBody.abortExactAbsence
+#print axioms DeltaReduce.PublicFailureBody.abortCheckpointAuthority
+#print axioms DeltaReduce.PublicFailureBody.nonemptyLineageRejects
+#print axioms DeltaReduce.PublicFailureBody.outsideViewLimitsRejects
+#print axioms DeltaReduce.PublicFailureBody.checkedWholeVote
+#print axioms DeltaReduce.PublicFailureBody.checkedDeadlines
+#print axioms DeltaReduce.PublicFailureBody.viewObservationFromSource
+#print axioms DeltaReduce.PublicFailureBody.configSetCoverage
+#print axioms DeltaReduce.PublicFailureBody.checkFromComponents
+#print axioms DeltaReduce.PublicFailureBody.wrongConfigurationRejects
+#print axioms DeltaReduce.PublicFailureBody.changedVoteRejects
+
+#print axioms DeltaReduce.PublicFailureHistory.Checked
+#print axioms DeltaReduce.PublicFailureHistory.check
+#print axioms DeltaReduce.PublicFailureHistory.exactNativeSource
+#print axioms DeltaReduce.PublicFailureHistory.exactOriginalBytes
+#print axioms DeltaReduce.PublicFailureHistory.originalCapturedSelection
+#print axioms DeltaReduce.PublicFailureHistory.completePublicVote
+#print axioms DeltaReduce.PublicFailureHistory.wrongPriorRejects
+
+#print axioms DeltaReduce.PublicFailureBodyVectors.syntheticTrust
+#print axioms DeltaReduce.PublicFailureBodyVectors.names
+#print axioms DeltaReduce.PublicFailureBodyVectors.limits
+#print axioms DeltaReduce.PublicFailureBodyVectors.view
+#print axioms DeltaReduce.PublicFailureBodyVectors.config
+#print axioms DeltaReduce.PublicFailureBodyVectors.abort
+#print axioms DeltaReduce.PublicFailureBodyVectors.models
+#print axioms DeltaReduce.PublicFailureBodyVectors.round
+#print axioms DeltaReduce.PublicFailureBodyVectors.viewBody
+#print axioms DeltaReduce.PublicFailureBodyVectors.viewVote
+#print axioms DeltaReduce.PublicFailureBodyVectors.abortBody
+#print axioms DeltaReduce.PublicFailureBodyVectors.abortVote
+#print axioms DeltaReduce.PublicFailureBodyVectors.originalViewSource
+#print axioms DeltaReduce.PublicFailureBodyVectors.originalAbortSource
+#print axioms DeltaReduce.PublicFailureBodyVectors.originalSevenLists
+#print axioms DeltaReduce.PublicFailureBodyVectors.loadedView
+#print axioms DeltaReduce.PublicFailureBodyVectors.loadedAbort
+#print axioms DeltaReduce.PublicFailureBodyVectors.completeViewValue
+#print axioms DeltaReduce.PublicFailureBodyVectors.completeAbortValue
+#print axioms DeltaReduce.PublicFailureBodyVectors.viewCanonical
+#print axioms DeltaReduce.PublicFailureBodyVectors.abortCanonical
+#print axioms DeltaReduce.PublicFailureBodyVectors.completeConfigList
+#print axioms DeltaReduce.PublicFailureBodyVectors.allEmptyLists
+#print axioms DeltaReduce.PublicFailureBodyVectors.originalTimeoutProjection
+#print axioms DeltaReduce.PublicFailureBodyVectors.inputPresenceRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.ecPresenceRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.planPresenceRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.parameterPresenceRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.rootPresenceRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.applyPresenceRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.wrongSoftDeadlineRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.viewRangeRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.timeRangeRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.unknownReasonRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.noAbortReasonRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.allPublicReasons
+#print axioms DeltaReduce.PublicFailureBodyVectors.noCheckpoint
+#print axioms DeltaReduce.PublicFailureBodyVectors.missingCheckpointRejects
+#print axioms DeltaReduce.PublicFailureBodyVectors.duplicatedConfigsPreserved
+#print axioms DeltaReduce.PublicFailureBodyVectors.collapsedConfigsReject
+#print axioms DeltaReduce.PublicFailureBodyVectors.opaqueViewContextRejected
+#print axioms DeltaReduce.PublicFailureBodyVectors.changedAbortCurrentRejected
+#print axioms DeltaReduce.PublicFailureBodyVectors.changedViewDeadlineRejected
+#print axioms DeltaReduce.PublicFailureBodyVectors.iscHasNoViewSource
+#print axioms DeltaReduce.PublicFailureBodyVectors.iscHasNoAbortSource
+#print axioms DeltaReduce.PublicFailureBodyVectors.differentPolicyDeadlineRejects

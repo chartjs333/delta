@@ -1,3 +1,7 @@
+import DeltaReduce.NativeFailureSource
+import DeltaReduce.PublicFailureBody
+import DeltaReduce.PublicFailureHistory
+import DeltaReduce.PublicFailureBodyVectors
 import DeltaReduce.NativePlanningSource
 import DeltaReduce.PublicPlanningBody
 import DeltaReduce.PublicPlanningHistory

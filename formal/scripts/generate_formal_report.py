@@ -1495,6 +1495,24 @@ def main() -> int:
         "crash/repair, physical authority, bounded resources, compatibility and "
         "freeze/offline/independent review remain OPEN. NO_GO and guard remain."
     )
+    report["coverage"]["unresolved"].append(
+        "Original VIEW/ABORT source projection now reuses the complete selected "
+        "snapshot and checked failure tail, retaining exact rows, timeout, "
+        "runtime guards and all seven native finalized lists. Complete public "
+        "VIEW_CHANGE bodies/envelopes preserve native integers and check model "
+        "limits and both policy deadlines. ABORT construction supports only "
+        "explicitly empty downstream lineage, retaining every config; nonempty "
+        "ISC/EC/APC/PARAMETER/ROOT/APPLY lists reject, never disappear. This is "
+        "a restricted projection, not native admission equivalence. Checkpoint "
+        "and shared primitive metadata require independent authentication, "
+        "synthetic in component examples. All public abort reasons are decoded "
+        "exactly; missing/unknown data is not empty state. No new whole selected "
+        "failure snapshot, native execution or physical absence authority is "
+        "claimed. Nonempty ABORT lineage, ROOT, full public durable equality, "
+        "all-actor sequences, source/configuration/current/phase/QC/recovery "
+        "and physical persistence, bounded resources, compatibility and "
+        "freeze/offline/independent review remain OPEN. NO_GO and guard remain."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
