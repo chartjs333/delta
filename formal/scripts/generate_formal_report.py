@@ -1422,9 +1422,25 @@ def main() -> int:
         "Recovery-scan flags cannot produce NativePrepared even with independent "
         "metadata authentication. A completed live event, complete prior durable "
         "set and distinct draft-vote versus mixed-WAL sequence relation remain "
-        "OPEN, as do repeated arithmetic history, physical persistence/export, "
+        "OPEN, as do authenticated arithmetic history, physical persistence/export, "
         "full recovery, compatibility, freeze/offline and independent review. "
         "No runtime guard change or formal GO follows."
+    )
+    report["coverage"]["unresolved"].append(
+        "A separate candidate mixed journal now folds arbitrarily many checked "
+        "arithmetic inputs, reloading each source against the exact preceding "
+        "policy/state and retaining executable pre/step/suffix vote provenance. "
+        "Original commands and guarded non-arithmetic votes remain unchanged. "
+        "Global positions, unique keys, invalidation, snapshot coverage and "
+        "historical exact retry are retained; complete observed bytes align with "
+        "an exact-length source list. Zero-snapshot state equality is an extra "
+        "candidate restriction, not a native equivalence claim. Unknown, torn "
+        "and corrupt inputs reject. No successful joined multi-arithmetic raw "
+        "capture, authenticated source/export or physical persistence follows. "
+        "Completed recovery/live NativePrepared, full prior public/draft durable "
+        "correspondence and sequence mapping, full production recovery and "
+        "phase/send/QC/current/repair, bounded resources, native compatibility, "
+        "freeze/offline/independent review remain OPEN. NO_GO and guard remain."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

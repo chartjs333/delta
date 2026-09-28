@@ -1,3 +1,6 @@
+import DeltaReduce.NativeArithmeticJournal
+import DeltaReduce.NativeArithmeticHistory
+import DeltaReduce.NativeArithmeticHistoryVectors
 import DeltaReduce.NativeVoteMetadata
 import DeltaReduce.NativeVoteMetadataVectors
 import DeltaReduce.NativePlanAssignments
@@ -13349,3 +13352,93 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeVoteMetadataVectors.metadataNoView
 #print axioms DeltaReduce.NativeVoteMetadataVectors.entireFrameRetainsSignature
 #print axioms DeltaReduce.NativeVoteMetadataVectors.entireFrameRetainsSemantics
+
+#print axioms DeltaReduce.NativeArithmeticJournal.Source
+#print axioms DeltaReduce.NativeArithmeticJournal.Arithmetic
+#print axioms DeltaReduce.NativeArithmeticJournal.projected
+#print axioms DeltaReduce.NativeArithmeticJournal.projectedOriginal
+#print axioms DeltaReduce.NativeArithmeticJournal.stored
+#print axioms DeltaReduce.NativeArithmeticJournal.added
+#print axioms DeltaReduce.NativeArithmeticJournal.arithmetic
+#print axioms DeltaReduce.NativeArithmeticJournal.Checked
+#print axioms DeltaReduce.NativeArithmeticJournal.checked
+#print axioms DeltaReduce.NativeArithmeticJournal.arithmeticFromComponents
+#print axioms DeltaReduce.NativeArithmeticJournal.actualPreparation
+#print axioms DeltaReduce.NativeArithmeticJournal.originalVote
+#print axioms DeltaReduce.NativeArithmeticJournal.originalGuard
+#print axioms DeltaReduce.NativeArithmeticJournal.scanCannotPrepare
+#print axioms DeltaReduce.NativeArithmeticJournal.invalidatedRejects
+#print axioms DeltaReduce.NativeArithmeticJournal.Input
+#print axioms DeltaReduce.NativeArithmeticJournal.Record
+#print axioms DeltaReduce.NativeArithmeticJournal.Transition
+#print axioms DeltaReduce.NativeArithmeticJournal.step
+#print axioms DeltaReduce.NativeArithmeticJournal.stepSource
+#print axioms DeltaReduce.NativeArithmeticJournal.stepSequence
+#print axioms DeltaReduce.NativeArithmeticJournal.stepCounts
+#print axioms DeltaReduce.NativeArithmeticJournal.stepClock
+#print axioms DeltaReduce.NativeArithmeticJournal.stepUnique
+#print axioms DeltaReduce.NativeArithmeticJournal.stepSnapshot
+#print axioms DeltaReduce.NativeArithmeticJournal.VoteCause
+#print axioms DeltaReduce.NativeArithmeticJournal.stepVoteOrigin
+#print axioms DeltaReduce.NativeArithmeticJournal.stepRecord
+
+#print axioms DeltaReduce.NativeArithmeticHistory.run
+#print axioms DeltaReduce.NativeArithmeticHistory.History
+#print axioms DeltaReduce.NativeArithmeticHistory.runSound
+#print axioms DeltaReduce.NativeArithmeticHistory.historyRun
+#print axioms DeltaReduce.NativeArithmeticHistory.historySequence
+#print axioms DeltaReduce.NativeArithmeticHistory.historyCounts
+#print axioms DeltaReduce.NativeArithmeticHistory.historyUnique
+#print axioms DeltaReduce.NativeArithmeticHistory.historyClock
+#print axioms DeltaReduce.NativeArithmeticHistory.historyVotePosition
+#print axioms DeltaReduce.NativeArithmeticHistory.historyPosition
+#print axioms DeltaReduce.NativeArithmeticHistory.arithmeticPosition
+#print axioms DeltaReduce.NativeArithmeticHistory.zeroSnapshot
+#print axioms DeltaReduce.NativeArithmeticHistory.recover
+#print axioms DeltaReduce.NativeArithmeticHistory.recoveryComputed
+#print axioms DeltaReduce.NativeArithmeticHistory.recoveryFromComponents
+#print axioms DeltaReduce.NativeArithmeticHistory.recoveryCounts
+#print axioms DeltaReduce.NativeArithmeticHistory.recoveryUnique
+#print axioms DeltaReduce.NativeArithmeticHistory.historySnapshot
+#print axioms DeltaReduce.NativeArithmeticHistory.positiveSnapshot
+#print axioms DeltaReduce.NativeArithmeticHistory.recoveredVotePosition
+#print axioms DeltaReduce.NativeArithmeticHistory.retryPosition
+#print axioms DeltaReduce.NativeArithmeticHistory.align
+#print axioms DeltaReduce.NativeArithmeticHistory.aligned
+#print axioms DeltaReduce.NativeArithmeticHistory.recoverObserved
+#print axioms DeltaReduce.NativeArithmeticHistory.observed
+#print axioms DeltaReduce.NativeArithmeticHistory.observedOriginal
+#print axioms DeltaReduce.NativeArithmeticHistory.unknownRejects
+#print axioms DeltaReduce.NativeArithmeticHistory.incompleteRejects
+#print axioms DeltaReduce.NativeArithmeticHistory.zeroSnapshotRejects
+#print axioms DeltaReduce.NativeArithmeticHistory.wrongSourceCount
+#print axioms DeltaReduce.NativeArithmeticHistory.corruptRejects
+
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.voteInput
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.commandInput
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.original
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.exactAlignment
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.missingSourcePosition
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.extraSourcePosition
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.missingWalSuffix
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.exactEmpty
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.reorderedRetained
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.unknownEmptyStillRejects
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.unknownNonemptyRejects
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.zeroStateRetained
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.zeroStateSubstitution
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.zeroStateRejects
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.noSnapshotRestriction
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.wrongPolicySource
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.wrongStateSource
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.commandSourceRejected
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.invalidationCannotRefresh
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.originalVote
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.originalCommand
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.originalFold
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.originalRecovery
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.originalCount
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.reorderedRejected
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.duplicatedRejected
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.exactHistoricalRetry
+#print axioms DeltaReduce.NativeArithmeticHistoryVectors.originalGuardWithoutSource

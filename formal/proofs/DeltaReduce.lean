@@ -1,3 +1,6 @@
+import DeltaReduce.NativeArithmeticJournal
+import DeltaReduce.NativeArithmeticHistory
+import DeltaReduce.NativeArithmeticHistoryVectors
 import DeltaReduce.NativeVoteMetadata
 import DeltaReduce.NativeVoteMetadataVectors
 import DeltaReduce.NativeArithmeticVote
