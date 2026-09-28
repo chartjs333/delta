@@ -1,0 +1,48 @@
+'DeltaReduce.VectorShardRepresentation.Source' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.load' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.Image' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.Represents' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.represent' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.represents' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.project' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.projectExact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.noCoordinateDefault' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.identityPreserved' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.identityObservablesPreserved' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.coordinatesPreserved' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.noCollapse' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.collectionKeepsOriginalObjects' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.sliceSource' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.globalCoordinateExact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.rowAt' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.parameterRowsAt' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.scalarParameterIsCoordinate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.VectorShardRepresentation.representedParameterCoordinate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.VectorShardRepresentation.parameterCoordinateNeverPads' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.scalarConversionIsCoordinate' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.scalarMixtureIsCoordinate' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.scalarOptimizerIsCoordinate' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.applyCoordinateFromSameVector' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.originalResultSource' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.originalResultCoordinate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.VectorShardRepresentation.originalScalarResultUnchanged' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.VectorShardRepresentation.original' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.originalShapes' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.originalSources' does not depend on any axioms
+'DeltaReduce.VectorShardRepresentation.originalWidths' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.originalObjectsRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.VectorShardRepresentation.originalManifestEntries' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.VectorShardRepresentation.originalStarts' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.originalCoordinateCount' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.originalFiveNotThirtySix' depends on axioms: [propext]
+'DeltaReduce.VectorShardRepresentation.originalValuesRetained' depends on axioms: [propext, Quot.sound]

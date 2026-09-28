@@ -6419,3 +6419,55 @@ WAL identity, runtime guard, semantics registry or GO report changes. No fresh T
 or complete formal gate is claimed. R1 CLOSED; R2 OPEN (remaining estimate 28–48
 active hours); R3 not started by this task; R4–R7 untouched. Evidence is local
 self-review, not independent attestation or Formal GO.
+
+## 28 September 2026 — R2 three frozen obligations / bounded constructor stage
+
+Tasks T044/T047/T053–T057. The user authorized only the three remaining R2
+obligations for at most four active hours, beginning 17:12:54 UTC. Frozen R1–R7
+and production Init/Next/certificate/WAL semantics are unchanged. The detailed
+residual is in `formal/proposals/b-family-transfer/CONSTRUCTORS.md`; reproducible
+source-bound evidence is `formal/proposals/evidence/b-family-constructors.json`.
+
+1. **Family to complete public inputs/bodies — PARTIAL.** Original vector cells,
+   ordered contributions and same-source current vectors now feed the complete
+   public input encoder and complete PARAMETER/ROOT/APPLY constructors. Complete
+   authority and body canonicality/acceptance follow from source-bound components,
+   primitive metadata and exact encoded-set uniqueness, rather than an assumed
+   whole translated body. The embedded inputs compute the same parameter value;
+   current-to-next scalar mixture/optimizer cells use the original global offsets.
+   ROOT does not require subsequent APPLY/conversion success. Remaining: all
+   configured inputs under OMIT_UNAVAILABLE and total source/input-loader coverage.
+2. **Native widths to existing public guards — PARTIAL.** Numeric implications
+   cover checked coefficients/products/prefixes, conversions, mixture and optimizer
+   intermediates at the relevant native widths, with a separate symmetric result
+   bound. Original uint64 optimizer denominators/negative rounding and checked
+   negation are represented. The existing native final LCM bound justifies signed
+   domain-weight denominators and every LCM prefix. Remaining: compose these
+   results with the full original source domain, removing or justifying old
+   4096/name/encoded-size/signed-fraction adapter restrictions and binding the
+   already required normalized immutable configuration. Raw profile syntax validity
+   is not admission and does not establish normalization.
+3. **Unified source/configuration/state relation — OPEN, partial composition.**
+   Original arithmetic journal source, full computed family body and exact
+   vote/context/sequence now compose in a checked arithmetic subrelation. ROOT
+   parents agree through original primitive metadata; actor aliases are bijective
+   to the original decoded committee, and signer count/quorum cannot multiply by
+   coordinates. Remaining: one common authenticated configuration/alias namespace
+   and complete static state/certificate/vote collection coverage across the
+   existing object kinds. This arithmetic subrelation is not the complete R2.
+
+The residual stays finite: these are the same three source/input/domain/static
+state interfaces, not more vector-length cases or a new protocol feature. The
+full existing ABORT body is not added as a separate gate; only its frozen sufficient
+projection remains in R2. No requirement for production Init/Next, certificate or
+WAL identity change has been established. This is not BLOCKED_EXTERNAL.
+
+R2 remains OPEN and R3 was not started. No mandatory semantics, existing source
+fixtures, runtime/guard or FormalVerificationReport was edited; the unchanged
+historical NO_GO report is not an exact-source report for this new proposal.
+Fresh isolated proposal kernels, complete named-declaration axiom audit, original
+byte-source reproduction and protected-source equality are recorded in the linked
+evidence. No fresh TLC, full formal gate, native execution, independent attestation
+or GO is claimed. Remaining R2 planning estimate: 24–44 active hours, low confidence,
+excluding R3 and R4–R7; this is not a delivery promise. The bounded stage ends at
+its recorded checkpoint; no automatic R3 or broader continuation is authorized.
