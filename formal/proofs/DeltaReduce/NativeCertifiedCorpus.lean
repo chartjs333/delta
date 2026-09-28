@@ -1,5 +1,6 @@
 import DeltaReduce.NativeBindingConstruction
 import DeltaReduce.NativeAggregateSection
+import DeltaReduce.NativeFinalizedAssignment
 
 /-! Check the actual finalized PARAMETER corpus against source computations.
 Original QC identifiers and projected artifact identifiers remain distinct. -/
@@ -50,7 +51,7 @@ def LeafChecks (b : Bound) (p : BoundParameter binding) (e : NativeParameterLine
   NativeVectorAuthority.FrameChecks binding.authority b j.native.frame ∧
   e.certificate.common.domain = asciiBytes p.domain ∧
   e.certificate.common.shard = asciiBytes p.shard ∧
-  NativeVectorAuthority.AssignmentChecks b j.native.assignment e
+  NativeFinalizedAssignment.Checks b j.native.assignment e
 instance (b p e i j) : Decidable (LeafChecks binding b p e i j) := by
   unfold LeafChecks; infer_instance
 
@@ -76,6 +77,15 @@ theorem leafChecked {b p e out} (h : checkLeaf binding b p e = some out) :
   cases Option.some.inj last
   exact ⟨hi,hj,hl,by assumption⟩
 
+theorem leafFromComponents {b p e out}
+    (hi : ordinal b p.shard = some out.index)
+    (hj : NativeVectorJoin.join binding b (asciiBytes p.domain) out.index = some out.computation)
+    (hl : NativeVectorAuthority.sourceLeaves out.index out.computation.out.slices = some out.leaves)
+    (checks : LeafChecks binding b p e out.index out.computation)
+    (body : ExactBody e.certificate.common out.leaves out.computation.native.numerators = true) :
+    checkLeaf binding b p e = some out := by
+  simp only [checkLeaf,hi,bind,Option.bind,hj,hl,if_pos (And.intro checks body)]
+
 theorem leafNumbers {b p e out} (h : checkLeaf binding b p e = some out) :
     e.certificate.common.numerators.map NativeCertificateDecimal.number = out.computation.out.values ∧
     e.certificate.common.leaves.Perm out.leaves ∧
@@ -87,10 +97,13 @@ theorem leafNumbers {b p e out} (h : checkLeaf binding b p e = some out) :
 
 theorem leafBody {b p e out} (h : checkLeaf binding b p e = some out) :
     out.computation.native.body = p.body ∧
-    NativeVectorAuthority.AssignmentChecks b out.computation.native.assignment e := by
+    NativeFinalizedAssignment.Checks b out.computation.native.assignment e := by
   have checks := (leafChecked binding h).2.2.2.1
   unfold LeafChecks at checks
   exact ⟨checks.2.2.1,checks.2.2.2.2.2.2⟩
+
+theorem leafContextIsFinalized {b p e out} (h : checkLeaf binding b p e = some out) :
+    e.voteContext = [] := NativeFinalizedAssignment.noInventedVoteContext (leafBody binding h).2
 
 theorem wrongDomainRejected {b p e} (bad : e.certificate.common.domain ≠ asciiBytes p.domain) :
     checkLeaf binding b p e = none := by
@@ -107,8 +120,7 @@ theorem wrongParentRejected {b p e} (bad : e.certificate.common.plan ≠ (plan b
   | none => rfl
   | some out =>
     have checks := (leafBody binding h).2
-    unfold NativeVectorAuthority.AssignmentChecks at checks
-    exact False.elim (bad checks.2.2.2.1)
+    exact False.elim (bad (NativeFinalizedAssignment.commonFields checks).2.1)
 
 /-- Strict ordered zipper: no omitted, extra or reordered shard is repaired. -/
 def checkLeaves (b : Bound) : List (BoundParameter binding) → List NativeParameterLineage.Edge → Bool
@@ -218,6 +230,10 @@ theorem originalShard {sha b id out} (h : check binding sha b id = some out)
       out.loaded.parameters.prior.keys out.loaded.parameters.prior.plans.eligibility.certificates out.loaded.parameters.prior.plans.certificates
       e.source = some e :=
   NativeAggregateSection.checkedShard (checked binding h).loaded (originalRoot binding h) mem
+
+theorem originalShardHasNoVoteContext {sha b id out} (h : check binding sha b id = some out)
+    {e} (mem : e ∈ out.root.shards) : e.voteContext = [] :=
+  NativeFinalizedAssignment.originalContext (originalShard binding h mem)
 
 theorem entireCorpus {sha b id out} (h : check binding sha b id = some out) :
     out.corpus.entries.length = out.root.shards.length ∧

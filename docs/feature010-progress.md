@@ -5870,3 +5870,55 @@ review remain required. `nativeArithmeticRecoveryRefines` is still missing;
 runtime/native guard remain unchanged and status remains NO_GO.
 
 Validation: Full Lean1183jobs, four fresh kernels,117explicit declarations axiom-audited;758tooling/38oracle,33legal112illegal,Ruff/format/consistency and387generatedfiles byte-exact PASS.36general helpers,33kernel/component cases,37definitions/10structures/1inductive. Pinned original failure candidate/tail components and small public values use synthetic metadata; no new positive whole selected failure snapshot or joined native execution. ABORT with nonempty downstream lineage remains unsupported and rejects. Only final frozen-source evidence counts.21TLA/schema/runtime/147nativewitnesses unchanged;145legacyonlysemanticsID. No freshTLC/newmutants. Mandatory44/45/nativeArithmeticRecoveryRefines missing;Phase0 errors unchanged/unfrozen;make absent/noaggregateformal-check. All3demosHTTP200withoutrestart/frozenrefsunchanged. Source-bound semantics: sha256:1c8047dc68099e4e9a3f9206b30974601ad01eb23b15c8596502aea9f9072300.
+
+
+## 28 September 2026 — fix impossible finalized PARAMETER corpus predicate
+
+Tasks T044/T048/T053/T054/T056/T057; amendment 0001. NO_GO remains.
+
+The preceding original aggregate binding had an unsatisfiable condition for
+every nonempty finalized PARAMETER corpus. `NativeCertifiedCorpus.LeafChecks`
+called `NativeVectorAuthority.AssignmentChecks`, which requires a nonempty
+proposed-vote context. The actual finalized certificate decoder sets that field
+to the empty list: the certificate wire has no such field. Thus its conditional
+success theorems did not establish an executable positive finalized-corpus path.
+Earlier component/encoding examples did not exercise this join. The prior
+evidence is retained as historical evidence, not treated as a successful run.
+
+`NativeFinalizedAssignment.decodedContext` and `originalContext` derive the empty
+field from the actual decoder and executed finalized lineage check.
+`proposedPredicateImpossible` proves the conflict for every checked finalized
+edge and every vector bound/assignment, not just one fixture.
+
+The corrected corpus calls a distinct finalized-certificate predicate. It checks
+the original empty field, full native certificate context, all ISC/EC/PLAN IDs
+and denominator. The computed assignment context stays in the computed body; it
+is not copied into or claimed to occur in the original certificate. The existing
+frame, domain, shard ordinal, full computed body, ordered corpus, full Q leaves,
+native computation and exact decimal checks remain. This neither relaxes native
+admission nor proves these stronger projection checks equivalent to it. Original
+native certificate/proposed IDs and preimages remain distinct.
+
+`leafFromComponents` reconstructs the real corrected executable leaf checker
+from its exact ordinal, vector join, original Q extraction and field/body checks.
+The successful checker proves the empty source context; independently, actual
+finalized lineage derives the same property for every loaded ROOT leaf. No
+proposed-body lookup, fresh-vote admission or future APPLY is added to that path.
+
+Regression examples reuse the pinned original finalized parser/check and hash
+proofs, show the former predicate impossible for any assignment, and exercise
+the corrected field predicate positively on that exact certificate. Mutations
+of native context, each parent, denominator and fabricated vote context reject.
+These are component proofs, not a new positive whole vector/corpus/ROOT run.
+The independent Python check compares the original certificate/proposal payloads
+and schema inventories: only the proposal carries `vote_context_id`.
+
+No full raw positive original/draft corpus execution is claimed. ROOT public body,
+nonempty ABORT lineage, shared source/configuration/unit/alias authentication,
+complete public durable sets, all-actor sequences and phase/send/delivery/QC/
+current/crash/unknown/repair/persist-before-expose refinement remain open.
+Concrete bounded codec/hash/exporter resources, native decimal compatibility,
+arbitrary snapshots, contract freeze, offline reproduction and independent review
+remain required. No new native capture, runtime/guard change, local PASS or GO.
+
+Validation: Full Lean 1185 jobs, three fresh kernels, 58 explicit declarations audited across new modules and modified corpus (12 new general helpers, 16 regression cases, 3 new definitions). 760 tooling/38 oracle,33 legal/112 illegal,Ruff/format/consistency and387 generatedfiles byte-exact PASS. Universal old-predicate impossibility and pinned actual finalized field/parser/hash components verified; no complete positive original/draft corpus or native execution. 21 TLA/schema/runtime/147 nativewitnesses unchanged;145legacyonlysemanticsID. No freshTLC/newmutants. Mandatory44/45/nativeArithmeticRecoveryRefines missing;Phase0 errors unchanged/unfrozen;make absent/noaggregateformal-check. All3demosHTTP200withoutrestart/frozenrefsunchanged. Source-bound semantics: sha256:6e0d9d665a9cdb0b33c76cb2db5b2643ca52d24e17b57da59bbd4a84e7602519.

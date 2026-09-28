@@ -3,6 +3,13 @@
 T044/T048/T053/T054/T056/T057; amendment0001. **NO_GO remains.**
 Evidence: `formal/proposals/evidence/native-aggregate-binding.json`.
 
+Correction on 28 September: the original finalized corpus predicate required
+a nonempty proposed-vote context, but finalized certificates decode with an
+empty context. Its nonempty success domain was therefore impossible. The
+historical evidence remains conditional component evidence. The corrected
+predicate and general regression proof are documented in
+`native-finalized-assignment-proof.md`; no complete positive raw run is claimed.
+
 NativeCertifiedCorpus loads the actual original aggregate section, including
 bounded original PARAMETER certificates, selects an actually finalized ROOT by
 its original ID, and executes deriveParameterCorpus on the computed authority.

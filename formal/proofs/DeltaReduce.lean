@@ -1,3 +1,5 @@
+import DeltaReduce.NativeFinalizedAssignmentVectors
+import DeltaReduce.NativeFinalizedAssignment
 import DeltaReduce.NativeFailureSource
 import DeltaReduce.PublicFailureBody
 import DeltaReduce.PublicFailureHistory

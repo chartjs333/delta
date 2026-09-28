@@ -1371,7 +1371,7 @@ def main() -> int:
         "encoding cases are not native custody, signatures or a GO decision."
     )
     report["coverage"]["unresolved"].append(
-        "The complete original finalized PARAMETER corpus is now checked in order "
+        "The finalized PARAMETER corpus checker compares all entries in order "
         "against source-bound vector computations, exact Q leaves, context, "
         "parents and decimal spelling. Full aggregate bytes and an extended "
         "Binding are constructed with the same HashAdapter, conditional on NEW "
@@ -1512,6 +1512,21 @@ def main() -> int:
         "all-actor sequences, source/configuration/current/phase/QC/recovery "
         "and physical persistence, bounded resources, compatibility and "
         "freeze/offline/independent review remain OPEN. NO_GO and guard remain."
+    )
+    report["coverage"]["unresolved"].append(
+        "A finalized-corpus defect was found and corrected: the earlier leaf "
+        "predicate required a nonempty proposed-vote context, whereas every "
+        "actual finalized certificate decodes with an empty context. A general "
+        "kernel theorem proves that old predicate impossible for every checked "
+        "finalized edge. The corrected predicate retains original empty context "
+        "and checks native context, ISC/EC/PLAN and denominator separately. "
+        "Existing vector/frame/body/leaf/ordered-coverage checks remain. "
+        "Pinned certificate component positives and mutations pass; no complete "
+        "positive raw original/draft corpus execution is claimed. Earlier "
+        "aggregate evidence is historical conditional/component evidence. "
+        "ROOT/nonempty ABORT public construction, full public durable equality, "
+        "source/configuration authentication and nativeArithmeticRecoveryRefines "
+        "remain OPEN. No runtime/native guard change, local PASS or GO."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

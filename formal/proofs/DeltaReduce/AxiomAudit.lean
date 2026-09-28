@@ -1,3 +1,6 @@
+import DeltaReduce.NativeFinalizedAssignmentVectors
+import DeltaReduce.NativeCertifiedCorpus
+import DeltaReduce.NativeFinalizedAssignment
 import DeltaReduce.NativeFailureSource
 import DeltaReduce.PublicFailureBody
 import DeltaReduce.PublicFailureHistory
@@ -13913,3 +13916,65 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.PublicFailureBodyVectors.iscHasNoViewSource
 #print axioms DeltaReduce.PublicFailureBodyVectors.iscHasNoAbortSource
 #print axioms DeltaReduce.PublicFailureBodyVectors.differentPolicyDeadlineRejects
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.Fields
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.Checks
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.decodedContext
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.originalContext
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.proposedPredicateImpossible
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.fieldsFromComponents
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.noInventedVoteContext
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.commonFields
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.proposedContextIrrelevant
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.nonemptyRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignment.changedDenominatorRejected
+
+#print axioms DeltaReduce.NativeCertifiedCorpus.leafFromComponents
+
+#print axioms DeltaReduce.NativeCertifiedCorpus.leafContextIsFinalized
+
+#print axioms DeltaReduce.NativeCertifiedCorpus.originalShardHasNoVoteContext
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.fixtureFields
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.originalDecodedContext
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.formerCorpusPredicateFails
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.originalCertificateMatches
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.proposedBodyStillRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.fabricatedVoteContextRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.changedRoundRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.changedPlanRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.changedIscRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.changedEcRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.changedDenominatorRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.zeroDenominatorRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.negativeDenominatorRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.missingNativeContextRejected
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.originalPayloadUnchanged
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.certificateIdUnchanged
+
+#print axioms DeltaReduce.NativeFinalizedAssignmentVectors.proposalAndCertificateRemainDifferent
