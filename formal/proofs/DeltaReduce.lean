@@ -1,3 +1,7 @@
+import DeltaReduce.NativeHistoryRow
+import DeltaReduce.PublicRootEnvelope
+import DeltaReduce.PublicRootHistory
+import DeltaReduce.PublicRootHistoryVectors
 import DeltaReduce.NativeRootParents
 import DeltaReduce.PublicParentNames
 import DeltaReduce.PublicRootParents

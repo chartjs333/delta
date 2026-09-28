@@ -1544,9 +1544,26 @@ def main() -> int:
         "are derived; original PLAN/ISC/EC source equality follows from actual "
         "raw parsers and lineage. Independent primitive metadata/configuration/"
         "alias authentication remains OPEN, as does the live public configuration "
-        "and full public envelope/durable/QC/recovery relation, "
+        "and full public durable/QC/recovery relation, "
         "nonempty ABORT and nativeArithmeticRecoveryRefines. No local PASS, "
         "runtime guard change or GO is implied by this construction."
+    )
+    report["coverage"]["unresolved"].append(
+        "The complete conditional ROOT envelope now binds the actor from the "
+        "original validator/epoch metadata, AGGREGATE_ROOT kind, entire "
+        "structured APC context and computed whole body. Historical ROOT "
+        "projection loads original policy/state/command bytes and preceding "
+        "machine facts; selection equals the actual ordinary cached selection "
+        "by deterministic source loading. Executable mixed-WAL position lookup "
+        "computes the prefix machine and requires complete suffix validation "
+        "before recovery lookup succeeds. Global WAL sequence and all-vote "
+        "ordinal remain distinct. Existing original ISC/command components "
+        "exercise lookup; separate synthetic ROOT envelope components do not "
+        "instantiate a positive full raw ROOT/corpus execution. ROOT remains "
+        "unsupported by arithmetic-only PublicState.expectedContext and "
+        "NativeCacheProjection; no public phase/readiness/exposure or full "
+        "durable/recovery theorem is implied. Original artifact, metadata, "
+        "live configuration and observation authentication remain open."
     )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"

@@ -1,3 +1,7 @@
+import DeltaReduce.NativeHistoryRow
+import DeltaReduce.PublicRootEnvelope
+import DeltaReduce.PublicRootHistory
+import DeltaReduce.PublicRootHistoryVectors
 import DeltaReduce.NativeRootParents
 import DeltaReduce.PublicParentNames
 import DeltaReduce.PublicRootParents
@@ -14120,3 +14124,69 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeRootParents.sameEcIsc
 #print axioms DeltaReduce.NativeRootParents.sameEcSeed
 #print axioms DeltaReduce.PublicRootParents.originalParentChecksDerived
+
+#print axioms DeltaReduce.NativeHistoryRow.Located
+#print axioms DeltaReduce.NativeHistoryRow.locate
+#print axioms DeltaReduce.NativeHistoryRow.source
+#print axioms DeltaReduce.NativeHistoryRow.inCompleteCache
+#print axioms DeltaReduce.NativeHistoryRow.positionOriginal
+#print axioms DeltaReduce.NativeHistoryRow.pastEnd
+#print axioms DeltaReduce.NativeHistoryRow.Recovered
+#print axioms DeltaReduce.NativeHistoryRow.recoverAt
+#print axioms DeltaReduce.NativeHistoryRow.incompleteRejects
+#print axioms DeltaReduce.NativeHistoryRow.commandPositionRejects
+#print axioms DeltaReduce.NativeHistoryRow.sameCompleteRun
+#print axioms DeltaReduce.NativeHistoryRow.locatedMember
+#print axioms DeltaReduce.NativeHistoryRow.originalSequences
+#print axioms DeltaReduce.NativeHistoryRow.completeNativeCache
+#print axioms DeltaReduce.PublicRootEnvelope.envelope
+#print axioms DeltaReduce.PublicRootEnvelope.value
+#print axioms DeltaReduce.PublicRootEnvelope.Checked
+#print axioms DeltaReduce.PublicRootEnvelope.check
+#print axioms DeltaReduce.PublicRootEnvelope.entireVote
+#print axioms DeltaReduce.PublicRootEnvelope.fields
+#print axioms DeltaReduce.PublicRootEnvelope.fullApcContext
+#print axioms DeltaReduce.PublicRootEnvelope.contextFromBody
+#print axioms DeltaReduce.PublicRootEnvelope.arithmeticContextUnsupported
+#print axioms DeltaReduce.PublicRootEnvelope.actorSource
+#print axioms DeltaReduce.PublicRootEnvelope.nativeIdentity
+#print axioms DeltaReduce.PublicRootEnvelope.wholeCanonical
+#print axioms DeltaReduce.PublicRootEnvelope.wrongKindRejects
+#print axioms DeltaReduce.PublicRootHistory.Checked
+#print axioms DeltaReduce.PublicRootHistory.check
+#print axioms DeltaReduce.PublicRootHistory.originalBytes
+#print axioms DeltaReduce.PublicRootHistory.originalSource
+#print axioms DeltaReduce.PublicRootHistory.capturedSelection
+#print axioms DeltaReduce.PublicRootHistory.completeVote
+#print axioms DeltaReduce.PublicRootHistory.completeContext
+#print axioms DeltaReduce.PublicRootHistory.nativeIdentity
+#print axioms DeltaReduce.PublicRootHistory.fromHistory
+#print axioms DeltaReduce.PublicRootHistory.historicalPosition
+#print axioms DeltaReduce.PublicRootHistory.originalSequences
+#print axioms DeltaReduce.PublicRootHistory.retainedInWholeCache
+#print axioms DeltaReduce.PublicRootHistory.historySelection
+#print axioms DeltaReduce.PublicRootHistory.cachedOriginalParents
+#print axioms DeltaReduce.PublicRootHistory.wrongPriorRejects
+#print axioms DeltaReduce.PublicRootHistoryVectors.firstLocated
+#print axioms DeltaReduce.PublicRootHistoryVectors.absentPosition
+#print axioms DeltaReduce.PublicRootHistoryVectors.pastOriginalLog
+#print axioms DeltaReduce.PublicRootHistoryVectors.failedFullSuffixBlocks
+#print axioms DeltaReduce.PublicRootHistoryVectors.firstAtOriginalPosition
+#print axioms DeltaReduce.PublicRootHistoryVectors.commandAtSecondPositionRejects
+#print axioms DeltaReduce.PublicRootHistoryVectors.computedRowRetained
+#print axioms DeltaReduce.PublicRootHistoryVectors.actualPriorAndOrdinals
+#print axioms DeltaReduce.PublicRootHistoryVectors.arithmeticOnlyCacheStillBlocks
+#print axioms DeltaReduce.PublicRootHistoryVectors.globalAndVoteSequenceDifferent
+#print axioms DeltaReduce.PublicRootHistoryVectors.unknownObservationStillRejects
+#print axioms DeltaReduce.PublicRootHistoryVectors.rootBody
+#print axioms DeltaReduce.PublicRootHistoryVectors.rootVote
+#print axioms DeltaReduce.PublicRootHistoryVectors.exactActor
+#print axioms DeltaReduce.PublicRootHistoryVectors.exactRootKind
+#print axioms DeltaReduce.PublicRootHistoryVectors.entireApcContext
+#print axioms DeltaReduce.PublicRootHistoryVectors.contextField
+#print axioms DeltaReduce.PublicRootHistoryVectors.arithmeticContextNotExtended
+#print axioms DeltaReduce.PublicRootHistoryVectors.changedActor
+#print axioms DeltaReduce.PublicRootHistoryVectors.changedKind
+#print axioms DeltaReduce.PublicRootHistoryVectors.opaqueContextNotStructured
+#print axioms DeltaReduce.PublicRootHistoryVectors.missingLeaf
+#print axioms DeltaReduce.PublicRootHistoryVectors.fullEnvelopeCanonical

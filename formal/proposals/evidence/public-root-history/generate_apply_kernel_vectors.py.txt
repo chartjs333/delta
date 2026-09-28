@@ -1,0 +1,1 @@
+generated 32 APPLY cases from 2 native-fixture graphs
