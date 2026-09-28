@@ -1,3 +1,7 @@
+import DeltaReduce.NativeEarlySource
+import DeltaReduce.PublicEarlyBody
+import DeltaReduce.PublicEarlyHistory
+import DeltaReduce.PublicEarlyBodyVectors
 import DeltaReduce.NativeVoteCache
 import DeltaReduce.NativeCacheHistory
 import DeltaReduce.NativeCacheProjection

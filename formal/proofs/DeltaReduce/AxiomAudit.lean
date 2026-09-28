@@ -1,3 +1,7 @@
+import DeltaReduce.NativeEarlySource
+import DeltaReduce.PublicEarlyBody
+import DeltaReduce.PublicEarlyHistory
+import DeltaReduce.PublicEarlyBodyVectors
 import DeltaReduce.NativeVoteCache
 import DeltaReduce.NativeCacheHistory
 import DeltaReduce.NativeCacheProjection
@@ -13527,3 +13531,125 @@ import DeltaReduce.NativeSnapshotBaseVectors
 #print axioms DeltaReduce.NativeVoteCacheVectors.finalGlobalDifferentFromVoteOrdinal
 #print axioms DeltaReduce.NativeVoteCacheVectors.capturedSource
 #print axioms DeltaReduce.NativeVoteCacheVectors.originalAuthority
+
+#print axioms DeltaReduce.NativeEarlySource.Loaded
+#print axioms DeltaReduce.NativeEarlySource.load
+#print axioms DeltaReduce.NativeEarlySource.expected
+#print axioms DeltaReduce.NativeEarlySource.iscMatches
+#print axioms DeltaReduce.NativeEarlySource.BodyChecked
+#print axioms DeltaReduce.NativeEarlySource.Isc
+#print axioms DeltaReduce.NativeEarlySource.loadIsc
+#print axioms DeltaReduce.NativeEarlySource.Config
+#print axioms DeltaReduce.NativeEarlySource.loadedOriginal
+#print axioms DeltaReduce.NativeEarlySource.loadedBytes
+#print axioms DeltaReduce.NativeEarlySource.loadedAuthority
+#print axioms DeltaReduce.NativeEarlySource.loadedIdentity
+#print axioms DeltaReduce.NativeEarlySource.iscOriginal
+#print axioms DeltaReduce.NativeEarlySource.iscWholeBody
+#print axioms DeltaReduce.NativeEarlySource.iscExactContext
+#print axioms DeltaReduce.NativeEarlySource.iscNoTupleErasure
+#print axioms DeltaReduce.NativeEarlySource.iscParentContext
+#print axioms DeltaReduce.NativeEarlySource.configParentContext
+#print axioms DeltaReduce.NativeEarlySource.loadFromComponents
+#print axioms DeltaReduce.NativeEarlySource.iscFromComponents
+#print axioms DeltaReduce.NativeEarlySource.ambiguousIscRejects
+#print axioms DeltaReduce.NativeEarlySource.missingIscRejects
+#print axioms DeltaReduce.NativeEarlySource.unsupportedIscRejects
+
+#print axioms DeltaReduce.PublicEarlyBody.NameKey
+#print axioms DeltaReduce.PublicEarlyBody.Trust
+#print axioms DeltaReduce.PublicEarlyBody.Metadata
+#print axioms DeltaReduce.PublicEarlyBody.Name
+#print axioms DeltaReduce.PublicEarlyBody.loadName
+#print axioms DeltaReduce.PublicEarlyBody.Name.value
+#print axioms DeltaReduce.PublicEarlyBody.nameAuthentic
+#print axioms DeltaReduce.PublicEarlyBody.Header
+#print axioms DeltaReduce.PublicEarlyBody.loadHeader
+#print axioms DeltaReduce.PublicEarlyBody.Header.round
+#print axioms DeltaReduce.PublicEarlyBody.Header.configVote
+#print axioms DeltaReduce.PublicEarlyBody.Entry
+#print axioms DeltaReduce.PublicEarlyBody.Entry.value
+#print axioms DeltaReduce.PublicEarlyBody.loadEntry
+#print axioms DeltaReduce.PublicEarlyBody.loadEntries
+#print axioms DeltaReduce.PublicEarlyBody.entryOriginal
+#print axioms DeltaReduce.PublicEarlyBody.entriesOriginal
+#print axioms DeltaReduce.PublicEarlyBody.entriesCount
+#print axioms DeltaReduce.PublicEarlyBody.entriesAt
+#print axioms DeltaReduce.PublicEarlyBody.entryPrimitiveAuthority
+#print axioms DeltaReduce.PublicEarlyBody.IscImage
+#print axioms DeltaReduce.PublicEarlyBody.iscVote
+#print axioms DeltaReduce.PublicEarlyBody.loadIscImage
+#print axioms DeltaReduce.PublicEarlyBody.Image
+#print axioms DeltaReduce.PublicEarlyBody.Image.vote
+#print axioms DeltaReduce.PublicEarlyBody.project
+#print axioms DeltaReduce.PublicEarlyBody.Image.Separated
+#print axioms DeltaReduce.PublicEarlyBody.Checked
+#print axioms DeltaReduce.PublicEarlyBody.check
+#print axioms DeltaReduce.PublicEarlyBody.checkedWholeVote
+#print axioms DeltaReduce.PublicEarlyBody.iscAllFields
+#print axioms DeltaReduce.PublicEarlyBody.iscCompleteOriginalList
+#print axioms DeltaReduce.PublicEarlyBody.iscFullSetCoverage
+#print axioms DeltaReduce.PublicEarlyBody.iscPolicyIndependent
+#print axioms DeltaReduce.PublicEarlyBody.contentKeyRetainsAvailability
+#print axioms DeltaReduce.PublicEarlyBody.contentKeyRetainsRoot
+#print axioms DeltaReduce.PublicEarlyBody.unsupportedProject
+#print axioms DeltaReduce.PublicEarlyBody.projectConfigFromComponents
+#print axioms DeltaReduce.PublicEarlyBody.projectIscFromComponents
+#print axioms DeltaReduce.PublicEarlyBody.checkFromComponents
+#print axioms DeltaReduce.PublicEarlyBody.changedVoteRejects
+#print axioms DeltaReduce.PublicEarlyBody.collapsedEntriesReject
+
+#print axioms DeltaReduce.PublicEarlyHistory.Checked
+#print axioms DeltaReduce.PublicEarlyHistory.check
+#print axioms DeltaReduce.PublicEarlyHistory.exactNativeSource
+#print axioms DeltaReduce.PublicEarlyHistory.exactOriginalBytes
+#print axioms DeltaReduce.PublicEarlyHistory.originalCapturedSelection
+#print axioms DeltaReduce.PublicEarlyHistory.completePublicVote
+#print axioms DeltaReduce.PublicEarlyHistory.historicalConfigContext
+#print axioms DeltaReduce.PublicEarlyHistory.historicalIscContext
+#print axioms DeltaReduce.PublicEarlyHistory.capturedLoads
+#print axioms DeltaReduce.PublicEarlyHistory.recoveredOrdinarySource
+#print axioms DeltaReduce.PublicEarlyHistory.wrongPriorRejects
+
+#print axioms DeltaReduce.PublicEarlyBodyVectors.loaded
+#print axioms DeltaReduce.PublicEarlyBodyVectors.originalSource
+#print axioms DeltaReduce.PublicEarlyBodyVectors.singletonSource
+#print axioms DeltaReduce.PublicEarlyBodyVectors.isc
+#print axioms DeltaReduce.PublicEarlyBodyVectors.loadedIsc
+#print axioms DeltaReduce.PublicEarlyBodyVectors.originalContext
+#print axioms DeltaReduce.PublicEarlyBodyVectors.syntheticTrust
+#print axioms DeltaReduce.PublicEarlyBodyVectors.names
+#print axioms DeltaReduce.PublicEarlyBodyVectors.header
+#print axioms DeltaReduce.PublicEarlyBodyVectors.entry
+#print axioms DeltaReduce.PublicEarlyBodyVectors.image
+#print axioms DeltaReduce.PublicEarlyBodyVectors.headerLoaded
+#print axioms DeltaReduce.PublicEarlyBodyVectors.imageLoaded
+#print axioms DeltaReduce.PublicEarlyBodyVectors.fullOriginalTuples
+#print axioms DeltaReduce.PublicEarlyBodyVectors.iscIsNotConfig
+#print axioms DeltaReduce.PublicEarlyBodyVectors.imageProjected
+#print axioms DeltaReduce.PublicEarlyBodyVectors.round
+#print axioms DeltaReduce.PublicEarlyBodyVectors.publicEntry
+#print axioms DeltaReduce.PublicEarlyBodyVectors.vote
+#print axioms DeltaReduce.PublicEarlyBodyVectors.models
+#print axioms DeltaReduce.PublicEarlyBodyVectors.completeImage
+#print axioms DeltaReduce.PublicEarlyBodyVectors.canonicalVote
+#print axioms DeltaReduce.PublicEarlyBodyVectors.separatedImage
+#print axioms DeltaReduce.PublicEarlyBodyVectors.completeChecked
+#print axioms DeltaReduce.PublicEarlyBodyVectors.changedActorRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.changedContextRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.changedKindRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.changedBodyRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.omittedEntryRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.changedPolicyRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.completeConfigShape
+#print axioms DeltaReduce.PublicEarlyBodyVectors.canonicalConfigShape
+#print axioms DeltaReduce.PublicEarlyBodyVectors.noNames
+#print axioms DeltaReduce.PublicEarlyBodyVectors.noPolicy
+#print axioms DeltaReduce.PublicEarlyBodyVectors.missingHeaderRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.missingPolicyRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.missingEntryRejects
+#print axioms DeltaReduce.PublicEarlyBodyVectors.twoOriginalEntriesRetained
+#print axioms DeltaReduce.PublicEarlyBodyVectors.collapsedPublicEntries
+#print axioms DeltaReduce.PublicEarlyBodyVectors.duplicatedSetNoncanonical
+#print axioms DeltaReduce.PublicEarlyBodyVectors.originalAvailabilityKey
+#print axioms DeltaReduce.PublicEarlyBodyVectors.originalRootKey

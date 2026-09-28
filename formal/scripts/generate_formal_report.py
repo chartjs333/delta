@@ -1459,6 +1459,24 @@ def main() -> int:
         "independent review remain OPEN. No new successful nonempty joined "
         "arithmetic projection or physical capture is claimed. NO_GO remains."
     )
+    report["coverage"]["unresolved"].append(
+        "Original CONFIG/ISC public vote construction now uses the selected "
+        "whole native snapshot at the actual historical prior state, without "
+        "requiring a future arithmetic Binding. ISC uniquely selects and "
+        "rechecks the complete original body/context/hash, retaining every "
+        "ordered tuple. Complete public envelopes and five-field ISC bodies "
+        "are constructed and compared with canonicality and collision checks. "
+        "Primitive names and close policy require independently authenticated "
+        "metadata; fixtures use synthetic trust. Public canonicalRoot is the "
+        "entry set, not the native crypto root. These are projection checks, "
+        "not new native admission restrictions. Historical cache composition "
+        "retains actual source and position but does not yet project the full "
+        "cache into all public durable sets. Ordinary diagnostic projection "
+        "still rejects; recovered/ready flags remain unchanged. EC/APC/ROOT/"
+        "VIEW/ABORT, shared aliases/configuration, full public durability and "
+        "phase/QC/current/recovery, physical authority, bounded resources and "
+        "freeze/offline/independent review remain OPEN. No GO or new native run."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
