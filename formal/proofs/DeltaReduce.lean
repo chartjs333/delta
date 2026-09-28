@@ -1,3 +1,6 @@
+import DeltaReduce.NativeArithmeticVote
+import DeltaReduce.NativeArithmeticPrefix
+import DeltaReduce.NativeArithmeticVoteVectors
 import DeltaReduce.NativeCertifiedCurrent
 import DeltaReduce.NativeCertifiedCurrentVectors
 import DeltaReduce.NativeCertifiedCorpus

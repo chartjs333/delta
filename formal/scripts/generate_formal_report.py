@@ -1399,6 +1399,21 @@ def main() -> int:
         "concrete codec/hash/exporter resources, native compatibility, freeze and "
         "independent review remain OPEN. No runtime guard change or formal GO."
     )
+    report["coverage"]["unresolved"].append(
+        "A separate candidate arithmetic vote relation now executes original "
+        "whole-policy selection, identity, parents, phase/deadline and actual "
+        "source PARAMETER/APPLY computations. One next original VOTE/WAL record "
+        "is checked after a completely scanned and executed guarded mixed prefix, "
+        "with exact global sequence and original signature/view/semantic fields. "
+        "Unknown/torn/corrupt prefixes and duplicate vote keys reject. The "
+        "original native arithmetic guard remains unchanged and still rejects. "
+        "This restricted prefix cannot contain earlier arithmetic votes; no "
+        "physical append/exposure or authenticated complete execution follows. "
+        "The distinct draft VoteMetadata/NativePrepared lossless bridge, full "
+        "arithmetic mixed recovery, public durable correspondence, authority, "
+        "phase/send/QC/current/crash/repair, concrete resources, compatibility, "
+        "freeze/offline/independent review remain OPEN. NO_GO remains."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
