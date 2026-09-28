@@ -238,6 +238,10 @@ import DeltaReduce.NativeCertificateDecimalVectors
 import DeltaReduce.NativeProposedIsc
 import DeltaReduce.NativeSnapshotBase
 import DeltaReduce.NativeSnapshotBaseVectors
+import DeltaReduce.NativeFinalizedLookup
+import DeltaReduce.NativeAbortLineage
+import DeltaReduce.PublicAbortAncestors
+import DeltaReduce.PublicAbortLineageVectors
 /-!
 # DeltaReduce v1 parametric proof bundle
 

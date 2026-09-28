@@ -1565,6 +1565,21 @@ def main() -> int:
         "durable/recovery theorem is implied. Original artifact, metadata, "
         "live configuration and observation authentication remain open."
     )
+    report["coverage"]["unresolved"].append(
+        "ABORT now resolves all seven original finalized lists to exact native "
+        "IDs and complete typed snapshot objects, preserving order, count and "
+        "positions; missing or ambiguous payloads reject. CONFIG remains an ID "
+        "list, while accepted ABORT implies empty APPLY. Source-bound certificate "
+        "checks are retained. Public CONFIG/ISC/EC/APC ancestors are computed "
+        "with explicit primitive metadata, separation and canonicality. Complete "
+        "native PARAMETER/ROOT objects remain retained; their public numerical "
+        "projection and the whole nonempty ABORT body/history are still open. "
+        "No supplied whole translation or empty substitute is accepted. These "
+        "are partial conditional constructions, not full public durable or "
+        "recovery refinement; no joined nonempty native ABORT capture is claimed. "
+        "Metadata, live configuration, alias and observation authentication, "
+        "all-kind/all-actor durable matching and phase/QC/current/unknown remain open."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
