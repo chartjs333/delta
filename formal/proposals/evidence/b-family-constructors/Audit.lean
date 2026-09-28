@@ -120,6 +120,9 @@ import Checks
 #print axioms DeltaReduce.FamilyInputs.entryAssignments
 #print axioms DeltaReduce.FamilyInputs.Corpus
 #print axioms DeltaReduce.FamilyInputs.loadCorpus
+#print axioms DeltaReduce.FamilyInputs.blockLoaderComplete
+#print axioms DeltaReduce.FamilyInputs.entriesLoaderComplete
+#print axioms DeltaReduce.FamilyInputs.corpusLoaderComplete
 #print axioms DeltaReduce.FamilyInputs.cellsAt
 #print axioms DeltaReduce.FamilyInputs.cellSource
 #print axioms DeltaReduce.FamilyInputs.cellsComplete
@@ -138,6 +141,8 @@ import Checks
 #print axioms DeltaReduce.FamilyInputs.selectedCurrentCellSource
 #print axioms DeltaReduce.FamilyInputs.Projected
 #print axioms DeltaReduce.FamilyInputs.project
+#print axioms DeltaReduce.FamilyInputs.weightPlanLoaderComplete
+#print axioms DeltaReduce.FamilyInputs.projectFromComputed
 #print axioms DeltaReduce.FamilyInputs.image
 #print axioms DeltaReduce.FamilyInputs.encode
 #print axioms DeltaReduce.FamilyInputs.completePublicFields
@@ -405,6 +410,7 @@ import Checks
 #print axioms DeltaReduce.FamilyRelation.widthMatches
 #print axioms DeltaReduce.FamilyRelation.Inputs
 #print axioms DeltaReduce.FamilyRelation.loadInputs
+#print axioms DeltaReduce.FamilyRelation.inputsLoaderComplete
 #print axioms DeltaReduce.FamilyRelation.loadedInputsHaveNumericGuards
 #print axioms DeltaReduce.FamilyRelation.ParameterBody
 #print axioms DeltaReduce.FamilyRelation.loadParameterBody

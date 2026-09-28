@@ -1,5 +1,6 @@
 import StateFamily
 import DeltaReduce.PublicArithmeticInputs
+import DeltaReduce.NativeVectorDerivation
 
 /-! R2: select coordinates from the full original input corpus, before any
 PARAMETER result or aggregate is available. Selection never creates a protocol
@@ -85,6 +86,53 @@ def loadCorpus {codec store trust anchor} (binding : Binding codec trust anchor 
     let entries ← loadEntries codec store binding.authority source.val source.val.plan.assignments
     some ⟨source.val,source.property,valid,entries.val,entries.property⟩
   else none
+
+/- Completeness of the executable source loader on the already bound corpus.
+This is not an existence claim for missing source artifacts or omitted tickets. -/
+theorem blockLoaderComplete {codec store authority frame assignment}
+    (block : Block codec store authority frame assignment)
+    (unique : (shardIds frame).Nodup) :
+    loadBlock codec store authority frame assignment = some block := by
+  have found : (List.finRange frame.shards.length).find?
+      (fun i => frame.shards[i.val].id == assignment.shard) = some block.slot := by
+    cases h : (List.finRange frame.shards.length).find?
+        (fun i => frame.shards[i.val].id == assignment.shard) with
+    | none =>
+      have rejected := (List.find?_eq_none.mp h) block.slot (List.mem_finRange block.slot)
+      simp [block.key] at rejected
+    | some slot =>
+      have same : frame.shards[slot.val].id = frame.shards[block.slot.val].id := by
+        have accepted := List.find?_some h
+        simpa only [beq_iff_eq,block.key] using accepted
+      have indices : slot.val = block.slot.val :=
+        (List.getElem_inj (h₀ := by simpa only [shardIds,List.length_map] using slot.isLt)
+          (h₁ := by simpa only [shardIds,List.length_map] using block.slot.isLt) unique).mp
+          (by simpa only [shardIds,List.getElem_map] using same)
+      have equal : slot = block.slot := Fin.ext indices
+      subst slot
+      rfl
+  cases block with
+  | mk slot key ordered rows bound numbers =>
+    simp only [loadBlock,found,bind,Option.bind,dif_pos key,dif_pos ordered,
+      NativeVectorDerivation.rowsComplete bound,dif_pos numbers]
+
+theorem entriesLoaderComplete {codec store authority frame assignments entries}
+    (bound : Entries codec store authority frame assignments entries)
+    (unique : (shardIds frame).Nodup) :
+    loadEntries codec store authority frame assignments = some ⟨entries,bound⟩ := by
+  induction bound with
+  | nil => rfl
+  | cons entry tail ih =>
+    simp only [loadEntries,blockLoaderComplete entry.block unique,ih,bind,Option.bind]
+
+theorem corpusLoaderComplete {codec store trust anchor} {binding : Binding codec trust anchor store}
+    (corpus : Corpus binding) : loadCorpus binding = some corpus := by
+  have unique : (shardIds corpus.frame).Nodup :=
+    corpus.valid.2.2.2.1.imp (fun {a b} less eq => by subst b; exact (String.lt_irrefl a) less)
+  cases corpus with
+  | mk frame origin valid entries bound =>
+    simp only [loadCorpus,NativeVectorDerivation.frameComplete origin,bind,Option.bind,
+      dif_pos valid,entriesLoaderComplete bound unique]
 
 /- No default, padding or truncating zip: both full ordered lists must end
 together, and every selected cell must exist in its original row. -/
@@ -307,6 +355,39 @@ def project {codec store trust anchor} {binding : Binding codec trust anchor sto
       else none
     else none
   | _,_,_,_,_ => none
+
+theorem weightPlanLoaderComplete {lo hi weights} (plan : ApplyKernel.WeightPlan lo hi weights) :
+    ApplyKernel.deriveWeightPlan lo hi weights = some plan := by
+  unfold ApplyKernel.deriveWeightPlan
+  split
+  · rename_i absent
+    rw [plan.computed] at absent
+    contradiction
+  · rename_i denominator found
+    cases plan with
+    | mk d computed nonempty normalized =>
+      cases Option.some.inj (found.symm.trans computed)
+      rw [dif_pos ⟨nonempty,normalized⟩]
+
+theorem projectFromComputed {codec store trust anchor binding corpus choice limit}
+    (p : Projected (codec := codec) (store := store) (trust := trust) (anchor := anchor)
+      (binding := binding) corpus choice limit) : project corpus choice limit = some p := by
+  cases p with
+  | mk inputs source tickets ticketsLoaded domains domainsLoaded weights model modelLoaded optimizer optimizerLoaded positive ranges =>
+    unfold project
+    simp only [source,bind,Option.bind]
+    split
+    · rename_i actual ts ds ms os hs ht hd hm ho
+      cases Option.some.inj (hs.symm.trans source)
+      cases Option.some.inj (ht.symm.trans ticketsLoaded)
+      cases Option.some.inj (hd.symm.trans domainsLoaded)
+      cases Option.some.inj (hm.symm.trans modelLoaded)
+      cases Option.some.inj (ho.symm.trans optimizerLoaded)
+      simp only [dif_pos True.intro,weightPlanLoaderComplete weights,
+        dif_pos (And.intro positive ranges)]
+    · simp_all
+      rename_i impossible
+      exact impossible inputs tickets domains model optimizer rfl ticketsLoaded domainsLoaded rfl rfl
 
 def image {codec store trust anchor binding corpus choice limit}
     (p : Projected (codec := codec) (store := store) (trust := trust) (anchor := anchor)

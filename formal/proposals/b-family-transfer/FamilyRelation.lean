@@ -100,6 +100,20 @@ def loadInputs : Option (Inputs (binding := binding) vocabulary source configura
       some ⟨corpus,choice,chosen,input,authority,widths⟩
   else none
 
+theorem inputsLoaderComplete
+    (inputs : Inputs (binding := binding) vocabulary source configuration indices) :
+    loadInputs vocabulary source configuration indices = some inputs := by
+  cases inputs with
+  | mk corpus choice chosen input authority widths =>
+    simp only [loadInputs,dif_pos widths,FamilyInputs.corpusLoaderComplete corpus,bind,Option.bind]
+    split
+    · rename_i absent
+      rw [chosen] at absent
+      contradiction
+    · rename_i selected found
+      cases Option.some.inj (found.symm.trans chosen)
+      simp only [FamilyInputs.projectFromComputed input,FamilyAuthority.projectFromComputed authority]
+
 theorem loadedInputsHaveNumericGuards
     (inputs : Inputs (binding := binding) vocabulary source configuration indices) :
     FamilyInputs.InputNumericGuards (FamilyInputs.image inputs.input) :=

@@ -118,6 +118,9 @@
 'DeltaReduce.FamilyInputs.entryAssignments' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.FamilyInputs.Corpus' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyInputs.loadCorpus' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyInputs.blockLoaderComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyInputs.entriesLoaderComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyInputs.corpusLoaderComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyInputs.cellsAt' depends on axioms: [propext]
 'DeltaReduce.FamilyInputs.cellSource' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.FamilyInputs.cellsComplete' depends on axioms: [propext, Quot.sound]
@@ -136,6 +139,8 @@
 'DeltaReduce.FamilyInputs.selectedCurrentCellSource' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.FamilyInputs.Projected' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyInputs.project' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyInputs.weightPlanLoaderComplete' does not depend on any axioms
+'DeltaReduce.FamilyInputs.projectFromComputed' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyInputs.image' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyInputs.encode' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyInputs.completePublicFields' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -417,6 +422,7 @@
 'DeltaReduce.FamilyRelation.widthMatches' does not depend on any axioms
 'DeltaReduce.FamilyRelation.Inputs' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyRelation.loadInputs' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.inputsLoaderComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyRelation.loadedInputsHaveNumericGuards' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyRelation.ParameterBody' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyRelation.loadParameterBody' depends on axioms: [propext, Classical.choice, Quot.sound]

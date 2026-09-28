@@ -27,6 +27,16 @@ using the same original global offset and ordered converted rows.
 No top-level R2 obligation is declared closed by counting helpers or fixtures.
 The three obligations and their existing safety meaning have not changed.
 
+The source-loader path is now constructive on its explicitly checked domain:
+`FamilyInputs.corpusLoaderComplete` derives the exact original block/row/frame
+loads, including unique shard lookup. `projectFromComputed` derives the exact
+family input load, and `FamilyRelation.inputsLoaderComplete` composes it with
+the same authority and configured width checks. These are equalities to the
+executable loaders, not extra successful-loader assumptions. They do not supply
+missing source artifacts or establish that every originally admitted source
+has such a complete input image. In particular, OMIT_UNAVAILABLE coverage and
+general input-encoding canonicality from primitive configuration remain open.
+
 `FamilyAuthority.checkedAuthorityFromConstructed` also removes the premise that
 the complete authority value is already canonical. It reconstructs the original
 atom/header/commitment loaders, then assembles ISC/seed/EC/APC and the complete

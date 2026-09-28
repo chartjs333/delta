@@ -6437,6 +6437,10 @@ source-bound evidence is `formal/proposals/evidence/b-family-constructors.json`.
    current-to-next scalar mixture/optimizer cells use the original global offsets.
    ROOT does not require subsequent APPLY/conversion success. Remaining: all
    configured inputs under OMIT_UNAVAILABLE and total source/input-loader coverage.
+   The final source-loader composition additionally proves exact block/corpus,
+   family input and authority loading on that checked domain. Thus executable
+   acceptance of an existing checked input is derived; existence and canonicality
+   over every original source, including omitted inputs, remain open.
 2. **Native widths to existing public guards — PARTIAL.** Numeric implications
    cover checked coefficients/products/prefixes, conversions, mixture and optimizer
    intermediates at the relevant native widths, with a separate symmetric result
