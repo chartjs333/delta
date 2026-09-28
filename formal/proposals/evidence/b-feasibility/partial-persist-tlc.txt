@@ -1,0 +1,35 @@
+Full raw counterexample retained in ignored build directory; excerpt below.
+raw_sha256=87e60c3cd65e3aa34f151829f66aee4189b9020f6406621c0bab137c3e4aa9d3
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Error: Invariant CommonControl is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ stage = 0
+State 2: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 1
+State 3: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 2
+State 4: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 3
+State 5: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 4
+State 6: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 5
+State 7: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 6
+State 8: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 7
+State 9: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 8
+State 10: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 9
+State 11: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 10
+State 12: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 11
+State 13: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 12
+State 14: <NextSpike line 507, col 14 to line 512, col 67 of module BFamilySpike>
+/\ stage = 13
+14 states generated, 14 distinct states found, 0 states left on queue.
+Finished in 03s at (2026-09-28 16:29:17)

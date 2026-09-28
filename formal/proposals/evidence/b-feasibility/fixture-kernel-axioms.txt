@@ -1,0 +1,43 @@
+'DeltaReduce.BFeasibility.Whole' does not depend on any axioms
+'DeltaReduce.BFeasibility.Family' does not depend on any axioms
+'DeltaReduce.BFeasibility.project' does not depend on any axioms
+'DeltaReduce.BFeasibility.reconstruct' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.reconstruct_project' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibility.project_reconstruct' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibility.joint_injective' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibility.coordinates' does not depend on any axioms
+'DeltaReduce.BFeasibility.acceptsCoordinates' does not depend on any axioms
+'DeltaReduce.BFeasibility.accepted_coordinates_exact' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.complete_coordinate_domain' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibility.ordered_values_exact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibility.scalarView' does not depend on any axioms
+'DeltaReduce.BFeasibility.one_identity' does not depend on any axioms
+'DeltaReduce.BFeasibility.one_control' does not depend on any axioms
+'DeltaReduce.BFeasibility.wholeStep' does not depend on any axioms
+'DeltaReduce.BFeasibility.familyStep' does not depend on any axioms
+'DeltaReduce.BFeasibility.step_commutes' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.rejection_is_atomic' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.whole_result_of_family_step' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibility.one_original_record' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.original_record_checks_retained' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.familyReplay' does not depend on any axioms
+'DeltaReduce.BFeasibility.history_keeps_exact_original_records' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.Synchronized' does not depend on any axioms
+'DeltaReduce.BFeasibility.synchronized_reconstruct' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibility.checked_parameter_family' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.BFeasibility.exampleControl' does not depend on any axioms
+'DeltaReduce.BFeasibility.exampleFamily' does not depend on any axioms
+'DeltaReduce.BFeasibility.exampleRoundTrip' depends on axioms: [propext]
+'DeltaReduce.BFeasibility.exampleComplete' does not depend on any axioms
+'DeltaReduce.BFeasibility.exampleMissing' does not depend on any axioms
+'DeltaReduce.BFeasibility.exampleReordered' does not depend on any axioms
+'DeltaReduce.BFeasibility.exampleDuplicate' does not depend on any axioms
+'DeltaReduce.BFeasibility.exampleChanged' does not depend on any axioms
+'DeltaReduce.BFeasibilityFixture.rows' does not depend on any axioms
+'DeltaReduce.BFeasibilityFixture.checkedOriginal' depends on axioms: [propext]
+'DeltaReduce.BFeasibilityFixture.actualFamily' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.BFeasibilityFixture.Cell' does not depend on any axioms
+'DeltaReduce.BFeasibilityFixture.fullState' does not depend on any axioms
+'DeltaReduce.BFeasibilityFixture.wholeStateRoundTrip' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.BFeasibilityFixture.originalModel' depends on axioms: [propext]
+'DeltaReduce.BFeasibilityFixture.originalOptimizer' depends on axioms: [propext]

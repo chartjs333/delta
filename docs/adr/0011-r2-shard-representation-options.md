@@ -1,8 +1,18 @@
 # ADR-0011 — Представление vector shard в R2
 
-**Статус:** ACCEPTED AS ARCHITECTURAL FORK / IMPLEMENTATION NOT AUTHORIZED, не formal authority.
+**Статус:** ACCEPTED AS ARCHITECTURAL FORK / B CONDITIONAL SPIKE COMPLETE;
+полная реализация не разрешена, не formal authority.
 **Дата:** 28 сентября 2026. **Основание:** `c666f62b4989fb1fd0306a2af7e02ccc6e649427`.
-**Scope:** выбор представления внутри замороженного R2. Код, schemas, proofs и DoD R1–R7 не меняются.
+**Scope:** выбор представления внутри замороженного R2. Production-код,
+mandatory schemas/proofs и DoD R1–R7 не меняются.
+
+**Последующее ограниченное разрешение:** пользователь условно выбрал B только для
+feasibility spike с бюджетом восемь активных часов. Изолированный
+[spike](../../formal/proposals/b-feasibility/README.md) дал **FEASIBLE** для
+центральной композиции на одном исходном диагностическом vector shard.
+Mandatory artifacts и protocol semantics не изменены. Это не окончательное
+принятие B, не закрытие R2/R3 и не разрешение продолжить их реализацию.
+После checkpoint действует STOP. Исходное сравнение A/B ниже сохранено.
 
 ## Граница решения
 
@@ -80,9 +90,10 @@ native protocol. Принятие архитектурной развилки н
 изменений контрактов, не установленный минимум трудозатрат: синхронизация в B
 нетривиальна. A прямее представляет whole body, но затрагивает больше schemas.
 
-**Развилка принята пользователем; реализация A/B не разрешена.**
+**Развилка принята пользователем; полная реализация A/B не разрешена.**
 Для B отдельно подготовлен [impact estimate](0011-r2-b-impact-estimate.md).
-Запрос этой оценки не является выбором B для реализации. Новые proof layers остановлены.
+Запрос этой оценки не являлся выбором B для реализации. После отдельно разрешённого
+ограниченного spike новые proof layers снова остановлены.
 
 Основания: [замороженный контракт](../../specs/000-formal-tla-spec/candidate-contract.md),
 [refinement contract](../../specs/000-formal-tla-spec/refinement-contract.md),

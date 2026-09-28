@@ -6350,3 +6350,39 @@ Residual delta: none closed; R1 remains CLOSED and R2/R3 OPEN. Frozen DoD R1–R
 unchanged. This step edits documentation only; no implementation, mandatory
 semantic/proof/schema/fixture artifact, report or runtime is changed and no new
 proof layer or gate is run. STOP remains pending direct implementation permission.
+
+## 28 September 2026 — conditional B feasibility spike / STOP checkpoint
+
+Tasks T044/T047/T053–T057. The user authorized only the central B feasibility
+experiment, at most eight active hours, with no production Init/Next, certificate
+semantics or WAL identity changes and no automatic R2/R3 continuation.
+Result **FEASIBLE within the bounded PoC scope**; see
+`formal/proposals/b-feasibility/README.md` and
+`formal/proposals/evidence/b-feasibility/checks.json`.
+
+Residual reduction is a specific architectural subquestion, not a top-level R
+closure: a complete synchronous coordinate family over one original vector object
+can reconstruct its original ordered Q/result/model/optimizer data, retain its
+original command bytes, shard/vote/QC identity and sequence, and share one journal
+operation. The general Lean relation has no width-one constraint. The existing
+checked vector PARAMETER computation derives each scalar coordinate at the same
+bounds. Actual unchanged production actions compose in one synchronized finite
+suffix; partial persist violates the common relation, and two original signers
+cannot finalize a QC through coordinate multiplication.
+
+The concrete source is the existing diagnostic `native-coordinate-matrix` d00/s01
+shard `[3,-4,5]`, sequence 6; original 4/8/8/8/8 component proofs are reused without
+pretending that their missing joined native vote/QC/WAL capture exists. The source
+QC identity is a synthetic trace label and its receipt is a diagnostic journal
+projection. Their preservation is not signature/exporter/fsync authentication.
+The TLA suffix starts from the existing certified Phase6 premise, not from empty
+production Init or a proven original full public/native state relation.
+
+R1 remains CLOSED. R2 still owes the general source/body/admission/state relation,
+all target widths and bound compatibility; R3 still owes complete recovery
+refinement. R4–R7 are untouched, DoD unchanged, no new ABORT gate or residual.
+The isolated proposal is outside the mandatory semantic inventory. No existing
+production/TLA/schema/fixture/runtime/guard or GO report is changed. Healthy demos
+8870/8865/8872 were checked read-only. Full R2 implementation is **not authorized**:
+STOP after this checkpoint, keep the automation present and quiet, await a new
+direct user decision.
