@@ -1,0 +1,15 @@
+'DeltaReduce.R2DomainAudit.parameterBodyRequiresScalar' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.R2DomainAudit.vectorParameterHasNoCompletePublicBody' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.R2DomainAudit.vectorParameterCompleteLoaderRejects' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.R2DomainAudit.applyBodyRequiresScalarPartition' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.R2DomainAudit.vectorApplyHasNoCompletePublicBody' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.R2DomainAudit.signedMinimumFailsEveryCurrentResultGuard' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.R2DomainAudit.originalPartitionIsOutsideCompleteBodyBridge' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

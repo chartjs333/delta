@@ -1,0 +1,28 @@
+[
+  {
+    "name": "target-dependencies",
+    "command": [
+      "D:/formal-tools-20260920/lean/bin/lake.exe",
+      "build",
+      "DeltaReduce.PublicApplyJoin",
+      "DeltaReduce.NativeVectorArithmeticVectors"
+    ],
+    "cwd": "formal/proofs",
+    "exit_code": 0,
+    "log": "formal/proposals/evidence/r2-domain-audit/target-dependencies.txt",
+    "sha256": "8e11e300a89ccde0860cbd6cc1de366817df007c7df60026f8288ee6451c3c34"
+  },
+  {
+    "name": "kernel",
+    "command": [
+      "D:/formal-tools-20260920/lean/bin/lake.exe",
+      "env",
+      "lean",
+      "../proposals/r2-domain-audit.lean"
+    ],
+    "cwd": "formal/proofs",
+    "exit_code": 0,
+    "log": "formal/proposals/evidence/r2-domain-audit/kernel.txt",
+    "sha256": "b74af7dd0b98d48af08ff25ad553134c4cd772cba7fbcb1e500b1d5e3a00603c"
+  }
+]

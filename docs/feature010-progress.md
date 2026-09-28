@@ -6220,3 +6220,38 @@ QC/current and crash/recovery/replay relation with complete prior state.
 The target statements are finite and fixed by PO-AB1, PO-R1/R2 and the accepted
 refinement contract; helper-module count is not a completion criterion.
 No proof or runtime implementation was changed in this R1 checkpoint.
+
+
+## 28 September 2026 — R2 early checkpoint: vector bridge architecture
+
+Tasks T044/T053–T057; only R2/R3 authorized. The user accepted R1 CLOSED.
+The frozen R1–R7 DoD is unchanged. R4–R7 remain deferred.
+
+A kernel-checked diagnostic establishes that every current complete public
+PARAMETER body entails native shard length=1, and every complete public APPLY
+body entails length=1 for all source shards. These are universal implications
+over metadata, aliases, candidate values and model limits. Consequently the
+existing complete-body constructors cannot be composed unchanged into the R2
+relation for vector shards. The already checked original manifest has lengths
+4,8,8,8,8. This is an architectural blocker in the current scalar bridge, not
+an external resource blocker or a new requirement. It does not prove that a
+vector-aware refinement is impossible.
+
+Residual delta: no additional R item closed. R1 CLOSED; R2 OPEN; R3 OPEN.
+The assumption that unchanged scalar APIs suffice for the general relation is
+now ruled out. Next within R2: retain each original shard and all its ordered
+coordinates in a faithful arithmetic/state image with the existing width bounds;
+keep one original vote/context/certificate and atomic admission. Coordinate
+checks alone cannot replace that identity/coverage/state-root relation. Then
+finish the same fixed source/configuration/parent/body/state correspondence and
+R3 preservation over the existing transition vocabulary. No standalone universal
+ABORT-body deliverable was reinstated.
+
+Diagnostic and exact limitations: formal/proposals/r2-domain-audit.md and
+r2-domain-audit.lean. Targeted dependency build and fresh Lean diagnostic pass;
+only propext/Classical.choice/Quot.sound occur in the audit. The original manifest
+is reused evidence, not a new joined admission, runtime execution or exporter.
+The diagnostic is outside the mandatory registry and semantic artifact inventory;
+its source/dependency hashes are separately recorded in evidence/r2-domain-audit.json.
+No production semantic/proof/runtime source, frozen contract, gate or GO report
+was changed. The previous formal report remains historical NO_GO for its own tree.
