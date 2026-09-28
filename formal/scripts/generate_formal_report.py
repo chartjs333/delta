@@ -1477,6 +1477,24 @@ def main() -> int:
         "phase/QC/current/recovery, physical authority, bounded resources and "
         "freeze/offline/independent review remain OPEN. No GO or new native run."
     )
+    report["coverage"]["unresolved"].append(
+        "Complete original EC/APC public vote bodies now derive from the unique "
+        "selected native snapshot lineage, retaining full ISC tuples, seed "
+        "transcripts, norm evidence, ordered accepted tickets and plan weights. "
+        "Whole public envelopes are compared, with canonicality and collision "
+        "checks. APC additionally checks complete ISC and seed parent equality; "
+        "this stronger projection restriction is not inferred from the native "
+        "parent-ID guard and does not change native admission. Seed, norm, "
+        "coefficient, policy and alias metadata require independent primitive "
+        "authentication, synthetic in component examples. Original EC/APC "
+        "component proofs are reused; no new positive whole EC/APC admission or "
+        "joined public/native execution is claimed. Historical source and "
+        "position composition does not yet connect the full public durable "
+        "cache. ROOT/VIEW/ABORT, unified configuration/aliases, all-actor sequence "
+        "mapping, completed live/recovery resolution, phase/send/QC/current/"
+        "crash/repair, physical authority, bounded resources, compatibility and "
+        "freeze/offline/independent review remain OPEN. NO_GO and guard remain."
+    )
     finalized = finalize_report(report, ROOT, registry)
     report_path = REPORTS / "formal-verification-report.json"
     write_canonical_json(report_path, finalized)
