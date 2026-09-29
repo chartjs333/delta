@@ -1,0 +1,327 @@
+{
+  "kind": "documentary-source-audit-not-snapshot-attestation",
+  "created_at_utc": "2026-09-29T16:30:10.830696+00:00",
+  "base_commit": "894a82850262ad74dfeec5ef0be760311b3959ce",
+  "native_revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "report_path": "docs/adr/0012-snapshot-provenance-audit.md",
+  "report_sha256": "ab6ffbb4b46f0ee0ffca9b72779ace3556c9ff50730571b44ba4fd6a8308b393",
+  "result": "MISSING SNAPSHOT PROVENANCE CONTRACT",
+  "existing_sufficient_full_snapshot_authority_predicate": false,
+  "reason": "Named authentication premises and local continuity checks exist, but no frozen interpretation/evidence binding establishes independent origin of all supplied initial certificate collections from an admissible protocol prefix.",
+  "existing_predicates_inspected": [
+    "NativeBinding.Trust.anchorAuthenticated",
+    "NativeBinding.Trust.recoveryAuthenticated",
+    "NativeBinding.Trust.certificateAuthenticated",
+    "PublicSnapshot.ExportTrust.authentic",
+    "NativeBindingConstruction.Premises",
+    "NativeAggregateBinding.CertificateAuthority",
+    "NativeReplay.Environment.applyAuthenticated",
+    "NativeReplay.Environment.scanAuthenticated",
+    "NativeReplayAdmission.prepareWhole",
+    "NativeConfigReplay.recoveryComputed",
+    "NativeArithmeticHistory.recoveryComputed"
+  ],
+  "paths_audited": [
+    "supplied prepared initial state and startup policy",
+    "local reactor snapshot",
+    "restart and WAL replay",
+    "verified backup or imported recovery cut",
+    "certified current checkpoint and P2P/CAS artifact",
+    "independently supplied formal native witness",
+    "synthetic fixtures and loaded examples"
+  ],
+  "new_predicates_created": false,
+  "proof_layers_created": false,
+  "implementation_changed": false,
+  "normative_contract_changed": false,
+  "new_native_or_formal_execution": false,
+  "architecture_options_implemented": [],
+  "domain_restriction_adopted": false,
+  "r2_1": "CLOSED",
+  "r2_2": "CLOSED",
+  "r2_3": "OPEN",
+  "r3_started": false,
+  "stop": true,
+  "sources": [
+    {
+      "path": "formal/reports/baseline-inputs.json",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "b5a5fb95661b5665d0a75ca37e753982471045193dbcfbc63aaaadf9787930bd"
+    },
+    {
+      "path": "specs/000-formal-tla-spec/candidate-contract.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "2cd9be46dcda84c8f1cf17b176ee8ebe9ead0fe405a5407490b556161bc795b4"
+    },
+    {
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6"
+    },
+    {
+      "path": "specs/000-formal-tla-spec/spec.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "4c723b178649277a170b227fc718fc38355be9ce6765bb9b2f86af81bbee3327"
+    },
+    {
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "e93d31266eac996412cd48d25c8b5a1558a5742068444cdd64cc8d67637faf8f"
+    },
+    {
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "375b09aaec41ca84a4959f0c5a65c8f0382356187297c5f7a3171bebff00e72e"
+    },
+    {
+      "path": "specs/000-formal-tla-spec/refinement-contract.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c"
+    },
+    {
+      "path": "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "45fef1b1d23604d8774d90086b46431fe7c73a16a481079d62a257dccf9f22e8"
+    },
+    {
+      "path": ".specify/memory/constitution.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "4b9da704f3c37ac4f8ce9756832e92c2ad732d0116c6dccebeee67ee722042fd"
+    },
+    {
+      "path": "docs/adr/0000-formal-verification-gate.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "59523ef963cfceaa741499e3d375ceedcd451ac0fb8574ab70b8ad9e480a8bd0"
+    },
+    {
+      "path": "docs/adr/0001-deltareduce-v1.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "bbfe6e23ca0658d23b41350fb3eb70df62fdfae124c2b460890fac16b77d30e9"
+    },
+    {
+      "path": "docs/adr/0010-hybrid-runtime-boundary.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "051b4836318f288256b4402943a6792d98df239f3a54b25dab11da1b29217875"
+    },
+    {
+      "path": "specs/003-bft-round-state-machine/spec.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "ffe129366f152719b25925afed8b9bdebac8ddae9fcdd67b9fe255a6c0073821"
+    },
+    {
+      "path": "specs/003-bft-round-state-machine/README.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "4885ba50e8310326a42a5d489a105fd81a610f98f933fa018a0a7835c95701a2"
+    },
+    {
+      "path": "specs/003-bft-round-state-machine/runtime-profile.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "3f305e9af634483d172e386acb0aff587bdcafa65cfc3a00e50801a69bb69ca3"
+    },
+    {
+      "path": "specs/003-bft-round-state-machine/formal-refinement.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "32ed46548616f99545fbbd69510bfb4bfcdb5ec0f89ae3993a379a1b2f0e8499"
+    },
+    {
+      "path": "specs/005-content-addressed-p2p-distribution/spec.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "0e504712e25ad585256f1d0d3f21e04a04871cbe82faa8dab80762a94969830f"
+    },
+    {
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae"
+    },
+    {
+      "path": "specs/008-certificates-and-consensus/formal-refinement.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "a8f0a174179a696643b10c57ae1850e8b65f98478b0f68316c4b82d21d306077"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/ArithmeticBinding.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "7224e4b5710433ef9f3d1e3666a6e8cdced0b8178bb780f0569ad78cdca38693"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeBindingConstruction.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "8f3de9564fb672a87c6199039deb30e354d6b9f19316086041d2d1d95f35c392"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeAggregateBinding.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "f2ca9ce8ec6c62f356bd28380f15cda3d7745ee179b6a50b433ea65faed09d8f"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeReplay.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "4d0e66d4574ac72dc642161251e8972c648a98967604369f56e9810640c54848"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicSnapshot.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "a927cf950a07e038952f99c7f638dda62e2edd9a080ef9c50cb8c29344b770fd"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicSnapshotVectors.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "a22884d9aadcda90065eb4f3861c45d057986e4e1ff2bc84975d310ef9e083fb"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeGraphVectors.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "e82a6e5fde87c5ad3da97111263e96a5c01a98c9733d07683c894c6b5606df6a"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeCurrentHistory.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "bb946c3b7dbf3ed847095de210ff7c5d59ae9833df8fc555e6b82fac820810ed"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeCurrentPointer.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "85eb5e4cfdbb4fb73c52fce2980949457199734c27f766d6297d87326af8a1df"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativePointerWal.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "3082ba369aad9922574f944fea2b78854c4fc34a49c34386712cdecfdcd25d21"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeReplayAdmission.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "cfb5cd07242be3d0a33f7d3215740adc059394f9fb9e32ef8591e8b5bdbeb2cd"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeConfigReplay.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "5010f830998502c76a3656239b36e41f32399507bd4cc6a3ec5cc662aab9a54a"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeArithmeticHistory.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "4f671279ac8b8024407ff597d3b3359b318f3f11250916775afcbf5e6b3daa20"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeSnapshotBase.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "61ff5ff6ce1b82b3018564ed28785471ad8d3cdd86044df16dea34c0c067eb88"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicEarlyBody.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "ce82e7cd4be4816f2aab5911492de3ff6355a2994554f71edec0702d610a4977"
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicPlanningBody.lean",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "e3b5b7b9be521ad3e4d166c9836a1fe96c477a014cad2f95d71eabd94dbbb916"
+    },
+    {
+      "path": "formal/schemas/formal-trace.schema.json",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "3d0356784ccfd398f5de30d4c21d3cbf8ec5061061d954219b8fce8e47d096fd"
+    },
+    {
+      "path": "formal/scripts/native_trace_witness.py",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "a6e39ce2e1b28306c302f2f4ac9b88c86734141b339f4e0700c251b405bb93a4"
+    },
+    {
+      "path": "formal/scripts/native_trace_fixture.py",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "358cd5dafee82c63ae75c79a901cf36b465889c7719ce5aaa85a68ffad944618"
+    },
+    {
+      "path": "formal/scripts/check-refinement.py",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "94a6f485a052bdf95e34cb8620a9ed062170f9636ade2235947c02b44355b3d8"
+    },
+    {
+      "path": "formal/proposals/native-admission-snapshot.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "e39c54f9e5a1605091d9ace69e41e6f93a52c2364d06959da5faeef5a6a754ca"
+    },
+    {
+      "path": "formal/proposals/native-snapshot-base-proof.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "36fbac315826f20f14983e30a0d0dd0e193f53747f0296a58e77b167dd63bb77"
+    },
+    {
+      "path": "formal/proposals/native-policy-wal.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "04e05ae5a234a75c443be23775157cc9fcc95927f50825167073a3cf36bcfd4f"
+    },
+    {
+      "path": "formal/proposals/public-snapshot-proof.md",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "64857efcefd048bd4ffbff941b2b8fb7bdf08c074d3476e62c8176fc0aa915bd"
+    },
+    {
+      "path": "formal/proposals/evidence/native-policy-wal.json",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "ce4675eb073fc9116f219f14acf24095225cfb8773a0d085a77a305ed795f313"
+    },
+    {
+      "path": "formal/proposals/evidence/public-snapshot.json",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "d5ec6c87b454a071bb0a89a041e6c1ba704a3a102ceb048a392cc4a54c608702"
+    },
+    {
+      "path": "formal/proposals/evidence/native-binding-construction.json",
+      "revision": "894a82850262ad74dfeec5ef0be760311b3959ce",
+      "sha256": "073da2b8b39b7e3dd6d9115748b93990b7c7c7ebb21d46ba9d7cfe34632fd19e"
+    },
+    {
+      "path": "delta-runtime-cpp/src/runtime.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91"
+    },
+    {
+      "path": "delta-runtime-cpp/src/wal.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "fd62c60727b6f5725cdcef2cb56591746736f444c87d1895a1357a7d85377e7e"
+    },
+    {
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3"
+    },
+    {
+      "path": "delta-runtime-cpp/src/certificate_runtime.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "d10db55f112976f79ff96aeabf0b60a3c2c632d4033d7d8acd587679be7ae6dd"
+    },
+    {
+      "path": "delta-runtime-cpp/src/sidecar_server.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "4983358e2789bbd70b52d78b0e9e9f833bc6fb2ef1f3f2fb9d6026991ba0c1cc"
+    },
+    {
+      "path": "delta-core-cpp/include/delta/core/consensus.hpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9"
+    },
+    {
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879"
+    },
+    {
+      "path": "delta-core-cpp/src/certificates/vote_admission.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "655b74601e163c62242a6ede4f93b2749ef32eb7828caaef9d32e7e63b8ce1ef"
+    },
+    {
+      "path": "delta-ffi/src/delta_abi.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "2a36951519067f7ca3b54d0ddf2c7a7a27468544336a8910019f16dbaa51cd40"
+    },
+    {
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "bbaa7f622810257791e53333687e7cac88e148f19462eeaba78ce4fb264a6cc9"
+    }
+  ]
+}

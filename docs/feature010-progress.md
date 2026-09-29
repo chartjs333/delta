@@ -1,5 +1,29 @@
 # Feature010 continuation checkpoint
 
+## Latest checkpoint — 29 September 2026 — MISSING SNAPSHOT PROVENANCE CONTRACT
+
+The user's documentation-only audit is complete:
+[snapshot provenance audit](adr/0012-snapshot-provenance-audit.md), with
+[documentary source hashes](adr/evidence/0012-snapshot-provenance-source-audit.json).
+It inventories supplied startup policy, local snapshot/replay, backup/recovery
+cut, certified current artifacts, exported witness and synthetic fixture paths:
+producer, authentication, required lineage, continuity checker and existing
+requirement. No new predicate or proof layer is created.
+
+The frozen contract contains anchor/recovery/certificate/export authentication
+premises and partial continuity checks, but no already specified sufficient
+independent authority/provenance predicate for the full nonempty initial snapshot
+and its producing protocol prefix. An uninterpreted authentication premise or
+policy/WAL hash cannot silently be given that stronger meaning. This is a contract
+decision STOP, not a request to implement a new exporter or prove cryptography.
+
+Result: **MISSING SNAPSHOT PROVENANCE CONTRACT**. No A/B/C selected or implemented;
+no domain restriction adopted. R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN; no R3. Existing
+DoD/requirements, code, proofs, schemas, fixtures, guard and old evidence remain
+unchanged. No new native/formal execution. Await a separate user contract/
+architecture decision; no automatic R2 continuation. Keep automation present,
+healthy demos and frozen refs unchanged. Earlier entries below are historical.
+
 ## Latest analysis — 29 September 2026 — R2 domain not established / STOP
 
 The bounded documentation-only domain analysis is recorded in
