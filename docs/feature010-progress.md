@@ -1,5 +1,32 @@
 # Feature010 continuation checkpoint
 
+## Latest analysis — 29 September 2026 — R2 domain not established / STOP
+
+The bounded documentation-only domain analysis is recorded in
+[the ADR-0012 addendum](adr/0012-r2-domain-analysis.md), with its
+[source audit](adr/evidence/0012-r2-domain-source-audit.json).
+It does not establish either requested binary outcome. The old API witness is
+not protocol genesis and its exact sequence cannot run through one pinned
+Runtime/WAL. Existing TLA finalization also excludes two finalized ISC records
+for the round. These source arguments do not establish the complete native
+initial/origin predicate for the frozen R2 domain. No admissible initial or
+production-reachable representation counterexample has been established either.
+
+The one precise analysis residual is the independent origin of preloaded,
+nonempty certificate collections. Native replay derives a history from supplied
+initial state/policy; it does not derive that initial snapshot's protocol origin.
+Restricting coverage to empty snapshots/current guarded Runtime would omit the
+already required nonempty cuts and amended arithmetic. Defining origin by a
+successful R2 projection would be circular. This is the existing initial/source
+part of R2.3, not a new obligation or production exporter requirement.
+
+No A/B/C implementation or source-domain restriction is selected. The diagnostic
+alone is not grounds for requiring an architecture change. R1/R2.1/R2.2 CLOSED,
+R2.3/R2 OPEN, R3 NOT STARTED. No code, proof, protocol, schema, fixture, guard or
+old evidence changes; no new native/formal run. STOP after this analysis; no
+automatic R2 continuation. Keep the existing automation present and healthy
+demos/frozen refs unchanged. Earlier entries below are historical.
+
 ## Latest analysis — 29 September 2026 — ADR-0012 / no implementation
 
 The user's EC context/identity decision analysis is recorded in
