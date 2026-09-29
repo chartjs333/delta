@@ -963,6 +963,12 @@ import Checks
 #print axioms DeltaReduce.FamilyRelation.Direct.currentCertificateParentsAgreeWithOriginalVote
 #print axioms DeltaReduce.FamilyRelation.Direct.currentCertificateRetainsRemoteParentSource
 #print axioms DeltaReduce.FamilyRelation.Direct.currentCertificateParentsComputed
+#print axioms DeltaReduce.FamilyRelation.Direct.ObservedState
+#print axioms DeltaReduce.FamilyRelation.Direct.loadObservedState
+#print axioms DeltaReduce.FamilyRelation.Direct.observedCurrentSameSource
+#print axioms DeltaReduce.FamilyRelation.Direct.observedCurrentConfigCannotAliasJournal
+#print axioms DeltaReduce.FamilyRelation.Direct.observedCurrentConfigForwardFromJournal
+#print axioms DeltaReduce.FamilyRelation.Direct.observedCurrentQuorum
 #print axioms DeltaReduce.FamilyChecks.wideProfile
 #print axioms DeltaReduce.FamilyChecks.unsignedDenominatorIsOriginalDomain
 #print axioms DeltaReduce.FamilyChecks.unsignedOptimizerComputes

@@ -372,6 +372,9 @@ def run() -> None:
                     "ISC/seed/EC/APC parents load from the original certified snapshot without "
                     "a fabricated local vote; original control context is derived through "
                     "the native chain and parent values agree with a same-source vote",
+                    "one executable static bundle joins the complete durable vote field, "
+                    "actual current/QC/parents and original actors; shared forward and inverse "
+                    "configuration names span the current policy and all observed journal rows",
                 ],
                 "remaining": [
                     "one authenticated configuration/alias/source relation across all existing "

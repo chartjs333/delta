@@ -3009,5 +3009,85 @@ theorem currentCertificateParentsComputed : loadCurrentCertificateParents curren
 
 end CurrentCertificateParents
 
+/- One checked static bundle for the fields already related above. The remaining
+certificate/candidate/environment collections and initial applicability are not
+inferred from this bundle. It adds no transition or recovery assertion. -/
+section ObservedState
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (units : NativeStateProjection.UnitSource) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+    (state : PublicState.State) (packets : List ActorPacket)
+    (policyRaw stateRaw : Bytes) (pointer : NativeCurrentPointer.State)
+
+structure ObservedState where
+  durable : DurableVoteState sha mapping actors units indices vocabulary configured names metadata
+    shardAliases checkpointNames expected state packets
+  current : CertifiedCurrent sha policyRaw stateRaw pointer
+  actorPolicy : PolicyActors mapping actors policyRaw
+  field : CurrentField mapping checkpointNames state pointer
+  parents : CertificateParents metadata current.edge.root.plan
+  configForward : names current.policy.config = some parents.config.text
+  configInverse : ConfigNamesSeparated
+    ((current.policy.config,parents.config.value)::observedConfigs durable.images)
+
+def loadObservedState : Option (ObservedState sha mapping actors units indices vocabulary configured names metadata
+    shardAliases checkpointNames expected state packets policyRaw stateRaw pointer) := do
+  let durable ← loadDurableVoteState sha mapping actors units indices vocabulary configured names metadata
+    shardAliases checkpointNames expected state packets
+  let current ← loadCertifiedCurrent sha policyRaw stateRaw pointer
+  let actorPolicy ← checkPolicyActors mapping actors policyRaw
+  let field ← loadCurrentField mapping checkpointNames state pointer
+  let parents ← loadCurrentCertificateParents current metadata
+  if checked : names current.policy.config = some parents.config.text ∧
+      ConfigNamesSeparated ((current.policy.config,parents.config.value)::observedConfigs durable.images) then
+    some ⟨durable,current,actorPolicy,field,parents,checked.1,checked.2⟩
+  else none
+
+variable {sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected
+    state packets policyRaw stateRaw pointer}
+    (joined : ObservedState sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected state packets policyRaw stateRaw pointer)
+
+theorem observedCurrentSameSource :
+    state.read "currentCheckpoint" = some joined.field.symbol ∧
+    checkpointNames joined.field.symbol = some (idBytes joined.current.values.modelHash) ∧
+    joined.current.edge.id = pointer.qc ∧
+    pointer.optimizer = idBytes joined.current.values.optimizerHash ∧
+    joined.actorPolicy.policy = joined.current.policy := by
+  have hashes := certifiedCurrentHashes joined.current
+  exact ⟨joined.field.original,joined.field.shared.trans (congrArg some hashes.1),
+    certifiedCurrentOriginalId joined.current,hashes.2,
+    certifiedCurrentSameActorPolicy joined.current joined.actorPolicy⟩
+
+theorem observedCurrentConfigCannotAliasJournal {image} (present : image ∈ joined.durable.images)
+    {row} (member : row ∈ image.collection.rows)
+    (same : joined.parents.config.value = row.projection.configAlias.2) :
+    joined.current.policy.config = row.projection.configAlias.1 := by
+  apply joined.configInverse _ (List.mem_cons_self ..) _ ?_ same
+  apply List.mem_cons_of_mem
+  exact List.mem_flatMap.mpr ⟨image,present,List.mem_map.mpr ⟨row,member,rfl⟩⟩
+
+theorem observedCurrentConfigForwardFromJournal {image} (_present : image ∈ joined.durable.images)
+    {row} (_member : row ∈ image.collection.rows)
+    (same : joined.current.policy.config = row.projection.configAlias.1) :
+    joined.parents.config.value = row.projection.configAlias.2 := by
+  obtain ⟨name,selected,value⟩ := journalConfigFromOriginalName row.projection
+  have forward := joined.configForward
+  rw [same] at forward
+  have text := Option.some.inj (forward.symm.trans selected)
+  simpa only [PublicEarlyBody.Name.value,text] using value.symm
+
+theorem observedCurrentQuorum {exposed}
+    (signers : SignerImage joined.actorPolicy joined.current.edge.decoded.certificate.signers exposed) :
+    joined.current.edge.decoded.certificate.threshold = 2*((actors.length-1)/3)+1 ∧
+    joined.current.edge.decoded.certificate.threshold ≤ exposed.length ∧ exposed.Nodup ∧
+    (∀ signer ∈ joined.current.edge.decoded.certificate.signers,
+      ∃ actor ∈ exposed, actorBytes mapping actor = some signer) :=
+  certifiedCurrentSignerQuorum joined.current joined.actorPolicy signers
+
+end ObservedState
+
 end Direct
 end DeltaReduce.FamilyRelation

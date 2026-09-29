@@ -6519,6 +6519,13 @@ agreement with an actual same-source vote are derived. This removes an adapter
 dependency for those parents, not the complete remote-certificate relation.
 Observed configuration aliases are checked not to merge distinct native IDs.
 
+These components now also compose in `loadObservedState`, one executable static
+check sharing the whole public state, actor namespace and current pointer. It
+rejects a configuration alias collision between the actual current policy and
+any observed journal row and derives forward name agreement for equal native
+IDs. This joins the already constructed fields; it does not fill the remaining
+certificate/candidate/environment collections or establish initial applicability.
+
 The exact remaining obligation 3 is unchanged in scope:
 
 - Join the existing primitive source/authentication/configuration/alias witnesses

@@ -1163,6 +1163,16 @@
 'DeltaReduce.FamilyRelation.Direct.currentCertificateParentsComputed' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.ObservedState' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadObservedState' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.observedCurrentSameSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.observedCurrentConfigCannotAliasJournal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.observedCurrentConfigForwardFromJournal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.observedCurrentQuorum' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyChecks.wideProfile' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyChecks.unsignedDenominatorIsOriginalDomain' depends on axioms: [propext,
  Classical.choice,

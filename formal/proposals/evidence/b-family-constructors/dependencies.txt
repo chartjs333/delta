@@ -1,4 +1,4 @@
-⚠ [28/157] Replayed DeltaReduce.NativeConfigAdmission
+⚠ [28/153] Replayed DeltaReduce.NativeConfigAdmission
 warning: DeltaReduce/NativeConfigAdmission.lean:173:13: This simp argument is unused:
   bind
 

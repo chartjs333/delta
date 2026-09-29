@@ -190,6 +190,17 @@ derived from the shared source naming function. This is a check on actual
 observed records; it neither assumes injectivity between unrelated namespaces
 nor authenticates an unobserved configuration.
 
+`loadObservedState` now joins these existing components in one executable static
+check: the complete all-actor durable vote field, actual certified current,
+currentCheckpoint field, original policy/actor namespace and current certificate
+parents. It checks the forward configuration name through the same primitive
+source used by the journal and inverse separation across the current policy plus
+every observed journal record. Thus the current checkpoint and a historical vote
+cannot use the same public config name for different native config IDs; equal
+native IDs have the same public name. Current QC signers still use the original
+policy. This is a partial static relation, not coverage of the remaining state
+fields or proof of applicability to every initial/incomplete snapshot.
+
 The existing failure constructor is reused unchanged: VIEW limits and deadlines
 are checked; its ABORT branch currently constructs only original empty-downstream
 lineage and rejects nonempty lineage. This is a recorded applicability limit of
