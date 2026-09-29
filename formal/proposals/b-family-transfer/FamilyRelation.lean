@@ -4,6 +4,7 @@ import DeltaReduce.PublicDurablePrefix
 import DeltaReduce.NativeVoteCache
 import DeltaReduce.NativeRootSource
 import DeltaReduce.PublicRootEnvelope
+import DeltaReduce.PublicFailureBody
 
 /-! R2 arithmetic subrelation at one family view. This composes complete body
 construction, the existing primitive metadata boundary and original journal
@@ -1753,6 +1754,1260 @@ def loadRootProjection : Option (RootProjection sha mapping actors artifacts uni
   some ⟨source,observation,authority,view⟩
 
 end RootProjection
+
+/- Common parent values are derived from the same original certificate graph
+and primitive metadata. Neither an equality of entire translated bodies nor a
+coordinate approval table is supplied. Actor is deliberately absent from these
+certificate values, so different original signers may share the same parents. -/
+section CommonParents
+
+theorem earlyHeaderControls {trust} {metadata : PublicEarlyBody.Metadata trust}
+    {left right : NativeSelectedVote.Checked}
+    (a : PublicEarlyBody.Header metadata left) (b : PublicEarlyBody.Header metadata right)
+    (height : left.state.height = right.state.height)
+    (epoch : left.policy.epoch = right.policy.epoch)
+    (config : left.policy.config = right.policy.config) :
+    a.round = b.round ∧ a.epoch.value = b.epoch.value ∧ a.config.value = b.config.value := by
+  have heights : a.height.text = b.height.text := by
+    apply Option.some.inj
+    rw [← a.height.selected,← b.height.selected,height]
+  have epochs : a.epoch.text = b.epoch.text := by
+    apply Option.some.inj
+    rw [← a.epoch.selected,← b.epoch.selected,epoch]
+  have configs : a.config.text = b.config.text := by
+    apply Option.some.inj
+    rw [← a.config.selected,← b.config.selected,config]
+  simp only [PublicEarlyBody.Header.round,PublicEarlyBody.Name.value,heights,epochs,configs,and_self]
+
+theorem iscParentsFromSameOriginal {earlyTrust planningTrust}
+    {metadata : PublicPlanningBody.Metadata earlyTrust planningTrust}
+    {left right : NativeSelectedVote.Checked} {native : NativeIscCertificate.Checked}
+    (a : PublicPlanningBody.IscBody metadata left native) (b : PublicPlanningBody.IscBody metadata right native)
+    (height : left.state.height = right.state.height)
+    (epoch : left.policy.epoch = right.policy.epoch)
+    (config : left.policy.config = right.policy.config) :
+    a.value = b.value ∧ a.header.epoch.value = b.header.epoch.value := by
+  have headers := earlyHeaderControls a.header b.header height epoch config
+  have policy := Option.some.inj (a.policySelected.symm.trans b.policySelected)
+  have entries := Option.some.inj (a.computed.symm.trans b.computed)
+  exact ⟨by simp only [PublicPlanningBody.IscBody.value,headers.1,headers.2.2,policy,entries],headers.2.1⟩
+
+theorem ecParentsFromSameOriginal {earlyTrust planningTrust}
+    {metadata : PublicPlanningBody.Metadata earlyTrust planningTrust}
+    {left right : NativeSelectedVote.Checked} {native : NativeEligibilityLineage.Edge}
+    (a : PublicPlanningBody.EcBody metadata left native) (b : PublicPlanningBody.EcBody metadata right native)
+    (height : left.state.height = right.state.height)
+    (epoch : left.policy.epoch = right.policy.epoch)
+    (config : left.policy.config = right.policy.config) :
+    a.parent.value = b.parent.value ∧ a.seedValue = b.seedValue ∧ a.value = b.value := by
+  have parent := iscParentsFromSameOriginal a.parent b.parent height epoch config
+  have seed := Option.some.inj (a.seed.selected.symm.trans b.seed.selected)
+  have norm := Option.some.inj (a.norm.selected.symm.trans b.norm.selected)
+  have members := Option.some.inj (a.computed.symm.trans b.computed)
+  have seedValue : a.seedValue = b.seedValue := by
+    simp only [PublicPlanningBody.EcBody.seedValue,parent.1,parent.2,PublicPlanningBody.Name.value,seed]
+  exact ⟨parent.1,seedValue,by
+    simp only [PublicPlanningBody.EcBody.value,parent.1,seedValue,members,PublicPlanningBody.Name.value,norm]⟩
+
+theorem apcParentsFromSameOriginal {earlyTrust planningTrust}
+    {metadata : PublicPlanningBody.Metadata earlyTrust planningTrust}
+    {left right : NativeSelectedVote.Checked} {native : NativePlanLineage.Edge}
+    (a : PublicPlanningBody.ApcBody metadata left native) (b : PublicPlanningBody.ApcBody metadata right native)
+    (height : left.state.height = right.state.height)
+    (epoch : left.policy.epoch = right.policy.epoch)
+    (config : left.policy.config = right.policy.config) :
+    a.ec.parent.value = b.ec.parent.value ∧ a.ec.seedValue = b.ec.seedValue ∧
+    a.ec.value = b.ec.value ∧ a.value = b.value := by
+  have parents := ecParentsFromSameOriginal a.ec b.ec height epoch config
+  have coefficient := Option.some.inj (a.coefficient.selected.symm.trans b.coefficient.selected)
+  have members := Option.some.inj (a.computed.symm.trans b.computed)
+  exact ⟨parents.1,parents.2.1,parents.2.2,by
+    simp only [PublicPlanningBody.ApcBody.value,parents.1,parents.2.1,parents.2.2,members,
+      PublicPlanningBody.Name.value,coefficient]⟩
+
+variable {sha mapping actors artifacts units current}
+    {source : Source sha mapping actors artifacts units current}
+    {wal receipt facts rootWal rootFacts indices rootIndices vocabulary configured names earlyTrust planningTrust metadata}
+    (arithmetic : NativeObservation source wal receipt facts)
+    (root : RootObservation source rootWal rootFacts)
+    (arithmeticAuthority : FamilyAuthority.Original source.bound indices source.numeric.profile source.numeric.quantum
+      current.values vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust)
+      metadata arithmetic.carrier)
+    (rootAuthority : FamilyAuthority.Original source.bound rootIndices source.numeric.profile source.numeric.quantum
+      current.values vocabulary configured names metadata root.loaded.original)
+
+theorem rootAndArithmeticHaveSameParents :
+    arithmeticAuthority.parents.ec.parent.value = rootAuthority.parents.ec.parent.value ∧
+    arithmeticAuthority.parents.ec.seedValue = rootAuthority.parents.ec.seedValue ∧
+    arithmeticAuthority.parents.ec.value = rootAuthority.parents.ec.value ∧
+    arithmeticAuthority.parents.value = rootAuthority.parents.value := by
+  have same := rootSameOriginalPolicyState root
+  apply apcParentsFromSameOriginal arithmeticAuthority.parents rootAuthority.parents
+  · exact congrArg NativeStateBytes.State.height same.2.symm
+  · exact congrArg NativePolicyBytes.Policy.epoch same.1.symm
+  · exact congrArg NativePolicyBytes.Policy.config same.1.symm
+
+theorem parameterApplySelectorsHaveSameParents {otherIndices}
+    (other : FamilyAuthority.Original source.bound otherIndices source.numeric.profile source.numeric.quantum
+      current.values vocabulary configured names metadata arithmetic.carrier) :
+    arithmeticAuthority.parents.ec.parent.value = other.parents.ec.parent.value ∧
+    arithmeticAuthority.parents.ec.seedValue = other.parents.ec.seedValue ∧
+    arithmeticAuthority.parents.ec.value = other.parents.ec.value ∧
+    arithmeticAuthority.parents.value = other.parents.value :=
+  apcParentsFromSameOriginal arithmeticAuthority.parents other.parents rfl rfl rfl
+
+end CommonParents
+
+/- Static current source when the original finalized ApplyQC is present in a
+snapshot but no preceding pointer-WAL history was supplied. This only resolves
+existing bytes and checks the current pointer; it does not advance/recover it. -/
+section CertifiedCurrent
+variable (sha : Bytes → Bytes) (policyRaw stateRaw : Bytes) (pointer : NativeCurrentPointer.State)
+
+structure CertifiedCurrent where
+  tree : NativePolicyCodec.Value
+  policy : NativePolicyBytes.Policy
+  policySource : NativePolicyBytes.decodePolicy policyRaw = some (tree,policy)
+  state : NativeStateBytes.State
+  stateSource : NativeStateBytes.decodeState stateRaw = some state
+  sectionBound : NativeApplySection.Bound
+  sectionSource : NativeApplySection.bindSection sha policy state = some sectionBound
+  edge : NativeApplyLineage.Edge
+  selected : sectionBound.certificates.find? (fun e => e.id == pointer.qc) = some edge
+  finalized : pointer.qc ∈ sectionBound.finalized
+  values : NativeCurrentValues.Image
+  valuesSource : NativeCurrentValues.load sha edge.decoded.candidate = some values
+  pointerValid : NativeCurrentPointer.StateValid pointer
+  checkpoint : pointer.checkpoint = edge.decoded.certificate.model
+  optimizer : pointer.optimizer = edge.decoded.certificate.optimizer
+  height : pointer.height = edge.decoded.certificate.context.height
+
+def loadCertifiedCurrent : Option (CertifiedCurrent sha policyRaw stateRaw pointer) := do
+  match policySource : NativePolicyBytes.decodePolicy policyRaw with
+  | none => none
+  | some (tree,policy) =>
+    match stateSource : NativeStateBytes.decodeState stateRaw with
+    | none => none
+    | some state =>
+      match sectionSource : NativeApplySection.bindSection sha policy state with
+      | none => none
+      | some sectionBound =>
+        match selected : sectionBound.certificates.find? (fun e => e.id == pointer.qc) with
+        | none => none
+        | some edge =>
+          if finalized : pointer.qc ∈ sectionBound.finalized then
+            match valuesSource : NativeCurrentValues.load sha edge.decoded.candidate with
+            | none => none
+            | some values =>
+              if checks : NativeCurrentPointer.StateValid pointer ∧
+                  pointer.checkpoint = edge.decoded.certificate.model ∧
+                  pointer.optimizer = edge.decoded.certificate.optimizer ∧
+                  pointer.height = edge.decoded.certificate.context.height then
+                some ⟨tree,policy,policySource,state,stateSource,sectionBound,sectionSource,edge,selected,
+                  finalized,values,valuesSource,checks.1,checks.2.1,checks.2.2.1,checks.2.2.2⟩
+              else none
+          else none
+
+variable {sha policyRaw stateRaw pointer} (current : CertifiedCurrent sha policyRaw stateRaw pointer)
+
+def CertifiedCurrent.basis : FamilyInputs.CurrentBasis :=
+  ⟨current.values,pointer,current.edge.decoded.candidate.context.schema⟩
+
+theorem certifiedCurrentLoadFromComponents :
+    loadCertifiedCurrent sha policyRaw stateRaw pointer = some current := by
+  cases current with
+  | mk tree policy policySource state stateSource sectionBound sectionSource edge selected finalized values valuesSource pointerValid checkpoint optimizer height =>
+    unfold loadCertifiedCurrent
+    split
+    · rename_i absent; rw [policySource] at absent; contradiction
+    · rename_i t p found
+      cases Option.some.inj (found.symm.trans policySource)
+      split
+      · rename_i absent; rw [stateSource] at absent; contradiction
+      · rename_i s found
+        cases Option.some.inj (found.symm.trans stateSource)
+        split
+        · rename_i absent; rw [sectionSource] at absent; contradiction
+        · rename_i sectionResult found
+          cases Option.some.inj (found.symm.trans sectionSource)
+          split
+          · rename_i absent; rw [selected] at absent; contradiction
+          · rename_i e found
+            cases Option.some.inj (found.symm.trans selected)
+            rw [dif_pos finalized]
+            split
+            · rename_i absent; rw [valuesSource] at absent; contradiction
+            · rename_i v found
+              cases Option.some.inj (found.symm.trans valuesSource)
+              rw [dif_pos (And.intro pointerValid (And.intro checkpoint (And.intro optimizer height)))]
+
+theorem certifiedCurrentOriginalId : current.edge.id = pointer.qc := by
+  simpa using List.find?_some current.selected
+
+theorem certifiedCurrentValuePreimages :
+    current.edge.decoded.candidate.modelValues = NativeApplyResult.decimalValues current.values.model ∧
+    current.edge.decoded.candidate.optimizerValues = NativeApplyResult.decimalValues current.values.optimizer :=
+  NativeCurrentValues.originalPreimages current.valuesSource
+
+theorem certifiedCurrentHashes :
+    pointer.checkpoint = idBytes current.values.modelHash ∧
+    pointer.optimizer = idBytes current.values.optimizerHash := by
+  have checked := NativeApplySection.certificateChecked current.sectionSource (List.mem_of_find?_eq_some current.selected)
+  have fields := NativeApplyLineage.certifiedFields checked
+  have values := (NativeCurrentValues.loaded current.valuesSource).checked
+  exact ⟨current.checkpoint.trans (fields.2.2.1.trans values.2.2.2.2.2.1),
+    current.optimizer.trans (fields.2.2.2.trans values.2.2.2.2.2.2)⟩
+
+theorem certifiedCurrentBounds : FamilyInputs.CurrentValues.Bounded current.basis.values :=
+  FamilyInputs.currentValuesFromNative current.valuesSource
+
+theorem certifiedCurrentOriginalPayload :
+    current.edge.source = NativeApplyLineage.original .finalized current.edge.decoded ∧
+    NativeApplyCertificate.candidateId sha current.edge.decoded.candidate = some current.edge.decoded.candidateId :=
+  NativeApplyLineage.originalPayload
+    (NativeApplySection.certificateChecked current.sectionSource (List.mem_of_find?_eq_some current.selected))
+
+theorem certifiedCurrentEntireLists :
+    current.sectionBound.profiles.map NativeApplyProfile.Checked.source = current.sectionBound.profileTrees ∧
+    current.sectionBound.bodies.map NativeApplyLineage.Edge.source = current.sectionBound.bodyTrees ∧
+    current.sectionBound.certificates.map NativeApplyLineage.Edge.source = current.sectionBound.certificateTrees :=
+  NativeApplySection.originalLists current.sectionSource
+
+theorem certifiedCurrentRejectsDifferentValues {otherModel otherOptimizer : List Int}
+    (modelRead : NativeCurrentValues.readValues current.edge.decoded.candidate.modelValues = some otherModel)
+    (optimizerRead : NativeCurrentValues.readValues current.edge.decoded.candidate.optimizerValues = some otherOptimizer) :
+    otherModel = current.values.model ∧ otherOptimizer = current.values.optimizer := by
+  have source := NativeCurrentValues.loaded current.valuesSource
+  exact ⟨Option.some.inj (modelRead.symm.trans source.model),
+    Option.some.inj (optimizerRead.symm.trans source.optimizer)⟩
+
+theorem certifiedCurrentRejectsUnfinalized
+    (missing : pointer.qc ∉ current.sectionBound.finalized) : False := missing current.finalized
+
+theorem certifiedCurrentRejectsMissingQc
+    (missing : current.sectionBound.certificates.find? (fun e => e.id == pointer.qc) = none) : False := by
+  rw [current.selected] at missing
+  contradiction
+
+theorem certifiedCurrentSameActorPolicy {mapping actors}
+    (actorNames : PolicyActors mapping actors policyRaw) : actorNames.policy = current.policy :=
+  congrArg Prod.snd (Option.some.inj (actorNames.decoded.symm.trans current.policySource))
+
+theorem certifiedCurrentSignerQuorum {mapping actors exposed}
+    (actorNames : PolicyActors mapping actors policyRaw)
+    (signers : SignerImage actorNames current.edge.decoded.certificate.signers exposed) :
+    current.edge.decoded.certificate.threshold = 2*((actors.length-1)/3)+1 ∧
+    current.edge.decoded.certificate.threshold ≤ exposed.length ∧
+    exposed.Nodup ∧
+    (∀ signer ∈ current.edge.decoded.certificate.signers,
+      ∃ actor ∈ exposed, actorBytes mapping actor = some signer) := by
+  have checked := NativeApplySection.certificateChecked current.sectionSource
+    (List.mem_of_find?_eq_some current.selected)
+  have valid := (NativeApplyLineage.checkedSource checked).certificateValid
+  rcases valid with ⟨_,_,_,_,_,_,_,_,_,quorum⟩
+  have samePolicy := certifiedCurrentSameActorPolicy current actorNames
+  have count := actorsExactCount actorNames.names
+  rw [samePolicy] at count
+  have threshold : current.edge.decoded.certificate.threshold = NativeIscCertificate.quorum current.policy.validators :=
+    quorum.2.2.1
+  refine ⟨?_,?_,signers.names.publicUnique,?_⟩
+  · rw [threshold,NativeIscCertificate.quorum,count]
+  · rw [actorsExactCount signers.names]; exact quorum.2.2.2.1
+  · intro signer member; exact originalHasActor signers.names member
+
+end CertifiedCurrent
+
+section SnapshotProjection
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource)
+    (currentPolicy currentState : Bytes) (pointer : NativeCurrentPointer.State)
+    (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+structure SnapshotProjection where
+  current : CertifiedCurrent sha currentPolicy currentState pointer
+  stored : StoredProjection sha mapping actors artifacts units current.basis wal facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected
+
+def loadSnapshotProjection : Option (SnapshotProjection sha mapping actors artifacts units currentPolicy currentState
+    pointer wal facts indices vocabulary configured names metadata shardAliases checkpointNames expected) := do
+  let current ← loadCertifiedCurrent sha currentPolicy currentState pointer
+  let stored ← loadStoredProjection sha mapping actors artifacts units current.basis wal facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected
+  some ⟨current,stored⟩
+
+variable {sha mapping actors artifacts units currentPolicy currentState pointer wal facts indices vocabulary configured
+    names metadata shardAliases checkpointNames expected}
+    (snapshot : SnapshotProjection sha mapping actors artifacts units currentPolicy currentState pointer wal facts indices
+      vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata
+      shardAliases checkpointNames expected)
+
+theorem snapshotCurrentLinksOriginalQc :
+    snapshot.current.edge.id = pointer.qc ∧ pointer.qc ∈ snapshot.current.sectionBound.finalized ∧
+    pointer.checkpoint = idBytes snapshot.current.values.modelHash ∧
+    pointer.optimizer = idBytes snapshot.current.values.optimizerHash ∧
+    (NativeVectorAuthority.state snapshot.stored.source.bound).wire.parent = pointer.checkpoint :=
+  ⟨certifiedCurrentOriginalId snapshot.current,snapshot.current.finalized,
+    (certifiedCurrentHashes snapshot.current).1,(certifiedCurrentHashes snapshot.current).2,
+    snapshot.stored.source.numeric.checked.1.2.1.symm⟩
+
+theorem snapshotCurrentFeedsOwnInput :
+    FamilyInputs.readOriginalImage snapshot.stored.source.bound indices snapshot.stored.source.numeric.profile.profile
+      snapshot.stored.source.numeric.quantum snapshot.current.basis.values = some snapshot.stored.authority.input.image ∧
+    pointer.height < (NativeVectorAuthority.state snapshot.stored.source.bound).height :=
+  ⟨snapshot.stored.authority.input.computed,snapshot.stored.source.numeric.checked.1.2.2.1⟩
+
+theorem snapshotSelectorsShareCurrent {otherIndices}
+    (other : SnapshotProjection sha mapping actors artifacts units currentPolicy currentState pointer wal facts
+      otherIndices vocabulary configured names metadata shardAliases checkpointNames expected) :
+    snapshot.current = other.current ∧ snapshot.stored.source.bound = other.stored.source.bound := by
+  have current := Option.some.inj ((certifiedCurrentLoadFromComponents snapshot.current).symm.trans
+    (certifiedCurrentLoadFromComponents other.current))
+  exact ⟨current,Option.some.inj (snapshot.stored.source.prepared.symm.trans other.stored.source.prepared)⟩
+
+theorem snapshotOriginalVoteAndCurrent :
+    snapshot.stored.observation.vote.wire.bodyHash = snapshot.stored.view.body.originalId ∧
+    actorBytes mapping snapshot.stored.view.projectedVote.actor = some snapshot.stored.observation.vote.wire.validator ∧
+    snapshot.stored.observation.entry.sequence = facts.expectedSequence ∧
+    snapshot.current.edge.id = pointer.qc :=
+  ⟨(storedOriginalVoteIdentity snapshot.stored).1,(storedOriginalVoteIdentity snapshot.stored).2.1,
+    (storedOriginalVoteIdentity snapshot.stored).2.2.1,certifiedCurrentOriginalId snapshot.current⟩
+
+end SnapshotProjection
+
+/- Exact static collection correspondence for the migrated PARAMETER/ROOT/APPLY
+constructors and the existing early/planning/failure projectors. Source packets
+are original per-record artifacts, never supplied public bodies. Unsupported
+payloads fail; they are not skipped or treated as empty collections. The existing
+failure projector still only constructs empty-downstream ABORT bodies; it is
+not promoted into a universal ABORT gate or a claim of complete R2 coverage. -/
+structure FailureNames where
+  trust : PublicFailureBody.Trust
+  checkpoint : NativeFailurePayload.AbortBody → Option String
+  authentic : ∀ body name, checkpoint body = some name → trust.checkpoint body name
+
+def FailureNames.metadata {earlyTrust} (names : FailureNames) (early : PublicEarlyBody.Metadata earlyTrust) :
+    PublicFailureBody.Metadata earlyTrust names.trust := ⟨early,names.checkpoint,names.authentic⟩
+
+structure JournalInput where
+  artifacts : Artifacts
+  current : FamilyInputs.CurrentBasis
+  facts : NativeConfigAdmission.RuntimeFacts
+  failureNames : Option FailureNames
+  failureLimits : PublicFailureBody.Limits
+
+section OrdinaryStored
+variable (sha : Bytes → Bytes) (input : JournalInput) (raw : Bytes)
+
+structure OrdinaryObservation where
+  entry : NativeWalBytes.Entry
+  decoded : NativeWalBytes.decode sha raw = some entry
+  loaded : NativeEarlySource.Loaded sha input.artifacts.policy input.artifacts.state entry.command input.facts
+  id : Bytes
+  hashed : NativeVoteBytes.voteId sha entry.command = some id
+  valid : NativeReceiptBytes.Valid (receiptForWal entry loaded.original.vote loaded.original.admitted id)
+  link : NativeWalBytes.ReceiptLink sha input.artifacts.policy entry
+    (receiptForWal entry loaded.original.vote loaded.original.admitted id)
+  voteLink : NativeVoteBytes.ReceiptLinked sha
+    (receiptForWal entry loaded.original.vote loaded.original.admitted id) loaded.original.vote
+
+def loadOrdinaryObservation : Option (OrdinaryObservation sha input raw) := do
+  match decoded : NativeWalBytes.decode sha raw with
+  | none => none
+  | some entry =>
+    let loaded ← NativeEarlySource.load sha input.artifacts.policy input.artifacts.state entry.command input.facts
+    match hashed : NativeVoteBytes.voteId sha entry.command with
+    | none => none
+    | some id =>
+      if checks : NativeReceiptBytes.Valid (receiptForWal entry loaded.original.vote loaded.original.admitted id) ∧
+          NativeWalBytes.ReceiptLink sha input.artifacts.policy entry
+            (receiptForWal entry loaded.original.vote loaded.original.admitted id) ∧
+          NativeVoteBytes.ReceiptLinked sha
+            (receiptForWal entry loaded.original.vote loaded.original.admitted id) loaded.original.vote then
+        some ⟨entry,decoded,loaded,id,hashed,checks.1,checks.2.1,checks.2.2⟩
+      else none
+
+variable {sha input raw} (observation : OrdinaryObservation sha input raw)
+
+def OrdinaryObservation.receipt : NativeReceiptBytes.Receipt :=
+  receiptForWal observation.entry observation.loaded.original.vote observation.loaded.original.admitted observation.id
+
+theorem ordinaryOriginalWalBinding :
+    NativeWalBytes.bindReceipt sha input.artifacts.policy raw (NativeReceiptBytes.encode observation.receipt) =
+      some (observation.entry,observation.receipt,observation.loaded.original.vote) :=
+  NativeWalBytes.bindFromComponents sha input.artifacts.policy raw (NativeReceiptBytes.encode observation.receipt)
+    observation.entry observation.receipt observation.loaded.original.vote observation.decoded
+    (NativeVoteBytes.receiptFromComponents sha observation.receipt observation.loaded.original.vote observation.valid
+      (NativeVoteBytes.bindingFromComponents sha observation.receipt observation.loaded.original.vote
+        (NativeEarlySource.loadedOriginal observation.loaded).vote observation.voteLink)) observation.link
+
+theorem ordinaryOriginalSequence : observation.entry.sequence = input.facts.expectedSequence := by
+  have bytes := NativeWalBytes.boundOriginalBytes sha input.artifacts.policy raw (NativeReceiptBytes.encode observation.receipt)
+    observation.entry observation.receipt observation.loaded.original.vote (ordinaryOriginalWalBinding observation)
+  exact bytes.2.2.2.trans (NativeEarlySource.loadedIdentity observation.loaded).2.2.2.2.2.2.2.2
+
+variable {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+
+inductive OrdinaryBody where
+  | early (image : PublicEarlyBody.Image sha observation.loaded.original metadata.early)
+      (computed : PublicEarlyBody.project sha observation.loaded.original metadata.early = some image)
+      (separated : image.Separated)
+  | planning (image : PublicPlanningBody.Image observation.loaded.original metadata)
+      (computed : PublicPlanningBody.project observation.loaded.original metadata = some image)
+      (separated : image.Separated)
+  | failure (names : FailureNames) (originalNames : input.failureNames = some names)
+      (image : PublicFailureBody.Image sha observation.loaded.original (names.metadata metadata.early) input.failureLimits)
+      (computed : PublicFailureBody.project sha observation.loaded.original (names.metadata metadata.early)
+        input.failureLimits = some image)
+      (separated : image.Separated)
+      (configured : PublicFailureBody.ConfigurationFits input.failureLimits observation.loaded.original)
+
+def loadOrdinaryBody : Option (OrdinaryBody observation metadata) :=
+  match computed : PublicEarlyBody.project sha observation.loaded.original metadata.early with
+  | some image => if separated : image.Separated then some (.early image computed separated) else none
+  | none =>
+    match computed : PublicPlanningBody.project observation.loaded.original metadata with
+    | some image => if separated : image.Separated then some (.planning image computed separated) else none
+    | none =>
+      match originalNames : input.failureNames with
+      | none => none
+      | some names =>
+        match computed : PublicFailureBody.project sha observation.loaded.original (names.metadata metadata.early)
+            input.failureLimits with
+        | none => none
+        | some image =>
+          if checks : image.Separated ∧ PublicFailureBody.ConfigurationFits input.failureLimits observation.loaded.original then
+            some (.failure names originalNames image computed checks.1 checks.2)
+          else none
+
+variable {observation metadata}
+
+def OrdinaryBody.vote : OrdinaryBody observation metadata → Vote
+  | .early image .. => image.vote
+  | .planning image .. => image.vote
+  | .failure _ _ image .. => image.vote
+
+def OrdinaryBody.header : OrdinaryBody observation metadata → PublicEarlyBody.Header metadata.early observation.loaded.original
+  | .early (.config _ header) .. => header
+  | .early (.isc _ body) .. => body.header
+  | .planning (.ec _ body) .. => body.parent.header
+  | .planning (.apc _ body) .. => body.ec.parent.header
+  | .failure _ _ (.view _ body) .. => body.header
+  | .failure _ _ (.abort _ body) .. => body.header
+
+theorem ordinaryBodyActor (body : OrdinaryBody observation metadata) : body.vote.actor = body.header.actor.value := by
+  cases body with
+  | early image _ _ => cases image <;> rfl
+  | planning image _ _ => cases image <;> rfl
+  | failure _ _ image _ _ _ => cases image <;> rfl
+
+variable (mapping : IdentityMap) (actors : List Value) (names : Bytes → Option String)
+    (vocabulary : Vocabulary) (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (sha input raw)
+
+def OrdinaryAliasChecks (observation : OrdinaryObservation sha input raw) (body : OrdinaryBody observation metadata) : Prop :=
+  actorBytes mapping body.header.actor.value = some observation.loaded.original.vote.wire.validator ∧
+  body.header.actor.value ∈ actors ∧
+  mapping.height body.header.height.value = some observation.loaded.original.state.height ∧
+  (mapping.epoch body.header.epoch.value).map asciiBytes = some observation.loaded.original.policy.epoch ∧
+  names observation.loaded.original.policy.config = some body.header.config.text
+
+instance (observation : OrdinaryObservation sha input raw) (body : OrdinaryBody observation metadata) :
+    Decidable (OrdinaryAliasChecks (sha := sha) (input := input) (raw := raw) (mapping := mapping) (actors := actors) (names := names) (metadata := metadata) observation body) := by
+  unfold OrdinaryAliasChecks; infer_instance
+
+structure OrdinaryProjection where
+  observation : OrdinaryObservation sha input raw
+  committee : PolicyActors mapping actors input.artifacts.policy
+  body : OrdinaryBody observation metadata
+  aliases : OrdinaryAliasChecks (sha := sha) (input := input) (raw := raw) (mapping := mapping) (actors := actors) (names := names) (metadata := metadata) observation body
+  canonical : PublicState.canonical vocabulary.models (.function (voteEntries body.vote)) = true
+
+def loadOrdinaryProjection : Option (OrdinaryProjection (sha := sha) (input := input) (raw := raw) (mapping := mapping) (actors := actors) (names := names) (vocabulary := vocabulary) (metadata := metadata)) := do
+  let observation ← loadOrdinaryObservation sha input raw
+  let committee ← checkPolicyActors mapping actors input.artifacts.policy
+  let body ← loadOrdinaryBody observation metadata
+  if checked : OrdinaryAliasChecks (sha := sha) (input := input) (raw := raw) (mapping := mapping) (actors := actors) (names := names) (metadata := metadata) observation body ∧
+      PublicState.canonical vocabulary.models (.function (voteEntries body.vote)) = true then
+    some ⟨observation,committee,body,checked.1,checked.2⟩
+  else none
+
+variable {mapping actors names vocabulary metadata sha input raw}
+    (ordinary : OrdinaryProjection (sha := sha) (input := input) (raw := raw) (mapping := mapping) (actors := actors) (names := names) (vocabulary := vocabulary) (metadata := metadata))
+
+theorem ordinaryOriginalActor : actorBytes mapping ordinary.body.vote.actor =
+    some ordinary.observation.loaded.original.vote.wire.validator := by
+  rw [ordinaryBodyActor]; exact ordinary.aliases.1
+
+theorem ordinaryNoSignerInflation {other : Value} (member : other ∈ actors)
+    (same : actorBytes mapping other = some ordinary.observation.loaded.original.vote.wire.validator) :
+    other = ordinary.body.vote.actor := by
+  apply actorAliasesInjective ordinary.committee.names member
+  · rw [ordinaryBodyActor]; exact ordinary.aliases.2.1
+  · exact same
+  · exact ordinaryOriginalActor ordinary
+
+end OrdinaryStored
+
+section MixedVoteRows
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (units : NativeStateProjection.UnitSource) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+inductive JournalProjection (input : JournalInput) (raw : Bytes) where
+  | arithmetic (stored : StoredProjection sha mapping actors input.artifacts units input.current raw input.facts indices
+      vocabulary configured names metadata shardAliases checkpointNames expected)
+  | root (stored : RootProjection sha mapping actors input.artifacts units input.current raw input.facts indices
+      vocabulary configured names metadata shardAliases checkpointNames)
+  | ordinary (stored : OrdinaryProjection (sha := sha) (input := input) (raw := raw) (mapping := mapping) (actors := actors) (names := names) (vocabulary := vocabulary) (metadata := metadata))
+
+def loadJournalProjection (input : JournalInput) (raw : Bytes) :
+    Option (JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw) :=
+  match loadStoredProjection sha mapping actors input.artifacts units input.current raw input.facts indices
+      vocabulary configured names metadata shardAliases checkpointNames expected with
+  | some stored => some (.arithmetic stored)
+  | none => do
+    match loadRootProjection sha mapping actors input.artifacts units input.current raw input.facts indices
+        vocabulary configured names metadata shardAliases checkpointNames with
+    | some stored => some (.root stored)
+    | none => do
+      let stored ← loadOrdinaryProjection (sha := sha) (input := input) (raw := raw) (mapping := mapping) (actors := actors) (names := names) (vocabulary := vocabulary) (metadata := metadata)
+      some (.ordinary stored)
+
+variable {sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected}
+
+def JournalProjection.entry {input raw} :
+    JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw → NativeWalBytes.Entry
+  | .arithmetic stored => stored.observation.entry
+  | .root stored => stored.observation.entry
+  | .ordinary stored => stored.observation.entry
+
+def JournalProjection.vote {input raw} :
+    JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw → Vote
+  | .arithmetic stored => stored.view.projectedVote
+  | .root stored => stored.view.projectedVote
+  | .ordinary stored => stored.body.vote
+
+def JournalProjection.nativeVote {input raw} :
+    JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw → NativeVoteBytes.Vote
+  | .arithmetic stored => stored.observation.vote
+  | .root stored => stored.observation.loaded.original.vote
+  | .ordinary stored => stored.observation.loaded.original.vote
+
+def JournalProjection.configAlias {input raw} :
+    JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw → Bytes × Value
+  | .arithmetic stored => ((NativeVectorAuthority.policy stored.source.bound).config,
+      stored.authority.parents.ec.parent.header.config.value)
+  | .root stored => ((NativeVectorAuthority.policy stored.source.bound).config,
+      stored.authority.parents.ec.parent.header.config.value)
+  | .ordinary stored => (stored.observation.loaded.original.policy.config,stored.body.header.config.value)
+
+theorem journalConfigFromOriginalName {input raw}
+    (row : JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw) :
+    ∃ name, names row.configAlias.1 = some name ∧ row.configAlias.2 = .model name := by
+  cases row with
+  | arithmetic stored => exact ⟨_,stored.view.aliases.2.2.2.2.1,rfl⟩
+  | root stored => exact ⟨_,stored.view.aliases.2.2.2.2.1,rfl⟩
+  | ordinary stored => exact ⟨_,stored.aliases.2.2.2.2,rfl⟩
+
+theorem journalSameConfigHasSamePublicName {leftInput leftRaw rightInput rightRaw}
+    (left : JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected leftInput leftRaw)
+    (right : JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected rightInput rightRaw)
+    (same : left.configAlias.1 = right.configAlias.1) : left.configAlias.2 = right.configAlias.2 := by
+  obtain ⟨a,ha,va⟩ := journalConfigFromOriginalName left
+  obtain ⟨b,hb,vb⟩ := journalConfigFromOriginalName right
+  have namesEqual := Option.some.inj (ha.symm.trans ((congrArg names same).trans hb))
+  exact va.trans ((congrArg Value.model namesEqual).trans vb.symm)
+
+theorem journalProjectionActorAndCanonical {input raw}
+    (row : JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw) :
+    actorBytes mapping row.vote.actor = some row.nativeVote.wire.validator ∧
+    PublicState.canonical vocabulary.models (.function (voteEntries row.vote)) = true := by
+  cases row with
+  | arithmetic stored => exact ⟨(storedOriginalVoteIdentity stored).2.1,stored.view.canonical⟩
+  | root stored => exact ⟨(rootViewKeepsWholeOriginals stored.view).2.2.1,stored.view.canonical⟩
+  | ordinary stored => exact ⟨ordinaryOriginalActor stored,stored.canonical⟩
+
+theorem journalProjectionOriginal {input raw}
+    (row : JournalProjection sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected input raw) :
+    NativeWalBytes.decode sha raw = some row.entry ∧ row.entry.kind = 2 ∧
+    row.entry.sequence = input.facts.expectedSequence := by
+  cases row with
+  | arithmetic stored =>
+    exact ⟨stored.observation.decoded,stored.observation.link.1,(storedOriginalVoteIdentity stored).2.2.1⟩
+  | root stored =>
+    exact ⟨stored.observation.decoded,stored.observation.link.1,(rootOriginalBytes stored.observation).2.2⟩
+  | ordinary stored =>
+    exact ⟨stored.observation.decoded,stored.observation.link.1,ordinaryOriginalSequence stored.observation⟩
+
+structure JournalRow where
+  piece : NativeWalScan.Piece
+  input : JournalInput
+  projection : JournalProjection sha mapping actors units indices vocabulary configured names metadata
+    shardAliases checkpointNames expected input piece.bytes
+  original : projection.entry = piece.entry
+
+variable (sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected)
+
+def loadJournalRow (piece : NativeWalScan.Piece) (input : JournalInput) :
+    Option (JournalRow (sha := sha) (mapping := mapping) (actors := actors) (units := units) (indices := indices)
+      (vocabulary := vocabulary) (configured := configured) (names := names) (metadata := metadata)
+      (shardAliases := shardAliases) (checkpointNames := checkpointNames) (expected := expected)) := do
+  let projection ← loadJournalProjection sha mapping actors units indices vocabulary configured names metadata
+    shardAliases checkpointNames expected input piece.bytes
+  if original : projection.entry = piece.entry then some ⟨piece,input,projection,original⟩ else none
+
+def loadJournalRows : List NativeWalScan.Piece → List JournalInput →
+    Option (List (JournalRow (sha := sha) (mapping := mapping) (actors := actors) (units := units) (indices := indices)
+      (vocabulary := vocabulary) (configured := configured) (names := names) (metadata := metadata)
+      (shardAliases := shardAliases) (checkpointNames := checkpointNames) (expected := expected)))
+  | [],[] => some []
+  | [],_::_ => none
+  | piece::pieces,inputs =>
+    if piece.entry.kind = 1 then
+      loadJournalRows pieces inputs
+    else match inputs with
+      | [] => none
+      | input::inputs => do
+        let row ← loadJournalRow sha mapping actors units indices vocabulary configured names metadata
+          shardAliases checkpointNames expected piece input
+        let rest ← loadJournalRows pieces inputs
+        some (row::rest)
+
+variable {sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected}
+
+theorem journalRowLoaded {piece input row}
+    (loaded : loadJournalRow sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected piece input = some row) : row.piece = piece ∧ row.input = input := by
+  unfold loadJournalRow at loaded
+  simp only [bind,Option.bind_eq_some_iff] at loaded
+  obtain ⟨projection,_,last⟩ := loaded
+  split at last <;> try contradiction
+  cases Option.some.inj last
+  exact ⟨rfl,rfl⟩
+
+theorem journalRowsEntireOriginals {pieces inputs rows}
+    (loaded : loadJournalRows sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected pieces inputs = some rows) :
+    rows.map JournalRow.piece = pieces.filter (fun piece => piece.entry.kind != 1) ∧
+    rows.map JournalRow.input = inputs := by
+  induction pieces generalizing inputs rows with
+  | nil =>
+    cases inputs <;> simp [loadJournalRows] at loaded
+    subst rows; exact ⟨rfl,rfl⟩
+  | cons piece pieces ih =>
+    unfold loadJournalRows at loaded
+    split at loaded
+    · rename_i command
+      have tail := ih loaded
+      simpa only [List.filter_cons,command,bne_self_eq_false,Bool.false_eq_true,if_false] using tail
+    · rename_i notCommand
+      cases inputs with
+      | nil => contradiction
+      | cons input inputs =>
+        simp only [bind,Option.bind_eq_some_iff] at loaded
+        obtain ⟨row,hr,rest,ht,last⟩ := loaded
+        cases Option.some.inj last
+        have first := journalRowLoaded hr
+        have tail := ih ht
+        constructor
+        · simp only [List.map_cons,first.1,tail.1,List.filter_cons,bne_iff_ne.mpr notCommand,if_true]
+        · simp only [List.map_cons,first.2,tail.2]
+
+theorem journalRowsNoExtraSource {pieces inputs rows}
+    (loaded : loadJournalRows sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected pieces inputs = some rows) :
+    rows.length = inputs.length ∧ rows.length = (pieces.filter (fun piece => piece.entry.kind != 1)).length := by
+  have exacts := journalRowsEntireOriginals loaded
+  exact ⟨by simpa using congrArg List.length exacts.2,by simpa using congrArg List.length exacts.1⟩
+
+theorem journalRowsEveryNativeVote {pieces inputs rows piece}
+    (loaded : loadJournalRows sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected pieces inputs = some rows)
+    (member : piece ∈ pieces) (vote : piece.entry.kind = 2) :
+    ∃ row ∈ rows, row.piece = piece := by
+  apply List.mem_map.mp
+  rw [(journalRowsEntireOriginals loaded).1]
+  exact List.mem_filter.mpr ⟨member,by simp [vote]⟩
+
+theorem journalRowsEveryPublicVote {pieces inputs rows row}
+    (loaded : loadJournalRows sha mapping actors units indices vocabulary configured names metadata
+      shardAliases checkpointNames expected pieces inputs = some rows) (member : row ∈ rows) :
+    row.piece ∈ pieces ∧ row.piece.entry.sequence = row.input.facts.expectedSequence ∧
+    NativeWalBytes.decode sha row.piece.bytes = some row.piece.entry := by
+  have original := journalProjectionOriginal row.projection
+  rw [row.original] at original
+  refine ⟨?_,original.2.2,original.1⟩
+  apply List.mem_of_mem_filter
+  rw [← (journalRowsEntireOriginals loaded).1]
+  exact List.mem_map.mpr ⟨row,member,rfl⟩
+
+def journalVotes (rows : List (JournalRow (sha := sha) (mapping := mapping) (actors := actors) (units := units)
+    (indices := indices) (vocabulary := vocabulary) (configured := configured) (names := names)
+    (metadata := metadata) (shardAliases := shardAliases) (checkpointNames := checkpointNames) (expected := expected))) :
+    List Vote := rows.map (fun row => row.projection.vote)
+
+variable (sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected)
+    (observation : Option Bytes) (inputs : List JournalInput) (actor : Value) (candidate : List Vote)
+
+structure VoteCollection where
+  raw : Bytes
+  known : observation = some raw
+  scan : NativeWalScan.Result
+  scanned : NativeWalScan.check sha raw = some scan
+  complete : scan.torn = false
+  rows : List (JournalRow (sha := sha) (mapping := mapping) (actors := actors) (units := units)
+    (indices := indices) (vocabulary := vocabulary) (configured := configured) (names := names)
+    (metadata := metadata) (shardAliases := shardAliases) (checkpointNames := checkpointNames) (expected := expected))
+  loaded : loadJournalRows sha mapping actors units indices vocabulary configured names metadata shardAliases
+    checkpointNames expected scan.pieces inputs = some rows
+  unique : (journalVotes rows).Nodup
+  sameActor : ∀ vote ∈ journalVotes rows, vote.actor = actor
+  exactVotes : candidate.Perm (journalVotes rows)
+
+def loadVoteCollection : Option (VoteCollection sha mapping actors units indices vocabulary configured names
+    metadata shardAliases checkpointNames expected observation inputs actor candidate) :=
+  match observation with
+  | none => none
+  | some raw =>
+    match scanned : NativeWalScan.check sha raw with
+    | none => none
+    | some scan =>
+      if complete : scan.torn = false then
+        match loaded : loadJournalRows sha mapping actors units indices vocabulary configured names metadata shardAliases
+            checkpointNames expected scan.pieces inputs with
+        | none => none
+        | some rows =>
+          if checked : (journalVotes rows).Nodup ∧ (∀ vote ∈ journalVotes rows, vote.actor = actor) ∧
+              candidate.Perm (journalVotes rows) then
+            some ⟨raw,rfl,scan,scanned,complete,rows,loaded,checked.1,checked.2.1,checked.2.2⟩
+          else none
+      else none
+
+theorem unknownVoteCollectionRejects :
+    loadVoteCollection sha mapping actors units indices vocabulary configured names metadata shardAliases
+      checkpointNames expected none inputs actor candidate = none := rfl
+
+variable {sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected
+  observation inputs actor candidate}
+    (collection : VoteCollection sha mapping actors units indices vocabulary configured names metadata shardAliases
+      checkpointNames expected observation inputs actor candidate)
+
+theorem collectionExactOriginalRows :
+    collection.rows.map JournalRow.piece = collection.scan.pieces.filter (fun piece => piece.entry.kind != 1) ∧
+    collection.rows.map JournalRow.input = inputs := journalRowsEntireOriginals collection.loaded
+
+theorem collectionNoMissingPublicVote {piece} (member : piece ∈ collection.scan.pieces)
+    (vote : piece.entry.kind = 2) :
+    ∃ row ∈ collection.rows, row.piece = piece ∧ row.projection.vote ∈ candidate := by
+  obtain ⟨row,present,exactPiece⟩ := journalRowsEveryNativeVote collection.loaded member vote
+  refine ⟨row,present,exactPiece,collection.exactVotes.mem_iff.mpr ?_⟩
+  exact List.mem_map.mpr ⟨row,present,rfl⟩
+
+theorem collectionNoExtraPublicVote {vote} (member : vote ∈ candidate) :
+    ∃ row ∈ collection.rows, row.projection.vote = vote ∧ row.piece ∈ collection.scan.pieces ∧
+      NativeWalBytes.decode sha row.piece.bytes = some row.piece.entry := by
+  obtain ⟨row,present,exactVote⟩ := List.mem_map.mp (collection.exactVotes.mem_iff.mp member)
+  have original := journalRowsEveryPublicVote collection.loaded present
+  exact ⟨row,present,exactVote,original.1,original.2.2⟩
+
+include collection in
+theorem collectionNoDuplicatePublicVote : candidate.Nodup :=
+  collection.exactVotes.symm.nodup collection.unique
+
+include collection in
+theorem collectionActorFromOriginal {vote} (member : vote ∈ candidate) : vote.actor = actor :=
+  collection.sameActor vote (collection.exactVotes.mem_iff.mp member)
+
+theorem collectionPhysicalSequenceRetained {row} (member : row ∈ collection.rows) :
+    ∃ position, collection.scan.pieces[position]? = some row.piece ∧
+      row.piece.entry.sequence = position + 1 ∧ row.input.facts.expectedSequence = position + 1 := by
+  have original := journalRowsEveryPublicVote collection.loaded member
+  obtain ⟨position,atPosition⟩ := List.mem_iff_getElem?.mp original.1
+  have entry : (NativeWalScan.entries collection.scan)[position]? = some row.piece.entry := by
+    simp only [NativeWalScan.entries,List.getElem?_map,atPosition,Option.map_some]
+  have sequence := NativeWalScan.checkedPosition sha collection.raw collection.scan collection.scanned
+    position row.piece.entry entry
+  exact ⟨position,atPosition,by omega,by omega⟩
+
+theorem collectionLogicalCountKeepsPhysicalPositions :
+    candidate.length = (collection.scan.pieces.filter (fun piece => piece.entry.kind != 1)).length := by
+  have count := (journalRowsNoExtraSource collection.loaded).2
+  exact collection.exactVotes.length_eq.trans ((List.length_map ..).trans count)
+
+theorem collectionWholeOriginalBytes : collection.raw = NativeWalScan.joined collection.scan.pieces := by
+  have terminal := NativeWalScan.checkedTerminal sha collection.raw collection.scan collection.scanned
+  simp only [collection.complete,Bool.false_eq_true,if_false] at terminal
+  simpa only [terminal,List.append_nil] using
+    NativeWalScan.checkedPartition sha collection.raw collection.scan collection.scanned
+
+include collection in
+theorem collectionCandidateCanonical {vote} (member : vote ∈ candidate) :
+    PublicState.canonical vocabulary.models (.function (voteEntries vote)) = true := by
+  obtain ⟨row,_,same,_,_⟩ := collectionNoExtraPublicVote collection member
+  rw [← same]
+  exact (journalProjectionActorAndCanonical row.projection).2
+
+theorem collectionsUseSameOriginalRows {otherCandidate}
+    (other : VoteCollection sha mapping actors units indices vocabulary configured names metadata shardAliases
+      checkpointNames expected observation inputs actor otherCandidate) :
+    collection.raw = other.raw ∧ collection.scan = other.scan ∧ collection.rows = other.rows := by
+  have raw := Option.some.inj (collection.known.symm.trans other.known)
+  have scan := Option.some.inj (collection.scanned.symm.trans
+    ((congrArg (NativeWalScan.check sha) raw).trans other.scanned))
+  have rows := Option.some.inj (collection.loaded.symm.trans
+    ((congrArg (fun s : NativeWalScan.Result => loadJournalRows sha mapping actors units indices vocabulary configured
+      names metadata shardAliases checkpointNames expected s.pieces inputs) scan).trans other.loaded))
+  exact ⟨raw,scan,rows⟩
+
+include collection in
+theorem collectionRejectsDroppedExtraOrSubstituted {otherCandidate}
+    (different : ¬ candidate.Perm otherCandidate)
+    (other : VoteCollection sha mapping actors units indices vocabulary configured names metadata shardAliases
+      checkpointNames expected observation inputs actor otherCandidate) : False := by
+  have rows := (collectionsUseSameOriginalRows collection other).2.2
+  have same := collection.exactVotes
+  rw [rows] at same
+  exact different (same.trans other.exactVotes.symm)
+
+/- One observed stream per original actor. This binds the ENTIRE durableVotes
+field, without assigning command positions to the public logical vote count.
+Authentication of complete actor observations and the other static fields stays
+in the same remaining R2.3 source/state boundary. -/
+structure ActorPacket where
+  actor : Value
+  observation : Option Bytes
+  inputs : List JournalInput
+
+def votesOf (actor : Value) (votes : List Vote) : List Vote := votes.filter (fun vote => vote.actor == actor)
+
+structure ActorVotes (votes : List Vote) where
+  packet : ActorPacket
+  collection : VoteCollection sha mapping actors units indices vocabulary configured names metadata shardAliases
+    checkpointNames expected packet.observation packet.inputs packet.actor (votesOf packet.actor votes)
+
+def observedConfigs {votes} (images : List (ActorVotes (sha := sha) (mapping := mapping) (actors := actors)
+    (units := units) (indices := indices) (vocabulary := vocabulary) (configured := configured) (names := names)
+    (metadata := metadata) (shardAliases := shardAliases) (checkpointNames := checkpointNames) (expected := expected) votes)) :
+    List (Bytes × Value) := images.flatMap (fun image => image.collection.rows.map (fun row => row.projection.configAlias))
+
+/- Only configuration identities share this namespace. There is no imposed
+global injectivity across unrelated primitive-key categories or coordinates. -/
+def ConfigNamesSeparated (pairs : List (Bytes × Value)) : Prop :=
+  ∀ left ∈ pairs, ∀ right ∈ pairs, left.2 = right.2 → left.1 = right.1
+
+instance (pairs : List (Bytes × Value)) : Decidable (ConfigNamesSeparated pairs) := by
+  unfold ConfigNamesSeparated; infer_instance
+
+theorem distinctConfigurationsCannotCollapse {pairs left right}
+    (checked : ConfigNamesSeparated pairs) (first : left ∈ pairs) (second : right ∈ pairs)
+    (different : left.1 ≠ right.1) : left.2 ≠ right.2 := fun same => different (checked left first right second same)
+
+variable (sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected)
+
+def loadActorVotes (votes : List Vote) : List ActorPacket →
+    Option (List (ActorVotes (sha := sha) (mapping := mapping) (actors := actors) (units := units) (indices := indices)
+      (vocabulary := vocabulary) (configured := configured) (names := names) (metadata := metadata)
+      (shardAliases := shardAliases) (checkpointNames := checkpointNames) (expected := expected) votes))
+  | [] => some []
+  | packet::packets => do
+    let collection ← loadVoteCollection sha mapping actors units indices vocabulary configured names metadata shardAliases
+      checkpointNames expected packet.observation packet.inputs packet.actor (votesOf packet.actor votes)
+    let rest ← loadActorVotes votes packets
+    some (⟨packet,collection⟩::rest)
+
+variable {sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected}
+
+theorem actorVotesEntirePackets {votes packets images}
+    (loaded : loadActorVotes sha mapping actors units indices vocabulary configured names metadata shardAliases
+      checkpointNames expected votes packets = some images) : images.map ActorVotes.packet = packets := by
+  induction packets generalizing images with
+  | nil => cases Option.some.inj loaded; rfl
+  | cons packet packets ih =>
+    simp only [loadActorVotes,bind,Option.bind_eq_some_iff] at loaded
+    obtain ⟨collection,_,rest,tail,last⟩ := loaded
+    cases Option.some.inj last
+    simp only [List.map_cons,ih tail]
+
+variable (sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected)
+    (state : PublicState.State) (packets : List ActorPacket)
+
+structure DurableVoteState where
+  votes : List Vote
+  fromState : PublicState.readVotes state = some votes
+  inventory : packets.map ActorPacket.actor = actors
+  distinctActors : actors.Nodup
+  knownActors : ∀ vote ∈ votes, vote.actor ∈ actors
+  unique : votes.Nodup
+  sequences : ∀ actor ∈ actors, (state.read "durableSequence" >>= fun f => readFunction f actor) =
+    some (.integer (votesOf actor votes).length)
+  images : List (ActorVotes (sha := sha) (mapping := mapping) (actors := actors) (units := units) (indices := indices)
+    (vocabulary := vocabulary) (configured := configured) (names := names) (metadata := metadata)
+    (shardAliases := shardAliases) (checkpointNames := checkpointNames) (expected := expected) votes)
+  loaded : loadActorVotes sha mapping actors units indices vocabulary configured names metadata shardAliases
+    checkpointNames expected votes packets = some images
+  configNames : ConfigNamesSeparated (observedConfigs images)
+
+def loadDurableVoteState : Option (DurableVoteState sha mapping actors units indices vocabulary configured names metadata
+    shardAliases checkpointNames expected state packets) :=
+  match fromState : PublicState.readVotes state with
+  | none => none
+  | some votes =>
+    if checked : packets.map ActorPacket.actor = actors ∧ actors.Nodup ∧ (∀ vote ∈ votes, vote.actor ∈ actors) ∧ votes.Nodup ∧
+        (∀ actor ∈ actors, (state.read "durableSequence" >>= fun f => readFunction f actor) =
+          some (.integer (votesOf actor votes).length)) then
+      match loaded : loadActorVotes sha mapping actors units indices vocabulary configured names metadata shardAliases
+          checkpointNames expected votes packets with
+      | none => none
+      | some images =>
+        if configNames : ConfigNamesSeparated (observedConfigs images) then
+          some ⟨votes,fromState,checked.1,checked.2.1,checked.2.2.1,checked.2.2.2.1,checked.2.2.2.2,images,loaded,configNames⟩
+        else none
+    else none
+
+variable {sha mapping actors units indices vocabulary configured names metadata shardAliases checkpointNames expected state packets}
+    (durable : DurableVoteState sha mapping actors units indices vocabulary configured names metadata shardAliases
+      checkpointNames expected state packets)
+
+theorem durableEntireActorInventory : durable.images.map (fun image => image.packet.actor) = actors := by
+  have same := congrArg (List.map ActorPacket.actor) (actorVotesEntirePackets durable.loaded)
+  simpa only [List.map_map,Function.comp_def] using same.trans durable.inventory
+
+theorem durableEveryActorHasOriginalStream {actor} (member : actor ∈ actors) :
+    ∃ image ∈ durable.images, image.packet.actor = actor ∧ image.packet.observation = some image.collection.raw := by
+  rw [← durableEntireActorInventory durable] at member
+  obtain ⟨image,present,same⟩ := List.mem_map.mp member
+  exact ⟨image,present,same,image.collection.known⟩
+
+theorem durableEveryPublicVoteHasOriginal {vote} (member : vote ∈ durable.votes) :
+    ∃ image ∈ durable.images, ∃ row ∈ image.collection.rows,
+      row.projection.vote = vote ∧ row.piece ∈ image.collection.scan.pieces ∧
+      NativeWalBytes.decode sha row.piece.bytes = some row.piece.entry := by
+  obtain ⟨image,present,actor,_⟩ := durableEveryActorHasOriginalStream durable (durable.knownActors vote member)
+  have selected : vote ∈ votesOf image.packet.actor durable.votes := by
+    apply List.mem_filter.mpr
+    exact ⟨member,by simp only [actor,beq_self_eq_true]⟩
+  obtain ⟨row,rowPresent,same,original,decoded⟩ := collectionNoExtraPublicVote image.collection selected
+  exact ⟨image,present,row,rowPresent,same,original,decoded⟩
+
+theorem durableEveryNativeVoteHasPublic {image} (present : image ∈ durable.images) {piece}
+    (member : piece ∈ image.collection.scan.pieces) (vote : piece.entry.kind = 2) :
+    image.packet ∈ packets ∧ ∃ row ∈ image.collection.rows, row.piece = piece ∧ row.projection.vote ∈ durable.votes := by
+  obtain ⟨row,rowPresent,same,exposed⟩ := collectionNoMissingPublicVote image.collection member vote
+  refine ⟨?_,row,rowPresent,same,(List.mem_filter.mp exposed).1⟩
+  have mapped : image.packet ∈ durable.images.map ActorVotes.packet := List.mem_map.mpr ⟨image,present,rfl⟩
+  simpa only [actorVotesEntirePackets durable.loaded] using mapped
+
+theorem durableLogicalSequenceFromOriginalVotes {image} (present : image ∈ durable.images) :
+    (state.read "durableSequence" >>= fun f => readFunction f image.packet.actor) =
+      some (.integer image.collection.rows.length) := by
+  have member : image.packet.actor ∈ durable.images.map (fun i => i.packet.actor) :=
+    List.mem_map.mpr ⟨image,present,rfl⟩
+  have actor : image.packet.actor ∈ actors := by simpa only [durableEntireActorInventory durable] using member
+  have sequence := durable.sequences image.packet.actor actor
+  have count := image.collection.exactVotes.length_eq
+  simp only [journalVotes,List.length_map] at count
+  simpa only [count] using sequence
+
+theorem durableOriginalSourcePackets : durable.images.map ActorVotes.packet = packets :=
+  actorVotesEntirePackets durable.loaded
+
+theorem durableConfigNameIsUnambiguous {leftImage rightImage}
+    (firstImage : leftImage ∈ durable.images) (secondImage : rightImage ∈ durable.images)
+    {left right} (first : left ∈ leftImage.collection.rows) (second : right ∈ rightImage.collection.rows)
+    (same : left.projection.configAlias.2 = right.projection.configAlias.2) :
+    left.projection.configAlias.1 = right.projection.configAlias.1 := by
+  apply durable.configNames _ ?_ _ ?_ same
+  · exact List.mem_flatMap.mpr ⟨leftImage,firstImage,List.mem_map.mpr ⟨left,first,rfl⟩⟩
+  · exact List.mem_flatMap.mpr ⟨rightImage,secondImage,List.mem_map.mpr ⟨right,second,rfl⟩⟩
+
+theorem durableWholeStateSource {field} (known : field ∈ PublicState.fieldNames) :
+    ∃ value, state.read field = some value := by
+  obtain ⟨value,read,_⟩ := PublicState.everyFieldRetained state known
+  exact ⟨value,read⟩
+
+end MixedVoteRows
+
+/- Static current-field identity. The initial checkpoint may be a separately
+authenticated identifier; only an actual finalized APPLY source proves it is
+the model hash. No structured public vector is coerced to a native content ID. -/
+section CurrentField
+variable (mapping : IdentityMap) (checkpointNames : Value → Option Bytes)
+    (state : PublicState.State) (pointer : NativeCurrentPointer.State)
+
+structure CurrentField where
+  symbol : Value
+  original : state.read "currentCheckpoint" = some symbol
+  valid : NativeCurrentPointer.StateValid pointer
+  mapped : (mapping.checkpoint symbol).map asciiBytes = some pointer.checkpoint
+  shared : checkpointNames symbol = some pointer.checkpoint
+
+def loadCurrentField : Option (CurrentField mapping checkpointNames state pointer) :=
+  match original : state.read "currentCheckpoint" with
+  | none => none
+  | some symbol =>
+    if checked : NativeCurrentPointer.StateValid pointer ∧
+        (mapping.checkpoint symbol).map asciiBytes = some pointer.checkpoint ∧
+        checkpointNames symbol = some pointer.checkpoint then
+      some ⟨symbol,original,checked.1,checked.2.1,checked.2.2⟩ else none
+
+variable {mapping checkpointNames state pointer} (field : CurrentField mapping checkpointNames state pointer)
+
+theorem currentFieldComputed : loadCurrentField mapping checkpointNames state pointer = some field := by
+  unfold loadCurrentField
+  split
+  · rename_i absent; rw [field.original] at absent; contradiction
+  · rename_i symbol found
+    cases Option.some.inj (found.symm.trans field.original)
+    rw [dif_pos ⟨field.valid,field.mapped,field.shared⟩]
+
+include field in
+theorem currentFieldCannotChangeCheckpoint {otherPointer}
+    (other : CurrentField mapping checkpointNames state otherPointer) : pointer.checkpoint = otherPointer.checkpoint := by
+  have symbol := Option.some.inj (field.original.symm.trans other.original)
+  exact Option.some.inj (field.shared.symm.trans ((congrArg checkpointNames symbol).trans other.shared))
+
+theorem currentFieldRejectsConflictingNamespaces {native}
+    (different : native ≠ pointer.checkpoint) (observed : checkpointNames field.symbol = some native) : False :=
+  different (Option.some.inj (observed.symm.trans field.shared))
+
+end CurrentField
+
+section CurrentSourceField
+variable {sha mapping actors artifacts units currentPolicy currentState pointer wal facts indices vocabulary configured names
+    earlyTrust planningTrust} {metadata : PublicPlanningBody.Metadata earlyTrust planningTrust}
+    {shardAliases checkpointNames expected}
+    (snapshot : SnapshotProjection sha mapping actors artifacts units currentPolicy currentState pointer wal facts indices
+      vocabulary configured names metadata shardAliases checkpointNames expected)
+    (state : PublicState.State) (field : CurrentField mapping checkpointNames state pointer)
+
+theorem snapshotBindsPublicCurrentToOriginalQc :
+    state.read "currentCheckpoint" = some field.symbol ∧
+    checkpointNames field.symbol = some (idBytes snapshot.current.values.modelHash) ∧
+    snapshot.current.edge.id = pointer.qc ∧ pointer.optimizer = idBytes snapshot.current.values.optimizerHash := by
+  have hashes := certifiedCurrentHashes snapshot.current
+  exact ⟨field.original,field.shared.trans (congrArg some hashes.1),
+    certifiedCurrentOriginalId snapshot.current,hashes.2⟩
+
+theorem snapshotParentUsesPublicCurrent :
+    checkpointNames field.symbol = some (NativeVectorAuthority.state snapshot.stored.source.bound).wire.parent :=
+  field.shared.trans (congrArg some snapshot.stored.source.numeric.checked.1.2.1)
+
+end CurrentSourceField
+
+/- The current QC can have arrived from another validator without a local vote.
+Its original parent bodies therefore read controls from the actual ISC context,
+not from a fabricated NativeSelectedVote. This is part of the same static join. -/
+section CertificateParents
+variable {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (native : NativePlanLineage.Edge)
+
+structure CertificateParents where
+  height : PublicEarlyBody.Name metadata.early (.height native.ec.parent.certificate.body.context.height)
+  epoch : PublicEarlyBody.Name metadata.early (.epoch native.ec.parent.certificate.body.context.epoch)
+  config : PublicEarlyBody.Name metadata.early (.config native.ec.parent.certificate.body.context.config)
+  policy : PublicAuthority.ClosePolicy
+  policySelected : metadata.early.policy native.ec.parent.bodyId native.ec.parent.certificate.body = some policy
+  entries : List (PublicEarlyBody.Entry metadata.early native.ec.parent.bodyId native.ec.parent.certificate.body)
+  entriesComputed : PublicEarlyBody.loadEntries metadata.early native.ec.parent.bodyId
+    native.ec.parent.certificate.body native.ec.parent.certificate.body.tuples = some entries
+  seed : PublicPlanningBody.Name metadata (.seed native.ec.seed.id native.ec.seed.transcript)
+  norm : PublicPlanningBody.Name metadata (.norm native.ec.norm.id native.ec.norm.evidence native.ec.certificate.common)
+  ecMembers : List (PublicPlanningBody.Member metadata.early native.ec.parent.certificate.body.context)
+  ecComputed : PublicPlanningBody.loadMembers metadata.early native.ec.parent.certificate.body.context
+    (NativePlan.acceptedTickets native.ec.certificate) = some ecMembers
+  coefficient : PublicPlanningBody.Name metadata (.coefficient native.id native.certificate.common native.ec.certificate.common)
+  planMembers : List (PublicPlanningBody.Member metadata.early native.ec.parent.certificate.body.context)
+  planComputed : PublicPlanningBody.loadMembers metadata.early native.ec.parent.certificate.body.context
+    (native.certificate.common.weights.map NativePlan.Weight.ticket) = some planMembers
+  parents : PublicPlanningBody.SamePlanParents native
+  members : planMembers.map PublicPlanningBody.Member.value = ecMembers.map PublicPlanningBody.Member.value
+
+def loadCertificateParents : Option (CertificateParents metadata native) := do
+  let height ← PublicEarlyBody.loadName metadata.early (.height native.ec.parent.certificate.body.context.height)
+  let epoch ← PublicEarlyBody.loadName metadata.early (.epoch native.ec.parent.certificate.body.context.epoch)
+  let config ← PublicEarlyBody.loadName metadata.early (.config native.ec.parent.certificate.body.context.config)
+  match policySelected : metadata.early.policy native.ec.parent.bodyId native.ec.parent.certificate.body with
+  | none => none
+  | some policy =>
+    match entriesComputed : PublicEarlyBody.loadEntries metadata.early native.ec.parent.bodyId
+        native.ec.parent.certificate.body native.ec.parent.certificate.body.tuples with
+    | none => none
+    | some entries =>
+      let seed ← PublicPlanningBody.loadName metadata (.seed native.ec.seed.id native.ec.seed.transcript)
+      let norm ← PublicPlanningBody.loadName metadata (.norm native.ec.norm.id native.ec.norm.evidence native.ec.certificate.common)
+      match ecComputed : PublicPlanningBody.loadMembers metadata.early native.ec.parent.certificate.body.context
+          (NativePlan.acceptedTickets native.ec.certificate) with
+      | none => none
+      | some ecMembers =>
+        let coefficient ← PublicPlanningBody.loadName metadata
+          (.coefficient native.id native.certificate.common native.ec.certificate.common)
+        match planComputed : PublicPlanningBody.loadMembers metadata.early native.ec.parent.certificate.body.context
+            (native.certificate.common.weights.map NativePlan.Weight.ticket) with
+        | none => none
+        | some planMembers =>
+          if checked : PublicPlanningBody.SamePlanParents native ∧
+              planMembers.map PublicPlanningBody.Member.value = ecMembers.map PublicPlanningBody.Member.value then
+            some ⟨height,epoch,config,policy,policySelected,entries,entriesComputed,seed,norm,ecMembers,ecComputed,
+              coefficient,planMembers,planComputed,checked.1,checked.2⟩ else none
+
+variable {metadata native} (p : CertificateParents metadata native)
+
+theorem certificateParentsLoaded : loadCertificateParents metadata native = some p := by
+  unfold loadCertificateParents
+  rw [FamilyAuthority.originalEarlyNameLoaded p.height,FamilyAuthority.originalEarlyNameLoaded p.epoch,
+    FamilyAuthority.originalEarlyNameLoaded p.config]
+  simp only [bind,Option.bind]
+  split
+  · rename_i absent; rw [p.policySelected] at absent; contradiction
+  · rename_i policy found
+    cases Option.some.inj (found.symm.trans p.policySelected)
+    split
+    · rename_i absent; rw [p.entriesComputed] at absent; contradiction
+    · rename_i entries found
+      cases Option.some.inj (found.symm.trans p.entriesComputed)
+      rw [FamilyAuthority.originalPlanningNameLoaded p.seed,FamilyAuthority.originalPlanningNameLoaded p.norm]
+      dsimp only
+      split
+      · rename_i absent; rw [p.ecComputed] at absent; contradiction
+      · rename_i members found
+        cases Option.some.inj (found.symm.trans p.ecComputed)
+        rw [FamilyAuthority.originalPlanningNameLoaded p.coefficient]
+        dsimp only
+        split
+        · rename_i absent; rw [p.planComputed] at absent; contradiction
+        · rename_i members found
+          cases Option.some.inj (found.symm.trans p.planComputed)
+          rw [dif_pos ⟨p.parents,p.members⟩]
+
+def CertificateParents.isc : Value := PublicAuthority.iscValue
+  (PublicAuthority.roundValue p.height.value p.epoch.value) p.config.value p.policy
+  (PublicAuthority.setValue (p.entries.map PublicEarlyBody.Entry.value))
+def CertificateParents.seedValue : Value := PublicAuthority.seedValue p.isc p.epoch.value p.seed.value
+def CertificateParents.ec : Value := PublicAuthority.ecValue p.isc p.seedValue
+  (PublicAuthority.setValue (p.ecMembers.map PublicPlanningBody.Member.value)) p.norm.value
+def CertificateParents.apc : Value := PublicAuthority.apcValue p.isc p.seedValue p.ec
+  (PublicAuthority.setValue (p.planMembers.map PublicPlanningBody.Member.value)) p.coefficient.value
+
+theorem certificateParentsOriginalEntries :
+    p.entries.map PublicEarlyBody.Entry.original = native.ec.parent.certificate.body.tuples :=
+  PublicEarlyBody.entriesOriginal p.entriesComputed
+
+theorem certificateParentsOriginalMembers :
+    p.ecMembers.map PublicPlanningBody.Member.original = NativePlan.acceptedTickets native.ec.certificate ∧
+    p.planMembers.map PublicPlanningBody.Member.original = native.certificate.common.weights.map NativePlan.Weight.ticket :=
+  ⟨PublicPlanningBody.membersOriginal p.ecComputed,PublicPlanningBody.membersOriginal p.planComputed⟩
+
+theorem certificateParentsNoLocalVotePremise {x : NativeSelectedVote.Checked}
+    (old : PublicPlanningBody.ApcBody metadata x native)
+    (height : x.state.height = native.ec.parent.certificate.body.context.height)
+    (epoch : x.policy.epoch = native.ec.parent.certificate.body.context.epoch)
+    (config : x.policy.config = native.ec.parent.certificate.body.context.config) :
+    p.isc = old.ec.parent.value ∧ p.seedValue = old.ec.seedValue ∧ p.ec = old.ec.value ∧ p.apc = old.value := by
+  have h : p.height.text = old.ec.parent.header.height.text := by
+    apply Option.some.inj
+    rw [← p.height.selected,← old.ec.parent.header.height.selected,height]
+  have e : p.epoch.text = old.ec.parent.header.epoch.text := by
+    apply Option.some.inj
+    rw [← p.epoch.selected,← old.ec.parent.header.epoch.selected,epoch]
+  have c : p.config.text = old.ec.parent.header.config.text := by
+    apply Option.some.inj
+    rw [← p.config.selected,← old.ec.parent.header.config.selected,config]
+  have policy := Option.some.inj (p.policySelected.symm.trans old.ec.parent.policySelected)
+  have entries := Option.some.inj (p.entriesComputed.symm.trans old.ec.parent.computed)
+  have seed := Option.some.inj (p.seed.selected.symm.trans old.ec.seed.selected)
+  have norm := Option.some.inj (p.norm.selected.symm.trans old.ec.norm.selected)
+  have ecMembers := Option.some.inj (p.ecComputed.symm.trans old.ec.computed)
+  have coefficient := Option.some.inj (p.coefficient.selected.symm.trans old.coefficient.selected)
+  have planMembers := Option.some.inj (p.planComputed.symm.trans old.computed)
+  have isc : p.isc = old.ec.parent.value := by
+    simp only [CertificateParents.isc,PublicPlanningBody.IscBody.value,PublicEarlyBody.Header.round,
+      PublicEarlyBody.Name.value,h,e,c,policy,entries]
+  have seedValue : p.seedValue = old.ec.seedValue := by
+    simp only [CertificateParents.seedValue,PublicPlanningBody.EcBody.seedValue,isc,
+      PublicEarlyBody.Name.value,PublicPlanningBody.Name.value,e,seed]
+  have ec : p.ec = old.ec.value := by
+    simp only [CertificateParents.ec,PublicPlanningBody.EcBody.value,isc,seedValue,
+      PublicPlanningBody.Name.value,ecMembers,norm]
+  exact ⟨isc,seedValue,ec,by
+    simp only [CertificateParents.apc,PublicPlanningBody.ApcBody.value,isc,seedValue,ec,
+      PublicPlanningBody.Name.value,coefficient,planMembers]⟩
+
+end CertificateParents
+
+section CurrentCertificateParents
+variable {sha policyRaw stateRaw pointer} (current : CertifiedCurrent sha policyRaw stateRaw pointer)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+
+def loadCurrentCertificateParents : Option (CertificateParents metadata current.edge.root.plan) :=
+  loadCertificateParents metadata current.edge.root.plan
+
+variable {metadata} (parents : CertificateParents metadata current.edge.root.plan)
+
+theorem currentCertificateParentIsOriginal :
+    current.edge.root.plan ∈ current.sectionBound.roots.parameters.prior.plans.certificates := by
+  have apply := NativeApplySection.certificateChecked current.sectionSource
+    (List.mem_of_find?_eq_some current.selected)
+  have root := NativeApplySection.selectedRoot current.sectionSource apply
+  exact List.mem_of_find?_eq_some (NativeAggregateLineage.checkedSource root).plan
+
+theorem currentCertificateParentControls :
+    current.edge.root.plan.ec.parent.certificate.body.context.height = current.state.height ∧
+    current.edge.root.plan.ec.parent.certificate.body.context.epoch = current.policy.epoch ∧
+    current.edge.root.plan.ec.parent.certificate.body.context.config = current.policy.config := by
+  have roots := (NativeApplySection.checkedSource current.sectionSource).roots
+  have parameters := (NativeSizedParameterSection.checkedSource
+    (NativeAggregateSection.checkedSource roots).parameters).1
+  have plans := (NativeParameterSection.checkedSource parameters).plans
+  have plan := NativePlanSection.certificateChecked plans (currentCertificateParentIsOriginal current)
+  have ec := (NativePlanSection.checkedParents plans plan).2.1
+  have isc := (NativeEligibilitySection.checkedParents (NativePlanSection.checkedSource plans).eligibility ec).1
+  have context := isc.2.2.2.1.2.1.2.1
+  exact ⟨congrArg NativeInputSetBody.Context.height context,congrArg NativeInputSetBody.Context.epoch context,
+    congrArg NativeInputSetBody.Context.config context⟩
+
+theorem currentCertificateParentsAgreeWithOriginalVote {vote facts}
+    (loaded : NativeEarlySource.Loaded sha policyRaw stateRaw vote facts)
+    (old : PublicPlanningBody.ApcBody metadata loaded.original current.edge.root.plan) :
+    parents.isc = old.ec.parent.value ∧ parents.seedValue = old.ec.seedValue ∧
+    parents.ec = old.ec.value ∧ parents.apc = old.value := by
+  have original := NativeEarlySource.loadedOriginal loaded
+  obtain ⟨_,policySource⟩ := original.policy
+  have policy : loaded.original.policy = current.policy :=
+    congrArg Prod.snd (Option.some.inj (policySource.symm.trans current.policySource))
+  have state : loaded.original.state = current.state := Option.some.inj (original.state.symm.trans current.stateSource)
+  have controls := currentCertificateParentControls current
+  exact certificateParentsNoLocalVotePremise parents old
+    ((congrArg NativeStateBytes.State.height state).trans controls.1.symm)
+    ((congrArg NativePolicyBytes.Policy.epoch policy).trans controls.2.1.symm)
+    ((congrArg NativePolicyBytes.Policy.config policy).trans controls.2.2.symm)
+
+theorem currentCertificateRetainsRemoteParentSource :
+    current.edge.id = pointer.qc ∧
+    parents.entries.map PublicEarlyBody.Entry.original = current.edge.root.plan.ec.parent.certificate.body.tuples ∧
+    parents.planMembers.map PublicPlanningBody.Member.original =
+      current.edge.root.plan.certificate.common.weights.map NativePlan.Weight.ticket :=
+  ⟨certifiedCurrentOriginalId current,certificateParentsOriginalEntries parents,
+    (certificateParentsOriginalMembers parents).2⟩
+
+theorem currentCertificateParentsComputed : loadCurrentCertificateParents current metadata = some parents :=
+  certificateParentsLoaded parents
+
+end CurrentCertificateParents
 
 end Direct
 end DeltaReduce.FamilyRelation

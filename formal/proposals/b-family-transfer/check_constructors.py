@@ -356,15 +356,33 @@ def run() -> None:
                     "canonical values bind to existing explicitly authenticated anchor hashes",
                     "direct original ROOT selector, finalized full ordered certificates and "
                     "family aggregate compose with existing AGGREGATE_ROOT/APC envelope",
+                    "shared complete ISC/seed/EC/APC parents derived from the same original "
+                    "objects and primitive metadata, including ROOT/arithmetic joins",
+                    "static current values joined to an original finalized APPLY QC and "
+                    "exact candidate preimages without a fabricated pointer history",
+                    "mixed original WAL collection uses computed arithmetic and existing "
+                    "early/planning/failure bodies with exact bidirectional public vote coverage",
+                    "whole durableVotes and logical durableSequence fields checked for the "
+                    "entire actor inventory while retaining physical command/vote positions",
+                    "observed configuration aliases cannot collapse distinct original config IDs; "
+                    "same-ID forward equality follows from the shared source naming function",
+                    "actual public currentCheckpoint agrees with both existing namespaces and "
+                    "the original pointer/QC/model/optimizer sources",
+                    "current QC signer quorum retains the original decoded policy and actors; "
+                    "ISC/seed/EC/APC parents load from the original certified snapshot without "
+                    "a fabricated local vote; original control context is derived through "
+                    "the native chain and parent values agree with a same-source vote",
                 ],
                 "remaining": [
                     "one authenticated configuration/alias/source relation across all existing "
                     "object kinds",
-                    "entire static public/native state and certificate/vote collections with "
-                    "exact coverage",
-                    "complete all-actor original journal/static-state coverage, including "
-                    "arbitrary initial current snapshots and existing non-arithmetic projections; "
-                    "the direct arithmetic observation does not imply that complete relation",
+                    "remaining static public/native certificate, candidate, current and "
+                    "environment collections with exact coverage; the durable-vote component "
+                    "does not prove the other fields or the existing complete-document guards",
+                    "total applicability and coherent source witnesses for the complete "
+                    "all-actor relation, arbitrary initial snapshots and the frozen sufficient "
+                    "ABORT projection; the reused failure body constructor only supports "
+                    "empty downstream ABORT and adds no universal full-body gate",
                 ],
             },
         },

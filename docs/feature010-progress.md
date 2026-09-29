@@ -6477,3 +6477,76 @@ evidence. No fresh TLC, full formal gate, native execution, independent attestat
 or GO is claimed. Remaining R2 planning estimate: 24–44 active hours, low confidence,
 excluding R3 and R4–R7; this is not a delivery promise. The bounded stage ends at
 its recorded checkpoint; no automatic R3 or broader continuation is authorized.
+
+## 29 September 2026 — R2 six-hour stage / frozen residual checkpoint
+
+Tasks T044/T047/T053–T057. Scope remains exactly the three accepted R2 obligations;
+R1 stays CLOSED, R2 stays OPEN and R3 was not started. The bounded stage began at
+07:59:56 UTC, with a maximum of 21600 active seconds. Exact elapsed time and the
+end of authorization are recorded in the external active-time ledger. No new
+requirement, protocol object, production predicate or independent proof layer
+was added. See `formal/proposals/b-family-transfer/CONSTRUCTORS.md` and the exact
+source/evidence manifest `formal/proposals/evidence/b-family-constructors.json`.
+
+| Frozen R2 obligation | Checkpoint status | Change in residual |
+|---|---|---|
+| 1. Family to full public inputs/bodies | CLOSED | The original-source path constructs all configured inputs, including a proved latent completion for OMIT_UNAVAILABLE, and complete PARAMETER/ROOT/APPLY bodies. General admitted original shard lengths, ordered rows, global offsets and identities are preserved. Component canonicality is derived from checked primitive names and original values, not assumed whole-body equality. |
+| 2. Native INT64/INT128 to public arithmetic guards | CLOSED | Direct constructors remove the old draft adapter limits. Checked products/prefixes, conversion, mixture and optimizer retain original widths, uint64 denominators, signed minimum and rounding. The actual policy-selected normalized profile and source-keyed quantum supply the same input/body configuration. |
+| 3. Unified source/configuration/aliases/certificates/state relation | OPEN | Whole all-actor durableVotes/durableSequence now have exact original WAL coverage. Current/pointer/QC/value and observed config-alias components are joined. Remaining complete state/collection applicability and source coherence are described below. |
+
+CLOSED for 1/2 is a component claim under the original source, checked immutable
+numeric configuration and primitive namespaces. It does not assert that all
+observed state is already related or that the remaining source authentication
+boundary is proved. That global coherence remains the same obligation 3.
+
+Within 3, the reader now consumes the original complete mixed WAL per actor,
+preserves physical command/vote positions and matches the complete public vote
+set in both directions. Supplied extra/missing/duplicate/substituted votes fail.
+Public durableSequence counts actual votes; command positions are not mistaken
+for vote counts. Historical source packets keep their own original context and
+current; they are not required to satisfy a later first-vote freshness check.
+Known but unexposed durable records are supported without inferring delivery.
+Corrupt, torn or UNKNOWN observations cannot create a complete witness.
+
+The same native certificate graph determines shared ISC/seed/EC/APC parents.
+Current values can come from canonical authenticated initial anchors or an actual
+finalized prior APPLY QC in a snapshot, without inventing pointer history. The
+public currentCheckpoint uses both existing checkpoint namespaces and binds to
+the actual pointer/QC/model/optimizer sources. Original current-QC signers and
+quorum use the same decoded policy and actor namespace. Current certificate
+parents are also constructed without requiring a local vote; native context and
+agreement with an actual same-source vote are derived. This removes an adapter
+dependency for those parents, not the complete remote-certificate relation.
+Observed configuration aliases are checked not to merge distinct native IDs.
+
+The exact remaining obligation 3 is unchanged in scope:
+
+- Join the existing primitive source/authentication/configuration/alias witnesses
+  across the complete snapshot, including configured units and namespaces not
+  determined by the observed journal alone.
+- Bind all remaining certificate/candidate/current/environment collections and
+  relevant fields, including their existing complete-document representation
+  guards. The native ROUND_STATE summary alone is insufficient; these fields
+  require the existing snapshot/artifact/environment sources. No production
+  network/exporter implementation is added to R2.
+- Prove applicability for the admitted initial/incomplete observations and the
+  frozen sufficient ABORT projection. The reused full failure-body constructor
+  still handles only empty downstream ABORT lineage; a universal full ABORT body
+  constructor is NOT a new gate. Nonempty original lists must not be erased.
+
+This is a finite set of existing source interfaces and the fixed public-state
+field/action vocabulary. There is no new proof obligation per vector length or
+coordinate. The obstruction is missing integration and general applicability,
+not a demonstrated requirement to change production Init/Next, certificate
+semantics or WAL identity. R2 is not declared BLOCKED_EXTERNAL. The earlier
+remaining-hour estimate has not been independently recalibrated into a promise.
+
+Fresh isolated Lean kernels, complete named-declaration dependency audit, exact
+original byte-source reproduction, Ruff and protected-source checks are captured
+in the proposal evidence. This is self-review. Mandatory semantics/report,
+production/TLA/schema/fixtures/runtime/guard and frozen demo refs are unchanged.
+No fresh TLC, full formal gate, production execution or GO is claimed.
+
+At this bounded checkpoint, STOP: no automatic further R2 work and no R3.
+The existing automation stays present/ACTIVE and quiet for unchanged state;
+a heartbeat is not a new scoped instruction or an extension of this budget.
