@@ -141,8 +141,8 @@ def run() -> None:
                 "FamilyAuthority",
                 "FamilyParameter",
                 "FamilyApplyArithmetic",
-                "FamilyApply",
                 "FamilyGuards",
+                "FamilyApply",
                 "FamilyRoot",
                 "FamilyRelation",
                 "FamilyChecks",
@@ -233,8 +233,8 @@ def run() -> None:
         {"path": p.relative_to(ROOT).as_posix(), "sha256": sha256_file(p)} for p in sorted(paths)
     ]
     result = {
-        "scope": "R2_FAMILY_CONSTRUCTORS_NUMERIC_IMPLICATIONS_PARTIAL_SOURCE_RELATION",
-        "status": "CONSTRUCTORS_AND_NUMERIC_COMPONENTS_PROVED_R2_OPEN",
+        "scope": "R2_FROZEN_FULL_CONSTRUCTORS_NATIVE_DOMAINS_STATIC_SOURCE_RELATION",
+        "status": "R2_1_CLOSED_R2_2_CLOSED_R2_3_OPEN",
         "basis_commit": BASE,
         "completed_at_utc": datetime.now(UTC).isoformat(),
         "formal_semantics_id_unchanged": SEMANTICS,
@@ -251,21 +251,20 @@ def run() -> None:
         "original_joined_vector_vote_qc_wal_capture": False,
         "remaining_source_gaps": original["original008_unresolved"],
         "general_bounds": (
-            "Family representation remains general within original manifest bounds. New body "
-            "theorems "
-            "are length-parametric over successful checked input authority and typed native "
-            "results. "
-            "Coverage of every original admitted source is NOT established."
+            "Length-parametric direct original-source constructors and numeric implications "
+            "within original native bounds; no draft layout/Q/name/pack/signed-denominator "
+            "restriction. Full static source/configuration/alias correspondence remains R2.3; "
+            "universal admission/refinement is NOT claimed."
         ),
         "boundary": (
-            "Existing codec/hash/metadata/certificate abstractions remain. Full configuration, "
-            "availability/domain completeness and static state correspondence remain OPEN. "
+            "Existing codec/hash/metadata/certificate/UnitSource abstractions remain. Full "
+            "configuration/alias provenance and exact static state correspondence remain OPEN. "
             "The numeric original-optimizer graph is source-reviewed, not C++ "
             "execution/compiler verification."
         ),
         "residual": {
             "R2_1": {
-                "status": "PARTIAL",
+                "status": "CLOSED",
                 "closed": [
                     "original vector coordinate input selection and complete public field "
                     "construction",
@@ -285,15 +284,17 @@ def run() -> None:
                     "and exact encoded-set uniqueness",
                     "exact block/corpus/family/authority source loading on the checked input "
                     "domain, composed directly with complete PARAMETER/APPLY body gates",
+                    "OMIT_UNAVAILABLE full configured input completion with exact active-row "
+                    "noninterference, without claiming unavailable bytes are zero",
+                    "full original image construction and canonicality from primitive "
+                    "namespaces and the same original numeric configuration",
+                    "complete direct original PARAMETER/ROOT/APPLY construction avoiding "
+                    "draft graph representability restrictions",
                 ],
-                "remaining": [
-                    "full configured ticket input coverage for OMIT_UNAVAILABLE",
-                    "general source-loader coverage and constructor canonicality over complete "
-                    "declared domain",
-                ],
+                "remaining": [],
             },
             "R2_2": {
-                "status": "PARTIAL",
+                "status": "CLOSED",
                 "closed": [
                     "INT64/INT128 checked typed-native arithmetic implies corresponding public "
                     "numeric guards",
@@ -302,15 +303,16 @@ def run() -> None:
                     "all numeric input guards derived from actual source input image",
                     "original final mixture LCM bound entails signed domain-weight "
                     "denominator and prefix checks, using the exact native LCM recurrence",
+                    "direct original coefficient/APC/manifest source implies each numeric "
+                    "PARAMETER guard without draft caps",
+                    "original full uint64 common/optimizer denominator domain composes with "
+                    "the full input and body constructors",
+                    "same original policy selects the normalized immutable profile and "
+                    "existing source-keyed quantum; all numeric input guards are derived",
+                    "full original conversion/mixture/optimizer checks compose at the same "
+                    "global shard offset and current/next cells",
                 ],
-                "remaining": [
-                    "compose full original numeric domain with the complete source/input "
-                    "constructors",
-                    "remove or justify old adapter representability restrictions without "
-                    "changing native admission",
-                    "bind existing normalized immutable configuration; raw profile validity "
-                    "alone does not establish normalization",
-                ],
+                "remaining": [],
             },
             "R2_3": {
                 "status": "OPEN_PARTIAL_COMPOSITION",
@@ -327,6 +329,9 @@ def run() -> None:
                     "object kinds",
                     "entire static public/native state and certificate/vote collections with "
                     "exact coverage",
+                    "connect the direct original constructors to the whole observed native "
+                    "admission/journal/static-state relation; old journal entry point still "
+                    "uses its draft body adapter",
                 ],
             },
         },

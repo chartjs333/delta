@@ -332,4 +332,403 @@ theorem checkedParameterFromAuthority {codec store trust anchor} {binding : Bind
   · rfl
   · rename_i bad; exact False.elim (bad ⟨bodyCanonical,by trivial⟩)
 
+
+/- Full original vector arithmetic without the older signed-fraction or 4096
+representation restrictions. Whole native objects are compared, never rebuilt. -/
+structure OriginalVector where
+  first : NativeScaleBinding.Bound
+  slices : List NativeVectorContext.Slice
+  values : List Int
+  leaves : List Bytes
+
+def originalVector (source : NativeVectorContext.Bound) (domain : Bytes) (block : Nat) : Option OriginalVector := do
+  let first ← source.first.corpus.manifest.blocks[block]?
+  let slices ← NativeVectorContext.sliceRows block (NativePlanQCorpus.inDomain domain source.source.rows)
+  let leaves ← NativeVectorAuthority.sourceLeaves block slices
+  let width := first.block.frame.values.length
+  if 0 < width ∧ slices ≠ [] ∧ ∀ row ∈ slices, row.block.block.frame.values.length = width then
+    some ⟨first,slices,ParameterKernel.exactParameterRows source.source.plan.accumulator.numbers.denominator
+      (List.replicate width 0) (slices.map NativeVectorArithmetic.kernelRow),leaves⟩
+  else none
+
+theorem originalVectorSource {source domain block vector} (loaded : originalVector source domain block = some vector) :
+    source.first.corpus.manifest.blocks[block]? = some vector.first ∧
+    NativeVectorContext.sliceRows block (NativePlanQCorpus.inDomain domain source.source.rows) = some vector.slices ∧
+    NativeVectorAuthority.sourceLeaves block vector.slices = some vector.leaves ∧
+    0 < vector.first.block.frame.values.length ∧ vector.slices ≠ [] ∧
+    (∀ row ∈ vector.slices, row.block.block.frame.values.length = vector.first.block.frame.values.length) ∧
+    vector.values = ParameterKernel.exactParameterRows source.source.plan.accumulator.numbers.denominator
+      (List.replicate vector.first.block.frame.values.length 0) (vector.slices.map NativeVectorArithmetic.kernelRow) := by
+  simp only [originalVector,bind,Option.bind_eq_some_iff] at loaded
+  obtain ⟨first,hf,slices,hs,leaves,hl,last⟩ := loaded
+  split at last <;> try contradiction
+  rename_i valid
+  cases Option.some.inj last
+  exact ⟨hf,hs,hl,valid.1,valid.2.1,valid.2.2,rfl⟩
+
+def publicParameterRows (limit denominator : Int) (rows : List ParameterKernel.Row) : Option Int := do
+  if ∀ row ∈ rows, row.values.length = 1 then
+    let terms := ParameterKernel.coordinateTerms denominator 0 rows
+    let _ ← checkedAccumulate (-limit-1) limit (-limit-1) limit 0 (terms.map (fun pair => (pair.1,1)))
+    checkedAccumulate (-limit-1) limit (-limit-1) limit 0 terms
+  else none
+
+theorem originalSlicesTotal {first : NativeManifestBinding.Bound} {rows : List NativePlanQCorpus.Row}
+    {block q} (slot : first.blocks[block]? = some q)
+    (compatible : ∀ r ∈ rows, NativeVectorContext.Compatible first r.corpus.manifest) :
+    ∃ slices, NativeVectorContext.sliceRows block rows = some slices := by
+  induction rows with
+  | nil => exact ⟨[],rfl⟩
+  | cons r rs ih =>
+    obtain ⟨head,atHead,_⟩ := NativeVectorContext.sameSlot (compatible r (by simp)) slot
+    obtain ⟨tail,atTail⟩ := ih (fun r hr => compatible r (List.mem_cons_of_mem _ hr))
+    exact ⟨⟨r,head⟩::tail,by simp only [NativeVectorContext.sliceRows,atHead,atTail,bind,Option.bind]⟩
+
+theorem originalLeavesTotal {block slices}
+    (slots : ∀ s ∈ slices, ∃ ref, s.source.corpus.manifest.manifest.refs[block]? = some ref) :
+    ∃ leaves, NativeVectorAuthority.sourceLeaves block slices = some leaves := by
+  induction slices with
+  | nil => exact ⟨[],rfl⟩
+  | cons s ss ih =>
+    obtain ⟨ref,atRef⟩ := slots s (by simp)
+    obtain ⟨leaves,rest⟩ := ih (fun s hs => slots s (List.mem_cons_of_mem _ hs))
+    exact ⟨ref.wire.leaf::leaves,by simp only [NativeVectorAuthority.sourceLeaves,atRef,rest,bind,Option.bind]⟩
+
+/- This completeness statement starts at the actual original-byte binder.
+The nonempty selected domain is an existing plan/domain-coverage requirement;
+there is no caller-provided result vector or bound on its coordinate count. -/
+theorem originalVectorTotal {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source}
+    (bound : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    {domain block first} (slot : source.first.corpus.manifest.blocks[block]? = some first)
+    (nonempty : NativePlanQCorpus.inDomain domain source.source.rows ≠ []) :
+    ∃ vector, originalVector source domain block = some vector := by
+  have src := FamilyInputs.originalVectorSourceParts bound
+  have rows := (FamilyInputs.originalRowsSourceParts src.1).2
+  have subset : ∀ r ∈ NativePlanQCorpus.inDomain domain source.source.rows, r ∈ source.source.rows :=
+    fun r hr => (List.mem_filter.mp hr).1
+  obtain ⟨slices,sliced⟩ := originalSlicesTotal slot (fun r hr => src.2.2 r (subset r hr))
+  have slicesSource := NativeVectorContext.slicedSources sliced
+  have firstMember : source.first ∈ source.source.rows := List.mem_of_head? src.2.1
+  obtain ⟨_,_,_,_,firstLoaded⟩ := NativePlanQCorpus.rowMember rows source.first firstMember
+  have manifest := FamilyInputs.rowManifestSource firstLoaded
+  have firstShape := ManifestFamily.corpusShapes (NativeManifestBinding.fullOrderedCorpus manifest)
+    first (List.mem_of_getElem? slot)
+  have positive : 0 < first.block.frame.values.length := by
+    rw [firstShape]
+    exact (ManifestFamily.positiveAndBounded manifest first (List.mem_of_getElem? slot)).1
+  have eachSource (s : NativeVectorContext.Slice) (member : s ∈ slices) : s.source ∈ source.source.rows := by
+    apply subset
+    rw [← slicesSource.1]
+    exact List.mem_map.mpr ⟨s,member,rfl⟩
+  have widths : ∀ s ∈ slices, s.block.block.frame.values.length = first.block.frame.values.length := by
+    intro s member
+    obtain ⟨_,_,_,_,loaded⟩ := NativePlanQCorpus.rowMember rows s.source (eachSource s member)
+    have manifest := FamilyInputs.rowManifestSource loaded
+    have shape := ManifestFamily.corpusShapes (NativeManifestBinding.fullOrderedCorpus manifest)
+      s.block (List.mem_of_getElem? (slicesSource.2 s member))
+    obtain ⟨q,atQ,same⟩ := NativeVectorContext.sameSlot (src.2.2 s.source (eachSource s member)) slot
+    have equal := Option.some.inj (atQ.symm.trans (slicesSource.2 s member))
+    subst q
+    rw [shape,same,firstShape]
+  obtain ⟨leaves,leafSource⟩ := originalLeavesTotal (block := block) (slices := slices) (by
+    intro s member
+    obtain ⟨_,_,_,_,loaded⟩ := NativePlanQCorpus.rowMember rows s.source (eachSource s member)
+    have lengths := NativeManifestBinding.corpusLengths
+      (NativeManifestBinding.fullOrderedCorpus (FamilyInputs.rowManifestSource loaded))
+    have inside := (List.getElem?_eq_some_iff.mp (slicesSource.2 s member)).1
+    have refInside : block < s.source.corpus.manifest.manifest.refs.length := by omega
+    exact ⟨_,List.getElem?_eq_getElem refInside⟩)
+  have slicesNonempty : slices ≠ [] := by
+    intro empty
+    apply nonempty
+    simpa only [empty,List.map_nil] using slicesSource.1.symm
+  unfold originalVector
+  simp only [slot,sliced,leafSource,bind,Option.bind]
+  rw [if_pos ⟨positive,slicesNonempty,widths⟩]
+  exact ⟨_,rfl⟩
+
+section OriginalParameter
+variable {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (authority : FamilyAuthority.Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected)
+    (native : NativeParameterLineage.Edge) (block : Nat) (nativeShardAlias : Bytes → Option String)
+
+structure OriginalProjection where
+  vector : OriginalVector
+  vectorSource : originalVector source native.certificate.common.domain block = some vector
+  coordinate : Nat
+  atCoordinate : indices[block]? = some coordinate
+  value : Int
+  nativeValue : vector.values[coordinate]? = some value
+  exactNative : native.certificate.common.leaves = vector.leaves.mergeSort NativePolicyBytes.bytesLT ∧
+    native.certificate.common.numerators = vector.values.map (asciiBytes ∘ toString)
+  parents : native.certificate.common.context = source.source.plan.members.edge.certificate.common.context ∧
+    native.certificate.common.plan = source.source.plan.members.edge.id ∧
+    native.certificate.common.isc = source.source.plan.members.edge.parent.qcId ∧
+    native.certificate.common.ec = source.source.plan.members.edge.ec.id ∧
+    native.certificate.common.denominator = source.source.plan.accumulator.numbers.denominator
+  rows : List ParameterKernel.Row
+  imageRows : FamilyInputs.imageRows authority.input.image (NativeVectorLayout.text native.certificate.common.domain) block = some rows
+  arithmetic : publicParameterRows authority.input.image.limit native.certificate.common.denominator rows = some value
+  domainName : String
+  domainAlias : vocabulary.domain (NativeVectorLayout.text native.certificate.common.domain) = some domainName
+  domainConfigured : domainName ∈ vocabulary.domains
+  shardName : String
+  shardAlias : vocabulary.shard (NativeVectorLayout.shardName vector.first.block.header.ordinal) = some shardName
+  nativeAlias : nativeShardAlias native.certificate.common.shard = some shardName
+  shardConfigured : shardName ∈ vocabulary.shards
+
+def projectOriginal : Option (OriginalProjection authority native block nativeShardAlias) := do
+  match vs : originalVector source native.certificate.common.domain block, atIndex : indices[block]? with
+  | some vector, some coordinate =>
+    match nv : vector.values[coordinate]?, rs : FamilyInputs.imageRows authority.input.image
+        (NativeVectorLayout.text native.certificate.common.domain) block,
+        dn : vocabulary.domain (NativeVectorLayout.text native.certificate.common.domain),
+        sn : vocabulary.shard (NativeVectorLayout.shardName vector.first.block.header.ordinal) with
+    | some value,some rows,some domainName,some shardName =>
+      if exactBody : native.certificate.common.leaves = vector.leaves.mergeSort NativePolicyBytes.bytesLT ∧
+          native.certificate.common.numerators = vector.values.map (asciiBytes ∘ toString) then
+        if parents : native.certificate.common.context = source.source.plan.members.edge.certificate.common.context ∧
+            native.certificate.common.plan = source.source.plan.members.edge.id ∧
+            native.certificate.common.isc = source.source.plan.members.edge.parent.qcId ∧
+            native.certificate.common.ec = source.source.plan.members.edge.ec.id ∧
+            native.certificate.common.denominator = source.source.plan.accumulator.numbers.denominator then
+          if arithmetic : publicParameterRows authority.input.image.limit native.certificate.common.denominator rows = some value then
+            if aliases : domainName ∈ vocabulary.domains ∧ nativeShardAlias native.certificate.common.shard = some shardName ∧
+                shardName ∈ vocabulary.shards then
+              some ⟨vector,vs,coordinate,atIndex,value,nv,exactBody,parents,rows,rs,arithmetic,
+                domainName,dn,aliases.1,shardName,sn,aliases.2.1,aliases.2.2⟩
+            else none
+          else none
+        else none
+      else none
+    | _,_,_,_ => none
+  | _,_ => none
+
+def OriginalProjection.fields (p : OriginalProjection authority native block nativeShardAlias) : List (String × Value) :=
+  PublicParameterBody.fields authority.parents.value authority.header.arithmetic.value authority.value
+    authority.parents.coefficient.value authority.parents.ec.parent.header.config.value (.model p.domainName)
+    authority.parents.ec.value authority.parents.ec.parent.value authority.header.parent.value
+    authority.parents.ec.parent.header.round authority.header.schema.value authority.parents.ec.seedValue
+    (.model p.shardName) p.value
+
+def OriginalProjection.body (p : OriginalProjection authority native block nativeShardAlias) : Value := record (p.fields authority native block nativeShardAlias)
+
+def checkOriginal (candidate : Value) : Option (OriginalProjection authority native block nativeShardAlias) := do
+  let p ← projectOriginal authority native block nativeShardAlias
+  if canonical vocabulary.models (p.body authority native block nativeShardAlias) = true ∧
+      candidate = p.body authority native block nativeShardAlias then some p else none
+
+theorem originalProjectionLoaded (p : OriginalProjection authority native block nativeShardAlias) :
+    projectOriginal authority native block nativeShardAlias = some p := by
+  unfold projectOriginal
+  split
+  · rename_i vector coordinate hv hc
+    have sameVector := Option.some.inj (hv.symm.trans p.vectorSource)
+    have sameCoordinate := Option.some.inj (hc.symm.trans p.atCoordinate)
+    subst vector; subst coordinate
+    split
+    · rename_i value rows domainName shardName hn hr hd hs
+      have sameValue := Option.some.inj (hn.symm.trans p.nativeValue)
+      have sameRows := Option.some.inj (hr.symm.trans p.imageRows)
+      have sameDomain := Option.some.inj (hd.symm.trans p.domainAlias)
+      have sameShard := Option.some.inj (hs.symm.trans p.shardAlias)
+      subst value; subst rows; subst domainName; subst shardName
+      rw [dif_pos p.exactNative,dif_pos p.parents,dif_pos p.arithmetic,
+        dif_pos ⟨p.domainConfigured,p.nativeAlias,p.shardConfigured⟩]
+    · simp_all [p.nativeValue,p.imageRows,p.domainAlias,p.shardAlias]
+      rename_i bad
+      exact (bad _ _ _ _ rfl rfl rfl) rfl
+  · simp_all [p.vectorSource,p.atCoordinate]
+
+theorem originalCheckFromCanonical (p : OriginalProjection authority native block nativeShardAlias)
+    (safe : canonical vocabulary.models (p.body authority native block nativeShardAlias) = true) :
+    checkOriginal authority native block nativeShardAlias (p.body authority native block nativeShardAlias) = some p := by
+  simp only [checkOriginal,originalProjectionLoaded authority native block nativeShardAlias p,bind,Option.bind]
+  exact if_pos ⟨safe,by trivial⟩
+
+theorem originalFullVectorRetained (p : OriginalProjection authority native block nativeShardAlias) :
+    native.certificate.common.numerators = p.vector.values.map (asciiBytes ∘ toString) ∧
+    native.certificate.common.leaves.Perm p.vector.leaves :=
+  ⟨p.exactNative.2,p.exactNative.1 ▸ List.mergeSort_perm p.vector.leaves NativePolicyBytes.bytesLT⟩
+
+theorem originalValueFromOwnInputs (p : OriginalProjection authority native block nativeShardAlias) :
+    (FamilyInputs.memberImageRows (FamilyInputs.completedImage authority.input.image configured)
+      (FamilyInputs.activeNames authority.input.image.tickets)
+      (NativeVectorLayout.text native.certificate.common.domain) block).bind
+      (publicParameterRows authority.input.image.limit native.certificate.common.denominator) = some p.value := by
+  rw [FamilyInputs.completedImageComputesSameRows _ _ authority.input.coverage.2.1
+    authority.input.coverage.2.2.1,p.imageRows]
+  exact p.arithmetic
+
+theorem originalBodyFieldInventory (p : OriginalProjection authority native block nativeShardAlias) :
+    (p.fields authority native block nativeShardAlias).map Prod.fst = PublicParameterBody.parameterFieldNames := rfl
+
+theorem originalBodyContainsWholeAuthority (p : OriginalProjection authority native block nativeShardAlias) :
+    readField (p.body authority native block nativeShardAlias) "authority" = some authority.value := rfl
+
+theorem originalBodyCanonical (p : OriginalProjection authority native block nativeShardAlias)
+    (auth : canonical vocabulary.models authority.value = true)
+    (domain : canonical vocabulary.models (.model p.domainName) = true)
+    (shard : canonical vocabulary.models (.model p.shardName) = true) :
+    canonical vocabulary.models (p.body authority native block nativeShardAlias) = true := by
+  have apc := FamilyAuthority.canonicalField auth
+    (show readField authority.value "apc" = some authority.parents.value from rfl)
+  have ec := FamilyAuthority.canonicalField auth
+    (show readField authority.value "ec" = some authority.parents.ec.value from rfl)
+  have isc := FamilyAuthority.canonicalField auth
+    (show readField authority.value "isc" = some authority.parents.ec.parent.value from rfl)
+  have profile := FamilyAuthority.canonicalField auth
+    (show readField authority.value "profile" = some authority.header.arithmetic.value from rfl)
+  have coefficient := FamilyAuthority.canonicalField apc
+    (show readField authority.parents.value "coefficientProfile" = some authority.parents.coefficient.value from rfl)
+  have config := FamilyAuthority.canonicalField isc
+    (show readField authority.parents.ec.parent.value "config" = some authority.parents.ec.parent.header.config.value from rfl)
+  have parent := FamilyAuthority.canonicalField auth
+    (show readField authority.value "parent" = some authority.header.parent.value from rfl)
+  have round := FamilyAuthority.canonicalField isc
+    (show readField authority.parents.ec.parent.value "round" = some authority.parents.ec.parent.header.round from rfl)
+  have schema := FamilyAuthority.canonicalField auth
+    (show readField authority.value "schema" = some authority.header.schema.value from rfl)
+  have seed := FamilyAuthority.canonicalField ec
+    (show readField authority.parents.ec.value "seed" = some authority.parents.ec.seedValue from rfl)
+  apply FamilyAuthority.canonicalRecord
+  · intro f member
+    simp only [OriginalProjection.fields,PublicParameterBody.fields,List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with h|h|h|h|h|h|h|h|h|h|h|h|h|h|h
+    all_goals subst f
+    all_goals constructor
+    all_goals first | assumption | (simp only [canonical]; try decide +kernel)
+  · change ordered (PublicParameterBody.parameterFieldNames.map (fun s => encode (.text s))) = true
+    decide +kernel
+
+end OriginalParameter
+
+/- The full exact recurrence is independent of draft adapter bounds. This
+identity holds for every present coordinate, with no out-of-range fallback. -/
+theorem exactVectorLength (denominator : Int) {acc : List Int} {rows : List ParameterKernel.Row}
+    (shapes : ∀ row ∈ rows, row.values.length = acc.length) :
+    (ParameterKernel.exactParameterRows denominator acc rows).length = acc.length := by
+  induction rows generalizing acc with
+  | nil => rfl
+  | cons row rows ih =>
+    have shape := shapes row List.mem_cons_self
+    have length : (ParameterKernel.exactAddVector (row.numerator*(denominator/row.denominator)) acc row.values).length = acc.length := by
+      simp only [ParameterKernel.exactAddVector,List.length_zipWith,shape,Nat.min_self]
+    exact (ih (fun r hr => (shapes r (List.mem_cons_of_mem _ hr)).trans length.symm)).trans length
+
+theorem exactVectorCoordinate (denominator : Int) {acc : List Int} {rows : List ParameterKernel.Row}
+    (shapes : ∀ row ∈ rows, row.values.length = acc.length) {index : Nat} {a : Int}
+    (atIndex : acc[index]? = some a) :
+    (ParameterKernel.exactParameterRows denominator acc rows)[index]? =
+      some (exactAccumulate a (ParameterKernel.coordinateTerms denominator index rows)) := by
+  induction rows generalizing acc a with
+  | nil => exact atIndex
+  | cons row rows ih =>
+    have shape := shapes row List.mem_cons_self
+    have inside : index < row.values.length := by
+      rw [shape]; exact (List.getElem?_eq_some_iff.mp atIndex).1
+    have lookup := List.getElem?_eq_getElem inside
+    have length : (ParameterKernel.exactAddVector (row.numerator*(denominator/row.denominator)) acc row.values).length = acc.length := by
+      simp only [ParameterKernel.exactAddVector,List.length_zipWith,shape,Nat.min_self]
+    have next : (ParameterKernel.exactAddVector (row.numerator*(denominator/row.denominator)) acc row.values)[index]? =
+        some (a + (row.numerator*(denominator/row.denominator))*row.values[index]) := by
+      simp [ParameterKernel.exactAddVector,List.getElem?_zipWith,atIndex,lookup]
+    have tail := ih (fun r hr => (shapes r (List.mem_cons_of_mem _ hr)).trans length.symm) next
+    simpa only [ParameterKernel.exactParameterRows,ParameterKernel.coordinateTerms,List.map_cons,
+      lookup,Option.getD_some,exactAccumulate] using tail
+
+theorem scalarRowsFromSlices {source domain block coordinate vector}
+    (computed : originalVector source domain block = some vector)
+    (inside : coordinate < vector.first.block.frame.values.length) :
+    FamilyInputs.originalScalarRows source.source domain block coordinate =
+      some (vector.slices.map (fun s => VectorShardRepresentation.rowAt coordinate (NativeVectorArithmetic.kernelRow s))) := by
+  have src := originalVectorSource computed
+  have slices := NativeVectorContext.slicedSources src.2.1
+  unfold FamilyInputs.originalScalarRows
+  rw [← slices.1]
+  have collector : ∀ s ∈ vector.slices,
+      (NativeAvailableQ.coordinate s.source.corpus.manifest block coordinate).map
+        (fun value => (⟨s.source.term.source.weight.numerator,s.source.term.source.weight.denominator,[value]⟩ : ParameterKernel.Row)) =
+      some (VectorShardRepresentation.rowAt coordinate (NativeVectorArithmetic.kernelRow s)) := by
+    intro s member
+    have bound : coordinate < s.block.block.frame.values.length := by rw [src.2.2.2.2.2.1 s member]; exact inside
+    simp only [NativeAvailableQ.coordinate,slices.2 s member,bind,Option.bind_some,
+      List.getElem?_eq_getElem bound,Option.map_some,VectorShardRepresentation.rowAt,NativeVectorArithmetic.kernelRow]
+    rfl
+  generalize vector.slices = ss at collector ⊢
+  induction ss with
+  | nil => rfl
+  | cons s ss ih =>
+    simp only [List.map_cons,collect,collector s List.mem_cons_self,bind,Option.bind_some]
+    rw [ih (fun t ht => collector t (List.mem_cons_of_mem _ ht))]
+    rfl
+
+theorem originalVectorCoordinate {source domain block coordinate vector}
+    (computed : originalVector source domain block = some vector)
+    (inside : coordinate < vector.first.block.frame.values.length) :
+    vector.values[coordinate]? = some (exactAccumulate 0
+      (ParameterKernel.coordinateTerms source.source.plan.accumulator.numbers.denominator coordinate
+        (vector.slices.map NativeVectorArithmetic.kernelRow))) := by
+  have src := originalVectorSource computed
+  rw [src.2.2.2.2.2.2]
+  apply exactVectorCoordinate
+  · intro row member
+    obtain ⟨s,hs,rfl⟩ := List.mem_map.mp member
+    simpa only [List.length_replicate,NativeVectorArithmetic.kernelRow] using src.2.2.2.2.2.1 s hs
+  · exact List.getElem?_replicate_of_lt inside
+
+/- Resolve the original native shard name into exactly one original manifest
+slot. The ordinal name is only a refinement key, never a native identity. -/
+def originalBlockMatches (source : NativeVectorContext.Bound) (vocabulary : Vocabulary)
+    (nativeShardAlias : Bytes → Option String) (native : NativeParameterLineage.Edge) : List Nat :=
+  (List.range source.first.corpus.manifest.blocks.length).filter (fun block =>
+    match source.first.corpus.manifest.blocks[block]? with
+    | none => false
+    | some q => match nativeShardAlias native.certificate.common.shard with
+      | none => false
+      | some name => vocabulary.shard (NativeVectorLayout.shardName q.block.header.ordinal) == some name)
+
+section OriginalLeaf
+variable {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (authority : FamilyAuthority.Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected)
+    (nativeShardAlias : Bytes → Option String) (native : NativeParameterLineage.Edge)
+
+structure OriginalLeaf where
+  block : Nat
+  uniqueBlock : originalBlockMatches source vocabulary nativeShardAlias native = [block]
+  projection : OriginalProjection authority native block nativeShardAlias
+
+def loadOriginalLeaf : Option (OriginalLeaf authority nativeShardAlias native) :=
+  match found : originalBlockMatches source vocabulary nativeShardAlias native with
+  | [block] => do
+    let projection ← projectOriginal authority native block nativeShardAlias
+    some ⟨block,found,projection⟩
+  | _ => none
+
+def OriginalLeaf.value (p : OriginalLeaf authority nativeShardAlias native) : Value :=
+  p.projection.body authority native p.block nativeShardAlias
+
+theorem originalLeafLoaded (p : OriginalLeaf authority nativeShardAlias native) :
+    loadOriginalLeaf authority nativeShardAlias native = some p := by
+  unfold loadOriginalLeaf
+  split
+  · rename_i block found
+    have same : block = p.block := by simpa only [p.uniqueBlock,List.cons.injEq,and_true] using found.symm
+    subst block
+    rw [originalProjectionLoaded authority native p.block nativeShardAlias p.projection]
+    rfl
+  · simp_all [p.uniqueBlock]
+
+theorem originalLeafRejectsAmbiguous
+    (many : 1 < (originalBlockMatches source vocabulary nativeShardAlias native).length) :
+    loadOriginalLeaf authority nativeShardAlias native = none := by
+  unfold loadOriginalLeaf
+  split <;> try rfl
+  rename_i block found
+  rw [found] at many; simp at many
+
+end OriginalLeaf
+
 end DeltaReduce.FamilyParameter

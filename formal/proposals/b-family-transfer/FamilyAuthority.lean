@@ -1,5 +1,6 @@
 import FamilyInputs
 import DeltaReduce.PublicAuthority
+import DeltaReduce.PublicPlanningBody
 
 /-! R2 family input/body integration. Reuses the existing primitive metadata
 boundary and full public constructors; no new certificates or identities. -/
@@ -27,7 +28,8 @@ theorem collectedValueSource {α β} {f : α → Option β} {xs ys}
 structure Projection {codec store trust anchor} {binding : Binding codec trust anchor store}
     {corpus : FamilyInputs.Corpus binding} {choice : FamilyInputs.Choice corpus.frame} {limit : Int} (input : FamilyInputs.Projected corpus choice limit)
     (vocabulary : Vocabulary) {metadataTrust} (source : Metadata metadataTrust) where
-  encoded : Encoded vocabulary (FamilyInputs.image input)
+  completion : FamilyInputs.Completed (FamilyInputs.image input)
+  encoded : Encoded vocabulary (FamilyInputs.completedImage (FamilyInputs.image input) completion.configured)
   header : Header binding source
   entryValues : List Value
   entryOrigin : EntriesFor source binding.authority.isc vocabulary corpus.frame.commitments entryValues
@@ -35,6 +37,7 @@ structure Projection {codec store trust anchor} {binding : Binding codec trust a
   members : collect vocabulary.ticket corpus.frame.members = some memberNames
   memberUnique : memberNames.Nodup
   memberConfigured : ∀ name ∈ memberNames, name ∈ vocabulary.tickets
+  memberSources : ∀ ticket ∈ corpus.frame.members, ticket ∈ completion.configured.map (·.id)
   eligibleNames : List String
   eligible : collect vocabulary.ticket corpus.frame.eligible = some eligibleNames
   eligibleUnique : eligibleNames.Nodup
@@ -78,17 +81,33 @@ def Projection.value {codec store trust anchor binding corpus choice limit input
 
 def project {codec store trust anchor} {binding : Binding codec trust anchor store}
     {corpus : FamilyInputs.Corpus binding} {choice : FamilyInputs.Choice corpus.frame} {limit : Int} (input : FamilyInputs.Projected corpus choice limit)
-    (vocabulary : Vocabulary) {metadataTrust} (source : Metadata metadataTrust) :
+    (vocabulary : Vocabulary) {metadataTrust} (source : Metadata metadataTrust)
+    (configured : List Ticket := corpus.frame.plan.tickets) :
     Option (Projection input vocabulary source) := do
-  let encoded ← FamilyInputs.encode vocabulary input
+  let completion ← FamilyInputs.complete (FamilyInputs.image input) configured
+  let encoded ← encodeImage vocabulary (FamilyInputs.completedImage (FamilyInputs.image input) completion.configured)
   let header ← loadHeader binding source
   let entryValues ← PublicAuthority.loadEntries source binding.authority.isc vocabulary corpus.frame.commitments
   match hm : collect vocabulary.ticket corpus.frame.members, he : collect vocabulary.ticket corpus.frame.eligible with
   | some members, some eligible =>
-      if valid : members.Nodup ∧ (∀ name ∈ members, name ∈ vocabulary.tickets) ∧ eligible.Nodup then
-        some ⟨encoded,header,entryValues.val,entryValues.property,members,hm,valid.1,valid.2.1,eligible,he,valid.2.2⟩
+      if valid : members.Nodup ∧ (∀ name ∈ members, name ∈ vocabulary.tickets) ∧
+          (∀ ticket ∈ corpus.frame.members, ticket ∈ completion.configured.map (·.id)) ∧ eligible.Nodup then
+        some ⟨completion,encoded,header,entryValues.val,entryValues.property,members,hm,valid.1,valid.2.1,
+          valid.2.2.1,eligible,he,valid.2.2.2⟩
       else none
   | _,_ => none
+
+theorem projectedConfiguration {codec store trust anchor binding corpus choice limit input vocabulary metadataTrust source configured out}
+    (accepted : project (codec := codec) (store := store) (trust := trust) (anchor := anchor)
+      (binding := binding) (corpus := corpus) (choice := choice) (limit := limit) input vocabulary
+      (metadataTrust := metadataTrust) source configured = some out) :
+    out.completion.configured = configured := by
+  simp only [project,bind,Option.bind_eq_some_iff] at accepted
+  obtain ⟨completion,hc,encoded,_,header,_,entryValues,_,last⟩ := accepted
+  split at last <;> try contradiction
+  split at last <;> try contradiction
+  cases Option.some.inj last
+  exact (FamilyInputs.completionCheckedExactly hc).1
 
 structure Checked {codec store trust anchor} {binding : Binding codec trust anchor store}
     {corpus : FamilyInputs.Corpus binding} {choice : FamilyInputs.Choice corpus.frame} {limit : Int} (input : FamilyInputs.Projected corpus choice limit)
@@ -98,9 +117,10 @@ structure Checked {codec store trust anchor} {binding : Binding codec trust anch
 
 def check {codec store trust anchor} {binding : Binding codec trust anchor store}
     {corpus : FamilyInputs.Corpus binding} {choice : FamilyInputs.Choice corpus.frame} {limit : Int} (input : FamilyInputs.Projected corpus choice limit)
-    (vocabulary : Vocabulary) {metadataTrust} (source : Metadata metadataTrust) (candidate : Value) :
+    (vocabulary : Vocabulary) {metadataTrust} (source : Metadata metadataTrust) (candidate : Value)
+    (configured : List Ticket := corpus.frame.plan.tickets) :
     Option (Checked input vocabulary source) := do
-  let p ← project input vocabulary source
+  let p ← project input vocabulary source configured
   if valid : PublicState.canonical vocabulary.models p.value = true ∧ candidate = p.value then
     some ⟨p,valid.1⟩
   else none
@@ -238,6 +258,7 @@ collision or a certificate with a changed member set. -/
 include p in
 theorem omittedMemberRequiresInputCompletion {ticket}
     (member : ticket ∈ corpus.frame.members) (omitted : ticket ∉ corpus.frame.eligible)
+    (eligibleOnly : p.completion.configured = corpus.frame.plan.tickets)
     (distinct : ∀ a ∈ corpus.frame.members, ∀ b ∈ corpus.frame.members,
       vocabulary.ticket a = vocabulary.ticket b → a = b) : False := by
   obtain ⟨index,atTicket⟩ := List.mem_iff_getElem?.mp member
@@ -251,8 +272,13 @@ theorem omittedMemberRequiresInputCompletion {ticket}
   have configured := p.memberConfigured p.memberNames[index] (List.getElem_mem inside)
   have inNames := permutation.mem_iff.mpr configured
   obtain ⟨eligible,inEligible,sameAlias⟩ := collectedValueSource encoded inNames
-  change eligible ∈ input.tickets.map (·.ticket) at inEligible
-  rw [FamilyInputs.projectedTicketNames input] at inEligible
+  change eligible ∈ (FamilyInputs.completeTickets _ p.completion.configured input.tickets).map (·.ticket) at inEligible
+  rw [FamilyInputs.completionExactUniverse,eligibleOnly] at inEligible
+  have eligibleOrder := input.ticketsLoaded
+  have names : corpus.frame.plan.tickets.map (·.id) = corpus.frame.eligible := by
+    rw [← FamilyInputs.projectedTicketNames input]
+    exact (FamilyInputs.collectedKeys eligibleOrder (fun _ _ h => (derivedTicketSource h).1)).symm
+  rw [names] at inEligible
   have inMembers := corpus.valid.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1 eligible inEligible
   have same := distinct ticket member eligible inMembers (aliased.trans sameAlias.symm)
   exact omitted (same ▸ inEligible)
@@ -444,6 +470,151 @@ theorem functionCanonicalFromParts (models : List String) (rows : List (Value ×
   · rw [pairKeys,orderedCorrect]
     simpa only [List.pairwise_map] using sortedKeysOrdered rows unique
 
+/- Canonicality is derived from primitive aliases and computed cells, rather
+than supplied for a translated table or the complete input image. The byte-key
+condition is the existing public-schema uniqueness condition on that namespace. -/
+theorem collectProjection {α β γ : Type} {f : α → Option β} {g : α → Option γ}
+    {h : β → γ} {xs ys} (loaded : collect f xs = some ys)
+    (same : ∀ x ∈ xs, ∀ y, f x = some y → g x = some (h y)) :
+    collect g xs = some (ys.map h) := by
+  induction xs generalizing ys with
+  | nil => simp only [collect,Option.some.injEq] at loaded; subst ys; rfl
+  | cons x xs ih =>
+    simp only [collect,bind,Option.bind_eq_some_iff] at loaded
+    obtain ⟨y,head,tail,rest,last⟩ := loaded
+    cases Option.some.inj last
+    simp only [collect,same x List.mem_cons_self y head,
+      ih rest (fun a ha => same a (List.mem_cons_of_mem _ ha)),bind,Option.bind,List.map_cons]
+
+def CanonicalAliases (models : List String) (nameMap : String → Option String) (names : List String) : Prop :=
+  (∀ name ∈ names, ∃ publicName, nameMap name = some publicName ∧ canonical models (.model publicName) = true) ∧
+  ∃ keys, collect (fun name => (nameMap name).map (fun s => encode (.model s))) names = some keys ∧ keys.Nodup
+
+theorem namedCanonicalTotal {α : Type} (models : List String) (nameMap : String → Option String)
+    (key : α → String) (value : α → Option Value) (rows : List α)
+    (aliases : CanonicalAliases models nameMap (rows.map key))
+    (cells : ∀ row ∈ rows, ∃ v, value row = some v ∧ canonical models v = true) :
+    ∃ out, named nameMap key value rows = some out ∧ canonical models out = true := by
+  obtain ⟨pairs,loaded⟩ := FamilyInputs.collectExists
+    (fun row => do let name ← nameMap (key row); let v ← value row; some (Value.model name,v)) rows (by
+      intro row member
+      obtain ⟨name,ha,_⟩ := aliases.1 _ (List.mem_map.mpr ⟨row,member,rfl⟩)
+      obtain ⟨v,hv,_⟩ := cells row member
+      exact ⟨(.model name,v),by simp only [ha,hv,bind,Option.bind]⟩)
+  refine ⟨function pairs,?_,?_⟩
+  · unfold named
+    change (collect (fun row => (nameMap (key row)).bind (fun name =>
+      (value row).bind (fun v => some (Value.model name,v)))) rows).bind
+      (fun ps => some (function ps)) = some (function pairs)
+    exact congrArg (fun output => output.bind (fun ps => some (function ps))) loaded
+  apply functionCanonicalFromParts
+  · intro pair member
+    obtain ⟨row,hr,source⟩ := collectedValueSource loaded member
+    obtain ⟨name,ha,ca⟩ := aliases.1 _ (List.mem_map.mpr ⟨row,hr,rfl⟩)
+    obtain ⟨v,hv,cv⟩ := cells row hr
+    simp only [ha,hv,bind,Option.bind,Option.some.injEq] at source
+    cases source
+    exact ⟨ca,cv⟩
+  · obtain ⟨keys,computed,unique⟩ := aliases.2
+    have projected := collectProjection (h := encodedKey) loaded (g := fun row =>
+      (nameMap (key row)).map (fun name => encode (.model name))) (by
+        intro row _ pair source
+        simp only [bind,Option.bind_eq_some_iff] at source
+        obtain ⟨name,ha,v,_,last⟩ := source
+        cases Option.some.inj last
+        simp only [ha,Option.map_some,encodedKey])
+    have mapped : ∀ xs : List α, collect (fun row => (nameMap (key row)).map (fun name => encode (.model name))) xs =
+        collect (fun name => (nameMap name).map (fun s => encode (.model s))) (xs.map key) := by
+      intro xs
+      induction xs with
+      | nil => rfl
+      | cons x xs ih => simp only [collect,List.map_cons,ih]
+    rw [mapped,computed] at projected
+    exact (Option.some.inj projected) ▸ unique
+
+theorem canonicalAliasesCongr {models nameMap left right}
+    (same : left = right) (valid : CanonicalAliases models nameMap left) :
+    CanonicalAliases models nameMap right := same ▸ valid
+
+theorem currentTableCanonicalTotal (models : List String) (nameMap : String → Option String)
+    (cells : List (String × Int)) (aliases : CanonicalAliases models nameMap (cells.map Prod.fst)) :
+    ∃ value, currentTable nameMap cells = some value ∧ canonical models value = true :=
+  namedCanonicalTotal models nameMap Prod.fst (fun p => some (.integer p.2)) cells aliases
+    (fun row _ => ⟨.integer row.2,rfl,rfl⟩)
+
+theorem vectorTableCanonicalTotal (models : List String) (nameMap : String → Option String)
+    (shards : List String) (cells : List Int) (shape : cells.length = shards.length)
+    (aliases : CanonicalAliases models nameMap shards) :
+    ∃ value, vectorTable nameMap shards cells = some value ∧ canonical models value = true := by
+  have names : (shards.zip cells).map Prod.fst = shards := List.map_fst_zip (by omega)
+  obtain ⟨value,computed,safe⟩ := namedCanonicalTotal models nameMap Prod.fst
+    (fun p : String × Int => some (.integer p.2)) (shards.zip cells)
+    (by rw [names]; exact aliases) (fun row _ => ⟨.integer row.2,rfl,rfl⟩)
+  exact ⟨value,by simp only [vectorTable,if_pos shape,computed],safe⟩
+
+theorem decimalCharsBound (n : Nat) (c : Char) (member : c ∈ Nat.toDigits 10 n) :
+    48 ≤ c.toNat ∧ c.toNat ≤ 57 := by
+  have digit := Nat.isDigit_of_mem_toDigits (by decide : 0 < 10) (by decide : 10 ≤ 10) member
+  simpa only [Char.reduceToNat] using Char.isDigit_iff_toNat.mp digit
+
+theorem decimalQuoted (n : Nat) :
+    quoted (toString n) = [34] ++ ((Nat.toDigits 10 n).map (fun c => UInt8.ofNat c.toNat)) ++ [34] := by
+  have flat : (Nat.toDigits 10 n).flatMap (fun c => escapedASCII c.toNat) =
+      (Nat.toDigits 10 n).map (fun c => UInt8.ofNat c.toNat) := by
+    rw [List.map_eq_flatMap]
+    apply List.flatMap_congr
+    intro c member
+    have bound := decimalCharsBound n c member
+    simp only [escapedASCII,if_neg (by omega : c.toNat ≠ 34),if_neg (by omega : c.toNat ≠ 92),
+      if_neg (by omega : c.toNat ≠ 8),if_neg (by omega : c.toNat ≠ 12),if_neg (by omega : c.toNat ≠ 10),
+      if_neg (by omega : c.toNat ≠ 13),if_neg (by omega : c.toNat ≠ 9),if_neg (by omega : ¬ (c.toNat < 32 ∨ c.toNat = 127))]
+  simp only [quoted,Nat.toString_eq_ofList_toDigits,String.toList_ofList,flat,quotedBytes]
+
+theorem decimalByteRecovery (n : Nat) :
+    (((Nat.toDigits 10 n).map (fun c => UInt8.ofNat c.toNat)).map (fun b => Char.ofNat b.toNat)) = Nat.toDigits 10 n := by
+  rw [List.map_map]
+  conv_rhs => rw [← List.map_id (Nat.toDigits 10 n)]
+  apply List.map_congr_left
+  intro c member
+  have bound := decimalCharsBound n c member
+  simp only [Function.comp_def,UInt8.toNat_ofNat_of_lt' (by change c.toNat < 256; omega),Char.ofNat_toNat,id_eq]
+
+theorem encodedNatInjective (a b : Nat) (same : encode (.integer (Int.ofNat a)) = encode (.integer (Int.ofNat b))) : a = b := by
+  change array [quoted "int",quoted (toString a)] = array [quoted "int",quoted (toString b)] at same
+  have raw : (Nat.toDigits 10 a).map (fun c => UInt8.ofNat c.toNat) = (Nat.toDigits 10 b).map (fun c => UInt8.ofNat c.toNat) := by
+    simpa only [array,List.intercalate_cons_cons,List.intercalate_singleton,decimalQuoted,List.append_assoc,
+      List.cons_append,List.nil_append,List.cons.injEq,true_and,List.append_cancel_left_eq,List.append_cancel_right_eq] using same
+  have digits := congrArg (List.map (fun b : UInt8 => Char.ofNat b.toNat)) raw
+  rw [decimalByteRecovery,decimalByteRecovery] at digits
+  have decoded := congrArg (fun cs => Nat.ofDigitChars 10 cs 0) digits
+  simpa only [Nat.ofDigitChars_ten_toDigits] using decoded
+
+theorem sequenceIndexKeysUnique (n : Nat) :
+    ((List.range n).map (fun k => encode (.integer (Int.ofNat (k+1))))).Nodup := by
+  apply List.Nodup.map _ (List.nodup_range (n := n))
+  intro a b same
+  have equal := encodedNatInjective (a+1) (b+1) same
+  omega
+
+theorem sequenceCanonicalFromPrimitiveKeys (models : List String) (values : List Value)
+    (safe : ∀ v ∈ values, canonical models v = true)
+    (unique : ((List.range values.length).map (fun i => encode (.integer (Int.ofNat (i+1))))).Nodup) :
+    canonical models (sequence values) = true := by
+  apply functionCanonicalFromParts
+  · intro row member
+    obtain ⟨pair,hp,rfl⟩ := List.mem_map.mp member
+    exact ⟨rfl,safe pair.2 (List.of_mem_zip hp).2⟩
+  · have names : ((List.range values.length).zip values).map Prod.fst = List.range values.length :=
+      List.map_fst_zip (by simp)
+    have same : (((List.range values.length).zip values).map
+        (fun (i,v) => (Value.integer (Int.ofNat (i+1)),v))).map encodedKey =
+        (((List.range values.length).zip values).map Prod.fst).map
+          (fun i => encode (.integer (Int.ofNat (i+1)))) := by
+      simp only [List.map_map]
+      congr 1
+    rw [same,names]
+    exact unique
+
 theorem currentRowsKeys {nameMap : String → Option String} {cells rows}
     (computed : collect (fun c : String × Int => do
       let name ← nameMap c.1
@@ -538,17 +709,18 @@ theorem entriesLoaderComplete {metadataTrust source isc vocabulary commitments v
 theorem projectFromComputed {codec store trust anchor binding corpus choice limit input vocabulary metadataTrust source}
     (p : Projection (codec := codec) (store := store) (trust := trust) (anchor := anchor)
       (binding := binding) (corpus := corpus) (choice := choice) (limit := limit) input vocabulary
-      (metadataTrust := metadataTrust) source) : project input vocabulary source = some p := by
+      (metadataTrust := metadataTrust) source) : project input vocabulary source p.completion.configured = some p := by
   unfold project
-  change (PublicArithmeticInputs.encodeImage vocabulary (FamilyInputs.image input) >>= _) = some p
+  rw [FamilyInputs.completeFromSource p.completion]
+  simp only [bind,Option.bind]
   rw [encodeImageFromComputed p.encoded]
-  simp only [bind,Option.bind,headerLoaderComplete p.header,entriesLoaderComplete p.entryOrigin]
+  simp only [headerLoaderComplete p.header,entriesLoaderComplete p.entryOrigin]
   split
   · rename_i members eligible hm he
     have sameMembers := Option.some.inj (hm.symm.trans p.members)
     have sameEligible := Option.some.inj (he.symm.trans p.eligible)
     subst members; subst eligible
-    rw [dif_pos ⟨p.memberUnique,p.memberConfigured,p.eligibleUnique⟩]
+    rw [dif_pos ⟨p.memberUnique,p.memberConfigured,p.memberSources,p.eligibleUnique⟩]
   · simp_all [p.members,p.eligible]
 
 /- Canonicality of the complete authority is assembled from the independently
@@ -695,7 +867,7 @@ theorem checkedAuthorityFromConstructed
     (eligibleAtoms : ∀ name ∈ p.eligibleNames, canonical vocabulary.models (.model name) = true)
     (entryUnique : (p.entryValues.map encode).Nodup)
     (eligibleUnique : ((p.eligibleNames.map Value.model).map encode).Nodup) :
-    ∃ checked, check input vocabulary source p.value = some checked ∧ checked.projection = p := by
+    ∃ checked, check input vocabulary source p.value p.completion.configured = some checked ∧ checked.projection = p := by
   have safe := constructedAuthorityCanonical p header entryAtoms eligibleAtoms entryUnique eligibleUnique
   unfold check
   rw [projectFromComputed p]
@@ -704,4 +876,698 @@ theorem checkedAuthorityFromConstructed
   exact ⟨_,rfl,rfl⟩
 
 end CanonicalAuthority
+def readPublicEscapes : Bytes → List Char
+  | [] => []
+  | first :: rest => if first = 92 then
+      match rest with
+      | [] => []
+      | escaped :: tail => Char.ofNat escaped.toNat :: readPublicEscapes tail
+    else Char.ofNat first.toNat :: readPublicEscapes rest
+
+theorem publicEscapesRoundtrip (cs : List Char)
+    (safe : ∀ c ∈ cs, 32 ≤ c.toNat ∧ c.toNat ≤ 126) :
+    readPublicEscapes (cs.flatMap (fun c => escapedASCII c.toNat)) = cs := by
+  induction cs with
+  | nil => rfl
+  | cons c cs ih =>
+    have bound := safe c List.mem_cons_self
+    have tail := ih (fun x hx => safe x (List.mem_cons_of_mem _ hx))
+    rw [List.flatMap_cons]
+    by_cases quote : c.toNat = 34
+    · have equal : c = '"' := Char.toNat_inj.mp quote
+      subst c
+      exact congrArg (List.cons '"') tail
+    · by_cases slash : c.toNat = 92
+      · have equal : c = '\\' := Char.toNat_inj.mp slash
+        subst c
+        exact congrArg (List.cons '\\') tail
+      · have one : escapedASCII c.toNat = [UInt8.ofNat c.toNat] := by
+          simp only [escapedASCII,if_neg quote,if_neg slash,
+            if_neg (by omega : c.toNat ≠ 8),if_neg (by omega : c.toNat ≠ 12),if_neg (by omega : c.toNat ≠ 10),
+            if_neg (by omega : c.toNat ≠ 13),if_neg (by omega : c.toNat ≠ 9),if_neg (by omega : ¬ (c.toNat < 32 ∨ c.toNat = 127))]
+        have notEscape : UInt8.ofNat c.toNat ≠ 92 := by
+          intro equal
+          have same := congrArg UInt8.toNat equal
+          simp only [UInt8.toNat_ofNat_of_lt' (by change c.toNat < 256; omega)] at same
+          exact slash same
+        rw [one]
+        rw [List.singleton_append,readPublicEscapes.eq_def]
+        simp only [if_neg notEscape,UInt8.toNat_ofNat_of_lt' (by change c.toNat < 256; omega),Char.ofNat_toNat]
+        exact congrArg (List.cons c) tail
+
+theorem modelEncodedInjective {models : List String} {a b : String}
+    (safeA : canonical models (.model a) = true) (safeB : canonical models (.model b) = true)
+    (same : encode (.model a) = encode (.model b)) : a = b := by
+  have charsA : ∀ c ∈ a.toList, 32 ≤ c.toNat ∧ c.toNat ≤ 126 := by
+    have parts : models.contains a = true ∧ (∀ c ∈ a.toList, 32 ≤ c.toNat ∧ c.toNat ≤ 126) := by
+      simpa only [canonical,Bool.and_eq_true,List.all_eq_true,decide_eq_true_eq] using safeA
+    exact parts.2
+  have charsB : ∀ c ∈ b.toList, 32 ≤ c.toNat ∧ c.toNat ≤ 126 := by
+    have parts : models.contains b = true ∧ (∀ c ∈ b.toList, 32 ≤ c.toNat ∧ c.toNat ≤ 126) := by
+      simpa only [canonical,Bool.and_eq_true,List.all_eq_true,decide_eq_true_eq] using safeB
+    exact parts.2
+  have raw : a.toList.flatMap (fun c => escapedASCII c.toNat) = b.toList.flatMap (fun c => escapedASCII c.toNat) := by
+    simpa only [encode,array,quoted,quotedBytes,List.intercalate_cons_cons,List.intercalate_singleton,List.append_assoc,
+      List.cons_append,List.nil_append,List.cons.injEq,true_and,List.append_cancel_left_eq,List.append_cancel_right_eq] using same
+  have decoded := congrArg readPublicEscapes raw
+  rw [publicEscapesRoundtrip _ charsA,publicEscapesRoundtrip _ charsB] at decoded
+  exact String.toList_inj.mp decoded
+theorem canonicalAliasesFromNamespace {models nameMap names configured}
+    (checked : checkNamespace nameMap names configured = true)
+    (atoms : ∀ name ∈ configured, canonical models (.model name) = true) :
+    CanonicalAliases models nameMap names := by
+  obtain ⟨rendered,computed,permutation,unique⟩ := namespaceCheckSound checked
+  constructor
+  · intro name member
+    obtain ⟨out,hm,selected⟩ := FamilyInputs.collectInputHasOutput computed member
+    exact ⟨out,selected,atoms out (permutation.mem_iff.mp hm)⟩
+  · refine ⟨rendered.map (fun name => encode (.model name)),?_,?_⟩
+    · exact collectProjection computed (fun name _ out selected => by simp only [selected,Option.map_some])
+    · exact List.Nodup.map_on (fun a ha b hb same =>
+        modelEncodedInjective (atoms a (permutation.mem_iff.mp ha))
+          (atoms b (permutation.mem_iff.mp hb)) same) unique
+
+/- These are checks of primitive namespace/configuration cells, not a supplied
+translation or canonicality assumption for a whole input body. -/
+structure InputEncodingPrimitives (v : Vocabulary) (i : Image) : Prop where
+  ticketAtoms : ∀ name ∈ v.tickets, canonical v.models (.model name) = true
+  domainAtoms : ∀ name ∈ v.domains, canonical v.models (.model name) = true
+  shardAtoms : ∀ name ∈ v.shards, canonical v.models (.model name) = true
+  ticketNamespace : checkNamespace v.ticket (i.tickets.map (·.ticket)) v.tickets = true
+  domainNamespace : checkNamespace v.domain (NativeBinding.domains i.profile) v.domains = true
+  shardNamespace : checkNamespace v.shard i.shards v.shards = true
+
+theorem InputEncodingPrimitives.ticketAliases {v i} (p : InputEncodingPrimitives v i) :
+    CanonicalAliases v.models v.ticket (i.tickets.map (·.ticket)) :=
+  canonicalAliasesFromNamespace p.ticketNamespace p.ticketAtoms
+
+theorem InputEncodingPrimitives.domainAliases {v i} (p : InputEncodingPrimitives v i) :
+    CanonicalAliases v.models v.domain (NativeBinding.domains i.profile) :=
+  canonicalAliasesFromNamespace p.domainNamespace p.domainAtoms
+
+theorem InputEncodingPrimitives.shardAliases {v i} (p : InputEncodingPrimitives v i) :
+    CanonicalAliases v.models v.shard i.shards :=
+  canonicalAliasesFromNamespace p.shardNamespace p.shardAtoms
+
+theorem inputTablesCanonicalTotal {v : Vocabulary} {i : Image}
+    (numeric : FamilyInputs.InputNumericGuards i) (primitive : InputEncodingPrimitives v i) :
+    ∀ operation ∈ [ticketDomains v i,qTable v i,
+      weightTable Rational.numerator v i,weightTable Rational.denominator v i,
+      denominatorTable v i,quantumTable Rational.numerator v i,quantumTable Rational.denominator v i,
+      mixtureTable Rational.numerator v i,mixtureTable Rational.denominator v i,
+      currentTable v.shard i.model,currentTable v.shard i.optimizer],
+    ∃ value, operation = some value ∧ canonical v.models value = true := by
+  obtain ⟨_,domainNames,tickets,domains,_,_,_,_,_,_,_,_,modelNames,optimizerNames,_,_⟩ := numeric
+  have domainAliases : CanonicalAliases v.models v.domain (i.domains.map (·.domain)) := by
+    rw [domainNames]; exact primitive.domainAliases
+  have ticketDomainTable : ∃ value, ticketDomains v i = some value ∧ canonical v.models value = true := by
+    apply namedCanonicalTotal _ _ _ _ _ primitive.ticketAliases
+    intro ticket member
+    obtain ⟨name,computed,safe⟩ := domainAliases.1 _ (tickets ticket member).1
+    exact ⟨.model name,by simp only [computed,Option.map_some],safe⟩
+  have q : ∃ value, qTable v i = some value ∧ canonical v.models value = true := by
+    apply namedCanonicalTotal _ _ _ _ _ primitive.ticketAliases
+    intro ticket member
+    exact vectorTableCanonicalTotal _ _ _ _ (tickets ticket member).2.1 primitive.shardAliases
+  have weight : ∀ part, ∃ value, weightTable part v i = some value ∧ canonical v.models value = true := by
+    intro part
+    exact namedCanonicalTotal _ _ _ _ _ primitive.ticketAliases (fun row _ => ⟨.integer (part row.weight),rfl,rfl⟩)
+  have denominator : ∃ value, denominatorTable v i = some value ∧ canonical v.models value = true :=
+    namedCanonicalTotal _ _ _ _ _ domainAliases (fun row _ => ⟨.integer row.denominator,rfl,rfl⟩)
+  have quantum : ∀ part, ∃ value, quantumTable part v i = some value ∧ canonical v.models value = true := by
+    intro part
+    apply namedCanonicalTotal _ _ _ _ _ domainAliases
+    intro domain member
+    exact vectorTableCanonicalTotal _ _ _ _ (by rw [List.length_map]; exact (domains domain member).2.1)
+      primitive.shardAliases
+  have mixture : ∀ part, ∃ value, mixtureTable part v i = some value ∧ canonical v.models value = true := by
+    intro part
+    exact namedCanonicalTotal _ _ _ _ _ primitive.domainAliases (fun row _ => ⟨.integer (part row.weight),rfl,rfl⟩)
+  have model := currentTableCanonicalTotal v.models v.shard i.model (by rw [modelNames]; exact primitive.shardAliases)
+  have optimizer := currentTableCanonicalTotal v.models v.shard i.optimizer (by rw [optimizerNames]; exact primitive.shardAliases)
+  intro operation member
+  simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+  rcases member with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+  · exact ticketDomainTable
+  · exact q
+  · exact weight _
+  · exact weight _
+  · exact denominator
+  · exact quantum _
+  · exact quantum _
+  · exact mixture _
+  · exact mixture _
+  · exact model
+  · exact optimizer
+
+theorem inputComponentsTotal {v : Vocabulary} {i : Image}
+    (numeric : FamilyInputs.InputNumericGuards i) (primitive : InputEncodingPrimitives v i) :
+    ∃ c, loadComponents v i = some c := by
+  obtain ⟨ticketNames,tickets⟩ := FamilyInputs.collectExists v.ticket (i.tickets.map (·.ticket))
+    (fun name member => by obtain ⟨out,computed,_⟩ := primitive.ticketAliases.1 name member; exact ⟨out,computed⟩)
+  obtain ⟨domainNames,domains⟩ := FamilyInputs.collectExists v.domain (NativeBinding.domains i.profile)
+    (fun name member => by obtain ⟨out,computed,_⟩ := primitive.domainAliases.1 name member; exact ⟨out,computed⟩)
+  obtain ⟨values,computed⟩ := FamilyInputs.collectExists id _
+    (fun operation member => by obtain ⟨out,computed,_⟩ := inputTablesCanonicalTotal numeric primitive operation member; exact ⟨out,computed⟩)
+  have size : values.length = 11 := by simpa using collectLength computed
+  let c : Components v i := ⟨ticketNames,tickets,domainNames,domains,values,computed,size,
+    primitive.ticketNamespace,primitive.domainNamespace,primitive.shardNamespace⟩
+  exact ⟨c,loadComponentsFromComputed c⟩
+
+theorem inputComponentsCanonical {v : Vocabulary} {i : Image}
+    (numeric : FamilyInputs.InputNumericGuards i) (primitive : InputEncodingPrimitives v i)
+    (c : Components v i) : canonical v.models (record c.fields) = true := by
+  have cells : ∀ k : Fin 11, canonical v.models (c.at k) = true := by
+    intro k
+    have source := componentIsComputed c k
+    obtain ⟨out,computed,safe⟩ := inputTablesCanonicalTotal numeric primitive (some (c.at k))
+      (List.mem_of_getElem? source)
+    cases Option.some.inj computed
+    exact safe
+  have ticketNames : ∀ name ∈ c.ticketNames, canonical v.models (.model name) = true := by
+    intro name member
+    obtain ⟨original,ho,selected⟩ := collectedValueSource c.tickets member
+    obtain ⟨out,computed,safe⟩ := primitive.ticketAliases.1 original ho
+    cases Option.some.inj (selected.symm.trans computed)
+    exact safe
+  have domainNames : ∀ name ∈ c.domainNames, canonical v.models (.model name) = true := by
+    intro name member
+    obtain ⟨original,ho,selected⟩ := collectedValueSource c.domains member
+    obtain ⟨out,computed,safe⟩ := primitive.domainAliases.1 original ho
+    cases Option.some.inj (selected.symm.trans computed)
+    exact safe
+  have ticketSequence := sequenceCanonicalFromPrimitiveKeys v.models (c.ticketNames.map Value.model)
+    (by intro value member; obtain ⟨name,hm,rfl⟩ := List.mem_map.mp member; exact ticketNames name hm)
+    (sequenceIndexKeysUnique _)
+  have domainSequence := sequenceCanonicalFromPrimitiveKeys v.models (c.domainNames.map Value.model)
+    (by intro value member; obtain ⟨name,hm,rfl⟩ := List.mem_map.mp member; exact domainNames name hm)
+    (sequenceIndexKeysUnique _)
+  apply canonicalRecord
+  · intro field member
+    simp only [Components.fields,List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+      rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+    all_goals constructor
+    all_goals first | assumption | exact cells _ | rfl | (simp only [canonical]; decide +kernel)
+  · change ordered (PublicArithmeticInputs.fieldNames.map (fun s => encode (.text s))) = true
+    decide +kernel
+
+theorem inputEncoderTotal {v : Vocabulary} {i : Image}
+    (numeric : FamilyInputs.InputNumericGuards i) (primitive : InputEncodingPrimitives v i) :
+    ∃ encoded, encodeImage v i = some encoded := by
+  obtain ⟨c,_⟩ := inputComponentsTotal numeric primitive
+  let e : Encoded v i := ⟨c,inputComponentsCanonical numeric primitive c⟩
+  exact ⟨e,encodeImageFromComputed e⟩
+
+theorem collectedNamesAsMap {nameMap : String → Option String} {names rendered}
+    (computed : collect nameMap names = some rendered) :
+    rendered = names.map (fun name => (nameMap name).getD "") := by
+  have same := FamilyInputs.collectedKeys (left := fun name => (nameMap name).getD "")
+    (right := id) computed (fun name out selected => by simp only [selected,Option.getD_some,id_eq])
+  simpa only [List.map_id] using same
+
+theorem namespaceSubset {nameMap : String → Option String} {names configured selected}
+    (checked : checkNamespace nameMap names configured = true)
+    (included : ∀ name ∈ selected, name ∈ names) (unique : selected.Nodup) :
+    ∃ rendered, collect nameMap selected = some rendered ∧ rendered.Nodup ∧
+      ∀ name ∈ rendered, name ∈ configured := by
+  obtain ⟨all,allComputed,permutation,allUnique⟩ := namespaceCheckSound checked
+  obtain ⟨rendered,computed⟩ := FamilyInputs.collectExists nameMap selected (fun name member => by
+    obtain ⟨out,source,_⟩ := configuredAlias checked (included name member)
+    exact ⟨out,source⟩)
+  refine ⟨rendered,computed,?_,?_⟩
+  · have mappedUnique : (names.map (fun name => (nameMap name).getD "")).Nodup := by
+      rw [← collectedNamesAsMap allComputed]; exact allUnique
+    rw [collectedNamesAsMap computed]
+    exact List.Nodup.map_on (fun a ha b hb same =>
+      List.inj_on_of_nodup_map mappedUnique (included a ha) (included b hb) same) unique
+  · intro name member
+    obtain ⟨original,ho,source⟩ := collectedValueSource computed member
+    obtain ⟨out,selected,inside⟩ := configuredAlias checked (included original ho)
+    cases Option.some.inj (source.symm.trans selected)
+    exact inside
+
+theorem authorityConstructorTotal {codec store trust anchor} {binding : Binding codec trust anchor store}
+    {corpus : FamilyInputs.Corpus binding} {choice : FamilyInputs.Choice corpus.frame} {limit : Int}
+    (input : FamilyInputs.Projected corpus choice limit) (vocabulary : Vocabulary)
+    {metadataTrust} (source : Metadata metadataTrust)
+    (completion : FamilyInputs.Completed (FamilyInputs.image input))
+    (primitive : InputEncodingPrimitives vocabulary
+      (FamilyInputs.completedImage (FamilyInputs.image input) completion.configured))
+    (header : Header binding source)
+    (contents : ∀ commitment ∈ corpus.frame.commitments,
+      ∃ name, source.atom (.content binding.authority.isc commitment) = some name)
+    (members : ∀ name ∈ corpus.frame.members, name ∈ completion.configured.map (·.id)) :
+    ∃ out, project input vocabulary source completion.configured = some out := by
+  have numeric := FamilyInputs.completedImageNumericGuards _ _ (FamilyInputs.allInputNumericGuards input)
+    completion.coverage.2.2.2.1
+  obtain ⟨encoded,_⟩ := inputEncoderTotal numeric primitive
+  have configuredNamespace : checkNamespace vocabulary.ticket (completion.configured.map (·.id)) vocabulary.tickets = true := by
+    simpa only [FamilyInputs.completedImage,FamilyInputs.completionExactUniverse] using primitive.ticketNamespace
+  have valid := corpus.valid
+  simp only [ParameterFrameValid] at valid
+  obtain ⟨_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,memberOrder,_,eligibleOrder,eligibleSubset,_,_,commitmentNames,_⟩ := valid
+  have memberUnique : corpus.frame.members.Nodup :=
+    memberOrder.imp (fun h equal => by subst equal; exact String.lt_irrefl _ h)
+  have eligibleUnique : corpus.frame.eligible.Nodup :=
+    eligibleOrder.imp (fun h equal => by subst equal; exact String.lt_irrefl _ h)
+  obtain ⟨memberNames,hm,um,cm⟩ := namespaceSubset configuredNamespace members memberUnique
+  obtain ⟨eligibleNames,he,ue,_⟩ := namespaceSubset configuredNamespace
+    (fun name member => members name (eligibleSubset name member)) eligibleUnique
+  have entrySources : ∀ commitments : List Commitment,
+      (∀ c ∈ commitments, c ∈ corpus.frame.commitments) →
+      ∃ entries, PublicAuthority.loadEntries source binding.authority.isc vocabulary commitments = some entries := by
+    intro commitments
+    induction commitments with
+    | nil => exact fun _ => ⟨⟨[],.nil⟩,rfl⟩
+    | cons commitment rest ih =>
+      intro included
+      have member := included commitment List.mem_cons_self
+      have ticketMember : commitment.ticket ∈ corpus.frame.members := by
+        rw [← commitmentNames]; exact List.mem_map.mpr ⟨commitment,member,rfl⟩
+      obtain ⟨ticket,selected,_⟩ := configuredAlias configuredNamespace (members commitment.ticket ticketMember)
+      obtain ⟨name,atom⟩ := contents commitment member
+      let entry : PublicAuthority.Entry source binding.authority.isc vocabulary commitment :=
+        ⟨ticket,selected,⟨name,atom⟩⟩
+      obtain ⟨entries,computed⟩ := ih (fun c hc => included c (List.mem_cons_of_mem _ hc))
+      exact ⟨⟨entry.value :: entries.val,.cons entry entries.property⟩,by
+        simp only [PublicAuthority.loadEntries,entryLoaderComplete entry,computed,bind,Option.bind]⟩
+  obtain ⟨entries,_⟩ := entrySources corpus.frame.commitments (fun _ h => h)
+  let out : Projection input vocabulary source :=
+    ⟨completion,encoded,header,entries.val,entries.property,memberNames,hm,um,cm,members,eligibleNames,he,ue⟩
+  exact ⟨out,projectFromComputed out⟩
+
+
+/- Completeness of the full original-source input encoder, including configured
+nonmembers. Configuration/aliases remain explicit primitive source premises;
+no successful whole-image check or translated body is a premise. -/
+theorem originalInputEncoderTotal
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source indices
+      profile applyQuantum current image candidate vocabulary configured}
+    (loaded : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : FamilyInputs.readOriginalImage source indices profile applyQuantum current = some image)
+    (profileValid : NativeApplyProfile.Valid profile)
+    (normalized : FamilyInputs.OriginalProfileNormalized profile)
+    (quantum : 0 < applyQuantum.numerator ∧ 0 < applyQuantum.denominator ∧
+      Int.gcd applyQuantum.numerator applyQuantum.denominator = 1)
+    (domainCoverage : ∀ row ∈ source.source.rows,
+      row.term.source.member.input.domain ∈ profile.weights.map (·.domain))
+    (currentLoaded : NativeCurrentValues.load sha candidate = some current)
+    (coverage : FamilyInputs.CompletionCoverage image configured)
+    (primitive : InputEncodingPrimitives vocabulary (FamilyInputs.completedImage image configured)) :
+    ∃ encoded, encodeImage vocabulary (FamilyInputs.completedImage image configured) = some encoded := by
+  have original := FamilyInputs.originalImageNumericGuards loaded computed profileValid normalized
+    quantum domainCoverage currentLoaded
+  exact inputEncoderTotal (FamilyInputs.completedImageNumericGuards image configured original
+    coverage.2.2.2.1) primitive
+
+
+/- The direct input gate retains the original source and the complete configured
+image. It deliberately does not manufacture a draft graph artifact or identifier. -/
+structure OriginalInput (source : NativeVectorContext.Bound) (indices : List Nat)
+    (profile : NativeApplyProfile.Profile) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (vocabulary : Vocabulary) (configured : List Ticket) where
+  image : Image
+  computed : FamilyInputs.readOriginalImage source indices profile quantum current = some image
+  coverage : FamilyInputs.CompletionCoverage image configured
+  numeric : FamilyInputs.InputNumericGuards image
+  encoded : Encoded vocabulary (FamilyInputs.completedImage image configured)
+
+def loadOriginalInput (source : NativeVectorContext.Bound) (indices : List Nat)
+    (profile : NativeApplyProfile.Profile) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (vocabulary : Vocabulary) (configured : List Ticket) :
+    Option (OriginalInput source indices profile quantum current vocabulary configured) := do
+  match computed : FamilyInputs.readOriginalImage source indices profile quantum current with
+  | none => none
+  | some image =>
+    if valid : FamilyInputs.CompletionCoverage image configured ∧ FamilyInputs.InputNumericGuards image then
+      let encoded ← encodeImage vocabulary (FamilyInputs.completedImage image configured)
+      some ⟨image,computed,valid.1,valid.2,encoded⟩
+    else none
+
+theorem originalInputFromComponents {source indices profile quantum current vocabulary configured}
+    (p : OriginalInput source indices profile quantum current vocabulary configured) :
+    loadOriginalInput source indices profile quantum current vocabulary configured = some p := by
+  unfold loadOriginalInput
+  split
+  · rename_i absent; simp [p.computed] at absent
+  · rename_i image computed
+    have same := Option.some.inj (computed.symm.trans p.computed)
+    subst image
+    rw [dif_pos ⟨p.coverage,p.numeric⟩,encodeImageFromComputed p.encoded]
+    rfl
+
+theorem originalInputFullNumeric {source indices profile quantum current vocabulary configured}
+    (p : OriginalInput source indices profile quantum current vocabulary configured) :
+    FamilyInputs.InputNumericGuards (FamilyInputs.completedImage p.image configured) :=
+  FamilyInputs.completedImageNumericGuards _ _ p.numeric p.coverage.2.2.2.1
+
+theorem originalInputFullCoverage {source indices profile quantum current vocabulary configured}
+    (p : OriginalInput source indices profile quantum current vocabulary configured) :
+    ((FamilyInputs.completedImage p.image configured).tickets.map (·.ticket)) = configured.map (·.id) ∧
+    FamilyInputs.memberTickets (FamilyInputs.activeNames p.image.tickets)
+      (FamilyInputs.completedImage p.image configured).tickets = p.image.tickets := by
+  refine ⟨FamilyInputs.completionExactUniverse _ _ _,?_⟩
+  exact FamilyInputs.completionSelectedRowsExact p.image.shards.length configured p.image.tickets
+    p.coverage.2.1 p.coverage.2.2.1
+
+/- Compose original source, the selected immutable numeric configuration and
+primitive namespaces with the full executable encoder. Neither a whole input
+image translation nor its canonicality is assumed. Namespace provenance and
+coverage of the entire static state belong to the unified R2 relation. -/
+theorem originalConfiguredInputLoaded
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source
+      units profileId current indices image vocabulary configured}
+    (bound : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (configuration : FamilyInputs.OriginalNumericConfiguration sha source units profileId current)
+    (computed : FamilyInputs.readOriginalImage source indices configuration.profile.profile
+      configuration.quantum current.last.values = some image)
+    (coverage : FamilyInputs.CompletionCoverage image configured)
+    (primitive : InputEncodingPrimitives vocabulary (FamilyInputs.completedImage image configured)) :
+    ∃ result, loadOriginalInput source indices configuration.profile.profile configuration.quantum
+      current.last.values vocabulary configured = some result ∧ result.image = image := by
+  have numeric := FamilyInputs.originalConfiguredInputGuards bound configuration computed
+  obtain ⟨encoded,_⟩ := inputEncoderTotal
+    (FamilyInputs.completedImageNumericGuards image configured numeric coverage.2.2.2.1) primitive
+  let result : OriginalInput source indices configuration.profile.profile configuration.quantum
+      current.last.values vocabulary configured := ⟨image,computed,coverage,numeric,encoded⟩
+  exact ⟨result,originalInputFromComponents result,rfl⟩
+
+/- Four independently supplied primitive aliases of existing original content
+identifiers. This is the existing configuration/alias boundary in R2, not an
+identity constructor or an assertion of external authentication. -/
+structure OriginalContentName (names : Bytes → Option String) (id : Bytes) where
+  name : String
+  selected : names id = some name
+
+def OriginalContentName.value {names id} (n : OriginalContentName names id) : Value := .model n.name
+
+def loadOriginalContentName (names : Bytes → Option String) (id : Bytes) : Option (OriginalContentName names id) :=
+  match h : names id with | none => none | some name => some ⟨name,h⟩
+
+structure OriginalHeader (source : NativeVectorContext.Bound) (profile : NativeApplyProfile.Checked)
+    (names : Bytes → Option String) where
+  parent : OriginalContentName names source.first.corpus.manifest.manifest.wire.parent
+  schema : OriginalContentName names source.first.corpus.manifest.manifest.wire.schema
+  arithmetic : OriginalContentName names source.first.corpus.manifest.manifest.wire.profile
+  apply : OriginalContentName names profile.id
+
+def loadOriginalHeader (source : NativeVectorContext.Bound) (profile : NativeApplyProfile.Checked)
+    (names : Bytes → Option String) : Option (OriginalHeader source profile names) := do
+  let parent ← loadOriginalContentName names source.first.corpus.manifest.manifest.wire.parent
+  let schema ← loadOriginalContentName names source.first.corpus.manifest.manifest.wire.schema
+  let arithmetic ← loadOriginalContentName names source.first.corpus.manifest.manifest.wire.profile
+  let apply ← loadOriginalContentName names profile.id
+  some ⟨parent,schema,arithmetic,apply⟩
+
+theorem originalContentNameLoaded {names id} (n : OriginalContentName names id) :
+    loadOriginalContentName names id = some n := by
+  unfold loadOriginalContentName
+  split
+  · rename_i absent; simp [n.selected] at absent
+  · rename_i name selected
+    have same := Option.some.inj (selected.symm.trans n.selected)
+    subst name; rfl
+
+theorem originalHeaderLoaded {source profile names} (h : OriginalHeader source profile names) :
+    loadOriginalHeader source profile names = some h := by
+  simp only [loadOriginalHeader,originalContentNameLoaded h.parent,originalContentNameLoaded h.schema,
+    originalContentNameLoaded h.arithmetic,originalContentNameLoaded h.apply,bind,Option.bind]
+
+structure Original (source : NativeVectorContext.Bound) (indices : List Nat)
+    (profile : NativeApplyProfile.Checked) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (selected : NativeSelectedVote.Checked) where
+  input : OriginalInput source indices profile.profile quantum current vocabulary configured
+  header : OriginalHeader source profile names
+  parents : PublicPlanningBody.ApcBody metadata selected source.source.plan.members.edge
+
+def Original.fields {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (p : Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected) : List (String × Value) := [
+  ("apc",p.parents.value),("applyProfile",p.header.apply.value),("ec",p.parents.ec.value),
+  ("inputs",p.input.encoded.value),("isc",p.parents.ec.parent.value),
+  ("model",vectorValue "MODEL" p.header.schema.value (p.input.encoded.components.at 9)),
+  ("optimizer",vectorValue "OPTIMIZER" p.header.schema.value (p.input.encoded.components.at 10)),
+  ("parent",p.header.parent.value),("profile",p.header.arithmetic.value),("schema",p.header.schema.value)]
+
+def Original.value {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (p : Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected) : Value := record p.fields
+
+def loadOriginal (source : NativeVectorContext.Bound) (indices : List Nat)
+    (profile : NativeApplyProfile.Checked) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (selected : NativeSelectedVote.Checked) :
+    Option (Original source indices profile quantum current vocabulary configured names metadata selected) := do
+  let input ← loadOriginalInput source indices profile.profile quantum current vocabulary configured
+  let header ← loadOriginalHeader source profile names
+  let parents ← PublicPlanningBody.loadApcBody metadata selected source.source.plan.members.edge
+  some ⟨input,header,parents⟩
+
+theorem originalAllInputs {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (p : Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected) :
+    readField p.value "inputs" = some p.input.encoded.value ∧
+    FamilyInputs.InputNumericGuards (FamilyInputs.completedImage p.input.image configured) :=
+  ⟨rfl,originalInputFullNumeric p.input⟩
+
+theorem originalAuthorityInventory {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (p : Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected) :
+    p.fields.map Prod.fst = PublicAuthority.authorityFieldNames := rfl
+
+theorem originalAuthorityRetainsParentObjects {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (p : Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected) :
+    readField p.value "apc" = some p.parents.value ∧ readField p.value "ec" = some p.parents.ec.value ∧
+    readField p.value "isc" = some p.parents.ec.parent.value := ⟨rfl,rfl,rfl⟩
+
+
+/- Canonicality is assembled from primitive atoms, never supplied as a complete
+translated authority/body. These helpers only reuse existing public constructors. -/
+theorem originalRoundCanonical {models height epoch}
+    (heightSafe : canonical models height = true) (epochSafe : canonical models epoch = true) :
+    canonical models (roundValue height epoch) = true := by
+  apply canonicalRecord
+  · intro field member
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with rfl | rfl
+    all_goals constructor
+    all_goals first | assumption | (simp only [canonical]; decide +kernel)
+  · simp only [List.map_cons,List.map_nil]
+    decide +kernel
+
+theorem originalIscCanonical {models round config policy entries}
+    (roundSafe : canonical models round = true) (configSafe : canonical models config = true)
+    (entrySafe : ∀ entry ∈ entries, canonical models entry = true)
+    (unique : (entries.map encode).Nodup) :
+    canonical models (iscValue round config policy (setValue entries)) = true := by
+  have entrySet := canonicalSet models entries entrySafe unique
+  have policySafe : canonical models (.text policy.text) = true := by
+    cases policy <;> simp only [ClosePolicy.text,canonical] <;> decide +kernel
+  apply canonicalRecord
+  · intro field member
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with rfl | rfl | rfl | rfl | rfl
+    all_goals constructor
+    all_goals first | assumption | (simp only [canonical]; decide +kernel)
+  · simp only [List.map_cons,List.map_nil]
+    decide +kernel
+
+theorem originalSeedCanonical {models isc epoch seed}
+    (iscSafe : canonical models isc = true) (epochSafe : canonical models epoch = true)
+    (seedSafe : canonical models seed = true) : canonical models (seedValue isc epoch seed) = true := by
+  apply canonicalRecord
+  · intro field member
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with rfl | rfl | rfl
+    all_goals constructor
+    all_goals first | assumption | (simp only [canonical]; decide +kernel)
+  · simp only [List.map_cons,List.map_nil]
+    decide +kernel
+
+theorem originalEcCanonical {models isc seed members norm}
+    (iscSafe : canonical models isc = true) (seedSafe : canonical models seed = true)
+    (memberSafe : ∀ member ∈ members, canonical models member = true)
+    (unique : (members.map encode).Nodup) (normSafe : canonical models norm = true) :
+    canonical models (ecValue isc seed (setValue members) norm) = true := by
+  have memberSet := canonicalSet models members memberSafe unique
+  apply canonicalRecord
+  · intro field member
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with rfl | rfl | rfl | rfl
+    all_goals constructor
+    all_goals first | assumption | (simp only [canonical]; decide +kernel)
+  · simp only [List.map_cons,List.map_nil]
+    decide +kernel
+
+theorem originalApcCanonical {models isc seed ec members coefficient}
+    (iscSafe : canonical models isc = true) (seedSafe : canonical models seed = true)
+    (ecSafe : canonical models ec = true)
+    (memberSafe : ∀ member ∈ members, canonical models member = true)
+    (unique : (members.map encode).Nodup) (coefficientSafe : canonical models coefficient = true) :
+    canonical models (apcValue isc seed ec (setValue members) coefficient) = true := by
+  have memberSet := canonicalSet models members memberSafe unique
+  apply canonicalRecord
+  · intro field member
+    simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with rfl | rfl | rfl | rfl | rfl
+    all_goals constructor
+    all_goals first | assumption | (simp only [canonical]; decide +kernel)
+  · simp only [List.map_cons,List.map_nil]
+    decide +kernel
+
+theorem originalPlanningParentsCanonical {earlyTrust planningTrust metadata selected native models}
+    (p : PublicPlanningBody.ApcBody (earlyTrust := earlyTrust) (trust := planningTrust) metadata selected native)
+    (header : ∀ value ∈ [p.ec.parent.header.height.value,p.ec.parent.header.epoch.value,
+      p.ec.parent.header.config.value,p.ec.seed.value,p.ec.norm.value,p.coefficient.value],
+      canonical models value = true)
+    (entryAtoms : ∀ entry ∈ p.ec.parent.entries,
+      canonical models entry.ticket.value = true ∧ canonical models entry.content.value = true)
+    (entryUnique : ((p.ec.parent.entries.map PublicEarlyBody.Entry.value).map encode).Nodup)
+    (memberAtoms : ∀ member ∈ p.ec.members, canonical models member.value = true)
+    (memberUnique : ((p.ec.members.map PublicPlanningBody.Member.value).map encode).Nodup) :
+    canonical models p.ec.parent.value = true ∧ canonical models p.ec.seedValue = true ∧
+    canonical models p.ec.value = true ∧ canonical models p.value = true := by
+  have round := originalRoundCanonical (header p.ec.parent.header.height.value (by simp))
+    (header p.ec.parent.header.epoch.value (by simp))
+  have entries : ∀ value ∈ p.ec.parent.entries.map PublicEarlyBody.Entry.value,
+      canonical models value = true := by
+    intro value member
+    obtain ⟨entry,inEntries,rfl⟩ := List.mem_map.mp member
+    have atoms := entryAtoms entry inEntries
+    apply canonicalRecord
+    · intro field member
+      simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+      rcases member with rfl | rfl
+      all_goals constructor
+      all_goals first | exact atoms.1 | exact atoms.2 | (simp only [canonical]; decide +kernel)
+    · simp only [List.map_cons,List.map_nil]
+      decide +kernel
+  have isc := originalIscCanonical (policy := p.ec.parent.policy) round (header p.ec.parent.header.config.value (by simp)) entries entryUnique
+  have seed := originalSeedCanonical isc (header p.ec.parent.header.epoch.value (by simp)) (header p.ec.seed.value (by simp))
+  have members : ∀ value ∈ p.ec.members.map PublicPlanningBody.Member.value, canonical models value = true := by
+    intro value member
+    obtain ⟨original,hm,rfl⟩ := List.mem_map.mp member
+    exact memberAtoms original hm
+  have ec := originalEcCanonical isc seed members memberUnique (header p.ec.norm.value (by simp))
+  have apc := originalApcCanonical isc seed ec members memberUnique (header p.coefficient.value (by simp))
+  exact ⟨isc,seed,ec,by simpa only [PublicPlanningBody.ApcBody.value,PublicPlanningBody.EcBody.value,
+    PublicPlanningBody.EcBody.seedValue,PublicPlanningBody.IscBody.value,PublicEarlyBody.Header.round,p.sameMembers] using apc⟩
+
+section OriginalCanonical
+variable {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (p : Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected)
+
+theorem originalAuthorityCanonical
+    (header : ∀ value ∈ [p.header.parent.value,p.header.schema.value,p.header.arithmetic.value,p.header.apply.value],
+      canonical vocabulary.models value = true)
+    (parents : canonical vocabulary.models p.parents.ec.parent.value = true ∧
+      canonical vocabulary.models p.parents.ec.value = true ∧ canonical vocabulary.models p.parents.value = true) :
+    canonical vocabulary.models p.value = true := by
+  have parent := header p.header.parent.value (by simp)
+  have schema := header p.header.schema.value (by simp)
+  have arithmetic := header p.header.arithmetic.value (by simp)
+  have applyProfile := header p.header.apply.value (by simp)
+  have modelTable := canonicalField p.input.encoded.canonical
+    (show readField p.input.encoded.value "model" = some (p.input.encoded.components.at 9) from rfl)
+  have optimizerTable := canonicalField p.input.encoded.canonical
+    (show readField p.input.encoded.value "optimizer" = some (p.input.encoded.components.at 10) from rfl)
+  have vector (kind : String) (table : Value) (tableSafe : canonical vocabulary.models table = true)
+      (kindSafe : canonical vocabulary.models (.text kind) = true) :
+      canonical vocabulary.models (vectorValue kind p.header.schema.value table) = true := by
+    apply canonicalRecord
+    · intro field member
+      simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+      rcases member with rfl | rfl | rfl
+      all_goals constructor
+      all_goals first | assumption | (simp only [canonical]; decide +kernel)
+    · simp only [List.map_cons,List.map_nil]
+      decide +kernel
+  have model := vector "MODEL" _ modelTable (by simp only [canonical]; decide +kernel)
+  have optimizer := vector "OPTIMIZER" _ optimizerTable (by simp only [canonical]; decide +kernel)
+  apply canonicalRecord
+  · intro field member
+    simp only [Original.fields,List.mem_cons,List.not_mem_nil,or_false] at member
+    rcases member with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+    all_goals constructor
+    all_goals first | assumption | exact parents.1 | exact parents.2.1 | exact parents.2.2 |
+      exact p.input.encoded.canonical | (simp only [canonical]; decide +kernel)
+  · change ordered (PublicAuthority.authorityFieldNames.map (fun s => encode (.text s))) = true
+    decide +kernel
+
+end OriginalCanonical
+
+theorem originalEarlyNameLoaded {trust source key}
+    (n : PublicEarlyBody.Name (trust := trust) source key) :
+    PublicEarlyBody.loadName source key = some n := by
+  unfold PublicEarlyBody.loadName
+  split
+  · rename_i absent; simp [n.selected] at absent
+  · rename_i name selected
+    have same := Option.some.inj (selected.symm.trans n.selected)
+    subst name; rfl
+
+theorem originalPlanningNameLoaded {earlyTrust trust source key}
+    (n : PublicPlanningBody.Name (earlyTrust := earlyTrust) (trust := trust) source key) :
+    PublicPlanningBody.loadName source key = some n := by
+  unfold PublicPlanningBody.loadName
+  split
+  · rename_i absent; simp [n.selected] at absent
+  · rename_i name selected
+    have same := Option.some.inj (selected.symm.trans n.selected)
+    subst name; rfl
+
+theorem originalEarlyHeaderLoaded {trust source x}
+    (h : PublicEarlyBody.Header (trust := trust) source x) :
+    PublicEarlyBody.loadHeader source x = some h := by
+  simp only [PublicEarlyBody.loadHeader,originalEarlyNameLoaded h.actor,
+    originalEarlyNameLoaded h.height,originalEarlyNameLoaded h.epoch,
+    originalEarlyNameLoaded h.config,bind,Option.bind]
+
+theorem originalIscLoaded {earlyTrust trust source x native}
+    (p : PublicPlanningBody.IscBody (earlyTrust := earlyTrust) (trust := trust) source x native) :
+    PublicPlanningBody.loadIscBody source x native = some p := by
+  unfold PublicPlanningBody.loadIscBody
+  rw [originalEarlyHeaderLoaded p.header]
+  simp only [bind,Option.bind]
+  split
+  · rename_i absent; simp [p.policySelected] at absent
+  · rename_i policy selected
+    have same := Option.some.inj (selected.symm.trans p.policySelected)
+    subst policy
+    split
+    · rename_i absent; simp [p.computed] at absent
+    · rename_i entries computed
+      have same := Option.some.inj (computed.symm.trans p.computed)
+      subst entries; rfl
+
+theorem originalEcLoaded {earlyTrust trust source x native}
+    (p : PublicPlanningBody.EcBody (earlyTrust := earlyTrust) (trust := trust) source x native) :
+    PublicPlanningBody.loadEcBody source x native = some p := by
+  unfold PublicPlanningBody.loadEcBody
+  rw [originalIscLoaded p.parent]
+  simp only [bind,Option.bind,originalPlanningNameLoaded p.seed,originalPlanningNameLoaded p.norm]
+  split
+  · rename_i absent; simp [p.computed] at absent
+  · rename_i members computed
+    have same := Option.some.inj (computed.symm.trans p.computed)
+    subst members; rfl
+
+theorem originalApcLoaded {earlyTrust trust source x native}
+    (p : PublicPlanningBody.ApcBody (earlyTrust := earlyTrust) (trust := trust) source x native) :
+    PublicPlanningBody.loadApcBody source x native = some p :=
+  PublicPlanningBody.loadApcFromComponents p (originalEcLoaded p.ec) (originalPlanningNameLoaded p.coefficient)
+
+theorem originalAuthorityLoaded {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (p : Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected) :
+    loadOriginal source indices profile quantum current vocabulary configured names metadata selected = some p := by
+  simp only [loadOriginal,originalInputFromComponents p.input,originalHeaderLoaded p.header,
+    originalApcLoaded p.parents,bind,Option.bind]
+
 end DeltaReduce.FamilyAuthority

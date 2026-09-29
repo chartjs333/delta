@@ -1,4 +1,5 @@
 import FamilyGuards
+import FamilyApply
 import DeltaReduce.PublicDurablePrefix
 import DeltaReduce.NativeVoteCache
 
@@ -70,6 +71,7 @@ structure ArithmeticConfiguration where
   limit : Int
   resultBound : Int
   expectedCheckpoint : Value
+  tickets : List Ticket
   deriving DecidableEq, Repr
 
 def widthMatches (p : Profile) (c : ArithmeticConfiguration) : Prop :=
@@ -87,6 +89,7 @@ structure Inputs where
   chosen : selectCoordinates corpus.frame indices = some choice
   input : FamilyInputs.Projected corpus choice configuration.limit
   authority : FamilyAuthority.Projection input vocabulary source
+  configured : authority.completion.configured = configuration.tickets
   widths : widthMatches binding.profile configuration
 
 def loadInputs : Option (Inputs (binding := binding) vocabulary source configuration indices) := do
@@ -96,15 +99,17 @@ def loadInputs : Option (Inputs (binding := binding) vocabulary source configura
     | none => none
     | some choice =>
       let input ← FamilyInputs.project corpus choice configuration.limit
-      let authority ← FamilyAuthority.project input vocabulary source
-      some ⟨corpus,choice,chosen,input,authority,widths⟩
+      match original : FamilyAuthority.project input vocabulary source configuration.tickets with
+      | none => none
+      | some authority =>
+        some ⟨corpus,choice,chosen,input,authority,FamilyAuthority.projectedConfiguration original,widths⟩
   else none
 
 theorem inputsLoaderComplete
     (inputs : Inputs (binding := binding) vocabulary source configuration indices) :
     loadInputs vocabulary source configuration indices = some inputs := by
   cases inputs with
-  | mk corpus choice chosen input authority widths =>
+  | mk corpus choice chosen input authority configured widths =>
     simp only [loadInputs,dif_pos widths,FamilyInputs.corpusLoaderComplete corpus,bind,Option.bind]
     split
     · rename_i absent
@@ -112,7 +117,24 @@ theorem inputsLoaderComplete
       contradiction
     · rename_i selected found
       cases Option.some.inj (found.symm.trans chosen)
-      simp only [FamilyInputs.projectFromComputed input,FamilyAuthority.projectFromComputed authority]
+      simp only [FamilyInputs.projectFromComputed input]
+      have complete := FamilyAuthority.projectFromComputed authority
+      rw [configured] at complete
+      split
+      · rename_i absent
+        rw [complete] at absent
+        contradiction
+      · rename_i result loaded
+        cases Option.some.inj (loaded.symm.trans complete)
+        rfl
+
+theorem loadedCompleteInputsHaveNumericGuards
+    (inputs : Inputs (binding := binding) vocabulary source configuration indices) :
+    FamilyInputs.InputNumericGuards
+      (FamilyInputs.completedImage (FamilyInputs.image inputs.input) configuration.tickets) := by
+  rw [← inputs.configured]
+  exact FamilyInputs.completedImageNumericGuards _ _ (FamilyInputs.allInputNumericGuards inputs.input)
+    inputs.authority.completion.coverage.2.2.2.1
 
 theorem loadedInputsHaveNumericGuards
     (inputs : Inputs (binding := binding) vocabulary source configuration indices) :
@@ -138,7 +160,7 @@ theorem parameterBodyConstructorTotal
     {domain shard} (native : DerivedParameter binding domain shard) :
     ∃ candidate body, loadParameterBody vocabulary source configuration indices native candidate = some body := by
   cases configuration with
-  | mk limit resultBound expectedCheckpoint =>
+  | mk limit resultBound expectedCheckpoint tickets =>
     have widths := inputs.widths
     change limit = accumulatorHi binding.profile ∧ resultBound = accumulatorHi binding.profile + 1 at widths
     rcases widths with ⟨rfl,rfl⟩
@@ -170,6 +192,35 @@ theorem parameterCandidateUsesOwnInputs {domain shard} {native : DerivedParamete
   · exact congrArg (fun v => readField v "authority" >>= fun a => readField a "inputs") body.exactBody
   · exact congrArg (fun v => readField v "value") body.exactBody
   · exact FamilyParameter.actualInputImageComputesBody configuration.resultBound native body.checked.projection
+
+/- The full configured image embedded in the body is the image used for the
+APC member selection. Excluded ticket completion has no arithmetic effect. -/
+theorem parameterCandidateUsesCompleteInputs {domain shard} {native : DerivedParameter binding domain shard}
+    {candidate : Value} (body : ParameterBody vocabulary source configuration indices native candidate) :
+    FamilyInputs.InputNumericGuards
+      (FamilyInputs.completedImage (FamilyInputs.image body.inputs.input) configuration.tickets) ∧
+    (readField candidate "authority" >>= fun a => readField a "inputs") =
+      some body.inputs.authority.encoded.value ∧
+    ∃ d ∈ body.inputs.input.domains, d.domain = native.assignment.domain ∧
+      d.denominator = native.assignment.denominator ∧
+      ((FamilyInputs.memberImageRows
+          (FamilyInputs.completedImage (FamilyInputs.image body.inputs.input) configuration.tickets)
+          (FamilyInputs.activeNames body.inputs.input.tickets) d.domain
+          body.checked.projection.entry.block.slot.val).bind
+        (ParameterKernel.checkedParameter (-configuration.limit-1) configuration.limit minInput maxInput d.denominator 1)) =
+          some [body.checked.projection.value] := by
+  refine ⟨loadedCompleteInputsHaveNumericGuards vocabulary source configuration indices body.inputs,
+    (parameterCandidateUsesOwnInputs vocabulary source configuration indices body).2.1,?_⟩
+  obtain ⟨d,member,domain,denominator,computed⟩ :=
+    FamilyParameter.actualInputImageComputesBody configuration.resultBound native body.checked.projection
+  refine ⟨d,member,domain,denominator,?_⟩
+  have same := FamilyInputs.excludedCellsNeverEnterParameter body.inputs.authority.completion
+    d.domain body.checked.projection.entry.block.slot.val
+  change FamilyInputs.memberImageRows
+    (FamilyInputs.completedImage (FamilyInputs.image body.inputs.input) body.inputs.authority.completion.configured)
+    (FamilyInputs.activeNames body.inputs.input.tickets) d.domain body.checked.projection.entry.block.slot.val = _ at same
+  rw [← body.inputs.configured,same]
+  exact computed
 
 structure ApplyBody (native : NativeApply binding) (candidate : Value) where
   inputs : Inputs (binding := binding) vocabulary source configuration indices

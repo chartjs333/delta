@@ -1,4 +1,4 @@
-import FamilyApply
+import FamilyApplyArithmetic
 import DeltaReduce.NativeApplyResult
 
 /-! R2 numeric domain compatibility. These are implications from the existing
@@ -743,5 +743,405 @@ theorem checkedOriginalProfileMixtureLcm {sha source checked}
   simpa only [List.map_map,Function.comp_def,Rational.kernelWeight] using
     originalMixtureLcmCompletes wire (by
       simpa only [List.map_map,Function.comp_def,Rational.kernelWeight] using bound)
+
+/- Direct original numeric-domain implication. No draft signed denominator,
+identifier grammar, coordinate label or artifact-size premise is introduced. -/
+theorem absoluteListSumBound {values : List Int} {bound : Int}
+    (items : ∀ value ∈ values, |value| ≤ bound) :
+    |values.sum| ≤ (values.length : Int)*bound := by
+  induction values with
+  | nil => simp
+  | cons value values ih =>
+    have head := items value (by simp)
+    have tail := ih (fun v hv => items v (List.mem_cons_of_mem _ hv))
+    have triangle := abs_add_le value values.sum
+    simp only [List.sum_cons,List.length_cons,Nat.cast_add,Nat.cast_one]
+    exact triangle.trans ((add_le_add head tail).trans_eq (by rw [add_mul,one_mul,add_comm]))
+
+theorem publicSequenceFromItemBounds {limit bound : Int} {values : List Int}
+    (positive : 0 ≤ bound) (single : bound ≤ limit)
+    (total : (values.length : Int)*bound ≤ limit)
+    (items : ∀ value ∈ values, |value| ≤ bound) : PublicSequence limit values := by
+  have fits (value : Int) (safe : |value| ≤ bound) : Fits (-limit-1) limit value := by
+    have signed := abs_le.mp safe
+    constructor <;> omega
+  refine ⟨fun value member => fits value (items value member),?_⟩
+  intro count _
+  have subtotal := absoluteListSumBound (values := values.take count)
+    (fun value member => items value (List.mem_of_mem_take member))
+  have length : ((values.take count).length : Int) ≤ (values.length : Int) := by
+    simp only [List.length_take]
+    exact_mod_cast Nat.min_le_right count values.length
+  have product := mul_le_mul_of_nonneg_right length positive
+  have signed := abs_le.mp (subtotal.trans (product.trans total))
+  constructor <;> omega
+
+theorem originalParameterSequences {n : NativeAccumulatorBinding.Numbers} {pairs : List (Int × Int)}
+    (native : NativeAccumulatorBinding.NumericValid n)
+    (count : pairs.length ≤ n.count)
+    (coefficients : ∀ p ∈ pairs, |p.1| ≤ (n.coefficient : Int))
+    (quantized : ∀ p ∈ pairs, |p.2| ≤ 32767) :
+    PublicSequence (NativeAccumulatorBinding.limit n.accumulatorBits : Int) (pairs.map Prod.fst) ∧
+    PublicSequence (NativeAccumulatorBinding.limit n.accumulatorBits : Int) (pairs.map (fun p => p.1*p.2)) := by
+  have b := NativeAccumulatorBinding.computedBounds native
+  have positiveCount : 0 < n.count := native.2.2.1
+  have productNative : n.coefficient*32767 ≤ NativeAccumulatorBinding.limit n.accumulatorBits := by
+    have productPositive : n.coefficient*32767 ≤ n.coefficient*32767*n.count := by
+      exact Nat.le_mul_of_pos_right _ positiveCount
+    have full : n.coefficient*32767*n.count ≤ NativeAccumulatorBinding.limit n.accumulatorBits := by
+      simpa only [b.2.1,Nat.mul_comm n.coefficient 32767] using b.2.2.2
+    exact productPositive.trans full
+  have totalNative : pairs.length*(n.coefficient*32767) ≤ NativeAccumulatorBinding.limit n.accumulatorBits := by
+    have full : n.count*(n.coefficient*32767) ≤ NativeAccumulatorBinding.limit n.accumulatorBits := by
+      simpa [b.2.1,Nat.mul_assoc,Nat.mul_comm,Nat.mul_left_comm] using b.2.2.2
+    exact (Nat.mul_le_mul_right _ count).trans full
+  have product : (n.coefficient : Int)*32767 ≤ (NativeAccumulatorBinding.limit n.accumulatorBits : Int) := by
+    exact_mod_cast productNative
+  have total : (pairs.length : Int)*((n.coefficient : Int)*32767) ≤
+      (NativeAccumulatorBinding.limit n.accumulatorBits : Int) := by exact_mod_cast totalNative
+  have coefficientNonnegative : (0 : Int) ≤ n.coefficient := Int.natCast_nonneg _
+  have coefficientBelow : (n.coefficient : Int) ≤ (n.coefficient : Int)*32767 := by omega
+  constructor
+  · apply publicSequenceFromItemBounds coefficientNonnegative (coefficientBelow.trans product)
+    · simp only [List.length_map]
+      exact (mul_le_mul_of_nonneg_left coefficientBelow (Int.natCast_nonneg _)).trans total
+    · intro value member
+      obtain ⟨p,hp,rfl⟩ := List.mem_map.mp member
+      exact coefficients p hp
+  · apply publicSequenceFromItemBounds (by positivity) product
+    · simpa only [List.length_map] using total
+    · intro value member
+      obtain ⟨p,hp,rfl⟩ := List.mem_map.mp member
+      rw [abs_mul]
+      exact mul_le_mul (coefficients p hp) (quantized p hp) (abs_nonneg _) coefficientNonnegative
+
+def originalParameterTerms (source : NativePlanQCorpus.Bound) (domain : NativeReceiptBytes.Bytes)
+    (block coordinate : Nat) : Option (List (Int × Int)) :=
+  NativeInputProjection.collect (fun row =>
+    (NativeAvailableQ.coordinate row.corpus.manifest block coordinate).map
+      (fun value => ((row.term.coefficient : Int),value))) (NativePlanQCorpus.inDomain domain source.rows)
+
+theorem originalSourceParameterGuards
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source domain block coordinate pairs}
+    (loaded : FamilyInputs.OriginalRowsSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : originalParameterTerms source domain block coordinate = some pairs) :
+    PublicSequence (NativeAccumulatorBinding.limit source.plan.accumulator.numbers.accumulatorBits : Int)
+      (pairs.map Prod.fst) ∧
+    PublicSequence (NativeAccumulatorBinding.limit source.plan.accumulator.numbers.accumulatorBits : Int)
+      (pairs.map (fun p => p.1*p.2)) := by
+  have sources := FamilyInputs.originalRowsSourceParts loaded
+  have coefficients := NativePlanCoefficients.checked sources.1.coefficients
+  have countRows : source.rows.length ≤ source.plan.accumulator.numbers.count := by
+    have same := congrArg List.length (NativePlanQCorpus.completeRows sources.2).1
+    simp only [List.length_map] at same
+    rw [same,coefficients.2,NativePlanCoefficients.exactCount]
+    exact coefficients.1.2.1
+  apply originalParameterSequences coefficients.1.1
+  · exact (NativeInputProjection.collectLength computed).le.trans
+      ((List.length_filter_le _ _).trans countRows)
+  · intro pair member
+    obtain ⟨row,selected,read⟩ := FamilyAuthority.collectedValueSource computed member
+    have original := List.mem_of_mem_filter selected
+    obtain ⟨value,_,same⟩ := Option.map_eq_some_iff.mp read
+    cases same
+    have coefficientMember : row.term ∈ source.plan.coefficients := by
+      rw [← (NativePlanQCorpus.completeRows sources.2).1]
+      exact List.mem_map.mpr ⟨row,original,rfl⟩
+    rw [coefficients.2] at coefficientMember
+    have bounded := NativePlanCoefficients.coefficientBound coefficients.1 coefficientMember
+    simpa only [abs_of_nonneg (Int.natCast_nonneg _)] using
+      (show (row.term.coefficient : Int) ≤ source.plan.accumulator.numbers.coefficient by exact_mod_cast bounded)
+  · intro pair member
+    obtain ⟨row,selected,read⟩ := FamilyAuthority.collectedValueSource computed member
+    obtain ⟨value,lookup,same⟩ := Option.map_eq_some_iff.mp read
+    cases same
+    exact FamilyInputs.originalCoordinateRange loaded row (List.mem_of_mem_filter selected) lookup
+
+theorem originalSourceCoefficientsArePublicFormula
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source domain block coordinate pairs}
+    (loaded : FamilyInputs.OriginalRowsSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : originalParameterTerms source domain block coordinate = some pairs) :
+    pairs.map Prod.fst = (NativePlanQCorpus.inDomain domain source.rows).map (fun row =>
+      (row.term.source.weight.numerator : Int) *
+        ((source.plan.accumulator.numbers.denominator : Int)/row.term.source.weight.denominator)) := by
+  have sources := FamilyInputs.originalRowsSourceParts loaded
+  have keys := FamilyInputs.collectedKeys computed (left := fun row : NativePlanQCorpus.Row =>
+      (row.term.coefficient : Int)) (right := Prod.fst)
+    (fun row pair accepted => by
+      obtain ⟨_,_,same⟩ := Option.map_eq_some_iff.mp accepted
+      cases same; rfl)
+  rw [keys]
+  apply List.map_congr_left
+  intro row selected
+  have original := List.mem_of_mem_filter selected
+  have coefficientMember : row.term ∈ source.plan.coefficients := by
+    rw [← (NativePlanQCorpus.completeRows sources.2).1]
+    exact List.mem_map.mpr ⟨row,original,rfl⟩
+  have same := (FamilyInputs.originalCoefficientIdentity sources.1 coefficientMember).2
+  exact_mod_cast same
+
+theorem sequenceSafeFromPrefixes {lo hi acc : Int} {values : List Int}
+    (items : ∀ v ∈ values, Fits lo hi v)
+    (prefixes : ∀ n ≤ values.length, Fits lo hi (acc+(values.take n).sum)) :
+    SequenceSafe lo hi acc values := by
+  induction values generalizing acc with
+  | nil => simpa only [SequenceSafe,List.take_nil,List.sum_nil,add_zero] using prefixes 0 (by simp)
+  | cons v vs ih =>
+    refine ⟨by simpa using prefixes 0 (by simp),items v List.mem_cons_self,?_⟩
+    apply ih (fun x hx => items x (List.mem_cons_of_mem _ hx))
+    intro n hn
+    simpa only [List.take_succ_cons,List.sum_cons,Int.add_assoc] using prefixes (n+1) (by simpa using hn)
+
+theorem checkedTermsFromPublicSequence {limit : Int} {terms : List (Int × Int)}
+    (safe : PublicSequence limit (terms.map (fun p => p.1*p.2))) :
+    checkedAccumulate (-limit-1) limit (-limit-1) limit 0 terms = some (exactAccumulate 0 terms) := by
+  have recurrence := sequenceSafeFromPrefixes (acc := 0) safe.1 (by simpa only [zero_add] using safe.2)
+  apply checkedAccumulateComplete
+  have transfer {acc : Int} (h : SequenceSafe (-limit-1) limit acc (terms.map (fun p => p.1*p.2))) :
+      AllPrefixesFit (-limit-1) limit (-limit-1) limit acc terms := by
+    clear safe recurrence
+    induction terms generalizing acc with
+    | nil => exact h
+    | cons p ps ih => exact ⟨h.1,h.2.1,ih h.2.2⟩
+  exact transfer recurrence
+
+theorem originalScalarTerms {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source domain block coordinate rows}
+    (loaded : FamilyInputs.OriginalRowsSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : FamilyInputs.originalScalarRows source domain block coordinate = some rows) :
+    originalParameterTerms source domain block coordinate = some
+      (ParameterKernel.coordinateTerms source.plan.accumulator.numbers.denominator 0 rows) := by
+  have sources := FamilyInputs.originalRowsSourceParts loaded
+  unfold originalParameterTerms
+  apply FamilyAuthority.collectProjection computed
+  intro row member scalar selected
+  obtain ⟨value,atValue,same⟩ := Option.map_eq_some_iff.mp selected
+  cases same
+  have coefficientMember : row.term ∈ source.plan.coefficients := by
+    rw [← (NativePlanQCorpus.completeRows sources.2).1]
+    exact List.mem_map.mpr ⟨row,List.mem_of_mem_filter member,rfl⟩
+  have coefficient := (FamilyInputs.originalCoefficientIdentity sources.1 coefficientMember).2
+  have formula : (row.term.coefficient : Int) =
+      (row.term.source.weight.numerator : Int) * ((source.plan.accumulator.numbers.denominator : Int)/row.term.source.weight.denominator) := by
+    exact_mod_cast coefficient
+  simp only [atValue,Option.map_some,formula]
+  rfl
+
+theorem originalScalarShapes {source domain block coordinate rows}
+    (computed : FamilyInputs.originalScalarRows source domain block coordinate = some rows) :
+    ∀ row ∈ rows, row.values.length = 1 := by
+  intro row member
+  obtain ⟨_,_,accepted⟩ := FamilyAuthority.collectedValueSource computed member
+  obtain ⟨_,_,same⟩ := Option.map_eq_some_iff.mp accepted
+  cases same; rfl
+
+theorem originalScalarParameterAccepts {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source domain block coordinate rows}
+    (loaded : FamilyInputs.OriginalRowsSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : FamilyInputs.originalScalarRows source domain block coordinate = some rows) :
+    FamilyParameter.publicParameterRows (NativeAccumulatorBinding.limit source.plan.accumulator.numbers.accumulatorBits : Int)
+      source.plan.accumulator.numbers.denominator rows =
+      some (exactAccumulate 0 (ParameterKernel.coordinateTerms source.plan.accumulator.numbers.denominator 0 rows)) := by
+  have terms := originalScalarTerms loaded computed
+  have safe := originalSourceParameterGuards loaded terms
+  have coefficients := checkedTermsFromPublicSequence (terms :=
+    (ParameterKernel.coordinateTerms source.plan.accumulator.numbers.denominator 0 rows).map (fun p => (p.1,1)))
+    (by simpa only [List.map_map,Function.comp_def,mul_one] using safe.1)
+  have products := checkedTermsFromPublicSequence safe.2
+  simp only [FamilyParameter.publicParameterRows,if_pos (originalScalarShapes computed),coefficients,
+    bind,Option.bind_some,products]
+
+theorem originalImageParameterAccepts
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source indices
+      profile quantum current image domain block coordinate rows}
+    (loaded : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : FamilyInputs.readOriginalImage source indices profile quantum current = some image)
+    (atIndex : indices[block]? = some coordinate)
+    (selected : FamilyInputs.imageRows image (NativeVectorLayout.text domain) block = some rows) :
+    FamilyParameter.publicParameterRows (NativeAccumulatorBinding.limit source.source.plan.accumulator.numbers.accumulatorBits : Int)
+      source.source.plan.accumulator.numbers.denominator rows =
+      some (exactAccumulate 0 (ParameterKernel.coordinateTerms source.source.plan.accumulator.numbers.denominator 0 rows)) := by
+  rw [FamilyInputs.originalInputRowsAreSourceRows loaded computed domain atIndex] at selected
+  exact originalScalarParameterAccepts (FamilyInputs.originalVectorSourceParts loaded).1 selected
+
+theorem originalImageLimit {source indices profile quantum current image}
+    (computed : FamilyInputs.readOriginalImage source indices profile quantum current = some image) :
+    image.limit = (NativeAccumulatorBinding.limit source.source.plan.accumulator.numbers.accumulatorBits : Int) := by
+  simp only [FamilyInputs.readOriginalImage,bind,Option.bind_eq_some_iff] at computed
+  obtain ⟨_,_,_,_,_,_,last⟩ := computed
+  cases Option.some.inj last; rfl
+
+section OriginalParameterTotal
+variable {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata selected}
+    (authority : FamilyAuthority.Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected)
+    (native : NativeParameterLineage.Edge) (block : Nat) (nativeShardAlias : NativeBinding.Bytes → Option String)
+
+theorem originalParameterProjectionTotal
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs vector coordinate dn sn}
+    (loaded : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : FamilyParameter.originalVector source native.certificate.common.domain block = some vector)
+    (atCoordinate : indices[block]? = some coordinate)
+    (inside : coordinate < vector.first.block.frame.values.length)
+    (exactNative : native.certificate.common.leaves = vector.leaves.mergeSort NativePolicyBytes.bytesLT ∧
+      native.certificate.common.numerators = vector.values.map (asciiBytes ∘ toString))
+    (parents : native.certificate.common.context = source.source.plan.members.edge.certificate.common.context ∧
+      native.certificate.common.plan = source.source.plan.members.edge.id ∧
+      native.certificate.common.isc = source.source.plan.members.edge.parent.qcId ∧
+      native.certificate.common.ec = source.source.plan.members.edge.ec.id ∧
+      native.certificate.common.denominator = source.source.plan.accumulator.numbers.denominator)
+    (domainAlias : vocabulary.domain (NativeVectorLayout.text native.certificate.common.domain) = some dn)
+    (domainConfigured : dn ∈ vocabulary.domains)
+    (shardAlias : vocabulary.shard (NativeVectorLayout.shardName vector.first.block.header.ordinal) = some sn)
+    (nativeAlias : nativeShardAlias native.certificate.common.shard = some sn)
+    (shardConfigured : sn ∈ vocabulary.shards) :
+    ∃ p, FamilyParameter.projectOriginal authority native block nativeShardAlias = some p := by
+  let rows := vector.slices.map (fun s => VectorShardRepresentation.rowAt coordinate (NativeVectorArithmetic.kernelRow s))
+  have imageRows : FamilyInputs.imageRows authority.input.image
+      (NativeVectorLayout.text native.certificate.common.domain) block = some rows := by
+    rw [FamilyInputs.originalInputRowsAreSourceRows loaded authority.input.computed _ atCoordinate]
+    exact FamilyParameter.scalarRowsFromSlices computed inside
+  let value := exactAccumulate 0 (ParameterKernel.coordinateTerms source.source.plan.accumulator.numbers.denominator 0 rows)
+  have terms : ParameterKernel.coordinateTerms source.source.plan.accumulator.numbers.denominator 0 rows =
+      ParameterKernel.coordinateTerms source.source.plan.accumulator.numbers.denominator coordinate
+        (vector.slices.map NativeVectorArithmetic.kernelRow) := by
+    simp [rows,ParameterKernel.coordinateTerms,VectorShardRepresentation.rowAt,List.map_map,Function.comp_def]
+  have nativeValue : vector.values[coordinate]? = some value := by
+    dsimp only [value]
+    rw [terms]
+    exact FamilyParameter.originalVectorCoordinate computed inside
+  have arithmetic : FamilyParameter.publicParameterRows authority.input.image.limit native.certificate.common.denominator rows = some value := by
+    rw [originalImageLimit authority.input.computed,parents.2.2.2.2]
+    exact originalImageParameterAccepts loaded authority.input.computed atCoordinate imageRows
+  let p : FamilyParameter.OriginalProjection authority native block nativeShardAlias :=
+    ⟨vector,computed,coordinate,atCoordinate,value,nativeValue,exactNative,parents,rows,imageRows,arithmetic,
+      dn,domainAlias,domainConfigured,sn,shardAlias,nativeAlias,shardConfigured⟩
+  exact ⟨p,FamilyParameter.originalProjectionLoaded authority native block nativeShardAlias p⟩
+
+end OriginalParameterTotal
+
+/- CheckedParameterValue uses a symmetric result bound, while the arithmetic
+domain is the asymmetric signed interval. The extra endpoint is required to
+represent the native minimum; it is a configuration value, not a new guard. -/
+theorem originalParameterResultGuard {source indices profile quantum current vocabulary configured names
+    earlyTrust planningTrust metadata selected}
+    (authority : FamilyAuthority.Original source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected)
+    {native block nativeShardAlias}
+    (p : FamilyParameter.OriginalProjection authority native block nativeShardAlias) :
+    p.value = ((ParameterKernel.coordinateTerms native.certificate.common.denominator 0 p.rows).map
+      (fun t => t.1*t.2)).sum ∧
+      Fits (-(authority.input.image.limit+1)) (authority.input.image.limit+1) p.value := by
+  have checked := p.arithmetic
+  unfold FamilyParameter.publicParameterRows at checked
+  split at checked <;> try contradiction
+  simp only [bind,Option.bind_eq_some_iff] at checked
+  obtain ⟨_,_,computed⟩ := checked
+  have sound := checkedAccumulateSound _ _ _ _ _ _ _ computed
+  constructor
+  · simpa only [exactAccumulateIsSum,Int.zero_add] using sound.1
+  · have bounds := sound.2.2
+    unfold Fits at bounds ⊢
+    omega
+
+/- Full APPLY numeric traversal using the original unsigned-denominator
+optimizer. The existing mixture kernel is valid because native mixture requires
+its final LCM to fit int64. This replaces only the restrictive optimizer adapter. -/
+structure OriginalApplyMath (profile : NativeApplyProfile.Profile) (model optimizer : List Int)
+    (rows : List ApplyKernel.DomainRow) where
+  nonempty : model ≠ []
+  optimizerShape : optimizer.length = model.length
+  rowShapes : ∀ row ∈ rows, row.values.length = model.length
+  weights : rows.map (·.weight) = profile.weights.map (fun w => (NativeApplyResult.fraction w.fraction).kernelWeight)
+  plan : ApplyKernel.WeightPlan minInput maxInput (rows.map (·.weight))
+  gradients : List Int
+  trace : ApplyKernel.GradientTrace minInput maxInput rows plan (List.range model.length) gradients
+  values : List ApplyKernel.OptimizerValues
+  computed : nativeOptimizerVector profile model optimizer gradients = some values
+
+def checkOriginalApplyMath (profile : NativeApplyProfile.Profile) (model optimizer : List Int)
+    (rows : List ApplyKernel.DomainRow) : Option (OriginalApplyMath profile model optimizer rows) := do
+  if shape : model ≠ [] ∧ optimizer.length = model.length ∧
+      (∀ row ∈ rows, row.values.length = model.length) ∧
+      rows.map (·.weight) = profile.weights.map (fun w => (NativeApplyResult.fraction w.fraction).kernelWeight) then
+    let plan ← ApplyKernel.deriveWeightPlan minInput maxInput (rows.map (·.weight))
+    let gradients ← ApplyKernel.deriveGradients minInput maxInput rows plan (List.range model.length)
+    match computed : nativeOptimizerVector profile model optimizer gradients.val with
+    | none => none
+    | some values => some ⟨shape.1,shape.2.1,shape.2.2.1,shape.2.2.2,plan,gradients.val,gradients.property,values,computed⟩
+  else none
+
+def OriginalApplyMath.nextModel {profile model optimizer rows} (p : OriginalApplyMath profile model optimizer rows) : List Int :=
+  p.values.map ApplyKernel.OptimizerValues.nextModel
+
+def OriginalApplyMath.nextOptimizer {profile model optimizer rows} (p : OriginalApplyMath profile model optimizer rows) : List Int :=
+  p.values.map ApplyKernel.OptimizerValues.nextOptimizer
+
+theorem originalApplyMathTotal {profile model optimizer rows} (p : OriginalApplyMath profile model optimizer rows) :
+    checkOriginalApplyMath profile model optimizer rows = some p := by
+  unfold checkOriginalApplyMath
+  rw [dif_pos ⟨p.nonempty,p.optimizerShape,p.rowShapes,p.weights⟩,derivePlanComplete p.plan]
+  simp only [bind,Option.bind,deriveGradientsComplete p.trace]
+  split
+  · rename_i absent; simp [p.computed] at absent
+  · rename_i values computed
+    have same := Option.some.inj (computed.symm.trans p.computed)
+    subst values; rfl
+
+theorem originalApplyMathShape {profile model optimizer rows} (p : OriginalApplyMath profile model optimizer rows) :
+    p.nextModel.length = model.length ∧ p.nextOptimizer.length = model.length := by
+  have shape := nativeVectorShape p.computed
+  simpa only [OriginalApplyMath.nextModel,OriginalApplyMath.nextOptimizer,List.length_map] using
+    And.intro shape.1.symm shape.1.symm
+
+theorem originalApplyMathCoordinate {profile model optimizer rows} (p : OriginalApplyMath profile model optimizer rows)
+    {index : Nat} {value} (atValue : p.values[index]? = some value) :
+    ∃ theta momentum gradient total terms,
+      model[index]? = some theta ∧ optimizer[index]? = some momentum ∧ p.gradients[index]? = some gradient ∧
+      ApplyKernel.ColumnTerms index rows terms ∧
+      ApplyKernel.checkedMix minInput maxInput p.plan.denominator 0 terms = some total ∧
+      gradient = round total p.plan.denominator ∧
+      value = ApplyKernel.optimizerValues theta momentum gradient
+        (NativeApplyResult.fraction profile.learning).kernelWeight
+        (NativeApplyResult.fraction profile.momentum).kernelWeight
+        (NativeApplyResult.fraction profile.decay).kernelWeight := by
+  obtain ⟨theta,momentum,gradient,hm,ho,hg,computed⟩ := nativeVectorAt p.computed atValue
+  have inside : index < model.length := by
+    rw [(nativeVectorShape p.computed).1]
+    exact (List.getElem?_eq_some_iff.mp atValue).1
+  obtain ⟨g,total,terms,atHead,column,mix,rounded,_⟩ :=
+    VectorShardRepresentation.scalarMixtureIsCoordinate p.trace index index (by simp [inside])
+  have equal := Option.some.inj (atHead.symm.trans hg)
+  exact ⟨theta,momentum,gradient,total,terms,hm,ho,hg,column,mix,
+    (rounded.trans equal).symm,(nativeOptimizerSound computed).1⟩
+
+theorem originalApplyCoordinatePublicGuards {profile model optimizer rows}
+    (p : OriginalApplyMath profile model optimizer rows) {index : Nat} {value}
+    (atValue : p.values[index]? = some value) (limit : Int)
+    (lower : -limit-1 ≤ minInput) (upper : maxInput ≤ limit) :
+    ∃ theta momentum gradient total terms,
+      model[index]? = some theta ∧ optimizer[index]? = some momentum ∧ p.gradients[index]? = some gradient ∧
+      ColumnTerms index rows terms ∧
+      PublicSequence limit (mixtureProducts p.plan.denominator terms) ∧
+      (∀ term ∈ terms, Fits (-limit-1) limit (term.value*term.weight.numerator)) ∧
+      Fits (-limit-1) limit p.plan.denominator ∧
+      gradient = round total p.plan.denominator ∧ Fits (-limit-1) limit gradient ∧
+      (∀ v ∈ PublicOptimizerValues theta momentum gradient
+        (NativeApplyResult.fraction profile.learning).kernelWeight
+        (NativeApplyResult.fraction profile.momentum).kernelWeight
+        (NativeApplyResult.fraction profile.decay).kernelWeight, Fits (-limit-1) limit v) ∧
+      value = optimizerValues theta momentum gradient
+        (NativeApplyResult.fraction profile.learning).kernelWeight
+        (NativeApplyResult.fraction profile.momentum).kernelWeight
+        (NativeApplyResult.fraction profile.decay).kernelWeight := by
+  obtain ⟨theta,momentum,g,hm,ho,hg,computed⟩ := nativeVectorAt p.computed atValue
+  obtain ⟨theta',momentum',g',total,terms,hm',ho',hg',column,mix,rounded,result⟩ := originalApplyMathCoordinate p atValue
+  have tm := Option.some.inj (hm'.symm.trans hm)
+  have om := Option.some.inj (ho'.symm.trans ho)
+  have gg := Option.some.inj (hg'.symm.trans hg)
+  have checked := checkedMixSound _ _ _ _ _ _ (mixWiden lower upper mix)
+  have sequence := mixtureSequence checked.2.1
+  have optimizer := nativeOptimizerPublicGuard computed limit lower upper
+  exact ⟨theta,momentum,g,total,terms,hm,ho,hg,column,publicSequenceFromRecurrence sequence.1,sequence.2,
+    fitsWiden lower upper (weightPlanLeast _ _ _ p.plan).2.1,by simpa only [gg] using rounded,
+    optimizer.1,optimizer.2.1,by simpa only [tm,om,gg] using result⟩
 
 end DeltaReduce.FamilyGuards
