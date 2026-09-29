@@ -1,5 +1,26 @@
 # Feature010 continuation checkpoint
 
+## R2.3 execution plan — 29 September 2026 — approved profile / STOP
+
+The user approved Snapshot Provenance Profile v1 for the current production
+scope and authorized only a short implementation/proof plan. The finite
+[R2.3 plan](adr/0013-r2-3-implementation-plan.md) names the exact proposal files,
+six target statements, five work packages and CLOSED/STOP criteria. Conditional
+estimate: 32–56 active hours, with a source-contract/representation stop-check
+within the first 2–4 hours of any later authorized implementation. This is an
+estimate, not current programming authority or a Formal GO/R3 estimate.
+
+The target is independent raw profile/source-history binding -> admissible
+native cut -> complete static family relation using accepted R2.1/R2.2. A
+success-only checker or supplied full-state equality cannot close it; complete
+coverage/totality on the approved source domain is required. No new source cap,
+public-success premise or protocol identity change may hide an incompatibility.
+Production recovery/activation and R3 are excluded. No new provenance alternative.
+
+R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN; R3 not started. Only planning/progress docs
+changed; no code, schema, checker or proof implementation. STOP after plan until
+the user explicitly authorizes programming. Older entries are historical.
+
 ## Snapshot Provenance Profile v1 — 29 September 2026 — concrete proposal / STOP
 
 The user conceptually accepted ADR-0013 as the production trust model and asked
