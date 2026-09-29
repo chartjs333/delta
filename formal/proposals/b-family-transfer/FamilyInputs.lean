@@ -1645,8 +1645,139 @@ def originalImageValue (source : NativeVectorContext.Bound) (profile : NativeApp
     optimizer := optimizer
     limit := NativeAccumulatorBinding.limit source.source.plan.accumulator.numbers.accumulatorBits }
 
+/- Numeric constructors need current vectors, not a fabricated preceding APPLY
+candidate. Native finalized values embed here without changing their identity;
+an initial snapshot may supply the same value carrier through its own source. -/
+structure CurrentValues where
+  model : List Int
+  optimizer : List Int
+  deriving DecidableEq, Repr
+
+def CurrentValues.fromNative (current : NativeCurrentValues.Image) : CurrentValues :=
+  ⟨current.model,current.optimizer⟩
+
+instance : Coe NativeCurrentValues.Image CurrentValues := ⟨CurrentValues.fromNative⟩
+
+def CurrentValues.Bounded (current : CurrentValues) : Prop :=
+  (∀ value ∈ current.model, Fits minInput maxInput value) ∧
+  (∀ value ∈ current.optimizer, Fits minInput maxInput value)
+
+instance (current : CurrentValues) : Decidable (CurrentValues.Bounded current) := by
+  unfold CurrentValues.Bounded; infer_instance
+
+structure CurrentBasis where
+  values : CurrentValues
+  pointer : NativeCurrentPointer.State
+  schema : Bytes
+  deriving DecidableEq, Repr
+
+def CurrentBasis.fromHistory (current : NativeCurrentHistory.Current) : CurrentBasis :=
+  ⟨current.last.values,current.recovery.wal.state,current.last.edge.decoded.candidate.context.schema⟩
+
+instance : Coe NativeCurrentHistory.Current CurrentBasis := ⟨CurrentBasis.fromHistory⟩
+
+def currentUnitKey (source : NativeVectorContext.Bound) (profile : NativeApplyProfile.Checked)
+    (current : CurrentBasis) : NativeStateProjection.UnitKey :=
+  ⟨(NativeVectorAuthority.plan source).certificate.common.context,(NativeVectorAuthority.plan source).id,
+    profile.id,profile.profile.accumulator,current.pointer⟩
+
+theorem historyUnitKeyUnchanged (source : NativeVectorContext.Bound) (profile : NativeApplyProfile.Checked)
+    (current : NativeCurrentHistory.Current) : currentUnitKey source profile current =
+      NativeStateProjection.unitKey source profile current := rfl
+
+def currentLinks (source : NativeVectorContext.Bound) (profile : NativeApplyProfile.Checked)
+    (current : CurrentBasis) : Prop :=
+  profile.profile.accumulator = (NativeVectorAuthority.plan source).certificate.common.accumulator ∧
+  current.pointer.checkpoint = (NativeVectorAuthority.state source).wire.parent ∧
+  current.pointer.height < (NativeVectorAuthority.state source).height ∧
+  current.schema = (NativeVectorAuthority.plan source).certificate.common.context.schema
+
+instance (source profile current) : Decidable (currentLinks source profile current) := by
+  unfold currentLinks; infer_instance
+
+theorem historyLinksUnchanged (source : NativeVectorContext.Bound) (profile : NativeApplyProfile.Checked)
+    (current : NativeCurrentHistory.Current) : currentLinks source profile current ↔
+      NativeStateProjection.Links source profile current := Iff.rfl
+
+theorem currentValuesFromNative {sha candidate current}
+    (loaded : NativeCurrentValues.load sha candidate = some current) :
+    CurrentValues.Bounded (CurrentValues.fromNative current) := NativeCurrentValues.valueBounds loaded
+
+/- The existing anchor carries current value hashes independently of a new
+request. Canonical vector spellings can be checked against it even when there
+is no prior APPLY. Authentication of that anchor is the existing named trust
+premise; hash equality alone does not establish its provenance. -/
+structure AnchoredValues (sha : Bytes → Bytes) (anchor : Anchor)
+    (modelRaw optimizerRaw : List Bytes) where
+  values : CurrentValues
+  model : NativeCurrentValues.readValues modelRaw = some values.model
+  optimizer : NativeCurrentValues.readValues optimizerRaw = some values.optimizer
+  modelHash : sha (valueHashInput .model values.model) = anchor.currentModelHash
+  optimizerHash : sha (valueHashInput .optimizer values.optimizer) = anchor.currentOptimizerHash
+  modelHashWidth : anchor.currentModelHash.length = 32
+  optimizerHashWidth : anchor.currentOptimizerHash.length = 32
+  shape : 0 < values.model.length ∧ values.model.length ≤ 100000 ∧ values.optimizer.length = values.model.length
+
+def loadAnchoredValues (sha : Bytes → Bytes) (anchor : Anchor) (modelRaw optimizerRaw : List Bytes) :
+    Option (AnchoredValues sha anchor modelRaw optimizerRaw) := do
+  match model : NativeCurrentValues.readValues modelRaw with
+  | none => none
+  | some modelValues =>
+    match optimizer : NativeCurrentValues.readValues optimizerRaw with
+    | none => none
+    | some optimizerValues =>
+      if checks : sha (valueHashInput .model modelValues) = anchor.currentModelHash ∧
+          sha (valueHashInput .optimizer optimizerValues) = anchor.currentOptimizerHash ∧
+          anchor.currentModelHash.length = 32 ∧ anchor.currentOptimizerHash.length = 32 ∧
+          0 < modelValues.length ∧ modelValues.length ≤ 100000 ∧ optimizerValues.length = modelValues.length then
+        some ⟨⟨modelValues,optimizerValues⟩,model,optimizer,checks.1,checks.2.1,checks.2.2.1,
+          checks.2.2.2.1,checks.2.2.2.2⟩
+      else none
+
+theorem anchoredValuesLoaded {sha anchor modelRaw optimizerRaw}
+    (current : AnchoredValues sha anchor modelRaw optimizerRaw) :
+    loadAnchoredValues sha anchor modelRaw optimizerRaw = some current := by
+  unfold loadAnchoredValues
+  split
+  · rename_i absent; rw [current.model] at absent; contradiction
+  · rename_i model found
+    have same := Option.some.inj (found.symm.trans current.model)
+    subst model
+    split
+    · rename_i absent; rw [current.optimizer] at absent; contradiction
+    · rename_i optimizer found
+      have same := Option.some.inj (found.symm.trans current.optimizer)
+      subst optimizer
+      rw [dif_pos ⟨current.modelHash,current.optimizerHash,current.modelHashWidth,current.optimizerHashWidth,current.shape⟩]
+
+theorem anchoredValuesOriginal {sha anchor modelRaw optimizerRaw}
+    (current : AnchoredValues sha anchor modelRaw optimizerRaw) :
+    modelRaw = NativeApplyResult.decimalValues current.values.model ∧
+    optimizerRaw = NativeApplyResult.decimalValues current.values.optimizer ∧
+    sha (NativeApplyResult.rawValueInput .model modelRaw) = anchor.currentModelHash ∧
+    sha (NativeApplyResult.rawValueInput .optimizer optimizerRaw) = anchor.currentOptimizerHash := by
+  have model := (NativeCurrentValues.valuesSource current.model).1
+  have optimizer := (NativeCurrentValues.valuesSource current.optimizer).1
+  refine ⟨model,optimizer,?_,?_⟩
+  · rw [model,NativeApplyResult.exactValueInput]; exact current.modelHash
+  · rw [optimizer,NativeApplyResult.exactValueInput]; exact current.optimizerHash
+
+theorem anchoredValuesBounded {sha anchor modelRaw optimizerRaw}
+    (current : AnchoredValues sha anchor modelRaw optimizerRaw) : CurrentValues.Bounded current.values :=
+  ⟨(NativeCurrentValues.valuesSource current.model).2,(NativeCurrentValues.valuesSource current.optimizer).2⟩
+
+theorem anchoredValuesRejectModelMismatch {sha anchor modelRaw optimizerRaw model}
+    (decoded : NativeCurrentValues.readValues modelRaw = some model)
+    (mismatch : sha (valueHashInput .model model) ≠ anchor.currentModelHash) :
+    loadAnchoredValues sha anchor modelRaw optimizerRaw = none := by
+  cases loaded : loadAnchoredValues sha anchor modelRaw optimizerRaw with
+  | none => rfl
+  | some current =>
+    have same := Option.some.inj (decoded.symm.trans current.model)
+    exact False.elim (mismatch (same ▸ current.modelHash))
+
 def readOriginalImage (source : NativeVectorContext.Bound) (indices : List Nat)
-    (profile : NativeApplyProfile.Profile) (applyQuantum : Rational) (current : NativeCurrentValues.Image) :
+    (profile : NativeApplyProfile.Profile) (applyQuantum : Rational) (current : CurrentValues) :
     Option PublicArithmeticInputs.Image := do
   let tickets ← readOriginalTickets source indices
   let model ← selectOriginalCurrent source.first.corpus.manifest indices current.model
@@ -1657,7 +1788,7 @@ theorem originalImageConstructorTotal
     {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source indices}
     (loaded : OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
     (selected : OriginalSelectionFits source.first.corpus.manifest indices)
-    (profile : NativeApplyProfile.Profile) (applyQuantum : Rational) (current : NativeCurrentValues.Image)
+    (profile : NativeApplyProfile.Profile) (applyQuantum : Rational) (current : CurrentValues)
     (shape : current.model.length = source.first.corpus.manifest.plan.inputs.schema.total ∧
       current.optimizer.length = current.model.length) :
     ∃ image, readOriginalImage source indices profile applyQuantum current = some image := by
@@ -1768,9 +1899,9 @@ theorem originalLimitContainsCurrent {bits : Nat} (width : NativeAccumulatorBind
     maxInput ≤ (NativeAccumulatorBinding.limit bits : Int) := by
   rcases width with rfl | rfl <;> decide +kernel
 
-theorem originalImageNumericGuards
+theorem originalImageNumericGuardsFromValues
     {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source indices
-      profile applyQuantum current image candidate}
+      profile applyQuantum current image}
     (loaded : OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
     (computed : readOriginalImage source indices profile applyQuantum current = some image)
     (profileValid : NativeApplyProfile.Valid profile)
@@ -1779,7 +1910,7 @@ theorem originalImageNumericGuards
       Int.gcd applyQuantum.numerator applyQuantum.denominator = 1)
     (domainCoverage : ∀ row ∈ source.source.rows,
       row.term.source.member.input.domain ∈ profile.weights.map (·.domain))
-    (currentLoaded : NativeCurrentValues.load sha candidate = some current) :
+    (currentBounded : CurrentValues.Bounded current) :
     InputNumericGuards image := by
   simp only [readOriginalImage,bind,Option.bind_eq_some_iff] at computed
   obtain ⟨tickets,ticketsLoaded,model,modelLoaded,optimizer,optimizerLoaded,last⟩ := computed
@@ -1791,7 +1922,6 @@ theorem originalImageNumericGuards
     numeric.2.2.2.2.2.2.2.1
   have limits := originalLimitContainsCurrent width
   have mixture := originalProfileMixture profileValid
-  have currentSource := NativeCurrentValues.loaded currentLoaded
   have firstMember := List.mem_of_head? context.2.1
   obtain ⟨_,_,_,_,firstLoaded⟩ := NativePlanQCorpus.rowMember sources.2 source.first firstMember
   have quantums := originalManifestQuantumGuards (rowManifestSource firstLoaded)
@@ -1844,11 +1974,26 @@ theorem originalImageNumericGuards
     · exact frac _ profileValid.2.2.2.2.2.2.1
     · exact frac _ profileValid.2.2.2.2.2.2.2.1
   · intro cell member
-    have range := (NativeCurrentValues.valuesSource currentSource.model).2 cell.2 (originalCurrentCellSource modelLoaded member)
+    have range := currentBounded.1 cell.2 (originalCurrentCellSource modelLoaded member)
     exact ⟨limits.2.1.trans range.1,range.2.trans limits.2.2⟩
   · intro cell member
-    have range := (NativeCurrentValues.valuesSource currentSource.optimizer).2 cell.2 (originalCurrentCellSource optimizerLoaded member)
+    have range := currentBounded.2 cell.2 (originalCurrentCellSource optimizerLoaded member)
     exact ⟨limits.2.1.trans range.1,range.2.trans limits.2.2⟩
+
+theorem originalImageNumericGuards
+    {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source indices
+      profile applyQuantum image candidate} {current : NativeCurrentValues.Image}
+    (loaded : OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
+    (computed : readOriginalImage source indices profile applyQuantum current = some image)
+    (profileValid : NativeApplyProfile.Valid profile)
+    (normalized : OriginalProfileNormalized profile)
+    (quantum : 0 < applyQuantum.numerator ∧ 0 < applyQuantum.denominator ∧
+      Int.gcd applyQuantum.numerator applyQuantum.denominator = 1)
+    (domainCoverage : ∀ row ∈ source.source.rows,
+      row.term.source.member.input.domain ∈ profile.weights.map (·.domain))
+    (currentLoaded : NativeCurrentValues.load sha candidate = some current) : InputNumericGuards image :=
+  originalImageNumericGuardsFromValues loaded computed profileValid normalized quantum domainCoverage
+    (currentValuesFromNative currentLoaded)
 
 
 /- Native labels are carried bijectively before the separately checked public
@@ -1989,40 +2134,40 @@ accepted as an unrelated public profile. UnitSource is the pre-existing named
 primitive boundary; its full context/APC/profile/accumulator/current key is kept.
 This reads already checked current values and adds no recovery transition. -/
 def OriginalNumericConfigurationChecks (source : NativeVectorContext.Bound)
-    (profile : NativeApplyProfile.Checked) (current : NativeCurrentHistory.Current)
+    (profile : NativeApplyProfile.Checked) (current : CurrentBasis)
     (quantum : Rational) : Prop :=
-  NativeStateProjection.Links source profile current ∧
+  currentLinks source profile current ∧
   OriginalProfileNormalized profile.profile ∧
   (0 < quantum.numerator ∧ 0 < quantum.denominator ∧ Int.gcd quantum.numerator quantum.denominator = 1) ∧
   (∀ row ∈ source.source.rows, row.term.source.member.input.domain ∈ profile.profile.weights.map (·.domain)) ∧
-  current.last.values.model.length = source.first.corpus.manifest.plan.inputs.schema.total ∧
-  current.last.values.optimizer.length = current.last.values.model.length
+  current.values.model.length = source.first.corpus.manifest.plan.inputs.schema.total ∧
+  current.values.optimizer.length = current.values.model.length
 
 instance (source profile current quantum) : Decidable (OriginalNumericConfigurationChecks source profile current quantum) := by
   unfold OriginalNumericConfigurationChecks OriginalProfileNormalized
   infer_instance
 
 structure OriginalNumericConfiguration (sha : Bytes → Bytes) (source : NativeVectorContext.Bound)
-    (units : NativeStateProjection.UnitSource) (profileId : Bytes) (current : NativeCurrentHistory.Current) where
+    (units : NativeStateProjection.UnitSource) (profileId : Bytes) (current : CurrentBasis) where
   profile : NativeApplyProfile.Checked
   profileSource : NativeStateProjection.selectProfile sha source profileId = some profile
   quantum : Rational
-  unitSource : units (NativeStateProjection.unitKey source profile current) = some quantum
-  currentSource : NativeCurrentValues.load sha current.last.edge.decoded.candidate = some current.last.values
+  unitSource : units (currentUnitKey source profile current) = some quantum
+  currentBounded : CurrentValues.Bounded current.values
   checked : OriginalNumericConfigurationChecks source profile current quantum
 
 def loadOriginalNumericConfiguration (sha : Bytes → Bytes) (source : NativeVectorContext.Bound)
-    (units : NativeStateProjection.UnitSource) (profileId : Bytes) (current : NativeCurrentHistory.Current) :
+    (units : NativeStateProjection.UnitSource) (profileId : Bytes) (current : CurrentBasis) :
     Option (OriginalNumericConfiguration sha source units profileId current) := do
   match profileSource : NativeStateProjection.selectProfile sha source profileId with
   | none => none
   | some profile =>
-    match unitSource : units (NativeStateProjection.unitKey source profile current) with
+    match unitSource : units (currentUnitKey source profile current) with
     | none => none
     | some quantum =>
-      if currentSource : NativeCurrentValues.load sha current.last.edge.decoded.candidate = some current.last.values then
+      if currentBounded : CurrentValues.Bounded current.values then
         if checked : OriginalNumericConfigurationChecks source profile current quantum then
-          some ⟨profile,profileSource,quantum,unitSource,currentSource,checked⟩ else none
+          some ⟨profile,profileSource,quantum,unitSource,currentBounded,checked⟩ else none
       else none
 
 theorem originalNumericConfigurationLoaded {sha source units profileId current}
@@ -2039,7 +2184,7 @@ theorem originalNumericConfigurationLoaded {sha source units profileId current}
     · rename_i quantum found
       have same := Option.some.inj (found.symm.trans c.unitSource)
       subst quantum
-      rw [dif_pos c.currentSource,dif_pos c.checked]
+      rw [dif_pos c.currentBounded,dif_pos c.checked]
 
 theorem originalNumericConfigurationProfile {sha source units profileId current}
     (c : OriginalNumericConfiguration sha source units profileId current) :
@@ -2054,23 +2199,23 @@ theorem originalConfiguredInputTotal {sha policyRaw stateRaw apcId configRaw pro
     (bound : OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
     (configuration : OriginalNumericConfiguration sha source units profileId current)
     (selection : OriginalSelectionFits source.first.corpus.manifest indices) :
-    ∃ image, readOriginalImage source indices configuration.profile.profile configuration.quantum current.last.values = some image ∧
+    ∃ image, readOriginalImage source indices configuration.profile.profile configuration.quantum current.values = some image ∧
       InputNumericGuards image := by
   obtain ⟨image,computed⟩ := originalImageConstructorTotal bound selection configuration.profile.profile
-    configuration.quantum current.last.values configuration.checked.2.2.2.2
+    configuration.quantum current.values configuration.checked.2.2.2.2
   have profile := originalNumericConfigurationProfile configuration
-  refine ⟨image,computed,originalImageNumericGuards bound computed
+  refine ⟨image,computed,originalImageNumericGuardsFromValues bound computed
     (NativeApplyProfile.checkedSource profile.1).2.2.1 configuration.checked.2.1
-    configuration.checked.2.2.1 configuration.checked.2.2.2.1 configuration.currentSource⟩
+    configuration.checked.2.2.1 configuration.checked.2.2.2.1 configuration.currentBounded⟩
 
 theorem originalConfiguredInputGuards {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source
     units profileId current indices image}
     (bound : OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
     (configuration : OriginalNumericConfiguration sha source units profileId current)
-    (computed : readOriginalImage source indices configuration.profile.profile configuration.quantum current.last.values = some image) :
+    (computed : readOriginalImage source indices configuration.profile.profile configuration.quantum current.values = some image) :
     InputNumericGuards image :=
-  originalImageNumericGuards bound computed
+  originalImageNumericGuardsFromValues bound computed
     (NativeApplyProfile.checkedSource (originalNumericConfigurationProfile configuration).1).2.2.1
-    configuration.checked.2.1 configuration.checked.2.2.1 configuration.checked.2.2.2.1 configuration.currentSource
+    configuration.checked.2.1 configuration.checked.2.2.1 configuration.checked.2.2.2.1 configuration.currentBounded
 
 end DeltaReduce.FamilyInputs

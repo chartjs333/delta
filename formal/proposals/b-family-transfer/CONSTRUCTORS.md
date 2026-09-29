@@ -12,7 +12,7 @@ mandatory semantics/report and protected fixtures are unchanged. No GO is issued
 |---|---|---|
 | 1. Family → full public input/body constructors | **CLOSED** | The direct original-source path constructs the full configured 23-field input image, authority and complete PARAMETER/ROOT/APPLY bodies for every selected coordinate of arbitrary original admitted shard lengths. OMIT_UNAVAILABLE receives a total latent completion without changing the eligible input rows. Canonicality follows from checked primitive namespaces and original component values. Ordered original entries, offsets and full native objects remain present; no supplied whole translated body is accepted. |
 | 2. Native INT64/INT128 domain → existing public guards | **CLOSED** | The direct path avoids the older draft layout/Q/name/pack/signed-fraction restrictions. Original accumulator proof and coefficient rows imply all coefficient/product/prefix guards. Conversion checks every intermediate at the original accumulator width; mixture uses the existing native final-LCM bound; optimizer preserves unsigned denominators, rounding and all checked intermediates. The same policy-selected normalized profile and source-keyed quantum feed the full input/body constructors. Arithmetic and symmetric result bounds remain distinct. |
-| 3. Source/configuration/aliases/certificates/state → one checked R2 relation | **OPEN** | The new constructor and numeric component relation still must compose with one coherent authenticated configuration/alias namespace and exact complete static public/native certificate, vote, current and environment collections. Original arithmetic-journal and signer joins exist, but the old journal entry point still uses its older draft body adapter. This is not a complete static R2 relation. |
+| 3. Source/configuration/aliases/certificates/state → one checked R2 relation | **OPEN** | Direct PARAMETER/APPLY and ROOT observations compose the original source, policy-selected profile, full input/authority/body constructors and original WAL/candidate identity without the draft body adapter. Mixed-WAL positions and shared actor/context/config/current aliases are checked. Current values can come from existing history or an independently authenticated anchor without a fabricated prior APPLY. Still missing: one authenticated configuration/alias relation across all object kinds and exact complete static public/native certificate, vote, current and environment collections, including the full initial snapshot/pointer-QC relation. |
 
 CLOSED for 1/2 refers to these two frozen component obligations. It does not
 assert universal admission/refinement or authenticate the remaining source
@@ -85,6 +85,49 @@ is a representation index, never a new shard, vote, signer, certificate or WAL
 slot. Missing/ambiguous native shard aliases reject.
 
 ## Remaining static relation (obligation 3 only)
+
+`FamilyRelation.Direct.loadStoredProjection` is the executable arithmetic
+entry point for a stored WAL record. It reads the original vector source, same
+policy and committee, selected immutable profile and source-keyed quantum.
+It decodes the original WAL record and selects the original candidate from the complete
+native snapshot. The full PARAMETER/APPLY constructor computes the public body;
+its context is derived from that body. Primitive names and canonicality are
+checked, and an altered supplied vote is rejected. All coordinate views keep
+the same original body ID, signer and WAL sequence. Input ticket order/names
+are proved equal to the actual APC member order/names, not only their count.
+
+The deterministic receipt is derived from the original command/candidate/hash;
+it need not have been observed or exposed. Any supplied observed receipt must
+match exactly. This does not imply response exposure, network delivery or quorum
+power. `loadLocatedProjection` checks the complete original mixed WAL byte
+partition and the original position, including intervening command records.
+All coordinate views preserve the original per-actor sequence and object.
+UNKNOWN, corrupt scans and incomplete/torn observations reject this complete
+source path. The whole original stream is retained; this is not yet complete
+public collection coverage for that stream.
+
+`loadObservedProjection` reuses the existing nonempty pointer-history reader.
+Original candidate value preimages determine current model/optimizer hashes;
+UNKNOWN rejects. The pure constructor's `CurrentBasis` now holds values,
+pointer and schema independently of a preceding APPLY carrier. Existing history
+unit keys and links are definitionally unchanged. `loadAnchoredProjection`
+checks canonical current-value spellings and both original hashes against an
+anchor with explicit existing `anchorAuthenticated/recoveryAuthenticated`
+premises, then checks source context/schema and pointer optimizer identity.
+This represents initial numeric values without inventing an APPLY. It does
+not establish the complete initial snapshot or pointer-QC relation; those stay
+in 3. No new recovery-preservation theorem is claimed. The original native
+arithmetic guard still rejects; this is not production admission/execution.
+
+`loadRootProjection` uses the same direct numeric source and original native
+ROOT selector. Every original finalized PARAMETER certificate is retained in
+the original ordered corpus; its native body ID and parent context come from
+`NativeRootSource`. The complete family aggregate is wrapped by the existing
+`PublicRootEnvelope.envelope`: kind AGGREGATE_ROOT, context equal to its complete
+APC. It does not call the arithmetic-only `PublicState.expectedContext`.
+Primitive namespaces, original actor and WAL position are checked, and selector
+views cannot inflate signers or create new native objects. ROOT construction
+does not require a future APPLY or successful conversion/optimizer computation.
 
 The outstanding interfaces are finite and unchanged: one original-source
 configuration and alias namespace; the existing CONFIG/ISC/EC/APC/PARAMETER/

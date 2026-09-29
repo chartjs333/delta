@@ -1163,7 +1163,7 @@ nonmembers. Configuration/aliases remain explicit primitive source premises;
 no successful whole-image check or translated body is a premise. -/
 theorem originalInputEncoderTotal
     {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source indices
-      profile applyQuantum current image candidate vocabulary configured}
+      profile applyQuantum image candidate vocabulary configured} {current : NativeCurrentValues.Image}
     (loaded : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
     (computed : FamilyInputs.readOriginalImage source indices profile applyQuantum current = some image)
     (profileValid : NativeApplyProfile.Valid profile)
@@ -1185,7 +1185,7 @@ theorem originalInputEncoderTotal
 /- The direct input gate retains the original source and the complete configured
 image. It deliberately does not manufacture a draft graph artifact or identifier. -/
 structure OriginalInput (source : NativeVectorContext.Bound) (indices : List Nat)
-    (profile : NativeApplyProfile.Profile) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (profile : NativeApplyProfile.Profile) (quantum : Rational) (current : FamilyInputs.CurrentValues)
     (vocabulary : Vocabulary) (configured : List Ticket) where
   image : Image
   computed : FamilyInputs.readOriginalImage source indices profile quantum current = some image
@@ -1194,7 +1194,7 @@ structure OriginalInput (source : NativeVectorContext.Bound) (indices : List Nat
   encoded : Encoded vocabulary (FamilyInputs.completedImage image configured)
 
 def loadOriginalInput (source : NativeVectorContext.Bound) (indices : List Nat)
-    (profile : NativeApplyProfile.Profile) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (profile : NativeApplyProfile.Profile) (quantum : Rational) (current : FamilyInputs.CurrentValues)
     (vocabulary : Vocabulary) (configured : List Ticket) :
     Option (OriginalInput source indices profile quantum current vocabulary configured) := do
   match computed : FamilyInputs.readOriginalImage source indices profile quantum current with
@@ -1241,16 +1241,16 @@ theorem originalConfiguredInputLoaded
     (bound : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs source)
     (configuration : FamilyInputs.OriginalNumericConfiguration sha source units profileId current)
     (computed : FamilyInputs.readOriginalImage source indices configuration.profile.profile
-      configuration.quantum current.last.values = some image)
+      configuration.quantum current.values = some image)
     (coverage : FamilyInputs.CompletionCoverage image configured)
     (primitive : InputEncodingPrimitives vocabulary (FamilyInputs.completedImage image configured)) :
     ∃ result, loadOriginalInput source indices configuration.profile.profile configuration.quantum
-      current.last.values vocabulary configured = some result ∧ result.image = image := by
+      current.values vocabulary configured = some result ∧ result.image = image := by
   have numeric := FamilyInputs.originalConfiguredInputGuards bound configuration computed
   obtain ⟨encoded,_⟩ := inputEncoderTotal
     (FamilyInputs.completedImageNumericGuards image configured numeric coverage.2.2.2.1) primitive
   let result : OriginalInput source indices configuration.profile.profile configuration.quantum
-      current.last.values vocabulary configured := ⟨image,computed,coverage,numeric,encoded⟩
+      current.values vocabulary configured := ⟨image,computed,coverage,numeric,encoded⟩
   exact ⟨result,originalInputFromComponents result,rfl⟩
 
 /- Four independently supplied primitive aliases of existing original content
@@ -1295,7 +1295,7 @@ theorem originalHeaderLoaded {source profile names} (h : OriginalHeader source p
     originalContentNameLoaded h.arithmetic,originalContentNameLoaded h.apply,bind,Option.bind]
 
 structure Original (source : NativeVectorContext.Bound) (indices : List Nat)
-    (profile : NativeApplyProfile.Checked) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (profile : NativeApplyProfile.Checked) (quantum : Rational) (current : FamilyInputs.CurrentValues)
     (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
     {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
     (selected : NativeSelectedVote.Checked) where
@@ -1317,7 +1317,7 @@ def Original.value {source indices profile quantum current vocabulary configured
       (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata selected) : Value := record p.fields
 
 def loadOriginal (source : NativeVectorContext.Bound) (indices : List Nat)
-    (profile : NativeApplyProfile.Checked) (quantum : Rational) (current : NativeCurrentValues.Image)
+    (profile : NativeApplyProfile.Checked) (quantum : Rational) (current : FamilyInputs.CurrentValues)
     (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
     {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
     (selected : NativeSelectedVote.Checked) :

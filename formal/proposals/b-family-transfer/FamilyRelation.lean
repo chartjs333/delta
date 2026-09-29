@@ -2,6 +2,8 @@ import FamilyGuards
 import FamilyApply
 import DeltaReduce.PublicDurablePrefix
 import DeltaReduce.NativeVoteCache
+import DeltaReduce.NativeRootSource
+import DeltaReduce.PublicRootEnvelope
 
 /-! R2 arithmetic subrelation at one family view. This composes complete body
 construction, the existing primitive metadata boundary and original journal
@@ -558,4 +560,1199 @@ theorem configuredOriginalCommitteeCount : actors.length = (NativeVectorAuthorit
   exact actorsExactCount c.actorNames.names
 
 end Configured
+
+/- Direct original-source composition for obligation 3. These are static
+observations: no journal mutation, recovery induction or response exposure is
+inferred from decoding a WAL/receipt pair. The production arithmetic guard is
+still rejected. All constructor inputs below share this single source. -/
+namespace Direct
+
+structure Artifacts where
+  policy : Bytes
+  state : Bytes
+  apc : Bytes
+  accumulator : Bytes
+  proof : Bytes
+  arithmetic : Bytes
+  permission : NativeAvailableQ.Permission
+  inputs : List NativeAvailableQ.Input
+  applyProfile : Bytes
+
+structure Source (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource)
+    (current : FamilyInputs.CurrentBasis) where
+  bound : NativeVectorContext.Bound
+  prepared : FamilyInputs.prepareOriginalVector sha artifacts.policy artifacts.state artifacts.apc
+    artifacts.accumulator artifacts.proof artifacts.arithmetic artifacts.permission artifacts.inputs = some bound
+  numeric : FamilyInputs.OriginalNumericConfiguration sha bound units artifacts.applyProfile current
+  committee : PolicyActors mapping actors artifacts.policy
+
+def loadSource (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource)
+    (current : FamilyInputs.CurrentBasis) : Option (Source sha mapping actors artifacts units current) := do
+  match prepared : FamilyInputs.prepareOriginalVector sha artifacts.policy artifacts.state artifacts.apc
+      artifacts.accumulator artifacts.proof artifacts.arithmetic artifacts.permission artifacts.inputs with
+  | none => none
+  | some bound =>
+    let numeric ← FamilyInputs.loadOriginalNumericConfiguration sha bound units artifacts.applyProfile current
+    let committee ← checkPolicyActors mapping actors artifacts.policy
+    some ⟨bound,prepared,numeric,committee⟩
+
+theorem originalRawSource {sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs bound}
+    (source : FamilyInputs.OriginalVectorSource sha policyRaw stateRaw apcId configRaw proofRaw profileRaw permission inputs bound) :
+    ∃ tree, NativePolicyBytes.decodePolicy policyRaw = some (tree,NativeVectorAuthority.policy bound) ∧
+      NativeStateBytes.decodeState stateRaw = some (NativeVectorAuthority.state bound) := by
+  obtain ⟨tree,p,s,hp,hs,ps⟩ := NativePlanSection.preparedSource source.corpus.plan.members.plans
+  have es := NativeEligibilitySection.checkedSource ps.eligibility
+  have ns := NativeNormSection.checkedSource es.norms
+  have src := NativeFinalizedIscSection.checkedSource ns.1
+  exact ⟨tree,by simpa only [NativeVectorAuthority.policy,NativeVectorAuthority.base,src.1] using hp,
+    by simpa only [NativeVectorAuthority.state,NativeVectorAuthority.base,src.2.1] using hs⟩
+
+section Source
+variable {sha mapping actors artifacts units current}
+    (source : Source sha mapping actors artifacts units current)
+
+theorem sourceRaw :
+    ∃ tree, NativePolicyBytes.decodePolicy artifacts.policy = some (tree,NativeVectorAuthority.policy source.bound) ∧
+      NativeStateBytes.decodeState artifacts.state = some (NativeVectorAuthority.state source.bound) :=
+  originalRawSource (FamilyInputs.originalVectorPrepared source.prepared)
+
+theorem sourceCommittee : source.committee.policy = NativeVectorAuthority.policy source.bound := by
+  obtain ⟨_,decoded,_⟩ := sourceRaw source
+  exact congrArg Prod.snd (Option.some.inj (source.committee.decoded.symm.trans decoded))
+
+theorem sourceCommitteeCardinality : actors.length = (NativeVectorAuthority.policy source.bound).validators.length := by
+  rw [← sourceCommittee source]
+  exact actorsExactCount source.committee.names
+
+structure NativeObservation (wal receipt : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) where
+  entry : NativeWalBytes.Entry
+  record : NativeReceiptBytes.Receipt
+  vote : NativeVoteBytes.Vote
+  original : NativeWalBytes.bindReceipt sha artifacts.policy wal receipt = some (entry,record,vote)
+  admitted : NativeSelectedVote.Admitted
+  selected : NativeArithmeticVote.select sha source.bound facts vote = some admitted
+
+def loadNativeObservation (wal receipt : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) :
+    Option (NativeObservation source wal receipt facts) := do
+  match original : NativeWalBytes.bindReceipt sha artifacts.policy wal receipt with
+  | none => none
+  | some (entry,record,vote) =>
+    match selected : NativeArithmeticVote.select sha source.bound facts vote with
+    | none => none
+    | some admitted => some ⟨entry,record,vote,original,admitted,selected⟩
+
+variable {source} {wal receipt facts}
+    (native : NativeObservation source wal receipt facts)
+
+def NativeObservation.carrier : NativeSelectedVote.Checked :=
+  ⟨NativeVectorAuthority.policy source.bound,NativeVectorAuthority.state source.bound,native.admitted,native.vote⟩
+
+theorem originalBytes :
+    NativeWalBytes.encode sha native.entry = wal ∧ NativeReceiptBytes.encode native.record = receipt ∧
+    NativeVoteBytes.encodeFrame native.vote.wire = native.entry.command ∧
+    native.entry.sequence = native.vote.sequence :=
+  NativeWalBytes.boundOriginalBytes sha artifacts.policy wal receipt native.entry native.record native.vote native.original
+
+theorem originalSequence : native.entry.sequence = facts.expectedSequence :=
+  (originalBytes native).2.2.2.trans (NativeArithmeticVote.selectedSequence native.selected)
+
+theorem originalPolicyCandidate :
+    (NativeVectorAuthority.policy source.bound).candidates.find?
+      (NativeSelectedVote.matching (NativeVectorAuthority.state source.bound) native.vote) = some native.admitted.selected.original ∧
+    NativeCandidateAuthority.check sha (NativeVectorAuthority.policy source.bound) (NativeVectorAuthority.state source.bound)
+      native.admitted.checked.snapshot native.admitted.selected.original = some native.admitted.selected :=
+  NativeArithmeticVote.originalCandidate native.selected
+
+theorem completeOriginalSnapshot :
+    NativeSnapshotBase.bindSnapshot sha (NativeVectorAuthority.policy source.bound) (NativeVectorAuthority.state source.bound) =
+      some native.admitted.checked.snapshot :=
+  (NativeCandidateAuthority.policySource (NativeArithmeticVote.selected native.selected).1).1
+
+theorem completeOriginalCandidateList :
+    native.admitted.checked.entries.map NativeCandidateAuthority.Entry.original =
+      (NativeVectorAuthority.policy source.bound).candidates :=
+  NativeCandidateAuthority.completeCandidateList (NativeArithmeticVote.selected native.selected).1
+
+theorem productionGuardStillClosed :
+    NativeSelectedVote.checkVote (NativeVectorAuthority.policy source.bound) (NativeVectorAuthority.state source.bound)
+      native.admitted.checked.snapshot.prior.tail native.admitted.selected facts native.vote = none :=
+  NativeArithmeticVote.originalGuardStillRejects native.selected
+
+end Source
+
+/- A durable record can exist before any receipt is exposed. Reconstruct the
+deterministic receipt from its original WAL command and selected candidate;
+this does not assert that a response was returned, sent or delivered. -/
+section WalObservation
+variable {sha mapping actors artifacts units current}
+    (source : Source sha mapping actors artifacts units current)
+
+def receiptForWal (entry : NativeWalBytes.Entry) (vote : NativeVoteBytes.Vote)
+    (admitted : NativeSelectedVote.Admitted) (id : Bytes) : NativeReceiptBytes.Receipt :=
+  ⟨admitted.selected.original.action,entry.sequence,entry.command,id,vote.wire.context⟩
+
+structure WalObservation (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) where
+  entry : NativeWalBytes.Entry
+  decoded : NativeWalBytes.decode sha wal = some entry
+  vote : NativeVoteBytes.Vote
+  frame : NativeVoteBytes.decodeFrame entry.command = some vote
+  admitted : NativeSelectedVote.Admitted
+  selected : NativeArithmeticVote.select sha source.bound facts vote = some admitted
+  id : Bytes
+  hashed : NativeVoteBytes.voteId sha entry.command = some id
+  valid : NativeReceiptBytes.Valid (receiptForWal entry vote admitted id)
+  link : NativeWalBytes.ReceiptLink sha artifacts.policy entry (receiptForWal entry vote admitted id)
+  voteLink : NativeVoteBytes.ReceiptLinked sha (receiptForWal entry vote admitted id) vote
+
+def loadWalObservation (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) :
+    Option (WalObservation source wal facts) := do
+  match decoded : NativeWalBytes.decode sha wal with
+  | none => none
+  | some entry =>
+    match frame : NativeVoteBytes.decodeFrame entry.command with
+    | none => none
+    | some vote =>
+      match selected : NativeArithmeticVote.select sha source.bound facts vote with
+      | none => none
+      | some admitted =>
+        match hashed : NativeVoteBytes.voteId sha entry.command with
+        | none => none
+        | some id =>
+          if h : NativeReceiptBytes.Valid (receiptForWal entry vote admitted id) ∧
+              NativeWalBytes.ReceiptLink sha artifacts.policy entry (receiptForWal entry vote admitted id) ∧
+              NativeVoteBytes.ReceiptLinked sha (receiptForWal entry vote admitted id) vote then
+            some ⟨entry,decoded,vote,frame,admitted,selected,id,hashed,h.1,h.2.1,h.2.2⟩
+          else none
+
+variable {source wal facts} (observation : WalObservation source wal facts)
+
+def WalObservation.receipt : NativeReceiptBytes.Receipt :=
+  receiptForWal observation.entry observation.vote observation.admitted observation.id
+
+def WalObservation.native : NativeObservation source wal (NativeReceiptBytes.encode observation.receipt) facts :=
+  ⟨observation.entry,observation.receipt,observation.vote,
+    NativeWalBytes.bindFromComponents sha artifacts.policy wal (NativeReceiptBytes.encode observation.receipt)
+      observation.entry observation.receipt observation.vote observation.decoded
+      (NativeVoteBytes.receiptFromComponents sha observation.receipt observation.vote observation.valid
+        (NativeVoteBytes.bindingFromComponents sha observation.receipt observation.vote observation.frame observation.voteLink))
+      observation.link,
+    observation.admitted,observation.selected⟩
+
+theorem walObservationLoaded : loadWalObservation source wal facts = some observation := by
+  cases observation with
+  | mk entry decoded vote frame admitted selected id hashed valid link voteLink =>
+    unfold loadWalObservation
+    split
+    · rename_i absent; rw [decoded] at absent; contradiction
+    · rename_i e he
+      cases Option.some.inj (he.symm.trans decoded)
+      split
+      · rename_i absent; rw [frame] at absent; contradiction
+      · rename_i v hv
+        cases Option.some.inj (hv.symm.trans frame)
+        split
+        · rename_i absent; rw [selected] at absent; contradiction
+        · rename_i a ha
+          cases Option.some.inj (ha.symm.trans selected)
+          split
+          · rename_i absent; rw [hashed] at absent; contradiction
+          · rename_i i hi
+            cases Option.some.inj (hi.symm.trans hashed)
+            rw [dif_pos ⟨valid,link,voteLink⟩]
+
+theorem receiptComesFromWal :
+    observation.receipt.action = observation.admitted.selected.original.action ∧
+    observation.receipt.sequence = observation.entry.sequence ∧
+    observation.receipt.frame = observation.entry.command ∧
+    observation.receipt.context = observation.vote.wire.context ∧
+    NativeVoteBytes.voteId sha observation.entry.command = some observation.receipt.voteId :=
+  ⟨rfl,rfl,rfl,rfl,observation.hashed⟩
+
+theorem walOnlyOriginalBytes :
+    NativeWalBytes.encode sha observation.entry = wal ∧
+    NativeVoteBytes.encodeFrame observation.vote.wire = observation.entry.command ∧
+    observation.entry.sequence = facts.expectedSequence :=
+  ⟨NativeWalBytes.decodedCanonical sha wal observation.entry observation.decoded,
+    (NativeVoteBytes.decodedVoteSound observation.frame).2,originalSequence observation.native⟩
+
+/- Decoding an additionally observed receipt can only confirm the derived
+receipt. The receipt may not relabel its action while retaining the same vote. -/
+theorem actionNameInjective {a b : Nat} (aLower : 1 ≤ a) (aUpper : a ≤ 9)
+    (bLower : 1 ≤ b) (bUpper : b ≤ 9)
+    (same : NativeVoteBytes.actionName a = NativeVoteBytes.actionName b) : a = b := by
+  have as : a = 1 ∨ a = 2 ∨ a = 3 ∨ a = 4 ∨ a = 5 ∨ a = 6 ∨ a = 7 ∨ a = 8 ∨ a = 9 := by omega
+  have bs : b = 1 ∨ b = 2 ∨ b = 3 ∨ b = 4 ∨ b = 5 ∨ b = 6 ∨ b = 7 ∨ b = 8 ∨ b = 9 := by omega
+  rcases as with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    rcases bs with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp_all [NativeVoteBytes.actionName,NativeVoteBytes.ascii]
+
+theorem observedReceiptMatches {rawReceipt entry record vote}
+    (observed : NativeWalBytes.bindReceipt sha artifacts.policy wal rawReceipt = some (entry,record,vote)) :
+    entry = observation.entry ∧ vote = observation.vote ∧
+    record = observation.receipt ∧ rawReceipt = NativeReceiptBytes.encode observation.receipt := by
+  have bound := NativeWalBytes.bindingSound sha artifacts.policy wal rawReceipt entry record vote observed
+  have entrySame := Option.some.inj (bound.1.symm.trans observation.decoded)
+  subst entry
+  have receipt := NativeVoteBytes.semanticReceiptSound bound.2.1
+  have frameSame : record.frame = observation.entry.command := bound.2.2.2.2.1.symm
+  have decoded : NativeVoteBytes.decodeFrame observation.entry.command = some vote := by rw [← frameSame]; exact receipt.2.1
+  have voteSame := Option.some.inj (decoded.symm.trans observation.frame)
+  subst vote
+  have valid := receipt.2.2.1
+  have linked := receipt.2.2.2.2.2.2
+  have actionSame : record.action = observation.receipt.action :=
+    actionNameInjective valid.1 valid.2.1 observation.valid.1 observation.valid.2.1
+      (linked.2.2.1.trans observation.voteLink.2.2.1.symm)
+  have sequenceSame : record.sequence = observation.receipt.sequence := bound.2.2.2.1.symm
+  have idSame : record.voteId = observation.receipt.voteId := by
+    have hash := linked.2.2.2
+    rw [frameSame] at hash
+    exact Option.some.inj (hash.symm.trans observation.hashed)
+  have contextSame : record.context = observation.receipt.context := linked.2.1
+  have same : record = observation.receipt := by
+    cases record
+    simp only [WalObservation.receipt,receiptForWal,NativeReceiptBytes.Receipt.mk.injEq]
+    exact ⟨actionSame,sequenceSame,frameSame,idSame,contextSame⟩
+  exact ⟨rfl,rfl,same,receipt.2.2.2.2.1.symm.trans (congrArg NativeReceiptBytes.encode same)⟩
+
+end WalObservation
+
+section Body
+variable {sha mapping actors artifacts units current}
+    {source : Source sha mapping actors artifacts units current} {wal receipt facts}
+    (native : NativeObservation source wal receipt facts)
+    {indices vocabulary configured names earlyTrust planningTrust}
+    {metadata : PublicPlanningBody.Metadata earlyTrust planningTrust}
+    (authority : FamilyAuthority.Original source.bound indices source.numeric.profile source.numeric.quantum
+      current.values vocabulary configured names metadata native.carrier)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+/- The selected original candidate chooses its original canonical certificate
+row. A public body is then computed by the full constructor, never assumed or
+looked up in a table of previously approved whole-body translations. -/
+inductive Body where
+  | parameter (edge : NativeParameterLineage.Edge)
+      (action : native.admitted.selected.original.action = 5)
+      (selected : (NativeCandidateAuthority.parameterSection native.admitted.checked.snapshot).bodies.find?
+        (fun e => e.id == native.admitted.selected.original.body) = some edge)
+      (leaf : FamilyParameter.OriginalLeaf authority shardAliases edge)
+  | apply (edge : NativeApplyLineage.Edge)
+      (action : native.admitted.selected.original.action = 7)
+      (selected : (NativeCandidateAuthority.applySection native.admitted.checked.snapshot).bodies.find?
+        (fun e => e.id == native.admitted.selected.original.body) = some edge)
+      (result : FamilyApply.OriginalApply authority shardAliases sha checkpointNames expected edge)
+
+def loadBody : Option (Body native authority shardAliases checkpointNames expected) :=
+  if action : native.admitted.selected.original.action = 5 then
+    match selected : (NativeCandidateAuthority.parameterSection native.admitted.checked.snapshot).bodies.find?
+        (fun e => e.id == native.admitted.selected.original.body) with
+    | none => none
+    | some edge => do
+      let leaf ← FamilyParameter.loadOriginalLeaf authority shardAliases edge
+      some (.parameter edge action selected leaf)
+  else if action : native.admitted.selected.original.action = 7 then
+    match selected : (NativeCandidateAuthority.applySection native.admitted.checked.snapshot).bodies.find?
+        (fun e => e.id == native.admitted.selected.original.body) with
+    | none => none
+    | some edge => do
+      let result ← FamilyApply.loadOriginalApply authority shardAliases sha checkpointNames expected edge
+      some (.apply edge action selected result)
+  else none
+
+def Body.value : Body native authority shardAliases checkpointNames expected → Value
+  | .parameter edge _ _ leaf => leaf.value authority shardAliases edge
+  | .apply _ _ _ result => result.value authority shardAliases
+
+def Body.kind : Body native authority shardAliases checkpointNames expected → Value
+  | .parameter .. => .text "PARAMETER"
+  | .apply .. => .text "APPLY"
+
+def Body.originalId : Body native authority shardAliases checkpointNames expected → Bytes
+  | .parameter edge .. => edge.id
+  | .apply edge .. => edge.id
+
+theorem bodyLoaded (body : Body native authority shardAliases checkpointNames expected) :
+    loadBody native authority shardAliases checkpointNames expected = some body := by
+  cases body with
+  | parameter edge action selected leaf =>
+    simp only [loadBody,dif_pos action]
+    split
+    · rename_i absent; simp [selected] at absent
+    · rename_i found foundAt
+      have same := Option.some.inj (foundAt.symm.trans selected)
+      subst found
+      simp only [FamilyParameter.originalLeafLoaded authority shardAliases edge leaf,bind,Option.bind]
+  | apply edge action selected result =>
+    have notParameter : native.admitted.selected.original.action ≠ 5 := by omega
+    simp only [loadBody,dif_neg notParameter,dif_pos action]
+    split
+    · rename_i absent; simp [selected] at absent
+    · rename_i found foundAt
+      have same := Option.some.inj (foundAt.symm.trans selected)
+      subst found
+      simp only [FamilyApply.originalApplyLoaded authority shardAliases result,bind,Option.bind]
+
+theorem bodyOriginalIdentity (body : Body native authority shardAliases checkpointNames expected) :
+    body.originalId = native.admitted.selected.original.body ∧
+      native.vote.wire.bodyHash = body.originalId := by
+  have identity := NativeArithmeticVote.identity native.selected
+  have vote : native.vote.wire.bodyHash = native.admitted.selected.original.body := identity.2.2.2.2.2.2.1
+  cases body with
+  | parameter edge action selected leaf =>
+    have id : edge.id = native.admitted.selected.original.body := by simpa using List.find?_some selected
+    exact ⟨id,vote.trans id.symm⟩
+  | apply edge action selected result =>
+    have id : edge.id = native.admitted.selected.original.body := by simpa using List.find?_some selected
+    exact ⟨id,vote.trans id.symm⟩
+
+theorem bodyOriginalKind (body : Body native authority shardAliases checkpointNames expected) :
+    (match body.kind with | .text kind => some (asciiBytes kind) | _ => none) = some native.vote.wire.kind := by
+  have kind := (NativeArithmeticVote.selected native.selected).2.2.2.2.1
+  cases body with
+  | parameter edge action selected leaf =>
+    simpa only [Body.kind,action,NativeVoteBytes.actionName,
+      show NativeVoteBytes.ascii "PARAMETER" = asciiBytes "PARAMETER" from by decide] using congrArg some kind
+  | apply edge action selected result =>
+    simpa only [Body.kind,action,NativeVoteBytes.actionName,
+      show NativeVoteBytes.ascii "APPLY" = asciiBytes "APPLY" from by decide] using congrArg some kind
+
+def bodyVote (body : Body native authority shardAliases checkpointNames expected) : Option Vote := do
+  let context ← expectedContext ⟨authority.parents.ec.parent.header.actor.value,body.kind,.text "",body.value⟩
+  some ⟨authority.parents.ec.parent.header.actor.value,body.kind,context,body.value⟩
+
+/- These equalities join independent primitive namespaces on the same original
+keys. They do not authenticate a function merely because it returns a name.
+The existing metadata/source trust boundary remains explicit. -/
+def AliasChecks : Prop :=
+  actorBytes mapping authority.parents.ec.parent.header.actor.value = some native.vote.wire.validator ∧
+  authority.parents.ec.parent.header.actor.value ∈ actors ∧
+  mapping.height authority.parents.ec.parent.header.height.value = some (NativeVectorAuthority.state source.bound).height ∧
+  (mapping.epoch authority.parents.ec.parent.header.epoch.value).map asciiBytes = some (NativeVectorAuthority.policy source.bound).epoch ∧
+  names (NativeVectorAuthority.policy source.bound).config = some authority.parents.ec.parent.header.config.text ∧
+  checkpointNames authority.header.parent.value = some (NativeVectorAuthority.state source.bound).wire.parent
+
+instance : Decidable (AliasChecks native authority checkpointNames) := by unfold AliasChecks; infer_instance
+
+/- The same primitive ticket name is used by the numeric image and by every
+ISC/EC/APC parent row. All unavailable configured tickets remain in the numeric
+image; only actual parent members are required to have an original row here. -/
+def InputAliasChecks : Prop :=
+  (∀ entry ∈ authority.parents.ec.parent.entries,
+    vocabulary.ticket (NativeVectorLayout.text entry.original.ticket) = some entry.ticket.text) ∧
+  (∀ member ∈ authority.parents.ec.members,
+    vocabulary.ticket (NativeVectorLayout.text member.original) = some member.name.text) ∧
+  (∀ member ∈ authority.parents.members,
+    vocabulary.ticket (NativeVectorLayout.text member.original) = some member.name.text)
+
+instance : Decidable (InputAliasChecks native authority) := by unfold InputAliasChecks; infer_instance
+
+structure View where
+  body : Body native authority shardAliases checkpointNames expected
+  projectedVote : Vote
+  computed : bodyVote native authority shardAliases checkpointNames expected body = some projectedVote
+  aliases : AliasChecks native authority checkpointNames
+  inputAliases : InputAliasChecks native authority
+  canonical : PublicState.canonical vocabulary.models (.function (voteEntries projectedVote)) = true
+
+def loadView : Option (View native authority shardAliases checkpointNames expected) := do
+  if aliases : AliasChecks native authority checkpointNames then
+    if inputAliases : InputAliasChecks native authority then
+      let body ← loadBody native authority shardAliases checkpointNames expected
+      match computed : bodyVote native authority shardAliases checkpointNames expected body with
+      | none => none
+      | some projectedVote =>
+        if canonical : PublicState.canonical vocabulary.models (.function (voteEntries projectedVote)) = true then
+          some ⟨body,projectedVote,computed,aliases,inputAliases,canonical⟩ else none
+    else none
+  else none
+
+variable {native authority shardAliases checkpointNames expected}
+    (view : View native authority shardAliases checkpointNames expected)
+
+theorem viewLoaded : loadView native authority shardAliases checkpointNames expected = some view := by
+  unfold loadView
+  rw [dif_pos view.aliases,dif_pos view.inputAliases,bodyLoaded native authority shardAliases checkpointNames expected view.body]
+  simp only [bind,Option.bind]
+  split
+  · rename_i absent; simp [view.computed] at absent
+  · rename_i vote found
+    have same := Option.some.inj (found.symm.trans view.computed)
+    subst vote
+    rw [dif_pos view.canonical]
+
+def checkView (candidate : Vote) : Option (View native authority shardAliases checkpointNames expected) := do
+  let computed ← loadView native authority shardAliases checkpointNames expected
+  if candidate = computed.projectedVote then some computed else none
+
+theorem viewChecksOwnValue : checkView (native := native) (authority := authority) (shardAliases := shardAliases)
+    (checkpointNames := checkpointNames) (expected := expected) view.projectedVote = some view := by
+  simp only [checkView,viewLoaded view,bind,Option.bind,ite_true]
+
+theorem substitutedVoteRejected (candidate : Vote) (different : candidate ≠ view.projectedVote) :
+    checkView (native := native) (authority := authority) (shardAliases := shardAliases)
+      (checkpointNames := checkpointNames) (expected := expected) candidate = none := by
+  simp only [checkView,viewLoaded view,bind,Option.bind,if_neg different]
+
+theorem viewComputedBody : view.projectedVote.body = view.body.value ∧ view.projectedVote.kind = view.body.kind ∧
+    view.projectedVote.actor = authority.parents.ec.parent.header.actor.value := by
+  have computed := view.computed
+  simp only [bodyVote,bind,Option.bind_eq_some_iff] at computed
+  obtain ⟨_,_,eq⟩ := computed
+  have same := (Option.some.inj eq).symm
+  exact ⟨congrArg Vote.body same,congrArg Vote.kind same,congrArg Vote.actor same⟩
+
+theorem viewComputedContext : expectedContext view.projectedVote = some view.projectedVote.context := by
+  have computed := view.computed
+  simp only [bodyVote,bind,Option.bind_eq_some_iff] at computed
+  obtain ⟨context,derived,eq⟩ := computed
+  have same := (Option.some.inj eq).symm
+  rw [same]
+  exact derived
+
+theorem viewOriginalActor : actorBytes mapping view.projectedVote.actor = some native.vote.wire.validator := by
+  rw [(viewComputedBody view).2.2]
+  exact view.aliases.1
+
+theorem inputTicketsFromOriginal :
+    FamilyInputs.readOriginalTickets source.bound indices = some authority.input.image.tickets := by
+  have computed := authority.input.computed
+  simp only [FamilyInputs.readOriginalImage,bind,Option.bind_eq_some_iff] at computed
+  obtain ⟨tickets,ht,model,_,optimizer,_,last⟩ := computed
+  have same := congrArg PublicArithmeticInputs.Image.tickets (Option.some.inj last)
+  rw [← same]
+  exact ht
+
+theorem inputApcOriginalOrder :
+    authority.input.image.tickets.map (·.ticket) =
+      authority.parents.members.map (fun m => NativeVectorLayout.text m.original) := by
+  have bound := FamilyInputs.originalVectorPrepared source.prepared
+  have ordered := congrArg (List.map Prod.fst)
+    (FamilyInputs.originalTicketsFullOrderedSource bound (inputTicketsFromOriginal (authority := authority))).2
+  have ids : authority.input.image.tickets.map (·.ticket) =
+      source.bound.source.plan.members.rows.map (fun r => NativeVectorLayout.text r.member.input.ticket) := by
+    simpa only [List.map_map,Function.comp_def] using ordered
+  obtain ⟨_,all,_,_,_,weights,_,valid⟩ := FamilyInputs.originalPlanExactMembers bound.corpus.plan.members.rows
+  have raw := PublicPlanningBody.membersOriginal authority.parents.computed
+  have rawText := congrArg (List.map NativeVectorLayout.text) raw
+  simp only [List.map_map,Function.comp_def] at rawText
+  rw [ids,rawText,← weights]
+  simp only [List.map_map,Function.comp_def]
+  apply List.map_congr_left
+  intro row member
+  exact congrArg NativeVectorLayout.text (valid row member).2.2.1.symm
+
+include view in
+theorem inputApcNamesAgree :
+    authority.input.image.tickets.map (fun t => vocabulary.ticket t.ticket) =
+      authority.parents.members.map (fun m => some m.name.text) := by
+  have same := congrArg (List.map vocabulary.ticket) (inputApcOriginalOrder (authority := authority))
+  simp only [List.map_map,Function.comp_def] at same
+  rw [same]
+  apply List.map_congr_left
+  intro member present
+  exact view.inputAliases.2.2 member present
+
+theorem viewNoSignerInflation {other : Value} (member : other ∈ actors)
+    (same : actorBytes mapping other = some native.vote.wire.validator) : other = view.projectedVote.actor := by
+  apply actorAliasesInjective source.committee.names member
+  · rw [(viewComputedBody view).2.2]; exact view.aliases.2.1
+  · exact same
+  · exact viewOriginalActor view
+
+theorem viewsKeepOneNativeObject {otherIndices}
+    {otherAuthority : FamilyAuthority.Original source.bound otherIndices source.numeric.profile source.numeric.quantum
+      current.values vocabulary configured names metadata native.carrier}
+    (other : View native otherAuthority shardAliases checkpointNames expected) :
+    view.body.originalId = other.body.originalId ∧ view.projectedVote.actor = other.projectedVote.actor ∧
+      native.entry.sequence = facts.expectedSequence := by
+  refine ⟨(bodyOriginalIdentity native authority shardAliases checkpointNames expected view.body).1.trans
+    (bodyOriginalIdentity native otherAuthority shardAliases checkpointNames expected other.body).1.symm,?_,originalSequence native⟩
+  apply viewNoSignerInflation other
+  · rw [(viewComputedBody view).2.2]; exact view.aliases.2.1
+  · exact viewOriginalActor view
+
+end Body
+
+/- Single executable entry point for the direct arithmetic observation. The
+remaining complete-state join must use this computed result, not the draft
+Binding path or a supplied public-body equality. This does not assert that
+unobserved global state or unrelated certificate collections are empty. -/
+section Projection
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource) (current : FamilyInputs.CurrentBasis)
+    (wal receipt : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+structure Projection where
+  source : Source sha mapping actors artifacts units current
+  native : NativeObservation source wal receipt facts
+  authority : FamilyAuthority.Original source.bound indices source.numeric.profile source.numeric.quantum
+    current.values vocabulary configured names metadata native.carrier
+  view : View native authority shardAliases checkpointNames expected
+
+def loadProjection : Option (Projection sha mapping actors artifacts units current wal receipt facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected) := do
+  let source ← loadSource sha mapping actors artifacts units current
+  let native ← loadNativeObservation source wal receipt facts
+  let authority ← FamilyAuthority.loadOriginal source.bound indices source.numeric.profile source.numeric.quantum
+    current.values vocabulary configured names metadata native.carrier
+  let view ← loadView native authority shardAliases checkpointNames expected
+  some ⟨source,native,authority,view⟩
+
+variable {sha mapping actors artifacts units current wal receipt facts indices vocabulary configured names metadata
+    shardAliases checkpointNames expected}
+    (projection : Projection sha mapping actors artifacts units current wal receipt facts indices
+      vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata
+      shardAliases checkpointNames expected)
+
+theorem projectionOriginalArtifacts :
+    FamilyInputs.prepareOriginalVector sha artifacts.policy artifacts.state artifacts.apc artifacts.accumulator
+      artifacts.proof artifacts.arithmetic artifacts.permission artifacts.inputs = some projection.source.bound ∧
+    NativeWalBytes.encode sha projection.native.entry = wal ∧
+    NativeReceiptBytes.encode projection.native.record = receipt ∧
+    NativeVoteBytes.encodeFrame projection.native.vote.wire = projection.native.entry.command :=
+  ⟨projection.source.prepared,(originalBytes projection.native).1,(originalBytes projection.native).2.1,
+    (originalBytes projection.native).2.2.1⟩
+
+theorem projectionSameProfileAndUnits :
+    NativeStateProjection.selectProfile sha projection.source.bound artifacts.applyProfile = some projection.source.numeric.profile ∧
+    units (FamilyInputs.currentUnitKey projection.source.bound projection.source.numeric.profile current) =
+      some projection.source.numeric.quantum ∧
+    FamilyInputs.OriginalProfileNormalized projection.source.numeric.profile.profile :=
+  ⟨projection.source.numeric.profileSource,projection.source.numeric.unitSource,projection.source.numeric.checked.2.1⟩
+
+theorem projectionFullInputImage :
+    FamilyInputs.readOriginalImage projection.source.bound indices projection.source.numeric.profile.profile
+      projection.source.numeric.quantum current.values = some projection.authority.input.image ∧
+    FamilyInputs.InputNumericGuards (FamilyInputs.completedImage projection.authority.input.image configured) :=
+  ⟨projection.authority.input.computed,FamilyAuthority.originalInputFullNumeric projection.authority.input⟩
+
+theorem projectionOriginalVoteIdentity :
+    projection.native.vote.wire.bodyHash = projection.view.body.originalId ∧
+    actorBytes mapping projection.view.projectedVote.actor = some projection.native.vote.wire.validator ∧
+    projection.native.entry.sequence = facts.expectedSequence ∧
+    expectedContext projection.view.projectedVote = some projection.view.projectedVote.context :=
+  ⟨(bodyOriginalIdentity projection.native projection.authority shardAliases checkpointNames expected projection.view.body).2,
+    viewOriginalActor projection.view,originalSequence projection.native,viewComputedContext projection.view⟩
+
+end Projection
+
+/- The same full arithmetic constructors also accept a WAL-only observation.
+The receipt below is derived data, never evidence of exposure. -/
+section StoredProjection
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource) (current : FamilyInputs.CurrentBasis)
+    (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+structure StoredProjection where
+  source : Source sha mapping actors artifacts units current
+  observation : WalObservation source wal facts
+  authority : FamilyAuthority.Original source.bound indices source.numeric.profile source.numeric.quantum
+    current.values vocabulary configured names metadata observation.native.carrier
+  view : View observation.native authority shardAliases checkpointNames expected
+
+def loadStoredProjection : Option (StoredProjection sha mapping actors artifacts units current wal facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected) := do
+  let source ← loadSource sha mapping actors artifacts units current
+  let observation ← loadWalObservation source wal facts
+  let authority ← FamilyAuthority.loadOriginal source.bound indices source.numeric.profile source.numeric.quantum
+    current.values vocabulary configured names metadata observation.native.carrier
+  let view ← loadView observation.native authority shardAliases checkpointNames expected
+  some ⟨source,observation,authority,view⟩
+
+variable {sha mapping actors artifacts units current wal facts indices vocabulary configured names metadata
+    shardAliases checkpointNames expected}
+    (stored : StoredProjection sha mapping actors artifacts units current wal facts indices
+      vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata
+      shardAliases checkpointNames expected)
+
+def StoredProjection.asProjection : Projection sha mapping actors artifacts units current wal
+    (NativeReceiptBytes.encode stored.observation.receipt) facts indices vocabulary configured names
+    metadata shardAliases checkpointNames expected :=
+  ⟨stored.source,stored.observation.native,stored.authority,stored.view⟩
+
+theorem storedOriginalVoteIdentity :
+    stored.observation.vote.wire.bodyHash = stored.view.body.originalId ∧
+    actorBytes mapping stored.view.projectedVote.actor = some stored.observation.vote.wire.validator ∧
+    stored.observation.entry.sequence = facts.expectedSequence ∧
+    expectedContext stored.view.projectedVote = some stored.view.projectedVote.context :=
+  projectionOriginalVoteIdentity stored.asProjection
+
+theorem storedObservedReceipt {rawReceipt entry record vote}
+    (observed : NativeWalBytes.bindReceipt sha artifacts.policy wal rawReceipt = some (entry,record,vote)) :
+    record = stored.observation.receipt ∧ rawReceipt = NativeReceiptBytes.encode stored.observation.receipt :=
+  (observedReceiptMatches stored.observation observed).2.2
+
+end StoredProjection
+
+/- A separately authenticated current anchor can provide initial values without
+inventing a previous APPLY. Only its value/context boundary is composed here;
+the complete initial state and pointer-QC correspondence remain R2.3. -/
+section AnchoredProjection
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource)
+    (trust : NativeBinding.Trust) (anchor : Anchor)
+    (authenticated : trust.anchorAuthenticated anchor) (recovered : trust.recoveryAuthenticated anchor)
+    (pointer : NativeCurrentPointer.State) (schema : Bytes) (modelRaw optimizerRaw : List Bytes)
+    (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+structure AnchoredProjection where
+  values : FamilyInputs.AnchoredValues sha anchor modelRaw optimizerRaw
+  anchorAuthenticated : trust.anchorAuthenticated anchor
+  recoveryAuthenticated : trust.recoveryAuthenticated anchor
+  stored : StoredProjection sha mapping actors artifacts units ⟨values.values,pointer,schema⟩ wal facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected
+  context : anchor.context = NativeVectorAuthority.context stored.source.bound
+  pointerValid : NativeCurrentPointer.StateValid pointer
+  optimizer : pointer.optimizer = idBytes anchor.currentOptimizerHash
+
+def loadAnchoredProjection : Option (AnchoredProjection sha mapping actors artifacts units trust anchor pointer schema
+    modelRaw optimizerRaw wal facts indices vocabulary configured names metadata shardAliases checkpointNames expected) := do
+  let values ← FamilyInputs.loadAnchoredValues sha anchor modelRaw optimizerRaw
+  let stored ← loadStoredProjection sha mapping actors artifacts units ⟨values.values,pointer,schema⟩ wal facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected
+  if checked : anchor.context = NativeVectorAuthority.context stored.source.bound ∧
+      NativeCurrentPointer.StateValid pointer ∧ pointer.optimizer = idBytes anchor.currentOptimizerHash then
+    some ⟨values,authenticated,recovered,stored,checked.1,checked.2.1,checked.2.2⟩
+  else none
+
+variable {sha mapping actors artifacts units trust anchor pointer schema modelRaw optimizerRaw wal facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected}
+    (anchored : AnchoredProjection sha mapping actors artifacts units trust anchor pointer schema modelRaw optimizerRaw
+      wal facts indices vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata
+      shardAliases checkpointNames expected)
+
+theorem anchoredCurrentOriginalPreimages :
+    modelRaw = NativeApplyResult.decimalValues anchored.values.values.model ∧
+    optimizerRaw = NativeApplyResult.decimalValues anchored.values.values.optimizer ∧
+    sha (NativeApplyResult.rawValueInput .model modelRaw) = anchor.currentModelHash ∧
+    sha (NativeApplyResult.rawValueInput .optimizer optimizerRaw) = anchor.currentOptimizerHash :=
+  FamilyInputs.anchoredValuesOriginal anchored.values
+
+theorem anchoredCurrentContextAndSchema :
+    asciiBytes anchor.context.parentCheckpoint = pointer.checkpoint ∧
+    schema = (NativeVectorAuthority.plan anchored.stored.source.bound).certificate.common.context.schema ∧
+    anchor.context = NativeVectorAuthority.context anchored.stored.source.bound := by
+  refine ⟨?_,anchored.stored.source.numeric.checked.1.2.2.2,anchored.context⟩
+  rw [anchored.context]
+  change asciiBytes (NativeVectorLayout.text (NativeVectorAuthority.state anchored.stored.source.bound).wire.parent) = _
+  rw [FamilyInputs.originalLabelRoundtrip]
+  exact anchored.stored.source.numeric.checked.1.2.1.symm
+
+theorem anchoredCurrentDoesNotInventApply :
+    NativeWalBytes.encode sha anchored.stored.observation.entry = wal ∧
+    anchored.stored.observation.vote.wire.bodyHash = anchored.stored.view.body.originalId ∧
+    anchored.stored.observation.entry.sequence = facts.expectedSequence ∧
+    FamilyInputs.readOriginalImage anchored.stored.source.bound indices anchored.stored.source.numeric.profile.profile
+      anchored.stored.source.numeric.quantum anchored.values.values = some anchored.stored.authority.input.image :=
+  ⟨(walOnlyOriginalBytes anchored.stored.observation).1,(storedOriginalVoteIdentity anchored.stored).1,
+    (storedOriginalVoteIdentity anchored.stored).2.2.1,(projectionFullInputImage anchored.stored.asProjection).1⟩
+
+end AnchoredProjection
+
+/- Source provenance for an observed nonempty current-pointer history is checked
+by the EXISTING native reader. This only reuses that reader at the static source
+boundary; it adds no recovery transition theorem. Arbitrary initial snapshots
+and unknown observations must not be represented by a fabricated last APPLY. -/
+section ObservedProjection
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource)
+    (initial : NativeCurrentPointer.State) (pointer : NativePointerWal.Observation)
+    (currentInputs : List NativeCurrentHistory.Input)
+    (wal receipt : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+structure ObservedProjection where
+  current : NativeCurrentHistory.Current
+  currentSource : NativeCurrentHistory.current sha initial pointer currentInputs = some current
+  projection : Projection sha mapping actors artifacts units current wal receipt facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected
+
+def loadObservedProjection : Option (ObservedProjection sha mapping actors artifacts units initial pointer currentInputs
+    wal receipt facts indices vocabulary configured names metadata shardAliases checkpointNames expected) := do
+  match currentSource : NativeCurrentHistory.current sha initial pointer currentInputs with
+  | none => none
+  | some current =>
+    let projection ← loadProjection sha mapping actors artifacts units current wal receipt facts indices
+      vocabulary configured names metadata shardAliases checkpointNames expected
+    some ⟨current,currentSource,projection⟩
+
+theorem unknownCurrentRejects :
+    loadObservedProjection sha mapping actors artifacts units initial .unknown currentInputs wal receipt facts indices
+      vocabulary configured names metadata shardAliases checkpointNames expected = none := rfl
+
+variable {sha mapping actors artifacts units initial currentInputs wal receipt facts indices vocabulary configured names
+    metadata shardAliases checkpointNames expected} {pointerRaw : Bytes}
+    (observed : ObservedProjection sha mapping actors artifacts units initial (.bytes pointerRaw) currentInputs
+      wal receipt facts indices vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust)
+      metadata shardAliases checkpointNames expected)
+
+theorem observedCurrentOriginalBytes :
+    NativePointerWal.recover sha initial (.bytes pointerRaw) = some observed.current.recovery.wal ∧
+    observed.current.last.edge.decoded.candidate.modelValues = NativeApplyResult.decimalValues observed.current.last.values.model ∧
+    observed.current.last.edge.decoded.candidate.optimizerValues = NativeApplyResult.decimalValues observed.current.last.values.optimizer :=
+  ⟨NativeCurrentHistory.retainedObservation observed.currentSource,
+    NativeCurrentHistory.currentOriginalValues observed.currentSource⟩
+
+theorem observedCurrentPreimages :
+    (NativeVectorAuthority.state observed.projection.source.bound).wire.parent =
+      idBytes (sha (valueHashInput .model observed.current.last.values.model)) ∧
+    observed.current.recovery.wal.state.optimizer =
+      idBytes (sha (valueHashInput .optimizer observed.current.last.values.optimizer)) := by
+  have hashes := NativeCurrentHistory.currentValueHashes observed.currentSource
+  exact ⟨observed.projection.source.numeric.checked.1.2.1.symm.trans hashes.1,hashes.2⟩
+
+end ObservedProjection
+
+/- Select by the original mixed-WAL position. State commands retain their
+positions; no vote count or coordinate index is substituted for a sequence.
+This is a static source join. Complete public collection correspondence is not
+inferred merely because the complete native byte stream was checked. -/
+section LocatedProjection
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource)
+    (initial : NativeCurrentPointer.State) (pointer : NativePointerWal.Observation)
+    (currentInputs : List NativeCurrentHistory.Input)
+    (observation : Option Bytes) (position : Nat) (facts : NativeConfigAdmission.RuntimeFacts)
+    (indices : List Nat) (vocabulary : Vocabulary) (configured : List Ticket)
+    (names : Bytes → Option String) {earlyTrust planningTrust}
+    (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes) (expected : Value)
+
+structure LocatedProjection where
+  raw : Bytes
+  known : observation = some raw
+  scan : NativeWalScan.Result
+  scanned : NativeWalScan.check sha raw = some scan
+  complete : scan.torn = false
+  piece : NativeWalScan.Piece
+  atPosition : scan.pieces[position]? = some piece
+  current : NativeCurrentHistory.Current
+  currentSource : NativeCurrentHistory.current sha initial pointer currentInputs = some current
+  stored : StoredProjection sha mapping actors artifacts units current piece.bytes facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected
+  entry : stored.observation.entry = piece.entry
+
+def loadLocatedProjection : Option (LocatedProjection sha mapping actors artifacts units initial pointer currentInputs
+    observation position facts indices vocabulary configured names metadata shardAliases checkpointNames expected) := do
+  match known : observation with
+  | none => none
+  | some raw =>
+    match scanned : NativeWalScan.check sha raw with
+    | none => none
+    | some scan =>
+      if complete : scan.torn = false then
+        match atPosition : scan.pieces[position]? with
+        | none => none
+        | some piece =>
+          match currentSource : NativeCurrentHistory.current sha initial pointer currentInputs with
+          | none => none
+          | some current =>
+            let stored ← loadStoredProjection sha mapping actors artifacts units current piece.bytes facts indices
+              vocabulary configured names metadata shardAliases checkpointNames expected
+            if entry : stored.observation.entry = piece.entry then
+              some ⟨raw,known,scan,scanned,complete,piece,atPosition,current,currentSource,stored,entry⟩
+            else none
+      else none
+
+theorem unknownWalRejects :
+    loadLocatedProjection sha mapping actors artifacts units initial pointer currentInputs none position facts indices
+      vocabulary configured names metadata shardAliases checkpointNames expected = none := rfl
+
+variable {sha mapping actors artifacts units initial pointer currentInputs observation position facts indices
+    vocabulary configured names metadata shardAliases checkpointNames expected}
+    (located : LocatedProjection sha mapping actors artifacts units initial pointer currentInputs observation
+      position facts indices vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust)
+      metadata shardAliases checkpointNames expected)
+
+theorem locatedWholeOriginalBytes :
+    located.raw = NativeWalScan.joined located.scan.pieces ∧
+    ∀ piece ∈ located.scan.pieces, NativeWalBytes.decode sha piece.bytes = some piece.entry ∧
+      NativeWalBytes.encode sha piece.entry = piece.bytes := by
+  have tail := NativeWalScan.checkedTerminal sha located.raw located.scan located.scanned
+  simp only [located.complete,Bool.false_eq_true,if_false] at tail
+  have partition := NativeWalScan.checkedPartition sha located.raw located.scan located.scanned
+  rw [tail,List.append_nil] at partition
+  refine ⟨partition,?_⟩
+  intro piece member
+  have scanned := (NativeWalScan.checkedSound sha located.raw located.scan located.scanned).1
+  exact ⟨(NativeWalScan.tracePieces sha located.raw located.scan
+    ((NativeWalScan.scanExact sha located.raw located.scan).mp scanned) piece member).1,
+    (NativeWalScan.scannedCanonical sha located.raw located.scan scanned piece member).2⟩
+
+theorem locatedOriginalSequence :
+    located.stored.observation.entry.sequence = position + 1 ∧ facts.expectedSequence = position + 1 := by
+  have atEntry : (NativeWalScan.entries located.scan)[position]? = some located.piece.entry := by
+    simp only [NativeWalScan.entries,List.getElem?_map,located.atPosition,Option.map_some]
+  have sequence := NativeWalScan.checkedPosition sha located.raw located.scan located.scanned
+    position located.piece.entry atEntry
+  have original := (walOnlyOriginalBytes located.stored.observation).2.2
+  rw [located.entry] at original
+  constructor
+  · rw [located.entry,sequence]; omega
+  · omega
+
+theorem locatedOriginalObject :
+    located.stored.observation.vote.wire.bodyHash = located.stored.view.body.originalId ∧
+    actorBytes mapping located.stored.view.projectedVote.actor = some located.stored.observation.vote.wire.validator ∧
+    located.stored.observation.entry.sequence = position + 1 ∧
+    expectedContext located.stored.view.projectedVote = some located.stored.view.projectedVote.context :=
+  ⟨(storedOriginalVoteIdentity located.stored).1,(storedOriginalVoteIdentity located.stored).2.1,
+    (locatedOriginalSequence located).1,(storedOriginalVoteIdentity located.stored).2.2.2⟩
+
+theorem locatedCurrentPreimages :
+    (NativeVectorAuthority.state located.stored.source.bound).wire.parent =
+      idBytes (sha (valueHashInput .model located.current.last.values.model)) ∧
+    located.current.recovery.wal.state.optimizer =
+      idBytes (sha (valueHashInput .optimizer located.current.last.values.optimizer)) := by
+  cases pointer with
+  | unknown =>
+    have source := located.currentSource
+    simp only [NativeCurrentHistory.unknownNoCurrent] at source
+    contradiction
+  | bytes raw =>
+    have hashes := NativeCurrentHistory.currentValueHashes located.currentSource
+    exact ⟨located.stored.source.numeric.checked.1.2.1.symm.trans hashes.1,hashes.2⟩
+
+include located in
+theorem incompleteWalCannotHaveProjection {raw scan}
+    (known : observation = some raw) (scanned : NativeWalScan.check sha raw = some scan)
+    (torn : scan.torn = true) : False := by
+  have rawSame := Option.some.inj (known.symm.trans located.known)
+  subst raw
+  have scanSame := Option.some.inj (scanned.symm.trans located.scanned)
+  subst scan
+  rw [located.complete] at torn
+  contradiction
+
+include located in
+theorem corruptWalCannotHaveProjection {raw}
+    (known : observation = some raw) (corrupt : NativeWalScan.check sha raw = none) : False := by
+  have rawSame := Option.some.inj (known.symm.trans located.known)
+  subst raw
+  rw [located.scanned] at corrupt
+  contradiction
+
+theorem commandPositionCannotHaveProjection (command : located.piece.entry.kind = 1) : False := by
+  have vote := located.stored.observation.link.1
+  rw [located.entry,command] at vote
+  contradiction
+
+/- Running the executable source join at different coordinate selectors must
+resolve the same original objects. No equality of translated bodies is assumed. -/
+theorem locatedSelectorsShareOriginals {otherIndices}
+    (other : LocatedProjection sha mapping actors artifacts units initial pointer currentInputs observation
+      position facts otherIndices vocabulary configured names metadata shardAliases checkpointNames expected) :
+    located.raw = other.raw ∧ located.scan = other.scan ∧ located.piece = other.piece ∧
+    located.stored.observation.entry = other.stored.observation.entry ∧
+    located.stored.observation.vote = other.stored.observation.vote ∧
+    located.current = other.current ∧ located.stored.source.bound = other.stored.source.bound := by
+  have raw := Option.some.inj (located.known.symm.trans other.known)
+  have scan : located.scan = other.scan := Option.some.inj
+    (located.scanned.symm.trans ((congrArg (NativeWalScan.check sha) raw).trans other.scanned))
+  have piece : located.piece = other.piece := Option.some.inj
+    (located.atPosition.symm.trans ((congrArg (fun s : NativeWalScan.Result => s.pieces[position]?) scan).trans other.atPosition))
+  have entry : located.stored.observation.entry = other.stored.observation.entry :=
+    located.entry.trans ((congrArg NativeWalScan.Piece.entry piece).trans other.entry.symm)
+  have vote : located.stored.observation.vote = other.stored.observation.vote := Option.some.inj
+    (located.stored.observation.frame.symm.trans
+      ((congrArg (fun e : NativeWalBytes.Entry => NativeVoteBytes.decodeFrame e.command) entry).trans
+        other.stored.observation.frame))
+  exact ⟨raw,scan,piece,entry,vote,
+    Option.some.inj (located.currentSource.symm.trans other.currentSource),
+    Option.some.inj (located.stored.source.prepared.symm.trans other.stored.source.prepared)⟩
+
+theorem locatedSelectorsPreserveIdentity {otherIndices}
+    (other : LocatedProjection sha mapping actors artifacts units initial pointer currentInputs observation
+      position facts otherIndices vocabulary configured names metadata shardAliases checkpointNames expected) :
+    located.stored.view.body.originalId = other.stored.view.body.originalId ∧
+    located.stored.view.projectedVote.actor = other.stored.view.projectedVote.actor ∧
+    located.stored.observation.entry.sequence = other.stored.observation.entry.sequence ∧
+    located.current.last.values.model = other.current.last.values.model ∧
+    located.current.last.values.optimizer = other.current.last.values.optimizer := by
+  have originals := locatedSelectorsShareOriginals located other
+  have vote := originals.2.2.2.2.1
+  have current := originals.2.2.2.2.2.1
+  have left := storedOriginalVoteIdentity located.stored
+  have right := storedOriginalVoteIdentity other.stored
+  refine ⟨left.1.symm.trans ((congrArg (fun v : NativeVoteBytes.Vote => v.wire.bodyHash) vote).trans right.1),?_,
+    congrArg NativeWalBytes.Entry.sequence originals.2.2.2.1,
+    congrArg (fun c : NativeCurrentHistory.Current => c.last.values.model) current,
+    congrArg (fun c : NativeCurrentHistory.Current => c.last.values.optimizer) current⟩
+  apply viewNoSignerInflation other.stored.view
+  · rw [(viewComputedBody located.stored.view).2.2]
+    exact located.stored.view.aliases.2.1
+  · exact left.2.1.trans (congrArg (fun v : NativeVoteBytes.Vote => some v.wire.validator) vote)
+
+end LocatedProjection
+/- The ROOT observation uses the existing ordinary native selector. Its
+PARAMETER ancestors are finalized original objects; no future APPLY or
+conversion result is a premise of constructing the aggregate body. -/
+section RootObservation
+variable {sha mapping actors artifacts units current}
+    (source : Source sha mapping actors artifacts units current)
+
+structure RootObservation (source : Source sha mapping actors artifacts units current)
+    (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) where
+  entry : NativeWalBytes.Entry
+  decoded : NativeWalBytes.decode sha wal = some entry
+  loaded : NativeEarlySource.Loaded sha artifacts.policy artifacts.state entry.command facts
+  root : NativeRootSource.Root loaded.original
+  id : Bytes
+  hashed : NativeVoteBytes.voteId sha entry.command = some id
+  valid : NativeReceiptBytes.Valid (receiptForWal entry loaded.original.vote loaded.original.admitted id)
+  link : NativeWalBytes.ReceiptLink sha artifacts.policy entry
+    (receiptForWal entry loaded.original.vote loaded.original.admitted id)
+  voteLink : NativeVoteBytes.ReceiptLinked sha
+    (receiptForWal entry loaded.original.vote loaded.original.admitted id) loaded.original.vote
+
+def loadRootObservation (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) :
+    Option (RootObservation source wal facts) := do
+  match decoded : NativeWalBytes.decode sha wal with
+  | none => none
+  | some entry =>
+    let loaded ← NativeEarlySource.load sha artifacts.policy artifacts.state entry.command facts
+    let root ← NativeRootSource.loadRoot loaded.original
+    match hashed : NativeVoteBytes.voteId sha entry.command with
+    | none => none
+    | some id =>
+      if h : NativeReceiptBytes.Valid (receiptForWal entry loaded.original.vote loaded.original.admitted id) ∧
+          NativeWalBytes.ReceiptLink sha artifacts.policy entry
+            (receiptForWal entry loaded.original.vote loaded.original.admitted id) ∧
+          NativeVoteBytes.ReceiptLinked sha
+            (receiptForWal entry loaded.original.vote loaded.original.admitted id) loaded.original.vote then
+        some ⟨entry,decoded,loaded,root,id,hashed,h.1,h.2.1,h.2.2⟩
+      else none
+
+variable {source wal facts} (observation : RootObservation source wal facts)
+
+def RootObservation.receipt : NativeReceiptBytes.Receipt :=
+  receiptForWal observation.entry observation.loaded.original.vote observation.loaded.original.admitted observation.id
+
+theorem rootObservationLoaded : loadRootObservation source wal facts = some observation := by
+  unfold loadRootObservation
+  split
+  · rename_i absent; rw [observation.decoded] at absent; contradiction
+  · rename_i entry found
+    cases Option.some.inj (found.symm.trans observation.decoded)
+    have selected : NativeEarlySource.load sha artifacts.policy artifacts.state observation.entry.command facts =
+        some observation.loaded := by
+      unfold NativeEarlySource.load
+      split
+      · rename_i absent; rw [observation.loaded.computed] at absent; contradiction
+      · rename_i original found
+        cases Option.some.inj (found.symm.trans observation.loaded.computed)
+        rfl
+    rw [selected]
+    simp only [bind,Option.bind,NativeRootSource.fromComponents observation.root]
+    split
+    · rename_i absent; rw [observation.hashed] at absent; contradiction
+    · rename_i id found
+      cases Option.some.inj (found.symm.trans observation.hashed)
+      rw [dif_pos ⟨observation.valid,observation.link,observation.voteLink⟩]
+
+theorem rootOriginalWalBinding :
+    NativeWalBytes.bindReceipt sha artifacts.policy wal (NativeReceiptBytes.encode observation.receipt) =
+      some (observation.entry,observation.receipt,observation.loaded.original.vote) :=
+  NativeWalBytes.bindFromComponents sha artifacts.policy wal (NativeReceiptBytes.encode observation.receipt)
+    observation.entry observation.receipt observation.loaded.original.vote observation.decoded
+    (NativeVoteBytes.receiptFromComponents sha observation.receipt observation.loaded.original.vote observation.valid
+      (NativeVoteBytes.bindingFromComponents sha observation.receipt observation.loaded.original.vote
+        (NativeEarlySource.loadedOriginal observation.loaded).vote observation.voteLink)) observation.link
+
+theorem rootOriginalBytes :
+    NativeWalBytes.encode sha observation.entry = wal ∧
+    NativeVoteBytes.encodeFrame observation.loaded.original.vote.wire = observation.entry.command ∧
+    observation.entry.sequence = facts.expectedSequence := by
+  have bytes := NativeWalBytes.boundOriginalBytes sha artifacts.policy wal (NativeReceiptBytes.encode observation.receipt)
+    observation.entry observation.receipt observation.loaded.original.vote (rootOriginalWalBinding observation)
+  exact ⟨bytes.1,bytes.2.2.1,bytes.2.2.2.trans
+    (NativeEarlySource.loadedIdentity observation.loaded).2.2.2.2.2.2.2.2⟩
+
+theorem rootSameOriginalPolicyState :
+    observation.loaded.original.policy = NativeVectorAuthority.policy source.bound ∧
+    observation.loaded.original.state = NativeVectorAuthority.state source.bound := by
+  obtain ⟨_,policy,state⟩ := sourceRaw source
+  obtain ⟨_,original⟩ := (NativeEarlySource.loadedOriginal observation.loaded).policy
+  exact ⟨congrArg Prod.snd (Option.some.inj (original.symm.trans policy)),
+    Option.some.inj ((NativeEarlySource.loadedOriginal observation.loaded).state.symm.trans state)⟩
+
+theorem rootOriginalBodyAndContext :
+    observation.loaded.original.vote.wire.bodyHash = observation.root.original.id ∧
+    NativeAggregateRoot.bodyId sha observation.root.original.certificate.common =
+      some observation.loaded.original.vote.wire.bodyHash ∧
+    NativeCandidateAuthority.parentContext sha "deltareduce.vote-context.root.v1"
+      observation.root.original.certificate.common.plan = some observation.loaded.original.vote.wire.context :=
+  ⟨(NativeRootSource.identity observation.loaded observation.root).1,
+    NativeRootSource.originalPreimage observation.loaded observation.root,
+    (NativeRootSource.identity observation.loaded observation.root).2⟩
+
+theorem rootNoFutureApplyPremise :
+    observation.root.original.shards.map NativeAggregateLineage.shardLeaf =
+      observation.root.original.certificate.common.leaves ∧
+    ∀ shard ∈ observation.root.original.shards,
+      shard.id ∈ (NativeRootSource.sectionOf observation.loaded.original).parameters.prior.finalized ∧
+      NativeContractSize.contentId sha NativeParameter.domain (NativeParameter.json shard.certificate) = some shard.id :=
+  ⟨NativeRootSource.completeLeaves observation.loaded observation.root,
+    fun _ member => NativeRootSource.leafFinalizedAndHashed observation.loaded observation.root member⟩
+
+end RootObservation
+
+section RootView
+variable {sha mapping actors artifacts units current source wal facts indices vocabulary configured names earlyTrust planningTrust metadata}
+    (observation : RootObservation (sha := sha) (mapping := mapping) (actors := actors)
+      (artifacts := artifacts) (units := units) (current := current) source wal facts)
+    (authority : FamilyAuthority.Original source.bound indices source.numeric.profile source.numeric.quantum
+      current.values vocabulary configured names (earlyTrust := earlyTrust) (planningTrust := planningTrust)
+      metadata observation.loaded.original)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes)
+
+def rootBodyVote (root : FamilyApply.OriginalRoot authority shardAliases observation.root.original) : Option Vote := do
+  some (PublicRootEnvelope.envelope authority.parents.ec.parent.header.actor.value authority.parents.value
+    (FamilyApply.originalAggregate authority shardAliases root.entries))
+
+theorem rootBodyVoteTotal (root : FamilyApply.OriginalRoot authority shardAliases observation.root.original) :
+    rootBodyVote observation authority shardAliases root =
+      some (PublicRootEnvelope.envelope authority.parents.ec.parent.header.actor.value authority.parents.value
+        (FamilyApply.originalAggregate authority shardAliases root.entries)) := rfl
+
+def RootAliasChecks : Prop :=
+  actorBytes mapping authority.parents.ec.parent.header.actor.value = some observation.loaded.original.vote.wire.validator ∧
+  authority.parents.ec.parent.header.actor.value ∈ actors ∧
+  mapping.height authority.parents.ec.parent.header.height.value = some (NativeVectorAuthority.state source.bound).height ∧
+  (mapping.epoch authority.parents.ec.parent.header.epoch.value).map asciiBytes = some (NativeVectorAuthority.policy source.bound).epoch ∧
+  names (NativeVectorAuthority.policy source.bound).config = some authority.parents.ec.parent.header.config.text ∧
+  checkpointNames authority.header.parent.value = some (NativeVectorAuthority.state source.bound).wire.parent ∧
+  (∀ entry ∈ authority.parents.ec.parent.entries,
+    vocabulary.ticket (NativeVectorLayout.text entry.original.ticket) = some entry.ticket.text) ∧
+  (∀ member ∈ authority.parents.ec.members,
+    vocabulary.ticket (NativeVectorLayout.text member.original) = some member.name.text) ∧
+  (∀ member ∈ authority.parents.members,
+    vocabulary.ticket (NativeVectorLayout.text member.original) = some member.name.text)
+
+instance : Decidable (RootAliasChecks observation authority checkpointNames) := by
+  unfold RootAliasChecks; infer_instance
+
+structure RootView where
+  root : FamilyApply.OriginalRoot authority shardAliases observation.root.original
+  projectedVote : Vote
+  computed : rootBodyVote observation authority shardAliases root = some projectedVote
+  aliases : RootAliasChecks observation authority checkpointNames
+  canonical : PublicState.canonical vocabulary.models (.function (voteEntries projectedVote)) = true
+
+def loadRootView : Option (RootView observation authority shardAliases checkpointNames) := do
+  if aliases : RootAliasChecks observation authority checkpointNames then
+    let root ← FamilyApply.loadOriginalRoot authority shardAliases observation.root.original
+    match computed : rootBodyVote observation authority shardAliases root with
+    | none => none
+    | some projectedVote =>
+      if canonical : PublicState.canonical vocabulary.models (.function (voteEntries projectedVote)) = true then
+        some ⟨root,projectedVote,computed,aliases,canonical⟩ else none
+  else none
+
+variable {observation authority shardAliases checkpointNames}
+    (view : RootView observation authority shardAliases checkpointNames)
+
+theorem rootViewLoaded : loadRootView observation authority shardAliases checkpointNames = some view := by
+  unfold loadRootView
+  rw [dif_pos view.aliases,FamilyApply.originalRootLoaded authority shardAliases view.root]
+  simp only [bind,Option.bind]
+  split
+  · rename_i absent; rw [view.computed] at absent; contradiction
+  · rename_i projected found
+    cases Option.some.inj (found.symm.trans view.computed)
+    rw [dif_pos view.canonical]
+
+theorem rootViewComputed :
+    view.projectedVote.body = FamilyApply.originalAggregate authority shardAliases view.root.entries ∧
+    view.projectedVote.kind = .text "AGGREGATE_ROOT" ∧
+    view.projectedVote.actor = authority.parents.ec.parent.header.actor.value ∧
+    readField view.projectedVote.body "apc" = some view.projectedVote.context := by
+  have computed := view.computed
+  have same := (Option.some.inj computed).symm
+  rw [same]
+  exact ⟨rfl,rfl,rfl,rfl⟩
+
+theorem rootUsesExistingApcContext : view.projectedVote.context = authority.parents.value ∧
+    expectedContext view.projectedVote = none := by
+  have same := (Option.some.inj view.computed).symm
+  rw [same]
+  exact ⟨rfl,rfl⟩
+
+theorem rootViewKeepsWholeOriginals :
+    view.root.entries.map FamilyApply.OriginalEntry.native = observation.root.original.shards ∧
+    observation.loaded.original.vote.wire.bodyHash = observation.root.original.id ∧
+    actorBytes mapping view.projectedVote.actor = some observation.loaded.original.vote.wire.validator ∧
+    observation.entry.sequence = facts.expectedSequence := by
+  refine ⟨FamilyApply.originalRootExact authority shardAliases view.root,
+    (rootOriginalBodyAndContext observation).1,?_,(rootOriginalBytes observation).2.2⟩
+  rw [(rootViewComputed view).2.2.1]
+  exact view.aliases.1
+
+theorem rootVoteNativeKind : observation.loaded.original.vote.wire.kind = NativeVoteBytes.ascii "AGGREGATE_ROOT" := by
+  have checked := NativeSelectedVote.originalByteAuthority observation.loaded.computed
+  have kind := checked.2.2.2.2.2.2.1
+  simpa only [observation.root.kind,NativeVoteBytes.actionName] using kind.symm
+
+theorem rootViewNoSignerInflation {other : Value} (member : other ∈ actors)
+    (same : actorBytes mapping other = some observation.loaded.original.vote.wire.validator) :
+    other = view.projectedVote.actor := by
+  apply actorAliasesInjective source.committee.names member
+  · rw [(rootViewComputed view).2.2.1]; exact view.aliases.2.1
+  · exact same
+  · exact (rootViewKeepsWholeOriginals view).2.2.1
+
+theorem rootViewsKeepOneNativeObject {otherIndices}
+    {otherAuthority : FamilyAuthority.Original source.bound otherIndices source.numeric.profile source.numeric.quantum
+      current.values vocabulary configured names metadata observation.loaded.original}
+    (other : RootView observation otherAuthority shardAliases checkpointNames) :
+    view.root.entries.map FamilyApply.OriginalEntry.native = other.root.entries.map FamilyApply.OriginalEntry.native ∧
+    view.projectedVote.actor = other.projectedVote.actor ∧ observation.entry.sequence = facts.expectedSequence := by
+  refine ⟨(rootViewKeepsWholeOriginals view).1.trans (rootViewKeepsWholeOriginals other).1.symm,?_,
+    (rootOriginalBytes observation).2.2⟩
+  apply rootViewNoSignerInflation other
+  · rw [(rootViewComputed view).2.2.1]; exact view.aliases.2.1
+  · exact (rootViewKeepsWholeOriginals view).2.2.1
+
+end RootView
+
+section RootProjection
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (artifacts : Artifacts) (units : NativeStateProjection.UnitSource) (current : FamilyInputs.CurrentBasis)
+    (wal : Bytes) (facts : NativeConfigAdmission.RuntimeFacts) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (checkpointNames : Value → Option Bytes)
+
+structure RootProjection where
+  source : Source sha mapping actors artifacts units current
+  observation : RootObservation source wal facts
+  authority : FamilyAuthority.Original source.bound indices source.numeric.profile source.numeric.quantum
+    current.values vocabulary configured names metadata observation.loaded.original
+  view : RootView observation authority shardAliases checkpointNames
+
+def loadRootProjection : Option (RootProjection sha mapping actors artifacts units current wal facts indices
+    vocabulary configured names metadata shardAliases checkpointNames) := do
+  let source ← loadSource sha mapping actors artifacts units current
+  let observation ← loadRootObservation source wal facts
+  let authority ← FamilyAuthority.loadOriginal source.bound indices source.numeric.profile source.numeric.quantum
+    current.values vocabulary configured names metadata observation.loaded.original
+  let view ← loadRootView observation authority shardAliases checkpointNames
+  some ⟨source,observation,authority,view⟩
+
+end RootProjection
+
+end Direct
 end DeltaReduce.FamilyRelation

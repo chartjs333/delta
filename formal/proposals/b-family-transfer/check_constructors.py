@@ -40,6 +40,28 @@ def require(condition: bool, label: str) -> None:
         raise ValueError(label)
 
 
+def declared_names(text: str) -> list[str]:
+    """Keep namespace qualification while sections only scope variables."""
+    declaration = r"^(?:@\[[^\n]+\]\s*)?(?:structure|inductive|def|abbrev|theorem) ([\w.]+)"
+    scopes: list[tuple[str, str]] = []
+    names = []
+    for line in text.splitlines():
+        if start := re.fullmatch(r"(namespace|section)(?: (\S+))?", line):
+            scopes.append((start[1], start[2] or ""))
+        elif end := re.fullmatch(r"end(?: (\S+))?", line):
+            require(bool(scopes), "AUDIT_UNMATCHED_END")
+            _, name = scopes.pop()
+            require(end[1] is None or end[1] == name, "AUDIT_SCOPE_MISMATCH")
+        elif found := re.match(declaration, line):
+            namespace = ".".join(name for kind, name in scopes if kind == "namespace")
+            require(bool(namespace), "AUDIT_MISSING_NAMESPACE")
+            names.append(f"{namespace}.{found[1]}")
+    require(not scopes, "AUDIT_UNCLOSED_SCOPE")
+    require(len(names) == len(re.findall(declaration, text, re.M)), "AUDIT_DROPPED_NAME")
+    require(len(set(names)) == len(names), "AUDIT_DUPLICATE_NAME")
+    return names
+
+
 def run() -> None:
     BUILD.mkdir(parents=True, exist_ok=True)
     EVIDENCE.mkdir(parents=True, exist_ok=True)
@@ -161,13 +183,7 @@ def run() -> None:
         if source.parent == HERE:
             text = source.read_text(encoding="utf-8")
             require(not re.search(r"\b(?:sorry|admit|axiom|native_decide)\b", text), "PROOF_ESCAPE")
-            namespace = re.search(r"^namespace (\S+)", text, re.M).group(1)
-            names = re.findall(
-                r"^(?:@\[[^\n]+\]\s*)?(?:structure|inductive|def|abbrev|theorem) ([\w.]+)",
-                text,
-                re.M,
-            )
-            declarations += [f"{namespace}.{name}" for name in names]
+            declarations += declared_names(text)
     audit = BUILD / "Audit.lean"
     audit.write_text(
         "import FamilyChecks\nimport Checks\n"
@@ -323,15 +339,32 @@ def run() -> None:
                     "family bodies",
                     "same decoded original policy, exact actor namespace and no alias inflation",
                     "generic signer membership/count and actual checked ISC quorum preserved",
+                    "one direct executable source/profile/input/authority/body/vote projection "
+                    "from original policy/state and canonical WAL/receipt bytes, without the "
+                    "old draft Binding body adapter",
+                    "original candidate and complete native snapshot/list retained; all "
+                    "coordinate views share the original body ID, actor and sequence",
+                    "exact arithmetic-input/APC member order and names; primitive actor, "
+                    "height, epoch, config and current-parent namespaces checked together",
+                    "observed nonempty current-pointer history supplies original model/optimizer "
+                    "preimages through the existing reader; UNKNOWN is rejected",
+                    "durable WAL-only arithmetic observation derives its receipt without "
+                    "claiming response exposure; observed receipts must match exactly",
+                    "complete mixed WAL scan and original positions retained, including "
+                    "intervening commands; corrupt, torn and UNKNOWN observations reject",
+                    "numeric current carrier no longer requires a fabricated prior APPLY; "
+                    "canonical values bind to existing explicitly authenticated anchor hashes",
+                    "direct original ROOT selector, finalized full ordered certificates and "
+                    "family aggregate compose with existing AGGREGATE_ROOT/APC envelope",
                 ],
                 "remaining": [
                     "one authenticated configuration/alias/source relation across all existing "
                     "object kinds",
                     "entire static public/native state and certificate/vote collections with "
                     "exact coverage",
-                    "connect the direct original constructors to the whole observed native "
-                    "admission/journal/static-state relation; old journal entry point still "
-                    "uses its draft body adapter",
+                    "complete all-actor original journal/static-state coverage, including "
+                    "arbitrary initial current snapshots and existing non-arithmetic projections; "
+                    "the direct arithmetic observation does not imply that complete relation",
                 ],
             },
         },
