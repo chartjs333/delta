@@ -5,6 +5,7 @@ import DeltaReduce.NativeVoteCache
 import DeltaReduce.NativeRootSource
 import DeltaReduce.PublicRootEnvelope
 import DeltaReduce.PublicFailureBody
+import DeltaReduce.PublicAbortAncestors
 
 /-! R2 arithmetic subrelation at one family view. This composes complete body
 construction, the existing primitive metadata boundary and original journal
@@ -3088,6 +3089,689 @@ theorem observedCurrentQuorum {exposed}
   certifiedCurrentSignerQuorum joined.current joined.actorPolicy signers
 
 end ObservedState
+
+/- Snapshot certificates need no local vote. The input/arithmetic components are
+the same closed constructors; only their parent carrier reads the original
+certificate context. No coordinate is allocated a protocol identity. -/
+section SnapshotAuthority
+variable (source : NativeVectorContext.Bound) (indices : List Nat)
+    (profile : NativeApplyProfile.Checked) (quantum : Rational) (current : FamilyInputs.CurrentValues)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+
+structure SnapshotAuthority where
+  input : FamilyAuthority.OriginalInput source indices profile.profile quantum current vocabulary configured
+  header : FamilyAuthority.OriginalHeader source profile names
+  parents : CertificateParents metadata source.source.plan.members.edge
+
+def loadSnapshotAuthority : Option (SnapshotAuthority source indices profile quantum current vocabulary configured names metadata) := do
+  let input ← FamilyAuthority.loadOriginalInput source indices profile.profile quantum current vocabulary configured
+  let header ← FamilyAuthority.loadOriginalHeader source profile names
+  let parents ← loadCertificateParents metadata source.source.plan.members.edge
+  some ⟨input,header,parents⟩
+
+variable {source indices profile quantum current vocabulary configured names metadata}
+    (a : SnapshotAuthority source indices profile quantum current vocabulary configured names metadata)
+
+def SnapshotAuthority.fields : List (String × Value) := [
+  ("apc",a.parents.apc),("applyProfile",a.header.apply.value),("ec",a.parents.ec),
+  ("inputs",a.input.encoded.value),("isc",a.parents.isc),
+  ("model",PublicAuthority.vectorValue "MODEL" a.header.schema.value (a.input.encoded.components.at 9)),
+  ("optimizer",PublicAuthority.vectorValue "OPTIMIZER" a.header.schema.value (a.input.encoded.components.at 10)),
+  ("parent",a.header.parent.value),("profile",a.header.arithmetic.value),("schema",a.header.schema.value)]
+
+def SnapshotAuthority.value : Value := PublicAuthority.record a.fields
+
+theorem snapshotAuthorityInventory : a.fields.map Prod.fst = PublicAuthority.authorityFieldNames := rfl
+
+theorem snapshotAuthorityHasOriginalParents :
+    readField a.value "apc" = some a.parents.apc ∧ readField a.value "ec" = some a.parents.ec ∧
+    readField a.value "isc" = some a.parents.isc := ⟨rfl,rfl,rfl⟩
+
+theorem snapshotAuthoritySameAsVote {selected : NativeSelectedVote.Checked}
+    (old : FamilyAuthority.Original source indices profile quantum current vocabulary configured names metadata selected)
+    (height : selected.state.height = source.source.plan.members.edge.ec.parent.certificate.body.context.height)
+    (epoch : selected.policy.epoch = source.source.plan.members.edge.ec.parent.certificate.body.context.epoch)
+    (config : selected.policy.config = source.source.plan.members.edge.ec.parent.certificate.body.context.config) :
+    a.value = old.value := by
+  have input := Option.some.inj ((FamilyAuthority.originalInputFromComponents a.input).symm.trans
+    (FamilyAuthority.originalInputFromComponents old.input))
+  have header := Option.some.inj ((FamilyAuthority.originalHeaderLoaded a.header).symm.trans
+    (FamilyAuthority.originalHeaderLoaded old.header))
+  have parents := certificateParentsNoLocalVotePremise a.parents old.parents height epoch config
+  have encoded := congrArg (fun p => p.encoded.value) input
+  have model := congrArg (fun p => p.encoded.components.at 9) input
+  have optimizer := congrArg (fun p => p.encoded.components.at 10) input
+  simp only [SnapshotAuthority.value,SnapshotAuthority.fields,FamilyAuthority.Original.value,
+    FamilyAuthority.Original.fields,encoded,model,optimizer,header,parents.1,parents.2.2.1,parents.2.2.2]
+
+end SnapshotAuthority
+
+section SnapshotParameter
+variable {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata}
+    (authority : SnapshotAuthority source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata)
+    (native : NativeParameterLineage.Edge) (block : Nat) (nativeShardAlias : Bytes → Option String)
+
+structure SnapshotParameter where
+  vector : FamilyParameter.OriginalVector
+  vectorSource : FamilyParameter.originalVector source native.certificate.common.domain block = some vector
+  coordinate : Nat
+  atCoordinate : indices[block]? = some coordinate
+  value : Int
+  nativeValue : vector.values[coordinate]? = some value
+  exactNative : native.certificate.common.leaves = vector.leaves.mergeSort NativePolicyBytes.bytesLT ∧
+    native.certificate.common.numerators = vector.values.map (asciiBytes ∘ toString)
+  parents : native.certificate.common.context = source.source.plan.members.edge.certificate.common.context ∧
+    native.certificate.common.plan = source.source.plan.members.edge.id ∧
+    native.certificate.common.isc = source.source.plan.members.edge.parent.qcId ∧
+    native.certificate.common.ec = source.source.plan.members.edge.ec.id ∧
+    native.certificate.common.denominator = source.source.plan.accumulator.numbers.denominator
+  rows : List ParameterKernel.Row
+  imageRows : FamilyInputs.imageRows authority.input.image (NativeVectorLayout.text native.certificate.common.domain) block = some rows
+  arithmetic : FamilyParameter.publicParameterRows authority.input.image.limit native.certificate.common.denominator rows = some value
+  domainName : String
+  domainAlias : vocabulary.domain (NativeVectorLayout.text native.certificate.common.domain) = some domainName
+  domainConfigured : domainName ∈ vocabulary.domains
+  shardName : String
+  shardAlias : vocabulary.shard (NativeVectorLayout.shardName vector.first.block.header.ordinal) = some shardName
+  nativeAlias : nativeShardAlias native.certificate.common.shard = some shardName
+  shardConfigured : shardName ∈ vocabulary.shards
+
+def loadSnapshotParameter : Option (SnapshotParameter authority native block nativeShardAlias) := do
+  match vs : FamilyParameter.originalVector source native.certificate.common.domain block, atIndex : indices[block]? with
+  | some vector, some coordinate =>
+    match nv : vector.values[coordinate]?, rs : FamilyInputs.imageRows authority.input.image
+        (NativeVectorLayout.text native.certificate.common.domain) block,
+        dn : vocabulary.domain (NativeVectorLayout.text native.certificate.common.domain),
+        sn : vocabulary.shard (NativeVectorLayout.shardName vector.first.block.header.ordinal) with
+    | some value,some rows,some domainName,some shardName =>
+      if exactBody : native.certificate.common.leaves = vector.leaves.mergeSort NativePolicyBytes.bytesLT ∧
+          native.certificate.common.numerators = vector.values.map (asciiBytes ∘ toString) then
+        if parents : native.certificate.common.context = source.source.plan.members.edge.certificate.common.context ∧
+            native.certificate.common.plan = source.source.plan.members.edge.id ∧
+            native.certificate.common.isc = source.source.plan.members.edge.parent.qcId ∧
+            native.certificate.common.ec = source.source.plan.members.edge.ec.id ∧
+            native.certificate.common.denominator = source.source.plan.accumulator.numbers.denominator then
+          if arithmetic : FamilyParameter.publicParameterRows authority.input.image.limit native.certificate.common.denominator rows = some value then
+            if aliases : domainName ∈ vocabulary.domains ∧ nativeShardAlias native.certificate.common.shard = some shardName ∧
+                shardName ∈ vocabulary.shards then
+              some ⟨vector,vs,coordinate,atIndex,value,nv,exactBody,parents,rows,rs,arithmetic,
+                domainName,dn,aliases.1,shardName,sn,aliases.2.1,aliases.2.2⟩
+            else none
+          else none
+        else none
+      else none
+    | _,_,_,_ => none
+  | _,_ => none
+
+variable {authority native block nativeShardAlias} (p : SnapshotParameter authority native block nativeShardAlias)
+
+def SnapshotParameter.fields : List (String × Value) :=
+  PublicParameterBody.fields authority.parents.apc authority.header.arithmetic.value authority.value
+    authority.parents.coefficient.value authority.parents.config.value (.model p.domainName)
+    authority.parents.ec authority.parents.isc authority.header.parent.value
+    (PublicAuthority.roundValue authority.parents.height.value authority.parents.epoch.value)
+    authority.header.schema.value authority.parents.seedValue (.model p.shardName) p.value
+
+def SnapshotParameter.body : Value := PublicAuthority.record p.fields
+
+theorem snapshotParameterLoaded : loadSnapshotParameter authority native block nativeShardAlias = some p := by
+  unfold loadSnapshotParameter
+  split
+  · rename_i vector coordinate hv hc
+    have sv := Option.some.inj (hv.symm.trans p.vectorSource)
+    have sc := Option.some.inj (hc.symm.trans p.atCoordinate)
+    subst vector; subst coordinate
+    split
+    · rename_i value rows domainName shardName hn hr hd hs
+      have sn := Option.some.inj (hn.symm.trans p.nativeValue)
+      have sr := Option.some.inj (hr.symm.trans p.imageRows)
+      have sd := Option.some.inj (hd.symm.trans p.domainAlias)
+      have ss := Option.some.inj (hs.symm.trans p.shardAlias)
+      subst value; subst rows; subst domainName; subst shardName
+      rw [dif_pos p.exactNative,dif_pos p.parents,dif_pos p.arithmetic,
+        dif_pos ⟨p.domainConfigured,p.nativeAlias,p.shardConfigured⟩]
+    · simp_all [p.nativeValue,p.imageRows,p.domainAlias,p.shardAlias]
+      rename_i bad
+      exact (bad _ _ _ _ rfl rfl rfl) rfl
+  · simp_all [p.vectorSource,p.atCoordinate]
+
+theorem snapshotParameterOriginalVector :
+    native.certificate.common.numerators = p.vector.values.map (asciiBytes ∘ toString) ∧
+    native.certificate.common.leaves.Perm p.vector.leaves :=
+  ⟨p.exactNative.2,p.exactNative.1 ▸ List.mergeSort_perm p.vector.leaves NativePolicyBytes.bytesLT⟩
+
+theorem snapshotParameterOwnInputs :
+    (FamilyInputs.memberImageRows (FamilyInputs.completedImage authority.input.image configured)
+      (FamilyInputs.activeNames authority.input.image.tickets)
+      (NativeVectorLayout.text native.certificate.common.domain) block).bind
+      (FamilyParameter.publicParameterRows authority.input.image.limit native.certificate.common.denominator) = some p.value := by
+  rw [FamilyInputs.completedImageComputesSameRows _ _ authority.input.coverage.2.1
+    authority.input.coverage.2.2.1,p.imageRows]
+  exact p.arithmetic
+
+theorem snapshotParameterInventory : p.fields.map Prod.fst = PublicParameterBody.parameterFieldNames := rfl
+
+theorem snapshotParameterSameAsVote {selected : NativeSelectedVote.Checked}
+    (old : FamilyAuthority.Original source indices profile quantum current vocabulary configured names metadata selected)
+    (q : FamilyParameter.OriginalProjection old native block nativeShardAlias)
+    (height : selected.state.height = source.source.plan.members.edge.ec.parent.certificate.body.context.height)
+    (epoch : selected.policy.epoch = source.source.plan.members.edge.ec.parent.certificate.body.context.epoch)
+    (config : selected.policy.config = source.source.plan.members.edge.ec.parent.certificate.body.context.config) :
+    p.body = q.body old native block nativeShardAlias := by
+  have vector := Option.some.inj (p.vectorSource.symm.trans q.vectorSource)
+  have coordinate := Option.some.inj (p.atCoordinate.symm.trans q.atCoordinate)
+  have value : p.value = q.value := by
+    have h := p.nativeValue
+    rw [vector,coordinate] at h
+    exact Option.some.inj (h.symm.trans q.nativeValue)
+  have domain := Option.some.inj (p.domainAlias.symm.trans q.domainAlias)
+  have shard : p.shardName = q.shardName := by
+    have h := p.shardAlias
+    rw [vector] at h
+    exact Option.some.inj (h.symm.trans q.shardAlias)
+  have inputHeader := Option.some.inj ((FamilyAuthority.originalHeaderLoaded authority.header).symm.trans
+    (FamilyAuthority.originalHeaderLoaded old.header))
+  have parents := certificateParentsNoLocalVotePremise authority.parents old.parents height epoch config
+  have configValue : authority.parents.config.value = old.parents.ec.parent.header.config.value := by
+    exact Option.some.inj (congrArg (fun body => readField body "config") parents.1)
+  have roundValue : PublicAuthority.roundValue authority.parents.height.value authority.parents.epoch.value =
+      old.parents.ec.parent.header.round := by
+    exact Option.some.inj (congrArg (fun body => readField body "round") parents.1)
+  have coefficient : authority.parents.coefficient.value = old.parents.coefficient.value := by
+    exact Option.some.inj (congrArg (fun body => readField body "coefficientProfile") parents.2.2.2)
+  simp only [SnapshotParameter.body,SnapshotParameter.fields,FamilyParameter.OriginalProjection.body,
+    FamilyParameter.OriginalProjection.fields,domain,shard,value,inputHeader,parents.1,parents.2.1,
+    parents.2.2.1,parents.2.2.2,configValue,roundValue,coefficient,
+    snapshotAuthoritySameAsVote authority old height epoch config]
+
+end SnapshotParameter
+
+section SnapshotLeaf
+variable {source indices profile quantum current vocabulary configured names earlyTrust planningTrust metadata}
+    (authority : SnapshotAuthority source indices profile quantum current vocabulary configured names
+      (earlyTrust := earlyTrust) (planningTrust := planningTrust) metadata)
+    (nativeShardAlias : Bytes → Option String)
+
+structure SnapshotLeaf (native : NativeParameterLineage.Edge) where
+  block : Nat
+  uniqueBlock : FamilyParameter.originalBlockMatches source vocabulary nativeShardAlias native = [block]
+  projection : SnapshotParameter authority native block nativeShardAlias
+
+def loadSnapshotLeaf (native : NativeParameterLineage.Edge) : Option (SnapshotLeaf authority nativeShardAlias native) :=
+  match found : FamilyParameter.originalBlockMatches source vocabulary nativeShardAlias native with
+  | [block] => do
+    let projection ← loadSnapshotParameter authority native block nativeShardAlias
+    some ⟨block,found,projection⟩
+  | _ => none
+
+structure SnapshotEntry where
+  native : NativeParameterLineage.Edge
+  leaf : SnapshotLeaf authority nativeShardAlias native
+
+def loadSnapshotEntry (native : NativeParameterLineage.Edge) : Option (SnapshotEntry authority nativeShardAlias) := do
+  let leaf ← loadSnapshotLeaf authority nativeShardAlias native
+  some ⟨native,leaf⟩
+
+def SnapshotEntry.value (entry : SnapshotEntry authority nativeShardAlias) : Value := entry.leaf.projection.body
+
+theorem snapshotEntrySource {native entry} (loaded : loadSnapshotEntry authority nativeShardAlias native = some entry) :
+    entry.native = native := by
+  simp only [loadSnapshotEntry,bind,Option.bind_eq_some_iff] at loaded
+  obtain ⟨_,_,last⟩ := loaded
+  cases Option.some.inj last; rfl
+
+def snapshotAggregateFields (entries : List (SnapshotEntry authority nativeShardAlias)) : List (String × Value) :=
+  PublicApplyBody.aggregateFields authority.parents.apc authority.header.arithmetic.value authority.parents.coefficient.value
+    authority.parents.config.value authority.parents.ec authority.parents.isc authority.header.parent.value
+    (PublicAuthority.roundValue authority.parents.height.value authority.parents.epoch.value)
+    authority.header.schema.value authority.parents.seedValue (entries.map (SnapshotEntry.value authority nativeShardAlias))
+
+def snapshotAggregate (entries : List (SnapshotEntry authority nativeShardAlias)) : Value :=
+  PublicAuthority.record (snapshotAggregateFields authority nativeShardAlias entries)
+
+structure SnapshotRoot (native : NativeAggregateLineage.Edge) where
+  entries : List (SnapshotEntry authority nativeShardAlias)
+  computed : collect (loadSnapshotEntry authority nativeShardAlias) native.shards = some entries
+  parent : native.plan.id = source.source.plan.members.edge.id
+
+def loadSnapshotRoot (native : NativeAggregateLineage.Edge) : Option (SnapshotRoot authority nativeShardAlias native) := do
+  if parent : native.plan.id = source.source.plan.members.edge.id then
+    match computed : collect (loadSnapshotEntry authority nativeShardAlias) native.shards with
+    | none => none
+    | some entries => some ⟨entries,computed,parent⟩
+  else none
+
+theorem snapshotRootOriginalOrder {native} (root : SnapshotRoot authority nativeShardAlias native) :
+    root.entries.map SnapshotEntry.native = native.shards := by
+  have h := FamilyInputs.collectedKeys root.computed (left := fun x => x) (right := SnapshotEntry.native)
+    (fun _ _ h => snapshotEntrySource authority nativeShardAlias h)
+  exact h.trans (List.map_id native.shards)
+
+theorem snapshotRootOriginalCertificateIds {native} (root : SnapshotRoot authority nativeShardAlias native) :
+    root.entries.map (fun e => e.native.id) = native.shards.map (·.id) := by
+  simpa only [List.map_map,Function.comp_def] using congrArg (List.map NativeParameterLineage.Edge.id)
+    (snapshotRootOriginalOrder authority nativeShardAlias root)
+
+theorem snapshotAggregateInventory (entries : List (SnapshotEntry authority nativeShardAlias)) :
+    (snapshotAggregateFields authority nativeShardAlias entries).map Prod.fst = PublicApplyBody.aggregateFieldNames := rfl
+
+end SnapshotLeaf
+
+/- Original artifact packets, keyed by original APC, are data observations. They
+contain no translated public body and no invented vote/certificate. -/
+structure CertificatePacket where
+  artifacts : Artifacts
+  current : FamilyInputs.CurrentBasis
+
+section CertificateBasis
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (units : NativeStateProjection.UnitSource) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (policyRaw stateRaw : Bytes) (packet : CertificatePacket) (plan : NativePlanLineage.Edge)
+
+structure CertificateBasis where
+  originalPolicy : packet.artifacts.policy = policyRaw
+  originalState : packet.artifacts.state = stateRaw
+  source : Source sha mapping actors packet.artifacts units packet.current
+  originalPlan : source.bound.source.plan.members.edge.certificate = plan.certificate ∧
+    source.bound.source.plan.members.edge.id = plan.id
+  authority : SnapshotAuthority source.bound indices source.numeric.profile source.numeric.quantum packet.current.values
+    vocabulary configured names metadata
+
+def loadCertificateBasis : Option (CertificateBasis sha mapping actors units indices vocabulary configured names metadata
+    policyRaw stateRaw packet plan) := do
+  if original : packet.artifacts.policy = policyRaw ∧ packet.artifacts.state = stateRaw then
+    let source ← loadSource sha mapping actors packet.artifacts units packet.current
+    if originalPlan : source.bound.source.plan.members.edge.certificate = plan.certificate ∧
+        source.bound.source.plan.members.edge.id = plan.id then
+      let authority ← loadSnapshotAuthority source.bound indices source.numeric.profile source.numeric.quantum
+        packet.current.values vocabulary configured names metadata
+      some ⟨original.1,original.2,source,originalPlan,authority⟩
+    else none
+  else none
+
+variable {sha mapping actors units indices vocabulary configured names metadata policyRaw stateRaw packet plan}
+    (basis : CertificateBasis sha mapping actors units indices vocabulary configured names metadata policyRaw stateRaw packet plan)
+
+theorem certificateBasisOriginalBytes :
+    ∃ tree, NativePolicyBytes.decodePolicy policyRaw = some (tree,NativeVectorAuthority.policy basis.source.bound) ∧
+      NativeStateBytes.decodeState stateRaw = some (NativeVectorAuthority.state basis.source.bound) := by
+  have h := sourceRaw basis.source
+  simpa only [basis.originalPolicy,basis.originalState] using h
+
+theorem certificateBasisOriginalPlan :
+    basis.source.bound.source.plan.members.edge.certificate = plan.certificate ∧
+    basis.source.bound.source.plan.members.edge.id = plan.id := basis.originalPlan
+
+theorem certificateBasisOriginalUnits :
+    FamilyInputs.loadOriginalNumericConfiguration sha basis.source.bound units packet.artifacts.applyProfile packet.current =
+      some basis.source.numeric := FamilyInputs.originalNumericConfigurationLoaded basis.source.numeric
+
+end CertificateBasis
+
+section CertificateBodies
+variable (sha : Bytes → Bytes) (mapping : IdentityMap) (actors : List Value)
+    (units : NativeStateProjection.UnitSource) (indices : List Nat)
+    (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (policyRaw stateRaw : Bytes)
+    (packets : Bytes → Option CertificatePacket)
+
+structure CertificateParameter (native : NativeParameterLineage.Edge) where
+  packet : CertificatePacket
+  packetSource : packets native.plan.id = some packet
+  basis : CertificateBasis sha mapping actors units indices vocabulary configured names metadata policyRaw stateRaw packet native.plan
+  leaf : SnapshotLeaf basis.authority shardAliases native
+
+def loadCertificateParameter (native : NativeParameterLineage.Edge) :
+    Option (CertificateParameter sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets native) := do
+  match packetSource : packets native.plan.id with
+  | none => none
+  | some packet =>
+    let basis ← loadCertificateBasis sha mapping actors units indices vocabulary configured names metadata policyRaw stateRaw packet native.plan
+    let leaf ← loadSnapshotLeaf basis.authority shardAliases native
+    some ⟨packet,packetSource,basis,leaf⟩
+
+def certificateParameterValue (native : NativeParameterLineage.Edge) : Option Value := do
+  let image ← loadCertificateParameter sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets native
+  some image.leaf.projection.body
+
+structure CertificateRoot (native : NativeAggregateLineage.Edge) where
+  packet : CertificatePacket
+  packetSource : packets native.plan.id = some packet
+  basis : CertificateBasis sha mapping actors units indices vocabulary configured names metadata policyRaw stateRaw packet native.plan
+  root : SnapshotRoot basis.authority shardAliases native
+
+def loadCertificateRoot (native : NativeAggregateLineage.Edge) :
+    Option (CertificateRoot sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets native) := do
+  match packetSource : packets native.plan.id with
+  | none => none
+  | some packet =>
+    let basis ← loadCertificateBasis sha mapping actors units indices vocabulary configured names metadata policyRaw stateRaw packet native.plan
+    let root ← loadSnapshotRoot basis.authority shardAliases native
+    some ⟨packet,packetSource,basis,root⟩
+
+def certificateRootValue (native : NativeAggregateLineage.Edge) : Option Value := do
+  let image ← loadCertificateRoot sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets native
+  some (snapshotAggregate image.basis.authority shardAliases image.root.entries)
+
+theorem certificateParameterComputed {native value}
+    (loaded : certificateParameterValue sha mapping actors units indices vocabulary configured names metadata shardAliases
+      policyRaw stateRaw packets native = some value) :
+    ∃ image, loadCertificateParameter sha mapping actors units indices vocabulary configured names metadata shardAliases
+      policyRaw stateRaw packets native = some image ∧ value = image.leaf.projection.body := by
+  simp only [certificateParameterValue,bind,Option.bind_eq_some_iff] at loaded
+  obtain ⟨image,computed,last⟩ := loaded
+  exact ⟨image,computed,(Option.some.inj last).symm⟩
+
+theorem certificateRootComputed {native value}
+    (loaded : certificateRootValue sha mapping actors units indices vocabulary configured names metadata shardAliases
+      policyRaw stateRaw packets native = some value) :
+    ∃ image, loadCertificateRoot sha mapping actors units indices vocabulary configured names metadata shardAliases
+      policyRaw stateRaw packets native = some image ∧
+      value = snapshotAggregate image.basis.authority shardAliases image.root.entries := by
+  simp only [certificateRootValue,bind,Option.bind_eq_some_iff] at loaded
+  obtain ⟨image,computed,last⟩ := loaded
+  exact ⟨image,computed,(Option.some.inj last).symm⟩
+
+end CertificateBodies
+
+/- Sufficient ABORT projection inside the frozen static relation. Each lineage
+element is reconstructed from its original certificate/artifacts. The only
+empty downstream collection is APPLY, whose absence is derived from original
+ABORT admission. Nonempty PARAMETER/ROOT lists are never replaced by labels or
+empty sets. The surrounding full-state equality is checked separately. -/
+section SufficientAbort
+variable {sha policyRaw stateRaw voteRaw facts}
+    (loaded : NativeEarlySource.Loaded sha policyRaw stateRaw voteRaw facts)
+    (abort : NativeFailureSource.Abort sha loaded.original)
+    (mapping : IdentityMap) (actors : List Value) (units : NativeStateProjection.UnitSource)
+    (indices : List Nat) (vocabulary : Vocabulary) (configured : List Ticket) (names : Bytes → Option String)
+    {earlyTrust planningTrust} (metadata : PublicPlanningBody.Metadata earlyTrust planningTrust)
+    (shardAliases : Bytes → Option String) (packets : Bytes → Option CertificatePacket)
+    (failureNames : FailureNames) (limits : PublicFailureBody.Limits) (checkpointNames : Value → Option Bytes)
+
+structure SufficientAbort where
+  header : PublicEarlyBody.Header metadata.early loaded.original
+  ancestors : PublicAbortAncestors.Image abort metadata
+  parameters : List Value
+  parametersComputed : collect
+    (certificateParameterValue sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets)
+    ancestors.native.image.parameters = some parameters
+  roots : List Value
+  rootsComputed : collect
+    (certificateRootValue sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets)
+    ancestors.native.image.roots = some roots
+  separated : ancestors.Separated ∧ parameters.Nodup ∧ roots.Nodup
+  fits : PublicFailureBody.AbortFits limits abort.original.row.body
+  configured : PublicFailureBody.ConfigurationFits limits loaded.original
+  checkpoint : String
+  checkpointSource : failureNames.checkpoint abort.original.row.body = some checkpoint
+  checkpointOriginal : checkpointNames (.model checkpoint) = some abort.original.row.body.parent
+  reason : String
+  reasonComputed : PublicFailureBody.reason abort.original.row.body.reason = some reason
+
+def loadSufficientAbort : Option (SufficientAbort loaded abort mapping actors units indices vocabulary configured names
+    metadata shardAliases packets failureNames limits checkpointNames) := do
+  let header ← PublicEarlyBody.loadHeader metadata.early loaded.original
+  let ancestors ← PublicAbortAncestors.project abort metadata
+  match parametersComputed : collect
+      (certificateParameterValue sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets)
+      ancestors.native.image.parameters with
+  | none => none
+  | some parameters =>
+    match rootsComputed : collect
+        (certificateRootValue sha mapping actors units indices vocabulary configured names metadata shardAliases policyRaw stateRaw packets)
+        ancestors.native.image.roots with
+    | none => none
+    | some roots =>
+      match checkpointSource : failureNames.checkpoint abort.original.row.body,
+          reasonComputed : PublicFailureBody.reason abort.original.row.body.reason with
+      | some checkpoint,some reason =>
+        if valid : ancestors.Separated ∧ parameters.Nodup ∧ roots.Nodup ∧
+            PublicFailureBody.AbortFits limits abort.original.row.body ∧
+            PublicFailureBody.ConfigurationFits limits loaded.original ∧
+            checkpointNames (.model checkpoint) = some abort.original.row.body.parent then
+          some ⟨header,ancestors,parameters,parametersComputed,roots,rootsComputed,
+            ⟨valid.1,valid.2.1,valid.2.2.1⟩,valid.2.2.2.1,valid.2.2.2.2.1,checkpoint,checkpointSource,
+            valid.2.2.2.2.2,reason,reasonComputed⟩
+        else none
+      | _,_ => none
+
+variable {loaded abort mapping actors units indices vocabulary configured names metadata shardAliases packets failureNames limits checkpointNames}
+    (p : SufficientAbort loaded abort mapping actors units indices vocabulary configured names metadata shardAliases packets failureNames limits checkpointNames)
+
+def SufficientAbort.lineage : Value := PublicAuthority.record
+  [("aggregate",PublicAuthority.setValue p.roots),("apc",PublicAuthority.setValue p.ancestors.plans),
+   ("apply",PublicAuthority.setValue []),("ec",PublicAuthority.setValue p.ancestors.eligibility),
+   ("isc",PublicAuthority.setValue p.ancestors.inputs),("parameter",PublicAuthority.setValue p.parameters)]
+
+def SufficientAbort.body : Value := PublicAuthority.record
+  [("configs",PublicAuthority.setValue (p.ancestors.configs.map PublicFailureBody.Config.value)),
+   ("hardDeadline",.integer abort.original.row.body.deadline),("lineage",p.lineage),
+   ("parentCheckpoint",.model p.checkpoint),("reason",.text p.reason),
+   ("round",p.header.round),("validatorEpoch",p.header.epoch.value),("view",.integer abort.original.row.body.view)]
+
+def SufficientAbort.vote : Vote := ⟨p.header.actor.value,.text "ABORT",p.header.round,p.body⟩
+
+theorem sufficientAbortOriginalLineage :
+    NativeFailureSection.LineageSource loaded.original.policy p.ancestors.native.image.ids :=
+  PublicAbortAncestors.originalSevenLists loaded p.ancestors
+
+theorem sufficientAbortNoAppliedLineage : abort.original.row.body.applies = [] ∧ p.ancestors.native.image.applies = [] :=
+  ⟨NativeAbortLineage.acceptedApplyAbsence loaded abort,
+    NativeAbortLineage.resolvedApplyAbsence loaded abort p.ancestors.native⟩
+
+theorem sufficientAbortArithmeticCounts : p.parameters.length = abort.original.row.body.parameters.length ∧
+    p.roots.length = abort.original.row.body.roots.length := by
+  have original := PublicAbortAncestors.arithmeticPayloadsRetained loaded p.ancestors
+  exact ⟨(collectLength p.parametersComputed).trans (by simpa only [List.length_map] using congrArg List.length original.1),
+    (collectLength p.rootsComputed).trans (by simpa only [List.length_map] using congrArg List.length original.2)⟩
+
+theorem sufficientAbortParameterNonempty (nonempty : abort.original.row.body.parameters ≠ []) : p.parameters ≠ [] := by
+  intro empty
+  have h := (sufficientAbortArithmeticCounts p).1
+  rw [empty] at h
+  exact nonempty (List.length_eq_zero_iff.mp h.symm)
+
+theorem sufficientAbortRootNonempty (nonempty : abort.original.row.body.roots ≠ []) : p.roots ≠ [] := by
+  intro empty
+  have h := (sufficientAbortArithmeticCounts p).2
+  rw [empty] at h
+  exact nonempty (List.length_eq_zero_iff.mp h.symm)
+
+theorem sufficientAbortParameterAt {index : Nat} {value} (position : p.parameters[index]? = some value) :
+    ∃ native, abort.original.row.body.parameters[index]? = some native.id ∧
+      native ∈ (NativeCandidateAuthority.parameterSection (NativeAbortLineage.snapshot loaded.original)).certificates ∧
+      certificateParameterValue sha mapping actors units indices vocabulary configured names metadata shardAliases
+        policyRaw stateRaw packets native = some value := by
+  obtain ⟨native,atNative,computed⟩ := collectAt p.parametersComputed index value position
+  exact ⟨native,(NativeAbortLineage.parameterAt loaded abort p.ancestors.native atNative).1,
+    NativeAbortLineage.parameterOriginal loaded abort p.ancestors.native (List.mem_of_getElem? atNative),computed⟩
+
+theorem sufficientAbortRootAt {index : Nat} {value} (position : p.roots[index]? = some value) :
+    ∃ native, abort.original.row.body.roots[index]? = some native.id ∧
+      native ∈ (NativeCandidateAuthority.rootSection (NativeAbortLineage.snapshot loaded.original)).certificates ∧
+      certificateRootValue sha mapping actors units indices vocabulary configured names metadata shardAliases
+        policyRaw stateRaw packets native = some value := by
+  obtain ⟨native,atNative,computed⟩ := collectAt p.rootsComputed index value position
+  exact ⟨native,(NativeAbortLineage.rootAt loaded abort p.ancestors.native atNative).1,
+    NativeAbortLineage.rootOriginal loaded abort p.ancestors.native (List.mem_of_getElem? atNative),computed⟩
+
+theorem sufficientAbortCheckpointPreserved :
+    readField p.body "parentCheckpoint" = some (.model p.checkpoint) ∧
+    checkpointNames (.model p.checkpoint) = some loaded.original.state.wire.parent := by
+  have exactBody := (NativeFailureSource.abortOriginalRow loaded abort).2
+  exact ⟨rfl,p.checkpointOriginal.trans (congrArg some exactBody.2.2.2.2.2.1)⟩
+
+theorem sufficientAbortSetContents :
+    ∃ parameterValues rootValues,
+      readField p.lineage "parameter" = some (.set parameterValues) ∧
+      readField p.lineage "aggregate" = some (.set rootValues) ∧
+      (PublicAuthority.valuesList parameterValues).Perm p.parameters ∧
+      (PublicAuthority.valuesList rootValues).Perm p.roots := by
+  obtain ⟨pv,ph,pp⟩ := PublicAuthority.setRetainsAllValues p.parameters
+  obtain ⟨rv,rh,rp⟩ := PublicAuthority.setRetainsAllValues p.roots
+  exact ⟨pv,rv,congrArg some ph,congrArg some rh,pp,rp⟩
+
+end SufficientAbort
+
+/- Read the existing TLA RoundLineage/AbortBody fields from the actual public
+state. Malformed or absent collections fail; a different round is filtered only
+after its original round has been read. This is a static equality at one cut,
+not an assertion that historical ABORT votes are freshly enabled at every cut. -/
+def readPath (body : Value) : List String → Option Value
+  | [] => some body
+  | name::rest => do let next ← readField body name; readPath next rest
+
+def certificateBodyRound (path : List String) (certificate : Value) : Option (Value × Value) := do
+  let body ← readField certificate "body"
+  let round ← readPath body path
+  some (body,round)
+
+def configurationBodyRound (certificate : Value) : Option (Value × Value) := do
+  let body ← readField certificate "body"
+  let context ← readField certificate "context"
+  let height ← readField context "height"
+  let epoch ← readField context "epoch"
+  some (body,PublicAuthority.roundValue height epoch)
+
+def roundCollection (state : PublicState.State) (field : String)
+    (decode : Value → Option (Value × Value)) (round : Value) : Option (List Value) := do
+  let value ← state.read field
+  let certificates ← readSet value
+  let pairs ← collect decode certificates
+  some ((pairs.filter (fun p => p.2 == round)).map Prod.fst)
+
+theorem roundCollectionSource {state field decode round bodies}
+    (loaded : roundCollection state field decode round = some bodies) :
+    ∃ value certificates pairs, state.read field = some value ∧ readSet value = some certificates ∧
+      collect decode certificates = some pairs ∧ bodies = (pairs.filter (fun p => p.2 == round)).map Prod.fst := by
+  simp only [roundCollection,bind,Option.bind_eq_some_iff] at loaded
+  obtain ⟨value,hv,certificates,hc,pairs,hp,last⟩ := loaded
+  exact ⟨value,certificates,pairs,hv,hc,hp,(Option.some.inj last).symm⟩
+
+theorem roundCollectionEveryOriginal {state field decode round bodies}
+    (loaded : roundCollection state field decode round = some bodies) (body : Value) :
+    body ∈ bodies ↔ ∃ value certificates certificate, state.read field = some value ∧
+      readSet value = some certificates ∧ certificate ∈ certificates ∧ decode certificate = some (body,round) := by
+  obtain ⟨value,certificates,pairs,hv,hc,hp,same⟩ := roundCollectionSource loaded
+  constructor
+  · intro member
+    rw [same] at member
+    obtain ⟨pair,inside,bodyEq⟩ := List.mem_map.mp member
+    have filtered := List.mem_filter.mp inside
+    have roundEq : pair.2 = round := by simpa using filtered.2
+    obtain ⟨index,position⟩ := List.mem_iff_getElem?.mp filtered.1
+    obtain ⟨certificate,original,computed⟩ := collectAt hp index pair position
+    exact ⟨value,certificates,certificate,hv,hc,List.mem_of_getElem? original,
+      by simpa only [← bodyEq,← roundEq] using computed⟩
+  · rintro ⟨otherValue,otherCertificates,certificate,otherRead,otherSet,member,computed⟩
+    cases Option.some.inj (hv.symm.trans otherRead)
+    cases Option.some.inj (hc.symm.trans otherSet)
+    obtain ⟨pair,inPairs,decoded⟩ := FamilyInputs.collectInputHasOutput hp member
+    have pairEq := Option.some.inj (decoded.symm.trans computed)
+    rw [same]
+    apply List.mem_map.mpr
+    exact ⟨pair,List.mem_filter.mpr ⟨inPairs,by simp only [pairEq,beq_self_eq_true]⟩,by rw [pairEq]⟩
+
+structure PublicAbortLineage where
+  configs : List Value
+  inputs : List Value
+  eligibility : List Value
+  plans : List Value
+  parameters : List Value
+  roots : List Value
+  applies : List Value
+
+def readPublicAbortLineage (state : PublicState.State) (round : Value) : Option PublicAbortLineage := do
+  let configs ← roundCollection state "finalizedCertificates" configurationBodyRound round
+  let inputs ← roundCollection state "inputSetCertificates" (certificateBodyRound ["round"]) round
+  let eligibility ← roundCollection state "eligibilityCertificates" (certificateBodyRound ["isc","round"]) round
+  let plans ← roundCollection state "aggregationPlanCertificates" (certificateBodyRound ["isc","round"]) round
+  let parameters ← roundCollection state "parameterQCs" (certificateBodyRound ["round"]) round
+  let roots ← roundCollection state "aggregateRootQCs" (certificateBodyRound ["round"]) round
+  let applies ← roundCollection state "applyQCs" (certificateBodyRound ["round"]) round
+  some ⟨configs,inputs,eligibility,plans,parameters,roots,applies⟩
+
+theorem publicAbortLineageOriginal {state round image} (loaded : readPublicAbortLineage state round = some image) :
+    roundCollection state "finalizedCertificates" configurationBodyRound round = some image.configs ∧
+    roundCollection state "inputSetCertificates" (certificateBodyRound ["round"]) round = some image.inputs ∧
+    roundCollection state "eligibilityCertificates" (certificateBodyRound ["isc","round"]) round = some image.eligibility ∧
+    roundCollection state "aggregationPlanCertificates" (certificateBodyRound ["isc","round"]) round = some image.plans ∧
+    roundCollection state "parameterQCs" (certificateBodyRound ["round"]) round = some image.parameters ∧
+    roundCollection state "aggregateRootQCs" (certificateBodyRound ["round"]) round = some image.roots ∧
+    roundCollection state "applyQCs" (certificateBodyRound ["round"]) round = some image.applies := by
+  simp only [readPublicAbortLineage,bind,Option.bind_eq_some_iff] at loaded
+  obtain ⟨configs,hc,inputs,hi,eligibility,he,plans,hp,parameters,hs,roots,hr,applies,ha,last⟩ := loaded
+  cases Option.some.inj last
+  exact ⟨hc,hi,he,hp,hs,hr,ha⟩
+
+section AbortStateLink
+variable {sha policyRaw stateRaw voteRaw facts} {loaded : NativeEarlySource.Loaded sha policyRaw stateRaw voteRaw facts}
+    {abort mapping actors units indices vocabulary configured names earlyTrust planningTrust}
+    {metadata : PublicPlanningBody.Metadata earlyTrust planningTrust} {shardAliases packets failureNames limits checkpointNames}
+    (p : SufficientAbort loaded abort mapping actors units indices vocabulary configured names metadata shardAliases packets failureNames limits checkpointNames)
+    (state : PublicState.State)
+
+structure AbortStateLink where
+  image : PublicAbortLineage
+  computed : readPublicAbortLineage state p.header.round = some image
+  configs : image.configs.Perm (p.ancestors.configs.map PublicFailureBody.Config.value)
+  inputs : image.inputs.Perm p.ancestors.inputs
+  eligibility : image.eligibility.Perm p.ancestors.eligibility
+  plans : image.plans.Perm p.ancestors.plans
+  parameters : image.parameters.Perm p.parameters
+  roots : image.roots.Perm p.roots
+  applies : image.applies = []
+  current : state.read "currentCheckpoint" = some (.model p.checkpoint)
+  view : state.read "view" = some (.integer abort.original.row.body.view)
+
+def loadAbortStateLink : Option (AbortStateLink p state) :=
+  match computed : readPublicAbortLineage state p.header.round with
+  | none => none
+  | some image =>
+    if checked : image.configs.Perm (p.ancestors.configs.map PublicFailureBody.Config.value) ∧
+        image.inputs.Perm p.ancestors.inputs ∧ image.eligibility.Perm p.ancestors.eligibility ∧
+        image.plans.Perm p.ancestors.plans ∧ image.parameters.Perm p.parameters ∧
+        image.roots.Perm p.roots ∧ image.applies = [] ∧
+        state.read "currentCheckpoint" = some (.model p.checkpoint) ∧
+        state.read "view" = some (.integer abort.original.row.body.view) then
+      some ⟨image,computed,checked.1,checked.2.1,checked.2.2.1,checked.2.2.2.1,checked.2.2.2.2.1,
+        checked.2.2.2.2.2.1,checked.2.2.2.2.2.2.1,checked.2.2.2.2.2.2.2.1,checked.2.2.2.2.2.2.2.2⟩
+    else none
+
+variable {p state} (link : AbortStateLink p state)
+
+include link in
+theorem abortStateAllParameterBodies (body : Value) :
+    body ∈ p.parameters ↔ ∃ value certificates certificate, state.read "parameterQCs" = some value ∧
+      readSet value = some certificates ∧ certificate ∈ certificates ∧
+      certificateBodyRound ["round"] certificate = some (body,p.header.round) := by
+  rw [← link.parameters.mem_iff]
+  exact roundCollectionEveryOriginal (publicAbortLineageOriginal link.computed).2.2.2.2.1 body
+
+include link in
+theorem abortStateAllRootBodies (body : Value) :
+    body ∈ p.roots ↔ ∃ value certificates certificate, state.read "aggregateRootQCs" = some value ∧
+      readSet value = some certificates ∧ certificate ∈ certificates ∧
+      certificateBodyRound ["round"] certificate = some (body,p.header.round) := by
+  rw [← link.roots.mem_iff]
+  exact roundCollectionEveryOriginal (publicAbortLineageOriginal link.computed).2.2.2.2.2.1 body
+
+theorem abortStateNoHiddenApply : link.image.applies = [] ∧ abort.original.row.body.applies = [] :=
+  ⟨link.applies,(sufficientAbortNoAppliedLineage p).1⟩
+
+include link in
+theorem abortStateCurrentOriginal :
+    state.read "currentCheckpoint" = some (.model p.checkpoint) ∧
+    checkpointNames (.model p.checkpoint) = some loaded.original.state.wire.parent :=
+  ⟨link.current,(sufficientAbortCheckpointPreserved p).2⟩
+
+end AbortStateLink
 
 end Direct
 end DeltaReduce.FamilyRelation

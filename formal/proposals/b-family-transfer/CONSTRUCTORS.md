@@ -1,7 +1,7 @@
 # R2: full family constructors, native domains and static source relation
 
 Tasks T044/T047/T053–T057. Frozen DoD R1–R7 is unchanged. This is the
-2026-09-29 six-active-hour R2 stage, following source fc293e520ae81967b38b0e7292c08f970d0f373e.
+2026-09-29 R2.3-only stage, following source b128c760700bb7e21d806f7511499abb367afbb9.
 R1 remains CLOSED. R2 remains OPEN. R3 is not started. The work is an isolated
 proposal; production Init/Next, certificate semantics, WAL identity, runtime,
 mandatory semantics/report and protected fixtures are unchanged. No GO is issued.
@@ -12,7 +12,7 @@ mandatory semantics/report and protected fixtures are unchanged. No GO is issued
 |---|---|---|
 | 1. Family → full public input/body constructors | **CLOSED** | The direct original-source path constructs the full configured 23-field input image, authority and complete PARAMETER/ROOT/APPLY bodies for every selected coordinate of arbitrary original admitted shard lengths. OMIT_UNAVAILABLE receives a total latent completion without changing the eligible input rows. Canonicality follows from checked primitive namespaces and original component values. Ordered original entries, offsets and full native objects remain present; no supplied whole translated body is accepted. |
 | 2. Native INT64/INT128 domain → existing public guards | **CLOSED** | The direct path avoids the older draft layout/Q/name/pack/signed-fraction restrictions. Original accumulator proof and coefficient rows imply all coefficient/product/prefix guards. Conversion checks every intermediate at the original accumulator width; mixture uses the existing native final-LCM bound; optimizer preserves unsigned denominators, rounding and all checked intermediates. The same policy-selected normalized profile and source-keyed quantum feed the full input/body constructors. Arithmetic and symmetric result bounds remain distinct. |
-| 3. Source/configuration/aliases/certificates/state → one checked R2 relation | **OPEN** | Exact per-actor WAL collections now bind the whole public durableVotes/durableSequence fields in both directions. Observed config aliases cannot merge different native config IDs. Public current binds to the actual pointer and finalized prior APPLY QC; its values, parent certificate sources and signer quorum retain the original objects. ISC/EC/APC parents can be constructed for a remotely received current QC without a local vote. Remaining: coherent source/configuration/alias witnesses across the complete state, sufficient ABORT projection applicability, complete certificate/candidate/current/environment correspondence and arbitrary initial snapshots. The successful component checkers do not prove that every admissible native snapshot satisfies the complete R2 relation. |
+| 3. Source/configuration/aliases/certificates/state → one checked R2 relation | **OPEN — architectural STOP** | Conditional snapshot PARAMETER/ROOT and sufficient ABORT components now retain original nonempty lineage without a fabricated local vote. A total static relation is blocked by the concrete ISC-QC/EC-context mismatch in [QC-CONTEXT-BLOCKER.md](QC-CONTEXT-BLOCKER.md): two native quorum variants of one ISC body admit two original EC votes, while the public model has one parent-body context. Distinct public bodies violate uniqueness; equal bodies lose a durable record. No complete-state or initial/incomplete applicability claim is made. |
 
 CLOSED for 1/2 refers to these two frozen component obligations. It does not
 assert universal admission/refinement or authenticate the remaining source
@@ -20,6 +20,15 @@ boundary. The explicit inputs to the constructors are the source-bound original
 corpus, the checked immutable numeric configuration and primitive namespaces;
 coherence of those namespaces with the entire observed configuration/state is
 obligation 3. No obligation has been dropped or renamed.
+
+The R2.3 stage stopped early on the user's architectural condition. The new
+`SnapshotAuthority`, `SnapshotParameter`, `SnapshotRoot`, `CertificateBasis`,
+`SufficientAbort` and `AbortStateLink` components in `FamilyRelation.lean` are
+conditional results within this existing obligation. They do not replace the
+full static relation or establish its total applicability. They are not wired
+into the previous complete-state loader. Exact nonempty PARAMETER/ROOT lineage
+is retained when these component checks succeed; no empty ancestor substitute
+or new universal ABORT gate is introduced. R2.1/R2.2 remain accepted CLOSED.
 
 ## General composition and domain
 

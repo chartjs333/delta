@@ -1173,6 +1173,122 @@
  Classical.choice,
  Quot.sound]
 'DeltaReduce.FamilyRelation.Direct.observedCurrentQuorum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotAuthority' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadSnapshotAuthority' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotAuthority.fields' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotAuthority.value' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotAuthorityInventory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotAuthorityHasOriginalParents' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotAuthoritySameAsVote' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotParameter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadSnapshotParameter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotParameter.fields' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotParameter.body' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotParameterLoaded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotParameterOriginalVector' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotParameterOwnInputs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotParameterInventory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotParameterSameAsVote' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotLeaf' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadSnapshotLeaf' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotEntry' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadSnapshotEntry' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotEntry.value' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotEntrySource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotAggregateFields' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotAggregate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SnapshotRoot' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadSnapshotRoot' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotRootOriginalOrder' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotRootOriginalCertificateIds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.snapshotAggregateInventory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.CertificatePacket' does not depend on any axioms
+'DeltaReduce.FamilyRelation.Direct.CertificateBasis' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadCertificateBasis' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.certificateBasisOriginalBytes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.certificateBasisOriginalPlan' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.certificateBasisOriginalUnits' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.CertificateParameter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadCertificateParameter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.certificateParameterValue' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.CertificateRoot' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadCertificateRoot' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.certificateRootValue' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.certificateParameterComputed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.certificateRootComputed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SufficientAbort' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadSufficientAbort' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SufficientAbort.lineage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SufficientAbort.body' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.SufficientAbort.vote' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortOriginalLineage' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortNoAppliedLineage' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortArithmeticCounts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortParameterNonempty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortRootNonempty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortParameterAt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortRootAt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortCheckpointPreserved' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.sufficientAbortSetContents' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.readPath' depends on axioms: [propext]
+'DeltaReduce.FamilyRelation.Direct.certificateBodyRound' depends on axioms: [propext]
+'DeltaReduce.FamilyRelation.Direct.configurationBodyRound' depends on axioms: [propext]
+'DeltaReduce.FamilyRelation.Direct.roundCollection' depends on axioms: [propext]
+'DeltaReduce.FamilyRelation.Direct.roundCollectionSource' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.roundCollectionEveryOriginal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.PublicAbortLineage' does not depend on any axioms
+'DeltaReduce.FamilyRelation.Direct.readPublicAbortLineage' depends on axioms: [propext]
+'DeltaReduce.FamilyRelation.Direct.publicAbortLineageOriginal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.AbortStateLink' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.loadAbortStateLink' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.abortStateAllParameterBodies' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.abortStateAllRootBodies' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.abortStateNoHiddenApply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.FamilyRelation.Direct.abortStateCurrentOriginal' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyChecks.wideProfile' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.FamilyChecks.unsignedDenominatorIsOriginalDomain' depends on axioms: [propext,
  Classical.choice,

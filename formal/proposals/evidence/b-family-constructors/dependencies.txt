@@ -1,4 +1,4 @@
-⚠ [28/153] Replayed DeltaReduce.NativeConfigAdmission
+⚠ [28/99] Replayed DeltaReduce.NativeConfigAdmission
 warning: DeltaReduce/NativeConfigAdmission.lean:173:13: This simp argument is unused:
   bind
 
@@ -13,4 +13,4 @@ Hint: Omit it from the simp argument list.
   simp only [bind,̵O̵p̵t̵i̵o̵n̵.̵b̵i̵n̵d̵]
 
 Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-Build completed successfully (1076 jobs).
+Build completed successfully (1082 jobs).

@@ -145,6 +145,7 @@ def run() -> None:
             "DeltaReduce.PublicParentNames",
             "DeltaReduce.PublicDurablePrefix",
             "DeltaReduce.NativeVoteCache",
+            "DeltaReduce.PublicAbortAncestors",
         ],
         dependencies=True,
     )
@@ -243,6 +244,7 @@ def run() -> None:
             "specs/000-formal-tla-spec/candidate-contract.md",
             "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
             "formal/proposals/b-family-transfer/CONSTRUCTORS.md",
+            "formal/proposals/b-family-transfer/QC-CONTEXT-BLOCKER.md",
         )
     )
     source_hashes = [
@@ -331,7 +333,7 @@ def run() -> None:
                 "remaining": [],
             },
             "R2_3": {
-                "status": "OPEN_PARTIAL_COMPOSITION",
+                "status": "OPEN_ARCHITECTURAL_CONTEXT_OBSTRUCTION",
                 "closed": [
                     "same-store frame/row equality derived; original arithmetic vote bytes and "
                     "sequences retained",
@@ -375,17 +377,22 @@ def run() -> None:
                     "one executable static bundle joins the complete durable vote field, "
                     "actual current/QC/parents and original actors; shared forward and inverse "
                     "configuration names span the current policy and all observed journal rows",
+                    "conditional snapshot PARAMETER/ROOT constructors use original certified "
+                    "contexts without fabricating a local vote and agree with the closed "
+                    "same-source vote constructors",
+                    "conditional sufficient ABORT component retains all original ancestor "
+                    "lists and nonempty PARAMETER/ROOT lineage; the public round-collection "
+                    "reader rejects missing/malformed collections and checks exact coverage",
                 ],
                 "remaining": [
-                    "one authenticated configuration/alias/source relation across all existing "
-                    "object kinds",
-                    "remaining static public/native certificate, candidate, current and "
-                    "environment collections with exact coverage; the durable-vote component "
-                    "does not prove the other fields or the existing complete-document guards",
-                    "total applicability and coherent source witnesses for the complete "
-                    "all-actor relation, arbitrary initial snapshots and the frozen sufficient "
-                    "ABORT projection; the reused failure body constructor only supports "
-                    "empty downstream ABORT and adds no universal full-body gate",
+                    "The frozen full static relation remains unclosed. Two quorum variants of "
+                    "one ISC body yield distinct native EC contexts and two accepted original "
+                    "votes, but one public parent-body context: distinct projected bodies "
+                    "violate CertificateVoteUniqueness, equal bodies lose a durable record. "
+                    "See QC-CONTEXT-BLOCKER.md and the separate pinned native component "
+                    "counterexample. Existing conditional snapshot/ABORT components are not "
+                    "a total relation for complete or initial/incomplete states. STOP; no "
+                    "additional obligations or production fixes are introduced.",
                 ],
             },
         },

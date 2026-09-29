@@ -1,5 +1,44 @@
 # Feature010 continuation checkpoint
 
+## Latest checkpoint — 29 September 2026 — R2 OPEN / architectural STOP
+
+Direct R2.3-only authorization followed user acceptance of R2.1/R2.2 as CLOSED.
+The eight-active-hour maximum was stopped early on a concrete representation
+obstruction. No R3, scope expansion or production fix is authorized here.
+R1 and R2.1/R2.2 remain CLOSED; full R2 and Formal GO remain OPEN/NO_GO.
+
+One original ISC body with two valid quorum signer subsets {1,2,3}/{1,2,4}
+produces different native QC IDs. The unchanged native policy admits two EC
+contexts/votes for the same actor, retaining its prior ISC vote and original
+EC sequences 2/3. The public EC context is the identical ISC body. Distinct
+projected EC bodies violate CertificateVoteUniqueness; equal bodies collapse
+the durable set and cannot retain the original vote count/sequence. This blocks
+total coverage of the accepted native snapshot/journal domain by the current
+source-bound public representation. The test executes original admission and
+the in-memory VoteJournal, not a filesystem WAL or a production-reachable trace.
+An assumed complete public-state projection is not an admissible way to exclude
+the witness. No production predicate or certificate/WAL identity was changed.
+
+Before STOP, conditional snapshot PARAMETER/ROOT constructors and a sufficient
+ABORT component were added inside the existing FamilyRelation. They retain
+original nonempty downstream lineage and do not invent a local vote for remote
+certificates. Their kernels do not establish the unclosed complete-state or
+initial/incomplete applicability claim. The same frozen R2.3 residual remains;
+no extra deliverable or universal full-ABORT gate is introduced.
+
+Exact reproduction, source predicates, limitations and residual delta:
+`formal/proposals/b-family-transfer/QC-CONTEXT-BLOCKER.md`.
+Native diagnostic evidence:
+`formal/proposals/evidence/r2-qc-context/counterexample.json`.
+Proposal kernel/source audit:
+`formal/proposals/evidence/b-family-constructors.json`.
+Active time and final commit are recorded in
+`D:/delta-presentation/FORMAL-GO-R1-R3-ACTIVE-TIME.json` and the latest continuation
+entry. No automatic R2 resumption or R3; keep the existing automation ACTIVE,
+preserve healthy demos and frozen refs. Earlier entries below are historical.
+
+---
+
 Updated: 2026-09-23. Current stage: **Feature000 arithmetic binding candidate, IN_PROGRESS**.
 No new Formal GO, qualifying BenchmarkResultQC or Feature010 GO checkpoint exists.
 
