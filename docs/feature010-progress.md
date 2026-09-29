@@ -1,5 +1,29 @@
 # Feature010 continuation checkpoint
 
+## Snapshot Provenance Profile v1 — 29 September 2026 — concrete proposal / STOP
+
+The user conceptually accepted ADR-0013 as the production trust model and asked
+for one concrete profile, documentation only. The
+[Linux single-epoch profile](adr/0013-snapshot-provenance-profile-v1.md) selects
+offline independent bootstrap, genesis-to-cut native history verification, a
+separate non-rolled-back trust volume retaining original own journals/floor,
+immutable data generations plus one authoritative activation commit, and closed
+canonical JSON control metadata preserving original protocol bytes/identities.
+
+The eight-step procedure is bounded: fresh runtime on an empty data disk ->
+bootstrap anchor -> certificate authority -> full provenance -> exact trusted
+floor -> original WAL reconstruction -> atomic activation -> READY. This profile
+restores an already enrolled identity with independent retained own history;
+it does not invent membership or a new empty journal. Rollback of the trust
+volume/host-root compromise is outside its explicit threat boundary. Full native
+producer composition and original typed signature evidence binding are not yet
+implemented/proved; missing checker/input ends BLOCKED, never READY.
+
+R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN; R3 not started. Only profile/progress docs
+changed; no schema/code/proof/fixture/normative DoD or baseline modification.
+Detailed profile awaits approval; STOP after this report, with no automatic
+R2/R3 or production work. Earlier entries are historical.
+
 ## Snapshot Provenance Contract v1 — 29 September 2026 — draft / STOP
 
 The user selected the production architecture: independently trusted validator
