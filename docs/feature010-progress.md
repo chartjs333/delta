@@ -1,5 +1,30 @@
 # Feature010 continuation checkpoint
 
+## Snapshot Provenance Contract v1 — 29 September 2026 — draft / STOP
+
+The user selected the production architecture: independently trusted validator
+set/epoch -> existing ApplyQC/checkpoint -> snapshot -> WAL -> recovered current,
+with fail-closed rollback protection against a known newer trusted anchor.
+[ADR-0013 specification](adr/0013-snapshot-provenance-contract-v1.md) records the
+exact reusable types, missing bindings, import/bootstrap/rollback/crash rules,
+R2/R3 impact and remaining decisions. Detailed contract awaits approval.
+
+Existing ApplyQC authenticates its model/optimizer tuple, not a complete
+consensus snapshot root or private local journals. The draft proposes complete
+cut derivation from independently verified native producer history, using the
+existing certificates; no parallel SnapshotQC. That producer/checker is not yet
+complete, and replay from an arbitrary supplied snapshot is insufficient. A
+direct full-root certificate commitment would instead require an explicit
+separate semantic decision. Key/epoch provisioning, monotone floor storage,
+genesis/import profiles and concrete evidence encoding remain stated decisions.
+
+R1/R2.1/R2.2 remain accepted CLOSED; R2.3/R2 OPEN; R3 not started. This is
+documentation only, not a new predicate, proof, schema, fixture, runtime change,
+Formal GO or completed provenance verification. Frozen DoD and baseline inputs
+remain unchanged. STOP after specification; no automatic R2/R3 or A/B/C work.
+Await approval and a separate scoped implementation instruction. Earlier entries
+are historical; their unselected P1/P2 status predates the user's new decision.
+
 ## Latest decision memo — 29 September 2026 — P1/P2 awaiting user choice
 
 The user accepted `MISSING SNAPSHOT PROVENANCE CONTRACT` as the architectural
