@@ -1,5 +1,29 @@
 # Feature010 continuation checkpoint
 
+## R2.3 stage 1 — 29 September 2026 — INSUFFICIENT / ARCHITECTURE STOP
+
+The user authorized only the existing-native-producer/bounds sufficiency check,
+maximum four active hours. The [stage-1 checkpoint](adr/0013-r2-3-stage1-sufficiency.md)
+identifies a minimal missing source-bound native finalization edge: original
+votes/prior snapshot -> first finalized ISC in `input_set_certificates` and
+`finalized_input_set_ids`. Existing native code validates supplied collections;
+FINALIZE_INPUT_FREEZE updates only RoundState, and journal replay pins an immutable
+startup policy. Public FinalizeISC already specifies the protocol obligation,
+but substituting public Next for an independent native producer is forbidden by
+approved Profile v1. No fix/new rule was introduced.
+
+The mandatory early STOP precedes completion of the planned 33/64-field map.
+Whole-public bounds were located but their total applicability is NOT ESTABLISHED;
+no valid produced oversized cut or production-reachable EC counterexample is
+claimed. The [source audit](adr/evidence/0013-r2-3-stage1-source-audit.json) pins
+inspected sources and unchanged baseline hashes; it is not new formal evidence.
+
+R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN; R3 not started. Profile/DoD and all code,
+proofs, schemas, fixtures, Init/Next and QC/WAL identities remain unchanged.
+Stages 2-5 are NOT authorized; the conditional 30-52 hour estimate assumed
+producer sufficiency and is not validated. STOP pending a new direct decision;
+heartbeat does not authorize a fix or continuation. Earlier entries are historical.
+
 ## R2.3 execution plan — 29 September 2026 — approved profile / STOP
 
 The user approved Snapshot Provenance Profile v1 for the current production
