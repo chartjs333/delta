@@ -1,5 +1,27 @@
 # Feature010 continuation checkpoint
 
+## Latest decision memo — 29 September 2026 — P1/P2 awaiting user choice
+
+The user accepted `MISSING SNAPSHOT PROVENANCE CONTRACT` as the architectural
+blocker for R2.3. The requested documentation-only comparison is in
+[ADR-0012 provenance decision memo](adr/0012-snapshot-provenance-decision-memo.md).
+P1 states explicit conditional R2/R3 targets and a logical non-circularity
+argument for an external native-origin assumption; it does not prove R2/R3.
+P2 describes a proposed genesis/epoch/QC-rooted recovery evidence contract and
+source-only origin verification. A signature alone cannot establish history
+legality, and a checkpoint QC cannot authenticate every actor's local WAL.
+
+Neither option is adopted. Their trust-boundary/DoD/claim and verification impact
+is documented, including that a missing full producer contract cannot be hidden
+inside a Boolean assumption or a digest-only checker. The full article text is
+not present; claim impact is grounded in the repository's source provenance
+memos and normative formal requirements rather than unverified article quotes.
+
+R1/R2.1/R2.2 remain accepted CLOSED; R2.3/R2 OPEN; no R3. No new formal predicate,
+proof, schema, fixture, runtime change or normative contract amendment. No formal
+GO claimed. Direct STOP until the user chooses; no automatic implementation of
+P1/P2 or A/B/C, and no automatic R2/R3 continuation. Earlier entries are historical.
+
 ## Latest checkpoint — 29 September 2026 — MISSING SNAPSHOT PROVENANCE CONTRACT
 
 The user's documentation-only audit is complete:
