@@ -1,0 +1,267 @@
+{
+  "kind": "documentary-source-audit-not-formal-evidence",
+  "created_at_utc": "2026-09-29T15:46:44.957178+00:00",
+  "base_commit": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+  "native_revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "analysis_method": "Read pinned Git blobs, production call paths and existing diagnostic evidence; no new system execution or proof.",
+  "new_native_execution": false,
+  "new_lean_or_tlc_execution": false,
+  "implementation_changed": false,
+  "proofs_changed": false,
+  "r2_1_reopened": false,
+  "r2_2_reopened": false,
+  "r3_started": false,
+  "conclusions": {
+    "original_in_memory_admission_witness": "historically reproduced; original evidence unchanged",
+    "exact_isc1_ec2_ec3_single_runtime_wal": "excluded by phase guards, immutable policy invalidation and replay policy identity in inspected source",
+    "externally_supplied_eligible_snapshot": "API input path exists; EC-only runtime execution not tested here; no source-generated protocol history established",
+    "production_protocol_safety_violation": "not established",
+    "architecture_option_selected": false,
+    "r2": "OPEN",
+    "implementation_stop": true
+  },
+  "ancestry": {
+    "native_revision_is_ancestor_of_candidate": false,
+    "native_revision_is_ancestor_of_frozen_demo": false
+  },
+  "sources": [
+    {
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8",
+      "lines": 733
+    },
+    {
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8",
+      "lines": 732
+    },
+    {
+      "path": "delta-core-cpp/src/certificates/vote_admission.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "655b74601e163c62242a6ede4f93b2749ef32eb7828caaef9d32e7e63b8ce1ef",
+      "lines": 1332
+    },
+    {
+      "path": "delta-core-cpp/src/transition.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "74e5a6e62cc1b6c4cd1e30a33cc983e522f22cb5f839942fbec5c707b48eb569",
+      "lines": 195
+    },
+    {
+      "path": "delta-runtime-cpp/src/runtime.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91",
+      "lines": 666
+    },
+    {
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3",
+      "lines": 141
+    },
+    {
+      "path": "delta-runtime-cpp/src/certificate_runtime.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "d10db55f112976f79ff96aeabf0b60a3c2c632d4033d7d8acd587679be7ae6dd",
+      "lines": 225
+    },
+    {
+      "path": "delta-runtime-cpp/src/sidecar_server.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "4983358e2789bbd70b52d78b0e9e9f833bc6fb2ef1f3f2fb9d6026991ba0c1cc",
+      "lines": 1364
+    },
+    {
+      "path": "delta-runtime-cpp/src/vote_codec.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "154e105e2a12799c7f499312273330895a180cda2430b09b4662bbb67b00937b",
+      "lines": 1236
+    },
+    {
+      "path": "delta-ffi/src/delta_abi.cpp",
+      "revision": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "sha256": "2a36951519067f7ca3b54d0ddf2c7a7a27468544336a8910019f16dbaa51cd40",
+      "lines": 562
+    },
+    {
+      "path": "formal/tla/DeltaReduce.tla",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "40d7db71f42375ea70bda7968f546707c54fa939b962652dbb712298084372d1",
+      "lines": 65
+    },
+    {
+      "path": "formal/tla/DeltaReduceTypes.tla",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "2eb3008060f8bbe3ed1be12167211d602dc5bf2f5bc7d65caa9896f8586b0121",
+      "lines": 466
+    },
+    {
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00",
+      "lines": 901
+    },
+    {
+      "path": "formal/tla/DeltaReduceQuorums.tla",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "ae0e9a64976f6b9158bfc44379648aabbde990047a4321f3b4f6355e5f6768e3",
+      "lines": 267
+    },
+    {
+      "path": "formal/tla/DeltaReduceFailures.tla",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "ee94c1c67335888544b1689200b829526f09d618bdf4e9c256ad2c1c0788ecf5",
+      "lines": 553
+    },
+    {
+      "path": "formal/tla/DeltaReducePublicState.tla",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "f0238f5ef131318b19006d089ba13ac3a6fd5c37ba591ddc7f673acd29827915",
+      "lines": 206
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/Quorum.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "f1e807c3938475d7255120f05e769b74abd66a13761c73231000acfdf806e525",
+      "lines": 52
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicPlanningBody.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "e3b5b7b9be521ad3e4d166c9836a1fe96c477a014cad2f95d71eabd94dbbb916",
+      "lines": 256
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicPlanningHistory.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "c5f336bb0081237044b096aa2db747882e163fe3cb618405d95142d297aeeee2",
+      "lines": 57
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicAuthority.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "669234237db53cf832dc9a2623a3120895da97548bb34bc9abf0a375518b5f87",
+      "lines": 410
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicJournal.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "d7f6ca8ceb1d5b1e763d896d23fc74364a2ba5e868a5bb122103b1650232cfa3",
+      "lines": 373
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicRecovery.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "a5c072970c09bbae91d374369754c935c28a329030921423b9021b95fad66ca4",
+      "lines": 398
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/PublicReachability.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "ead75dd5dcaf9a04330968dd74418e39d4afc47553cfaf3167744cb951d763cf",
+      "lines": 457
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeCandidateAuthority.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "ee77014660b57d58cded7f1101bc55ff7cbdd651ef51331714cbb158f43b4011",
+      "lines": 359
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeSnapshotBase.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "61ff5ff6ce1b82b3018564ed28785471ad8d3cdd86044df16dea34c0c067eb88",
+      "lines": 151
+    },
+    {
+      "path": "formal/proofs/DeltaReduce/NativeVoteCache.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "b0e3e7e842295458f21e071067152e9611a3cb11ce91bc73f960cf6316f21438",
+      "lines": 193
+    },
+    {
+      "path": "formal/proposals/b-family-transfer/FamilyRelation.lean",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "afb51312b2e3c2556820f394db552f0e611e36e0e7c43672f791e62a3ec1b385",
+      "lines": 3777
+    },
+    {
+      "path": "formal/proposals/b-family-transfer/QC-CONTEXT-BLOCKER.md",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "887d200fbd0fb3399935d6e265e4bc62eb53216e2c3ab320f253133842625457",
+      "lines": 133
+    },
+    {
+      "path": "formal/proposals/b-family-transfer/qc_context_probe.cpp",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "99dc1907a0bbe99f6d35174091aaddc3bab8992b816f31022ca39724de292327",
+      "lines": 118
+    },
+    {
+      "path": "formal/proposals/b-family-transfer/check_qc_context.py",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "1829fe91cb5432ddedc087c5dd3cd093e6abbf40918c79a1e4c3aff767fa1544",
+      "lines": 154
+    },
+    {
+      "path": "formal/proposals/evidence/r2-qc-context/counterexample.json",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "2f4bbd36e316781cb78bf1743e20a1d76531f3457988645d32134259267ebcc3",
+      "lines": 1
+    },
+    {
+      "path": "formal/proposals/evidence/b-family-constructors.json",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "5bf1a46946a29bfa5dfd2c08349f5868e50059d71b7112ec02f58564a21559cc",
+      "lines": 1
+    },
+    {
+      "path": "specs/000-formal-tla-spec/candidate-contract.md",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "2cd9be46dcda84c8f1cf17b176ee8ebe9ead0fe405a5407490b556161bc795b4",
+      "lines": 121
+    },
+    {
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+      "lines": 166
+    },
+    {
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "e93d31266eac996412cd48d25c8b5a1558a5742068444cdd64cc8d67637faf8f",
+      "lines": 385
+    },
+    {
+      "path": "specs/000-formal-tla-spec/refinement-contract.md",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c",
+      "lines": 360
+    },
+    {
+      "path": "docs/adr/0001-deltareduce-v1.md",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "bbfe6e23ca0658d23b41350fb3eb70df62fdfae124c2b460890fac16b77d30e9",
+      "lines": 54
+    },
+    {
+      "path": "delta-protocol/schemas/008/input-set-certificate-v1.json",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "6822bbf6cbb02002b1f6fc398300538b150a258774c9e9c8853e73babdde37e6",
+      "lines": 122
+    },
+    {
+      "path": "delta-protocol/schemas/008/eligibility-certificate-v1.json",
+      "revision": "957323cd18b18e6b7dd29fcc6d08b14ea8b44b21",
+      "sha256": "bdcf77f78dd5bac0d9d3bdc7bf34df8268d809063d3c7c6814edd15a43af0852",
+      "lines": 153
+    }
+  ],
+  "adr": {
+    "path": "docs/adr/0012-ec-context-identity-options.md",
+    "sha256": "a57e349f49f32c4aaf74434e0bd291d0409ab6bcafb647a610c9cd13855f5c6f"
+  }
+}

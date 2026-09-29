@@ -1,5 +1,36 @@
 # Feature010 continuation checkpoint
 
+## Latest analysis — 29 September 2026 — ADR-0012 / no implementation
+
+The user's EC context/identity decision analysis is recorded in
+[ADR-0012](adr/0012-ec-context-identity-options.md), with exact source provenance
+in [its documentary audit](adr/evidence/0012-ec-context-source-audit.json).
+Options A/B/C, existing contract impact, affected proofs/evidence and conditional
+active-hour estimates are compared. No option is selected or implemented.
+
+Reachability clarification: the prior ISC@1/EC@2/EC@3 witness combines separate
+ISC and EC admission fixtures/policies in one in-memory VoteJournal. The exact
+chain cannot run through one Runtime/WAL at the pinned native revision:
+ISC requires available, EC requires eligible, committed submit invalidates the
+immutable vote policy, and replay rejects replacement policy identity. A fresh
+ELIGIBLE state/policy supplied through OPEN is a different initial-state/API
+claim, not a protocol-generated history; its Runtime execution was not tested.
+Production TLA FinalizeISC also prevents a second finalization for that round.
+This is source/control-flow analysis, not a new native run, Lean theorem or TLC
+result. The native pin is not an ancestor of this candidate or the frozen demo.
+
+The old API-domain counterexample remains valid at its exact source. It is not
+a proven production-reachable safety violation and does not by itself establish
+that production semantics must change. Source-qualified initial-state admission
+is already in the frozen contract; neither an assumed whole-state translation
+nor a new unconditional source-domain restriction is introduced here.
+
+R1/R2.1/R2.2 remain CLOSED. R2.3/R2 OPEN; no R3. The same full snapshot/static
+collections/initial-incomplete-sufficient-ABORT relation remains unclosed.
+No proof, implementation, schema, fixture, report, guard or demo changes; no new
+proof layers. STOP and the frozen DoD remain. Await a direct scoped instruction;
+heartbeats and unused old budgets do not authorize implementation.
+
 ## Latest checkpoint — 29 September 2026 — R2 OPEN / architectural STOP
 
 Direct R2.3-only authorization followed user acceptance of R2.1/R2.2 as CLOSED.
