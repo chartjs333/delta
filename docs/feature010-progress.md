@@ -1,5 +1,27 @@
 # Feature010 continuation checkpoint
 
+## ISC producer ownership audit — 30 September 2026 — MISSING PRODUCTION TRANSITION / STOP
+
+The user accepted the previous STOP and authorized only an ownership audit.
+The [audit](adr/0013-isc-producer-ownership-audit.md) classifies the result as
+**3. MISSING PRODUCTION TRANSITION**, with a necessary qualification: the original
+native owner, abstract FinalizeISC contract and canonical object contracts DO
+exist. The missing part is the executable received-quorum -> finalized typed ISC
+-> durable/exposed native state transaction and its state/WAL binding.
+
+Original August design assigns computation to C++ core and persistence/exposure
+to native runtime. Java/FFM/sidecar forward opaque inputs; the Python/controller
+Authorization Gate has no consensus authority. No intentionally external producer
+contract was found. ISCBuilder/QC is a plan node; existing constructors/validators,
+fixture signers and summary ACT-ISC-FINALIZE traces do not establish the production
+transition. The checked source pins and historical design blobs are preserved in
+[documentary evidence](adr/evidence/0013-isc-producer-ownership-source-audit.json).
+
+No transition, predicate, authority, schema, code, proof, Profile v1 or DoD change.
+R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN. R2/R3 were not continued. STOP pending a new
+direct production architecture decision; do not infer programming authorization.
+Older continuation entries below are historical.
+
 ## R2.3 stage 1 — 29 September 2026 — INSUFFICIENT / ARCHITECTURE STOP
 
 The user authorized only the existing-native-producer/bounds sufficiency check,
