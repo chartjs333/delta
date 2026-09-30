@@ -1,0 +1,358 @@
+{
+  "kind": "DOCUMENTARY_SOURCE_AUDIT_NOT_NEW_NATIVE_OR_FORMAL_EVIDENCE",
+  "status": "TWO_PROPOSED_DECISIONS_AWAITING_USER_APPROVAL",
+  "source_commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+  "native_source_commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "report": {
+    "path": "docs/adr/0014-isc-identity-sequence-amendment.md",
+    "sha256": "b94ea6ee8b82a1422172aae1c96ba1c4c50c4113ee199f5f126a6a4c46625a46"
+  },
+  "decisions": {
+    "identity": "I-B: existing body ID as ISC consensus identity; unchanged C bytes retained as witness identities",
+    "sequence": "S-RANK: original physical signed sequence plus separate public all-vote rank"
+  },
+  "native_parent_reference_semantics_would_change_under_I_B": true,
+  "old_downstream_qc_ids_cannot_be_relabelled": true,
+  "production_Init_Next_change_required_by_selected_decisions_alone": false,
+  "init_next_compatibility_is_source_analysis_not_a_completed_refinement_proof": true,
+  "code_schema_proof_fixture_changes": false,
+  "formal_semantics_id_changed": false,
+  "implementation_authorized": false,
+  "r2_3_or_r3_continued": false,
+  "prior_50_84_hour_estimate_approved": false,
+  "arrival_cut_example": "symbolic quorum cut analysis; not a native executed trace or TLC counterexample",
+  "source_audit_checks": [
+    "TLA downstream ISC parent is body; native seed/finalized index/downstream refs use full ISC content ID",
+    "Native body hash and full certificate hash domains differ; signer-dependent witness is not body identity",
+    "Native signed Vote.durable_sequence is original sender physical WAL slot",
+    "Public DurableSequenceExact counts distinct original public votes per actor",
+    "Existing cache positionMapping subtracts commands only, and existing codecs accept kinds 1/2 only",
+    "FamilyRelation kind-not-1 vote filter needs explicit kind-3 validation before reuse",
+    "Complete original history and injective vote projection required; no deduplication or renumbering"
+  ],
+  "evidence_families_requiring_new_qualification": [
+    "formal/proposals/evidence/native-isc-certificate",
+    "formal/proposals/evidence/native-seed-transcript",
+    "formal/proposals/evidence/public-root-parents",
+    "formal/proposals/evidence/public-root-history",
+    "formal/proposals/evidence/native-wal-codec",
+    "formal/proposals/evidence/native-wal-scan",
+    "formal/proposals/evidence/native-config-replay",
+    "formal/proposals/evidence/native-vote-cache",
+    "formal/proposals/evidence/native-whole-replay",
+    "formal/proposals/evidence/b-family-constructors"
+  ],
+  "baseline_inputs_verified_unchanged": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "6470de74a14d0d6cd745ef6b46858427b0f7b4222b6bad7e9a5b51316313ce56",
+      "unchanged": true
+    },
+    {
+      "path": ".specify/memory/constitution.md",
+      "sha256": "4b9da704f3c37ac4f8ce9756832e92c2ad732d0116c6dccebeee67ee722042fd",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0000-formal-verification-gate.md",
+      "sha256": "59523ef963cfceaa741499e3d375ceedcd451ac0fb8574ab70b8ad9e480a8bd0",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0001-deltareduce-v1.md",
+      "sha256": "bbfe6e23ca0658d23b41350fb3eb70df62fdfae124c2b460890fac16b77d30e9",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0002-canonical-rational-rounding.md",
+      "sha256": "560c4b5f2bf76008a6e71803f9b98958aa5bcb443bd6bb86c2559fcd245dcf50",
+      "unchanged": true
+    },
+    {
+      "path": "specs/ROADMAP.md",
+      "sha256": "92cf5c38792fa926efeb8adb712a72d9769c7f36c1d3f4a06c653dc18b0d5dff",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "sha256": "375b09aaec41ca84a4959f0c5a65c8f0382356187297c5f7a3171bebff00e72e",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "sha256": "e93d31266eac996412cd48d25c8b5a1558a5742068444cdd64cc8d67637faf8f",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/refinement-contract.md",
+      "sha256": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/spec.md",
+      "sha256": "4c723b178649277a170b227fc718fc38355be9ce6765bb9b2f86af81bbee3327",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/plan.md",
+      "sha256": "7c7ab970373621790ebf31175a2a7b0c22f178ab1fe60be31ba28107bade58f9",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/tasks.md",
+      "sha256": "55c690e61072928e7b8cb48f30b119ec81245599ba058cff89afca12541cc251",
+      "unchanged": true
+    },
+    {
+      "path": "formal/reports/formal-id-registry.json",
+      "sha256": "ef855fbe752294e6b01ee4e0ad0f2659fa7db5e9db303456bbe9acc663a0f6cc",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0010-hybrid-runtime-boundary.md",
+      "sha256": "051b4836318f288256b4402943a6792d98df239f3a54b25dab11da1b29217875",
+      "unchanged": true
+    },
+    {
+      "path": "specs/HYBRID-RUNTIME-MAP.md",
+      "sha256": "911b09b5aa83cc913af4ef82c547022617cbc90062842b4e0430350b7002332d",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
+      "sha256": "45fef1b1d23604d8774d90086b46431fe7c73a16a481079d62a257dccf9f22e8",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/candidate-contract.md",
+      "sha256": "2cd9be46dcda84c8f1cf17b176ee8ebe9ead0fe405a5407490b556161bc795b4",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+      "unchanged": true
+    },
+    {
+      "path": "formal/reports/coverage-matrix.md",
+      "sha256": "7a5f28d28a47c2d7a140b202fa0109e4add7ef6561d0c85c35888c5bbfde8460",
+      "unchanged": true
+    }
+  ],
+  "frozen_artifacts_verified_unchanged": {
+    "specs/000-formal-tla-spec/accepted-residual-20260928.md": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+    "docs/adr/0013-snapshot-provenance-profile-v1.md": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+  },
+  "sources": [
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "blob_oid": "b1cbf055fa74c312c9124b6d097f724fe81dae1b",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/tla/DeltaReduceReduceApply.tla",
+      "blob_oid": "c59d754384a354dcbf58966c376c00a5b16e583b",
+      "sha256": "38deb9c336618b7ca9c548b249ac573375dc5e95175bb4ec4e2fa6b28d0139fc"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/tla/DeltaReduceQuorums.tla",
+      "blob_oid": "d6c44cb70a17d86bfc83e154f9ef57731397d3db",
+      "sha256": "ae0e9a64976f6b9158bfc44379648aabbde990047a4321f3b4f6355e5f6768e3"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/tla/DeltaReduceFailures.tla",
+      "blob_oid": "49266ae57b566c93ca763903ab5c94f30c606e8a",
+      "sha256": "ee94c1c67335888544b1689200b829526f09d618bdf4e9c256ad2c1c0788ecf5"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "specs/000-formal-tla-spec/refinement-contract.md",
+      "blob_oid": "dcab5a4599ce7a53375fcab4c1686ec17fd21837",
+      "sha256": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "blob_oid": "9661c576252542d7144b1ed19fc8fb66205d19d6",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeIscCertificate.lean",
+      "blob_oid": "ed69bdb8b079c019cff797167d29b7d6b25fe7bc",
+      "sha256": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeSeedTranscript.lean",
+      "blob_oid": "cf8dd7b13f00a5030a52ad94dfd394018220d181",
+      "sha256": "df7f38bcced4929c1b57ba7c8c381ea9ad8661b64c05ae5c82bfdf9ab10bd818"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeSeedSection.lean",
+      "blob_oid": "01428c6f7e02c5acaf3eeed1d64b77814969c7d7",
+      "sha256": "270c5aab367fd07adecdf126f478ac43e594ed05ae7239b7b52a0d8a9a566868"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeEligibilityLineage.lean",
+      "blob_oid": "fd37bb7a459f6e4eb2446c1f916b35a012cd7364",
+      "sha256": "dbd439e1c4a5c2ed2d8ba02a197b433c36123db3d2362d38166d3193eb0a1b94"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativePlanLineage.lean",
+      "blob_oid": "03135663d9f97c1abece2c4990772d86e0d32744",
+      "sha256": "7d331d1c6daa6da0624eface08e587dc5278772b41d561c43d6f945041f1c5e1"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeRootParents.lean",
+      "blob_oid": "b0eb5c68732a92d30880db9c169e37b5142ba9c4",
+      "sha256": "234bbf38fe2c6665a0c26e2c4aacf553bb395592561ea2f7937a92f9b36a12b2"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/PublicRootHistory.lean",
+      "blob_oid": "bbb8ff58db89914363a766c4aec413e959e2a5b1",
+      "sha256": "5d68bba4720a6ed6759e1ee88afb7a297fa24d19c30a2b94a1e48d3f78e58a47"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeWalBytes.lean",
+      "blob_oid": "6bcd4c1848b159bce2c58fca6707f37c82fc85b8",
+      "sha256": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeWalScan.lean",
+      "blob_oid": "a97b9dfd4a120f42a16bd22b20698d513aab8c90",
+      "sha256": "0281eef29dfd973c3f63685ffffb926c012e399dea05444b647d36f989b14e58"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeConfigReplay.lean",
+      "blob_oid": "6042e69affc20b9242650128943e206dca0d9365",
+      "sha256": "5010f830998502c76a3656239b36e41f32399507bd4cc6a3ec5cc662aab9a54a"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeArithmeticHistory.lean",
+      "blob_oid": "3d113589e4c5499b86785dc163d333419818ce3d",
+      "sha256": "4f671279ac8b8024407ff597d3b3359b318f3f11250916775afcbf5e6b3daa20"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeCacheHistory.lean",
+      "blob_oid": "289c6de55e78d36a211324480dfca7bd18844285",
+      "sha256": "1061e425eae6d1587abb0278195fd3dc0aaa6fcb9d002299a5ed3382d249c525"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeCacheProjection.lean",
+      "blob_oid": "740d9683e78684f92fc4d4b8a66c9f7cabcc6370",
+      "sha256": "fe3ce5461dca7a99891eae0c3c02ae474675258e096191e57a08b20cc864fa97"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeReplayAdmission.lean",
+      "blob_oid": "e26efd690c422e7d19899eb9dc997e96a7ca0e3a",
+      "sha256": "cfb5cd07242be3d0a33f7d3215740adc059394f9fb9e32ef8591e8b5bdbeb2cd"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proofs/DeltaReduce/NativeIscAdmission.lean",
+      "blob_oid": "9fe179a72b7ce6c3158d10adb54d9253ee9085ad",
+      "sha256": "63ddf5cc963d51b7837afc1e4bb6ca6d0f1024f0ef60a23bd9e23b9348af213c"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proposals/b-family-transfer/FamilyRelation.lean",
+      "blob_oid": "4834a57fec9f11a2e12ac57ce34c891a05b6854e",
+      "sha256": "afb51312b2e3c2556820f394db552f0e611e36e0e7c43672f791e62a3ec1b385"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "formal/proposals/b-family-transfer/CONSTRUCTORS.md",
+      "blob_oid": "fb3fda5ea2d197c37bd83470ac927a8ec287e579",
+      "sha256": "7537c37c0282c033edcde39b850f31f34b07943951c2f1a5492d6db103b550b3"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "blob_oid": "9c1bb1e425dcf604232052d86eae411781780888",
+      "sha256": "d185a7511e2709b9581b99bc609ca33baf4a3e6c0de1dc796732b5481ae1580a"
+    },
+    {
+      "commit": "559100e747ebca425a442e25eb21db2283eaefc4",
+      "path": "docs/adr/0014-isc-commitment-profile-v1.md",
+      "blob_oid": "124ac62642e2832fc9064aef9655372bae16c1a7",
+      "sha256": "74772102898b2a18c65bb20f6adb371ff486c0ee701cae1fac30d87e6a7334ae"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "blob_oid": "286b84eaaa4c834479704aecdccf6af20d0a0e81",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "blob_oid": "196b611a06504af4a70b597b272f458f62f4e5c8",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/vote_admission.cpp",
+      "blob_oid": "bf6200becf69716cec47320068e7aa07563d18b0",
+      "sha256": "655b74601e163c62242a6ede4f93b2749ef32eb7828caaef9d32e7e63b8ce1ef"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "blob_oid": "80bcc59c6c37518564cde120d441d170c14c357a",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/robust/plan.cpp",
+      "blob_oid": "0dc3393966af4d53763847004d8754db09518485",
+      "sha256": "cd90684b9f82912433f77c3bdd4bae03db6d21bf396b58b786d07ef9e4b28929"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/protocol.hpp",
+      "blob_oid": "db48c87923822d21f3a570532d54d97f31765b25",
+      "sha256": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/runtime.cpp",
+      "blob_oid": "d45f586db062e73cc42ca238deefbbd319c27633",
+      "sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/wal.hpp",
+      "blob_oid": "ce491374bcc3939ec39c965b0cb8403247eedc9c",
+      "sha256": "7ed2427f12db7668d686f508e29527818c96fa53a2a0a7c7db4fe9b47753b688"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/wal.cpp",
+      "blob_oid": "6cbb5704930a3503129ec3d279748c2a63cf4856",
+      "sha256": "fd62c60727b6f5725cdcef2cb56591746736f444c87d1895a1357a7d85377e7e"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/vote_codec.cpp",
+      "blob_oid": "2c460fb21d526dfa87036a9cacf9849bfc67a4b3",
+      "sha256": "154e105e2a12799c7f499312273330895a180cda2430b09b4662bbb67b00937b"
+    }
+  ]
+}

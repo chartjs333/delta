@@ -1,5 +1,30 @@
 # Feature010 continuation checkpoint
 
+## ISC identity / sequence amendment — 30 September 2026 — decisions proposed / STOP
+
+Prepared only the requested [decision memo](adr/0014-isc-identity-sequence-amendment.md)
+with pinned [source audit](adr/evidence/0014-isc-identity-sequence-source-audit.json).
+Neither proposal is approved: **I-B** uses the existing ISC body ID consistently
+as consensus identity while retaining original signer-dependent C/c witnesses;
+**S-RANK** preserves each signed physical WAL slot and projects the complete
+original kind-2 vote count to public durableSequence. Kind 3 is not a vote.
+
+I-B explicitly changes native ISC parent-reference/index semantics; downstream
+signed bodies/QC IDs cannot be relabelled as compatible. Public TLA already uses
+body identity, and its durable counter already counts votes. Neither selected
+proposal alone calls for a production Init/Next change; this is source analysis,
+not a completed refinement proof or full liveness qualification. The memo lists
+exact old proofs/evidence that do not cover these changes. Earlier capsule claims
+of unchanged downstream identities cannot establish I-B compatibility.
+
+Commitment Profile A remains approved for FR-004; WAL Capsule remains PROPOSED.
+Explicit parent/context completeness is not discharged. R1/R2.1/R2.2 CLOSED;
+R2.3/R2 OPEN; no R3. No code/schemas/proofs/fixtures or frozen DoD/Profile changed;
+all 19 baseline inputs verified unchanged. The 50–84h estimate remains unapproved.
+**STOP pending explicit decisions on identity and sequence mapping.** No automatic
+capsule rewrite, implementation, new proof layer or R2/R3 continuation. Active
+tracking records documentation time only; idle and old proof totals excluded.
+
 ## ISC Finalization WAL Capsule v1 — 30 September 2026 — proposed document / STOP
 
 The two required edits to Commitment Profile A were committed separately at
