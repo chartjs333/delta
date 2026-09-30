@@ -1,0 +1,151 @@
+{
+  "git_address": "https://github.com/chartjs333/delta.git",
+  "agents": {
+    "overwrite": true,
+    "include_managed": false
+  },
+  "execution": {
+    "mode": "sequential",
+    "initialize_reviewers": false,
+    "start_node": "a01-handoff",
+    "required_approvals": 2,
+    "max_rework_cycles": 3,
+    "reviewers": [
+      {
+        "id": "isc-s16-sequential-architecture-reviewer",
+        "name": "Delta ISC Sequential Architecture Reviewer",
+        "phone": "2791",
+        "git_branch": "review/isc-s16-sequential-architecture",
+        "profile": "Review every proposed transition for architecture, frozen scope, formal-first boundaries, exact branch/commit provenance and sprint-file preservation. Derive the reviewer branch from agent/isc-s16-sequential-sprint. Use only APPROVE or actionable REJECT."
+      },
+      {
+        "id": "isc-s16-sequential-evidence-reviewer",
+        "name": "Delta ISC Sequential Evidence Reviewer",
+        "phone": "2792",
+        "git_branch": "review/isc-s16-sequential-evidence",
+        "profile": "Review every proposed transition for tests, evidence, changed files, source ancestry and absence of unauthorized production/formal changes. Derive the reviewer branch from agent/isc-s16-sequential-sprint. Use only APPROVE or actionable REJECT."
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "a01-handoff",
+      "agent": {
+        "id": "isc-s16-a01-handoff-coordinator",
+        "name": "Delta ISC A01 Handoff Coordinator",
+        "phone": "2740",
+        "git_branch": "agent/isc-s16-a01-handoff",
+        "profile": "Package the already completed A01 commit into the declared sequential graph. Do not repeat or alter A01."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-A01-HANDOFF",
+          "queue": "worker-all",
+          "message": "Read orchestration/sprints/isc-s16-sequential/{README.md,bootstrap-ru.md,lane-tasks.md}. Create the assigned branch from origin/agent/isc-s16-sequential-sprint. Verify agent/isc-s16-contract-freeze from 4873b3559b390318c0fc8ff80dd00ecea4ea7b59 to a579a5c66586ba3f8f1d7cc26c454aba5addbd8f. Do not modify A01. Create only orchestration/sprints/isc-s16-sequential/handoffs/ISC-S16-A01.json with exact provenance, checks, original orchestration blocker and review_status=PENDING_GRAPH_REVIEW. Return DONE or STOP."
+        }
+      ],
+      "transitions": {
+        "DONE": "w1-reference-engine",
+        "STOP": "blocked"
+      }
+    },
+    {
+      "id": "w1-reference-engine",
+      "agent": {
+        "id": "isc-s16-w1-reference-engineer",
+        "name": "Delta W1 Reference Storage Engineer",
+        "phone": "2741",
+        "git_branch": "agent/isc-s16-w1-reference-engine",
+        "profile": "Implement only the quarantined W1 reference codec/storage harness. No production integration."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-B01",
+          "queue": "worker-all",
+          "message": "Read orchestration/sprints/isc-s16-sequential/{README.md,bootstrap-ru.md,lane-tasks.md}; create the assigned branch from origin/agent/isc-s16-sequential-sprint; execute only ISC-S16-B01. Preserve sprint files. Return DONE or STOP."
+        }
+      ],
+      "transitions": {
+        "DONE": "crypto-reference",
+        "STOP": "blocked"
+      }
+    },
+    {
+      "id": "crypto-reference",
+      "agent": {
+        "id": "isc-s16-crypto-reference-engineer",
+        "name": "Delta ISC Crypto Reference Engineer",
+        "phone": "2742",
+        "git_branch": "agent/isc-s16-ed25519-reference",
+        "profile": "Implement only quarantined ISC canonical-byte and Ed25519 conformance artifacts."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-C01",
+          "queue": "worker-all",
+          "message": "Read orchestration/sprints/isc-s16-sequential/{README.md,bootstrap-ru.md,lane-tasks.md}; create the assigned branch from origin/agent/isc-s16-sequential-sprint; execute only ISC-S16-C01. Preserve sprint files. Return DONE or STOP."
+        }
+      ],
+      "transitions": {
+        "DONE": "formal-linkage",
+        "STOP": "blocked"
+      }
+    },
+    {
+      "id": "formal-linkage",
+      "agent": {
+        "id": "isc-s16-formal-linkage-engineer",
+        "name": "Delta ISC Formal Linkage Engineer",
+        "phone": "2743",
+        "git_branch": "agent/isc-s16-formal-linkage",
+        "profile": "Prove only the frozen TLA+/Lean integration-point scope. Return source-bound GO, NO_GO or STOP."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-D01",
+          "queue": "worker-all",
+          "message": "Read orchestration/sprints/isc-s16-sequential/{README.md,bootstrap-ru.md,lane-tasks.md}; create the assigned branch from origin/agent/isc-s16-sequential-sprint; execute only ISC-S16-D01. Preserve sprint files. Return GO, NO_GO or STOP."
+        }
+      ],
+      "transitions": {
+        "GO": "formal-qualification",
+        "NO_GO": "blocked",
+        "STOP": "blocked"
+      }
+    },
+    {
+      "id": "formal-qualification",
+      "agent": {
+        "id": "isc-s16-formal-qualification-engineer",
+        "name": "Delta ISC Formal Qualification Engineer",
+        "phone": "2744",
+        "git_branch": "agent/isc-s16-formal-qualification",
+        "profile": "Join exact accepted lane commits and issue only a limited-scope source-bound GO, NO_GO or STOP."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-Q01",
+          "queue": "worker-all",
+          "message": "Read orchestration/sprints/isc-s16-sequential/{README.md,bootstrap-ru.md,lane-tasks.md}; create the assigned branch from origin/agent/isc-s16-sequential-sprint; execute only ISC-S16-Q01 using exact accepted prior outcomes and reviewer decisions. Preserve sprint files. Return GO, NO_GO or STOP."
+        }
+      ],
+      "transitions": {
+        "GO": "completed",
+        "NO_GO": "blocked",
+        "STOP": "blocked"
+      }
+    },
+    {
+      "id": "completed",
+      "type": "terminal",
+      "status": "DONE",
+      "message": "Sequential ISC reference/formal pipeline completed with accepted limited-scope qualification. Production integration remains separately gated."
+    },
+    {
+      "id": "blocked",
+      "type": "terminal",
+      "status": "BLOCKED",
+      "message": "Sequential ISC pipeline stopped on an exact scope, evidence, crypto or formal blocker. Production integration remains stopped."
+    }
+  ]
+}
