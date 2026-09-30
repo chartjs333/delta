@@ -1,0 +1,225 @@
+{
+  "task_id": "ISC-S16-A01-HANDOFF",
+  "assignment_id": "403e4b5c-46f0-454b-b38f-3a01aa3aea6e",
+  "agent_phone": "2740",
+  "scope": "HANDOFF_RECORD_ONLY",
+  "review_status": "PENDING_GRAPH_REVIEW",
+  "requested_outcome": "STOP",
+  "independent_attestation": false,
+  "created_at_utc": "2026-09-30T22:19:25.131614+00:00",
+  "handoff_branch": "agent/isc-s16-a01-handoff",
+  "handoff_from_commit": "9938fbc7db324f40f3e67687f875d788d4b5ce51",
+  "source_baseline": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+  "a01": {
+    "branch": "agent/isc-s16-contract-freeze",
+    "from_commit": "4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+    "git_commit": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "verified_local_head": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "verified_remote_head": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "result_commit": "081f67fbc692bc5b83b973136ddb91f787b75304",
+    "commits": [
+      "081f67fbc692bc5b83b973136ddb91f787b75304",
+      "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f"
+    ],
+    "changed_files": [
+      "docs/adr/0014-isc-contract-freeze-v1.md",
+      "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "docs/adr/0014-isc-producer-integration-v1.md",
+      "docs/adr/0014-isc-production-contract-amendment-v1.md",
+      "docs/adr/evidence/0014-isc-contract-freeze-v1.json"
+    ],
+    "evidence_path": "docs/adr/evidence/0014-isc-contract-freeze-v1.json",
+    "evidence_sha256": "56da31fe96186617fcf77e630274434967daec31d2009d737e3658a978504e1a",
+    "document_checks": [
+      {
+        "path": "docs/adr/0014-isc-contract-freeze-v1.md",
+        "sha256": "fead9e4772b0d9d26dfcfacea10ccd7235c80ea17f1469bfc258a06a5588606e",
+        "result": "PASS_EXACT_GIT_BYTES"
+      },
+      {
+        "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+        "sha256": "b853596dcb6893467d215572d2701367643f142cbaaf510e225fb0d5bf92f3ee",
+        "result": "PASS_EXACT_GIT_BYTES"
+      },
+      {
+        "path": "docs/adr/0014-isc-producer-integration-v1.md",
+        "sha256": "eaa7206d25269a88135869862c7864f3771260e5f70c5f40c4ad1722a8cd2ede",
+        "result": "PASS_EXACT_GIT_BYTES"
+      },
+      {
+        "path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+        "sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd",
+        "result": "PASS_EXACT_GIT_BYTES"
+      }
+    ],
+    "a01_modified_by_handoff": false
+  },
+  "checks": {
+    "source_to_from_to_result_to_sprint_ancestry": "PASS",
+    "a01_remote_and_local_head": "PASS",
+    "a01_scope": "PASS",
+    "a01_document_hashes": "PASS",
+    "a01_dependency_DAG": "PASS_DOCUMENTARY_ONLY",
+    "a01_git_diff_check": "PASS",
+    "original_sprint_preserved_by_a01": "PASS",
+    "new_sprint_digest_manifest": "FAIL_DIGEST_MISMATCH",
+    "a01_documents_preserved_in_new_base": "PASS"
+  },
+  "protected_spine_diff": [],
+  "production_code_diff": [],
+  "original_orchestration_blocker": {
+    "status": "BLOCKED_HANDOFF_NOT_ACCEPTED",
+    "owner_component": "nginx-qa sequential queue_graph outcome routing / sprint graph configuration",
+    "result_commit_submitted": "081f67fbc692bc5b83b973136ddb91f787b75304",
+    "local_remote_result_heads_equal": true,
+    "assignment_id": "7fec1504-4c14-4a93-80bc-ea257c951594",
+    "outcome_endpoint": "https://soon-jerusalem-thousand-mason.trycloudflare.com/api/v1/projects/9008/agents/2721/whoami",
+    "submitted_outcome": "DONE",
+    "error": "use_sequential_queue_graph_identity",
+    "error_message": "A sequential executor is not permanently bound to this phone. Start at /api/v1/agents/whoami and use the returned reply_url; the next queued item selects the current role.",
+    "read_only_evidence_endpoint": "https://soon-jerusalem-thousand-mason.trycloudflare.com/api/v1/projects/9008/state.json",
+    "observed_execution": {
+      "mode": "sequential",
+      "strategy": "queue_graph",
+      "status": "active",
+      "revision": 3,
+      "current_agent_id": "isc-s16-contract-freeze",
+      "current_node_id": null,
+      "phase": "node",
+      "current_assignment_id": "7fec1504-4c14-4a93-80bc-ea257c951594",
+      "workflow": null,
+      "pending_transition": null,
+      "completed_agent_ids": []
+    },
+    "observed_task_controls": {
+      "graph_node_index": 1,
+      "graph_node_count": 4,
+      "graph_node_id": "",
+      "allowed_outcomes": [],
+      "message_advertised_outcome": "DONE"
+    },
+    "subsequent_dequeue_performed": false,
+    "reviewer_gate_entered": false,
+    "manual_queue_handoff_performed": false,
+    "orchestrator_runtime_files_read": false,
+    "required_external_action": "Repair the advertised outcome route / missing declared workflow for this existing assignment. Preserve assignment and completed commit; do not assign a successor manually."
+  },
+  "sprint_digest_checks": [
+    {
+      "path": "orchestration/sprints/isc-s16-sequential/README.md",
+      "expected_sha256": "4ace90891fdba9943ea5133a336357be7f18d26053c98892d42006312ae45ca2",
+      "actual_git_bytes_sha256": "4ace90891fdba9943ea5133a336357be7f18d26053c98892d42006312ae45ca2",
+      "LF_sha256": "4ace90891fdba9943ea5133a336357be7f18d26053c98892d42006312ae45ca2",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-sequential/bootstrap-ru.md",
+      "expected_sha256": "e58edb705604e9a24f6a20ff6bb7725672b0f96fd42c79873f14c4702b128254",
+      "actual_git_bytes_sha256": "ba5f84682c5a3ffc07fbbda78b87f36d08ab6a839fb834ea2504fc3db216db7f",
+      "LF_sha256": "ba5f84682c5a3ffc07fbbda78b87f36d08ab6a839fb834ea2504fc3db216db7f",
+      "result": "FAIL_DIGEST_MISMATCH"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-sequential/branch-map.md",
+      "expected_sha256": "ffd352a3313afda5fbcf6174d6727eee1623b4f9deecd5c25c37f7894a809a39",
+      "actual_git_bytes_sha256": "ffd352a3313afda5fbcf6174d6727eee1623b4f9deecd5c25c37f7894a809a39",
+      "LF_sha256": "ffd352a3313afda5fbcf6174d6727eee1623b4f9deecd5c25c37f7894a809a39",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-sequential/lane-tasks.md",
+      "expected_sha256": "a853a14baa41882fde6d2649d0209cb1baf569f1996ee84c48da4f395518075b",
+      "actual_git_bytes_sha256": "a853a14baa41882fde6d2649d0209cb1baf569f1996ee84c48da4f395518075b",
+      "LF_sha256": "a853a14baa41882fde6d2649d0209cb1baf569f1996ee84c48da4f395518075b",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-sequential/sequential-sprint.json",
+      "expected_sha256": "66cd3b2ebdcc24417ddafed527cde1df98b451d9bbfeaaa1cc8ebd7189409c24",
+      "actual_git_bytes_sha256": "66cd3b2ebdcc24417ddafed527cde1df98b451d9bbfeaaa1cc8ebd7189409c24",
+      "LF_sha256": "66cd3b2ebdcc24417ddafed527cde1df98b451d9bbfeaaa1cc8ebd7189409c24",
+      "result": "PASS"
+    }
+  ],
+  "blockers": [
+    {
+      "code": "SPRINT_CHECKSUM_MANIFEST_MISMATCH",
+      "owner_component": "ISC S16 sequential sprint manifest owner",
+      "scope_boundary": "Only handoffs/ISC-S16-A01.json may be created; bootstrap-ru.md and SHA256SUMS.json are outside this assignment ownership.",
+      "evidence": [
+        {
+          "path": "orchestration/sprints/isc-s16-sequential/bootstrap-ru.md",
+          "expected_sha256": "e58edb705604e9a24f6a20ff6bb7725672b0f96fd42c79873f14c4702b128254",
+          "actual_git_bytes_sha256": "ba5f84682c5a3ffc07fbbda78b87f36d08ab6a839fb834ea2504fc3db216db7f",
+          "LF_sha256": "ba5f84682c5a3ffc07fbbda78b87f36d08ab6a839fb834ea2504fc3db216db7f",
+          "result": "FAIL_DIGEST_MISMATCH"
+        }
+      ],
+      "required_action": "Owner must reconcile the exact bootstrap text and checksum manifest and publish an explicitly identified corrected sprint ref. No automatic content normalization, manifest rewrite or reassignment performed."
+    }
+  ],
+  "decisions_preserved": {
+    "Commitment_A": "APPROVED_FR004_ONLY",
+    "I-B": "APPROVED_ARCHITECTURE",
+    "S-RANK": "APPROVED_ARCHITECTURE",
+    "W1": "APPROVED_LOCAL_BYTE_STORAGE_ONLY",
+    "P-EXPLICIT": "SELECTED_FOR_SPECIFICATION",
+    "SIG-ISC-ED25519-v1": "SELECTED_FOR_SPECIFICATION",
+    "ISC-EVIDENCE-BUDGET-v1": "SELECTED_FOR_SPECIFICATION",
+    "consolidated_exact_details": "DRAFT",
+    "Producer_Integration": "BLOCKED"
+  },
+  "open_obligations_preserved": [
+    {
+      "obligation": "exact_consolidated_draft_approval",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "feature000_parent_context_budget_conditional_liveness_qualification",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "concrete_key_signature_and_source_verification",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "original_intent_G_durability_and_recovery_association",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "full_inventory_P0_P1_output_sufficiency",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "mixed_WAL_rank_refinement",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "exact_compatible_merged_Formal_GO",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "separate_production_integration_authorization",
+      "status": "OPEN"
+    }
+  ],
+  "commands": [
+    "git fetch origin --prune",
+    "git rev-parse origin/main",
+    "gh pr list --head agent/isc-s16-a01-handoff --state all",
+    "git merge-base --is-ancestor (source/from/final/sprint chain)",
+    "git ls-remote --heads origin agent/isc-s16-contract-freeze",
+    "git diff --name-only 4873b3559b390318c0fc8ff80dd00ecea4ea7b59 a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "git diff --check 4873b3559b390318c0fc8ff80dd00ecea4ea7b59 a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "inline Python: exact Git blob SHA256, evidence consistency, documentary DAG, sprint checksums and LF/CRLF diagnosis"
+  ],
+  "formal_native_tests_executed": false,
+  "sigma_assigned": false,
+  "production_authorization": false,
+  "limitations": [
+    "Documentary and handoff checks only; no new formal qualification.",
+    "Old assignment not manually advanced; original blocker remains historical evidence.",
+    "The same sequential executor authored A01; this is not an independent technical attestation.",
+    "No merge, runtime change, R2.3 or R3."
+  ]
+}
