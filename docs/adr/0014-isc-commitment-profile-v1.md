@@ -325,6 +325,11 @@ fixture не изменён. Будущий real certificate будет имет
 
 ## Граница утверждения и STOP
 
+Следующий [консолидированный draft amendment](0014-isc-production-contract-amendment-v1.md)
+специфицирует выбранные пользователем explicit parent, ISC Ed25519 и evidence budgets
+для будущей версии. Он не меняет J(t), FR-004 Merkle construction или old root vectors;
+future full B/C/V bytes и IDs квалифицируются отдельно. σ_next не назначена.
+
 Утверждены только A и следующий byte-level контракт FR-004:
 
 ```text

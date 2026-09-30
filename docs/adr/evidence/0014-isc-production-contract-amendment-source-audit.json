@@ -1,0 +1,386 @@
+{
+  "kind": "DOCUMENTARY_ARCHITECTURE_AMENDMENT_SOURCE_AND_SIZE_AUDIT_NOT_FORMAL_OR_NATIVE_EVIDENCE",
+  "status": "CONSOLIDATED_DRAFT_COMPLETE_STOP",
+  "source_commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+  "native_source_commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "report": {
+    "path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+    "sha256": "a543978acb3ca67b17a8b7e9680b8203a722bfe0af5b6b80f3e2fcef36bfd9cc"
+  },
+  "directions_selected_for_specification": [
+    "P-EXPLICIT",
+    "SIG-ISC-ED25519-v1",
+    "ISC-EVIDENCE-BUDGET-v1"
+  ],
+  "exact_draft_details_approved": false,
+  "implementation_authorized": false,
+  "sigma_next_assigned": false,
+  "material_proposed_consequences": [
+    "Explicit parent in new B/C, versioned canonical/schema/hash domains; no old object relabelling",
+    "ISC Vote v2 removes signature_id from exact signable bytes; detached artifact owns its identity",
+    "FR-003: persist kind-2 exact Vote intent and barrier before signing; retained signature/source artifacts durable before exposure",
+    "Inline complete W1 delivery evidence, with explicit new per-actor round event/byte admission domain",
+    "Production model budget accounting changes Init/Next guards and liveness premises; no unchanged-model claim",
+    "Full original source/other-certificate authentication remains required, not proved by ISC signatures"
+  ],
+  "proposed_library_reference": {
+    "name": "libsodium",
+    "release": "1.0.22-RELEASE",
+    "deployed_source_or_binary_qualified": false,
+    "installed_or_downloaded_for_task": false
+  },
+  "primary_external_references": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc8032.html#section-5.1",
+      "role": "pure Ed25519 primitive; domain/preimage are this draft design"
+    },
+    {
+      "url": "https://doc.libsodium.org/public-key_cryptography/public-key_signatures",
+      "role": "single-part detached API versus ph/multipart and deterministic build"
+    },
+    {
+      "url": "https://doc.libsodium.org/advanced/point-arithmetic",
+      "role": "point checks and documented <=1.0.20 subgroup issue"
+    },
+    {
+      "url": "https://github.com/jedisct1/libsodium/releases/tag/1.0.22-RELEASE",
+      "role": "concrete proposed library release, not binary qualification"
+    },
+    {
+      "url": "https://github.com/jedisct1/libsodium/blob/1.0.22-RELEASE/src/libsodium/crypto_core/ed25519/core_ed25519.c",
+      "role": "release-tagged point-validation reference"
+    }
+  ],
+  "size_calculations": {
+    "kind": "documentary sums of proposed field widths; no signing/codec implementation",
+    "vote_field_count": 12,
+    "maximum_vote_bytes_from_declared_field_lengths": 878,
+    "admission_vote_cap": 4096,
+    "signing_preimage_overhead": 186,
+    "detached_artifact_overhead": 226,
+    "ifq1_fixed_bytes": 76,
+    "ifr1_bytes": 369,
+    "outer_fixed_bytes": 72,
+    "combined_fixed_bytes": 604,
+    "delivery_event_cap": 4096,
+    "delivery_entry_bytes_cap": 33554432,
+    "max_w1_frame_bytes": 47317596,
+    "existing_wal_ceiling": 67108864,
+    "max_result_bytes": 5243261,
+    "existing_result_ceiling": 16777216,
+    "max_result_plus_metadata_bytes": 5251453,
+    "max_result_plus_metadata_and_header_bytes": 5251581
+  },
+  "conditional_integration_active_hours": {
+    "minimum": 70,
+    "maximum": 116,
+    "approved_execution_budget": false,
+    "excludes": [
+      "external authority/review waits",
+      "key provisioning",
+      "full provenance import/recovery",
+      "R2.3/R3 closure",
+      "full Formal GO"
+    ]
+  },
+  "sources": [
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "git_blob": "9661c576252542d7144b1ed19fc8fb66205d19d6",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae",
+      "topic": "FR-001/002/003/004/005/037/038/040; durable intent precedes signing"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "specs/008-certificates-and-consensus/runtime-profile.md",
+      "git_blob": "d490fbcd4691c9907e6ce36ce8d742fbb198762e",
+      "sha256": "a43a3fbab9f9c38ac6998598aee41dcd21246e78858bff2229d6de3140e0b802",
+      "topic": "native-owned graph; vote lifecycle and boundary"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "git_blob": "88b5e9b27ec6bd29f9c4b520fb9a89adf0e91f68",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "topic": "fixed deployment, trusted bootstrap/key refs and retained source/control bounds"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "git_blob": "1f186495e12885b0195508e2aa1f7417f8dc80fb",
+      "sha256": "265f0614471fd41a290ecb14367963a41d0dbdb152cd286b9954c42ad9c64f74",
+      "topic": "approved W1 exact sections and retained delivery obligations"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "docs/adr/0014-isc-identity-sequence-amendment.md",
+      "git_blob": "a50ef0e823989e089388c42f00c1713853a024bc",
+      "sha256": "a881b3f7be7fa2c035e38c33ebc1f69f6b771c4959652476ae7cf530db7895a9",
+      "topic": "approved I-B/S-RANK; no old relabelling"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "docs/adr/0014-w1-three-gate-audit.md",
+      "git_blob": "40fe03aa6f48973ab3924d999ca3d23fd65f8f3f",
+      "sha256": "05f1ccd29ac23e3ece476ea0137eb33da399cc0b602188fecce7c7b2a9278b64",
+      "topic": "accepted STOP findings"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "delta-protocol/schemas/003/protocol-types-v1.json",
+      "git_blob": "055f55ad7acd886d25a718cf9f0186e64d14aa95",
+      "sha256": "1ea1e636b4e797aa99775165175ba4edeed53fe8b8add9625eca74ffb56f6f44",
+      "topic": "existing 13-field Vote and canonical semantics/version fields"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "delta-protocol/schemas/008/input-set-certificate-v1.json",
+      "git_blob": "b36800f455a69b5758b3511275a56c5e89475cfc",
+      "sha256": "6822bbf6cbb02002b1f6fc398300538b150a258774c9e9c8853e73babdde37e6",
+      "topic": "existing closed ISC schema, no direct parent"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/tla/DeltaReduceTypes.tla",
+      "git_blob": "f93082ac55cb9f8a9e9dc80bcadf2db60ea8c38b",
+      "sha256": "2eb3008060f8bbe3ed1be12167211d602dc5bf2f5bc7d65caa9896f8586b0121",
+      "topic": "InputSetBodies without explicit parent; projection changes required"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "git_blob": "b1cbf055fa74c312c9124b6d097f724fe81dae1b",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00",
+      "topic": "InputBody/CloseInput/VoteISC/FinalizeISC and existing invariants"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/tla/DeltaReduceQuorums.tla",
+      "git_blob": "d6c44cb70a17d86bfc83e154f9ef57731397d3db",
+      "sha256": "ae0e9a64976f6b9158bfc44379648aabbde990047a4321f3b4f6355e5f6768e3",
+      "topic": "persist/send/deliver, pending multiplicity versus cumulative history"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/tla/DeltaReduceFailures.tla",
+      "git_blob": "49266ae57b566c93ca763903ab5c94f30c606e8a",
+      "sha256": "ee94c1c67335888544b1689200b829526f09d618bdf4e9c256ad2c1c0788ecf5",
+      "topic": "DuplicateMessage and existing failure bounds"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/proofs/DeltaReduce/NativeInputSetBody.lean",
+      "git_blob": "0ea7e4c7cb2f66e7b164442923461b05dd90d8d0",
+      "sha256": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
+      "topic": "existing encoding/binding proof target"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/proofs/DeltaReduce/NativeIscCertificate.lean",
+      "git_blob": "ed69bdb8b079c019cff797167d29b7d6b25fe7bc",
+      "sha256": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
+      "topic": "existing named body/quorum/context/source results"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/proofs/DeltaReduce/NativeIscAdmission.lean",
+      "git_blob": "9fe179a72b7ce6c3158d10adb54d9253ee9085ad",
+      "sha256": "63ddf5cc963d51b7837afc1e4bb6ca6d0f1024f0ef60a23bd9e23b9348af213c",
+      "topic": "existing source/sequence results"
+    },
+    {
+      "commit": "2a0e68375ca070eac391dbb6c8d3b980b972888e",
+      "path": "formal/proofs/DeltaReduce/NativeVoteBytes.lean",
+      "git_blob": "3a0ef7359d440206f7e6e40cd15476fb02934e6b",
+      "sha256": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
+      "topic": "13-field WireVote/mapHeader and receipt/vote-ID binding"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/contracts.hpp",
+      "git_blob": "82c089d5a8a264f4826e8ec29a0a28d8f5900939",
+      "sha256": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1",
+      "topic": "existing Context/ISC shapes"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "git_blob": "196b611a06504af4a70b597b272f458f62f4e5c8",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8",
+      "topic": "canonical ISC JSON, identity formula"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "git_blob": "80bcc59c6c37518564cde120d441d170c14c357a",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879",
+      "topic": "structural validation is not authentication"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "git_blob": "286b84eaaa4c834479704aecdccf6af20d0a0e81",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8",
+      "topic": "existing U64 big-endian hash fields/tuples, round-scoped ISC vote context"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/protocol.cpp",
+      "git_blob": "4f50880504cf0c371ea49be51cfc0920c9bd9078",
+      "sha256": "431fe8e40afeaaf8479cb8fe86240e8db875629a0add316113b4ce748d4a86ab",
+      "topic": "canonical Vote encoding and parse field set"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/canonical.cpp",
+      "git_blob": "fa0539790392715f07df6f1780abbf667c328c86",
+      "sha256": "432ca0299a85e18fb4e1ac4b3be93c1e8c8109acb995120b0e4512b81a01e156",
+      "topic": "DRC1 framing, map/text tags and exact content-ID domain encoding"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/wal.cpp",
+      "git_blob": "6cbb5704930a3503129ec3d279748c2a63cf4856",
+      "sha256": "fd62c60727b6f5725cdcef2cb56591746736f444c87d1895a1357a7d85377e7e",
+      "topic": "DRW1 outer 72-byte fixed cost and 64 MiB maximum"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/vote_codec.hpp",
+      "git_blob": "d8a7003328e63276656e8bd982c166a5ddef26ea",
+      "sha256": "92c14cb6e9c404b53a665e83ed5b5481c0f201b4408bbe3dc934af03d25eb24c",
+      "topic": "4 MiB policy/16 MiB result and 8 KiB metadata bounds"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/sidecar_protocol.hpp",
+      "git_blob": "10a568774fc68d1d9781d93356fe5c3d28d33d54",
+      "sha256": "0261f849ad39d5a34716e7562f8e5d223194dc5e3fda7528058f5ef5a1875f51",
+      "topic": "physical/logical transport caps"
+    }
+  ],
+  "baseline_inputs_verified_unchanged": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "6470de74a14d0d6cd745ef6b46858427b0f7b4222b6bad7e9a5b51316313ce56",
+      "unchanged": true
+    },
+    {
+      "path": ".specify/memory/constitution.md",
+      "sha256": "4b9da704f3c37ac4f8ce9756832e92c2ad732d0116c6dccebeee67ee722042fd",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0000-formal-verification-gate.md",
+      "sha256": "59523ef963cfceaa741499e3d375ceedcd451ac0fb8574ab70b8ad9e480a8bd0",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0001-deltareduce-v1.md",
+      "sha256": "bbfe6e23ca0658d23b41350fb3eb70df62fdfae124c2b460890fac16b77d30e9",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0002-canonical-rational-rounding.md",
+      "sha256": "560c4b5f2bf76008a6e71803f9b98958aa5bcb443bd6bb86c2559fcd245dcf50",
+      "unchanged": true
+    },
+    {
+      "path": "specs/ROADMAP.md",
+      "sha256": "92cf5c38792fa926efeb8adb712a72d9769c7f36c1d3f4a06c653dc18b0d5dff",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "sha256": "375b09aaec41ca84a4959f0c5a65c8f0382356187297c5f7a3171bebff00e72e",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "sha256": "e93d31266eac996412cd48d25c8b5a1558a5742068444cdd64cc8d67637faf8f",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/refinement-contract.md",
+      "sha256": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/spec.md",
+      "sha256": "4c723b178649277a170b227fc718fc38355be9ce6765bb9b2f86af81bbee3327",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/plan.md",
+      "sha256": "7c7ab970373621790ebf31175a2a7b0c22f178ab1fe60be31ba28107bade58f9",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/tasks.md",
+      "sha256": "55c690e61072928e7b8cb48f30b119ec81245599ba058cff89afca12541cc251",
+      "unchanged": true
+    },
+    {
+      "path": "formal/reports/formal-id-registry.json",
+      "sha256": "ef855fbe752294e6b01ee4e0ad0f2659fa7db5e9db303456bbe9acc663a0f6cc",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0010-hybrid-runtime-boundary.md",
+      "sha256": "051b4836318f288256b4402943a6792d98df239f3a54b25dab11da1b29217875",
+      "unchanged": true
+    },
+    {
+      "path": "specs/HYBRID-RUNTIME-MAP.md",
+      "sha256": "911b09b5aa83cc913af4ef82c547022617cbc90062842b4e0430350b7002332d",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
+      "sha256": "45fef1b1d23604d8774d90086b46431fe7c73a16a481079d62a257dccf9f22e8",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/candidate-contract.md",
+      "sha256": "2cd9be46dcda84c8f1cf17b176ee8ebe9ead0fe405a5407490b556161bc795b4",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+      "unchanged": true
+    },
+    {
+      "path": "formal/reports/coverage-matrix.md",
+      "sha256": "7a5f28d28a47c2d7a140b202fa0109e4add7ef6561d0c85c35888c5bbfde8460",
+      "unchanged": true
+    }
+  ],
+  "frozen_files_verified_unchanged": [
+    {
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "unchanged": true
+    }
+  ],
+  "scope": {
+    "production_code_schemas_proofs_fixtures_changed": false,
+    "formal_tests_executed": false,
+    "native_tests_executed": false,
+    "new_proof_layers_created": false,
+    "old_objects_signatures_qc_wal_migrated": false,
+    "r2_3_r3_started": false,
+    "production_services_restarted": false
+  },
+  "r1": "CLOSED",
+  "r2_1": "CLOSED",
+  "r2_2": "CLOSED",
+  "r2_3": "OPEN",
+  "r2": "OPEN"
+}

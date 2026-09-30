@@ -10,6 +10,14 @@ rules and is now approved as a local byte/storage contract. This does not approv
 production integration or establish the three remaining gates. No code,
 schema, proof, production fixture or R2.3/R3 work is authorized.
 
+The user has subsequently selected P-EXPLICIT, SIG-ISC-ED25519-v1 and
+ISC-EVIDENCE-BUDGET-v1 for specification. One
+[consolidated draft amendment](0014-isc-production-contract-amendment-v1.md)
+defines their proposed exact contract, compatibility consequences and revised
+conditional 70–116 active-hour estimate. Its future parent/Vote/intent-artifact/budget/model
+changes explicitly supersede the unchanged-Init/Next and old-payload assumptions
+of this draft only after approval and qualification. Implementation remains blocked.
+
 30 September 2026. Existing tasks: feature-008 T016, HR008-002/003/015/018;
 feature-000 T053. Documentation only; R2.3 and R3 remain stopped.
 

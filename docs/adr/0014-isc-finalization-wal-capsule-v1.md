@@ -28,6 +28,13 @@ parent/context и source/authentication obligations сохраняются (§11
 parent/context, source/authentication и whole-domain bounds — каждый **STOP**.
 Новых решений или разрешения на implementation этот отчёт не добавляет.
 
+Следующее решение пользователя выбирает P-EXPLICIT, SIG-ISC-ED25519-v1 и
+ISC-EVIDENCE-BUDGET-v1 **для дальнейшей спецификации**. Их единые exact bytes,
+budget/sufficiency, future vote intent/signature artifact lifecycle и совместимость описаны в
+[консолидированном draft amendment](0014-isc-production-contract-amendment-v1.md).
+Его детали ещё требуют утверждения; этот документ остаётся approved local W1,
+а не разрешением на implementation. Старые payloads/identities не переопределяются.
+
 Источники: candidate `45632414`, native pin
 `60c692f6e391f839829dfc64e93380db54cd507b`, не merged Formal GO.
 Исторические blobs и границы исходной редакции записаны в

@@ -1,5 +1,33 @@
 # Feature010 continuation checkpoint
 
+## Consolidated ISC production contract amendment — 30 September 2026 — DRAFT / STOP
+
+The user selected P-EXPLICIT, SIG-ISC-ED25519-v1 and ISC-EVIDENCE-BUDGET-v1 for
+further specification only. One [consolidated amendment](adr/0014-isc-production-contract-amendment-v1.md)
+now specifies exact proposed B/C parent/hash bytes, signable ISC Vote and detached
+signature artifact, independently provisioned registry/key objects, event/byte
+budgets, W1/result size accounting, compatibility and one integration footprint.
+
+Review-significant consequences are explicit: remove signature_id from the new
+signable Vote to avoid a signing/hash cycle; retain it as detached artifact identity;
+persist the kind-2 Vote intent before signing and the detached artifact before exposure; qualify new
+parent/policy/schema/hash dispatch; change model admission accounting/guards and
+state the weaker budget-conditional liveness claim. Old objects and original slots
+are never relabelled. Proposed budgets consciously restrict the future admission
+domain and cannot justify trimming already-admitted source history.
+
+Documentary upper bounds: W1 47,317,596 < 67,108,864 bytes; dedicated result
+5,243,261 < 16,777,216 bytes, plus separately capped transport metadata/header.
+Exact P0/P1/output/pre-append checks remain mandatory. These are specification
+calculations, not new formal/native evidence or a claim that producer legality is solved.
+
+Conditional integration estimate is now 70–116 active hours, not an approved budget
+or a time-to-GO promise; external authority waits and full R2.3/R3/import recovery are
+excluded. Exact draft details await approval. W1 stays APPROVED only as local
+byte/storage contract; Producer Integration remains blocked. No implementation,
+schemas/proofs/fixtures or R2.3/R3 work occurred, no σ_next was assigned, and frozen
+DoD/Profile/baseline remain unchanged. **STOP after amendment; no automatic continuation.**
+
 ## W1 local approval and three independent gates — 30 September 2026 — STOP
 
 User approved W1 only as the local byte/storage contract. Document statuses and

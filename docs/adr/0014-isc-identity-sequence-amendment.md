@@ -12,6 +12,12 @@ IDs. σ_next — обозначение, новый version/hash не назна
 R2.3/R3 и frozen DoD/Profile не меняются. Документальные amendments внесены в
 WAL Capsule и Producer Integration; W1 теперь утверждён как local byte/storage contract.
 
+Позднее выбранные P-EXPLICIT/SIG-ISC-ED25519-v1/ISC-EVIDENCE-BUDGET-v1 сведены в
+[один draft amendment](0014-isc-production-contract-amendment-v1.md). Он отдельно
+предлагает future B/C parent/hash и Vote/signature bytes; прежние утверждения этого
+memo об отсутствии нового parent field относятся только к решению I-B/S-RANK.
+Роли b/c и s/V_a(s) сохраняются; новые bytes не объявляются историческими objects.
+
 ## 1. ISC consensus identity: утверждённый I-B
 
 Обозначения: `B` — существующий `VoteInputSetBody`; `b=vote_input_set_body_id(B)`;
