@@ -1,0 +1,65 @@
+{
+  "git_address": "https://github.com/chartjs333/delta.git",
+  "agents": {
+    "overwrite": false,
+    "include_managed": false
+  },
+  "execution": {
+    "mode": "sequential",
+    "initialize_reviewers": true,
+    "start_node": "w1-reference-engine",
+    "required_approvals": 2,
+    "max_rework_cycles": 3,
+    "reviewers": [
+      {
+        "id": "w1-architecture-reviewer",
+        "name": "W1 Architecture Reviewer",
+        "phone": "2781",
+        "git_branch": "review/isc-s16-w1-architecture",
+        "profile": "Review W1 scope and verify all sprint files remain available from agent/isc-s16-pipelined-sprint. Use APPROVE or REJECT."
+      },
+      {
+        "id": "w1-evidence-reviewer",
+        "name": "W1 Evidence Reviewer",
+        "phone": "2782",
+        "git_branch": "review/isc-s16-w1-evidence",
+        "profile": "Review commits, tests and fault evidence; verify orchestration/sprints/isc-s16-pipelined/ is unchanged and present. Use APPROVE or REJECT."
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "w1-reference-engine",
+      "agent": {
+        "id": "w1-reference-engineer",
+        "name": "W1 Reference Storage Engineer",
+        "phone": "2780",
+        "git_branch": "agent/isc-s16-w1-reference-engine",
+        "profile": "Execute only ISC-S16-B01. Branch derives from agent/isc-s16-pipelined-sprint; preserve all sprint files."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-B01",
+          "queue": "worker-all",
+          "message": "Прочитай `orchestration/sprints/isc-s16-pipelined/README.md`, `orchestration/sprints/isc-s16-pipelined/bootstrap-ru.md` и `orchestration/sprints/isc-s16-pipelined/lane-tasks.md`. Создай или проверь assigned branch от `origin/agent/isc-s16-pipelined-sprint`. Проверь source baseline `ea5a70d8c5fd3516de243632f2c5681b0e5a6292` в ancestry. Выполни только ISC-S16-B01. Sprint-файлы должны остаться доступными в итоговой ветке. При выходе за scope верни STOP."
+        }
+      ],
+      "transitions": {
+        "DONE": "completed",
+        "STOP": "blocked"
+      }
+    },
+    {
+      "id": "completed",
+      "type": "terminal",
+      "status": "DONE",
+      "message": "W1 reference engine completed and both reviewers approved; production integration remains blocked."
+    },
+    {
+      "id": "blocked",
+      "type": "terminal",
+      "status": "BLOCKED",
+      "message": "W1 reference work found an ambiguity or scope blocker; production integration remains stopped."
+    }
+  ]
+}
