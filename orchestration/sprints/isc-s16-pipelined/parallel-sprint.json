@@ -1,0 +1,94 @@
+{
+  "git_address": "https://github.com/chartjs333/delta.git",
+  "agents": {
+    "overwrite": false,
+    "include_managed": false,
+    "assignment_mode": "parallel",
+    "items": [
+      {
+        "id": "isc-s16-contract-freeze",
+        "name": "ISC Contract Freeze Engineer",
+        "phone": "2721",
+        "git_branch": "agent/isc-s16-contract-freeze",
+        "profile": "Pipeline lane A. Work only in docs-only. Branch derives from agent/isc-s16-pipelined-sprint; preserve all sprint files.",
+        "parameters": {
+          "pipeline_lane": "A",
+          "scope": "docs-only",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint",
+          "sprint_manifest_path": "orchestration/sprints/isc-s16-pipelined",
+          "source_code_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-A01",
+            "queue": "worker-all",
+            "message": "Прочитай `orchestration/sprints/isc-s16-pipelined/README.md`, `orchestration/sprints/isc-s16-pipelined/bootstrap-ru.md` и `orchestration/sprints/isc-s16-pipelined/lane-tasks.md`. Создай или проверь assigned branch от `origin/agent/isc-s16-pipelined-sprint`. Проверь source baseline `ea5a70d8c5fd3516de243632f2c5681b0e5a6292` в ancestry. Выполни только секцию своего task ID. Sprint-файлы должны остаться доступными в итоговой ветке. При выходе за scope верни STOP."
+          }
+        ]
+      },
+      {
+        "id": "isc-s16-w1-reference",
+        "name": "W1 Reference Storage Engineer",
+        "phone": "2722",
+        "git_branch": "agent/isc-s16-w1-reference-engine",
+        "profile": "Pipeline lane B. Work only in reference-w1-only. Branch derives from agent/isc-s16-pipelined-sprint; preserve all sprint files.",
+        "parameters": {
+          "pipeline_lane": "B",
+          "scope": "reference-w1-only",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint",
+          "sprint_manifest_path": "orchestration/sprints/isc-s16-pipelined",
+          "source_code_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-B01",
+            "queue": "worker-all",
+            "message": "Прочитай `orchestration/sprints/isc-s16-pipelined/README.md`, `orchestration/sprints/isc-s16-pipelined/bootstrap-ru.md` и `orchestration/sprints/isc-s16-pipelined/lane-tasks.md`. Создай или проверь assigned branch от `origin/agent/isc-s16-pipelined-sprint`. Проверь source baseline `ea5a70d8c5fd3516de243632f2c5681b0e5a6292` в ancestry. Выполни только секцию своего task ID. Sprint-файлы должны остаться доступными в итоговой ветке. При выходе за scope верни STOP."
+          }
+        ]
+      },
+      {
+        "id": "isc-s16-crypto-reference",
+        "name": "ISC Crypto Reference Engineer",
+        "phone": "2723",
+        "git_branch": "agent/isc-s16-ed25519-reference",
+        "profile": "Pipeline lane C. Work only in reference-crypto-only. Branch derives from agent/isc-s16-pipelined-sprint; preserve all sprint files.",
+        "parameters": {
+          "pipeline_lane": "C",
+          "scope": "reference-crypto-only",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint",
+          "sprint_manifest_path": "orchestration/sprints/isc-s16-pipelined",
+          "source_code_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-C01",
+            "queue": "worker-all",
+            "message": "Прочитай `orchestration/sprints/isc-s16-pipelined/README.md`, `orchestration/sprints/isc-s16-pipelined/bootstrap-ru.md` и `orchestration/sprints/isc-s16-pipelined/lane-tasks.md`. Создай или проверь assigned branch от `origin/agent/isc-s16-pipelined-sprint`. Проверь source baseline `ea5a70d8c5fd3516de243632f2c5681b0e5a6292` в ancestry. Выполни только секцию своего task ID. Sprint-файлы должны остаться доступными в итоговой ветке. При выходе за scope верни STOP."
+          }
+        ]
+      },
+      {
+        "id": "isc-s16-formal-linkage",
+        "name": "ISC Formal Linkage Engineer",
+        "phone": "2724",
+        "git_branch": "agent/isc-s16-formal-linkage",
+        "profile": "Pipeline lane D. Work only in formal-only. Branch derives from agent/isc-s16-pipelined-sprint; preserve all sprint files.",
+        "parameters": {
+          "pipeline_lane": "D",
+          "scope": "formal-only",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint",
+          "sprint_manifest_path": "orchestration/sprints/isc-s16-pipelined",
+          "source_code_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-D01",
+            "queue": "worker-all",
+            "message": "Прочитай `orchestration/sprints/isc-s16-pipelined/README.md`, `orchestration/sprints/isc-s16-pipelined/bootstrap-ru.md` и `orchestration/sprints/isc-s16-pipelined/lane-tasks.md`. Создай или проверь assigned branch от `origin/agent/isc-s16-pipelined-sprint`. Проверь source baseline `ea5a70d8c5fd3516de243632f2c5681b0e5a6292` в ancestry. Выполни только секцию своего task ID. Sprint-файлы должны остаться доступными в итоговой ветке. При выходе за scope верни STOP."
+          }
+        ]
+      }
+    ]
+  }
+}
