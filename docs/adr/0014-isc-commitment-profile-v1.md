@@ -9,8 +9,8 @@
 30 сентября 2026. Scope: только конкретизация существующего feature-008
 FR-004/FR-005. Код, proofs, schemas и production fixtures не изменяются.
 R2.3/R3 не продолжаются. Оценка 50–84 часа не утверждена и здесь не используется
-как бюджет. `ISC Finalization WAL Capsule v1` подготовлен отдельно и остаётся
-PROPOSED. I-B/S-RANK утверждены отдельно; их terminology/compatibility amendment
+как бюджет. `ISC Finalization WAL Capsule v1` утверждён отдельно как local
+byte/storage contract, без разрешения implementation. I-B/S-RANK утверждены отдельно; их terminology/compatibility amendment
 ниже не меняет tuple/tree FR-004 contract или V1–V5/N11 vectors.
 
 Исходники: candidate `bc2c6df6dcb2402a919b1052526958af2ef27182`, native reference
@@ -340,7 +340,7 @@ validated ordered unique InputTuple list
 
 Две обязательные правки FR-004 уже зафиксированы; I-B/S-RANK впоследствии утверждены
 отдельно. `ISC Finalization WAL Capsule v1` и Producer Integration документально
-согласованы с ними. Полный W1 format всё ещё требует отдельного утверждения.
+согласованы с ними. W1 теперь утверждён как local byte/storage contract; production sufficiency этим не установлена.
 Ни код, ни proofs, ни schemas, fixtures, R2.3/R3 или runtime changes не разрешены
 без обоих утверждённых contracts и отдельной команды с соблюдением exact compatible
 merged Formal GO. Parent/context obligation нельзя закрыть самим WAL capsule.

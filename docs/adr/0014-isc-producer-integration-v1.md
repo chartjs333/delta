@@ -1,12 +1,13 @@
 # ADR-0014 — ISC Producer Integration v1
 
-**Status: integration DRAFT; I-B/S-RANK APPROVED; WAL Capsule PROPOSED.
+**Status: integration DRAFT; I-B/S-RANK APPROVED; W1 APPROVED as a local byte/storage contract.
 Not approved for implementation.**
 
 30 September 2026 documentary amendment: the FR-004 commitment profile and the
 [I-B/S-RANK decisions](0014-isc-identity-sequence-amendment.md) are approved.
 The [WAL Capsule](0014-isc-finalization-wal-capsule-v1.md) now incorporates these
-rules, but its complete storage contract still requires approval. No code,
+rules and is now approved as a local byte/storage contract. This does not approve
+production integration or establish the three remaining gates. No code,
 schema, proof, production fixture or R2.3/R3 work is authorized.
 
 30 September 2026. Existing tasks: feature-008 T016, HR008-002/003/015/018;
@@ -45,8 +46,8 @@ native source observations in §12 remain historical evidence, not new qualifica
 The normative integration identities are now I-B/S-RANK. All changed parent-reference
 meanings apply only to a future independently pinned, qualified semantics version
 `σ_next` (notation, not a newly assigned version/hash or wire field). Existing
-accepted/candidate semantics IDs are not authority for this change. W1 approval,
-explicit parent/context completeness and source/bounds qualification remain open.
+accepted/candidate semantics IDs are not authority for this change. Explicit parent/context completeness and source/bounds qualification remain open
+after local W1 approval.
 No new parent field or alternative provenance mechanism is introduced.
 
 ### Normative terminology and compatibility boundary
@@ -244,7 +245,7 @@ producer evidence and certificate state. Resetting `vote_authority_invalidated_`
 or replacing the startup snapshot by caller data would not solve this.
 
 The separately proposed W1 capsule uses additive **kind 3** and four typed sections
-in the existing DRW1 frame. Its full status remains PROPOSED; approved I-B/S-RANK
+in the existing DRW1 frame. It is approved as a local byte/storage contract; approved I-B/S-RANK
 are now normative within it. Original kinds 1/2, frame checksum algorithm and source
 positions are not rewritten. The layout's reuse does not reuse old c-based policy
 semantics: P0/P1 must already belong to independently selected σ_next. Old readers
@@ -339,7 +340,7 @@ no Java pointer after a downcall; bounded-copy paths have equal outputs.
 The following is the bounded integration footprint identified so far. Existing paths
 refer to PR50 or the candidate source pin; `NEW` entries are proposed file names,
 **not files created by this ADR**. The root and I-B/S-RANK decisions are approved,
-but the complete WAL Capsule is not. This is a conditional impact inventory,
+and W1 is approved as a local byte/storage contract. This is still a conditional impact inventory,
 not a finalized coding checklist, new proof layer or closed R2/R3 proof plan.
 
 | Area | Exact files and intended role |
@@ -366,8 +367,8 @@ to the frozen provenance profile or R1–R7 are authorized here.
 
 ## 10. Acceptance criteria and effect on evidence
 
-Commitment A and I-B/S-RANK are approved. Acceptance still requires W1 approval and
-separately authorized qualification/implementation; the following outcomes are not
+Commitment A, I-B/S-RANK and local W1 are approved. Acceptance still requires
+the three remaining gates and separately authorized qualification/implementation; the following outcomes are not
 claimed achieved by this documentary amendment:
 
 1. Original native envelopes and closed inputs produce the expected canonical ISC,
@@ -447,7 +448,7 @@ Approved S-RANK supplies physical-slot/public-vote-count terminology and mapping
 The corresponding negative vectors are normative documentary expectations for the
 future semantics closure, not generated production fixtures or passing tests.
 
-WAL Capsule remains PROPOSED. Explicit parent/context completeness, independent
+W1 is approved as a local byte/storage contract. Explicit parent/context completeness, independent
 source authority and full-domain/bounds compatibility remain unqualified; no extra
 fields, alternate provenance profile or old-history migration is selected here.
 No new semantics version/hash is assigned by this ADR. Integration and the old

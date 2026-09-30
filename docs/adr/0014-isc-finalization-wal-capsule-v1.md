@@ -1,10 +1,11 @@
 # ISC Finalization WAL Capsule v1
 
-**Decision document к ADR-0014. WAL Capsule: PROPOSED; I-B и S-RANK: APPROVED.**
+**Decision document к ADR-0014. WAL Capsule W1: APPROVED как local byte/storage contract; I-B и S-RANK: APPROVED.**
 
 Amendment от 30 сентября 2026 переносит утверждённые
 [identity/sequence решения](0014-isc-identity-sequence-amendment.md) в storage contract.
-Он не утверждает W1 целиком и не разрешает реализацию. Все новые значения ниже
+W1 утверждён пользователем как локальный byte/storage contract; это не разрешение
+на реализацию или утверждение production/refinement sufficiency. Все новые значения ниже
 нормативны только для будущей отдельно квалифицированной semantics version `σ_next`;
 это метаобозначение, не присвоенный version string/hash или новое wire field.
 Существующие accepted/candidate semantics IDs не активируют эти правила.
@@ -502,9 +503,9 @@ source-specific evidence не изменяются; документальные
 
 ## 11. Конечная граница решения и STOP
 
-Для утверждения W1 требуется согласиться с kind 3 и четырьмя sections, исходными
+Утверждённый W1 фиксирует kind 3 и четыре sections, исходные
 source/signature dependencies, derived P0→P1 commit, receipt semantics, no-tail-repair
-поведением выбранного profile и fail-closed compatibility. Никакой альтернативный
+поведение выбранного profile и fail-closed compatibility. Никакой альтернативный
 provenance mechanism не предлагается.
 
 Уже существующие вопросы, которые **не закрывает** этот storage contract:
@@ -522,7 +523,7 @@ provenance mechanism не предлагается.
    объявляются доказанными; корректный oversized/unrepresentable cut требует STOP,
    не silent source-domain narrowing. Это existing compatibility gate, не новый DoD.
 
-I-B/S-RANK утверждены; W1 целиком остаётся PROPOSED. После его отдельного approval всё равно необходима прямая
+I-B/S-RANK и W1 local byte/storage contract утверждены. Для реализации всё равно необходима прямая
 команда на следующий ограниченный этап и соблюдение formal-first STOP. Реализация
 producer, code/proofs/schemas/fixtures, R2.3/R3, new predicates и recovery не начаты.
 **STOP после этого документа.**

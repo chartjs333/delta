@@ -3,14 +3,14 @@
 **30 сентября 2026. I-B и S-RANK APPROVED как архитектурные решения.
 Реализация не разрешена.**
 Existing tasks T053/T016, HR008-001/002/018. Только amendment к
-[WAL Capsule v1](0014-isc-finalization-wal-capsule-v1.md), которая остаётся PROPOSED.
+[WAL Capsule v1](0014-isc-finalization-wal-capsule-v1.md), которая утверждена как local byte/storage contract.
 [Commitment Profile A](0014-isc-commitment-profile-v1.md) утверждён только для FR-004.
 Пользователь утвердил I-B и S-RANK; альтернативы ниже сохраняются как rationale,
 не открытые варианты. Изменения действуют только в будущей независимо закреплённой
 и квалифицированной semantics version `σ_next`, не в существующих accepted/candidate
 IDs. σ_next — обозначение, новый version/hash не назначен. Код, schemas, proofs,
 R2.3/R3 и frozen DoD/Profile не меняются. Документальные amendments внесены в
-WAL Capsule и Producer Integration; W1 целиком остаётся PROPOSED.
+WAL Capsule и Producer Integration; W1 теперь утверждён как local byte/storage contract.
 
 ## 1. ISC consensus identity: утверждённый I-B
 
@@ -177,6 +177,6 @@ native slot на vote ordinal меняет подписанные bytes/receipt 
 - **L1/L2:** тот же candidate: Lean files из §3; `NativeCacheHistory.positionMapping`; `FamilyRelation.lean` complete original rows / public durable vote counter.
 
 **STOP после разрешённого documentary amendment.** I-B/S-RANK утверждены;
-WAL Capsule целиком остаётся PROPOSED. Код, schemas, proofs, production recovery,
+W1 утверждён как local byte/storage contract. Код, schemas, proofs, production recovery,
 R2.3/R3 не разрешены; approval не является exact compatible merged Formal GO.
 R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN; R3 не начат. Новых решений о profile/DoD нет.
