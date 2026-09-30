@@ -281,5 +281,42 @@
     "git diff 4873b3559b390318c0fc8ff80dd00ecea4ea7b59 -- orchestration/sprints/isc-s16-pipelined",
     "git ls-tree -r --name-only 4873b3559b390318c0fc8ff80dd00ecea4ea7b59 orchestration/sprints/isc-s16-pipelined",
     "inline Python assertions: DAG, paths, source blobs, scope, links"
-  ]
+  ],
+  "orchestration": {
+    "status": "BLOCKED_HANDOFF_NOT_ACCEPTED",
+    "owner_component": "nginx-qa sequential queue_graph outcome routing / sprint graph configuration",
+    "result_commit_submitted": "081f67fbc692bc5b83b973136ddb91f787b75304",
+    "local_remote_result_heads_equal": true,
+    "assignment_id": "7fec1504-4c14-4a93-80bc-ea257c951594",
+    "outcome_endpoint": "https://soon-jerusalem-thousand-mason.trycloudflare.com/api/v1/projects/9008/agents/2721/whoami",
+    "submitted_outcome": "DONE",
+    "error": "use_sequential_queue_graph_identity",
+    "error_message": "A sequential executor is not permanently bound to this phone. Start at /api/v1/agents/whoami and use the returned reply_url; the next queued item selects the current role.",
+    "read_only_evidence_endpoint": "https://soon-jerusalem-thousand-mason.trycloudflare.com/api/v1/projects/9008/state.json",
+    "observed_execution": {
+      "mode": "sequential",
+      "strategy": "queue_graph",
+      "status": "active",
+      "revision": 3,
+      "current_agent_id": "isc-s16-contract-freeze",
+      "current_node_id": null,
+      "phase": "node",
+      "current_assignment_id": "7fec1504-4c14-4a93-80bc-ea257c951594",
+      "workflow": null,
+      "pending_transition": null,
+      "completed_agent_ids": []
+    },
+    "observed_task_controls": {
+      "graph_node_index": 1,
+      "graph_node_count": 4,
+      "graph_node_id": "",
+      "allowed_outcomes": [],
+      "message_advertised_outcome": "DONE"
+    },
+    "subsequent_dequeue_performed": false,
+    "reviewer_gate_entered": false,
+    "manual_queue_handoff_performed": false,
+    "orchestrator_runtime_files_read": false,
+    "required_external_action": "Repair the advertised outcome route / missing declared workflow for this existing assignment. Preserve assignment and completed commit; do not assign a successor manually."
+  }
 }
