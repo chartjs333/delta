@@ -1,5 +1,34 @@
 # Feature010 continuation checkpoint
 
+## ISC Producer Integration v1 — 30 September 2026 — ADR draft / architecture checkpoint
+
+The user accepted native ownership and authorized only an implementation ADR.
+[ADR-0014](adr/0014-isc-producer-integration-v1.md) records exact inputs, delivered
+quorum grouping, existing identity formulas, helper limits, validate/append/barrier/
+commit/expose requirements, crash and idempotency behavior, conflict/seed guards,
+Java boundary, conditional file inventory and acceptance criteria.
+
+It is explicitly **not a fully specified implementation contract**: existing
+feature-008 FR-004 requires the input-set Merkle root, but the inspected ISC
+contracts do not fix the tuple-to-Merkle-leaf encoding/domain. InputLedger::freeze
+returns references; verify_input_set checks context/signers/content ID, not the
+root-to-tuple relationship; the fixture uses SHA256("input-root"). An existing
+generic Merkle helper is not the missing ISC leaf contract. Source inspection gives
+a structural two-root witness, not a claimed production-reachable bad history.
+
+**CANONICAL ISC INPUT-ROOT BINDING MISSING / STOP.** No root algorithm or new
+certificate semantics was selected. No old vote/QC/WAL identity was rewritten.
+It has not been established that production Init/Next or identity formulas must
+change. The exact additive durable capsule/discriminator remains unselected after
+this checkpoint; a hash-only submit cannot persist the complete producer state.
+Conditional integration estimate 50–84 active hours excludes decisions/external GO
+waits and general R2.3/R3; it is not an approved execution budget.
+
+Only ADR/progress/source-inventory documentation changed. Code/proofs/schemas,
+fixtures, frozen DoD/Profile v1 and baseline inputs remain unchanged. R1/R2.1/R2.2
+CLOSED; R2.3/R2 OPEN; R2/R3 not continued. Await a direct architecture decision;
+no automatic implementation or new proof work. Older entries below are historical.
+
 ## ISC producer ownership audit — 30 September 2026 — MISSING PRODUCTION TRANSITION / STOP
 
 The user accepted the previous STOP and authorized only an ownership audit.
