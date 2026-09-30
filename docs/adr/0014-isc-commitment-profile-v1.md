@@ -9,12 +9,15 @@
 30 сентября 2026. Scope: только конкретизация существующего feature-008
 FR-004/FR-005. Код, proofs, schemas и production fixtures не изменяются.
 R2.3/R3 не продолжаются. Оценка 50–84 часа не утверждена и здесь не используется
-как бюджет. `ISC Finalization WAL Capsule v1` готовится **только после утверждения
-этого документа**; его поля и формат этим решением не выбираются.
+как бюджет. `ISC Finalization WAL Capsule v1` подготовлен отдельно и остаётся
+PROPOSED. I-B/S-RANK утверждены отдельно; их terminology/compatibility amendment
+ниже не меняет tuple/tree FR-004 contract или V1–V5/N11 vectors.
 
 Исходники: candidate `bc2c6df6dcb2402a919b1052526958af2ef27182`, native reference
 `60c692f6e391f839829dfc64e93380db54cd507b`. Последний — source pin, не Formal GO.
 [Инвентаризация источников и проверок документа](evidence/0014-isc-commitment-profile-v1-source-audit.json).
+Инвентаризация сохраняет hashes исходной редакции; текущий terminology/compatibility
+amendment фиксируется отдельным Git commit, без изменения нормативных root vectors.
 
 ## Утверждённое решение и рассмотренные альтернативы
 
@@ -217,8 +220,15 @@ full-context requirements ISC. Соответствие фактической I
 `parent_checkpoint_id` сейчас не добавляется; вопрос не решается новым полем
 или ослаблением контракта в этом документе.
 
-Existing `vote_input_set_body_id` связывает context, root и ordered tuples;
-existing ISC content ID связывает canonical certificate целиком, включая signers.
+По отдельно утверждённому I-B `b=vote_input_set_body_id(B)` связывает context, root
+и ordered tuples и служит consensus ISC identity. `c=content_id(C)` связывает
+canonical certificate witness целиком, включая original signers, и является artifact
+identity. Downstream ISC parent-reference и semantic replay используют b только в
+будущей квалифицированной semantics version `σ_next`; original C/c не relabel.
+Согласно S-RANK native `s` остаётся physical WAL slot, а public `V_a(s)` считает только
+original kind-2 votes. Kind 3 не увеличивает V_a. Artifact c и consensus b, как и s/V_a,
+не являются взаимозаменяемыми aliases; их documentary negatives заданы в
+[WAL Capsule](0014-isc-finalization-wal-capsule-v1.md).
 Round-scoped ISC `vote_context_id` не меняется и не заменяет full body checking.
 Нельзя переносить root или подпись в другой context, даже когда leaf digests совпали.
 
@@ -273,8 +283,9 @@ native producer execution, TLC/Lean results или новый Formal GO здес
 | Signers и quorum | IDs, epoch, threshold и signer-order rules сохраняются; root не доказывает наличие quorum |
 | Root уже равен computed value | При полностью одинаковых прочих bytes ISC ID остаётся тем же. Однако допускается ли этот semantics ID для данного профиля — отдельная обязательная проверка |
 | Existing constant-root fixtures | Их нельзя объявить profile-v1 producer evidence. Старые bytes/IDs сохраняются как исторический corpus; новые положительные profile vectors/fixtures должны быть отдельными |
-| Existing finalized QC и downstream lineage | Не переписывать QC, родительские ссылки, seeds/EC/APC или history. Обновлённый root создаёт новый body/объект только в новом разрешённом execution; не «исправление» уже finalized round |
-| WAL/vote sequences | Старые records, checksums, identities, policy bindings и sequence positions неизменны. Этот документ не задаёт их миграцию или новый capsule |
+| Existing finalized QC и downstream lineage | Не переписывать QC, ссылки, seeds/EC/APC или history. Новый root/semantics создаёт новый body только в новом разрешённом execution; не исправление finalized round |
+| Approved I-B parent-reference | В будущей σ_next consensus ISC parent/index = b; c остаётся original witness/artifact identity. Это меняет native reference semantics и новые downstream signed bodies/QC IDs. Old c-based objects не проходят как b-based посредством relabel или fallback |
+| Approved S-RANK / WAL sequences | Original signed s/checksums/receipts сохраняются. Public V_a(s) — rank original kind-2 votes, не physical s; kind 3 не vote. Counts/replay не перенумеровывают старые records. Этот FR-004 документ не утверждает W1 format |
 | Current native structural guards | Будущая profile проверка root будет строже нынешней проверки hash-shaped string. Это observable admission/conformance change, а не чисто редакционное уточнение |
 | Production TLA `Init/Next` | Изменения не предлагаются. Existing `canonicalRoot` abstraction требует отдельного refinement к этому byte contract; старые model результаты не доказывают новую SHA/Merkle связь |
 | Accepted/candidate semantics IDs | `cc98f15a…` и `b96d2253…` не объявляются authority для нового binding. После approval требуются включение профиля/vectors в semantics closure, новый вычисленный semantics ID и exact compatible merged GO. Ни один ID сейчас не заменяется |
@@ -327,8 +338,9 @@ validated ordered unique InputTuple list
 квалифицирован, quorum сформирован, ISC durable, старые QC можно мигрировать
 или R2.3/R3 закрыты. Оценка 50–84 часа остаётся не утверждённой.
 
-После отдельного commit этих двух правок разрешён только следующий **документ** —
-`ISC Finalization WAL Capsule v1`. Его формат требует собственного утверждения.
+Две обязательные правки FR-004 уже зафиксированы; I-B/S-RANK впоследствии утверждены
+отдельно. `ISC Finalization WAL Capsule v1` и Producer Integration документально
+согласованы с ними. Полный W1 format всё ещё требует отдельного утверждения.
 Ни код, ни proofs, ни schemas, fixtures, R2.3/R3 или runtime changes не разрешены
 без обоих утверждённых contracts и отдельной команды с соблюдением exact compatible
 merged Formal GO. Parent/context obligation нельзя закрыть самим WAL capsule.

@@ -1,6 +1,13 @@
 # ISC Finalization WAL Capsule v1
 
-**Decision document к ADR-0014. Статус: PROPOSED, требуется отдельное утверждение.**
+**Decision document к ADR-0014. WAL Capsule: PROPOSED; I-B и S-RANK: APPROVED.**
+
+Amendment от 30 сентября 2026 переносит утверждённые
+[identity/sequence решения](0014-isc-identity-sequence-amendment.md) в storage contract.
+Он не утверждает W1 целиком и не разрешает реализацию. Все новые значения ниже
+нормативны только для будущей отдельно квалифицированной semantics version `σ_next`;
+это метаобозначение, не присвоенный version string/hash или новое wire field.
+Существующие accepted/candidate semantics IDs не активируют эти правила.
 
 30 сентября 2026. Existing tasks T053/T016, HR008-001/002/018.
 Только спецификация хранения одного native `FinalizeISC`.
@@ -18,8 +25,36 @@ parent/context и source/authentication obligations сохраняются (§11
 
 Источники: candidate `45632414`, native pin
 `60c692f6e391f839829dfc64e93380db54cd507b`, не merged Formal GO.
-Точные blobs и границы проверены в
+Исторические blobs и границы исходной редакции записаны в
 [source audit](evidence/0014-isc-finalization-wal-capsule-v1-source-audit.json).
+Его report hash относится к той редакции; amendment фиксируется отдельным Git commit.
+
+### Нормативные identities и positions
+
+| Обозначение | Единственный смысл в `σ_next` |
+|---|---|
+| `B`, `b` | Полный `VoteInputSetBody` и `b=vote_input_set_body_id(B)`: **consensus body identity** ISC. Используется в seed/assignment context, каждой downstream ссылке на ISC, finalized index и semantic replay |
+| `C`, `c` | Полный typed ISC и `c=content_id(C)`: **certificate witness/artifact identity**. Original signer set и exact bytes сохраняются; разные C для одного B могут иметь разные c |
+| `s` | **Physical WAL slot** в исходном журнале actor, не byte offset и не vote count. Native signed `Vote.durable_sequence` и native receipt сохраняют этот s |
+| `V_a(s)` | **Public vote ordinal/count**: число original kind-2 records actor a в independently verified prefix до s включительно. Для vote в slot s это его public ordinal; для kind 1/3 это только неизменившийся count |
+
+`b` не заменяет quorum evidence. `c` не является consensus parent. Ни одинаковая
+`sha256:` grammar, ни hash-only equality не разрешают interchange: каждая позиция
+проверяется своим typed resolver и exact source bytes. `C.body=B`, computed b и
+computed c проверяются совместно. Generic QC ID — ещё отдельная existing identity.
+`RoundState.durable_sequence` остаётся отдельным coarse command-state счётчиком.
+
+| Позиция | Требуемая identity |
+|---|---|
+| IFQ1 command.body_hash; logical finalized `(round context) → b`; semantic replay `(round context,b)` | b |
+| Seed/EC/APC/PARAMETER/ROOT field `input_set_certificate_id` и их ISC context; assignment authority | b в `σ_next`; historical c-meaning остаётся только в старом profile |
+| IFS1 exact C; witness lookup `c → exact C`; PUBLISH_CERTIFICATE.body_hash; IFR1 certificate reference | c — artifact, не parent |
+| DRW1.sequence; IFR1 sequence; native vote durable_sequence | s |
+| Public durableSequence[a]; diagnostic public vote ordinal | V_a(s), не переписанный native receipt |
+
+No new persisted identity field: b уже есть в IFQ1 command и восстанавливается
+из B в IFS1 C; c сохраняется в existing proposed IFR1/publish positions.
+Сравнение этих двух выводов обязательно, не inference из string prefix.
 
 ## 1. Выбранный минимальный вариант и альтернативы
 
@@ -79,7 +114,8 @@ ASCII("DRW1") | U16(1) | U16(0 flags) | U32(total_frame_bytes)
 | SHA256(all preceding frame bytes) [32 raw bytes]
 ```
 
-`B(x)=U32(byte_length(x)) || x`; `s` — следующий собственный physical journal slot.
+`B(x)=U32(byte_length(x)) || x` — notation для length-prefix framing, не body B.
+`s` — следующий собственный physical journal slot.
 `total_frame_bytes` включает checksum. Existing maximum frame — 64 MiB. Unknown
 kind/version, nonzero reserved/flags, integer overflow, wrong lengths/checksum,
 trailing bytes или invalid nested encoding дают отказ. Checksum — integrity,
@@ -162,14 +198,19 @@ READY. Никакой garbage collection этих dependencies или новог
 H("IFS1") | B(P1) | B(canonical_ISC_JSON)
 ```
 
-P0/P1 — точные bytes **существующего** `encode_vote_policy_v1`, включая full
-`VoteAdmissionSnapshot`; не новый full-state codec. Для одной finalization P1
-отличается от P0 ровно set-union C в `snapshot.input_set_certificates` и
-`ISC_ID(C)` в `snapshot.finalized_input_set_ids`, в canonical order существующего
-codec. Если exact C уже есть в первой collection, его bytes сохраняются один раз;
-существующее finalized membership обрабатывается как replay, не новый append.
-Повтор/конфликт проверен раньше. Все остальные поля/collections/candidates,
-existing finalized IDs, downstream lineage и исходные objects сохраняются.
+P0/P1 используют структурный layout existing `encode_vote_policy_v1`, включая full
+`VoteAdmissionSnapshot`, но **не прежнее значение ISC reference fields**. Обе generation
+уже принадлежат `σ_next`, выбранной независимо от payload. Legacy policy с c-membership
+не превращается в P0 заменой IDs. Same binary layout не означает совместимость semantics.
+Для одной finalization P1 отличается от P0 ровно set-union original C в
+`snapshot.input_set_certificates` и **b** в `snapshot.finalized_input_set_ids`,
+в canonical order. Witness index `c → exact C` и finalized `(round context) → b`
+выводятся из проверенных collections/source, а не требуют новых wire fields.
+Если exact C уже есть, bytes сохраняются один раз. Other original witnesses того же B,
+уже присутствующие в source collections, не удаляются и не объявляются одним c.
+Already finalized b обрабатывается как semantic replay: ни второй finalization,
+ни union нового C посредством этой команды. Все остальные fields/collections,
+existing b-memberships данного profile, downstream lineage и original objects сохраняются.
 
 RoundState S0, его `state_id`, phase, current checkpoint/model/optimizer и coarse
 `durable_sequence` не меняются: existing `FinalizeISC` меняет certificate collection,
@@ -178,10 +219,14 @@ RoundState S0, его `state_id`, phase, current checkpoint/model/optimizer и c
 отдельный finalized-round/replay index; один coarse `state_root` её не описывает.
 
 C — existing `InputSetCertificate{B.context,B.input_root,q,signer_ids,B.tuples}`.
-Его canonical JSON, content-ID domain и signer bytes не меняются. P1 и JSON должны
-восстанавливаться независимо из P0/source и точно совпасть с записанными values.
+Field order/content-ID domain сохраняются, original signer bytes не переписываются.
+Для тех же полных C bytes c тот же; новый semantics context изменяет bytes/IDs.
+P1 и JSON должны восстанавливаться независимо из P0/source и точно совпасть
+с записанными values.
 Saved P1 — проверяемый output, не permission заменить state caller snapshot.
-Полная existing policy validation P1 остаётся обязательной. Если сохранённая
+Все прежние safety checks P1 остаются обязательными; их ISC lookup должен быть
+квалифицирован для b в `σ_next`. Legacy validator, ожидающий c, не объявляется
+достаточным и не обходится fallback. Если сохранённая
 collection/candidate (например, exact-lineage ABORT body) делает P1 несовместимой
 с ней, нельзя удалять или переписывать эту collection ради success: exact
 source-valid witness означает STOP по уже существующему state-compatibility
@@ -191,7 +236,7 @@ source-valid witness означает STOP по уже существующем�
 
 Exact existing type-003 `EffectBatch` bytes с одним existing `PUBLISH_CERTIFICATE`:
 
-- `body_hash=ISC_ID(C)`, `kind="PUBLISH_CERTIFICATE"`, `target_id="validators"`;
+- `body_hash=c`, `kind="PUBLISH_CERTIFICATE"`, `target_id="validators"`: это witness artifact reference, **не** consensus parent;
 - `effect_id="effect:" + original_request_id + ":02:publish"`;
 - batch `request_id/round_id` исходного command;
 - `prior_state_root=next_state_root=content_id(Type::round_state,S0)`.
@@ -207,7 +252,7 @@ ID не вводим. Полные canonical ISC bytes из section 2 сопро
 
 ```text
 H("IFR1") | U64(s)
-| T(command_id) | T(ISC_ID(C)) | T(effect_batch_id)
+| T(command_id) | T(c) | T(effect_batch_id)
 | D(P0) | D(P1)
 ```
 
@@ -215,7 +260,11 @@ IDs вычисляются existing domain/type functions. Нет receipt UUID, 
 второго WAL sequence или self-referential hash. Операционный флаг replay не входит
 в эти canonical bytes. Future dedicated ABI result должен возвращать этот receipt,
 section-3 effect и exact ISC bytes; он не маскируется под старый `SubmitReceipt`.
-Transport request nonce не меняет ранее сохранённый результат.
+Transport request nonce не меняет ранее сохранённый результат. IFR1.s равен outer
+DRW1.s. IFR1.c должен совпасть с computed content_id exact IFS1 C, а IFQ1.command.body_hash
+с computed b его B. Подстановка b в IFR1.c или c в command.body_hash отвергается до append.
+Replay возвращает исходный c/s даже если позднее предъявлен другой валидный witness C′
+того же B; semantic identity остаётся b.
 
 Все lengths/counts проверяются до allocation и append. P0/P1 ≤ existing 4 MiB каждый;
 ISC ≤ existing 4 MiB; votes и nested types сохраняют existing limits; полный DRW1 ≤
@@ -251,7 +300,10 @@ Native finalizer для единственного ранее closed B посл�
 `FinalizeISC(B)` с полным `ISCSigners(B)`; внутренние prepare stages stutter.
 Не создаётся новый vote, `GenerateSeed` или публичный recovery action. Разные legal
 cuts могут иметь разные signer sets/QC IDs; документ не вводит новый global
-signer-subset consensus rule. После finalization исходный signer set неизменен.
+signer-subset consensus rule. После finalization исходный local witness C/signers
+неизменен; разные C одного B имеют общий b и разные artifact c. Они не создают разные
+seed/assignment/ISC-parent contexts и не требуют ожидать один глобальный signer set.
+Полная downstream liveness этим разделом не объявляется доказанной.
 
 ## 6. Validate append barrier commit expose
 
@@ -265,7 +317,7 @@ signer-subset consensus rule. После finalization исходный signer se
    Любая ошибка оставляет operation uncertain и закрывает дальнейшие mutations и
    exposure до verified recovery. Не считать неудачный fsync доказательством absent.
 4. **Commit:** единая publication generation для P1/certificate membership,
-   finalized-round index, request→original-result cache, policy digest и physical tip s.
+   finalized-round→b index, c→original-C witness index, request→original-result cache, policy digest и physical tip s; public vote count V_a(s) не увеличивается.
    Readers получают old либо whole new generation, не смесь. Никакая allocation
    failure после barrier не разрешает продолжить из старого state с новым WAL tip.
 5. **Expose:** только после commit и последней binding check возвращаются original
@@ -313,40 +365,63 @@ Legacy DRS1 snapshot хранит coarse RoundState: он не заменяет 
   Если caller пытается приложить иные evidence bytes к exact historical retry,
   они не заменяют authoritative saved capsule и не обрабатываются как новый source.
 - New request ID + already finalized exact full B/context: вернуть original finalized
-  result/receipt с исходным request/effect identity. Не создавать durable alias,
+  result/receipt с исходным request/effect identity, c и s. Logical lookup использует b, а не c. Не создавать durable alias,
   дополнительный WAL slot или QC с расширенным signer set.
 - Different full B/context для уже finalized round: fail closed до append; исходные
   state, prefix и receipt остаются. Root equality не отменяет body/context conflict.
-- Recovery rebuild двух индексов: original request→result и finalized round→original
-  full B/C/receipt. Это derived caches; source — только verified capsule/prefix.
-- Late matching votes не меняют C. Другой quorum certificate с иным signer set
-  нельзя молча объявить тем же content ID или вставить вторым finalized ISC.
+- Recovery rebuild original request→result, finalized round context→b и witness
+  c→original C/receipt/source. Это derived caches; source — только verified capsule/prefix.
+- Late matching votes не меняют C. Валидный C′ с другим signer set для того же B —
+  допустимый alternate witness, не body conflict и не новая finalization. Его original
+  evidence проверяется/сохраняется в своей исходной lineage; c′ не подменяет c в старом
+  receipt. Эта команда не добавляет ради C′ второй WAL record или новый finalized object.
 
 Rejection сам по себе не создаёт новый durable vote/record или AbortQC. I/O failure
 может оставить partial bytes и отличается от semantic conflict, отвергнутого до write.
 
 ## 9. Identity и seed release
 
-Сохраняются original vote frame, `signature_id`, signer, epoch, `context_id`,
-`body_hash`, `Vote.durable_sequence` и все прежние certificate IDs. Typed ISC ID,
-proposal body ID и generic QC ID — разные existing identities, не aliases.
+Original vote frames, signatures, signer/epoch/context/body IDs, receipts и старые
+QC/WAL bytes сохраняются под **исходным** semantics profile. I-B не обещает неизменность
+IDs будущих downstream объектов: в `σ_next` их ISC parent-reference — b вместо c.
+Это утверждённое изменение native certificate-reference semantics, не миграция.
+No relabel, resign, replay conversion или rehash historical objects в новом profile.
 
-В native pin `Vote.durable_sequence` — **позиция vote в own physical WAL отправителя**,
-не число одних votes. Finalization потребляет новый local physical slot, поэтому
-следующий ещё не подписанный local vote использует уже следующий slot. Старые
-signed envelopes не перенумеровываются. Remote signer sequence не равен slot
-получателя. Public per-validator `durableSequence` увеличивается только для
-производимого vote: storage kind 3 не добавляет абстрактный vote. Требуется прежняя
-явная native→public sequence mapping, а не равенство этих чисел.
+S-RANK нормативно задаёт для полного original prefix actor a:
 
-Root profile A может изменять **новые** B/C bytes относительно исторического
-constant-root fixture; эта несовместимость уже записана в commitment decision.
-Capsule не мигрирует old QC/votes, не resigns защищённый context и не выдаёт новый
-семантический ID. Existing kinds 1/2 и their exact hashes/interpretation unchanged;
-whole-file digest после нового append закономерно изменяется, old prefix — нет.
+```text
+physicalSequence = length(L_a) = p
+V_a(s) = count(i in 1..s where L_a[i].kind = 2)
+public durableSequence[a] = V_a(p)
+native Vote.durable_sequence at vote slot s = s
+s = V_a(s) + count(kind 1 through s) + count(kind 3 through s)
+```
 
-Seed release требует finalized ISC membership в **committed durable generation**
-и existing seed-action predicates. Candidate C, записанный но unverified record,
+Учитываются все original local votes. Remote envelopes внутри kind 3 не становятся
+local kind 2. Скан проверяет **каждый** frame, kind 3 нельзя пропускать как opaque
+padding или считать vote через `kind != 1`. Projection original votes→public votes
+должна сохранять identity/order и быть injective; collapse не исправляется dedup.
+Для checkpoint counts выводятся из independently verified original prefix,
+не обнуляются и не принимаются из caller metadata. Unknown kinds fail closed.
+
+Kind 1/3 увеличивают physical p, но не V; kind 2 увеличивает оба. Native signed s
+никогда не заменяется на V_a(s). Complete surviving frame после проверенного recovery
+учитывается ровно один раз; exact retry/replay не увеличивает ни p, ни V и возвращает
+original s/c. При uncertain append/barrier tip неизвестен до verified recovery:
+не выдавать новый slot, success/effect или READY. Torn/corrupt required prefix не
+ремонтируется. No new public recovery action или production recovery implementation.
+
+Следующий новый vote после kind 3 подписывает следующий physical slot, поэтому его
+bytes/ID могут отличаться от run без kind 3; это не изменение уже подписанного vote.
+Old prefix/checksums не меняются; whole-file digest меняется только новым append.
+Root profile A и новый semantics context также меняют **новые** B/C/IDs; historical
+constant-root fixtures не «исправляются» и не становятся producer evidence.
+
+Seed release требует finalized **b** в **committed durable generation**, проверенный
+witness C с body B и existing seed-action predicates. Seed/assignment consensus identity
+не зависит от выбранного c/signers. EC/APC/PARAMETER/ROOT ISC references разрешаются
+через тот же b; artifact c lookup остаётся отдельной проверкой authority.
+Candidate C, записанный но unverified record,
 quorum count в памяти, successful `verify_input_set`, response cache без recovered
 prefix или coarse phase `ELIGIBLE` не открывают gate. Finalization effect не содержит
 random bytes/shares. Local replay обязан сначала завершить recovery, затем решить
@@ -358,10 +433,12 @@ separate existing `GenerateSeed`; receipt replay не запускает её а
 |---|---|
 | DRW1 version/checksum/framing kinds 1/2 | UNCHANGED. Новый kind 3 требует explicit dispatch; old reader отвергает его, не пропускает |
 | Old `WalRecord`, command/vote/QC IDs, old evidence | UNCHANGED для исходных bytes. Новый receipt не выдаётся за existing WalRecord; его ID не выдумывается |
-| Existing policy codec | Bytes/identity function reused. Runtime immutable-at-startup assumption needs explicit derived-generation integration; старые fixed-policy proofs этого не покрывают |
+| Policy layout / semantic dispatch | Структурный layout reused только с independently pinned `σ_next`; finalized_input_set_ids и downstream ISC references теперь b. Original C/c witnesses сохранены. Old fixed-policy/c-based lookup proofs не покрывают изменение |
 | C++ runtime/ABI/sidecar | Будущий new command/result dispatch и atomic generation cache. Старый API не может вернуть новый receipt через случайное type punning |
 | Java | Opaque transport/authentication boundary, без вычисления membership/quorum/C/P1. Native проверяет semantic authority |
-| Production TLA `Init/Next`, certificate semantics | Изменения не предлагаются. Нужна qualification implementation phases→existing `FinalizeISC`, включая signer cut и unchanged vote sequences; документ не доказывает её |
+| Production TLA `Init/Next` | I-B/S-RANK не требуют их изменения: body-based ISC и vote count уже заданы. Нужна новая qualification phases→FinalizeISC, signer cut и mapping; она не выполнена |
+| Native certificate-reference semantics / signed bytes | I-B меняет ISC parent/index c→b **только в σ_next**. Downstream signed bodies/QC IDs и bytes с новым formal_semantics_id новые; existing ISC C domain/formula не меняются. Сохранение old bytes не означает interop |
+| Semantics version / compatibility | Новый version/hash должен быть вычислен из будущей qualified closure; сейчас не назначен. Old/unknown version, c-valued parent в σ_next и b-valued witness fail closed. Ни old records, ни signatures/QC не relabel/migrate |
 | Lean и trace evidence | Existing codecs/quorum/static-body theorems сохраняют original scope. New capsule/generation/replay не следуют из v1-only WalScan/ConfigReplay proofs. Не менять старые statements ради claim |
 | R1/R2.1/R2.2, R2.3/R3 | CLOSED части не открываются. R2.3/R2 OPEN; ни full source-domain sufficiency, ни recovery refinement здесь не закрыты |
 | Downgrade | Writer, поддерживающий только kinds 1/2, не открывает журнал с kind 3. Не truncate, не rewrite, не fallback к coarse-only snapshot |
@@ -370,9 +447,58 @@ separate existing `GenerateSeed`; receipt replay не запускает её а
 `wal.hpp`, `wal.cpp`, `runtime.cpp`, dedicated capsule codec; `runtime.hpp`/dedicated
 ABI dispatch, `delta-core-cpp` ISC producer; proposed schema documentation из
 integration ADR. Affected proof targets — future NativeIscFinalizeBytes/Replay и
-refinement wrapper. Production `.tla`, certificate schema, 003 identities и approved
-provenance profile не меняются данным документом. Новую source qualification,
+refinement wrapper. Exact existing requalification inventory —
+[identity/sequence memo §3](0014-isc-identity-sequence-amendment.md#3-что-потребуется-переквалифицировать-после-approval).
+Source-bound seed/parent proofs с parent.qcId и kinds-1/2-only replay/position theorems
+не покрывают b/kind 3. Production `.tla`, schemas, 003 identities и approved provenance
+profile **сейчас не меняются**; future schema/semantic dispatch не обходится старым parser. Новую source qualification,
 semantics closure и exact compatible merged Formal GO нельзя заменить этим ADR.
+
+### Нормативные documentary vectors I-B / S-RANK
+
+Эти vectors задают expected outcomes будущей conformance qualification. Это
+**typed relational vectors**, не serialized/signature fixtures, native executions
+или новые proof results. Outcome names — обозначения документа, не ABI status codes.
+Метки B/C/IDs ниже — символы exact исходных objects, не настоящие digest literals;
+никакие private keys, подписи или «новые валидные QC» здесь не генерируются.
+
+Общая база: один допущенный context `r`, B в `σ_next`, `b=body_id(B)`;
+C_A=(B,q=3,signers=[h1,h2,z]), C_B=(B,q=3,signers=[h2,h3,z]). Для соответствующих
+independently authenticated delivered cuts оба witnesses валидны, `c_A≠c_B`,
+`b≠c_A`, `b≠c_B`. Original signatures/envelopes каждого cut остаются исходными.
+Исходная finalization, если указана, уже durable: round r→b, witness c_A→C_A,
+receipt (request_A,c_A,s=3). Root equality alone не заменяет полное равенство B.
+
+| ID | Input / ошибочная операция | Expected outcome и неизменяемое состояние |
+|---|---|---|
+| ID-N1 c-for-b | При B/C_A передать c_A вместо b в IFQ1.command.body_hash, finalized membership или seed/EC/APC/PARAMETER/ROOT ISC-parent position | `REJECT_IDENTITY_ROLE_MISMATCH`; resolver требует computed b/full B. Никакого append, parent fallback c→b или seed release |
+| ID-N2 b-for-c | Передать b вместо c_A в witness lookup, PUBLISH_CERTIFICATE.body_hash или IFR1.c при exact C_A | `REJECT_IDENTITY_ROLE_MISMATCH`; требуется computed c_A. Original receipt/effect и artifact identity не переписываются |
+| ID-N3 same-B second-finalization | После durable C_A предъявить валидный C_B того же B и попытаться append второй finalization на s=4 или replace receipt c_A→c_B | `REJECT_SECOND_FINALIZATION` / `REJECT_WITNESS_RELABEL`; p,V и original request/C_A/c_A/s=3 неизменны |
+| ID-C3 positive control | Те же C_A/C_B: проверить C_B как alternate witness и запросить уже finalized B | `VALID_ALTERNATE_WITNESS_SAME_CONSENSUS_BODY`; это **не** body conflict. Semantic replay возвращает original result C_A/c_A/s=3 без нового slot; c_B не объявляется c_A. Reject только за c_A≠c_B был бы ошибкой |
+| ID-N4 witness-ID collapse | Два exact C_A≠C_B из двух retained source cuts представить как один artifact c_A, потеряв C_B/signers/source | `REJECT_WITNESS_RELABEL`; общий b не разрешает стереть исходную witness multiplicity |
+| SQ-N1 original-vote collapse | Два distinct original kind-2 frames actor a в slots 2 и 4 с разными vote identities; candidate projection отображает оба в один public vote u, оставляя cardinality=1 | `REJECT_NONINJECTIVE_VOTE_PROJECTION`; V_a(4)=2. Ни dedup, ни удаление второго record, ни замена count на 1 не разрешены. Это negative projection, не утверждение production reachability произвольной пары |
+
+Общий mixed-WAL control (проверенные исходные frames одного actor):
+
+| Frame kind | s | V_a(s) | Native signed vote sequence | Public vote ordinal |
+|---|---:|---:|---:|---:|
+| 1 command | 1 | 0 | — | — |
+| 2 ISC vote | 2 | 1 | 2 | 1 |
+| 3 finalize B with C_A | 3 | 1 | — | — |
+| 2 EC vote referencing b | 4 | 2 | 4 | 2 |
+
+| ID | Mixed-WAL mutation / cut | Expected outcome |
+|---|---|---|
+| SQ-N2 kind-3-as-vote | Для того же 1→2→3→2 заявить V(3)=2 или V(4)=3 | `REJECT_VOTE_COUNT_MISMATCH`; правильные counts 0→1→1→2 |
+| SQ-N3 physical-as-public | Заявить public durableSequence[a]=4 на complete prefix length 4 | `REJECT_VOTE_COUNT_MISMATCH`; physical 4 не public 2 |
+| SQ-N4 signed renumber | Заменить original EC Vote.durable_sequence=4 на 2 либо original ISC sequence=2 на 1 ради public ordinal | `REJECT_ORIGINAL_SEQUENCE_REWRITE`; original signature/frame/receipt должны остаться byte-identical |
+| SQ-N5 replay append | На complete prefix p=4,V=2 повторить finalized B и добавить kind 3 в slot 5, либо вернуть IFR1.s=V(3)=1 | `REJECT_DUPLICATE_APPEND` / `REJECT_PHYSICAL_RECEIPT_MISMATCH`; правильный replay возвращает original IFR1.s=3,c_A, сохраняя p=4,V=2 |
+| SQ-C6 surviving unacknowledged control | Crash после complete kind 3, до подтверждённого barrier; independently verified surviving prefix 1→2→3 | После source/floor checks и required barrier: p=3,V=1, receipt s=3,c_A, без append. Следующий новый EC vote получает s=4,V=2 |
+| SQ-N7 uncertain/corrupt recovery | При unknown durability объявить p=3,V=1/READY без проверки; либо при torn/corrupt slot 3 пропустить его и принять slot 4 | `BLOCK_READY_UNVERIFIED_PREFIX`; no exposure/renumber/tail repair. Проверенная absence до slot 3 — отдельный контроль, не вывод из timeout |
+
+Vectors являются частью этих двух уже утверждённых решений и будущей новой semantics
+closure; они не расширяют DoD и не закрывают R2/R3. Старые raw fixtures и прежние
+source-specific evidence не изменяются; документальные controls не выдаются за tests.
 
 ## 11. Конечная граница решения и STOP
 
@@ -385,7 +511,7 @@ provenance mechanism не предлагается.
 
 1. **Explicit parent/context binding:** отдельное compatibility/refinement obligation
    из правки пользователя. Наличие parent в local source record его не удовлетворяет;
-   новых ISC полей здесь нет. Если его закрытие требует certificate change — STOP.
+   новых ISC полей здесь нет. Если его закрытие требует дополнительного certificate change сверх утверждённого I-B — STOP.
 2. **Concrete source/authentication authority:** producer/delivery history и закреплённые
    signature codec/keys должны существовать независимо. Source pin содержит opaque
    authentication callbacks и signature IDs, не полное доказательство этого binding.
@@ -396,7 +522,7 @@ provenance mechanism не предлагается.
    объявляются доказанными; корректный oversized/unrepresentable cut требует STOP,
    не silent source-domain narrowing. Это existing compatibility gate, не новый DoD.
 
-После отдельного утверждения обоих byte contracts всё равно необходима прямая
+I-B/S-RANK утверждены; W1 целиком остаётся PROPOSED. После его отдельного approval всё равно необходима прямая
 команда на следующий ограниченный этап и соблюдение formal-first STOP. Реализация
 producer, code/proofs/schemas/fixtures, R2.3/R3, new predicates и recovery не начаты.
 **STOP после этого документа.**

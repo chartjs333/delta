@@ -1,6 +1,13 @@
 # ADR-0014 — ISC Producer Integration v1
 
-**Status: DRAFT / ARCHITECTURE CHECKPOINT. Not approved for implementation.**
+**Status: integration DRAFT; I-B/S-RANK APPROVED; WAL Capsule PROPOSED.
+Not approved for implementation.**
+
+30 September 2026 documentary amendment: the FR-004 commitment profile and the
+[I-B/S-RANK decisions](0014-isc-identity-sequence-amendment.md) are approved.
+The [WAL Capsule](0014-isc-finalization-wal-capsule-v1.md) now incorporates these
+rules, but its complete storage contract still requires approval. No code,
+schema, proof, production fixture or R2.3/R3 work is authorized.
 
 30 September 2026. Existing tasks: feature-008 T016, HR008-002/003/015/018;
 feature-000 T053. Documentation only; R2.3 and R3 remain stopped.
@@ -9,7 +16,8 @@ Source base: `ce63d3eca0175b5b82726a1994402dc14d3be1b5`.
 Native source reference: `60c692f6e391f839829dfc64e93380db54cd507b` (PR50).
 The latter is an inspected implementation reference, **not** a merged formal authority.
 Exact inspected blobs are recorded in
-[the source inventory](evidence/0014-isc-producer-integration-source-audit.json).
+[the historical source inventory](evidence/0014-isc-producer-integration-source-audit.json).
+Its report hash records the pre-amendment document; this amendment has its own Git commit.
 
 ## 0. Decision boundary and result
 
@@ -29,31 +37,41 @@ durable, authenticated and delivered matching ISC votes
 → expose the original canonical ISC/effect
 ```
 
-**A complete, executable integration contract cannot yet be declared specified.**
-The audit found a missing concrete binding for an existing obligation, feature-008
-**FR-004: the ISC contains the ordered input array and its Merkle root**.
-Neither the inspected contracts nor the native implementation specify how an ISC
-tuple becomes a Merkle leaf: its exact bytes, leaf hash domain and the selection
-of the existing Merkle construction for this particular object.
+**The original FR-004 byte-contract gap is resolved at the specification level** by
+[ISC Commitment Profile v1, A](0014-isc-commitment-profile-v1.md). This does not mean
+`InputLedger::freeze` or `verify_input_set` already implements that check. The original
+native source observations in §12 remain historical evidence, not new qualification.
 
-`InputLedger::freeze` returns ordered ticket/commitment/AC references, not that root.
-`ChainVerifier::verify_input_set` validates context/signers and obtains the canonical
-certificate ID, but does not establish that `input_root` commits to `tuples`.
-The fixture generator supplies `cid("input-root")`, independent of the tuple array.
-An existing generic Merkle helper is not an ISC leaf contract.
+The normative integration identities are now I-B/S-RANK. All changed parent-reference
+meanings apply only to a future independently pinned, qualified semantics version
+`σ_next` (notation, not a newly assigned version/hash or wire field). Existing
+accepted/candidate semantics IDs are not authority for this change. W1 approval,
+explicit parent/context completeness and source/bounds qualification remain open.
+No new parent field or alternative provenance mechanism is introduced.
 
-**STOP at this architecture checkpoint: CANONICAL ISC INPUT-ROOT BINDING MISSING.**
-No leaf encoding/domain, replacement root, new predicate or producer implementation
-is introduced here. This is an unresolved concretization of FR-004, not a new DoD
-item. It does not reopen the accepted R2.1/R2.2 structural/arithmetic results.
+### Normative terminology and compatibility boundary
 
-It has **not** been established that production `Init/Next`, the existing QC ID
-formula or old WAL identities must change. It *has* been established that simply
-connecting the existing helpers does not verify the required root binding. Choosing
-the missing certificate-byte interpretation, or silently treating the root as an
-opaque label, would exceed a claim of an already fixed integration contract.
-The sections below preserve the determined transaction requirements and identify
-the exact blocked precondition; they are not an implementation authorization.
+| Symbol | Meaning and use in σ_next |
+|---|---|
+| `B`, `b` | Full `VoteInputSetBody`; `b=vote_input_set_body_id(B)` is the **consensus body identity** in seed/assignment, every downstream ISC parent-reference, logical finalized index and semantic replay |
+| `C`, `c` | Original typed ISC witness; `c=content_id(C)` is its **certificate artifact identity**, including original signers. Witness bytes, signatures and source lineage are retained; different c values may certify the same b |
+| `s` | Original **physical WAL slot**, including kinds 1/2/3. Native signed Vote.durable_sequence and native receipt sequence retain s |
+| `V_a(s)` | **Public vote ordinal/count** = number of original actor-a kind-2 records in the verified prefix through s. At a vote slot it is that vote's public ordinal; kinds 1/3 do not increment it |
+
+Finalized lookup is `(round context)→b`; artifact lookup is `c→exact C`; semantic
+replay is `(round context,b)→original result/C/c/s`. A common b is not permission
+to merge witness bytes/identities or erase votes. Native `input_set_certificate_id`
+in seed/EC/APC/PARAMETER/ROOT changes from historical c to b **only in σ_next**;
+IFR1 and publish-artifact references remain c. Typed source resolution enforces each
+role; digest string grammar cannot distinguish them. Full-context comparison remains
+mandatory; none of these IDs supplies authority without the admitted source/quorum.
+
+This is an approved native certificate-reference semantic change. It changes new
+downstream signed bodies/QC IDs; no old object, signature, QC, WAL or receipt is
+migrated, resigned, repaired or relabelled. No old history is made σ_next-compatible
+by changing its references. Current production Init/Next is already body-based and
+vote-count-based; no change to it is selected. Qualification of the concrete relation
+is still required. Coarse RoundState.durable_sequence is a separate command counter.
 
 ## 1. Exact inputs and their owners
 
@@ -70,7 +88,7 @@ nor declares the full source state admissible for R2.
 | Validator set | Independently authorized epoch and original ordered validator IDs, role/key bindings from existing enrollment/authentication contracts. Never derive membership from the votes being checked |
 | Quorum profile | Existing `QuorumPolicy`/`ValidatorPolicy`: `n=3f+1`, `q=2f+1`; configured threshold, certificate threshold and epoch agree. No arrival-dependent threshold |
 | Frozen inputs | The prior `InputLedger::freeze()` result: original `ticket_id`, `commitment_id`, `certificate_id`. Bind `domain_id` from the original ticket; construct the existing `InputTuple` fields `availability_certificate_id`, `commitment_id`, `domain_id`, `ticket_id`. Preserve strict `(ticket_id, commitment_id)` order and uniqueness |
-| Closed body | Existing `VoteInputSetBody`: full `Context`, `input_root`, `tuples`. Its content ID is `vote_input_set_body_id`. It is already a closed proposal, not a caller-created alternate input set. **Root-to-tuple verification is the blocked binding in §12** |
+| Closed body | Existing `VoteInputSetBody`: full `Context`, `input_root`, `tuples`. Its content ID is `vote_input_set_body_id`. It is already a closed proposal, not a caller-created alternate input set. Root-to-tuple verification MUST use approved Commitment Profile A; current helpers alone do not establish it |
 | Original envelopes | Canonical original `Vote` bytes, original signature/authentication material and signer/epoch binding, `vote_id`, and the existing persist/send/delivery lineage. All original `durable_sequence`, `signature_id`, context/body hashes and signer IDs remain intact |
 | Reactor cut | Complete delivered-vote inventory at the serialized finalization point, existing local durable-prefix position, current finalized-per-round index, complete prior certificate collections, exact request bytes/ID and immutable policy/source bindings |
 
@@ -138,8 +156,10 @@ For a **previously closed** body B, pure core performs the following finite work
    B.tuples}`. Run `verify_input_set` as a structural/context/signer back-check,
    in addition to the lineage, authentication and root checks above.
 8. Construct a candidate state by preserving all prior collections and adding
-   precisely this ISC and its finalized membership. No deletion of downstream
-   lineage, re-keying or coordinate-level objects. Return an internal candidate,
+   precisely original C in the witness collection and b in finalized membership of
+   the same σ_next generation. Preserve other retained C variants and their c IDs;
+   already-finalized b is replay, not another insertion/finalization. No deletion of
+   downstream lineage, historical re-keying or coordinate-level objects. Return an internal candidate,
    not externally sendable bytes.
 
 `ISCBuilder/QC` names the existing feature-008 plan node. No such complete producer
@@ -150,27 +170,36 @@ for proposal validation; it must not be reused as the actual quorum builder.
 The same body and the same received cut produce identical bytes. Different legal
 cuts may have different signer sets and therefore different existing QC IDs.
 This ADR does not add a new global minimum-quorum-selection rule or promise identical
-QC bytes across unequal signer cuts. Round finalization and retry preserve the first
-locally committed certificate under the existing safety contract.
+QC bytes across unequal signer cuts. Each cut produces the same consensus b for
+that B, even with different c. Finalization/retry preserve the first locally committed
+C/c/receipt; another valid witness is not a conflicting body and does not create a
+second finalization. No globally unique signer witness is required for seed/ISC-parent
+identity. This removes the ISC-witness-induced context split, not all liveness obligations.
 
 ## 4. Canonical identity and helper reuse
 
 For an existing typed ISC C:
 
 ```text
-ISC_ID(C) = "sha256:" + lowerhex(SHA256(
+c = content_id(C) = "sha256:" + lowerhex(SHA256(
   ASCII("deltareduce.008.input-set-certificate.v1") || 00 || canonical_json(C)))
 ```
 
 Keep the existing field order, versions, context, ordered tuples and sorted unique
-`signer_ids`. The body ID (`deltareduce.vote.input-set-body.v1`) is a different ID;
-it excludes quorum-only signer/threshold data. Neither is the generic type-004 QC
-envelope's content ID. Do not alias these three identities.
+`signer_ids`. The consensus body ID b (`deltareduce.vote.input-set-body.v1`) is different;
+it excludes quorum-only signer/threshold data. b is the ISC parent, c is the witness
+artifact. Neither is the generic type-004 QC envelope's content ID. Do not alias
+these identities or use c as a fallback when b lookup fails. For identical full
+C bytes, the old content-ID formula still gives the same c; a changed semantics
+context changes bytes and resulting IDs.
 
 Original Vote IDs use the existing type-003 vote domain over the original complete
 canonical envelope. Association with typed ISC is retained as native evidence,
 without inserting vote IDs, new signatures or a new certificate type into ISC bytes.
-All old vote/QC bytes and their hashes remain unchanged.
+All old vote/QC bytes and their hashes remain unchanged under their original
+profile. This preservation is not interoperability: new σ_next parent references,
+semantics-tagged signed payloads and dependent QC IDs differ. Original envelope
+bytes are never regenerated under σ_next merely to match its parent terminology.
 
 | Existing helper | Reuse; limit of its current guarantee |
 |---|---|
@@ -178,7 +207,7 @@ All old vote/QC bytes and their hashes remain unchanged.
 | `VoteJournal::record` | Local original vote uniqueness/replay; not a delivered-vote collector or signature verifier |
 | `validate_quorum` | Existing threshold, canonical signer membership and supplied vote-ID cardinality checks; not a received-vote assembler |
 | `ChainVerifier::verify_input_set` | Existing context/signer/encoding back-check; no Merkle derivation or producer proof |
-| `canonical_json` / `content_id` | Exact existing typed ISC identity; never serialize structs or reconstruct a different signed body |
+| `canonical_json` / `content_id` | Exact witness C/c encoding; consensus b separately uses vote_input_set_body_id. Preserve old objects; no struct serialization or signing-byte reconstruction |
 | Runtime WAL/receipt cache | Existing single writer, durable directory binding, append/barrier and exact receipt replay; requires the missing transaction integration described below |
 
 ## 5. Durable transaction contract and unresolved storage binding
@@ -196,11 +225,11 @@ The required state transaction is:
 2. **Append:** append one self-contained finalization transaction to the same
    native-owned consensus WAL. It must bind prior source/policy, exact original
    request, closed body, full received cut used, original envelope bytes, candidate
-   ISC bytes/ID, next certificate membership and exact effect/receipt. A hash without
+   ISC bytes/c plus the b binding, next consensus membership and exact effect/receipt. A hash without
    recoverable bytes is insufficient. No parallel ISC authority journal.
 3. **Barrier:** complete the existing fsync/durability and directory-binding checks.
    Until successful, no sendable ISC/seed effect or success receipt escapes.
-4. **Commit:** atomically install ISC collection/index and immutable source-policy
+4. **Commit:** atomically install C/c witness collection, round→b index and immutable source-policy
    generation, source cut and exact replay cache entry. Keep previous generations
    for interpreting original vote records; never rebind them to a later policy.
 5. **Expose:** return the committed canonical ISC effect and its original transaction
@@ -214,20 +243,33 @@ Thus simply passing a hash-only `Command` to `Runtime::submit` loses the require
 producer evidence and certificate state. Resetting `vote_authority_invalidated_`
 or replacing the startup snapshot by caller data would not solve this.
 
-**The exact new capsule/discriminator is not selected after the checkpoint in §0.**
-It is a remaining concrete integration decision, not an existing implemented format.
-Any subsequently proposed additive encoding must preserve all original DRW1 record
-bytes/checksums, original sequence positions, 003 hash domains/type codes and old
-record interpretations; old readers must reject unsupported extensions. It must
-also define how the full certificate state is reconstructed from the WAL even though
-the legacy `RoundState`/snapshot cache does not contain it. Rewriting old v1 records
-or reinterpreting `FINALIZE_INPUT_FREEZE` is not permitted by this ADR.
+The separately proposed W1 capsule uses additive **kind 3** and four typed sections
+in the existing DRW1 frame. Its full status remains PROPOSED; approved I-B/S-RANK
+are now normative within it. Original kinds 1/2, frame checksum algorithm and source
+positions are not rewritten. The layout's reuse does not reuse old c-based policy
+semantics: P0/P1 must already belong to independently selected σ_next. Old readers
+reject unsupported kind/profile; no reinterpretation of FINALIZE_INPUT_FREEZE or
+automatic import/relabel of legacy policy is allowed. Full state/index/cache must be
+reconstructed from verified retained prefix/capsules, not the coarse legacy snapshot.
 
-Three counters/identities must stay distinct: original signer `Vote.durable_sequence`,
-native transition-state bookkeeping, and physical `JournalEntry.sequence`. One
-successful finalization consumes one new local WAL position, no vote position.
-An exact replay consumes none. Existing votes retain their original policy digest
-and sequence even when a later, independently derived policy generation is committed.
+For a verified complete actor-a journal, physical p=length(L_a), and:
+
+```text
+V_a(s) = count(original kind-2 entries through physical slot s)
+public durableSequence[a] = V_a(p)
+native signed Vote.durable_sequence at a vote slot s = s
+s = V_a(s) + count(kind 1 through s) + count(kind 3 through s)
+```
+
+A finalization increments p only. A new vote increments p and V; exact replay
+increments neither and returns the original physical s and witness c. Remote
+vote envelopes retained in a capsule are not new local votes. The public projection
+must preserve all original votes injectively; collapsing them and counting a set
+is rejected. Verify each kind-3 frame before excluding it from the vote count;
+`kind != 1` is not a valid vote classifier. Counts across checkpoint boundaries come
+from verified complete history, not caller metadata or a reset. Native policy digests
+and signed sequences are retained. The normative positive/negative mixed-WAL controls
+are in [WAL Capsule §10](0014-isc-finalization-wal-capsule-v1.md#нормативные-documentary-vectors-i-b--s-rank).
 
 ## 6. Crash behavior required at every boundary
 
@@ -237,9 +279,9 @@ implementation or a proof of R3, and does not authorize general snapshot recover
 | Crash/failure point | Required recovery and visibility |
 |---|---|
 | Before/during validation; after candidate but before append | Old committed state; no final ISC, receipt or seed exposure; retry may attempt one transaction |
-| During append, torn final record | No exposure. Reconcile the tail under existing durability/provenance rules. An authenticated trusted floor cannot be silently rolled back to discard it. Ambiguity blocks readiness |
+| During append, torn final record | No exposure or automatic tail repair/truncation. Required prefix ambiguity blocks READY under the approved profile; no rollback of trusted floor or skipping kind 3 |
 | Complete append before barrier, or failed barrier | Do not assume the record is absent: complete bytes can survive. No success/effect on the failed call. Recovery verifies the actual durable prefix and source binding before deciding absence or replay |
-| Barrier succeeded, before in-memory commit | Recover the complete original transaction, derive the same ISC and membership, restore its original sequence/receipt; do not append a replacement |
+| Barrier succeeded, before in-memory commit | Recover the original C/c, b membership and physical s/receipt once; kind 3 does not increase V. No replacement append |
 | During in-memory publication | Readers observe either old or complete new generation, never a partial index/collection/cache combination. On process failure, replay resolves from durable bytes |
 | After commit, before receipt/effect return | Restore/reuse the original receipt/effect and sequence; caller timeout does not authorize another finalization |
 | After copying/returning effect, before/after Java sends | Retransmission uses identical effect/ISC IDs. Transport delivery may repeat; no additional protocol vote or WAL append |
@@ -263,6 +305,13 @@ into a false promise that failed I/O writes zero bytes.
 - Process restart reconstructs both exact-request and finalized-round indexes from
   durable source transactions; a memory-only cache is insufficient.
 
+For the same full B/context, a different valid C/c is an alternate witness, not a
+body conflict. It cannot replace the original receipt c, create another physical s,
+or change seed/assignment identity. Witness lookup preserves original C/c and source
+multiplicity. Recovery reconstructs round→b and c→C bindings together with the
+original result index. Public vote count is recomputed from all original kind-2
+entries, never from witness/signature count.
+
 The rejection result need not fabricate a durable `RejectConflictingISC` event.
 If no protocol rejection record is committed, it projects as unchanged protocol
 state with a local rejection, not as an invented public action. Existing modeled
@@ -271,7 +320,9 @@ rejection/replay collections cannot be silently populated or erased.
 ## 8. Seed release and Java boundary
 
 Seed generation/reveal, EC and APC admission must resolve their parent against the
-**committed durable ISC index**. A temporary candidate, a structural `verify_input_set`
+**committed durable round→b index**, backed by a verified witness C with that B.
+The seed/assignment consensus identity is independent of the selected c/signers;
+all downstream ISC parent references use b. A temporary candidate, a structural `verify_input_set`
 success, an unbarriered WAL append or Java's receipt of quorum messages does not
 open this gate. Finalization returns no seed material. Later seed work remains its
 existing separate transition; no seed algorithm is redesigned here.
@@ -287,13 +338,14 @@ no Java pointer after a downcall; bounded-copy paths have equal outputs.
 
 The following is the bounded integration footprint identified so far. Existing paths
 refer to PR50 or the candidate source pin; `NEW` entries are proposed file names,
-**not files created by this ADR**. Since the root and durable capsule are not fixed,
-this is not presented as a finalized coding checklist or a closed proof plan.
+**not files created by this ADR**. The root and I-B/S-RANK decisions are approved,
+but the complete WAL Capsule is not. This is a conditional impact inventory,
+not a finalized coding checklist, new proof layer or closed R2/R3 proof plan.
 
 | Area | Exact files and intended role |
 |---|---|
-| Core producer | NEW `delta-core-cpp/include/delta/certificates/isc_producer.hpp`, NEW `delta-core-cpp/src/certificates/isc_producer.cpp`: pure received-cut validation, grouping, candidate/receipt plan. Reuse `delta-core-cpp/include/delta/core/consensus.hpp`, `delta-core-cpp/src/consensus.cpp`; no change to existing vote hash/context algorithms |
-| Certificate bytes | `delta-core-cpp/include/delta/certificates/contracts.hpp`, `delta-core-cpp/src/certificates/contracts.cpp`, `delta-core-cpp/src/certificates/verifier.cpp`: preserve existing ISC bytes/ID and structural verifier. Any new root helper/binding is **not authorized**, pending §12 |
+| Core producer | NEW `delta-core-cpp/include/delta/certificates/isc_producer.hpp`, NEW `delta-core-cpp/src/certificates/isc_producer.cpp`: pure received-cut validation, grouping, candidate/receipt plan. Reuse `delta-core-cpp/include/delta/core/consensus.hpp`, `delta-core-cpp/src/consensus.cpp`; reuse hash domains/algorithms; σ_next ISC references/derived context inputs use b, so downstream IDs change |
+| Certificate bytes | `delta-core-cpp/include/delta/certificates/contracts.hpp`, `delta-core-cpp/src/certificates/contracts.cpp`, `delta-core-cpp/src/certificates/verifier.cpp`: preserve historical ISC bytes/c and hash formulas; future approved A root check and σ_next b-parent lookup need qualification. `delta-core-cpp/src/certificates/vote_admission.cpp` and `src/robust/plan.cpp` references also require semantic dispatch; no implementation authorized |
 | Native integration | `delta-runtime-cpp/include/delta/runtime/runtime.hpp`, `delta-runtime-cpp/src/runtime.cpp`, `delta-runtime-cpp/include/delta/runtime/certificate_runtime.hpp`, `delta-runtime-cpp/src/certificate_runtime.cpp`: reactor operation, atomic full-state/index commit, seed guard, exact replay and policy generations |
 | Durable bytes | `delta-runtime-cpp/src/wal.hpp`, `delta-runtime-cpp/src/wal.cpp`; NEW `delta-runtime-cpp/src/isc_finalize_codec.hpp`, NEW `delta-runtime-cpp/src/isc_finalize_codec.cpp`: complete transaction binding and decoder dispatch, once the additive format is approved. `delta-runtime-cpp/src/vote_codec.cpp` old DVPOL001/vote encodings must remain byte-identical |
 | FFI | `delta-ffi/include/delta_abi.h`, `delta-ffi/src/certificates_abi.cpp`, `delta-ffi/src/delta_abi.cpp`: one bounded command/effect operation and version/capability checks; no fine-grained Java setters. `noexcept`, size/error behavior and replay receipts remain explicit |
@@ -308,23 +360,25 @@ this is not presented as a finalized coding checklist or a closed proof plan.
 | Transport tests | `delta-node-java/src/test/java/io/deltareduce/node/certificates/CertificatesConformance.java`, `delta-node-java/src/test/java/io/deltareduce/node/NativeRuntimeFfmConformance.java`, `delta-node-java/src/test/java/io/deltareduce/node/sidecar/NativeSidecarConformance.java`; `delta-runtime-cpp/tests/sidecar_protocol_test.cpp` |
 | Fixtures/build/evidence | NEW `delta-protocol/fixtures/008/isc-producer-v1.json`; NEW `specs/008-certificates-and-consensus/evidence/isc-producer-integration-v1.json`; `CMakeLists.txt`, `Makefile` for targeted registration. Existing 003/008 golden fixtures and prior evidence remain immutable comparison inputs |
 
-A future exact root decision could change the proposed footprint; that must be
-reported before coding, not silently absorbed into an open-ended task. No changes
+Future W1 qualification beyond these approved I-B/S-RANK amendments must be reported
+before coding, not silently absorbed into an open-ended task. No changes
 to the frozen provenance profile or R1–R7 are authorized here.
 
 ## 10. Acceptance criteria and effect on evidence
 
-Acceptance is blocked until the concrete root binding and complete durable transaction
-format are approved. Thereafter the required outcomes are:
+Commitment A and I-B/S-RANK are approved. Acceptance still requires W1 approval and
+separately authorized qualification/implementation; the following outcomes are not
+claimed achieved by this documentary amendment:
 
 1. Original native envelopes and closed inputs produce the expected canonical ISC,
-   with every signer justified by the complete delivered cut and all identities kept.
+   with every signer justified by the complete delivered cut, b used as consensus identity and original c/vote identities retained.
    Root validity is checked from source bytes, not a success flag or hash label.
 2. A below-quorum/mixed-context/malformed/authentication-failed input cannot append
    a finalization; duplicates cannot increase quorum. Correct Byzantine multiplicity
    remains in source evidence, without renumbering or synthetic honest votes.
-3. Exactly one committed certificate per round. Same request/restart retry returns
-   original ISC/effect/sequence; conflicting finalization leaves the prior durable
+3. Exactly one finalized consensus B/b per round context; distinct valid C/c witnesses
+   for B are not new consensus values. Same request/restart retry returns original
+   C/c/effect/physical s; conflicting B finalization leaves the prior durable
    prefix and all committed collections unchanged.
 4. At each §6 cut, no pre-barrier exposure and no lost/duplicated committed finalization.
    The actual complete-append/failed-barrier-survived case must be exercised; a fault
@@ -334,7 +388,10 @@ format are approved. Thereafter the required outcomes are:
    verifier-only paths cannot release randomness or allow EC/APC.
 6. New implementation phases refine the **unchanged** public actions and no-double-vote,
    context, quorum, input freeze and seed-order invariants. Existing raw bytes, vote/QC
-   IDs, WAL prefix identities and signer sequences replay unchanged.
+   IDs, WAL prefix identities and signer sequences replay under their original profile;
+   they are not imported by relabel into σ_next. Mixed 1→2→3→2 projects to counts
+   0→1→1→2; original vote slots remain 2 and 4. Role substitutions and vote collapse
+   must fail as specified by the documentary vectors in WAL Capsule §10.
 7. Native/FFM/sidecar paths agree on canonical results and fail-closed behavior;
    Java contains no quorum/finalization logic. Source-specific evidence names its
    exact source/semantics/profile and declared cryptographic/storage assumptions.
@@ -349,7 +406,11 @@ Formal-first ordering remains mandatory: after a separate approval, specify/chec
 affected refinement and compatibility obligations in feature 000; production code
 still requires the exact compatible merged `FormalVerificationReport(GO)`. This ADR
 is not that report. Any required change to production `Init/Next`, certificate
-meaning, original QC/WAL IDs or the approved provenance profile is a fresh STOP.
+meaning beyond approved I-B, original QC/WAL identities or the approved provenance
+profile is a fresh STOP. I-B authorizes future c→b reference semantics, not changing
+already-existing objects. The requalification inventory in the identity/sequence memo
+includes old parent.qcId proofs, mixed-WAL position/count proofs and full source loaders;
+none is silently treated as a theorem about σ_next/kind 3.
 
 ## 11. Conditional active-time estimate
 
@@ -369,46 +430,29 @@ closure, R3 closure or full Formal GO, and not permission to start.
 
 External review/merged authority waits and general provenance import/recovery are
 excluded. The observed fixed-policy replay and coarse RoundState are the main cost;
-this is not merely connecting a serializer to `VoteJournal`. Until §12 is resolved,
-this interval must not be presented as a committed execution budget.
+this is not merely connecting a serializer to `VoteJournal`. The historical 50–84h
+interval is **not approved or re-estimated** by the documentary
+amendment and must not be presented as a committed execution budget.
 
-## 12. Separate architecture checkpoint: the missing root binding
+## 12. Historical checkpoint and current STOP
 
-**Existing obligation:** feature-008 FR-004/FR-005, not a new requirement.
+The original source audit found that InputLedger::freeze returned references,
+verify_input_set checked structural/context/signer validity, and the fixture used
+`cid("input-root")`. Those observations concern the pinned old source, not the
+current specification. Approved Commitment A now supplies the missing leaf/order/tree
+byte contract for FR-004; no native implementation or existing fixture was changed.
 
-**Source evidence:**
+Approved I-B supplies the common ISC consensus b while retaining witness c.
+Approved S-RANK supplies physical-slot/public-vote-count terminology and mapping.
+The corresponding negative vectors are normative documentary expectations for the
+future semantics closure, not generated production fixtures or passing tests.
 
-- PR50 `delta-core-cpp/src/consensus.cpp:690–710`: freeze produces references only.
-- PR50 `delta-core-cpp/src/certificates/contracts.cpp:240–275`: `input_root` is checked
-  as a content ID and serialized, without derivation from tuples.
-- PR50 `delta-core-cpp/src/certificates/verifier.cpp:181–185`: context/signers/content
-  ID only; unlike AggregateRoot's explicit Merkle check in `contracts.cpp:498–500`.
-- `specs/008-certificates-and-consensus/scripts/certificate_contracts.py:451–475`:
-  `cid(label)=SHA256(label)`; ISC fixture uses the constant label `input-root`.
-- Existing `delta-core-cpp/src/shards/envelope.cpp:127–162` defines a Merkle tree over
-  already identified leaves. It does not say which bytes/IDs constitute ISC leaves.
-  `aggregate_merkle_root` is for a different certificate and leaf type.
+WAL Capsule remains PROPOSED. Explicit parent/context completeness, independent
+source authority and full-domain/bounds compatibility remain unqualified; no extra
+fields, alternate provenance profile or old-history migration is selected here.
+No new semantics version/hash is assigned by this ADR. Integration and the old
+50–84h estimate remain unapproved for execution.
 
-Minimal **structural**, not production-reachability, witness: hold one valid context,
-one ordered tuple and one valid signer set fixed. Substitute two distinct well-formed
-`sha256:...` strings for `input_root`. Inspection of the verifier/encoder shows neither
-is checked against that tuple; both receive canonical, different body/certificate IDs.
-For a deterministic canonical Merkle construction over that same tuple array, both
-cannot be the required root. No native execution or new proof is claimed by this
-source-derived witness, and it does not label either historical fixture a demonstrated
-production-reachable bad certificate.
-
-The missing decision is exactly the ISC leaf preimage/domain and Merkle construction
-binding (including odd-leaf handling), with an authoritative vector. The order and
-source tuple fields already exist. The choices must not be guessed from AC IDs,
-aggregate leaves, generic JSON hashing or the fixture's constant root. No algorithm
-is selected here and no old signed body/root is recalculated or repaired.
-
-This may be resolved by locating an already authoritative concrete contract or by an
-explicitly approved concretization of FR-004 followed by the formal compatibility
-gate. It is not evidence that a new certificate type, authority or public `Init/Next`
-is necessary. Until resolved, a claim of a **fully specified production ISC transition**
-would hide an unchecked certificate-semantic premise.
-
-**STOP after this ADR/checkpoint.** No implementation, new proofs, R2.3/R3 continuation,
-scope expansion, new authority, schema file or root rule was created.
+**STOP after this documentary amendment.** No code, schemas, proofs, R2.3/R3,
+production recovery or further implementation work until a new explicit instruction
+and the applicable exact compatible merged Formal GO gate.

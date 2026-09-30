@@ -1,13 +1,18 @@
 # ISC identity / sequence mapping — decision memo
 
-**30 сентября 2026. PROPOSED: требуются два отдельных решения пользователя.**
+**30 сентября 2026. I-B и S-RANK APPROVED как архитектурные решения.
+Реализация не разрешена.**
 Existing tasks T053/T016, HR008-001/002/018. Только amendment к
 [WAL Capsule v1](0014-isc-finalization-wal-capsule-v1.md), которая остаётся PROPOSED.
 [Commitment Profile A](0014-isc-commitment-profile-v1.md) утверждён только для FR-004.
-Ниже выбран минимальный *рекомендуемый* вариант каждого решения; они не утверждены
-и не реализованы. Код, schemas, proofs, R2.3/R3 и frozen DoD/Profile не меняются.
+Пользователь утвердил I-B и S-RANK; альтернативы ниже сохраняются как rationale,
+не открытые варианты. Изменения действуют только в будущей независимо закреплённой
+и квалифицированной semantics version `σ_next`, не в существующих accepted/candidate
+IDs. σ_next — обозначение, новый version/hash не назначен. Код, schemas, proofs,
+R2.3/R3 и frozen DoD/Profile не меняются. Документальные amendments внесены в
+WAL Capsule и Producer Integration; W1 целиком остаётся PROPOSED.
 
-## 1. ISC consensus identity: рекомендуемый I-B
+## 1. ISC consensus identity: утверждённый I-B
 
 Обозначения: `B` — существующий `VoteInputSetBody`; `b=vote_input_set_body_id(B)`;
 `C` — полный typed ISC с quorum/signers; `c=content_id(C)`.
@@ -15,7 +20,7 @@ Existing tasks T053/T016, HR008-001/002/018. Только amendment к
 `deltareduce.vote.input-set-body.v1`. `c` хэширует canonical ISC, включая signer set,
 под `deltareduce.008.input-set-certificate.v1`. Это **разные существующие IDs** [N1].
 
-**Предложение I-B: единая consensus identity ISC — `b`; `C/c` — неизменяемый
+**Нормативное решение I-B: единая consensus identity ISC — `b`; `C/c` — неизменяемый
 certificate witness / identity его bytes, удостоверяющий B.** Body ID сам по себе
 не является authority: нужен проверенный quorum witness для того же полного B,
 независимо допущенные context/configuration и durable finalization.
@@ -50,7 +55,7 @@ canonical один set, но не делает разные sets одинако�
 
 | Альтернатива | Certificate semantics / bytes / Init/Next | Liveness при разных cuts |
 |---|---|---|
-| **I-B, рекомендуется** | Меняет native смысл ISC parent-reference/index; ISC C encoding/hash formula остаются. Downstream signed references/IDs меняются. Existing production TLA Init/Next менять для выбора B не требуется: они уже body-based | Устраняет именно split из-за ISC witnesses при одном B; не требует ожидания конкретного signer subset. Полная liveness по-прежнему зависит от существующих seed/network/quorum предпосылок и ещё не доказана |
+| **I-B, утверждён** | Меняет native смысл ISC parent-reference/index; ISC C encoding/hash formula остаются. Downstream signed references/IDs меняются. Existing production TLA Init/Next менять для выбора B не требуется: они уже body-based | Устраняет именно split из-за ISC witnesses при одном B; не требует ожидания конкретного signer subset. Полная liveness по-прежнему зависит от существующих seed/network/quorum предпосылок и ещё не доказана |
 | I-C: полный C | Сохраняет нынешние native ссылки/bytes. Прямой перевод public identity на C меняет seed/parent predicates и семантику соответствующих Next actions; простая подстановка в refinement этого не доказывает | Текущий контракт не обеспечивает общий C. First-q и minimum-seen зависят от cut; ожидание фиксированных signers/all validators может ждать Byzantine бесконечно |
 | I-W: protocol-unique witness | В существующем контракте нет правила, делающего witness глобально уникальным. Дополнительное agreement/selection либо другой certificate profile — отдельное семантическое решение; последствия Init/Next/bytes нельзя определить без этого решения | Из существующих producer/quorum rules такая liveness не следует. Новый механизм здесь не проектируется |
 
@@ -63,25 +68,26 @@ hash и ISC C bytes/hash для *тех же* B/signers/context сохраняю
 не мигрируют путём relabel. No-double-vote не разрешает пересигнировать старый
 защищённый context. Сейчас никакой ID/version не изменён и не назначен.
 
-W1 §§4/8/9 поэтому нуждаются в amendment **после approval**: finalized consensus
-lookup должен использовать b; его существующий IFQ1 command body hash уже равен b;
-original C/c в persisted witness/receipt/publish остаются artifact references.
-Точный layout не исправляется этим memo; фраза W1 о неизменности всех downstream
-identities не может служить совместимостью для I-B. Если обязательна неизменность
-нынешнего native значения каждого QC parent ID, I-B несовместим с этим условием.
+[W1](0014-isc-finalization-wal-capsule-v1.md) теперь нормативно различает:
+consensus parent/finalized lookup = b; original witness/receipt/publish artifact = c;
+native physical slot = s; public vote ordinal/count = V_a(s). Его IFQ1 command body hash
+уже содержит b; IFR1 и PUBLISH_CERTIFICATE сохраняют artifact c. Дополнительные wire
+identity fields не добавлены. Старое обещание неизменности смысла downstream
+parent-reference заменено явной σ_next-only compatibility boundary. Старые C/QC/WAL
+не relabel или мигрируют; parent.qcId в old source остаётся фактом о старой версии.
 
 Это решение **не закрывает explicit parent/context completeness**: существующий B
 не дополняется parent field, transitive configuration binding не объявляется
 достаточным. Также не решается уникальность witnesses остальных certificate видов.
 
-## 2. Sequence mapping: рекомендуемый S-RANK
+## 2. Sequence mapping: утверждённый S-RANK
 
 Область: один actor/фиксированный epoch approved profile, полный независимо
 проверенный original WAL prefix `L_a[1..p]`. Physical slot — порядковый номер frame,
 **не byte offset**. Все local kind-2 records принадлежат этому actor; remote vote
 envelopes внутри kind 3 — witness evidence, не новые local vote records [N3,L2].
 
-Предлагаемая relation использует существующие счётчики раздельно:
+Нормативная relation использует существующие счётчики раздельно:
 
 ```text
 physicalSequence(L_a) = p = length(L_a)
@@ -156,7 +162,12 @@ native slot на vote ordinal меняет подписанные bytes/receipt 
 ## 4. Evidence path и STOP
 
 Исходники прочитаны без выполнения новых native/formal tests. Exact pinned blobs
-и documentary checks: [source audit](evidence/0014-isc-identity-sequence-source-audit.json).
+и documentary checks исходной редакции:
+[historical source audit](evidence/0014-isc-identity-sequence-source-audit.json).
+Его report hash относится к pre-approval редакции, не к этому amendment.
+Нормативные documentary vectors с positive controls и rejected mutations находятся
+в [WAL Capsule §10](0014-isc-finalization-wal-capsule-v1.md#нормативные-documentary-vectors-i-b--s-rank).
+Они не являются production fixtures, native evidence, новыми schemas или proofs.
 
 - **N1:** native pin `60c692f6`: `consensus.cpp:419–434`; `certificates/contracts.cpp` canonical ISC/content_id.
 - **N2:** тот же pin: `certificates/vote_admission.cpp` input_qc_id/finalized/seed/EC bindings; `certificates/verifier.cpp` verify_seed/eligibility/plan; `robust/plan.cpp` seed_number/build_plan.
@@ -165,8 +176,7 @@ native slot на vote ordinal меняет подписанные bytes/receipt 
 - **T2:** тот же candidate: `DeltaReduceQuorums.tla` PersistVoteEnvelopeChanges; `DeltaReduceFailures.tla` DurableSequenceExact; `refinement-contract.md:85–94` already distinguishes abstract vote sequence from WAL offsets.
 - **L1/L2:** тот же candidate: Lean files из §3; `NativeCacheHistory.positionMapping`; `FamilyRelation.lean` complete original rows / public durable vote counter.
 
-**STOP: ожидаются I-B (или иной явно выбранный identity вариант) и S-RANK.**
-I-B требует явного согласия на изменение native ISC parent-reference semantics;
-оно не может быть проведено под прежним обещанием неизменности всех QC identities.
-WAL Capsule остаётся PROPOSED. Approval memo не является implementation authorization
-или exact compatible merged Formal GO. R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN; R3 не начат.
+**STOP после разрешённого documentary amendment.** I-B/S-RANK утверждены;
+WAL Capsule целиком остаётся PROPOSED. Код, schemas, proofs, production recovery,
+R2.3/R3 не разрешены; approval не является exact compatible merged Formal GO.
+R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN; R3 не начат. Новых решений о profile/DoD нет.
