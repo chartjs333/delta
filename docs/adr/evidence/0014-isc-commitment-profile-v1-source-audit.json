@@ -1,0 +1,150 @@
+{
+  "kind": "DOCUMENTARY_PROFILE_DECISION_AND_NUMERICAL_VECTOR_AUDIT_NOT_IMPLEMENTATION_OR_FORMAL_PROOF",
+  "source_commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+  "native_source_commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "status": "PROPOSED_PENDING_USER_APPROVAL",
+  "started_at_utc": "2026-09-30T02:11:37+00:00",
+  "profile_identifier": "deltareduce.008.isc-commitment.v1",
+  "proposed_choice": "A: existing tuple JSON, dedicated ISC leaf domain, existing 004 duplicate-last Merkle tree",
+  "existing_requirement": "008 FR-004 and FR-005",
+  "profile_approved": false,
+  "new_wire_fields": false,
+  "new_production_code_proofs_or_schemas": false,
+  "existing_fixtures_rewritten": false,
+  "formal_semantics_ids_changed": false,
+  "r2_3_or_r3_continued": false,
+  "wal_capsule_document_started": false,
+  "prior_50_84_hour_estimate_approved": false,
+  "document_vectors_python_hashlib_verified": true,
+  "document_vectors_dotnet_independent_assembly_verified": true,
+  "native_cpp_java_conformance_claimed": false,
+  "new_formal_evidence_claimed": false,
+  "report": {
+    "path": "docs/adr/0014-isc-commitment-profile-v1.md",
+    "sha256": "d3464a2e33feee55cf1e4be6fed99d69bfcfeb69ecbbf1943a7715f67b90998a"
+  },
+  "vectors": {
+    "path": "docs/adr/evidence/0014-isc-commitment-profile-v1-vectors.json",
+    "sha256": "2e40a843456ef4f95857ee81d78809cd94583c3e3e2942284636def13f6e130a"
+  },
+  "baseline_inputs_verified_unchanged": 19,
+  "frozen_documents_verified": {
+    "specs/000-formal-tla-spec/accepted-residual-20260928.md": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+    "docs/adr/0013-snapshot-provenance-profile-v1.md": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+  },
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/contracts.hpp",
+      "blob_oid": "82c089d5a8a264f4826e8ec29a0a28d8f5900939",
+      "sha256": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "blob_oid": "196b611a06504af4a70b597b272f458f62f4e5c8",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "blob_oid": "80bcc59c6c37518564cde120d441d170c14c357a",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "blob_oid": "286b84eaaa4c834479704aecdccf6af20d0a0e81",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/shards/envelope.cpp",
+      "blob_oid": "705b9732c96cda9183b89a798edd2168d4829e38",
+      "sha256": "19f4113b17b7c192563b54efddcb0c6df8a0a99d76a25336e55f822b07f5842a"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/shards/envelope.hpp",
+      "blob_oid": "0838bde06b1c761ff1cfea6e821e723df7143be0",
+      "sha256": "1d0466d5729c6a47dcea5a52fdf5b7e2de77f9e3a838e97096f1fb97f8640ec3"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/canonical.hpp",
+      "blob_oid": "bb2cd6fe88506e3ae75a2ffeab20aa72f6fb103d",
+      "sha256": "10ac39eb4362ad336140861f6fe81a64f7f7282036eb37aa195d117439363314"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-protocol/schemas/008/input-set-certificate-v1.json",
+      "blob_oid": "b36800f455a69b5758b3511275a56c5e89475cfc",
+      "sha256": "6822bbf6cbb02002b1f6fc398300538b150a258774c9e9c8853e73babdde37e6"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/scripts/certificate_contracts.py",
+      "blob_oid": "570cc4bcfe55bd21500da2085b07bc64b4cc9e92",
+      "sha256": "47a1e59018c12da19956946c9f1469631becb76ddd33ce3f3f669779ca1cfc37"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "blob_oid": "9661c576252542d7144b1ed19fc8fb66205d19d6",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "specs/008-certificates-and-consensus/formal-refinement.md",
+      "blob_oid": "b8a456f79c1474f9ca2a96a9db69f3035f725dda",
+      "sha256": "a8f0a174179a696643b10c57ae1850e8b65f98478b0f68316c4b82d21d306077"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "delta-protocol/fixtures/008/valid/certificate-contract-v1.json",
+      "blob_oid": "7263f0ca41b70e65cd68303ab9e65bf3a57f0a02",
+      "sha256": "adb42ccc2619007913cb4cacb8587a42d3a699b115fc20666db78436b685b108"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "delta-protocol/fixtures/008/cross-language/golden-v1.json",
+      "blob_oid": "7263f0ca41b70e65cd68303ab9e65bf3a57f0a02",
+      "sha256": "adb42ccc2619007913cb4cacb8587a42d3a699b115fc20666db78436b685b108"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "blob_oid": "b1cbf055fa74c312c9124b6d097f724fe81dae1b",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "formal/reports/baseline-inputs.json",
+      "blob_oid": "04606f78daa9319970f92ebc537d3b58b7a3fa4a",
+      "sha256": "b5a5fb95661b5665d0a75ca37e753982471045193dbcfbc63aaaadf9787930bd"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "docs/adr/0014-isc-producer-integration-v1.md",
+      "blob_oid": "69bba8b3e50346fc224a26222745ed62b6af39a9",
+      "sha256": "000adaeb275427a7b59298c6a830b4f064c759cc3c3cecb48a591d98613ac35c"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "blob_oid": "88b5e9b27ec6bd29f9c4b520fb9a89adf0e91f68",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+    },
+    {
+      "commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "blob_oid": "70a8ee8c901c60cdf5865bdd8c3739a39eea2c89",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6"
+    }
+  ],
+  "document_vector_verification_scope": "Independent tuple/preimage construction and complete trees for V1-V5, every supplied internal preimage digest, legacy tuple root and held-context root-only ISC ID comparison, and byte-explicit wrong-preimage digests. No native conformance/checker implementation.",
+  "ended_at_utc": "2026-09-30T02:22:57.394770+00:00",
+  "active_documentation_seconds": 680,
+  "idle_included": false,
+  "document_file_hash_encoding": "Exact UTF-8 file bytes with LF newlines, as stored in Git; not an alternative protocol encoding."
+}

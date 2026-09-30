@@ -1,5 +1,34 @@
 # Feature010 continuation checkpoint
 
+## ISC Commitment Profile v1 — 30 September 2026 — proposed decision / STOP
+
+The user accepted the architecture STOP, did not approve the 50–84 hour estimate,
+and requested two sequential byte-contract decisions. Only the first is prepared:
+[ISC Commitment Profile v1](adr/0014-isc-commitment-profile-v1.md), with
+[proposed normative vectors](adr/evidence/0014-isc-commitment-profile-v1-vectors.json).
+The WAL Capsule decision document must wait for explicit approval of this profile.
+
+Proposed minimum A reuses existing four-field tuple JSON/order and the existing
+004 Merkle node construction, adding a dedicated ISC leaf domain as a proposed
+specification only. Empty rejected; singleton is its leaf digest; odd levels repeat
+their last node. The known unchecked [A,B,C] / [A,B,C,C] ambiguity is explicit:
+duplicate-ticket/tuple rejection and the full signed ISC body remain mandatory.
+No new protocol fields or authority. Profile selection uses the existing qualified
+formal_semantics_id binding, not a new per-round profile field.
+
+Exact vectors were numerically cross-checked using Python hashlib and independent
+.NET preimage/tree assembly; this is documentation accuracy, not C++/Java/native
+conformance or formal evidence. The old constant-root fixture demonstrably gets a
+different root/ISC ID under A. Old objects/votes/WAL are not rewritten; fresh bytes
+need fresh qualification/votes. A future semantics closure/ID and pinned constants
+must be qualified; neither accepted nor candidate semantics ID was changed now.
+
+Only documents/vector data/source audit and progress tracking changed. Code/proofs,
+schemas, production fixtures, DoD/Profile v1 and baseline inputs remain unchanged.
+R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN. No R2.3/R3 or WAL format design continued.
+**STOP pending profile approval.** No implementation until both contracts are
+approved and separately authorized subject to the exact merged Formal GO gate.
+
 ## ISC Producer Integration v1 — 30 September 2026 — ADR draft / architecture checkpoint
 
 The user accepted native ownership and authorized only an implementation ADR.
