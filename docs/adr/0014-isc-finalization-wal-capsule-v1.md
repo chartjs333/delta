@@ -24,6 +24,10 @@ parent/context completeness, подписи, producer, durability или R2/R3.
 parent/context и source/authentication obligations сохраняются (§11).
 Оценка 50–84 часа не утверждена; новый execution budget здесь не предлагается.
 
+После local approval выполнен только [аудит трёх gates](0014-w1-three-gate-audit.md):
+parent/context, source/authentication и whole-domain bounds — каждый **STOP**.
+Новых решений или разрешения на implementation этот отчёт не добавляет.
+
 Источники: candidate `45632414`, native pin
 `60c692f6e391f839829dfc64e93380db54cd507b`, не merged Formal GO.
 Исторические blobs и границы исходной редакции записаны в
@@ -61,12 +65,12 @@ No new persisted identity field: b уже есть в IFQ1 command и восст
 
 | Вариант | Хранение | Совместимость и решение |
 |---|---|---|
-| **W1, предложен** | Один новый local `JournalKind=3` в прежнем DRW1 frame, четыре явно типизированные sections; self-contained относительно сохранённого trusted prefix/source bundle | Старые kinds 1/2, bytes, checksums и positions не переопределяются. Новый reader обязателен; старый отвергает kind 3. Есть один transaction commit, нет нового журнала certificate authority |
+| **W1, APPROVED local byte/storage contract** | Один новый local `JournalKind=3` в прежнем DRW1 frame, четыре явно типизированные sections; self-contained относительно сохранённого trusted prefix/source bundle | Старые kinds 1/2, bytes, checksums и positions не переопределяются. Новый reader обязателен; старый отвергает kind 3. Есть один transaction commit, нет нового журнала certificate authority |
 | W2 | Спрятать ISC в existing kind 1 / `FINALIZE_INPUT_FREEZE` | Отклонён: legacy replay вычисляет только coarse RoundState, не ISC membership/source. Existing `WalRecord.record_kind` допускает только `TRANSITION`. Reinterpretation разрушит старый replay contract |
 | W3 | Отдельный ISC log/side file с pointer из основного WAL | Отклонён для v1: создаёт дополнительную durability/atomicity границу и восстановление двух журналов. Не нужен для одного bounded ISC; файл сам не может стать authority |
 
-W1 — **новое предлагаемое local storage encoding**, а не уже существующий codec.
-Не регистрируем его в коде/schema до решения пользователя и formal-first допуска.
+W1 — **утверждённое local storage encoding**, а не уже существующий codec.
+Не регистрируем его в коде/schema без отдельного разрешения на реализацию и formal-first допуска.
 Операция требует read capability kind 3 и согласованных codec/build/semantics pins
 до открытия writer; импортированный frame не выбирает версию verifier.
 

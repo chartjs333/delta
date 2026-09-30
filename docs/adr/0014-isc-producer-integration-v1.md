@@ -49,6 +49,9 @@ meanings apply only to a future independently pinned, qualified semantics versio
 accepted/candidate semantics IDs are not authority for this change. Explicit parent/context completeness and source/bounds qualification remain open
 after local W1 approval.
 No new parent field or alternative provenance mechanism is introduced.
+The separately authorized [three-gate audit](0014-w1-three-gate-audit.md) records
+STOP for each gate, with source-specific reasons. Integration remains stopped;
+local byte/storage approval is not production sufficiency.
 
 ### Normative terminology and compatibility boundary
 

@@ -1,5 +1,35 @@
 # Feature010 continuation checkpoint
 
+## W1 local approval and three independent gates — 30 September 2026 — STOP
+
+User approved W1 only as the local byte/storage contract. Document statuses and
+cross-references were updated first in `5c343f2b72fdba5bbac6c06d5bbc89b349827094`;
+the subsequent documentary audit also corrects the remaining W1 alternative-table
+status wording. I-B/S-RANK and FR-004 approvals remain limited to their stated scope.
+
+The authorized [three-gate audit](adr/0014-w1-three-gate-audit.md) and pinned
+[source inventory](adr/evidence/0014-w1-three-gate-source-audit.json) record:
+
+- Parent/context: STOP. Existing ISC bytes provide a config reference, not the
+  explicit parent field/binding whose sufficiency was left open by the accepted
+  Commitment Profile. No two-parent hash collision is asserted.
+- Source/authentication: STOP. Native signer/quorum checks and a Java callback
+  do not supply a concrete approved ISC payload/key/role/epoch signature verifier
+  and independently qualified source verifier. AdmissionRecord/governance crypto
+  is a different protocol and cannot be silently reused.
+- Bounds: STOP. Source index/import caps do not establish the aggregate W1 frame,
+  full P1 and output limits while retaining delivery multiplicity and lineage.
+  This is a missing whole-domain size contract, not a reproduced valid overflow
+  trace; no new source cap, deduplication or encoding choice was made.
+
+No new predicate/proof/schema/fixture or runtime implementation; R2.3/R3 did not
+resume. No semantics version/hash assigned; old signatures/QC/WAL unchanged.
+R1/R2.1/R2.2 stay CLOSED, R2.3/R2 OPEN. DoD/Profile and baseline inputs unchanged.
+**STOP after the report; no automatic continuation.** Active audit time is recorded
+separately from prior proof time; the four-hour budget is a ceiling, not an estimate.
+Automation stays ACTIVE and quiet while waiting for a new direct instruction.
+Older entries below are historical and do not undo the approvals above.
+
 ## ISC identity / sequence amendment — 30 September 2026 — decisions proposed / STOP
 
 Prepared only the requested [decision memo](adr/0014-isc-identity-sequence-amendment.md)

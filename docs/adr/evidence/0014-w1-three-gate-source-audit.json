@@ -1,0 +1,536 @@
+{
+  "kind": "DOCUMENTARY_SOURCE_AUDIT_NOT_NATIVE_TRACE_OR_FORMAL_EVIDENCE",
+  "status": "THREE_GATES_STOP_NO_IMPLEMENTATION",
+  "source_commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+  "native_source_commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "w1_local_byte_storage_contract_approved": true,
+  "report": {
+    "path": "docs/adr/0014-w1-three-gate-audit.md",
+    "sha256": "05f1ccd29ac23e3ece476ea0137eb33da399cc0b602188fecce7c7b2a9278b64"
+  },
+  "results": {
+    "parent_context": {
+      "result": "STOP",
+      "reason": "Explicit ISC parent/context binding remains outside existing typed/canonical ISC fields; verified transitive RoundConfig binding is not the preserved explicit-field contract. No hash-collision counterexample asserted."
+    },
+    "source_authentication": {
+      "result": "STOP",
+      "reason": "No concrete approved protocol ISC payload/signature/key/role/epoch verifier and complete independent source verifier found; structural signer checks, signature_id and Authenticator callback are insufficient."
+    },
+    "bounds": {
+      "result": "STOP",
+      "reason": "Existing source caps do not establish full per-delivery expansion into 64 MiB W1, complete P1 within 4 MiB and exact output within 16 MiB. No source-valid overflow trace claimed; no new cap or hidden source-domain restriction selected."
+    }
+  },
+  "documentary_size_accounting": {
+    "outer_frame_fixed_bytes": 72,
+    "per_delivery_fixed_bytes": 28,
+    "arithmetic_kind": "sum of existing W1 field widths, not a new proof or codec"
+  },
+  "authentication_search": {
+    "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+    "paths": [
+      "delta-core-cpp",
+      "delta-runtime-cpp",
+      "delta-ffi",
+      "delta-node-java"
+    ],
+    "pattern": "ed25519|EVP_|sodium|blst|bls12|Signature.getInstance|PublicKey|verify_signature|signature_verifier|signatureVerifier|key_registry|keyRegistry",
+    "matches": [],
+    "transport_constructors": [
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-node-java/src/test/java/io/deltareduce/node/certificates/CertificatesConformance.java:47:    var transport = new AuthenticatedCertificateTransport(",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-node-java/src/test/java/io/deltareduce/node/certificates/CertificatesConformance.java:50:    var envelope = new AuthenticatedCertificateTransport.Envelope(",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-node-java/src/test/java/io/deltareduce/node/certificates/CertificatesConformance.java:60:    var bad = new AuthenticatedCertificateTransport.Envelope("
+    ],
+    "limitation": "Search supports named-source inspection; not a universal absence proof. Existing AdmissionRecord/governance crypto is explicitly recorded separately."
+  },
+  "baseline_inputs_verified_unchanged": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "6470de74a14d0d6cd745ef6b46858427b0f7b4222b6bad7e9a5b51316313ce56",
+      "unchanged": true
+    },
+    {
+      "path": ".specify/memory/constitution.md",
+      "sha256": "4b9da704f3c37ac4f8ce9756832e92c2ad732d0116c6dccebeee67ee722042fd",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0000-formal-verification-gate.md",
+      "sha256": "59523ef963cfceaa741499e3d375ceedcd451ac0fb8574ab70b8ad9e480a8bd0",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0001-deltareduce-v1.md",
+      "sha256": "bbfe6e23ca0658d23b41350fb3eb70df62fdfae124c2b460890fac16b77d30e9",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0002-canonical-rational-rounding.md",
+      "sha256": "560c4b5f2bf76008a6e71803f9b98958aa5bcb443bd6bb86c2559fcd245dcf50",
+      "unchanged": true
+    },
+    {
+      "path": "specs/ROADMAP.md",
+      "sha256": "92cf5c38792fa926efeb8adb712a72d9769c7f36c1d3f4a06c653dc18b0d5dff",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "sha256": "375b09aaec41ca84a4959f0c5a65c8f0382356187297c5f7a3171bebff00e72e",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "sha256": "e93d31266eac996412cd48d25c8b5a1558a5742068444cdd64cc8d67637faf8f",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/refinement-contract.md",
+      "sha256": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/spec.md",
+      "sha256": "4c723b178649277a170b227fc718fc38355be9ce6765bb9b2f86af81bbee3327",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/plan.md",
+      "sha256": "7c7ab970373621790ebf31175a2a7b0c22f178ab1fe60be31ba28107bade58f9",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/tasks.md",
+      "sha256": "55c690e61072928e7b8cb48f30b119ec81245599ba058cff89afca12541cc251",
+      "unchanged": true
+    },
+    {
+      "path": "formal/reports/formal-id-registry.json",
+      "sha256": "ef855fbe752294e6b01ee4e0ad0f2659fa7db5e9db303456bbe9acc663a0f6cc",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0010-hybrid-runtime-boundary.md",
+      "sha256": "051b4836318f288256b4402943a6792d98df239f3a54b25dab11da1b29217875",
+      "unchanged": true
+    },
+    {
+      "path": "specs/HYBRID-RUNTIME-MAP.md",
+      "sha256": "911b09b5aa83cc913af4ef82c547022617cbc90062842b4e0430350b7002332d",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
+      "sha256": "45fef1b1d23604d8774d90086b46431fe7c73a16a481079d62a257dccf9f22e8",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/candidate-contract.md",
+      "sha256": "2cd9be46dcda84c8f1cf17b176ee8ebe9ead0fe405a5407490b556161bc795b4",
+      "unchanged": true
+    },
+    {
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+      "unchanged": true
+    },
+    {
+      "path": "formal/reports/coverage-matrix.md",
+      "sha256": "7a5f28d28a47c2d7a140b202fa0109e4add7ef6561d0c85c35888c5bbfde8460",
+      "unchanged": true
+    }
+  ],
+  "frozen_documents_verified_unchanged": [
+    {
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6",
+      "unchanged": true
+    },
+    {
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "unchanged": true
+    }
+  ],
+  "sources": [
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "git_blob": "9661c576252542d7144b1ed19fc8fb66205d19d6",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae",
+      "line_ranges": [
+        [
+          169,
+          173
+        ],
+        [
+          214,
+          227
+        ]
+      ],
+      "gates": [
+        "parent_context",
+        "source_authentication"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "delta-protocol/schemas/008/input-set-certificate-v1.json",
+      "git_blob": "b36800f455a69b5758b3511275a56c5e89475cfc",
+      "sha256": "6822bbf6cbb02002b1f6fc398300538b150a258774c9e9c8853e73babdde37e6",
+      "line_ranges": [
+        [
+          1,
+          122
+        ]
+      ],
+      "gates": [
+        "parent_context"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "docs/adr/0014-isc-commitment-profile-v1.md",
+      "git_blob": "810bf1c9c2390ed82f7eb8cf4be76ce9d4744006",
+      "sha256": "bc52dbb217af3ae72efdbf1231050210eba8f305563979460adc81d0f211c903",
+      "line_ranges": [
+        [
+          194,
+          232
+        ]
+      ],
+      "gates": [
+        "parent_context"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "git_blob": "386e8a09eb082dfdf280e85a5bb7607617879900",
+      "sha256": "29f78d6d371cc872b996083189dc9b52aec991b49c49f80cd37ba6bc5f4864f0",
+      "line_ranges": [
+        [
+          72,
+          105
+        ],
+        [
+          143,
+          230
+        ],
+        [
+          270,
+          297
+        ]
+      ],
+      "gates": [
+        "parent_context",
+        "source_authentication",
+        "bounds"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "git_blob": "88b5e9b27ec6bd29f9c4b520fb9a89adf0e91f68",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "line_ranges": [
+        [
+          86,
+          187
+        ],
+        [
+          194,
+          220
+        ]
+      ],
+      "gates": [
+        "source_authentication",
+        "bounds"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "formal/tla/DeltaReduceQuorums.tla",
+      "git_blob": "d6c44cb70a17d86bfc83e154f9ef57731397d3db",
+      "sha256": "ae0e9a64976f6b9158bfc44379648aabbde990047a4321f3b4f6355e5f6768e3",
+      "line_ranges": [
+        [
+          110,
+          145
+        ]
+      ],
+      "gates": [
+        "bounds"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "formal/tla/DeltaReduceFailures.tla",
+      "git_blob": "49266ae57b566c93ca763903ab5c94f30c606e8a",
+      "sha256": "ee94c1c67335888544b1689200b829526f09d618bdf4e9c256ad2c1c0788ecf5",
+      "line_ranges": [
+        [
+          157,
+          169
+        ]
+      ],
+      "gates": [
+        "bounds"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "delta-controller-python/src/deltacontroller/canonical.py",
+      "git_blob": "e26988432d8ece1dca43f36a1c3e7a015d4aaa4b",
+      "sha256": "5553c63d55305cc762a9c7338ed1cc763b402677d1fa4a0eea449ca4a3c5d752",
+      "line_ranges": [
+        [
+          95,
+          133
+        ]
+      ],
+      "gates": [
+        "source_authentication"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "delta-worker-python/src/deltatorrent/live_execution/crypto.py",
+      "git_blob": "9731234135fc85cd77b19116986d0990fba95abd",
+      "sha256": "7765d29cad727a3d71b8b0d705dfe0b63763cb19d4b1faa2928f201df4e095de",
+      "line_ranges": [
+        [
+          182,
+          227
+        ]
+      ],
+      "gates": [
+        "source_authentication"
+      ]
+    },
+    {
+      "commit": "5c343f2b72fdba5bbac6c06d5bbc89b349827094",
+      "path": "delta-worker-python/src/deltatorrent/benchmark/governance.py",
+      "git_blob": "a22336859eced9e5676500df9bd4f0c7ade7bb3e",
+      "sha256": "43f9cde9d707db6b896a81936a7e9531e213813105df468f603b3fb7c91d1da3",
+      "line_ranges": [
+        [
+          326,
+          344
+        ]
+      ],
+      "gates": [
+        "source_authentication"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/contracts.hpp",
+      "git_blob": "82c089d5a8a264f4826e8ec29a0a28d8f5900939",
+      "sha256": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1",
+      "line_ranges": [
+        [
+          14,
+          19
+        ],
+        [
+          49,
+          83
+        ]
+      ],
+      "gates": [
+        "parent_context",
+        "bounds"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "git_blob": "196b611a06504af4a70b597b272f458f62f4e5c8",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8",
+      "line_ranges": [
+        [
+          240,
+          275
+        ]
+      ],
+      "gates": [
+        "parent_context"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "git_blob": "286b84eaaa4c834479704aecdccf6af20d0a0e81",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8",
+      "line_ranges": [
+        [
+          302,
+          319
+        ],
+        [
+          419,
+          424
+        ]
+      ],
+      "gates": [
+        "parent_context"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/protocol.cpp",
+      "git_blob": "4f50880504cf0c371ea49be51cfc0920c9bd9078",
+      "sha256": "431fe8e40afeaaf8479cb8fe86240e8db875629a0add316113b4ce748d4a86ab",
+      "line_ranges": [
+        [
+          370,
+          410
+        ],
+        [
+          654,
+          680
+        ]
+      ],
+      "gates": [
+        "parent_context"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/verifier.hpp",
+      "git_blob": "43607248265177d61d1c8418ca31c610ed1ea8dd",
+      "sha256": "934835e7f5e8f9bca7ceb8006557b6dcb357807f81717a3c86d88346f0247ff9",
+      "line_ranges": [
+        [
+          26,
+          30
+        ]
+      ],
+      "gates": [
+        "source_authentication"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "git_blob": "80bcc59c6c37518564cde120d441d170c14c357a",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879",
+      "line_ranges": [
+        [
+          107,
+          184
+        ]
+      ],
+      "gates": [
+        "source_authentication"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java",
+      "git_blob": "46b9ef4da09129bf42ab5b468e9cdecffa97260b",
+      "sha256": "bbaa7f622810257791e53333687e7cac88e148f19462eeaba78ce4fb264a6cc9",
+      "line_ranges": [
+        [
+          22,
+          65
+        ],
+        [
+          81,
+          121
+        ]
+      ],
+      "gates": [
+        "source_authentication",
+        "bounds"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/test/java/io/deltareduce/node/certificates/CertificatesConformance.java",
+      "git_blob": "f69e9d7abbd7d5b5a4075e59bd95ac33d1186c10",
+      "sha256": "5c43e0c8ac3eb85fac6f21a97a5844f9f0845d47fc64ea6f51b49637d1b8ca7c",
+      "line_ranges": [
+        [
+          46,
+          68
+        ]
+      ],
+      "gates": [
+        "source_authentication"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/wal.cpp",
+      "git_blob": "6cbb5704930a3503129ec3d279748c2a63cf4856",
+      "sha256": "fd62c60727b6f5725cdcef2cb56591746736f444c87d1895a1357a7d85377e7e",
+      "line_ranges": [
+        [
+          35,
+          43
+        ],
+        [
+          161,
+          182
+        ]
+      ],
+      "gates": [
+        "bounds"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/vote_codec.hpp",
+      "git_blob": "d8a7003328e63276656e8bd982c166a5ddef26ea",
+      "sha256": "92c14cb6e9c404b53a665e83ed5b5481c0f201b4408bbe3dc934af03d25eb24c",
+      "line_ranges": [
+        [
+          14,
+          26
+        ]
+      ],
+      "gates": [
+        "bounds"
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/sidecar_protocol.hpp",
+      "git_blob": "10a568774fc68d1d9781d93356fe5c3d28d33d54",
+      "sha256": "0261f849ad39d5a34716e7562f8e5d223194dc5e3fda7528058f5ef5a1875f51",
+      "line_ranges": [
+        [
+          21,
+          28
+        ]
+      ],
+      "gates": [
+        "bounds"
+      ]
+    }
+  ],
+  "scope": {
+    "production_code_changed": false,
+    "schema_changed": false,
+    "proofs_changed": false,
+    "new_predicates_created": false,
+    "fixtures_changed": false,
+    "runtime_executed_or_restarted": false,
+    "formal_or_native_tests_executed": false,
+    "sigma_next_assigned": false,
+    "certificate_qc_wal_identities_changed": false,
+    "production_Init_Next_changed": false,
+    "r2_3_or_r3_continued": false,
+    "architecture_remedy_selected": false,
+    "implementation_authorized": false,
+    "automatic_continuation_authorized": false
+  },
+  "r1": "CLOSED",
+  "r2_1": "CLOSED",
+  "r2_2": "CLOSED",
+  "r2_3": "OPEN",
+  "r2": "OPEN"
+}
