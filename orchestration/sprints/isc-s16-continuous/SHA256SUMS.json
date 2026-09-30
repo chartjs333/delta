@@ -5,5 +5,6 @@
   "continuity-agent.md": "673bfe352ce91e57bc572c486b156e1d3eb35c8525e80cbb736b45704727ab6f",
   "lane-tasks.md": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f",
   "recovery-state.json": "c095477ae620c0669acbdf3517819c3c068c5213de611e012e5428d2cc145f72",
-  "sequential-sprint.json": "4f4e320e75b3d2bb1c95a89b2828637c5823f6906f8c165b78838f12108d9ca4"
+  "sequential-sprint.json": "4f4e320e75b3d2bb1c95a89b2828637c5823f6906f8c165b78838f12108d9ca4",
+  "start-sprint.ps1": "212c8db21903fd523b3232ced1ada421eb688c61c5f7d78b6d193c23356a778e"
 }
