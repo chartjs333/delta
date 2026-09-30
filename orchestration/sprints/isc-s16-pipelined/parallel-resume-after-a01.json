@@ -1,0 +1,115 @@
+{
+  "git_address": "https://github.com/chartjs333/delta.git",
+  "agents": {
+    "overwrite": true,
+    "include_managed": false,
+    "assignment_mode": "parallel",
+    "items": [
+      {
+        "id": "isc-s16-a01-architecture-review",
+        "name": "ISC A01 Architecture Reviewer",
+        "phone": "2731",
+        "git_branch": "review/isc-s16-a01-architecture",
+        "profile": "Independently review the completed documentation-only ISC-S16-A01 commit. Do not alter implementation, formal sources, the completed branch, or sprint manifests. Publish a source-bound APPROVE or REJECT review report on this reviewer branch.",
+        "parameters": {
+          "pipeline_lane": "A-review-1",
+          "reviewed_branch": "agent/isc-s16-contract-freeze",
+          "reviewed_from_commit": "4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+          "reviewed_commit": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-A01-R1",
+            "queue": "tester-all",
+            "message": "Review `agent/isc-s16-contract-freeze@a579a5c66586ba3f8f1d7cc26c454aba5addbd8f` against `4873b3559b390318c0fc8ff80dd00ecea4ea7b59`. Verify the dependency DAG is acyclic and non-self-referential; concrete deployment objects do not feed `sigma`; approval/status boundaries are accurate; the diff is documentation-only; no formal/production source or sprint manifest changed. Write `docs/adr/reviews/0014-isc-contract-freeze-architecture-review.md` on your reviewer branch with `APPROVE` or actionable `REJECT`, exact commits, commands and evidence. Do not edit the reviewed branch or advance another lane."
+          }
+        ]
+      },
+      {
+        "id": "isc-s16-a01-evidence-review",
+        "name": "ISC A01 Evidence Reviewer",
+        "phone": "2732",
+        "git_branch": "review/isc-s16-a01-evidence",
+        "profile": "Independently review source provenance, scope and machine-readable evidence for completed ISC-S16-A01. Publish an APPROVE or REJECT report without modifying the reviewed work.",
+        "parameters": {
+          "pipeline_lane": "A-review-2",
+          "reviewed_branch": "agent/isc-s16-contract-freeze",
+          "reviewed_from_commit": "4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+          "reviewed_commit": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-A01-R2",
+            "queue": "tester-all",
+            "message": "Review `agent/isc-s16-contract-freeze@a579a5c66586ba3f8f1d7cc26c454aba5addbd8f` against `4873b3559b390318c0fc8ff80dd00ecea4ea7b59`. Verify exact branch/commit provenance, source ancestry, sprint-file preservation, scope restrictions, JSON/evidence validity, document hashes and the claim that no formal/native tests or Formal GO are asserted. Write `docs/adr/reviews/0014-isc-contract-freeze-evidence-review.md` on your reviewer branch with `APPROVE` or actionable `REJECT`, exact commands and evidence. Do not edit the reviewed branch or manually hand off another task."
+          }
+        ]
+      },
+      {
+        "id": "isc-s16-w1-reference",
+        "name": "W1 Reference Storage Engineer",
+        "phone": "2722",
+        "git_branch": "agent/isc-s16-w1-reference-engine",
+        "profile": "Pipeline lane B. Implement only the quarantined reference W1 codec/storage harness. It is not production integration or Formal GO.",
+        "parameters": {
+          "pipeline_lane": "B",
+          "scope": "reference-w1-only",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint",
+          "sprint_manifest_path": "orchestration/sprints/isc-s16-pipelined",
+          "source_code_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-B01",
+            "queue": "worker-all",
+            "message": "Create or verify `agent/isc-s16-w1-reference-engine` from `origin/agent/isc-s16-pipelined-sprint`. Read `README.md`, `bootstrap-ru.md` and the ISC-S16-B01 section of `lane-tasks.md`. Verify source baseline ancestry. Implement only the isolated W1 reference codec/file harness and its tests. Preserve all sprint files. STOP on any need to touch production runtime, consensus authority, ABI/Java, schemas, TLA/Lean, R2.3 or R3."
+          }
+        ]
+      },
+      {
+        "id": "isc-s16-crypto-reference",
+        "name": "ISC Crypto Reference Engineer",
+        "phone": "2723",
+        "git_branch": "agent/isc-s16-ed25519-reference",
+        "profile": "Pipeline lane C. Implement only quarantined canonical-byte and Ed25519 conformance/reference artifacts. No production key custody or consensus invocation.",
+        "parameters": {
+          "pipeline_lane": "C",
+          "scope": "reference-crypto-only",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint",
+          "sprint_manifest_path": "orchestration/sprints/isc-s16-pipelined",
+          "source_code_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-C01",
+            "queue": "worker-all",
+            "message": "Create or verify `agent/isc-s16-ed25519-reference` from `origin/agent/isc-s16-pipelined-sprint`. Read `README.md`, `bootstrap-ru.md` and the ISC-S16-C01 section of `lane-tasks.md`. Verify source baseline ancestry. Implement only the isolated K/E/R/V/M/G canonical-byte and Ed25519 conformance/reference target and vectors. Preserve sprint files. STOP on any need for production key custody, consensus/runtime invocation, WAL integration, new authority, sigma assignment, R2.3 or R3."
+          }
+        ]
+      },
+      {
+        "id": "isc-s16-formal-linkage",
+        "name": "ISC Formal Linkage Engineer",
+        "phone": "2724",
+        "git_branch": "agent/isc-s16-formal-linkage",
+        "profile": "Pipeline lane D. Work only on the approved TLA+/Lean integration-point scope and return a source-bound GO or NO_GO for that limited scope. No production code.",
+        "parameters": {
+          "pipeline_lane": "D",
+          "scope": "formal-only",
+          "sprint_manifest_branch": "agent/isc-s16-pipelined-sprint",
+          "sprint_manifest_path": "orchestration/sprints/isc-s16-pipelined",
+          "source_code_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+        },
+        "tasks": [
+          {
+            "task_id": "ISC-S16-D01",
+            "queue": "worker-all",
+            "message": "Create or verify `agent/isc-s16-formal-linkage` from `origin/agent/isc-s16-pipelined-sprint`. Read `README.md`, `bootstrap-ru.md` and the ISC-S16-D01 section of `lane-tasks.md`. Verify source baseline ancestry. Work only on TLA+/Lean parent, budget, identity, V-to-G and mixed-WAL obligations in the frozen scope. Preserve sprint files. Do not write production code, assign sigma, weaken invariants, start R2.3/R3 or claim integration GO. STOP on any new authority or contract change."
+          }
+        ]
+      }
+    ]
+  }
+}
