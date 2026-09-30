@@ -1,5 +1,30 @@
 # Feature010 continuation checkpoint
 
+## ISC Finalization WAL Capsule v1 — 30 September 2026 — proposed document / STOP
+
+The two required edits to Commitment Profile A were committed separately at
+`456324147d8ac72c2d55f2385e4bc37a0cdaa8ea`; A is approved for FR-004 only.
+The separately authorized second document is now prepared:
+[ISC Finalization WAL Capsule v1](adr/0014-isc-finalization-wal-capsule-v1.md).
+W1 proposes one additive DRW1 kind 3 with four exact local sections, original
+source/delivery/signature evidence, checked P0-to-P1 membership, original effects
+and replay receipt. Old records/votes/QC identities remain unchanged. No certificate
+protocol, signing preimage, producer implementation or proof was added.
+
+The document specifies validate/append/barrier/commit/expose, complete-surviving
+unacknowledged append, fail-closed torn/corrupt recovery under the approved profile,
+replay/conflict/seed rules and reader compatibility. Parent/context completeness,
+independent source/signature authority and whole-state/bounds compatibility remain
+existing unresolved qualifications; this document does not assert their sufficiency.
+Native vote durable_sequence is the sender's physical slot; local finalization does
+not produce another public vote or rewrite an existing signed sequence.
+
+**STOP pending separate WAL Capsule approval and any later explicit scoped task.**
+No code/schemas/proofs/production fixtures, R2.3/R3 or guard changes. DoD/Profile v1
+and baseline inputs preserved. R1/R2.1/R2.2 CLOSED; R2.3/R2 OPEN. Both documentary
+contracts alone are not exact compatible merged Formal GO. The 50–84h estimate
+remains unapproved.
+
 ## ISC Commitment Profile v1 — two required edits applied / FR-004 approved
 
 User approval is limited to variant A as the FR-004 byte contract. Both required

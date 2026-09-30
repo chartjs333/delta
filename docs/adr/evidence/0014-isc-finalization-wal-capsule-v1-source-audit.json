@@ -1,0 +1,180 @@
+{
+  "kind": "DOCUMENTARY_STORAGE_CONTRACT_PROPOSAL_NOT_NATIVE_OR_FORMAL_EVIDENCE",
+  "status": "PROPOSED_PENDING_SEPARATE_USER_APPROVAL",
+  "source_commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+  "native_source_commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "commitment_profile_status": "APPROVED_FR004_ONLY_TWO_REQUIRED_EDITS_APPLIED",
+  "selected_proposal": "W1 additive DRW1 kind 3, typed local sections, original certificate/vote identities",
+  "report": {
+    "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+    "sha256": "d185a7511e2709b9581b99bc609ca33baf4a3e6c0de1dc796732b5481ae1580a"
+  },
+  "existing_records_rewritten": false,
+  "new_protocol_authority": false,
+  "new_runtime_code_schemas_proofs": false,
+  "production_Init_Next_changed": false,
+  "r2_3_or_r3_continued": false,
+  "implementation_authorized": false,
+  "prior_50_84_hour_estimate_approved": false,
+  "existing_limits": {
+    "DRW1_max_frame_bytes": 67108864,
+    "policy_max_bytes": 4194304,
+    "result_max_bytes": 16777216
+  },
+  "residual_not_discharged": [
+    "Explicit parent/context binding",
+    "Independent source/signature authority",
+    "Whole admissible state and storage bounds; full P1 policy validation without lineage deletion"
+  ],
+  "documentary_checks": [
+    "Existing native kind list 1/2 and old unknown-kind rejection inspected",
+    "Existing WalRecord only TRANSITION inspected; new receipt not mislabeled as old WalRecord",
+    "Native vote sequence belongs to sender physical WAL; no remote renumbering",
+    "Existing finalized_input_set_ids references typed ISC content ID",
+    "Existing P0/P1 full codec preserved; derived-generation semantics proposed, not implemented",
+    "No signature algorithm/preimage or TLA action introduced"
+  ],
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/wal.hpp",
+      "blob_oid": "ce491374bcc3939ec39c965b0cb8403247eedc9c",
+      "sha256": "7ed2427f12db7668d686f508e29527818c96fa53a2a0a7c7db4fe9b47753b688"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/wal.cpp",
+      "blob_oid": "6cbb5704930a3503129ec3d279748c2a63cf4856",
+      "sha256": "fd62c60727b6f5725cdcef2cb56591746736f444c87d1895a1357a7d85377e7e"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/runtime.cpp",
+      "blob_oid": "d45f586db062e73cc42ca238deefbbd319c27633",
+      "sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "blob_oid": "eb2e0d92a068791a65a29f181c9b482ac10ad543",
+      "sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/vote_codec.cpp",
+      "blob_oid": "2c460fb21d526dfa87036a9cacf9849bfc67a4b3",
+      "sha256": "154e105e2a12799c7f499312273330895a180cda2430b09b4662bbb67b00937b"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/vote_codec.hpp",
+      "blob_oid": "d8a7003328e63276656e8bd982c166a5ddef26ea",
+      "sha256": "92c14cb6e9c404b53a665e83ed5b5481c0f201b4408bbe3dc934af03d25eb24c"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/protocol.hpp",
+      "blob_oid": "db48c87923822d21f3a570532d54d97f31765b25",
+      "sha256": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/protocol.cpp",
+      "blob_oid": "4f50880504cf0c371ea49be51cfc0920c9bd9078",
+      "sha256": "431fe8e40afeaaf8479cb8fe86240e8db875629a0add316113b4ce748d4a86ab"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/transition.cpp",
+      "blob_oid": "f327be63174103bb65b29ec234ec34924fbc9901",
+      "sha256": "74e5a6e62cc1b6c4cd1e30a33cc983e522f22cb5f839942fbec5c707b48eb569"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/consensus.hpp",
+      "blob_oid": "0f52f06879868e8c8c268be5a7eafd139dd25219",
+      "sha256": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "blob_oid": "286b84eaaa4c834479704aecdccf6af20d0a0e81",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/vote_admission.cpp",
+      "blob_oid": "bf6200becf69716cec47320068e7aa07563d18b0",
+      "sha256": "655b74601e163c62242a6ede4f93b2749ef32eb7828caaef9d32e7e63b8ce1ef"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "blob_oid": "196b611a06504af4a70b597b272f458f62f4e5c8",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "blob_oid": "80bcc59c6c37518564cde120d441d170c14c357a",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java",
+      "blob_oid": "46b9ef4da09129bf42ab5b468e9cdecffa97260b",
+      "sha256": "bbaa7f622810257791e53333687e7cac88e148f19462eeaba78ce4fb264a6cc9"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "blob_oid": "b1cbf055fa74c312c9124b6d097f724fe81dae1b",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "formal/tla/DeltaReduceQuorums.tla",
+      "blob_oid": "d6c44cb70a17d86bfc83e154f9ef57731397d3db",
+      "sha256": "ae0e9a64976f6b9158bfc44379648aabbde990047a4321f3b4f6355e5f6768e3"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "formal/tla/DeltaReduce.tla",
+      "blob_oid": "c5fceeed475b144be8cd44e3f402c57aad6556dd",
+      "sha256": "40d7db71f42375ea70bda7968f546707c54fa939b962652dbb712298084372d1"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "blob_oid": "88b5e9b27ec6bd29f9c4b520fb9a89adf0e91f68",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "docs/adr/0014-isc-commitment-profile-v1.md",
+      "blob_oid": "124ac62642e2832fc9064aef9655372bae16c1a7",
+      "sha256": "74772102898b2a18c65bb20f6adb371ff486c0ee701cae1fac30d87e6a7334ae"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "docs/adr/0014-isc-producer-integration-v1.md",
+      "blob_oid": "69bba8b3e50346fc224a26222745ed62b6af39a9",
+      "sha256": "000adaeb275427a7b59298c6a830b4f064c759cc3c3cecb48a591d98613ac35c"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "blob_oid": "9661c576252542d7144b1ed19fc8fb66205d19d6",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae"
+    },
+    {
+      "commit": "456324147d8ac72c2d55f2385e4bc37a0cdaa8ea",
+      "path": "specs/000-formal-tla-spec/accepted-residual-20260928.md",
+      "blob_oid": "70a8ee8c901c60cdf5865bdd8c3739a39eea2c89",
+      "sha256": "51b1a92b724f6021eb4a534e6f86c92905c8fecd6f55fb5173c7eaf253d8a2e6"
+    }
+  ],
+  "new_record_kind_is_local_storage_extension_not_protocol_identity": true,
+  "baseline_inputs_verified_unchanged": 19,
+  "validation_scope": "Source/contract/document consistency only; no implementation execution, new proof, crash test or formal result."
+}
