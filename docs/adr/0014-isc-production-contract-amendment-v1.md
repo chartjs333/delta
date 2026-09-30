@@ -21,6 +21,13 @@ W1 сохраняет **APPROVED as local byte/storage contract**. Producer Inte
 
 ## 1. Version и identity boundary
 
+Documentary dependency/status freeze ISC-S16-A01:
+[ISC S16 contract freeze](0014-isc-contract-freeze-v1.md). Construction order is
+source profile → σ → E/e → R/r → V/v → M/sig/G/g → C/c/W1/evidence, with independent
+bootstrap/K and B inputs. Concrete deployment objects/IDs never feed back into
+σ, directly or through generated literals in hashed formal sources. This does
+not approve the exact draft details or assign a semantics value.
+
 `σ` ниже — будущий независимо закреплённый `formal_semantics_id`, всегда 71 ASCII
 byte `sha256:` + 64 lowercase hex. Значение **не назначено**. Запись `σ_next` не
 может попасть в реальные bytes. Для нового ISC C и ISC Vote предлагается отдельный
@@ -165,7 +172,9 @@ R и independently trusted bootstrap — reject. Registry не может дел
 Новых bootstrap wire fields не требуется: validator IDs/key_ref/roles/q/origin/epoch
 уже существуют; σ/codec/producer/build pins выбираются независимо. `signature_codec_id`
 и `producer_rules_id` должны указывать на будущие квалифицированные manifests,
-закрепляющие ровно этот profile/encoding/E, а не на arbitrary plugin. Их hashes сейчас
+закрепляющие ровно этот profile/encoding/E, а не на arbitrary plugin. Source rules
+bind the symbolic E constructor/constants; concrete E/e and manifests containing
+them are downstream of σ and excluded from its derivation. Их hashes сейчас
 не назначаются. R/E хранятся на T как воспроизводимые artifacts; checker дополнительно
 проверяет derivation от trusted inputs. Бюджеты одинаковы для всех четырёх validators.
 

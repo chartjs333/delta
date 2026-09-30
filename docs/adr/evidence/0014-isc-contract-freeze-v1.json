@@ -1,0 +1,285 @@
+{
+  "task_id": "ISC-S16-A01",
+  "assignment_id": "7fec1504-4c14-4a93-80bc-ea257c951594",
+  "agent_phone": "2721",
+  "branch": "agent/isc-s16-contract-freeze",
+  "base_commit": "4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+  "source_commit": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+  "scope": "DOCUMENTATION_ONLY",
+  "formal_qualification": "NOT_CLAIMED",
+  "sigma_assigned": false,
+  "deployment_bytes_generated": false,
+  "source_ancestry_verified": true,
+  "sprint_files": [
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/README.md",
+      "blob": "bf0b4beb9da7d57104acbb72055558b9b66b220a"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/SHA256SUMS.json",
+      "blob": "7400343a46064b585e9b81f32a08fdc441902d34"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/bootstrap-ru.md",
+      "blob": "855d8080a8aaa038be657151f60818598ee9e99b"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/branch-map.md",
+      "blob": "6a5ef650e6a6bf14bc7752846abef4c30514a350"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/lane-tasks.md",
+      "blob": "0309c37f4d9ea801960b5d2a66bdb1c8714d5615"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/parallel-sprint.json",
+      "blob": "0a1f267c6efefd3c74a5465ed7a9c32483b74a1c"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/w1-one-branch-sequential-sprint.json",
+      "blob": "6d89c20c949932b778a5339832f29d7080772f3d"
+    }
+  ],
+  "sprint_unchanged": true,
+  "decisions": {
+    "Commitment_A": "APPROVED_FR004_ONLY",
+    "I-B": "APPROVED_ARCHITECTURE",
+    "S-RANK": "APPROVED_ARCHITECTURE",
+    "W1": "APPROVED_LOCAL_BYTE_STORAGE_ONLY",
+    "P-EXPLICIT": "SELECTED_FOR_SPECIFICATION",
+    "SIG-ISC-ED25519-v1": "SELECTED_FOR_SPECIFICATION",
+    "ISC-EVIDENCE-BUDGET-v1": "SELECTED_FOR_SPECIFICATION",
+    "consolidated_exact_details": "DRAFT",
+    "Producer_Integration": "BLOCKED"
+  },
+  "dependency_graph": [
+    {
+      "node": "source_profile",
+      "dependencies": []
+    },
+    {
+      "node": "semantic_artifacts",
+      "dependencies": [
+        "source_profile"
+      ]
+    },
+    {
+      "node": "sigma",
+      "dependencies": [
+        "semantic_artifacts"
+      ]
+    },
+    {
+      "node": "independent_bootstrap",
+      "dependencies": []
+    },
+    {
+      "node": "K",
+      "dependencies": [
+        "source_profile",
+        "independent_bootstrap"
+      ]
+    },
+    {
+      "node": "E",
+      "dependencies": [
+        "source_profile",
+        "sigma"
+      ]
+    },
+    {
+      "node": "R",
+      "dependencies": [
+        "sigma",
+        "E",
+        "K",
+        "independent_bootstrap"
+      ]
+    },
+    {
+      "node": "admitted_round_inputs",
+      "dependencies": []
+    },
+    {
+      "node": "B",
+      "dependencies": [
+        "source_profile",
+        "sigma",
+        "admitted_round_inputs"
+      ]
+    },
+    {
+      "node": "V",
+      "dependencies": [
+        "source_profile",
+        "sigma",
+        "B",
+        "R"
+      ]
+    },
+    {
+      "node": "M",
+      "dependencies": [
+        "R",
+        "K",
+        "V"
+      ]
+    },
+    {
+      "node": "sig",
+      "dependencies": [
+        "M",
+        "independent_bootstrap"
+      ]
+    },
+    {
+      "node": "G",
+      "dependencies": [
+        "R",
+        "K",
+        "V",
+        "sig"
+      ]
+    },
+    {
+      "node": "C",
+      "dependencies": [
+        "B",
+        "G"
+      ]
+    },
+    {
+      "node": "W1",
+      "dependencies": [
+        "C",
+        "V",
+        "G",
+        "admitted_round_inputs"
+      ]
+    },
+    {
+      "node": "evidence",
+      "dependencies": [
+        "source_profile",
+        "sigma",
+        "E",
+        "R",
+        "V",
+        "G",
+        "C",
+        "W1"
+      ]
+    }
+  ],
+  "dag_check": "ACYCLIC_DOCUMENTARY_GRAPH",
+  "sigma_algorithm": "EXISTING_formal/scripts/formal_artifacts.py:derive_formal_semantics_id",
+  "sigma_input_set": "non-mutant TLA + mandatory Lean + public trace schema; LF-normalized source only",
+  "excluded_concrete_inputs": [
+    "E/e",
+    "R/r",
+    "K/key_id",
+    "B/b",
+    "V/v",
+    "M",
+    "sig",
+    "G/g",
+    "C/c",
+    "W1",
+    "receipts/effects",
+    "deployment_manifests",
+    "snapshots/history",
+    "generated_vectors",
+    "reports"
+  ],
+  "indirect_generated_literal_inclusion_forbidden": true,
+  "open_obligations": [
+    {
+      "obligation": "exact_consolidated_draft_approval",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "feature000_parent_context_budget_conditional_liveness_qualification",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "concrete_key_signature_and_source_verification",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "original_intent_G_durability_and_recovery_association",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "full_inventory_P0_P1_output_sufficiency",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "mixed_WAL_rank_refinement",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "exact_compatible_merged_Formal_GO",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "separate_production_integration_authorization",
+      "status": "OPEN"
+    }
+  ],
+  "prohibitions": [
+    "production_integration",
+    "native_guard_removal",
+    "sigma_assignment",
+    "old_object_signature_QC_WAL_migration_or_relabel",
+    "R2.3",
+    "R3",
+    "lineage_pruning",
+    "code_schema_TLA_Lean_fixture_build_edits",
+    "sprint_manifest_changes",
+    "automatic_join_or_merge",
+    "self_review_as_independent_attestation"
+  ],
+  "semantic_source_entries_checked_unchanged": 271,
+  "document_hashes": [
+    {
+      "path": "docs/adr/0014-isc-contract-freeze-v1.md",
+      "sha256": "fead9e4772b0d9d26dfcfacea10ccd7235c80ea17f1469bfc258a06a5588606e"
+    },
+    {
+      "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "sha256": "b853596dcb6893467d215572d2701367643f142cbaaf510e225fb0d5bf92f3ee"
+    },
+    {
+      "path": "docs/adr/0014-isc-producer-integration-v1.md",
+      "sha256": "eaa7206d25269a88135869862c7864f3771260e5f70c5f40c4ad1722a8cd2ede"
+    },
+    {
+      "path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+      "sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd"
+    }
+  ],
+  "checks": {
+    "git_diff_check": "PASS",
+    "scope": "PASS",
+    "source_ancestry": "PASS",
+    "sprint_presence_and_preservation": "PASS",
+    "semantic_inputs_unchanged": "PASS",
+    "local_markdown_links": "PASS",
+    "documentary_DAG_topological_order": "PASS"
+  },
+  "tests_executed": [],
+  "formal_or_native_tests_executed": false,
+  "limitations": [
+    "DAG consistency is documentary, not executable refinement or Formal GO.",
+    "Exact draft details remain unapproved.",
+    "Graph role reviews do not establish independent reviewer provenance."
+  ],
+  "commands": [
+    "git fetch origin --prune",
+    "git merge-base --is-ancestor ea5a70d8c5fd3516de243632f2c5681b0e5a6292 HEAD",
+    "git diff --check",
+    "git diff 4873b3559b390318c0fc8ff80dd00ecea4ea7b59 -- orchestration/sprints/isc-s16-pipelined",
+    "git ls-tree -r --name-only 4873b3559b390318c0fc8ff80dd00ecea4ea7b59 orchestration/sprints/isc-s16-pipelined",
+    "inline Python assertions: DAG, paths, source blobs, scope, links"
+  ]
+}

@@ -3,6 +3,10 @@
 **Status: integration DRAFT; I-B/S-RANK APPROVED; W1 APPROVED as a local byte/storage contract.
 Not approved for implementation.**
 
+The [ISC-S16-A01 contract freeze](0014-isc-contract-freeze-v1.md) records the
+non-circular source/σ/deployment DAG and exact approval matrix. This integration
+remains BLOCKED; reference-lane authorization is not production authorization.
+
 30 September 2026 documentary amendment: the FR-004 commitment profile and the
 [I-B/S-RANK decisions](0014-isc-identity-sequence-amendment.md) are approved.
 The [WAL Capsule](0014-isc-finalization-wal-capsule-v1.md) now incorporates these

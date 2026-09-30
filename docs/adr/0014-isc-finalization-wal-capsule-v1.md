@@ -2,6 +2,10 @@
 
 **Decision document к ADR-0014. WAL Capsule W1: APPROVED как local byte/storage contract; I-B и S-RANK: APPROVED.**
 
+[ISC-S16-A01 contract freeze](0014-isc-contract-freeze-v1.md) фиксирует единые
+статусы и dependency DAG. Concrete W1/source/deployment evidence — downstream
+outputs, не inputs σ. Local W1 approval не утверждает draft exact payload details.
+
 Amendment от 30 сентября 2026 переносит утверждённые
 [identity/sequence решения](0014-isc-identity-sequence-amendment.md) в storage contract.
 W1 утверждён пользователем как локальный byte/storage contract; это не разрешение
