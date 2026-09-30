@@ -1,0 +1,152 @@
+{
+  "git_address": "https://github.com/chartjs333/delta.git",
+  "agents": {
+    "overwrite": true,
+    "include_managed": false
+  },
+  "execution": {
+    "mode": "sequential",
+    "initialize_reviewers": false,
+    "start_node": "continuity-coordinator",
+    "required_approvals": 2,
+    "max_rework_cycles": 100,
+    "reviewers": [
+      {
+        "id": "isc-s16-continuous-architecture-reviewer",
+        "name": "Delta ISC Continuous Architecture Reviewer",
+        "phone": "2791",
+        "git_branch": "review/isc-s16-continuous-architecture",
+        "profile": "Process architecture reviewer for the continuous sequential graph. Verify exact scope, contract authority, fail-closed reasoning, branch/commit provenance and that the Continuity Coordinator did not self-authorize Formal GO or production changes. Use only APPROVE or actionable REJECT. This graph role is not an independent external attestation."
+      },
+      {
+        "id": "isc-s16-continuous-evidence-reviewer",
+        "name": "Delta ISC Continuous Evidence Reviewer",
+        "phone": "2792",
+        "git_branch": "review/isc-s16-continuous-evidence",
+        "profile": "Process evidence reviewer for the continuous sequential graph. Verify changed files, commands, tests, hashes, ancestry, sprint-file presence and absence of unauthorized production/R2.3/R3 changes. Use only APPROVE or actionable REJECT. This graph role is not an independent external attestation."
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "continuity-coordinator",
+      "agent": {
+        "id": "isc-s16-continuity-coordinator",
+        "name": "Delta ISC Continuity Coordinator",
+        "phone": "2750",
+        "git_branch": "agent/isc-s16-continuous-sprint",
+        "profile": "Ты — Delta ISC Continuity Coordinator, технический decision-agent в стиле GPT-5.6 Pro. Восстанавливай контекст только из Git/ADR/evidence/project_state. Решай обычные вопросы на месте; исправляй sprint-owned manifests/checksums/handoffs; выбирай минимальный deterministic fail-closed вариант в пределах уже утверждённых контрактов; фиксируй source-bound decision и возвращай graph в нужный node. Не являйся независимым reviewer, не объявляй Formal GO, не изобретай authority, не ослабляй safety, не подключай reference code к production, не начинай R2.3/R3. Если safe resolution требует remediation, зафиксируй NO_GO/remediation и продолжи graph без blocked terminal."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-CONTINUITY",
+          "queue": "consultant-all",
+          "message": "Read orchestration/sprints/isc-s16-continuous/{README.md,bootstrap-ru.md,continuity-agent.md,lane-tasks.md,recovery-state.json,SHA256SUMS.json}. Work on the canonical assigned branch. On the initial run verify A01 a579a5c66586ba3f8f1d7cc26c454aba5addbd8f and handoff 85a2a526468293e90daf019c0e10781e3d753a8c, verify all current sprint hashes, write handoffs/ISC-S16-CONTINUITY-RECOVERY.json, then return START_W1. On later runs inspect project_state and the latest source outcome/reviewer feedback, resolve the question under continuity-agent.md, commit a source-bound decision/handoff, and return the corresponding RESUME_* status. Do not terminate through a blocked state or claim Formal GO."
+        }
+      ],
+      "transitions": {
+        "START_W1": "w1-reference-engine",
+        "RESUME_W1": "w1-reference-engine",
+        "RESUME_CRYPTO": "crypto-reference",
+        "RESUME_FORMAL": "formal-linkage",
+        "RESUME_QUALIFICATION": "formal-qualification"
+      }
+    },
+    {
+      "id": "w1-reference-engine",
+      "agent": {
+        "id": "isc-s16-w1-reference-engineer",
+        "name": "Delta W1 Reference Storage Engineer",
+        "phone": "2751",
+        "git_branch": "agent/isc-s16-w1-reference-engine",
+        "profile": "Implement only quarantined W1 reference storage work. Read continuity-agent.md and resolve ordinary questions in-place. No production integration."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-B01",
+          "queue": "worker-all",
+          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-B01. Preserve sprint files. Return DONE, NEED_DECISION, or STOP."
+        }
+      ],
+      "transitions": {
+        "DONE": "crypto-reference",
+        "NEED_DECISION": "continuity-coordinator",
+        "STOP": "continuity-coordinator"
+      }
+    },
+    {
+      "id": "crypto-reference",
+      "agent": {
+        "id": "isc-s16-crypto-reference-engineer",
+        "name": "Delta ISC Crypto Reference Engineer",
+        "phone": "2752",
+        "git_branch": "agent/isc-s16-ed25519-reference",
+        "profile": "Implement only quarantined canonical-byte and Ed25519 reference/conformance work. Read continuity-agent.md and resolve ordinary questions in-place."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-C01",
+          "queue": "worker-all",
+          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-C01. Preserve sprint files. Return DONE, NEED_DECISION, or STOP."
+        }
+      ],
+      "transitions": {
+        "DONE": "formal-linkage",
+        "NEED_DECISION": "continuity-coordinator",
+        "STOP": "continuity-coordinator"
+      }
+    },
+    {
+      "id": "formal-linkage",
+      "agent": {
+        "id": "isc-s16-formal-linkage-engineer",
+        "name": "Delta ISC Formal Linkage Engineer",
+        "phone": "2753",
+        "git_branch": "agent/isc-s16-formal-linkage",
+        "profile": "Prove only the frozen TLA+/Lean integration-point scope. Read continuity-agent.md; resolve ordinary proof-engineering questions in-place; do not weaken invariants."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-D01",
+          "queue": "worker-all",
+          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-D01. Preserve sprint files. Return GO, NO_GO, NEED_DECISION, or STOP."
+        }
+      ],
+      "transitions": {
+        "GO": "formal-qualification",
+        "NO_GO": "continuity-coordinator",
+        "NEED_DECISION": "continuity-coordinator",
+        "STOP": "continuity-coordinator"
+      }
+    },
+    {
+      "id": "formal-qualification",
+      "agent": {
+        "id": "isc-s16-formal-qualification-engineer",
+        "name": "Delta ISC Formal Qualification Engineer",
+        "phone": "2754",
+        "git_branch": "agent/isc-s16-formal-qualification",
+        "profile": "Join exact accepted lane commits and issue a limited-scope source-bound result. GO requires all exact gates; NO_GO routes to Continuity Coordinator for remediation."
+      },
+      "tasks": [
+        {
+          "task_id": "ISC-S16-Q01",
+          "queue": "worker-all",
+          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-Q01 using exact accepted prior outcomes/reviews. Preserve sprint files. Return GO, NO_GO, NEED_DECISION, or STOP."
+        }
+      ],
+      "transitions": {
+        "GO": "completed",
+        "NO_GO": "continuity-coordinator",
+        "NEED_DECISION": "continuity-coordinator",
+        "STOP": "continuity-coordinator"
+      }
+    },
+    {
+      "id": "completed",
+      "type": "terminal",
+      "status": "DONE",
+      "message": "ISC S16 continuous reference/formal pipeline completed with an accepted limited-scope qualification. Production integration, R2.3/R3 and guard removal remain separately gated."
+    }
+  ]
+}
