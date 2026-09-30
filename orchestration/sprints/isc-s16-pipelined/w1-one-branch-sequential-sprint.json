@@ -1,7 +1,7 @@
 {
   "git_address": "https://github.com/chartjs333/delta.git",
   "agents": {
-    "overwrite": false,
+    "overwrite": true,
     "include_managed": false
   },
   "execution": {
