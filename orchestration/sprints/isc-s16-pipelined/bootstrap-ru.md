@@ -21,4 +21,23 @@ Source baseline: `codex/feature000-binding-candidate@ea5a70d8c5fd3516de243632f2c
 12. В outcome укажи from_commit, git_commit, git_branch, changed files, commands, tests/evidence и manifest-presence check.
 13. Join/qualification и production-ветки автоматически не запускай.
 
-Для sequential W1-варианта сначала вызови общий `/api/v1/agents/whoami`, один раз отправь `git_address` в выданный `reply_url`, а официальный результат отправляй в current assignment endpoint с сохранённым `assignment_id`. Reviewer использует только `APPROVE` или `REJECT`.
+## Parallel sprint
+
+Для `parallel-sprint.json` и `parallel-resume-after-a01.json`:
+
+- импортируй только через direct project import либо parallel Telegram/pending-sprint route;
+- не отправляй JSON в sequential endpoint;
+- после старта используй постоянную карточку и communication endpoints конкретного phone;
+- не используй общий `/api/v1/agents/whoami` как outcome router;
+- завершение lane — source-bound result/progress message, commit + push; formal join выполняется отдельным sprint.
+
+Если parallel JSON случайно импортирован через sequential endpoint, получится `queue_graph` без declared workflow/transitions. Не делай новый dequeue и не назначай successor вручную. Текущий mis-imported sprint должен быть административно архивирован/заменён, а completed commit сохранён как вход resume sprint.
+
+## Sequential W1-only sprint
+
+Только для `w1-one-branch-sequential-sprint.json`:
+
+1. Вызови общий `/api/v1/agents/whoami`.
+2. Один раз отправь `git_address` в выданный `reply_url`.
+3. Официальный результат отправляй в current assignment endpoint с сохранённым `assignment_id`.
+4. Reviewer использует только `APPROVE` или `REJECT`.
