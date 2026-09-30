@@ -1,5 +1,19 @@
 # Feature010 continuation checkpoint
 
+## ISC Commitment Profile v1 — two required edits applied / FR-004 approved
+
+User approval is limited to variant A as the FR-004 byte contract. Both required
+edits are now normative: reject duplicate decoded JSON member names before typed
+InputTuple construction (raw negative vector N11), and do not claim sufficient
+parent/context binding through RoundConfig/WorkTickets. Explicit parent/context
+completeness remains a separate existing compatibility/refinement obligation.
+V1–V5/tree/fields remain unchanged. No code, schemas, proofs or runtime fixtures
+changed; no native conformance or Formal GO claimed. R1/R2.1/R2.2 CLOSED;
+R2.3/R2 OPEN. The 50–84 hour estimate remains unapproved.
+
+After this separate documentation commit, only the next decision document,
+ISC Finalization WAL Capsule v1, is authorized. Implementation remains stopped.
+
 ## ISC Commitment Profile v1 — 30 September 2026 — proposed decision / STOP
 
 The user accepted the architecture STOP, did not approve the 50–84 hour estimate,

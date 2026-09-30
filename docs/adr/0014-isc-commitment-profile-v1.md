@@ -1,6 +1,10 @@
 # ISC Commitment Profile v1
 
-**Decision document к ADR-0014. Статус: PROPOSED, ожидает утверждения.**
+**Decision document к ADR-0014. Статус: APPROVED для конкретизации FR-004, variant A.**
+
+Утверждение пользователя от 30 сентября 2026 было обусловлено двумя обязательными
+правками; обе внесены: duplicate JSON member rejection и отсутствие утверждения
+о достаточности parent binding. Это утверждение byte-level контракта, не реализации.
 
 30 сентября 2026. Scope: только конкретизация существующего feature-008
 FR-004/FR-005. Код, proofs, schemas и production fixtures не изменяются.
@@ -12,9 +16,9 @@ R2.3/R3 не продолжаются. Оценка 50–84 часа не утв
 `60c692f6e391f839829dfc64e93380db54cd507b`. Последний — source pin, не Formal GO.
 [Инвентаризация источников и проверок документа](evidence/0014-isc-commitment-profile-v1-source-audit.json).
 
-## Предлагаемое решение и альтернативы
+## Утверждённое решение и рассмотренные альтернативы
 
-Выбранный **для утверждения** минимальный профиль — **A**: существующие canonical
+Утверждённый минимальный профиль — **A**: существующие canonical
 JSON bytes одного `InputTuple`, отдельный ISC leaf domain и существующее дерево
 `delta::shards::merkle_root`. Новые поля в tuple, ISC, RoundConfig, vote или WAL
 не добавляются. Leaf digest — вычисляемое промежуточное значение, не новый
@@ -22,7 +26,7 @@ certificate, protocol object, signer identity или журналируемый 
 
 | Вариант | Конкретный выбор | Причины и compatibility consequences |
 |---|---|---|
-| **A — выбран для предложения** | Existing tuple JSON; новый leaf domain; existing `deltareduce.004.merkle-node.v1`; duplicate-last на каждом нечётном уровне | Переиспользует существующие tuple bytes и Merkle helper. Не вводит поля или новый tree codec. Root имеет известную неоднозначность при добавлении повторного последнего leaf; такие входы запрещены existing uniqueness contract и должны отвергаться **до** проверки root |
+| **A — утверждён для FR-004** | Existing tuple JSON; новый leaf domain; existing `deltareduce.004.merkle-node.v1`; duplicate-last на каждом нечётном уровне | Переиспользует существующие tuple bytes и Merkle helper. Не вводит поля или новый tree codec. Root имеет известную неоднозначность при добавлении повторного последнего leaf; такие входы запрещены existing uniqueness contract и должны отвергаться **до** проверки root |
 | B | Тот же tuple JSON и leaf domain, что в A; node domain `deltareduce.008.isc-merkle-node.v1`; рекурсивное деление массива по наибольшей степени двойки меньше его длины, без padding | Различает длины без зависимости от duplicate rejection. Singleton совпадает с A; multi-leaf preimages меняются, их roots нельзя считать совместимыми. Не выбран: текущий ISC contract уже требует уникальные tickets, а A повторно использует existing helper |
 | C | SHA-256 от `ASCII("deltareduce.008.isc-input-array.v1") || 00 || ASCII("[" + comma-separated J(t) + "]")` | Другая root preimage для всех размеров; это не Merkle tree. Не соответствует FR-004 без отдельного изменения требования; не выбран |
 
@@ -30,9 +34,9 @@ certificate, protocol object, signer identity или журналируемый 
 прямой commitment к четырём существующим tuple fields. Не допускается silent
 fallback между A/B/C по тому, какой root подошёл.
 
-Это **новая конкретная спецификация отсутствовавшего binding**, а не утверждение,
-что данный алгоритм уже был принят или реализован для ISC. После её утверждения
-потребуется формальная квалификация. Одобрение документа не разрешает кодировать.
+Это **конкретная спецификация отсутствовавшего binding**. Она теперь утверждена
+для FR-004, но её native implementation и формальная квалификация ещё не выполнены.
+Одобрение документа не разрешает кодировать.
 
 ## Существующая tuple schema и ограничения
 
@@ -50,6 +54,16 @@ fallback между A/B/C по тому, какой root подошёл.
 `additionalProperties=false`. Нет `leaf_index`, `leaf_count`, `profile_id`,
 `round_id`, `parent_id`, `signature`, `length` или иных добавленных tuple fields.
 Нельзя брать native struct memory или порядок ключей произвольного map.
+
+При разборе tuple **любое повторение имени JSON-поля является ошибкой до построения
+typed `InputTuple`**. Парсер не вправе применять first-wins, last-wins или объединение
+значений, в том числе если оба значения одинаковы. Имена сравниваются после JSON
+string decoding: эквивалентная escape-запись имени не скрывает повтор. Duplicate
+member detection выполняется на исходном потоке members, до сведения к map,
+JSON Schema validation и canonical reconstruction. `additionalProperties=false`
+после обычного map parsing этой проверки не заменяет. Negative vector N11 хранит
+исходные bytes со вторым `ticket_id`; ожидается `REJECT_DUPLICATE_JSON_MEMBER`
+до typed construction/root evaluation. Это test outcome, не новый ABI status code.
 
 Existing JSON schema требует `tuples.minItems=1`; отдельного `maxItems` в ней нет.
 Existing native certificate constructor допускает не более 100000 entries и
@@ -193,8 +207,15 @@ Root намеренно зависит только от tuples. Поэтому 
 в двух contexts даёт одинаковый root. Context binding выполняется существующим
 полным `VoteInputSetBody`/ISC: `round_id`, `height`, `view`, `round_config_id`,
 `validator_epoch_id`, `parameter_schema_id`, `arithmetic_profile_id`, version/semantics
-и root/tuples проверяются вместе. Parent остаётся связан через existing RoundConfig
-и WorkTickets; `parent_checkpoint_id` не добавляется в ISC.
+и root/tuples проверяются вместе.
+
+**Этот профиль нормативно определяет только вычисление `input_root` из ordered
+tuples. Он не утверждает достаточность существующего parent binding и не изменяет
+full-context requirements ISC. Соответствие фактической ISC schema требованию
+явной parent/context binding остаётся отдельным compatibility/refinement obligation.**
+Транзитивные ссылки через RoundConfig/WorkTickets не объявляются его закрытием.
+`parent_checkpoint_id` сейчас не добавляется; вопрос не решается новым полем
+или ослаблением контракта в этом документе.
 
 Existing `vote_input_set_body_id` связывает context, root и ordered tuples;
 existing ISC content ID связывает canonical certificate целиком, включая signers.
@@ -205,7 +226,7 @@ Round-scoped ISC `vote_context_id` не меняется и не заменяе�
 
 [Полный vector document](evidence/0014-isc-commitment-profile-v1-vectors.json)
 содержит tuple objects, exact ASCII/hex bytes, длины, полные leaf/node preimages,
-все промежуточные уровни и expected roots. Это **предлагаемые нормативные данные**
+все промежуточные уровни и expected roots. Это **утверждённые нормативные данные FR-004**
 для будущих C++/Java/Python implementations, не изменённые runtime fixtures/schema.
 Имена A–E/V1–V5 и поля vector document — метаданные документа, не protocol identities.
 
@@ -231,7 +252,8 @@ Round-scoped ISC `vote_context_id` не меняется и не заменяе�
 
 Обязательные отрицательные/relational cases в том же документе: empty, reversed
 order, duplicate tail с root как у V3, одинаковый ticket с другим body, uppercase
-digest, лишнее tuple field, неканонические tuple bytes, ASCII вместо raw children,
+digest, лишнее tuple field, повтор JSON member до typed construction,
+неканонические tuple bytes, ASCII вместо raw children,
 отсутствующий domain separator, повтор доставки и неизвестная profile authority.
 Строки `REJECT_*` описывают исход проверки, **не вводят новые ABI status codes**.
 Проверка raw Merkle tree без schema/order/uniqueness validation не является profile
@@ -290,18 +312,26 @@ production certificate, не approved semantics и не разрешённая �
 fixture не изменён. Будущий real certificate будет иметь квалифицированный context
 и fresh votes; его ID здесь не выдумывается.
 
-## Предмет утверждения и STOP
+## Граница утверждения и STOP
 
-На утверждение вынесены только: A, точные domains/preimages/tree rules,
-existing no-new-fields encoding, mandatory duplicate/order/context checks,
-нормативные векторы и изложенные compatibility consequences. Это документальное
-решение FR-004; оно не закрывает R2.3 и не принимает 50–84 часа.
+Утверждены только A и следующий byte-level контракт FR-004:
 
-После утверждения разрешён следующий **документ** — `ISC Finalization WAL Capsule v1`
-с собственными альтернативами, выбранным минимальным форматом и compatibility
-анализом. Сейчас он не создан и не спроектирован. Ни кодирование, ни новые proofs,
-ни schemas, R2.3/R3 или runtime changes не разрешены до принятия обоих contracts
-и отдельной команды в пределах действующего formal-first gate.
+```text
+validated ordered unique InputTuple list
+→ canonical J(t) → domain-separated leaves
+→ specified duplicate-last Merkle root → exact input_root
+```
 
-**STOP после первого decision document.** DoD R1–R7 и Snapshot Provenance Profile v1
+Утверждение включает duplicate-member fail-closed decoding и normative vectors.
+Оно не означает, что production ISC producer реализован, parent/context binding
+квалифицирован, quorum сформирован, ISC durable, старые QC можно мигрировать
+или R2.3/R3 закрыты. Оценка 50–84 часа остаётся не утверждённой.
+
+После отдельного commit этих двух правок разрешён только следующий **документ** —
+`ISC Finalization WAL Capsule v1`. Его формат требует собственного утверждения.
+Ни код, ни proofs, ни schemas, fixtures, R2.3/R3 или runtime changes не разрешены
+без обоих утверждённых contracts и отдельной команды с соблюдением exact compatible
+merged Formal GO. Parent/context obligation нельзя закрыть самим WAL capsule.
+
+**STOP на реализации сохраняется.** DoD R1–R7 и Snapshot Provenance Profile v1
 не менялись; R1/R2.1/R2.2 CLOSED, R2.3/R2 OPEN.

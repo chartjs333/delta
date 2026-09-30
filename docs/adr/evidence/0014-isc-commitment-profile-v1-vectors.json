@@ -1,6 +1,6 @@
 {
-  "document_kind": "PROPOSED_NORMATIVE_BYTE_VECTORS_NOT_RUNTIME_SCHEMA_OR_EXECUTION_EVIDENCE",
-  "status": "PROPOSED_PENDING_USER_APPROVAL",
+  "document_kind": "APPROVED_FR004_NORMATIVE_BYTE_VECTORS_NOT_RUNTIME_SCHEMA_OR_EXECUTION_EVIDENCE",
+  "status": "APPROVED_FOR_FR004_ONLY",
   "profile_identifier": "deltareduce.008.isc-commitment.v1",
   "leaf_domain": "deltareduce.008.isc-input-leaf.v1",
   "internal_node_domain": "deltareduce.004.merkle-node.v1",
@@ -468,6 +468,14 @@
       "expected": "REJECT_PROFILE_AUTHORITY_EVEN_IF_ROOT_MATCHES",
       "formal_semantics_id": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "authority_registry_premise": "This exact ID is absent from the independently configured approved-profile registry."
+    },
+    {
+      "name": "N11-duplicate-json-member",
+      "raw_tuple_ascii": "{\"availability_certificate_id\":\"sha256:1111111111111111111111111111111111111111111111111111111111111111\",\"commitment_id\":\"sha256:2222222222222222222222222222222222222222222222222222222222222222\",\"domain_id\":\"code\",\"ticket_id\":\"ticket-001\",\"ticket_id\":\"ticket-002\"}",
+      "raw_tuple_hex": "7b22617661696c6162696c6974795f63657274696669636174655f6964223a227368613235363a31313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131313131222c22636f6d6d69746d656e745f6964223a227368613235363a32323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232323232222c22646f6d61696e5f6964223a22636f6465222c227469636b65745f6964223a227469636b65742d303031222c227469636b65745f6964223a227469636b65742d303032227d",
+      "expected": "REJECT_DUPLICATE_JSON_MEMBER",
+      "rejection_stage": "RAW_JSON_MEMBERS_BEFORE_TYPED_INPUT_TUPLE_AND_ROOT",
+      "abi_status_code_added": false
     }
   ],
   "legacy_compatibility": {

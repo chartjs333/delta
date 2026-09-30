@@ -2,12 +2,12 @@
   "kind": "DOCUMENTARY_PROFILE_DECISION_AND_NUMERICAL_VECTOR_AUDIT_NOT_IMPLEMENTATION_OR_FORMAL_PROOF",
   "source_commit": "bc2c6df6dcb2402a919b1052526958af2ef27182",
   "native_source_commit": "60c692f6e391f839829dfc64e93380db54cd507b",
-  "status": "PROPOSED_PENDING_USER_APPROVAL",
+  "status": "APPROVED_FOR_FR004_ONLY_TWO_REQUIRED_EDITS_APPLIED",
   "started_at_utc": "2026-09-30T02:11:37+00:00",
   "profile_identifier": "deltareduce.008.isc-commitment.v1",
   "proposed_choice": "A: existing tuple JSON, dedicated ISC leaf domain, existing 004 duplicate-last Merkle tree",
   "existing_requirement": "008 FR-004 and FR-005",
-  "profile_approved": false,
+  "profile_approved": true,
   "new_wire_fields": false,
   "new_production_code_proofs_or_schemas": false,
   "existing_fixtures_rewritten": false,
@@ -21,11 +21,11 @@
   "new_formal_evidence_claimed": false,
   "report": {
     "path": "docs/adr/0014-isc-commitment-profile-v1.md",
-    "sha256": "d3464a2e33feee55cf1e4be6fed99d69bfcfeb69ecbbf1943a7715f67b90998a"
+    "sha256": "74772102898b2a18c65bb20f6adb371ff486c0ee701cae1fac30d87e6a7334ae"
   },
   "vectors": {
     "path": "docs/adr/evidence/0014-isc-commitment-profile-v1-vectors.json",
-    "sha256": "2e40a843456ef4f95857ee81d78809cd94583c3e3e2942284636def13f6e130a"
+    "sha256": "22f84f58dadb68f3c6c98074b4eb58d9b9de8f2697e10f5b22ed5974fb9fd5df"
   },
   "baseline_inputs_verified_unchanged": 19,
   "frozen_documents_verified": {
@@ -146,5 +146,12 @@
   "ended_at_utc": "2026-09-30T02:22:57.394770+00:00",
   "active_documentation_seconds": 680,
   "idle_included": false,
-  "document_file_hash_encoding": "Exact UTF-8 file bytes with LF newlines, as stored in Git; not an alternative protocol encoding."
+  "document_file_hash_encoding": "Exact UTF-8 file bytes with LF newlines, as stored in Git; not an alternative protocol encoding.",
+  "approval_scope": "FR-004 byte-level commitment only; parent/context completeness not qualified; no implementation authorization",
+  "required_edits": [
+    "Reject any duplicate decoded JSON member name before typed InputTuple; N11 raw bytes retained",
+    "Remove parent-binding sufficiency claim; retain explicit context compatibility/refinement obligation"
+  ],
+  "previous_proposed_document_commit": "031640af0edbc76c465cde1ae2bfa501653510a5",
+  "revision_validation": "N11 raw bytes contain both ticket_id occurrences; no production parser/checker execution claimed. Existing V1-V5 and their numerical content unchanged."
 }
