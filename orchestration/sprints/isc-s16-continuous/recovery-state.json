@@ -1,0 +1,39 @@
+{
+  "sprint_id": "ISC-S16-CONTINUOUS",
+  "mode": "sequential_declared_graph",
+  "canonical_branch": "agent/isc-s16-continuous-sprint",
+  "base_commit": "85a2a526468293e90daf019c0e10781e3d753a8c",
+  "source_baseline": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+  "historical_a01": {
+    "branch": "agent/isc-s16-contract-freeze",
+    "commit": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "status": "DOCUMENTARY_WORK_COMPLETE_NOT_FORMAL_GO"
+  },
+  "historical_handoff": {
+    "branch": "agent/isc-s16-a01-handoff",
+    "commit": "85a2a526468293e90daf019c0e10781e3d753a8c",
+    "path": "orchestration/sprints/isc-s16-sequential/handoffs/ISC-S16-A01.json",
+    "status": "PRESERVED_HISTORICAL_INPUT"
+  },
+  "previous_terminal": {
+    "status": "blocked",
+    "reason": "bootstrap checksum mismatch in prior sprint base",
+    "active_assignment": false
+  },
+  "continuity_policy": {
+    "explicit_blocked_terminal": false,
+    "only_terminal": "completed",
+    "ordinary_questions_resolved_in_place": true,
+    "authority_questions_route_to": "continuity-coordinator",
+    "formal_no_go_routes_to": "continuity-coordinator",
+    "max_rework_cycles": 100
+  },
+  "formal_boundaries": {
+    "independent_attestation_claimed": false,
+    "formal_go_claimed": false,
+    "production_authorization": false,
+    "sigma_assigned": false,
+    "r2_3_started": false,
+    "r3_started": false
+  }
+}
