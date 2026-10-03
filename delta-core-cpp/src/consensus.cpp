@@ -1,8 +1,10 @@
 #include <delta/core/consensus.hpp>
 
 #include <algorithm>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -46,10 +48,6 @@ void require_strict_order(const std::vector<std::string>& values, ErrorCode code
   return std::tie(
       vote.validator_id,
       vote.validator_epoch_id,
-      vote.kind,
-      vote.round_id,
-      vote.height,
-      vote.view,
       vote.context_id);
 }
 
@@ -63,6 +61,134 @@ void require_vote(const protocol::Vote& vote) {
   require_content_id(vote.signature_id);
   require(vote.durable_sequence > 0U, ErrorCode::vote_invalid, "durable vote sequence is zero");
 }
+
+void append_hash_text(core::canonical::Bytes& output, std::string_view value) {
+  const auto length = static_cast<std::uint64_t>(value.size());
+  for (std::size_t offset = sizeof(length); offset != 0U; --offset) {
+    const auto shift = static_cast<unsigned>((offset - 1U) * 8U);
+    output.push_back(static_cast<std::byte>((length >> shift) & 0xffU));
+  }
+  const auto bytes = std::as_bytes(std::span(value.data(), value.size()));
+  output.insert(output.end(), bytes.begin(), bytes.end());
+}
+
+void append_hash_u64(core::canonical::Bytes& output, std::uint64_t value) {
+  for (std::size_t offset = sizeof(value); offset != 0U; --offset) {
+    const auto shift = static_cast<unsigned>((offset - 1U) * 8U);
+    output.push_back(static_cast<std::byte>((value >> shift) & 0xffU));
+  }
+}
+
+void append_hash_texts(
+    core::canonical::Bytes& output,
+    const std::vector<std::string>& values) {
+  append_hash_u64(output, values.size());
+  for (const auto& value : values) {
+    append_hash_text(output, value);
+  }
+}
+
+void append_hash_bool(core::canonical::Bytes& output, bool value) {
+  output.push_back(value ? std::byte{1U} : std::byte{0U});
+}
+
+void append_hash_context(
+    core::canonical::Bytes& output,
+    const certificates::Context& value) {
+  append_hash_text(output, value.arithmetic_profile_id);
+  append_hash_u64(output, value.height);
+  append_hash_text(output, value.parameter_schema_id);
+  append_hash_text(output, value.round_config_id);
+  append_hash_text(output, value.round_id);
+  append_hash_text(output, value.validator_epoch_id);
+  append_hash_u64(output, value.view);
+}
+
+void append_hash_rational(
+    core::canonical::Bytes& output,
+    const certificates::Rational& value) {
+  append_hash_u64(output, std::bit_cast<std::uint64_t>(value.numerator));
+  append_hash_u64(output, value.denominator);
+}
+
+void append_hash_input_tuples(
+    core::canonical::Bytes& output,
+    const std::vector<certificates::InputTuple>& values) {
+  append_hash_u64(output, values.size());
+  for (const auto& value : values) {
+    append_hash_text(output, value.availability_certificate_id);
+    append_hash_text(output, value.commitment_id);
+    append_hash_text(output, value.domain_id);
+    append_hash_text(output, value.ticket_id);
+  }
+}
+
+void append_hash_eligibility_entries(
+    core::canonical::Bytes& output,
+    const std::vector<certificates::EligibilityEntry>& values) {
+  append_hash_u64(output, values.size());
+  for (const auto& value : values) {
+    append_hash_bool(output, value.accepted);
+    append_hash_text(output, value.domain_id);
+    append_hash_rational(output, value.gamma);
+    append_hash_text(output, value.reason_code);
+    append_hash_text(output, value.ticket_id);
+  }
+}
+
+void append_hash_bucket_assignments(
+    core::canonical::Bytes& output,
+    const std::vector<certificates::BucketAssignment>& values) {
+  append_hash_u64(output, values.size());
+  for (const auto& value : values) {
+    append_hash_text(output, value.bucket_id);
+    append_hash_text(output, value.ticket_id);
+  }
+}
+
+void append_hash_weights(
+    core::canonical::Bytes& output,
+    const std::vector<certificates::Weight>& values) {
+  append_hash_u64(output, values.size());
+  for (const auto& value : values) {
+    append_hash_rational(output, value.alpha);
+    append_hash_text(output, value.ticket_id);
+  }
+}
+
+void append_hash_root_leaves(
+    core::canonical::Bytes& output,
+    const std::vector<certificates::RootLeaf>& values) {
+  append_hash_u64(output, values.size());
+  for (const auto& value : values) {
+    append_hash_text(output, value.domain_id);
+    append_hash_text(output, value.parameter_shard_qc_id);
+    append_hash_text(output, value.shard_id);
+  }
+}
+
+void append_hash_shard_keys(
+    core::canonical::Bytes& output,
+    const std::vector<certificates::ShardKey>& values) {
+  append_hash_u64(output, values.size());
+  for (const auto& value : values) {
+    append_hash_text(output, value.domain_id);
+    append_hash_text(output, value.shard_id);
+  }
+}
+
+[[nodiscard]] std::string authority_content_id(
+    std::string_view domain,
+    const core::canonical::Bytes& body) {
+  core::canonical::Bytes input;
+  input.reserve(domain.size() + 1U + body.size());
+  const auto domain_bytes = std::as_bytes(std::span(domain.data(), domain.size()));
+  input.insert(input.end(), domain_bytes.begin(), domain_bytes.end());
+  input.push_back(std::byte{0U});
+  input.insert(input.end(), body.begin(), body.end());
+  return "sha256:" + core::canonical::sha256_hex(input);
+}
+
 
 [[nodiscard]] auto find_commitment(
     std::vector<Commitment>& commitments,
@@ -102,24 +228,312 @@ void require_canonical_ids(const std::vector<std::string>& values, ErrorCode cod
 
 }  // namespace
 
+std::string_view vote_kind_name(VoteAction action) noexcept {
+  switch (action) {
+    case VoteAction::round_config:
+      return "ROUND_CONFIG";
+    case VoteAction::input_set:
+      return "ISC";
+    case VoteAction::eligibility:
+      return "EC";
+    case VoteAction::aggregation_plan:
+      return "APC";
+    case VoteAction::parameter:
+      return "PARAMETER";
+    case VoteAction::aggregate_root:
+      return "AGGREGATE_ROOT";
+    case VoteAction::apply:
+      return "APPLY";
+    case VoteAction::view_change:
+      return "VIEW_CHANGE";
+    case VoteAction::abort:
+      return "ABORT";
+  }
+  return "UNKNOWN";
+}
+
+std::string_view vote_formal_action_id(VoteAction action) noexcept {
+  switch (action) {
+    case VoteAction::round_config:
+      return "ACT-CONFIG-VOTE";
+    case VoteAction::input_set:
+      return "ACT-ISC-VOTE";
+    case VoteAction::eligibility:
+      return "ACT-EC-VOTE";
+    case VoteAction::aggregation_plan:
+      return "ACT-APC-VOTE";
+    case VoteAction::parameter:
+      return "ACT-PARAM-VOTE";
+    case VoteAction::aggregate_root:
+      return "ACT-ROOT-VOTE";
+    case VoteAction::apply:
+      return "ACT-APPLY-VOTE";
+    case VoteAction::view_change:
+      return "ACT-VIEW-VOTE";
+    case VoteAction::abort:
+      return "ACT-ABORT-VOTE";
+  }
+  return "UNKNOWN";
+}
+
+VoteAction parse_vote_action(std::string_view kind) {
+  for (std::uint32_t value = static_cast<std::uint32_t>(VoteAction::round_config);
+       value <= static_cast<std::uint32_t>(VoteAction::abort);
+       ++value) {
+    const auto action = static_cast<VoteAction>(value);
+    if (kind == vote_kind_name(action)) {
+      return action;
+    }
+  }
+  reject(ErrorCode::vote_action_invalid, "vote kind has no accepted formal action");
+}
+
+bool is_configured_abort_reason(std::string_view reason) noexcept {
+  return reason == "HARD_DEADLINE" || reason == "INCOMPLETE_INPUT" ||
+         reason == "UNSAFE_COEFFICIENTS" ||
+         reason == "IRRECOVERABLE_AVAILABILITY" || reason == "PARAMETER_FAILURE" ||
+         reason == "APPLY_FAILURE";
+}
+
+std::string_view frozen_vote_context(const VoteCandidateBinding& candidate) noexcept {
+  return candidate.context_id;
+}
+
+std::string vote_context_id(
+    VoteAction action,
+    std::string_view round_id,
+    std::uint64_t height,
+    std::uint64_t view,
+    std::string_view validator_epoch_id,
+    std::string_view formal_parent_or_assignment) {
+  core::canonical::Bytes encoded;
+  switch (action) {
+    case VoteAction::round_config:
+      require_content_id(validator_epoch_id);
+      append_hash_u64(encoded, height);
+      append_hash_text(encoded, validator_epoch_id);
+      return authority_content_id("deltareduce.vote-context.config.v1", encoded);
+    case VoteAction::input_set:
+      require_id(round_id);
+      append_hash_text(encoded, round_id);
+      return authority_content_id("deltareduce.vote-context.isc.v1", encoded);
+    case VoteAction::eligibility:
+      require_content_id(formal_parent_or_assignment);
+      append_hash_text(encoded, formal_parent_or_assignment);
+      return authority_content_id("deltareduce.vote-context.ec.v1", encoded);
+    case VoteAction::aggregation_plan:
+      require_content_id(formal_parent_or_assignment);
+      append_hash_text(encoded, formal_parent_or_assignment);
+      return authority_content_id("deltareduce.vote-context.apc.v1", encoded);
+    case VoteAction::parameter:
+      require_id(formal_parent_or_assignment);
+      return std::string(formal_parent_or_assignment);
+    case VoteAction::aggregate_root:
+      require_content_id(formal_parent_or_assignment);
+      append_hash_text(encoded, formal_parent_or_assignment);
+      return authority_content_id("deltareduce.vote-context.root.v1", encoded);
+    case VoteAction::apply:
+      require_content_id(formal_parent_or_assignment);
+      append_hash_text(encoded, formal_parent_or_assignment);
+      return authority_content_id("deltareduce.vote-context.apply.v1", encoded);
+    case VoteAction::view_change:
+      require_id(round_id);
+      append_hash_text(encoded, round_id);
+      append_hash_u64(encoded, view);
+      return authority_content_id("deltareduce.vote-context.view.v1", encoded);
+    case VoteAction::abort:
+      require_id(round_id);
+      append_hash_text(encoded, round_id);
+      return authority_content_id("deltareduce.vote-context.abort.v1", encoded);
+  }
+  reject(ErrorCode::vote_action_invalid, "vote action has no formal context");
+}
+
+VoteInputSetBody project_input_set_vote_body(
+    const certificates::InputSetCertificate& certificate) {
+  return VoteInputSetBody{
+      certificate.context,
+      certificate.input_root,
+      certificate.tuples,
+  };
+}
+
+VoteEligibilityBody project_eligibility_vote_body(
+    const certificates::EligibilityCertificate& certificate,
+    std::string seed_transcript_id) {
+  return VoteEligibilityBody{
+      certificate.context,
+      certificate.entries,
+      certificate.input_set_certificate_id,
+      certificate.norm_evidence_id,
+      certificate.robust_profile_id,
+      std::move(seed_transcript_id),
+  };
+}
+
+VoteAggregationPlanBody project_aggregation_plan_vote_body(
+    const certificates::AggregationPlanCertificate& certificate) {
+  return VoteAggregationPlanBody{
+      certificate.context,
+      certificate.accumulator_proof_id,
+      certificate.bucket_assignments,
+      certificate.eligibility_certificate_id,
+      certificate.input_set_certificate_id,
+      certificate.iteration_count,
+      certificate.seed_transcript_id,
+      certificate.transcript_root,
+      certificate.weights,
+  };
+}
+
+VoteParameterBody project_parameter_vote_body(
+    const certificates::ParameterShardQc& certificate,
+    std::string assignment_vote_context_id) {
+  return VoteParameterBody{
+      certificate.context,
+      certificate.aggregation_plan_certificate_id,
+      certificate.denominator,
+      certificate.domain_id,
+      certificate.eligibility_certificate_id,
+      certificate.input_leaf_ids,
+      certificate.input_set_certificate_id,
+      certificate.result_numerators,
+      certificate.shard_id,
+      std::move(assignment_vote_context_id),
+  };
+}
+
+VoteAggregateRootBody project_aggregate_root_vote_body(
+    const certificates::AggregateRootQc& certificate) {
+  return VoteAggregateRootBody{
+      certificate.context,
+      certificate.aggregation_plan_certificate_id,
+      certificate.eligibility_certificate_id,
+      certificate.input_set_certificate_id,
+      certificate.leaves,
+      certificate.merkle_root,
+      certificate.required_keys,
+  };
+}
+
+std::string vote_input_set_body_id(const VoteInputSetBody& body) {
+  core::canonical::Bytes encoded;
+  append_hash_context(encoded, body.context);
+  append_hash_text(encoded, body.input_root);
+  append_hash_input_tuples(encoded, body.tuples);
+  return authority_content_id("deltareduce.vote.input-set-body.v1", encoded);
+}
+
+std::string vote_eligibility_body_id(const VoteEligibilityBody& body) {
+  core::canonical::Bytes encoded;
+  append_hash_context(encoded, body.context);
+  append_hash_eligibility_entries(encoded, body.entries);
+  append_hash_text(encoded, body.input_set_certificate_id);
+  append_hash_text(encoded, body.norm_evidence_id);
+  append_hash_text(encoded, body.robust_profile_id);
+  append_hash_text(encoded, body.seed_transcript_id);
+  return authority_content_id("deltareduce.vote.eligibility-body.v1", encoded);
+}
+
+std::string vote_aggregation_plan_body_id(const VoteAggregationPlanBody& body) {
+  core::canonical::Bytes encoded;
+  append_hash_context(encoded, body.context);
+  append_hash_text(encoded, body.accumulator_proof_id);
+  append_hash_bucket_assignments(encoded, body.bucket_assignments);
+  append_hash_text(encoded, body.eligibility_certificate_id);
+  append_hash_text(encoded, body.input_set_certificate_id);
+  append_hash_u64(encoded, body.iteration_count);
+  append_hash_text(encoded, body.seed_transcript_id);
+  append_hash_text(encoded, body.transcript_root);
+  append_hash_weights(encoded, body.weights);
+  return authority_content_id("deltareduce.vote.aggregation-plan-body.v1", encoded);
+}
+
+std::string vote_parameter_body_id(const VoteParameterBody& body) {
+  core::canonical::Bytes encoded;
+  append_hash_context(encoded, body.context);
+  append_hash_text(encoded, body.aggregation_plan_certificate_id);
+  append_hash_u64(encoded, body.denominator);
+  append_hash_text(encoded, body.domain_id);
+  append_hash_text(encoded, body.eligibility_certificate_id);
+  append_hash_texts(encoded, body.input_leaf_ids);
+  append_hash_text(encoded, body.input_set_certificate_id);
+  append_hash_texts(encoded, body.result_numerators);
+  append_hash_text(encoded, body.shard_id);
+  return authority_content_id("deltareduce.vote.parameter-body.v1", encoded);
+}
+
+std::string vote_aggregate_root_body_id(const VoteAggregateRootBody& body) {
+  core::canonical::Bytes encoded;
+  append_hash_context(encoded, body.context);
+  append_hash_text(encoded, body.aggregation_plan_certificate_id);
+  append_hash_text(encoded, body.eligibility_certificate_id);
+  append_hash_text(encoded, body.input_set_certificate_id);
+  append_hash_root_leaves(encoded, body.leaves);
+  append_hash_text(encoded, body.merkle_root);
+  append_hash_shard_keys(encoded, body.required_keys);
+  return authority_content_id("deltareduce.vote.aggregate-root-body.v1", encoded);
+}
+
+std::string vote_view_change_body_id(const VoteViewChangeBody& body) {
+  core::canonical::Bytes encoded;
+  append_hash_text(encoded, body.round_id);
+  append_hash_u64(encoded, body.height);
+  append_hash_u64(encoded, body.from_view);
+  append_hash_u64(encoded, body.to_view);
+  append_hash_u64(encoded, body.soft_deadline_tick);
+  return authority_content_id("deltareduce.vote.view-change-body.v1", encoded);
+}
+
+std::string vote_abort_body_id(const VoteAbortBody& body) {
+  core::canonical::Bytes encoded;
+  append_hash_text(encoded, body.round_id);
+  append_hash_text(encoded, body.validator_epoch_id);
+  append_hash_u64(encoded, body.height);
+  append_hash_u64(encoded, body.view);
+  append_hash_u64(encoded, body.hard_deadline_tick);
+  append_hash_text(encoded, body.parent_checkpoint_id);
+  append_hash_text(encoded, body.reason_code);
+  append_hash_texts(encoded, body.round_config_ids);
+  append_hash_texts(encoded, body.input_set_ids);
+  append_hash_texts(encoded, body.eligibility_ids);
+  append_hash_texts(encoded, body.aggregation_plan_ids);
+  append_hash_texts(encoded, body.parameter_ids);
+  append_hash_texts(encoded, body.aggregate_root_ids);
+  append_hash_texts(encoded, body.apply_ids);
+  return authority_content_id("deltareduce.vote.abort-body.v1", encoded);
+}
+
+
 ConsensusError::ConsensusError(ErrorCode code, std::string message)
     : std::runtime_error(std::move(message)), code_(code) {}
 
 ErrorCode ConsensusError::code() const noexcept { return code_; }
 
 Disposition VoteJournal::record(const protocol::Vote& vote) {
-  require_vote(vote);
+  // The durable uniqueness key is validated and classified before any
+  // non-key vote field. Once a key exists, every canonically decoded byte
+  // change is a conflict even when the changed kind/body would independently
+  // fail admission. This keeps equivocation classification stable.
+  require_id(vote.validator_id);
+  require_content_id(vote.validator_epoch_id);
+  require_id(vote.context_id);
   const auto found = std::lower_bound(
       votes_.begin(), votes_.end(), vote, [](const protocol::Vote& left, const protocol::Vote& right) {
         return vote_key(left) < vote_key(right);
       });
   if (found != votes_.end() && vote_key(*found) == vote_key(vote)) {
+#if defined(DELTA_RECORD_VOTE_MUTANT_SKIP_CONFLICT)
+    static_cast<void>(vote);
+#else
     require(
-        found->body_hash == vote.body_hash,
+        *found == vote,
         ErrorCode::conflicting_vote,
-        "validator attempted a conflicting vote in one context");
+        "validator attempted different canonical vote bytes in one context");
+#endif
     return Disposition::replay;
   }
+  require_vote(vote);
   votes_.insert(found, vote);
   return Disposition::recorded;
 }

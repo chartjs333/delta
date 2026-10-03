@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.invalid/schemas/010/projected-formal-trace-receipt.schema.json",
+  "title": "Feature 010 deterministic-prefix projected formal trace receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "canonical_input_trace_sha256",
+    "deterministic_prefix",
+    "formal_semantics_id",
+    "initial_abstraction_witness",
+    "initial_abstraction_witness_sha256",
+    "projected_trace",
+    "projected_trace_sha256",
+    "schema_version",
+    "source",
+    "type_name"
+  ],
+  "properties": {
+    "canonical_input_trace_sha256": {"$ref": "#/$defs/contentId"},
+    "deterministic_prefix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding",
+        "execution_binding_encoding",
+        "execution_binding_sha256",
+        "first_ordinal",
+        "last_ordinal",
+        "operation_count",
+        "request_transcript_sha256"
+      ],
+      "properties": {
+        "encoding": {"const": "DLTSTRC1_U64_ORDINAL_U32_LENGTH_COMMAND_SHA256"},
+        "execution_binding_encoding": {
+          "const": "DLTSPB1_U64_COUNT_THEN_U64_ORDINAL_U32_REQUEST_BYTES_COMMAND_STATUS_EFFECT_ROOTS_SEQUENCE_EVENT_SHA256"
+        },
+        "execution_binding_sha256": {"$ref": "#/$defs/contentId"},
+        "first_ordinal": {"const": 0},
+        "last_ordinal": {"const": 60999},
+        "operation_count": {"const": 61000},
+        "request_transcript_sha256": {"$ref": "#/$defs/contentId"}
+      }
+    },
+    "formal_semantics_id": {
+      "const": "sha256:cc98f15ac20fc3ed265cb76682ca15a936e24660a651e2b8f81638abb3265cb6"
+    },
+    "initial_abstraction_witness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "abstraction_version",
+        "abort_request_count",
+        "active_lease_count",
+        "canonical_input_operation_count",
+        "certificate_progress_open",
+        "command_transcript_encoding",
+        "command_transcript_sha256",
+        "completed_ticket_count",
+        "content_universe_rule",
+        "enable_ticket_actions",
+        "first_ordinal",
+        "initial_commitment_count",
+        "initial_phase",
+        "initial_state_root",
+        "input_closed",
+        "last_ordinal",
+        "lease_epoch",
+        "mapping_rule",
+        "planned_ticket_count",
+        "round_id",
+        "schema_version",
+        "ticket_count",
+        "ticket_mapping_encoding",
+        "ticket_mapping_sha256",
+        "type_name",
+        "worker_universe_rule"
+      ],
+      "properties": {
+        "abstraction_version": {"const": "1.0.0"},
+        "abort_request_count": {"const": 0},
+        "active_lease_count": {"const": 61000},
+        "canonical_input_operation_count": {"const": 61000},
+        "certificate_progress_open": {"const": true},
+        "command_transcript_encoding": {
+          "const": "DLTSTRC1_U64_ORDINAL_U32_LENGTH_COMMAND_SHA256"
+        },
+        "command_transcript_sha256": {"$ref": "#/$defs/contentId"},
+        "completed_ticket_count": {"const": 61000},
+        "content_universe_rule": {"const": "EXACT_COMMAND_BODY_HASHES"},
+        "enable_ticket_actions": {"const": true},
+        "first_ordinal": {"const": 0},
+        "initial_commitment_count": {"const": 0},
+        "initial_phase": {"const": "TICKETING_OPEN"},
+        "initial_state_root": {"$ref": "#/$defs/contentId"},
+        "input_closed": {"const": false},
+        "last_ordinal": {"const": 60999},
+        "lease_epoch": {"const": 0},
+        "mapping_rule": {
+          "const": "TICKET_ID_REQUEST_ID_WORKER_COMMAND_ACTOR_LEASE_EPOCH_0_CONTENT_BODY_HASH"
+        },
+        "planned_ticket_count": {"const": 61000},
+        "round_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "schema_version": {"const": "1.0.0"},
+        "ticket_count": {"const": 61000},
+        "ticket_mapping_encoding": {
+          "const": "DLTSTW1_U64_COUNT_THEN_U64_ORDINAL_U32_TICKET_BYTES_U32_WORKER_BYTES_U64_EPOCH_BODY_SHA256"
+        },
+        "ticket_mapping_sha256": {"$ref": "#/$defs/contentId"},
+        "type_name": {"const": "FEATURE010_INITIAL_ABSTRACTION_WITNESS"},
+        "worker_universe_rule": {"const": "EXACT_COMMAND_ACTOR_IDS"}
+      }
+    },
+    "initial_abstraction_witness_sha256": {"$ref": "#/$defs/contentId"},
+    "projected_trace": {
+      "$ref": "https://deltareduce.invalid/schemas/formal-trace.schema.json"
+    },
+    "projected_trace_sha256": {"$ref": "#/$defs/contentId"},
+    "schema_version": {"const": "1.0.0"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "tree"],
+      "properties": {
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "type_name": {"const": "FEATURE010_PROJECTED_FORMAL_TRACE_RECEIPT"}
+  },
+  "$defs": {
+    "contentId": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

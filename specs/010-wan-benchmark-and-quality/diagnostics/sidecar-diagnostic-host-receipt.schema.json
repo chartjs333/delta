@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.example/schemas/feature010-sidecar-diagnostic-host-receipt-v1.1.json",
+  "title": "Feature 010 sidecar diagnostic independent host receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "collected_at_utc",
+    "collector_sha256",
+    "container",
+    "diagnostic_campaign_id",
+    "host",
+    "receipt_nonce",
+    "resources",
+    "schema_version",
+    "type_name"
+  ],
+  "properties": {
+    "collected_at_utc": {"type": "string", "minLength": 1},
+    "collector_sha256": {"$ref": "#/$defs/contentId"},
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container_id", "image_digest", "runtime", "runtime_version"],
+      "properties": {
+        "container_id": {"type": "string", "pattern": "^[0-9a-f]{12,64}$"},
+        "image_digest": {"$ref": "#/$defs/contentId"},
+        "runtime": {"enum": ["docker", "podman"]},
+        "runtime_version": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "diagnostic_campaign_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"},
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["machine_id_sha256", "operating_system"],
+      "properties": {
+        "machine_id_sha256": {"$ref": "#/$defs/contentId"},
+        "operating_system": {"type": "string", "minLength": 1, "maxLength": 4096}
+      }
+    },
+    "receipt_nonce": {"$ref": "#/$defs/contentId"},
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cgroup_mode", "cpu_max", "cpuset_cpus_effective", "memory_max"],
+      "properties": {
+        "cgroup_mode": {"enum": ["V1", "V2"]},
+        "cpu_max": {"type": "string", "minLength": 1, "maxLength": 512},
+        "cpuset_cpus_effective": {"type": "string", "minLength": 1, "maxLength": 512},
+        "memory_max": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "schema_version": {"const": "1.1.0"},
+    "type_name": {"const": "FEATURE010_SIDECAR_DIAGNOSTIC_HOST_RECEIPT"}
+  },
+  "$defs": {
+    "contentId": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

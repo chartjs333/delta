@@ -1,7 +1,7 @@
 # Isolated-sidecar refinement design
 
 **Status**: design-only prerequisite; not implemented; no measurement authority
-**IPC contract**: `delta-local-sidecar-ipc/1.0`
+**IPC contract**: `delta-local-sidecar-ipc/1.1`
 **Historical exactness outcome**: `FAIL` at
 `fc012861d8a1577f155abb94877102adef5cbf36` (tree
 `deeb2bda4c0a7e68015843d2ebe6fe4396edfb7b`)
@@ -61,6 +61,25 @@ snapshots, durable vote journal, state/current roots, recovery, replay identity,
 and canonical effects. A replacement process cannot become ready while an older
 generation still owns the durable-directory lock.
 
+The POSIX deployment prerequisite is that the Java supervisor and its native
+sidecar are the only trusted same-principal writers to the durable directory,
+its parent namespace, and `runtime.wal`, including every confirmed-death restart
+gap. A same-principal process must not rename, unlink, replace, or rewrite those
+objects behind the supervisor. Java retains a `SecureDirectoryStream` for the
+directory and, after the first native `READY`, a relative `READ|NOFOLLOW` channel
+for `runtime.wal`; it binds each sampled `unix:*` `fileKey`/device/inode and
+rechecks the pathname identities before every generation. Native durable I/O
+remains descriptor-relative and independently validates the supplied directory
+identity. Detected replacement fails closed before launch/`READY`.
+
+This prerequisite is necessary because public Java NIO exposes no atomic
+`fstat`/`fileKey` query for an opened `SeekableByteChannel`: the initial WAL
+channel-to-attribute sampling window, and a final native pathname check followed
+by response publication, cannot exclude a malicious same-principal mutation.
+The retained handles prevent inode-reuse ABA after pinning; they do not claim a
+security boundary against an actor that already has that principal's filesystem
+authority.
+
 Netty event loops only enqueue bounded requests and receive completions. They
 never wait for IPC, FFM, WAL, snapshot, replay, or process termination. The
 sidecar may accept multiple framed requests into its bounded ingress queue, but
@@ -91,30 +110,29 @@ The local control channel begins in `DESCRIBE_ONLY`. Before `OPEN`, Java sends a
 The descriptor also binds the canonical frame-layout SHA-256, numeric message
 types, numeric flags and rules, and the canonical-encoding ID
 `sha256:393cd207a2cd3fd4da366be56095a3467e3184c2c5db1d300d1c07d49cdd7aff`.
-The other v1 handshake IDs are:
+The other v1.1 handshake IDs are:
 
 - bounds:
-  `sha256:32d9e791ac35dc6bb061aaedb0a67ee28ad1a2662bbb0ffd1bfc9177b055d0f8`;
+  `sha256:12259ada8ff8a14febf167b2631768911fefd9fd26c7298b7ff0f3d103837708`;
 - flag table:
-  `sha256:6aa94eb75b5b6af99132f71b2753d56988454be86a371b46f46241cf7a8e33d5`;
+  `sha256:857da723287529fe38f3f6479decb962f435e21b541b38abe71b28489933b248`;
 - frame layout and carrier rules:
-  `sha256:46fcc91280fc2c878cb176bf6e9d855f8e39ac9fffcf18709b1a6b80a30ce18e`;
+  `sha256:b8d8a521133d4d5b41ab5035f2cfaa82594a4789c8b83ad0c81b77a67afbcb4b`;
 - message-type table:
-  `sha256:dfa3fe65b946e6527b317168ef0ea000a4610bba1e9c1ed9ebd099adff71e64e`;
+  `sha256:1581d40a12765ea54c1abf7f3c5434025f40d6718e639c9f9fbfcc1eb6e07950`;
 - payload schemas:
-  `sha256:31edfa48d707fb06cd24624d1790946981294bb093d74d44c202a5d15c5376c5`;
+  `sha256:fdeb9e2607dfe2661fff8e99a9510ae1eb6658e516f1496ade6fd1dd6e7af7ce`;
 - shared-memory layout:
-  `sha256:0a48282fddae72060e9b93c02f97f174b56f8a20b07aabb88ee51f7ef03f5aa4`.
+  `sha256:17ce8022d0075e715e8c699ba17c27d9901bf08727579ab977e74f169b205b78`.
 
 Both hello and descriptor carry the exact `BOUNDS_SHA256`; its pre-versioned
-table is the only v1 bounds value. A missing or unequal hash fails the handshake.
+table is the only v1.1 bounds value. A missing or unequal hash fails the handshake.
 
 The outer deployment profile and nested native-library profile are distinct
 identity fields and cannot be substituted for one another. Version or identity
-mismatch fails before `OPEN`; there is no downgrade negotiation. Major versions
-must be equal. A minor version is admitted only when every required field,
-operation, flag, and bound has an exact supported interpretation; unknown
-required fields or flags fail closed.
+mismatch fails before `OPEN`; there is no downgrade negotiation. Both peers must
+identify exact version 1.1. Version 1.0 is rejected rather than silently
+downgraded, and unknown required fields or flags fail closed.
 
 The nested C ABI descriptor is never raw struct memory. Its canonical bytes are
 `DELTABI1` at offset 0 (8 bytes), total encoded length `u32be` at offset 8,
@@ -134,13 +152,13 @@ existing native open/recovery path, replays and verifies the journal, then emits
 
 Control frames use the existing canonical-binary rules: explicit unsigned
 big-endian integers, no raw structs or pointers, no padding-dependent bytes, and
-no trailing data. V1 has this exact 128-byte header:
+no trailing data. V1.1 has this exact 128-byte header:
 
 | Offset | Bytes | Field | Encoding/value |
 | ---: | ---: | --- | --- |
 | 0 | 8 | magic | ASCII `DELTAIPC` |
 | 8 | 2 | IPC major | `u16be`, exactly 1 |
-| 10 | 2 | IPC minor | `u16be`, exactly 0 |
+| 10 | 2 | IPC minor | `u16be`, exactly 1 |
 | 12 | 2 | header length | `u16be`, exactly 128 |
 | 14 | 2 | message type | `u16be`, frozen opcode table |
 | 16 | 4 | flags | `u32be`, frozen bit table |
@@ -154,7 +172,8 @@ no trailing data. V1 has this exact 128-byte header:
 | 116 | 12 | reserved | all zero |
 
 Request/response opcode pairs are `OPEN=0x10/0x11`, `SUBMIT=0x20/0x21`,
-`STATE=0x30/0x31`, `SNAPSHOT=0x40/0x41`, `CLOSE=0x50/0x51`, and
+`VOTE=0x22/0x23`, `STATE=0x30/0x31`, `SNAPSHOT=0x40/0x41`,
+`CLOSE=0x50/0x51`, and
 `HEALTH=0x60/0x61`; `CLIENT_HELLO=0x01`, `SERVER_DESCRIPTOR=0x02`,
 `SHARED_MEMORY_ACK=0x70`, and `ERROR_RESPONSE=0xff`. Flags are
 `PAYLOAD_INLINE=0x01`, `PAYLOAD_SHARED_MEMORY=0x02`,
@@ -166,7 +185,7 @@ that releases a shared-memory reference never depends on that same reference.
 Every opcode accepts only the exact flag set frozen in the normative JSON;
 `READ_ONLY` is required only on `STATE_REQUEST` and `HEALTH_REQUEST`, never on
 the ordered, durable `SNAPSHOT_REQUEST`. Every response-expecting request,
-including `CLIENT_HELLO`, sets `RESPONSE_CAPACITY` exactly to the frozen v1
+including `CLIENT_HELLO`, sets `RESPONSE_CAPACITY` exactly to the frozen v1.1
 maximum logical payload of 16,785,408 bytes; every other message sets it to
 zero. Transport `SEQUENCE` starts at one and increments
 by one independently in each direction and session. Zero is reserved, overflow
@@ -179,9 +198,10 @@ with the exact 16-byte prefix
 the type equals `MESSAGE_TYPE` and the schema version is 1.0. The value is an
 ordered TLV sequence with the exact header
 `field_id:u16be || wire_type:u8 || flags-zero:u8 || length:u32be`. Field IDs are
-strictly increasing and unique. All fields in the selected schema are required;
-unknown, duplicate, missing, mis-sized, non-canonical UTF-8, or trailing fields
-fail before admission. Wire-type codes are `U8=1`, `U16_BE=2`, `U32_BE=3`,
+strictly increasing and unique. All fields in the selected schema are required
+except the explicitly optional `OPEN_REQUEST` vote-policy field; unknown,
+duplicate, missing, mis-sized, non-canonical UTF-8, or trailing fields fail
+before admission. Wire-type codes are `U8=1`, `U16_BE=2`, `U32_BE=3`,
 `U64_BE=4`, `ID128=5`, `SHA256=6`, `BYTES=7`, `CANONICAL_UTF8=8`, and
 `SHM_REFERENCE_64=9`. Scalar lengths are exact. A textual SHA-256 identity is
 validated as `sha256:` plus 64 lowercase hexadecimal digits and carried as its
@@ -193,10 +213,12 @@ message schemas are summarized here without changing that order:
 | Message | Exact logical fields after the prefix |
 | --- | --- |
 | `CLIENT_HELLO`, `SERVER_DESCRIPTOR` | contract name; IPC major/minor; encoding, frame, payload-schema, message-table, flag-table, bounds, and SHM-layout digests; session; generation; executable digest; sidecar build; outer profile; canonical nested ABI descriptor and digest |
-| `OPEN_REQUEST` | request ID/digest; submission capacity; durable-directory UTF-8; initial state; nested-descriptor digest |
+| `OPEN_REQUEST` | request ID/digest; submission capacity; durable-directory UTF-8; initial state; nested-descriptor digest; optional nonempty opaque canonical vote policy |
 | `OPEN_RESPONSE` | echoed request ID/digest; admission state/sequence; native status; runtime instance; durable sequence; state root; ready bit |
 | `SUBMIT_REQUEST` | request ID/digest; opaque canonical command |
 | `SUBMIT_RESPONSE` | echoed request ID/digest; admission state/sequence; native status; effect identity; opaque canonical effect and digest; durable sequence; prior/next state roots |
+| `VOTE_REQUEST` | request ID/digest; one opaque canonical vote |
+| `VOTE_RESPONSE` | echoed request ID/digest; admission state/sequence; native status; native-authored opaque canonical vote receipt and digest |
 | `STATE_REQUEST`, `SNAPSHOT_REQUEST` | request ID/digest; runtime instance |
 | `STATE_RESPONSE` | echoed request ID/digest; admission state/sequence; native status; durable sequence; state root; canonical-state digest and bytes |
 | `SNAPSHOT_RESPONSE` | echoed request ID/digest; admission state/sequence; native status; durable sequence; state root; snapshot-receipt digest and bytes |
@@ -210,6 +232,9 @@ message schemas are summarized here without changing that order:
 For request messages, `REQUEST_DIGEST` is SHA-256 over ASCII
 `DELTAIPCREQUEST1`, then message type/schema major/schema minor as `u16be`, then
 the complete encoded operation-specific request TLVs (field IDs 16 and above).
+`OPEN_REQUEST` field 20 is absent or appears exactly once as a nonempty opaque
+vote policy of at most 4,194,304 bytes. When present it is covered by that
+request digest; when absent the runtime remains submit-only.
 Responses and errors echo that request digest; they never rehash their own
 response fields. `CLIENT_HELLO`/`SERVER_DESCRIPTOR` payload session and
 generation must equal both the frame header and the current session/generation;
@@ -218,11 +243,14 @@ are `NOT_APPLICABLE=0`,
 `NOT_ADMITTED_PROVEN=1`, `ADMITTED_OUTCOME_AVAILABLE=2`, and
 `OUTCOME_UNKNOWN=3`; only native recovery may turn an unknown admitted request
 into an exact replay result. Java may compare and route these opaque bytes but
-cannot reconstruct a consensus transition from them.
+cannot reconstruct a consensus transition from them. In particular, Java never
+parses vote policy, vote, or receipt semantics and never chooses action,
+context, parent, or guard values; the native runtime is the only parser,
+validator, durable admission/replay authority, and receipt author.
 
 When admission fields are present, `NOT_APPLICABLE` requires admitted sequence
 zero, native status zero, and no result authority. `NOT_ADMITTED_PROVEN` requires
-sequence zero, reserved unavailable native status `4294967295`, and
+sequence zero, a nonzero exact native status, and
 `ERROR_RESPONSE`. A successful admitted operation uses its operation response
 with a nonzero sequence, native status zero, and every result field present; an
 admitted nonzero native status uses `ERROR_RESPONSE`. `OUTCOME_UNKNOWN` requires
@@ -245,7 +273,8 @@ SHA-256(empty).
 Carrier eligibility is per message and frozen. `CLIENT_HELLO`,
 `SERVER_DESCRIPTOR`, `OPEN_RESPONSE`, `STATE_REQUEST`, `SNAPSHOT_REQUEST`, both
 `CLOSE` messages, both `HEALTH` messages, `SHARED_MEMORY_ACK`, and
-`ERROR_RESPONSE` are inline-only. `OPEN_REQUEST`, both `SUBMIT` messages,
+`ERROR_RESPONSE` are inline-only. `OPEN_REQUEST`, both `SUBMIT` messages, both
+`VOTE` messages,
 `STATE_RESPONSE`, and `SNAPSHOT_RESPONSE` may use inline or SHM. Thus handshake
 cannot depend on unnegotiated SHM and an ACK cannot recursively consume a slot.
 
@@ -254,12 +283,15 @@ Truncation, trailing bytes, unknown version/opcode/flag, bad digest, generation
 mismatch, non-monotonic sequence, or out-of-bounds shared-memory reference is
 rejected before native admission. Nonzero reserved bytes also fail closed.
 
-Frozen hard bounds for v1 are:
+Frozen hard bounds for v1.1 are:
 
 - canonical control envelope: at most 16,785,536 bytes, including the 128-byte
   header and maximum inline logical payload;
 - inline and logical payload: at most 16,785,408 bytes;
 - canonical command or effect payload: at most 16 MiB;
+- opaque canonical vote policy: at most 4,194,304 bytes; opaque canonical vote:
+  at most 16,769,024 bytes; native-authored canonical vote receipt: at most
+  16,777,216 bytes;
 - logical IPC payload including frozen metadata: at most 16,785,408 bytes, with
   at most 8,192 metadata bytes around a 16 MiB command/effect;
 - request IDs: at most 256 bytes; identity text: at most 256 bytes; durable
@@ -273,7 +305,7 @@ Frozen hard bounds for v1 are:
 - timers tracked per runtime: 65,536;
 - one mutating native call at a time.
 
-V1 does not negotiate or lower bounds. Both peers use the exact frozen table
+V1.1 does not negotiate or lower bounds. Both peers use the exact frozen table
 identified by `BOUNDS_SHA256`; any other table or hash is a pre-`OPEN` mismatch.
 Before admitting a mutation, the sidecar reserves bounded response storage or a
 retrievable replay slot. Output backpressure can never discard a durable effect.
@@ -281,7 +313,7 @@ retrievable replay slot. Output backpressure can never discard a durable effect.
 abstract state unchanged.
 
 The nested FFI may report `BUFFER_TOO_SMALL` after a command has already become
-durable. V1 therefore preallocates the frozen maximum or retries the identical
+durable. V1.1 therefore preallocates the frozen maximum or retries the identical
 canonical request ID/body inside the same hard bound; it never treats buffer
 sizing as proof that admission did not occur and never exposes a prefix.
 
@@ -317,15 +349,25 @@ producer acquires the free slot with an acquire-release CAS, writes metadata and
 the complete data/digest, then release-stores `PUBLISHED`. The consumer
 acquire-loads and CASes to `READING` before any read and release-stores its final
 ACK/rejection only after all access ends. The producer acquire-loads that final
-state before clearing and release-storing `FREE`. The handshake requires aligned,
-lock-free interprocess 32-bit big-endian atomics; otherwise the SHM path is
-disabled and the mandatory bounded-copy path is used.
+state before clearing and release-storing `FREE`. Before launching with SHM,
+Java reserves slot zero in the exact generation's Java-to-native `MAP_SHARED`
+region with `FREE -> WRITING`, writes the region/generation/slot identity, and
+verifies raw big-endian bytes. A native probe subprocess opens that exact
+path/device/inode, validates the identity, mapping shape, alignment, generation,
+and slot, then performs the lock-free atomic `WRITING -> PUBLISHED` CAS and
+verifies the raw bytes. Java acquire-verifies `PUBLISHED`, CASes to `READING`,
+then clears and release-stores `FREE` before the protocol process starts. SHM is
+enabled only if this exact Java/native cross-process probe completes; any
+failure selects the mandatory bounded-copy path.
 
 After the consumer release-stores `ACKED` or `REJECTED`, it may send the
 inline-only `SHARED_MEMORY_ACK` as a notification. That frame is not slot-release
 authority: the producer still must acquire-observe the matching terminal control
 state before clearing it to `FREE`. A lost or duplicate ACK frame stutters and
-cannot cause early or repeated reuse.
+cannot cause early or repeated reuse. A current notification must exactly match
+session, generation, correlation, reference, referenced digest, request ID,
+request digest, disposition, and the terminal control state. Stale, reclaimed,
+or already-notified references stutter without freeing a slot.
 
 The producer exclusively owns a slot while writing. The consumer is read-only
 until it acknowledges or rejects the reference. Reuse is forbidden until the
@@ -407,6 +449,13 @@ before durability returns no externally sendable effect. A crash after durable
 commit but before a complete IPC response is recovered through exact replay;
 partial frames and partial shared-memory writes are never visible.
 
+For `VOTE`, native code validates the opaque vote against the native-parsed
+policy and guards, appends the durable vote journal, crosses the durability
+barrier, commits native vote state, and only then authors the canonical receipt.
+The sidecar reserves the full 16,785,408-byte logical response capacity before
+native admission. Exact retries delegate to native durable replay; Java never
+authors, semantically parses, or serves a cached vote receipt as authority.
+
 ## Trace projection
 
 Before the first clean `OPEN`, lifecycle events are diagnostic-only: no formal
@@ -436,7 +485,7 @@ reference.
 | ordered durable `SNAPSHOT` compaction | operational native mutation; consensus-state stutter |
 | active close request, kill request, or heartbeat suspicion | stutter; fence only, no death action |
 | confirmed death/removal of an active formal actor | exactly one existing `ACT-CRASH` per generation |
-| `SUBMIT` dispatch/framing | stutter; native trace owns semantic projection |
+| `SUBMIT` or `VOTE` dispatch/framing | stutter; native trace owns semantic projection |
 | each native trace event excluding `ACT-CRASH`, `ACT-RESTART`, `ACT-JOURNAL-RECOVER`, `ACT-MESSAGE-REPLAY`, and `ACT-MESSAGE-DROP` | the same existing action ID and canonical fields, one-to-one |
 | timer schedule/cancel/wait or timer-frame arrival | stutter; preserve any separate native-emitted logical-time/timeout action |
 | stale timer rejected before a native formal event | stutter with no native mutation |
@@ -477,8 +526,9 @@ hardware allocation, toolchains, initial WAL/snapshot hashes, canonical input
 bytes, request IDs and order, timer tokens/order, queue/in-flight bounds,
 warm-up count, measured repetitions, offered-load schedule, paired core fault
 trace, and aggregation rules. For every paired run, canonical statuses, effects,
-state roots, WAL receipts/durable sequences, replay effect identities, and the
-projected formal trace bytes after stutter erasure must be exact matches.
+state roots, WAL receipts/durable sequences, replay effect identities, canonical
+vote receipt bytes, and the projected formal trace bytes after stutter erasure
+must be exact matches.
 
 The frozen run schedule is 1,000 warm-up operations followed by 10 fixed-load
 blocks. Each fixed-load block offers exactly 6,000 operations at 100 operations
@@ -509,6 +559,12 @@ ingress/egress bytes, zero-copy eligible/hit counts, retries, duplicate
 responses, stale responses, and rejected frames. Per-operation fallback copy is
 the checked sum of staging-fallback ingress plus egress; selection uses the
 maximum across all measured operations.
+
+The current v1.1 shared-memory carrier copies logical bytes into and out of the
+mapped regions. Shared-memory byte counters therefore prove mapped transport,
+not zero-copy execution: eligible operations are counted, while
+`ZERO_COPY_HIT_COUNT` remains zero until a genuinely borrowed-buffer path is
+implemented and separately qualified.
 
 The common hard gates are exact canonical status/effect/state/WAL bytes, exact
 projected traces, persist-before-expose at every paired cut, recovery before

@@ -21,7 +21,8 @@ class CertificateVoteRuntime final {
  public:
   CertificateVoteRuntime(
       std::filesystem::path directory,
-      core::canonical::Bytes initial_state_bytes);
+      core::canonical::Bytes initial_state_bytes,
+      core::consensus::VoteAdmissionPolicy vote_policy);
 
   [[nodiscard]] PersistedVoteFrame persist_and_expose(
       const core::protocol::Vote& vote,

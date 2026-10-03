@@ -163,7 +163,14 @@ void append_framed(canonical::Bytes& output, std::span<const std::byte> value) {
 [[nodiscard]] runtime::Config config(
     const std::filesystem::path& directory,
     const canonical::Bytes& initial) {
-  return runtime::Config{directory, initial, 512U};
+  return runtime::Config{
+      .directory = directory,
+      .initial_state_bytes = initial,
+      .submission_capacity = 512U,
+      .durable_binding_guard = {},
+      .vote_policy = {},
+      .expected_wal_identity = {},
+  };
 }
 
 [[nodiscard]] RunResult run_validator(

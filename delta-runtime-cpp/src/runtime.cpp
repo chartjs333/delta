@@ -6,11 +6,13 @@
 #include <delta/core/protocol.hpp>
 #include <delta/core/transition.hpp>
 #include <delta/runtime/bounded_mpsc.hpp>
+#include <delta/runtime/vote_codec.hpp>
 
 #include <atomic>
 #include <cstdint>
 #include <filesystem>
 #include <future>
+#include <limits>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -31,6 +33,18 @@ void require(bool condition, ErrorCode code, const char* message) {
   if (!condition) {
     reject(code, message);
   }
+}
+
+[[nodiscard]] core::canonical::Bytes vote_policy_identity(
+    const core::consensus::VoteAdmissionPolicy& policy) {
+  const auto encoded = encode_vote_policy_v1(policy);
+  const auto digest = core::canonical::sha256_hex(encoded);
+  core::canonical::Bytes result;
+  result.reserve(digest.size());
+  for (const char character : digest) {
+    result.push_back(static_cast<std::byte>(static_cast<unsigned char>(character)));
+  }
+  return result;
 }
 
 [[noreturn]] void simulated_crash(const char* boundary) {
@@ -60,6 +74,17 @@ struct SnapshotWork {
 
 using Work = std::variant<SubmitWork, VoteWork, SnapshotWork>;
 
+[[nodiscard]] std::optional<detail::WalFileIdentity> expected_wal_identity(
+    const Config& config) {
+  if (!config.expected_wal_identity.has_value()) {
+    return std::nullopt;
+  }
+  return detail::WalFileIdentity{
+      config.expected_wal_identity->device,
+      config.expected_wal_identity->inode,
+  };
+}
+
 template <typename Promise>
 void set_exception(Promise& promise, std::exception_ptr exception) noexcept {
   try {
@@ -75,25 +100,43 @@ RuntimeError::RuntimeError(ErrorCode code, std::string message)
 
 ErrorCode RuntimeError::code() const noexcept { return code_; }
 
+std::uint64_t checked_next_journal_sequence(std::uint64_t current) {
+  require(
+      current != std::numeric_limits<std::uint64_t>::max(),
+      ErrorCode::sequence_invalid,
+      "runtime journal sequence is exhausted");
+  return current + 1U;
+}
+
 class Runtime::Impl {
  public:
   explicit Impl(Config config)
       : config_(std::move(config)),
-        wal_(config_.directory / "runtime.wal"),
+        wal_(
+            config_.directory / "runtime.wal",
+            expected_wal_identity(config_)),
         snapshot_path_(config_.directory / "runtime.snapshot"),
         queue_(config_.submission_capacity) {
+    verify_durable_binding();
     require(!config_.directory.empty(), ErrorCode::invalid_config, "runtime directory is empty");
     require(
         !config_.initial_state_bytes.empty(),
         ErrorCode::invalid_config,
         "runtime initial state is empty");
-    static_cast<void>(core::protocol::parse_round_state(config_.initial_state_bytes));
+    const auto initial_state = core::protocol::parse_round_state(config_.initial_state_bytes);
+    if (config_.vote_policy.has_value()) {
+      core::consensus::validate_vote_admission_policy(*config_.vote_policy, initial_state);
+      vote_policy_identity_ = vote_policy_identity(*config_.vote_policy);
+      logical_tick_ = config_.vote_policy->initial_logical_tick;
+    }
     std::error_code error;
     std::filesystem::create_directories(config_.directory, error);
     if (error) {
       reject(ErrorCode::io_error, "cannot create runtime directory");
     }
+    verify_durable_binding();
     recover();
+    verify_durable_binding();
     accepting_.store(true);
     reactor_ = std::thread([this] { reactor_loop(); });
   }
@@ -156,14 +199,33 @@ class Runtime::Impl {
   [[nodiscard]] bool accepting() const noexcept { return accepting_.load(); }
 
  private:
+  void verify_durable_binding() {
+    if (!config_.durable_binding_guard) {
+      return;
+    }
+    try {
+      config_.durable_binding_guard();
+    } catch (...) {
+      reject(
+          ErrorCode::durable_binding_lost,
+          "sidecar durable directory pathname binding changed");
+    }
+  }
+
   void recover() {
+    verify_durable_binding();
     auto recovered = wal_.recover();
+    verify_durable_binding();
     if (recovered.torn_tail) {
+      verify_durable_binding();
       wal_.truncate(recovered.durable_prefix_bytes);
+      verify_durable_binding();
     }
     std::optional<detail::Snapshot> snapshot;
-    if (detail::snapshot_exists(snapshot_path_)) {
-      snapshot = detail::read_snapshot(snapshot_path_);
+    if (wal_.snapshot_exists(snapshot_path_)) {
+      verify_durable_binding();
+      snapshot = wal_.read_snapshot(snapshot_path_);
+      verify_durable_binding();
       static_cast<void>(core::protocol::parse_round_state(snapshot->state_bytes));
     }
 
@@ -177,6 +239,12 @@ class Runtime::Impl {
           "runtime journal sequence is not strictly monotonic");
       if (entry.kind == detail::JournalKind::transition) {
         const auto command = core::protocol::parse_command(entry.command_or_vote_bytes);
+        if (config_.vote_policy.has_value()) {
+          require(
+              command.logical_tick >= logical_tick_,
+              ErrorCode::recovery_mismatch,
+              "durable command logical time moved backwards");
+        }
         const auto result = core::transition::apply(recovered_state, entry.command_or_vote_bytes);
         require(
             result.next_state_bytes == entry.next_state_bytes &&
@@ -204,8 +272,45 @@ class Runtime::Impl {
                 },
             });
         recovered_state = entry.next_state_bytes;
+        if (config_.vote_policy.has_value()) {
+          logical_tick_ = command.logical_tick;
+          vote_authority_invalidated_ = true;
+        }
       } else {
         const auto vote = core::protocol::parse_vote(entry.command_or_vote_bytes);
+        require(
+            core::protocol::encode(vote) == entry.command_or_vote_bytes,
+            ErrorCode::recovery_mismatch,
+            "durable vote frame is not the unique canonical encoding");
+        require(
+            config_.vote_policy.has_value(),
+            ErrorCode::recovery_mismatch,
+            "durable vote exists on a submit-only runtime handle");
+        require(
+            entry.wal_record_bytes == vote_policy_identity_,
+            ErrorCode::recovery_mismatch,
+            "durable vote admission-policy identity differs from startup policy");
+        core::consensus::VoteAdmission admission{};
+        try {
+          const auto vote_id = core::canonical::content_id(
+              core::canonical::Type::vote, entry.command_or_vote_bytes);
+          static_cast<void>(vote_receipt_v1_encoded_size(
+              entry.command_or_vote_bytes.size(),
+              vote_id,
+              vote.context_id));
+          admission = core::consensus::validate_vote_admission(
+              *config_.vote_policy,
+              core::protocol::parse_round_state(recovered_state),
+              core::consensus::VoteAdmissionState{
+                  logical_tick_, false, vote_authority_invalidated_},
+              vote,
+              entry.sequence,
+              core::consensus::VoteAdmissionMode::recovery);
+        } catch (const std::exception&) {
+          reject(
+              ErrorCode::recovery_mismatch,
+              "durable vote does not refine its native admission policy");
+        }
         const auto disposition = vote_journal_.record(vote);
         require(
             disposition == core::consensus::Disposition::recorded,
@@ -214,6 +319,8 @@ class Runtime::Impl {
         const auto vote_id = core::canonical::content_id(
             core::canonical::Type::vote, entry.command_or_vote_bytes);
         vote_sequences_.emplace(vote_id, entry.sequence);
+        vote_frames_.emplace(vote_id, entry.command_or_vote_bytes);
+        vote_admissions_.emplace(vote_id, std::move(admission));
       }
       if (snapshot.has_value() && entry.sequence == snapshot->journal_sequence) {
         require(
@@ -237,9 +344,12 @@ class Runtime::Impl {
     }
     sequence_.store(expected_sequence - 1U);
     recovered_vote_count_.store(vote_journal_.votes().size());
+    recovery_ready_ = true;
+    verify_durable_binding();
   }
 
   [[nodiscard]] SubmitReceipt process_submit(SubmitWork& work) {
+    verify_durable_binding();
     const auto command = core::protocol::parse_command(work.command_bytes);
     const auto command_id =
         core::canonical::content_id(core::canonical::Type::command, work.command_bytes);
@@ -250,7 +360,14 @@ class Runtime::Impl {
           "request ID was replayed with different command bytes");
       auto replay = found->second.receipt;
       replay.replay = true;
+      verify_durable_binding();
       return replay;
+    }
+    if (config_.vote_policy.has_value()) {
+      require(
+          command.logical_tick >= logical_tick_,
+          ErrorCode::request_conflict,
+          "command logical time moved backwards");
     }
 
     core::canonical::Bytes prior;
@@ -259,7 +376,7 @@ class Runtime::Impl {
       prior = state_bytes_;
     }
     const auto result = core::transition::apply(prior, work.command_bytes);
-    const auto next_sequence = sequence_.load() + 1U;
+    const auto next_sequence = checked_next_journal_sequence(sequence_.load());
     const detail::JournalEntry entry{
         next_sequence,
         detail::JournalKind::transition,
@@ -272,7 +389,9 @@ class Runtime::Impl {
       simulated_crash("simulated crash before WAL append");
     }
     if (work.crash_point == CrashPoint::during_wal_append) {
+      verify_durable_binding();
       wal_.append_and_sync(entry, true);
+      verify_durable_binding();
       simulated_crash("simulated crash during WAL append");
     }
     if (work.crash_point == CrashPoint::after_wal_append_before_durability) {
@@ -281,7 +400,9 @@ class Runtime::Impl {
 #if defined(DELTA_NATIVE_MUTANT_EXPOSE_BEFORE_DURABILITY)
     static_cast<void>(entry);
 #else
+    verify_durable_binding();
     wal_.append_and_sync(entry, false);
+    verify_durable_binding();
 #endif
     if (work.crash_point == CrashPoint::after_durability_before_commit) {
       simulated_crash("simulated crash after durability before commit");
@@ -302,6 +423,10 @@ class Runtime::Impl {
       state_bytes_ = result.next_state_bytes;
     }
     sequence_.store(next_sequence);
+    if (config_.vote_policy.has_value()) {
+      logical_tick_ = command.logical_tick;
+      vote_authority_invalidated_ = true;
+    }
     requests_.emplace(command.request_id, CachedRequest{command_id, receipt});
     if (work.crash_point == CrashPoint::after_commit_before_effect_return) {
       simulated_crash("simulated crash after commit before effect return");
@@ -311,11 +436,17 @@ class Runtime::Impl {
       static_cast<void>(released);
       simulated_crash("simulated crash after effect copy before return");
     }
+    verify_durable_binding();
     return released;
   }
 
   [[nodiscard]] VoteReceipt process_vote(VoteWork& work) {
+    verify_durable_binding();
     const auto vote = core::protocol::parse_vote(work.vote_bytes);
+    require(
+        core::protocol::encode(vote) == work.vote_bytes,
+        ErrorCode::invalid_config,
+        "vote frame is not the unique canonical encoding");
     const auto vote_id =
         core::canonical::content_id(core::canonical::Type::vote, work.vote_bytes);
     auto candidate = vote_journal_;
@@ -326,49 +457,104 @@ class Runtime::Impl {
           found != vote_sequences_.end(),
           ErrorCode::recovery_mismatch,
           "vote replay sequence is missing");
-      return VoteReceipt{vote_id, found->second, true};
+      const auto frame = vote_frames_.find(vote_id);
+      require(
+          frame != vote_frames_.end(),
+          ErrorCode::recovery_mismatch,
+          "vote replay frame is missing");
+      const auto admission = vote_admissions_.find(vote_id);
+      require(
+          admission != vote_admissions_.end(),
+          ErrorCode::recovery_mismatch,
+          "vote replay admission projection is missing");
+      verify_durable_binding();
+      return VoteReceipt{
+          frame->second,
+          vote_id,
+          found->second,
+          admission->second.action,
+          admission->second.formal_action_id,
+          admission->second.context_id,
+          admission->second.parents,
+          true,
+      };
     }
-    const auto next_sequence = sequence_.load() + 1U;
+    static_cast<void>(vote_receipt_v1_encoded_size(
+        work.vote_bytes.size(), vote_id, vote.context_id));
+    require(
+        config_.vote_policy.has_value(),
+        ErrorCode::invalid_config,
+        "vote admission is disabled for this submit-only runtime handle");
+    const auto next_sequence = checked_next_journal_sequence(sequence_.load());
+    const auto admission = core::consensus::validate_vote_admission(
+        *config_.vote_policy,
+        core::protocol::parse_round_state(state_bytes_),
+        core::consensus::VoteAdmissionState{
+            logical_tick_, recovery_ready_, vote_authority_invalidated_},
+        vote,
+        next_sequence);
     const detail::JournalEntry entry{
         next_sequence,
         detail::JournalKind::vote,
         work.vote_bytes,
         {},
         {},
-        {},
+        vote_policy_identity_,
     };
     if (work.crash_point == CrashPoint::before_wal_append) {
       simulated_crash("simulated vote crash before WAL append");
     }
     if (work.crash_point == CrashPoint::during_wal_append) {
+      verify_durable_binding();
       wal_.append_and_sync(entry, true);
+      verify_durable_binding();
       simulated_crash("simulated vote crash during WAL append");
     }
     if (work.crash_point == CrashPoint::after_wal_append_before_durability) {
       simulated_crash("simulated vote crash after append before durability");
     }
+#if defined(DELTA_RECORD_VOTE_MUTANT_EXPOSE_BEFORE_DURABILITY)
+    static_cast<void>(entry);
+#else
+    verify_durable_binding();
     wal_.append_and_sync(entry, false);
+    verify_durable_binding();
+#endif
     if (work.crash_point == CrashPoint::after_durability_before_commit) {
       simulated_crash("simulated vote crash after durability before commit");
     }
     vote_journal_ = std::move(candidate);
     vote_sequences_.emplace(vote_id, next_sequence);
+    vote_frames_.emplace(vote_id, work.vote_bytes);
+    vote_admissions_.emplace(vote_id, admission);
     sequence_.store(next_sequence);
     recovered_vote_count_.store(vote_journal_.votes().size());
     if (work.crash_point == CrashPoint::after_commit_before_effect_return ||
         work.crash_point == CrashPoint::after_effect_copy_before_return) {
       simulated_crash("simulated vote crash after commit before receipt return");
     }
-    return VoteReceipt{vote_id, next_sequence, false};
+    verify_durable_binding();
+    return VoteReceipt{
+        work.vote_bytes,
+        vote_id,
+        next_sequence,
+        admission.action,
+        admission.formal_action_id,
+        admission.context_id,
+        admission.parents,
+        false,
+    };
   }
 
   void process_snapshot(SnapshotWork&) {
+    verify_durable_binding();
     core::canonical::Bytes state;
     {
       std::lock_guard lock(state_mutex_);
       state = state_bytes_;
     }
-    detail::write_snapshot(snapshot_path_, detail::Snapshot{sequence_.load(), std::move(state)});
+    wal_.write_snapshot(snapshot_path_, detail::Snapshot{sequence_.load(), std::move(state)});
+    verify_durable_binding();
   }
 
   void reactor_loop() noexcept {
@@ -391,7 +577,8 @@ class Runtime::Impl {
               try {
                 std::rethrow_exception(exception);
               } catch (const RuntimeError& error) {
-                crashed = error.code() == ErrorCode::simulated_crash;
+                crashed = error.code() == ErrorCode::simulated_crash ||
+                          error.code() == ErrorCode::durable_binding_lost;
               } catch (...) {
               }
               if (crashed) {
@@ -428,8 +615,14 @@ class Runtime::Impl {
   mutable std::mutex state_mutex_;
   core::canonical::Bytes state_bytes_;
   core::consensus::VoteJournal vote_journal_;
+  std::uint64_t logical_tick_{0U};
+  bool recovery_ready_{false};
+  bool vote_authority_invalidated_{false};
   std::map<std::string, std::uint64_t> vote_sequences_;
+  std::map<std::string, core::canonical::Bytes> vote_frames_;
+  std::map<std::string, core::consensus::VoteAdmission> vote_admissions_;
   std::map<std::string, CachedRequest> requests_;
+  core::canonical::Bytes vote_policy_identity_;
 };
 
 Runtime::Runtime(Config config) : impl_(std::make_unique<Impl>(std::move(config))) {}

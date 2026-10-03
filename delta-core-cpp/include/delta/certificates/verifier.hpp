@@ -21,6 +21,7 @@ enum class VoteKind {
 };
 
 [[nodiscard]] std::string_view vote_kind_name(VoteKind kind) noexcept;
+[[nodiscard]] core::consensus::VoteAction vote_action(VoteKind kind) noexcept;
 
 struct ValidatorPolicy {
   std::string validator_epoch_id;
@@ -39,7 +40,7 @@ struct OpaqueTimerToken {
 [[nodiscard]] core::protocol::Vote make_vote(
     VoteKind kind,
     const Context& context,
-    std::string body_id,
+    const core::consensus::VoteCandidateBinding& candidate,
     std::string validator_id,
     std::string signature_id,
     std::uint64_t durable_sequence);

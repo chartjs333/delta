@@ -114,8 +114,12 @@ jobs:
                   -I/workspace/delta-core-cpp/include \
                   /workspace/delta-core-cpp/src/canonical.cpp \
                   /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/certificates/contracts.cpp \
+                  /workspace/delta-core-cpp/src/certificates/verifier.cpp \
+                  /workspace/delta-core-cpp/src/certificates/vote_admission.cpp \
                   /workspace/delta-core-cpp/src/protocol.cpp \
                   /workspace/delta-core-cpp/src/sha256.cpp \
+                  /workspace/delta-core-cpp/tests/vote_fixture.cpp \
                   /workspace/delta-core-cpp/tests/consensus_test.cpp \
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -o "$consensus_output"
@@ -210,11 +214,16 @@ jobs:
                   -I/workspace/delta-runtime-cpp/include \
                   /workspace/delta-core-cpp/src/canonical.cpp \
                   /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/certificates/contracts.cpp \
+                  /workspace/delta-core-cpp/src/certificates/verifier.cpp \
+                  /workspace/delta-core-cpp/src/certificates/vote_admission.cpp \
                   /workspace/delta-core-cpp/src/protocol.cpp \
                   /workspace/delta-core-cpp/src/sha256.cpp \
                   /workspace/delta-core-cpp/src/transition.cpp \
                   /workspace/delta-runtime-cpp/src/runtime.cpp \
+                  /workspace/delta-runtime-cpp/src/vote_codec.cpp \
                   /workspace/delta-runtime-cpp/src/wal.cpp \
+                  /workspace/delta-core-cpp/tests/vote_fixture.cpp \
                   /workspace/delta-runtime-cpp/tests/runtime_test.cpp \
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
                   -o "$runtime_output"
@@ -229,10 +238,14 @@ jobs:
                   /workspace/delta-core-cpp/src/arithmetic.cpp \
                   /workspace/delta-core-cpp/src/canonical.cpp \
                   /workspace/delta-core-cpp/src/consensus.cpp \
+                  /workspace/delta-core-cpp/src/certificates/contracts.cpp \
+                  /workspace/delta-core-cpp/src/certificates/verifier.cpp \
+                  /workspace/delta-core-cpp/src/certificates/vote_admission.cpp \
                   /workspace/delta-core-cpp/src/protocol.cpp \
                   /workspace/delta-core-cpp/src/sha256.cpp \
                   /workspace/delta-core-cpp/src/transition.cpp \
                   /workspace/delta-runtime-cpp/src/runtime.cpp \
+                  /workspace/delta-runtime-cpp/src/vote_codec.cpp \
                   /workspace/delta-runtime-cpp/src/wal.cpp \
                   /workspace/delta-ffi/src/delta_abi.cpp \
                   /workspace/delta-ffi/src/fixedpoint_abi.cpp \
@@ -246,6 +259,7 @@ jobs:
                   /workspace/delta-core-cpp/src/shards/envelope.cpp \
                   /workspace/delta-core-cpp/src/shards/plan.cpp \
                   /workspace/delta-core-cpp/src/shards/reader.cpp \
+                  /workspace/delta-core-cpp/tests/vote_fixture.cpp \
                   /workspace/delta-ffi/tests/abi_test.cpp \
                   -DDELTA_FFI_BUILD \
                   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
@@ -317,10 +331,14 @@ jobs:
               /workspace/delta-core-cpp/src/arithmetic.cpp \
               /workspace/delta-core-cpp/src/canonical.cpp \
               /workspace/delta-core-cpp/src/consensus.cpp \
+              /workspace/delta-core-cpp/src/certificates/contracts.cpp \
+              /workspace/delta-core-cpp/src/certificates/verifier.cpp \
+              /workspace/delta-core-cpp/src/certificates/vote_admission.cpp \
               /workspace/delta-core-cpp/src/protocol.cpp \
               /workspace/delta-core-cpp/src/sha256.cpp \
               /workspace/delta-core-cpp/src/transition.cpp \
               /workspace/delta-runtime-cpp/src/runtime.cpp \
+              /workspace/delta-runtime-cpp/src/vote_codec.cpp \
               /workspace/delta-runtime-cpp/src/wal.cpp \
               /workspace/delta-ffi/src/delta_abi.cpp \
               /workspace/delta-ffi/src/fixedpoint_abi.cpp \

@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deltareduce.example/schemas/feature010-sidecar-diagnostic-evidence-v1.1.json",
+  "title": "Feature 010 sealed non-qualifying sidecar diagnostic evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifacts",
+    "assembler_eligible",
+    "authority",
+    "benchmark_result_qc",
+    "campaign_classification",
+    "classified_missed_slots",
+    "diagnostic_campaign_id",
+    "ended_at_utc",
+    "execution_class",
+    "external_ledger",
+    "feature010_go",
+    "gate_a_qualified",
+    "gate_b_qualified",
+    "gate_c_qualified",
+    "gate_d_qualified",
+    "lanes",
+    "manifest_checkout",
+    "manifest_sha256",
+    "official_comparison",
+    "profile_selection_allowed",
+    "schema_version",
+    "selected_profile",
+    "source",
+    "source_checkout",
+    "status",
+    "type_name"
+  ],
+  "properties": {
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allocation_manifest",
+        "attempt_seal",
+        "execution_started_seal",
+        "environment",
+        "frozen_manifest",
+        "host_receipt",
+        "host_telemetry",
+        "lanes_complete",
+        "preflight_receipt"
+      ],
+      "properties": {
+        "allocation_manifest": {"$ref": "#/$defs/fileRecord"},
+        "attempt_seal": {"$ref": "#/$defs/fileRecord"},
+        "execution_started_seal": {"$ref": "#/$defs/fileRecord"},
+        "environment": {"$ref": "#/$defs/fileRecord"},
+        "frozen_manifest": {"$ref": "#/$defs/fileRecord"},
+        "host_receipt": {"$ref": "#/$defs/fileRecord"},
+        "host_telemetry": {"$ref": "#/$defs/fileRecord"},
+        "lanes_complete": {"$ref": "#/$defs/fileRecord"},
+        "preflight_receipt": {"$ref": "#/$defs/fileRecord"}
+      }
+    },
+    "assembler_eligible": {"const": false},
+    "authority": {"const": "DIAGNOSTIC_ONLY"},
+    "benchmark_result_qc": {"const": null},
+    "campaign_classification": {
+      "enum": [
+        "ENVIRONMENT_INVALID",
+        "GENUINE_RUNTIME_DEMAND_INDICATOR",
+        "HARNESS_OR_TIMER_DEFECT",
+        "INCONCLUSIVE",
+        "NO_MISSED_SLOTS_OBSERVED"
+      ]
+    },
+    "classified_missed_slots": {"type": "array", "items": {"type": "object"}},
+    "diagnostic_campaign_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"},
+    "ended_at_utc": {"type": "string", "minLength": 1},
+    "execution_class": {"const": "NON_QUALIFYING_DIAGNOSTIC_ONLY"},
+    "external_ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_record_sha256",
+        "completion_record_required",
+        "execution_started_record_sha256",
+        "terminal_record_required"
+      ],
+      "properties": {
+        "attempt_record_sha256": {"$ref": "#/$defs/contentId"},
+        "completion_record_required": {"const": true},
+        "execution_started_record_sha256": {"$ref": "#/$defs/contentId"},
+        "terminal_record_required": {"const": true}
+      }
+    },
+    "feature010_go": {"const": false},
+    "gate_a_qualified": {"const": false},
+    "gate_b_qualified": {"const": false},
+    "gate_c_qualified": {"const": false},
+    "gate_d_qualified": {"const": false},
+    "lanes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/lane"}, {"properties": {"profile_id": {"const": "EMBEDDED_FFM"}}}]},
+        {"allOf": [{"$ref": "#/$defs/lane"}, {"properties": {"profile_id": {"const": "ISOLATED_SIDECAR"}}}]}
+      ],
+      "items": false
+    },
+    "manifest_checkout": {"$ref": "#/$defs/manifestReceipt"},
+    "manifest_sha256": {"$ref": "#/$defs/contentId"},
+    "official_comparison": {"const": false},
+    "profile_selection_allowed": {"const": false},
+    "schema_version": {"const": "1.1.0"},
+    "selected_profile": {"const": null},
+    "source": {"$ref": "#/$defs/source"},
+    "source_checkout": {"$ref": "#/$defs/sourceReceipt"},
+    "status": {"const": "SEALED"},
+    "type_name": {"const": "FEATURE010_SIDECAR_DIAGNOSTIC_EVIDENCE"}
+  },
+  "$defs": {
+    "contentId": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "fileRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "size_bytes"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?!\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        },
+        "sha256": {"$ref": "#/$defs/contentId"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807}
+      }
+    },
+    "availability": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "value"],
+          "properties": {"status": {"const": "AVAILABLE"}, "value": {"type": "object"}}
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reason", "status"],
+          "properties": {
+            "reason": {"type": "string", "minLength": 1, "maxLength": 1024},
+            "status": {"const": "NOT_AVAILABLE"}
+          }
+        }
+      ]
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifacts",
+        "ended_at_utc",
+        "event_count",
+        "executed_argv",
+        "executed_environment",
+        "environment_mode",
+        "exit_code",
+        "java_involved",
+        "jfr",
+        "missed_slots",
+        "monotonic_duration_ns",
+        "profile_id",
+        "started_at_utc",
+        "strace_fsync",
+        "timed_out",
+        "working_directory"
+      ],
+      "properties": {
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["event_log", "host_telemetry", "stderr", "stdout"],
+          "properties": {
+            "event_log": {"$ref": "#/$defs/fileRecord"},
+            "host_telemetry": {"$ref": "#/$defs/fileRecord"},
+            "stderr": {"$ref": "#/$defs/fileRecord"},
+            "stdout": {"$ref": "#/$defs/fileRecord"}
+          }
+        },
+        "ended_at_utc": {"type": "string", "minLength": 1},
+        "event_count": {"type": "integer", "minimum": 2},
+        "executed_argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "executed_environment": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment_mode": {"const": "REPLACE"},
+        "exit_code": {"const": 0},
+        "java_involved": {"const": true},
+        "jfr": {"$ref": "#/$defs/availability"},
+        "missed_slots": {"type": "array", "items": {"type": "object"}},
+        "monotonic_duration_ns": {"type": "integer", "minimum": 1},
+        "profile_id": {"enum": ["EMBEDDED_FFM", "ISOLATED_SIDECAR"]},
+        "started_at_utc": {"type": "string", "minLength": 1},
+        "strace_fsync": {"$ref": "#/$defs/availability"},
+        "timed_out": {"const": false},
+        "working_directory": {"type": "string", "minLength": 1, "maxLength": 4096}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "repository", "tree"],
+      "properties": {
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "repository": {"const": "https://github.com/chartjs333/delta.git"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "sourceReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkout_root", "commit", "git_invocations", "status_porcelain_sha256", "tree"],
+      "properties": {
+        "checkout_root": {"type": "string", "minLength": 1},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "git_invocations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/processReceipt"}
+        },
+        "status_porcelain_sha256": {"$ref": "#/$defs/contentId"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "manifestReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkout_root",
+        "commit",
+        "git_invocations",
+        "manifest_blob",
+        "manifest_relative_path",
+        "status_porcelain_sha256",
+        "tree"
+      ],
+      "properties": {
+        "checkout_root": {"type": "string", "minLength": 1},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "git_invocations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/processReceipt"}
+        },
+        "manifest_blob": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "manifest_relative_path": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "status_porcelain_sha256": {"$ref": "#/$defs/contentId"},
+        "tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["argv", "environment", "environment_mode", "working_directory"],
+      "properties": {
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment_mode": {"const": "REPLACE"},
+        "working_directory": {"type": "string", "minLength": 1, "maxLength": 4096}
+      }
+    },
+    "processReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "argv",
+        "environment",
+        "environment_mode",
+        "exit_code",
+        "stderr_sha256",
+        "stdout_sha256",
+        "working_directory"
+      ],
+      "properties": {
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment_mode": {"const": "REPLACE"},
+        "exit_code": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+        "stderr_sha256": {"$ref": "#/$defs/contentId"},
+        "stdout_sha256": {"$ref": "#/$defs/contentId"},
+        "working_directory": {"type": "string", "minLength": 1, "maxLength": 4096}
+      }
+    }
+  }
+}

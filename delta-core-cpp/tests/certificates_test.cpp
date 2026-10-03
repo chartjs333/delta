@@ -5,6 +5,8 @@
 #include <delta/robust/plan.hpp>
 #include <delta/runtime/certificate_runtime.hpp>
 
+#include "vote_fixture.hpp"
+
 #include <cstdint>
 #include <filesystem>
 #include <iostream>
@@ -119,22 +121,6 @@ void expect_certificate_error(
       .shard_id = std::move(shard_id),
       .signer_ids = signers(),
   };
-}
-
-[[nodiscard]] delta::core::canonical::Bytes initial_state() {
-  return delta::core::protocol::encode(delta::core::protocol::RoundState{
-      .available_ticket_count = 0U,
-      .committed_ticket_count = 0U,
-      .config_id = id('a'),
-      .durable_sequence = 0U,
-      .height = 8U,
-      .parent_checkpoint_id = id('b'),
-      .phase = delta::core::protocol::RoundPhase::ticketing_open,
-      .round_id = "round-008",
-      .state_root = id('0'),
-      .ticket_count = 3U,
-      .view = 0U,
-  });
 }
 
 struct Chain {
@@ -368,46 +354,75 @@ void test_vote_and_pointer_recovery() {
   const auto chain = make_chain();
   const auto directory = std::filesystem::temp_directory_path() / "delta-008-certificate-test";
   std::filesystem::remove_all(directory);
-  {
-    delta::runtime::CertificateVoteRuntime runtime(directory / "votes", initial_state());
-    std::uint64_t sequence = 1U;
-    const std::vector<std::pair<delta::certificates::VoteKind, std::string>> bodies{
-        {delta::certificates::VoteKind::input_set, delta::certificates::content_id(chain.isc)},
-        {delta::certificates::VoteKind::eligibility,
-         delta::certificates::content_id(chain.robust.eligibility)},
-        {delta::certificates::VoteKind::aggregation_plan,
-         delta::certificates::content_id(chain.robust.plan)},
-        {delta::certificates::VoteKind::parameter_shard,
-         delta::certificates::content_id(chain.shards[0])},
-        {delta::certificates::VoteKind::aggregate_root,
-         delta::certificates::content_id(chain.root)},
-        {delta::certificates::VoteKind::apply, delta::certificates::content_id(chain.apply_qc)},
+  const std::vector<delta::certificates::VoteKind> kinds{
+      delta::certificates::VoteKind::input_set,
+      delta::certificates::VoteKind::eligibility,
+      delta::certificates::VoteKind::aggregation_plan,
+      delta::certificates::VoteKind::parameter_shard,
+      delta::certificates::VoteKind::aggregate_root,
+      delta::certificates::VoteKind::apply,
+  };
+  for (const auto kind : kinds) {
+    const auto action = delta::certificates::vote_action(kind);
+    const auto fixture = delta::test::vote_fixture::full(action);
+    const auto& candidate = fixture.candidate;
+    const auto& policy = fixture.policy;
+    const Context vote_context{
+        policy.snapshot.arithmetic_profile_id,
+        fixture.state.height,
+        policy.snapshot.parameter_schema_id,
+        fixture.state.config_id,
+        fixture.state.round_id,
+        policy.validator_epoch_id,
+        fixture.state.view,
     };
-    for (const auto& [kind, body] : bodies) {
-      const auto vote = delta::certificates::make_vote(
-          kind, context(), body, "validator-0", id('6'), sequence++);
-      const auto receipt = runtime.persist_and_expose(vote);
-      expect(!receipt.replay, "new certificate vote was treated as replay");
-    }
+    const auto vote = delta::certificates::make_vote(
+        kind, vote_context, candidate, policy.local_validator_id, id('6'), 1U);
+    expect(
+        vote.kind == delta::core::consensus::vote_kind_name(candidate.action) &&
+            vote.context_id == delta::core::consensus::frozen_vote_context(candidate),
+        "certificate vote constructor diverged from core action/context projection");
+  }
+
+  constexpr auto persisted_kind = delta::certificates::VoteKind::aggregate_root;
+  const auto fixture =
+      delta::test::vote_fixture::full(delta::certificates::vote_action(persisted_kind));
+  const auto& candidate = fixture.candidate;
+  const auto& policy = fixture.policy;
+  const Context vote_context{
+      policy.snapshot.arithmetic_profile_id,
+      fixture.state.height,
+      policy.snapshot.parameter_schema_id,
+      fixture.state.config_id,
+      fixture.state.round_id,
+      policy.validator_epoch_id,
+      fixture.state.view,
+  };
+  const auto vote = delta::certificates::make_vote(
+      persisted_kind, vote_context, candidate, policy.local_validator_id, id('6'), 1U);
+  const auto vote_directory = directory / "votes";
+  {
+    delta::runtime::CertificateVoteRuntime runtime(
+        vote_directory, delta::core::protocol::encode(fixture.state), policy);
+    const auto receipt = runtime.persist_and_expose(vote);
+    expect(!receipt.replay && receipt.frame == delta::core::protocol::encode(vote),
+           "new certificate vote changed its durable frame");
   }
   {
-    delta::runtime::CertificateVoteRuntime recovered(directory / "votes", initial_state());
-    expect(recovered.recovered_vote_count() == 6U, "certificate votes were not recovered");
-    const auto replay_vote = delta::certificates::make_vote(
-        delta::certificates::VoteKind::apply,
-        context(),
-        delta::certificates::content_id(chain.apply_qc),
-        "validator-0",
-        id('6'),
-        6U);
-    expect(recovered.persist_and_expose(replay_vote).replay, "durable vote replay was not idempotent");
+    delta::runtime::CertificateVoteRuntime recovered(
+        vote_directory, delta::core::protocol::encode(fixture.state), policy);
+    expect(recovered.recovered_vote_count() == 1U, "certificate vote was not recovered");
+    expect(recovered.persist_and_expose(vote).replay,
+           "durable certificate vote replay was not idempotent");
+    auto conflicting_candidate = candidate;
+    conflicting_candidate.body_hash = id('f');
     const auto conflict = delta::certificates::make_vote(
-        delta::certificates::VoteKind::apply,
-        context(),
-        id('f'),
-        "validator-0",
+        persisted_kind,
+        vote_context,
+        conflicting_candidate,
+        policy.local_validator_id,
         id('6'),
-        7U);
+        2U);
     bool rejected = false;
     try {
       (void)recovered.persist_and_expose(conflict);

@@ -98,6 +98,9 @@ struct QuorumCertificate {
 struct Vote {
   std::string body_hash;
   std::string context_id;
+  // Signed claim binding this envelope to the native WAL slot. It is never an
+  // allocator input: delta-runtime computes next(current durable WAL sequence)
+  // and rejects any envelope whose claim differs before append.
   std::uint64_t durable_sequence;
   std::uint64_t height;
   std::string kind;

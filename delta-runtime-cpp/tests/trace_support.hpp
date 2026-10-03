@@ -37,6 +37,8 @@ struct Event {
   std::string prior_state_root;
   std::optional<std::string> request_id;
   std::optional<std::string> result_hash;
+  std::optional<std::string> round_id;
+  std::optional<std::string> validator_epoch;
   std::uint64_t view = 0U;
   std::optional<std::string> vote_context_id;
 };
@@ -118,9 +120,11 @@ struct Event {
          << ",\"prior_state_root\":" << quote(event.prior_state_root)
          << ",\"request_id\":" << nullable(event.request_id)
          << ",\"result_hash\":" << nullable(event.result_hash)
-         << ",\"round_id\":" << quote(round_id)
+         << ",\"round_id\":" << quote(event.round_id.value_or(std::string(round_id)))
          << ",\"schema_version\":\"1.0.0\""
-         << ",\"validator_epoch\":" << quote(epoch_id) << ",\"view\":" << event.view
+         << ",\"validator_epoch\":"
+         << quote(event.validator_epoch.value_or(std::string(epoch_id)))
+         << ",\"view\":" << event.view
          << ",\"vote_context_id\":" << nullable(event.vote_context_id) << '}';
   return output.str();
 }

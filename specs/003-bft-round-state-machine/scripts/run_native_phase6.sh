@@ -10,12 +10,13 @@ mkdir -p "$output/traces" "$output/mutants"
 flags="-std=c++${standard} -Wall -Wextra -Wpedantic -Werror -fno-fast-math -pthread"
 includes="-I/workspace/delta-core-cpp/include -I/workspace/delta-runtime-cpp/include -I/workspace/delta-ffi/include"
 core_sources="/workspace/delta-core-cpp/src/arithmetic.cpp /workspace/delta-core-cpp/src/canonical.cpp /workspace/delta-core-cpp/src/consensus.cpp /workspace/delta-core-cpp/src/protocol.cpp /workspace/delta-core-cpp/src/sha256.cpp /workspace/delta-core-cpp/src/transition.cpp"
-runtime_sources="/workspace/delta-runtime-cpp/src/runtime.cpp /workspace/delta-runtime-cpp/src/wal.cpp"
+certificate_sources="/workspace/delta-core-cpp/src/certificates/contracts.cpp /workspace/delta-core-cpp/src/certificates/verifier.cpp /workspace/delta-core-cpp/src/certificates/vote_admission.cpp"
+runtime_sources="/workspace/delta-runtime-cpp/src/runtime.cpp /workspace/delta-runtime-cpp/src/vote_codec.cpp /workspace/delta-runtime-cpp/src/wal.cpp"
 
 # Four independent runtimes, 100 prepared integer tickets and crash/restart identity.
 # Intentional word splitting expands the frozen source/flag lists above.
 # shellcheck disable=SC2086
-"$compiler" $flags $includes $core_sources $runtime_sources \
+"$compiler" $flags $includes $core_sources $certificate_sources $runtime_sources \
   /workspace/delta-runtime-cpp/tests/native_exit_test.cpp \
   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
   -DDELTA_PREPARED_100_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/prepared-100-v1.json\" \
@@ -24,7 +25,8 @@ runtime_sources="/workspace/delta-runtime-cpp/src/runtime.cpp /workspace/delta-r
 
 # Runtime-derived legal implementation traces must reproduce checked-in bytes.
 # shellcheck disable=SC2086
-"$compiler" $flags $includes $core_sources $runtime_sources \
+"$compiler" $flags $includes $core_sources $certificate_sources $runtime_sources \
+  /workspace/delta-core-cpp/tests/vote_fixture.cpp \
   /workspace/delta-runtime-cpp/tests/trace_exporter.cpp \
   -DDELTA_GOLDEN_FIXTURE_PATH=\"/workspace/delta-protocol/fixtures/003/cross-language/golden-v1.json\" \
   -o "$output/trace-exporter"
@@ -36,7 +38,7 @@ done
 
 # Bounded parser and C ABI invalid-corpus smoke path.
 # shellcheck disable=SC2086
-"$compiler" $flags $includes $core_sources $runtime_sources \
+"$compiler" $flags $includes $core_sources $certificate_sources $runtime_sources \
   /workspace/delta-ffi/src/delta_abi.cpp \
   /workspace/delta-ffi/tests/fuzz_smoke_test.cpp \
   -DDELTA_FFI_BUILD \
@@ -58,7 +60,7 @@ cmp "$output/mutants/native-view-without-qc.json" \
   /workspace/specs/003-bft-round-state-machine/evidence/mutants/native-view-without-qc.json
 
 # shellcheck disable=SC2086
-"$compiler" $flags $includes $core_sources $runtime_sources \
+"$compiler" $flags $includes $core_sources $certificate_sources $runtime_sources \
   /workspace/delta-runtime-cpp/tests/native_mutant_test.cpp \
   -DDELTA_NATIVE_MUTANT_EXPOSE_BEFORE_DURABILITY \
   -DDELTA_EXPECT_DURABILITY_MUTANT \
