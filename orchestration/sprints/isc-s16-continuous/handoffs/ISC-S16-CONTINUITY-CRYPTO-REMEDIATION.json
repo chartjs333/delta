@@ -1,0 +1,110 @@
+{
+  "task_id": "ISC-S16-CONTINUITY",
+  "related_task_ids": [
+    "T053",
+    "HR008-003"
+  ],
+  "assignment_id": "e39c26b8-1789-4ee7-af3d-fc277019f6c0",
+  "agent_phone": "2750",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "from_commit": "e213e6f92c3f4ea7d39600cdca3ceb7b6c9b5ad1",
+  "created_at_utc": "2026-10-04T15:41:07.803307+00:00",
+  "scope": "REFERENCE_ONLY_NOT_PRODUCTION",
+  "outcome": "RESUME_CRYPTO",
+  "source_transition": {
+    "transition_id": "371d2b3b-2d9b-4e3b-b1a4-084f2e0b1d06",
+    "source_node_id": "crypto-reference",
+    "source_assignment_id": "a8dc3d8c-22b1-4cac-b916-31e74fdaefed",
+    "submission": {
+      "assignment_id": "a8dc3d8c-22b1-4cac-b916-31e74fdaefed",
+      "from_commit": "e213e6f92c3f4ea7d39600cdca3ceb7b6c9b5ad1",
+      "git_commit": "a7e5d04044a8805a98b11fc1c3d70546cbcf080b",
+      "git_branch": "agent/isc-s16-ed25519-reference"
+    },
+    "outcome": "STOP",
+    "status": "approved",
+    "reviews": [
+      {
+        "assignment_id": "523900e2-d400-41f5-b2a4-50e1abf4bbdd",
+        "reviewer_agent_id": "isc-s16-continuous-architecture-reviewer",
+        "decision": "APPROVE",
+        "feedback": "APPROVE return to coordinator: no qualified strict backend and reproduced identity-key mismatch justify STOP. Scope/authority/provenance verified. Clarification for coordinator: already-installed/no-download wording is worker conservative interpretation inherited from historical pipelined lane; current continuous instructions do not explicitly prohibit bounded reference-only dependency provisioning. Evaluate this under current delegated authority, preserving exact strict SIG profile and provenance gates."
+      },
+      {
+        "assignment_id": "5c5abbc4-3cad-4d0c-b4b1-8158478d9143",
+        "reviewer_agent_id": "isc-s16-continuous-evidence-reviewer",
+        "decision": "APPROVE",
+        "feedback": "APPROVE evidenced STOP and coordinator remediation. Exact public probe reproduces all recorded fields; evidence/source/ADR hashes match. Architecture clarification applies: historical already-installed/no-download restriction is not an established permanent current-sprint ban."
+      }
+    ]
+  },
+  "source_evidence": {
+    "path": "formal/reference/isc_crypto/evidence.json",
+    "sha256": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
+    "probe_exact_reproduction": "PASS",
+    "observed_result": "ACCEPTED_IDENTITY_KEY"
+  },
+  "sprint_hash_checks": {
+    "count": 8,
+    "result": "PASS"
+  },
+  "decision": {
+    "blocker": "STRICT_ED25519_BACKEND_UNAVAILABLE remains real until qualified provisioning and conformance pass.",
+    "authority": "Current continuous lane C01 and continuity-agent delegated items 3-7 permit bounded reference environment remediation. The historical pipelined available-library/no-download restriction was a conservative worker interpretation, not expressly adopted by current continuous task. This decision clarifies environment preparation only; it changes no frozen protocol or strict verification predicate.",
+    "allowed_preparation": "Obtain the exact official libsodium1.0.22 release source archive, Windows MSVC archive, detached signatures and upstream public signing key into a dedicated repository .cache subdirectory. No global install, PATH mutation, production dependency, or committed downloaded source/binaries.",
+    "verification_before_use": "Verify exact release API SHA256 and detached GPG signatures with existing Git-bundled gpg in a dedicated cache homedir. Read the maintainer public key from official installation documentation, record its full fingerprint and verified signing fingerprint. Fail closed on any missing/mismatched verification. Do not fetch keys from arbitrary keyservers.",
+    "dependency_trust_boundary": "Upstream package-signing key authenticates this development dependency only; it is not a new Delta validator, deployment, consensus, or governance trust root.",
+    "implementation_boundary": "After archive authentication, select one x64 release DLL by explicit resolved path. Record its SHA256, upstream release tag/commit, archive path, architecture, build variant, reported sodium version and exact exported APIs. Use bounded ctypes buffers in quarantined reference only. No permissive cryptography fallback or custom curve implementation.",
+    "required_conformance": [
+      "Strict canonical nonidentity prime-order checks for both A and Rpoint through crypto_core_ed25519_is_valid_point; reject S >= L before detached verification.",
+      "Public deterministic known-answer signature vectors; exact K/E/R/V/M/G canonical bytes and signable preimage.",
+      "Negative A/Rpoint/S/context/preimage/tamper and malformed-length vectors with explicit expected reject behavior.",
+      "No acceptance skipped because the backend is unavailable; STOP with exact diagnostic if provisioning or required APIs fail."
+    ],
+    "history": "Preserve original STOP evidence immutably. Add new remediation/conformance evidence rather than rewrite the historical outcome.",
+    "limitations": "Vendor-authenticated package identity and local conformance are not a reproducible-build attestation, proof of binary correctness, production key-custody qualification, or Formal GO.",
+    "resume": "Resume ISC-S16-C01 on its API-assigned branch; incorporate only this new coordinator handoff from canonical. Existing W1 accepted commit remains separately pinned. Do not merge unrelated code or reimport the graph."
+  },
+  "upstream": {
+    "release_url": "https://github.com/jedisct1/libsodium/releases/tag/1.0.22-RELEASE",
+    "tag": "1.0.22-RELEASE",
+    "release_commit": "77e1ce5d6dee871c49ef211222ba18ef0c486bda",
+    "documentation": "https://doc.libsodium.org/installation",
+    "assets": [
+      {
+        "name": "libsodium-1.0.22-msvc.zip",
+        "size": 17690194,
+        "digest": "sha256:3e03a726fac4bc09cb61d8f29d658ef7a5eca0811de59082130414f7ca2e4279",
+        "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22-msvc.zip"
+      },
+      {
+        "name": "libsodium-1.0.22-msvc.zip.sig",
+        "size": 594,
+        "digest": "sha256:ec59666f62b853576105b5e151a21672c95a057aced84ef1e1de8fc850704eb4",
+        "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22-msvc.zip.sig"
+      },
+      {
+        "name": "libsodium-1.0.22.tar.gz",
+        "size": 2008529,
+        "digest": "sha256:adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349",
+        "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22.tar.gz"
+      },
+      {
+        "name": "libsodium-1.0.22.tar.gz.sig",
+        "size": 594,
+        "digest": "sha256:350191b0a5545158716e0e52f249c1511e203972edd61a7a2fec3d03653ea8a7",
+        "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22.tar.gz.sig"
+      }
+    ],
+    "provisioning_executed_by_coordinator": false
+  },
+  "preserved_w1_commit": "9744e701d27de413f32ee39ce86c25f89ec30663",
+  "protected_spine_diff": [],
+  "production_code_diff": [],
+  "formal_go_claimed": false,
+  "independent_attestation_claimed": false,
+  "production_authorization": false,
+  "sigma_assigned": false,
+  "r2_3_started": false,
+  "r3_started": false
+}
