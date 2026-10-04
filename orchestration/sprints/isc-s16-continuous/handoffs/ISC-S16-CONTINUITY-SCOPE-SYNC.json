@@ -1,0 +1,260 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "ISC-S16-CONTINUITY",
+  "related_task_ids": [
+    "ISC-S16-D01",
+    "T053",
+    "HR008-018"
+  ],
+  "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "from_commit": "0c8fe0426586810c1e1a342d11f0d5c42ce2de16",
+  "created_at_utc": "2026-10-04T19:25:49.939348+00:00",
+  "decision": "RUNTIME_SCOPE_SYNC_BLOCKED",
+  "decision_kind": "DOCUMENTARY_HANDOFF_NOT_API_OUTCOME",
+  "authority_status": "USER_AUTHORIZED_NARROW_PROOF_ONLY_EXCEPTION_RECORDED_IN_GIT",
+  "activation_status": "LIVE_ASSIGNMENT_SYNCHRONIZATION_NOT_ESTABLISHED",
+  "scope_amendment": "scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json",
+  "changed_scope_input_sha256": {
+    "orchestration/sprints/isc-s16-continuous/README.md": "cf09cfd1140f27ce653a9f955c3991e580b2043f9927043ea824da32a6a5f159",
+    "orchestration/sprints/isc-s16-continuous/bootstrap-ru.md": "6f62a3abc50330111874cbb64ca947d9c226c0457be56a7f3f48cc328cbb5c13",
+    "orchestration/sprints/isc-s16-continuous/continuity-agent.md": "a580d99508717c5893c7da3605c5f2aec5149385b9ee4c25d97e1b981dde4fab",
+    "orchestration/sprints/isc-s16-continuous/lane-tasks.md": "641a5c0465505cf79f013f5577a810137e8f54dea371ddfd766f155100479f1d",
+    "orchestration/sprints/isc-s16-continuous/sequential-sprint.json": "9e8824d142978b849d9240fd5004794f8c66483e979b94d04f174671dc646260",
+    "orchestration/sprints/isc-s16-continuous/SHA256SUMS.json": "fc4e2686c7b58521a78e78a86b338487c7ba2a06b6d19d1c7d90d2e62b4f7cf7",
+    "orchestration/sprints/isc-s16-continuous/scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json": "1637f837aca3e028a66e5e1a306a83c695a4d010e35f7b53e54e44cecd38d655"
+  },
+  "hash_convention": "SHA-256 of LF UTF-8 bytes intended for exact Git blobs; verify after staging. Prior evidence is preserved at the recorded from_commit.",
+  "http_observation": {
+    "observed_at_utc": "2026-10-04T19:25:49.939348+00:00",
+    "state_endpoint": "http://localhost:18025/api/v1/projects/9000/state.json",
+    "revision": 52,
+    "status": "active",
+    "current_node_id": "continuity-coordinator",
+    "current_assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+    "rework_cycle_count": 4,
+    "active_task_message_sha256": "4ea64574a6f8086c78b9065260804ba0d1380029a7080dd5a4f604fbc9cc91f4",
+    "active_task_retains_old_blanket_prohibition": "не начинай R2.3/R3",
+    "last_transition": {
+      "source_node_id": "formal-linkage",
+      "target_node_id": "continuity-coordinator",
+      "source_assignment_id": "c55e9068-332d-4de3-9112-a195d2ba5f90",
+      "outcome": "NO_GO",
+      "status": "approved"
+    },
+    "accepted_formal_submission": {
+      "assignment_id": "c55e9068-332d-4de3-9112-a195d2ba5f90",
+      "from_commit": "1ecea3a588b80b43b87b50fa41c38dbdabf0d8f7",
+      "git_commit": "bb830cf1ad37a0ac22caaa69bf4ce8a68bed9f46",
+      "git_branch": "agent/isc-s16-formal-linkage"
+    },
+    "accepted_formal_reviews": [
+      {
+        "reviewer_index": 1,
+        "reviewer_agent_id": "isc-s16-continuous-architecture-reviewer",
+        "reviewer_name": "Delta ISC Continuous Architecture Reviewer",
+        "decision": "APPROVE",
+        "feedback": "APPROVE corrected source-bound NO_GO transition. Correction only labels exact Git blob provenance and fixes four CRLF-derived pins; no contract, invariant or authority changes. Mandatory recovery proof failure remains applicable and R3 remains explicitly outside current scope. Coordinator must resolve scope/graph authorization without gate waiver or unchanged loops.",
+        "reviewed_at": "2026-10-04T16:18:57.507987+00:00",
+        "assignment_id": "577034ca-af58-4cf8-84d2-fe27eb53be17"
+      },
+      {
+        "reviewer_index": 2,
+        "reviewer_agent_id": "isc-s16-continuous-evidence-reviewer",
+        "reviewer_name": "Delta ISC Continuous Evidence Reviewer",
+        "decision": "APPROVE",
+        "feedback": "APPROVE corrected NO_GO. Recomputed all 20 exact Git blob input pins both at recorded base and final source: PASS. All 8 frozen sprint hashes PASS; previously verified 271 normalized semantic hashes remain unchanged. Provenance defect is fixed; mandatory missing recovery proof remains a real scope/graph blocker.",
+        "reviewed_at": "2026-10-04T16:20:04.730572+00:00",
+        "assignment_id": "f96b4cdb-3a38-45b2-8266-6c42ed679ac4"
+      }
+    ],
+    "allowed_coordinator_transitions": {
+      "START_W1": "w1-reference-engine",
+      "RESUME_W1": "w1-reference-engine",
+      "RESUME_CRYPTO": "crypto-reference",
+      "RESUME_FORMAL": "formal-linkage",
+      "RESUME_QUALIFICATION": "formal-qualification"
+    },
+    "actual_formal_node_profile": "Prove only the frozen TLA+/Lean integration-point scope. Read continuity-agent.md; resolve ordinary proof-engineering questions in-place; do not weaken invariants.",
+    "formal_agent_card_endpoint": "http://localhost:18025/api/v1/projects/9000/agents/2753",
+    "formal_agent_profile_sha256": "4a3b578877522c8760ea5578f8d2ccd37549fcb61a0a999b83475320991df29d"
+  },
+  "supported_api_investigation": {
+    "requests": "Read-only HTTP GET to published OpenAPI, root UI, project/agent card, sprint listing and state; no internal runtime-file reads.",
+    "openapi_endpoint": "http://localhost:18025/openapi.json",
+    "openapi_body_sha256": "6a894a363f74dfb560839a03edb6b107fdcf780b08ca30906df89b427612994b",
+    "relevant_advertised_methods": {
+      "/api/v1/agents/whoami": [
+        "get",
+        "post"
+      ],
+      "/api/v1/agents/whoami/repository": [
+        "post"
+      ],
+      "/api/v1/projects/{project_id}/state.json": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/state": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/pending-sprints": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/pending-sprints/{sprint_id}": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/pending-sprints/{sprint_id}/start": [
+        "post"
+      ],
+      "/api/v1/projects/{project_id}/sprints/start-from-git": [
+        "post"
+      ],
+      "/api/v1/sprints/{sprint_id}/repair": [
+        "post"
+      ],
+      "/api/v1/projects/{project_id}/sprints": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/sprints/{sprint_id}/download": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/actors": [
+        "get",
+        "delete"
+      ],
+      "/api/v1/projects/{project_id}/agents": [
+        "get",
+        "delete"
+      ],
+      "/api/v1/projects/{project_id}/actors/import": [
+        "post"
+      ],
+      "/api/v1/projects/{project_id}/agents/import": [
+        "post"
+      ],
+      "/api/v1/projects/{project_id}/telegram-history-forwarding": [
+        "get",
+        "put"
+      ],
+      "/api/v1/projects/{project_id}/agents/{agent_phone}": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/agents/{agent_phone}/whoami": [
+        "post"
+      ],
+      "/api/v1/telegram/agents/sequential": [
+        "post"
+      ],
+      "/api/v1/telegram/agents/parallel": [
+        "post"
+      ],
+      "/api/v1/telegram/agents": [
+        "post"
+      ],
+      "/api/v1/projects/{project_id}/groups": [
+        "get",
+        "post"
+      ],
+      "/api/v1/groups/{group_id}/agents/{agent_id}/tasks": [
+        "get"
+      ],
+      "/api/v1/projects/{project_id}/cycles": [
+        "get"
+      ],
+      "/api/v1/sequential-sprint-prompt/settings": [
+        "get",
+        "put"
+      ],
+      "/api/v1/sequential-sprint-prompt": [
+        "get"
+      ],
+      "/agents": [
+        "get",
+        "post"
+      ],
+      "/agents/create-empty": [
+        "post"
+      ],
+      "/agents/poll/{phone}": [
+        "get"
+      ],
+      "/agents/specialize/{phone}": [
+        "post"
+      ],
+      "/agents/poll/{phone}/confirm": [
+        "post"
+      ],
+      "/agents/clone-preview": [
+        "post"
+      ]
+    },
+    "repair_operation": {
+      "summary": "Repair Managed Sprint",
+      "operationId": "repair_managed_sprint_api_v1_sprints__sprint_id__repair_post",
+      "parameters": [
+        {
+          "name": "sprint_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Sprint Id"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      }
+    },
+    "finding": "No documented supported in-place scope update preserving the active assignment, history and reviews was established. Repair exists by name only: OpenAPI has no request body or repair-mode/preservation contract. No assignment/execution/node PATCH/PUT is advertised. Import/start UI describes saved sprint creation/task queuing; overwrite=false does not document preservation of the active graph.",
+    "mutating_probe_sent": false,
+    "repair_post_sent": false,
+    "import_or_start_sent": false,
+    "limitation": "Do not infer that a repair-named endpoint supports scope amendment, and do not test undocumented mutation payloads against the active sprint.",
+    "needed_capability": "A supported, documented in-place amendment API/UI or its verified contract, including exact payload fields, assignment/revision guard, update of current and future D01 profile/tasks, and preservation of assignment/history/reviews. Existing user authority is sufficient; another scope-permission request is not needed."
+  },
+  "checkpoint_status": {
+    "prerequisite_investigation_started": false,
+    "extended_proof_started": false,
+    "reason": "User requires Git/live assignment scope agreement first. Current runtime still issues the old prohibition.",
+    "scope_coordination_started_at_utc": "2026-10-04T19:18:59+00:00",
+    "first_checkpoint_budget_seconds": 7200,
+    "budget_meaning": "Two active hours for initial investigation; not a theorem completion estimate.",
+    "not_a_prerequisite_sufficiency_result": true
+  },
+  "preserved": {
+    "assignment": true,
+    "graph_nodes_edges_and_review_count": true,
+    "accepted_w1_commit": "9744e701d27de413f32ee39ce86c25f89ec30663",
+    "accepted_crypto_commit": "af13fd25bf11716736febdb1a0498e6856a83e4f",
+    "accepted_formal_no_go_commit": "bb830cf1ad37a0ac22caaa69bf4ce8a68bed9f46",
+    "historical_reports_and_handoffs": true,
+    "runtime_history_and_reviews": true
+  },
+  "next_action": "Obtain the supported in-place scope-update contract or have an authorized operator apply that supported update, then verify the same assignment/history and synchronized live scope over HTTP before official RESUME_FORMAL. Do not dequeue or restart a sprint to work around this limitation.",
+  "official_outcome_sent": false,
+  "assignment_remains_active": true,
+  "runtime_files_edited": false,
+  "nginx_development_started": false,
+  "formal_sources_changed": false,
+  "production_changed": false,
+  "formal_go_claimed": false,
+  "independent_attestation_claimed": false
+}

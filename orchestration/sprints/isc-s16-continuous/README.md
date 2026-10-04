@@ -54,3 +54,24 @@ Continuity recovery/coordinator
 
 через sequential import/pending-sprint flow. Старые parallel и blocked sequential
 sprints повторно не импортировать.
+
+## User-authorized D01 recovery-proof exception
+
+The narrow authorization is recorded in
+[`ISC-S16-D01-RECOVERY-PROOF-ONLY.json`](scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json).
+Only the existing `DeltaReduce.nativeArithmeticRecoveryRefines`, its axiom audit
+and necessary lemmas are excepted from the R3 restriction. Existing task IDs,
+graph edges and two process reviews are preserved.
+
+Proof work requires both the committed amendment and a supported live nginx-qa
+profile/task update preserving the current assignment/history/reviews. Do not
+apply this updated sprint file through overwrite/reimport. If no safe supported
+update exists, retain the assignment and report that limitation.
+
+The first D01 phase is a prerequisite checkpoint within two active investigation
+hours, not a theorem deadline. It returns `NEED_DECISION` through the two existing
+process reviews to Coordinator. Only a positively sufficient, within-scope report
+with two approvals for its exact commit permits `RESUME_FORMAL` for extended proof
+work. An approved blocked report or amendment approvals cannot satisfy this gate.
+The theorem's closure does not close original D01 integration, Q01, remaining R3
+or Formal GO. Historical outcomes and evidence remain unchanged.

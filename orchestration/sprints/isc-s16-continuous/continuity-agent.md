@@ -33,8 +33,10 @@ nginx-qa assignment; принимаешь минимальные fail-closed р�
 - объявлять Formal GO без exact compatible formal report и требуемых review/authority;
 - изобретать новый trust root, validator authority или migration старых объектов;
 - ослаблять explicit parent, signature verification, source lineage, durability или bounds;
-- снимать native guard, подключать reference code к production или начинать R2.3/R3
-  без отдельной формальной authority;
+- снимать native guard, подключать reference code к production, начинать R2.3
+  или иной R3. Единственное пользовательское исключение — proof-only работа D01
+  над `DeltaReduce.nativeArithmeticRecoveryRefines`, его axiom audit и необходимыми
+  леммами, строго по scope amendment и после синхронизации live assignment;
 - удалять evidence, lineage или переименовывать старые objects/signatures/QC/WAL.
 
 Если новый безопасный production contract объективно необходим, зафиксируй NO_GO и
@@ -46,6 +48,8 @@ nginx-qa assignment; принимаешь минимальные fail-closed р�
 Обычный вопрос в пределах task решай на месте по этому протоколу. Только когда
 решение меняет frozen authority, stage может вернуть `NEED_DECISION` или `STOP`;
 тогда nginx-qa переводит identity к этому Coordinator node.
+D01 также обязан вернуть `NEED_DECISION` для первой проверки достаточности
+предпосылок названной recovery-теоремы и двух process review точного commit.
 
 Coordinator изучает последний outcome/reviewer feedback и выбирает один из исходов:
 
@@ -57,3 +61,32 @@ Coordinator изучает последний outcome/reviewer feedback и вы�
 
 Перед outcome создай source-bound decision/handoff в
 `orchestration/sprints/isc-s16-continuous/handoffs/` и commit/push его.
+
+## Исключение D01: proof-only recovery obligation
+
+Пользовательское решение сохранено в
+[`ISC-S16-D01-RECOVERY-PROOF-ONLY.json`](scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json).
+До начала обследования теоремы согласуй Git и фактические profile/task nginx-qa
+поддерживаемым обновлением без overwrite/reimport, сброса assignment, истории или
+review. Если механизм не документирован безопасно, сохрани активный assignment и
+сообщи конкретное ограничение; разработка nginx-qa не входит в работу.
+
+Первая контрольная точка D01 ограничена двумя активными часами обследования и
+содержит точную формулировку, классификацию зависимостей, проверку необходимости
+R2.3/source-provenance/model changes и конечный список proof-файлов/проверок.
+Это бюджет обследования, не срок закрытия теоремы. D01 возвращает `NEED_DECISION`;
+обычный граф даёт два process review, затем возвращает Coordinator.
+
+Для `RESUME_FORMAL` на длительное доказательство проверь обе APPROVE для точного
+checkpoint commit и положительный вывод о достаточности в разрешённой границе.
+Сам факт двух approvals не разрешает исключённую зависимость; approvals amendment
+не заменяют reviews checkpoint. После выполнения условий необходимые леммы
+разрешены без повторных запросов пользователя. При существенном изменении отчёта
+нужны два review нового commit.
+
+Не допускай `sorry`, непроверенные аксиомы, тривиальное утверждение под нужным
+именем, скрытое сужение domain, предположение результата refinement или перенос
+незакрытой запрещённой зависимости в assumptions. Сохрани исходное обязательство,
+критерии gate, старые отчёты и отдельные независимые аттестации. После доказательства
+и проверок возобновляются исходные integration points D01, затем Q01; закрытие
+одной теоремы не означает закрытие D01, всего R3 или Formal GO.
