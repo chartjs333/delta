@@ -1,0 +1,83 @@
+{
+  "task_id": "ISC-S16-C01",
+  "related_task_ids": [
+    "T053",
+    "HR008-003"
+  ],
+  "assignment_id": "a8dc3d8c-22b1-4cac-b916-31e74fdaefed",
+  "agent_phone": "2752",
+  "branch": "agent/isc-s16-ed25519-reference",
+  "from_commit": "e213e6f92c3f4ea7d39600cdca3ceb7b6c9b5ad1",
+  "source_baseline": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+  "previous_accepted_lane_commit": "9744e701d27de413f32ee39ce86c25f89ec30663",
+  "scope": "REFERENCE_ONLY_NOT_PRODUCTION",
+  "outcome": "STOP",
+  "created_at_utc": "2026-10-04T15:31:26.118847+00:00",
+  "probe": {
+    "scope": "REFERENCE_ONLY_NOT_PRODUCTION",
+    "python": "3.12.1",
+    "cryptography_version": "44.0.3",
+    "openssl_version": "OpenSSL 3.4.1 11 Feb 2025",
+    "nacl_available": false,
+    "ctypes_sodium": null,
+    "ctypes_libsodium": null,
+    "identity_key_hex": "0100000000000000000000000000000000000000000000000000000000000000",
+    "signature_hex": "58666666666666666666666666666666666666666666666666666666666666660100000000000000000000000000000000000000000000000000000000000000",
+    "message_ascii": "ISC-S16 public negative probe",
+    "expected_strict_profile_result": "REJECTED_IDENTITY_KEY",
+    "observed_result": "ACCEPTED_IDENTITY_KEY",
+    "strict_profile_qualified": false,
+    "secrets_used": false,
+    "signing_performed": false,
+    "qualification_note": "Even rejection of this one probe would not qualify all point/subgroup checks. No replacement for the selected library is implemented."
+  },
+  "probe_script_sha256": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
+  "contract_path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+  "contract_sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd",
+  "blockers": [
+    {
+      "code": "STRICT_ED25519_BACKEND_UNAVAILABLE",
+      "owner_component": "ISC crypto execution environment / independently pinned crypto library qualification",
+      "reason": "Selected libsodium1.0.22 point-validation/detached APIs are not available in inspected execution environment. Available cryptography/OpenSSL accepts the public identity-key witness rejected by selected strict profile.",
+      "locations_checked": [
+        "active Python and repository .venv module discovery",
+        "ctypes library discovery for sodium/libsodium",
+        "PATH directories for sodium*.dll/libsodium*.dll",
+        "repository .cache and formal/toolchain matching sodium/nacl files"
+      ],
+      "required_remediation": "Provide an already installed independently pinned libsodium1.0.22 build with detached Ed25519 and crypto_core_ed25519_is_valid_point. Verify exact binary/source/build provenance and run strict A/Rpoint/S and positive conformance vectors before resuming C01. No download/vendor or permissive fallback under this task."
+    }
+  ],
+  "commands": [
+    "git fetch origin --prune",
+    "git ls-remote --heads origin agent/isc-s16-ed25519-reference",
+    "gh pr list --state all --head agent/isc-s16-ed25519-reference",
+    "Python and .venv module/library discovery",
+    ".venv/Scripts/python.exe formal/reference/isc_crypto/probe_library.py",
+    "scoped Ruff check and format"
+  ],
+  "checks": {
+    "negative_capability_probe": "REPRODUCED_STRICT_PROFILE_MISMATCH",
+    "production_code_diff": "EMPTY",
+    "protected_spine_diff": "EMPTY",
+    "sprint_files": "UNCHANGED"
+  },
+  "protected_spine_diff": [],
+  "production_code_diff": [],
+  "formal_go_claimed": false,
+  "production_authorization": false,
+  "sigma_assigned": false,
+  "r2_3_started": false,
+  "r3_started": false,
+  "canonical_encoders_completed": false,
+  "signature_conformance_completed": false,
+  "secrets_used": false,
+  "dependencies_downloaded_or_vendored": false,
+  "limitations": [
+    "A diagnostic public invalid-key vector only, not a complete Ed25519 validation suite.",
+    "Library discovery is limited to the listed environment locations, not an assertion about every disk file.",
+    "No library substitution or custom crypto primitive/point checker implemented.",
+    "No deployment signature, key custody, consensus invocation, WAL integration or trust root.",
+    "Assigned branch created from canonical sprint as instructed; previous W1 lane is independently preserved, not merged here."
+  ]
+}
