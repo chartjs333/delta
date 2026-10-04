@@ -1,0 +1,203 @@
+{
+  "task_id": "ISC-S16-D01",
+  "related_task_ids": [
+    "T010",
+    "T011",
+    "T016",
+    "T024",
+    "T053",
+    "T057",
+    "HR008-001",
+    "HR008-002",
+    "HR008-003",
+    "HR008-018"
+  ],
+  "assignment_id": "f1151c2e-b92b-4cd1-825c-698b57433755",
+  "agent_phone": "2753",
+  "branch": "agent/isc-s16-formal-linkage",
+  "from_commit": "668d55f0b382bab4b5e70ab3cb5b4241f5b65c0e",
+  "created_at_utc": "2026-10-04T16:07:58.952773+00:00",
+  "scope": "FROZEN_ISC_FORMAL_LINKAGE_ONLY",
+  "outcome": "NO_GO",
+  "implementation_started": false,
+  "accepted_prior_lanes": {
+    "w1": "9744e701d27de413f32ee39ce86c25f89ec30663",
+    "crypto": "af13fd25bf11716736febdb1a0498e6856a83e4f",
+    "crypto_reviews": [
+      "1458c774-47b7-4bf3-ad63-81e1ee031104",
+      "f6e9006b-4b40-44f5-937f-0ecbe8dcb948"
+    ],
+    "prior_lane_code_merged": false
+  },
+  "input_sha256": {
+    "formal/reports/formal-verification-report.json": "6998a3c99186d3a6d0c369321230366c27ba201fb8b19aa3fd0a353880942789",
+    "formal/reports/lean-proof-report.json": "295b4d74adc6e3054097719cf77b38bab54a1aec69e98b5bad97a5fb22853b45",
+    "formal/proofs/DeltaReduce/ArithmeticBinding.lean": "7224e4b5710433ef9f3d1e3666a6e8cdced0b8178bb780f0569ad78cdca38693",
+    "formal/proofs/DeltaReduce/RecoveryKernel.lean": "af56e3c48ec83febd468e4702e3ed51b1493ea1c2ff67c0bb07bd3a9d227acfa",
+    "formal/proofs/DeltaReduce/AxiomAudit.lean": "c628992cb6a13fc56b0abde2bfae9d144fa349fab353a80d28ae40e4343e8a56",
+    "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
+    "formal/proofs/DeltaReduce/NativeIscCertificate.lean": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
+    "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
+    "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
+    "formal/proofs/DeltaReduce/NativeWholeReplay.lean": "9c03a26510506d0becdef7636278907ef054c272a5363fbda8a7176db9212147",
+    "formal/proofs/dependencies.lock.json": "8b4b1e28f448308d2533f64267c51e09b15b9d26f5720a29692534ddddab2df0",
+    "formal/scripts/verify_phase0.py": "17a6b4b369f14e5c8ca57c5589c3f76b9bcd17adda1f46eeab18b1ab37ad38c2",
+    "formal/scripts/run_formal_gate.py": "70223da05a232e70550dd21f964ec09c0374d5d30d6f82a6d764096bebd29c90",
+    "docs/adr/0014-isc-contract-freeze-v1.md": "fead9e4772b0d9d26dfcfacea10ccd7235c80ea17f1469bfc258a06a5588606e",
+    "orchestration/sprints/isc-s16-continuous/lane-tasks.md": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f",
+    "formal/tla/DeltaReduceTypes.tla": "2eb3008060f8bbe3ed1be12167211d602dc5bf2f5bc7d65caa9896f8586b0121",
+    "formal/tla/DeltaReduceCertificates.tla": "d53d47fe7d020893739b748b3eb4b23ebb4ed183818f88b77c955e7f49e12aa9",
+    "formal/tla/DeltaReduceQuorums.tla": "87f9457b8e679dea8362a599730fe77eec2da9d7da1a372c5a709ccefdc24508",
+    "formal/tla/DeltaReduceFailures.tla": "2fc3fd53bd25b4e396348826b0bf8761c6772050b88f903896b40909499a9a8b",
+    "formal/tla/DeltaReduceLivenessHarness.tla": "427a7acb1eb791af91beb9bcbbf4f40ca3d78f171dfffcb15323c6cd9fa8bcf3"
+  },
+  "retained_gate": {
+    "report_path": "formal/reports/formal-verification-report.json",
+    "report_source_commit": "a8a27250e52cec1b1ca998ea05d067f07f236497",
+    "report_decision": "NO_GO",
+    "candidate_semantics_id": "sha256:b96d22536c196d778dc3643149d4180a44a14993ac6d50d89845967627d420ad",
+    "proof_report_path": "formal/reports/lean-proof-report.json",
+    "proof_status": "FAIL",
+    "proof_errors": [
+      "PO-AB1 conjunct admission-recovery-refinement theorem nativeArithmeticRecoveryRefines is missing",
+      "axiom dependency result missing for DeltaReduce.nativeArithmeticRecoveryRefines"
+    ],
+    "semantic_source_count": 271,
+    "matching_current_semantic_sources": 271,
+    "changed_semantic_sources": [],
+    "missing_declaration_confirmed_by_source_scan": "nativeArithmeticRecoveryRefines",
+    "classification": "APPLICABLE_RETAINED_MANDATORY_PROOF_FAILURE_NOT_NEW_MODEL_COUNTEREXAMPLE",
+    "old_report_not_rewritten": true
+  },
+  "checks_performed": [
+    {
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "formal/scripts/verify_phase0.py"
+      ],
+      "exit_code": 0,
+      "result": {
+        "counts": {
+          "actions": 49,
+          "configs": 35,
+          "faults": 42,
+          "invariants": 30,
+          "proof_obligations": 15,
+          "temporal_properties": 15
+        },
+        "errors": [],
+        "formal_semantics_version": "1.1.0",
+        "input_bundle_sha256": "340b2636677ccbf0f95a362711a6dc531b3b78dc9269148ea500d546512d508a",
+        "phase": "T000-T003",
+        "schema_version": "1.0.0",
+        "status": "PASS"
+      }
+    },
+    {
+      "check": "LF-normalized current semantic-source hashes compared with retained NO_GO report",
+      "status": "PASS",
+      "count": 271
+    },
+    {
+      "check": "Mandatory recovery theorem declaration scan in current project Lean sources",
+      "result": "ABSENT"
+    },
+    {
+      "check": "Required proof dependency checkout availability",
+      "result": "MISSING",
+      "packages": [
+        "mathlib",
+        "plausible",
+        "LeanSearchClient",
+        "importGraph",
+        "proofwidgets",
+        "aesop",
+        "Qq",
+        "batteries",
+        "Cli"
+      ]
+    }
+  ],
+  "baseline_report_caveat": "Current Phase0 passes; the retained report also includes historical baseline/reproduction/review reasons. Those are not all reclassified as fresh failures. The unchanged mandatory missing-proof failure alone suffices for the STOP boundary.",
+  "integration_gaps": [
+    {
+      "area": "explicit parent",
+      "paths": [
+        "formal/tla/DeltaReduceTypes.tla",
+        "formal/tla/DeltaReduceCertificates.tla",
+        "formal/proofs/DeltaReduce/NativeInputSetBody.lean",
+        "formal/proofs/DeltaReduce/NativeIscCertificate.lean"
+      ],
+      "gap": "Existing B/C v1 omit proposed explicit parent; preserve legacy bytes and use versioned successors only after boundary unblocked."
+    },
+    {
+      "area": "budgets and conditional liveness",
+      "paths": [
+        "formal/tla/DeltaReduceQuorums.tla",
+        "formal/tla/DeltaReduceFailures.tla",
+        "formal/tla/DeltaReduceLivenessHarness.tla"
+      ],
+      "gap": "No receiving-actor cumulative original event/byte inventory or budget-availability liveness premise; existing received-vote set loses multiplicity."
+    },
+    {
+      "area": "identity separation",
+      "paths": [
+        "formal/proofs/DeltaReduce/NativeFinalizedIscSection.lean",
+        "formal/proofs/DeltaReduce/NativePolicySchema.lean"
+      ],
+      "gap": "Existing finalized IDs use witness c. Existing TLA body/witness distinction must be preserved; I-B needs versioned b linkage."
+    },
+    {
+      "area": "V to G and exact byte/size linkage",
+      "paths": [
+        "formal/proofs/DeltaReduce/NativeVoteBytes.lean"
+      ],
+      "gap": "Existing WireVote has signature_id and13fields; no detached G/key/registry/budget formal linkage or two durability boundaries. Crypto reference does not discharge this."
+    },
+    {
+      "area": "original physical slot and mixed WAL",
+      "paths": [
+        "formal/proofs/DeltaReduce/NativeWalBytes.lean",
+        "formal/proofs/DeltaReduce/NativeConfigReplay.lean",
+        "formal/proofs/DeltaReduce/NativeWholeReplay.lean"
+      ],
+      "gap": "Shape/replay only kinds1/2. Need versioned kind3 and proof physical s maps through original kind2 rank, without relabeling old objects."
+    }
+  ],
+  "blockers": [
+    {
+      "code": "APPLICABLE_MANDATORY_PROOF_FAILURE",
+      "owner_component": "feature000 formal baseline / general native recovery refinement",
+      "required_remediation": "Obtain an explicitly authorized scope/graph path for the already-required missing recovery theorem and axiom result, retaining existing obligations; then qualify exact source. Current D01 forbids R2.3/R3, so do not implement or waive it here."
+    },
+    {
+      "code": "PINNED_PROOF_DEPENDENCY_CACHE_MISSING",
+      "owner_component": "formal verification environment",
+      "required_remediation": "Explicitly materialize/verify the9 locked proof package sources and matching compiled environment using existing setup protocol; no implicit Lake downloads or lock changes."
+    }
+  ],
+  "resume_acceptance": [
+    "Applicable missing mandatory proof failure is actually repaired and source-bound evidence verifies; no obligation removed or weakened.",
+    "The currently prohibited cross-owner R3 boundary has an explicit authorized route, or graph is revised to await that external result without claiming completion.",
+    "Pinned dependency cache verifies; then resume the existing D01 integration points and affected model/proof/mutant/refinement/compatibility gates."
+  ],
+  "not_run": [
+    "make formal-check/full formal gate: applicable mandatory proof failure triggers STOP; no semantic implementation change was made.",
+    "New TLA/Lean model/proof/mutant runs or implementation."
+  ],
+  "preserved_retained_passes": [
+    "TLC",
+    "production mutants",
+    "refinement"
+  ],
+  "semantic_artifact_diff": [],
+  "protected_spine_diff": [],
+  "production_code_diff": [],
+  "formal_go_claimed": false,
+  "limited_scope_go_claimed": false,
+  "independent_attestation_claimed": false,
+  "production_authorization": false,
+  "sigma_assigned": false,
+  "r2_3_started": false,
+  "r3_started": false
+}
