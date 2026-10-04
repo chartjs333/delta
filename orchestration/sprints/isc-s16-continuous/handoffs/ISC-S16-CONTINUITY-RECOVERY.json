@@ -1,0 +1,272 @@
+{
+  "task_id": "ISC-S16-CONTINUITY",
+  "related_task_ids": [
+    "T053"
+  ],
+  "assignment_id": "82e46b4f-5efd-45c1-aa68-4659c60b8267",
+  "agent_phone": "2750",
+  "scope": "DOCUMENTARY_CONTINUITY_RECOVERY_ONLY",
+  "created_at_utc": "2026-10-04T15:07:49.869172+00:00",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "from_commit": "9c0742fb7f6dcb2ec33a7c8b8f628c86f30408f3",
+  "verified_remote_from_commit": "9c0742fb7f6dcb2ec33a7c8b8f628c86f30408f3",
+  "origin_main": "5b75bc562f83fd99125ae79d76a6527ef7c716aa",
+  "pr_url": null,
+  "source_baseline": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+  "requested_outcome": "START_W1",
+  "review_status": "PENDING_GRAPH_PROCESS_REVIEW",
+  "historical_a01": {
+    "branch": "agent/isc-s16-contract-freeze",
+    "commit": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "verified_remote_head": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+    "document_checks": [
+      {
+        "path": "docs/adr/0014-isc-contract-freeze-v1.md",
+        "sha256": "fead9e4772b0d9d26dfcfacea10ccd7235c80ea17f1469bfc258a06a5588606e",
+        "preserved_at_base": true,
+        "result": "PASS_EXACT_GIT_BYTES"
+      },
+      {
+        "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+        "sha256": "b853596dcb6893467d215572d2701367643f142cbaaf510e225fb0d5bf92f3ee",
+        "preserved_at_base": true,
+        "result": "PASS_EXACT_GIT_BYTES"
+      },
+      {
+        "path": "docs/adr/0014-isc-producer-integration-v1.md",
+        "sha256": "eaa7206d25269a88135869862c7864f3771260e5f70c5f40c4ad1722a8cd2ede",
+        "preserved_at_base": true,
+        "result": "PASS_EXACT_GIT_BYTES"
+      },
+      {
+        "path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+        "sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd",
+        "preserved_at_base": true,
+        "result": "PASS_EXACT_GIT_BYTES"
+      },
+      {
+        "path": "docs/adr/evidence/0014-isc-contract-freeze-v1.json",
+        "sha256": "56da31fe96186617fcf77e630274434967daec31d2009d737e3658a978504e1a",
+        "preserved_at_base": true,
+        "result": "PASS_EXACT_GIT_BYTES"
+      }
+    ],
+    "documentary_dag": "ACYCLIC",
+    "status": "DOCUMENTARY_WORK_COMPLETE_NOT_FORMAL_GO"
+  },
+  "historical_handoff": {
+    "branch": "agent/isc-s16-a01-handoff",
+    "commit": "85a2a526468293e90daf019c0e10781e3d753a8c",
+    "verified_remote_head": "85a2a526468293e90daf019c0e10781e3d753a8c",
+    "path": "orchestration/sprints/isc-s16-sequential/handoffs/ISC-S16-A01.json",
+    "sha256": "c3f4477afb98bb28af6d196d1fa0cce6c633f6c76c33640fc44d2679131d2c04",
+    "preserved_at_base": true
+  },
+  "ancestry_checks": [
+    {
+      "from": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+      "to": "4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+      "result": "PASS"
+    },
+    {
+      "from": "4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+      "to": "081f67fbc692bc5b83b973136ddb91f787b75304",
+      "result": "PASS"
+    },
+    {
+      "from": "081f67fbc692bc5b83b973136ddb91f787b75304",
+      "to": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+      "result": "PASS"
+    },
+    {
+      "from": "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+      "to": "9938fbc7db324f40f3e67687f875d788d4b5ce51",
+      "result": "PASS"
+    },
+    {
+      "from": "9938fbc7db324f40f3e67687f875d788d4b5ce51",
+      "to": "85a2a526468293e90daf019c0e10781e3d753a8c",
+      "result": "PASS"
+    },
+    {
+      "from": "85a2a526468293e90daf019c0e10781e3d753a8c",
+      "to": "9c0742fb7f6dcb2ec33a7c8b8f628c86f30408f3",
+      "result": "PASS"
+    }
+  ],
+  "sprint_digest_checks": [
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/README.md",
+      "expected_sha256": "db51c99fd64c561e50a038b7a6f380653c3d5800b6a1ade46d1082ff30382222",
+      "git_sha256": "db51c99fd64c561e50a038b7a6f380653c3d5800b6a1ade46d1082ff30382222",
+      "working_tree_sha256": "db51c99fd64c561e50a038b7a6f380653c3d5800b6a1ade46d1082ff30382222",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/bootstrap-ru.md",
+      "expected_sha256": "5a8ed52230a760b1cc22d5c233601fe4f87af7b7d04294777aa85e7120986762",
+      "git_sha256": "5a8ed52230a760b1cc22d5c233601fe4f87af7b7d04294777aa85e7120986762",
+      "working_tree_sha256": "5a8ed52230a760b1cc22d5c233601fe4f87af7b7d04294777aa85e7120986762",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/branch-map.md",
+      "expected_sha256": "d2e9348459d09cd05035066349d823a61ea7cb203d11838f06971565b766470a",
+      "git_sha256": "d2e9348459d09cd05035066349d823a61ea7cb203d11838f06971565b766470a",
+      "working_tree_sha256": "d2e9348459d09cd05035066349d823a61ea7cb203d11838f06971565b766470a",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/continuity-agent.md",
+      "expected_sha256": "673bfe352ce91e57bc572c486b156e1d3eb35c8525e80cbb736b45704727ab6f",
+      "git_sha256": "673bfe352ce91e57bc572c486b156e1d3eb35c8525e80cbb736b45704727ab6f",
+      "working_tree_sha256": "673bfe352ce91e57bc572c486b156e1d3eb35c8525e80cbb736b45704727ab6f",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/lane-tasks.md",
+      "expected_sha256": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f",
+      "git_sha256": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f",
+      "working_tree_sha256": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/recovery-state.json",
+      "expected_sha256": "c095477ae620c0669acbdf3517819c3c068c5213de611e012e5428d2cc145f72",
+      "git_sha256": "c095477ae620c0669acbdf3517819c3c068c5213de611e012e5428d2cc145f72",
+      "working_tree_sha256": "c095477ae620c0669acbdf3517819c3c068c5213de611e012e5428d2cc145f72",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/sequential-sprint.json",
+      "expected_sha256": "4f4e320e75b3d2bb1c95a89b2828637c5823f6906f8c165b78838f12108d9ca4",
+      "git_sha256": "4f4e320e75b3d2bb1c95a89b2828637c5823f6906f8c165b78838f12108d9ca4",
+      "working_tree_sha256": "4f4e320e75b3d2bb1c95a89b2828637c5823f6906f8c165b78838f12108d9ca4",
+      "result": "PASS"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/start-sprint.ps1",
+      "expected_sha256": "212c8db21903fd523b3232ced1ada421eb688c61c5f7d78b6d193c23356a778e",
+      "git_sha256": "212c8db21903fd523b3232ced1ada421eb688c61c5f7d78b6d193c23356a778e",
+      "working_tree_sha256": "212c8db21903fd523b3232ced1ada421eb688c61c5f7d78b6d193c23356a778e",
+      "result": "PASS"
+    }
+  ],
+  "sprint_manifest_sha256": "e9c3d7b26bbc60237b4aa69bc339162b7fe1843092c6fc5bbc4e7feed6d9b218",
+  "project_state_observation": {
+    "url": "http://localhost:18025/api/v1/projects/9000/state.json",
+    "generated_at": "2026-10-04T15:07:49.774169+00:00",
+    "execution": {
+      "mode": "sequential",
+      "strategy": "conditional_graph",
+      "status": "active",
+      "revision": 3,
+      "current_agent_id": "isc-s16-continuity-coordinator",
+      "current_node_id": "continuity-coordinator",
+      "phase": "node",
+      "current_assignment_id": "82e46b4f-5efd-45c1-aa68-4659c60b8267",
+      "pending_transition": null,
+      "rework_cycle_count": 0,
+      "visit_counts": {
+        "continuity-coordinator": 1
+      }
+    },
+    "allowed_transitions": {
+      "START_W1": "w1-reference-engine",
+      "RESUME_W1": "w1-reference-engine",
+      "RESUME_CRYPTO": "crypto-reference",
+      "RESUME_FORMAL": "formal-linkage",
+      "RESUME_QUALIFICATION": "formal-qualification"
+    },
+    "required_process_approvals": 2,
+    "source_outcome_or_reviewer_feedback": "NONE_INITIAL_VISIT"
+  },
+  "decision": {
+    "outcome": "START_W1",
+    "basis": "Current continuous sprint hashes and preserved A01 ancestry verify. The historical checksum failure belongs to the preserved previous sprint; it does not affect the exact corrected continuous manifest. The declared HTTP graph provides the two-review transition.",
+    "authorized_scope": "Only the separately assigned quarantined W1 reference codec/file harness; production and semantic authority remain gated.",
+    "historical_blockers_preserved": true
+  },
+  "checks": {
+    "ancestry": "PASS",
+    "historical_bytes_and_document_hashes": "PASS",
+    "remote_heads": "PASS",
+    "current_sprint_checksums": "PASS_8_OF_8",
+    "documentary_dag": "PASS",
+    "git_diff_check": "PASS",
+    "post_handoff_scope": "SPRINT_FILES_ONLY",
+    "http_assignment_and_transition": "PASS"
+  },
+  "decisions_preserved": {
+    "Commitment_A": "APPROVED_FR004_ONLY",
+    "I-B": "APPROVED_ARCHITECTURE",
+    "S-RANK": "APPROVED_ARCHITECTURE",
+    "W1": "APPROVED_LOCAL_BYTE_STORAGE_ONLY",
+    "P-EXPLICIT": "SELECTED_FOR_SPECIFICATION",
+    "SIG-ISC-ED25519-v1": "SELECTED_FOR_SPECIFICATION",
+    "ISC-EVIDENCE-BUDGET-v1": "SELECTED_FOR_SPECIFICATION",
+    "consolidated_exact_details": "DRAFT",
+    "Producer_Integration": "BLOCKED"
+  },
+  "open_obligations_preserved": [
+    {
+      "obligation": "exact_consolidated_draft_approval",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "feature000_parent_context_budget_conditional_liveness_qualification",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "concrete_key_signature_and_source_verification",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "original_intent_G_durability_and_recovery_association",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "full_inventory_P0_P1_output_sufficiency",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "mixed_WAL_rank_refinement",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "exact_compatible_merged_Formal_GO",
+      "status": "OPEN"
+    },
+    {
+      "obligation": "separate_production_integration_authorization",
+      "status": "OPEN"
+    }
+  ],
+  "protected_spine_diff": [],
+  "production_code_diff": [],
+  "blockers": [],
+  "formal_go_claimed": false,
+  "independent_attestation_claimed": false,
+  "production_authorization": false,
+  "sigma_assigned": false,
+  "r2_3_started": false,
+  "r3_started": false,
+  "formal_native_tests_executed": false,
+  "commands": [
+    "git fetch origin --prune",
+    "git log -5 --oneline origin/main",
+    "git log -5 --oneline origin/agent/isc-s16-continuous-sprint",
+    "gh pr list --state all --head agent/isc-s16-continuous-sprint --json number,url,state,headRefOid,baseRefName",
+    "git ls-remote --heads origin (assigned and historical branches)",
+    "git merge-base --is-ancestor (recorded exact ancestry pairs)",
+    "git diff --check 85a2a526468293e90daf019c0e10781e3d753a8c 9c0742fb7f6dcb2ec33a7c8b8f628c86f30408f3",
+    "inline Python: exact Git/working-tree SHA256, historical document preservation, documentary DAG, sprint-only diff and HTTP assignment/transition assertions",
+    "GET http://localhost:18025/api/v1/projects/9000/state.json"
+  ],
+  "limitations": [
+    "Documentary recovery only; no formal, native, cryptographic or performance qualification.",
+    "Process reviews must not be represented as independent Formal GO attestations.",
+    "Existing unrelated untracked workspace files were preserved and excluded.",
+    "Result commit and exact pushed remote HEAD are supplied in the official outcome; this record does not embed its own commit hash."
+  ]
+}
