@@ -40,15 +40,15 @@
     "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
     "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
     "formal/proofs/DeltaReduce/NativeWholeReplay.lean": "9c03a26510506d0becdef7636278907ef054c272a5363fbda8a7176db9212147",
-    "formal/proofs/dependencies.lock.json": "8b4b1e28f448308d2533f64267c51e09b15b9d26f5720a29692534ddddab2df0",
+    "formal/proofs/dependencies.lock.json": "b5a0e5a816cce0d971af3ba3230a39e09108332f407e3c7d97588dfa1096a1ab",
     "formal/scripts/verify_phase0.py": "17a6b4b369f14e5c8ca57c5589c3f76b9bcd17adda1f46eeab18b1ab37ad38c2",
     "formal/scripts/run_formal_gate.py": "70223da05a232e70550dd21f964ec09c0374d5d30d6f82a6d764096bebd29c90",
     "docs/adr/0014-isc-contract-freeze-v1.md": "fead9e4772b0d9d26dfcfacea10ccd7235c80ea17f1469bfc258a06a5588606e",
     "orchestration/sprints/isc-s16-continuous/lane-tasks.md": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f",
     "formal/tla/DeltaReduceTypes.tla": "2eb3008060f8bbe3ed1be12167211d602dc5bf2f5bc7d65caa9896f8586b0121",
-    "formal/tla/DeltaReduceCertificates.tla": "d53d47fe7d020893739b748b3eb4b23ebb4ed183818f88b77c955e7f49e12aa9",
-    "formal/tla/DeltaReduceQuorums.tla": "87f9457b8e679dea8362a599730fe77eec2da9d7da1a372c5a709ccefdc24508",
-    "formal/tla/DeltaReduceFailures.tla": "2fc3fd53bd25b4e396348826b0bf8761c6772050b88f903896b40909499a9a8b",
+    "formal/tla/DeltaReduceCertificates.tla": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00",
+    "formal/tla/DeltaReduceQuorums.tla": "ae0e9a64976f6b9158bfc44379648aabbde990047a4321f3b4f6355e5f6768e3",
+    "formal/tla/DeltaReduceFailures.tla": "ee94c1c67335888544b1689200b829526f09d618bdf4e9c256ad2c1c0788ecf5",
     "formal/tla/DeltaReduceLivenessHarness.tla": "427a7acb1eb791af91beb9bcbbf4f40ca3d78f171dfffcb15323c6cd9fa8bcf3"
   },
   "retained_gate": {
@@ -199,5 +199,22 @@
   "production_authorization": false,
   "sigma_assigned": false,
   "r2_3_started": false,
-  "r3_started": false
+  "r3_started": false,
+  "input_hash_convention": {
+    "algorithm": "SHA-256",
+    "bytes": "exact Git blob bytes; no working-tree newline conversion",
+    "source_commit": "668d55f0b382bab4b5e70ab3cb5b4241f5b65c0e"
+  },
+  "evidence_correction": {
+    "assignment_id": "c55e9068-332d-4de3-9112-a195d2ba5f90",
+    "review_assignment_id": "08b64e42-9a21-43d5-80ee-6d856f21dfa1",
+    "prior_evidence_commit": "1ecea3a588b80b43b87b50fa41c38dbdabf0d8f7",
+    "reason": "Four original input pins used unlabeled Windows CRLF working-tree bytes. All input pins now identify exact Git blob bytes at the recorded source base. Underlying sources and NO_GO conclusion are unchanged.",
+    "corrected_paths": [
+      "formal/proofs/dependencies.lock.json",
+      "formal/tla/DeltaReduceCertificates.tla",
+      "formal/tla/DeltaReduceQuorums.tla",
+      "formal/tla/DeltaReduceFailures.tla"
+    ]
+  }
 }
