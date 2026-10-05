@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0.0",
+  "task_ids": [
+    "ISC-S16-CONTINUITY",
+    "ISC-S16-D01",
+    "T053",
+    "HR008-018"
+  ],
+  "decision": "RESUME_FORMAL",
+  "formal_status": "NO_GO",
+  "r2_3_status": "OPEN",
+  "created_at_utc": "2026-10-05T16:00:35.442236+00:00",
+  "project_id": "9000",
+  "sprint_id": "sprint-0001-783ef52c",
+  "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+  "role": "2750",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "source_commit": "0647e54c2763c0b44f4704b20681de6d2ec38194",
+  "workflow": "scope request -> exact validation -> record_existing_authorization -> revision 2 -> role GET/hash verification -> exact ACK -> ordinary graph review gates",
+  "request": {
+    "request_id": "scope-request-934d027ac1097c0b400e1657e8c3befa",
+    "request_sha256": "934d027ac1097c0b400e1657e8c3befa0762874d3d72b84d64b1538242948ee0",
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "0647e54c2763c0b44f4704b20681de6d2ec38194",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-EXISTING-AUTHORIZATION.json",
+      "sha256": "90ced144cb695204176037b8b150d917176bc1ea3ad74cbba08b2dcda4dedf3f"
+    },
+    "authorization_provenance": {
+      "kind": "existing_human_authorization",
+      "reference": "Direct user authorization on 2026-10-05, attachment 9f87124a-776e-486b-b390-25f70a0c91b7, reaffirmed by the direct request to resume after nginx-qa v2 deployment. Exact request SHA256 217bcd20241420ea2e2457504c9d4ccf742027e18045e22a4ff02bfda79dd80c; prior Git record ca61d5300148c127d76d23cf90592c6247840785:orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-CONTINUITY-R23-SCOPE-INFRA.json"
+    },
+    "proposal": {
+      "instructions": "Continue only the existing Delta ISC S16 graph in each server-assigned role and branch. The user's 2026-10-05 authorization permits complete R2.3 under the frozen Snapshot Provenance Profile v1: implement, prove and qualify the source-to-complete-family bridge, including necessary formal/reference definitions, schemas, checkers, code, helper lemmas, tests and source-bound evidence. Derive the bridge; never assume the required refinement result or weaken its domain. R1/R2.1/R2.2 stay CLOSED absent a concrete counterexample. The coordinator returns RESUME_FORMAL through the existing two-review route; D01 closes R2.3 and obtains substantive reviews before proceeding to the existing DeltaReduce.nativeArithmeticRecoveryRefines obligation, its necessary lemmas, mandatory-project registration and axiom audit. Then complete applicable pinned build/formal/refinement/compatibility checks and the existing Q01 qualification route. Technical decomposition, prerequisites, reviewer cycles and ordinary evidence repairs inside these boundaries need no new human decision. This permission supersedes the earlier R2.3/source-binding prohibition and the obsolete requirement that the initial two-hour checkpoint establish sufficiency without R2.3; it does not waive reviews of actual results or reinterpret the historical blocked checkpoint as positive. Existing roles, branch boundaries, graph nodes/edges, assignments, reviews and old scope/ACK lineage remain intact. Every governed assignment reads effective scope, verifies source/content/precedence and ACKs the exact scope_context. ACK removes only the authorization blocker; it does not advance the graph or waive pending gates. Keep formal NO_GO until the exact required evidence supports a different status; sequential process reviews are not independent Formal GO attestations. Use Pending decisions for a genuinely new semantic scope decision outside these boundaries.",
+      "retained_restrictions": [
+        "No production integration, production recovery deployment or guard removal; reference work remains quarantined.",
+        "No changes to approved protocol semantics, production Init/Next, certificate semantics or existing QC/WAL identities. Do not assign sigma_next or migrate/relabel historical objects, signatures, QC, WAL or evidence.",
+        "No new trust authority/root or expansion of Snapshot Provenance Profile v1 to unenrolled nodes, epoch changes, trusted-volume rollback/compromise, network bootstrap or universal backup formats.",
+        "No full R3 authorization: only the named DeltaReduce.nativeArithmeticRecoveryRefines obligation and its necessary lemmas, audit and applicable gates after reviewed R2.3 closure.",
+        "No sorry, hidden/unreviewed axioms, circular assumptions, vacuous/name-only theorem, hidden source-domain restriction or weaker invariants/acceptance criteria.",
+        "No proof/review/qualification gate waiver, historical FAIL/NO_GO relabeling or self-review represented as independent attestation.",
+        "No new sprint, graph reimport/reset, manual nginx-qa mutation/development/deployment/restart, destructive workaround or subagents. Preserve frozen refs, unrelated files and healthy demos 8870/8865/8872."
+      ],
+      "node_ids": [
+        "continuity-coordinator",
+        "formal-linkage",
+        "formal-qualification"
+      ],
+      "reviewer_ids": [
+        "isc-s16-continuous-architecture-reviewer",
+        "isc-s16-continuous-evidence-reviewer"
+      ]
+    }
+  },
+  "validation": {
+    "validation_id": "scope-validation-6e841c785c7a8aab0899a728c80328fa",
+    "proposal_sha256": "1646f7373eaccc8ef1aa7761c412359fa49b6271a677ad0379c6b914c61e19ac",
+    "before_effective_sha256": "a79c2ea21a0d723ef15a8d75a2ca5f03974ce087b60c17acc36f7ad04d68cec5",
+    "after_effective_sha256": "44c65665e2b5277451e03377daa8a5c41085ac5a57838bf2b34f056b84b67608"
+  },
+  "application_receipt": {
+    "request_id": "scope-request-934d027ac1097c0b400e1657e8c3befa",
+    "decision_id": "scope-decision-f3deb4f5a8b37aa589cc170baee85854",
+    "action": "record_existing_authorization",
+    "status": "applied",
+    "receipt": {
+      "schema_version": 2,
+      "amendment_id": "scope-human-50c286628496914ab914ea05ad3ddba0",
+      "effective_revision": 2,
+      "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-50c286628496914ab914ea05ad3ddba0",
+        "effective_revision": 2,
+        "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+        "node_id": "continuity-coordinator",
+        "phase": "node",
+        "agent_id": "isc-s16-continuity-coordinator",
+        "occurrence": 4,
+        "source_commit": "0647e54c2763c0b44f4704b20681de6d2ec38194",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-EXISTING-AUTHORIZATION.json",
+        "source_sha256": "90ced144cb695204176037b8b150d917176bc1ea3ad74cbba08b2dcda4dedf3f",
+        "effective_scope_sha256": "7ae82c0a6df6fb644420e947ff190ed4c61a59c2dab455b01f4249b64cc551d4",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true
+      },
+      "effective_scope_sha256": "7ae82c0a6df6fb644420e947ff190ed4c61a59c2dab455b01f4249b64cc551d4",
+      "assignment_preserved": true,
+      "graph_advanced": false,
+      "queue_changed": false,
+      "deduplicated": false,
+      "before_effective_sha256": "a79c2ea21a0d723ef15a8d75a2ca5f03974ce087b60c17acc36f7ad04d68cec5",
+      "after_effective_sha256": "44c65665e2b5277451e03377daa8a5c41085ac5a57838bf2b34f056b84b67608"
+    },
+    "execution_revision": 75,
+    "scope_revision": 2,
+    "graph_advanced": false,
+    "deduplicated": false
+  },
+  "acknowledgement_receipt": {
+    "schema_version": 1,
+    "project_id": "9000",
+    "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+    "acknowledgement": {
+      "ack_id": "scope-ack-db878b29ab933f44fde83673e51575da",
+      "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "amendment_id": "scope-human-50c286628496914ab914ea05ad3ddba0",
+      "effective_revision": 2,
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-50c286628496914ab914ea05ad3ddba0",
+        "effective_revision": 2,
+        "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+        "node_id": "continuity-coordinator",
+        "phase": "node",
+        "agent_id": "isc-s16-continuity-coordinator",
+        "occurrence": 4,
+        "source_commit": "0647e54c2763c0b44f4704b20681de6d2ec38194",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-EXISTING-AUTHORIZATION.json",
+        "source_sha256": "90ced144cb695204176037b8b150d917176bc1ea3ad74cbba08b2dcda4dedf3f",
+        "effective_scope_sha256": "7ae82c0a6df6fb644420e947ff190ed4c61a59c2dab455b01f4249b64cc551d4",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true
+      },
+      "acknowledged_at": "2026-10-05T17:58:16.868461+02:00"
+    },
+    "deduplicated": false,
+    "execution_revision": 76
+  },
+  "verification": {
+    "source_blob_sha256_verified": true,
+    "canonical_effective_core_sha256_verified": true,
+    "precedence": {
+      "authoritative": "effective",
+      "historical": "issued",
+      "rule": "effective_scope_supersedes_conflicting_issued_scope",
+      "explanation": "Effective profile/tasks supersede conflicting issued scope text; the graph, gates, assignment identity and history remain unchanged."
+    },
+    "preservation_checks": {
+      "assignments": true,
+      "workflow": true,
+      "visit_counts": true,
+      "completed_agent_ids": true,
+      "pending_transition": true,
+      "last_transition": true,
+      "role_agent_ids": true,
+      "current_assignment_id": true,
+      "current_agent_id": true,
+      "current_node_id": true,
+      "phase": true,
+      "status": true,
+      "issued_active_task": true,
+      "prior_amendments_unchanged": true,
+      "prior_ack_history_unchanged": true,
+      "prior_binding_history_prefix_unchanged": true
+    },
+    "preserved_execution_sha256": {
+      "assignments": "37854e85490dc115b87631cadfd35d6e901d4c1cbf2aa2a54cb6a430b27cd04d",
+      "workflow": "512295dbbfaf013c240f1d685f8bb2d37f019a53bd10fcff89c31d91cd39649e",
+      "visit_counts": "730307dfbd74506e73a1f355fc3d89ff318ac1e8227bb9541767216a78c92315",
+      "last_transition": "b7d34fa35725fc78f630a1f57cf97d8e734b19b58d55eda92fdd5288cba00d06"
+    },
+    "counts_before_after": {
+      "assignments": [
+        28,
+        28
+      ],
+      "reviews": [
+        18,
+        18
+      ],
+      "scope_revision": [
+        1,
+        2
+      ],
+      "execution_revision": [
+        74,
+        76
+      ],
+      "acknowledgement_history": [
+        7,
+        8
+      ]
+    }
+  },
+  "next_assignment_work": [
+    "Merge this scope source and activation handoff into the existing D01 branch after assignment, preserving exact W1/Crypto/checkpoint ancestry.",
+    "Read approved Profile v1, frozen R2 residual and existing proof contracts. Implement and qualify full R2.3 including source checks and complete family applicability; derive rather than assume the source-origin bridge.",
+    "Return an honest R2.3 result for both ordinary process reviews before named recovery proof continuation. Coordinator routes RESUME_FORMAL after actual reviewed closure; partial results must not claim closure.",
+    "Then discharge nativeArithmeticRecoveryRefines, audit axioms and run applicable source-bound gates; continue Q01 only with supported claims."
+  ],
+  "limits": [
+    "No production, protocol, trust, identity or full R3 change; no guard removal or sigma assignment.",
+    "Old prerequisite report remains negative under its former restricted scope. New authority is the actual human grant, not those reviews.",
+    "No independent attestation or Formal GO claimed; substantive sequential reviews remain required.",
+    "nginx-qa code/configuration/deployment untouched; only official scope/ACK API operations used."
+  ]
+}
