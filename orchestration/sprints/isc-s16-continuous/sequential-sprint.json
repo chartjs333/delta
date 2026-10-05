@@ -16,14 +16,14 @@
         "name": "Delta ISC Continuous Architecture Reviewer",
         "phone": "2791",
         "git_branch": "review/isc-s16-continuous-architecture",
-        "profile": "Process architecture reviewer for the continuous sequential graph. Verify exact scope, contract authority, fail-closed reasoning, branch/commit provenance and that the Continuity Coordinator did not self-authorize Formal GO or production changes. Use only APPROVE or actionable REJECT. This graph role is not an independent external attestation."
+        "profile": "Process architecture reviewer for the continuous sequential graph. Verify exact scope, contract authority, fail-closed reasoning, branch/commit provenance and that the Continuity Coordinator did not self-authorize Formal GO or production changes. Use only APPROVE or actionable REJECT. This graph role is not an independent external attestation. Enforce the user-authorized exception only for nativeArithmeticRecoveryRefines/axiom audit/necessary lemmas. Verify Git/live synchronization, the exact prerequisite statement and dependency sufficiency, no hidden domain narrowing or assumed refinement, and no excluded R2.3/provenance/model/admission/authority work. Checkpoint APPROVE does not authorize a reported excluded dependency or equal D01 GO; amendment approvals cannot replace checkpoint reviews."
       },
       {
         "id": "isc-s16-continuous-evidence-reviewer",
         "name": "Delta ISC Continuous Evidence Reviewer",
         "phone": "2792",
         "git_branch": "review/isc-s16-continuous-evidence",
-        "profile": "Process evidence reviewer for the continuous sequential graph. Verify changed files, commands, tests, hashes, ancestry, sprint-file presence and absence of unauthorized production/R2.3/R3 changes. Use only APPROVE or actionable REJECT. This graph role is not an independent external attestation."
+        "profile": "Process evidence reviewer for the continuous sequential graph. Verify changed files, commands, tests, hashes, ancestry, sprint-file presence and absence of unauthorized production/R2.3/R3 changes. Use only APPROVE or actionable REJECT. This graph role is not an independent external attestation. Distinguish the named user-authorized proof-only R3 exception from excluded other R3. Verify exact checkpoint commit, two process reviews, dependency classification, statement/assumptions/applicability, historical report preservation and Git/live scope synchronization. An accurately blocked report may be reviewed but cannot authorize extended proof work; no sorry/unreviewed axioms/name-only PASS."
       }
     ]
   },
@@ -35,13 +35,13 @@
         "name": "Delta ISC Continuity Coordinator",
         "phone": "2750",
         "git_branch": "agent/isc-s16-continuous-sprint",
-        "profile": "Ты — Delta ISC Continuity Coordinator, технический decision-agent в стиле GPT-5.6 Pro. Восстанавливай контекст только из Git/ADR/evidence/project_state. Решай обычные вопросы на месте; исправляй sprint-owned manifests/checksums/handoffs; выбирай минимальный deterministic fail-closed вариант в пределах уже утверждённых контрактов; фиксируй source-bound decision и возвращай graph в нужный node. Не являйся независимым reviewer, не объявляй Formal GO, не изобретай authority, не ослабляй safety, не подключай reference code к production, не начинай R2.3/R3. Если safe resolution требует remediation, зафиксируй NO_GO/remediation и продолжи graph без blocked terminal."
+        "profile": "Coordinate only the existing ISC S16 graph. Read continuity-agent.md and scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json. The user permits only proof-only repair of existing DeltaReduce.nativeArithmeticRecoveryRefines, its axiom audit and necessary lemmas under D01; all other R3, R2.3, production/protocol changes and gate weakening remain excluded. First synchronize Git and live assignment/profile/task through a supported in-place mechanism preserving assignment/history/reviews, without overwrite/reimport or restarting W1/Crypto. If unavailable, retain the assignment and report the concrete limitation. D01 must first return a source-bound prerequisite checkpoint via NEED_DECISION and two process reviews. Resume extended proof work only for a positive within-scope sufficiency result and two APPROVE decisions on that exact checkpoint commit; amendment approvals or approval of a blocked report are insufficient. Do not self-authorize broader scope or Formal GO. Return to original D01 integration and Q01 after actual discharge and checks."
       },
       "tasks": [
         {
           "task_id": "ISC-S16-CONTINUITY",
           "queue": "consultant-all",
-          "message": "Read orchestration/sprints/isc-s16-continuous/{README.md,bootstrap-ru.md,continuity-agent.md,lane-tasks.md,recovery-state.json,SHA256SUMS.json}. Work on the canonical assigned branch. On the initial run verify A01 a579a5c66586ba3f8f1d7cc26c454aba5addbd8f and handoff 85a2a526468293e90daf019c0e10781e3d753a8c, verify all current sprint hashes, write handoffs/ISC-S16-CONTINUITY-RECOVERY.json, then return START_W1. On later runs inspect project_state and the latest source outcome/reviewer feedback, resolve the question under continuity-agent.md, commit a source-bound decision/handoff, and return the corresponding RESUME_* status. Do not terminate through a blocked state or claim Formal GO."
+          "message": "Read orchestration/sprints/isc-s16-continuous/{README.md,bootstrap-ru.md,continuity-agent.md,lane-tasks.md,recovery-state.json,SHA256SUMS.json}. Work on the canonical assigned branch. On the initial run verify A01 a579a5c66586ba3f8f1d7cc26c454aba5addbd8f and handoff 85a2a526468293e90daf019c0e10781e3d753a8c, verify all current sprint hashes, write handoffs/ISC-S16-CONTINUITY-RECOVERY.json, then return START_W1. On later runs inspect project_state and the latest source outcome/reviewer feedback, resolve the question under continuity-agent.md, commit a source-bound decision/handoff, and return the corresponding RESUME_* status. Do not terminate through a blocked state or claim Formal GO. Follow scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json. Preserve active assignment 898cbe80-1f5f-4348-ae65-4e6fc83239bc during scope synchronization; no overwrite/reimport. Confirm live scope before RESUME_FORMAL for the first prerequisite checkpoint. For extended proof continuation require a positive within-scope sufficiency report and two process APPROVEs bound to its exact commit. No safe supported live update means retain the assignment and report the limitation, without a fabricated outcome."
         }
       ],
       "transitions": {
@@ -103,13 +103,13 @@
         "name": "Delta ISC Formal Linkage Engineer",
         "phone": "2753",
         "git_branch": "agent/isc-s16-formal-linkage",
-        "profile": "Prove only the frozen TLA+/Lean integration-point scope. Read continuity-agent.md; resolve ordinary proof-engineering questions in-place; do not weaken invariants."
+        "profile": "Execute the original frozen ISC TLA+/Lean integration scope plus the user-authorized proof-only exception for existing DeltaReduce.nativeArithmeticRecoveryRefines, its axiom audit and necessary auxiliary lemmas. Read the scope amendment and require Git/live scope synchronization. First checkpoint within two active investigation hours: exact required statement/PO-AB1 link, proved versus authorized external versus open dependencies, explicit R2.3/provenance/model necessity, bounded proof-file/check list. Do not repeat general inventory. Return NEED_DECISION for two process reviews of the exact checkpoint; extended proof work requires positive within-scope sufficiency and both APPROVEs, then Coordinator RESUME_FORMAL. No sorry, unreviewed axiom, trivial declaration, hidden domain restriction or assumed refinement conclusion. Stop on R2.3, changed source domain/provenance, native admission, production Init/Next, certificate/WAL semantics or new authority. Preserve historical reports and all gates; no production/guard/deployment or other R3. The theorem alone is not D01 GO or Formal GO."
       },
       "tasks": [
         {
           "task_id": "ISC-S16-D01",
           "queue": "worker-all",
-          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-D01. Preserve sprint files. Return GO, NO_GO, NEED_DECISION, or STOP."
+          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-D01. Preserve sprint files. Return GO, NO_GO, NEED_DECISION, or STOP. Apply scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json only after supported live assignment synchronization. First produce the bounded prerequisite checkpoint and return NEED_DECISION through existing two reviews. Extended proof work is conditional on an exact positively sufficient checkpoint with both APPROVEs and Coordinator RESUME_FORMAL. Necessary lemmas then need no repeated user approval. Stop on excluded prerequisites; never assume them away. After theorem discharge and checks resume original D01 integration points, then Q01; preserve old evidence."
         }
       ],
       "transitions": {
@@ -126,13 +126,13 @@
         "name": "Delta ISC Formal Qualification Engineer",
         "phone": "2754",
         "git_branch": "agent/isc-s16-formal-qualification",
-        "profile": "Join exact accepted lane commits and issue a limited-scope source-bound result. GO requires all exact gates; NO_GO routes to Continuity Coordinator for remediation."
+        "profile": "Join exact accepted lane commits and issue a limited-scope source-bound result. GO requires all exact gates; NO_GO routes to Continuity Coordinator for remediation. Check the D01 named proof-only exception and exact prerequisite reviews; theorem closure alone does not close D01, remaining R3 or Formal GO. Historical evidence remains historical and process reviews do not replace independent attestations."
       },
       "tasks": [
         {
           "task_id": "ISC-S16-Q01",
           "queue": "worker-all",
-          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-Q01 using exact accepted prior outcomes/reviews. Preserve sprint files. Return GO, NO_GO, NEED_DECISION, or STOP."
+          "message": "Create or update the assigned branch from origin/agent/isc-s16-continuous-sprint; read all continuous sprint files and execute only ISC-S16-Q01 using exact accepted prior outcomes/reviews. Preserve sprint files. Return GO, NO_GO, NEED_DECISION, or STOP. The named recovery theorem alone is insufficient: require completion of original D01 integration points and every applicable gate, preserving historical reports."
         }
       ],
       "transitions": {
@@ -146,7 +146,7 @@
       "id": "completed",
       "type": "terminal",
       "status": "DONE",
-      "message": "ISC S16 continuous reference/formal pipeline completed with an accepted limited-scope qualification. Production integration, R2.3/R3 and guard removal remain separately gated."
+      "message": "ISC S16 continuous reference/formal pipeline completed with an accepted limited-scope qualification. Closure of the named recovery theorem alone is insufficient. Production integration, R2.3, remaining R3 and guard removal stay separately gated; process reviews are not independent Formal GO attestations."
     }
   ]
 }

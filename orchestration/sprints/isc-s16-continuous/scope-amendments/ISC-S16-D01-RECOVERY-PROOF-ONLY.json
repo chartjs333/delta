@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "ISC-S16-D01",
+  "coordinator_task_id": "ISC-S16-CONTINUITY",
+  "kind": "USER_AUTHORIZED_SCOPE_AMENDMENT",
+  "from_commit": "0c8fe0426586810c1e1a342d11f0d5c42ce2de16",
+  "created_at_utc": "2026-10-04T19:24:21.675106+00:00",
+  "authorization": {
+    "source": "Direct user message in the existing Codex conversation on 2026-10-04, following coordinator handoff 0c8fe042.",
+    "grant": "Разрешаю узкое расширение ISC-S16-D01 для proof-only работы над существующим обязательством DeltaReduce.nativeArithmeticRecoveryRefines и его axiom audit. Исключение из запрета R3 относится только к названному обязательству и необходимым вспомогательным леммам.",
+    "scope_authorized": true,
+    "formal_gate_waived": false,
+    "independent_attestation": false
+  },
+  "preserved_assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+  "allowed": [
+    "Proof sources discharging the existing DeltaReduce.nativeArithmeticRecoveryRefines obligation without changing its required content or domain.",
+    "Strictly necessary auxiliary lemmas and mandatory-project registration/imports.",
+    "Axiom audit of the actual theorem statement, assumptions and applicability.",
+    "Preparation and verification of the pinned environment.",
+    "New source-bound evidence and required checks; preserve historical reports unchanged."
+  ],
+  "excluded": [
+    "R2.3 implementation",
+    "Other R3 obligations or general R3 authorization",
+    "Production recovery or deployment",
+    "Protocol or model changes, including production Init/Next",
+    "Source-domain changes or new source/provenance binding",
+    "Native admission changes",
+    "Certificate or WAL semantics changes",
+    "New trust authority",
+    "Guard removal or sigma assignment",
+    "Gate weakening or historical evidence rewriting"
+  ],
+  "proof_integrity": [
+    "No sorry or unreviewed axiom.",
+    "No trivial declaration under the required theorem name.",
+    "No hidden domain restriction or assumption of the refinement conclusion.",
+    "An excluded missing dependency must be reported, not promoted to an assumption.",
+    "Verify theorem content, assumptions and applicability in addition to declaration identity."
+  ],
+  "activation_gate": {
+    "required": [
+      "Commit the consistent Git amendment on the canonical branch.",
+      "Reflect the exception in the live nginx-qa assignment and future D01 profile/task using a supported in-place mechanism.",
+      "Verify assignment, accepted commits, history and reviewer decisions are preserved."
+    ],
+    "forbidden": [
+      "Sprint overwrite/reimport or W1/Crypto restart",
+      "Manual nginx runtime-file edits",
+      "New nginx-qa development sprint"
+    ],
+    "git_only_is_sufficient": false,
+    "runtime_sync_evidence_required": true
+  },
+  "prerequisite_checkpoint": {
+    "active_time_budget_seconds": 7200,
+    "budget_scope": "Initial investigation budget only; not a theorem completion estimate or protocol deadline.",
+    "budget_origin_utc": "2026-10-04T19:18:59+00:00",
+    "start_condition": "Activation gate satisfied and D01 assigned by the existing graph.",
+    "required_contents": [
+      "Exact required theorem statement and link to the existing PO-AB1 recovery obligation.",
+      "Dependencies partitioned into already proved results, already authorized external assumptions, and open obligations.",
+      "Explicit determination whether unfinished R2.3, new source/provenance binding or model changes are necessary.",
+      "Finite proposed proof-file and verification scope."
+    ],
+    "avoid": "Do not repeat the completed general inventory; assess dependencies of the missing recovery theorem specifically.",
+    "no_extended_proof_work_before_checkpoint_reviews": true
+  },
+  "existing_graph_review_route": {
+    "checkpoint_outcome": "NEED_DECISION",
+    "route": [
+      "formal-linkage",
+      "two existing process reviews of the exact checkpoint commit",
+      "continuity-coordinator",
+      "RESUME_FORMAL with normal process reviews",
+      "formal-linkage"
+    ],
+    "new_task_ids": false,
+    "new_nodes_or_edges": false,
+    "continuation_requires": [
+      "Two APPROVE decisions for the exact prerequisite report commit.",
+      "The report positively establishes sufficiency within this named exception.",
+      "No excluded dependency is needed or assumed away.",
+      "Git and live scope remain synchronized."
+    ],
+    "review_limits": [
+      "Scope-amendment approvals cannot substitute for prerequisite-report approvals.",
+      "Approving an accurate report of an excluded prerequisite does not authorize that prerequisite.",
+      "Material checkpoint revisions require two reviews of the revised commit.",
+      "Process reviews are not independent formal attestations."
+    ]
+  },
+  "conditional_continuation": "After the prerequisite checkpoint satisfies the stated conditions, continue the named proof and necessary lemmas without seeking permission for every lemma. Stop on any excluded dependency.",
+  "after_theorem": "After actual discharge and required checks, return to the original D01 integration points and then Q01. One theorem does not close D01, all R3 or Formal GO.",
+  "known_failure": "The known FAIL still blocks integration. This amendment authorizes only investigation and repair of its named cause under the activation and checkpoint gates.",
+  "historical_preservation": {
+    "supersedes_only": "The authority prohibition for the named proof-only obligation after activation; it does not rewrite historical facts or convert prior NO_GO to GO.",
+    "formal_no_go_commit": "bb830cf1ad37a0ac22caaa69bf4ce8a68bed9f46",
+    "w1_commit": "9744e701d27de413f32ee39ce86c25f89ec30663",
+    "crypto_commit": "af13fd25bf11716736febdb1a0498e6856a83e4f",
+    "prior_blocker_handoff": "handoffs/ISC-S16-CONTINUITY-FORMAL-REMEDIATION.json"
+  }
+}

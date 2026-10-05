@@ -1,0 +1,311 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "ISC-S16-CONTINUITY",
+  "related_task_ids": [
+    "ISC-S16-D01",
+    "T053",
+    "HR008-018"
+  ],
+  "kind": "SOURCE_BOUND_ORCHESTRATION_HANDOFF_NOT_FORMAL_EVIDENCE",
+  "created_at_utc": "2026-10-05T11:03:09.427014+00:00",
+  "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+  "project_id": "9000",
+  "sprint_id": "sprint-0001-783ef52c",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "from_commit": "65074657df5f9ba3f16b7ac4912a563128d902ee",
+  "decision": "RESUME_FORMAL_PREREQUISITE_CHECKPOINT_ONLY",
+  "official_outcome_sent": false,
+  "assignment_remains_active": true,
+  "identity": {
+    "response_id": "ad2362479c5641401475",
+    "phone": "2750",
+    "agent": "Delta ISC Continuity Coordinator",
+    "identity_reused": true,
+    "execution_authorized": true,
+    "scope_control": null
+  },
+  "authority_source": {
+    "path": "orchestration/sprints/isc-s16-continuous/scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json",
+    "sha256": "1637f837aca3e028a66e5e1a306a83c695a4d010e35f7b53e54e44cecd38d655",
+    "git_commit": "65074657df5f9ba3f16b7ac4912a563128d902ee",
+    "activation_requires_live_sync": true
+  },
+  "verification": {
+    "hash_convention": "SHA-256 of exact Git blob bytes at from_commit; no worktree newline conversion",
+    "sprint_hashes": [
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/README.md",
+        "sha256": "cf09cfd1140f27ce653a9f955c3991e580b2043f9927043ea824da32a6a5f159"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/bootstrap-ru.md",
+        "sha256": "6f62a3abc50330111874cbb64ca947d9c226c0457be56a7f3f48cc328cbb5c13"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/branch-map.md",
+        "sha256": "d2e9348459d09cd05035066349d823a61ea7cb203d11838f06971565b766470a"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/continuity-agent.md",
+        "sha256": "a580d99508717c5893c7da3605c5f2aec5149385b9ee4c25d97e1b981dde4fab"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/lane-tasks.md",
+        "sha256": "641a5c0465505cf79f013f5577a810137e8f54dea371ddfd766f155100479f1d"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/recovery-state.json",
+        "sha256": "c095477ae620c0669acbdf3517819c3c068c5213de611e012e5428d2cc145f72"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/sequential-sprint.json",
+        "sha256": "9e8824d142978b849d9240fd5004794f8c66483e979b94d04f174671dc646260"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/start-sprint.ps1",
+        "sha256": "212c8db21903fd523b3232ced1ada421eb688c61c5f7d78b6d193c23356a778e"
+      },
+      {
+        "path": "orchestration/sprints/isc-s16-continuous/scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json",
+        "sha256": "1637f837aca3e028a66e5e1a306a83c695a4d010e35f7b53e54e44cecd38d655"
+      }
+    ],
+    "local_remote_heads_equal": true,
+    "existing_prs": [],
+    "previous_formal_assignment": {
+      "assignment_id": "c55e9068-332d-4de3-9112-a195d2ba5f90",
+      "status": "transitioned",
+      "outcome": "NO_GO",
+      "review_decisions": [
+        {
+          "assignment_id": "577034ca-af58-4cf8-84d2-fe27eb53be17",
+          "decision": "APPROVE"
+        },
+        {
+          "assignment_id": "f96b4cdb-3a38-45b2-8266-6c42ed679ac4",
+          "decision": "APPROVE"
+        }
+      ]
+    },
+    "executed_checks": [
+      "Nine exact Git sprint hashes",
+      "Published and local canonical ref exact target",
+      "Authenticated preflight CAS assignment/revision",
+      "Verified pre-amendment backup and unchanged post-restart state",
+      "Exact issued task/message hashes",
+      "Effective core/source hashes and precedence",
+      "Assignment/graph/review preservation with API timestamp normalization",
+      "Role 2750 exact-context ACK"
+    ]
+  },
+  "owner_component": "nginx-qa scope-control credential and live binding administration",
+  "next_action": "Two existing process reviews of this exact coordinator handoff, then D01 prerequisite investigation only, capped at two active hours. D01 must report the exact nativeArithmeticRecoveryRefines statement/PO-AB1 link, classified dependencies, explicit R2.3/source/model dependency assessment, and finite proof/check scope via NEED_DECISION. Do not start extended proof work before its own positive within-scope checkpoint and two exact-commit approvals.",
+  "preserved": {
+    "graph_state_revision": 52,
+    "accepted_w1_commit": "9744e701d27de413f32ee39ce86c25f89ec30663",
+    "accepted_crypto_commit": "af13fd25bf11716736febdb1a0498e6856a83e4f",
+    "accepted_formal_no_go_commit": "bb830cf1ad37a0ac22caaa69bf4ce8a68bed9f46",
+    "historical_evidence": true,
+    "foreign_untracked_files": true,
+    "production_and_semantic_artifacts": true
+  },
+  "not_started": {
+    "new_sprint": true,
+    "graph_reimport": true,
+    "scope_mutation": false,
+    "proof_investigation": true,
+    "proof_implementation": true,
+    "r2_3": true,
+    "other_r3": true,
+    "production_changes": true,
+    "sigma_assignment": true
+  },
+  "formal_go_claimed": false,
+  "independent_attestation_claimed": false,
+  "initial_access_observation": {
+    "http_observations": {
+      "base_url": "http://127.0.0.1:18025",
+      "state_revision": 52,
+      "current_node_id": "continuity-coordinator",
+      "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+      "effective_scope": {
+        "http_status": 404,
+        "body": {
+          "detail": {
+            "error": "SCOPE_BINDING_NOT_FOUND"
+          }
+        }
+      },
+      "scope_amendment_preflight": {
+        "http_status": 403,
+        "body": {
+          "detail": {
+            "error": "SCOPE_CONTROL_FORBIDDEN",
+            "message": "The supplied scope-control credential is invalid"
+          }
+        }
+      },
+      "preflight_path": "/api/v1/projects/9000/sprints/sprint-0001-783ef52c/scope-amendments/preflight"
+    },
+    "credential_check": {
+      "credential_header": "X-Nginx-QA-Scope-Token",
+      "credential_supplied": false,
+      "known_environment_names_checked": [
+        "NGINX_QA_SCOPE_TOKEN",
+        "NGINX_QA_SCOPE_CONTROL_TOKEN"
+      ],
+      "environment_targets_checked": [
+        "Process",
+        "User",
+        "Machine"
+      ],
+      "available": false,
+      "internal_nginx_runtime_or_credentials_files_read": false,
+      "credential_value_recorded": false
+    },
+    "finding": "Supported effective-scope and scope-amendment routes are now advertised. The active assignment has no scope binding, and the correct current sprint preflight rejects an absent scope-control credential. The legacy identity execution_authorized=true authorizes coordinator work only; it does not activate the Git-only D01 recovery-proof exception.",
+    "required_external_resource": "An explicitly authorized credential source for X-Nginx-QA-Scope-Token, or an authorized operator applying the existing committed amendment through supported scope API while preserving this assignment/history/reviews.",
+    "resolved": true
+  },
+  "resolution_at_utc": "2026-10-05T11:11:38.986807+00:00",
+  "finding": "The explicitly authorized existing amendment was applied through the supported authenticated admin API. The original assignment, graph and historical accepted results/reviews are preserved. Effective scope takes precedence over conflicting issued text; exact scope hash/source binding verified and role 2750 ACK accepted.",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "ISC-S16-D01",
+    "effective_revision": 1,
+    "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 3,
+    "source_commit": "65074657df5f9ba3f16b7ac4912a563128d902ee",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json",
+    "source_sha256": "1637f837aca3e028a66e5e1a306a83c695a4d010e35f7b53e54e44cecd38d655",
+    "effective_scope_sha256": "a90f0dd692aadfaf356f97489b3741a928d0cb326f8bf8e8aeb63e5bf6f33544",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "scope_apply_receipt": {
+    "schema_version": 1,
+    "project_id": "9000",
+    "sprint_id": "sprint-0001-783ef52c",
+    "amendment_id": "ISC-S16-D01",
+    "from_execution_revision": 52,
+    "execution_revision": 53,
+    "effective_revision": 1,
+    "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+    "assignment_preserved": true,
+    "graph_advanced": false,
+    "queue_changed": false,
+    "effective_scope_sha256": "a90f0dd692aadfaf356f97489b3741a928d0cb326f8bf8e8aeb63e5bf6f33544",
+    "effective_scope_hash_contract": {
+      "algorithm": "SHA-256",
+      "canonicalization": "json-sort-keys-utf8-no-whitespace",
+      "input": "effective_core"
+    },
+    "source_ref_observation": {
+      "ref": "refs/heads/agent/isc-s16-continuous-sprint",
+      "commit": "65074657df5f9ba3f16b7ac4912a563128d902ee",
+      "verified_at": "2026-10-05T11:08:38.564296+00:00"
+    },
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "ISC-S16-D01",
+      "effective_revision": 1,
+      "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 3,
+      "source_commit": "65074657df5f9ba3f16b7ac4912a563128d902ee",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json",
+      "source_sha256": "1637f837aca3e028a66e5e1a306a83c695a4d010e35f7b53e54e44cecd38d655",
+      "effective_scope_sha256": "a90f0dd692aadfaf356f97489b3741a928d0cb326f8bf8e8aeb63e5bf6f33544",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "deduplicated": false,
+    "audit_history_recorded": true,
+    "audit_history_created": true
+  },
+  "scope_ack_receipt": {
+    "schema_version": 1,
+    "project_id": "9000",
+    "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+    "acknowledgement": {
+      "ack_id": "scope-ack-76c3dcff77b1377c7a93579d8e048b19",
+      "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "amendment_id": "ISC-S16-D01",
+      "effective_revision": 1,
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "ISC-S16-D01",
+        "effective_revision": 1,
+        "assignment_id": "898cbe80-1f5f-4348-ae65-4e6fc83239bc",
+        "node_id": "continuity-coordinator",
+        "phase": "node",
+        "agent_id": "isc-s16-continuity-coordinator",
+        "occurrence": 3,
+        "source_commit": "65074657df5f9ba3f16b7ac4912a563128d902ee",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json",
+        "source_sha256": "1637f837aca3e028a66e5e1a306a83c695a4d010e35f7b53e54e44cecd38d655",
+        "effective_scope_sha256": "a90f0dd692aadfaf356f97489b3741a928d0cb326f8bf8e8aeb63e5bf6f33544",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true
+      },
+      "acknowledged_at": "2026-10-05T11:10:49.719284+00:00"
+    },
+    "deduplicated": false,
+    "execution_revision": 54
+  },
+  "preservation_verification": {
+    "compared_fields": [
+      "assignments",
+      "current_assignment_id",
+      "current_node_id",
+      "current_agent_id",
+      "phase",
+      "workflow",
+      "pending_transition",
+      "rework_cycle_count",
+      "visit_counts",
+      "identity_deliveries",
+      "last_transition"
+    ],
+    "all_equal_after_api_timestamp_normalization": true,
+    "issued_task_exact_hash_preserved": true,
+    "state_active_task_is_effective_projection": true,
+    "before_revision": 52,
+    "after_revision": 53,
+    "effective_core_sha256": "a90f0dd692aadfaf356f97489b3741a928d0cb326f8bf8e8aeb63e5bf6f33544"
+  },
+  "operational_backup": {
+    "path": "D:/nginx-qa-backups/delta-18025/20261005T110706Z-pre-amendment",
+    "state_files_verified": 5,
+    "prompt_pointers_verified": 56,
+    "canonical_hashes_unchanged_across_restart": true,
+    "http_execution_preserved_across_restart": true,
+    "release_commit": "d28726bbcbb552dd21f8cda1042f39f2ee2a21ec",
+    "other_ports_preserved": [
+      8025,
+      8870,
+      8865,
+      8872
+    ],
+    "runtime_files_used_for_identity": false
+  },
+  "credential_handling": {
+    "source": "User-authorized pre-existing DPAPI role/admin wrappers",
+    "new_credentials_created": false,
+    "role_get_and_ack": 2750,
+    "admin_used_only_for_preflight_and_apply": true,
+    "credential_values_recorded": false
+  },
+  "planned_official_outcome": "RESUME_FORMAL",
+  "prerequisite_investigation_authorized_after_graph_assignment": true,
+  "extended_proof_authorized_now": false,
+  "scope_amendment_reviews_are_not_prerequisite_reviews": true,
+  "historical_no_go_still_applicable": true
+}

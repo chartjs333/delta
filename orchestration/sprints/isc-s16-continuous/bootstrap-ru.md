@@ -55,3 +55,17 @@ git log --oneline --decorate -n 10
 Обычные вопросы решайте в пределах task по `continuity-agent.md`.
 Если требуется изменение frozen authority, верните `NEED_DECISION` или `STOP`.
 Graph передаст работу Coordinator node; промежуточного blocked terminal нет.
+
+## Согласование proof-only scope D01
+
+Прочитай `scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json`.
+Существующий assignment `898cbe80-1f5f-4348-ae65-4e6fc83239bc`, принятые commits,
+история и reviewer-решения должны сохраниться. Этот amendment нельзя применять
+через overwrite/reimport или перезапуск W1/Crypto. Используй только поддерживаемое
+обновление live profile/task; не меняй runtime-файлы. При отсутствии безопасного
+механизма сообщи ограничение и не начинай доказательное обследование.
+
+После синхронизации первая фаза D01 — точная проверка предпосылок, затем
+`NEED_DECISION` и два process review checkpoint commit. Длительное доказательство
+начинается через существующий `RESUME_FORMAL` только при положительном выводе о
+достаточности внутри исключения. Запрещённые зависимости не становятся assumptions.
