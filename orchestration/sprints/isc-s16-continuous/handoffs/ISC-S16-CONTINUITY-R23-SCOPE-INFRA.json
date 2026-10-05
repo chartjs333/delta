@@ -1,0 +1,146 @@
+{
+  "additional_amendment_error_contract": {
+    "basis": "Installed implementation legacy_scope_replay_transaction, main.py lines26517-26555, and limited rollout runbook lines991-999. Preflight already declares accepts_new_amendment=false.",
+    "body": {
+      "detail": {
+        "error": "SCOPE_ADDITIONAL_AMENDMENT_UNSUPPORTED"
+      }
+    },
+    "http_status": 409,
+    "observed_as_live_post_response": false,
+    "post_sent": false,
+    "reason_no_post": "Runbook prohibits testing a live mutation conflict merely for evidence. A known-inapplicable apply was not attempted. The 409/error above is source/documentation-bound, not presented as an observed POST failure.",
+    "source_pins": [
+      {
+        "commit": "d28726bbcbb552dd21f8cda1042f39f2ee2a21ec",
+        "git_blob_sha256": "2d282b5d9ff7d48bf799fdcd5ef7d541c7e95de6cb55f20f9873ca9ffaf48d05",
+        "path": "main.py",
+        "repository": "nginx-qa"
+      },
+      {
+        "commit": "d28726bbcbb552dd21f8cda1042f39f2ee2a21ec",
+        "git_blob_sha256": "48db30c2c0b2414d8a32c16bee3f173a8e52cad13da43a5b15af287410de937a",
+        "path": "docs/LEGACY_SCOPE_CONTROL_LIMITED_ROLLOUT.md",
+        "repository": "nginx-qa"
+      }
+    ]
+  },
+  "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+  "blocker": "ADDITIONAL_DISTINCT_SCOPE_AMENDMENT_UNSUPPORTED",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "created_at_utc": "2026-10-05T12:27:00.461433+00:00",
+  "decision": "STOP_INFRASTRUCTURE_SCOPE_CONTROL_ONE_SHOT",
+  "effective_scope": {
+    "ack_id": "scope-ack-c32b5df9df042413dd48394724696bc5",
+    "canonical_core_sha256_verified": true,
+    "context": {
+      "ack_required": true,
+      "agent_id": "isc-s16-continuity-coordinator",
+      "amendment_id": "ISC-S16-D01",
+      "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+      "effective_revision": 1,
+      "effective_scope_sha256": "a90f0dd692aadfaf356f97489b3741a928d0cb326f8bf8e8aeb63e5bf6f33544",
+      "node_id": "continuity-coordinator",
+      "occurrence": 4,
+      "phase": "node",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "schema_version": 1,
+      "source_commit": "65074657df5f9ba3f16b7ac4912a563128d902ee",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-amendments/ISC-S16-D01-RECOVERY-PROOF-ONLY.json",
+      "source_sha256": "1637f837aca3e028a66e5e1a306a83c695a4d010e35f7b53e54e44cecd38d655"
+    },
+    "existing_exact_ack_verified": true,
+    "new_scope_applied": false,
+    "same_assignment_via_official_whoami": true,
+    "source_git_blob_sha256_verified": true,
+    "still_excludes_r2_3": true
+  },
+  "kind": "COORDINATOR_INFRASTRUCTURE_BLOCKER_NOT_GRAPH_OUTCOME",
+  "observed_api": {
+    "authenticated_with_existing_operator_wrapper": true,
+    "http_status": 200,
+    "method": "GET",
+    "path": "/api/v1/projects/9000/sprints/sprint-0001-783ef52c/scope-amendments/preflight",
+    "response": {
+      "accepts_new_amendment": false,
+      "agent_id": "isc-s16-continuity-coordinator",
+      "amendment_mode": "one_shot_v1",
+      "applicable": true,
+      "assignment_id": "89e70d7d-7b35-43ff-b5c2-cfe96f8526c6",
+      "execution_revision": 74,
+      "issued_message_sha256": "78c0bb636ace92eeb6f0ebe75dfb47950e273a3684718248d391327005ee6fcd",
+      "issued_task_sha256": "4395b3c22c472787810508933c67ecb32649b3c7e247249a559cc42e7fe0d643",
+      "minimum_runtime_capability": "legacy_scope_control_v1",
+      "mutated": false,
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "project_id": "9000",
+      "runtime_type": "legacy_sequential_conditional_graph",
+      "schema_version": 1,
+      "scope_control_present": true,
+      "source_repository": {
+        "available": true,
+        "path": "D:\\delta",
+        "repository_key": "github.com/chartjs333/delta",
+        "resolution": "operator_repository_map"
+      },
+      "sprint_id": "sprint-0001-783ef52c"
+    }
+  },
+  "preservation": {
+    "assignment_preserved": true,
+    "current_node_id": "continuity-coordinator",
+    "execution_revision": 74,
+    "execution_unchanged_before_after": true,
+    "formal_status": "NO_GO",
+    "graph_not_advanced": true,
+    "no_manual_runtime_state_edit": true,
+    "no_new_credential_or_secret_disclosure": true,
+    "no_new_sprint_or_reimport": true,
+    "no_production_schema_proof_or_guard_change": true,
+    "no_service_restart": true,
+    "old_amendment_and_ack_preserved": true,
+    "phase": "node",
+    "status": "active"
+  },
+  "project_id": "9000",
+  "related_task_ids": [
+    "ISC-S16-D01",
+    "T053",
+    "HR008-018"
+  ],
+  "required_external_resolution": {
+    "capability": "Qualified support for an additional distinct amendment with preserved assignment, immutable history and prior scope/ACK lineage, or a compatible forward migration.",
+    "component": "nginx-qa scope-control infrastructure",
+    "forbidden_workarounds": [
+      "overwrite old amendment identity",
+      "reuse old idempotency key for different scope",
+      "manual runtime files",
+      "new sprint",
+      "graph reimport",
+      "claim old ACK covers new R2.3 scope"
+    ],
+    "user_decision": "Authorize/provide the separately qualified nginx-qa scope-control upgrade or compatible migration for the existing saved sprint. R2.3 permission itself has already been granted; no further technical decomposition approval is requested."
+  },
+  "resume_when_supported": [
+    "Read fresh preflight and current state through API.",
+    "Prepare and validate a distinct source-bound R2.3 authorization amendment using current CAS and fresh idempotency key.",
+    "Apply via official authenticated API; preserve this assignment and history.",
+    "GET/hash-verify/exact-ACK the returned new scope_context.",
+    "Continue existing graph through reviewed R2.3 closure, named recovery theorem and qualification."
+  ],
+  "role": "2750",
+  "schema_version": "1.0.0",
+  "source_base": "9fd125bd77fb7a81e4aa2d0ac21599a90ce17e30",
+  "sprint_id": "sprint-0001-783ef52c",
+  "task_id": "ISC-S16-CONTINUITY",
+  "user_authorization": {
+    "exact_request_sha256": "217bcd20241420ea2e2457504c9d4ccf742027e18045e22a4ff02bfda79dd80c",
+    "human_scope_permission_missing": false,
+    "production_integration_guard_removal_semantics_change_new_authority_full_r3_gate_waiver_not_authorized": true,
+    "r2_3_fully_authorized_under_frozen_profile": true,
+    "scope_control_operations_authorized": true,
+    "source": "Direct user attachment 9f87124a-776e-486b-b390-25f70a0c91b7 on 2026-10-05",
+    "subsequent_named_recovery_proof_and_gates_authorized": true
+  }
+}
