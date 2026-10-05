@@ -1,4 +1,4 @@
-# Delta → nginx-qa: additional scope amendments
+# Delta → nginx-qa: versioned scope and human-approval workflow
 
 Статус: **WAITING_FOR_EXTERNAL_NGINX_QA_CAPABILITY**. Задание разработчику nginx-qa,
 не проект scope-control v2 и не разрешение Delta-исполнителю менять nginx-qa.
@@ -12,6 +12,15 @@
 nginx-qa. Новый sprint, reimport graph, сброс assignment и ручная подмена runtime
 не являются допустимым решением.
 
+**Backend capability недостаточно: обязателен штатный human-approval workflow
+в UI nginx-qa.** Оператор принимает semantic scope decision, а оркестратор сам
+создаёт versioned amendment, выполняет validation/preflight/CAS/idempotency/apply,
+выдаёт effective scope и продолжает граф после exact ACK исполнителя.
+Оператор не создаёт JSON, не вычисляет hashes, не запускает PowerShell, не работает
+с bearer credentials и не вызывает REST API для технической доставки решения.
+Delta-исполнитель подаёт структурированный scope request; он не должен каждый раз
+вручную писать amendment или переносить длинное ТЗ через пользователя.
+
 Пользователь уже разрешил полный R2.3 в пределах принятого Snapshot Provenance
 Profile v1, затем `DeltaReduce.nativeArithmeticRecoveryRefines` и применимые gates.
 Разрешены formal/reference implementation, Lean/TLA, schemas/checkers, source
@@ -24,6 +33,76 @@ binding, evidence, tests, prerequisite closure и штатные reviewer cycles
 Production integration, guard removal, изменение утверждённых protocol semantics,
 новая trust/authority model, полный R3 и отказ от обязательных gates не разрешены.
 Ни scope update, ни migration сами по себе не меняют Formal NO_GO.
+
+## Product requirement: Approve scope change
+
+Название пользовательской операции — **«Разрешить изменение scope» / «Approve
+scope change»**. Это append-only переход `scope revision N → N+1`, не reset.
+
+Требуемый поток:
+
+```text
+Delta agent → NEED_SCOPE_CHANGE → nginx-qa persists structured request
+→ UI: Approve / Reject / Изменить границы
+→ nginx-qa: versioned amendment + validation/CAS/idempotency/apply
+→ new effective_scope → exact ACK current role
+→ resume existing graph + audit/evidence
+```
+
+`NEED_SCOPE_CHANGE` здесь — требование к будущему штатному workflow. Это не
+утверждение о поддержке такого outcome установленным API и не команда отправить
+его в текущий граф до появления совместимой реализации. Wire schema, endpoints
+и внутреннее устройство остаются задачей отдельного разработчика nginx-qa.
+
+Структурированный запрос должен позволять однозначно связать исходный
+sprint/assignment/роль и текущий scope revision с запрашиваемой границей,
+причиной/зависимостью, сохраняемыми запретами и source/evidence. Это смысловые
+данные для серверной проверки и UI, не новая схема Delta в этом handoff.
+
+Пример карточки для **ещё не принятого** semantic scope decision:
+
+```text
+Sprint blocked — authorization required
+Запрашивается: R2.3 — Snapshot Provenance Profile v1.
+Причина: nativeArithmeticRecoveryRefines зависит от незакрытого R2.3.
+Сохраняются запреты: production integration, guard removal, new trust/authority,
+full R3; остальные действующие границы и обязательные gates тоже сохраняются.
+[Разрешить] [Отклонить] [Изменить границы]
+```
+
+Для **текущего** R2.3 решение уже принято пользователем. Его состояние —
+«одобрено, ожидает инфраструктурного применения», а не «нужно снова разрешить».
+Совместимая версия должна штатно отразить уже принятое решение с его provenance;
+никакого выдуманного клика, нового consent или автоматического одобрения иных
+границ. Источник текущей авторизации указан в
+[сохранённом evidence](ISC-S16-CONTINUITY-R23-SCOPE-INFRA.json).
+
+### Приёмка пользовательского workflow
+
+1. Исполнитель отправляет machine-readable request непосредственно оркестратору.
+   nginx-qa сохраняет его и показывает человеку scope, причину и сохраняемые
+   запреты. Передача JSON или длинного технического письма через человека не нужна.
+2. `Approve` связывает решение с exact содержанием запроса и текущей версией scope.
+   nginx-qa сам оформляет и применяет следующий amendment через штатные проверки.
+   Повторный клик/retry не создаёт лишнюю версию; stale решение не применяется
+   молча к изменившимся scope или границам.
+3. `Reject` сохраняет запрос и отказ в истории; запрошенное расширение не вступает
+   в силу, прежний scope/ACK/history не стираются. «Изменить границы» показывает
+   точное исправленное содержание для решения; оно не наследует approval другого
+   содержания. Исполнитель получает фактически одобренные границы.
+4. Предыдущие amendments, ACK, assignments, results и reviews остаются immutable.
+   Audit/evidence связывает request → decision → amendment → effective scope
+   → ACK → resume. Старый ACK не разблокирует работу по новой версии.
+5. После exact ACK текущей роли граф автоматически продолжает штатный цикл,
+   сохраняя reviewer и qualification gates. Человек не доставляет результат
+   обратно агенту и не выполняет API/PowerShell-команды.
+6. Внутри уже разрешённых верхнеуровневых границ обычные prerequisites, helper
+   lemmas, файлы, tests и reviewer cycles не порождают повторных запросов approval.
+   Новое участие человека нужно для следующего semantic scope decision за этими
+   границами, а не для технической доставки предыдущего решения.
+
+Эти требования дополняют backend compatibility ниже. Они не реализуют nginx-qa,
+не добавляют Delta proof layer и не меняют DoD/Profile v1.
 
 ## Точка сохранения
 
@@ -109,6 +188,9 @@ revision/timestamps; это не разрешение переписывать �
   старого sprint и amendment/ACK lineage, список ожидаемых metadata changes.
 - Штатные preflight/apply/GET/ACK API и их актуальные payload/CAS/idempotency rules.
   Не требуется присылать секрет или вручную собирать Delta amendment JSON.
+- Рабочий machine-readable scope-request flow, UI `Approve / Reject / Изменить
+  границы` и evidence автоматического request-to-ACK-to-resume сценария, включая
+  штатное отражение уже принятого решения по текущему R2.3.
 - Рабочий безопасный credential-wrapper path, если существующий интерфейс изменён.
 
 Разработку, установку и migration выполняет отдельный владелец nginx-qa.
@@ -129,9 +211,12 @@ GET effective scope выполняется свежим процессом ро�
    отсутствует, только чтение; при неизменном состоянии — без уведомлений.
 2. Проверить сохранность текущего sprint/assignment и предыдущей scope/ACK lineage.
    Не выводить identity из локальных runtime файлов или старого импортированного JSON.
-3. После положительного compatible preflight оформить отдельный source-bound
-   R2.3 amendment на назначенной Git-ветке, validate и применить через штатный API
-   с актуальным CAS и собственным idempotency key. Граф не переимпортировать.
+3. После положительной проверки совместимости использовать штатный структурированный
+   scope-request/approval flow nginx-qa и provenance уже принятого решения R2.3.
+   Создание source-bound amendment, hashes, validation/CAS/idempotency/apply —
+   обязанность оркестратора, не ручная процедура пользователя или Delta-исполнителя.
+   Не запрашивать повторное разрешение R2.3; не имитировать отсутствующий UI/API
+   ручной правкой runtime. Граф не переимпортировать.
 4. Получить effective scope фактической ролью, проверить source/hash/priority,
    выполнить ACK exact возвращённого нового `scope_context`.
 5. Продолжить существующий graph: штатные coordinator result/reviews и назначения,
