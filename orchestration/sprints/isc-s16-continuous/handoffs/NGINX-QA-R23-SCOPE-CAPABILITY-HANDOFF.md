@@ -1,8 +1,15 @@
-# Delta → nginx-qa: versioned scope and human-approval workflow
+# nginx-qa UI: scope approval and graph observability — Delta handoff
 
 Статус: **WAITING_FOR_EXTERNAL_NGINX_QA_CAPABILITY**. Задание разработчику nginx-qa,
 не проект scope-control v2 и не разрешение Delta-исполнителю менять nginx-qa.
 Связанные задачи: ISC-S16-CONTINUITY, ISC-S16-D01, T053, HR008-018.
+
+Product requirements этого документа универсальны для **любых проектов и
+поддерживаемых типов sprint nginx-qa**. Scope approval, Pending decisions и
+execution visualization — согласованные части общего UI, без отдельного режима
+или hardcoded логики для Delta. Приведённые ниже Delta identifiers служат только
+конкретным compatibility/handoff case; роли, nodes, branches и project-specific
+qualification статусы UI получает из модели соответствующего проекта.
 
 ## Требуемый результат
 
@@ -104,6 +111,146 @@ full R3; остальные действующие границы и обяза�
 Эти требования дополняют backend compatibility ниже. Они не реализуют nginx-qa,
 не добавляют Delta proof layer и не меняют DoD/Profile v1.
 
+## Product requirement: Graph observability / execution visualization
+
+Главный экран sprint объединяет **Graph**, **Current assignment**, **Pending
+decisions** и **Execution timeline**. Пользователь без PowerShell, curl, raw JSON,
+filesystem или Git inspection видит: что и кем выполняется, где находится sprint,
+что уже прошло, где и почему возникло ожидание, требуется ли решение человека и
+что произойдёт после него. Расположение, цвета и конкретные компоненты выбирает
+разработчик UI; отдельный Delta dashboard не требуется.
+
+### Topology и текущее выполнение
+
+UI показывает полный graph topology, текущие node и phase, current assignment,
+выданную роль/agent и Git branch при её наличии. Видны пройденные, ожидающие,
+заблокированные и reviewer nodes, выполненные transitions, повторные visits,
+execution revision, active effective scope revision, pending scope request,
+ACK status и terminal state. Formal/qualification status отображается, если он
+предусмотрен моделью проекта; его отсутствие не означает PASS или NO_GO.
+
+Состояния должны визуально различаться; смысловые примеры:
+`completed`, `active`, `waiting`, `blocked`, `review_pending`, `rejected`,
+`skipped`, `terminal`. Это требования к отображению реальных состояний, а не
+назначение новых backend enums этим документом. Непройденный conditional branch
+не помечается `skipped` без соответствующего решения графа. Неизвестные либо
+отсутствующие данные показываются явно, не подменяются успехом или нулём.
+
+Topology и execution history — разные сущности. Возврат в тот же node создаёт
+новый отображаемый occurrence/visit, сохраняя предыдущие:
+
+```text
+continuity-coordinator
+  visit #1 — completed
+  visit #2 — completed
+  visit #3 — completed
+  visit #4 — waiting (reason visible)
+```
+
+UI не ограничивается перекраской одной вершины и не выводит прошлые посещения
+из её нынешнего статуса. Каждый visit связан с собственными assignments,
+результатами, reviews, scope и ACK. Примеры имён и номеров не являются fixtures
+или hardcoded правилами реализации.
+
+### Execution timeline и drill-down
+
+Помимо topology view необходим упорядоченный timeline с timestamp и привязкой
+к execution revision/event identity. В нём отдельно видны assignment issued,
+delivery/claim, result submitted, reviewer assignment, review decision, transition,
+повторный visit, scope request, решение оператора, применение scope, ACK, resume
+и terminal event — в пределах событий, реально сохранённых данной моделью.
+
+Любое событие открывается для просмотра связанных metadata: project/sprint,
+node/visit, assignment, роль, result/review, transition, scope revision, ACK,
+commit/evidence references и причины отказа/ожидания. Это навигация по связям
+сохранённых записей; пользователю не нужно вручную сопоставлять IDs через API.
+Старые события не пересчитываются на основании current state.
+
+### Scope overlay и Pending decisions
+
+Для конкретного assignment/visit отображаются действовавший effective scope,
+его revision и соответствующий ACK. Открываемая из graph карточка pending
+decision — тот же объект и те же действия, что в общем Pending decisions UI,
+а не отдельная копия approval workflow.
+
+Различимы состояния «решение pending», «approved, применение pending»,
+«новый scope применён, ACK pending» и «ACK accepted, graph resumed».
+Запрошенная будущая revision показывается только если её уже определил сервер;
+предложение N+1 нельзя выдавать за применённый scope. Один click Approve не
+означает, что ACK уже получен или выполнение возобновилось.
+
+Для текущего Delta case показываются обе фактические границы: graph API остаётся
+`active`, а работа ожидает инфраструктурного применения **уже одобренного** R2.3.
+Не создавать фиктивный terminal `blocked`, pending human decision или новый
+approval request вместо этого состояния. Formal NO_GO остаётся отдельным
+qualification status и сам по себе не означает terminal state sprint.
+
+### Reviewer gates и queue/assignments
+
+Review — отдельное execution event. Его карточка содержит reviewer role,
+assignment, decision, timestamp, точный reviewed result/evidence/commit,
+required approvals, фактически полученные применимые approvals и reject reason
+при наличии. Approval другого результата не считается approval текущего.
+Возвраты на rework и повторные reviews сохраняются в истории; итоговая галочка
+не заменяет эти события.
+
+UI показывает current active и queued/pending assignments, их адресатов,
+породившие node/visit, branch при наличии, delivery/claim/ACK status и scope,
+который к ним привязан или будет применён согласно authoritative API.
+Если future scope ещё не определён, UI показывает это явно. Чтение графа или
+раскрытие карточки не должно claim/dequeue assignment или посылать ACK за агента.
+
+### Live updates и historical mode
+
+Автоматическое обновление обязательно; WebSocket, SSE или polling с
+revision/event cursor выбирает разработчик. Ручной refresh не требуется.
+При reconnect пользователь должен получить пропущенные события без потери и
+визуального дублирования history. UI показывает состояние синхронизации и
+наблюдаемую revision, не выдавая устаревший snapshot за подтверждённое новое
+состояние. Historical view не перепрыгивает в latest mode без выбора пользователя.
+
+После завершения sprint этот же экран работает как audit viewer. Выбор
+`Project → Sprint → execution revision / timestamp` открывает topology и
+сохранённую execution history на выбранный момент, включая старые assignments,
+reviews, scope revisions, ACK и transitions. Текущий scope не подставляется в
+карточки прошлых visits. Источником служит сохранённая история, не реконструкция
+из нынешнего graph pointer.
+
+### Разрешённые действия
+
+Из graph доступны открытие pending scope decision, Approve/Reject/Изменить
+границы в пределах прав оператора, assignment/result/review, evidence,
+effective scope и audit trail. Действуют те же authorization и concurrency
+checks, что у общего workflow. Просмотр истории не даёт права менять её.
+
+Произвольное перетаскивание execution pointer или ручная отметка node completed
+не входят в обычный UI. Возможная administrative recovery operation требует
+отдельного явного полномочия и не проектируется этим handoff.
+
+### Проверяемая приёмка общего UI
+
+1. На Delta и на другом поддерживаемом проекте без Delta-specific fields один
+   экран показывает topology, active assignment/роль, branch при наличии,
+   revisions и причину ожидания. Optional поля корректно отсутствуют.
+2. Цикл с возвратом в node сохраняет несколько occurrences; drill-down каждого
+   показывает собственные result/reviews/scope/ACK, не последние общие значения.
+3. Два reviewer gate, reject/rework и повторный review отображаются отдельными
+   событиями с привязкой к reviewed result и корректным счётчиком approvals.
+4. Pending decision проходит request → decision → applied scope → exact ACK
+   → resume в graph и timeline согласованно с API. Текущий уже одобренный R2.3
+   не получает лишнего запроса consent; Reject не стирает прежнюю историю.
+5. Queue item открывается вместе с породившими node/visit и delivery/claim/ACK;
+   чтение UI не изменяет assignment, очередь, scope или execution pointer.
+6. При live updates/reconnect история догружается, а выбор старой revision
+   воспроизводит её сохранённое состояние. Terminal sprint доступен для audit.
+7. В нормальном workflow пользователь получает ответы о progress/blocker/decision
+   через UI без scripts/JSON. Нельзя произвольно продвинуть pointer, закрыть node
+   или обойти review/ACK через элементы визуализации.
+
+Это внешний product scope разработчика nginx-qa, не новый proof/qualification
+gate R2.3/R3 и не изменение замороженного Delta DoD. Изменений runtime, schemas
+или реализации визуализации в этом handoff нет.
+
 ## Точка сохранения
 
 | Объект | Точное значение |
@@ -191,6 +338,9 @@ revision/timestamps; это не разрешение переписывать �
 - Рабочий machine-readable scope-request flow, UI `Approve / Reject / Изменить
   границы` и evidence автоматического request-to-ACK-to-resume сценария, включая
   штатное отражение уже принятого решения по текущему R2.3.
+- Общий Graph/Timeline/Pending decisions UI и evidence его приёмки: повторные
+  visits, reviewer gates, scope/ACK overlay, очередь, live updates и historical
+  audit на Delta и другом поддерживаемом проекте.
 - Рабочий безопасный credential-wrapper path, если существующий интерфейс изменён.
 
 Разработку, установку и migration выполняет отдельный владелец nginx-qa.
