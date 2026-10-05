@@ -1,0 +1,32 @@
+{
+  "kind": "SEMANTIC_SCOPE_REQUEST_SOURCE_NOT_AN_AMENDMENT",
+  "task_ids": ["ISC-S16-CONTINUITY", "ISC-S16-D01", "T053", "HR008-018"],
+  "authorization": {
+    "source": "Direct user authorization on 2026-10-05, attachment 9f87124a-776e-486b-b390-25f70a0c91b7, reaffirmed by the direct request to resume after nginx-qa v2 deployment.",
+    "exact_request_sha256": "217bcd20241420ea2e2457504c9d4ccf742027e18045e22a4ff02bfda79dd80c",
+    "prior_git_record": "ca61d5300148c127d76d23cf90592c6247840785:orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-CONTINUITY-R23-SCOPE-INFRA.json",
+    "record_as": "existing_human_authorization",
+    "new_ui_approval_claimed": false
+  },
+  "reason": "The reviewed prerequisite checkpoint at 082cabfe674ab6cd25bb0f3bc4f22009301a9f2d established that nativeArithmeticRecoveryRefines requires the unfinished R2.3 source-origin/complete-state bridge. The user subsequently authorized full R2.3 under the frozen Snapshot Provenance Profile v1, followed by the named recovery theorem and applicable qualification. Scope revision 1 still excludes this prerequisite. Apply the existing authorization through the v2 human-decision workflow without resetting the saved sprint or relabeling NO_GO.",
+  "dependencies": [
+    "Full source-to-complete-family applicability under the already approved Snapshot Provenance Profile v1, using independent bootstrap authority, verified native history, trusted floor and provenance metadata.",
+    "Reviewed R2.3 closure precedes DeltaReduce.nativeArithmeticRecoveryRefines; the theorem, axiom audit and applicable gates precede any qualification claim."
+  ],
+  "proposal": {
+    "instructions": "Continue only the existing Delta ISC S16 graph in each server-assigned role and branch. The user's 2026-10-05 authorization permits complete R2.3 under the frozen Snapshot Provenance Profile v1: implement, prove and qualify the source-to-complete-family bridge, including necessary formal/reference definitions, schemas, checkers, code, helper lemmas, tests and source-bound evidence. Derive the bridge; never assume the required refinement result or weaken its domain. R1/R2.1/R2.2 stay CLOSED absent a concrete counterexample. The coordinator returns RESUME_FORMAL through the existing two-review route; D01 closes R2.3 and obtains substantive reviews before proceeding to the existing DeltaReduce.nativeArithmeticRecoveryRefines obligation, its necessary lemmas, mandatory-project registration and axiom audit. Then complete applicable pinned build/formal/refinement/compatibility checks and the existing Q01 qualification route. Technical decomposition, prerequisites, reviewer cycles and ordinary evidence repairs inside these boundaries need no new human decision. This permission supersedes the earlier R2.3/source-binding prohibition and the obsolete requirement that the initial two-hour checkpoint establish sufficiency without R2.3; it does not waive reviews of actual results or reinterpret the historical blocked checkpoint as positive. Existing roles, branch boundaries, graph nodes/edges, assignments, reviews and old scope/ACK lineage remain intact. Every governed assignment reads effective scope, verifies source/content/precedence and ACKs the exact scope_context. ACK removes only the authorization blocker; it does not advance the graph or waive pending gates. Keep formal NO_GO until the exact required evidence supports a different status; sequential process reviews are not independent Formal GO attestations. Use Pending decisions for a genuinely new semantic scope decision outside these boundaries.",
+    "retained_restrictions": [
+      "No production integration, production recovery deployment or guard removal; reference work remains quarantined.",
+      "No changes to approved protocol semantics, production Init/Next, certificate semantics or existing QC/WAL identities. Do not assign sigma_next or migrate/relabel historical objects, signatures, QC, WAL or evidence.",
+      "No new trust authority/root or expansion of Snapshot Provenance Profile v1 to unenrolled nodes, epoch changes, trusted-volume rollback/compromise, network bootstrap or universal backup formats.",
+      "No full R3 authorization: only the named DeltaReduce.nativeArithmeticRecoveryRefines obligation and its necessary lemmas, audit and applicable gates after reviewed R2.3 closure.",
+      "No sorry, hidden/unreviewed axioms, circular assumptions, vacuous/name-only theorem, hidden source-domain restriction or weaker invariants/acceptance criteria.",
+      "No proof/review/qualification gate waiver, historical FAIL/NO_GO relabeling or self-review represented as independent attestation.",
+      "No new sprint, graph reimport/reset, manual nginx-qa mutation/development/deployment/restart, destructive workaround or subagents. Preserve frozen refs, unrelated files and healthy demos 8870/8865/8872."
+    ],
+    "node_ids": ["continuity-coordinator", "formal-linkage", "formal-qualification"],
+    "reviewer_ids": ["isc-s16-continuous-architecture-reviewer", "isc-s16-continuous-evidence-reviewer"]
+  },
+  "activation": "This file is a source reference only. The server creates the scope revision through exact validation and record_existing_authorization; it is not active until returned by effective-scope and acknowledged by the actual role. No manual amendment construction is required.",
+  "historical_status": "R2.3 OPEN; Formal NO_GO. This authorization is not a closure or qualification result."
+}
