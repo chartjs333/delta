@@ -1,8 +1,8 @@
-# nginx-qa UI: scope approval and graph observability — Delta handoff
+# nginx-qa: Human Scope Decisions and Graph Execution UI
 
-Статус: **WAITING_FOR_EXTERNAL_NGINX_QA_CAPABILITY**. Задание разработчику nginx-qa,
-не проект scope-control v2 и не разрешение Delta-исполнителю менять nginx-qa.
-Связанные задачи: ISC-S16-CONTINUITY, ISC-S16-D01, T053, HR008-018.
+Статус: продуктовые требования разработчику nginx-qa. Документ задаёт наблюдаемое
+поведение и критерии приёмки; внутренний дизайн и реализация принадлежат отдельному
+разработчику инфраструктуры.
 
 Product requirements этого документа универсальны для **любых проектов и
 поддерживаемых типов sprint nginx-qa**. Scope approval, Pending decisions и
@@ -23,23 +23,12 @@ nginx-qa. Новый sprint, reimport graph, сброс assignment и ручна
 в UI nginx-qa.** Оператор принимает semantic scope decision, а оркестратор сам
 создаёт versioned amendment, выполняет validation/preflight/CAS/idempotency/apply,
 выдаёт effective scope и продолжает граф после exact ACK исполнителя.
-Оператор не создаёт JSON, не вычисляет hashes, не запускает PowerShell, не работает
-с bearer credentials и не вызывает REST API для технической доставки решения.
-Delta-исполнитель подаёт структурированный scope request; он не должен каждый раз
-вручную писать amendment или переносить длинное ТЗ через пользователя.
-
-Пользователь уже разрешил полный R2.3 в пределах принятого Snapshot Provenance
-Profile v1, затем `DeltaReduce.nativeArithmeticRecoveryRefines` и применимые gates.
-Разрешены formal/reference implementation, Lean/TLA, schemas/checkers, source
-binding, evidence, tests, prerequisite closure и штатные reviewer cycles.
-Дополнительного разрешения на техническую декомпозицию R2.3 не требуется.
-Текущий блокер его запуска — исключительно невозможность отразить это разрешение
-в live effective scope. Это не утверждение, что R2.3 уже доказан или что дальнейшие
-архитектурные вопросы заведомо отсутствуют.
-
-Production integration, guard removal, изменение утверждённых protocol semantics,
-новая trust/authority model, полный R3 и отказ от обязательных gates не разрешены.
-Ни scope update, ни migration сами по себе не меняют Formal NO_GO.
+Оператор не создаёт JSON, не вычисляет hashes, не запускает PowerShell и не
+вызывает REST API для технической доставки решения. Оператор не вводит, не копирует
+и не передаёт raw bearer credentials вручную. Это не запрещает UI использовать
+штатные authentication tokens/sessions внутри реализации.
+Исполнитель или coordinator подаёт структурированный scope request; он не должен
+каждый раз вручную писать amendment или переносить длинное ТЗ через пользователя.
 
 ## Product requirement: Approve scope change
 
@@ -49,7 +38,7 @@ scope change»**. Это append-only переход `scope revision N → N+1`, 
 Требуемый поток:
 
 ```text
-Delta agent → NEED_SCOPE_CHANGE → nginx-qa persists structured request
+<executor/coordinator> → NEED_SCOPE_CHANGE → nginx-qa persists structured request
 → UI: Approve / Reject / Изменить границы
 → nginx-qa: versioned amendment + validation/CAS/idempotency/apply
 → new effective_scope → exact ACK current role
@@ -64,25 +53,24 @@ Delta agent → NEED_SCOPE_CHANGE → nginx-qa persists structured request
 Структурированный запрос должен позволять однозначно связать исходный
 sprint/assignment/роль и текущий scope revision с запрашиваемой границей,
 причиной/зависимостью, сохраняемыми запретами и source/evidence. Это смысловые
-данные для серверной проверки и UI, не новая схема Delta в этом handoff.
+данные для серверной проверки и UI, не назначение конкретной wire schema.
 
 Пример карточки для **ещё не принятого** semantic scope decision:
 
 ```text
-Sprint blocked — authorization required
-Запрашивается: R2.3 — Snapshot Provenance Profile v1.
-Причина: nativeArithmeticRecoveryRefines зависит от незакрытого R2.3.
-Сохраняются запреты: production integration, guard removal, new trust/authority,
-full R3; остальные действующие границы и обязательные gates тоже сохраняются.
+Требуется решение о scope
+Graph execution state: <authoritative execution state>
+Operator attention: authorization required
+Запрашивается: <requested scope>
+Причина: <dependency / reason>
+Сохраняемые ограничения: <current upper-level boundaries and gates>
 [Разрешить] [Отклонить] [Изменить границы]
 ```
 
-Для **текущего** R2.3 решение уже принято пользователем. Его состояние —
-«одобрено, ожидает инфраструктурного применения», а не «нужно снова разрешить».
-Совместимая версия должна штатно отразить уже принятое решение с его provenance;
-никакого выдуманного клика, нового consent или автоматического одобрения иных
-границ. Источник текущей авторизации указан в
-[сохранённом evidence](ISC-S16-CONTINUITY-R23-SCOPE-INFRA.json).
+Для уже принятого semantic decision UI показывает «одобрено, ожидает применения»
+и его provenance, а не запрашивает то же согласие повторно. Нельзя выдумывать
+клик пользователя или автоматически одобрять другие границы. Конкретный ранее
+одобренный запрос приведён в compatibility fixture ниже.
 
 ### Приёмка пользовательского workflow
 
@@ -94,9 +82,14 @@ full R3; остальные действующие границы и обяза�
    Повторный клик/retry не создаёт лишнюю версию; stale решение не применяется
    молча к изменившимся scope или границам.
 3. `Reject` сохраняет запрос и отказ в истории; запрошенное расширение не вступает
-   в силу, прежний scope/ACK/history не стираются. «Изменить границы» показывает
-   точное исправленное содержание для решения; оно не наследует approval другого
-   содержания. Исполнитель получает фактически одобренные границы.
+   в силу, прежний scope/ACK/history не стираются. При `Approve with changes` /
+   «Изменить границы» отредактированное решение проходит **ту же server-side
+   validation, что и исходный request**. До подтверждения UI показывает **exact
+   resulting scope diff** относительно актуального effective scope, включая
+   сохраняемые ограничения. Approval относится именно к проверенному результату;
+   изменение исходной revision требует обновлённых validation и diff. Исправленное
+   содержание не наследует approval другого содержания. Исполнитель получает
+   фактически одобренные границы.
 4. Предыдущие amendments, ACK, assignments, results и reviews остаются immutable.
    Audit/evidence связывает request → decision → amendment → effective scope
    → ACK → resume. Старый ACK не разблокирует работу по новой версии.
@@ -108,8 +101,8 @@ full R3; остальные действующие границы и обяза�
    Новое участие человека нужно для следующего semantic scope decision за этими
    границами, а не для технической доставки предыдущего решения.
 
-Эти требования дополняют backend compatibility ниже. Они не реализуют nginx-qa,
-не добавляют Delta proof layer и не меняют DoD/Profile v1.
+Эти требования дополняют backend compatibility ниже. Scope decision не заменяет
+review, qualification или иные обязательные gates соответствующего проекта.
 
 ## Product requirement: Graph observability / execution visualization
 
@@ -129,10 +122,30 @@ execution revision, active effective scope revision, pending scope request,
 ACK status и terminal state. Formal/qualification status отображается, если он
 предусмотрен моделью проекта; его отсутствие не означает PASS или NO_GO.
 
-Состояния должны визуально различаться; смысловые примеры:
+### Graph execution state и operator attention state
+
+UI явно разделяет две независимые характеристики:
+
+| Характеристика | Значение и источник |
+| --- | --- |
+| `graph execution state` | Фактическое состояние выполнения из authoritative execution model: текущая позиция, phase и terminal status. |
+| `operator attention state` | Причина ожидания или требуемого внимания, связанная с сохранёнными request/decision/application/ACK events; не подменяет execution state. |
+
+Например, одновременно могут отображаться `execution_state=active` и
+`attention=waiting_for_scope_application`: решение уже принято, техническое
+применение ещё ожидается. Это смысловой пример отображения, не новый API enum
+или обязательное имя wire field. UI показывает причину, статус решения и
+следующий ожидаемый шаг. Ожидание operator decision, scope application и ACK
+различаются; отсутствие нового решения человека не означает отсутствие ожидания.
+
+Изменение attention само по себе не передвигает execution pointer и не создаёт
+фиктивный `blocked` или terminal state. И наоборот, terminal state нельзя
+определять по attention или project-specific qualification status.
+
+Состояния и события должны визуально различаться; смысловые примеры:
 `completed`, `active`, `waiting`, `blocked`, `review_pending`, `rejected`,
 `skipped`, `terminal`. Это требования к отображению реальных состояний, а не
-назначение новых backend enums этим документом. Непройденный conditional branch
+единый enum для execution, attention и review. Непройденный conditional branch
 не помечается `skipped` без соответствующего решения графа. Неизвестные либо
 отсутствующие данные показываются явно, не подменяются успехом или нулём.
 
@@ -140,7 +153,7 @@ Topology и execution history — разные сущности. Возврат 
 новый отображаемый occurrence/visit, сохраняя предыдущие:
 
 ```text
-continuity-coordinator
+<node>
   visit #1 — completed
   visit #2 — completed
   visit #3 — completed
@@ -179,11 +192,9 @@ decision — тот же объект и те же действия, что в �
 предложение N+1 нельзя выдавать за применённый scope. Один click Approve не
 означает, что ACK уже получен или выполнение возобновилось.
 
-Для текущего Delta case показываются обе фактические границы: graph API остаётся
-`active`, а работа ожидает инфраструктурного применения **уже одобренного** R2.3.
-Не создавать фиктивный terminal `blocked`, pending human decision или новый
-approval request вместо этого состояния. Formal NO_GO остаётся отдельным
-qualification status и сам по себе не означает terminal state sprint.
+Scope overlay использует раздельные execution/attention характеристики выше.
+Qualification status проекта остаётся отдельным показателем и сам по себе
+не означает terminal state sprint.
 
 ### Reviewer gates и queue/assignments
 
@@ -229,16 +240,19 @@ checks, что у общего workflow. Просмотр истории не д
 
 ### Проверяемая приёмка общего UI
 
-1. На Delta и на другом поддерживаемом проекте без Delta-specific fields один
+1. На compatibility fixture ниже и другом поддерживаемом проекте один
    экран показывает topology, active assignment/роль, branch при наличии,
-   revisions и причину ожидания. Optional поля корректно отсутствуют.
+   revisions и раздельные execution/attention states. Optional поля корректно
+   отсутствуют; ожидание применения одобренного scope не создаёт ложный terminal.
 2. Цикл с возвратом в node сохраняет несколько occurrences; drill-down каждого
    показывает собственные result/reviews/scope/ACK, не последние общие значения.
 3. Два reviewer gate, reject/rework и повторный review отображаются отдельными
    событиями с привязкой к reviewed result и корректным счётчиком approvals.
 4. Pending decision проходит request → decision → applied scope → exact ACK
-   → resume в graph и timeline согласованно с API. Текущий уже одобренный R2.3
-   не получает лишнего запроса consent; Reject не стирает прежнюю историю.
+   → resume в graph и timeline согласованно с API. Уже одобренный запрос не
+   получает лишнего consent; Reject сохраняет историю. `Approve with changes`
+   проходит ту же server-side validation и показывает exact resulting scope diff
+   до подтверждения; stale diff не применяется к новой revision.
 5. Queue item открывается вместе с породившими node/visit и delivery/claim/ACK;
    чтение UI не изменяет assignment, очередь, scope или execution pointer.
 6. При live updates/reconnect история догружается, а выбор старой revision
@@ -247,11 +261,50 @@ checks, что у общего workflow. Просмотр истории не д
    через UI без scripts/JSON. Нельзя произвольно продвинуть pointer, закрыть node
    или обойти review/ACK через элементы визуализации.
 
-Это внешний product scope разработчика nginx-qa, не новый proof/qualification
-gate R2.3/R3 и не изменение замороженного Delta DoD. Изменений runtime, schemas
-или реализации визуализации в этом handoff нет.
+Изменений runtime, schemas или реализации визуализации в этом документе нет.
 
-## Точка сохранения
+## Compatibility fixture: existing Delta sprint
+
+**Приложение: реальный migration/compatibility fixture.** Все конкретные IDs,
+SHA, роли, branches, ограничения, endpoints и Formal NO_GO ниже относятся только
+к существующему Delta deployment. Они не являются полями, константами или
+обязательными статусами core-модели nginx-qa. Раздел служит проверке сохранности
+реального состояния при реализации общих product requirements выше.
+
+Статус fixture: **WAITING_FOR_EXTERNAL_NGINX_QA_CAPABILITY**.
+Связанные задачи: ISC-S16-CONTINUITY, ISC-S16-D01, T053, HR008-018.
+Реализация nginx-qa остаётся у отдельного разработчика; Delta-исполнитель не
+проектирует scope-control v2 и не меняет nginx-qa.
+
+### Авторизация и границы fixture
+
+Пользователь уже разрешил полный R2.3 в пределах принятого Snapshot Provenance
+Profile v1, затем `DeltaReduce.nativeArithmeticRecoveryRefines` и применимые gates.
+Разрешены formal/reference implementation, Lean/TLA, schemas/checkers, source
+binding, evidence, tests, prerequisite closure и штатные reviewer cycles.
+Дополнительного разрешения на техническую декомпозицию R2.3 не требуется.
+Текущий блокер его запуска — исключительно невозможность отразить это разрешение
+в live effective scope. Это не утверждение, что R2.3 уже доказан или что дальнейшие
+архитектурные вопросы заведомо отсутствуют.
+
+Production integration, guard removal, изменение утверждённых protocol semantics,
+новая trust/authority model, полный R3 и отказ от обязательных gates не разрешены.
+Ни scope update, ни migration сами по себе не меняют Formal NO_GO. Product scope
+этого документа не добавляет proof/qualification gate R2.3/R3 и не меняет Delta DoD.
+
+Для **текущего** R2.3 решение уже принято пользователем. Его состояние —
+«одобрено, ожидает инфраструктурного применения», а не «нужно снова разрешить».
+Совместимая версия должна штатно отразить уже принятое решение с его provenance;
+никакого выдуманного клика, нового consent или автоматического одобрения иных
+границ. Источник текущей авторизации указан в
+[сохранённом evidence](ISC-S16-CONTINUITY-R23-SCOPE-INFRA.json).
+
+В этом fixture graph API остаётся `active`, а attention означает ожидание
+применения уже одобренного scope. Нельзя создавать вместо этого фиктивный
+terminal `blocked`, pending human decision или новый approval request.
+Formal NO_GO остаётся отдельным project-specific qualification status.
+
+### Точка сохранения
 
 | Объект | Точное значение |
 | --- | --- |
@@ -279,7 +332,7 @@ Effective-core SHA-256: `a90f0dd692aadfaf356f97489b3741a928d0cb326f8bf8e8aeb63e5
 Он фиксирует наблюдение, а не подменяет authoritative live API. Перед любой будущей
 mutation заново читать API; revision 74 не использовать как вечное значение CAS.
 
-## Воспроизведённое ограничение
+### Воспроизведённое ограничение
 
 Авторизованный `GET /api/v1/projects/9000/sprints/sprint-0001-783ef52c/scope-amendments/preflight`
 возвращает HTTP 200, `amendment_mode=one_shot_v1`,
@@ -293,7 +346,7 @@ mutation заново читать API; revision 74 не использоват�
 Заведомо отклоняемая mutation ради демонстрации ошибки не выполнялась.
 Точные source pins сохранены в [предыдущем evidence](ISC-S16-CONTINUITY-R23-SCOPE-INFRA.json).
 
-## Совместимость и критерии приёмки
+### Совместимость и критерии приёмки fixture
 
 1. После установки совместимой версии либо forward migration сохраняются project,
    sprint identity, текущие assignment/node/phase/occurrence, graph topology,
@@ -328,7 +381,7 @@ mutation заново читать API; revision 74 не использоват�
 разрешённом apply могут добавиться новый scope/ACK и соответствующий audit с
 revision/timestamps; это не разрешение переписывать прежнюю историю или graph.
 
-## Что передать Delta-исполнителю после готовности
+### Что передать Delta-исполнителю после готовности
 
 - Идентификатор установленной совместимой версии и compatibility/test evidence.
 - Документированную процедуру обновления/migration, подтверждение сохранности
@@ -355,7 +408,7 @@ GET effective scope выполняется свежим процессом ро�
 роли; admin credential применяется только к штатным operator операциям.
 Не менять здоровые demo 8870/8865/8872, другой сервис 8025 или frozen Delta refs.
 
-## Разрешённое автоматическое возобновление
+### Разрешённое автоматическое возобновление
 
 1. Читать текущие HTTP state/preflight и совместимый runbook. Пока capability
    отсутствует, только чтение; при неизменном состоянии — без уведомлений.
