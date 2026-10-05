@@ -1,0 +1,5 @@
+'DeltaReduce.NativeIscCertificateVectors.bodyIdIsNotFinalizedQc' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.NativeIscCertificateVectors.distinctIds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.NativeFinalizedIscSection.noInventedFinalized' depends on axioms: [propext, Classical.choice, Quot.sound]
