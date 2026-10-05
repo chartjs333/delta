@@ -125,7 +125,8 @@
     "original_amendments_retained": true,
     "assignment_count": 34,
     "review_assignments": 22,
-    "ack_history_entries": 112
+    "ack_history_entries": 14,
+    "ack_history_count_method": "Count ack_id-keyed records, not their member fields."
   },
   "formal_status": "NO_GO",
   "r2_3": "OPEN",
