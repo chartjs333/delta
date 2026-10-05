@@ -1,0 +1,32 @@
+{
+  "reason": "Требуется новое semantic source-generation decision, не повторное разрешение R2.3. Полный R2.3 уже разрешён в revision2. Проверенный checkpoint a8e3fbb7 показывает: старый native pin и его Lean source relation требуют finalized ISC c, тогда как уже утверждённый будущий I-B/W1 требует b и policy generations. Прямое соединение отвергается существующей леммой bodyIdIsNotFinalizedQc. Это не production-reachable counterexample. Полная будущая parent/signature/budget спецификация остаётся DRAFT_EXACT_DETAILS и SEMANTIC_CHANGE; её нельзя молча объявить утверждённой. Предлагается утвердить exact существующий consolidated amendment только как источник новой изолированной formal/reference qualification для R2.3. Старое native поколение и evidence остаются отдельными и неизменными. Approve будет НОВЫМ semantic решением; прежнее разрешение R2.3 не используется как его замена.",
+  "dependencies": [
+    "Checkpoint formal/proposals/isc-s16-r23-source-generation-checkpoint.md at a8e3fbb7345bb4771544386919f71f7bafed3c4e; two process APPROVE reviews, transition da79c3bc-fb2d-4b72-8afe-a942b10e9e0c. Same sequential executor, not independent attestations.",
+    "Exact proposed source: 26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/adr/0014-isc-production-contract-amendment-v1.md SHA256 214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd. This approval would promote its previously draft exact parent/signature/budget source rules for quarantined qualification only; it is not runtime approval.",
+    "Approved I-B/S-RANK/W1 retained. Profile-v1 trust/deployment assumptions and frozen R2 residual remain; source-version bindings require new qualification, not old-evidence relabeling."
+  ],
+  "proposal": {
+    "instructions": "Продолжать существующий Delta graph по серверной identity/ветке. Полное разрешение R2.3, затем reviewed closure, DeltaReduce.nativeArithmeticRecoveryRefines, axiom audit и применимые gates сохраняется. НОВОЕ SEMANTIC РЕШЕНИЕ ПРИ APPROVE: выбрать для дальнейшей R2.3 source-origin qualification отдельное будущее поколение native source rules на основе уже утверждённых I-B/S-RANK/W1 и утвердить exact draft docs/adr/0014-isc-production-contract-amendment-v1.md at 26eb02d0632435c9aa0d8ef44eb496b6fa73dd13, SHA256 214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd, исключительно для изолированных feature-000 formal/reference implementations и qualification. Это разрешает versioned successor definitions/модель/checkers для explicit parent, exact Ed25519 Vote/G/registry association, зафиксированных evidence budgets, b/c distinction, S-RANK и полного policy-generation producer/replay. В отдельной proposal-модели проверить предусмотренные amendment Init counters/Next guards и все существующие invariants/liveness; не менять текущую production модель или runtime. Это новое поколение обязано получить независимый source binding и весь approved Profile-v1/full-family bridge; нельзя называть его доказательством о неизменённом PR50 60c692f6 или просто подставить b вместо c в legacy proof. Старые R2.1/R2.2 results остаются CLOSED для исходного domain; generic arithmetic можно переиспользовать при доказанных hypotheses, изменённые source bindings квалифицируются отдельно. Legacy objects, bytes, signatures, QC/WAL identities и evidence не мигрировать/relabel. Sigma остаётся символическим параметром; новое конкретное sigma_next сейчас не назначать. Утверждение спецификации не означает GO, закрытие R2.3 или существование production producer. Полную profile-source applicability и bounds нужно вывести, а не предположить. Сначала substantive reviews фактического R2.3 результата, затем named recovery theorem и штатные qualification gates. Все прежние graph/reviewer/ACK gates сохраняются. Любое изменение exact выбранного semantic контракта после найденного контрпримера требует нового Pending decision; обычная реализация/леммы/проверки внутри утверждённого контракта не требуют повторного согласия.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal. Work remains isolated formal/reference qualification.",
+      "Current qualified/legacy production Init/Next, certificate semantics, objects, signatures, QC/WAL bytes and identities remain unchanged. New version definitions are separate and never reported as the old native implementation.",
+      "No new trust authority/root and no expansion of Snapshot Provenance Profile v1 to unenrolled nodes, epoch changes, trusted-volume rollback/compromise, network bootstrap or universal backup formats.",
+      "Do not assign a concrete sigma_next now, fabricate source deployment artifacts, or declare Formal GO without the exact applicable gates and independent attestations.",
+      "No full R3: only the named nativeArithmeticRecoveryRefines obligation and necessary lemmas after reviewed R2.3 closure.",
+      "No sorry, hidden/unreviewed axioms, circular assumptions, public-success source predicate, vacuous theorem, hidden domain cap, weaker invariant, evidence relabel or gate waiver.",
+      "No new sprint/import/reset/manual nginx mutation/deployment/restart/destructive workaround/subagents. Preserve assignment/review/scope/ACK history, frozen refs, unrelated files and healthy demos."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PENDING_NEW_HUMAN_SEMANTIC_DECISION_NOT_PREVIOUS_AUTHORIZATION",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
