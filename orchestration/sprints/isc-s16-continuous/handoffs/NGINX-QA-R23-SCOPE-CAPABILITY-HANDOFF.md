@@ -13,22 +13,28 @@ qualification статусы UI получает из модели соотве�
 
 ## Требуемый результат
 
-Поддержать второй и последующие **distinct scope amendments** в существующем
+Поддержать вторую и последующие **versioned scope revisions** в существующем
 сохранённом sprint либо предоставить совместимую forward migration с тем же
 наблюдаемым результатом. Внутреннее устройство реализации выбирает разработчик
 nginx-qa. Новый sprint, reimport graph, сброс assignment и ручная подмена runtime
 не являются допустимым решением.
 
+Публичная модель: **Scope Change Request → Human Decision → Scope Revision → ACK**
+для одобренного изменения. nginx-qa создаёт следующую versioned scope revision;
+в совместимой реализации текущего scope-control она может быть представлена
+`amendment`. Это backend/compatibility термин, не обязательная публичная сущность.
+
 **Backend capability недостаточно: обязателен штатный human-approval workflow
 в UI nginx-qa.** Оператор принимает semantic scope decision, а оркестратор сам
-создаёт versioned amendment, выполняет validation/preflight/CAS/idempotency/apply,
-выдаёт effective scope и продолжает граф после exact ACK исполнителя.
+создаёт scope revision, выполняет validation/preflight/CAS/idempotency/apply,
+выдаёт effective scope и после exact ACK исполнителя повторно оценивает штатные
+условия выполнения графа. ACK снимает только scope-authorization блокировку.
 Оператор не создаёт JSON, не вычисляет hashes, не запускает PowerShell и не
 вызывает REST API для технической доставки решения. Оператор не вводит, не копирует
 и не передаёт raw bearer credentials вручную. Это не запрещает UI использовать
 штатные authentication tokens/sessions внутри реализации.
 Исполнитель или coordinator подаёт структурированный scope request; он не должен
-каждый раз вручную писать amendment или переносить длинное ТЗ через пользователя.
+каждый раз вручную оформлять scope revision или переносить длинное ТЗ через пользователя.
 
 ## Product requirement: Approve scope change
 
@@ -40,9 +46,10 @@ scope change»**. Это append-only переход `scope revision N → N+1`, 
 ```text
 <executor/coordinator> → NEED_SCOPE_CHANGE → nginx-qa persists structured request
 → UI: Approve / Reject / Изменить границы
-→ nginx-qa: versioned amendment + validation/CAS/idempotency/apply
+→ nginx-qa: versioned scope revision + validation/CAS/idempotency/apply
 → new effective_scope → exact ACK current role
-→ resume existing graph + audit/evidence
+→ clear scope-authorization blocker; re-evaluate normal graph conditions
+→ ordinary execution only when all applicable gates allow it + audit/evidence
 ```
 
 `NEED_SCOPE_CHANGE` здесь — требование к будущему штатному workflow. Это не
@@ -78,7 +85,7 @@ Operator attention: authorization required
    nginx-qa сохраняет его и показывает человеку scope, причину и сохраняемые
    запреты. Передача JSON или длинного технического письма через человека не нужна.
 2. `Approve` связывает решение с exact содержанием запроса и текущей версией scope.
-   nginx-qa сам оформляет и применяет следующий amendment через штатные проверки.
+   nginx-qa сам оформляет и применяет следующую scope revision через штатные проверки.
    Повторный клик/retry не создаёт лишнюю версию; stale решение не применяется
    молча к изменившимся scope или границам.
 3. `Reject` сохраняет запрос и отказ в истории; запрошенное расширение не вступает
@@ -90,16 +97,27 @@ Operator attention: authorization required
    изменение исходной revision требует обновлённых validation и diff. Исправленное
    содержание не наследует approval другого содержания. Исполнитель получает
    фактически одобренные границы.
-4. Предыдущие amendments, ACK, assignments, results и reviews остаются immutable.
-   Audit/evidence связывает request → decision → amendment → effective scope
-   → ACK → resume. Старый ACK не разблокирует работу по новой версии.
-5. После exact ACK текущей роли граф автоматически продолжает штатный цикл,
-   сохраняя reviewer и qualification gates. Человек не доставляет результат
-   обратно агенту и не выполняет API/PowerShell-команды.
+4. Предыдущие scope revisions, ACK, assignments, results и reviews остаются immutable.
+   Audit/evidence связывает request → decision → scope revision → effective scope
+   → ACK; последующие обычные execution events связываются с этой цепочкой отдельно.
+   Старый ACK не снимает scope-блокировку работы по новой версии.
+5. После exact ACK scope-authorization перестаёт быть блокирующим условием.
+   nginx-qa повторно оценивает штатные условия выполнения графа. **ACK сам по себе
+   не создаёт transition, completion, review decision или dequeue и не обходит
+   другие pending gates.** Человек не доставляет результат обратно агенту и не
+   выполняет API/PowerShell-команды; дальнейшее выполнение происходит только по
+   штатным правилам графа.
 6. Внутри уже разрешённых верхнеуровневых границ обычные prerequisites, helper
    lemmas, файлы, tests и reviewer cycles не порождают повторных запросов approval.
    Новое участие человека нужно для следующего semantic scope decision за этими
    границами, а не для технической доставки предыдущего решения.
+7. **Гонка двух operator sessions:** при одновременных `Approve`, `Reject` или
+   `Approve with changes` для одного request/revision только одно решение может
+   стать authoritative. Конкурирующая проигравшая попытка получает conflict/stale
+   response без частичной mutation. History сохраняет принятое решение и факт
+   отклонённой stale попытки без лишней scope revision. Проверить пары решений,
+   включая разные edited scopes; exact idempotent retry уже принятого решения
+   по-прежнему не создаёт нового решения или revision.
 
 Эти требования дополняют backend compatibility ниже. Scope decision не заменяет
 review, qualification или иные обязательные gates соответствующего проекта.
@@ -187,7 +205,9 @@ decision — тот же объект и те же действия, что в �
 а не отдельная копия approval workflow.
 
 Различимы состояния «решение pending», «approved, применение pending»,
-«новый scope применён, ACK pending» и «ACK accepted, graph resumed».
+«новый scope применён, ACK pending» и «ACK accepted, scope-блокировка снята».
+Фактическое resume показывается только по отдельному обычному execution event;
+при другом pending gate UI продолжает показывать его причину ожидания.
 Запрошенная будущая revision показывается только если её уже определил сервер;
 предложение N+1 нельзя выдавать за применённый scope. Один click Approve не
 означает, что ACK уже получен или выполнение возобновилось.
@@ -249,7 +269,10 @@ checks, что у общего workflow. Просмотр истории не д
 3. Два reviewer gate, reject/rework и повторный review отображаются отдельными
    событиями с привязкой к reviewed result и корректным счётчиком approvals.
 4. Pending decision проходит request → decision → applied scope → exact ACK
-   → resume в graph и timeline согласованно с API. Уже одобренный запрос не
+   → снятие scope-блокировки в graph и timeline согласованно с API. Отдельно
+   проверить ACK при другом pending gate: transition/completion/review/dequeue
+   не появляются из-за ACK. Обычное выполнение допустимо только после соблюдения
+   всех применимых условий графа. Уже одобренный запрос не
    получает лишнего consent; Reject сохраняет историю. `Approve with changes`
    проходит ту же server-side validation и показывает exact resulting scope diff
    до подтверждения; stale diff не применяется к новой revision.
@@ -421,8 +444,10 @@ GET effective scope выполняется свежим процессом ро�
    Не запрашивать повторное разрешение R2.3; не имитировать отсутствующий UI/API
    ручной правкой runtime. Граф не переимпортировать.
 4. Получить effective scope фактической ролью, проверить source/hash/priority,
-   выполнить ACK exact возвращённого нового `scope_context`.
-5. Продолжить существующий graph: штатные coordinator result/reviews и назначения,
+   выполнить ACK exact возвращённого нового `scope_context`. Он снимает только
+   scope-блокировку; сам ACK не создаёт transition/completion/review/dequeue.
+5. После повторной оценки и соблюдения остальных штатных условий продолжить
+   существующий graph: coordinator result/reviews и назначения,
    reviewed закрытие полного R2.3, затем named recovery theorem, axiom audit и
    применимые pinned formal/refinement/compatibility gates. Новый Formal GO возможен
    только по действительным evidence и требуемым authority/review.
