@@ -1,0 +1,33 @@
+{
+  "reason": "MISSING_NON_ISC_SIGNATURE_BINDING: reviewed checkpoint 4c99272e9e9f4640ed51cf34bef81516630329a5 доказывает недостаточность существующего source binding для ApplyQC. Snapshot Provenance Profile v1 требует original valid Apply signatures даже для provisioned initial anchor. Exact approved ADR0014, section 3, задаёт только SIG-ISC и явно не выбирает EC/APC/Apply preimages. Pinned verify_apply получает typed objects и signer IDs, но не original signatures/keys. Его структурный успех нельзя объявить аутентификацией. Нужен следующий semantic contract decision; повторное разрешение всего R2.3 не требуется.",
+  "dependencies": [
+    "Snapshot Provenance Profile v1 checkpoint-authority step 3 → source-origin admission → existing R2.1/R2.2 relation.",
+    "Exact reviewed boundary and immutable evidence: 4c99272e9e9f4640ed51cf34bef81516630329a5:orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-R23-NON-ISC-AUTHORITY-BOUNDARY.md.",
+    "Architecture and evidence reviews APPROVE transition 027b52b8-841c-43ea-a2f3-764ed835266f, retaining R2.3 OPEN/Formal NO_GO; sequential same-executor reviews are not independent attestations."
+  ],
+  "proposal": {
+    "instructions": "Полное разрешение R2.3, затем reviewed closure, DeltaReduce.nativeArithmeticRecoveryRefines и применимые gates сохраняется. Новое решение для этого request: разрешить один консолидированный specification-only decision document для недостающего non-ISC authority/signature binding существующей Profile-v1 source chain. Минимальный anchor — ApplyQC; в том же документе конечным перечнем учесть существующие non-ISC зависимости его исходной certificate/vote lineage. Сначала перечислить реально переиспользуемые exact contracts; затем дать конкретный предлагаемый closed signed-byte/artifact/key-role binding и compatibility consequences только для будущего source generation. Сохранять independently provisioned fixed epoch/validator authority и исходные voted-body/certificate dependencies. Не переносить SIG-ISC на другие kinds неявно. Если уже существует утверждённый exact applicable contract, принять только проверяемый immutable reference вместо изобретения замены. Результат — один reviewable документ с конечными verification obligations, а не новый открытый список требований. После документа STOP: фактический новый semantic byte/signature contract потребует отдельного human decision до реализации или доказательств, использующих его. Это request на снятие запрета проектировать отсутствующий non-ISC контракт, не утверждение нового алгоритма, GO, R2.3 closure или source validity. Уже разрешённые обычные helpers не требуют отдельного согласия, но не могут обойти конкретный незакрытый authority binding. Graph identity/branches/review gates сохраняются; не отправлять RESUME_* ради обхода ожидания этого решения.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal.",
+      "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged; no migration or relabel.",
+      "No new trust root/authority and no expansion beyond the enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "No non-ISC codec implementation, new proof assumption or producer rule based on an unapproved proposed contract. The requested document is specification-only.",
+      "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim or qualification/review gate waiver. R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved.",
+      "No full R3; named nativeArithmeticRecoveryRefines only after substantive reviewed R2.3 closure.",
+      "No sorry, hidden/circular axioms, opaque accept callbacks, public-success source predicates, vacuous proofs, hidden source caps, weakened invariants or evidence relabel.",
+      "No new sprint, graph reimport/reset, manual graph promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve all assignment/review/scope/ACK history, frozen refs, unrelated files and healthy demos."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PROPOSED_NEW_HUMAN_DECISION_NOT_EXISTING_AUTHORIZATION",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
