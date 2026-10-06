@@ -1,0 +1,37 @@
+{
+  "reason": "MISSING_STORAGE_PRODUCING_HISTORY_BINDING. Scope7 approved ADR0016 storage bytes/keys, but explicitly requires STOP if original producer/evidence is absent. Reviewed a2fd1725 identifies no independent native per-location storage event/cut binding in the pinned ledger/coarse transition/local I/O/transport. Valid historical attestations remain unchanged after pre-finalization shard loss, while existing HasCompleteAvailability becomes false. This is not a production exploit or a repeated request for general R2.3 permission. A distinct producer/observation contract decision is needed; byte approval alone cannot supply it.",
+  "dependencies": [
+    "a2fd17259240be0a7721512e7a12fe972587f3bf:formal/proposals/storage-producer-checkpoint.md and formal/proposals/evidence/storage-producer-boundary.json; report SHA256 cc55c075c42a3b3e36abfd16301d346695acd134780b00fa8f765b80ebd1c6d6.",
+    "NEED_DECISION transition e37078b0-3101-40da-bcaa-2b980d0fb90a has both process APPROVE reviews (assignments3271a2b7-90d5-4164-af81-8a1273eec017 and ea38860c-3565-4cbc-9d4e-8b8ec502deb1). Same executor, not independent attestation.",
+    "ADR0016 sections3-7 at1438fa3d78ec99291475cf4660fd8c190ac01bb3 remains approved by human decision scope-decision-614a7db8512f59e36720131917827d4c. Original TLA availability guards, Snapshot Provenance Profile v1 and full R2.3 authority remain unchanged."
+  ],
+  "proposal": {
+    "instructions": "Сохраняется полное ранее выданное разрешение R2.3 и утверждённый ADR0016 storage byte/key contract. Отдельное решение этого запроса: разрешить только один bounded specification-only decision memo Storage Producing History Binding для выявленного отсутствующего source contract. Если оператор укажет уже существующий применимый immutable producer/observation contract и original evidence path, сначала проверить именно его; не изобретать замену. Иначе документ должен показать конкретную production ownership boundary, original upload/attest/loss/corruption/repair/finalization events и их identity/order/cut binding, кто и на каком существующем основании наблюдает их полноту, и как это соотносится с неизменёнными AttestAvailability/HasCompleteAvailability/FinalizeAvailability. Различать local write, signed statement и фактическую доступность; не приравнивать faithful T или подпись к truthful availability. Максимально переиспользовать существующие storage identities, утверждённые Rs/Ks/A/Ms/SAG1/D/ac, исходную retention policy и native history; сохранить AC/ISC после законной finalization при последующей потере. Если необходим новый producer rule, observer/trust assumption, изменение публичного guard, ограничения source domain или profile, показать точный минимальный semantic choice и последствия как PROPOSED, не выбирать/применять его автоматически. Это разрешение на один документ, не одобрение ещё неизвестного контракта и не permission на implementation/proofs. После документа снова STOP для отдельного exact human decision. Не переоткрывать R2.1/R2.2, не добавлять самостоятельный proof layer/DoD item, не начинать recovery theorem/full R3. Обычные reviewer gates и история существующего sprint остаются обязательными.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+      "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged. Future proposed generation does not migrate, relabel or resign legacy objects.",
+      "No new authority/trust root or profile expansion: preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "No invented producer rule or authentication for worker/storage/beacon objects by validator-key substitution. Existing original producer/dependency/source verification remains mandatory.",
+      "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim, review/qualification gate waiver or claim that sequential self-review is independent attestation.",
+      "R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved. No full R3; named recovery theorem only after reviewed substantive R2.3 closure.",
+      "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, hidden source caps, lineage truncation, weakened invariants or evidence relabel.",
+      "No new sprint, graph reimport/reset/manual promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve assignments, reviews, all scope/ACK history, frozen refs, foreign files and healthy demos.",
+      "The exact storage config/codec binding in ADR0016 sections3-7 remains approved and unchanged. No old object, signature, storage enrollment or certificate may be converted/relabelled; no new authority root or stronger storage honesty/observation assumption is adopted by this documentation request.",
+      "Storage signatures authenticate statements, not ArtifactLocation/availability or lawful producing history. Missing original producer/evidence, incompatible bounds or required Init/Next/protocol change is a STOP, not permission for a new rule, callback or source-domain restriction.",
+      "No SIG-ISC/NSG1/validator-registry substitution, TLS fallback, faithful-T-as-validity or global-union-only availability quorum. Preserve original per-leaf quorums, original witness IDs, delivery multiplicity and source cuts.",
+      "This request, if approved, authorizes one documentation-only producer/observation decision memo. No implementation or new source-success predicate/proof; proposed semantic alternatives are not adopted without a separate exact decision."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PROPOSED_NEW_PRODUCER_CONTRACT_DECISION_NOT_EXISTING_AUTHORIZATION",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
