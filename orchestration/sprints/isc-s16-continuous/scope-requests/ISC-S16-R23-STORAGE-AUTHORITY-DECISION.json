@@ -1,0 +1,35 @@
+{
+  "reason": "MISSING_STORAGE_ATTESTATION_SOURCE_BINDING. Reviewed worker e766ef98748504779a9a88d06ee3760594c4184d supplies the approved non-ISC signature reference but stops at the next original source dependency: feature003 FR014/015 requires storage attestations for exact shards/lengths/retention epoch before freeze. Native AvailabilityProof carries six structural fields, no original attestation bytes/keys/length/retention; its API cannot distinguish genuine from absent/stale attestations with equal IDs. Profile v1 and approved ADR0015 section5 preserve this separate storage authority. The issue is a missing exact contract, not a demonstrated production attack or a request to reauthorize all R2.3.",
+  "dependencies": [
+    "e766ef98748504779a9a88d06ee3760594c4184d:formal/proposals/non-isc-source-checkpoint.md and formal/proposals/evidence/non-isc-source-v1/availability-boundary.json; immutable native pin 60c692f6e391f839829dfc64e93380db54cd507b.",
+    "Transition d90be72d-67da-4ed6-9fe1-4bba5620e1a6 has two APPROVE process reviews for NEED_DECISION; source assignment 91d05d0d-4fca-43e6-bd5e-7442d77e4ec0. Same sequential executor, not independent Formal GO attestations.",
+    "ISC source/freeze -> EC/APC/Parameter/Root -> authenticated ApplyQC initial anchor -> full Profile-v1 native source -> existing R2.1/R2.2 relation. Validator signatures do not replace storage-peer authority."
+  ],
+  "proposal": {
+    "instructions": "Полное ранее выданное разрешение R2.3 сохраняется. Отдельное решение этого request — разрешить один bounded specification-only документ Storage Availability Source Binding v1 для конкретного недостающего original AvailabilityAttestation/AC binding. Сначала использовать уже утверждённый exact applicable contract, если оператор укажет его immutable source/evidence path; не изобретать замену существующему. Если такого контракта нет, подготовить один конкретный reviewable proposed byte/source contract: существующий issuer/storage peer и его допустимый источник identity/key authority, exact shard/length/retention/context binding, original AC/content identity, canonical/signable bytes либо уже существующий иной нормативный способ удостоверения, verification и compatibility consequences. Максимально переиспользовать первоначальный storage/availability contract, не назначать validator keys storage peers и не считать faithful T bytes доказательством истинности AC. Если без нового trust root/authority, producer rule или изменения frozen profile это невозможно, показать точную архитектурную границу и варианты, не выбирать её автоматически. Это разрешение подготовить документ, не утверждение ещё неизвестных byte-level механизмов. После документа снова STOP для exact human semantic decision до implementation/proofs на его основании. Не добавлять четвёртый residual/новый proof layer; решается зависимость существующего R2.3. Не возобновлять граф ради обхода pending decision; обычные reviewer gates сохраняются.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+      "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged. Future proposed generation does not migrate, relabel or resign legacy objects.",
+      "No new authority/trust root or profile expansion: preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "No invented producer rule or authentication for worker/storage/beacon objects by validator-key substitution. Existing original producer/dependency/source verification remains mandatory.",
+      "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim, review/qualification gate waiver or claim that sequential self-review is independent attestation.",
+      "R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved. No full R3; named recovery theorem only after reviewed substantive R2.3 closure.",
+      "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, hidden source caps, lineage truncation, weakened invariants or evidence relabel.",
+      "No new sprint, graph reimport/reset/manual promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve assignments, reviews, all scope/ACK history, frozen refs, foreign files and healthy demos.",
+      "This request authorizes only one specification document if approved; no storage codec implementation, new source-success predicate/proof or production producer change based on its unapproved draft.",
+      "No silent use of SIG-ISC/NSG1, validator keys, TLS/authenticationTag, local-volume trust or structural proof success as storage-attestation authorization. No new storage authority is approved by this request."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PROPOSED_NEW_SEMANTIC_DECISION_NOT_EXISTING_AUTHORIZATION",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
