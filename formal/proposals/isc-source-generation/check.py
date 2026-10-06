@@ -88,6 +88,8 @@ def main() -> None:
         "distinctLegacyHeader",
         "fullPolicyRoundTrip",
         "fullPolicyNoErasure",
+        "snapshotLineageRetained",
+        "fullPolicyOutsideSnapshotRetained",
     ]
     audit = "import SourcePolicy\nimport SourceBudget\n" + "".join(
         "#print axioms DeltaReduce.ISCSourceV2." + name + "\n" for name in names

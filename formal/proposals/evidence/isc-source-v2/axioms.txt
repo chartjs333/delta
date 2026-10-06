@@ -8,6 +8,8 @@
 'DeltaReduce.ISCSourceV2.distinctLegacyHeader' does not depend on any axioms
 'DeltaReduce.ISCSourceV2.fullPolicyRoundTrip' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ISCSourceV2.fullPolicyNoErasure' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.snapshotLineageRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.fullPolicyOutsideSnapshotRetained' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ISCSourceV2.Budget.walSufficient' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ISCSourceV2.Budget.outputSufficient' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ISCSourceV2.Budget.logicalResponseSufficient' depends on axioms: [propext, Classical.choice, Quot.sound]

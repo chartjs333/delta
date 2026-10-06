@@ -1,0 +1,57 @@
+{
+  "task_id": "ISC-S16-D01",
+  "scope_revision": 3,
+  "status": "MISSING_NON_ISC_SIGNATURE_BINDING",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/verifier.hpp",
+      "sha256": "934835e7f5e8f9bca7ceb8006557b6dcb357807f81717a3c86d88346f0247ff9"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/vote_admission.cpp",
+      "sha256": "655b74601e163c62242a6ede4f93b2749ef32eb7828caaef9d32e7e63b8ce1ef"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/certificate_runtime.cpp",
+      "sha256": "d10db55f112976f79ff96aeabf0b60a3c2c632d4033d7d8acd587679be7ae6dd"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+      "sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae"
+    }
+  ],
+  "dispatch_probe": {
+    "sha256": "a13a3dacc8d1ff4f2fdd9488ceaa4dcebad05b44ac51864287a4afe5a216ea5c",
+    "bytes": 594,
+    "outcome": "vote profile dispatch mismatch",
+    "is_normative_apply_encoding": false
+  },
+  "argument": "Pinned verify_apply takes typed objects and IDs, not signature evidence/keys; equal arguments cannot distinguish missing from genuine signatures. Approved ISC codec rejects non-ISC kinds.",
+  "limits": [
+    "Source/API insufficiency, not a production-reachable forged snapshot.",
+    "No new non-ISC signed bytes or authentication assumptions selected.",
+    "No runtime, legacy identity, profile trust or production model change."
+  ],
+  "audit_script_sha256": "cda8563668fa63f7d32285212ac56ea026251035959818dcf96662cb2aa2fc8b"
+}

@@ -6,6 +6,10 @@ test_complete_w1_and_result_sizes_are_exact (test_budget.BudgetTests.test_comple
 test_duplicate_event_index_is_not_normalized (test_budget.BudgetTests.test_duplicate_event_index_is_not_normalized) ... ok
 test_finer_command_and_effect_budget_fail_before_append (test_budget.BudgetTests.test_finer_command_and_effect_budget_fail_before_append) ... ok
 test_repeated_delivery_and_view_change_do_not_reset_counter (test_budget.BudgetTests.test_repeated_delivery_and_view_change_do_not_reset_counter) ... ok
+test_different_arrival_cuts_same_b_distinct_c_no_replay_reassembly (test_finalization.CandidateTests.test_different_arrival_cuts_same_b_distinct_c_no_replay_reassembly) ... ok
+test_exact_parent_closed_list_time_and_identity_roles_required (test_finalization.CandidateTests.test_exact_parent_closed_list_time_and_identity_roles_required) ... ok
+test_full_prior_lineage_and_original_delivery_inventory_retained (test_finalization.CandidateTests.test_full_prior_lineage_and_original_delivery_inventory_retained) ... ok
+test_repeat_does_not_create_quorum_and_bad_duplicate_material_rejects (test_finalization.CandidateTests.test_repeat_does_not_create_quorum_and_bad_duplicate_material_rejects) ... ok
 test_duplicate_members_rejected_before_typed_construction (test_identity.IdentityTests.test_duplicate_members_rejected_before_typed_construction) ... ok
 test_frozen_fr004_normative_vectors (test_identity.IdentityTests.test_frozen_fr004_normative_vectors) ... ok
 test_noncanonical_and_legacy_certificates_rejected (test_identity.IdentityTests.test_noncanonical_and_legacy_certificates_rejected) ... ok
@@ -20,6 +24,6 @@ test_only_two_approved_parent_insertions (test_policy.PolicyTests.test_only_two_
 test_parent_bytes_preserved_in_both_policy_positions (test_policy.PolicyTests.test_parent_bytes_preserved_in_both_policy_positions) ... ok
 
 ----------------------------------------------------------------------
-Ran 20 tests in 1.213s
+Ran 24 tests in 1.188s
 
 OK

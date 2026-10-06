@@ -147,4 +147,52 @@ theorem fullPolicyNoErasure {left right raw}
     (b : encode (successor fmtPolicy) right = some raw) : left = right :=
   NativePolicyCodec.encodingInjective a b
 
+/-- W1 changes exactly two existing snapshot memberships. This field operation
+does not decide source legality, quorum, durability or phase. -/
+def replaceField : Format → Value → String → Value → Option Value
+  | .field name _ tail, .pair head rest, key, replacement =>
+    if key = name then some (.pair replacement rest)
+    else (replaceField tail rest key replacement).map (.pair head)
+  | _, _, _, _ => none
+
+theorem replacedOther {fmt before after key replacement observed}
+    (ok : replaceField fmt before key replacement = some after)
+    (different : observed ≠ key) : lookup fmt after observed = lookup fmt before observed := by
+  induction fmt generalizing before after with
+  | field name head tail ihHead ihTail =>
+    cases before <;> simp only [replaceField] at ok <;> try contradiction
+    case pair a b =>
+      by_cases same : key = name
+      · simp only [same,ite_true] at ok
+        cases Option.some.inj ok
+        simp [lookup,← same,different]
+      · simp only [same,ite_false,Option.map_eq_some_iff] at ok
+        obtain ⟨rest,hr,he⟩ := ok
+        cases he
+        by_cases atHead : observed = name
+        · simp [lookup,atHead]
+        · simp only [lookup,atHead,ite_false]
+          exact ihTail hr
+  | _ => cases before <;> simp [replaceField] at ok
+
+def snapshotDelta (before certificates finalized : Value) : Option Value := do
+  let intermediate ← replaceField (successor fmtSnapshot) before
+    "input_set_certificates" certificates
+  replaceField (successor fmtSnapshot) intermediate "finalized_input_set_ids" finalized
+
+theorem snapshotLineageRetained {before after certificates finalized field}
+    (ok : snapshotDelta before certificates finalized = some after)
+    (notWitness : field ≠ "input_set_certificates")
+    (notIndex : field ≠ "finalized_input_set_ids") :
+    lookup (successor fmtSnapshot) after field = lookup (successor fmtSnapshot) before field := by
+  simp only [snapshotDelta,bind,Option.bind_eq_some_iff] at ok
+  obtain ⟨middle,hm,ha⟩ := ok
+  exact (replacedOther ha notIndex).trans (replacedOther hm notWitness)
+
+theorem fullPolicyOutsideSnapshotRetained {before after snapshot field}
+    (ok : replaceField (successor fmtPolicy) before "snapshot" snapshot = some after)
+    (different : field ≠ "snapshot") :
+    lookup (successor fmtPolicy) after field = lookup (successor fmtPolicy) before field :=
+  replacedOther ok different
+
 end DeltaReduce.ISCSourceV2

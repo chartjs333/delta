@@ -34,12 +34,25 @@ result bytes before any append; it does not truncate history or establish public
 state bounds. Full source-history linkage must ensure the supplied inventory is
 the complete original cut for the actor/origin/epoch/round.
 
+`finalization.py` composes exact authenticated deliveries, complete matching
+signers and the W1 P0-to-P1 membership delta. Prior certificate variants and all
+other policy/snapshot fields survive. A finalized round requires its original
+replay receipt instead of reassembling a witness from later arrivals. `Cut` is
+primitive source input, not provenance authority. This component does not
+establish phase, complete delivery occurrence, the frozen ledger's origin or
+the full producer transition. No append, durability or exposure is implemented.
+
 `formal/proposals/isc-source-generation/SourcePolicy.lean` proves typed source
 round trips, exact parent extraction, complete structural field preservation
 and injectivity of the full successor policy encoding. It imports no public
 relation. `SourceBudget.lean` proves the approved W1/output size implications
 from the already selected admission caps. Neither theorem assumes public success.
 These are source-binding components, not a general producer-origin theorem.
+The additional field-update lemmas prove retention of every snapshot field
+outside the two W1 memberships and every policy field outside its snapshot,
+without an empty-lineage premise. They do not establish validity of the original
+contents. The synthetic composition fixture keeps opaque nonempty sentinel
+collections; it is deliberately not a qualified source snapshot.
 
 Reproduce with the previously authenticated local backend (no download required):
 
