@@ -64,8 +64,14 @@ D:/delta-main-demo/.venv/Scripts/ruff.exe check formal/reference/isc_source form
 
 The checker verifies the exact approved Git blob, rebuilds the complete Lean
 dependency closure, audits theorem axioms and records source hashes and local
-reference results in `formal/proposals/evidence/isc-source-v2/`. The only reported
-Lean axioms are standard foundations; no `sorryAx` or custom oracle is accepted.
+reference results in `formal/proposals/evidence/isc-source-v2/`. Source-file
+identity uses tracked UTF-8 text normalized from CRLF to LF, matching
+Git blobs; the receipt states that rule explicitly. Protocol/signed/binary bytes
+are never normalized. The receipt at `7dc4b546` had one working-tree CRLF digest
+for `policy-layout.json`; evidence review rejected that mismatch. The subsequent
+receipt repairs the source fingerprint, not the old result or protocol objects.
+The only reported Lean axioms are standard foundations; no `sorryAx` or custom
+oracle is accepted.
 Public synthetic fixtures test byte and crypto composition, not authenticated
 production histories or independent attestations.
 

@@ -24,6 +24,6 @@ test_only_two_approved_parent_insertions (test_policy.PolicyTests.test_only_two_
 test_parent_bytes_preserved_in_both_policy_positions (test_policy.PolicyTests.test_parent_bytes_preserved_in_both_policy_positions) ... ok
 
 ----------------------------------------------------------------------
-Ran 24 tests in 1.188s
+Ran 24 tests in 1.303s
 
 OK

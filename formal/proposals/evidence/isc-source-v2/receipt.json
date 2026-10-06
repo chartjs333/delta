@@ -7,6 +7,7 @@
     "sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd"
   },
   "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
+  "source_hash_canonicalization": "Tracked UTF-8 source text with CRLF normalized to LF, matching Git blobs. This applies only to sources/reference/checker source hashes; original protocol, signed artifact and binary hashes are never normalized.",
   "sources": {
     "SourcePolicy": {
       "path": "formal/proposals/isc-source-generation/SourcePolicy.lean",
@@ -134,16 +135,16 @@
     "formal/reference/isc_source/budget.py": "4a5d534adb2da95cfbf797c26c231161fa68efb9640676fcbc401ffe976917a0",
     "formal/reference/isc_source/finalization.py": "0b35dd3d09828d80e4771f48688ecfbf1527354e4d209a5d470e3986ba125191",
     "formal/reference/isc_source/identity.py": "23bc5b5c6b9088b8e47faa347a69d3e615d0eee0f0294172427e1c925b21c13a",
-    "formal/reference/isc_source/policy-layout.json": "88f4df6a7e929629b9954747c023f4f29c7bf2f632a0d7cfd8b28aa744df7f5b",
+    "formal/reference/isc_source/policy-layout.json": "dbc992e9155b768b4f92fb25a05c883aae80763c473e402336b58c23b5d32799",
     "formal/reference/isc_source/policy.py": "6dcd4d272a1426baa076bb53fc5c61b33ce6f4dceb3be2150ebe246dd0d12783",
-    "formal/reference/isc_source/README.md": "d3fae3168b529c8ba101d54a973c6aa2974faa292a315146383475d8120c1178",
+    "formal/reference/isc_source/README.md": "c53d1e9616c18d0b250d68135434ba3e9fc49c1bcee1d202a400c70702c691bb",
     "formal/reference/isc_source/test_authentication.py": "9e7a56ed6506e9c1138373c939d0bc5118b793dd47c426516032ce30857a8282",
     "formal/reference/isc_source/test_budget.py": "069ef659cd6451c35b7b0d907b9d45f98a7eb50f876ce0e57cdd0fe0ebe25304",
     "formal/reference/isc_source/test_finalization.py": "0b7cbb65c11168c4ccccddc03f65044fdd99105899a003636144900a0c0f24b8",
     "formal/reference/isc_source/test_identity.py": "0cd5271e13aa5e16e2fe8b3189836ed222591785683991f7b0c8a1ee1d1c1740",
     "formal/reference/isc_source/test_policy.py": "8ee6f396ba5b999650392f5d2f9716d8ed7ac0ac4e4f70586562cae8434e0350"
   },
-  "checker_sha256": "70bab21d6b388a476aa14de23d20c555f4c08f881ea2ced244b66531c0a0899c",
+  "checker_sha256": "1a04e559af7d139ec09452a7c64a575e66270aca92cb2da50cf491e931f3f8a3",
   "axioms_sha256": "127183153db9142af645d0d82fa6deaeb78d7e93ac4de54f62b5473d421d1eaf",
   "reference_test_exit": 0,
   "result": "SUCCESSOR_SOURCE_REPRESENTATION_COMPONENTS_CHECKED",

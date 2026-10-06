@@ -23,6 +23,11 @@ def digest(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def source_digest(raw: bytes) -> str:
+    """Tracked text identity; protocol artifacts and crypto bytes are untouched."""
+    return digest(raw.replace(b"\r\n", b"\n"))
+
+
 def main() -> None:
     exact = subprocess.check_output(["git", "show", f"{PIN}:{AMENDMENT}"], cwd=ROOT)
     if digest(exact) != AMENDMENT_SHA:
@@ -41,7 +46,7 @@ def main() -> None:
         else:
             raise RuntimeError("Unreviewed import: " + name)
         raw = path.read_bytes()
-        sources[name] = {"path": path.relative_to(ROOT).as_posix(), "sha256": digest(raw)}
+        sources[name] = {"path": path.relative_to(ROOT).as_posix(), "sha256": source_digest(raw)}
         text = raw.decode("utf-8-sig")
         for child in re.findall(r"^import\s+(\S+)", text, re.M):
             visit(child)
@@ -142,14 +147,19 @@ def main() -> None:
         "scope_revision": 3,
         "approved_contract": {"commit": PIN, "path": AMENDMENT, "sha256": AMENDMENT_SHA},
         "lean": version,
+        "source_hash_canonicalization": (
+            "Tracked UTF-8 source text with CRLF normalized to LF, matching Git blobs. "
+            "This applies only to sources/reference/checker source hashes; "
+            "original protocol, signed artifact and binary hashes are never normalized."
+        ),
         "sources": sources,
         "checks": checks,
         "reference": {
-            p.relative_to(ROOT).as_posix(): digest(p.read_bytes())
+            p.relative_to(ROOT).as_posix(): source_digest(p.read_bytes())
             for p in sorted(reference.iterdir())
             if p.suffix in {".py", ".json", ".md"}
         },
-        "checker_sha256": digest(Path(__file__).read_bytes()),
+        "checker_sha256": source_digest(Path(__file__).read_bytes()),
         "axioms_sha256": digest(log.encode()),
         "reference_test_exit": process.returncode,
         "result": "SUCCESSOR_SOURCE_REPRESENTATION_COMPONENTS_CHECKED",
