@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "ISC-S16-CONTINUITY",
+    "ISC-S16-D01",
+    "T047",
+    "T053"
+  ],
+  "created_at_utc": "2026-10-06T03:01:47.667194+00:00",
+  "outcome": "RESUME_FORMAL",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN",
+  "assignment_id": "bf4df936-26e4-494d-a32d-c35eea1c1fc0",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "decision": {
+    "decision_id": "scope-decision-440f81e578f29a53a34a33be3ebc21aa",
+    "request_id": "scope-request-2875d41baa78314041627a691f641cf3",
+    "idempotency_key": "489aefcd-462e-4499-82f6-8bc9d780c95f",
+    "request_sha256": "440f81e578f29a53a34a33be3ebc21aa32a7ebcc67e86ab99daaa6d8a2e65c95",
+    "action": "approve",
+    "actor": "operator-cc5bc065ef022225",
+    "timestamp": "2026-10-06T02:57:03.363250+00:00",
+    "reason": "",
+    "authorization": {
+      "request_id": "scope-request-2875d41baa78314041627a691f641cf3",
+      "decision_id": "scope-decision-440f81e578f29a53a34a33be3ebc21aa",
+      "validation_id": "scope-validation-1db3c55dbd30e442bac9815f25510086",
+      "proposal_sha256": "d59156acca0ce0231a0c46b4097f7f1365dacf747b6030b3339d1a7853ddaa45",
+      "actor": "operator-cc5bc065ef022225",
+      "origin": "human_decision",
+      "provenance": null
+    },
+    "response": {
+      "request_id": "scope-request-2875d41baa78314041627a691f641cf3",
+      "decision_id": "scope-decision-440f81e578f29a53a34a33be3ebc21aa",
+      "action": "approve",
+      "status": "applied",
+      "receipt": {
+        "schema_version": 2,
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "assignment_id": "bf4df936-26e4-494d-a32d-c35eea1c1fc0",
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+          "effective_revision": 3,
+          "assignment_id": "bf4df936-26e4-494d-a32d-c35eea1c1fc0",
+          "node_id": "continuity-coordinator",
+          "phase": "node",
+          "agent_id": "isc-s16-continuity-coordinator",
+          "occurrence": 5,
+          "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+          "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+          "effective_scope_sha256": "0c54bea368dd1fdbdf0ed6efe3d57af65d5699afee543ccfde9484c0ec3fede3",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true
+        },
+        "effective_scope_sha256": "0c54bea368dd1fdbdf0ed6efe3d57af65d5699afee543ccfde9484c0ec3fede3",
+        "assignment_preserved": true,
+        "graph_advanced": false,
+        "queue_changed": false,
+        "deduplicated": false,
+        "before_effective_sha256": "44c65665e2b5277451e03377daa8a5c41085ac5a57838bf2b34f056b84b67608",
+        "after_effective_sha256": "92e040c4c64683371521cd6a78166ffeb478a9990621cbf5d602234d6fe8c454"
+      },
+      "execution_revision": 97,
+      "scope_revision": 3,
+      "graph_advanced": false,
+      "deduplicated": false
+    }
+  },
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+    "effective_revision": 3,
+    "assignment_id": "bf4df936-26e4-494d-a32d-c35eea1c1fc0",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 5,
+    "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+    "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+    "effective_scope_sha256": "0c54bea368dd1fdbdf0ed6efe3d57af65d5699afee543ccfde9484c0ec3fede3",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "ack_receipt": {
+    "schema_version": 1,
+    "project_id": "9000",
+    "assignment_id": "bf4df936-26e4-494d-a32d-c35eea1c1fc0",
+    "acknowledgement": {
+      "ack_id": "scope-ack-370e4ac8aca6de95a597012d5c5fc0c0",
+      "assignment_id": "bf4df936-26e4-494d-a32d-c35eea1c1fc0",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+      "effective_revision": 3,
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "assignment_id": "bf4df936-26e4-494d-a32d-c35eea1c1fc0",
+        "node_id": "continuity-coordinator",
+        "phase": "node",
+        "agent_id": "isc-s16-continuity-coordinator",
+        "occurrence": 5,
+        "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+        "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+        "effective_scope_sha256": "0c54bea368dd1fdbdf0ed6efe3d57af65d5699afee543ccfde9484c0ec3fede3",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true
+      },
+      "acknowledged_at": "2026-10-06T05:01:11.760744+02:00"
+    },
+    "deduplicated": false,
+    "execution_revision": 98
+  },
+  "source_contract": {
+    "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+    "path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+    "sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd"
+  },
+  "checks": {
+    "source_hash_verified": true,
+    "effective_core_hash_verified": true,
+    "same_assignment_before_after_ack": true,
+    "ack_does_not_advance_graph": true,
+    "execution_revision_after_ack": 98
+  },
+  "next_work": [
+    "Use isolated versioned feature-000 reference/proposal files for the newly approved exact source generation; do not edit or relabel legacy runtime/semantics/evidence.",
+    "Qualify full Profile-v1 source origin and family applicability, including source legality, complete retained inventory, b/c identities, S-RANK and bounds; derive premises instead of assuming public success.",
+    "Return actual R2.3 result through both review gates before nativeArithmeticRecoveryRefines and axiom/qualification gates."
+  ],
+  "limits": [
+    "No production integration, guard removal, new trust/profile expansion or full R3.",
+    "No concrete sigma_next assignment, no migration/relabel of old IDs.",
+    "Sequential process reviews are not independent Formal GO attestations.",
+    "Any newly falsified semantic contract requires a Pending decision, not an automatic fix."
+  ]
+}
