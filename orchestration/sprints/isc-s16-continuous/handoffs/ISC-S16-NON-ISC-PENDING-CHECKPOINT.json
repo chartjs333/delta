@@ -1,0 +1,260 @@
+{
+  "record_type": "orchestration_checkpoint_not_formal_attestation",
+  "project_id": "9000",
+  "sprint_id": "sprint-0001-783ef52c",
+  "execution": {
+    "revision": 128,
+    "status": "active",
+    "phase": "node",
+    "current_agent_id": "isc-s16-continuity-coordinator",
+    "current_assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+    "requires_scope_ack": false
+  },
+  "scope_workflow_revision": 9,
+  "effective_scope_revision": 3,
+  "persisted_acks": [
+    {
+      "role": "architecture",
+      "acknowledged": true,
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "assignment_id": "a20ea0d7-474d-4a8e-824c-67f64a554d13",
+        "node_id": "formal-linkage",
+        "phase": "review",
+        "agent_id": "isc-s16-continuous-architecture-reviewer",
+        "occurrence": 6,
+        "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+        "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+        "effective_scope_sha256": "bc342f0ab53e089dbad5855c4ad709f352f3ecbf44eb228e79656854aa38b43d",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true,
+        "source_assignment_id": "0ea0e4af-b1d6-4b72-af4d-b858d172ca32",
+        "reviewed_source_scope_context_sha256": "ad8147f3ad6657ebe1058b5394487a3c8eb257284f8a131e5dc2e5f8498f2388"
+      },
+      "acknowledgement": {
+        "ack_id": "scope-ack-ebfbe2ed0446353ac0b94ef571d0b9ef",
+        "assignment_id": "a20ea0d7-474d-4a8e-824c-67f64a554d13",
+        "agent_id": "isc-s16-continuous-architecture-reviewer",
+        "agent_phone": "2791",
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+          "effective_revision": 3,
+          "assignment_id": "a20ea0d7-474d-4a8e-824c-67f64a554d13",
+          "node_id": "formal-linkage",
+          "phase": "review",
+          "agent_id": "isc-s16-continuous-architecture-reviewer",
+          "occurrence": 6,
+          "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+          "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+          "effective_scope_sha256": "bc342f0ab53e089dbad5855c4ad709f352f3ecbf44eb228e79656854aa38b43d",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true,
+          "source_assignment_id": "0ea0e4af-b1d6-4b72-af4d-b858d172ca32",
+          "reviewed_source_scope_context_sha256": "ad8147f3ad6657ebe1058b5394487a3c8eb257284f8a131e5dc2e5f8498f2388"
+        },
+        "acknowledged_at": "2026-10-06T10:54:13.439463+02:00"
+      }
+    },
+    {
+      "role": "evidence",
+      "acknowledged": true,
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "assignment_id": "ad0e59f9-9e82-4c1c-9cb7-eb8f4150d4fa",
+        "node_id": "formal-linkage",
+        "phase": "review",
+        "agent_id": "isc-s16-continuous-evidence-reviewer",
+        "occurrence": 6,
+        "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+        "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+        "effective_scope_sha256": "bc342f0ab53e089dbad5855c4ad709f352f3ecbf44eb228e79656854aa38b43d",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true,
+        "source_assignment_id": "0ea0e4af-b1d6-4b72-af4d-b858d172ca32",
+        "reviewed_source_scope_context_sha256": "ad8147f3ad6657ebe1058b5394487a3c8eb257284f8a131e5dc2e5f8498f2388"
+      },
+      "acknowledgement": {
+        "ack_id": "scope-ack-eae244d4fa2009df7c7f9cf9930ed14d",
+        "assignment_id": "ad0e59f9-9e82-4c1c-9cb7-eb8f4150d4fa",
+        "agent_id": "isc-s16-continuous-evidence-reviewer",
+        "agent_phone": "2792",
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+          "effective_revision": 3,
+          "assignment_id": "ad0e59f9-9e82-4c1c-9cb7-eb8f4150d4fa",
+          "node_id": "formal-linkage",
+          "phase": "review",
+          "agent_id": "isc-s16-continuous-evidence-reviewer",
+          "occurrence": 6,
+          "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+          "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+          "effective_scope_sha256": "bc342f0ab53e089dbad5855c4ad709f352f3ecbf44eb228e79656854aa38b43d",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true,
+          "source_assignment_id": "0ea0e4af-b1d6-4b72-af4d-b858d172ca32",
+          "reviewed_source_scope_context_sha256": "ad8147f3ad6657ebe1058b5394487a3c8eb257284f8a131e5dc2e5f8498f2388"
+        },
+        "acknowledged_at": "2026-10-06T10:56:18.33063+02:00"
+      }
+    },
+    {
+      "role": "coordinator",
+      "acknowledged": true,
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+        "node_id": "continuity-coordinator",
+        "phase": "node",
+        "agent_id": "isc-s16-continuity-coordinator",
+        "occurrence": 6,
+        "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+        "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+        "effective_scope_sha256": "0c54bea368dd1fdbdf0ed6efe3d57af65d5699afee543ccfde9484c0ec3fede3",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true
+      },
+      "acknowledgement": {
+        "ack_id": "scope-ack-bc80438ceccdaf10650b6e2aab522456",
+        "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+        "agent_id": "isc-s16-continuity-coordinator",
+        "agent_phone": "2750",
+        "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+        "effective_revision": 3,
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-2e75dc31c8adbf3e5ac44c993831a931",
+          "effective_revision": 3,
+          "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+          "node_id": "continuity-coordinator",
+          "phase": "node",
+          "agent_id": "isc-s16-continuity-coordinator",
+          "occurrence": 6,
+          "source_commit": "3bd1f9dd7c536cc2985d78713e4df1ac83183df4",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-SOURCE-GENERATION-DECISION.json",
+          "source_sha256": "a067c92a311dca8543a2a1c74b35b02c04d75394f401fb24a2696edf0dec8d12",
+          "effective_scope_sha256": "0c54bea368dd1fdbdf0ed6efe3d57af65d5699afee543ccfde9484c0ec3fede3",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true
+        },
+        "acknowledged_at": "2026-10-06T10:58:17.882574+02:00"
+      }
+    }
+  ],
+  "reviewed_transition": {
+    "transition_id": "027b52b8-841c-43ea-a2f3-764ed835266f",
+    "source_node_id": "formal-linkage",
+    "source_agent_id": "isc-s16-formal-linkage-engineer",
+    "source_agent_name": "Delta ISC Formal Linkage Engineer",
+    "source_agent_phone": "2753",
+    "source_git_branch": "agent/isc-s16-formal-linkage",
+    "source_assignment_id": "0ea0e4af-b1d6-4b72-af4d-b858d172ca32",
+    "outcome": "NEED_DECISION",
+    "target_node_id": "continuity-coordinator",
+    "status": "approved",
+    "proposed_at": "2026-10-06T03:55:25.008359+00:00",
+    "resolved_at": "2026-10-06T08:56:45.833507+00:00",
+    "applied_target_node_id": "continuity-coordinator",
+    "feedback": "",
+    "reviews": [
+      {
+        "reviewer_index": 1,
+        "reviewer_agent_id": "isc-s16-continuous-architecture-reviewer",
+        "reviewer_name": "Delta ISC Continuous Architecture Reviewer",
+        "assignment_id": "a20ea0d7-474d-4a8e-824c-67f64a554d13",
+        "decision": "APPROVE",
+        "feedback": "Architecture re-review of source result 4c99272e9e9f4640ed51cf34bef81516630329a5, from 7dc4b546. The four-file rework explicitly normalizes tracked text fingerprints to LF only; signed/protocol/binary bytes and semantic/proof definitions are untouched, and rejected historical evidence is retained. Read exact amendment and Profile-v1 authority clauses: ISC-only preimages cannot silently cover ApplyQC; pinned typed-object verifier cannot supply absent signature/key binding. APPROVE the honest NEED_DECISION route to coordinator and the scoped fingerprint repair, not R2.3 closure, any new signing contract or Formal GO. Full source/Profile/public-family relation and applicable qualification remain OPEN/NO_GO. No production integration, domain narrowing or gate waiver. Same sequential executor, not independent attestation; reviewer branch unchanged.",
+        "reviewed_at": "2026-10-06T08:55:02.351644+00:00"
+      },
+      {
+        "reviewer_index": 2,
+        "reviewer_agent_id": "isc-s16-continuous-evidence-reviewer",
+        "reviewer_name": "Delta ISC Continuous Evidence Reviewer",
+        "assignment_id": "ad0e59f9-9e82-4c1c-9cb7-eb8f4150d4fa",
+        "decision": "APPROVE",
+        "feedback": "Evidence re-review of exact 4c99272e from 7dc4b546 after persisted scope3 ACK. Recomputed all advertised Lean/reference/checker source SHA256 from committed Git blobs, all authority-audit pinned blobs and audit script, every Lean log fingerprint and axiom log fingerprint: match. Previously rejected policy-layout CRLF fingerprint now equals the committed LF blob; documented source-only normalization does not touch signed/protocol/binary artifacts, and the original rejection/receipt remain in history. Existing fresh component checks and standard-foundation axiom audit support only stated components; no full formal-check or production history is claimed. The Apply authentication boundary is source/API insufficiency, not a production-reachable forged-history claim. APPROVE NEED_DECISION routing to coordinator, retaining R2.3 OPEN/Formal NO_GO and all gates. No new non-ISC contract approved. Same sequential executor, not independent Formal GO attestation; reviewer branch unchanged.",
+        "reviewed_at": "2026-10-06T08:56:45.833507+00:00"
+      }
+    ],
+    "result_available": true,
+    "result_chars": 2050
+  },
+  "pending_request": {
+    "request_id": "scope-request-a96d54e8001fef83987ff5350604b0bc",
+    "idempotency_key": "delta-isc-s16-r23-nonisc-authority-decision-20261006",
+    "request_sha256": "a96d54e8001fef83987ff5350604b0bc458b94047f6072336c9f244b163d4e05",
+    "identity": {
+      "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "occurrence": null,
+      "occurrence_id": null,
+      "source_assignment_id": null
+    },
+    "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+    "base_scope_revision": 3,
+    "execution_revision": 128,
+    "created_at": "2026-10-06T11:01:17.37151+02:00",
+    "reason": "MISSING_NON_ISC_SIGNATURE_BINDING: reviewed checkpoint 4c99272e9e9f4640ed51cf34bef81516630329a5 доказывает недостаточность существующего source binding для ApplyQC. Snapshot Provenance Profile v1 требует original valid Apply signatures даже для provisioned initial anchor. Exact approved ADR0014, section 3, задаёт только SIG-ISC и явно не выбирает EC/APC/Apply preimages. Pinned verify_apply получает typed objects и signer IDs, но не original signatures/keys. Его структурный успех нельзя объявить аутентификацией. Нужен следующий semantic contract decision; повторное разрешение всего R2.3 не требуется.",
+    "dependencies": [
+      "Snapshot Provenance Profile v1 checkpoint-authority step 3 → source-origin admission → existing R2.1/R2.2 relation.",
+      "Exact reviewed boundary and immutable evidence: 4c99272e9e9f4640ed51cf34bef81516630329a5:orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-R23-NON-ISC-AUTHORITY-BOUNDARY.md.",
+      "Architecture and evidence reviews APPROVE transition 027b52b8-841c-43ea-a2f3-764ed835266f, retaining R2.3 OPEN/Formal NO_GO; sequential same-executor reviews are not independent attestations."
+    ],
+    "proposal": {
+      "instructions": "Полное разрешение R2.3, затем reviewed closure, DeltaReduce.nativeArithmeticRecoveryRefines и применимые gates сохраняется. Новое решение для этого request: разрешить один консолидированный specification-only decision document для недостающего non-ISC authority/signature binding существующей Profile-v1 source chain. Минимальный anchor — ApplyQC; в том же документе конечным перечнем учесть существующие non-ISC зависимости его исходной certificate/vote lineage. Сначала перечислить реально переиспользуемые exact contracts; затем дать конкретный предлагаемый closed signed-byte/artifact/key-role binding и compatibility consequences только для будущего source generation. Сохранять independently provisioned fixed epoch/validator authority и исходные voted-body/certificate dependencies. Не переносить SIG-ISC на другие kinds неявно. Если уже существует утверждённый exact applicable contract, принять только проверяемый immutable reference вместо изобретения замены. Результат — один reviewable документ с конечными verification obligations, а не новый открытый список требований. После документа STOP: фактический новый semantic byte/signature contract потребует отдельного human decision до реализации или доказательств, использующих его. Это request на снятие запрета проектировать отсутствующий non-ISC контракт, не утверждение нового алгоритма, GO, R2.3 closure или source validity. Уже разрешённые обычные helpers не требуют отдельного согласия, но не могут обойти конкретный незакрытый authority binding. Graph identity/branches/review gates сохраняются; не отправлять RESUME_* ради обхода ожидания этого решения.",
+      "retained_restrictions": [
+        "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal.",
+        "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged; no migration or relabel.",
+        "No new trust root/authority and no expansion beyond the enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+        "No non-ISC codec implementation, new proof assumption or producer rule based on an unapproved proposed contract. The requested document is specification-only.",
+        "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim or qualification/review gate waiver. R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved.",
+        "No full R3; named nativeArithmeticRecoveryRefines only after substantive reviewed R2.3 closure.",
+        "No sorry, hidden/circular axioms, opaque accept callbacks, public-success source predicates, vacuous proofs, hidden source caps, weakened invariants or evidence relabel.",
+        "No new sprint, graph reimport/reset, manual graph promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve all assignment/review/scope/ACK history, frozen refs, unrelated files and healthy demos."
+      ],
+      "node_ids": [
+        "continuity-coordinator",
+        "formal-linkage",
+        "formal-qualification"
+      ],
+      "reviewer_ids": [
+        "isc-s16-continuous-architecture-reviewer",
+        "isc-s16-continuous-evidence-reviewer"
+      ]
+    },
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "4cb065008d2f50bf02b83c7177bc53a4acd8aeff",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-NON-ISC-AUTHORITY-DECISION.json",
+      "sha256": "9cdc317af034b9bb1cb76250abfefc94508324a6995dc8607f8e4305c8a0af6e"
+    },
+    "authorization_provenance": null,
+    "status": "pending",
+    "deduplicated": false
+  },
+  "matching_human_decision_count": 0,
+  "worker_source_commit": "4c99272e9e9f4640ed51cf34bef81516630329a5",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "independent_attestations": false,
+  "infrastructure_ack_blocker": "RESOLVED"
+}
