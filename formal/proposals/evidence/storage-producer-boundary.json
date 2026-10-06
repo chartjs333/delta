@@ -1,0 +1,152 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "assignment_id": "b52fcd71-2a71-456e-86a0-f5c1691f58c9",
+  "effective_scope_revision": 7,
+  "ack_id": "scope-ack-9946f552dad9e7696d4b29ea5d9d240f",
+  "decision_id": "scope-decision-614a7db8512f59e36720131917827d4c",
+  "result": "MISSING_STORAGE_PRODUCING_HISTORY_BINDING",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "source_hash_rule": "Exact immutable Git blob bytes; no normalization.",
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "formal/tla/DeltaReduceAvailability.tla",
+      "sha256": "dc84f8cfd350fae97646cb318ff055af5d5df542e04ea15aba027daf961321a4"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/consensus.hpp",
+      "sha256": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/protocol.hpp",
+      "sha256": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/transition.cpp",
+      "sha256": "74e5a6e62cc1b6c4cd1e30a33cc983e522f22cb5f839942fbec5c707b48eb569"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/tests/prepared_100_test.cpp",
+      "sha256": "d531899c332490632830db9f76be90a522ba0e4bf73204f884964d45306a3ded"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/certificate_runtime.hpp",
+      "sha256": "0f1bdeebc0e54996e614af872fd0fd9497acef48495ed79cd5604323ab9a1c92"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/apply/ArtifactEffectAdapter.java",
+      "sha256": "71a58dc703172643c422d5fd927228f450190c7774042f6f25b580475f8211b3"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java",
+      "sha256": "bbaa7f622810257791e53333687e7cac88e148f19462eeaba78ce4fb264a6cc9"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-worker-python/src/deltatorrent/artifacts/filesystem.py",
+      "sha256": "0b26479c6a26f70cf273f6ad9f6bb730b3d271e5214d36183896c52d0d0f5273"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/003-bft-round-state-machine/spec.md",
+      "sha256": "ffe129366f152719b25925afed8b9bdebac8ddae9fcdd67b9fe255a6c0073821"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/003-bft-round-state-machine/formal-refinement.md",
+      "sha256": "32ed46548616f99545fbbd69510bfb4bfcdb5ec0f89ae3993a379a1b2f0e8499"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+    },
+    {
+      "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+      "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41"
+    },
+    {
+      "commit": "e766ef98748504779a9a88d06ee3760594c4184d",
+      "path": "formal/reference/isc_source/README.md",
+      "sha256": "c53d1e9616c18d0b250d68135434ba3e9fc49c1bcee1d202a400c70702c691bb"
+    }
+  ],
+  "native_call_inventory": {
+    "searched_code_file_count": 356,
+    "record_availability_occurrences": [
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/include/delta/core/consensus.hpp:421:  [[nodiscard]] Disposition record_availability(",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/src/consensus.cpp:626:Disposition InputLedger::record_availability(",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/consensus_test.cpp:1061:      ledger.record_availability(proof_a, leaves, attesters, 3U) ==",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/consensus_test.cpp:1065:      ledger.record_availability(proof_a, leaves, attesters, 3U) ==",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/consensus_test.cpp:1081:      ledger.record_availability(proof_b, leaves, attesters, 3U) ==",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/consensus_test.cpp:1100:        static_cast<void>(ledger.record_availability(incomplete, leaves, attesters, 3U));",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/consensus_test.cpp:1108:        static_cast<void>(ledger.record_availability(insufficient, leaves, attesters, 3U));",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/consensus_test.cpp:1116:        static_cast<void>(ledger.record_availability(wrong_threshold, leaves, attesters, 3U));",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/consensus_test.cpp:1123:        static_cast<void>(ledger.record_availability(wrong_parent, leaves, attesters, 3U));",
+      "60c692f6e391f839829dfc64e93380db54cd507b:delta-core-cpp/tests/prepared_100_test.cpp:300:        ledger.record_availability("
+    ],
+    "non_test_occurrences_are_declaration_and_definition_only": true
+  },
+  "guard_diagnostic": {
+    "kind": "Existing-guard evaluation, not a TLC/native execution",
+    "preconditions": "Existing committed ticket/content, CertificateProgressOpen, availability actions/faults enabled, content not yet frozen; one selected original leaf, others fully covered in both cuts.",
+    "common_prefix": [
+      "UploadArtifact and AttestAvailability for storage-1,2,3",
+      "Retain the same original authentic attestation statements"
+    ],
+    "cut_a": {
+      "available_attesters": [
+        "storage-1",
+        "storage-2",
+        "storage-3"
+      ],
+      "HasAttestationCoverage": true,
+      "HasCompleteAvailability": true,
+      "FinalizeAvailability_enabled_given_other_guards": true
+    },
+    "cut_b": {
+      "additional_original_action": "LoseArtifactPreFreeze(storage-3,content,leaf)",
+      "available_attesters": [
+        "storage-1",
+        "storage-2"
+      ],
+      "HasAttestationCoverage": true,
+      "HasCompleteAvailability": false,
+      "FinalizeAvailability_enabled_given_other_guards": false
+    },
+    "unchanged": "Original attestation bytes/IDs, signatures, signer identities, candidate D/ac and six AvailabilityProof fields can stay equal. No concrete SAG1 bytes or qualified AC are manufactured here.",
+    "negative_control": "Finalize at cut_a THEN lose a shard: the existing finalized AC remains in lineage; this audit does not demand deletion or current availability forever after finalization."
+  },
+  "missing_link": "An independently defined original native storage producer/observation and complete retained event binding sufficient to determine per-location availability at the original attestation/finalization cuts. The pinned coarse transition, six-field ledger, local artifact I/O and opaque transport do not supply that original event history.",
+  "limitations": [
+    "No claim that a forbidden FinalizeAvailability is production reachable.",
+    "No refutation of R2 totality for an independently valid full source bundle.",
+    "No claim that no external producer can exist; an immutable applicable contract/evidence is required.",
+    "No weakened source domain, new producer/observer/authority assumption or changed Init/Next.",
+    "No storage implementation, production change, Lean proof or semantics ID assigned.",
+    "Scope7 approves authentication bytes; it expressly does not discharge this source-origin obligation.",
+    "Bounds/full R2 composition remain unqualified; this audit stops at the first mandatory source gate."
+  ]
+}
