@@ -1,0 +1,86 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "record_type": "read-only-confirmed-pending-storage-producer-decision",
+  "observed_at": "2026-10-06T12:47:11.859154+00:00",
+  "project": "9000",
+  "sprint": "sprint-0001-783ef52c",
+  "execution": {
+    "revision": 176,
+    "phase": "node",
+    "status": "active",
+    "current_assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "current_node_id": "continuity-coordinator"
+  },
+  "scope_revision": 7,
+  "workflow_revision": 25,
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-f90ac34d219ff49c8e1ef2ad0e0f12da",
+    "effective_revision": 7,
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 8,
+    "source_commit": "c5b71677a320da9252c66482a34e867dc7343272",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-CONTRACT-APPROVAL.json",
+    "source_sha256": "818118b9da74254146fac8569ea85f8c69a625f5dc2c55b08c0dd0abae346746",
+    "effective_scope_sha256": "01c23d9eca6d7134c69d5ecb95487c83d0cee034bccea4cc275ff7a53e8571e8",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "ack_id": "scope-ack-73db8f79427b8715f3b6d3b19377e7cf",
+  "ack_get_confirmed": true,
+  "reviewed_worker_commit": "a2fd17259240be0a7721512e7a12fe972587f3bf",
+  "reviewed_transition_id": "e37078b0-3101-40da-bcaa-2b980d0fb90a",
+  "reviews": [
+    {
+      "reviewer_index": 1,
+      "reviewer_agent_id": "isc-s16-continuous-architecture-reviewer",
+      "reviewer_name": "Delta ISC Continuous Architecture Reviewer",
+      "decision": "APPROVE",
+      "feedback": "APPROVE NEED_DECISION, not R2 closure. Reviewed a2fd1725 against scope7 and immutable ADR0016 section6. Existing TLA guard distinguishes pre-finalization loss from later loss; authentic historical statements cannot establish availableArtifacts at the source cut. Native aggregate admission/coarse transition and local I/O boundaries do not supply that history. Audit explicitly scopes absence to inspected source, does not claim production exploit or R2-totality refutation, preserves lineage after legal finalization and introduces no producer/trust/model/domain change. Separate architectural input is warranted under the explicit STOP. Same executor process review, not independent attestation.",
+      "reviewed_at": "2026-10-06T12:37:59.790167+00:00",
+      "assignment_id": "3271a2b7-90d5-4164-af81-8a1273eec017",
+      "amendment_id": "scope-human-f90ac34d219ff49c8e1ef2ad0e0f12da",
+      "effective_revision": 7,
+      "scope_context_sha256": "70ec0109c2ee58f8059a95a4eec28b00948581fe603a48e741ebac29c18e75e4",
+      "scope_ack_id": "scope-ack-b5b1e773c45008c4d6c055bddbf7192f"
+    },
+    {
+      "reviewer_index": 2,
+      "reviewer_agent_id": "isc-s16-continuous-evidence-reviewer",
+      "reviewer_name": "Delta ISC Continuous Evidence Reviewer",
+      "decision": "APPROVE",
+      "feedback": "APPROVE NEED_DECISION only. Re-executed exact committed audit a2fd1725 from Git into temporary output, byte-for-byte matched committed evidence and independently recomputed every pinned source hash. Confirmed diff has only audit/report/evidence, remote branch contains exact commit, no runtime/schema/Lean/TLA edits. Diagnostic computes existing guards; it is explicitly neither TLC/native attack execution nor full profile counterexample. Missing source binding is not filled by a new oracle. Prior signature-byte approval and closed R2.1/R2.2 retained; R2.3 OPEN/Formal NO_GO. Same executor review is not independent attestation.",
+      "reviewed_at": "2026-10-06T12:41:05.878622+00:00",
+      "assignment_id": "ea38860c-3565-4cbc-9d4e-8b8ec502deb1",
+      "amendment_id": "scope-human-f90ac34d219ff49c8e1ef2ad0e0f12da",
+      "effective_revision": 7,
+      "scope_context_sha256": "e20e4aa9d5022c1f0393b76ef230437fcae12c0c34c0ef146beed911d9094d42",
+      "scope_ack_id": "scope-ack-17f32a461cbc4642ddb3ad25cc6b91c3"
+    }
+  ],
+  "request": {
+    "request_id": "scope-request-f06ccb71b8c73ea5a07e713cbbafc74c",
+    "idempotency_key": "delta-isc-s16-storage-producer-a2fd1725",
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "c531870eb9af25a25c70b4e7347e0e235a48933f",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-DECISION.json",
+      "sha256": "d8671747226539f3e0be33b101d8ba5aebaba63f713532934378a769299aeb11"
+    },
+    "created_at": "2026-10-06T12:46:28.453101+00:00"
+  },
+  "no_matching_human_decision_at_observation": true,
+  "request_post_response_timed_out": true,
+  "request_get_persisted_exactly_once": true,
+  "request_registration_preserved_execution_assignment_and_scope": true,
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "next_action": "Wait for actual human decision or immutable existing producer/evidence input. No RESUME solely to bypass pending; a documentation-only approval permits only that memo. Exact new effective scope and role ACK required after application.",
+  "qualification_limit": "Same sequential executor process reviews; not independent Formal GO attestation."
+}
