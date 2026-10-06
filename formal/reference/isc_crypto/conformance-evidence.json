@@ -1,0 +1,133 @@
+{
+  "task_id": "ISC-S16-C01",
+  "related_task_ids": [
+    "T053",
+    "HR008-003"
+  ],
+  "assignment_id": "91eee7fd-b400-40df-9070-1110e5f27bda",
+  "agent_phone": "2752",
+  "branch": "agent/isc-s16-ed25519-reference",
+  "from_commit": "a7e5d04044a8805a98b11fc1c3d70546cbcf080b",
+  "coordinator_source_commit": "668d55f0b382bab4b5e70ab3cb5b4241f5b65c0e",
+  "coordinator_handoff_cherry_pick": "41c7178ca23ac78e21b72609af4f14027b529835",
+  "scope": "REFERENCE_ONLY_NOT_PRODUCTION",
+  "outcome": "DONE",
+  "created_at_utc": "2026-10-04T15:57:55.072566+00:00",
+  "source_sha256": {
+    "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
+    "formal/reference/isc_crypto/evidence.json": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
+    "formal/reference/isc_crypto/library-provenance.json": "88c6f9a355c2e97a6d65bdb6eaa8165b59c64dcf66ce31f3ad831b1c525adeaa",
+    "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
+    "formal/reference/isc_crypto/public-vector.json": "dfed5d72577b74fa084fb0a8a72859e1f9145ee124a90941f803aad253c0e591",
+    "formal/reference/isc_crypto/README.md": "99140d6235925487e327e35bd6edf09ca60a5049bc846bb568ae4fbf88e260d3",
+    "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
+    "formal/reference/isc_crypto/test_codec.py": "fab2abb09f18f4998af6fc584a9e582610a7c8668f3eb7a01e5f58ac10bb7d0b",
+    "formal/reference/isc_crypto/test_public_vector.py": "3108c775f583a26f8188b2c12480658fece48c2d0b4461db6857d41a3b19aebe",
+    "formal/reference/isc_crypto/test_signatures.py": "2194b0a8291a7ad30c277bc0ab9db6a55cb6607d5343c339f764c1f4cc9fef32"
+  },
+  "input_sha256": {
+    "docs/adr/0014-isc-production-contract-amendment-v1.md": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd",
+    "docs/adr/0014-isc-contract-freeze-v1.md": "fead9e4772b0d9d26dfcfacea10ccd7235c80ea17f1469bfc258a06a5588606e",
+    "orchestration/sprints/isc-s16-continuous/lane-tasks.md": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f",
+    "orchestration/sprints/isc-s16-continuous/continuity-agent.md": "673bfe352ce91e57bc572c486b156e1d3eb35c8525e80cbb736b45704727ab6f",
+    "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-CONTINUITY-CRYPTO-REMEDIATION.json": "884f3a17a2669edb5931dd609a36c0e55ad031e37e2d4bcf5ec13911fbb8f4f4"
+  },
+  "test_count": 29,
+  "checks": [
+    {
+      "argv": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "formal/reference/isc_crypto",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_artifact_and_preimage_malformed_rejected (test_codec.CodecTests.test_artifact_and_preimage_malformed_rejected) ... ok\ntest_byte_identity_and_parsing_are_not_authority (test_codec.CodecTests.test_byte_identity_and_parsing_are_not_authority) ... ok\ntest_control_json_canonical_and_duplicate_rejection (test_codec.CodecTests.test_control_json_canonical_and_duplicate_rejection) ... ok\ntest_fixed_evidence_exact_values_and_all_changed_budget_rejection (test_codec.CodecTests.test_fixed_evidence_exact_values_and_all_changed_budget_rejection) ... ok\ntest_integer_and_label_boundaries (test_codec.CodecTests.test_integer_and_label_boundaries) ... ok\ntest_key_exact_json_and_domain (test_codec.CodecTests.test_key_exact_json_and_domain) ... ok\ntest_key_length_hex_algorithm_schema_and_closed_fields (test_codec.CodecTests.test_key_length_hex_algorithm_schema_and_closed_fields) ... ok\ntest_preimage_and_artifact_exact_literal_layout (test_codec.CodecTests.test_preimage_and_artifact_exact_literal_layout) ... ok\ntest_registry_exact_json_round_trip_and_linkage (test_codec.CodecTests.test_registry_exact_json_round_trip_and_linkage) ... ok\ntest_registry_rejects_duplicate_unsorted_count_and_key_reuse (test_codec.CodecTests.test_registry_rejects_duplicate_unsorted_count_and_key_reuse) ... ok\ntest_registry_rejects_wrong_profiles_bindings_roles_and_members (test_codec.CodecTests.test_registry_rejects_wrong_profiles_bindings_roles_and_members) ... ok\ntest_vote_dispatch_canonical_decimals_and_content_ids (test_codec.CodecTests.test_vote_dispatch_canonical_decimals_and_content_ids) ... ok\ntest_vote_exact_struct_encoding_and_domain (test_codec.CodecTests.test_vote_exact_struct_encoding_and_domain) ... ok\ntest_vote_header_lengths_tags_and_truncation (test_codec.CodecTests.test_vote_header_lengths_tags_and_truncation) ... ok\ntest_vote_unknown_duplicate_missing_reordered_old_signature_field (test_codec.CodecTests.test_vote_unknown_duplicate_missing_reordered_old_signature_field) ... ok\ntest_frozen_full_vector_matches_independent_byte_recipes (test_public_vector.PublicVectorTests.test_frozen_full_vector_matches_independent_byte_recipes) ... ok\ntest_other_valid_signature_does_not_establish_validator_key_association (test_public_vector.PublicVectorTests.test_other_valid_signature_does_not_establish_validator_key_association) ... ok\ntest_registry_role_and_epoch_substitution_do_not_reuse_signature (test_public_vector.PublicVectorTests.test_registry_role_and_epoch_substitution_do_not_reuse_signature) ... ok\ntest_ed25519ph_and_ed25519ctx_vectors_are_not_pure_ed25519 (test_signatures.SignatureConformanceTests.test_ed25519ph_and_ed25519ctx_vectors_are_not_pure_ed25519) ... ok\ntest_full_exact_isc_preimage_is_signed_without_prehash (test_signatures.SignatureConformanceTests.test_full_exact_isc_preimage_is_signed_without_prehash) ... ok\ntest_invalid_public_key_points_are_rejected (test_signatures.SignatureConformanceTests.test_invalid_public_key_points_are_rejected) ... ok\ntest_invalid_r_points_are_rejected (test_signatures.SignatureConformanceTests.test_invalid_r_points_are_rejected) ... ok\ntest_modified_message_key_and_every_signature_byte_are_rejected (test_signatures.SignatureConformanceTests.test_modified_message_key_and_every_signature_byte_are_rejected) ... ok\ntest_public_identity_key_equation_witness_is_rejected (test_signatures.SignatureConformanceTests.test_public_identity_key_equation_witness_is_rejected) ... ok\ntest_rfc8032_known_answers_and_deterministic_repeat (test_signatures.SignatureConformanceTests.test_rfc8032_known_answers_and_deterministic_repeat) ... ok\ntest_scalar_range_and_s_plus_l_malleability_are_rejected (test_signatures.SignatureConformanceTests.test_scalar_range_and_s_plus_l_malleability_are_rejected) ... ok\ntest_seed_size_and_message_budget_fail_closed (test_signatures.SignatureConformanceTests.test_seed_size_and_message_budget_fail_closed) ... ok\ntest_short_and_long_public_keys_and_signatures_are_rejected (test_signatures.SignatureConformanceTests.test_short_and_long_public_keys_and_signatures_are_rejected) ... ok\ntest_wrong_binary_hash_fails_closed (test_signatures.SignatureConformanceTests.test_wrong_binary_hash_fails_closed) ... ok\n\n----------------------------------------------------------------------\nRan 29 tests in 0.504s\n\nOK\n"
+    },
+    {
+      "argv": [
+        "D:\\delta\\.venv\\Scripts\\ruff.exe",
+        "check",
+        "--isolated",
+        "--select",
+        "B,E,F,I,RUF,UP",
+        "--line-length",
+        "100",
+        "--target-version",
+        "py312",
+        "formal/reference/isc_crypto"
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "D:\\delta\\.venv\\Scripts\\ruff.exe",
+        "format",
+        "--isolated",
+        "--line-length",
+        "100",
+        "--check",
+        "formal/reference/isc_crypto"
+      ],
+      "exit_code": 0,
+      "stdout": "7 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "D:\\delta\\.venv\\Scripts\\mypy.exe",
+        "--strict",
+        "--explicit-package-bases",
+        "formal/reference/isc_crypto/codec.py",
+        "formal/reference/isc_crypto/sodium_reference.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Success: no issues found in 2 source files\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "missing_backend_negative": {
+    "expected": "NONZERO_NO_SKIP",
+    "exit_code": 5,
+    "required_error_observed": true
+  },
+  "library_authentication": "Both upstream detached GPG signatures verified; four exact release asset sizes/hashes and selected DLL hash/member/PE architecture verified. See library-provenance.json.",
+  "strict_profile": "libsodium1.0.22 pure detached Ed25519 with canonical nonidentity prime-order A/Rpoint and S<L; public deterministic RFC8032 and exact M known-answer/negative conformance.",
+  "prior_stop_preserved": true,
+  "historical_evidence_sha256": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
+  "protected_spine_diff": [],
+  "production_code_diff": [],
+  "formal_go_claimed": false,
+  "independent_attestation_claimed": false,
+  "production_authorization": false,
+  "sigma_assigned": false,
+  "r2_3_started": false,
+  "r3_started": false,
+  "limitations": [
+    "Quarantined draft byte/signature conformance only; no protocol/schema acceptance or production integration.",
+    "Synthetic fixture sigma is not an assigned or qualified semantics ID. All signing inputs are explicitly public test seeds.",
+    "No independent trusted-bootstrap provisioning, native context/PB/parent admission, remote durability or original source/WAL lineage verification.",
+    "No quorum/WAL/key custody/runtime/ABI/Java/worker integration.",
+    "Vendor-authenticated library package and local conformance are not a reproducible-build attestation or proof of native binary correctness.",
+    "No full formal-check or cross-language/production gates run: no model/proof/schema/runtime targets changed.",
+    "Only accepted coordinator handoff incorporated from canonical; W1 reference commit9744e701 remains separately preserved."
+  ]
+}

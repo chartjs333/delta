@@ -1,0 +1,73 @@
+{
+  "documentation_url": "https://doc.libsodium.org/installation",
+  "public_key_retrieval": "Official documentation via web tool; ASCII armor blank line/checksum newline reconstructed from rendered text. GPG import checked key self-signatures; public key imported despite unavailable agent warning; --no-autostart detached verification succeeded.",
+  "public_key_file_sha256": "114ac08689505527338c3d650b6bc7030407e7533a8b311906c59acdafa3a621",
+  "gpg_path": "C:\\Program Files\\Git\\usr\\bin\\gpg.exe",
+  "gpg_sha256": "22356f7af9f43c98339a51cee22ab9930688b699f71c5f964b0b07dfa0bc0d73",
+  "key_fingerprints": "tru::1:1791128931:0:3:1:5\npub:-:4096:1:210627AABA709FE1:1423560719:::-:::scESC::::::23::0:\nfpr:::::::::54A2B8892CC3D6A597B92B6C210627AABA709FE1:\nuid:-::::1423561361::DD97BA54466EA909B583B5053DF38954115FE672::Frank Denis (Jedi/Sector One) <0daydigest@pureftpd.org>::::::::::0:\nuid:-::::1423561082::5F248CF5C8C1B63679C58EFAC08B4A3789CC4960::Frank Denis (Jedi/Sector One) <j@pureftpd.org>::::::::::0:\nuid:-::::1423561065::281B4062CF2E559E3FA130ACFEED304A7228B98A::Frank Denis <github@pureftpd.org>::::::::::0:\nuid:-::::1423561082::2FB12C867C60331D5CFB9F15BB8E56C09076AE0E::Frank Denis <frank.denis@corp.ovh.com>::::::::::0:\nsub:-:4096:1:69CC1C79EE11A667:1423560719::::::e::::::23:\nfpr:::::::::40D90B7DC76B360DF383855569CC1C79EE11A667:\nsub:-:4096:1:62F25B592B6F76DA:1423560759::::::s::::::23:\nfpr:::::::::0C7983A8FD9A104C623172CB62F25B592B6F76DA:\n",
+  "verification": [
+    {
+      "artifact": "libsodium-1.0.22-msvc.zip",
+      "exit_code": 0,
+      "status": "[GNUPG:] NEWSIG\n[GNUPG:] KEY_CONSIDERED 54A2B8892CC3D6A597B92B6C210627AABA709FE1 0\n[GNUPG:] SIG_ID HOoYmjFjXUiQcr0xD7die0NvFTM 2026-04-09 1775772957\n[GNUPG:] KEY_CONSIDERED 54A2B8892CC3D6A597B92B6C210627AABA709FE1 0\n[GNUPG:] GOODSIG 62F25B592B6F76DA Frank Denis (Jedi/Sector One) <0daydigest@pureftpd.org>\n[GNUPG:] NOTATION_NAME manu\n[GNUPG:] NOTATION_FLAGS 0 1\n[GNUPG:] NOTATION_DATA 2,2.5+1.12,2,3\n[GNUPG:] VALIDSIG 0C7983A8FD9A104C623172CB62F25B592B6F76DA 2026-04-09 1775772957 0 4 0 1 8 00 54A2B8892CC3D6A597B92B6C210627AABA709FE1\n[GNUPG:] KEY_CONSIDERED 54A2B8892CC3D6A597B92B6C210627AABA709FE1 0\n[GNUPG:] TRUST_UNDEFINED 0 pgp\n"
+    },
+    {
+      "artifact": "libsodium-1.0.22.tar.gz",
+      "exit_code": 0,
+      "status": "[GNUPG:] NEWSIG\n[GNUPG:] KEY_CONSIDERED 54A2B8892CC3D6A597B92B6C210627AABA709FE1 0\n[GNUPG:] SIG_ID 9K+rVEHMrzfe8VF9e4SUjaulcpo 2026-04-09 1775774793\n[GNUPG:] KEY_CONSIDERED 54A2B8892CC3D6A597B92B6C210627AABA709FE1 0\n[GNUPG:] GOODSIG 62F25B592B6F76DA Frank Denis (Jedi/Sector One) <0daydigest@pureftpd.org>\n[GNUPG:] NOTATION_NAME manu\n[GNUPG:] NOTATION_FLAGS 0 1\n[GNUPG:] NOTATION_DATA 2,2.5+1.12,2,3\n[GNUPG:] VALIDSIG 0C7983A8FD9A104C623172CB62F25B592B6F76DA 2026-04-09 1775774793 0 4 0 1 8 00 54A2B8892CC3D6A597B92B6C210627AABA709FE1\n[GNUPG:] KEY_CONSIDERED 54A2B8892CC3D6A597B92B6C210627AABA709FE1 0\n[GNUPG:] TRUST_UNDEFINED 0 pgp\n"
+    }
+  ],
+  "assets": [
+    {
+      "name": "libsodium-1.0.22-msvc.zip",
+      "size": 17690194,
+      "digest": "sha256:3e03a726fac4bc09cb61d8f29d658ef7a5eca0811de59082130414f7ca2e4279",
+      "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22-msvc.zip"
+    },
+    {
+      "name": "libsodium-1.0.22-msvc.zip.sig",
+      "size": 594,
+      "digest": "sha256:ec59666f62b853576105b5e151a21672c95a057aced84ef1e1de8fc850704eb4",
+      "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22-msvc.zip.sig"
+    },
+    {
+      "name": "libsodium-1.0.22.tar.gz",
+      "size": 2008529,
+      "digest": "sha256:adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349",
+      "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22.tar.gz"
+    },
+    {
+      "name": "libsodium-1.0.22.tar.gz.sig",
+      "size": 594,
+      "digest": "sha256:350191b0a5545158716e0e52f249c1511e203972edd61a7a2fec3d03653ea8a7",
+      "browser_download_url": "https://github.com/jedisct1/libsodium/releases/download/1.0.22-RELEASE/libsodium-1.0.22.tar.gz.sig"
+    }
+  ],
+  "scope": "REFERENCE_ONLY_NOT_PRODUCTION",
+  "sodium_version": "1.0.22",
+  "upstream_release_commit": "77e1ce5d6dee871c49ef211222ba18ef0c486bda",
+  "dll": {
+    "sha256": "f656aeb789bfc3a2ac587fae1d7cfe278bbe8ce73f28da73b4d08282ea8f9fe3",
+    "archive_member": "libsodium/x64/Release/v143/dynamic/libsodium.dll",
+    "local_relative_path": ".cache/isc-s16-libsodium-1.0.22/x64-release-v143-libsodium.dll",
+    "architecture": "x64",
+    "build_variant": "Release/v143/dynamic"
+  },
+  "upstream_signing_primary_fingerprint": "54A2B8892CC3D6A597B92B6C210627AABA709FE1",
+  "upstream_signing_subkey_fingerprint": "0C7983A8FD9A104C623172CB62F25B592B6F76DA",
+  "limits": [
+    "Vendor-authenticated package identity, not a reproducible-build proof.",
+    "No deployment qualification, key custody, consensus or Formal GO.",
+    "No downloaded archive, source, native binary or upstream signing-key file committed. Public synthetic conformance seeds/keys are explicitly labelled; no private deployment keys used."
+  ],
+  "upstream_release_tag": "1.0.22-RELEASE",
+  "resolved_apis": {
+    "sodium_init": "int(void)",
+    "sodium_version_string": "const char*(void)",
+    "crypto_core_ed25519_is_valid_point": "int(const unsigned char[32])",
+    "crypto_sign_seed_keypair": "int(unsigned char[32],unsigned char[64],const unsigned char[32])",
+    "crypto_sign_detached": "int(unsigned char[64],unsigned long long*,const unsigned char*,unsigned long long,const unsigned char[64])",
+    "crypto_sign_verify_detached": "int(const unsigned char[64],const unsigned char*,unsigned long long,const unsigned char[32])",
+    "sodium_memzero": "void(void*,size_t)"
+  }
+}
