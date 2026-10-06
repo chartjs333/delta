@@ -2,6 +2,35 @@
 
 T047/T053. 6 October 2026. **STOP / R2.3 OPEN / Formal NO_GO.**
 
+## Subsequent direct user request: exhaust E before any F/O choice
+
+Completed the read-only contract/evidence audit documented in
+`docs/adr/0017-existing-storage-producer-audit.md`, with source/corpus evidence in
+`docs/adr/evidence/0017-existing-producer-audit.json` and
+`docs/adr/evidence/0017-existing-producer-corpus.json`.
+**E_ABSENT_IN_AVAILABLE_CORPUS. F and O remain NOT SELECTED.**
+The inspected corpus includes all recorded accessible Git histories/remote roots,
+worktree HEADs and supplied project evidence, not just native pin N. P2P/CAS,
+artifact I/O/journals, benchmark signal producers, demo paths, historical
+AvailableQ proofs and generated traces do not establish original physical cuts.
+This is not an assertion about an undisclosed external/unreachable artifact.
+
+The addendum separately states F's new factual-history trust/conditional theorem
+claim and O's changed observed/certified model and requalification consequences.
+Neither is ordinary implementation under general R2.3 authority. No new producer,
+predicate, model/schema/proof/runtime or Pending request was created. A new request
+with exact E references was authorized only if sufficient E was actually found.
+Existing request/history remain intact; unchanged approval of its menu still
+selects neither F nor O. Do not re-run the same audit or invent a RESUME.
+
+Final official GET at `2026-10-06T14:20:41Z`: execution178/scope8/workflow29,
+same active coordinator assignment, no matching decision for the existing request;
+assignments/transitions/scope-control/workflow equal the beginning-of-audit state.
+Scope8 ACK was already accepted and GET-confirmed; no duplicate ACK was sent.
+The checkpoint JSON now includes this later audit and exact document hashes.
+
+## Earlier scope8 memo checkpoint (preserved)
+
 Scope8's one-document task is complete at
 `ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec`, branch
 `agent/isc-s16-continuous-sprint`, pushed and remote-verified:

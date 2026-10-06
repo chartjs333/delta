@@ -1,0 +1,1179 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "kind": "documentary-source-audit-not-formal-or-runtime-qualification",
+  "result": "E_ABSENT_IN_AVAILABLE_CORPUS",
+  "basis": "Direct user request to exhaust E before choosing F or O; no implementation authorization inferred.",
+  "head_before_audit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+  "counts": {
+    "all_commit_count": 1014,
+    "all_blob_count": 22126,
+    "blob_bytes": 1186415386,
+    "text_blobs_searched": 22059
+  },
+  "source_pins": [
+    {
+      "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+      "blob_oid": "19ed0d4e88c1efa2f39a356f6f4b5ad0ec427686",
+      "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41",
+      "bytes": 19599
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/proposals/native-available-q-lean-proof.md",
+      "blob_oid": "d2c641734d06bd17e9da7846fde6d7c569f0739e",
+      "sha256": "849c9e74c92fb910e9df3d1293a4359258bb1c7b75d471a047c30530e690fb29",
+      "bytes": 6205
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/proposals/native-available-q.md",
+      "blob_oid": "df87eb0be04d3efb3e6f7d907dda9e9e2338ba6e",
+      "sha256": "b01ce3af338ff5157004ff0854d042966a8420ac048da4f89a8d0241d1d8b92b",
+      "bytes": 8671
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/proposals/native-source-artifacts.md",
+      "blob_oid": "863074c7426a43d85b2efbf67dc6cfcb1d853e03",
+      "sha256": "6b71a07c2596f71faf23af92bb56eecbfaf09451092aa98bd147dd4f107ab552",
+      "bytes": 7418
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/scripts/public_state_storage.py",
+      "blob_oid": "e787c1a20b38eea313170fbd72686d39579e4f00",
+      "sha256": "c8fe33750ed85bb265f47e0ebefe1733ce24b48542714a050b444e119cc26ca7",
+      "bytes": 2502
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "blob_oid": "88b5e9b27ec6bd29f9c4b520fb9a89adf0e91f68",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "bytes": 37676
+    },
+    {
+      "commit": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java",
+      "blob_oid": "d73769feafe61dcbbffd4cd50ca53ba479418d56",
+      "sha256": "82d130bd53a2b7764d2c82560f2280b97e80f00f223854e5d327e5b5c85dd48e",
+      "bytes": 36859
+    },
+    {
+      "commit": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "blob_oid": "09b6b59d8c5f0d2ad3a9258c293fa252109c0d20",
+      "sha256": "29290f6995ad822e1315064006753a73ca30d5126f7d4cb2f05363269358ff8f",
+      "bytes": 70260
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": ".specify/memory/constitution.md",
+      "blob_oid": "8736604da37fe374044acfcaf1028d73317fe691",
+      "sha256": "4b9da704f3c37ac4f8ce9756832e92c2ad732d0116c6dccebeee67ee722042fd",
+      "bytes": 8572
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/consensus.hpp",
+      "blob_oid": "0f52f06879868e8c8c268be5a7eafd139dd25219",
+      "sha256": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9",
+      "bytes": 15847
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/protocol.hpp",
+      "blob_oid": "db48c87923822d21f3a570532d54d97f31765b25",
+      "sha256": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4",
+      "bytes": 5754
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "blob_oid": "286b84eaaa4c834479704aecdccf6af20d0a0e81",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8",
+      "bytes": 27385
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/distribution/certification_policy.cpp",
+      "blob_oid": "526f51f4755fcd256ebb06a2420f2d601b0ffddb",
+      "sha256": "35c3ff564e5e475eb8f96eaa2a2f5230d0cb14e095c6b2012935345859f076dd",
+      "bytes": 18002
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/transition.cpp",
+      "blob_oid": "f327be63174103bb65b29ec234ec34924fbc9901",
+      "sha256": "74e5a6e62cc1b6c4cd1e30a33cc983e522f22cb5f839942fbec5c707b48eb569",
+      "bytes": 7127
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/tests/prepared_100_test.cpp",
+      "blob_oid": "01061f66710264b58b3b572f1ef923b48487598d",
+      "sha256": "d531899c332490632830db9f76be90a522ba0e4bf73204f884964d45306a3ded",
+      "bytes": 16671
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/apply/ArtifactEffectAdapter.java",
+      "blob_oid": "e2570a3a1557c040f67d489314e9f58e8a8e9cb1",
+      "sha256": "71a58dc703172643c422d5fd927228f450190c7774042f6f25b580475f8211b3",
+      "bytes": 2715
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java",
+      "blob_oid": "46b9ef4da09129bf42ab5b468e9cdecffa97260b",
+      "sha256": "bbaa7f622810257791e53333687e7cac88e148f19462eeaba78ce4fb264a6cc9",
+      "bytes": 4253
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/CasStore.java",
+      "blob_oid": "39a7206dd5ea9facf3c6bc66b7bfd5099dfec7dc",
+      "sha256": "36e9d2c90b733b2e0be9e4d5b2a9fc5e99779739e69930755dde9e88634f010a",
+      "bytes": 8430
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/DownloadJournal.java",
+      "blob_oid": "ef269942acc195bab05b5d80784503abde290a36",
+      "sha256": "7459b7672b749e57fa3d263bb7ccea003193ccb88c89cb283a74951585e930af",
+      "bytes": 5440
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/PeerPlane.java",
+      "blob_oid": "b9a5958fa6d55f3a1f7442e113913212e7fccbff",
+      "sha256": "a3cb7cbed0a5fc19eec552989144f77941e0ced33af11d06c93de72d83d7ac0c",
+      "bytes": 8648
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/certificate_runtime.hpp",
+      "blob_oid": "6eb8564ab2d3d178aa5b72b7803c1393e4f8b6d4",
+      "sha256": "0f1bdeebc0e54996e614af872fd0fd9497acef48495ed79cd5604323ab9a1c92",
+      "bytes": 1566
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "blob_oid": "eb2e0d92a068791a65a29f181c9b482ac10ad543",
+      "sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3",
+      "bytes": 4004
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-worker-python/src/deltatorrent/artifacts/filesystem.py",
+      "blob_oid": "76e70b10c39995b42b3ff03c8e37dec55a36b0be",
+      "sha256": "0b26479c6a26f70cf273f6ad9f6bb730b3d271e5214d36183896c52d0d0f5273",
+      "bytes": 5356
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "docs/adr/0010-hybrid-runtime-boundary.md",
+      "blob_oid": "6045734e414c599eefded9c1545237a6c4a86d48",
+      "sha256": "051b4836318f288256b4402943a6792d98df239f3a54b25dab11da1b29217875",
+      "bytes": 6940
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "formal/tla/DeltaReduceAvailability.tla",
+      "blob_oid": "04ecf78315d20588f46bfc78f8c133d7a878ffaf",
+      "sha256": "dc84f8cfd350fae97646cb318ff055af5d5df542e04ea15aba027daf961321a4",
+      "bytes": 14657
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "blob_oid": "d17bbc6f21a9d745d53f01298b4196cb518c114f",
+      "sha256": "abc6a7999b8258fac915405c8e446be3cd57d50c81c0b8504f6757f489d49cab",
+      "bytes": 14956
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "blob_oid": "f387d8b2372dc8fb7965832f8d9272c93986fd92",
+      "sha256": "942488fb0d88cb299c0c23f3b414c51258780a2290402b3e3439c6ff20c795f0",
+      "bytes": 7191
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/003-bft-round-state-machine/formal-refinement.md",
+      "blob_oid": "f0d9679413037e5a821d374c120314c631128e11",
+      "sha256": "32ed46548616f99545fbbd69510bfb4bfcdb5ec0f89ae3993a379a1b2f0e8499",
+      "bytes": 2049
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/003-bft-round-state-machine/spec.md",
+      "blob_oid": "14de41c4709918264efa4a06b4567d8886da97f7",
+      "sha256": "ffe129366f152719b25925afed8b9bdebac8ddae9fcdd67b9fe255a6c0073821",
+      "bytes": 19797
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/evidence/distribution-refinement.json",
+      "blob_oid": "205db5f552fde3f103894d804ba2148558ae67c0",
+      "sha256": "227ea7b3c534115db50757a77ad74e717ae081621350bd36d19170c836be6016",
+      "bytes": 6860
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/evidence/native-execution.json",
+      "blob_oid": "26a08f73d8db45adeb3b35bb5dbe7db21d2ae52d",
+      "sha256": "15f40ed1c6902c287bcf493a70e4254fc654f6cd5e9ebda772386c2291f9899a",
+      "bytes": 6653
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/evidence/traces/legal/multi-peer-repair.json",
+      "blob_oid": "0b205abca3506a49f3778dff5999f7f9d9d56c6d",
+      "sha256": "fbafe1ce5c8c69b6328c3d822537565fca3f6fce715b7abfbfce88386e0fa961",
+      "bytes": 2848
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/formal-refinement.md",
+      "blob_oid": "5b469dea02a7205d9dbd9ceba2af14f08d3c1c4f",
+      "sha256": "4644bb72d16af928289ae4bb6d68868aa9671fab418822e2fac486fc9cfa607f",
+      "bytes": 1542
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/scripts/capture_native_execution.py",
+      "blob_oid": "8d26ed7f3236c82ec44c76ba123a11b7eabca82d",
+      "sha256": "a5ca3ffc9d1291307d070095cdc737de7aaa1a525c2584096055dad3ada397c1",
+      "bytes": 4779
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/scripts/generate_refinement_traces.py",
+      "blob_oid": "b79c1c6ebc7b357f49241ed459bec120b598347f",
+      "sha256": "5c4c7fd0e1a5b47968f016e19e92ba9ca7cd283096f01c9b4f48a9df63e4bbdb",
+      "bytes": 4823
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "blob_oid": "9661c576252542d7144b1ed19fc8fb66205d19d6",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae",
+      "bytes": 22074
+    },
+    {
+      "commit": "79293c1a2cac5721c5cc9609af621c83d317520b",
+      "path": "integration/mnist-delta/native/mnist_delta_node.cpp",
+      "blob_oid": "85d918a5bcb3023540b8bf510b6d827ad63aeb1e",
+      "sha256": "25f61620439085dd3e8792fc7aae9abc7fc23c2974d71eb714fdc14bf84ed35f",
+      "bytes": 87384
+    },
+    {
+      "commit": "e766ef98748504779a9a88d06ee3760594c4184d",
+      "path": "formal/reference/isc_source/README.md",
+      "blob_oid": "e4e542f7cc815e58236e168cf9476a7bf57103e7",
+      "sha256": "c53d1e9616c18d0b250d68135434ba3e9fc49c1bcee1d202a400c70702c691bb",
+      "bytes": 5574
+    }
+  ],
+  "candidate_versions": [
+    {
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/DownloadJournal.java",
+      "versions": [
+        {
+          "oid": "ef269942acc195bab05b5d80784503abde290a36",
+          "commit": "fba1d8776ae525c763190deea8b98dc84a4699a9"
+        }
+      ]
+    },
+    {
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/PeerPlane.java",
+      "versions": [
+        {
+          "oid": "b9a5958fa6d55f3a1f7442e113913212e7fccbff",
+          "commit": "fba1d8776ae525c763190deea8b98dc84a4699a9"
+        }
+      ]
+    },
+    {
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/CasStore.java",
+      "versions": [
+        {
+          "oid": "39a7206dd5ea9facf3c6bc66b7bfd5099dfec7dc",
+          "commit": "fba1d8776ae525c763190deea8b98dc84a4699a9"
+        }
+      ]
+    },
+    {
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/apply/ArtifactEffectAdapter.java",
+      "versions": [
+        {
+          "oid": "e2570a3a1557c040f67d489314e9f58e8a8e9cb1",
+          "commit": "9fbd0523c027bd031e4f20566ee442def2635dc9"
+        }
+      ]
+    },
+    {
+      "path": "formal/tla/DeltaReduceAvailability.tla",
+      "versions": [
+        {
+          "oid": "04ecf78315d20588f46bfc78f8c133d7a878ffaf",
+          "commit": "7d87cc27f9a166285a2482fb92b42d27d65cd8fc"
+        }
+      ]
+    },
+    {
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "versions": [
+        {
+          "oid": "286b84eaaa4c834479704aecdccf6af20d0a0e81",
+          "commit": "cc82b9ddd1e6825be0d46e28e229dc085a1beb96"
+        },
+        {
+          "oid": "e7321bd68a2325af7704c59b2bb14d8e42c94803",
+          "commit": "83429fe0a055a0f0f14ba126bc3c7f8720550278"
+        },
+        {
+          "oid": "3d9b45ae8f436f7660311bb54ee30981b893c458",
+          "commit": "a11d88a60d48978401b4a560cd5b2190e81363a4"
+        }
+      ]
+    },
+    {
+      "path": "delta-core-cpp/src/transition.cpp",
+      "versions": [
+        {
+          "oid": "f327be63174103bb65b29ec234ec34924fbc9901",
+          "commit": "9254e3f4a16104be731ea2b45299194c368aaa9b"
+        },
+        {
+          "oid": "ea6c17b29463a855531866804a61202c3aaeaa24",
+          "commit": "0779b1b028e4d00ac7da7ada05db3f780c94d175"
+        }
+      ]
+    }
+  ],
+  "binary_classification": [
+    {
+      "oid": "c38eda48b9306d7ac9776f0a6e8e52ce3af74ffc",
+      "path": ".cache/isc-s16-libsodium-1.0.22/gnupg/pubring.kbx",
+      "reason": "binary NUL detection",
+      "sha256": "41554b659550f0d27be43748cc037d313f9b90db70bdada2ff9a3a52b585dfbc",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "bfd47801278e96e102fa5c28cc9f85fa4d433fa8",
+      "path": ".cache/isc-s16-libsodium-1.0.22/gnupg/pubring.kbx~",
+      "reason": "binary NUL detection",
+      "sha256": "12b46f65ce6a3ec842c41e9814801229188eee6f643fe29c2fa11bd2b2180606",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "c5ae893891545b71d23dd0dca70f206048fbfd2e",
+      "path": ".cache/isc-s16-libsodium-1.0.22/gnupg/trustdb.gpg",
+      "reason": "binary NUL detection",
+      "sha256": "5ccbca4e81c0d6067c8bf941ddc1de6b124d35effc057d3c3d8d8cbdffbe3580",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "912e92d007cc665c185e2ad27955d482f440b606",
+      "path": ".cache/isc-s16-libsodium-1.0.22/libsodium-1.0.22-msvc.zip",
+      "reason": "binary NUL detection",
+      "sha256": "3e03a726fac4bc09cb61d8f29d658ef7a5eca0811de59082130414f7ca2e4279",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "098bea6b56a21d71b3a4fc8f8a594accb9f02702",
+      "path": ".cache/isc-s16-libsodium-1.0.22/libsodium-1.0.22-msvc.zip.sig",
+      "reason": "binary NUL detection",
+      "sha256": "ec59666f62b853576105b5e151a21672c95a057aced84ef1e1de8fc850704eb4",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "7fe08df16c61e3502021518fb25a209fa8caf5d4",
+      "path": ".cache/isc-s16-libsodium-1.0.22/libsodium-1.0.22.tar.gz",
+      "reason": "binary NUL detection",
+      "sha256": "adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "7cea78dc814fdba135bccd163f632a2561eb6772",
+      "path": ".cache/isc-s16-libsodium-1.0.22/libsodium-1.0.22.tar.gz.sig",
+      "reason": "binary NUL detection",
+      "sha256": "350191b0a5545158716e0e52f249c1511e203972edd61a7a2fec3d03653ea8a7",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "aa870684e193c3e2403e07e106f92f05501cee5d",
+      "path": ".chart-data-2eJTzb/candidate.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "2cfcd1d6a4da9e57f5bfb8f11b33789ef91f5d343426628cbd5fe49f4c6e2d38",
+      "category": "derived_demo_or_presentation",
+      "members": 82,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "bdc4b9f9be74921865fc6e47159665b254297663",
+      "path": ".chart-data-6tnbCI/candidate.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "f03d3e8fa49a88946fceab946dd02410f73b5e5bef18fc7fbf30fa07cb53dbae",
+      "category": "derived_demo_or_presentation",
+      "members": 64,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "fe1873e3c33c83f0e44f02644acb34963066b106",
+      "path": ".chart-data-CEh5k2/candidate.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "8d6b08459af16066f753c01bb400deab70f9f03aef2b438ee7999ca7ae4a9c1c",
+      "category": "derived_demo_or_presentation",
+      "members": 82,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "ab2afeffa2bfa528c6f43272a2209a519176b3f3",
+      "path": ".chart-data-DDJZpO/candidate.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "cdf9b354b329aba70ab9ec1999c928356a57ba9feb93e5f529b7b20bfc0aeaab",
+      "category": "derived_demo_or_presentation",
+      "members": 57,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "f90b8777b0c97f9910c81c5d4485444594fa5d72",
+      "path": ".chart-data-KH29nr/candidate.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "d3e9dfcc2b76b141e867a70dd4ba7637852bb631d9927b27d56a1fe5ed3819c6",
+      "category": "derived_demo_or_presentation",
+      "members": 71,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "c69a02b45a191ea13aee15c6490a65326f71a4f7",
+      "path": "Federated_Medical_AI_DeltaReduce_EN.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "a0fa2eba38bb9720b88d202c86fe4c8db5aa1c757229321cd2cf6779ecc8c096",
+      "category": "derived_demo_or_presentation",
+      "members": 52,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "24d3fb008bda597d4e90d37a70d3339b972626b4",
+      "path": "Federated_Medical_AI_QLoRA.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "9464dc780e2adfe4ebd73820026ec2303fc81409f61aa8ee41d7c5dddfa2e873",
+      "category": "derived_demo_or_presentation",
+      "members": 52,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "29110a8c8e885119c93c6bad10c13eaeeb1dc69d",
+      "path": "Federated_Medical_AI_QLoRA_EN.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "8ab8c98647e13f94952096a1e65862dbc80e0f678f033ef66054a4d345edd285",
+      "category": "derived_demo_or_presentation",
+      "members": 52,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "50365be0bef36d4942c1e16ae362c0395bcce43f",
+      "path": "demo_v1/static.zip",
+      "reason": "binary NUL detection",
+      "sha256": "2262769bd42df7156347ef5b4bec08039a35c4ce8924cb59295cf38251088a3d",
+      "category": "derived_demo_or_presentation",
+      "members": 10,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "0a0ec218abd40048ec6255e97c4154db710a0a97",
+      "path": "formal/proposals/evidence/liveness-recovery/cfg-liveness-eventual-synchrony.dot.gz",
+      "reason": "binary NUL detection",
+      "sha256": "95dbb25c33d7f7ffcd711e441b7d147f2cf3f6bce9223b1c8c67b49289739c12",
+      "category": "compressed_generated_formal_output",
+      "decompressed_sha256": "415aac84a87fb74613e775b0a3ca377e7fb0d793cf45c4a0d32a3064a634d629",
+      "bytes": 4746164,
+      "start": "strict digraph DiskGraph {\nnodesep=0.35;\nsubgraph cluster_graph {\ncolor=\"white\";\n2596393872604825363 [label=\"/\\\\ applyVotes = {}\\n/\\\\ aggregateVotes = {}\\n/\\\\ aggregationPlanCertificates = {}\\n/\\\\ finalizedCertificates = {}\\n/\\\\ timeoutVotes = {}\\n/\\\\ abortReason = \\\"NO_ABORT\\\"\\n/\\\\ repairAttempts = (content1 :> 0)\\n/\\\\ availableTickets = {}\\n/\\\\ materializedArtifacts = {}\\n/\\\\ viewChangeQCs = {}\\n/\\\\ availabilityShortfalls = {}\\n/\\\\ availabilityAttestations = {}\\n/\\\\ pendingPointerRecoveries = {}\\n/\\\\ crashCoverage = {}\\n/\\\\ availabilityCertificates = {}\\n/\\\\ partition = {}\\n/\\\\ rejectedPublications = {}\\n/\\\\ volatileVotes = {}\\n/\\\\ currentCheckpoint = parent1\\n/\\\\ apcVotes = {}\\n/\\\\ reject",
+      "model_terms": [
+        "digraph"
+      ]
+    },
+    {
+      "oid": "374188919d93f2fc7969f546123cdf330332e4de",
+      "path": "formal/proposals/evidence/liveness-recovery/cfg-native-arithmetic-liveness.dot.gz",
+      "reason": "binary NUL detection",
+      "sha256": "45e39fd8c63c68859fb8f9711ac220ff74282832a48a8f321f9d6748d3f0ca1a",
+      "category": "compressed_generated_formal_output",
+      "decompressed_sha256": "0b2bcb23fa9f7204349e759d41e3715fa1243b78c23ed1528b5040e4b87e037a",
+      "bytes": 4746841,
+      "start": "strict digraph DiskGraph {\nnodesep=0.35;\nsubgraph cluster_graph {\ncolor=\"white\";\n2596393872604825363 [label=\"/\\\\ applyVotes = {}\\n/\\\\ aggregateVotes = {}\\n/\\\\ aggregationPlanCertificates = {}\\n/\\\\ finalizedCertificates = {}\\n/\\\\ timeoutVotes = {}\\n/\\\\ abortReason = \\\"NO_ABORT\\\"\\n/\\\\ repairAttempts = (content1 :> 0)\\n/\\\\ availableTickets = {}\\n/\\\\ materializedArtifacts = {}\\n/\\\\ viewChangeQCs = {}\\n/\\\\ availabilityShortfalls = {}\\n/\\\\ availabilityAttestations = {}\\n/\\\\ pendingPointerRecoveries = {}\\n/\\\\ crashCoverage = {}\\n/\\\\ availabilityCertificates = {}\\n/\\\\ partition = {}\\n/\\\\ rejectedPublications = {}\\n/\\\\ volatileVotes = {}\\n/\\\\ currentCheckpoint = parent1\\n/\\\\ apcVotes = {}\\n/\\\\ reject",
+      "model_terms": [
+        "digraph"
+      ]
+    },
+    {
+      "oid": "3b7dcca0cf94cdba22b4adce849a21f4ce5cc0b9",
+      "path": "formal/proposals/evidence/persistence-crash-cuts/cfg-persistence-apply.log.gz",
+      "reason": "binary NUL detection",
+      "sha256": "b6362ad7fad8da62bc34352ab57c63538a3d6d18fc7a1ae87e73117339602839",
+      "category": "compressed_generated_formal_output",
+      "decompressed_sha256": "5190729d170a6c2e4753a2378246e0fbaec5a32c31b5bb7a9282a5f890d92f2d",
+      "bytes": 683701,
+      "start": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\r\nRunning breadth-first search Model-Checking with fp 43 and seed 2026092411 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 35088] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).\r\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\tla\\DeltaReducePersistenceHarness.tla\r\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\tla\\DeltaReduceCurrentBindingHarness.tla\r\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\tla\\DeltaReducePhase6Harness.tla\r\nParsing file C:\\Users\\m",
+      "model_terms": [
+        "Model checking",
+        "TLC"
+      ]
+    },
+    {
+      "oid": "ecc058edf847b8743ab171e4b86ed90d18c6ee9f",
+      "path": "formal/proposals/evidence/persistence-crash-cuts/cfg-persistence-parameter.log.gz",
+      "reason": "binary NUL detection",
+      "sha256": "0c7e4bbb54f470e2b8a847c83ea523b98f714bdd0b1937b1d40061c045a98e62",
+      "category": "compressed_generated_formal_output",
+      "decompressed_sha256": "bab22c6c8b7d848131ebb0fd1980c3a4f87daeb938cd98f657ce501652077194",
+      "bytes": 248695,
+      "start": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\r\nRunning breadth-first search Model-Checking with fp 42 and seed 2026092410 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 37680] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).\r\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\tla\\DeltaReducePersistenceHarness.tla\r\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\tla\\DeltaReduceCurrentBindingHarness.tla\r\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\tla\\DeltaReducePhase6Harness.tla\r\nParsing file C:\\Users\\m",
+      "model_terms": [
+        "Model checking",
+        "TLC"
+      ]
+    },
+    {
+      "oid": "1b430105c1976d4b9a76cb775018335430856ad6",
+      "path": "formal/proposals/evidence/public-arithmetic-state/arithmetic/negative-0/tlc.txt.gz",
+      "reason": "binary NUL detection",
+      "sha256": "47837177f65a6b58aabdaabf3ffb43a48543751e5fb98d242d46b1fc81ddcfb9",
+      "category": "compressed_generated_formal_output",
+      "decompressed_sha256": "bc7e385c38bfb3db107de5f295bfecfe9402a972f830be5c768f396a217b7796",
+      "bytes": 1086657,
+      "start": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\nRunning breadth-first search Model-Checking with fp 0 and seed 1 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 33360] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithmetic-replay\\negative-0\\FullStateReplay.tla\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithmetic-replay\\negative-0\\DeltaReducePublicState.tla\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithm",
+      "model_terms": [
+        "TLC"
+      ]
+    },
+    {
+      "oid": "b841ed230dab87cf4bcad9b31a00fbbe9aaabc8c",
+      "path": "formal/proposals/evidence/public-arithmetic-state/arithmetic/negative-1/tlc.txt.gz",
+      "reason": "binary NUL detection",
+      "sha256": "9fa1145c14e433ceccd2add0a4bb607f690f832d44becf510bcb9d532465f1a7",
+      "category": "compressed_generated_formal_output",
+      "decompressed_sha256": "1bcfde24285ce7fc38c0da515a2881655fe6c3b91cd8fa9471bc120ae04154ef",
+      "bytes": 20362569,
+      "start": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\nRunning breadth-first search Model-Checking with fp 0 and seed 1 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 35248] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithmetic-replay\\negative-1\\FullStateReplay.tla\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithmetic-replay\\negative-1\\DeltaReducePublicState.tla\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithm",
+      "model_terms": [
+        "TLC"
+      ]
+    },
+    {
+      "oid": "886200b9f68e9535632fd1a182a7eff169c1e8a5",
+      "path": "formal/proposals/evidence/public-arithmetic-state/arithmetic/negative-2/tlc.txt.gz",
+      "reason": "binary NUL detection",
+      "sha256": "3348047850e889bdd2cc18890c2f5a38158966b341992695028a210143624cd2",
+      "category": "compressed_generated_formal_output",
+      "decompressed_sha256": "76f341176df9558893cf5f550f3929749e1c3094b8776e69008fc334ca8de307",
+      "bytes": 49195910,
+      "start": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\nRunning breadth-first search Model-Checking with fp 0 and seed 1 with 1 worker on 16 cores with 7230MB heap and 64MB offheap memory [pid: 15968] (Windows 10 10.0 amd64, Eclipse Adoptium 17.0.20.1 x86_64, MSBDiskFPSet, DiskStateQueue).\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithmetic-replay\\negative-2\\FullStateReplay.tla\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithmetic-replay\\negative-2\\DeltaReducePublicState.tla\nParsing file C:\\Users\\madoev\\.codex\\worktrees\\feature000-binding-candidate\\delta\\formal\\build\\public-arithm",
+      "model_terms": [
+        "TLC"
+      ]
+    },
+    {
+      "oid": "369a2bb388167d5a1dfbe360a23f68db47714cfa",
+      "path": "presentation-output-20260924/DeltaReduce_Compact_English_8_Slides.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "4ec057dbba28af9e20f562f307d675d52643638ab7b002b6eca0bc824e6316a9",
+      "category": "derived_demo_or_presentation",
+      "members": 50,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "657fba30422582167adb055a6107db2afd2bcaa4",
+      "path": "presentation-output-20260924/DeltaReduce_English_Final_8_Slides.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "555d53238c39db32d49bccfddb7567977e93efb2101c509a4ccb5782ec041800",
+      "category": "derived_demo_or_presentation",
+      "members": 50,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "cac263de243750936b881973a8146d60687a60a2",
+      "path": "presentation-output-20260924/DeltaReduce_English_MNIST_Evidence_8_Slides.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "c138e65cc02c0edcb30136d253b64d14565216be1561eb70a2c1e790982a5fd2",
+      "category": "derived_demo_or_presentation",
+      "members": 50,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "d3a32db0b719468ba1af65e871a8bcac733842a1",
+      "path": "presentation-output-20260924/DeltaReduce_English_Physical_Test_14_Slides.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "0539b537a4dcf3cfe353255dbf7c13fa2387af9aa6a379e133161ff4f93c9bd6",
+      "category": "derived_demo_or_presentation",
+      "members": 86,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "715f43c0071e1ed0c6763808823b8b008a91946b",
+      "path": "presentation-output-20260924/DeltaReduce_English_Research_Outlook_11_Slides.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "a2d07080f7d3a86193bcb981899ffeaceca5009b0e8ca28733640aa74a91ac1b",
+      "category": "derived_demo_or_presentation",
+      "members": 71,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "1f67df9e87310601294ef660f768c81fd54f6ed3",
+      "path": "presentation-output-20260924/DeltaTorrent_DeltaReduce_Paper_Discussion_EN.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "e9f46df135ae145d2df8d900470293f921a16ca32d737ea72f479c5df1cc1136",
+      "category": "derived_demo_or_presentation",
+      "members": 81,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "b43a3cea717861670da6545ef4507bf8acd774ad",
+      "path": "presentation-output-20260924/DeltaTorrent_Technical_Overview_EN.pptx",
+      "reason": "binary NUL detection",
+      "sha256": "c35e37fb3c286f36f2633605b3b29e65168d57e018b6ba9e256aca1cea11dcd8",
+      "category": "derived_demo_or_presentation",
+      "members": 65,
+      "matching_excerpts": []
+    },
+    {
+      "oid": "2e22414b84897d642f69611174240a5d5ecf065d",
+      "path": "tools/admin-ui/src/modules/guide/images/slide-1.png",
+      "reason": "binary NUL detection",
+      "sha256": "00154ac488030f89acd46c09b5bc35a064c6e0ed0a1fdfc91b5d8529d5eb14d7",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "615dc8514e49d355e4e3ace386f6d648a7e6e8e2",
+      "path": "tools/admin-ui/src/modules/guide/images/slide-2.png",
+      "reason": "binary NUL detection",
+      "sha256": "ce7f4fa1e319276c5c102e1fdba3423a1d733e1b2c213e6b6452d77d916ea359",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "436761052af42938c6d35625be5210bb2595cc1e",
+      "path": "tools/admin-ui/src/modules/guide/images/slide-3.png",
+      "reason": "binary NUL detection",
+      "sha256": "bfbfaf6624757f1776f253a338c5f4a57d832824c6e75b7ccd060d4bfa136785",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "e7be19e9829284a28446a4a9a9dae7e668d6b0af",
+      "path": "tools/admin-ui/src/modules/guide/images/slide-4.png",
+      "reason": "binary NUL detection",
+      "sha256": "98924b677202cc323550833d5b0d9c74730b723ca4fc647bbe9f5b4e9da52f05",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "4f37bd8ffeb9dced44105360553f37366ce53d36",
+      "path": "tools/admin-ui/src/modules/guide/images/slide-5.png",
+      "reason": "binary NUL detection",
+      "sha256": "8be5391a0f48411aa6584241ab2447c362502aa6e6a31e1d3d6c1731315b6abe",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "94b018e37f2c8a10abf44ad509c7b52a1021f393",
+      "path": "tools/admin-ui/src/modules/guide/images/slide-6.png",
+      "reason": "binary NUL detection",
+      "sha256": "cd4e3c32f0f03752b3dd35b2c3c01cd887bff8018034c254a08c5f3a8fce007f",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "8f816fea9da9f76cd6136699264d72da965e00b7",
+      "path": "tools/admin-ui/src/modules/guide/images/slide-7.png",
+      "reason": "binary NUL detection",
+      "sha256": "41e59e6bb3cf02a214c0436fa7f3c5bde505f9c79a8b7df47c1beac002cd4b8d",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "58268ec3663f3a996bd8e3f9ae8668aca32e75d1",
+      "path": "tools/presentation/slides/screenshots/admin_campaigns.png",
+      "reason": "binary NUL detection",
+      "sha256": "1c62d9c4c17add8a1c866b2a3adb78da465571eb1d516f20c6a221e82a3b04f1",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "dcc76f906400692f7e5ff1ba74e2e4cc2170615f",
+      "path": "tools/presentation/slides/screenshots/admin_live_execution.png",
+      "reason": "binary NUL detection",
+      "sha256": "aebf29036bab3f1621b09e3c141fde57e048d53410a55489b16a004cfcbb2d0e",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "fd0eeff34fe0f211a2da0517c59041c81beeb07e",
+      "path": "tools/presentation/slides/screenshots/admin_sdk_plugin_dev.png",
+      "reason": "binary NUL detection",
+      "sha256": "b270c2f7639f3efb67c9de0ffac074888a47de0e199f827632dc1331f3d3325b",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "55633cf51589cf32e01c6a1dc3ef31be61b15c0e",
+      "path": "tools/presentation/slides/screenshots/admin_workloads.png",
+      "reason": "binary NUL detection",
+      "sha256": "547cd329b44f08a31816a210d062a453b8ce55d8f612c7b3ab40b64eb1688e4c",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "c5384726f779b54604086f483df587c7677544d2",
+      "path": "tools/presentation/slides/screenshots/lab_initial_state.png",
+      "reason": "binary NUL detection",
+      "sha256": "97357025e64e91d0ce9effe20b9f506cf0a14d216ecaeedb3bdd2399583cc8c9",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "e3e3d9765f78a5325af55cc19c055100fc0e4047",
+      "path": "tools/presentation/slides/screenshots/lab_rejection_tamper_bytes.png",
+      "reason": "binary NUL detection",
+      "sha256": "c217bdc3b3ac87dc8713451756d7f14b4d375bd2d5885c77ee8b7a03c4b826a1",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "50e01485e78b7c78897b7d10d338d901069330be",
+      "path": "tools/presentation/slides/screenshots/lab_verification_7_of_7.png",
+      "reason": "binary NUL detection",
+      "sha256": "7683fdc935e65d3023ab4095165981ff67877b9e71680de8ba51dfa4c8403110",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "c68e9d2c61df5e6acb09ec6c6b526fa9c2806ab5",
+      "path": "tools/presentation/slides/screenshots/node_training_mnist_byte_exact.png",
+      "reason": "binary NUL detection",
+      "sha256": "fe2fa3f77e4ef58108ae9bb47b598a80560bca3a98548386149fd699b15d78a6",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "0c75e5d90cda0f38aeb3cc629df3f66b5262d624",
+      "path": "tools/presentation/slides/screenshots/node_training_recovery_contracts.png",
+      "reason": "binary NUL detection",
+      "sha256": "694dea9463ca974546452d6f915f221ee49e4677ea7fb5336af07a7397e22837",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "e20f63b74d9ba624bad51194109b5924b327717d",
+      "path": "tools/presentation/slides/screenshots/slide1_overview_arch.png",
+      "reason": "binary NUL detection",
+      "sha256": "82e97a29c2be9897bae68027aa4ba112140653735f28d5779daa7996744f8f30",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "7e0cba263ec3ba5c82dea0f2b5287a6a4589e565",
+      "path": "tools/presentation/slides/screenshots/slide2_roles_and_tickets.png",
+      "reason": "binary NUL detection",
+      "sha256": "575dd267a6841f102ee75d4fcffc0aa62aa0fd8fee522fa0e03059af77dafd19",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "d297dcda0eec76264fa8b4b4f0eac62162d33de6",
+      "path": "tools/presentation/slides/screenshots/slide3_ticket_parent_roundconfig.png",
+      "reason": "binary NUL detection",
+      "sha256": "accfb70f90c48c62d35296f012cf5746942de960554d93ffd31f0325c4623535",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "9636c1ec2df61e8b1c89a5e9dcc097d087369e82",
+      "path": "tools/presentation/slides/screenshots/slide4_bft_quorum_math.png",
+      "reason": "binary NUL detection",
+      "sha256": "7716226971f859a8099332d6bd309ffaeb3b5f2588bd794a21f75ad00fa032b8",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "7a887218099af79aa305e41d24d5b6f26d2b16ca",
+      "path": "tools/presentation/slides/screenshots/slide5_shard_aggregation_math.png",
+      "reason": "binary NUL detection",
+      "sha256": "43e4c60e63d481c661e05622737806571d3215a6d45a5d7994341b3665bd811b",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "960890b3f1a5f9b010d3bc8104df997a5c717ef2",
+      "path": "tools/presentation/slides/screenshots/slide6_quorum_intersection.png",
+      "reason": "binary NUL detection",
+      "sha256": "3ad559dcdc1ecb4d3adeca2c38136ec09053f3374ba26874418e8b0680faa760",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "ac669858c700456adad3d4c98faf69d02504c039",
+      "path": "tools/presentation/slides/screenshots/slide7_domain_sharding_allocation.png",
+      "reason": "binary NUL detection",
+      "sha256": "0eb50ef32aaa437cbec5041b4fda510808dc65fe73c243873d78a02c2657aba2",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "d1bfbe3aa622fc1c76509d31e2e5483711b40ebd",
+      "path": "tools/presentation/slides/screenshots/system_overview_dashboard.png",
+      "reason": "binary NUL detection",
+      "sha256": "74b8a23fadb4dad6fb80c90b5ad01c6ac3e6ceeeb9a3030c088940ddafc90681",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "457936a32a43a8035aea7416313f717c2cda9da0",
+      "path": "tools/presentation/slides/screenshots/system_readiness_status.png",
+      "reason": "binary NUL detection",
+      "sha256": "626981487efe1c4047fe9bd8678b2e97e983bae87f7682ee40db128d12786afa",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "a5f73cc68d9f28f5ddfb92ad695c7eb8bb35a3a6",
+      "path": "cds_server_deploy/molecular_gold/ATP13A2/gold/ATP13A2.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "8646c749b2193014ec27665300ba21858c68739874b743643eda53e3f190d0c0",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "7b8dbecbf5581e84d62e7411183280b144e24658",
+      "path": "cds_server_deploy/molecular_gold/GBA1/gold/GBA1_PARK.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "e7b9fca8c7ffe5b7f9c9d21db8b25ab1e752b13d6474e8076fe8d5e5c1d390c0",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "e062ac504ab35ade97f8b50d22f43dbe52f38d10",
+      "path": "cds_server_deploy/molecular_gold/GCH1/gold/gold-standard.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "67d73119ee7e6a884c32c5bb4c15b021c49aeec84c99f92c8b83099523dd8794",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "08a5a336b92b5e5d554b916c1a3274ea2c6c5e60",
+      "path": "cds_server_deploy/molecular_gold/LRRK2/gold/gold-standard.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "06b9dd0604769e9500d088fa7f6413eb6c68031436f50853e68fcbab278a88dd",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "07e29120972d26665e160e2773584435ef1c7c06",
+      "path": "cds_server_deploy/molecular_gold/PARK7/gold/PARK7_November 2025_SCH (1).xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "f5d5bfa7d899e5c968a38d067175eb1b0416afe15abf018e60eac53b6a00718b",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "ec16a73988a9dba818a9d8c7441a37eff323de57",
+      "path": "cds_server_deploy/molecular_gold/PINK1/gold/PINK1_November 2025.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "d8ba98df8261b22fed4e6da526ad62949c28553e2eb86a211db2afe5ae6844a3",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "a3d1a6472b3dac8d03f15d1c3b81fcca86224bdb",
+      "path": "cds_server_deploy/molecular_gold/PRKN/gold/PRKN-PARK_20260131.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "a00caa8dfa4adaf908d8c98fb86bdad9269a12c7abf728d611fe437c0912aed6",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "2d462fe0e0329c3c9754582c795de91684a6b6e1",
+      "path": "cds_server_deploy/molecular_gold/RAB32/gold/gold-standard.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "2309a7495e99248b4bd2a3c0c94555180c8062bc614ce22818c21a79006dfb2e",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "9fda9945e7c8913267c9e5ece9ff80bbe21d0027",
+      "path": "cds_server_deploy/molecular_gold/SNCA/gold/SNCA (6).xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "6c94805793854c20e819f65fdf3676bc4c5d92ee6546316c0f5819c5e771bed3",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "0354cb6348685ff68eaa91a8aba212c14a09d0ee",
+      "path": "cds_server_deploy/molecular_gold/VPS35/gold/gold-standard.xlsx",
+      "reason": "binary NUL detection",
+      "sha256": "b7d161a7579bd7ad906c6b2d6b4267da2ccf1a8e92102df348f5a8fc8e8ceb5a",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "5978c368ebd2145d987ac578312d1990b9a6dc02",
+      "path": "cds_server_deploy/molecular_gold/audit/molecular_gold_index_original.json.gz",
+      "reason": "binary NUL detection",
+      "sha256": "2dfb2ce506fd0edb0c06470aeaa2255d6d718669c19adb43db69accea6a78d88",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    },
+    {
+      "oid": "8d74409c4e69e916a2f8016e181a68c875cee333",
+      "path": "cds_server_deploy/phenotype_support_index_v2.npz",
+      "reason": "binary NUL detection",
+      "sha256": "7b53c595de9422afb8078076671e994111c1721e1dbe8f767e7b2cd46f37137f",
+      "category": "crypto_library_archive_or_unrelated_dataset_or_image"
+    }
+  ],
+  "external_path_inventory": {
+    "D:/delta-data": {
+      "exists": true,
+      "paths": [
+        "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-070406-5eead96b\\controllers\\bootstrap-validator-set.demo.json",
+        "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260928-114619-dac958f9\\controllers\\bootstrap-validator-set.demo.json",
+        "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-063554-7b086acf\\controllers\\bootstrap-validator-set.demo.json",
+        "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-093418-4af12954\\controllers\\bootstrap-validator-set.demo.json",
+        "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-062313-43319039\\controllers\\bootstrap-validator-set.demo.json",
+        "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260926-233939-e399b371\\controllers\\bootstrap-validator-set.demo.json",
+        "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260927-205057-51114d80\\controllers\\bootstrap-validator-set.demo.json"
+      ]
+    },
+    "D:/delta-presentation": {
+      "exists": true,
+      "paths": []
+    },
+    "D:/delta untracked candidates": [
+      ".cache/isc-review-af13fd25/formal/reference/isc_crypto/library-provenance.json",
+      ".cache/sprint-author-20260926/main-formal-exact-bytes/formal/tla/DeltaReduceAvailability.tla",
+      ".cache/sprint-author-20260926/main-formal-exact-bytes/formal/tla/cfg/availability-loss-repair.cfg",
+      ".cache/sprint-author-20260926/main-formal-exact-bytes/formal/tla/cfg/ticket-lease-availability.cfg"
+    ]
+  },
+  "external_content_search": [
+    {
+      "root": "D:/delta-data",
+      "command": [
+        "rg",
+        "-l",
+        "-i",
+        "--hidden",
+        "-g",
+        "*.md",
+        "-g",
+        "*.json",
+        "-g",
+        "*.jsonl",
+        "-g",
+        "*.txt",
+        "-g",
+        "!**/models/**",
+        "-g",
+        "!**/datasets/**",
+        "-g",
+        "!**/.git/**",
+        "physical availability|producer_rules_id|storage_registry|SAG1|storage.{0,40}(attest|producer|history|observer)|HasCompleteAvailability",
+        "D:/delta-data"
+      ],
+      "paths": []
+    },
+    {
+      "root": "D:/delta-presentation",
+      "command": [
+        "rg",
+        "-l",
+        "-i",
+        "--hidden",
+        "-g",
+        "*.md",
+        "-g",
+        "*.json",
+        "-g",
+        "*.jsonl",
+        "-g",
+        "*.txt",
+        "-g",
+        "!**/models/**",
+        "-g",
+        "!**/datasets/**",
+        "-g",
+        "!**/.git/**",
+        "physical availability|producer_rules_id|storage_registry|SAG1|storage.{0,40}(attest|producer|history|observer)|HasCompleteAvailability",
+        "D:/delta-presentation"
+      ],
+      "paths": [
+        "D:/delta-presentation\\FEATURE010-CONTINUE.md"
+      ]
+    }
+  ],
+  "scope_of_absence": "All enumerated accessible Git roots/histories and provided local project evidence; not an impossibility claim about unprovided external or unreachable artifacts.",
+  "choices": {
+    "F": "NOT_SELECTED",
+    "O": "NOT_SELECTED"
+  },
+  "implementation_or_new_proof": false,
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "official_api_checkpoint": {
+    "revision": 178,
+    "status": "active",
+    "phase": "node",
+    "current_node_id": "continuity-coordinator",
+    "current_assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "observed_at": "2026-10-06T14:20:41.130741+00:00",
+    "scope_revision": 8,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-98f74dc2bcac122bece1e99bf5bcb305",
+      "effective_revision": 8,
+      "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 8,
+      "source_commit": "c531870eb9af25a25c70b4e7347e0e235a48933f",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-DECISION.json",
+      "source_sha256": "d8671747226539f3e0be33b101d8ba5aebaba63f713532934378a769299aeb11",
+      "effective_scope_sha256": "0c86edbd3fe357f970b2d62b5bec5ad5bd263a0aa94796417a5788d264494052",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged": true,
+    "unchanged": {
+      "assignments": true,
+      "last_transition": true,
+      "pending_transition": true,
+      "scope_control": true,
+      "scope_workflow": true
+    },
+    "workflow_revision": 29,
+    "pending_request_id": "scope-request-09adbfc8a16275064414fca2743101b1",
+    "matching_decisions": [],
+    "sprint_id_from_preserved_checkpoint": "sprint-0001-783ef52c",
+    "review_history_note": "No top-level reviews array in this response. Full assignments and transition collections compared unchanged; no result/review mutation performed."
+  },
+  "document": "docs/adr/0017-existing-storage-producer-audit.md",
+  "document_sha256": "e2bccf72fa8f4041798d958cc87517b0a7f174e22e955d880953db932070397b",
+  "benchmark_demo_versions": [
+    {
+      "commit": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "oid": "09b6b59d8c5f0d2ad3a9258c293fa252109c0d20",
+      "sha256": "29290f6995ad822e1315064006753a73ca30d5126f7d4cb2f05363269358ff8f"
+    },
+    {
+      "commit": "4aaa3885fcb2ebedcdf360d4d43fa4cfe5d277bf",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "oid": "2e43a5bf7122b6b0c89837727dceef943029d4dc",
+      "sha256": "9adbaf5246df2256f89268f59c3a9e578d8d783e47b3b840dc976fd6f19be96d"
+    },
+    {
+      "commit": "188de41c66d4db6335ae9e9145de91f58f1863b4",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "oid": "38ba190c470e709e198b695abb86acf07dd04323",
+      "sha256": "fab8608d07b285039468fccce45fe633554e3e26d1173fc9b9d803ff790562a0"
+    },
+    {
+      "commit": "d2880e16ee162d91c5088a871421762fb5999ddc",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "oid": "6910d5905161d5495610869634b8b52e61433fa2",
+      "sha256": "e234fcedfb7a78338f2dbf2ace31db8c3c007524b8be63c462dce134115d46fb"
+    },
+    {
+      "commit": "aa4bb2d21ded1dbea1bebf86f0d57396a205e6e8",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "oid": "f8ef05b403a35470bf5e59e3011daea2b6058b20",
+      "sha256": "0b893f11e5e2fa0b92a4c458330511891e910b6d13c791344e03cafd500e9567"
+    },
+    {
+      "commit": "ee895ad32bcfe6ec061bdc80f68a47c3d5448521",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "oid": "0885a5d9c4fa7fcd3889c7dd698133ad09e86156",
+      "sha256": "a5e05b79e128dbd82ba80c5350f2ca4e6b91b626442ea1f1bd7fa25d22158bb4"
+    },
+    {
+      "commit": "29c32c1ee55f37fd0a376f04e4f49cd67f47ac8b",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "oid": "d22368332963bedb9e61509589145fde57cbf19b",
+      "sha256": "5eeffb3a7a689f07ece4a40d0751f8234fd55643880a64b2864a73e6ec0e59ef"
+    },
+    {
+      "commit": "90f4b46a81f6a9ba05e0e5f3c757d008b4bdfcd9",
+      "path": "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+      "oid": "12a2039bd1fe0aea22e06cd496a1c9062b774ef9",
+      "sha256": "2f13f0798ceb84d563ba315e229d0bb8cf35d7b906e77c1c11fbf53bc489ea33"
+    },
+    {
+      "commit": "a191302ecdd25dae6b0858bd302fa0d73544a957",
+      "path": "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+      "oid": "8b3b075b0c091cc83de5f1e09c5adc0c3e39a4bb",
+      "sha256": "7b603e85f39b86824e034677e547bf3f011ad19cd38827a8cf942a371483c12b"
+    },
+    {
+      "commit": "660710818a7a45708231ae03da78bac9bbc0abc9",
+      "path": "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+      "oid": "1973e2fa25240204470015d6a26debe8c37891e4",
+      "sha256": "5c360e3e454cbb568805b1379fdf62115da7a68a27be5210e722b134d899add0"
+    },
+    {
+      "commit": "aa04ca82399c98e43fbe61744bd20ed17b96f87e",
+      "path": "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+      "oid": "051f8ad4417c4e451afc0bea7b322b6287d6a421",
+      "sha256": "c66ba9c85e9d24bee9b1662b41eb987d38f46df427448e23a7411c51567dd8eb"
+    },
+    {
+      "commit": "6c68dc6c7360ef8a85efdf59f6b232be6c52a849",
+      "path": "delta-worker-python/src/deltatorrent/benchmark/measured_runner.py",
+      "oid": "1bc15341cd84979042d2acdd9ca16b26bb554200",
+      "sha256": "b3198fbfc18cde746ec3826f94705d246201090a1576f0b9736e18f5de070dba"
+    },
+    {
+      "commit": "79293c1a2cac5721c5cc9609af621c83d317520b",
+      "path": "integration/mnist-delta/native/mnist_delta_node.cpp",
+      "oid": "85d918a5bcb3023540b8bf510b6d827ad63aeb1e",
+      "sha256": "25f61620439085dd3e8792fc7aae9abc7fc23c2974d71eb714fdc14bf84ed35f"
+    },
+    {
+      "commit": "f795f061fc22b43a7957391f1070f01a960a46f8",
+      "path": "integration/mnist-delta/native/mnist_delta_node.cpp",
+      "oid": "78256fbd65d948f70c5b87564ab04f94801a73d9",
+      "sha256": "9fdc208a3d149735025c5ae36e844ee489c6c96d66b942f87f9e2a42e263e0f2"
+    },
+    {
+      "commit": "d3ba767931c0bbe141a533ce0363b15daf73405c",
+      "path": "integration/mnist-delta/native/mnist_delta_node.cpp",
+      "oid": "b443decb057e81b7366c3e4389d93222af10e986",
+      "sha256": "e585ca45190ab1bd2dd4c2b4b52d2e0a9f96cb5c0b4c98f88e55ef11ea2eba1b"
+    },
+    {
+      "commit": "bb47e48828756e9d923dc3623184597d820058c5",
+      "path": "integration/mnist-delta/native/mnist_delta_node.cpp",
+      "oid": "bd798d73ef653c2ab6acef51a823b79fdba92eeb",
+      "sha256": "76438c54d4941d8ef69526b1acccb6e910e597a775a9726a0a879f65230a3709"
+    }
+  ],
+  "external_candidate_hashes": [
+    {
+      "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-070406-5eead96b\\controllers\\bootstrap-validator-set.demo.json",
+      "sha256": "a26d9371dbf953814edffb884bc9b326ec94841faa8f8df50de76e9fbebe904c",
+      "classification": "demo validator bootstrap; not storage observation authority",
+      "execution_authorized": false
+    },
+    {
+      "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260928-114619-dac958f9\\controllers\\bootstrap-validator-set.demo.json",
+      "sha256": "c6e932145c68fecc5043526de095b1b9c87917dd3388d52176769c55bcfa1abb",
+      "classification": "demo validator bootstrap; not storage observation authority",
+      "execution_authorized": false
+    },
+    {
+      "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-063554-7b086acf\\controllers\\bootstrap-validator-set.demo.json",
+      "sha256": "df96f5931c2019f9302cba7d1483a206835dd9be204929f7811700725e0a492f",
+      "classification": "demo validator bootstrap; not storage observation authority",
+      "execution_authorized": false
+    },
+    {
+      "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-093418-4af12954\\controllers\\bootstrap-validator-set.demo.json",
+      "sha256": "53e92e2662b23370c7a31f543e714c0797995716e4e3c67fc0eb231d0ef5215f",
+      "classification": "demo validator bootstrap; not storage observation authority",
+      "execution_authorized": false
+    },
+    {
+      "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-062313-43319039\\controllers\\bootstrap-validator-set.demo.json",
+      "sha256": "4b1892cd24cc12b29ee848a5a534d8dc9e2842725209017f8fbc447b74abcb72",
+      "classification": "demo validator bootstrap; not storage observation authority",
+      "execution_authorized": false
+    },
+    {
+      "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260926-233939-e399b371\\controllers\\bootstrap-validator-set.demo.json",
+      "sha256": "a66da95e7d7055a2d5a4bad2d0ae8fd3d702a4ef28d733e994f9188bcd9804e9",
+      "classification": "demo validator bootstrap; not storage observation authority",
+      "execution_authorized": false
+    },
+    {
+      "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260927-205057-51114d80\\controllers\\bootstrap-validator-set.demo.json",
+      "sha256": "357eca08f448efca9d0d6abde509d9854295a7447cbcc0763672e08ea5cc9c8b",
+      "classification": "demo validator bootstrap; not storage observation authority",
+      "execution_authorized": false
+    }
+  ],
+  "corpus_index_sha256": "6e037e35fb31fe441a1205ddfa86aa79657e8e88589195bb04e1fa0af868d064"
+}

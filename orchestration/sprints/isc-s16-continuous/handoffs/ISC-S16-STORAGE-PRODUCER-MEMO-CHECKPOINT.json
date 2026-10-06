@@ -65,5 +65,55 @@
   "memo_review_status": "No result/review transition submitted for this memo; current coordinator only offers RESUME/START outcomes, which would not represent the mandated STOP. Prior two process reviews cover the worker source audit, not this memo.",
   "formal_status": "NO_GO",
   "r2_3": "OPEN",
-  "next_action": "STOP. Existing Pending decisions requires explicit E evidence, F trust/conditional-claim choice or O model/claim choice. Unchanged approval selects neither F nor O and grants no implementation or new proof. No duplicate request on unchanged/no-op decision. On actual new authorization get fresh current-role effective scope, verify and exact ACK, then follow only that scope and ordinary gates."
+  "next_action": "STOP. Direct user-requested E audit completed: E absent in enumerated accessible corpus. F and O are unselected semantic choices with different trust/theorem consequences in the audit addendum. Do not repeat audit or choose automatically. Preserve existing Pending request; create a new E-reference decision only if genuinely sufficient new E evidence is later supplied. General R2.3 authority remains effective but does not select a new trust/model choice. No duplicate results, fake RESUME or new work under completed scope8.",
+  "subsequent_user_requested_E_audit": {
+    "document": "docs/adr/0017-existing-storage-producer-audit.md",
+    "document_sha256": "e2bccf72fa8f4041798d958cc87517b0a7f174e22e955d880953db932070397b",
+    "evidence": "docs/adr/evidence/0017-existing-producer-audit.json",
+    "result": "E_ABSENT_IN_AVAILABLE_CORPUS",
+    "choices": {
+      "F": "NOT_SELECTED",
+      "O": "NOT_SELECTED"
+    },
+    "api_checkpoint": {
+      "revision": 178,
+      "status": "active",
+      "phase": "node",
+      "current_node_id": "continuity-coordinator",
+      "current_assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "observed_at": "2026-10-06T14:20:41.130741+00:00",
+      "scope_revision": 8,
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-98f74dc2bcac122bece1e99bf5bcb305",
+        "effective_revision": 8,
+        "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+        "node_id": "continuity-coordinator",
+        "phase": "node",
+        "agent_id": "isc-s16-continuity-coordinator",
+        "occurrence": 8,
+        "source_commit": "c531870eb9af25a25c70b4e7347e0e235a48933f",
+        "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-DECISION.json",
+        "source_sha256": "d8671747226539f3e0be33b101d8ba5aebaba63f713532934378a769299aeb11",
+        "effective_scope_sha256": "0c86edbd3fe357f970b2d62b5bec5ad5bd263a0aa94796417a5788d264494052",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true
+      },
+      "acknowledged": true,
+      "unchanged": {
+        "assignments": true,
+        "last_transition": true,
+        "pending_transition": true,
+        "scope_control": true,
+        "scope_workflow": true
+      },
+      "workflow_revision": 29,
+      "pending_request_id": "scope-request-09adbfc8a16275064414fca2743101b1",
+      "matching_decisions": [],
+      "sprint_id_from_preserved_checkpoint": "sprint-0001-783ef52c",
+      "review_history_note": "No top-level reviews array in this response. Full assignments and transition collections compared unchanged; no result/review mutation performed."
+    },
+    "new_pending_request_created": false,
+    "implementation_or_new_proof": false
+  }
 }
