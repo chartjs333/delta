@@ -1,0 +1,102 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "record_type": "scope7-activation-and-reviewed-routing-request",
+  "decision": {
+    "decision_id": "scope-decision-614a7db8512f59e36720131917827d4c",
+    "request_id": "scope-request-4caaaf434f8b54d4eeb36ece7bf229d1",
+    "idempotency_key": "5d67ce6a-55e4-4ddf-98ad-2ff07e7cfa29",
+    "request_sha256": "614a7db8512f59e36720131917827d4cea8ae6645e4d88827bf420bbc029757d",
+    "action": "approve",
+    "actor": "operator-ceb24915bb97f04f",
+    "timestamp": "2026-10-06T11:34:45.120987+00:00",
+    "reason": "",
+    "authorization": {
+      "request_id": "scope-request-4caaaf434f8b54d4eeb36ece7bf229d1",
+      "decision_id": "scope-decision-614a7db8512f59e36720131917827d4c",
+      "validation_id": "scope-validation-e730799b01244e78c1d9512f97b7a468",
+      "proposal_sha256": "76fefa433de0ba4bc34ec816f451f6e9cf72ec84ed50d351c869f0dcf8a5352a",
+      "actor": "operator-ceb24915bb97f04f",
+      "origin": "human_decision",
+      "provenance": null
+    },
+    "response": {
+      "request_id": "scope-request-4caaaf434f8b54d4eeb36ece7bf229d1",
+      "decision_id": "scope-decision-614a7db8512f59e36720131917827d4c",
+      "action": "approve",
+      "status": "applied",
+      "receipt": {
+        "schema_version": 2,
+        "amendment_id": "scope-human-f90ac34d219ff49c8e1ef2ad0e0f12da",
+        "effective_revision": 7,
+        "assignment_id": "6a4e2acb-444f-45dd-aa08-8b4c4741a39c",
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-f90ac34d219ff49c8e1ef2ad0e0f12da",
+          "effective_revision": 7,
+          "assignment_id": "6a4e2acb-444f-45dd-aa08-8b4c4741a39c",
+          "node_id": "continuity-coordinator",
+          "phase": "node",
+          "agent_id": "isc-s16-continuity-coordinator",
+          "occurrence": 7,
+          "source_commit": "c5b71677a320da9252c66482a34e867dc7343272",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-CONTRACT-APPROVAL.json",
+          "source_sha256": "818118b9da74254146fac8569ea85f8c69a625f5dc2c55b08c0dd0abae346746",
+          "effective_scope_sha256": "01c23d9eca6d7134c69d5ecb95487c83d0cee034bccea4cc275ff7a53e8571e8",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true
+        },
+        "effective_scope_sha256": "01c23d9eca6d7134c69d5ecb95487c83d0cee034bccea4cc275ff7a53e8571e8",
+        "assignment_preserved": true,
+        "graph_advanced": false,
+        "queue_changed": false,
+        "deduplicated": false,
+        "before_effective_sha256": "65d40cd8b857ef47350c053d9aed56cd1fb9bf674275d05ad4036b885b58e774",
+        "after_effective_sha256": "7aff8b6c5ca5742995450e11a21edf2f73ae088f49c79623a5bb8e4b7c4967a8"
+      },
+      "execution_revision": 155,
+      "scope_revision": 7,
+      "graph_advanced": false,
+      "deduplicated": false
+    }
+  },
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-f90ac34d219ff49c8e1ef2ad0e0f12da",
+    "effective_revision": 7,
+    "assignment_id": "6a4e2acb-444f-45dd-aa08-8b4c4741a39c",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 7,
+    "source_commit": "c5b71677a320da9252c66482a34e867dc7343272",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-CONTRACT-APPROVAL.json",
+    "source_sha256": "818118b9da74254146fac8569ea85f8c69a625f5dc2c55b08c0dd0abae346746",
+    "effective_scope_sha256": "01c23d9eca6d7134c69d5ecb95487c83d0cee034bccea4cc275ff7a53e8571e8",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "ack_id": "scope-ack-7f78f2f190785a341dc6dba347a4f58e",
+  "scope_ack_get_confirmed": true,
+  "contract": {
+    "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+    "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+    "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41",
+    "approved_sections": "3-7; later human decision applies without rewriting historical proposal"
+  },
+  "route": "RESUME_FORMAL after both normal reviews",
+  "worker_branch": "agent/isc-s16-formal-linkage",
+  "worker_resume_from": "e766ef98748504779a9a88d06ee3760594c4184d",
+  "work": "Implement and qualify isolated exact storage reference/source binding under approved ADR0016, then remaining R2.3 source composition; nativeArithmeticRecoveryRefines only after substantive reviewed closure. Preserve other original source rules and do not claim storage signature proves availability/producer origin.",
+  "review_scope": "Verify exact applied human/source/scope/ACK and bounded routing; no R2 closure or Formal GO attestation.",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "restrictions": [
+    "No production integration/guard removal/full R3/concrete sigma.",
+    "No old-object migration/relabel, new producer/trust root/profile scope or hidden source restriction.",
+    "Missing original source producer/evidence or need to change production Init/Next is STOP.",
+    "Same sequential executor reviewer gates are not independent Formal GO attestations."
+  ]
+}
