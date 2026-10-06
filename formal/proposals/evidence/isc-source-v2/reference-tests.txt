@@ -1,0 +1,25 @@
+test_all_matching_original_signers_with_repeats_and_conflicts (test_authentication.AuthenticationTests.test_all_matching_original_signers_with_repeats_and_conflicts) ... ok
+test_parent_and_signature_cannot_be_substituted (test_authentication.AuthenticationTests.test_parent_and_signature_cannot_be_substituted) ... ok
+test_registry_is_not_selected_by_imported_artifact (test_authentication.AuthenticationTests.test_registry_is_not_selected_by_imported_artifact) ... ok
+test_w1_duplicate_fields_bind_exact_original_g (test_authentication.AuthenticationTests.test_w1_duplicate_fields_bind_exact_original_g) ... ok
+test_complete_w1_and_result_sizes_are_exact (test_budget.BudgetTests.test_complete_w1_and_result_sizes_are_exact) ... ok
+test_duplicate_event_index_is_not_normalized (test_budget.BudgetTests.test_duplicate_event_index_is_not_normalized) ... ok
+test_finer_command_and_effect_budget_fail_before_append (test_budget.BudgetTests.test_finer_command_and_effect_budget_fail_before_append) ... ok
+test_repeated_delivery_and_view_change_do_not_reset_counter (test_budget.BudgetTests.test_repeated_delivery_and_view_change_do_not_reset_counter) ... ok
+test_duplicate_members_rejected_before_typed_construction (test_identity.IdentityTests.test_duplicate_members_rejected_before_typed_construction) ... ok
+test_frozen_fr004_normative_vectors (test_identity.IdentityTests.test_frozen_fr004_normative_vectors) ... ok
+test_noncanonical_and_legacy_certificates_rejected (test_identity.IdentityTests.test_noncanonical_and_legacy_certificates_rejected) ... ok
+test_parent_changes_signed_body_not_round_anti_equivocation_key (test_identity.IdentityTests.test_parent_changes_signed_body_not_round_anti_equivocation_key) ... ok
+test_preimage_matches_independent_literal_field_sequence (test_identity.IdentityTests.test_preimage_matches_independent_literal_field_sequence) ... ok
+test_root_checks_order_uniqueness_and_all_tuple_fields (test_identity.IdentityTests.test_root_checks_order_uniqueness_and_all_tuple_fields) ... ok
+test_two_original_witnesses_for_one_consensus_body (test_identity.IdentityTests.test_two_original_witnesses_for_one_consensus_body) ... ok
+test_complete_nonempty_inventory_round_trip_without_erasure (test_policy.PolicyTests.test_complete_nonempty_inventory_round_trip_without_erasure) ... ok
+test_no_parent_invention_or_legacy_upgrade (test_policy.PolicyTests.test_no_parent_invention_or_legacy_upgrade) ... ok
+test_no_unknown_collection_or_reordered_candidates (test_policy.PolicyTests.test_no_unknown_collection_or_reordered_candidates) ... ok
+test_only_two_approved_parent_insertions (test_policy.PolicyTests.test_only_two_approved_parent_insertions) ... ok
+test_parent_bytes_preserved_in_both_policy_positions (test_policy.PolicyTests.test_parent_bytes_preserved_in_both_policy_positions) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 1.213s
+
+OK

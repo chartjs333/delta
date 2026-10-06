@@ -1,0 +1,13 @@
+'DeltaReduce.ISCSourceV2.bodyOriginal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.certificateOriginal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.completeSnapshotInventory' depends on axioms: [propext]
+'DeltaReduce.ISCSourceV2.completePolicyInventory' depends on axioms: [propext]
+'DeltaReduce.ISCSourceV2.bodyParentExact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.certificateParentExact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.bodyIgnoresWitness' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ISCSourceV2.distinctLegacyHeader' does not depend on any axioms
+'DeltaReduce.ISCSourceV2.fullPolicyRoundTrip' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.fullPolicyNoErasure' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ISCSourceV2.Budget.walSufficient' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ISCSourceV2.Budget.outputSufficient' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ISCSourceV2.Budget.logicalResponseSufficient' depends on axioms: [propext, Classical.choice, Quot.sound]

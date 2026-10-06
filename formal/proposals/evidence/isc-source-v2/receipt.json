@@ -1,0 +1,156 @@
+{
+  "task_id": "ISC-S16-D01",
+  "scope_revision": 3,
+  "approved_contract": {
+    "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+    "path": "docs/adr/0014-isc-production-contract-amendment-v1.md",
+    "sha256": "214ca238fde93ebe2e6e08b25a6ea366b93d735333125f651398c0d0daad58fd"
+  },
+  "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
+  "sources": {
+    "SourcePolicy": {
+      "path": "formal/proposals/isc-source-generation/SourcePolicy.lean",
+      "sha256": "2437dd609e56ca5d89cfb54af9d8157be3decb4ce2db60c92ffadfef7ddc8907"
+    },
+    "DeltaReduce.NativeIscCertificate": {
+      "path": "formal/proofs/DeltaReduce/NativeIscCertificate.lean",
+      "sha256": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053"
+    },
+    "DeltaReduce.NativeInputSetBody": {
+      "path": "formal/proofs/DeltaReduce/NativeInputSetBody.lean",
+      "sha256": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71"
+    },
+    "DeltaReduce.NativeConfigAdmission": {
+      "path": "formal/proofs/DeltaReduce/NativeConfigAdmission.lean",
+      "sha256": "73890c23bae73e474465b7e0b5412016be3982d888cfc88be9cf2219f03db534"
+    },
+    "DeltaReduce.NativePolicyBytes": {
+      "path": "formal/proofs/DeltaReduce/NativePolicyBytes.lean",
+      "sha256": "9a7570b9ecd340a869c2a154e7be41f9c77cd43cf5d04bb985dcc2539f271dd2"
+    },
+    "DeltaReduce.NativePolicySchema": {
+      "path": "formal/proofs/DeltaReduce/NativePolicySchema.lean",
+      "sha256": "4d19ebe15b067aab6442c8b67b4adfd1adfd9fe7718bd3cded8df4a9b8267612"
+    },
+    "DeltaReduce.NativePolicyCodec": {
+      "path": "formal/proofs/DeltaReduce/NativePolicyCodec.lean",
+      "sha256": "799f13148f1913c5a21eecdb1931dd6c72d7e147f96a6eb4b1817f9ecf4c7320"
+    },
+    "DeltaReduce.NativeReceiptBytes": {
+      "path": "formal/proofs/DeltaReduce/NativeReceiptBytes.lean",
+      "sha256": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580"
+    },
+    "DeltaReduce.NativeStateBytes": {
+      "path": "formal/proofs/DeltaReduce/NativeStateBytes.lean",
+      "sha256": "cb66d643495fbfb3a694240cf533e8f745a68afd58f28bcfb99891391463782e"
+    },
+    "DeltaReduce.NativeWalScan": {
+      "path": "formal/proofs/DeltaReduce/NativeWalScan.lean",
+      "sha256": "0281eef29dfd973c3f63685ffffb926c012e399dea05444b647d36f989b14e58"
+    },
+    "DeltaReduce.NativeWalBytes": {
+      "path": "formal/proofs/DeltaReduce/NativeWalBytes.lean",
+      "sha256": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e"
+    },
+    "DeltaReduce.NativeVoteBytes": {
+      "path": "formal/proofs/DeltaReduce/NativeVoteBytes.lean",
+      "sha256": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35"
+    },
+    "SourceBudget": {
+      "path": "formal/proposals/isc-source-generation/SourceBudget.lean",
+      "sha256": "ef88ef1e7a827edfd9e05569b76158f535a2e5e6832b4c7ed71b417fe2216f47"
+    }
+  },
+  "checks": [
+    {
+      "module": "DeltaReduce.NativeReceiptBytes",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativePolicyCodec",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativePolicySchema",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativePolicyBytes",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativeVoteBytes",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativeWalBytes",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativeWalScan",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativeStateBytes",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativeConfigAdmission",
+      "exit_code": 0,
+      "log_sha256": "1b2fa0912aedf33bca76312100c4b206f8a1e9dd73f882a9d66a0bcfc2eb0dda"
+    },
+    {
+      "module": "DeltaReduce.NativeInputSetBody",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "DeltaReduce.NativeIscCertificate",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "SourcePolicy",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "module": "SourceBudget",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "reference": {
+    "formal/reference/isc_source/__init__.py": "adc3fecf736563adc0922ce7bf83a2b4c1a6e8e650c047a59ce4de93a2a84449",
+    "formal/reference/isc_source/authentication.py": "cd50f0c344b50631541cc35eb87eebfa80bd5233d7a2e178870809318d3ed527",
+    "formal/reference/isc_source/budget.py": "4a5d534adb2da95cfbf797c26c231161fa68efb9640676fcbc401ffe976917a0",
+    "formal/reference/isc_source/identity.py": "23bc5b5c6b9088b8e47faa347a69d3e615d0eee0f0294172427e1c925b21c13a",
+    "formal/reference/isc_source/policy-layout.json": "88f4df6a7e929629b9954747c023f4f29c7bf2f632a0d7cfd8b28aa744df7f5b",
+    "formal/reference/isc_source/policy.py": "6dcd4d272a1426baa076bb53fc5c61b33ce6f4dceb3be2150ebe246dd0d12783",
+    "formal/reference/isc_source/README.md": "054f39a12980881bc343908f7fba89963a5f70481d0e6827f52f258c130b9ad5",
+    "formal/reference/isc_source/test_authentication.py": "9e7a56ed6506e9c1138373c939d0bc5118b793dd47c426516032ce30857a8282",
+    "formal/reference/isc_source/test_budget.py": "069ef659cd6451c35b7b0d907b9d45f98a7eb50f876ce0e57cdd0fe0ebe25304",
+    "formal/reference/isc_source/test_identity.py": "0cd5271e13aa5e16e2fe8b3189836ed222591785683991f7b0c8a1ee1d1c1740",
+    "formal/reference/isc_source/test_policy.py": "8ee6f396ba5b999650392f5d2f9716d8ed7ac0ac4e4f70586562cae8434e0350"
+  },
+  "axioms_sha256": "e8b93d4eb5eb1ac30bc32ba978c0377e0ffbe07bef42e87b703e4456f44f8576",
+  "reference_test_exit": 0,
+  "result": "SUCCESSOR_SOURCE_REPRESENTATION_COMPONENTS_CHECKED",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "limits": [
+    "No producer-origin or complete Profile-v1 applicability theorem yet.",
+    "No full public family, R2.3 closure, recovery theorem or production changes.",
+    "Synthetic byte fixtures do not authenticate a deployment history.",
+    "Legacy semantics/evidence unchanged; sigma remains a parameter."
+  ],
+  "checker_sha256": "fa5d5a7284e3758e58686eab68d3e97027ae34f4836aff1a87d406014cbf5e3a"
+}
