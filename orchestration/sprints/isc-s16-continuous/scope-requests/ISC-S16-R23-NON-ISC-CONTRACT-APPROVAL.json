@@ -1,0 +1,34 @@
+{
+  "reason": "Scope revision 4 разрешил только документ, а не фактический новый signing contract. Документ docs/adr/0015-non-isc-authority-binding-v1.md подготовлен в том же immutable source commit. Требуется semantic decision по его sections 3–7: SIG-NON-ISC-ED25519-v1 для восьми существующих validator vote kinds, exact Vn/Mn/Gn, явный bootstrap codec dispatch с reuse исходной epoch/key table и binding к original bodies/certificate witnesses. Это не повторный запрос общего разрешения R2.3. До принятого решения документ PROPOSED; implementation/proofs на его основании не выполняются.",
+  "dependencies": [
+    "Snapshot Provenance Profile v1 требует authenticated ApplyQC даже для independently provisioned initial anchor; structural verify_apply и signature_id не являются криптографической аутентификацией.",
+    "Reviewed boundary 4c99272e9e9f4640ed51cf34bef81516630329a5; exact ISC-only contract 26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/adr/0014-isc-production-contract-amendment-v1.md.",
+    "Scope4 human decision scope-decision-3a596d361b5328e1acaf48e2ac4699d1, coordinator assignment e34133ee-83e7-4b4c-959f-913dc109cbf0, persisted ACK scope-ack-591dddd4aac8c7b6a55e0d6a577c7262."
+  ],
+  "proposal": {
+    "instructions": "Утвердить точный proposed contract sections 3–7 docs/adr/0015-non-isc-authority-binding-v1.md из того же immutable Git commit, что source этого request, только для будущего isolated formal/reference source generation в уже разрешённом R2.3. Это явное решение по SIG-NON-ISC-ED25519-v1, восьми существующим kinds, exact Vn/Mn/Gn/IDs, independently selected closed codec dispatch, reuse original validator/epoch/key table, original body/certificate associations и указанным compatibility consequences; не неявное распространение SIG-ISC. После действительного apply и exact role ACK продолжить штатный граф и reviewed R2.3, выполнив finite acceptance sections 5–8 без пропуска обычных gates. Сохранять исходные producer rules, full history/lineage и boundaries других dependency authorities; signature success сам по себе не source validity/refinement. Отсутствие иного существующего необходимого exact contract или несовместимость не предполагаются закрытыми: новый semantic вопрос направляется через Pending decisions. После substantive reviewed R2.3 closure — DeltaReduce.nativeArithmeticRecoveryRefines, axiom audit и применимые qualification gates; full R3 не разрешён. Документ не даёт GO и не подтверждает никакой deployed capability.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+      "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged. Future proposed generation does not migrate, relabel or resign legacy objects.",
+      "No new authority/trust root or profile expansion: preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "No invented producer rule or authentication for worker/storage/beacon objects by validator-key substitution. Existing original producer/dependency/source verification remains mandatory.",
+      "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim, review/qualification gate waiver or claim that sequential self-review is independent attestation.",
+      "R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved. No full R3; named recovery theorem only after reviewed substantive R2.3 closure.",
+      "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, hidden source caps, lineage truncation, weakened invariants or evidence relabel.",
+      "No new sprint, graph reimport/reset/manual promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve assignments, reviews, all scope/ACK history, frozen refs, foreign files and healthy demos."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "document_path": "docs/adr/0015-non-isc-authority-binding-v1.md",
+  "approval_state": "PROPOSED_EXACT_CONTRACT_REQUIRES_HUMAN_DECISION",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
