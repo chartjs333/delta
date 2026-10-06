@@ -63,3 +63,17 @@ R1/R2.1/R2.2 stay CLOSED for their old domain. Recovery theorem/full R3,
 production integration, guard removal and concrete sigma remain untouched.
 Healthy demo8870,8865 and8872 `/node-training/api/health` returned HTTP200;
 no service was restarted. Foreign D:/delta files and frozen refs are preserved.
+
+## Saved Pending decision
+
+Request `scope-request-91665ced7dc001a4388d852ffe6dd8c2`, idempotency key
+`delta-isc-s16-storage-authority-e766ef98`, is saved through the role API.
+Source is `2edc9298a3e041ff32772289ba1d3b881821cfc5` at the request path above;
+the server-resolved blob hash was checked against Git. Public GET confirms the
+request and no matching human decision. Scope-workflow revision17; execution152,
+scope5, assignment, reviews and scope/ACK lineage are unchanged by registration.
+See `ISC-S16-STORAGE-AUTHORITY-CHECKPOINT.json` for the exact receipts.
+
+UI: <http://127.0.0.1:18025/execution>. Quiet read-only monitoring while pending.
+No new approval is inferred from this handoff or from the general R2.3 consent.
+An operator rejection is not permission to recreate the same request.

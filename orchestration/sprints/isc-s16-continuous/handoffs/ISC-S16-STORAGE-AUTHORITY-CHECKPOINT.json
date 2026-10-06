@@ -1,0 +1,141 @@
+{
+  "record_type": "reviewed-source-boundary-awaiting-new-semantic-decision",
+  "project_id": "9000",
+  "sprint_id": "sprint-0001-783ef52c",
+  "execution_revision": 152,
+  "execution_status": "active",
+  "current_assignment_id": "6a4e2acb-444f-45dd-aa08-8b4c4741a39c",
+  "agent_phone": "2750",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "effective_scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-65bbe9ca502002b84c9fa574e6a90c9a",
+    "effective_revision": 5,
+    "assignment_id": "6a4e2acb-444f-45dd-aa08-8b4c4741a39c",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 7,
+    "source_commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-NON-ISC-CONTRACT-APPROVAL.json",
+    "source_sha256": "7ceedf63b51efdc09ada5a66e14a5c1368ea8d67bddea972814ac4e1a9837316",
+    "effective_scope_sha256": "ca75d02d8c58f7798ad58a49d4b65b0dc29ae413fc84b108b4505f5a4c8276b4",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "acknowledged": true,
+  "ack_id": "scope-ack-135f9bc85ae47d69b5be53a94b751974",
+  "scope_workflow_revision": 17,
+  "worker_commit": "e766ef98748504779a9a88d06ee3760594c4184d",
+  "worker_branch": "agent/isc-s16-formal-linkage",
+  "transition_id": "d90be72d-67da-4ed6-9fe1-4bba5620e1a6",
+  "reviews": [
+    {
+      "reviewer_index": 1,
+      "reviewer_agent_id": "isc-s16-continuous-architecture-reviewer",
+      "reviewer_name": "Delta ISC Continuous Architecture Reviewer",
+      "decision": "APPROVE",
+      "feedback": "APPROVE only NEED_DECISION routing for exact e766ef98748504779a9a88d06ee3760594c4184d, not R2.3 closure or acceptance-8 completion. Architecture review: separate NSG1/Vn/Mn matches approved ADR0015 scope5; ISC decoder/domain and legacy objects remain untouched; concrete backend and independent contract selection do not assert body/finality/source truth. Checked source diff and original N InputLedger/AvailabilityProof against FR014/015 and Profile/ADR0015 storage boundary. The six-field API cannot establish original storage attestation authentication/length/retention; Java Authenticator is opaque. Counterexample is correctly limited to API insufficiency, not production reachability. Reject validator-key substitution, trusted-volume-as-validity, invented storage codec, hidden caps, or auto-RESUME. Source body/witness/producer/refinement obligations remain OPEN. Coordinator must resolve missing original contract through Pending decisions. Same sequential executor; this is process review, not independent Formal GO attestation.",
+      "reviewed_at": "2026-10-06T10:03:44.861542+00:00",
+      "assignment_id": "e607625c-db3c-4e26-8123-42143abe564b",
+      "amendment_id": "scope-human-65bbe9ca502002b84c9fa574e6a90c9a",
+      "effective_revision": 5,
+      "scope_context_sha256": "eb4a03130d37842364b7778530fd384dc95284f812b8cf8d9761b691afc2f80d",
+      "scope_ack_id": "scope-ack-c6e42c6b476f83ace3ad87c195518168"
+    },
+    {
+      "reviewer_index": 2,
+      "reviewer_agent_id": "isc-s16-continuous-evidence-reviewer",
+      "reviewer_name": "Delta ISC Continuous Evidence Reviewer",
+      "decision": "APPROVE",
+      "feedback": "APPROVE NEED_DECISION checkpoint e766ef98748504779a9a88d06ee3760594c4184d only. Verified all committed source, imported primitive/registry, log, vector-container and audit hashes from Git blobs; pinned original audit sources match their hashes. LF receipt correction is explicit follow-up, not relabeling old bytes. Final local tests pass; initial runner import error retained and invocation repair explained. Eight public synthetic vectors and real pinned C Ed25519 exercise are not production provenance or complete cross-language qualification. No Lean/TLA/production/schema change; full formal-check/mutant/refinement/report gates remain pending and NO_GO. Minimal availability pair demonstrates only identical native API inputs with missing source authentication information, not production reachability. R2.3 body/certificate/history/composition remain OPEN. Request coordinator semantic decision rather than claim closure or invent storage authority. Role obtained by official whoami; delivered identity confirmed via public GET after client timeout; exact scope5 ACK persisted and GET-confirmed. Same sequential executor, not independent Formal GO attestation.",
+      "reviewed_at": "2026-10-06T10:09:21.120425+00:00",
+      "assignment_id": "0babcee4-8bb0-4196-92d1-7579c8952848",
+      "amendment_id": "scope-human-65bbe9ca502002b84c9fa574e6a90c9a",
+      "effective_revision": 5,
+      "scope_context_sha256": "c06b18c2ddaaf063cb4cf62a78627ae683c03e547aee8feb97d69949a21a0724",
+      "scope_ack_id": "scope-ack-08a1f09af8326f077352905a2da0088c"
+    }
+  ],
+  "pending_request": {
+    "request_id": "scope-request-91665ced7dc001a4388d852ffe6dd8c2",
+    "idempotency_key": "delta-isc-s16-storage-authority-e766ef98",
+    "request_sha256": "91665ced7dc001a4388d852ffe6dd8c2af354bc1c04b45ee0fd5262fcc0c7fd8",
+    "identity": {
+      "assignment_id": "6a4e2acb-444f-45dd-aa08-8b4c4741a39c",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "occurrence": null,
+      "occurrence_id": null,
+      "source_assignment_id": null
+    },
+    "assignment_id": "6a4e2acb-444f-45dd-aa08-8b4c4741a39c",
+    "base_scope_revision": 5,
+    "execution_revision": 152,
+    "created_at": "2026-10-06T12:13:52.268945+02:00",
+    "reason": "MISSING_STORAGE_ATTESTATION_SOURCE_BINDING. Reviewed worker e766ef98748504779a9a88d06ee3760594c4184d supplies the approved non-ISC signature reference but stops at the next original source dependency: feature003 FR014/015 requires storage attestations for exact shards/lengths/retention epoch before freeze. Native AvailabilityProof carries six structural fields, no original attestation bytes/keys/length/retention; its API cannot distinguish genuine from absent/stale attestations with equal IDs. Profile v1 and approved ADR0015 section5 preserve this separate storage authority. The issue is a missing exact contract, not a demonstrated production attack or a request to reauthorize all R2.3.",
+    "dependencies": [
+      "e766ef98748504779a9a88d06ee3760594c4184d:formal/proposals/non-isc-source-checkpoint.md and formal/proposals/evidence/non-isc-source-v1/availability-boundary.json; immutable native pin 60c692f6e391f839829dfc64e93380db54cd507b.",
+      "Transition d90be72d-67da-4ed6-9fe1-4bba5620e1a6 has two APPROVE process reviews for NEED_DECISION; source assignment 91d05d0d-4fca-43e6-bd5e-7442d77e4ec0. Same sequential executor, not independent Formal GO attestations.",
+      "ISC source/freeze -> EC/APC/Parameter/Root -> authenticated ApplyQC initial anchor -> full Profile-v1 native source -> existing R2.1/R2.2 relation. Validator signatures do not replace storage-peer authority."
+    ],
+    "proposal": {
+      "instructions": "Полное ранее выданное разрешение R2.3 сохраняется. Отдельное решение этого request — разрешить один bounded specification-only документ Storage Availability Source Binding v1 для конкретного недостающего original AvailabilityAttestation/AC binding. Сначала использовать уже утверждённый exact applicable contract, если оператор укажет его immutable source/evidence path; не изобретать замену существующему. Если такого контракта нет, подготовить один конкретный reviewable proposed byte/source contract: существующий issuer/storage peer и его допустимый источник identity/key authority, exact shard/length/retention/context binding, original AC/content identity, canonical/signable bytes либо уже существующий иной нормативный способ удостоверения, verification и compatibility consequences. Максимально переиспользовать первоначальный storage/availability contract, не назначать validator keys storage peers и не считать faithful T bytes доказательством истинности AC. Если без нового trust root/authority, producer rule или изменения frozen profile это невозможно, показать точную архитектурную границу и варианты, не выбирать её автоматически. Это разрешение подготовить документ, не утверждение ещё неизвестных byte-level механизмов. После документа снова STOP для exact human semantic decision до implementation/proofs на его основании. Не добавлять четвёртый residual/новый proof layer; решается зависимость существующего R2.3. Не возобновлять граф ради обхода pending decision; обычные reviewer gates сохраняются.",
+      "retained_restrictions": [
+        "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+        "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged. Future proposed generation does not migrate, relabel or resign legacy objects.",
+        "No new authority/trust root or profile expansion: preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+        "No invented producer rule or authentication for worker/storage/beacon objects by validator-key substitution. Existing original producer/dependency/source verification remains mandatory.",
+        "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim, review/qualification gate waiver or claim that sequential self-review is independent attestation.",
+        "R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved. No full R3; named recovery theorem only after reviewed substantive R2.3 closure.",
+        "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, hidden source caps, lineage truncation, weakened invariants or evidence relabel.",
+        "No new sprint, graph reimport/reset/manual promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve assignments, reviews, all scope/ACK history, frozen refs, foreign files and healthy demos.",
+        "This request authorizes only one specification document if approved; no storage codec implementation, new source-success predicate/proof or production producer change based on its unapproved draft.",
+        "No silent use of SIG-ISC/NSG1, validator keys, TLS/authenticationTag, local-volume trust or structural proof success as storage-attestation authorization. No new storage authority is approved by this request."
+      ],
+      "node_ids": [
+        "continuity-coordinator",
+        "formal-linkage",
+        "formal-qualification"
+      ],
+      "reviewer_ids": [
+        "isc-s16-continuous-architecture-reviewer",
+        "isc-s16-continuous-evidence-reviewer"
+      ]
+    },
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "2edc9298a3e041ff32772289ba1d3b881821cfc5",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-AUTHORITY-DECISION.json",
+      "sha256": "0bf24e976db6bcd9243412e3bc006459ad4324fc9462cff6e53d710e5b97ec77"
+    },
+    "authorization_provenance": null,
+    "status": "pending",
+    "deduplicated": false
+  },
+  "matching_human_decision_count": 0,
+  "unchanged_graph_comparisons": {
+    "revision": true,
+    "status": true,
+    "phase": true,
+    "current_agent_id": true,
+    "current_node_id": true,
+    "current_assignment_id": true,
+    "assignments": true,
+    "last_transition": true,
+    "pending_transition": true,
+    "scope_control": true
+  },
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "review_independence": "Same sequential executor. Not independent Formal GO attestations.",
+  "limits": [
+    "Non-ISC signature reference is locally checked only; body/certificate/source/refinement qualification remains open.",
+    "Source API insufficiency only, not a production-reachable attack trace.",
+    "Storage authority/codec not selected or implemented; current request asks for one specification document or existing exact source reference.",
+    "No runtime/legacy identity/schema/TLA/Lean change, no concrete sigma, no recovery theorem/full R3.",
+    "No accepted result or review resubmitted after unknown HTTP outcome; official GET verified persistence."
+  ]
+}
