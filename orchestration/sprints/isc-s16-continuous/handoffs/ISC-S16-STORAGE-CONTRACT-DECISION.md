@@ -54,3 +54,18 @@ original domain; recovery theorem only follows reviewed substantive R2.3 closure
 full R3, production integration, concrete sigma and guard removal remain excluded.
 Keep the automation ACTIVE, with quiet read-only polling while this exact
 decision is pending. Never recreate a rejected request as if it were new consent.
+
+## Saved request
+
+Pending request `scope-request-4caaaf434f8b54d4eeb36ece7bf229d1`, idempotency
+`delta-isc-s16-storage-contract-1438fa3d`, was registered through the role API.
+Source commit `c5b71677a320da9252c66482a34e867dc7343272` at the request path
+above; server-resolved source SHA-256
+`818118b9da74254146fac8569ea85f8c69a625f5dc2c55b08c0dd0abae346746`
+matches the immutable Git blob. Public GET confirms the request and no matching
+human decision. Execution154, scope6, workflow21; assignment, graph, prior
+reviews and all scope/ACK lineage compare unchanged before/after registration.
+See `ISC-S16-STORAGE-CONTRACT-CHECKPOINT.json` for the saved receipt.
+
+UI: <http://127.0.0.1:18025/execution>. Demo8870/8865 and
+8872 `/node-training/api/health` returned HTTP200; no service was restarted.
