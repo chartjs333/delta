@@ -1,0 +1,35 @@
+{
+  "reason": "Storage Producing History Binding memo (ADR0017) is complete under scope8. This is a semantic selection, not another request for general R2.3 permission. The unchanged contract requires physical available-attester coverage at the original cut; authenticated statements and faithful T do not determine missing loss/order. Use Edit boundaries to identify E with concrete immutable producer/evidence, or explicitly choose F (new factual-history trust/conditional claim) or O (availability model/claim redesign). Plain unchanged Approve deliberately retains STOP and selects neither F nor O; no automatic implementation or new proof layer follows.",
+  "dependencies": [
+    "docs/adr/0017-storage-producing-history-binding.md sections3-7 and docs/adr/evidence/0017-storage-producing-history-binding-audit.json: documentary source audit, no new formal result.",
+    "Human scope8 decision scope-decision-67a9a689e49b4cc1dcc98d70e5087373; exact ACK scope-ack-190ebfac12e88037b509574a5f79c8b0. Approved one memo only, followed by STOP.",
+    "Existing approved storage byte/key contract ADR0016 at1438fa3d78ec99291475cf4660fd8c190ac01bb3 retained. Reviewed source audit a2fd17259240be0a7721512e7a12fe972587f3bf and both process reviews remain historical evidence; not independent attestation."
+  ],
+  "proposal": {
+    "instructions": "SEMANTIC SELECTION REQUIRED — not implementation authorization. Scope8 memo ADR0017 is delivered. Default if this exact text is approved unchanged: retain current physical availability contract and STOP; no F/O selected, no duplicate request, no new document/proof work by default. Operator may use Edit boundaries to give one exact next decision: E — provide applicable immutable original producer/observation contract and original evidence paths for verification against the unchanged profile; F — explicitly adopt the factual-history assumption quoted in ADR0017 section6 and acknowledge that it is a NEW trust/profile premise, not supplied by T/signatures, permitting at most a conditional refinement claim and NOT current production GO; O — explicitly authorize revision of the physical-cut availability model/claim toward authenticated/observed availability, with exact new guards/fault assumptions still subject to decision before implementation. F and O are alternatives, not jointly approved by reading this menu. Do not infer a choice from an empty reason, acknowledgement of the memo or general R2.3 authorization. No existing actor is silently appointed a truthful complete observer. If no exact selection or required existing evidence is supplied, preserve STOP and report only a new material decision. A changed semantic boundary must be explicitly stated in the resulting effective scope and receive the normal exact role ACK; scope approval does not bypass result/review/qualification gates. No production code, proof, schema or runtime change is authorized by this pending selection request.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+      "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged. Future proposed generation does not migrate, relabel or resign legacy objects.",
+      "No new authority/trust root or profile expansion: preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "No invented producer rule or authentication for worker/storage/beacon objects by validator-key substitution. Existing original producer/dependency/source verification remains mandatory.",
+      "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim, review/qualification gate waiver or claim that sequential self-review is independent attestation.",
+      "R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved. No full R3; named recovery theorem only after reviewed substantive R2.3 closure.",
+      "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, hidden source caps, lineage truncation, weakened invariants or evidence relabel.",
+      "No new producer/observer/factual-history assumption or changed physical availability guard is adopted by unchanged approval of this request. Any selected trust/model change must be explicit in the human decision; missing evidence cannot be manufactured.",
+      "R2.1/R2.2 remain CLOSED for their original domain; R2.3 OPEN/Formal NO_GO. No named recovery theorem/full R3, conditional-claim-as-production-GO, hidden axiom, circular public-success premise or automatic follow-on proof layer.",
+      "No RESUME outcome solely to route this memo or bypass its STOP. Existing worker result/reviews must not be sent again. History and prior scope/ACK lineage remain immutable."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "HUMAN_SELECTION_REQUIRED_UNCHANGED_APPROVAL_RETAINS_STOP",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
