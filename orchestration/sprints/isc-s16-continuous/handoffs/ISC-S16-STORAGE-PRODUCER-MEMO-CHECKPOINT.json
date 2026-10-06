@@ -1,0 +1,69 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "record_type": "scope8-memo-completed-pending-exact-semantic-choice",
+  "observed_at": "2026-10-06T13:22:47.691915+00:00",
+  "project": "9000",
+  "sprint": "sprint-0001-783ef52c",
+  "document_commit": "ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec",
+  "git_branch": "agent/isc-s16-continuous-sprint",
+  "remote_exact_commit_verified": true,
+  "document": "docs/adr/0017-storage-producing-history-binding.md",
+  "evidence": "docs/adr/evidence/0017-storage-producing-history-binding-audit.json",
+  "execution": {
+    "revision": 178,
+    "status": "active",
+    "phase": "node",
+    "current_assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "current_node_id": "continuity-coordinator"
+  },
+  "scope_revision": 8,
+  "workflow_revision": 29,
+  "human_scope8_decision": "scope-decision-67a9a689e49b4cc1dcc98d70e5087373",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-98f74dc2bcac122bece1e99bf5bcb305",
+    "effective_revision": 8,
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 8,
+    "source_commit": "c531870eb9af25a25c70b4e7347e0e235a48933f",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-DECISION.json",
+    "source_sha256": "d8671747226539f3e0be33b101d8ba5aebaba63f713532934378a769299aeb11",
+    "effective_scope_sha256": "0c86edbd3fe357f970b2d62b5bec5ad5bd263a0aa94796417a5788d264494052",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "ack_id": "scope-ack-190ebfac12e88037b509574a5f79c8b0",
+  "ack_get_confirmed": true,
+  "unchanged_api_collections_since_scope8_before_ack": {
+    "assignments": true,
+    "last_transition": true,
+    "pending_transition": true
+  },
+  "pending_request": {
+    "request_id": "scope-request-09adbfc8a16275064414fca2743101b1",
+    "idempotency_key": "delta-isc-s16-storage-history-choice-ff8b8f1e",
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-SEMANTIC-CHOICE.json",
+      "sha256": "54f2171d192d947eddb0d0cf1ab61e1e347d9a7db14c05ff9da29ae3090ae868"
+    },
+    "created_at": "2026-10-06T13:20:54.349084+00:00",
+    "base_scope_revision": 8,
+    "execution_revision": 178
+  },
+  "request_get_confirmed_exactly_once": true,
+  "post_response_unavailable": true,
+  "request_preserved_execution_assignment_scope": true,
+  "matching_decision_present": false,
+  "memo_review_status": "No result/review transition submitted for this memo; current coordinator only offers RESUME/START outcomes, which would not represent the mandated STOP. Prior two process reviews cover the worker source audit, not this memo.",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "next_action": "STOP. Existing Pending decisions requires explicit E evidence, F trust/conditional-claim choice or O model/claim choice. Unchanged approval selects neither F nor O and grants no implementation or new proof. No duplicate request on unchanged/no-op decision. On actual new authorization get fresh current-role effective scope, verify and exact ACK, then follow only that scope and ordinary gates."
+}
