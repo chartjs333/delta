@@ -1,0 +1,99 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "record_type": "scope5-activation-and-reviewed-routing-request",
+  "decision": {
+    "decision_id": "scope-decision-dff5cf14af975d7da34f29cfdc4a55c1",
+    "request_id": "scope-request-4395b63c8605983a6adfde98805f76fa",
+    "idempotency_key": "98d8e25d-da54-4e98-ad6f-e5ebc5e796cd",
+    "request_sha256": "dff5cf14af975d7da34f29cfdc4a55c13df9a4b5fd7a9a2e6c8115cf2423531b",
+    "action": "approve",
+    "actor": "operator-c796744b484ba658",
+    "timestamp": "2026-10-06T09:37:00.035336+00:00",
+    "reason": "",
+    "authorization": {
+      "request_id": "scope-request-4395b63c8605983a6adfde98805f76fa",
+      "decision_id": "scope-decision-dff5cf14af975d7da34f29cfdc4a55c1",
+      "validation_id": "scope-validation-9f96bdafaec352f7cc94ab89c8a95209",
+      "proposal_sha256": "1d2fffac849190b7719bf9849af7655092ec8c612df017bb5a0a880907ce681d",
+      "actor": "operator-c796744b484ba658",
+      "origin": "human_decision",
+      "provenance": null
+    },
+    "response": {
+      "request_id": "scope-request-4395b63c8605983a6adfde98805f76fa",
+      "decision_id": "scope-decision-dff5cf14af975d7da34f29cfdc4a55c1",
+      "action": "approve",
+      "status": "applied",
+      "receipt": {
+        "schema_version": 2,
+        "amendment_id": "scope-human-65bbe9ca502002b84c9fa574e6a90c9a",
+        "effective_revision": 5,
+        "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-65bbe9ca502002b84c9fa574e6a90c9a",
+          "effective_revision": 5,
+          "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+          "node_id": "continuity-coordinator",
+          "phase": "node",
+          "agent_id": "isc-s16-continuity-coordinator",
+          "occurrence": 6,
+          "source_commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-NON-ISC-CONTRACT-APPROVAL.json",
+          "source_sha256": "7ceedf63b51efdc09ada5a66e14a5c1368ea8d67bddea972814ac4e1a9837316",
+          "effective_scope_sha256": "ca75d02d8c58f7798ad58a49d4b65b0dc29ae413fc84b108b4505f5a4c8276b4",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true
+        },
+        "effective_scope_sha256": "ca75d02d8c58f7798ad58a49d4b65b0dc29ae413fc84b108b4505f5a4c8276b4",
+        "assignment_preserved": true,
+        "graph_advanced": false,
+        "queue_changed": false,
+        "deduplicated": false,
+        "before_effective_sha256": "7cc6c791e39119435d981f0b6ef3a521314a0e86795937dfb493d33efb227912",
+        "after_effective_sha256": "6e302d02f8a9716dcba43f4f9a7bf1657886bdb415ec558b553765b194d6a4bf"
+      },
+      "execution_revision": 131,
+      "scope_revision": 5,
+      "graph_advanced": false,
+      "deduplicated": false
+    }
+  },
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-65bbe9ca502002b84c9fa574e6a90c9a",
+    "effective_revision": 5,
+    "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 6,
+    "source_commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-NON-ISC-CONTRACT-APPROVAL.json",
+    "source_sha256": "7ceedf63b51efdc09ada5a66e14a5c1368ea8d67bddea972814ac4e1a9837316",
+    "effective_scope_sha256": "ca75d02d8c58f7798ad58a49d4b65b0dc29ae413fc84b108b4505f5a4c8276b4",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "ack_id": "scope-ack-d97082f576dff515aec75b67d575a525",
+  "ack_get_confirmed": true,
+  "document": {
+    "commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+    "path": "docs/adr/0015-non-isc-authority-binding-v1.md",
+    "sha256": "f2e988d26a28ff8cedf74cc2265c535057e7ae37dc152002a853c75a0614710d",
+    "approved_sections": "3-7",
+    "status": "APPROVED_ISOLATED_FUTURE_FORMAL_REFERENCE_ONLY"
+  },
+  "requested_outcome": "RESUME_FORMAL",
+  "next_work": "Implement and qualify exact approved non-ISC binding in isolated reference source, preserve full Profile-v1 producer/dependency/history checks, compose substantive R2.3. Named recovery theorem only after reviewed R2.3 closure.",
+  "worker_prior_commit": "4c99272e9e9f4640ed51cf34bef81516630329a5",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "review_required": true,
+  "independent_attestation": false,
+  "production_authorized": false,
+  "sigma_assigned": false
+}
