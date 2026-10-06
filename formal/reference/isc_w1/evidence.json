@@ -1,0 +1,108 @@
+{
+  "task_id": "ISC-S16-B01",
+  "related_task_ids": [
+    "T016",
+    "T053",
+    "HR008-001",
+    "HR008-002",
+    "HR008-018"
+  ],
+  "assignment_id": "2f73749d-43ba-44d1-ba53-5bf99194b70f",
+  "agent_phone": "2751",
+  "branch": "agent/isc-s16-w1-reference-engine",
+  "from_commit": "e213e6f92c3f4ea7d39600cdca3ceb7b6c9b5ad1",
+  "source_baseline": "ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+  "origin_main": "5b75bc562f83fd99125ae79d76a6527ef7c716aa",
+  "created_at_utc": "2026-10-04T15:23:37.487836+00:00",
+  "scope": "REFERENCE_ONLY_NOT_PRODUCTION",
+  "outcome": "DONE",
+  "sources": [
+    {
+      "path": "formal/reference/isc_w1/codec.py",
+      "sha256": "cbfe9fa10a12428daa4dabc6f61fe38fce2050a82fe9ebddeeb4bd2695286c72"
+    },
+    {
+      "path": "formal/reference/isc_w1/harness.py",
+      "sha256": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c"
+    },
+    {
+      "path": "formal/reference/isc_w1/test_codec.py",
+      "sha256": "b8cc4f0728c1913fbc790b7ffd27c1eb8138ae31fa644ba8ed86aa806272cf07"
+    },
+    {
+      "path": "formal/reference/isc_w1/test_harness.py",
+      "sha256": "130d31a94ee336071906035206bc0df54359231088e6227feb9136db1e69ff28"
+    },
+    {
+      "path": "formal/reference/isc_w1/README.md",
+      "sha256": "e2c29c47df24df279cc7fdb804b91bd7aca916c2c95c4b83b557fe8927eeb7a6"
+    }
+  ],
+  "authority_sources": [
+    {
+      "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "sha256": "b853596dcb6893467d215572d2701367643f142cbaaf510e225fb0d5bf92f3ee"
+    },
+    {
+      "path": "docs/adr/0014-isc-contract-freeze-v1.md",
+      "sha256": "fead9e4772b0d9d26dfcfacea10ccd7235c80ea17f1469bfc258a06a5588606e"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-continuous/lane-tasks.md",
+      "sha256": "9acfd7db9fadd6db849304abca23dcf3085bca89974d858db726c2e711809e7f"
+    },
+    {
+      "path": "orchestration/sprints/isc-s16-pipelined/lane-tasks.md",
+      "sha256": "7fd014f7c7239eec8ec87e4bae5d8498cfc5e61181aa2d5b4520f9048767cccc"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python -m unittest discover -s formal\\reference\\isc_w1 -p test_*.py -v",
+      "exit_code": 0,
+      "output": "test_ascii_content_ids_and_policy_digest_grammar (test_codec.CodecTests.test_ascii_content_ids_and_policy_digest_grammar) ... ok\ntest_checked_u64_sequence_and_request_fields (test_codec.CodecTests.test_checked_u64_sequence_and_request_fields) ... ok\ntest_checksum_and_every_truncation_rejected (test_codec.CodecTests.test_checksum_and_every_truncation_rejected) ... ok\ntest_command_envelope_boundaries (test_codec.CodecTests.test_command_envelope_boundaries) ... ok\ntest_delivery_count_is_checked_before_allocation (test_codec.CodecTests.test_delivery_count_is_checked_before_allocation) ... ok\ntest_encoder_rejects_aggregate_overflow_before_blob_copies (test_codec.CodecTests.test_encoder_rejects_aggregate_overflow_before_blob_copies) ... ok\ntest_exact_legacy_layout_and_round_trip (test_codec.CodecTests.test_exact_legacy_layout_and_round_trip) ... ok\ntest_exact_w1_layout_and_round_trip (test_codec.CodecTests.test_exact_w1_layout_and_round_trip) ... ok\ntest_frame_boundaries (test_codec.CodecTests.test_frame_boundaries) ... ok\ntest_legacy_section_shapes_and_unknown_kind_rejected (test_codec.CodecTests.test_legacy_section_shapes_and_unknown_kind_rejected) ... ok\ntest_nested_section_tag_version_flags_trailing_and_truncation (test_codec.CodecTests.test_nested_section_tag_version_flags_trailing_and_truncation) ... ok\ntest_outer_lengths_and_trailing_bytes_rejected (test_codec.CodecTests.test_outer_lengths_and_trailing_bytes_rejected) ... ok\ntest_output_content_boundaries_without_draft_result_codec (test_codec.CodecTests.test_output_content_boundaries_without_draft_result_codec) ... ok\ntest_payload_authority_is_intentionally_absent (test_codec.CodecTests.test_payload_authority_is_intentionally_absent) ... ok\ntest_policy_and_isc_boundaries (test_codec.CodecTests.test_policy_and_isc_boundaries) ... ok\ntest_receipt_sequence_and_policy_digest_mismatch_rejected (test_codec.CodecTests.test_receipt_sequence_and_policy_digest_mismatch_rejected) ... ok\ntest_section_round_trips_preserve_repeats_and_conflicts (test_codec.CodecTests.test_section_round_trips_preserve_repeats_and_conflicts) ... ok\ntest_sections_match_independent_literal_layout (test_codec.CodecTests.test_sections_match_independent_literal_layout) ... ok\ntest_source_event_order_and_cut_rejected (test_codec.CodecTests.test_source_event_order_and_cut_rejected) ... ok\ntest_unknown_magic_version_flags_kind_and_reserved_rejected_with_valid_hash (test_codec.CodecTests.test_unknown_magic_version_flags_kind_and_reserved_rejected_with_valid_hash) ... ok\ntest_bad_total_length_is_rejected_without_allocating_body (test_harness.HarnessTests.test_bad_total_length_is_rejected_without_allocating_body) ... ok\ntest_before_append_preserves_ready_prefix (test_harness.HarnessTests.test_before_append_preserves_ready_prefix) ... ok\ntest_complete_unacknowledged_survives_without_second_append (test_harness.HarnessTests.test_complete_unacknowledged_survives_without_second_append) ... ok\ntest_corruption_unknown_kind_and_sequence_gap_are_not_skipped (test_harness.HarnessTests.test_corruption_unknown_kind_and_sequence_gap_are_not_skipped) ... ok\ntest_create_does_not_overwrite (test_harness.HarnessTests.test_create_does_not_overwrite) ... ok\ntest_external_change_fences_handle (test_harness.HarnessTests.test_external_change_fences_handle) ... ok\ntest_floor_cannot_be_downgraded_to_missing_or_changed_bytes (test_harness.HarnessTests.test_floor_cannot_be_downgraded_to_missing_or_changed_bytes) ... ok\ntest_fsync_exception_fences_handle_and_reopen_requires_barrier (test_harness.HarnessTests.test_fsync_exception_fences_handle_and_reopen_requires_barrier) ... ok\ntest_mixed_slots_and_exact_replay_across_reopen (test_harness.HarnessTests.test_mixed_slots_and_exact_replay_across_reopen) ... ok\ntest_partial_append_blocks_scan_and_never_repairs_tail (test_harness.HarnessTests.test_partial_append_blocks_scan_and_never_repairs_tail) ... ok\ntest_reopen_rejects_self_consistent_frame_with_wrong_prefix (test_harness.HarnessTests.test_reopen_rejects_self_consistent_frame_with_wrong_prefix) ... ok\ntest_short_write_fences_and_retains_partial_bytes (test_harness.HarnessTests.test_short_write_fences_and_retains_partial_bytes) ... ok\ntest_slot_conflict_gap_and_prefix_mismatch_do_not_write (test_harness.HarnessTests.test_slot_conflict_gap_and_prefix_mismatch_do_not_write) ... ok\n\n----------------------------------------------------------------------\nRan 33 tests in 2.320s\n\nOK\n"
+    },
+    {
+      "command": ".venv/Scripts/ruff.exe check --isolated --select B,E,F,I,RUF,UP --line-length 100 --target-version py312 formal\\reference\\isc_w1",
+      "exit_code": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": ".venv/Scripts/ruff.exe format --isolated --line-length 100 --check formal\\reference\\isc_w1",
+      "exit_code": 0,
+      "output": "5 files already formatted\n"
+    },
+    {
+      "command": ".venv/Scripts/mypy.exe --strict --explicit-package-bases formal\\reference\\isc_w1\\codec.py formal\\reference\\isc_w1\\harness.py",
+      "exit_code": 0,
+      "output": "Success: no issues found in 2 source files\n"
+    }
+  ],
+  "python": "3.12.1",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "checks": {
+    "tests": "PASS_33_TESTS",
+    "ruff": "PASS",
+    "ruff_format": "PASS",
+    "strict_mypy_codec_and_harness": "PASS",
+    "source_ancestry": "PASS",
+    "sprint_preserved": "PASS",
+    "scope": "ONLY_formal/reference/isc_w1"
+  },
+  "protected_spine_diff": [],
+  "production_code_diff": [],
+  "blockers": [],
+  "formal_go_claimed": false,
+  "sigma_assigned": false,
+  "production_authorization": false,
+  "r2_3_started": false,
+  "r3_started": false,
+  "limitations": [
+    "Opaque nested payloads: framing acceptance is not canonical nested object or semantic authority verification.",
+    "Necessary 16 MiB output content sum only; no unapproved dedicated-result wire codec.",
+    "File fsync and injected local cuts only; directory durability, adversarial path binding and real power loss not qualified.",
+    "Replay keyed by exact original frame/physical slot only; no request-ID or consensus body replay implementation.",
+    "No full make formal-check, C++/Java, worker, cross-language or production gates: no mandatory formal source or production target changed.",
+    "Process review is not independent external Formal GO attestation."
+  ]
+}
