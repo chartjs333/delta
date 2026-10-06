@@ -1,0 +1,36 @@
+{
+  "reason": "Exact semantic approval required after the scope6 specification-only task. ADR0016 proposes the concrete missing storage enrollment/config/key linkage and exact attestation/AC bytes. Storage roles exist, but this binding was not already present: proposed same offline bootstrap owner -> initial_config_ref.storage_authority -> separate Rs/Ks; RoundConfig adds storage_binding without replacing close/repair/deadline policy. Human scope6 approved writing the document only. R2.3 remains OPEN / Formal NO_GO; no implementation or formal result is claimed.",
+  "dependencies": [
+    "1438fa3d78ec99291475cf4660fd8c190ac01bb3:docs/adr/0016-storage-availability-source-binding-v1.md sections 3-7 (exact proposed contract) and docs/adr/evidence/0016-storage-availability-source-binding-v1-audit.json (immutable source references, not qualification).",
+    "Existing worker e766ef98748504779a9a88d06ee3760594c4184d and its reviewed NEED_DECISION boundary. Scope6 human decision scope-decision-344bf1b51a2dd860e4fd57e20f3a9b84 authorizes one document only; ACK scope-ack-cc85140300f70cddfca87cc7527e9807 confirmed by GET.",
+    "Full previously authorized R2.3 -> named DeltaReduce.nativeArithmeticRecoveryRefines -> axiom audit/applicable review/qualification remains the objective. This is one existing source-dependency semantic choice, not general R2 reauthorization or a fourth residual."
+  ],
+  "proposal": {
+    "instructions": "Утвердить точный будущий Storage Availability Source Binding v1 в ADR0016 §§3–7 на commit 1438fa3d78ec99291475cf4660fd8c190ac01bb3 для изолированной formal/reference работы внутри уже разрешённого R2.3. Явное решение включает additive storage_authority/storage_binding через независимо pinned initial_config_ref и исходную RoundConfig availability policy, отдельные storage Rs/Ks, exact A/Ms/SAG1 и AC D/ac, без подмены storage peers ключами валидаторов. Это новая конкретизация существующей enrollment authority, не утверждение, что binding уже реализован; если она не принимается — отклонить/изменить decision или указать существующий exact immutable contract. Не заменять прежние close/repair/deadline fields и не менять frozen deployment assumptions. После actual apply/ACK разрешены необходимые reference schemas/checkers/codec/helpers/tests/proofs и reviewed source/refinement composition R2.3 в этих точных границах. Ключевая граница сохранена: подписи не доказывают truthful storage availability или legality producer history; отсутствие существующего producer/evidence либо нужда в новом правиле, trust root/assumption, Init/Next или source-domain restriction означает STOP. Full R2.3 permission не спрашивать повторно, но CLOSED и nativeArithmeticRecoveryRefines не объявлять до действительной reviewed композиции. Выполнить обычные reviewer/qualification gates; не выдавать same-executor review за независимую Formal GO аттестацию.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+      "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged. Future proposed generation does not migrate, relabel or resign legacy objects.",
+      "No new authority/trust root or profile expansion: preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "No invented producer rule or authentication for worker/storage/beacon objects by validator-key substitution. Existing original producer/dependency/source verification remains mandatory.",
+      "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim, review/qualification gate waiver or claim that sequential self-review is independent attestation.",
+      "R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved. No full R3; named recovery theorem only after reviewed substantive R2.3 closure.",
+      "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, hidden source caps, lineage truncation, weakened invariants or evidence relabel.",
+      "No new sprint, graph reimport/reset/manual promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve assignments, reviews, all scope/ACK history, frozen refs, foreign files and healthy demos.",
+      "Only the exact future storage config/codec binding in ADR0016 sections 3-7 is proposed for approval. No old object, signature, storage enrollment or certificate may be converted/relabelled; no new authority root or stronger storage honesty/observation assumption.",
+      "Storage signatures authenticate statements, not ArtifactLocation/availability or lawful producing history. Missing original producer/evidence, incompatible bounds or required Init/Next/protocol change is a STOP, not permission for a new rule, callback or source-domain restriction.",
+      "No SIG-ISC/NSG1/validator-registry substitution, TLS fallback, faithful-T-as-validity or global-union-only availability quorum. Preserve original per-leaf quorums, original witness IDs, delivery multiplicity and source cuts."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PROPOSED_EXACT_CONTRACT_NOT_YET_APPROVED",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
