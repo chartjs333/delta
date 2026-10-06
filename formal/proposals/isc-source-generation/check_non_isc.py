@@ -82,7 +82,9 @@ def main():
                 "artifact_id": verified.artifact_id,
             }
         )
-    (OUT / "public-vectors.json").write_text(json.dumps(vectors, indent=2) + "\n", encoding="utf8")
+    (OUT / "public-vectors.json").write_text(
+        json.dumps(vectors, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
     paths = sorted((ROOT / "formal/reference/non_isc").glob("*.py"))
     paths += [ROOT / "formal/reference/non_isc/README.md", Path(__file__)]
     paths += [Path(__file__).with_name("audit_availability.py")]
@@ -122,7 +124,9 @@ def main():
             "no concrete future sigma or deployment.",
         ],
     }
-    (OUT / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf8")
+    (OUT / "receipt.json").write_text(
+        json.dumps(receipt, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
     print(receipt["result"])
 
 

@@ -131,7 +131,7 @@ def main():
     }
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "availability-boundary.json").write_text(
-        json.dumps(report, indent=2) + "\n", encoding="utf8"
+        json.dumps(report, indent=2) + "\n", encoding="utf8", newline="\n"
     )
     print(report["result"])
 

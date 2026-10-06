@@ -9,8 +9,8 @@
     "sha256": "f2e988d26a28ff8cedf74cc2265c535057e7ae37dc152002a853c75a0614710d"
   },
   "reference_sources": {
-    "formal/proposals/isc-source-generation/audit_availability.py": "06f5985620626541ec1819294635c31ee4f30ef17d92489aeb8900f50c960b86",
-    "formal/proposals/isc-source-generation/check_non_isc.py": "66a8bea9740e5ac7d503f1d3464e0bd48d6acbc241f65061bb1edf4077219537",
+    "formal/proposals/isc-source-generation/audit_availability.py": "3190fed691e7724d563a7425e1ffbd1103c2470d8d3905c33cdfadf1aea68ed9",
+    "formal/proposals/isc-source-generation/check_non_isc.py": "f6cd7eaf1eca9961ada5e0a76bc23b78a4de9d739ab2f54ef8034b613e80210c",
     "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
     "formal/reference/isc_crypto/conformance-evidence.json": "a351d5ad662859800519115f4ea19ea1b00b6bf472248d964f77e4865615ea19",
     "formal/reference/isc_crypto/evidence.json": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
@@ -43,19 +43,19 @@
   "checks": {
     "non-isc": {
       "exit_code": 0,
-      "log_sha256": "69acb0a5218f496ea1e3f1a5e9c4382c8b81ea867f8d4a3dba8529b9f08d0311"
+      "log_sha256": "d434225260288517ef2b2efef512799fd6e4acac2bdf021a1cd5972c85b17bc9"
     },
     "isc-regression": {
       "exit_code": 0,
-      "log_sha256": "bf8fe26879d233ef239e129c36f8d0a007b38d00749882501b6114ac32c4c513"
+      "log_sha256": "46ada6a467edb734efea7f84b543d29451dfe0c6fc0a863f567902812be3eebe"
     },
     "source-audit": {
       "exit_code": 0,
       "log_sha256": "ce91b55753cab01faa4cb6499a8e4ce739bdc5b6c453dfe68bb686992b57b9d4"
     }
   },
-  "vectors_sha256": "f475b2d119a4aa2630b4e13b59cad24959571114ebc10b791688585b624c217a",
-  "source_audit_sha256": "eb3af7703fda5932ae36d494e7b28dbf5072509d65a583e82e32b3430d7cd4d1",
+  "vectors_sha256": "784c712822f0a991a513bce8779c7cca3f928935d7b5f4df34f443331101c3e9",
+  "source_audit_sha256": "7f39471a79ee4497940a42968837db31288ddc6402378c76985a23d07ec9638e",
   "result": "NON_ISC_SIGNATURE_REFERENCE_CHECKED_SOURCE_COMPOSITION_BLOCKED",
   "formal_status": "NO_GO",
   "r2_3": "OPEN",

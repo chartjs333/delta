@@ -6,6 +6,6 @@ test_independent_codec_registry_and_key_selection (formal.reference.non_isc.test
 test_original_slots_replay_and_repeated_evidence_are_not_collapsed (formal.reference.non_isc.test_authentication.NonIscTests.test_original_slots_replay_and_repeated_evidence_are_not_collapsed) ... ok
 
 ----------------------------------------------------------------------
-Ran 6 tests in 0.106s
+Ran 6 tests in 0.118s
 
 OK
