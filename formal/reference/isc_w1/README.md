@@ -17,7 +17,9 @@ python -m unittest discover -s formal/reference/isc_w1 -p "test_*.py" -v
 `codec.py` encodes and decodes the original big-endian DRW1 frame, all four kind-3
 sections, fixed local section headers, lengths/counts, checksums and physical slot.
 Kind 1 preserves its four opaque payloads; kind 2 preserves its vote payload
-and requires the other three sections to stay empty. Policy, certificate and existing
+and original opaque fourth field, requiring only state/effects to be empty.
+The native runtime writes its 64 ASCII hex admission-policy digest into that
+fourth field; framing alone does not establish the policy binding. Policy, certificate and existing
 nested envelope bounds are checked before copying their fields. The necessary
 16 MiB receipt/effect/certificate payload sum is checked without inventing the
 consolidated draft's result wire format. Arbitrary noncanonical nested payloads
@@ -52,4 +54,5 @@ No draft numeric evidence budgets, deployment semantics ID, new authority,
 production integration, guard removal, R2.3/R3, TLA/Lean theorem or Formal GO is
 introduced. The accepted historical formal ID cannot authorize the pending ISC
 amendment; this reference task is not an implementation task in features 001–011.
-Local results and exact source hashes are recorded in `evidence.json` after tests.
+Historical B01 results and source hashes remain in `evidence.json`; later source
+qualification corrections have separate receipts and do not relabel that evidence.

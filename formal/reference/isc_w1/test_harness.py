@@ -21,7 +21,10 @@ from formal.reference.isc_w1.harness import FileHarness, InjectedFault, StorageE
 
 def legacy(sequence, kind=1):
     payload = f"original-{sequence}".encode()
-    sections = (payload, b"", b"", b"") if kind == 2 else (payload, b"state", b"effect", b"receipt")
+    digest = hashlib.sha256(b"original opaque policy").hexdigest().encode("ascii")
+    sections = (
+        (payload, b"", b"", digest) if kind == 2 else (payload, b"state", b"effect", b"receipt")
+    )
     return Frame(sequence, kind, sections)
 
 

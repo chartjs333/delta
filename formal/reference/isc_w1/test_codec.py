@@ -89,6 +89,16 @@ class CodecTests(unittest.TestCase):
         self.assertEqual(encode_frame(transition), independently_frame(1, 1, transition.sections))
         self.assertEqual(decode_frame(encode_frame(transition)), transition)
 
+    def test_native_vote_policy_digest_is_preserved(self) -> None:
+        policy_digest = sha256(b"original opaque policy bytes").hexdigest().encode("ascii")
+        frame = Frame(2, 2, (b"original vote", b"", b"", policy_digest))
+        wire = independently_frame(2, 2, frame.sections)
+        self.assertEqual(encode_frame(frame), wire)
+        self.assertEqual(decode_frame(wire), frame)
+        # The structural parser must not invent a semantic admission check.
+        opaque = Frame(2, 2, (b"original vote", b"", b"", b"opaque fourth field"))
+        self.assertEqual(decode_frame(encode_frame(opaque)), opaque)
+
     def test_exact_w1_layout_and_round_trip(self) -> None:
         sections = synthetic_sections(3)
         frame = Frame(3, 3, sections)
@@ -188,6 +198,7 @@ class CodecTests(unittest.TestCase):
         cases = [
             (1, (b"c", b"", b"e", b"r")),
             (2, (b"v", b"s", b"", b"")),
+            (2, (b"v", b"", b"e", b"policy")),
             (2, (b"", b"", b"", b"")),
             (4, (b"a", b"b", b"c", b"d")),
         ]

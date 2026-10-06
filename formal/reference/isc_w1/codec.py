@@ -303,7 +303,10 @@ def _validate_frame(frame: Frame) -> None:
     if frame.kind == 1:
         _require(all(frame.sections), "legacy transition sections required")
     elif frame.kind == 2:
-        _require(bool(first) and not any(frame.sections[1:]), "legacy vote section shape")
+        # Native DRW1 leaves the fourth section opaque at framing level. The
+        # runtime stores the original admission-policy digest there and checks
+        # its identity separately during recovery.
+        _require(bool(first) and not second and not effect, "legacy vote section shape")
     else:
         source = decode_request_source(first)
         state = decode_candidate_state(second)

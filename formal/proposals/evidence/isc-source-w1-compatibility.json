@@ -1,0 +1,68 @@
+{
+  "task_id": "ISC-S16-D01",
+  "qualification": "REFERENCE_ONLY_NOT_PRODUCTION",
+  "scope_revision": 3,
+  "assignment_id": "6a3718d7-25b3-4f2e-802c-9688fe931b4d",
+  "source_pin": "60c692f6e391f839829dfc64e93380db54cd507b",
+  "native_sources": {
+    "delta-runtime-cpp/src/wal.cpp": {
+      "sha256": "fd62c60727b6f5725cdcef2cb56591746736f444c87d1895a1357a7d85377e7e"
+    },
+    "delta-runtime-cpp/src/runtime.cpp": {
+      "sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91"
+    }
+  },
+  "change": "Preserve original opaque kind-2 fourth section, as existing DRW1 parser requires; runtime binds the original 64-hex policy identity separately. No native source semantics change.",
+  "claims": [
+    "Independent struct framing oracle preserves original kind-2 policy digest bytes.",
+    "Mixed physical slots 1/2/3/4 with kinds 1/2/3/2 retain two original votes across replay/reopen.",
+    "Nonempty vote state/effect sections still fail closed."
+  ],
+  "limits": [
+    "Historical B01 evidence unchanged.",
+    "Not source producer qualification, R2.3 closure, R3 or Formal GO.",
+    "Synthetic storage examples are not signed/admitted protocol histories."
+  ],
+  "checks": [
+    {
+      "command": [
+        "D:\\delta-main-demo\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "formal/reference/isc_w1",
+        "-p",
+        "test_*.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "output": "----------------------------------------------------------------------\nRan 34 tests in 1.304s\n\nOK\n"
+    },
+    {
+      "command": [
+        "D:/delta-main-demo/.venv/Scripts/ruff.exe",
+        "check",
+        "formal/reference/isc_w1"
+      ],
+      "exit_code": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": [
+        "D:/delta-main-demo/.venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        "formal/reference/isc_w1"
+      ],
+      "exit_code": 0,
+      "output": "5 files already formatted\n"
+    }
+  ],
+  "sources": {
+    "formal/reference/isc_w1/codec.py": "e8b6c09fd9edd5f909ab339719c2c2f6d4221d2b8ccaa7177a376e44181c7e96",
+    "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
+    "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
+    "formal/reference/isc_w1/README.md": "74bbe75db746cdf88c887292d47e1e69ba49be1525cbdcc775b2d71bd467926c"
+  }
+}
