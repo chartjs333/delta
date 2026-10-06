@@ -1,0 +1,70 @@
+{
+  "task_id": "ISC-S16-D01",
+  "scope_revision": 5,
+  "assignment_id": "91d05d0d-4fca-43e6-bd5e-7442d77e4ec0",
+  "human_decision": "scope-decision-dff5cf14af975d7da34f29cfdc4a55c1",
+  "approved_contract": {
+    "commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+    "path": "docs/adr/0015-non-isc-authority-binding-v1.md",
+    "sha256": "f2e988d26a28ff8cedf74cc2265c535057e7ae37dc152002a853c75a0614710d"
+  },
+  "reference_sources": {
+    "formal/proposals/isc-source-generation/audit_availability.py": "06f5985620626541ec1819294635c31ee4f30ef17d92489aeb8900f50c960b86",
+    "formal/proposals/isc-source-generation/check_non_isc.py": "66a8bea9740e5ac7d503f1d3464e0bd48d6acbc241f65061bb1edf4077219537",
+    "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
+    "formal/reference/isc_crypto/conformance-evidence.json": "a351d5ad662859800519115f4ea19ea1b00b6bf472248d964f77e4865615ea19",
+    "formal/reference/isc_crypto/evidence.json": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
+    "formal/reference/isc_crypto/library-provenance.json": "88c6f9a355c2e97a6d65bdb6eaa8165b59c64dcf66ce31f3ad831b1c525adeaa",
+    "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
+    "formal/reference/isc_crypto/public-vector.json": "dfed5d72577b74fa084fb0a8a72859e1f9145ee124a90941f803aad253c0e591",
+    "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
+    "formal/reference/isc_crypto/test_codec.py": "fab2abb09f18f4998af6fc584a9e582610a7c8668f3eb7a01e5f58ac10bb7d0b",
+    "formal/reference/isc_crypto/test_public_vector.py": "3108c775f583a26f8188b2c12480658fece48c2d0b4461db6857d41a3b19aebe",
+    "formal/reference/isc_crypto/test_signatures.py": "2194b0a8291a7ad30c277bc0ab9db6a55cb6607d5343c339f764c1f4cc9fef32",
+    "formal/reference/isc_source/__init__.py": "adc3fecf736563adc0922ce7bf83a2b4c1a6e8e650c047a59ce4de93a2a84449",
+    "formal/reference/isc_source/authentication.py": "cd50f0c344b50631541cc35eb87eebfa80bd5233d7a2e178870809318d3ed527",
+    "formal/reference/isc_source/budget.py": "4a5d534adb2da95cfbf797c26c231161fa68efb9640676fcbc401ffe976917a0",
+    "formal/reference/isc_source/finalization.py": "0b35dd3d09828d80e4771f48688ecfbf1527354e4d209a5d470e3986ba125191",
+    "formal/reference/isc_source/identity.py": "23bc5b5c6b9088b8e47faa347a69d3e615d0eee0f0294172427e1c925b21c13a",
+    "formal/reference/isc_source/policy-layout.json": "dbc992e9155b768b4f92fb25a05c883aae80763c473e402336b58c23b5d32799",
+    "formal/reference/isc_source/policy.py": "6dcd4d272a1426baa076bb53fc5c61b33ce6f4dceb3be2150ebe246dd0d12783",
+    "formal/reference/isc_source/test_authentication.py": "9e7a56ed6506e9c1138373c939d0bc5118b793dd47c426516032ce30857a8282",
+    "formal/reference/isc_source/test_budget.py": "069ef659cd6451c35b7b0d907b9d45f98a7eb50f876ce0e57cdd0fe0ebe25304",
+    "formal/reference/isc_source/test_finalization.py": "0b7cbb65c11168c4ccccddc03f65044fdd99105899a003636144900a0c0f24b8",
+    "formal/reference/isc_source/test_identity.py": "0cd5271e13aa5e16e2fe8b3189836ed222591785683991f7b0c8a1ee1d1c1740",
+    "formal/reference/isc_source/test_policy.py": "8ee6f396ba5b999650392f5d2f9716d8ed7ac0ac4e4f70586562cae8434e0350",
+    "formal/reference/non_isc/__init__.py": "3e4fc1d23dad738309542869791e2f0d5ccc557a183cbe6962fe3d95eec5dbf7",
+    "formal/reference/non_isc/authentication.py": "978c50b96ae9e106b02e39e2a22728c962744de53e145fdad192d7e7fbc78cf5",
+    "formal/reference/non_isc/codec.py": "6c428bfc55d24b04af2c861297143ceedeaab6d13885d50a376b66dca70ce86c",
+    "formal/reference/non_isc/README.md": "ae888437b2419c305266daec3227140f1a783968bbf2615f8f56f05bff76c7da",
+    "formal/reference/non_isc/test_authentication.py": "e83e6781379e1dd8a92ffae65e80445c23d6f8a3e718f0a4ed161e592c8e2a71"
+  },
+  "source_hash_rule": "UTF-8 tracked source text, CRLF to LF, matching Git blobs. Never applied to protocol/signature/vector binary bytes.",
+  "checks": {
+    "non-isc": {
+      "exit_code": 0,
+      "log_sha256": "69acb0a5218f496ea1e3f1a5e9c4382c8b81ea867f8d4a3dba8529b9f08d0311"
+    },
+    "isc-regression": {
+      "exit_code": 0,
+      "log_sha256": "bf8fe26879d233ef239e129c36f8d0a007b38d00749882501b6114ac32c4c513"
+    },
+    "source-audit": {
+      "exit_code": 0,
+      "log_sha256": "ce91b55753cab01faa4cb6499a8e4ce739bdc5b6c453dfe68bb686992b57b9d4"
+    }
+  },
+  "vectors_sha256": "f475b2d119a4aa2630b4e13b59cad24959571114ebc10b791688585b624c217a",
+  "source_audit_sha256": "eb3af7703fda5932ae36d494e7b28dbf5072509d65a583e82e32b3430d7cd4d1",
+  "result": "NON_ISC_SIGNATURE_REFERENCE_CHECKED_SOURCE_COMPOSITION_BLOCKED",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "qualification_limits": [
+    "Reference byte/crypto component only; not all ADR0015 acceptance criteria.",
+    "Pinned C Ed25519 runs from Python; cross-language codec qualification is open.",
+    "No body/certificate/producer-cut or full source composition soundness theorem.",
+    "Storage attestation source binding needs a semantic decision; no replacement exists.",
+    "Full formal-check/mutant/refinement/report qualification is not run or claimed at this architecture STOP.",
+    "Existing Lean/TLA/proofs and old reports remain unchanged; no concrete future sigma or deployment."
+  ]
+}

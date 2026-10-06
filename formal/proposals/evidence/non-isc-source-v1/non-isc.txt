@@ -1,0 +1,11 @@
+test_all_eight_original_kinds_are_explicit_and_isc_stays_closed (formal.reference.non_isc.test_authentication.NonIscTests.test_all_eight_original_kinds_are_explicit_and_isc_stays_closed) ... ok
+test_all_original_bytes_matter_and_no_false_crypto_backend (formal.reference.non_isc.test_authentication.NonIscTests.test_all_original_bytes_matter_and_no_false_crypto_backend) ... ok
+test_domain_separation_cannot_be_replaced_by_magic_only (formal.reference.non_isc.test_authentication.NonIscTests.test_domain_separation_cannot_be_replaced_by_magic_only) ... ok
+test_exact_framing_vector_and_maximum_derived_bound (formal.reference.non_isc.test_authentication.NonIscTests.test_exact_framing_vector_and_maximum_derived_bound) ... ok
+test_independent_codec_registry_and_key_selection (formal.reference.non_isc.test_authentication.NonIscTests.test_independent_codec_registry_and_key_selection) ... ok
+test_original_slots_replay_and_repeated_evidence_are_not_collapsed (formal.reference.non_isc.test_authentication.NonIscTests.test_original_slots_replay_and_repeated_evidence_are_not_collapsed) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.106s
+
+OK

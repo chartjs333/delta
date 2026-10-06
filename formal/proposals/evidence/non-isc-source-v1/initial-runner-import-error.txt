@@ -1,0 +1,52 @@
+test_artifact_and_preimage_malformed_rejected (formal.reference.isc_crypto.test_codec.CodecTests.test_artifact_and_preimage_malformed_rejected) ... ok
+test_byte_identity_and_parsing_are_not_authority (formal.reference.isc_crypto.test_codec.CodecTests.test_byte_identity_and_parsing_are_not_authority) ... ok
+test_control_json_canonical_and_duplicate_rejection (formal.reference.isc_crypto.test_codec.CodecTests.test_control_json_canonical_and_duplicate_rejection) ... ok
+test_fixed_evidence_exact_values_and_all_changed_budget_rejection (formal.reference.isc_crypto.test_codec.CodecTests.test_fixed_evidence_exact_values_and_all_changed_budget_rejection) ... ok
+test_integer_and_label_boundaries (formal.reference.isc_crypto.test_codec.CodecTests.test_integer_and_label_boundaries) ... ok
+test_key_exact_json_and_domain (formal.reference.isc_crypto.test_codec.CodecTests.test_key_exact_json_and_domain) ... ok
+test_key_length_hex_algorithm_schema_and_closed_fields (formal.reference.isc_crypto.test_codec.CodecTests.test_key_length_hex_algorithm_schema_and_closed_fields) ... ok
+test_preimage_and_artifact_exact_literal_layout (formal.reference.isc_crypto.test_codec.CodecTests.test_preimage_and_artifact_exact_literal_layout) ... ok
+test_registry_exact_json_round_trip_and_linkage (formal.reference.isc_crypto.test_codec.CodecTests.test_registry_exact_json_round_trip_and_linkage) ... ok
+test_registry_rejects_duplicate_unsorted_count_and_key_reuse (formal.reference.isc_crypto.test_codec.CodecTests.test_registry_rejects_duplicate_unsorted_count_and_key_reuse) ... ok
+test_registry_rejects_wrong_profiles_bindings_roles_and_members (formal.reference.isc_crypto.test_codec.CodecTests.test_registry_rejects_wrong_profiles_bindings_roles_and_members) ... ok
+test_vote_dispatch_canonical_decimals_and_content_ids (formal.reference.isc_crypto.test_codec.CodecTests.test_vote_dispatch_canonical_decimals_and_content_ids) ... ok
+test_vote_exact_struct_encoding_and_domain (formal.reference.isc_crypto.test_codec.CodecTests.test_vote_exact_struct_encoding_and_domain) ... ok
+test_vote_header_lengths_tags_and_truncation (formal.reference.isc_crypto.test_codec.CodecTests.test_vote_header_lengths_tags_and_truncation) ... ok
+test_vote_unknown_duplicate_missing_reordered_old_signature_field (formal.reference.isc_crypto.test_codec.CodecTests.test_vote_unknown_duplicate_missing_reordered_old_signature_field) ... ok
+test_signatures (unittest.loader._FailedTest.test_signatures) ... ERROR
+test_public_vector (unittest.loader._FailedTest.test_public_vector) ... ERROR
+test_all_matching_original_signers_with_repeats_and_conflicts (formal.reference.isc_source.test_authentication.AuthenticationTests.test_all_matching_original_signers_with_repeats_and_conflicts) ... ok
+test_parent_and_signature_cannot_be_substituted (formal.reference.isc_source.test_authentication.AuthenticationTests.test_parent_and_signature_cannot_be_substituted) ... ok
+test_registry_is_not_selected_by_imported_artifact (formal.reference.isc_source.test_authentication.AuthenticationTests.test_registry_is_not_selected_by_imported_artifact) ... ok
+test_w1_duplicate_fields_bind_exact_original_g (formal.reference.isc_source.test_authentication.AuthenticationTests.test_w1_duplicate_fields_bind_exact_original_g) ... ok
+
+======================================================================
+ERROR: test_signatures (unittest.loader._FailedTest.test_signatures)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_signatures
+Traceback (most recent call last):
+  File "C:\Python312\Lib\unittest\loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\reference\isc_crypto\test_signatures.py", line 14, in <module>
+    from codec import Vote, encode_vote, preimage
+ModuleNotFoundError: No module named 'codec'
+
+
+======================================================================
+ERROR: test_public_vector (unittest.loader._FailedTest.test_public_vector)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_public_vector
+Traceback (most recent call last):
+  File "C:\Python312\Lib\unittest\loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\reference\isc_crypto\test_public_vector.py", line 11, in <module>
+    from codec import (
+ModuleNotFoundError: No module named 'codec'
+
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.150s
+
+FAILED (errors=2)
