@@ -1,0 +1,124 @@
+{
+  "record_type": "documentation-only-scope-decision-checkpoint",
+  "project_id": "9000",
+  "sprint_id": "sprint-0001-783ef52c",
+  "execution_revision": 130,
+  "execution_status": "active",
+  "current_assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+  "agent_phone": "2750",
+  "branch": "agent/isc-s16-continuous-sprint",
+  "effective_scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-af3d4b1239f0df2518fee4cc8cc3e864",
+    "effective_revision": 4,
+    "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 6,
+    "source_commit": "4cb065008d2f50bf02b83c7177bc53a4acd8aeff",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-NON-ISC-AUTHORITY-DECISION.json",
+    "source_sha256": "9cdc317af034b9bb1cb76250abfefc94508324a6995dc8607f8e4305c8a0af6e",
+    "effective_scope_sha256": "c89a43c98191753caaee423701f0a3f116078c1315aa128d40c6774ac422e5ef",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "acknowledged": true,
+  "ack_id": "scope-ack-591dddd4aac8c7b6a55e0d6a577c7262",
+  "scope4_decision": "scope-decision-3a596d361b5328e1acaf48e2ac4699d1",
+  "scope_workflow_revision": 13,
+  "document": {
+    "commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+    "path": "docs/adr/0015-non-isc-authority-binding-v1.md",
+    "sha256": "f2e988d26a28ff8cedf74cc2265c535057e7ae37dc152002a853c75a0614710d",
+    "status": "PROPOSED"
+  },
+  "pending_request": {
+    "request_id": "scope-request-4395b63c8605983a6adfde98805f76fa",
+    "idempotency_key": "delta-isc-s16-nonisc-exact-contract-bb9fce95",
+    "request_sha256": "4395b63c8605983a6adfde98805f76fa94d1ff1b7d91c324642a2c00403ffeaf",
+    "identity": {
+      "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "occurrence": null,
+      "occurrence_id": null,
+      "source_assignment_id": null
+    },
+    "assignment_id": "e34133ee-83e7-4b4c-959f-913dc109cbf0",
+    "base_scope_revision": 4,
+    "execution_revision": 130,
+    "created_at": "2026-10-06T11:28:12.407262+02:00",
+    "reason": "Scope revision 4 разрешил только документ, а не фактический новый signing contract. Документ docs/adr/0015-non-isc-authority-binding-v1.md подготовлен в том же immutable source commit. Требуется semantic decision по его sections 3–7: SIG-NON-ISC-ED25519-v1 для восьми существующих validator vote kinds, exact Vn/Mn/Gn, явный bootstrap codec dispatch с reuse исходной epoch/key table и binding к original bodies/certificate witnesses. Это не повторный запрос общего разрешения R2.3. До принятого решения документ PROPOSED; implementation/proofs на его основании не выполняются.",
+    "dependencies": [
+      "Snapshot Provenance Profile v1 требует authenticated ApplyQC даже для independently provisioned initial anchor; structural verify_apply и signature_id не являются криптографической аутентификацией.",
+      "Reviewed boundary 4c99272e9e9f4640ed51cf34bef81516630329a5; exact ISC-only contract 26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/adr/0014-isc-production-contract-amendment-v1.md.",
+      "Scope4 human decision scope-decision-3a596d361b5328e1acaf48e2ac4699d1, coordinator assignment e34133ee-83e7-4b4c-959f-913dc109cbf0, persisted ACK scope-ack-591dddd4aac8c7b6a55e0d6a577c7262."
+    ],
+    "proposal": {
+      "instructions": "Утвердить точный proposed contract sections 3–7 docs/adr/0015-non-isc-authority-binding-v1.md из того же immutable Git commit, что source этого request, только для будущего isolated formal/reference source generation в уже разрешённом R2.3. Это явное решение по SIG-NON-ISC-ED25519-v1, восьми существующим kinds, exact Vn/Mn/Gn/IDs, independently selected closed codec dispatch, reuse original validator/epoch/key table, original body/certificate associations и указанным compatibility consequences; не неявное распространение SIG-ISC. После действительного apply и exact role ACK продолжить штатный граф и reviewed R2.3, выполнив finite acceptance sections 5–8 без пропуска обычных gates. Сохранять исходные producer rules, full history/lineage и boundaries других dependency authorities; signature success сам по себе не source validity/refinement. Отсутствие иного существующего необходимого exact contract или несовместимость не предполагаются закрытыми: новый semantic вопрос направляется через Pending decisions. После substantive reviewed R2.3 closure — DeltaReduce.nativeArithmeticRecoveryRefines, axiom audit и применимые qualification gates; full R3 не разрешён. Документ не даёт GO и не подтверждает никакой deployed capability.",
+      "retained_restrictions": [
+        "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+        "Legacy production Init/Next, certificate semantics, original objects, signatures and QC/WAL identities remain unchanged. Future proposed generation does not migrate, relabel or resign legacy objects.",
+        "No new authority/trust root or profile expansion: preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+        "No invented producer rule or authentication for worker/storage/beacon objects by validator-key substitution. Existing original producer/dependency/source verification remains mandatory.",
+        "No concrete sigma_next, fabricated deployment artifacts, Formal GO claim, review/qualification gate waiver or claim that sequential self-review is independent attestation.",
+        "R1/R2.1/R2.2 stay CLOSED for their existing domain; R2.3 stays OPEN until actually proved. No full R3; named recovery theorem only after reviewed substantive R2.3 closure.",
+        "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, hidden source caps, lineage truncation, weakened invariants or evidence relabel.",
+        "No new sprint, graph reimport/reset/manual promotion, nginx modification/deployment/restart, destructive workaround or subagents. Preserve assignments, reviews, all scope/ACK history, frozen refs, foreign files and healthy demos."
+      ],
+      "node_ids": [
+        "continuity-coordinator",
+        "formal-linkage",
+        "formal-qualification"
+      ],
+      "reviewer_ids": [
+        "isc-s16-continuous-architecture-reviewer",
+        "isc-s16-continuous-evidence-reviewer"
+      ]
+    },
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-NON-ISC-CONTRACT-APPROVAL.json",
+      "sha256": "7ceedf63b51efdc09ada5a66e14a5c1368ea8d67bddea972814ac4e1a9837316"
+    },
+    "authorization_provenance": null,
+    "status": "pending",
+    "deduplicated": false
+  },
+  "matching_human_decision_count": 0,
+  "unchanged_graph_comparisons": {
+    "revision": true,
+    "assignments": true,
+    "workflow": true,
+    "pending_transition": true,
+    "last_transition": true,
+    "current_assignment_id": true,
+    "current_node_id": true,
+    "phase": true
+  },
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "code_schema_proof_changes": false,
+  "independent_attestations": false,
+  "demo_health": [
+    {
+      "port": 8870,
+      "http": 200
+    },
+    {
+      "port": 8865,
+      "http": 200
+    },
+    {
+      "port": 8872,
+      "path": "/node-training/api/health",
+      "http": 200,
+      "service": "delta-node-training-example",
+      "mode": "LOCAL_DEMO_ONLY"
+    }
+  ]
+}
