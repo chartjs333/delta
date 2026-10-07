@@ -152,14 +152,17 @@
     "historical_disk_event_ruled_out": false
   },
   "latest_checkpoint": {
-    "document": "ISC-S16-SCOPE9-E-ABSENT-CHECKPOINT.json",
-    "scope_revision": 9,
-    "execution_revision": 180,
-    "workflow_revision": 33,
-    "request_id": "scope-request-3ddd40b5fb857b63abf2c11332a3ac08",
-    "request_source_commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
-    "human_decision": "scope-decision-6963b451e12af6b41ebe87c6118c1e67",
-    "ack_id": "scope-ack-9ef620b7681608f634d1b0a145315366",
-    "status": "STOP / R2.3 OPEN / Formal NO_GO; E absent, F/O unselected"
+    "file": "ISC-S16-SCOPE10-O-CONTRACT-CHECKPOINT.json",
+    "record_type": "scope10-O-direction-fulfilled-exact-contract-pending",
+    "observed_at": "2026-10-07T15:52:38.366345+00:00",
+    "document_commit": "90561a97de7f41f409bf22065ad6cdc9b3932458",
+    "request_source_commit": "85ba58e483db34a778673743885343b1264132d2",
+    "execution_revision": 182,
+    "scope_revision": 10,
+    "workflow_revision": 37,
+    "request_id": "scope-request-0f8f01cd810f576e9708d0769e8b06ac",
+    "formal_status": "NO_GO",
+    "r2_3": "OPEN",
+    "next_action": "STOP pending exact semantic approval of ADR0018. Read live identity and effective scope, verify exact source/hash/precedence and ACK if needed after a real new decision; ordinary graph/review gates still apply. No self approval/manual advance or repeat request."
   }
 }

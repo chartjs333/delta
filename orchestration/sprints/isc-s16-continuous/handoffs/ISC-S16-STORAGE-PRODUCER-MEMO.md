@@ -2,7 +2,62 @@
 
 T047/T053. 6 October 2026. **STOP / R2.3 OPEN / Formal NO_GO.**
 
-## Latest: 7 October scope9 fulfilled; new semantic decision pending
+## Latest: 7 October scope10 O contract proposed; exact semantic approval pending
+
+Human edit `scope-decision-c78a662f4607e470ed1a39d7d4238821` **selected O** for
+one bounded architectural proposal. It did not approve its concrete guards or
+implementation; F is expressly forbidden. This supersedes the older F/O-menu
+status below. The assigned coordinator completed that documentary task.
+
+Exact role GET verified scope10 source/core hashes and precedence. Exact ACK
+`scope-ack-eae23110c6f1a397a5af1a3988b9c0d2` is GET-confirmed, once. Its POST
+response timed out after persistence; no blind resend occurred.
+
+Proposed contract:
+`90561a97de7f41f409bf22065ad6cdc9b3932458:`
+`docs/adr/0018-authenticated-availability-contract-v1.md`, SHA256
+`4b5c91196b63644dc472954447e9b1426cbf88055f78a5d49eb903821780b0d5`.
+Its adjacent documentary source index pins all references. This is not formal,
+native or independent review evidence. No implementation or formal gate was run.
+
+The proposal explicitly changes AC's claim to complete authenticated original
+storage statements, with all accepted ACs governing close and exact verified
+bytes required at each data-dependent use. It admits loss before finalization,
+including false enrolled-storage statements, without a new factual observer or
+storage-honesty threshold. Physical faults remain in the environment; the
+refinement claim covers complete O protocol observations rather than reconstructing
+unobserved global cuts. Full lineage, existing repair/deadline/certified-abort,
+quorums and current checks remain. Conditional liveness and the changed article/
+model claims are explicit. Both AC finalization AND CloseInput's old physical
+guards need successor-generation qualification. No legacy bytes/IDs are relabeled.
+
+New Pending request **`scope-request-0f8f01cd810f576e9708d0769e8b06ac`** is
+GET-confirmed exactly once; no matching decision exists at this checkpoint.
+Source `85ba58e483db34a778673743885343b1264132d2:`
+`orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-O-AUTHENTICATED-AVAILABILITY-CONTRACT.json`,
+SHA256 `d13cc05328c418d145cf0cc2fdf96bd3c69fef3c1f8b1b1477f1dc4f104de8e8`.
+Both commits are pushed/remote-verified. Request POST also timed out after
+persistence; role/body/source/idempotency match was checked through official GET,
+with no repeated POST. This request asks approval of **one exact contract**, not
+another choice between F/O. Unchanged approval would select that contract;
+while pending/rejected, STOP. General R2.3 authorization is not being requested again.
+
+Official checkpoint: execution182 active/node, scope10, workflow37. Original
+sprint and coordinator assignment `4824b8d9-2e13-4a6f-89d1-917696ff8a43` remain;
+that assignment equals the pre-ACK scope10 record. ACK changed execution181→182;
+request registration left execution182/scope10 intact. No RESUME/START, result,
+review or manual graph transition was sent. The generic whoami repository reply
+did not return successfully; identity is supported by official state and
+actual-role authenticated scope/context, not local nginx state.
+
+Receipt: [ISC-S16-SCOPE10-O-CONTRACT-CHECKPOINT.json](ISC-S16-SCOPE10-O-CONTRACT-CHECKPOINT.json).
+**STOP / R2.3 OPEN / Formal NO_GO.** Await the exact contract decision in normal
+Pending decisions UI/API. No code, proof, schema, predicate, fixture, producer,
+source cap or runtime follow-on before that decision and ordinary graph gates.
+No production integration/recovery/guard removal, concrete sigma, full R3, new
+trust/profile expansion or evidence migration. Preserve history and old results.
+
+## Historical: 7 October scope9 fulfilled; its later decision is scope10
 
 Human edit `scope-decision-6963b451e12af6b41ebe87c6118c1e67` selected E audit
 and explicitly required a **new Pending decision if E is absent**. This supersedes

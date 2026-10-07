@@ -1,0 +1,143 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "record_type": "scope10-O-direction-fulfilled-exact-contract-pending",
+  "observed_at": "2026-10-07T15:52:38.366345+00:00",
+  "project": "9000",
+  "sprint": "sprint-0001-783ef52c",
+  "git_branch": "agent/isc-s16-continuous-sprint",
+  "document_commit": "90561a97de7f41f409bf22065ad6cdc9b3932458",
+  "request_source_commit": "85ba58e483db34a778673743885343b1264132d2",
+  "source_remote_exact_verified": true,
+  "human_decision": "scope-decision-c78a662f4607e470ed1a39d7d4238821",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-a6a67b171500bc38b62de28d97bd8af7",
+    "effective_revision": 10,
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 8,
+    "source_commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-E-ABSENT-TRUST-MODEL-DECISION.json",
+    "source_sha256": "96c34ec11c256ab1236252949d1f897223e4eb0603dc6411f854130bcbacfeaa",
+    "effective_scope_sha256": "a59da7fa111a519a5a87994307cf08d9b63465ae75602db473779ad20ab3bb02",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "acknowledgement": {
+    "ack_id": "scope-ack-eae23110c6f1a397a5af1a3988b9c0d2",
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "agent_phone": "2750",
+    "amendment_id": "scope-human-a6a67b171500bc38b62de28d97bd8af7",
+    "effective_revision": 10,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-a6a67b171500bc38b62de28d97bd8af7",
+      "effective_revision": 10,
+      "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 8,
+      "source_commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-E-ABSENT-TRUST-MODEL-DECISION.json",
+      "source_sha256": "96c34ec11c256ab1236252949d1f897223e4eb0603dc6411f854130bcbacfeaa",
+      "effective_scope_sha256": "a59da7fa111a519a5a87994307cf08d9b63465ae75602db473779ad20ab3bb02",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-07T17:29:07.283545+02:00"
+  },
+  "ack_post_response_available": false,
+  "ack_role_get_persistence_confirmed": true,
+  "identity_evidence": "Official state plus authenticated current-role effective scope/request context. The generic whoami repository reply did not return successfully; no successful delivery is claimed. No local nginx state or imported graph used for identity.",
+  "execution": {
+    "revision": 182,
+    "status": "active",
+    "phase": "node",
+    "current_node_id": "continuity-coordinator",
+    "current_agent_id": "isc-s16-continuity-coordinator",
+    "current_assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43"
+  },
+  "scope_revision": 10,
+  "workflow_revision": 37,
+  "request": {
+    "request_id": "scope-request-0f8f01cd810f576e9708d0769e8b06ac",
+    "idempotency_key": "delta-isc-s16-O-exact-contract-scope10-20261007",
+    "request_sha256": "0f8f01cd810f576e9708d0769e8b06ac5c42fb7329b053f69cfc435842b4f39c",
+    "identity": {
+      "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "occurrence": null,
+      "occurrence_id": null,
+      "source_assignment_id": null
+    },
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "base_scope_revision": 10,
+    "execution_revision": 182,
+    "created_at": "2026-10-07T15:50:10.831296+00:00",
+    "reason": "Scope10 явно выбрал O и поручил один exact reviewable contract с последующим STOP и новым Pending decision. ADR0018 готов. Требуется утвердить конкретное изменение claim: AC удостоверяет полные проверенные storage statements, а не физическое наличие quorum на original cut; работа с данными требует точных байтов при использовании. Принятые AC определяют полный close set; утрата до/после финализации не удаляет lineage. Все storage peers могут быть faulty для safety, liveness зависит от фактического получения данных. Init/state/Next и dependent formal evidence будущего поколения требуют повторной qualification. F запрещён; production, старые identities, sigma и runtime не менялись. Это новый semantic decision о конкретном контракте, не повтор выбора направления O и не повтор общей авторизации R2.3.",
+    "dependencies": [
+      "Exact proposed contract: 90561a97de7f41f409bf22065ad6cdc9b3932458:docs/adr/0018-authenticated-availability-contract-v1.md; SHA256 4b5c91196b63644dc472954447e9b1426cbf88055f78a5d49eb903821780b0d5. Approve selects the entire sections1-10 combination. No alternatives or unspecified storage-honesty threshold are left inside it.",
+      "Documentary source index: 90561a97de7f41f409bf22065ad6cdc9b3932458:docs/adr/evidence/0018-authenticated-availability-contract-sources.json; SHA256 eedd8806fafa2adbf9ef8ae4c272899b00137d669cef7e11ff718340a6935fc3. All pinned Git source blobs and document hashes verified. These checks are not native/formal qualification or graph/independent review.",
+      "Mandate: scope-decision-c78a662f4607e470ed1a39d7d4238821; scope10 effective_core SHA256 a59da7fa111a519a5a87994307cf08d9b63465ae75602db473779ad20ab3bb02. Coordinator assignment4824b8d9-2e13-4a6f-89d1-917696ff8a43; exact ACK scope-ack-eae23110c6f1a397a5af1a3988b9c0d2 confirmed through authenticated role GET. This scope expressly requires the present new Pending decision.",
+      "Unchanged authority/identity references: N60c692f6e391f839829dfc64e93380db54cd507b; Profile P26eb02d0632435c9aa0d8ef44eb496b6fa73dd13; ADR0016 S1438fa3d78ec99291475cf4660fd8c190ac01bb3 under scope-decision-614a7db8512f59e36720131917827d4c. Byte/key authentication is retained; the new claim does not certify remote physical truth.",
+      "Existing E audit08e86bad8be9b5af3c61e29a2e5f77a4e970374b and successful full post-disk-full recheck3ee3db8cd7ea9af944f41e34c0fc609ad3f250ce remain historical evidence. No redundant scan, new E source or F observer/trust premise was introduced."
+    ],
+    "proposal": {
+      "instructions": "SEMANTIC APPROVAL REQUEST — one exact O contract, not an F/O menu.\n\nApprove unchanged means approve Authenticated availability contract v1 in the exact ADR/source hash pinned below as the successor formal-generation semantic contract. Scope10 selected only direction O; this request asks for the distinct approval of its concrete guards and changed claims. F remains forbidden.\n\nThe complete combination is mandatory: (1) AC certifies exact authenticated, context-bound, per-leaf original storage statements admitted at the original protocol prefix, not physical quorum presence at that cut; (2) canonical close includes the full accepted-AC set for RequiredTickets, with OMIT_UNAVAILABLE/ABORT_ON_INCOMPLETE interpreted exactly as ADR section4, never by a consumer's discretionary failed fetch; (3) every first data-dependent operation/vote requires the exact original committed bytes, checked arithmetic and original parent/current/quorum guards; (4) losses preserve frozen membership and downstream lineage, with existing bounded exact-ID repair, deadlines, certified abort or BLOCKED, never fabricated QC or silent omission. All ordinary actions retain OrdinaryProgressOpen and their inner guards.\n\nAccepting this contract explicitly allows authenticated but false storage claims and loss before AC/close without assuming any storage honesty threshold. Up to all enrolled storage peers may be faulty for safety. It does not allow computation without the actual checked inputs. Honest-node durability, independent fixed-epoch authority and faithful trusted-volume provenance remain. No new factual-history observer, trust root, hidden no-loss source domain, source cap or retention interval is introduced. Liveness requires delivery of statements and actual exact bytes at use within existing budgets; all-data-lost executions cannot be promised APPLIED.\n\nThe successor refinement claim covers the complete authenticated/observed protocol state with all original source events, identities and multiplicity. Unobserved global physical cuts are environment state for fault exploration, not purportedly reconstructed native facts. The old physical available-attester quorum at AC/close is explicitly removed from the new claim. Physical loss/corruption/crash cases remain in safety exploration. This is a semantic/model/claim change, not a refinement-only proof of the old model.\n\nADR sections7-9 are the closed impact/qualification set: successor feature000 Init/state/Next composition and availability/close/data-use/failure framing, full source/public-state/refinement, applicable Lean composition, genuine new-guard mutants, current/lineage/recovery and exact compatibility reviews must be requalified. No concrete sigma is selected. ADR0016 byte/key/signature binding remains, but future semantics/config pins imply new-generation hashes and possibly B/b, C/c and downstream QC IDs. All legacy objects/signatures/QC/WAL keep their original bytes, identities and interpretation; no migration or relabeling.\n\nPending/rejected decision means STOP. Approval is semantic selection, not a passed model, proof, R2.3 closure or production GO. After an exact approved effective scope is issued and ACK persisted, use the existing R2.3 authorization only within the actual assignment and ordinary result/reviewer gates; no manual transition or gate bypass. The named recovery theorem remains after reviewed substantive R2.3 closure; full R3 remains forbidden. This request adds no production C++/ABI/Java/sidecar/recovery or guard-removal authority. If formalization requires another trust root, hidden source restriction, forbidden boundary change or fails a required safety gate, preserve NO_GO and raise that exact new semantic issue. General R2.3 permission need not be requested again. ACK itself never advances graph or creates completion/review/dequeue.",
+      "retained_restrictions": [
+        "Until this exact contract is approved, STOP: no implementation, models/proofs/schemas/predicates/fixtures/runtime changes or automatic R2.3/R3 work. Scope10 approves preparation only. Approval is not evidence of correctness.",
+        "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+        "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+        "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+        "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+        "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+        "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+        "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate."
+      ],
+      "node_ids": [
+        "continuity-coordinator",
+        "formal-linkage",
+        "formal-qualification"
+      ],
+      "reviewer_ids": [
+        "isc-s16-continuous-architecture-reviewer",
+        "isc-s16-continuous-evidence-reviewer"
+      ]
+    },
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "85ba58e483db34a778673743885343b1264132d2",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-O-AUTHENTICATED-AVAILABILITY-CONTRACT.json",
+      "sha256": "d13cc05328c418d145cf0cc2fdf96bd3c69fef3c1f8b1b1477f1dc4f104de8e8"
+    },
+    "authorization_provenance": null
+  },
+  "request_count_by_idempotency": 1,
+  "matching_decisions": [],
+  "request_body_and_immutable_source_match": true,
+  "request_post_response_available": false,
+  "current_assignment_unchanged_from_pre_ack_scope10": true,
+  "request_preserved_execution_assignment_scope": true,
+  "execution_graph_collection_digests_at_checkpoint": {
+    "assignments": "07cff8a9e1a75270d5d9c80643e1cfa446be22dba777dc60fbf3d364d2ab7bb9",
+    "last_transition": "30fe5ef79682044ef6bdcef9e5f98f2320ad1dc6b29d587320ab5962a25b5979",
+    "pending_transition": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+  },
+  "graph_result_review_resume_start_sent": false,
+  "graph_review_status": "No new graph review of this coordinator proposal; earlier worker reviews do not attest it. Same-executor review is not independent Formal GO attestation.",
+  "changes": "Documents/source indexes/scope request/handoff only; no models, proofs, schemas, fixtures, predicates or production code changed. Documentary hash/schema verification only; no formal gate run or qualification claimed.",
+  "direction": "O_SELECTED; exact guard/fault/claim contract PROPOSED; F_FORBIDDEN",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "next_action": "STOP pending exact semantic approval of ADR0018. Read live identity and effective scope, verify exact source/hash/precedence and ACK if needed after a real new decision; ordinary graph/review gates still apply. No self approval/manual advance or repeat request."
+}
