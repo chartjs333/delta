@@ -2,7 +2,33 @@
 
 T047/T053. 6 October 2026. **STOP / R2.3 OPEN / Formal NO_GO.**
 
-## Latest: 7 October scope10 O contract proposed; exact semantic approval pending
+## Latest: 7 October scope11 approved exact O contract; formal routing requested
+
+Human decision `scope-decision-e5c12ebc8342d99630d5fcf28a9c6753` approved the
+exact contract request `scope-request-0f8f01cd810f576e9708d0769e8b06ac` unchanged.
+Effective scope11 preserves assignment `4824b8d9-2e13-4a6f-89d1-917696ff8a43`.
+Its Git source/core hashes and precedence were checked. Exact ACK
+`scope-ack-05bee38572dd93a9cf85800fcc151447` is confirmed by authenticated role GET;
+its timed-out POST was not resent. The contract's approved immutable bytes are
+still at `90561a97de7f41f409bf22065ad6cdc9b3932458:docs/adr/0018-authenticated-availability-contract-v1.md`.
+The old PROPOSED label is historical at that pin; the separate activation record
+records approval without changing those normative bytes.
+
+See [ISC-S16-SCOPE11-O-CONTRACT-ACTIVATION.json](ISC-S16-SCOPE11-O-CONTRACT-ACTIVATION.json).
+The coordinator requests normal **RESUME_FORMAL** routing through both process
+reviews, for the approved successor formal/source/R2.3 work. This is a real
+resolved semantic decision, not a fake RESUME used to represent STOP. No review
+or graph transition is claimed until accepted by the service. The old pending
+instructions below are historical. No duplicate scope request or new permission
+for ordinary R2.3 is needed.
+
+**R2.3 OPEN / Formal NO_GO.** No production, guard removal, concrete sigma or
+full R3. Named recovery remains after reviewed substantive R2.3 and its existing
+prerequisite gates. No new trust/profile extension or legacy reinterpretation.
+The approved O contract removes only the stated old physical-cut claim and
+requires its complete replacement/qualification; it grants no passed proof.
+
+## Historical: 7 October scope10 proposal; later approved by scope11
 
 Human edit `scope-decision-c78a662f4607e470ed1a39d7d4238821` **selected O** for
 one bounded architectural proposal. It did not approve its concrete guards or

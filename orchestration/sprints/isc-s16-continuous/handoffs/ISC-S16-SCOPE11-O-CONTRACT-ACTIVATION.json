@@ -1,0 +1,139 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "record_type": "scope11-exact-O-contract-activation-routing-request",
+  "decision": {
+    "decision_id": "scope-decision-e5c12ebc8342d99630d5fcf28a9c6753",
+    "request_id": "scope-request-0f8f01cd810f576e9708d0769e8b06ac",
+    "idempotency_key": "52b30afe-8672-4cd7-9f90-8d8a1c0223cb",
+    "request_sha256": "e5c12ebc8342d99630d5fcf28a9c67532a8b88a6151e548b6b8b3cfd4f0af3cd",
+    "action": "approve",
+    "actor": "operator-cf0919565b031422",
+    "timestamp": "2026-10-07T16:08:02.106365+00:00",
+    "reason": "",
+    "authorization": {
+      "request_id": "scope-request-0f8f01cd810f576e9708d0769e8b06ac",
+      "decision_id": "scope-decision-e5c12ebc8342d99630d5fcf28a9c6753",
+      "validation_id": "scope-validation-fc88c144ab3f4e62751e908d84cc6120",
+      "proposal_sha256": "fdeff3bbc34480819ffd0612c97830a8b38886e259e10a6bdad32f38fc7ed14a",
+      "actor": "operator-cf0919565b031422",
+      "origin": "human_decision",
+      "provenance": null
+    },
+    "response": {
+      "request_id": "scope-request-0f8f01cd810f576e9708d0769e8b06ac",
+      "decision_id": "scope-decision-e5c12ebc8342d99630d5fcf28a9c6753",
+      "action": "approve",
+      "status": "applied",
+      "receipt": {
+        "schema_version": 2,
+        "amendment_id": "scope-human-96e89050afa4d92501e4c3fd497d456a",
+        "effective_revision": 11,
+        "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-96e89050afa4d92501e4c3fd497d456a",
+          "effective_revision": 11,
+          "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+          "node_id": "continuity-coordinator",
+          "phase": "node",
+          "agent_id": "isc-s16-continuity-coordinator",
+          "occurrence": 8,
+          "source_commit": "85ba58e483db34a778673743885343b1264132d2",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-O-AUTHENTICATED-AVAILABILITY-CONTRACT.json",
+          "source_sha256": "d13cc05328c418d145cf0cc2fdf96bd3c69fef3c1f8b1b1477f1dc4f104de8e8",
+          "effective_scope_sha256": "ee8649f5bb4bbd5ec50e17517407cd438b5916e5c5e8ee663ad5a44f0a8f55c6",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true
+        },
+        "effective_scope_sha256": "ee8649f5bb4bbd5ec50e17517407cd438b5916e5c5e8ee663ad5a44f0a8f55c6",
+        "assignment_preserved": true,
+        "graph_advanced": false,
+        "queue_changed": false,
+        "deduplicated": false,
+        "before_effective_sha256": "6440ffc3687db806a06967fe9197f6765b3e90c084ad6539634a34b1bc9b84cc",
+        "after_effective_sha256": "61525f514aced43c3071fef570bffc0dc9d3897aa40f8faf1b580db0abc808dd"
+      },
+      "execution_revision": 183,
+      "scope_revision": 11,
+      "graph_advanced": false,
+      "deduplicated": false
+    }
+  },
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-96e89050afa4d92501e4c3fd497d456a",
+    "effective_revision": 11,
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 8,
+    "source_commit": "85ba58e483db34a778673743885343b1264132d2",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-O-AUTHENTICATED-AVAILABILITY-CONTRACT.json",
+    "source_sha256": "d13cc05328c418d145cf0cc2fdf96bd3c69fef3c1f8b1b1477f1dc4f104de8e8",
+    "effective_scope_sha256": "ee8649f5bb4bbd5ec50e17517407cd438b5916e5c5e8ee663ad5a44f0a8f55c6",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "acknowledgement": {
+    "ack_id": "scope-ack-05bee38572dd93a9cf85800fcc151447",
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "agent_phone": "2750",
+    "amendment_id": "scope-human-96e89050afa4d92501e4c3fd497d456a",
+    "effective_revision": 11,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-96e89050afa4d92501e4c3fd497d456a",
+      "effective_revision": 11,
+      "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 8,
+      "source_commit": "85ba58e483db34a778673743885343b1264132d2",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-O-AUTHENTICATED-AVAILABILITY-CONTRACT.json",
+      "source_sha256": "d13cc05328c418d145cf0cc2fdf96bd3c69fef3c1f8b1b1477f1dc4f104de8e8",
+      "effective_scope_sha256": "ee8649f5bb4bbd5ec50e17517407cd438b5916e5c5e8ee663ad5a44f0a8f55c6",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-07T18:13:59.288841+02:00"
+  },
+  "ack_get_confirmed": true,
+  "ack_post_response_available": false,
+  "contract": {
+    "commit": "90561a97de7f41f409bf22065ad6cdc9b3932458",
+    "path": "docs/adr/0018-authenticated-availability-contract-v1.md",
+    "sha256": "4b5c91196b63644dc472954447e9b1426cbf88055f78a5d49eb903821780b0d5",
+    "status": "APPROVED_SUCCESSOR_FORMAL_SEMANTIC_CONTRACT_ONLY",
+    "normative_bytes_unchanged": true
+  },
+  "requested_outcome": "RESUME_FORMAL",
+  "next_work": "In the assigned formal-linkage branch, qualify the exact approved ADR0018 authenticated/observed availability contract and its finite source/model/refinement obligations. Reuse original worker a2fd17259240be0a7721512e7a12fe972587f3bf and approved ADR0016 authentication. Establish independent native protocol-source replay, complete observed state and all R2.3 relations without global physical-history truth. Preserve all original events, bytes, IDs, signer/witness and WAL multiplicity. Complete substantive reviewed R2.3 before named recovery theorem. Maintain NO_GO until every applicable obligation passes.",
+  "bounded_sequence": [
+    "Carry approved contract/evidence/activation into the assigned formal branch, without overwriting previous worker work or legacy objects.",
+    "Qualify ADR0016 exact bytes/key/context/per-leaf and original-prefix checks under ADR0018, then successor feature000 protocol/environment state and both AC/CloseInput guards with actual byte-use/failure/lineage semantics.",
+    "Compose complete independent Profile-v1 source/provenance and observed-state relation with existing R2.1/R2.2 checked domains; no assumption of R2/public acceptance, no erased original events and no invented physical observer.",
+    "Run the affected formal/source/Lean/refinement/mutant/compatibility checks in ADR0018 sections7-9. Preserve the separately required review and D01 prerequisite gates. After reviewed substantive R2.3 closure only, address the named recovery theorem and applicable qualification."
+  ],
+  "prior_worker_commit": "a2fd17259240be0a7721512e7a12fe972587f3bf",
+  "semantic_stop_resolved": "The exact physical-cut-to-authenticated/observed contract is human-approved; this is not a claim that producer, replay or joined refinement proofs passed.",
+  "retained_boundaries": [
+    "No production integration/recovery/deployment/guard removal or concrete sigma.",
+    "No F observer/trust, storage honesty threshold, hidden source cap/domain restriction, missing-byte success callbacks, lineage/event truncation or legacy evidence migration.",
+    "Preserve fixed-epoch enrolled Profile v1 and original IDs; do not extend enrollment, epoch, trusted-volume-compromise, network-bootstrap or backup scope.",
+    "Full R3 forbidden; named recovery theorem only after reviewed substantive R2.3 and its existing prerequisite gates.",
+    "Formal failure or forbidden boundary requirement is STOP; no sorry, hidden/circular axioms, weakened claims beyond exact approved O or relabeled NO_GO."
+  ],
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "production_authorized": false,
+  "sigma_assigned": false,
+  "review_required": true,
+  "independent_attestation": false,
+  "identity_evidence": "Official current state plus actual-role authenticated effective scope. Generic whoami repository reply timed out this turn; no successful identity delivery claimed. No local nginx state used."
+}
