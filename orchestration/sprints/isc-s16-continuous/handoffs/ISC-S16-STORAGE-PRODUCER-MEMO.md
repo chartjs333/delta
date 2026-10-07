@@ -2,6 +2,27 @@
 
 T047/T053. 6 October 2026. **STOP / R2.3 OPEN / Formal NO_GO.**
 
+## 7 October: recheck after the user's disk-full report
+
+The user specifically identified the 6 October E audit as interrupted. Do not
+treat the old completion marker alone as evidence or infer that no disk failure
+occurred. A fresh full pass completed on `2026-10-07T14:55:27Z`, followed by source,
+archive and API checks. See `docs/adr/0017-audit-recheck-after-disk-exhaustion.md`
+and `docs/adr/evidence/0017-audit-recheck-20261007.json`.
+
+The exact original object universe, complete reads, candidate hashes/matches and
+binary exclusions reproduce. A real metadata reproduction defect was corrected:
+the old root list omitted auxiliary tree refs that the actual `--all` scan had
+included. The three exact supplementary roots are now recorded, covering the
+already scanned 167 blobs and 34 trees. No original search objects were removed
+or added; no new source domain or producer rule was introduced.
+
+**E_ABSENT_IN_AVAILABLE_CORPUS is reverified now, on 7 October.** F/O remain
+unselected. Original audit documents and evidence are preserved. API at14:55:49Z
+retains execution178/scope8/workflow29 and the same assignment, with no matching
+new decision. No graph result/review/ACK/amendment or new Pending request was sent.
+Do not repeat this completed recheck without a new substantive reason; keep STOP.
+
 ## Subsequent direct user request: exhaust E before any F/O choice
 
 Completed the read-only contract/evidence audit documented in

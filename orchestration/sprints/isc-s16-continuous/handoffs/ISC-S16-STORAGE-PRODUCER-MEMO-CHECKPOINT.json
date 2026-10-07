@@ -65,7 +65,7 @@
   "memo_review_status": "No result/review transition submitted for this memo; current coordinator only offers RESUME/START outcomes, which would not represent the mandated STOP. Prior two process reviews cover the worker source audit, not this memo.",
   "formal_status": "NO_GO",
   "r2_3": "OPEN",
-  "next_action": "STOP. Direct user-requested E audit completed: E absent in enumerated accessible corpus. F and O are unselected semantic choices with different trust/theorem consequences in the audit addendum. Do not repeat audit or choose automatically. Preserve existing Pending request; create a new E-reference decision only if genuinely sufficient new E evidence is later supplied. General R2.3 authority remains effective but does not select a new trust/model choice. No duplicate results, fake RESUME or new work under completed scope8.",
+  "next_action": "STOP. After user-reported disk-full interruption of 6 October E audit, full original corpus and evidence were rechecked successfully on 7 October; auxiliary tree roots omitted from the old roots list are now recorded exactly. E remains absent in available corpus. This does not prove no earlier disk failure occurred. F/O unselected; no automatic repeated audit, proof layer, new request, fake RESUME or runtime work. Preserve graph and existing pending request. New substantive E evidence or an exact semantic decision is required for dependent work.",
   "subsequent_user_requested_E_audit": {
     "document": "docs/adr/0017-existing-storage-producer-audit.md",
     "document_sha256": "e2bccf72fa8f4041798d958cc87517b0a7f174e22e955d880953db932070397b",
@@ -115,5 +115,40 @@
     },
     "new_pending_request_created": false,
     "implementation_or_new_proof": false
+  },
+  "disk_interruption_report_recheck_20261007": {
+    "user_report": "User specifically reports E audit of 6 October interrupted by full disk; no inference that the old completion marker suffices.",
+    "document": "docs/adr/0017-audit-recheck-after-disk-exhaustion.md",
+    "document_sha256": "abc76c31d4000815667c04f8ad0fba113e422e574543a253f38866cc63faf23b",
+    "evidence": "docs/adr/evidence/0017-audit-recheck-20261007.json",
+    "result": "E_ABSENT_IN_AVAILABLE_CORPUS_REVERIFIED_20261007",
+    "completed_at": "2026-10-07T14:55:27.028239+00:00",
+    "root_manifest_correction": {
+      "reason": "Original scan used --all including auxiliary tree refs; original roots list recorded only heads/remotes/tags plus remote refs and worktree HEADs.",
+      "supplemental_immutable_tree_roots": [
+        "9a0cdd9a98d7824f41f5ecf111c3d6c47a9038e5",
+        "9cc34895e271a15bca9e007b79cb309f4a0f8f19",
+        "d0677af957aba077671c1f13e816e1ef3265a3f9"
+      ],
+      "additional_original_blobs": 167,
+      "additional_original_trees": 34,
+      "new_objects_added_to_original_scan": 0
+    },
+    "api_checkpoint": {
+      "observed_at": "2026-10-07T14:55:49.355198+00:00",
+      "execution_revision": 178,
+      "assignment": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "scope_revision": 8,
+      "workflow_revision": 29,
+      "matching_decisions": [],
+      "unchanged": {
+        "assignments": true,
+        "last_transition": true,
+        "pending_transition": true,
+        "scope_control": true,
+        "scope_workflow": true
+      }
+    },
+    "historical_disk_event_ruled_out": false
   }
 }

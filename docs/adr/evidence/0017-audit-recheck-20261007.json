@@ -1,0 +1,303 @@
+{
+  "kind": "read-only-original-audit-completeness-recheck-not-formal-qualification",
+  "trigger": "User reports 6 October E audit interrupted by disk exhaustion; do not rely only on completion marker.",
+  "original_commit": "08e86bad8be9b5af3c61e29a2e5f77a4e970374b",
+  "started_at": "2026-10-07T14:49:28.736083+00:00",
+  "completed_at": "2026-10-07T14:55:27.028239+00:00",
+  "duration_seconds": 358.28,
+  "recorded_roots_reenumerated": true,
+  "root_manifest_reproduction_gap": {
+    "reason": "Original scan used --all including auxiliary tree refs; original roots list recorded only heads/remotes/tags plus remote refs and worktree HEADs.",
+    "supplemental_immutable_tree_roots": [
+      "9a0cdd9a98d7824f41f5ecf111c3d6c47a9038e5",
+      "9cc34895e271a15bca9e007b79cb309f4a0f8f19",
+      "d0677af957aba077671c1f13e816e1ef3265a3f9"
+    ],
+    "additional_original_blobs": 167,
+    "additional_original_trees": 34,
+    "new_objects_added_to_original_scan": 0
+  },
+  "object_universe_matches_saved_inventory": true,
+  "every_original_blob_read_to_exact_length": true,
+  "git_cat_file_exit_code": 0,
+  "text_blob_count": 22059,
+  "binary_blob_count": 67,
+  "all_blob_count": 22126,
+  "blob_bytes": 1186415386,
+  "all_candidate_hashes_and_matches_equal": true,
+  "all_binary_exclusions_equal": true,
+  "io_errors": [],
+  "prior_disk_event_excluded": false,
+  "interpretation": "The original discovery corpus and its retained candidate index are reproducibly complete now. This does not prove no earlier disk-full event occurred, nor replace semantic source inspection or graph review.",
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "result": "E_ABSENT_IN_AVAILABLE_CORPUS_REVERIFIED_20261007",
+  "F": "NOT_SELECTED",
+  "O": "NOT_SELECTED",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "document": "docs/adr/0017-audit-recheck-after-disk-exhaustion.md",
+  "document_sha256": "abc76c31d4000815667c04f8ad0fba113e422e574543a253f38866cc63faf23b",
+  "source_pins_reverified": [
+    {
+      "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+      "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41"
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/proposals/native-available-q-lean-proof.md",
+      "sha256": "849c9e74c92fb910e9df3d1293a4359258bb1c7b75d471a047c30530e690fb29"
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/proposals/native-available-q.md",
+      "sha256": "b01ce3af338ff5157004ff0854d042966a8420ac048da4f89a8d0241d1d8b92b"
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/proposals/native-source-artifacts.md",
+      "sha256": "6b71a07c2596f71faf23af92bb56eecbfaf09451092aa98bd147dd4f107ab552"
+    },
+    {
+      "commit": "14c78004910eb166bf41f379fb0eb4b10c5bba6f",
+      "path": "formal/scripts/public_state_storage.py",
+      "sha256": "c8fe33750ed85bb265f47e0ebefe1733ce24b48542714a050b444e119cc26ca7"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+    },
+    {
+      "commit": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/benchmark/MeasuredStageCTransport.java",
+      "sha256": "82d130bd53a2b7764d2c82560f2280b97e80f00f223854e5d327e5b5c85dd48e"
+    },
+    {
+      "commit": "437558d886d4fc7aac4d8a72f2e4d69696fab7f7",
+      "path": "delta-runtime-cpp/src/benchmark/fault_execution.cpp",
+      "sha256": "29290f6995ad822e1315064006753a73ca30d5126f7d4cb2f05363269358ff8f"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": ".specify/memory/constitution.md",
+      "sha256": "4b9da704f3c37ac4f8ce9756832e92c2ad732d0116c6dccebeee67ee722042fd"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/consensus.hpp",
+      "sha256": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/protocol.hpp",
+      "sha256": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/distribution/certification_policy.cpp",
+      "sha256": "35c3ff564e5e475eb8f96eaa2a2f5230d0cb14e095c6b2012935345859f076dd"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/transition.cpp",
+      "sha256": "74e5a6e62cc1b6c4cd1e30a33cc983e522f22cb5f839942fbec5c707b48eb569"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/tests/prepared_100_test.cpp",
+      "sha256": "d531899c332490632830db9f76be90a522ba0e4bf73204f884964d45306a3ded"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/apply/ArtifactEffectAdapter.java",
+      "sha256": "71a58dc703172643c422d5fd927228f450190c7774042f6f25b580475f8211b3"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/certificates/AuthenticatedCertificateTransport.java",
+      "sha256": "bbaa7f622810257791e53333687e7cac88e148f19462eeaba78ce4fb264a6cc9"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/CasStore.java",
+      "sha256": "36e9d2c90b733b2e0be9e4d5b2a9fc5e99779739e69930755dde9e88634f010a"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/DownloadJournal.java",
+      "sha256": "7459b7672b749e57fa3d263bb7ccea003193ccb88c89cb283a74951585e930af"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-node-java/src/main/java/io/deltareduce/node/distribution/PeerPlane.java",
+      "sha256": "a3cb7cbed0a5fc19eec552989144f77941e0ced33af11d06c93de72d83d7ac0c"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/certificate_runtime.hpp",
+      "sha256": "0f1bdeebc0e54996e614af872fd0fd9497acef48495ed79cd5604323ab9a1c92"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-worker-python/src/deltatorrent/artifacts/filesystem.py",
+      "sha256": "0b26479c6a26f70cf273f6ad9f6bb730b3d271e5214d36183896c52d0d0f5273"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "docs/adr/0010-hybrid-runtime-boundary.md",
+      "sha256": "051b4836318f288256b4402943a6792d98df239f3a54b25dab11da1b29217875"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "formal/tla/DeltaReduceAvailability.tla",
+      "sha256": "dc84f8cfd350fae97646cb318ff055af5d5df542e04ea15aba027daf961321a4"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "sha256": "abc6a7999b8258fac915405c8e446be3cd57d50c81c0b8504f6757f489d49cab"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/000-formal-tla-spec/proof-obligations.md",
+      "sha256": "942488fb0d88cb299c0c23f3b414c51258780a2290402b3e3439c6ff20c795f0"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/003-bft-round-state-machine/formal-refinement.md",
+      "sha256": "32ed46548616f99545fbbd69510bfb4bfcdb5ec0f89ae3993a379a1b2f0e8499"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/003-bft-round-state-machine/spec.md",
+      "sha256": "ffe129366f152719b25925afed8b9bdebac8ddae9fcdd67b9fe255a6c0073821"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/evidence/distribution-refinement.json",
+      "sha256": "227ea7b3c534115db50757a77ad74e717ae081621350bd36d19170c836be6016"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/evidence/native-execution.json",
+      "sha256": "15f40ed1c6902c287bcf493a70e4254fc654f6cd5e9ebda772386c2291f9899a"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/evidence/traces/legal/multi-peer-repair.json",
+      "sha256": "fbafe1ce5c8c69b6328c3d822537565fca3f6fce715b7abfbfce88386e0fa961"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/formal-refinement.md",
+      "sha256": "4644bb72d16af928289ae4bb6d68868aa9671fab418822e2fac486fc9cfa607f"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/scripts/capture_native_execution.py",
+      "sha256": "a5ca3ffc9d1291307d070095cdc737de7aaa1a525c2584096055dad3ada397c1"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/005-content-addressed-p2p-distribution/scripts/generate_refinement_traces.py",
+      "sha256": "5c4c7fd0e1a5b47968f016e19e92ba9ca7cd283096f01c9b4f48a9df63e4bbdb"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae"
+    },
+    {
+      "commit": "79293c1a2cac5721c5cc9609af621c83d317520b",
+      "path": "integration/mnist-delta/native/mnist_delta_node.cpp",
+      "sha256": "25f61620439085dd3e8792fc7aae9abc7fc23c2974d71eb714fdc14bf84ed35f"
+    },
+    {
+      "commit": "e766ef98748504779a9a88d06ee3760594c4184d",
+      "path": "formal/reference/isc_source/README.md",
+      "sha256": "c53d1e9616c18d0b250d68135434ba3e9fc49c1bcee1d202a400c70702c691bb"
+    }
+  ],
+  "archive_and_version_checks": {
+    "candidate_version_references_checked": 26,
+    "compressed_formal_archives_decompressed_and_hash_verified": 7,
+    "presentation_demo_zip_crc_verified": true,
+    "external_candidates": [
+      {
+        "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-070406-5eead96b\\controllers\\bootstrap-validator-set.demo.json",
+        "exists": true,
+        "same_sha256": true
+      },
+      {
+        "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260928-114619-dac958f9\\controllers\\bootstrap-validator-set.demo.json",
+        "exists": true,
+        "same_sha256": true
+      },
+      {
+        "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-063554-7b086acf\\controllers\\bootstrap-validator-set.demo.json",
+        "exists": true,
+        "same_sha256": true
+      },
+      {
+        "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-093418-4af12954\\controllers\\bootstrap-validator-set.demo.json",
+        "exists": true,
+        "same_sha256": true
+      },
+      {
+        "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260924-062313-43319039\\controllers\\bootstrap-validator-set.demo.json",
+        "exists": true,
+        "same_sha256": true
+      },
+      {
+        "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260926-233939-e399b371\\controllers\\bootstrap-validator-set.demo.json",
+        "exists": true,
+        "same_sha256": true
+      },
+      {
+        "path": "D:/delta-data\\presentation-20260924\\node-training\\runs\\run-20260927-205057-51114d80\\controllers\\bootstrap-validator-set.demo.json",
+        "exists": true,
+        "same_sha256": true
+      }
+    ]
+  },
+  "official_api_checkpoint": {
+    "observed_at": "2026-10-07T14:55:49.355198+00:00",
+    "execution_revision": 178,
+    "assignment": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "scope_revision": 8,
+    "workflow_revision": 29,
+    "matching_decisions": [],
+    "unchanged": {
+      "assignments": true,
+      "last_transition": true,
+      "pending_transition": true,
+      "scope_control": true,
+      "scope_workflow": true
+    }
+  },
+  "free_disk_bytes_after_recheck": {
+    "C:/": 37080895488,
+    "D:/": 26530234368
+  },
+  "supplemental_hit_review": {
+    "blob": "1309f23f597f31cf1496a9a4b3c4c50544f8f987",
+    "path": "presentation-output-20260924/Paper_Discussion_QA_EN.md",
+    "result": "Restates liveness/artifact-availability assumptions; no immutable producer contract or original physical observation evidence."
+  },
+  "graph_mutations": [],
+  "new_pending_request_created": false
+}
