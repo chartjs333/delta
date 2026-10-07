@@ -1,0 +1,91 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "scope_revision": 11,
+  "decision_id": "scope-decision-e5c12ebc8342d99630d5fcf28a9c6753",
+  "ack_id": "scope-ack-a07a96b9126f50c24a663f2b99658f95",
+  "result": "STORAGE_AUTHENTICATION_COMPONENT_CHECKED",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "contracts": [
+    {
+      "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+      "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41"
+    },
+    {
+      "commit": "90561a97de7f41f409bf22065ad6cdc9b3932458",
+      "path": "docs/adr/0018-authenticated-availability-contract-v1.md",
+      "sha256": "4b5c91196b63644dc472954447e9b1426cbf88055f78a5d49eb903821780b0d5"
+    },
+    {
+      "commit": "85ba58e483db34a778673743885343b1264132d2",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-O-AUTHENTICATED-AVAILABILITY-CONTRACT.json",
+      "sha256": "d13cc05328c418d145cf0cc2fdf96bd3c69fef3c1f8b1b1477f1dc4f104de8e8"
+    }
+  ],
+  "checks": [
+    {
+      "command": [
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "formal/reference/storage_source",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "check-0.txt",
+      "sha256": "dafb4c0760ba080b9a77680b6d9ec36f6731b26445f47d3b3cb5d1cce064c1fe"
+    },
+    {
+      "command": [
+        "-m",
+        "ruff",
+        "check",
+        "formal/reference/storage_source",
+        "formal\\proposals\\isc-source-generation\\check_storage.py"
+      ],
+      "exit_code": 0,
+      "log": "check-1.txt",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "command": [
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "formal/reference/storage_source",
+        "formal\\proposals\\isc-source-generation\\check_storage.py"
+      ],
+      "exit_code": 0,
+      "log": "check-2.txt",
+      "sha256": "f114d83b30c5c657ee43a847a45bafccaea255d82673feb87c26d252c61e29c1"
+    }
+  ],
+  "backend_sha256": "f656aeb789bfc3a2ac587fae1d7cfe278bbe8ce73f28da73b4d08282ea8f9fe3",
+  "source_hash_rule": "Git-compatible LF normalization for source text only; original protocol/signature bytes are never normalized.",
+  "sources": {
+    "formal/reference/storage_source/__init__.py": "39145ac3fae5559d5aba1cb28d88f4725f4d5e3472179932cba1caa930f4a47b",
+    "formal/reference/storage_source/codec.py": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
+    "formal/reference/storage_source/test_codec.py": "ecf98bf2dfe56ec73833b0222ebaa0222c1996626ffa7890a07f5bbb91d2f7df",
+    "formal/reference/storage_source/README.md": "988409ec3c57eabcd29d46ae2f51ba7d557560b867bbed987633aa8e399c0f6e",
+    "formal/proposals/isc-source-generation/check_storage.py": "7f7a745de333a8b66bb74c4d657122c856a340fa8780667517e1ae13a7467151",
+    "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
+    "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
+    "formal/reference/isc_crypto/library-provenance.json": "88c6f9a355c2e97a6d65bdb6eaa8165b59c64dcf66ce31f3ad831b1c525adeaa"
+  },
+  "residual": "Derive Context and complete original prefix from independently checked source/configuration/ticket/commitment/manifest history, then full O source/public-state composition and applicable gates. Byte authentication alone establishes none of those premises.",
+  "limits": [
+    "Synthetic conformance, not production capture or independent attestation.",
+    "No physical availability inference or complete source/budget qualification.",
+    "No refinement result, Lean/TLA claim, recovery theorem, production change or sigma."
+  ]
+}
