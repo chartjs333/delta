@@ -2,6 +2,52 @@
 
 T047/T053. 6 October 2026. **STOP / R2.3 OPEN / Formal NO_GO.**
 
+## Latest: 7 October scope9 fulfilled; new semantic decision pending
+
+Human edit `scope-decision-6963b451e12af6b41ebe87c6118c1e67` selected E audit
+and explicitly required a **new Pending decision if E is absent**. This supersedes
+the earlier no-new-absence-request instruction below, not the prohibition on
+choosing F/O automatically. No new E contract/evidence was supplied. The completed
+full audit and 7 October recheck are applicable; their exact five document/evidence
+hashes were checked against commits `08e86bad8be9b5af3c61e29a2e5f77a4e970374b`
+and `3ee3db8cd7ea9af944f41e34c0fc609ad3f250ce`. No redundant full scan was run.
+
+Actual coordinator role2750 obtained fresh effective scope9, verified the Git
+source, effective-core hash and precedence, and sent one exact ACK. POST response
+timed out, but role GET confirmed persistence of
+`scope-ack-9ef620b7681608f634d1b0a145315366`. No duplicate ACK was sent.
+
+New request **`scope-request-3ddd40b5fb857b63abf2c11332a3ac08`** is GET-confirmed
+exactly once, with no matching decision. Source:
+`840629d67ce59bdc0dd2089f757156288c94e0a0:`
+`orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-E-ABSENT-TRUST-MODEL-DECISION.json`,
+SHA256 `96c34ec11c256ab1236252949d1f897223e4eb0603dc6411f854130bcbacfeaa`.
+That commit is pushed and remote-verified; transient GitHub push errors resolved.
+Request POST also timed out after persistence; no blind resend was performed.
+The prior request and its scope9 edit are retained as history.
+
+The new request separately states F's **new factual-history trust and conditional
+theorem claim**, and O's **changed observed/certified availability model/claim and
+required requalification**. **Neither is selected.** Unchanged approval retains
+STOP, with no repeat audit, duplicate request, new proof or implementation.
+New genuine E evidence can still be supplied; absence is limited to the recorded
+available corpus, not an impossibility claim.
+
+Official checkpoint: execution180 active/node, scope9, workflow33; original
+sprint `sprint-0001-783ef52c`, coordinator assignment
+`4824b8d9-2e13-4a6f-89d1-917696ff8a43`. Assignment/review collections, last
+transition and pending transition match the pre-ACK scope9 snapshot. ACK changed
+execution revision179→180 but did not advance the graph. Request registration
+left execution180/scope9 intact. No graph result/review or RESUME/START was sent.
+The generic whoami repository reply did not return successfully; identity was
+confirmed through official state and authenticated current-role scope/context,
+not inferred from local nginx state or imported JSON.
+
+Receipt: [ISC-S16-SCOPE9-E-ABSENT-CHECKPOINT.json](ISC-S16-SCOPE9-E-ABSENT-CHECKPOINT.json).
+This receipt does not confer graph review or independent attestation on the
+coordinator audits. **STOP / R2.3 OPEN / Formal NO_GO.** Await an exact semantic
+decision through the normal UI/API; no renewed general R2.3 permission is needed.
+
 ## 7 October: recheck after the user's disk-full report
 
 The user specifically identified the 6 October E audit as interrupted. Do not

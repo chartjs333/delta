@@ -1,0 +1,162 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "record_type": "scope9-E-audit-absent-new-pending-confirmed",
+  "observed_at": "2026-10-07T15:18:45.642907+00:00",
+  "project": "9000",
+  "sprint": "sprint-0001-783ef52c",
+  "git_branch": "agent/isc-s16-continuous-sprint",
+  "request_source_commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
+  "request_source_remote_exact_verified": true,
+  "human_decision": "scope-decision-6963b451e12af6b41ebe87c6118c1e67",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-9d9226cb10886b3cfd5efc6193e16a43",
+    "effective_revision": 9,
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 8,
+    "source_commit": "ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-SEMANTIC-CHOICE.json",
+    "source_sha256": "54f2171d192d947eddb0d0cf1ab61e1e347d9a7db14c05ff9da29ae3090ae868",
+    "effective_scope_sha256": "10b1f225963df5d301d9be1310e3f32e0226eda3e48738c57073472e73edcb29",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "acknowledgement": {
+    "ack_id": "scope-ack-9ef620b7681608f634d1b0a145315366",
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "agent_phone": "2750",
+    "amendment_id": "scope-human-9d9226cb10886b3cfd5efc6193e16a43",
+    "effective_revision": 9,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-9d9226cb10886b3cfd5efc6193e16a43",
+      "effective_revision": 9,
+      "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 8,
+      "source_commit": "ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-SEMANTIC-CHOICE.json",
+      "source_sha256": "54f2171d192d947eddb0d0cf1ab61e1e347d9a7db14c05ff9da29ae3090ae868",
+      "effective_scope_sha256": "10b1f225963df5d301d9be1310e3f32e0226eda3e48738c57073472e73edcb29",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-07T17:09:51.435592+02:00"
+  },
+  "ack_post_response_available": false,
+  "ack_role_get_persistence_confirmed": true,
+  "identity_evidence": "Official read-only HTTP state/current assignment plus authenticated role effective-scope and scope-request-context. Generic whoami repository reply did not return successfully; it is not claimed as a successful identity delivery.",
+  "execution": {
+    "status": "active",
+    "revision": 180,
+    "phase": "node",
+    "current_node_id": "continuity-coordinator",
+    "current_assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43"
+  },
+  "scope_revision": 9,
+  "workflow_revision": 33,
+  "request": {
+    "request_id": "scope-request-3ddd40b5fb857b63abf2c11332a3ac08",
+    "idempotency_key": "delta-isc-s16-E-absent-after-scope9-20261007",
+    "request_sha256": "3ddd40b5fb857b63abf2c11332a3ac08b693d22705c19bfa946b930f94757379",
+    "identity": {
+      "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "agent_phone": "2750",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "occurrence": null,
+      "occurrence_id": null,
+      "source_assignment_id": null
+    },
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "base_scope_revision": 9,
+    "execution_revision": 180,
+    "created_at": "2026-10-07T15:17:30.723845+00:00",
+    "reason": "Scope9 поручил проверить E и, если применимого existing producer/observation contract нет, сохранить STOP и создать новый Pending decision с подтверждением отсутствия E и последствиями F/O. Результат: E_ABSENT_IN_AVAILABLE_CORPUS. После сообщения пользователя о переполнении диска выполнена полная повторная проверка исходного immutable corpus 7 октября, завершена в 14:55:27Z; исправлен перечень исходных auxiliary tree roots без изменения обследованного множества объектов. Исходные evidence и свежая перепроверка сохранены в точных commits ниже. Это не утверждение о невозможности неизвестного внешнего артефакта. Новый scope не предоставил новых E evidence. Общая авторизация R2.3 сохраняется; требуется только отдельное решение о trust/model consequence. F/O не выбраны. Не возобновлять proof/runtime работу автоматически.",
+    "dependencies": [
+      "Mandate: scope-decision-6963b451e12af6b41ebe87c6118c1e67, effective scope9, assignment4824b8d9-2e13-4a6f-89d1-917696ff8a43; exact ACK scope-ack-9ef620b7681608f634d1b0a145315366 persisted and role-GET confirmed. Source ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec:orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-STORAGE-PRODUCER-SEMANTIC-CHOICE.json; effective_core SHA256 10b1f225963df5d301d9be1310e3f32e0226eda3e48738c57073472e73edcb29. Scope9 explicitly requests this new Pending decision if E is absent; this is not a retry of the prior request.",
+      "Fresh disk-interruption recheck: 3ee3db8cd7ea9af944f41e34c0fc609ad3f250ce:docs/adr/0017-audit-recheck-after-disk-exhaustion.md SHA256 abc76c31d4000815667c04f8ad0fba113e422e574543a253f38866cc63faf23b; docs/adr/evidence/0017-audit-recheck-20261007.json SHA256 900ef3580d6614c841700d15b98cc17766ed9b4f32227ec5f9ff7573bf9885fd. Complete original corpus reads and candidate hashes/matches reproduced; original root-list metadata defect repaired. This does not deny the earlier reported disk-full interruption.",
+      "Original E dispositions: 08e86bad8be9b5af3c61e29a2e5f77a4e970374b:docs/adr/0017-existing-storage-producer-audit.md SHA256 e2bccf72fa8f4041798d958cc87517b0a7f174e22e955d880953db932070397b; docs/adr/evidence/0017-existing-producer-audit.json SHA256 64f3cb9cdb5bf3eef555c4bef24366ba6552307ac4ab36ceb150431a01801be5; docs/adr/evidence/0017-existing-producer-corpus.json SHA256 6e037e35fb31fe441a1205ddfa86aa79657e8e88589195bb04e1fa0af868d064. Local artifact I/O, P2P/CAS/DownloadJournal, benchmark/demo signals and generated traces do not establish truthful complete physical history at the original cuts.",
+      "Exact F premise and separate F/O compatibility table: ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec:docs/adr/0017-storage-producing-history-binding.md sections6-7, with guard distinction in section4. Loss before finalization distinguishes historical from currently available attesters; it is not a production attack, TLC run or complete valid-snapshot counterexample. Lawful finalization followed by loss preserves original AC/ISC lineage.",
+      "Unchanged pins: native/model N60c692f6e391f839829dfc64e93380db54cd507b; Profile P26eb02d0632435c9aa0d8ef44eb496b6fa73dd13; approved ADR0016 bytes/keys at1438fa3d78ec99291475cf4660fd8c190ac01bb3 under scope-decision-614a7db8512f59e36720131917827d4c. Authentication approval is not physical-truth authority. Prior process reviews cover worker a2fd17259240be0a7721512e7a12fe972587f3bf, not these coordinator audits; sequential executor reviews are not independent Formal GO attestations."
+    ],
+    "proposal": {
+      "instructions": "SEMANTIC DECISION AFTER E AUDIT — no default F/O choice. E is absent in the recorded available corpus, including the successful full recheck after the disk-full report. Default if approved unchanged: retain STOP, R2.3 OPEN/Formal NO_GO; do not repeat the completed audit, create another duplicate Pending request or start proof/runtime work. Use Edit boundaries for an explicit semantic choice. F: adopt only explicitly the factual-history premise quoted in ff8b8f1e5d538e8969f819512ecc7c4dfc3931ec:docs/adr/0017-storage-producing-history-binding.md section6: independently designated observation boundary truthfully and completely records original materialization, attestation-producing observation, physical loss/corruption and repair, with no omitted/fabricated location change at the relevant original cuts and actual retrievability of original bytes, independently of certificate acceptance/public construction/R2 success. This is NEW trust/profile scope, not a property established by faithful T, signatures, storage enrollment or ApplyQC. No qualified concrete observer was found. Physical Init/Next and original QC/WAL bytes can remain unchanged, but theorem/domain and article claims become conditional on the new physical-history premise. A later recovery theorem inherits it. This alone cannot close currently selected production GO or justify verified production physical provenance, and gives no new liveness guarantee. Existing evidence does not discharge the premise; source composition still requires proof. O: explicitly authorize a bounded architecture decision on authenticated/observed availability in place of the current physical-cut claim. Native histories would be related to the newly decided observed/certified model, not silently to the old physical model. Exact new guards, storage fault/retention/observation assumptions, retrieval-failure behavior and safety/liveness claims must be decided before implementation. Replacing HasCompleteAvailability by HasAttestationCoverage alone is NOT an approved solution: it admits the pre-finalization-loss cut currently forbidden. AvailabilityNext/Next composition, possible Init/state impact, availability/freeze/lineage/repair/abort invariants, liveness/mutants/refinement and dependent Lean/source/recovery results require requalification. Original R2.1/R2.2 remain closed for their original domains. No old signatures/QC/WAL may be reinterpreted or migrated. F and O are alternatives, not both selected by reading or unchanged approval. A future exact decision must expressly state which trust/model boundary is amended and what next work is permitted; this menu does not pre-authorize implementation for either option. The operator may instead provide genuinely new immutable E contract AND original evidence, with exact applicability, for verification without changing the current profile. Do not manufacture a choice from an empty reason, ACK, general R2.3 permission or acceptance of the audit. No additional human permission for already authorized ordinary R2.3 work is requested. Preserve STOP pending the actual semantic decision; no fake RESUME/START, duplicate prior result or review. Scope ACK removes only the scope-authorization gate and never bypasses normal graph/review/qualification gates.",
+      "retained_restrictions": [
+        "No production C++/ABI/Java/sidecar integration, production recovery deployment or guard removal; exact compatible merged Formal GO gate remains.",
+        "Until a separate explicit human decision changes the stated boundary, preserve production Init/Next, certificate semantics, original objects/signatures/QC/WAL identities, signer identities and original delivery multiplicity. No legacy migration, relabeling or resigning.",
+        "No trust/profile expansion is adopted by this request. Preserve enrolled fixed-epoch Snapshot Provenance Profile v1; no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format. A future F/O selection must explicitly identify its changed boundary rather than contradict this restriction silently.",
+        "No invented producer/observer rule, validator-key substitution for original worker/storage/beacon authentication, new source caps or lineage truncation. Approved ADR0016 bytes/keys stay approved; authentication does not prove physical truth.",
+        "No concrete sigma_next, fabricated deployment evidence, Formal GO claim or review/qualification gate waiver. Same-executor process review is not independent attestation.",
+        "R1/R2.1/R2.2 remain CLOSED for their original domains; R2.3 OPEN. No full R3; named recovery theorem only after reviewed substantive R2.3 closure. Conditional refinement is not production GO.",
+        "No sorry, hidden/circular/public-success axioms, opaque accept callbacks, vacuous proofs, weakened invariants or relabeled FAIL/NO_GO.",
+        "No new sprint, reimport, reset, manual graph advancement, nginx-qa code/deployment/restart, subagents or foreign-file/frozen-ref changes. Preserve all assignment/review/scope/ACK history and healthy demos.",
+        "No new producer, predicate, proof, schema, runtime or automatic follow-on layer under unchanged approval. No repeated E audit without new substantive evidence; no duplicate request/result/review or fake RESUME to represent STOP."
+      ],
+      "node_ids": [
+        "continuity-coordinator",
+        "formal-linkage",
+        "formal-qualification"
+      ],
+      "reviewer_ids": [
+        "isc-s16-continuous-architecture-reviewer",
+        "isc-s16-continuous-evidence-reviewer"
+      ]
+    },
+    "source": {
+      "repository_key": "github.com/chartjs333/delta",
+      "commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-E-ABSENT-TRUST-MODEL-DECISION.json",
+      "sha256": "96c34ec11c256ab1236252949d1f897223e4eb0603dc6411f854130bcbacfeaa"
+    },
+    "authorization_provenance": null
+  },
+  "request_post_response_available": false,
+  "request_get_confirmed_exactly_once": true,
+  "matching_decisions": [],
+  "graph_transition_submitted": false,
+  "new_result_or_review_submitted": false,
+  "preservation_checks": {
+    "comparison_baseline": "Official HTTP state 2026-10-07T15:06:42.806977+00:00 after human scope9 decision, before this ACK/request",
+    "unchanged_collections": {
+      "assignments": true,
+      "last_transition": true,
+      "pending_transition": true
+    },
+    "assignments_count": 55,
+    "assignments_sha256": "07cff8a9e1a75270d5d9c80643e1cfa446be22dba777dc60fbf3d364d2ab7bb9",
+    "reviews_sha256": "569e4f4093025bc612d2ec943c34d5824270d4cd02a352e64a26a4be6ccdfc8e",
+    "last_transition_sha256": "30fe5ef79682044ef6bdcef9e5f98f2320ad1dc6b29d587320ab5962a25b5979",
+    "pending_transition_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+    "scope_context_unchanged_after_request": true,
+    "scope_revision_unchanged_by_ack_and_request": true,
+    "execution_revision_change": "179 to180 for accepted exact ACK; request registered at180, current execution180; graph pointer/assignment/transition collections unchanged.",
+    "scope_history_note": "No raw amendment/admin operation or prior-history update sent. This receipt checks the stated HTTP subsets; it does not claim a new full persistence/migration audit."
+  },
+  "audit_reused": {
+    "original_commit": "08e86bad8be9b5af3c61e29a2e5f77a4e970374b",
+    "recheck_commit": "3ee3db8cd7ea9af944f41e34c0fc609ad3f250ce",
+    "result": "E_ABSENT_IN_AVAILABLE_CORPUS_REVERIFIED_20261007",
+    "new_E_artifact_supplied_by_scope9": false,
+    "repeat_full_scan_this_scope9_registration": false,
+    "reason": "Completed full original corpus recheck after user-reported disk exhaustion remains applicable; exact five source document/evidence hashes verified against their immutable commits. No historical disk failure denied.",
+    "graph_review_or_formal_qualification": false
+  },
+  "choices": {
+    "F": "NOT_SELECTED",
+    "O": "NOT_SELECTED"
+  },
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "next_action": "STOP. Await an explicit F/O semantic decision or genuinely new applicable immutable E evidence through Pending decisions. Unchanged approval/no-op/rejection does not select F/O, authorize a duplicate request, repeat the audit or permit implementation. General R2.3 permission persists; no renewed approval for ordinary work requested."
+}

@@ -65,7 +65,7 @@
   "memo_review_status": "No result/review transition submitted for this memo; current coordinator only offers RESUME/START outcomes, which would not represent the mandated STOP. Prior two process reviews cover the worker source audit, not this memo.",
   "formal_status": "NO_GO",
   "r2_3": "OPEN",
-  "next_action": "STOP. After user-reported disk-full interruption of 6 October E audit, full original corpus and evidence were rechecked successfully on 7 October; auxiliary tree roots omitted from the old roots list are now recorded exactly. E remains absent in available corpus. This does not prove no earlier disk failure occurred. F/O unselected; no automatic repeated audit, proof layer, new request, fake RESUME or runtime work. Preserve graph and existing pending request. New substantive E evidence or an exact semantic decision is required for dependent work.",
+  "next_action": "Latest scope9 explicitly required a new Pending decision if E absent. Fulfilled: scope-request-3ddd40b5fb857b63abf2c11332a3ac08, source840629d6, exact ACK9ef620b7 GET-confirmed. Refer to latest_checkpoint, superseding older no-new-absence-request instruction. STOP until explicit F/O semantic choice or genuinely new immutable E evidence. Unchanged/no-op/rejected decision permits no repeated audit, duplicate request, implementation/proof, fake RESUME or renewed general R2.3 approval request.",
   "subsequent_user_requested_E_audit": {
     "document": "docs/adr/0017-existing-storage-producer-audit.md",
     "document_sha256": "e2bccf72fa8f4041798d958cc87517b0a7f174e22e955d880953db932070397b",
@@ -150,5 +150,16 @@
       }
     },
     "historical_disk_event_ruled_out": false
+  },
+  "latest_checkpoint": {
+    "document": "ISC-S16-SCOPE9-E-ABSENT-CHECKPOINT.json",
+    "scope_revision": 9,
+    "execution_revision": 180,
+    "workflow_revision": 33,
+    "request_id": "scope-request-3ddd40b5fb857b63abf2c11332a3ac08",
+    "request_source_commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
+    "human_decision": "scope-decision-6963b451e12af6b41ebe87c6118c1e67",
+    "ack_id": "scope-ack-9ef620b7681608f634d1b0a145315366",
+    "status": "STOP / R2.3 OPEN / Formal NO_GO; E absent, F/O unselected"
   }
 }
