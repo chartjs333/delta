@@ -1,0 +1,185 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "classification": "DOCUMENTARY_SEMANTIC_PROPOSAL_NOT_IMPLEMENTED",
+  "scope_decision": "scope-decision-c78a662f4607e470ed1a39d7d4238821",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-a6a67b171500bc38b62de28d97bd8af7",
+    "effective_revision": 10,
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 8,
+    "source_commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-E-ABSENT-TRUST-MODEL-DECISION.json",
+    "source_sha256": "96c34ec11c256ab1236252949d1f897223e4eb0603dc6411f854130bcbacfeaa",
+    "effective_scope_sha256": "a59da7fa111a519a5a87994307cf08d9b63465ae75602db473779ad20ab3bb02",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "ack": {
+    "ack_id": "scope-ack-eae23110c6f1a397a5af1a3988b9c0d2",
+    "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "agent_phone": "2750",
+    "amendment_id": "scope-human-a6a67b171500bc38b62de28d97bd8af7",
+    "effective_revision": 10,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-a6a67b171500bc38b62de28d97bd8af7",
+      "effective_revision": 10,
+      "assignment_id": "4824b8d9-2e13-4a6f-89d1-917696ff8a43",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 8,
+      "source_commit": "840629d67ce59bdc0dd2089f757156288c94e0a0",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-E-ABSENT-TRUST-MODEL-DECISION.json",
+      "source_sha256": "96c34ec11c256ab1236252949d1f897223e4eb0603dc6411f854130bcbacfeaa",
+      "effective_scope_sha256": "a59da7fa111a519a5a87994307cf08d9b63465ae75602db473779ad20ab3bb02",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-07T17:29:07.283545+02:00"
+  },
+  "scope_source_and_core_hashes_verified": true,
+  "document": "docs/adr/0018-authenticated-availability-contract-v1.md",
+  "document_sha256": "4b5c91196b63644dc472954447e9b1426cbf88055f78a5d49eb903821780b0d5",
+  "source_references": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "formal/tla/DeltaReduceAvailability.tla",
+      "sha256": "dc84f8cfd350fae97646cb318ff055af5d5df542e04ea15aba027daf961321a4",
+      "bytes": 14657
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00",
+      "bytes": 35498
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "bytes": 37676
+    },
+    {
+      "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+      "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41",
+      "bytes": 19599
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/tla/DeltaReduce.tla",
+      "sha256": "40d7db71f42375ea70bda7968f546707c54fa939b962652dbb712298084372d1",
+      "bytes": 1591
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/tla/DeltaReduceTypes.tla",
+      "sha256": "2eb3008060f8bbe3ed1be12167211d602dc5bf2f5bc7d65caa9896f8586b0121",
+      "bytes": 14642
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/tla/DeltaReduceReduceApply.tla",
+      "sha256": "38deb9c336618b7ca9c548b249ac573375dc5e95175bb4ec4e2fa6b28d0139fc",
+      "bytes": 53121
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/tla/DeltaReduceFailures.tla",
+      "sha256": "ee94c1c67335888544b1689200b829526f09d618bdf4e9c256ad2c1c0788ecf5",
+      "bytes": 19961
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/tla/DeltaReduceLivenessHarness.tla",
+      "sha256": "427a7acb1eb791af91beb9bcbbf4f40ca3d78f171dfffcb15323c6cd9fa8bcf3",
+      "bytes": 10298
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/NativeAvailableQ.lean",
+      "sha256": "17508af9ddaa1a89ab48c5fe1409d95594f6cfc21fba473adf158305e22063dc",
+      "bytes": 6092
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/NativeIscAdmission.lean",
+      "sha256": "63ddf5cc963d51b7837afc1e4bb6ca6d0f1024f0ef60a23bd9e23b9348af213c",
+      "bytes": 13126
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/NativeEarlySource.lean",
+      "sha256": "5f85e1c9b6ee5b46c07fd63f9fcd228b3579c830155d182e2ee27b50a92dd053",
+      "bytes": 7309
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/PublicEarlyHistory.lean",
+      "sha256": "4c79d2789d7946ea69b0179831e6859b7a6c56afb038d2e596def3fe86d0163d",
+      "bytes": 6895
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/PublicFailureHistory.lean",
+      "sha256": "d20a6eef0ab4e32bfd904c14a24c3edaf7340a9e8d366710b095be886e5c2055",
+      "bytes": 4218
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/PublicAbortAncestors.lean",
+      "sha256": "0c9cfd19a40d861d428e62eb2fb966648991429fa57fdf66490b38b80f854996",
+      "bytes": 10819
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/NativeReplayAdmission.lean",
+      "sha256": "cfb5cd07242be3d0a33f7d3215740adc059394f9fb9e32ef8591e8b5bdbeb2cd",
+      "bytes": 9837
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/proofs/DeltaReduce/NativeCurrentHistory.lean",
+      "sha256": "bb946c3b7dbf3ed847095de210ff7c5d59ae9833df8fc555e6b82fac820810ed",
+      "bytes": 15798
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "formal/scripts/native_available_q.py",
+      "sha256": "225abe3069112331913c43c4f8bd9b6369664fb6a12353bc1fc6ec6dc97683ee",
+      "bytes": 7137
+    },
+    {
+      "commit": "4555479c65161a901dd6582dea80ebd2521bb025",
+      "path": "specs/000-formal-tla-spec/failure-semantics.md",
+      "sha256": "375b09aaec41ca84a4959f0c5a65c8f0382356187297c5f7a3171bebff00e72e",
+      "bytes": 16884
+    }
+  ],
+  "availability_and_certificate_modules_equal_N": true,
+  "key_findings": [
+    "Physical guard occurs in FinalizeAvailability AND CanonicalEligibleEntries/CloseInput.",
+    "OrdinaryProgressOpen is the outer gate; no leaf action bypass is proposed.",
+    "ADR0016 bytes/keys are reused; its physical-source claim is explicitly superseded only on future semantic approval.",
+    "Existing NativeAvailableQ components explicitly exclude authentication/physical availability; no promotion to a source authority."
+  ],
+  "unexecuted": [
+    "No new model/proof/schema/fixture/runtime/source predicate implemented",
+    "No TLC/Lean/native tests or formal-check run for this unimplemented contract",
+    "No new independent review or Formal GO attestation"
+  ],
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "F": "FORBIDDEN",
+  "O_contract": "PROPOSED_REQUIRES_SEMANTIC_APPROVAL",
+  "new_semantics_id_assigned": false
+}
