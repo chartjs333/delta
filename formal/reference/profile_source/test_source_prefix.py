@@ -133,6 +133,77 @@ class SourcePrefixTests(unittest.TestCase):
         with self.assertRaisesRegex(CodecError, "independently retained original source inventory"):
             m.check_metadata(self.p.trust, m.canonical(manifest), raw, self.p.artifacts)
 
+    def retain_index(self, index, extra=()):
+        raw = m.canonical(index)
+        originals = dict(self.p.artifacts)
+        originals.update((m.raw_id(value), value) for value in (raw, *extra))
+        self.p.artifacts = tuple(sorted(originals.items()))
+        table = sorted((ref(value) for value in originals.values()), key=lambda r: r["content_id"])
+        self.p.index["artifacts"] = table
+        self.p.manifest["artifacts"] = table
+        self.rebind()
+        return raw
+
+    def earlier(self):
+        old = copy.deepcopy(self.p.index)
+        old["events"] = old["events"][:7]
+        return old
+
+    def bind_earlier(self, raw, *, cut=6, before=7, identifier=None):
+        prefix = s.materialize(self.p.check())
+        return s.retained_cut(
+            prefix, raw, identifier or m.document_id(raw, "SOURCE_INDEX"), cut, before
+        )
+
+    def test_w1_uses_retained_prior_index_without_self_referential_later_index(self):
+        raw = self.retain_index(self.earlier())
+        result = self.bind_earlier(raw)
+        self.assertNotEqual(result.original_index, self.p.index_raw)
+        self.assertNotEqual(result.index_id, m.document_id(self.p.index_raw, "SOURCE_INDEX"))
+        self.assertEqual(len(result.events), result.inclusive_cut + 1)
+        self.assertEqual(result.events[2].original, result.events[6].original)
+        self.assertEqual([e.index for e in result.events], list(range(7)))
+        self.assertEqual(result.journals[0][1], b"journal")
+        # Inclusive W1 cut 5 means exactly six events, not five or seven.
+        self.assertEqual(len(self.bind_earlier(raw, cut=5).events), 6)
+
+    def test_w1_cannot_borrow_future_index_or_rewrite_original_prefix(self):
+        future = copy.deepcopy(self.p.index)
+        raw = self.retain_index(future)
+        with self.assertRaisesRegex(CodecError, "precedes"):
+            self.bind_earlier(raw)
+        for key, value in (("actor_id", "another-receiver"), ("dependencies", ["1"])):
+            with self.subTest(key=key):
+                old = self.earlier()
+                old["events"][2][key] = value
+                raw = self.retain_index(old)
+                with self.assertRaisesRegex(CodecError, "whole original event prefix"):
+                    self.bind_earlier(raw)
+
+    def test_w1_requires_actual_retained_index_and_its_document_identity(self):
+        raw = m.canonical(self.earlier())
+        with self.assertRaisesRegex(CodecError, "independently retained original"):
+            self.bind_earlier(raw)
+        self.retain_index(self.earlier())
+        with self.assertRaisesRegex(CodecError, "domain-separated"):
+            self.bind_earlier(raw, identifier=m.raw_id(raw))
+
+    def test_w1_no_delivery_collapse_or_fabricated_journal_prefix(self):
+        old = self.earlier()
+        old["events"].pop(2)
+        # Keep well-formed backwards dependency coordinates, not a malformed
+        # index that would fail before the original-prefix comparison.
+        raw = self.retain_index(old)
+        with self.assertRaisesRegex(CodecError, "whole original event prefix"):
+            self.bind_earlier(raw, cut=5)
+        old = self.earlier()
+        bad = b"ourn"
+        old["original_journal_refs"][0]["ref"] = ref(bad)
+        old["artifacts"] = sorted([*old["artifacts"], ref(bad)], key=lambda row: row["content_id"])
+        raw = self.retain_index(old, (bad,))
+        with self.assertRaisesRegex(CodecError, "journal byte/sequence prefix"):
+            self.bind_earlier(raw)
+
 
 if __name__ == "__main__":
     unittest.main()

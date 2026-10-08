@@ -15,7 +15,7 @@
   "source_hash_rule": "Git LF source text; protocol originals retained without normalization",
   "sources": {
     "formal/proposals/b-family-transfer/ProfileControl.lean": "f6af4ec64f5a1d41cb7cdc61b9f77d55723c546c4a9d883ae13d113caa088aa7",
-    "formal/proposals/b-family-transfer/ProfileSource.lean": "04f4fcd0f19629b25655fa7eec0a74ee00e25970ab928ff8b7878d91476f675b",
+    "formal/proposals/b-family-transfer/ProfileSource.lean": "823a4e632f161c5a3e60fc9f67e31a427f5bdb1ec77cdf30969a361312d0377c",
     "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
     "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
     "formal/proofs/DeltaReduce/NativeReceiptBytes.lean": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580",
@@ -59,7 +59,7 @@
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
-    "formal/reference/profile_source/capsule_binding.py": "3a7af6145534cceef84762739797bcb80740a375ccef1314393dfb46c1b61d9b",
+    "formal/reference/profile_source/capsule_binding.py": "2abd8b1a44378fc82d2f07c486a417190e5bf9979509239da2f7c2a093732ddd",
     "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
     "formal/reference/profile_source/configuration.py": "be6d3cc595cc64b6951a7d693c671f1dd7da53586ac799fe4af3cc53828f77e0",
     "formal/reference/profile_source/configuration_history.py": "5748e255256095f1402766ae4c8111da421eb6f33b863e4432ec483a9cd9a7a7",
@@ -71,7 +71,7 @@
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
     "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
     "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
-    "formal/reference/profile_source/source_prefix.py": "3f47c519d7bac6057d429a4e6751462075a972df3eebfd943c11bd3e32d43348",
+    "formal/reference/profile_source/source_prefix.py": "6a390d80b00f2f339da3bc757fc62ee087ff2a0d2fad332af2c45fa41aba48ed",
     "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
     "formal/reference/profile_source/test_capsule_binding.py": "ce9c86a39dcd39dc38a3b14b9e977e276bd68fb6fe1f611132e96b2653ff76ec",
@@ -79,17 +79,19 @@
     "formal/reference/profile_source/test_configuration.py": "d409a2f2d9eb24935661c5f4f18e8fef4023baccdaa88d0f53d3c061995fe827",
     "formal/reference/profile_source/test_configuration_history.py": "e2b9d2bb5f1cd778c0c57ef0f01d42775987a1db5d93f5f5f825add3b098af27",
     "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
+    "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
     "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
     "formal/reference/profile_source/test_manifest_context.py": "d6c079ec8818c8052422d83a775b40d0ee609813b3b00b2569697ef189d89551",
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
     "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
     "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
-    "formal/reference/profile_source/test_source_prefix.py": "70a29d47ba12175efd09b4e21e9649894f488e28f862b0f0b021a36f55c5a6d6",
+    "formal/reference/profile_source/test_source_deliveries.py": "094f19a198c736261a0577ee7d93d73c656e5812cab4c13895b0f820de9b5cf4",
+    "formal/reference/profile_source/test_source_prefix.py": "ffe689855a4e5bef8ca02bd3d3c662985b55656b0ad72729e419c963cab52b90",
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "f53f575c769620a5795eb4f01845db640da9f37debb4ac18c535863e4e552983",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "d3cfa0d13a86a85c4cd43384410b6418f71df7f0a51501c6991f200c73bd2031",
+    "formal/reference/profile_source/README.md": "6726279e837b8a0ae63f5cf9a107de399cd018b49086f36c64ec715bdc7f4591",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "a3c4a2f25524800099c4ae325ac22f321a7aa6aa3b73a42d08464864551dc14e",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
@@ -118,9 +120,9 @@
     "formal/reference/isc_crypto/test_signatures.py": "2194b0a8291a7ad30c277bc0ab9db6a55cb6607d5343c339f764c1f4cc9fef32",
     "formal/reference/isc_source/__init__.py": "adc3fecf736563adc0922ce7bf83a2b4c1a6e8e650c047a59ce4de93a2a84449",
     "formal/reference/isc_source/authentication.py": "c18d0a52f7ed019319d487200fa67d14def563be676b4d6a131f8f2237e67630",
-    "formal/reference/isc_source/budget.py": "4a5d534adb2da95cfbf797c26c231161fa68efb9640676fcbc401ffe976917a0",
+    "formal/reference/isc_source/budget.py": "b7075bfa0ea7795dff77cb3ec3181c7953f496fb583ec9003d4b0efb87a459d1",
     "formal/reference/isc_source/finalization.py": "0b35dd3d09828d80e4771f48688ecfbf1527354e4d209a5d470e3986ba125191",
-    "formal/reference/isc_source/identity.py": "23bc5b5c6b9088b8e47faa347a69d3e615d0eee0f0294172427e1c925b21c13a",
+    "formal/reference/isc_source/identity.py": "134959feece71ecdafb84bff5861161184c809e44c14feb81d03c0e34d4d610c",
     "formal/reference/isc_source/policy-layout.json": "dbc992e9155b768b4f92fb25a05c883aae80763c473e402336b58c23b5d32799",
     "formal/reference/isc_source/policy.py": "6dcd4d272a1426baa076bb53fc5c61b33ce6f4dceb3be2150ebe246dd0d12783",
     "formal/reference/isc_source/test_authentication.py": "6fb83d78751b452b745e0fa214d9a827a89408070888239a6972aad32dbd598a",
@@ -128,7 +130,7 @@
     "formal/reference/isc_source/test_finalization.py": "0b7cbb65c11168c4ccccddc03f65044fdd99105899a003636144900a0c0f24b8",
     "formal/reference/isc_source/test_identity.py": "0cd5271e13aa5e16e2fe8b3189836ed222591785683991f7b0c8a1ee1d1c1740",
     "formal/reference/isc_source/test_policy.py": "8ee6f396ba5b999650392f5d2f9716d8ed7ac0ac4e4f70586562cae8434e0350",
-    "formal/reference/isc_w1/codec.py": "e8b6c09fd9edd5f909ab339719c2c2f6d4221d2b8ccaa7177a376e44181c7e96",
+    "formal/reference/isc_w1/codec.py": "45f20d9d77b6c89aede68f4ee61477d88dfd73d9275ce31871526d12dba52ce9",
     "formal/reference/isc_w1/evidence.json": "9e63360f198c153e3c813df62f0533ec26aaaf4e2262aea97854269f23c361bd",
     "formal/reference/isc_w1/harness.py": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c",
     "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
@@ -395,7 +397,7 @@
     {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "e352167a138c98cbfc264b7fb061a8de5c265791352e4bea100f46a2d038e86c"
+      "sha256": "45914cbb8e1132b3ac305a02627f917d2308c51dcc766d74945b4ce2df48f36c"
     },
     {
       "log": "control-vectors-0.txt",
@@ -440,12 +442,17 @@
     {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "00cd4ca9a80bb37878ddc628bc5769fef8f5eb36beba79de44be9a5b4655a493"
+      "sha256": "487ffa4accac349376d37371dc76d3c36f19017feb88045ce586f2331f31ca23"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "a922f4dff2500db3aa3afc43a6b4c8141cb276086483ce77ef4a9fcf71f78181"
+      "sha256": "4d370adec11d7ea5e115bfabf77c77ca9cb215a3c97865220cecd0e9159cfd44"
+    },
+    {
+      "log": "w1-reference-tests.txt",
+      "exit_code": 0,
+      "sha256": "9592c819b4f1f94d5ea7742db8b26bbed17cd206081083dad2af83110ca7892a"
     },
     {
       "log": "ruff.txt",
@@ -455,7 +462,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "a29905b4529aee76474b804c49e3c3820a3c2ffa2c958cba5ab50986b9fe0db0"
+      "sha256": "0760fafc4f10688940f82c60169dcd12eac4379bcf0334b2d9e31bb1fdc46bab"
     }
   ],
   "established": [
@@ -476,7 +483,10 @@
     "O actual read ownership from complete prefix; general binding, release/crash refusal",
     "Original007 plan/ticket/lease/timer bytes and DSJ1 producer; static commitment safety",
     "Original N command outputs/cache and coarse predecessor at every mixed WAL slot",
-    "CONFIG source occurrence keeps original receiver without fabricating transport peer"
+    "CONFIG source occurrence keeps original receiver without fabricating transport peer",
+    "Retained pre-finalization source index joins original ordered prefix and own WAL",
+    "W1 received inventory derives exact signed G/B inputs, receiver and original cut",
+    "Indexed W1 binds the retained command predecessor and all admitted deliveries"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

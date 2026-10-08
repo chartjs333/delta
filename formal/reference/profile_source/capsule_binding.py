@@ -11,6 +11,7 @@ from hashlib import sha256
 
 from formal.reference.isc_crypto.codec import _decimal, _id, _require, _uint, content_id
 from formal.reference.isc_source import budget, finalization
+from formal.reference.isc_source.authentication import registry
 from formal.reference.isc_source.policy import decode as decode_policy
 from formal.reference.isc_w1.codec import (
     decode_candidate_state,
@@ -203,3 +204,112 @@ def bind(bootstrap, backend, original, prior, body):
         effects,
         frame.sections[3],
     )
+
+
+@dataclass(frozen=True)
+class IndexedCapsule:
+    bound: BoundCapsule
+    original_source_cut: object
+    original_deliveries: object
+    command_prefix: object
+
+
+def bind_indexed(
+    bootstrap,
+    backend,
+    prefix,
+    *,
+    journal_id,
+    physical_slot,
+    consumer_index,
+    original_prior_index,
+    initial_state,
+    initial_tick,
+    original_policy,
+    logical_tick,
+    frozen_inputs,
+    body,
+):
+    """Join W1 to original source and own command prefix, not supplied S0/Gs.
+
+    Remaining inputs are explicit: initial native authority, full derived P0,
+    logical-clock/control state and frozen ledger. This function does not claim
+    their origin, kind-2 admission, barrier completion or whole R2.3 closure.
+    """
+    from formal.reference.profile_source import commands, metadata, source_prefix
+
+    boot = metadata.validate(prefix.metadata.bootstrap_bytes, "BOOTSTRAP")
+    actor = boot["local_validator_id"]
+    _, enrolled = registry(bootstrap)
+    _require(
+        bootstrap.formal_semantics_id == boot["formal_semantics_id"]
+        and bootstrap.validator_epoch_id == boot["validator_epoch_id"]
+        and bootstrap.origin_id == boot["origin_id"]
+        and [(name, key) for name, (key, _) in enrolled.items()]
+        == [(row["validator_id"], row["key_ref"]) for row in boot["validators"]],
+        "independent original profile origin/generation/epoch/keys",
+    )
+    originals = [
+        raw
+        for a, name, raw in prefix.metadata.original_own_journals
+        if (a, name) == (actor, journal_id)
+    ]
+    _require(len(originals) == 1, "one original own journal, no missing-as-empty")
+    journal = journals.inspect(originals[0], cut_slot=0, required_prefix=originals[0])
+    before = journals.finalization_prefix(journal, physical_slot)
+    position = journal.positions[physical_slot - 1]
+    request = decode_request_source(position.decoded.sections[0])
+    _require(
+        type(consumer_index) is int and 0 <= consumer_index < prefix.metadata.target,
+        "finalization event in original selected source prefix",
+    )
+    event = prefix.events[consumer_index]
+    _require(
+        event.actor == actor
+        and event.action == "ACT-ISC-FINALIZE"
+        and (
+            event.original == position.original
+            or (event.original == request.command_bytes and position.original in event.inputs)
+        ),
+        "original own finalization invocation/record association",
+    )
+    retained = source_prefix.retained_cut(
+        prefix,
+        original_prior_index,
+        request.source_index_id,
+        request.source_cut_event_index,
+        consumer_index,
+    )
+    own = [
+        (metadata.load(descriptor), raw)
+        for descriptor, raw in retained.journals
+        if (metadata.load(descriptor)["actor_id"], metadata.load(descriptor)["journal_id"])
+        == (actor, journal_id)
+    ]
+    _require(len(own) == 1 and own[0][1] == before, "exact retained own pre-finalization WAL")
+    folded = commands.prefix(
+        bootstrap.formal_semantics_id,
+        initial_state,
+        initial_tick,
+        before,
+        cut_slot=physical_slot - 1,
+        required_prefix=before,
+    )
+    journals.verify_inventory_row(folded.journal, own[0][0])
+    received = source_prefix.isc_inventory(retained, bootstrap, backend, actor, body.round_id)
+    _require(not received.unresolved, "complete original delivery source inputs required")
+    native = read_state(folded.target.state, bootstrap.formal_semantics_id)
+    cut = finalization.Cut(
+        content_id("deltareduce:003:round-state:v1", folded.target.state),
+        native["parent_checkpoint_id"],
+        int(native["height"]),
+        int(native["view"]),
+        logical_tick,
+        frozen_inputs,
+        received.admitted,
+    )
+    prior = Predecessor(
+        before, retained.index_id, retained.inclusive_cut, folded.target.state, original_policy, cut
+    )
+    result = bind(bootstrap, backend, position.original, prior, body)
+    return IndexedCapsule(result, retained, received, folded)

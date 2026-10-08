@@ -50,7 +50,7 @@ def delivery_size(delivery: Delivery) -> int:
 
 def inventory_size(deliveries: tuple[Delivery, ...], round_id: str, epoch: str) -> int:
     _require(len(deliveries) <= limit("max_delivery_events"), "cumulative delivery event budget")
-    previous, size = 0, 0
+    previous, size = -1, 0
     for delivery in deliveries:
         _require(
             type(delivery.event_index) is int and previous < delivery.event_index,

@@ -150,6 +150,24 @@ successful byte join is not origin authority, append success or a durability
 barrier. Synthetic W1 tests intentionally retain opaque invalid lineage markers
 and do not claim to be complete legal histories.
 
+`bind_indexed` derives the coarse predecessor and received inventory from the
+original own WAL and an independently retained pre-finalization source index.
+W1 references that earlier index, as required by its approved contract, rather
+than the later snapshot index containing the capsule itself. Inclusive W1 cuts
+and profile prefix lengths remain distinct. `ProfileSource.Cut` proves exact
+prefix/position preservation and exclusion of future source bytes.
+
+Every ISC delivery is tied to its original receiver, relay peer, exact V/G and
+original body input, using the independent epoch registry and strict signature
+verification. Earlier dependencies may supply original inputs; later events
+cannot. Repeats/conflicts keep their positions. Missing valid signed artifacts,
+unknown delivery layouts and position mismatches remain unresolved source
+inputs rather than being silently dropped as rejected votes. Invalid signatures
+and failed budget attempts remain in the original event inventory. This closes
+the received-byte/cut join, not transport origin or honest send durability.
+Initial-state authority, full P0, frozen ledger, clock/control, other native
+producer checks and durability barriers are still required by the whole fold.
+
 Run `formal/proposals/b-family-transfer/check_profile_components.py` with the
 pinned `ISC_SODIUM_DLL`; it rebuilds the involved Lean sources, audits axioms,
 checks the reference components and records exact source/log hashes. All

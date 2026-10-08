@@ -159,6 +159,40 @@ class _Reader:
         _require(self.remaining == 0, "trailing bytes")
 
 
+def encode_delivery(value: Delivery) -> bytes:
+    """Existing inline IFQ1 delivery layout, without a new header or identity."""
+    return _join(
+        [
+            _uint(value.event_index, 8),
+            _t(value.peer_id),
+            _blob(value.vote_frame, MAX_ENVELOPE_BYTES),
+            _blob(value.signed_payload, MAX_FRAME_BYTES),
+            _blob(value.signature_bytes, MAX_FRAME_BYTES),
+            _t(value.key_id),
+        ]
+    )
+
+
+def _read_delivery(reader: _Reader) -> Delivery:
+    return Delivery(
+        reader.uint(8),
+        reader.text(),
+        reader.blob(MAX_ENVELOPE_BYTES),
+        reader.blob(MAX_FRAME_BYTES),
+        reader.blob(MAX_FRAME_BYTES),
+        reader.text(),
+    )
+
+
+def decode_delivery(raw: bytes) -> Delivery:
+    """Read one retained original inline record; no authenticity is implied."""
+    reader = _Reader(raw)
+    result = _read_delivery(reader)
+    reader.finish()
+    _require(encode_delivery(result) == raw, "exact inline delivery bytes")
+    return result
+
+
 def encode_request_source(value: RequestSource) -> bytes:
     _require(len(value.prior_wal_sha256) == 32, "prior WAL digest length")
     _bytes(value.prior_wal_sha256, 32)
@@ -201,16 +235,7 @@ def encode_request_source(value: RequestSource) -> bytes:
         _uint(len(value.deliveries), 4),
     ]
     for delivery in value.deliveries:
-        parts.extend(
-            [
-                _uint(delivery.event_index, 8),
-                _t(delivery.peer_id),
-                _blob(delivery.vote_frame, MAX_ENVELOPE_BYTES),
-                _blob(delivery.signed_payload, MAX_FRAME_BYTES),
-                _blob(delivery.signature_bytes, MAX_FRAME_BYTES),
-                _t(delivery.key_id),
-            ]
-        )
+        parts.append(encode_delivery(delivery))
     return _join(parts)
 
 
@@ -227,19 +252,10 @@ def decode_request_source(data: bytes) -> RequestSource:
     deliveries = []
     prior = -1
     for _ in range(count):
-        event = reader.uint(8)
-        _require(prior < event <= cut, "source event order")
-        prior = event
-        deliveries.append(
-            Delivery(
-                event,
-                reader.text(),
-                reader.blob(MAX_ENVELOPE_BYTES),
-                reader.blob(MAX_FRAME_BYTES),
-                reader.blob(MAX_FRAME_BYTES),
-                reader.text(),
-            )
-        )
+        delivery = _read_delivery(reader)
+        _require(prior < delivery.event_index <= cut, "source event order")
+        prior = delivery.event_index
+        deliveries.append(delivery)
     reader.finish()
     return RequestSource(command, length, digest, source, cut, state, policy, tuple(deliveries))
 

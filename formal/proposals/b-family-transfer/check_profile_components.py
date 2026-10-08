@@ -112,6 +112,11 @@ def main():
         "resolveAllPosition",
         "repeatedOccurrenceKept",
         "checkedOrigin",
+        "Cut.selected",
+        "Cut.complete",
+        "Cut.exactOriginalPrefix",
+        "Cut.originalPosition",
+        "Cut.futureRejected",
         "Wal.annotationRetainsOriginals",
         "Wal.annotationLength",
         "Wal.annotationAppend",
@@ -257,9 +262,21 @@ def main():
         ],
         "isc-reference-tests.txt",
     )
+    run(
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "formal.reference.isc_w1.test_codec",
+            "formal.reference.isc_w1.test_harness",
+            "-v",
+        ],
+        "w1-reference-tests.txt",
+    )
     paths = [
         "formal/reference/profile_source",
         "formal/reference/isc_source",
+        "formal/reference/isc_w1/codec.py",
         str(Path(__file__).relative_to(ROOT)),
     ]
     run([sys.executable, "-m", "ruff", "check", *paths], "ruff.txt")
@@ -334,6 +351,9 @@ def main():
             "Original007 plan/ticket/lease/timer bytes and DSJ1 producer; static commitment safety",
             "Original N command outputs/cache and coarse predecessor at every mixed WAL slot",
             "CONFIG source occurrence keeps original receiver without fabricating transport peer",
+            "Retained pre-finalization source index joins original ordered prefix and own WAL",
+            "W1 received inventory derives exact signed G/B inputs, receiver and original cut",
+            "Indexed W1 binds the retained command predecessor and all admitted deliveries",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

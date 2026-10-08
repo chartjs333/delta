@@ -1,0 +1,39 @@
+test_ascii_content_ids_and_policy_digest_grammar (formal.reference.isc_w1.test_codec.CodecTests.test_ascii_content_ids_and_policy_digest_grammar) ... ok
+test_checked_u64_sequence_and_request_fields (formal.reference.isc_w1.test_codec.CodecTests.test_checked_u64_sequence_and_request_fields) ... ok
+test_checksum_and_every_truncation_rejected (formal.reference.isc_w1.test_codec.CodecTests.test_checksum_and_every_truncation_rejected) ... ok
+test_command_envelope_boundaries (formal.reference.isc_w1.test_codec.CodecTests.test_command_envelope_boundaries) ... ok
+test_delivery_count_is_checked_before_allocation (formal.reference.isc_w1.test_codec.CodecTests.test_delivery_count_is_checked_before_allocation) ... ok
+test_encoder_rejects_aggregate_overflow_before_blob_copies (formal.reference.isc_w1.test_codec.CodecTests.test_encoder_rejects_aggregate_overflow_before_blob_copies) ... ok
+test_exact_legacy_layout_and_round_trip (formal.reference.isc_w1.test_codec.CodecTests.test_exact_legacy_layout_and_round_trip) ... ok
+test_exact_w1_layout_and_round_trip (formal.reference.isc_w1.test_codec.CodecTests.test_exact_w1_layout_and_round_trip) ... ok
+test_frame_boundaries (formal.reference.isc_w1.test_codec.CodecTests.test_frame_boundaries) ... ok
+test_legacy_section_shapes_and_unknown_kind_rejected (formal.reference.isc_w1.test_codec.CodecTests.test_legacy_section_shapes_and_unknown_kind_rejected) ... ok
+test_native_vote_policy_digest_is_preserved (formal.reference.isc_w1.test_codec.CodecTests.test_native_vote_policy_digest_is_preserved) ... ok
+test_nested_section_tag_version_flags_trailing_and_truncation (formal.reference.isc_w1.test_codec.CodecTests.test_nested_section_tag_version_flags_trailing_and_truncation) ... ok
+test_outer_lengths_and_trailing_bytes_rejected (formal.reference.isc_w1.test_codec.CodecTests.test_outer_lengths_and_trailing_bytes_rejected) ... ok
+test_output_content_boundaries_without_draft_result_codec (formal.reference.isc_w1.test_codec.CodecTests.test_output_content_boundaries_without_draft_result_codec) ... ok
+test_payload_authority_is_intentionally_absent (formal.reference.isc_w1.test_codec.CodecTests.test_payload_authority_is_intentionally_absent) ... ok
+test_policy_and_isc_boundaries (formal.reference.isc_w1.test_codec.CodecTests.test_policy_and_isc_boundaries) ... ok
+test_receipt_sequence_and_policy_digest_mismatch_rejected (formal.reference.isc_w1.test_codec.CodecTests.test_receipt_sequence_and_policy_digest_mismatch_rejected) ... ok
+test_section_round_trips_preserve_repeats_and_conflicts (formal.reference.isc_w1.test_codec.CodecTests.test_section_round_trips_preserve_repeats_and_conflicts) ... ok
+test_sections_match_independent_literal_layout (formal.reference.isc_w1.test_codec.CodecTests.test_sections_match_independent_literal_layout) ... ok
+test_source_event_order_and_cut_rejected (formal.reference.isc_w1.test_codec.CodecTests.test_source_event_order_and_cut_rejected) ... ok
+test_unknown_magic_version_flags_kind_and_reserved_rejected_with_valid_hash (formal.reference.isc_w1.test_codec.CodecTests.test_unknown_magic_version_flags_kind_and_reserved_rejected_with_valid_hash) ... ok
+test_bad_total_length_is_rejected_without_allocating_body (formal.reference.isc_w1.test_harness.HarnessTests.test_bad_total_length_is_rejected_without_allocating_body) ... ok
+test_before_append_preserves_ready_prefix (formal.reference.isc_w1.test_harness.HarnessTests.test_before_append_preserves_ready_prefix) ... ok
+test_complete_unacknowledged_survives_without_second_append (formal.reference.isc_w1.test_harness.HarnessTests.test_complete_unacknowledged_survives_without_second_append) ... ok
+test_corruption_unknown_kind_and_sequence_gap_are_not_skipped (formal.reference.isc_w1.test_harness.HarnessTests.test_corruption_unknown_kind_and_sequence_gap_are_not_skipped) ... ok
+test_create_does_not_overwrite (formal.reference.isc_w1.test_harness.HarnessTests.test_create_does_not_overwrite) ... ok
+test_external_change_fences_handle (formal.reference.isc_w1.test_harness.HarnessTests.test_external_change_fences_handle) ... ok
+test_floor_cannot_be_downgraded_to_missing_or_changed_bytes (formal.reference.isc_w1.test_harness.HarnessTests.test_floor_cannot_be_downgraded_to_missing_or_changed_bytes) ... ok
+test_fsync_exception_fences_handle_and_reopen_requires_barrier (formal.reference.isc_w1.test_harness.HarnessTests.test_fsync_exception_fences_handle_and_reopen_requires_barrier) ... ok
+test_mixed_slots_and_exact_replay_across_reopen (formal.reference.isc_w1.test_harness.HarnessTests.test_mixed_slots_and_exact_replay_across_reopen) ... ok
+test_partial_append_blocks_scan_and_never_repairs_tail (formal.reference.isc_w1.test_harness.HarnessTests.test_partial_append_blocks_scan_and_never_repairs_tail) ... ok
+test_reopen_rejects_self_consistent_frame_with_wrong_prefix (formal.reference.isc_w1.test_harness.HarnessTests.test_reopen_rejects_self_consistent_frame_with_wrong_prefix) ... ok
+test_short_write_fences_and_retains_partial_bytes (formal.reference.isc_w1.test_harness.HarnessTests.test_short_write_fences_and_retains_partial_bytes) ... ok
+test_slot_conflict_gap_and_prefix_mismatch_do_not_write (formal.reference.isc_w1.test_harness.HarnessTests.test_slot_conflict_gap_and_prefix_mismatch_do_not_write) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 1.647s
+
+OK

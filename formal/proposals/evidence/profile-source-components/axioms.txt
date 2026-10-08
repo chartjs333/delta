@@ -5,6 +5,11 @@
 'DeltaReduce.ProfileSource.resolveAllPosition' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ProfileSource.repeatedOccurrenceKept' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ProfileSource.checkedOrigin' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Cut.selected' does not depend on any axioms
+'DeltaReduce.ProfileSource.Cut.complete' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Cut.exactOriginalPrefix' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.Cut.originalPosition' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.Cut.futureRejected' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ProfileSource.Wal.annotationRetainsOriginals' depends on axioms: [propext]
 'DeltaReduce.ProfileSource.Wal.annotationLength' depends on axioms: [propext]
 'DeltaReduce.ProfileSource.Wal.annotationAppend' depends on axioms: [propext]

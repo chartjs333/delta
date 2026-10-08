@@ -107,6 +107,58 @@ theorem checkedOrigin {original supplied} (ok : exactOrigin original supplied = 
   cases h
   exact ⟨rfl, rfl, rfl⟩
 
+/- A retained pre-finalization source index is an earlier complete original
+prefix, not the index later extended with the capsule that references it.
+`Bytes` below are exact full event descriptors, so actors, input/dependency
+positions and repeated occurrences are compared without set conversion.
+The enclosing closed decoder/reference checker binds these descriptors to the
+two original index byte objects; this lemma does not assume event legality. -/
+namespace Cut
+
+def select (complete retained : List Bytes) (inclusive before : Nat) : Option (List Bytes) :=
+  if inclusive < retained.length ∧ retained.length ≤ before ∧ before < complete.length ∧
+      retained = complete.take retained.length
+  then some (retained.take (inclusive + 1)) else none
+
+theorem selected {complete retained inclusive before result}
+    (ok : select complete retained inclusive before = some result) :
+    inclusive < retained.length ∧ retained.length ≤ before ∧ before < complete.length ∧
+      retained = complete.take retained.length ∧ result = retained.take (inclusive + 1) := by
+  unfold select at ok
+  split at ok <;> try contradiction
+  rename_i good
+  exact ⟨good.1, good.2.1, good.2.2.1, good.2.2.2, (Option.some.inj ok).symm⟩
+
+theorem complete {complete retained inclusive before}
+    (proper : inclusive < retained.length ∧ retained.length ≤ before ∧
+      before < complete.length ∧ retained = complete.take retained.length) :
+    select complete retained inclusive before = some (retained.take (inclusive + 1)) := by
+  simp only [select, if_pos proper]
+
+theorem exactOriginalPrefix {whole retained inclusive before result}
+    (ok : select whole retained inclusive before = some result) :
+    result = whole.take (inclusive + 1) ∧ result.length = inclusive + 1 ∧ inclusive < before := by
+  obtain ⟨lt, le, within, same, out⟩ := selected ok
+  have bound : inclusive + 1 ≤ retained.length := by omega
+  refine ⟨?_, ?_, by omega⟩
+  · rw [out, same, List.take_take, Nat.min_eq_left bound]
+  · rw [out, List.length_take, Nat.min_eq_left bound]
+
+theorem originalPosition {whole retained inclusive before result index}
+    (ok : select whole retained inclusive before = some result) (inside : index ≤ inclusive) :
+    result[index]? = whole[index]? := by
+  rw [(exactOriginalPrefix ok).1]
+  exact List.getElem?_take_of_lt (by omega)
+
+theorem futureRejected (whole retained : List Bytes) (inclusive before : Nat)
+    (future : before < retained.length) : select whole retained inclusive before = none := by
+  unfold select
+  split
+  next h => omega
+  next => rfl
+
+end Cut
+
 namespace Wal
 open NativeWalBytes (Entry)
 

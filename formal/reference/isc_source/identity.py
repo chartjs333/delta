@@ -14,6 +14,7 @@ from formal.reference.isc_crypto.codec import (
     CodecError,
     _id,
     _label,
+    _Reader,
     _require,
     _uint,
     content_id,
@@ -196,6 +197,42 @@ def body_preimage(body: Body) -> bytes:
 
 def body_id(body: Body) -> str:
     return content_id(BODY_DOMAIN, body_preimage(body))
+
+
+def decode_body_preimage(raw: bytes) -> Body:
+    """Inverse of the existing approved B preimage; no new wire wrapper.
+
+    The enclosing original profile inventory bounds raw bytes. Tuple/text
+    bounds and complete canonical reconstruction are those of body_preimage,
+    not a new cap borrowed from an unrelated manifest or certificate layout.
+    """
+    _require(type(raw) is bytes, "original body bytes")
+    reader = _Reader(raw, len(raw))
+
+    def number():
+        return int.from_bytes(reader.take(8), "big")
+
+    def text(bound):
+        size = number()
+        _require(size <= bound, "body field length")
+        try:
+            return reader.take(size).decode("ascii")
+        except UnicodeError as error:
+            raise CodecError("body ASCII field") from error
+
+    sigma, version, arithmetic = text(71), text(128), text(71)
+    _require(version == "2.0.0", "successor body generation, no legacy fallback")
+    height, schema, config = number(), text(71), text(71)
+    round_id, epoch, view = text(128), text(71), number()
+    parent, root, count = text(71), text(71), number()
+    _require(0 < count <= MAX_TUPLES and count <= reader.remaining // 32, "body tuple count")
+    rows = tuple(InputTuple(text(71), text(71), text(128), text(128)) for _ in range(count))
+    reader.finish()
+    result = Body(
+        sigma, arithmetic, height, schema, config, round_id, epoch, view, parent, root, rows
+    )
+    _require(body_preimage(result) == raw, "exact original body preimage")
+    return result
 
 
 def vote_context_id(round_id: str) -> str:
