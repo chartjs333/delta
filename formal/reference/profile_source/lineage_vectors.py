@@ -28,7 +28,7 @@ def generate():
         "parameter_schema_id": body.parameter_schema_id,
         "round_config_id": body.round_config_id,
         "round_id": body.round_id,
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "validator_epoch_id": body.validator_epoch_id,
         "view": body.view,
     }
@@ -96,12 +96,25 @@ def generate():
         "  [normRaw] []).isNone = true := by decide +kernel",
         "example : (bindSection hash sigma body.context body.parent wrongIndex [bodyRaw] raws",
         "  [normRaw] [seedRaw]).isNone = true := by decide +kernel",
+        "def originalNormTree : DeltaReduce.NativePolicyCodec.Value := "
+        + policy_term("norm", p["snapshot"]["norm_evidence"][0]),
+        "def originalSeedTree : DeltaReduce.NativePolicyCodec.Value := "
+        + policy_term("seed", p["snapshot"]["seed_transcripts"][0]),
+        "example : (bindNorm hash sigma body.context [b] originalNormTree",
+        f"  {bs(canonical({**norm, 'schema_version': '1.0.0'}))}).isNone = true "
+        ":= by decide +kernel",
+        "example : (bindSeed hash sigma body.context [b] originalSeedTree",
+        f"  {bs(canonical({**seed, 'schema_version': '1.0.0'}))}).isNone = true "
+        ":= by decide +kernel",
         "end LineageVectors",
     ]
     return "\n".join(lines) + "\n", {
         "evidence_kind": "SYNTHETIC_BYTE_LINEAGE_NOT_NATIVE_PRODUCER_OR_SEED_RELEASE",
         "input_collections": originals,
         "whole_policy": policy.encode(p).hex(),
+        "approved_schema_version": "2.0.0",
+        "negative_schema1_norm": canonical({**norm, "schema_version": "1.0.0"}).hex(),
+        "negative_schema1_seed": canonical({**seed, "schema_version": "1.0.0"}).hex(),
         "norm": norm_raw.hex(),
         "seed": seed_raw.hex(),
         "sha256_preimages": {raw.hex(): digest.hex() for raw, digest in tables.items()},

@@ -86,7 +86,7 @@ def generate():
         ],
         "formal_semantics_id": body.formal_semantics_id,
         "type_name": "ELIGIBILITY_CERTIFICATE",
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
     }
     body_raw, cert_raw = body_bytes(ctx, ec_body), canonical(cert_json)
     table = {}

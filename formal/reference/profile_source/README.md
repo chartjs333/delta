@@ -313,6 +313,42 @@ Generated downstream vectors import prior kernel-checked original definitions
 to avoid repeatedly elaborating the same examples, with all generated sources
 and individual kernel logs retained in the qualification receipt.
 
+`ProfileParameter.lean`, `ProfileAggregate.lean` and `ProfileApply.lean` preserve
+whole vector objects, original assignment keys, ordered ROOT leaves, computed
+Merkle preimages, and the full embedded APPLY candidate. The original nine
+certificate-size groups and the proposed-ISC size view are checked without
+replacing body identity with a newly invented witness. Proposed certificate
+views used by native size guards are not added to protocol collections.
+
+`ProfileCollections.lean` composes every installed-policy collection at its
+original context; `ProfileCandidates.lean` checks every original candidate
+against that same snapshot using the nine existing action guards. Its typed
+coarse-state view is never serialized by the legacy codec. Existing VIEW/ABORT
+guards are reused unchanged. In particular, ABORT keeps all seven source
+lineage lists and is still forbidden after finalized APPLY. Synthetic vectors
+retain the APPLY candidate/QC artifacts in the separate pre-finalization ABORT
+case, and reject a recomputed ABORT body that drops a PARAMETER ancestor.
+These are complete **static byte/collection joins**, not a proof that such
+collections were lawfully produced or that the full public state is valid.
+
+The downstream typed JSON join uses both future `formal_semantics_id` and
+`schema_version="2.0.0"` as required by approved ADR0015 section 5 at
+`bb9fce957dae329701a8cd473a7148e198e1ca12`. The earlier component implementation
+only changed the semantics value; its synthetic schema1 bytes were therefore
+not evidence for this approved generation. The corrected constructor and all
+new dependent source IDs are requalified here, with schema1 norm/seed rejection.
+Legacy objects, generic DRC1 schema1 envelopes and previously frozen results
+remain unchanged; no old object is relabeled or imported as schema2.
+
+`ProfileCommands.lean` reuses the seven original pure command guards and
+computes the whole successor coarse state, effects and inner WAL bytes from
+original state/command bytes. Original bytes under a different generation,
+trailing bytes, disabled commands and changed stored effects reject. Physical
+WAL slot remains distinct from the coarse counter. Its separate qualifier is
+`formal/proposals/b-family-transfer/check_profile_commands.py`; it reuses the
+pinned original native capture without claiming a fresh native run, genesis
+origin, full admission, durability or public refinement.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

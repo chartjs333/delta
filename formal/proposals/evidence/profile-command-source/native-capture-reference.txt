@@ -1,0 +1,10 @@
+test_all_original_native_captured_commands_keep_exact_bytes_and_errors (formal.reference.profile_source.test_commands.CommandsTests.test_all_original_native_captured_commands_keep_exact_bytes_and_errors) ... ok
+test_coarse_counter_is_not_physical_slot_and_retry_does_not_allocate (formal.reference.profile_source.test_commands.CommandsTests.test_coarse_counter_is_not_physical_slot_and_retry_does_not_allocate) ... ok
+test_complete_mixed_positions_without_forging_vote_legality (formal.reference.profile_source.test_commands.CommandsTests.test_complete_mixed_positions_without_forging_vote_legality) ... ok
+test_future_generation_is_selected_independently_no_legacy_fallback (formal.reference.profile_source.test_commands.CommandsTests.test_future_generation_is_selected_independently_no_legacy_fallback) ... ok
+test_whole_effect_and_inner_record_substitution_rejects (formal.reference.profile_source.test_commands.CommandsTests.test_whole_effect_and_inner_record_substitution_rejects) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.079s
+
+OK

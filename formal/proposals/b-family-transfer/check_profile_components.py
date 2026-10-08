@@ -23,6 +23,20 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     src, objects = BUILD / "source", BUILD / "objects"
     sources, order, checks = {}, [], []
+    typed_contract_commit = "bb9fce957dae329701a8cd473a7148e198e1ca12"
+    typed_contract_path = "docs/adr/0015-non-isc-authority-binding-v1.md"
+    typed_contract = subprocess.check_output(
+        [
+            "cmd.exe",
+            "/d",
+            "/c",
+            "git",
+            "cat-file",
+            "blob",
+            typed_contract_commit + ":" + typed_contract_path,
+        ],
+        cwd=ROOT,
+    )
     probe = json.loads((OUT / "native-lease-probe.json").read_text(encoding="utf8"))
     command_capture = json.loads(
         (ROOT / "formal/proposals/evidence/native-transition/cpp-cross-check.json").read_text()
@@ -66,6 +80,11 @@ def main():
             "ProfileInputSection",
             "ProfileLineage",
             "ProfileEligibility",
+            "ProfileParameter",
+            "ProfileAggregate",
+            "ProfileApply",
+            "ProfileCollections",
+            "ProfileCandidates",
             "ProfilePlan",
             "ProfileNativeHeader",
         }:
@@ -84,6 +103,11 @@ def main():
             "ProfileInputSection",
             "ProfileLineage",
             "ProfileEligibility",
+            "ProfileParameter",
+            "ProfileAggregate",
+            "ProfileApply",
+            "ProfileCollections",
+            "ProfileCandidates",
             "ProfilePlan",
             "ProfileNativeHeader",
             "SourcePolicy",
@@ -126,6 +150,11 @@ def main():
     visit("ProfileLineage")
     visit("ProfileEligibility")
     visit("ProfilePlan")
+    visit("ProfileParameter")
+    visit("ProfileAggregate")
+    visit("ProfileApply")
+    visit("ProfileCollections")
+    visit("ProfileCandidates")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -183,6 +212,8 @@ def main():
         "import ProfileSourceIndex\nimport ProfileVoteJournal\nimport ProfilePolicy\n"
         "import ProfileInputSection\nimport ProfileLineage\n"
         "import ProfileEligibility\nimport ProfilePlan\n"
+        "import ProfileParameter\nimport ProfileAggregate\nimport ProfileApply\n"
+        "import ProfileCollections\nimport ProfileCandidates\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
     )
     for namespace, theorems in (
@@ -258,6 +289,17 @@ def main():
         audit += "".join(
             f"#print axioms DeltaReduce.ProfileSource.{namespace}.{name}\n" for name in theorems
         )
+    for module in (
+        "ProfileParameter",
+        "ProfileAggregate",
+        "ProfileApply",
+        "ProfileCollections",
+        "ProfileCandidates",
+    ):
+        raw = Path(__file__).with_name(module + ".lean").read_text(encoding="utf8")
+        namespace = re.search(r"namespace (DeltaReduce\.ProfileSource\.\w+)", raw).group(1)
+        for name in re.findall(r"^theorem (\w+)", raw, re.M):
+            audit += f"#print axioms {namespace}.{name}\n"
     audit += "".join(
         "#print axioms DeltaReduce.ProfileSource.Policy." + name + "\n"
         for name in (
@@ -538,9 +580,13 @@ def main():
     )
     run([str(LEAN), "PolicyVectors.lean"], "policy-vectors.txt", src, environment)
     sources["generated/PolicyVectors.lean"] = digest(policy_source.encode())
+    from formal.reference.profile_source.aggregate_vectors import generate as aggregate_vectors
+    from formal.reference.profile_source.apply_vectors import generate as apply_vectors
+    from formal.reference.profile_source.collections_vectors import generate as collections_vectors
     from formal.reference.profile_source.eligibility_vectors import generate as eligibility_vectors
     from formal.reference.profile_source.input_section_vectors import generate as input_vectors
     from formal.reference.profile_source.lineage_vectors import generate as lineage_vectors
+    from formal.reference.profile_source.parameter_vectors import generate as parameter_vectors
     from formal.reference.profile_source.plan_vectors import generate as plan_vectors
 
     for stem, log_stem, generator in (
@@ -548,6 +594,10 @@ def main():
         ("LineageVectors", "lineage", lineage_vectors),
         ("EligibilityVectors", "eligibility", eligibility_vectors),
         ("PlanVectors", "plan", plan_vectors),
+        ("ParameterVectors", "parameter", parameter_vectors),
+        ("AggregateVectors", "aggregate", aggregate_vectors),
+        ("ApplyVectors", "apply", apply_vectors),
+        ("CollectionsVectors", "collections", collections_vectors),
     ):
         lean_source, originals = generator()
         (src / (stem + ".lean")).write_text(lean_source, encoding="utf8", newline="\n")
@@ -661,6 +711,14 @@ def main():
             "command_capture_files": command_capture["source_sha256"],
             "kind": "PIN_VERIFICATION_OF_RETAINED_EXECUTION_NOT_A_NEW_NATIVE_RUN",
         },
+        "approved_typed_generation_source": {
+            "commit": typed_contract_commit,
+            "path": typed_contract_path,
+            "sha256": digest(typed_contract),
+            "section": "5",
+            "schema_version": "2.0.0",
+            "approval": "scope-decision-dff5cf14af975d7da34f29cfdc4a55c1",
+        },
         "checks": checks,
         "established": [
             "Closed canonical profile fields, independent raw inventory, exact refs and floor",
@@ -704,6 +762,12 @@ def main():
             "Norm/seed source bytes join finalized b without replacing or erasing original C",
             "Complete EC/APC original payload collections retain native guards and b lineage",
             "APC coverage preserves exact original EC membership and ordered ticket weights",
+            "Whole PARAMETER vectors retain assignment identities without coordinate objects",
+            "ROOT ordered original QC coverage, computed Merkle, and every native size group",
+            "APPLY retains complete candidate values and exact QC/current parent-field joins",
+            "One full installed-policy collection join retains all seven ABORT lineage lists",
+            "All nine original candidate guards and parent slots join one shared snapshot",
+            "Approved schema2 typed downstream JSON; schema1 norm/seed reject without relabeling",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

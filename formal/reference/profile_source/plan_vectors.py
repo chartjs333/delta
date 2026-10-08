@@ -59,7 +59,7 @@ def generate():
                 ],
                 "formal_semantics_id": synthetic_body().formal_semantics_id,
                 "type_name": "AGGREGATION_PLAN_CERTIFICATE",
-                "schema_version": "1.0.0",
+                "schema_version": "2.0.0",
             }
         )
 

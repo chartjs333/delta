@@ -120,6 +120,7 @@ test_w1_cannot_borrow_future_index_or_rewrite_original_prefix (formal.reference.
 test_w1_no_delivery_collapse_or_fabricated_journal_prefix (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_w1_no_delivery_collapse_or_fabricated_journal_prefix) ... ok
 test_w1_requires_actual_retained_index_and_its_document_identity (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_w1_requires_actual_retained_index_and_its_document_identity) ... ok
 test_w1_uses_retained_prior_index_without_self_referential_later_index (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_w1_uses_retained_prior_index_without_self_referential_later_index) ... ok
+test_whole_chain_has_exact_approved_typed_json_generation (formal.reference.profile_source.test_typed_generation.TypedGenerationTests.test_whole_chain_has_exact_approved_typed_json_generation) ... ok
 test_mixed_slots_keep_two_original_vote_identities (formal.reference.profile_source.test_votes.VoteIntentTests.test_mixed_slots_keep_two_original_vote_identities) ... ok
 test_public_rank_cannot_replace_signed_physical_slot (formal.reference.profile_source.test_votes.VoteIntentTests.test_public_rank_cannot_replace_signed_physical_slot) ... ok
 test_round_view_height_or_kind_cannot_reopen_original_native_key (formal.reference.profile_source.test_votes.VoteIntentTests.test_round_view_height_or_kind_cannot_reopen_original_native_key) ... ok
@@ -128,6 +129,6 @@ test_signature_without_own_intent_or_corrupt_signature_rejected (formal.referenc
 test_unsigned_durable_cut_is_retained_without_claiming_signature (formal.reference.profile_source.test_votes.VoteIntentTests.test_unsigned_durable_cut_is_retained_without_claiming_signature) ... ok
 
 ----------------------------------------------------------------------
-Ran 128 tests in 10.032s
+Ran 129 tests in 9.856s
 
 OK

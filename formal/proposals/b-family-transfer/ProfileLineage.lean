@@ -13,7 +13,8 @@ open NativeInputSetBody (Context)
 
 def semanticFields (sigma : Bytes) (fields : List (String × Bytes)) : List (String × Bytes) :=
   fields.map (fun row => if row.1 = "formal_semantics_id" then
-    (row.1,NativeIscCertificate.quoted sigma) else row)
+    (row.1,NativeIscCertificate.quoted sigma) else if row.1 = "schema_version" then
+      (row.1,NativeIscCertificate.quoted (NativeVoteBytes.ascii "2.0.0")) else row)
 
 theorem fieldNamesUnchanged (sigma : Bytes) (fields : List (String × Bytes)) :
     (semanticFields sigma fields).map Prod.fst = fields.map Prod.fst := by
@@ -21,7 +22,14 @@ theorem fieldNamesUnchanged (sigma : Bytes) (fields : List (String × Bytes)) :
   apply List.map_congr_left
   intro row _
   dsimp only [Function.comp_apply]
-  split <;> rfl
+  split <;> (try split) <;> rfl
+
+/-- Approved ADR0015 section 5 selects schema2 for these future typed JSON
+objects. This constructs expected bytes; it never converts a legacy artifact. -/
+theorem explicitSchemaVersion (sigma prior : Bytes) :
+    semanticFields sigma [("schema_version",prior)] =
+      [("schema_version",NativeIscCertificate.quoted (NativeVoteBytes.ascii "2.0.0"))] := by
+  simp [semanticFields]
 
 def normBytes (sigma : Bytes) (n : NativeNormEvidence.Evidence) : Bytes :=
   NativeIscCertificate.object (semanticFields sigma (NativeNormEvidence.fields n))
