@@ -1,0 +1,132 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "scope_revision": 13,
+  "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "result": "PROFILE_BYTE_AUTHORITY_AND_WAL_COMPONENTS_CHECKED",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "reviewed_r2_closure": false,
+  "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
+  "backend_sha256": "f656aeb789bfc3a2ac587fae1d7cfe278bbe8ce73f28da73b4d08282ea8f9fe3",
+  "source_hash_rule": "Git LF source text; protocol originals retained without normalization",
+  "sources": {
+    "formal/proposals/b-family-transfer/ProfileSource.lean": "907b61c93a6378db212302d139de29136d6303d27b96cbd50c464281a4b2a52a",
+    "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
+    "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
+    "formal/proofs/DeltaReduce/NativeReceiptBytes.lean": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580",
+    "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
+    "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
+    "formal/reference/profile_source/configuration.py": "be6d3cc595cc64b6951a7d693c671f1dd7da53586ac799fe4af3cc53828f77e0",
+    "formal/reference/profile_source/configuration_qc.py": "2bd377eeb347c18308a12fc4ce5f4436e957dd88646599aec3abecae0d1161b2",
+    "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
+    "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
+    "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
+    "formal/reference/profile_source/test_configuration.py": "d409a2f2d9eb24935661c5f4f18e8fef4023baccdaa88d0f53d3c061995fe827",
+    "formal/reference/profile_source/test_configuration_qc.py": "abe0ea6215b9c44071bc9bc6cc66e099c6b11032d224d3b7e642c14752bb6794",
+    "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
+    "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
+    "formal/reference/profile_source/test_votes.py": "8efe2b54d40a213a76294678115d68e0aed6b479e4e6ce89152f6f44b5b6eeb2",
+    "formal/reference/profile_source/votes.py": "7e146912bf552246d62d3d8136d5427c61e1cf6cf9fd496ead72df6b859af153",
+    "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
+    "formal/reference/profile_source/README.md": "bd8e97f08078da6f5c262acdd0615e2d2b3ff5e5cd7bdee30c06697af82f6f65",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "2752f6c1d769f99e457692d4344e692067cb2b2d8ccc85a158ef978f98d12643",
+    "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
+    "formal/reference/isc_crypto/conformance-evidence.json": "a351d5ad662859800519115f4ea19ea1b00b6bf472248d964f77e4865615ea19",
+    "formal/reference/isc_crypto/evidence.json": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
+    "formal/reference/isc_crypto/library-provenance.json": "88c6f9a355c2e97a6d65bdb6eaa8165b59c64dcf66ce31f3ad831b1c525adeaa",
+    "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
+    "formal/reference/isc_crypto/public-vector.json": "dfed5d72577b74fa084fb0a8a72859e1f9145ee124a90941f803aad253c0e591",
+    "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
+    "formal/reference/isc_crypto/test_codec.py": "fab2abb09f18f4998af6fc584a9e582610a7c8668f3eb7a01e5f58ac10bb7d0b",
+    "formal/reference/isc_crypto/test_public_vector.py": "3108c775f583a26f8188b2c12480658fece48c2d0b4461db6857d41a3b19aebe",
+    "formal/reference/isc_crypto/test_signatures.py": "2194b0a8291a7ad30c277bc0ab9db6a55cb6607d5343c339f764c1f4cc9fef32",
+    "formal/reference/isc_source/__init__.py": "adc3fecf736563adc0922ce7bf83a2b4c1a6e8e650c047a59ce4de93a2a84449",
+    "formal/reference/isc_source/authentication.py": "cd50f0c344b50631541cc35eb87eebfa80bd5233d7a2e178870809318d3ed527",
+    "formal/reference/isc_source/budget.py": "4a5d534adb2da95cfbf797c26c231161fa68efb9640676fcbc401ffe976917a0",
+    "formal/reference/isc_source/finalization.py": "0b35dd3d09828d80e4771f48688ecfbf1527354e4d209a5d470e3986ba125191",
+    "formal/reference/isc_source/identity.py": "23bc5b5c6b9088b8e47faa347a69d3e615d0eee0f0294172427e1c925b21c13a",
+    "formal/reference/isc_source/policy-layout.json": "dbc992e9155b768b4f92fb25a05c883aae80763c473e402336b58c23b5d32799",
+    "formal/reference/isc_source/policy.py": "6dcd4d272a1426baa076bb53fc5c61b33ce6f4dceb3be2150ebe246dd0d12783",
+    "formal/reference/isc_source/test_authentication.py": "9e7a56ed6506e9c1138373c939d0bc5118b793dd47c426516032ce30857a8282",
+    "formal/reference/isc_source/test_budget.py": "069ef659cd6451c35b7b0d907b9d45f98a7eb50f876ce0e57cdd0fe0ebe25304",
+    "formal/reference/isc_source/test_finalization.py": "0b7cbb65c11168c4ccccddc03f65044fdd99105899a003636144900a0c0f24b8",
+    "formal/reference/isc_source/test_identity.py": "0cd5271e13aa5e16e2fe8b3189836ed222591785683991f7b0c8a1ee1d1c1740",
+    "formal/reference/isc_source/test_policy.py": "8ee6f396ba5b999650392f5d2f9716d8ed7ac0ac4e4f70586562cae8434e0350",
+    "formal/reference/isc_w1/codec.py": "e8b6c09fd9edd5f909ab339719c2c2f6d4221d2b8ccaa7177a376e44181c7e96",
+    "formal/reference/isc_w1/evidence.json": "9e63360f198c153e3c813df62f0533ec26aaaf4e2262aea97854269f23c361bd",
+    "formal/reference/isc_w1/harness.py": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c",
+    "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
+    "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
+    "formal/reference/non_isc/__init__.py": "3e4fc1d23dad738309542869791e2f0d5ccc557a183cbe6962fe3d95eec5dbf7",
+    "formal/reference/non_isc/authentication.py": "978c50b96ae9e106b02e39e2a22728c962744de53e145fdad192d7e7fbc78cf5",
+    "formal/reference/non_isc/codec.py": "6c428bfc55d24b04af2c861297143ceedeaab6d13885d50a376b66dca70ce86c",
+    "formal/reference/non_isc/test_authentication.py": "e83e6781379e1dd8a92ffae65e80445c23d6f8a3e718f0a4ed161e592c8e2a71",
+    "formal/reference/storage_source/__init__.py": "39145ac3fae5559d5aba1cb28d88f4725f4d5e3472179932cba1caa930f4a47b",
+    "formal/reference/storage_source/codec.py": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
+    "formal/reference/storage_source/retention-source.schema.json": "c3ee0e7bb4fd3da5d7d79d986b089a9923ef6cf0d338b7e680b35d5d6cafe17c",
+    "formal/reference/storage_source/retention-vectors.json": "8f78b8e5ddb9eed5c5447cb5030706ce060b58bf03b03c93679c06be7049b0fb",
+    "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",
+    "formal/reference/storage_source/test_codec.py": "ecf98bf2dfe56ec73833b0222ebaa0222c1996626ffa7890a07f5bbb91d2f7df",
+    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b"
+  },
+  "checks": [
+    {
+      "log": "DeltaReduce.NativeReceiptBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeVoteBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeWalBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "ProfileSource.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "axioms.txt",
+      "exit_code": 0,
+      "sha256": "74bca242e83dc69586648470c51b6e59d966136700ee61e9572a8fcd5c3568a0"
+    },
+    {
+      "log": "reference-tests.txt",
+      "exit_code": 0,
+      "sha256": "687b26619029a1ae789c3a35e1d6e26601496c56673a78e7ead2e498859d16bf"
+    },
+    {
+      "log": "ruff.txt",
+      "exit_code": 0,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "log": "ruff-format.txt",
+      "exit_code": 0,
+      "sha256": "d41ae50829b47e318b0787bc39d2a2ea2d52b518cfc7900d2efd569e6d26ab88"
+    }
+  ],
+  "established": [
+    "Closed canonical profile fields, independent raw inventory, exact refs and floor",
+    "Separate anchor/cut/target journals retain original bytes; anchor may precede tip",
+    "Bootstrap/initial-config authority, full RoundConfig with R/E and signed QC join",
+    "Mixed slots and S-RANK retain original votes and unsigned durable intents",
+    "General Lean original reference/position/multiplicity and rank injectivity lemmas"
+  ],
+  "not_established": [
+    "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",
+    "Full native origin from genesis; signatures do not prove finalization origin",
+    "Complete O state relation, totality, initial/incomplete and ABORT composition",
+    "Reviewed R2.3, named recovery theorem, full formal gates or production GO"
+  ],
+  "evidence_kind": "REFERENCE_SYNTHETIC_COMPONENTS_NOT_PRODUCTION_CAPTURE"
+}

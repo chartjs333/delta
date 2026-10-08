@@ -1,0 +1,666 @@
+{
+  "$comment": "Shape only. Original-byte canonical decoding, U64 upper bound, source binding, cross-references, authority, producer rules and native/public refinement require the pinned checker/composition. Never READY/GO from schema validation.",
+  "$defs": {
+    "activate": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "bootstrap_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "generation_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "journal_cuts": {
+          "items": {
+            "$ref": "#/$defs/journal"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "const": "ACTIVATE"
+        },
+        "manifest_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "ordinal": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "previous_record_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "snapshot-provenance-linux-single-epoch-v1"
+        },
+        "schema_version": {
+          "const": "1"
+        },
+        "type_name": {
+          "const": "TRUST_RECORD"
+        }
+      },
+      "required": [
+        "type_name",
+        "schema_version",
+        "profile_id",
+        "ordinal",
+        "previous_record_id",
+        "bootstrap_id",
+        "kind",
+        "anchor",
+        "journal_cuts",
+        "generation_id",
+        "manifest_id"
+      ],
+      "type": "object"
+    },
+    "anchor": {
+      "additionalProperties": false,
+      "properties": {
+        "apply_qc_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "checkpoint_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "height": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "optimizer_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "height",
+        "checkpoint_id",
+        "optimizer_id",
+        "apply_qc_id"
+      ],
+      "type": "object"
+    },
+    "anchor_record": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "bootstrap_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "generation_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "journal_cuts": {
+          "items": {
+            "$ref": "#/$defs/journal"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "const": "ANCHOR"
+        },
+        "manifest_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "ordinal": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "previous_record_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "snapshot-provenance-linux-single-epoch-v1"
+        },
+        "schema_version": {
+          "const": "1"
+        },
+        "type_name": {
+          "const": "TRUST_RECORD"
+        }
+      },
+      "required": [
+        "type_name",
+        "schema_version",
+        "profile_id",
+        "ordinal",
+        "previous_record_id",
+        "bootstrap_id",
+        "kind",
+        "anchor",
+        "journal_cuts",
+        "generation_id",
+        "manifest_id"
+      ],
+      "type": "object"
+    },
+    "artifact": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_length": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "content_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "locator": {
+          "pattern": "^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$",
+          "type": "string"
+        },
+        "media_type": {
+          "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "schema_id": {
+          "pattern": "^SCHEMA-[A-Z0-9-]+-V[0-9]+$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        }
+      },
+      "required": [
+        "schema_version",
+        "schema_id",
+        "media_type",
+        "byte_length",
+        "content_id",
+        "locator"
+      ],
+      "type": "object"
+    },
+    "bootstrap": {
+      "additionalProperties": false,
+      "properties": {
+        "formal_semantics_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "genesis_ref": {
+          "$ref": "#/$defs/artifact"
+        },
+        "initial_anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "initial_config_ref": {
+          "$ref": "#/$defs/artifact"
+        },
+        "local_validator_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "origin_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "producer_rules_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "snapshot-provenance-linux-single-epoch-v1"
+        },
+        "quorum_threshold": {
+          "const": "3"
+        },
+        "runtime_build_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "schema_set_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1"
+        },
+        "signature_codec_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "type_name": {
+          "const": "BOOTSTRAP"
+        },
+        "validator_epoch_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "validators": {
+          "items": {
+            "$ref": "#/$defs/validator"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        }
+      },
+      "required": [
+        "type_name",
+        "schema_version",
+        "profile_id",
+        "origin_id",
+        "validator_epoch_id",
+        "local_validator_id",
+        "genesis_ref",
+        "initial_config_ref",
+        "validators",
+        "quorum_threshold",
+        "runtime_build_id",
+        "formal_semantics_id",
+        "schema_set_id",
+        "signature_codec_id",
+        "producer_rules_id",
+        "initial_anchor"
+      ],
+      "type": "object"
+    },
+    "event": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "actor_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "dependencies": {
+          "items": {
+            "pattern": "^(0|[1-9][0-9]{0,19})$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "input_refs": {
+          "items": {
+            "$ref": "#/$defs/artifact"
+          },
+          "type": "array"
+        },
+        "original_ref": {
+          "$ref": "#/$defs/artifact"
+        }
+      },
+      "required": [
+        "actor_id",
+        "action_id",
+        "original_ref",
+        "input_refs",
+        "dependencies"
+      ],
+      "type": "object"
+    },
+    "init": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "bootstrap_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "journal_cuts": {
+          "items": {
+            "$ref": "#/$defs/journal"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "const": "INIT"
+        },
+        "ordinal": {
+          "const": "0"
+        },
+        "previous_record_id": {
+          "const": "GENESIS"
+        },
+        "profile_id": {
+          "const": "snapshot-provenance-linux-single-epoch-v1"
+        },
+        "schema_version": {
+          "const": "1"
+        },
+        "type_name": {
+          "const": "TRUST_RECORD"
+        }
+      },
+      "required": [
+        "type_name",
+        "schema_version",
+        "profile_id",
+        "ordinal",
+        "previous_record_id",
+        "bootstrap_id",
+        "kind",
+        "anchor",
+        "journal_cuts"
+      ],
+      "type": "object"
+    },
+    "journal": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "entry_count": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "first_sequence": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "journal_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "last_sequence": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "ref": {
+          "$ref": "#/$defs/artifact"
+        }
+      },
+      "required": [
+        "actor_id",
+        "journal_id",
+        "ref",
+        "entry_count",
+        "first_sequence",
+        "last_sequence"
+      ],
+      "type": "object"
+    },
+    "journal_prefix": {
+      "additionalProperties": false,
+      "properties": {
+        "entry_count": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "first_sequence": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "last_sequence": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "ref": {
+          "$ref": "#/$defs/artifact"
+        }
+      },
+      "required": [
+        "ref",
+        "entry_count",
+        "first_sequence",
+        "last_sequence"
+      ],
+      "type": "object"
+    },
+    "journal_range": {
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "cut": {
+          "$ref": "#/$defs/journal_prefix"
+        },
+        "journal_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/journal_prefix"
+        }
+      },
+      "required": [
+        "actor_id",
+        "journal_id",
+        "cut",
+        "target"
+      ],
+      "type": "object"
+    },
+    "manifest": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "apply_candidate_ref": {
+          "$ref": "#/$defs/artifact"
+        },
+        "apply_qc_ref": {
+          "$ref": "#/$defs/artifact"
+        },
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/artifact"
+          },
+          "maxItems": 65536,
+          "type": "array"
+        },
+        "bootstrap_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "cut_event_index": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "formal_semantics_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "journals": {
+          "items": {
+            "$ref": "#/$defs/journal_range"
+          },
+          "type": "array"
+        },
+        "local_validator_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "origin_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "profile_id": {
+          "const": "snapshot-provenance-linux-single-epoch-v1"
+        },
+        "schema_set_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/artifact"
+        },
+        "source_index_ref": {
+          "$ref": "#/$defs/artifact"
+        },
+        "target_event_index": {
+          "pattern": "^(0|[1-9][0-9]{0,19})$",
+          "type": "string"
+        },
+        "type_name": {
+          "const": "MANIFEST"
+        },
+        "validator_epoch_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type_name",
+        "schema_version",
+        "profile_id",
+        "origin_id",
+        "validator_epoch_id",
+        "local_validator_id",
+        "bootstrap_id",
+        "formal_semantics_id",
+        "schema_set_id",
+        "anchor",
+        "apply_qc_ref",
+        "apply_candidate_ref",
+        "snapshot_ref",
+        "source_index_ref",
+        "cut_event_index",
+        "target_event_index",
+        "journals",
+        "artifacts"
+      ],
+      "type": "object"
+    },
+    "source_index": {
+      "additionalProperties": false,
+      "properties": {
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/artifact"
+          },
+          "maxItems": 65536,
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/event"
+          },
+          "maxItems": 1000000,
+          "type": "array"
+        },
+        "genesis_ref": {
+          "$ref": "#/$defs/artifact"
+        },
+        "local_validator_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        },
+        "origin_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "original_journal_refs": {
+          "items": {
+            "$ref": "#/$defs/journal"
+          },
+          "type": "array"
+        },
+        "profile_id": {
+          "const": "snapshot-provenance-linux-single-epoch-v1"
+        },
+        "schema_version": {
+          "const": "1"
+        },
+        "type_name": {
+          "const": "SOURCE_INDEX"
+        },
+        "validator_epoch_id": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type_name",
+        "schema_version",
+        "profile_id",
+        "origin_id",
+        "validator_epoch_id",
+        "local_validator_id",
+        "genesis_ref",
+        "events",
+        "artifacts",
+        "original_journal_refs"
+      ],
+      "type": "object"
+    },
+    "validator": {
+      "additionalProperties": false,
+      "properties": {
+        "key_ref": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "roles": {
+          "const": [
+            "validator"
+          ]
+        },
+        "validator_id": {
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x21\\x23-\\x5b\\x5d-\\x7e]*$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "validator_id",
+        "key_ref",
+        "roles"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "urn:delta:formal:profile-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/bootstrap"
+    },
+    {
+      "$ref": "#/$defs/manifest"
+    },
+    {
+      "$ref": "#/$defs/source_index"
+    },
+    {
+      "$ref": "#/$defs/init"
+    },
+    {
+      "$ref": "#/$defs/activate"
+    },
+    {
+      "$ref": "#/$defs/anchor_record"
+    }
+  ]
+}
