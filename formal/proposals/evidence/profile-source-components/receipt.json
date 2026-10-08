@@ -6,12 +6,12 @@
   ],
   "scope_revision": 13,
   "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
-  "result": "INCOMPLETE_ENVIRONMENT_FAILURE",
+  "result": "PROFILE_BYTE_AUTHORITY_AND_WAL_COMPONENTS_CHECKED",
   "formal_status": "NO_GO",
   "r2_3": "OPEN",
   "reviewed_r2_closure": false,
-  "previous_complete_component_commit": "1e0834e35291efa4bd6e8cbb4de432d22d82c40b",
   "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
+  "backend_sha256": "f656aeb789bfc3a2ac587fae1d7cfe278bbe8ce73f28da73b4d08282ea8f9fe3",
   "source_hash_rule": "Git LF source text; protocol originals retained without normalization",
   "sources": {
     "formal/proposals/b-family-transfer/ProfileControl.lean": "f6af4ec64f5a1d41cb7cdc61b9f77d55723c546c4a9d883ae13d113caa088aa7",
@@ -48,6 +48,12 @@
     "formal/proofs/DeltaReduce/NativePolicyCodec.lean": "799f13148f1913c5a21eecdb1931dd6c72d7e147f96a6eb4b1817f9ecf4c7320",
     "formal/proofs/DeltaReduce/NativeStateBytes.lean": "cb66d643495fbfb3a694240cf533e8f745a68afd58f28bcfb99891391463782e",
     "formal/proofs/DeltaReduce/NativeWalScan.lean": "0281eef29dfd973c3f63685ffffb926c012e399dea05444b647d36f989b14e58",
+    "generated/ControlVectors0.lean": "907549be52d1375cfb903479a10989c482dcc0e3a66f4fe0d10b970233356d2b",
+    "generated/ControlVectors1.lean": "718e8671c7a02c9bdbb0b2f131411b39e47ae50bb2ca7d34d44855d19a75d5f8",
+    "generated/ControlVectors2.lean": "8200e34c241f5a259b16543a6f1eece1eb0947995492bbb304a75ecbd25c4db4",
+    "generated/ControlVectors3.lean": "2cc65a0008ef04c0ae3fe9febb1ccd35271de80877e99b32a88ee00060a32600",
+    "generated/ControlVectors4.lean": "ba631500a46d1dfc10c6c65dcbb5851855f2bd5ef4fc6c9dfd315719206cd48f",
+    "generated/ControlVectors5.lean": "630d4bbd61b93571810f4ba6e15da42ccd3a45c50281ea7d89349b454be3b9f2",
     "generated/ControlVectors.lean": "8cba1d4f135de0bd81772e1eab66cb4d94784b30391b34ac655dcc8c5b084c43",
     "generated/ISCVectors.lean": "272b5a8c021814dc20031d427ef1dd5862cb891940e45618e68425a41da52868",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
@@ -63,6 +69,7 @@
     "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
     "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
+    "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
     "formal/reference/profile_source/source_prefix.py": "c937d91dcf086ea65a860b953c7c6d0031e37ad95c3020362e185128f126a674",
     "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
@@ -74,6 +81,7 @@
     "formal/reference/profile_source/test_manifest_context.py": "d6c079ec8818c8052422d83a775b40d0ee609813b3b00b2569697ef189d89551",
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
     "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
+    "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
     "formal/reference/profile_source/test_source_prefix.py": "ea0390c76b9ec28592a15929605f06f8d76f19e1fc66a8effef0e644c9acb691",
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
@@ -82,6 +90,8 @@
     "formal/proposals/b-family-transfer/check_profile_components.py": "ea16ecc22d5b471522efa9c55e431eecc24928de16bcda59a22f0399465976b8",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
+    "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
+    "formal/proposals/evidence/profile-source-components/native-lease-probe.json": "c6014d0b0699ed59948227b254de31408a9e4a36cd8706de0d9b94a39c473e9d",
     "delta-protocol/fixtures/local-round/parameter-schema-v1.json": "b2e41ffaf836d0fa80bf5afc6d21a66fd9b54237b569f45e919f35675b7df7d6",
     "docs/adr/evidence/0014-isc-commitment-profile-v1-vectors.json": "22f84f58dadb68f3c6c98074b4eb58d9b9de8f2697e10f5b22ed5974fb9fd5df",
     "delta-protocol/schemas/004/accumulator-proof-instance-v1.json": "91a0c848a1133c4bbc1a6e8f6d230e92acbba570f50bc0266d56669472a7b3a1",
@@ -129,12 +139,53 @@
     "formal/reference/storage_source/retention-vectors.json": "8f78b8e5ddb9eed5c5447cb5030706ce060b58bf03b03c93679c06be7049b0fb",
     "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",
     "formal/reference/storage_source/test_codec.py": "ecf98bf2dfe56ec73833b0222ebaa0222c1996626ffa7890a07f5bbb91d2f7df",
-    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b",
-    "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
-    "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
-    "formal/proposals/evidence/profile-source-components/native-lease-probe.json": "c6014d0b0699ed59948227b254de31408a9e4a36cd8706de0d9b94a39c473e9d",
-    "generated/ControlVectors0.lean": "907549be52d1375cfb903479a10989c482dcc0e3a66f4fe0d10b970233356d2b",
-    "generated/ControlVectors1.lean": "718e8671c7a02c9bdbb0b2f131411b39e47ae50bb2ca7d34d44855d19a75d5f8"
+    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b"
+  },
+  "external_native_probe_sources": {
+    "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+    "files": {
+      "delta-core-cpp/include/delta/apply/engine.hpp": "f5e893cf84de8bed9cf14a7624803efc63ddd829f80d2686e5219b5eb7a57e05",
+      "delta-core-cpp/include/delta/certificates/contracts.hpp": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1",
+      "delta-core-cpp/include/delta/certificates/verifier.hpp": "934835e7f5e8f9bca7ceb8006557b6dcb357807f81717a3c86d88346f0247ff9",
+      "delta-core-cpp/include/delta/core/arithmetic.hpp": "85a523e0a259de1d6b5d4465639c0bd91a44ad1ed67248e004cc333aef39b2b3",
+      "delta-core-cpp/include/delta/core/canonical.hpp": "10ac39eb4362ad336140861f6fe81a64f7f7282036eb37aa195d117439363314",
+      "delta-core-cpp/include/delta/core/consensus.hpp": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9",
+      "delta-core-cpp/include/delta/core/protocol.hpp": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4",
+      "delta-core-cpp/include/delta/core/transition.hpp": "d4b19e02c016b9edc0256e695ed19e8b01e43252b6c5022c5dd151988e0d1f12",
+      "delta-core-cpp/include/delta/distribution/certification_policy.hpp": "f604c08565aede931fe2773852c3327ed0cb58771269f632a2ec61d8244e4766",
+      "delta-core-cpp/include/delta/distribution/manifest_verifier.hpp": "b3f12a44a74d2faf500105db59acccfa50b2945092c705f05b399f27cfde5461",
+      "delta-core-cpp/include/delta/fixedpoint/bounds.hpp": "dbabf938d4bd0775b9ba1075821344b2ee96dbde90def768e3b6767d81ad557c",
+      "delta-core-cpp/include/delta/fixedpoint/checked.hpp": "216b334b429b0032b479b7314673ea2cb9509e8ed43ed4738428706485c67e4f",
+      "delta-core-cpp/include/delta/fixedpoint/direct_q.hpp": "b458bb6b09ff16bce3eaabe8b7fb6ce53546a3e2f942562f3377c2e4fa9b2668",
+      "delta-core-cpp/include/delta/fixedpoint/encoder.hpp": "d803ff30e391716906a50719177e0afe684f629818f0dc059f4f86e8fca13cc7",
+      "delta-core-cpp/include/delta/fixedpoint/profile.hpp": "51e452ac2dae64d782af357e9e701d632739285fb3aa4d7e7dd56229a332ef6b",
+      "delta-core-cpp/include/delta/fixedpoint/rounding.hpp": "4a8c0aa2dc301d2ee63838accba40d5b31b71b2a81e31f5e002e726b87dd1a7d",
+      "delta-core-cpp/include/delta/fixedpoint/scale.hpp": "fe7e5f1c3fcf8dac1df5061570f2ce3aaf0bad143e3b8ae3bab9551980a7db81",
+      "delta-core-cpp/include/delta/qlora/adapter_apply.hpp": "ca5eebc37a570d72695d1d8d6dcb4e8bf9db46bd84504472e8cc70c9273f7a88",
+      "delta-core-cpp/include/delta/qlora/context.hpp": "109d5039646a52834b2592e4e95cee04f0c63435f713d06a90e097479fb755c3",
+      "delta-core-cpp/include/delta/qlora/distribution.hpp": "35798aec33fb9688b923c1a53aa0d798b4ff736fb093fe6afa4e247fe87299bf",
+      "delta-core-cpp/include/delta/reduce/hierarchy.hpp": "46491caff31896dd2efc947be0b7574132a121aa48a9769a5ab61956fd9fa8c5",
+      "delta-core-cpp/include/delta/reduce/topology.hpp": "07c1f1206e749328f6f06551d1932660f558e1f5219276a5c8913a38f0929895",
+      "delta-core-cpp/include/delta/robust/plan.hpp": "fca7aaa7f13140df5598d6a5d24881851a61c9dd00501811121d18188842211a",
+      "delta-core-cpp/include/delta/scheduling/contracts.hpp": "c5c37db8c1e0f3902702b558854cd12e495075c8af3052c0c2d6179bfc588384",
+      "delta-core-cpp/include/delta/scheduling/eligibility.hpp": "1cab913f143f69134f5d0dfd793fb7577dea106f948dce32c05a3c5817b8f821",
+      "delta-core-cpp/include/delta/scheduling/leases.hpp": "2169909ba6603083f35a06ed29df2c6204940e4bc1044e9540bcb259fe03563e",
+      "delta-core-cpp/include/delta/scheduling/planner.hpp": "183d04eec02532a892862cabb32940515a75c979d24a0daa4644547338d416df",
+      "delta-core-cpp/include/delta/scheduling/recovery.hpp": "86c984baadba4d251c686417eace0eae0b3036c36d6b5dc78bb2444c7b47bbe3",
+      "delta-core-cpp/include/delta/shards/envelope.hpp": "1d0466d5729c6a47dcea5a52fdf5b7e2de77f9e3a838e97096f1fb97f8640ec3",
+      "delta-core-cpp/include/delta/shards/plan.hpp": "483e7ea52bfa187e18a70510dd38185494ca26e53138716404b42db56126818e",
+      "delta-core-cpp/include/delta/shards/reader.hpp": "cf67b7deaef26b74a89ee29a96c9ec7fade9e88700ef1cfa20cabd3ce6d23089",
+      "delta-core-cpp/src/canonical.cpp": "432ca0299a85e18fb4e1ac4b3be93c1e8c8109acb995120b0e4512b81a01e156",
+      "delta-core-cpp/src/scheduling/contracts.cpp": "38a9dea5f40c3030c980186cd868683e8e9425e323f86f641cee4dcff51044c1",
+      "delta-core-cpp/src/scheduling/eligibility.cpp": "54f217616ea501c8900c44f3548e73f3a678f429153f5a12e564ca52e357ef5a",
+      "delta-core-cpp/src/scheduling/leases.cpp": "bc3bd41e79e3b2b5430e489d6ce60025dd1ca84fc14012f0cf7c27d1296aa12a",
+      "delta-core-cpp/src/scheduling/planner.cpp": "2c8dab75eda0f858651b1dfd40f43bb3909c5131bd0fb2647d9ac59798605fcf",
+      "delta-core-cpp/src/scheduling/recovery.cpp": "cce012f8c65bdc7efc7f44fd415e7795a8382f17ffee51e839d50f717675c638",
+      "delta-core-cpp/src/sha256.cpp": "efd60eb765908a04581446d0f3352688bd3f552403e54d317b8f922494576dfe",
+      "delta-core-cpp/src/sha256.hpp": "e50230051ea9cbde42a33dcf4cd2db7eaed2c534c1324937f1dbc78fec720d7e",
+      "delta-core-cpp/tests/scheduling_lifecycle_test.cpp": "546ec54bd06d9439c13c32a12ad30ed8e1823be3bd0b64ac52a3548512644e30"
+    },
+    "kind": "PIN_VERIFICATION_OF_RETAINED_EXECUTION_NOT_A_NEW_NATIVE_RUN"
   },
   "checks": [
     {
@@ -319,19 +370,83 @@
     },
     {
       "log": "control-vectors-1.txt",
-      "exit_code": 1,
-      "sha256": "cf6e327209e0b84b54d21e7f94dee3b0dbcb5dc178deaef11d95b6585d4c47e5"
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "control-vectors-2.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "control-vectors-3.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "control-vectors-4.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "control-vectors-5.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "control-vectors.txt",
+      "exit_code": 0,
+      "sha256": "fcbc02e7e7b14ea0c227f92a31a8c94ff44ed50eaabd3d29a13c02873d31db9f"
+    },
+    {
+      "log": "isc-vectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "reference-tests.txt",
+      "exit_code": 0,
+      "sha256": "7fa8aeadc1cc189f6128fe1d1ebfc932e913183187d09b904324606600a9fe19"
+    },
+    {
+      "log": "isc-reference-tests.txt",
+      "exit_code": 0,
+      "sha256": "80e4169cd724ae309d88480f8f644bd07aaca1047594266cc3cfcfd9088ab725"
+    },
+    {
+      "log": "ruff.txt",
+      "exit_code": 0,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "log": "ruff-format.txt",
+      "exit_code": 0,
+      "sha256": "d6675b63a4767317d34641fb3901c01a3e6f8536bb9289fd7d0bdf7ae2bfe59b"
     }
   ],
-  "failed_gate": "ControlVectors1.lean: INTERNAL PANIC: out of memory",
-  "isolated_recheck": "Even the first unchanged example alone failed with the same OOM; no later vector or full-suite PASS claimed.",
-  "host_failure": "CreateProcess OS1455 paging file too small subsequently rejected a test process before launch.",
-  "scope_recheck": "Two authenticated read-only effective-scope requests returned HTTP500; no ACK/result/review/graph mutation.",
+  "established": [
+    "Closed canonical profile fields, independent raw inventory, exact refs and floor",
+    "Separate anchor/cut/target journals retain original bytes; anchor may precede tip",
+    "Bootstrap/initial-config authority, full RoundConfig with R/E and signed QC join",
+    "Mixed slots and S-RANK retain original votes and unsigned durable intents",
+    "General Lean original reference/position/multiplicity and rank injectivity lemmas",
+    "Kernel whole control-byte binding and closed root names; synthetic raw vectors",
+    "Source-derived storage context: whole config + original metadata + commitment root",
+    "O ledger facet retains every delivery/attempt; no physical-presence premise",
+    "Metadata/data-use Lean join reuses existing full ordered unsplit vector binding",
+    "Original CONFIG event cut and first witness, late/repeat inventory retained",
+    "Complete source event/input materialization with original cut/target positions",
+    "Future whole ISC C bytes and policy tree, exact b/c, explicit parent and tuple root",
+    "Merkle fuel completeness for all existing 100000 tuples; no 4096 manifest cap",
+    "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
+    "O actual read ownership from complete prefix; general binding, release/crash refusal",
+    "Original007 plan/ticket/lease/timer bytes and DSJ1 producer; static commitment safety"
+  ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",
     "Full native origin from genesis; signatures do not prove finalization origin",
     "Complete O state relation, totality, initial/incomplete and ABORT composition",
     "Reviewed R2.3, named recovery theorem, full formal gates or production GO"
   ],
-  "evidence_kind": "PARTIAL_REFERENCE_QUALIFICATION_NOT_PRODUCTION_OR_FORMAL_GO"
+  "evidence_kind": "REFERENCE_SYNTHETIC_COMPONENTS_NOT_PRODUCTION_CAPTURE"
 }

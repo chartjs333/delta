@@ -69,6 +69,16 @@ test_no_cross_actor_context_or_forged_imported_buffer (formal.reference.profile_
 test_partial_or_corrupt_corpus_never_partially_populates_memory (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_partial_or_corrupt_corpus_never_partially_populates_memory) ... ok
 test_release_or_restart_prevents_old_receipt_reuse (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_release_or_restart_prevents_old_receipt_reuse) ... ok
 test_repeated_reads_remain_distinct_original_occurrences (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_repeated_reads_remain_distinct_original_occurrences) ... ok
+test_commit_projection_preserves_native_active_bytes_and_full_lineage (formal.reference.profile_source.test_scheduling.SchedulingTests.test_commit_projection_preserves_native_active_bytes_and_full_lineage) ... ok
+test_exact_executed_native_dsj1_prefix_and_recovered_identity (formal.reference.profile_source.test_scheduling.SchedulingTests.test_exact_executed_native_dsj1_prefix_and_recovered_identity) ... ok
+test_full_original_cross_language_plan_ticket_lease_timer_bytes (formal.reference.profile_source.test_scheduling.SchedulingTests.test_full_original_cross_language_plan_ticket_lease_timer_bytes) ... ok
+test_full_plan_reconstruction_rejects_forged_ticket_prefix (formal.reference.profile_source.test_scheduling.SchedulingTests.test_full_plan_reconstruction_rejects_forged_ticket_prefix) ... ok
+test_infeasibility_does_not_publish_partial_leases (formal.reference.profile_source.test_scheduling.SchedulingTests.test_infeasibility_does_not_publish_partial_leases) ... ok
+test_order_and_duplicate_members_are_not_reinterpreted (formal.reference.profile_source.test_scheduling.SchedulingTests.test_order_and_duplicate_members_are_not_reinterpreted) ... ok
+test_original_bounds_and_no_hidden_json_safe_integer_narrowing (formal.reference.profile_source.test_scheduling.SchedulingTests.test_original_bounds_and_no_hidden_json_safe_integer_narrowing) ... ok
+test_original_capability_to_decision_not_supplied_eligible_boolean (formal.reference.profile_source.test_scheduling.SchedulingTests.test_original_capability_to_decision_not_supplied_eligible_boolean) ... ok
+test_renew_stale_timer_and_original_receipt (formal.reference.profile_source.test_scheduling.SchedulingTests.test_renew_stale_timer_and_original_receipt) ... ok
+test_same_worker_reassign_keeps_original_ticket_and_static_identity (formal.reference.profile_source.test_scheduling.SchedulingTests.test_same_worker_reassign_keeps_original_ticket_and_static_identity) ... ok
 test_artifact_digest_is_not_an_original_event_occurrence (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_artifact_digest_is_not_an_original_event_occurrence) ... ok
 test_cut_and_target_derived_from_whole_original_index (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_cut_and_target_derived_from_whole_original_index) ... ok
 test_importer_cannot_rewrite_the_independent_source_index (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_importer_cannot_rewrite_the_independent_source_index) ... ok
@@ -82,6 +92,6 @@ test_signature_without_own_intent_or_corrupt_signature_rejected (formal.referenc
 test_unsigned_durable_cut_is_retained_without_claiming_signature (formal.reference.profile_source.test_votes.VoteIntentTests.test_unsigned_durable_cut_is_retained_without_claiming_signature) ... ok
 
 ----------------------------------------------------------------------
-Ran 82 tests in 4.477s
+Ran 92 tests in 4.989s
 
 OK
