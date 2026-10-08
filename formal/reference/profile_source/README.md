@@ -57,6 +57,10 @@ projection rewrites the signed Vote bytes. The earlier reference comparison
 to vote count was a checker defect, corrected before R2.3 qualification.
 The anti-equivocation key is exactly the native `(validator, epoch, context)`;
 changing round/view/height/kind cannot create another local slot for that key.
+`ProfileVoteJournal.lean` proves this across the complete mixed entry sequence,
+with soundness/completeness, original-vote retention and separate ordinal
+annotation. Its proof does not classify a kind-1/3 payload as a legal producer
+step or turn an unsigned durable intent into an authenticated message.
 
 `commands.py` derives the coarse state at every mixed WAL position by applying
 the original N command rules and checking all original state/effect/inner-WAL
