@@ -36,6 +36,19 @@
 'DeltaReduce.ProfileSource.Control.profileIndependentOfImportedVersion' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'DeltaReduce.ProfileSource.Policy.lookupByNames' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Policy.sameOuterFields' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Policy.sameSnapshotFields' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Policy.extractionOriginal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.consumed' does not depend on any axioms
+'DeltaReduce.ProfileSource.Policy.sound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.completeSourcePreserved' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.snapshotRetained' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.everySnapshotFieldRetained' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.boundComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Policy.boundOriginals' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Vote.readFrameEncoded' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Vote.decodeFrameEncoded' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Vote.decodedVoteSound' depends on axioms: [propext, Classical.choice, Quot.sound]

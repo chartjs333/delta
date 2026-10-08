@@ -62,6 +62,7 @@ def main():
             "ProfileConfigurationQC",
             "ProfileSourceIndex",
             "ProfileVoteJournal",
+            "ProfilePolicy",
             "ProfileNativeHeader",
         }:
             path = Path(__file__).with_name(name + ".lean")
@@ -75,6 +76,7 @@ def main():
             "ProfileConfigurationQC",
             "ProfileSourceIndex",
             "ProfileVoteJournal",
+            "ProfilePolicy",
             "ProfileNativeHeader",
             "SourcePolicy",
             "SourceVote",
@@ -111,6 +113,7 @@ def main():
     visit("ProfileConfigurationQC")
     visit("ProfileSourceIndex")
     visit("ProfileVoteJournal")
+    visit("ProfilePolicy")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -165,8 +168,26 @@ def main():
         "import ProfileControl\nimport ProfileManifest\n"
         "import ProfileConfiguration\nimport ProfileNativeHeader\n"
         "import SourcePolicy\nimport SourceVote\nimport ProfileConfigurationQC\n"
-        "import ProfileSourceIndex\nimport ProfileVoteJournal\n"
+        "import ProfileSourceIndex\nimport ProfileVoteJournal\nimport ProfilePolicy\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ProfileSource.Policy." + name + "\n"
+        for name in (
+            "lookupByNames",
+            "sameOuterFields",
+            "sameSnapshotFields",
+            "extractionOriginal",
+            "consumed",
+            "sound",
+            "complete",
+            "completeSourcePreserved",
+            "snapshotRetained",
+            "everySnapshotFieldRetained",
+            "boundSource",
+            "boundComplete",
+            "boundOriginals",
+        )
     )
     audit += "".join(
         "#print axioms DeltaReduce.ProfileSource.Vote." + name + "\n"
@@ -421,6 +442,15 @@ def main():
     )
     run([str(LEAN), "JournalVectors.lean"], "journal-vectors.txt", src, environment)
     sources["generated/JournalVectors.lean"] = digest(journal_source.encode())
+    from formal.reference.profile_source.policy_vectors import generate as policy_vectors
+
+    policy_source, policy_originals = policy_vectors()
+    (src / "PolicyVectors.lean").write_text(policy_source, encoding="utf8", newline="\n")
+    (OUT / "policy-originals.json").write_text(
+        json.dumps(policy_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run([str(LEAN), "PolicyVectors.lean"], "policy-vectors.txt", src, environment)
+    sources["generated/PolicyVectors.lean"] = digest(policy_source.encode())
     run(
         [
             sys.executable,
@@ -555,6 +585,8 @@ def main():
             "Original source index binds actors/actions/inputs/dependencies to raw bytes",
             "General materialization soundness/completeness retains positions and repeated inputs",
             "Own-journal scan retains every original vote and native context-key uniqueness",
+            "Whole successor policy extracts original typed fields without legacy re-encoding",
+            "CONFIG/S0/P0 source join retains all 33 snapshot fields and original candidate trees",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

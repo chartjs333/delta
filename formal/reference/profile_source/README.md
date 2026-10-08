@@ -225,6 +225,14 @@ reference path applies this join using its source-derived finalized CONFIG.
 Kernel vectors use finite SHA tables of explicit original preimages, with no
 hash axiom or native-evaluation proof axiom, and are synthetic partial inputs.
 
+`ProfilePolicy.lean` decodes the whole installed successor policy and joins its
+typed carrier to that header check. General inverse and field-spine proofs
+retain all 33 original snapshot fields, including changed ISC subtrees and
+unchanged downstream lineage, without encoding a legacy policy or equating b
+with c. The existing nonempty candidate requirement applies to an installed
+policy artifact; it is not imposed on initial states with no installed policy.
+Full collection validity and independent producing origin remain to be joined.
+
 Run `formal/proposals/b-family-transfer/check_profile_components.py` with the
 pinned `ISC_SODIUM_DLL`; it rebuilds the involved Lean sources, audits axioms,
 checks the reference components and records exact source/log hashes. All
