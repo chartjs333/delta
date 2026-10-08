@@ -41,6 +41,42 @@ check, not qualification of the complete approved source domain.
 
 Run `formal/proposals/isc-source-generation/check_storage.py` with the existing
 `ISC_SODIUM_DLL` pin. Its synthetic byte/signature fixtures are conformance
-evidence only, never a captured production history or full R2 result. No TLA,
-Lean, production runtime, schema, guard, old fixture or accepted result is
-modified by this component.
+evidence only, never a captured production history or full R2 result. The original
+scope-11 component changed no TLA/Lean or production artifacts.
+
+## Scope 13: exact original retention declaration
+
+Human decision `scope-decision-ccba23f3167be9feed1dd79a49db09b0` approved the
+exact binding at
+`12326b892690705b7141fcd32bf3f32cf07d092e:formal/proposals/retention-policy-source-binding-v1.md`.
+Role 2753 ACK `scope-ack-a30732f8d640518596da678cfa2e63c3` is GET-confirmed.
+`retention.py` and `retention-source.schema.json` implement the closed future R
+and required storage_binding. Schema validation follows strict original-byte
+decoding; a post-parse schema alone cannot detect duplicate JSON member names.
+
+Resolution requires the entire original E and checks its positive U64 length,
+raw digest and contextual epoch. E is never normalized, interpreted, executed
+or fetched. The derived r is a source identity, not a certificate. The S
+composition verifies actual signatures and preserves the original AC and every
+delivery occurrence. A bare epoch, digest-only inventory, missing R or different
+declaration cannot substitute for the original bytes. The returned component
+does not certify the enclosing RoundConfig or its original producing prefix.
+
+`RetentionSource.lean` proves canonical codec inversion/injectivity and exact
+resolution for arbitrary admitted R/E, without a policy-validity or collision
+axiom. Two differing E accepted for the same R necessarily exhibit an equal
+digest representation. The hash primitive remains explicitly parameterized;
+this is not a proof of SHA-256 collision resistance. Shared synthetic vectors
+check Python/Lean byte agreement, including binary E and maximum epoch length.
+
+Run `formal/proposals/isc-source-generation/check_retention.py` with the same
+`ISC_SODIUM_DLL`. It rebuilds the Lean closure, audits axioms and records a
+separate `formal/proposals/evidence/retention-source-v1/` receipt. Scope-11
+evidence is historical and is not overwritten or relabeled as scope-13 proof.
+
+Still OPEN: derive the exact enclosing configuration and original event
+association from independently anchored history; compose the full O source and
+public state, budgets and affected model/refinement/mutant/review gates. This
+component adds no trusted boolean, production policy value, temporal retention
+evaluator, source cap or physical truth assumption. R2.3 is not CLOSED. No
+production code, guard, old identities, named recovery theorem or full R3 changes.

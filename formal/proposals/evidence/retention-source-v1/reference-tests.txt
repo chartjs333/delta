@@ -1,0 +1,23 @@
+test_authentic_wrong_context_leaf_length_retention_key_and_source_reject (test_codec.StorageSourceTests.test_authentic_wrong_context_leaf_length_retention_key_and_source_reject) ... ok
+test_distinct_actual_witnesses_keep_distinct_ac_and_never_replace_original (test_codec.StorageSourceTests.test_distinct_actual_witnesses_keep_distinct_ac_and_never_replace_original) ... ok
+test_duplicate_keys_numeric_values_and_noncanonical_bytes_fail_before_typing (test_codec.StorageSourceTests.test_duplicate_keys_numeric_values_and_noncanonical_bytes_fail_before_typing) ... ok
+test_exact_byte_domains_and_deterministic_signature (test_codec.StorageSourceTests.test_exact_byte_domains_and_deterministic_signature) ... ok
+test_false_physical_claims_authenticate_without_creating_physical_truth (test_codec.StorageSourceTests.test_false_physical_claims_authenticate_without_creating_physical_truth) ... ok
+test_maximum_legal_attestation_fits_existing_strict_primitive (test_codec.StorageSourceTests.test_maximum_legal_attestation_fits_existing_strict_primitive) ... ok
+test_original_registry_key_role_and_complete_key_inventory (test_codec.StorageSourceTests.test_original_registry_key_role_and_complete_key_inventory) ... ok
+test_per_leaf_different_quorums_and_full_occurrence_inventory (test_codec.StorageSourceTests.test_per_leaf_different_quorums_and_full_occurrence_inventory) ... ok
+test_trailing_bytes_version_signature_and_wrong_domain_reject (test_codec.StorageSourceTests.test_trailing_bytes_version_signature_and_wrong_domain_reject) ... ok
+test_union_quorum_duplicate_inflation_missing_or_reordered_pairs_reject (test_codec.StorageSourceTests.test_union_quorum_duplicate_inflation_missing_or_reordered_pairs_reject) ... ok
+test_bound_crypto_witness_preserves_original_objects_and_occurrences (test_retention.RetentionTests.test_bound_crypto_witness_preserves_original_objects_and_occurrences) ... ok
+test_digest_and_closed_source_shape (test_retention.RetentionTests.test_digest_and_closed_source_shape) ... ok
+test_exact_raw_binary_declaration_and_separate_id (test_retention.RetentionTests.test_exact_raw_binary_declaration_and_separate_id) ... ok
+test_exact_u64_bound_not_python_integer_or_schema_approximation (test_retention.RetentionTests.test_exact_u64_bound_not_python_integer_or_schema_approximation) ... ok
+test_mandatory_future_binding_and_existing_storage_authority (test_retention.RetentionTests.test_mandatory_future_binding_and_existing_storage_authority) ... ok
+test_no_label_only_fallback_and_no_normalization (test_retention.RetentionTests.test_no_label_only_fallback_and_no_normalization) ... ok
+test_shared_lean_python_byte_vectors (test_retention.RetentionTests.test_shared_lean_python_byte_vectors) ... ok
+test_strict_wire_before_schema_and_typed_value (test_retention.RetentionTests.test_strict_wire_before_schema_and_typed_value) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.477s
+
+OK

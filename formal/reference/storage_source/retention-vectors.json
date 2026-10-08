@@ -1,0 +1,32 @@
+{
+  "qualification": "synthetic byte diagnostics, not deployment policy or original history",
+  "vectors": [
+    {
+      "name": "diagnostic-1",
+      "declaration_hex": "6f726967696e616c20706f6c6963790d0a",
+      "length": "17",
+      "digest": "6f2c1107c99ce2d4c9d8b13d898853221bc8a1b4e64265465d27ef2a7def0a91",
+      "epoch": "retention-1",
+      "source_ascii": "{\"obligation_ref\":{\"byte_length\":\"17\",\"sha256\":\"6f2c1107c99ce2d4c9d8b13d898853221bc8a1b4e64265465d27ef2a7def0a91\"},\"retention_epoch_id\":\"retention-1\",\"schema_version\":\"1.0.0\",\"type_name\":\"STORAGE_RETENTION_POLICY_SOURCE\"}",
+      "source_id": "sha256:8e813f5b359d5668a822392bcab7abd38dc686c08267629933924958f6f8efe2"
+    },
+    {
+      "name": "diagnostic-2",
+      "declaration_hex": "00ffefbbbf0a",
+      "length": "6",
+      "digest": "8ab1d708b7af1c2380f11097d29278a90281f43b29a0dfbb1559de6103af40b4",
+      "epoch": "epoch-2",
+      "source_ascii": "{\"obligation_ref\":{\"byte_length\":\"6\",\"sha256\":\"8ab1d708b7af1c2380f11097d29278a90281f43b29a0dfbb1559de6103af40b4\"},\"retention_epoch_id\":\"epoch-2\",\"schema_version\":\"1.0.0\",\"type_name\":\"STORAGE_RETENTION_POLICY_SOURCE\"}",
+      "source_id": "sha256:ee8a90450a57f0018c81b49fe2c9e004f9cc7a4db10f4a0851a3cacc575021a3"
+    },
+    {
+      "name": "diagnostic-3",
+      "declaration_hex": "78",
+      "length": "1",
+      "digest": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+      "epoch": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "source_ascii": "{\"obligation_ref\":{\"byte_length\":\"1\",\"sha256\":\"2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881\"},\"retention_epoch_id\":\"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\",\"schema_version\":\"1.0.0\",\"type_name\":\"STORAGE_RETENTION_POLICY_SOURCE\"}",
+      "source_id": "sha256:b5aca4c61e8ed54ffeb8e5c276facd6e467e13242db7fda7c08f23aca7fd8e8a"
+    }
+  ]
+}

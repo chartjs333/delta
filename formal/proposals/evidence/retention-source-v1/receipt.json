@@ -1,0 +1,143 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "scope_revision": 13,
+  "decision_id": "scope-decision-ccba23f3167be9feed1dd79a49db09b0",
+  "ack_id": "scope-ack-a30732f8d640518596da678cfa2e63c3",
+  "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "contract": {
+    "commit": "12326b892690705b7141fcd32bf3f32cf07d092e",
+    "path": "formal/proposals/retention-policy-source-binding-v1.md",
+    "sha256": "143452dac55c556cff99286e3e01df2a5ee27164c8c9668bf5079518c068540c"
+  },
+  "result": "EXACT_RETENTION_SOURCE_COMPONENT_CHECKED",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
+  "source_hash_rule": "Git-compatible LF source text only; original protocol bytes unchanged",
+  "sources": {
+    "formal/proposals/isc-source-generation/RetentionSourceVectors.lean": "8ff354ccb50f462c93d56d74717ac5cb3cf2f44a00389666229079787b9f040d",
+    "formal/proposals/isc-source-generation/RetentionSource.lean": "743eb635eb5fd65bd042985d476e8f161fd999d569846b5e462ee39a7b452a12",
+    "formal/proofs/DeltaReduce/NativeQJson.lean": "5a708d4351a037e00d070f95b50cfb35a296288f2aa6596257cd6d85fa6503ec",
+    "formal/proofs/DeltaReduce/NativeQBytes.lean": "42257ed19ffeea4a6a792e6077f2109e5514a1e5fbcc86b55a6872291f51bf32",
+    "formal/proofs/DeltaReduce/NativeReceiptBytes.lean": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580",
+    "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
+    "formal/proofs/DeltaReduce/NativeConfigAdmission.lean": "73890c23bae73e474465b7e0b5412016be3982d888cfc88be9cf2219f03db534",
+    "formal/proofs/DeltaReduce/NativePolicyBytes.lean": "9a7570b9ecd340a869c2a154e7be41f9c77cd43cf5d04bb985dcc2539f271dd2",
+    "formal/proofs/DeltaReduce/NativePolicySchema.lean": "4d19ebe15b067aab6442c8b67b4adfd1adfd9fe7718bd3cded8df4a9b8267612",
+    "formal/proofs/DeltaReduce/NativePolicyCodec.lean": "799f13148f1913c5a21eecdb1931dd6c72d7e147f96a6eb4b1817f9ecf4c7320",
+    "formal/proofs/DeltaReduce/NativeStateBytes.lean": "cb66d643495fbfb3a694240cf533e8f745a68afd58f28bcfb99891391463782e",
+    "formal/proofs/DeltaReduce/NativeWalScan.lean": "0281eef29dfd973c3f63685ffffb926c012e399dea05444b647d36f989b14e58",
+    "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
+    "formal/reference/storage_source/__init__.py": "39145ac3fae5559d5aba1cb28d88f4725f4d5e3472179932cba1caa930f4a47b",
+    "formal/reference/storage_source/codec.py": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
+    "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",
+    "formal/reference/storage_source/test_codec.py": "ecf98bf2dfe56ec73833b0222ebaa0222c1996626ffa7890a07f5bbb91d2f7df",
+    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b",
+    "formal/reference/storage_source/retention-source.schema.json": "c3ee0e7bb4fd3da5d7d79d986b089a9923ef6cf0d338b7e680b35d5d6cafe17c",
+    "formal/reference/storage_source/retention-vectors.json": "8f78b8e5ddb9eed5c5447cb5030706ce060b58bf03b03c93679c06be7049b0fb",
+    "formal/reference/storage_source/README.md": "83e230b6a642286fbcccf6bcd953778406566fba55214dcd3b5d3982cf4d0460",
+    "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
+    "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
+    "formal/reference/isc_crypto/library-provenance.json": "88c6f9a355c2e97a6d65bdb6eaa8165b59c64dcf66ce31f3ad831b1c525adeaa",
+    "formal/proposals/isc-source-generation/check_retention.py": "5771572fd95ec33c269239f88ac50626e7b3bd0148915c772d79911b0dd4a277"
+  },
+  "checks": [
+    {
+      "log": "DeltaReduce.NativeReceiptBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeQBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeVoteBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeQJson.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativePolicyCodec.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativePolicySchema.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativePolicyBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeWalBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeWalScan.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeStateBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "DeltaReduce.NativeConfigAdmission.txt",
+      "exit_code": 0,
+      "sha256": "1b2fa0912aedf33bca76312100c4b206f8a1e9dd73f882a9d66a0bcfc2eb0dda"
+    },
+    {
+      "log": "RetentionSource.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "RetentionSourceVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "axioms.txt",
+      "exit_code": 0,
+      "sha256": "0ad063ee6a209b254497c7d749ed764b3cc7a14503f5584ed889edd00309bd01"
+    },
+    {
+      "log": "reference-tests.txt",
+      "exit_code": 0,
+      "sha256": "d44e4598cfe80fe5cbae20877d6a06b75b251d74cb1a1e7df272c02ccf494e91"
+    },
+    {
+      "log": "ruff.txt",
+      "exit_code": 0,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "log": "ruff-format.txt",
+      "exit_code": 0,
+      "sha256": "0321fffcb91606a42c0a19d8c1121d5c544379d663821fce616c71a7bb62f6b5"
+    }
+  ],
+  "backend_sha256": "f656aeb789bfc3a2ac587fae1d7cfe278bbe8ce73f28da73b4d08282ea8f9fe3",
+  "closed_component": [
+    "Strict closed R, raw declaration length/digest and contextual epoch binding",
+    "Canonical Lean decoder/encoder inverse and injectivity, exact raw resolution",
+    "Substitution of differing accepted E requires a digest collision; no collision axiom",
+    "Required storage_binding and actual S crypto composition preserve full inventory"
+  ],
+  "residual": "Original complete configuration grammar/authority/producing-prefix composition, full O state/refinement and affected model/mutant/review gates remain open. Component Context is not provenance; no production policy or physical-retention claim."
+}

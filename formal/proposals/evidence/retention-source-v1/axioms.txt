@@ -1,0 +1,11 @@
+'DeltaReduce.RetentionSource.validSafe' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.RetentionSource.readEncoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.RetentionSource.decoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.RetentionSource.roundTrip' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.RetentionSource.encodingInjective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.RetentionSource.resolved' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.RetentionSource.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.RetentionSource.nonemptyOriginal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.RetentionSource.substitutionRequiresDigestCollision' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
