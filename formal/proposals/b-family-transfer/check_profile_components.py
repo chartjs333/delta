@@ -54,7 +54,7 @@ def main():
             return
         if name == "SourcePolicy":
             path = ROOT / "formal/proposals/isc-source-generation/SourcePolicy.lean"
-        elif name in {"ProfileSource", "ProfileControl", "ProfileManifest"}:
+        elif name in {"ProfileSource", "ProfileControl", "ProfileManifest", "ProfileConfiguration"}:
             path = Path(__file__).with_name(name + ".lean")
         else:
             path = ROOT / "formal/proofs" / (name.replace(".", "/") + ".lean")
@@ -62,6 +62,7 @@ def main():
             "ProfileSource",
             "ProfileControl",
             "ProfileManifest",
+            "ProfileConfiguration",
             "SourcePolicy",
         } and not name.startswith("DeltaReduce."):
             raise RuntimeError("Unqualified import " + name)
@@ -89,6 +90,7 @@ def main():
 
     visit("ProfileControl")
     visit("ProfileManifest")
+    visit("ProfileConfiguration")
     visit("SourcePolicy")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
@@ -140,8 +142,29 @@ def main():
         "Control.rootFieldsExact",
         "Control.profileIndependentOfImportedVersion",
     ]
-    audit = "import ProfileControl\nimport ProfileManifest\nimport SourcePolicy\n" + "".join(
-        "#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names
+    audit = (
+        "import ProfileControl\nimport ProfileManifest\n"
+        "import ProfileConfiguration\nimport SourcePolicy\n"
+        + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ProfileSource.Configuration." + name + "\n"
+        for name in (
+            "roundTrip",
+            "decoded",
+            "encoded",
+            "encodingInjective",
+            "frameEncoded",
+            "frameDecoded",
+            "frameInjective",
+            "policySource",
+            "noPolicyOverride",
+            "interpreted",
+            "checked",
+            "complete",
+            "wholeSource",
+            "enrolledSource",
+        )
     )
     audit += "".join(
         "#print axioms DeltaReduce.ProfileManifest." + name + "\n"
@@ -234,6 +257,15 @@ def main():
     )
     run([str(LEAN), "ISCVectors.lean"], "isc-vectors.txt", src, environment)
     sources["generated/ISCVectors.lean"] = digest(isc_source.encode())
+    from formal.reference.profile_source.configuration_vectors import generate as config_vectors
+
+    config_source, config_originals = config_vectors()
+    (src / "ConfigurationVectors.lean").write_text(config_source, encoding="utf8", newline="\n")
+    (OUT / "configuration-originals.json").write_text(
+        json.dumps(config_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run([str(LEAN), "ConfigurationVectors.lean"], "configuration-vectors.txt", src, environment)
+    sources["generated/ConfigurationVectors.lean"] = digest(config_source.encode())
     run(
         [
             sys.executable,
@@ -356,6 +388,8 @@ def main():
             "Indexed W1 binds the retained command predecessor and all admitted deliveries",
             "Closed B/tuples derive from original CONFIG/ticket/manifest/AC/freeze source facets",
             "Joined input-to-W1 path re-resolves profile keys; no supplied frozen body/tuple list",
+            "Full DRC1 configuration codec inverse/injectivity with original nested fields",
+            "Existing two close policies derive from exact signed config, with no override",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

@@ -23,7 +23,8 @@ and storage registry/keys from its pinned original initial configuration's
 approved `storage_authority` field. It preserves the other initial fields
 without claiming their source legality. `configuration.py` uses the existing
 DRC1 typed canonical encoding and all original 22 RoundConfig fields plus the
-approved mandatory storage binding. Its separate future schema version 2.0.0
+approved mandatory storage binding and the existing immutable close policy.
+Its separate future schema version 2.0.0
 does not assign sigma or accept/relabel legacy configuration bytes.
 
 `configuration_qc.py` preserves the existing QC bytes and supplied original
@@ -181,11 +182,33 @@ Unknown/missing input carriers remain unresolved rather than silently omitted.
 authority, reconstructs this input facet at W1's original retained cut, and
 passes its computed B/tuples into the existing exact W1 join. No caller-provided
 frozen tuples or body are accepted on that path. This is not a complete producing
-history: initial plan/configuration authority, normalized close-policy origin,
+history: initial plan/configuration authority,
 lease/phase/time/transport/control, full P0 and barriers remain outer obligations.
 `producer_edges` explicitly retains successful facet events for those checks;
 absence of byte-resolution errors is not full source validity. Combined fixtures
 still include unqualified initial policy/current/anchor fields and assert no READY.
+
+The input-close selector now comes from the original signed configuration, not
+a free `close_policy` argument. This implements the already frozen requirement
+in `failure-semantics.md` section5 that RoundConfig selects exactly one immutable
+policy; S section3 expressly preserves that field while adding storage_binding.
+The future reference grammar spells it `availability_policy.close_policy` with
+the two existing exact enum strings. It selects neither policy for deployment,
+changes neither close guard nor the required-ticket domain, and introduces no
+new source authority or default. All old production objects and frozen fixtures
+remain unchanged. Fresh synthetic configurations and dependent signatures/IDs
+are recomputed; old bytes are never reinterpreted under the completed grammar.
+
+`ProfileConfiguration.lean` parses the complete typed DRC1 tree with fixed keys,
+tags, original U32/U64/text/vector bounds and nested storage/retention objects.
+General round-trip and injectivity proofs cover every encodable value, not only
+fixtures. Exact frame decode/re-encode equality rules out alternate typed
+descriptors for the same bytes. The selected close policy is a function of those
+original bytes. Remaining semantic validation, independent CONFIG provenance
+and the full state relation are still required; byte decoding is not finality.
+Kernel vectors check both policies against complete Python-generated original
+bytes. The partial two-ticket diagnostic retains all original events and AC
+lineage; it is component evidence, not a complete production snapshot or ABORT QC.
 
 Run `formal/proposals/b-family-transfer/check_profile_components.py` with the
 pinned `ISC_SODIUM_DLL`; it rebuilds the involved Lean sources, audits axioms,

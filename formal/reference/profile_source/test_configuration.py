@@ -48,7 +48,7 @@ class ConfigurationTests(unittest.TestCase):
             },
         }
         return {
-            "availability_policy": {"storage_binding": binding},
+            "availability_policy": {"close_policy": "OMIT_UNAVAILABLE", "storage_binding": binding},
             "availability_threshold": 3,
             "batch_budget": 8,
             "dataset_manifest_id": identifier(31),
@@ -158,6 +158,24 @@ class ConfigurationTests(unittest.TestCase):
         good = self.sign(raw)
         with self.assertRaises(crypto.CodecError):
             self.check(raw, good[:-1] + bytes([good[-1] ^ 1]))
+
+    def test_close_policy_is_immutable_authenticated_config_not_an_override(self):
+        body = self.body()
+        before = c.encode(body)
+        original_signature = self.sign(before)
+        body["availability_policy"]["close_policy"] = "ABORT_ON_INCOMPLETE"
+        after = c.encode(body)
+        self.assertNotEqual(c.content_id(c.DOMAIN, before), c.content_id(c.DOMAIN, after))
+        with self.assertRaises(crypto.CodecError):
+            self.check(after, original_signature)
+        self.assertEqual(self.check(after, self.sign(after))[0].close_policy, "ABORT_ON_INCOMPLETE")
+        for invalid in (None, "", "omit_unavailable", "DEFAULT", 0):
+            body["availability_policy"]["close_policy"] = invalid
+            with self.assertRaises(crypto.CodecError):
+                c.encode(body)
+        del body["availability_policy"]["close_policy"]
+        with self.assertRaises(crypto.CodecError):
+            c.encode(body)
 
     def test_strict_wire_no_legacy_or_lossy_config(self):
         body = self.body()

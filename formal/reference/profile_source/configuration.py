@@ -1,8 +1,9 @@
 """R2.3: source-bound configuration decoding in the isolated future generation.
 
 DRC1 tags, type code/domain and all 22 original fields are retained. The selected
-S/retention contracts require availability_policy.storage_binding; it is part of
-the full signed body. This module does NOT infer proposal, delivery or finality
+S/retention contracts require availability_policy.storage_binding; the existing
+immutable input-close policy is also part of that full signed body. This module
+does NOT infer proposal, delivery or finality
 from a valid signature, and never admits a legacy config in the new generation.
 """
 
@@ -191,7 +192,11 @@ def validate(value):
         and sum(row["ticket_count"] for row in rows) == value["ticket_count"],
         "original ordered complete ticket plan",
     )
-    policy = closed(value["availability_policy"], {"storage_binding"})
+    policy = closed(value["availability_policy"], {"close_policy", "storage_binding"})
+    _require(
+        policy["close_policy"] in ("OMIT_UNAVAILABLE", "ABORT_ON_INCOMPLETE"),
+        "existing immutable RoundConfig input-close policy",
+    )
     binding = closed(policy["storage_binding"], retention.BINDING_KEYS)
     _id(binding["storage_registry_id"])
     _label(binding["storage_epoch_id"])
@@ -243,6 +248,7 @@ class BoundConfig:
     round_id: str
     height: int
     view: int
+    close_policy: str
     storage_binding: retention.StorageBinding
 
 
@@ -284,6 +290,7 @@ def bind(
         value["round_id"],
         int(value["height"]),
         int(value["view"]),
+        value["availability_policy"]["close_policy"],
         binding,
     )
 

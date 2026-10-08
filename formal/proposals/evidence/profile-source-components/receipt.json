@@ -39,15 +39,16 @@
     "formal/proofs/DeltaReduce/ArithmeticKernel.lean": "d8d43199a15914ba7f722d2dee7cc904b6b02e7cbdae37ec93f76dd1f8b45619",
     "formal/proofs/DeltaReduce/ApplyKernel.lean": "780760d7647806ae8eaa48ba461676815947656404f11da946d4217e64baf7b8",
     "formal/proofs/DeltaReduce/RecoveryKernel.lean": "af56e3c48ec83febd468e4702e3ed51b1493ea1c2ff67c0bb07bd3a9d227acfa",
-    "formal/proposals/isc-source-generation/SourcePolicy.lean": "16ca5ad4bbbbf2f163f2f9ca3904d7e761a61d38589be95a1120d29e2f9b08c9",
-    "formal/proofs/DeltaReduce/NativeIscCertificate.lean": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
-    "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
+    "formal/proposals/b-family-transfer/ProfileConfiguration.lean": "5a0f35c47652ceef62b9863e5a7b2dfa1b7ee0dbcd11e04f3071c0a57d9a7536",
+    "formal/proofs/DeltaReduce/NativePolicyCodec.lean": "799f13148f1913c5a21eecdb1931dd6c72d7e147f96a6eb4b1817f9ecf4c7320",
     "formal/proofs/DeltaReduce/NativeConfigAdmission.lean": "73890c23bae73e474465b7e0b5412016be3982d888cfc88be9cf2219f03db534",
     "formal/proofs/DeltaReduce/NativePolicyBytes.lean": "9a7570b9ecd340a869c2a154e7be41f9c77cd43cf5d04bb985dcc2539f271dd2",
     "formal/proofs/DeltaReduce/NativePolicySchema.lean": "4d19ebe15b067aab6442c8b67b4adfd1adfd9fe7718bd3cded8df4a9b8267612",
-    "formal/proofs/DeltaReduce/NativePolicyCodec.lean": "799f13148f1913c5a21eecdb1931dd6c72d7e147f96a6eb4b1817f9ecf4c7320",
     "formal/proofs/DeltaReduce/NativeStateBytes.lean": "cb66d643495fbfb3a694240cf533e8f745a68afd58f28bcfb99891391463782e",
     "formal/proofs/DeltaReduce/NativeWalScan.lean": "0281eef29dfd973c3f63685ffffb926c012e399dea05444b647d36f989b14e58",
+    "formal/proposals/isc-source-generation/SourcePolicy.lean": "16ca5ad4bbbbf2f163f2f9ca3904d7e761a61d38589be95a1120d29e2f9b08c9",
+    "formal/proofs/DeltaReduce/NativeIscCertificate.lean": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
+    "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
     "generated/ControlVectors0.lean": "907549be52d1375cfb903479a10989c482dcc0e3a66f4fe0d10b970233356d2b",
     "generated/ControlVectors1.lean": "718e8671c7a02c9bdbb0b2f131411b39e47ae50bb2ca7d34d44855d19a75d5f8",
     "generated/ControlVectors2.lean": "8200e34c241f5a259b16543a6f1eece1eb0947995492bbb304a75ecbd25c4db4",
@@ -56,16 +57,18 @@
     "generated/ControlVectors5.lean": "630d4bbd61b93571810f4ba6e15da42ccd3a45c50281ea7d89349b454be3b9f2",
     "generated/ControlVectors.lean": "8cba1d4f135de0bd81772e1eab66cb4d94784b30391b34ac655dcc8c5b084c43",
     "generated/ISCVectors.lean": "272b5a8c021814dc20031d427ef1dd5862cb891940e45618e68425a41da52868",
+    "generated/ConfigurationVectors.lean": "67311639f84eeb8d25c52e2ac734e4ae2b09f3617e206b81e768cdc02058b26f",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
-    "formal/reference/profile_source/capsule_binding.py": "dbb6b8e05a9b854529a3f21543b73d038165697a8fd755c650f3d6a55480d9cc",
+    "formal/reference/profile_source/capsule_binding.py": "de1ccb9b474f07f04283e5e8f30b51f5cb9eadae6ed77ba3d37a0c6d21af2e1c",
     "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
-    "formal/reference/profile_source/configuration.py": "be6d3cc595cc64b6951a7d693c671f1dd7da53586ac799fe4af3cc53828f77e0",
+    "formal/reference/profile_source/configuration.py": "eb537d44d64ef3b1dbc53edb04ee532e181f9cf5311a769d85cf5b3bbd693b6d",
     "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
     "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
+    "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
     "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
-    "formal/reference/profile_source/input_history.py": "95338c4929da283721afe01a6c19f0c02c9ed98cae5f4e00d034963f2ed7e04a",
+    "formal/reference/profile_source/input_history.py": "f6aeb697f7d393d5bb1d96ea2fa36474d0d1975a3c54dfd8ee16ef87011ad6d2",
     "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
     "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
@@ -77,12 +80,12 @@
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
     "formal/reference/profile_source/test_capsule_binding.py": "ce9c86a39dcd39dc38a3b14b9e977e276bd68fb6fe1f611132e96b2653ff76ec",
     "formal/reference/profile_source/test_commands.py": "abe076da3f78b9e00ef5fb3e7f31cee5d2d84e353b15474b9449f97c1a1cafbb",
-    "formal/reference/profile_source/test_configuration.py": "d409a2f2d9eb24935661c5f4f18e8fef4023baccdaa88d0f53d3c061995fe827",
+    "formal/reference/profile_source/test_configuration.py": "381602b8e8af51b78e8efa2aa8ab7387a9a2006ca40ec799d41ee29ad2fdccc1",
     "formal/reference/profile_source/test_configuration_history.py": "a669c68b3e162d8d6dd7a04a9eba1c22e3c1f5240b4336f1850108503eed3b66",
     "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
     "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
-    "formal/reference/profile_source/test_input_capsule.py": "42816bd7247e2630b1b49cf66a3a164842066b5189d8621ddf1e5fc12be52ec5",
-    "formal/reference/profile_source/test_input_history.py": "f140cfa35efc4d185fdae1803c090aaf530d588a4b90cbe7506d1f8c430ee65d",
+    "formal/reference/profile_source/test_input_capsule.py": "8dd8b5507e6b54479aef6aa7ee008b7cd85da2059275f602b3278e0d207cde9a",
+    "formal/reference/profile_source/test_input_history.py": "2224dd1644ad27af44421190994116c05fe8827524eacf0c0435e852066fe2f5",
     "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
     "formal/reference/profile_source/test_manifest_context.py": "2d53806558e73b80bde4716bef6abd266c079e09c7f607d506dac5bb6f4ffb83",
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
@@ -93,8 +96,8 @@
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "91e26ddac36236f59ab9541efe3227aa064d60286b5f4e2b4581d651ce156d05",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "4332a91425f096a139ccabdc5e0ed975b3aac48f2864ec7a053df820a975eb6c",
+    "formal/reference/profile_source/README.md": "8082ce0368fd18d59ad32f587559b3bac45bc61e4da794f044b2574f688e6435",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "ede662cc5ef7a73dec269e6aff2291de7488c6208beec4f57b493443f9831c0c",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
@@ -383,6 +386,11 @@
       "sha256": "1b2fa0912aedf33bca76312100c4b206f8a1e9dd73f882a9d66a0bcfc2eb0dda"
     },
     {
+      "log": "ProfileConfiguration.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "DeltaReduce.NativeInputSetBody.txt",
       "exit_code": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -400,7 +408,7 @@
     {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "45914cbb8e1132b3ac305a02627f917d2308c51dcc766d74945b4ce2df48f36c"
+      "sha256": "2242386c05db0acd1ca88f7729524570690a6df21b0d9931c7e3979f99aec501"
     },
     {
       "log": "control-vectors-0.txt",
@@ -443,19 +451,24 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "configuration-vectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "797c7d0859b9856a4f315395ce60a132ab5795a7bc7164e0d984812a0b9c4992"
+      "sha256": "19697d9e9bfa804171fd23e884a78e55b8233e182e7b035d86b583ec899a9e95"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "d39fd85ab0fc3c505899ed3e2966f986ccf82c00d51fce3050568811efeae871"
+      "sha256": "70001eb538be6042534400bf40e381a74cc96b881981ae4108c569c0d5a6bec8"
     },
     {
       "log": "w1-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "a675c346d1cee4b945095824c0434483e15483b54e36fcac0fc82db75bf0a870"
+      "sha256": "dee993b0f9659fe0ca7e15cf8b226a48e702ee1bdbcadafa6c946b020f9bd5c9"
     },
     {
       "log": "ruff.txt",
@@ -465,7 +478,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "1e8100ce5112b41053a89fae8931d735807139a983d212a9a9d2a8fab1194b67"
+      "sha256": "aec51819fa2b338a1a7896d7f3fa3a16c30fdb3b01d724c485d984ae83b87a06"
     }
   ],
   "established": [
@@ -491,7 +504,9 @@
     "W1 received inventory derives exact signed G/B inputs, receiver and original cut",
     "Indexed W1 binds the retained command predecessor and all admitted deliveries",
     "Closed B/tuples derive from original CONFIG/ticket/manifest/AC/freeze source facets",
-    "Joined input-to-W1 path re-resolves profile keys; no supplied frozen body/tuple list"
+    "Joined input-to-W1 path re-resolves profile keys; no supplied frozen body/tuple list",
+    "Full DRC1 configuration codec inverse/injectivity with original nested fields",
+    "Existing two close policies derive from exact signed config, with no override"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

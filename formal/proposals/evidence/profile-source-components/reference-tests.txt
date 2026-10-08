@@ -18,6 +18,7 @@ test_complete_mixed_positions_without_forging_vote_legality (formal.reference.pr
 test_future_generation_is_selected_independently_no_legacy_fallback (formal.reference.profile_source.test_commands.CommandsTests.test_future_generation_is_selected_independently_no_legacy_fallback) ... ok
 test_whole_effect_and_inner_record_substitution_rejects (formal.reference.profile_source.test_commands.CommandsTests.test_whole_effect_and_inner_record_substitution_rejects) ... ok
 test_all_original_config_fields_are_signed_not_only_storage_binding (formal.reference.profile_source.test_configuration.ConfigurationTests.test_all_original_config_fields_are_signed_not_only_storage_binding) ... ok
+test_close_policy_is_immutable_authenticated_config_not_an_override (formal.reference.profile_source.test_configuration.ConfigurationTests.test_close_policy_is_immutable_authenticated_config_not_an_override) ... ok
 test_configuration_cannot_select_storage_trust_or_normalize_declaration (formal.reference.profile_source.test_configuration.ConfigurationTests.test_configuration_cannot_select_storage_trust_or_normalize_declaration) ... ok
 test_strict_wire_no_legacy_or_lossy_config (formal.reference.profile_source.test_configuration.ConfigurationTests.test_strict_wire_no_legacy_or_lossy_config) ... ok
 test_whole_config_bytes_and_original_vote_retained (formal.reference.profile_source.test_configuration.ConfigurationTests.test_whole_config_bytes_and_original_vote_retained) ... ok
@@ -121,6 +122,6 @@ test_signature_without_own_intent_or_corrupt_signature_rejected (formal.referenc
 test_unsigned_durable_cut_is_retained_without_claiming_signature (formal.reference.profile_source.test_votes.VoteIntentTests.test_unsigned_durable_cut_is_retained_without_claiming_signature) ... ok
 
 ----------------------------------------------------------------------
-Ran 121 tests in 8.324s
+Ran 122 tests in 6.991s
 
 OK

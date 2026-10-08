@@ -337,13 +337,12 @@ def bind_input_indexed(
     plan,
     original_config,
     declaration,
-    close_policy,
 ):
     """Derive the full closed B/tuples from the same original retained W1 cut.
 
     This removes caller-selected body/tuple lists from this composition. It
     does not remove the remaining genesis, complete P0, producer/control and
-    normalized close-policy origin obligations. There is no R2 success premise.
+    full configuration origin obligations. There is no R2 success premise.
     """
     from formal.reference.profile_source import authority, input_history, metadata, source_prefix
 
@@ -386,7 +385,6 @@ def bind_input_indexed(
         original_config,
         declaration,
         actor=actor,
-        close_policy=close_policy,
     )
     _require(not inputs.unresolved, "complete original input source at retained cut")
     command = read_command(request.command_bytes, resolved.validators.formal_semantics_id)

@@ -153,7 +153,7 @@ class InputHistoryTests(unittest.TestCase):
             )
         )
 
-    def reconstruct(self, events=None, **changes):
+    def reconstruct(self, events=None):
         return h.reconstruct(
             tuple(self.events if events is None else events),
             self.f.boot,
@@ -163,7 +163,6 @@ class InputHistoryTests(unittest.TestCase):
             self.config,
             self.f.declaration,
             actor=self.actor,
-            close_policy=changes.get("close_policy", "OMIT_UNAVAILABLE"),
         )
 
     def test_closed_body_is_derived_from_original_complete_source_facets(self):

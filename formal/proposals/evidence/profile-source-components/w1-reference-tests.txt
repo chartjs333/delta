@@ -34,6 +34,6 @@ test_short_write_fences_and_retains_partial_bytes (formal.reference.isc_w1.test_
 test_slot_conflict_gap_and_prefix_mismatch_do_not_write (formal.reference.isc_w1.test_harness.HarnessTests.test_slot_conflict_gap_and_prefix_mismatch_do_not_write) ... ok
 
 ----------------------------------------------------------------------
-Ran 34 tests in 1.610s
+Ran 34 tests in 1.565s
 
 OK

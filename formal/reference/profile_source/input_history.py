@@ -2,7 +2,7 @@
 
 This is part of the independent source fold, not a complete origin certificate.
 All byte inputs are selected from original occurrences/backward dependencies.
-The enclosing fold still checks lease/phase/time, normalized close-policy origin,
+The enclosing fold still checks lease/phase/time, complete configuration origin,
 transport/control and durable producer edges. Unknown input layouts stay pending.
 No current physical availability premise, supplied ledger or frozen tuple list
 is accepted here.
@@ -106,16 +106,14 @@ def bound_plan(plan, original_config):
     return body, {scheduling.decode(raw)["ticket_id"]: raw for raw in plan.tickets}
 
 
-def reconstruct(
-    events, validators, storage, backend, plan, original_config, declaration, *, actor, close_policy
-):
+def reconstruct(events, validators, storage, backend, plan, original_config, declaration, *, actor):
     """Read the existing original byte carriers and derive this ledger from empty.
 
     The initial planner/configuration arguments retain explicit provenance
     obligations; no dataclass or successful R2 result is accepted as authority.
-    In particular `close_policy` must later be bound to normalized configuration.
+    Close policy comes only from the exact original authenticated configuration;
+    there is no caller-selected override or default.
     """
-    _require(close_policy in ("OMIT_UNAVAILABLE", "ABORT_ON_INCOMPLETE"), "existing close policy")
     value, tickets = bound_plan(plan, original_config)
     configuration = cfg.bind(validators, storage, original_config, declaration)
     _require(actor in [name for name, _ in validators.validators], "original enrolled receiver")
@@ -220,7 +218,8 @@ def reconstruct(
             elif event.actor == actor and event.action == "ACT-INPUT-CLOSE":
                 configs.finalized_config(config_state, configuration.body_id)
                 _require(
-                    close_policy == "OMIT_UNAVAILABLE" or len(state.availabilities) == len(tickets),
+                    configuration.close_policy == "OMIT_UNAVAILABLE"
+                    or len(state.availabilities) == len(tickets),
                     "incomplete original input set",
                 )
                 result = ledger.freeze(state, occurrence)

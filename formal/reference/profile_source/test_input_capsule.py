@@ -275,7 +275,6 @@ class InputCapsuleTests(unittest.TestCase):
             plan=self.input.plan,
             original_config=self.input.config,
             declaration=self.input.f.declaration,
-            close_policy="OMIT_UNAVAILABLE",
         )
         args.update(changes)
         return c.bind_input_indexed(authorities, self.backend, source.materialize(meta), **args)
