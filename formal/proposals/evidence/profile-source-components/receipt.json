@@ -60,9 +60,10 @@
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
     "formal/reference/profile_source/capsule_binding.py": "3a7af6145534cceef84762739797bcb80740a375ccef1314393dfb46c1b61d9b",
+    "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
     "formal/reference/profile_source/configuration.py": "be6d3cc595cc64b6951a7d693c671f1dd7da53586ac799fe4af3cc53828f77e0",
-    "formal/reference/profile_source/configuration_history.py": "a4db48c262408126e4fde7e7143d49caf9b23582b3c730ea0bb567561fb99a2b",
-    "formal/reference/profile_source/configuration_qc.py": "9ae386ad19b2ba4151e83be36fbc5b54c0b1fbcec58c4fd8543bb9ec276a4a64",
+    "formal/reference/profile_source/configuration_history.py": "5748e255256095f1402766ae4c8111da421eb6f33b863e4432ec483a9cd9a7a7",
+    "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
     "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
     "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
@@ -70,10 +71,11 @@
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
     "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
     "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
-    "formal/reference/profile_source/source_prefix.py": "c937d91dcf086ea65a860b953c7c6d0031e37ad95c3020362e185128f126a674",
+    "formal/reference/profile_source/source_prefix.py": "3f47c519d7bac6057d429a4e6751462075a972df3eebfd943c11bd3e32d43348",
     "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
     "formal/reference/profile_source/test_capsule_binding.py": "ce9c86a39dcd39dc38a3b14b9e977e276bd68fb6fe1f611132e96b2653ff76ec",
+    "formal/reference/profile_source/test_commands.py": "abe076da3f78b9e00ef5fb3e7f31cee5d2d84e353b15474b9449f97c1a1cafbb",
     "formal/reference/profile_source/test_configuration.py": "d409a2f2d9eb24935661c5f4f18e8fef4023baccdaa88d0f53d3c061995fe827",
     "formal/reference/profile_source/test_configuration_history.py": "e2b9d2bb5f1cd778c0c57ef0f01d42775987a1db5d93f5f5f825add3b098af27",
     "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
@@ -82,16 +84,18 @@
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
     "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
     "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
-    "formal/reference/profile_source/test_source_prefix.py": "ea0390c76b9ec28592a15929605f06f8d76f19e1fc66a8effef0e644c9acb691",
+    "formal/reference/profile_source/test_source_prefix.py": "70a29d47ba12175efd09b4e21e9649894f488e28f862b0f0b021a36f55c5a6d6",
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "38373df20498f34da3a5ef7fbfe637a9c076641fa5c293b81272151d620fad2f",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "ea16ecc22d5b471522efa9c55e431eecc24928de16bcda59a22f0399465976b8",
+    "formal/reference/profile_source/README.md": "f53f575c769620a5795eb4f01845db640da9f37debb4ac18c535863e4e552983",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "d3cfa0d13a86a85c4cd43384410b6418f71df7f0a51501c6991f200c73bd2031",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
     "formal/proposals/evidence/profile-source-components/native-lease-probe.json": "c6014d0b0699ed59948227b254de31408a9e4a36cd8706de0d9b94a39c473e9d",
+    "formal/proposals/native-transition-vectors.json": "fc095438fee6286f60f6199bc8fc0f3e05ff7f0d542223b6f55aec25e03392ae",
+    "formal/proposals/evidence/native-transition/cpp-cross-check.json": "6a91633e0dbcadc470a86df9af5b6d408d32ee8f56eab52dc61baf5a7dcec20c",
     "delta-protocol/fixtures/local-round/parameter-schema-v1.json": "b2e41ffaf836d0fa80bf5afc6d21a66fd9b54237b569f45e919f35675b7df7d6",
     "docs/adr/evidence/0014-isc-commitment-profile-v1-vectors.json": "22f84f58dadb68f3c6c98074b4eb58d9b9de8f2697e10f5b22ed5974fb9fd5df",
     "delta-protocol/schemas/004/accumulator-proof-instance-v1.json": "91a0c848a1133c4bbc1a6e8f6d230e92acbba570f50bc0266d56669472a7b3a1",
@@ -184,6 +188,36 @@
       "delta-core-cpp/src/sha256.cpp": "efd60eb765908a04581446d0f3352688bd3f552403e54d317b8f922494576dfe",
       "delta-core-cpp/src/sha256.hpp": "e50230051ea9cbde42a33dcf4cd2db7eaed2c534c1324937f1dbc78fec720d7e",
       "delta-core-cpp/tests/scheduling_lifecycle_test.cpp": "546ec54bd06d9439c13c32a12ad30ed8e1823be3bd0b64ac52a3548512644e30"
+    },
+    "command_capture_files": {
+      "delta-core-cpp/include/delta/certificates/contracts.hpp": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1",
+      "delta-core-cpp/include/delta/certificates/verifier.hpp": "934835e7f5e8f9bca7ceb8006557b6dcb357807f81717a3c86d88346f0247ff9",
+      "delta-core-cpp/include/delta/core/canonical.hpp": "10ac39eb4362ad336140861f6fe81a64f7f7282036eb37aa195d117439363314",
+      "delta-core-cpp/include/delta/core/consensus.hpp": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9",
+      "delta-core-cpp/include/delta/core/protocol.hpp": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4",
+      "delta-core-cpp/include/delta/core/transition.hpp": "d4b19e02c016b9edc0256e695ed19e8b01e43252b6c5022c5dd151988e0d1f12",
+      "delta-core-cpp/src/canonical.cpp": "432ca0299a85e18fb4e1ac4b3be93c1e8c8109acb995120b0e4512b81a01e156",
+      "delta-core-cpp/src/certificates/contracts.cpp": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8",
+      "delta-core-cpp/src/certificates/verifier.cpp": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879",
+      "delta-core-cpp/src/certificates/vote_admission.cpp": "655b74601e163c62242a6ede4f93b2749ef32eb7828caaef9d32e7e63b8ce1ef",
+      "delta-core-cpp/src/consensus.cpp": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8",
+      "delta-core-cpp/src/protocol.cpp": "431fe8e40afeaaf8479cb8fe86240e8db875629a0add316113b4ce748d4a86ab",
+      "delta-core-cpp/src/sha256.cpp": "efd60eb765908a04581446d0f3352688bd3f552403e54d317b8f922494576dfe",
+      "delta-core-cpp/src/sha256.hpp": "e50230051ea9cbde42a33dcf4cd2db7eaed2c534c1324937f1dbc78fec720d7e",
+      "delta-core-cpp/src/transition.cpp": "74e5a6e62cc1b6c4cd1e30a33cc983e522f22cb5f839942fbec5c707b48eb569",
+      "delta-core-cpp/tests/vote_fixture.cpp": "3e7b190aa844d6cdd7faaafecba2a6a38ea20b9e3e19509e2000c5fddf2b65bb",
+      "delta-core-cpp/tests/vote_fixture.hpp": "f2d7ff8afb99bd95dda165e7d3fec256bacd469aa5d949944481265a2390dca8",
+      "delta-ffi/src/delta_abi.cpp": "2a36951519067f7ca3b54d0ddf2c7a7a27468544336a8910019f16dbaa51cd40",
+      "delta-node-java/src/main/java/io/deltareduce/node/sidecar/SidecarSupervisor.java": "fde1d3e462a7cbdae33d2d9108634b0074991537c8b17fde5f95557e1e0b2706",
+      "delta-runtime-cpp/include/delta/runtime/bounded_mpsc.hpp": "3347aab5efa060dcd7e6ec5a8820a056f3e97f6a96cf89b21a2c21af3314c624",
+      "delta-runtime-cpp/include/delta/runtime/runtime.hpp": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3",
+      "delta-runtime-cpp/include/delta/runtime/vote_codec.hpp": "92c14cb6e9c404b53a665e83ed5b5481c0f201b4408bbe3dc934af03d25eb24c",
+      "delta-runtime-cpp/src/runtime.cpp": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91",
+      "delta-runtime-cpp/src/sidecar_server.cpp": "4983358e2789bbd70b52d78b0e9e9f833bc6fb2ef1f3f2fb9d6026991ba0c1cc",
+      "delta-runtime-cpp/src/vote_codec.cpp": "154e105e2a12799c7f499312273330895a180cda2430b09b4662bbb67b00937b",
+      "delta-runtime-cpp/src/wal.cpp": "fd62c60727b6f5725cdcef2cb56591746736f444c87d1895a1357a7d85377e7e",
+      "delta-runtime-cpp/src/wal.hpp": "7ed2427f12db7668d686f508e29527818c96fa53a2a0a7c7db4fe9b47753b688",
+      "delta-runtime-cpp/tests/vote_fixture_exporter.cpp": "f91c2d74359ac39ffa4909b540ede9395b6ce3ec90c6d0a5f237b71f5920f075"
     },
     "kind": "PIN_VERIFICATION_OF_RETAINED_EXECUTION_NOT_A_NEW_NATIVE_RUN"
   },
@@ -406,12 +440,12 @@
     {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "7fa8aeadc1cc189f6128fe1d1ebfc932e913183187d09b904324606600a9fe19"
+      "sha256": "00cd4ca9a80bb37878ddc628bc5769fef8f5eb36beba79de44be9a5b4655a493"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "80e4169cd724ae309d88480f8f644bd07aaca1047594266cc3cfcfd9088ab725"
+      "sha256": "a922f4dff2500db3aa3afc43a6b4c8141cb276086483ce77ef4a9fcf71f78181"
     },
     {
       "log": "ruff.txt",
@@ -421,7 +455,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "d6675b63a4767317d34641fb3901c01a3e6f8536bb9289fd7d0bdf7ae2bfe59b"
+      "sha256": "a29905b4529aee76474b804c49e3c3820a3c2ffa2c958cba5ab50986b9fe0db0"
     }
   ],
   "established": [
@@ -440,7 +474,9 @@
     "Merkle fuel completeness for all existing 100000 tuples; no 4096 manifest cap",
     "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
     "O actual read ownership from complete prefix; general binding, release/crash refusal",
-    "Original007 plan/ticket/lease/timer bytes and DSJ1 producer; static commitment safety"
+    "Original007 plan/ticket/lease/timer bytes and DSJ1 producer; static commitment safety",
+    "Original N command outputs/cache and coarse predecessor at every mixed WAL slot",
+    "CONFIG source occurrence keeps original receiver without fabricating transport peer"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

@@ -9,8 +9,6 @@ finalized-config collection with a replayed collection for these operations.
 from dataclasses import dataclass, replace
 
 from formal.reference.isc_crypto.codec import CodecError, _require
-from formal.reference.isc_w1.codec import Delivery
-from formal.reference.non_isc import codec as wire
 from formal.reference.non_isc.authentication import CONTRACT, AuthorityInputs, authenticate
 from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_qc as qc
@@ -27,7 +25,7 @@ class Proposal:
 @dataclass(frozen=True)
 class Received:
     source: Occurrence
-    original: qc.DeliverySource
+    original: qc.SignedOccurrence
     vote_id: str
     signer: str
     context: str
@@ -85,19 +83,10 @@ def deliver(state, event, validators, backend):
         signed = authenticate(AuthorityInputs(validators, CONTRACT), backend, event.original)
         if signed.vote.kind != "ROUND_CONFIG":
             return Result(result, "other_kind_requires_its_own_handler")
-        artifact = wire.decode_artifact(event.original)
     except CodecError:
         return Result(result, "rejected_signature_or_encoding")
     vote = signed.vote.original
-    material = Delivery(
-        event.index,
-        event.actor,
-        artifact.vote_bytes,
-        wire.preimage(artifact.registry_id, artifact.key_id, artifact.vote_bytes),
-        artifact.signature,
-        artifact.key_id,
-    )
-    original = qc.DeliverySource(material, event.original)
+    original = qc.SignedOccurrence(event.index, event.original)
     received = Received(
         event, original, signed.vote_id, vote.validator_id, vote.context_id, vote.body_hash
     )

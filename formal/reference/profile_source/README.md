@@ -32,6 +32,9 @@ actual strict signatures and all matching original delivered signers at the
 given cut, preserving repetitions, unrelated votes and exact vote IDs. This
 establishes the certificate conjunct, not the delivery's occurrence, proposal
 legality, durability or FinalizeRoundConfig history.
+An original CONFIG receive is carried with its original event index and bytes;
+the receiving actor is not substituted as a transport peer. Missing proposal
+inputs leave the failed attempt in the complete event inventory.
 
 `configuration_history.py` now folds original proposal/delivery/finalization
 occurrences from an empty CONFIG collection. It preserves the first finalized
@@ -53,6 +56,18 @@ projection rewrites the signed Vote bytes. The earlier reference comparison
 to vote count was a checker defect, corrected before R2.3 qualification.
 The anti-equivocation key is exactly the native `(validator, epoch, context)`;
 changing round/view/height/kind cannot create another local slot for that key.
+
+`commands.py` derives the coarse state at every mixed WAL position by applying
+the original N command rules and checking all original state/effect/inner-WAL
+outputs. It retains original request IDs, idempotent cached responses, logical
+time and policy invalidation. Physical slots stay separate from the coarse
+state counter. The original N C++ command capture is compared byte for byte;
+this is reuse of retained execution, not a new native run. Future-generation
+bytes use the independently selected semantics ID without legacy fallback.
+Kind-2/3 records remain explicit pending obligations of the complete producer
+fold; the kind-3 prior coarse state is already joined to this original command
+prefix. This component cannot establish initial-state authority, vote legality,
+durable finalization or an externally visible effect by itself.
 
 `ProfileSource.lean` proves general exact-reference, ordered position and
 multiplicity results and S-RANK annotation preservation/injectivity. It uses

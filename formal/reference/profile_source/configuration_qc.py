@@ -87,11 +87,20 @@ class DeliverySource:
 
 
 @dataclass(frozen=True)
+class SignedOccurrence:
+    # Profile source position is not a transport peer identity. Unlike a W1
+    # Delivery, this carrier makes no assertion about an original peer envelope.
+    # Its receiver/actor and original descriptor remain on source_prefix.Event.
+    index: int
+    original_artifact: bytes
+
+
+@dataclass(frozen=True)
 class BoundQC:
     original: bytes
     original_qc_id: str
     config: cfg.BoundConfig
-    deliveries: tuple[DeliverySource, ...]
+    deliveries: tuple[DeliverySource | SignedOccurrence, ...]
     matching_signers: tuple[str, ...]
     original_vote_ids: tuple[str, ...]
 
@@ -127,27 +136,28 @@ def bind(
     matching, previous = {}, -1
     for source in delivered:
         _require(
-            type(source) is DeliverySource and type(source.event) is Delivery,
+            type(source) is SignedOccurrence
+            or (type(source) is DeliverySource and type(source.event) is Delivery),
             "original delivery shape",
         )
-        event = source.event
-        _uint(event.event_index, 8)
-        _require(
-            previous < event.event_index <= source_cut, "original ordered delivery occurrences"
-        )
-        previous = event.event_index
+        index = source.index if type(source) is SignedOccurrence else source.event.event_index
+        _uint(index, 8)
+        _require(previous < index <= source_cut, "original ordered delivery occurrences")
+        previous = index
         signed = authenticate(
             AuthorityInputs(bootstrap, CONTRACT), backend, source.original_artifact
         )
         artifact = decode_artifact(source.original_artifact)
-        _require(
-            event.vote_frame == artifact.vote_bytes
-            and event.key_id == artifact.key_id
-            and event.signature_bytes == artifact.signature
-            and event.signed_payload
-            == preimage(artifact.registry_id, artifact.key_id, artifact.vote_bytes),
-            "original delivery/artifact exact material",
-        )
+        if type(source) is DeliverySource:
+            event = source.event
+            _require(
+                event.vote_frame == artifact.vote_bytes
+                and event.key_id == artifact.key_id
+                and event.signature_bytes == artifact.signature
+                and event.signed_payload
+                == preimage(artifact.registry_id, artifact.key_id, artifact.vote_bytes),
+                "original delivery/artifact exact material",
+            )
         vote = signed.vote.original
         # Unrelated retained votes stay in the inventory. Only the exact full
         # context/body group contributes to this certificate; no first-q cut.

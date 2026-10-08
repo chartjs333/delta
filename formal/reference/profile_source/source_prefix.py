@@ -8,7 +8,7 @@ handler is not CONFIG. This is not a complete all-action legality checker.
 
 from dataclasses import dataclass
 
-from formal.reference.isc_crypto.codec import _require
+from formal.reference.isc_crypto.codec import CodecError, _require
 from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_history as history
 from formal.reference.profile_source import metadata as m
@@ -113,13 +113,14 @@ def configuration_prefix(prefix: Prefix, validators, storage, backend) -> Config
     for event in prefix.before_target:
         occurrence = event.occurrence()
         if event.action == "ACT-CONFIG-PROPOSE":
-            state = history.propose(
-                state,
-                occurrence,
-                validators,
-                storage,
-                declaration_for(event, event.original),
-            ).state
+            try:
+                declaration = declaration_for(event, event.original)
+            except CodecError:
+                # Malformed or incomplete attempts are original occurrences,
+                # not fabricated proposals and not permission to drop history.
+                state = history.observed(state, occurrence)
+            else:
+                state = history.propose(state, occurrence, validators, storage, declaration).state
         elif event.action == "ACT-CONFIG-FINALIZE":
             state = history.finalize(state, occurrence, validators, storage, backend).state
         elif event.action == "ACT-MESSAGE-DELIVER":

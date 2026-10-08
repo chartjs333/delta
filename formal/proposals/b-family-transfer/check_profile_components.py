@@ -24,17 +24,30 @@ def main():
     src, objects = BUILD / "source", BUILD / "objects"
     sources, order, checks = {}, [], []
     probe = json.loads((OUT / "native-lease-probe.json").read_text(encoding="utf8"))
-    if probe["source_commit"] != "60c692f6e391f839829dfc64e93380db54cd507b":
-        raise RuntimeError("Unqualified native producer source pin")
-    for path, expected in probe["source_blobs"].items():
-        if not re.fullmatch(r"delta-core-cpp/[a-zA-Z0-9_./-]+", path) or ".." in path:
-            raise RuntimeError("Unexpected native source locator")
-        original = subprocess.check_output(
-            ["cmd.exe", "/d", "/c", "git", "cat-file", "blob", probe["source_commit"] + ":" + path],
-            cwd=ROOT,
-        )
-        if digest(original) != expected:
-            raise RuntimeError("Original native source mismatch " + path)
+    command_capture = json.loads(
+        (ROOT / "formal/proposals/evidence/native-transition/cpp-cross-check.json").read_text()
+    )
+    retained_sources = (
+        (probe["source_commit"], probe["source_blobs"]),
+        (command_capture["source_commit"], command_capture["source_sha256"]),
+    )
+    for commit, paths in retained_sources:
+        if commit != "60c692f6e391f839829dfc64e93380db54cd507b":
+            raise RuntimeError("Unqualified native producer source pin")
+        for path, expected in paths.items():
+            if (
+                not re.fullmatch(
+                    r"delta-(core-cpp|runtime-cpp|ffi|node-java)/[a-zA-Z0-9_./-]+", path
+                )
+                or ".." in path
+            ):
+                raise RuntimeError("Unexpected native source locator")
+            original = subprocess.check_output(
+                ["cmd.exe", "/d", "/c", "git", "cat-file", "blob", commit + ":" + path],
+                cwd=ROOT,
+            )
+            if digest(original) != expected:
+                raise RuntimeError("Original native source mismatch " + path)
 
     def visit(name):
         if name in order or name in {"Init", "Std"}:
@@ -260,6 +273,8 @@ def main():
         ROOT / "delta-protocol/fixtures/004/cross-language/golden-v1.json",
         ROOT / "delta-protocol/fixtures/007/cross-language/golden-v1.json",
         OUT / "native-lease-probe.json",
+        ROOT / "formal/proposals/native-transition-vectors.json",
+        ROOT / "formal/proposals/evidence/native-transition/cpp-cross-check.json",
         ROOT / "delta-protocol/fixtures/local-round/parameter-schema-v1.json",
         ROOT / "docs/adr/evidence/0014-isc-commitment-profile-v1-vectors.json",
         *sorted((ROOT / "delta-protocol/schemas/004").glob("*.json")),
@@ -296,6 +311,7 @@ def main():
         "external_native_probe_sources": {
             "commit": probe["source_commit"],
             "files": probe["source_blobs"],
+            "command_capture_files": command_capture["source_sha256"],
             "kind": "PIN_VERIFICATION_OF_RETAINED_EXECUTION_NOT_A_NEW_NATIVE_RUN",
         },
         "checks": checks,
@@ -316,6 +332,8 @@ def main():
             "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
             "O actual read ownership from complete prefix; general binding, release/crash refusal",
             "Original007 plan/ticket/lease/timer bytes and DSJ1 producer; static commitment safety",
+            "Original N command outputs/cache and coarse predecessor at every mixed WAL slot",
+            "CONFIG source occurrence keeps original receiver without fabricating transport peer",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

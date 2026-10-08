@@ -105,6 +105,26 @@ class SourcePrefixTests(unittest.TestCase):
         self.assertEqual(result.target.finalized, ())
         self.assertEqual([e.index for e in result.other_actions], [0, 8])
 
+    def test_rejected_config_attempt_is_retained_without_inventing_proposal(self):
+        # Missing original E makes the attempt inadmissible. Later authentic
+        # signatures cannot supply the missing proposal or delete its position.
+        self.p.index["events"][0]["input_refs"] = []
+        self.rebind()
+        result = self.check()
+        self.assertEqual(result.target.proposals, ())
+        self.assertEqual(result.target.finalized, ())
+        self.assertEqual(len(result.target.events), len(self.p.index["events"]))
+        self.assertEqual(result.target.events[0].original, self.config.raw)
+
+    def test_receiver_position_does_not_manufacture_w1_peer_identity(self):
+        result = self.check()
+        first = result.target.received[0]
+        self.assertEqual(first.source.actor, "original-receiver")
+        self.assertIs(type(first.original), qc.SignedOccurrence)
+        self.assertEqual(first.original.index, first.source.index)
+        self.assertEqual(first.original.original_artifact, first.source.original)
+        self.assertFalse(hasattr(first.original, "event"))
+
     def test_importer_cannot_rewrite_the_independent_source_index(self):
         changed = copy.deepcopy(self.p.index)
         changed["events"].pop()
