@@ -36,6 +36,37 @@
 'DeltaReduce.ProfileSource.Control.profileIndependentOfImportedVersion' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.collectedOriginals' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.collectedEach' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.collectComplete' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.InputSection.bodySource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.bodyComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.boundComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.finalizedBodyWitness' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.closedOriginalBody' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.originalCounts' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.sameBodySameConsensusId' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.witnessCannotReplaceBody' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.InputSection.cannotHideOriginalWitness' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.fieldNamesUnchanged' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.normSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.normComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.seedSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.seedComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.normOriginalParent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.seedOriginalParent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.sectionSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.sectionComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.everyNormParent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.everySeedParent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Lineage.noOriginalErasure' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Policy.lookupByNames' depends on axioms: [propext]
 'DeltaReduce.ProfileSource.Policy.sameOuterFields' depends on axioms: [propext]
 'DeltaReduce.ProfileSource.Policy.sameSnapshotFields' depends on axioms: [propext]

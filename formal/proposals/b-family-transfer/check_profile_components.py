@@ -63,6 +63,8 @@ def main():
             "ProfileSourceIndex",
             "ProfileVoteJournal",
             "ProfilePolicy",
+            "ProfileInputSection",
+            "ProfileLineage",
             "ProfileNativeHeader",
         }:
             path = Path(__file__).with_name(name + ".lean")
@@ -77,6 +79,8 @@ def main():
             "ProfileSourceIndex",
             "ProfileVoteJournal",
             "ProfilePolicy",
+            "ProfileInputSection",
+            "ProfileLineage",
             "ProfileNativeHeader",
             "SourcePolicy",
             "SourceVote",
@@ -114,6 +118,8 @@ def main():
     visit("ProfileSourceIndex")
     visit("ProfileVoteJournal")
     visit("ProfilePolicy")
+    visit("ProfileInputSection")
+    visit("ProfileLineage")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -169,8 +175,49 @@ def main():
         "import ProfileConfiguration\nimport ProfileNativeHeader\n"
         "import SourcePolicy\nimport SourceVote\nimport ProfileConfigurationQC\n"
         "import ProfileSourceIndex\nimport ProfileVoteJournal\nimport ProfilePolicy\n"
+        "import ProfileInputSection\nimport ProfileLineage\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
     )
+    for namespace, theorems in (
+        (
+            "InputSection",
+            (
+                "collectedOriginals",
+                "collectedEach",
+                "collectComplete",
+                "bodySource",
+                "bodyComplete",
+                "boundSource",
+                "boundComplete",
+                "finalizedBodyWitness",
+                "closedOriginalBody",
+                "originalCounts",
+                "sameBodySameConsensusId",
+                "witnessCannotReplaceBody",
+                "cannotHideOriginalWitness",
+            ),
+        ),
+        (
+            "Lineage",
+            (
+                "fieldNamesUnchanged",
+                "normSource",
+                "normComplete",
+                "seedSource",
+                "seedComplete",
+                "normOriginalParent",
+                "seedOriginalParent",
+                "sectionSource",
+                "sectionComplete",
+                "everyNormParent",
+                "everySeedParent",
+                "noOriginalErasure",
+            ),
+        ),
+    ):
+        audit += "".join(
+            f"#print axioms DeltaReduce.ProfileSource.{namespace}.{name}\n" for name in theorems
+        )
     audit += "".join(
         "#print axioms DeltaReduce.ProfileSource.Policy." + name + "\n"
         for name in (
@@ -451,6 +498,20 @@ def main():
     )
     run([str(LEAN), "PolicyVectors.lean"], "policy-vectors.txt", src, environment)
     sources["generated/PolicyVectors.lean"] = digest(policy_source.encode())
+    from formal.reference.profile_source.input_section_vectors import generate as input_vectors
+    from formal.reference.profile_source.lineage_vectors import generate as lineage_vectors
+
+    for stem, log_stem, generator in (
+        ("InputSectionVectors", "input-section", input_vectors),
+        ("LineageVectors", "lineage", lineage_vectors),
+    ):
+        lean_source, originals = generator()
+        (src / (stem + ".lean")).write_text(lean_source, encoding="utf8", newline="\n")
+        (OUT / (log_stem + "-originals.json")).write_text(
+            json.dumps(originals, indent=2) + "\n", encoding="utf8", newline="\n"
+        )
+        run([str(LEAN), stem + ".lean"], log_stem + "-vectors.txt", src, environment)
+        sources["generated/" + stem + ".lean"] = digest(lean_source.encode())
     run(
         [
             sys.executable,
@@ -587,6 +648,8 @@ def main():
             "Own-journal scan retains every original vote and native context-key uniqueness",
             "Whole successor policy extracts original typed fields without legacy re-encoding",
             "CONFIG/S0/P0 source join retains all 33 snapshot fields and original candidate trees",
+            "Whole original ISC collections retain two witnesses for one consensus body",
+            "Norm/seed source bytes join finalized b without replacing or erasing original C",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

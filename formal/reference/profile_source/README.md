@@ -287,6 +287,19 @@ composition and the full native producer remain required. Synthetic vectors
 deliberately retain malformed protocol payloads: materialization cannot erase
 them or turn them into a valid native history.
 
+`ProfileInputSection.lean` binds the entire original body/certificate and
+closed/finalized collections at their original policy context. Every raw body
+and certificate is retained; two witnesses of one body remain two witnesses,
+and finalized b cannot be replaced by artifact c. `ProfileLineage.lean` joins
+the complete original norm/seed collections to that finalized b using the
+existing field grammar and domain separators under the parameterized successor
+semantics. It constructs expected successor bytes, never rewrites a legacy
+source after verification. General collection soundness/completeness and
+no-erasure results do not assert legal production, norm computation, seed
+authority or durable seed-release permission. Those remain in the enclosing
+source fold. Kernel vectors contain two original witnesses and nonempty
+norm/seed lineage, with deliberately unqualified unrelated fields retained.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all
