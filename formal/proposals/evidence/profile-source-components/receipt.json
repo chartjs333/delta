@@ -50,6 +50,7 @@
     "formal/proposals/isc-source-generation/SourcePolicy.lean": "16ca5ad4bbbbf2f163f2f9ca3904d7e761a61d38589be95a1120d29e2f9b08c9",
     "formal/proofs/DeltaReduce/NativeIscCertificate.lean": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
     "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
+    "formal/proposals/isc-source-generation/SourceVote.lean": "fd7727fbab767898af14659215fc3512f4967321ea056b3fb90788704a37add5",
     "generated/ControlVectors0.lean": "907549be52d1375cfb903479a10989c482dcc0e3a66f4fe0d10b970233356d2b",
     "generated/ControlVectors1.lean": "718e8671c7a02c9bdbb0b2f131411b39e47ae50bb2ca7d34d44855d19a75d5f8",
     "generated/ControlVectors2.lean": "8200e34c241f5a259b16543a6f1eece1eb0947995492bbb304a75ecbd25c4db4",
@@ -59,18 +60,19 @@
     "generated/ControlVectors.lean": "8cba1d4f135de0bd81772e1eab66cb4d94784b30391b34ac655dcc8c5b084c43",
     "generated/ISCVectors.lean": "272b5a8c021814dc20031d427ef1dd5862cb891940e45618e68425a41da52868",
     "generated/ConfigurationVectors.lean": "67311639f84eeb8d25c52e2ac734e4ae2b09f3617e206b81e768cdc02058b26f",
-    "generated/NativeHeaderVectors.lean": "7babeefe088a96164cb2edac312b66717bdbc5e37327795c8e396ee7756e71de",
+    "generated/NativeHeaderVectors.lean": "4816420e5e461391ee22cb178186a3659026b287fd09a866ce7f03496b363cad",
+    "generated/SourceVoteVectors.lean": "6030cd9816354da3b076cc40bfbe74314f0eb9ce6cbd39f8f0649c52fe93fa02",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
-    "formal/reference/profile_source/capsule_binding.py": "70283e241c431b9acb2d362c79bb49274c26f3d5f1b80164fcb4b4291a317570",
+    "formal/reference/profile_source/capsule_binding.py": "1c934e79a04ddaa7bff78fb7d0df84decc7afd432c74aeae2f4b2339932b36e3",
     "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
     "formal/reference/profile_source/configuration.py": "b683b9155215ba28203492084141ae5a984d9e7da54d611353639e71b74ab180",
     "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
     "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
     "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
     "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
-    "formal/reference/profile_source/input_history.py": "1b724edc2c5c6d0adad7f3236f5aff809273d9eebafdee0f569cf117e230d74a",
+    "formal/reference/profile_source/input_history.py": "8a157a442c979a539c6810f4321aa1675e7111fee2918bfa3024f1773bf33180",
     "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
     "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
@@ -87,7 +89,7 @@
     "formal/reference/profile_source/test_configuration_history.py": "a669c68b3e162d8d6dd7a04a9eba1c22e3c1f5240b4336f1850108503eed3b66",
     "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
     "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
-    "formal/reference/profile_source/test_input_capsule.py": "a826075be3bcba0e8255366981d9165ade86a181b7a51e894c96ba2fb77cf20d",
+    "formal/reference/profile_source/test_input_capsule.py": "9096f4f67ddc44d1ab6e260e1718ee1219011284ab512f981aa7ec4215c2f644",
     "formal/reference/profile_source/test_input_history.py": "73ce9bcaf5ae6d1ec83443bf1a4b4d874c3b84d5fc1428c92fa486bc4d283cd1",
     "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
     "formal/reference/profile_source/test_manifest_context.py": "2d53806558e73b80bde4716bef6abd266c079e09c7f607d506dac5bb6f4ffb83",
@@ -97,10 +99,11 @@
     "formal/reference/profile_source/test_source_deliveries.py": "8ee65881544cb5f204685c4541e0694990047a99a07ac12ef371ce964de6b96a",
     "formal/reference/profile_source/test_source_prefix.py": "ffe689855a4e5bef8ca02bd3d3c662985b55656b0ad72729e419c963cab52b90",
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
+    "formal/reference/profile_source/vote_vectors.py": "77ccba72f393be28f2ff8745d8153ec0baecb4b9835f54c039ddcd9f5e55b687",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "fe1d3cfe982d2915a366a48286adf01e265204c85f179a9833929c794d020f51",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "3ebad1d8c5dd3b213424cb880f66906b5b80548c176a2ed1a4a7a1c0e1032497",
+    "formal/reference/profile_source/README.md": "fea142abaf817c0cce59ff3098b7bd87757f51046c4704d1fa745c901a9dc7dd",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "628667b9de887ce25d51b0e456f20845096251644e39b537e3cae06869be5b9f",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
@@ -414,9 +417,14 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "SourceVote.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "fa9aea57a9f0eeff0a5ccc74097433cc9aa1893fda6c794fa85f7f33f358fdca"
+      "sha256": "d30ebde1858c682d745cb41e40b4d57c18a1f19b8b2137ea265e232b2e5ec344"
     },
     {
       "log": "control-vectors-0.txt",
@@ -469,19 +477,24 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "source-vote-vectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "5d423e127d94c1a8d1d1144c205867b47b526f9d4927d45df7d884b5c7c29186"
+      "sha256": "8948c2fb936f46cb5e218cba21a8c7f485ad024141325d14d9a48a6e447fc153"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "d674ce48b9e740b3509451a15a5bd9157df10800a537ca7d427898bb36016ab5"
+      "sha256": "e46d69b9e749ff65ddc767fdc5b5af7140d2b78c808fc328bdf4b4e8bcaa1ce0"
     },
     {
       "log": "w1-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "bdafa3873b4219dd89bd0be96e25d72021a0e6f7d43a30cf4a57e0532d3d1265"
+      "sha256": "9592c819b4f1f94d5ea7742db8b26bbed17cd206081083dad2af83110ca7892a"
     },
     {
       "log": "ruff.txt",
@@ -491,7 +504,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "d29644cebc037e2a733db225b8964bef215b4d0e037a4d4d2ce1aeb46f05a78c"
+      "sha256": "eb27c90aa064a61ea9229c3acedb339696979cc4f1b6d1e8e8dd6eab0c1292a7"
     }
   ],
   "established": [
@@ -521,7 +534,10 @@
     "Full DRC1 configuration codec inverse/injectivity with original nested fields",
     "Existing two close policies derive from exact signed config, with no override",
     "Original CONFIG/S0/P0 context, parent, deadlines and validators join without erasure",
-    "Full policy descriptor is injective; later views/sequences are retained unchanged"
+    "Full policy descriptor is injective; later views/sequences are retained unchanged",
+    "Successor twelve-field V codec, original signed preimages and own physical slots",
+    "General S-RANK join retains distinct original V objects without signed renumbering",
+    "Four P0 input collections bind to the retained CONFIG/close source facet"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

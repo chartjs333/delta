@@ -228,6 +228,27 @@ fixtures here are synthetic component evidence, including deliberately
 invalid opaque QC/history placeholders in metadata-only fixtures. They are
 not authenticated production captures or evidence for R2.3 closure.
 
+`SourceVote.lean` binds the approved twelve-field successor Vote grammar and
+all nine existing kinds to exact original bytes, with general inverse and
+injectivity results. It reuses primitive byte lemmas, never the legacy Vote
+decoder or legacy semantics ID. Original registry/key/V/signature descriptors
+must reproduce the entire detached artifact and signable preimage. Artifact
+size follows from the existing field bounds. A structural zero-signature vector
+does not establish authentication; the pinned strict verifier remains required.
+Own-journal binding preserves signed physical sequence; composition with S-RANK
+keeps two distinct original votes distinct without rewriting their bytes.
+The indexed W1 path now also checks every original kind-2 predecessor's exact
+bytes, actor, epoch, physical slot and native context uniqueness. It records
+unsigned intents without inventing signatures; producer admission and original
+signature/barrier events remain separately required in the full source fold.
+
+The input facet now checks the four complete P0 input collections against the
+original CONFIG and close occurrences. Adding, removing or duplicating a list
+element cannot be hidden by a correct header or a recomputed policy hash. Every
+original event and non-selected configuration occurrence remains in the source
+prefix. This still requires enclosing producer, initial-state and full-history
+qualification; the facet is not asserted complete for every policy/source cut.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

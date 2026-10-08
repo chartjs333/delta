@@ -212,6 +212,7 @@ class IndexedCapsule:
     original_source_cut: object
     original_deliveries: object
     command_prefix: object
+    original_own_intents: tuple
 
 
 def bind_indexed(
@@ -236,7 +237,7 @@ def bind_indexed(
     logical-clock/control state and frozen ledger. This function does not claim
     their origin, kind-2 admission, barrier completion or whole R2.3 closure.
     """
-    from formal.reference.profile_source import commands, metadata, source_prefix
+    from formal.reference.profile_source import commands, metadata, source_prefix, votes
 
     boot = metadata.validate(prefix.metadata.bootstrap_bytes, "BOOTSTRAP")
     actor = boot["local_validator_id"]
@@ -296,6 +297,10 @@ def bind_indexed(
         required_prefix=before,
     )
     journals.verify_inventory_row(folded.journal, own[0][0])
+    # Establish the original kind-2 byte/actor/physical-slot conjunct as well.
+    # No signature is inferred for an intent: the original source/signature
+    # inventory remains retained and needs its separate producer/auth join.
+    intents = votes.bind(bootstrap, backend, actor, folded.journal, ())
     received = source_prefix.isc_inventory(retained, bootstrap, backend, actor, body.round_id)
     _require(not received.unresolved, "complete original delivery source inputs required")
     native = read_state(folded.target.state, bootstrap.formal_semantics_id)
@@ -312,7 +317,7 @@ def bind_indexed(
         before, retained.index_id, retained.inclusive_cut, folded.target.state, original_policy, cut
     )
     result = bind(bootstrap, backend, position.original, prior, body)
-    return IndexedCapsule(result, retained, received, folded)
+    return IndexedCapsule(result, retained, received, folded, intents)
 
 
 @dataclass(frozen=True)
@@ -320,6 +325,7 @@ class InputBoundCapsule:
     capsule: IndexedCapsule
     input_source: object
     configuration_header: object
+    input_collections: object
 
 
 def bind_input_indexed(
@@ -426,4 +432,7 @@ def bind_input_indexed(
         bound.bound.predecessor.policy,
         actor,
     )
-    return InputBoundCapsule(bound, inputs, header)
+    collections = input_history.bind_input_collections(
+        inputs, original_policy, body.round_config_id
+    )
+    return InputBoundCapsule(bound, inputs, header, collections)

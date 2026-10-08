@@ -108,6 +108,7 @@ class InputCapsuleTests(unittest.TestCase):
             parameter_schema_id=body.parameter_schema_id,
             arithmetic_profile_id=body.arithmetic_profile_id,
             state_id=state_id,
+            proposed_round_config_ids=[body.round_config_id],
             finalized_round_config_ids=[body.round_config_id],
             closed_input_set_ids=[identity.body_id(body)],
             input_set_bodies=[finalization.body_tree(body)],
@@ -117,6 +118,17 @@ class InputCapsuleTests(unittest.TestCase):
             finalized_input_set_ids=[],
         )
         self.policy = policy.encode(p)
+        self.prefix_wal, self.prefix_count = b"", 0
+        if getattr(self, "with_original_intent", False):
+            own_raw = crypto.decode_artifact(deliveries[0].original_g).vote_bytes
+            own_vote = crypto.decode_vote(own_raw)
+            own_vote = replace(own_vote, **getattr(self, "intent_changes", {}))
+            self.own_vote = crypto.encode_vote(own_vote)
+            self.prefix_wal = w.encode_frame(
+                w.Frame(1, 2, (self.own_vote, b"", b"", sha256(self.policy).hexdigest().encode()))
+            )
+            self.prefix_count = 1
+        self.physical_slot = self.prefix_count + 1
         cut = finalization.Cut(
             state_id,
             body.parent_checkpoint_id,
@@ -141,7 +153,11 @@ class InputCapsuleTests(unittest.TestCase):
             "view": str(body.view),
         }
         raw_command = c.envelope(6, command)
-        originals = {raw for _, raw in self.p.artifacts} | {b"", self.initial, self.policy}
+        originals = {raw for _, raw in self.p.artifacts} | {
+            self.prefix_wal,
+            self.initial,
+            self.policy,
+        }
         for event in self.events:
             originals.update((event.original, *event.inputs))
         self.p.boot["genesis_ref"] = ref(self.initial)
@@ -149,7 +165,7 @@ class InputCapsuleTests(unittest.TestCase):
             genesis_ref=ref(self.initial),
             events=self.rows(self.events),
             artifacts=self.table(originals),
-            original_journal_refs=[self.journal(b"", 0)],
+            original_journal_refs=[self.journal(self.prefix_wal, self.prefix_count)],
         )
         self.prior_index = m.canonical(self.p.index)
         effects = c.publish_bytes(
@@ -157,8 +173,8 @@ class InputCapsuleTests(unittest.TestCase):
         )
         request = w.RequestSource(
             raw_command,
-            0,
-            sha256(b"").digest(),
+            len(self.prefix_wal),
+            sha256(self.prefix_wal).digest(),
             m.document_id(self.prior_index, "SOURCE_INDEX"),
             len(self.events) - 1,
             self.initial,
@@ -167,7 +183,7 @@ class InputCapsuleTests(unittest.TestCase):
         )
         self.w1 = w.encode_frame(
             w.Frame(
-                1,
+                self.physical_slot,
                 3,
                 (
                     w.encode_request_source(request),
@@ -177,7 +193,7 @@ class InputCapsuleTests(unittest.TestCase):
                     effects,
                     w.encode_receipt(
                         w.Receipt(
-                            1,
+                            self.physical_slot,
                             crypto.content_id("deltareduce:003:command:v1", raw_command),
                             candidate.witness_id,
                             crypto.content_id("deltareduce:003:effect-batch:v1", effects),
@@ -200,17 +216,20 @@ class InputCapsuleTests(unittest.TestCase):
                 b"original-finalization",
             )
         )
-        originals.update((self.prior_index, self.w1))
+        self.own_wal = self.prefix_wal + self.w1
+        originals.update((self.prior_index, self.w1, self.own_wal))
         self.p.artifacts = tuple(sorted((m.raw_id(raw), raw) for raw in originals))
         table = self.table(originals)
         self.p.index.update(
             events=self.rows(self.events),
             artifacts=table,
-            original_journal_refs=[self.journal(self.w1, 1)],
+            original_journal_refs=[self.journal(self.own_wal, self.physical_slot)],
         )
         self.p.index_raw, self.p.boot_raw = m.canonical(self.p.index), m.canonical(self.p.boot)
         bid = m.document_id(self.p.boot_raw, "BOOTSTRAP")
-        self.p.record.update(bootstrap_id=bid, journal_cuts=[self.journal(b"", 0)])
+        self.p.record.update(
+            bootstrap_id=bid, journal_cuts=[self.journal(self.prefix_wal, self.prefix_count)]
+        )
         self.p.manifest.update(
             bootstrap_id=bid,
             artifacts=table,
@@ -221,8 +240,8 @@ class InputCapsuleTests(unittest.TestCase):
                 {
                     "actor_id": self.actor,
                     "journal_id": "consensus",
-                    "cut": self.position(b"", 0),
-                    "target": self.position(self.w1, 1),
+                    "cut": self.position(self.prefix_wal, self.prefix_count),
+                    "target": self.position(self.own_wal, self.physical_slot),
                 }
             ],
         )
@@ -232,7 +251,7 @@ class InputCapsuleTests(unittest.TestCase):
             tuple(sorted((k, self.p.boot[k]) for k in m.PINS)),
             self.p.boot_raw,
             frame(self.p.record),
-            ((self.actor, "consensus", self.w1),),
+            ((self.actor, "consensus", self.own_wal),),
         )
 
     @staticmethod
@@ -269,7 +288,7 @@ class InputCapsuleTests(unittest.TestCase):
         authorities = authority.resolve(meta, self.a.keys, self.a.registry, self.a.storage_keys)
         args = dict(
             journal_id="consensus",
-            physical_slot=1,
+            physical_slot=self.physical_slot,
             consumer_index=self.consumer,
             original_prior_index=self.prior_index,
             initial_state=self.initial,
@@ -292,6 +311,54 @@ class InputCapsuleTests(unittest.TestCase):
         self.assertEqual(result.configuration_header.original_policy, self.policy)
         self.assertEqual(result.configuration_header.original_state, self.initial)
         self.assertEqual(result.configuration_header.configuration.original, self.input.config)
+        self.assertEqual(result.input_collections.original_policy, self.policy)
+        self.assertEqual(result.input_collections.bodies, (self.body,))
+
+    def test_snapshot_cannot_add_or_hide_input_collection_members(self):
+        prefix = self.check().input_source
+        from formal.reference.profile_source.input_history import bind_input_collections
+
+        original = policy.decode(self.policy)
+        for field in (
+            "proposed_round_config_ids",
+            "finalized_round_config_ids",
+            "closed_input_set_ids",
+            "input_set_bodies",
+        ):
+            for change in ([], original["snapshot"][field] * 2):
+                altered = deepcopy(original)
+                altered["snapshot"][field] = change
+                raw = policy.encode(altered)
+                with self.subTest(field=field), self.assertRaises(crypto.CodecError):
+                    bind_input_collections(prefix, raw, self.body.round_config_id)
+        # The original all-action history survives source binding, not just a
+        # deduplicated set of inputs or certificate identities.
+        bound = bind_input_collections(prefix, self.policy, self.body.round_config_id)
+        self.assertEqual(bound.prefix.original_events, prefix.original_events)
+        self.assertEqual(bound.original_policy, self.policy)
+
+    def test_original_kind_two_prefix_is_bound_before_w1(self):
+        self.with_original_intent = True
+        self.setUp()
+        result = self.check().capsule
+        self.assertEqual(result.bound.physical_slot, 2)
+        (intent,) = result.original_own_intents
+        self.assertEqual(intent.original_vote, self.own_vote)
+        self.assertEqual(intent.vote.durable_sequence, 1)
+        self.assertEqual(intent.public_ordinal, 1)
+        self.assertEqual(intent.signed_artifacts, ())  # no fabricated authentication
+        self.assertTrue(result.command_prefix.pending_protocol)  # admission still required
+
+    def test_rehashed_wal_and_capsule_cannot_replace_original_vote_actor_or_slot(self):
+        self.with_original_intent = True
+        for changes in (
+            {"validator_id": self.boot.validators[1][0]},
+            {"durable_sequence": 2},
+        ):
+            self.intent_changes = changes
+            self.setUp()
+            with self.subTest(changes=changes), self.assertRaises(crypto.CodecError):
+                self.check()
 
     def test_original_config_cannot_be_replaced_by_an_internally_consistent_policy(self):
         bound = cfg.bind(

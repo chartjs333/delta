@@ -11,6 +11,7 @@ is accepted here.
 from dataclasses import dataclass
 
 from formal.reference.isc_crypto.codec import CodecError, _require
+from formal.reference.isc_source import finalization, policy
 from formal.reference.isc_source import identity as isc
 from formal.reference.profile_source import availability_ledger as ledger
 from formal.reference.profile_source import configuration as cfg
@@ -40,6 +41,73 @@ class Prefix:
     unresolved: tuple[source.Event, ...]
     # Even successful entries still need the outer native/control producer.
     producer_edges: tuple[source.Event, ...]
+
+
+@dataclass(frozen=True)
+class InputCollections:
+    original_policy: bytes
+    prefix: Prefix
+    configuration_id: str
+    # These are original native identity sets, not coordinate protocol objects.
+    proposed: tuple[str, ...]
+    finalized: tuple[str, ...]
+    closed: tuple[str, ...]
+    bodies: tuple[isc.Body, ...]
+
+
+def bind_input_collections(prefix, original_policy, configuration_id):
+    """Bind all four round-local input collections to their retained source facet.
+
+    Every non-selected configuration occurrence remains in prefix.configuration;
+    every replay/failed delivery remains in original_events. This does not decide
+    the outer phase/time/durability edges, other policy collections or source
+    origin. It does not use public acceptance or erase opaque downstream fields.
+    """
+    _require(type(prefix) is Prefix and not prefix.unresolved, "complete original input facet")
+    value = policy.decode(original_policy)
+    _require(value["round_config_id"] == configuration_id, "original selected configuration")
+    snapshot = value["snapshot"]
+    proposed = tuple(
+        sorted(
+            {
+                p.config.body_id
+                for p in prefix.configuration.proposals
+                if p.config.body_id == configuration_id
+            }
+        )
+    )
+    finalized = tuple(
+        sorted(
+            {
+                p.bound.config.body_id
+                for p in prefix.configuration.finalized
+                if p.bound.config.body_id == configuration_id
+            }
+        )
+    )
+    bodies = {}
+    for row in prefix.closed:
+        _require(row.body.round_config_id == configuration_id, "original input facet context")
+        key = isc.body_id(row.body)
+        _require(key not in bodies or bodies[key] == row.body, "original closed body collision")
+        bodies[key] = row.body
+    ordered = tuple(bodies[key] for key in sorted(bodies))
+    _require(
+        snapshot["proposed_round_config_ids"] == list(proposed)
+        and snapshot["finalized_round_config_ids"] == list(finalized)
+        and snapshot["closed_input_set_ids"] == sorted(bodies)
+        and snapshot["input_set_bodies"] == [finalization.body_tree(body) for body in ordered],
+        "whole original input collections differ from producing facet",
+    )
+    return InputCollections(
+        original_policy,
+        prefix,
+        configuration_id,
+        proposed,
+        finalized,
+        tuple(sorted(bodies)),
+        ordered,
+    )
 
 
 def metadata_inputs(events, event):

@@ -52,8 +52,8 @@ def main():
     def visit(name):
         if name in order or name in {"Init", "Std"}:
             return
-        if name == "SourcePolicy":
-            path = ROOT / "formal/proposals/isc-source-generation/SourcePolicy.lean"
+        if name in {"SourcePolicy", "SourceVote"}:
+            path = ROOT / "formal/proposals/isc-source-generation" / (name + ".lean")
         elif name in {
             "ProfileSource",
             "ProfileControl",
@@ -71,6 +71,7 @@ def main():
             "ProfileConfiguration",
             "ProfileNativeHeader",
             "SourcePolicy",
+            "SourceVote",
         } and not name.startswith("DeltaReduce."):
             raise RuntimeError("Unqualified import " + name)
         raw = path.read_bytes().replace(b"\r\n", b"\n")
@@ -100,6 +101,7 @@ def main():
     visit("ProfileConfiguration")
     visit("ProfileNativeHeader")
     visit("SourcePolicy")
+    visit("SourceVote")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -152,8 +154,29 @@ def main():
     ]
     audit = (
         "import ProfileControl\nimport ProfileManifest\n"
-        "import ProfileConfiguration\nimport ProfileNativeHeader\nimport SourcePolicy\n"
+        "import ProfileConfiguration\nimport ProfileNativeHeader\n"
+        "import SourcePolicy\nimport SourceVote\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ProfileSource.Vote." + name + "\n"
+        for name in (
+            "readFrameEncoded",
+            "decodeFrameEncoded",
+            "decodedVoteSound",
+            "wireEncodingInjective",
+            "sourceFields",
+            "signableSource",
+            "artifactSource",
+            "artifactComplete",
+            "artifactSubstitutionRejected",
+            "artifactBound",
+            "ownSource",
+            "ownComplete",
+            "physicalSlotRetained",
+            "originalPosition",
+            "differentOriginalVotes",
+        )
     )
     audit += "".join(
         "#print axioms DeltaReduce.ProfileSource.Configuration." + name + "\n"
@@ -295,6 +318,15 @@ def main():
     )
     run([str(LEAN), "NativeHeaderVectors.lean"], "native-header-vectors.txt", src, environment)
     sources["generated/NativeHeaderVectors.lean"] = digest(header_source.encode())
+    from formal.reference.profile_source.vote_vectors import generate as vote_vectors
+
+    vote_source, vote_originals = vote_vectors()
+    (src / "SourceVoteVectors.lean").write_text(vote_source, encoding="utf8", newline="\n")
+    (OUT / "source-vote-originals.json").write_text(
+        json.dumps(vote_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run([str(LEAN), "SourceVoteVectors.lean"], "source-vote-vectors.txt", src, environment)
+    sources["generated/SourceVoteVectors.lean"] = digest(vote_source.encode())
     run(
         [
             sys.executable,
@@ -421,6 +453,9 @@ def main():
             "Existing two close policies derive from exact signed config, with no override",
             "Original CONFIG/S0/P0 context, parent, deadlines and validators join without erasure",
             "Full policy descriptor is injective; later views/sequences are retained unchanged",
+            "Successor twelve-field V codec, original signed preimages and own physical slots",
+            "General S-RANK join retains distinct original V objects without signed renumbering",
+            "Four P0 input collections bind to the retained CONFIG/close source facet",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",
