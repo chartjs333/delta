@@ -9,6 +9,8 @@ from formal.reference.isc_source import identity as identity
 from formal.reference.isc_source import test_authentication as fixture
 from formal.reference.isc_w1 import codec as wal
 from formal.reference.profile_source import source_prefix as s
+from formal.reference.profile_source import test_configuration_qc as config_fixture
+from formal.reference.storage_source import test_codec as storage_fixture
 
 
 class OriginalDeliveryTests(unittest.TestCase):
@@ -110,6 +112,34 @@ class OriginalDeliveryTests(unittest.TestCase):
         self.assertEqual(result.admitted, ())
         self.assertEqual(result.unresolved, (missing,))
         self.assertEqual(result.source.events, (missing,))
+
+    def test_disjoint_original_protocol_containers_share_one_complete_source_prefix(self):
+        config_fixture.ConfigQcTests.setUpClass()
+        config = config_fixture.ConfigQcTests()
+        config.setUp()
+        storage_fixture.StorageSourceTests.setUpClass()
+        storage = storage_fixture.StorageSourceTests()
+        originals = (config.delivered[0].original_artifact, storage.signed())
+        events = [
+            replace(self.event(i, self.names[0]), original=raw, inputs=())
+            for i, raw in enumerate(originals)
+        ]
+        events += [self.event(i + 2, name) for i, name in enumerate(self.names)]
+        result = self.inventory(events)
+        self.assertFalse(result.unresolved)
+        self.assertEqual(len(result.source.events), 6)
+        self.assertEqual([r.event.event_index for r in result.admitted], [2, 3, 4, 5])
+        self.assertEqual(
+            result.outcomes[:2],
+            (
+                (0, "non_isc_delivery_requires_its_own_handler"),
+                (1, "storage_delivery_requires_its_own_handler"),
+            ),
+        )
+        # A malformed advertised container is not a parsed foreign kind and
+        # cannot hide an unresolved original behind an unrelated magic prefix.
+        malformed = replace(events[0], original=originals[0][:-1])
+        self.assertEqual(self.inventory([malformed]).unresolved, (malformed,))
 
     def test_original_position_mismatch_and_unknown_encoding_stay_unresolved(self):
         event = self.event(1, self.names[0])

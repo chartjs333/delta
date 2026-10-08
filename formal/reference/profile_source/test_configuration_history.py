@@ -1,6 +1,7 @@
 """First original CONFIG cut, late/repeated/invalid deliveries and no backdating."""
 
 import unittest
+from dataclasses import replace
 
 from formal.reference.profile_source import configuration_history as h
 from formal.reference.profile_source import configuration_qc as q
@@ -95,6 +96,20 @@ class ConfigurationHistoryTests(unittest.TestCase):
         self.assertEqual(self.finalize(self.x.qc), "rejected_configuration_quorum")
         self.assertEqual(len(self.state.received), 4)
         self.assertEqual(self.state.finalized, ())
+
+    def test_different_receivers_cannot_pool_a_local_finalizers_quorum(self):
+        self.propose()
+        for i, delivery in enumerate(self.x.delivered):
+            event = replace(self.event(delivery.original_artifact), actor=f"receiver-{i}")
+            self.state = h.deliver(self.state, event, self.f.boot, self.f.backend).state
+        self.assertEqual(self.finalize(self.x.qc), "rejected_configuration_quorum")
+        self.assertEqual(len(self.state.received), 4)
+        self.assertEqual(self.state.finalized, ())
+        for delivery in self.x.delivered:
+            self.deliver(delivery.original_artifact)
+        self.assertEqual(self.finalize(self.x.qc), "recorded")
+        self.assertEqual(len(self.state.received), 8)
+        self.assertEqual(len(self.state.finalized[0].bound.deliveries), 4)
 
 
 if __name__ == "__main__":

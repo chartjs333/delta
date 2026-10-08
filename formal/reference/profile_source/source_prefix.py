@@ -16,10 +16,12 @@ from formal.reference.isc_source import budget as isc_budget
 from formal.reference.isc_source import finalization as isc_final
 from formal.reference.isc_source import identity as isc_identity
 from formal.reference.isc_w1 import codec as wal
+from formal.reference.non_isc import codec as non_isc
 from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_history as history
 from formal.reference.profile_source import metadata as m
 from formal.reference.profile_source.availability_ledger import Occurrence
+from formal.reference.storage_source import codec as storage
 
 
 @dataclass(frozen=True)
@@ -282,6 +284,26 @@ def isc_inventory(cut: RetainedCut, bootstrap, backend, actor, round_id):
     for event in cut.events:
         if event.action != "ACT-MESSAGE-DELIVER" or event.actor != actor:
             outcomes.append((event.index, "other_source_action_or_actor"))
+            continue
+        # The complete source contains CONFIG and storage deliveries before ISC.
+        # Their closed, disjoint original containers identify another handler;
+        # they are neither missing ISC inputs nor ISC quorum/budget credit.
+        # Parsing does not authenticate them or establish their native legality.
+        family = None
+        try:
+            if event.original[:8] == b"NSG1\0\1\0\0":
+                value = non_isc.decode_artifact(event.original)
+                non_isc.decode_vote(value.vote_bytes)
+                family = "non_isc"
+            elif event.original[:8] == b"SAG1\0\1\0\0":
+                storage.split_artifact(event.original)
+                family = "storage"
+        except CodecError:
+            unresolved.append(event)
+            outcomes.append((event.index, "malformed_other_delivery_requires_handler"))
+            continue
+        if family is not None:
+            outcomes.append((event.index, family + "_delivery_requires_its_own_handler"))
             continue
         try:
             source = signed_isc_occurrence(cut.events, event, bootstrap, backend)

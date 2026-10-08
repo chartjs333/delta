@@ -354,6 +354,8 @@ def main():
             "Retained pre-finalization source index joins original ordered prefix and own WAL",
             "W1 received inventory derives exact signed G/B inputs, receiver and original cut",
             "Indexed W1 binds the retained command predecessor and all admitted deliveries",
+            "Closed B/tuples derive from original CONFIG/ticket/manifest/AC/freeze source facets",
+            "Joined input-to-W1 path re-resolves profile keys; no supplied frozen body/tuple list",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

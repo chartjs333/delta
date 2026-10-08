@@ -313,3 +313,104 @@ def bind_indexed(
     )
     result = bind(bootstrap, backend, position.original, prior, body)
     return IndexedCapsule(result, retained, received, folded)
+
+
+@dataclass(frozen=True)
+class InputBoundCapsule:
+    capsule: IndexedCapsule
+    input_source: object
+
+
+def bind_input_indexed(
+    authorities,
+    backend,
+    prefix,
+    *,
+    journal_id,
+    physical_slot,
+    consumer_index,
+    original_prior_index,
+    initial_state,
+    initial_tick,
+    original_policy,
+    logical_tick,
+    plan,
+    original_config,
+    declaration,
+    close_policy,
+):
+    """Derive the full closed B/tuples from the same original retained W1 cut.
+
+    This removes caller-selected body/tuple lists from this composition. It
+    does not remove the remaining genesis, complete P0, producer/control and
+    normalized close-policy origin obligations. There is no R2 success premise.
+    """
+    from formal.reference.profile_source import authority, input_history, metadata, source_prefix
+
+    resolved = authority.resolve(
+        prefix.metadata,
+        authorities.original_validator_keys,
+        authorities.original_storage_registry,
+        authorities.original_storage_keys,
+    )
+    _require(resolved == authorities, "exact independent profile authority sources")
+    boot = metadata.validate(prefix.metadata.bootstrap_bytes, "BOOTSTRAP")
+    actor = boot["local_validator_id"]
+    own = [
+        raw
+        for a, name, raw in prefix.metadata.original_own_journals
+        if (a, name) == (actor, journal_id)
+    ]
+    _require(len(own) == 1, "one original own journal")
+    journal = journals.inspect(own[0], cut_slot=0, required_prefix=own[0])
+    _require(
+        type(physical_slot) is int and 1 <= physical_slot <= len(journal.positions),
+        "original finalization physical position",
+    )
+    frame = journal.positions[physical_slot - 1].decoded
+    _require(frame.kind == 3, "original finalization kind")
+    request = decode_request_source(frame.sections[0])
+    cut = source_prefix.retained_cut(
+        prefix,
+        original_prior_index,
+        request.source_index_id,
+        request.source_cut_event_index,
+        consumer_index,
+    )
+    inputs = input_history.reconstruct(
+        cut.events,
+        resolved.validators,
+        resolved.storage,
+        backend,
+        plan,
+        original_config,
+        declaration,
+        actor=actor,
+        close_policy=close_policy,
+    )
+    _require(not inputs.unresolved, "complete original input source at retained cut")
+    command = read_command(request.command_bytes, resolved.validators.formal_semantics_id)
+    from formal.reference.isc_source.identity import body_id
+
+    selected = tuple(row for row in inputs.closed if body_id(row.body) == command["body_hash"])
+    _require(
+        bool(selected) and all(row.body == selected[0].body for row in selected),
+        "original closed body at exact source cut",
+    )
+    body = selected[0].body
+    bound = bind_indexed(
+        resolved.validators,
+        backend,
+        prefix,
+        journal_id=journal_id,
+        physical_slot=physical_slot,
+        consumer_index=consumer_index,
+        original_prior_index=original_prior_index,
+        initial_state=initial_state,
+        initial_tick=initial_tick,
+        original_policy=original_policy,
+        logical_tick=logical_tick,
+        frozen_inputs=body.tuples,
+        body=body,
+    )
+    return InputBoundCapsule(bound, inputs)

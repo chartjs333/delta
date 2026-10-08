@@ -17,7 +17,7 @@ from formal.scripts import native_source_artifacts as old
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def synthetic_fixture(f):
+def synthetic_fixture(f, *, ticket_id=None):
     """Create new synthetic objects from the published arithmetic dimensions.
 
     Every changed preimage receives its new real hash. No original QC/signature,
@@ -72,6 +72,8 @@ def synthetic_fixture(f):
     proof.update(profile_id=profile_id, scale_table_id=scale_id, config_id=fixed_id)
     proof_id = put("proof", proof)
     manifest = context("manifest")
+    if ticket_id is not None:
+        manifest["ticket_id"] = ticket_id
     manifest.update(
         profile_id=profile_id,
         parameter_schema_id=schema_id,

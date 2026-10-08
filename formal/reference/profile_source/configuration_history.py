@@ -128,7 +128,7 @@ def finalize(state, event, validators, storage, backend):
             proposal.config.original,
             proposal.original_declaration,
             event.original,
-            tuple(row.original for row in state.received),
+            tuple(row.original for row in state.received if row.source.actor == event.actor),
             source_cut=event.index - 1,
         )
     except CodecError:

@@ -59,39 +59,42 @@
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
-    "formal/reference/profile_source/capsule_binding.py": "2abd8b1a44378fc82d2f07c486a417190e5bf9979509239da2f7c2a093732ddd",
+    "formal/reference/profile_source/capsule_binding.py": "dbb6b8e05a9b854529a3f21543b73d038165697a8fd755c650f3d6a55480d9cc",
     "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
     "formal/reference/profile_source/configuration.py": "be6d3cc595cc64b6951a7d693c671f1dd7da53586ac799fe4af3cc53828f77e0",
-    "formal/reference/profile_source/configuration_history.py": "5748e255256095f1402766ae4c8111da421eb6f33b863e4432ec483a9cd9a7a7",
+    "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
     "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
     "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
+    "formal/reference/profile_source/input_history.py": "95338c4929da283721afe01a6c19f0c02c9ed98cae5f4e00d034963f2ed7e04a",
     "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
     "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
     "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
     "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
-    "formal/reference/profile_source/source_prefix.py": "6a390d80b00f2f339da3bc757fc62ee087ff2a0d2fad332af2c45fa41aba48ed",
+    "formal/reference/profile_source/source_prefix.py": "64956d0f22a8bb56f161243a0659182c2b7f721afc4eaff6b8f00ea91362402a",
     "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
     "formal/reference/profile_source/test_capsule_binding.py": "ce9c86a39dcd39dc38a3b14b9e977e276bd68fb6fe1f611132e96b2653ff76ec",
     "formal/reference/profile_source/test_commands.py": "abe076da3f78b9e00ef5fb3e7f31cee5d2d84e353b15474b9449f97c1a1cafbb",
     "formal/reference/profile_source/test_configuration.py": "d409a2f2d9eb24935661c5f4f18e8fef4023baccdaa88d0f53d3c061995fe827",
-    "formal/reference/profile_source/test_configuration_history.py": "e2b9d2bb5f1cd778c0c57ef0f01d42775987a1db5d93f5f5f825add3b098af27",
+    "formal/reference/profile_source/test_configuration_history.py": "a669c68b3e162d8d6dd7a04a9eba1c22e3c1f5240b4336f1850108503eed3b66",
     "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
     "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
+    "formal/reference/profile_source/test_input_capsule.py": "42816bd7247e2630b1b49cf66a3a164842066b5189d8621ddf1e5fc12be52ec5",
+    "formal/reference/profile_source/test_input_history.py": "f140cfa35efc4d185fdae1803c090aaf530d588a4b90cbe7506d1f8c430ee65d",
     "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
-    "formal/reference/profile_source/test_manifest_context.py": "d6c079ec8818c8052422d83a775b40d0ee609813b3b00b2569697ef189d89551",
+    "formal/reference/profile_source/test_manifest_context.py": "2d53806558e73b80bde4716bef6abd266c079e09c7f607d506dac5bb6f4ffb83",
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
     "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
     "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
-    "formal/reference/profile_source/test_source_deliveries.py": "094f19a198c736261a0577ee7d93d73c656e5812cab4c13895b0f820de9b5cf4",
+    "formal/reference/profile_source/test_source_deliveries.py": "8ee65881544cb5f204685c4541e0694990047a99a07ac12ef371ce964de6b96a",
     "formal/reference/profile_source/test_source_prefix.py": "ffe689855a4e5bef8ca02bd3d3c662985b55656b0ad72729e419c963cab52b90",
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "6726279e837b8a0ae63f5cf9a107de399cd018b49086f36c64ec715bdc7f4591",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "a3c4a2f25524800099c4ae325ac22f321a7aa6aa3b73a42d08464864551dc14e",
+    "formal/reference/profile_source/README.md": "91e26ddac36236f59ab9541efe3227aa064d60286b5f4e2b4581d651ce156d05",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "4332a91425f096a139ccabdc5e0ed975b3aac48f2864ec7a053df820a975eb6c",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
@@ -442,17 +445,17 @@
     {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "487ffa4accac349376d37371dc76d3c36f19017feb88045ce586f2331f31ca23"
+      "sha256": "797c7d0859b9856a4f315395ce60a132ab5795a7bc7164e0d984812a0b9c4992"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "4d370adec11d7ea5e115bfabf77c77ca9cb215a3c97865220cecd0e9159cfd44"
+      "sha256": "d39fd85ab0fc3c505899ed3e2966f986ccf82c00d51fce3050568811efeae871"
     },
     {
       "log": "w1-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "9592c819b4f1f94d5ea7742db8b26bbed17cd206081083dad2af83110ca7892a"
+      "sha256": "a675c346d1cee4b945095824c0434483e15483b54e36fcac0fc82db75bf0a870"
     },
     {
       "log": "ruff.txt",
@@ -462,7 +465,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "0760fafc4f10688940f82c60169dcd12eac4379bcf0334b2d9e31bb1fdc46bab"
+      "sha256": "1e8100ce5112b41053a89fae8931d735807139a983d212a9a9d2a8fab1194b67"
     }
   ],
   "established": [
@@ -486,7 +489,9 @@
     "CONFIG source occurrence keeps original receiver without fabricating transport peer",
     "Retained pre-finalization source index joins original ordered prefix and own WAL",
     "W1 received inventory derives exact signed G/B inputs, receiver and original cut",
-    "Indexed W1 binds the retained command predecessor and all admitted deliveries"
+    "Indexed W1 binds the retained command predecessor and all admitted deliveries",
+    "Closed B/tuples derive from original CONFIG/ticket/manifest/AC/freeze source facets",
+    "Joined input-to-W1 path re-resolves profile keys; no supplied frozen body/tuple list"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

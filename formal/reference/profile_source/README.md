@@ -168,6 +168,25 @@ the received-byte/cut join, not transport origin or honest send durability.
 Initial-state authority, full P0, frozen ledger, clock/control, other native
 producer checks and durability barriers are still required by the whole fold.
 
+`input_history.py` now composes the existing original byte carriers from an
+empty input ledger: local CONFIG proposals/deliveries/QC, exact native007 plan
+and issued tickets, complete004 manifest/root, original received Storage Gs,
+authenticated AC and first freeze. It computes the entire closed B, retaining
+all original tuples and source events. Other receiver deliveries cannot supply
+the local CONFIG or AC quorum. Closed disjoint NSG1/SAG1 containers remain in
+the source prefix with their own handlers; they receive no ISC quorum credit.
+Unknown/missing input carriers remain unresolved rather than silently omitted.
+
+`bind_input_indexed` re-resolves original validator/storage keys through profile
+authority, reconstructs this input facet at W1's original retained cut, and
+passes its computed B/tuples into the existing exact W1 join. No caller-provided
+frozen tuples or body are accepted on that path. This is not a complete producing
+history: initial plan/configuration authority, normalized close-policy origin,
+lease/phase/time/transport/control, full P0 and barriers remain outer obligations.
+`producer_edges` explicitly retains successful facet events for those checks;
+absence of byte-resolution errors is not full source validity. Combined fixtures
+still include unqualified initial policy/current/anchor fields and assert no READY.
+
 Run `formal/proposals/b-family-transfer/check_profile_components.py` with the
 pinned `ISC_SODIUM_DLL`; it rebuilds the involved Lean sources, audits axioms,
 checks the reference components and records exact source/log hashes. All
