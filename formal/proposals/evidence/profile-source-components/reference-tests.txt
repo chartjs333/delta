@@ -128,6 +128,6 @@ test_signature_without_own_intent_or_corrupt_signature_rejected (formal.referenc
 test_unsigned_durable_cut_is_retained_without_claiming_signature (formal.reference.profile_source.test_votes.VoteIntentTests.test_unsigned_durable_cut_is_retained_without_claiming_signature) ... ok
 
 ----------------------------------------------------------------------
-Ran 128 tests in 11.472s
+Ran 128 tests in 9.830s
 
 OK

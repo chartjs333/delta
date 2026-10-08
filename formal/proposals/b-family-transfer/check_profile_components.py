@@ -60,6 +60,7 @@ def main():
             "ProfileManifest",
             "ProfileConfiguration",
             "ProfileConfigurationQC",
+            "ProfileSourceIndex",
             "ProfileNativeHeader",
         }:
             path = Path(__file__).with_name(name + ".lean")
@@ -71,6 +72,7 @@ def main():
             "ProfileManifest",
             "ProfileConfiguration",
             "ProfileConfigurationQC",
+            "ProfileSourceIndex",
             "ProfileNativeHeader",
             "SourcePolicy",
             "SourceVote",
@@ -105,6 +107,7 @@ def main():
     visit("SourcePolicy")
     visit("SourceVote")
     visit("ProfileConfigurationQC")
+    visit("ProfileSourceIndex")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -159,6 +162,7 @@ def main():
         "import ProfileControl\nimport ProfileManifest\n"
         "import ProfileConfiguration\nimport ProfileNativeHeader\n"
         "import SourcePolicy\nimport SourceVote\nimport ProfileConfigurationQC\n"
+        "import ProfileSourceIndex\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
     )
     audit += "".join(
@@ -179,6 +183,29 @@ def main():
             "physicalSlotRetained",
             "originalPosition",
             "differentOriginalVotes",
+        )
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ProfileSource.Index." + name + "\n"
+        for name in (
+            "collectPosition",
+            "collectLength",
+            "referenceOriginal",
+            "resolved",
+            "eventSource",
+            "eventComplete",
+            "eventsOriginal",
+            "eventsPosition",
+            "eventsSound",
+            "eventsComplete",
+            "checked",
+            "wholeOriginalEvents",
+            "checkComplete",
+            "originalInputPosition",
+            "distinctOccurrences",
+            "receivedOriginal",
+            "receivedComplete",
+            "receivedAtOriginalPosition",
         )
     )
     audit += "".join(
@@ -357,6 +384,15 @@ def main():
         [str(LEAN), "ConfigurationQCVectors.lean"], "configuration-qc-vectors.txt", src, environment
     )
     sources["generated/ConfigurationQCVectors.lean"] = digest(qc_source.encode())
+    from formal.reference.profile_source.source_index_vectors import generate as index_vectors
+
+    index_source, index_originals = index_vectors()
+    (src / "SourceIndexVectors.lean").write_text(index_source, encoding="utf8", newline="\n")
+    (OUT / "source-index-originals.json").write_text(
+        json.dumps(index_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run([str(LEAN), "SourceIndexVectors.lean"], "source-index-vectors.txt", src, environment)
+    sources["generated/SourceIndexVectors.lean"] = digest(index_source.encode())
     run(
         [
             sys.executable,
@@ -488,6 +524,8 @@ def main():
             "Four P0 input collections bind to the retained CONFIG/close source facet",
             "Whole CONFIG/QC/V/G relation retains original witness and signer/vote pairing",
             "CONFIG QC context mismatch cannot be hidden by filtering; all originals retained",
+            "Original source index binds actors/actions/inputs/dependencies to raw bytes",
+            "General materialization soundness/completeness retains positions and repeated inputs",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

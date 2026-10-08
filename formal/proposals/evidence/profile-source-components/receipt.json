@@ -52,6 +52,7 @@
     "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
     "formal/proposals/isc-source-generation/SourceVote.lean": "fd7727fbab767898af14659215fc3512f4967321ea056b3fb90788704a37add5",
     "formal/proposals/b-family-transfer/ProfileConfigurationQC.lean": "89d5aa5c0ce83944654d113e9d897abc1bbc3d2511cb7f9db54ef96dd51f1f12",
+    "formal/proposals/b-family-transfer/ProfileSourceIndex.lean": "d092d46248c6a5aa58d42ca97fd915e42308907222ec4c01a478884a5fd7eae8",
     "generated/ControlVectors0.lean": "907549be52d1375cfb903479a10989c482dcc0e3a66f4fe0d10b970233356d2b",
     "generated/ControlVectors1.lean": "718e8671c7a02c9bdbb0b2f131411b39e47ae50bb2ca7d34d44855d19a75d5f8",
     "generated/ControlVectors2.lean": "8200e34c241f5a259b16543a6f1eece1eb0947995492bbb304a75ecbd25c4db4",
@@ -64,6 +65,7 @@
     "generated/NativeHeaderVectors.lean": "4816420e5e461391ee22cb178186a3659026b287fd09a866ce7f03496b363cad",
     "generated/SourceVoteVectors.lean": "6030cd9816354da3b076cc40bfbe74314f0eb9ce6cbd39f8f0649c52fe93fa02",
     "generated/ConfigurationQCVectors.lean": "499ca526d5d18d4a4b4461b845432136d66081684c165cb7ba475fec86e9c513",
+    "generated/SourceIndexVectors.lean": "e956f57cc57caa74e76118de114c256c02cf31c37436486989d4c27e38798eaa",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
@@ -83,6 +85,7 @@
     "formal/reference/profile_source/native_header_vectors.py": "4f05f687319ce563a164e7fdc77b76276bd1d570693cb912519c81abc27b908b",
     "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
     "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
+    "formal/reference/profile_source/source_index_vectors.py": "a0dc88066f5e0aa7c8060ebab0800e4b3b2fe2a8ff35ee8b5f0d28a80e36b5fc",
     "formal/reference/profile_source/source_prefix.py": "64956d0f22a8bb56f161243a0659182c2b7f721afc4eaff6b8f00ea91362402a",
     "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
@@ -105,8 +108,8 @@
     "formal/reference/profile_source/vote_vectors.py": "77ccba72f393be28f2ff8745d8153ec0baecb4b9835f54c039ddcd9f5e55b687",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "324f2caacb319420cca9cb23edb99cfc522e6342eef393b2fa319255c70c73f7",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "99be3bc9429207bb525bf72296033438f51cc94d75faa913a19e3ce684b59bd1",
+    "formal/reference/profile_source/README.md": "36d81458eb6f28c1295f558c373a7c72cde81e941717efa84446da133d3215bb",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "9f6ba3bebbb5a1c9495645c84f7eae8f42770443ad2f48ad6746b238dd54329f",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
@@ -430,9 +433,14 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "ProfileSourceIndex.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "99cd33e7143f0717b82edf365f52f307c76d0c349caf24e79e60925e030b06aa"
+      "sha256": "f343e707cf91cc82b910eb0c195e997a322b1d3a36e41c7bfa63ef578a389eba"
     },
     {
       "log": "control-vectors-0.txt",
@@ -495,19 +503,24 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "source-index-vectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "23707efd502c9b0a9ea1c406f16513f1ea72716e75e9c62a9719594f7f20af15"
+      "sha256": "a26a93a7f8ed5b6e82301037255c8ceae0109a1e64e538ba16978064783d17e0"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "68187784a6d3b4ff6263ed36b410af8d4daf1cf15122d1b82aa72d3663d9b7c6"
+      "sha256": "9f0805b4c0b6d6691fabef713b777c5b6f164cff61b431f5dd80a7f97c69b5a8"
     },
     {
       "log": "w1-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "d66ea6162c60318a4530a8a2973c9c372159bc9ab8330f7b47c867b56193bc81"
+      "sha256": "cb0b58b627bf50e6be7d57f0b2599f4d7a17385506249a4b3febf3f996f56273"
     },
     {
       "log": "ruff.txt",
@@ -517,7 +530,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "d6618aac860f8215745a8e56a5cc32d7f88af148570217bf95dcb18d3ed520d1"
+      "sha256": "b642d2f0cc49caff9e609808fb9c82854fc174b2f54b459a0d09dbe4c0f837ab"
     }
   ],
   "established": [
@@ -552,7 +565,9 @@
     "General S-RANK join retains distinct original V objects without signed renumbering",
     "Four P0 input collections bind to the retained CONFIG/close source facet",
     "Whole CONFIG/QC/V/G relation retains original witness and signer/vote pairing",
-    "CONFIG QC context mismatch cannot be hidden by filtering; all originals retained"
+    "CONFIG QC context mismatch cannot be hidden by filtering; all originals retained",
+    "Original source index binds actors/actions/inputs/dependencies to raw bytes",
+    "General materialization soundness/completeness retains positions and repeated inputs"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

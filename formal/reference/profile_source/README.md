@@ -262,6 +262,19 @@ byte relation does not assume that structurally bound G has a valid signature:
 authentication, actual delivery, first-finalization permission and the complete
 producer prefix remain obligations of the enclosing source checker.
 
+`ProfileSourceIndex.lean` now materializes complete ordered event and artifact
+inventories from the original source-index descriptor and exact canonical bytes.
+Every original reference retains all fields, resolves against the same declared
+inventory, and matches its original length/content ID. Actors, actions, ordered
+inputs (including repeats), original positions and strict backward dependencies
+are source-bound. The general soundness/completeness results cover this byte
+materialization, and its delivery adapter retains the original G/actor/position
+used by the CONFIG QC join. They do not prove that a recorded event was legally
+produced or authenticated. Independent bootstrap selection, journal-range/floor
+composition and the full native producer remain required. Synthetic vectors
+deliberately retain malformed protocol payloads: materialization cannot erase
+them or turn them into a valid native history.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all
