@@ -33,12 +33,26 @@ given cut, preserving repetitions, unrelated votes and exact vote IDs. This
 establishes the certificate conjunct, not the delivery's occurrence, proposal
 legality, durability or FinalizeRoundConfig history.
 
+`configuration_history.py` now folds original proposal/delivery/finalization
+occurrences from an empty CONFIG collection. It preserves the first finalized
+witness and does not backdate it using later deliveries. `source_prefix.py`
+materializes every original source event and ordered input reference, keeps
+cut/target as exact original prefix positions, and joins the CONFIG facet.
+Other actions remain explicitly uncovered; phase/transport/local durability
+are still obligations of the enclosing native producing history.
+
 `journals.py` scans the complete original DRW1 kind 1/2/3 sequence and W1
-preceding-prefix binding. `votes.py` binds original own kind-2 payloads to
-public vote rank rather than physical slot. Unsigned durable-but-unexposed
+preceding-prefix binding. `votes.py` retains original own kind-2 payloads at
+physical slots and derives separate public vote ranks. Unsigned durable-but-unexposed
 intents remain present, with no invented signature. Original detached signing
 artifacts are checked when present. Producer/admission legality is still
 required; structural WAL acceptance alone is insufficient.
+Original signed `Vote.durable_sequence` is checked against its physical slot s;
+`Intent.public_ordinal` separately exposes V_a(s). Neither rank nor any other
+projection rewrites the signed Vote bytes. The earlier reference comparison
+to vote count was a checker defect, corrected before R2.3 qualification.
+The anti-equivocation key is exactly the native `(validator, epoch, context)`;
+changing round/view/height/kind cannot create another local slot for that key.
 
 `ProfileSource.lean` proves general exact-reference, ordered position and
 multiplicity results and S-RANK annotation preservation/injectivity. It uses
@@ -73,6 +87,28 @@ use. Its general forward/converse lemmas connect that join to the existing
 `NativeManifestBinding.bind` premise used by R2.1/R2.2, retaining original bytes,
 ordered references, Merkle root and complete partition. It does not authenticate
 hashes, assert remote physical facts or derive a producer history from a hash.
+
+The existing `ISCSourceV2.SourcePolicy` component now binds the complete original
+successor C bytes to their original policy-tree value, explicit parent, every
+ordered unique tuple, all signer identities and separate computed b/c identities.
+Its duplicate-last Merkle recurrence has a general fuel-completeness proof for
+the existing 100000-tuple bound; the independent manifest's 4096-leaf cap is
+not imposed on ISC. Exact canonical-byte comparison rejects duplicate JSON
+members/alternate encodings. These shape/quorum-count checks do not establish
+signature authenticity, original delivery occurrence or durable finalization.
+Kernel examples use the approved FR004 roots and two original C witnesses for
+one B, with an explicit finite table of actual SHA256 preimages/digests. This
+table is cross-language byte evidence, never a proof or oracle for SHA256.
+
+`capsule_binding.py` checks all W1 sections against an independently supplied
+predecessor: exact own WAL prefix and next physical slot, original source cut,
+whole S0/P0 and full retained deliveries, computed P1/C, one witness publication
+with unchanged coarse state, and exact receipt IDs. Recomputed checksums cannot
+hide a b/c substitution, lineage deletion, resequencing or another effect. The
+enclosing producer fold must still derive this predecessor; the dataclass or a
+successful byte join is not origin authority, append success or a durability
+barrier. Synthetic W1 tests intentionally retain opaque invalid lineage markers
+and do not claim to be complete legal histories.
 
 Run `formal/proposals/b-family-transfer/check_profile_components.py` with the
 pinned `ISC_SODIUM_DLL`; it rebuilds the involved Lean sources, audits axioms,

@@ -157,17 +157,20 @@ def bind(
             and vote.context_id == config.context_id
         ):
             cfg.bind_vote(config, signed)
-            prior = matching.get(vote.validator_id)
-            _require(
-                prior is None or prior == signed.vote_id,
-                "same original signer/context has different durable vote identity",
-            )
-            matching[vote.validator_id] = signed.vote_id
+            # A receiver's own honest VoteJournal is not a remote journal. A
+            # Byzantine signer may send distinct signed originals; retain all
+            # occurrences, count that signer once, and verify the exact vote
+            # ID already present in the original QC (never choose/rewrite it).
+            matching.setdefault(vote.validator_id, set()).add(signed.vote_id)
     names = tuple(sorted(matching))
-    vote_ids = tuple(matching[name] for name in names)
+    vote_ids = tuple(qc["vote_ids"])
     _require(
-        len(names) >= 3 and tuple(qc["signer_ids"]) == names and tuple(qc["vote_ids"]) == vote_ids,
+        len(names) >= 3 and tuple(qc["signer_ids"]) == names,
         "FinalizeRoundConfig uses all matching delivered original signers/votes",
+    )
+    _require(
+        all(vote_id in matching[name] for name, vote_id in zip(names, vote_ids, strict=True)),
+        "QC original signer/vote pairing must occur in the complete delivery cut",
     )
     # qc_id remains the original field. Never invent a self-referential hash
     # equation or relabel a witness as its body identity.

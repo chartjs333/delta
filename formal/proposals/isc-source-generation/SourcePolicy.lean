@@ -1,4 +1,5 @@
 import DeltaReduce.NativeIscCertificate
+import DeltaReduce.NativeManifestMerkle
 
 /-! ISC-S16-D01 successor source representation, scope revision 3.
 No public-state/refinement imports. Sigma is a parameter; legacy definitions
@@ -194,5 +195,195 @@ theorem fullPolicyOutsideSnapshotRetained {before after snapshot field}
     (different : field ≠ "snapshot") :
     lookup (successor fmtPolicy) after field = lookup (successor fmtPolicy) before field :=
   replacedOther ok different
+
+/-! The original successor policy tree and the *whole* separately retained C
+must agree. There is no permissive JSON parser here: equality with the canonical
+serialization rejects duplicate members, extra bytes and alternate encodings.
+This join establishes byte/root/shape identity, not signatures or source history.
+The hash remains an explicit primitive; no cryptographic axiom is introduced. -/
+open NativeConfigAdmission (ascii)
+open NativeVoteBytes (ContentId)
+
+def rawHashId (sha : Bytes → Bytes) (raw : Bytes) : Bytes :=
+  let digest := sha raw
+  if digest.length = 32 then ascii "sha256:" ++ NativeVoteBytes.hexBytes digest else []
+
+def inputLeaf (sha : Bytes → Bytes) (t : Tuple) : Bytes :=
+  rawHashId sha (ascii "deltareduce.008.isc-input-leaf.v1" ++ [0] ++
+    NativeIscCertificate.tupleJSON t)
+
+/-- 17 pair reductions plus the singleton case covers the *existing* 100000
+tuple bound. The 004 manifest helper's separate 4096-leaf cap is not imported. -/
+def inputRoot (sha : Bytes → Bytes) (tuples : List Tuple) : Option Bytes :=
+  NativeManifestMerkle.tree (rawHashId sha) 18 (tuples.map (inputLeaf sha))
+
+def BodyShape (expected : Context) (parent : Bytes) (b : Body) : Prop :=
+  NativeInputSetBody.BodyValid expected ⟨b.context,b.root,b.tuples⟩ ∧
+  ContentId b.parent ∧ b.parent = parent ∧ (b.tuples.map Tuple.ticket).Nodup
+instance (expected parent b) : Decidable (BodyShape expected parent b) := by
+  unfold BodyShape; infer_instance
+
+def CertificateShape (sigma : Bytes) (expected : Context) (parent : Bytes)
+    (committee : List Bytes) (c : Certificate) : Prop :=
+  ContentId sigma ∧ committee.length = 4 ∧ NativeIscCertificate.CommitteeValid committee ∧
+  BodyShape expected parent c.body ∧
+  NativeIscCertificate.SignersValid committee
+    ⟨⟨c.body.context,c.body.root,c.body.tuples⟩,c.threshold,c.signers⟩
+instance (sigma expected parent committee c) :
+    Decidable (CertificateShape sigma expected parent committee c) := by
+  unfold CertificateShape; infer_instance
+
+def certificateFields (sigma : Bytes) (c : Certificate) : List (String × Bytes) :=
+  let quoted := NativeIscCertificate.quoted
+  let number := NativeIscCertificate.number
+  let array := NativeIscCertificate.array
+  [("arithmetic_profile_id",quoted c.body.context.arithmetic),
+   ("formal_semantics_id",quoted sigma),
+   ("height",number c.body.context.height),("input_root",quoted c.body.root),
+   ("parameter_schema_id",quoted c.body.context.schema),
+   ("parent_checkpoint_id",quoted c.body.parent),("quorum_threshold",number c.threshold),
+   ("round_config_id",quoted c.body.context.config),("round_id",quoted c.body.context.round),
+   ("schema_version",quoted (ascii "2.0.0")),("signer_ids",array (c.signers.map quoted)),
+   ("tuples",array (c.body.tuples.map NativeIscCertificate.tupleJSON)),
+   ("type_name",quoted (ascii "INPUT_SET_CERTIFICATE")),
+   ("validator_epoch_id",quoted c.body.context.epoch),("view",number c.body.context.view)]
+
+def certificateJSON (sigma : Bytes) (c : Certificate) : Bytes :=
+  NativeIscCertificate.object (certificateFields sigma c)
+
+def certificateId (sha : Bytes → Bytes) (sigma : Bytes) (c : Certificate) : Option Bytes :=
+  NativeStateBytes.contentId sha (ascii "deltareduce.008.input-set-certificate.v2")
+    (certificateJSON sigma c)
+
+structure BoundCertificate where
+  certificate : Certificate
+  originalTree : Value
+  originalBytes : Bytes
+  consensusId : Bytes
+  witnessId : Bytes
+
+def bindCertificate (sha : Bytes → Bytes) (sigma : Bytes) (expected : Context)
+    (parent : Bytes) (committee : List Bytes) (tree : Value) (raw : Bytes) :
+    Option BoundCertificate := do
+  let c ← readCertificate tree
+  if CertificateShape sigma expected parent committee c ∧
+      raw.length ≤ 4*1024*1024 ∧ raw = certificateJSON sigma c ∧
+      inputRoot sha c.body.tuples = some c.body.root then
+    let b ← bodyId sha sigma c.body
+    let w ← certificateId sha sigma c
+    some ⟨c,tree,raw,b,w⟩
+  else none
+
+structure CertificateSource (sha : Bytes → Bytes) (sigma : Bytes) (expected : Context)
+    (parent : Bytes) (committee : List Bytes) (tree : Value) (raw : Bytes)
+    (out : BoundCertificate) : Prop where
+  treeExact : out.originalTree = tree
+  bytesExact : out.originalBytes = raw
+  parsed : readCertificate tree = some out.certificate
+  fullTree : tree = certificateValue out.certificate
+  shape : CertificateShape sigma expected parent committee out.certificate
+  size : raw.length ≤ 4*1024*1024
+  canonical : raw = certificateJSON sigma out.certificate
+  root : inputRoot sha out.certificate.body.tuples = some out.certificate.body.root
+  body : bodyId sha sigma out.certificate.body = some out.consensusId
+  witness : certificateId sha sigma out.certificate = some out.witnessId
+
+theorem boundCertificateSource {sha sigma expected parent committee tree raw out}
+    (h : bindCertificate sha sigma expected parent committee tree raw = some out) :
+    CertificateSource sha sigma expected parent committee tree raw out := by
+  simp only [bindCertificate,bind,Option.bind_eq_some_iff] at h
+  obtain ⟨c,hc,last⟩ := h
+  split at last <;> try contradiction
+  rename_i guards
+  simp only [Option.bind_eq_some_iff] at last
+  obtain ⟨b,hb,w,hw,he⟩ := last
+  cases Option.some.inj he
+  exact ⟨rfl,rfl,hc,certificateOriginal hc,guards.1,guards.2.1,
+    guards.2.2.1,guards.2.2.2,hb,hw⟩
+
+theorem bindCertificateComplete {sha sigma expected parent committee tree raw c b w}
+    (parsed : readCertificate tree = some c)
+    (shape : CertificateShape sigma expected parent committee c)
+    (size : raw.length ≤ 4*1024*1024) (canonical : raw = certificateJSON sigma c)
+    (root : inputRoot sha c.body.tuples = some c.body.root)
+    (body : bodyId sha sigma c.body = some b) (witness : certificateId sha sigma c = some w) :
+    bindCertificate sha sigma expected parent committee tree raw = some ⟨c,tree,raw,b,w⟩ := by
+  have guards : CertificateShape sigma expected parent committee c ∧
+      raw.length ≤ 4*1024*1024 ∧ raw = certificateJSON sigma c ∧
+      inputRoot sha c.body.tuples = some c.body.root := ⟨shape,size,canonical,root⟩
+  simp only [bindCertificate,parsed,bind,Option.bind,if_pos guards,body,witness]
+
+theorem boundOrderedMerkle {sha sigma expected parent committee tree raw out}
+    (h : bindCertificate sha sigma expected parent committee tree raw = some out) :
+    NativeManifestMerkle.Tree (rawHashId sha)
+      (out.certificate.body.tuples.map (inputLeaf sha)) out.certificate.body.root :=
+  NativeManifestMerkle.treeSource (boundCertificateSource h).root
+
+theorem boundOriginalTuples {sha sigma expected parent committee tree raw out}
+    (h : bindCertificate sha sigma expected parent committee tree raw = some out) :
+    readCertificate tree = some out.certificate ∧
+    (out.certificate.body.tuples.map Tuple.ticket).Nodup ∧
+    NativePolicyBytes.strictly NativeInputSetBody.tupleLT out.certificate.body.tuples = true := by
+  have s := boundCertificateSource h
+  exact ⟨s.parsed,s.shape.2.2.2.1.2.2.2,s.shape.2.2.2.1.1.2.2.2.2.2.1⟩
+
+theorem boundExplicitParent {sha sigma expected parent committee tree raw out}
+    (h : bindCertificate sha sigma expected parent committee tree raw = some out) :
+    out.certificate.body.parent = parent ∧ out.certificate.body.context = expected := by
+  have shape := (boundCertificateSource h).shape.2.2.2.1
+  exact ⟨shape.2.2.1,shape.1.2.1⟩
+
+theorem boundSignerQuorum {sha sigma expected parent committee tree raw out}
+    (h : bindCertificate sha sigma expected parent committee tree raw = some out) :
+    out.certificate.threshold = 3 ∧ 3 ≤ out.certificate.signers.length ∧
+    ∀ signer ∈ out.certificate.signers, signer ∈ committee := by
+  have s := (boundCertificateSource h).shape
+  have q := s.2.2.2.2
+  have qt : NativeIscCertificate.quorum committee = 3 := by
+    simp [NativeIscCertificate.quorum,s.2.1]
+  exact ⟨q.2.2.1.trans qt,qt ▸ q.2.2.1 ▸ q.2.2.2.1,
+    fun signer hs => (q.2.2.2.2.2.2 signer hs).2⟩
+
+theorem noncanonicalCertificateRejected {sha sigma expected parent committee tree raw c}
+    (parsed : readCertificate tree = some c) (different : raw ≠ certificateJSON sigma c) :
+    bindCertificate sha sigma expected parent committee tree raw = none := by
+  simp [bindCertificate,parsed,different]
+
+theorem merkleLevelComplete {hash leaves next}
+    (h : NativeManifestMerkle.Layer hash leaves next) :
+    NativeManifestMerkle.level hash leaves = some next := by
+  induction h with
+  | nil => rfl
+  | odd checked => simp [NativeManifestMerkle.level,checked]
+  | cons checked remaining ih => simp [NativeManifestMerkle.level,checked,ih]
+
+/-- Completeness with respect to the original duplicate-last recurrence;
+the fuel parameter cannot silently exclude a valid tree in the approved bound. -/
+theorem merkleFuelComplete {hash leaves root} (fuel : Nat)
+    (h : NativeManifestMerkle.Tree hash leaves root) (bound : leaves.length ≤ 2^fuel) :
+    NativeManifestMerkle.tree hash (fuel+1) leaves = some root := by
+  induction fuel generalizing leaves root with
+  | zero =>
+    cases h with
+    | leaf valid => simp [NativeManifestMerkle.tree,valid]
+    | step layer remaining => simp only [List.length_cons,Nat.pow_zero] at bound; omega
+  | succ fuel ih =>
+    cases h with
+    | leaf valid => simp [NativeManifestMerkle.tree,valid]
+    | @step a b rest next root layer remaining =>
+      have size := NativeManifestMerkle.levelLength layer
+      have limit : next.length ≤ 2^fuel := by
+        simp only [List.length_cons,Nat.pow_succ] at bound size
+        omega
+      simp only [NativeManifestMerkle.tree,merkleLevelComplete layer,bind,Option.bind]
+      exact ih remaining limit
+
+theorem approvedInputBoundComplete {sha tuples root}
+    (bound : tuples.length ≤ 100000)
+    (tree : NativeManifestMerkle.Tree (rawHashId sha) (tuples.map (inputLeaf sha)) root) :
+    inputRoot sha tuples = some root := by
+  apply merkleFuelComplete 17 tree
+  simp only [List.length_map]
+  exact Nat.le_trans bound (by decide)
 
 end DeltaReduce.ISCSourceV2

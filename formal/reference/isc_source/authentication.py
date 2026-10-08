@@ -78,6 +78,7 @@ def registry(bootstrap: Bootstrap) -> tuple[str, dict[str, tuple[str, bytes]]]:
 def authenticate(
     bootstrap: Bootstrap, backend: SodiumReference, raw: bytes, original_body: Body
 ) -> AuthenticatedVote:
+    _require(type(backend) is SodiumReference, "concrete pinned strict Ed25519 backend required")
     artifact = decode_artifact(raw)
     vote = decode_vote(artifact.vote_bytes)
     registry_id, validators = registry(bootstrap)

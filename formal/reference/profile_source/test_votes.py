@@ -20,7 +20,7 @@ class VoteIntentTests(unittest.TestCase):
 
     def setUp(self):
         self.raw_config = fixtures.c.encode(self.f.body())
-        self.first_g = self.f.sign(self.raw_config)
+        self.first_g = self.f.sign(self.raw_config, {"durable_sequence": 2})
         self.first = n.decode_artifact(self.first_g).vote_bytes
         self.actor = self.f.boot.validators[0][0]
         self.policy_digest = (
@@ -46,24 +46,41 @@ class VoteIntentTests(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].signed_artifacts, ())
         self.assertEqual(result[0].original_vote, self.first)
-        self.assertEqual(result[0].vote.durable_sequence, 1)
+        self.assertEqual(result[0].vote.durable_sequence, 2)
         self.assertEqual(result[0].position.decoded.sequence, 2)
+        self.assertEqual(result[0].public_ordinal, 1)
         signed = self.check(journal, (self.first_g, self.first_g))
         self.assertEqual(signed[0].signed_artifacts, (self.first_g, self.first_g))
         self.assertEqual(len(signed), 1)
 
     def test_mixed_slots_keep_two_original_vote_identities(self):
         second_g = self.f.sign(
-            self.raw_config, {"durable_sequence": 2, "context_id": "sha256:" + "6" * 64}
+            self.raw_config, {"durable_sequence": 4, "context_id": "sha256:" + "6" * 64}
         )
         second = n.decode_artifact(second_g).vote_bytes
         result = self.check(self.journal(second), (self.first_g, second_g))
         self.assertEqual([i.position.decoded.sequence for i in result], [2, 4])
-        self.assertEqual([i.vote.durable_sequence for i in result], [1, 2])
+        self.assertEqual([i.vote.durable_sequence for i in result], [2, 4])
+        self.assertEqual([i.public_ordinal for i in result], [1, 2])
         self.assertEqual([i.original_vote for i in result], [self.first, second])
         # The arbitrary second context is not claimed valid CONFIG admission.
 
-    def test_physical_slot_as_vote_rank_and_second_context_vote_rejected(self):
+    def test_public_rank_cannot_replace_signed_physical_slot(self):
+        # Fully valid signatures over the wrong sequence remain inadmissible.
+        # The independent source contract (W1/S-RANK), not the verifier under
+        # test, fixes signed slots 2/4 and public ranks 1/2 for this mixed log.
+        self.first_g = self.f.sign(self.raw_config, {"durable_sequence": 1})
+        self.first = n.decode_artifact(self.first_g).vote_bytes
+        with self.assertRaisesRegex(c.CodecError, "original physical WAL slot"):
+            self.check(self.journal(), (self.first_g,))
+        self.setUp()
+        wrong = self.f.sign(
+            self.raw_config, {"durable_sequence": 2, "context_id": "sha256:" + "6" * 64}
+        )
+        with self.assertRaisesRegex(c.CodecError, "original physical WAL slot"):
+            self.check(self.journal(n.decode_artifact(wrong).vote_bytes), (self.first_g, wrong))
+
+    def test_second_vote_cannot_reopen_existing_native_context(self):
         value = n.decode_vote(self.first)
         for changed in (
             replace(value.original, durable_sequence=4),
@@ -78,6 +95,18 @@ class VoteIntentTests(unittest.TestCase):
         for signatures in ((other,), (self.first_g[:-1] + bytes([self.first_g[-1] ^ 1]),)):
             with self.assertRaises(c.CodecError):
                 self.check(self.journal(), signatures)
+
+    def test_round_view_height_or_kind_cannot_reopen_original_native_key(self):
+        first = n.decode_vote(self.first)
+        for changes in ({"round_id": "another-round"}, {"height": 2}, {"view": 1}):
+            value = replace(first.original, durable_sequence=4, **changes)
+            raw = n.encode_vote(n.NonIscVote(value, first.kind))
+            with self.assertRaisesRegex(c.CodecError, "context already"):
+                self.check(self.journal(raw), ())
+        value = replace(first.original, durable_sequence=4)
+        raw = n.encode_vote(n.NonIscVote(value, "EC"))
+        with self.assertRaisesRegex(c.CodecError, "context already"):
+            self.check(self.journal(raw), ())
 
 
 if __name__ == "__main__":

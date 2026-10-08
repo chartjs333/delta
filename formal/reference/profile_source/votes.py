@@ -40,6 +40,11 @@ class Intent:
     vote: c.Vote
     signed_artifacts: tuple[bytes, ...]
 
+    @property
+    def public_ordinal(self):
+        # Projection only. Never rewrite the signed native Vote or its ID.
+        return self.position.vote_count
+
 
 def bind(
     bootstrap: Bootstrap,
@@ -91,17 +96,17 @@ def bind(
             "independent original own journal identity",
         )
         c._require(
-            vote.durable_sequence == position.vote_count, "S-RANK is vote count, not physical slot"
+            vote.durable_sequence == position.decoded.sequence,
+            "signed native sequence must equal original physical WAL slot",
         )
         key = (
             vote.validator_id,
             vote.validator_epoch_id,
-            kind,
-            vote.round_id,
-            vote.height,
-            vote.view,
             vote.context_id,
         )
+        # N:consensus.cpp vote_key is exactly validator/epoch/context. Round,
+        # view and kind are signed non-key fields; changing one cannot reopen
+        # an occupied durable context. No second slot is allocated on retry.
         c._require(
             key not in no_double,
             "original context already has a durable intent; retry cannot allocate another slot",

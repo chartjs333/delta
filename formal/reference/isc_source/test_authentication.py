@@ -29,6 +29,16 @@ from formal.reference.isc_w1.codec import Delivery
 
 
 class AuthenticationTests(unittest.TestCase):
+    def test_opaque_success_callback_is_not_signature_authority(self):
+        class AcceptAll:
+            def verify(self, key, message, signature):
+                return True
+
+        signer = next(iter(self.seeds))
+        raw = self.signed(signer)
+        with self.assertRaisesRegex(CodecError, "concrete pinned strict Ed25519"):
+            authenticate(self.bootstrap, AcceptAll(), raw, self.body)
+
     @classmethod
     def setUpClass(cls):
         directory = Path(__file__).resolve().parents[1] / "isc_crypto"

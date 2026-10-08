@@ -108,7 +108,6 @@ class ConfigQcTests(unittest.TestCase):
     def test_original_material_order_context_and_vote_identity(self):
         for changed in (
             tuple(reversed(self.delivered)),
-            (*self.delivered, self.delivery(5, self.names[0], durable_sequence=2)),
             (
                 *self.delivered[:-1],
                 replace(
@@ -129,6 +128,26 @@ class ConfigQcTests(unittest.TestCase):
         ):
             with self.subTest(key=key), self.assertRaises(crypto.CodecError):
                 self.check(qc={**self.qc, key: value})
+
+    def test_remote_distinct_vote_ids_do_not_assume_an_honest_private_journal(self):
+        other = self.delivery(5, self.names[0], durable_sequence=2)
+        complete = (*self.delivered, other)
+        first = self.check(complete)
+        alternate_ids = list(self.qc["vote_ids"])
+        alternate_ids[0] = crypto.content_id(votes.VOTE_DOMAIN, other.event.vote_frame)
+        alternate = {**self.qc, "vote_ids": alternate_ids, "qc_id": "sha256:" + "8" * 64}
+        second = self.check(complete, alternate)
+        self.assertEqual(first.deliveries, second.deliveries)
+        self.assertEqual(len(first.deliveries), 5)
+        self.assertEqual(first.matching_signers, second.matching_signers)
+        self.assertEqual(len(first.matching_signers), 4)
+        self.assertNotEqual(first.original_vote_ids, second.original_vote_ids)
+        self.assertEqual(first.original_qc_id, self.qc["qc_id"])
+        self.assertEqual(second.original_qc_id, alternate["qc_id"])
+        with self.assertRaisesRegex(crypto.CodecError, "signer/vote pairing"):
+            self.check(self.delivered, alternate)
+        # This checks the certificate conjunct only. It does not legalize a
+        # second own journal intent or replace an already finalized witness.
 
 
 if __name__ == "__main__":

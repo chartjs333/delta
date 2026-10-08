@@ -27,15 +27,17 @@ def main():
     def visit(name):
         if name in order or name in {"Init", "Std"}:
             return
-        path = (
-            Path(__file__).with_name(name + ".lean")
-            if name in {"ProfileSource", "ProfileControl", "ProfileManifest"}
-            else (ROOT / "formal/proofs" / (name.replace(".", "/") + ".lean"))
-        )
+        if name == "SourcePolicy":
+            path = ROOT / "formal/proposals/isc-source-generation/SourcePolicy.lean"
+        elif name in {"ProfileSource", "ProfileControl", "ProfileManifest"}:
+            path = Path(__file__).with_name(name + ".lean")
+        else:
+            path = ROOT / "formal/proofs" / (name.replace(".", "/") + ".lean")
         if name not in {
             "ProfileSource",
             "ProfileControl",
             "ProfileManifest",
+            "SourcePolicy",
         } and not name.startswith("DeltaReduce."):
             raise RuntimeError("Unqualified import " + name)
         raw = path.read_bytes().replace(b"\r\n", b"\n")
@@ -62,6 +64,7 @@ def main():
 
     visit("ProfileControl")
     visit("ProfileManifest")
+    visit("SourcePolicy")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -97,7 +100,7 @@ def main():
         "Control.rootFieldsExact",
         "Control.profileIndependentOfImportedVersion",
     ]
-    audit = "import ProfileControl\nimport ProfileManifest\n" + "".join(
+    audit = "import ProfileControl\nimport ProfileManifest\nimport SourcePolicy\n" + "".join(
         "#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names
     )
     audit += "".join(
@@ -112,6 +115,23 @@ def main():
             "atUseExistingBinding",
             "existingBindingReusable",
             "atUseOriginalLengths",
+        )
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ISCSourceV2." + name + "\n"
+        for name in (
+            "boundCertificateSource",
+            "bindCertificateComplete",
+            "boundOrderedMerkle",
+            "boundOriginalTuples",
+            "boundExplicitParent",
+            "boundSignerQuorum",
+            "noncanonicalCertificateRejected",
+            "merkleLevelComplete",
+            "merkleFuelComplete",
+            "approvedInputBoundComplete",
+            "snapshotLineageRetained",
+            "fullPolicyOutsideSnapshotRetained",
         )
     )
     (src / "Audit.lean").write_text(audit, encoding="utf8", newline="\n")
@@ -133,6 +153,15 @@ def main():
     )
     run([str(LEAN), "ControlVectors.lean"], "control-vectors.txt", src, environment)
     sources["generated/ControlVectors.lean"] = digest(vector_source.encode())
+    from formal.reference.profile_source.isc_vectors import generate as generate_isc
+
+    isc_source, isc_originals = generate_isc()
+    (src / "ISCVectors.lean").write_text(isc_source, encoding="utf8", newline="\n")
+    (OUT / "isc-originals.json").write_text(
+        json.dumps(isc_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run([str(LEAN), "ISCVectors.lean"], "isc-vectors.txt", src, environment)
+    sources["generated/ISCVectors.lean"] = digest(isc_source.encode())
     run(
         [
             sys.executable,
@@ -147,7 +176,25 @@ def main():
         ],
         "reference-tests.txt",
     )
-    paths = ["formal/reference/profile_source", str(Path(__file__).relative_to(ROOT))]
+    run(
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "formal/reference/isc_source",
+            "-t",
+            ".",
+            "-v",
+        ],
+        "isc-reference-tests.txt",
+    )
+    paths = [
+        "formal/reference/profile_source",
+        "formal/reference/isc_source",
+        str(Path(__file__).relative_to(ROOT)),
+    ]
     run([sys.executable, "-m", "ruff", "check", *paths], "ruff.txt")
     run([sys.executable, "-m", "ruff", "format", "--check", *paths], "ruff-format.txt")
     inputs = [
@@ -158,6 +205,7 @@ def main():
         ROOT / "formal/scripts/native_source_artifacts.py",
         ROOT / "delta-protocol/fixtures/004/cross-language/golden-v1.json",
         ROOT / "delta-protocol/fixtures/local-round/parameter-schema-v1.json",
+        ROOT / "docs/adr/evidence/0014-isc-commitment-profile-v1-vectors.json",
         *sorted((ROOT / "delta-protocol/schemas/004").glob("*.json")),
     ]
     # Every imported project reference component is pinned, including synthetic
@@ -200,6 +248,11 @@ def main():
             "Source-derived storage context: whole config + original metadata + commitment root",
             "O ledger facet retains every delivery/attempt; no physical-presence premise",
             "Metadata/data-use Lean join reuses existing full ordered unsplit vector binding",
+            "Original CONFIG event cut and first witness, late/repeat inventory retained",
+            "Complete source event/input materialization with original cut/target positions",
+            "Future whole ISC C bytes and policy tree, exact b/c, explicit parent and tuple root",
+            "Merkle fuel completeness for all existing 100000 tuples; no 4096 manifest cap",
+            "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",
