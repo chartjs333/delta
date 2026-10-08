@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
 BUILD = ROOT / "formal/build/profile-source-components"
 OUT = ROOT / "formal/proposals/evidence/profile-source-components"
 LEAN = Path(os.environ.get("FAMILY_LEAN", "D:/formal-tools-20260920/lean/bin/lean.exe"))
@@ -28,10 +29,14 @@ def main():
             return
         path = (
             Path(__file__).with_name(name + ".lean")
-            if name == "ProfileSource"
+            if name in {"ProfileSource", "ProfileControl", "ProfileManifest"}
             else (ROOT / "formal/proofs" / (name.replace(".", "/") + ".lean"))
         )
-        if name != "ProfileSource" and not name.startswith("DeltaReduce."):
+        if name not in {
+            "ProfileSource",
+            "ProfileControl",
+            "ProfileManifest",
+        } and not name.startswith("DeltaReduce."):
             raise RuntimeError("Unqualified import " + name)
         raw = path.read_bytes().replace(b"\r\n", b"\n")
         sources[path.relative_to(ROOT).as_posix()] = digest(raw)
@@ -55,7 +60,8 @@ def main():
             raise RuntimeError(log)
         return log
 
-    visit("ProfileSource")
+    visit("ProfileControl")
+    visit("ProfileManifest")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -85,9 +91,28 @@ def main():
         "Wal.mixed1232",
         "Wal.distinctPhysicalPositions",
         "Wal.noEntryCollapse",
+        "Control.checked",
+        "Control.complete",
+        "Control.originalBytesCannotBeSubstituted",
+        "Control.rootFieldsExact",
+        "Control.profileIndependentOfImportedVersion",
     ]
-    audit = "import ProfileSource\n" + "".join(
+    audit = "import ProfileControl\nimport ProfileManifest\n" + "".join(
         "#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ProfileManifest." + name + "\n"
+        for name in (
+            "checked",
+            "complete",
+            "originalBytes",
+            "completeOrderedReferences",
+            "completeOrderedRoot",
+            "originalPlan",
+            "atUseExistingBinding",
+            "existingBindingReusable",
+            "atUseOriginalLengths",
+        )
     )
     (src / "Audit.lean").write_text(audit, encoding="utf8", newline="\n")
     log = run([str(LEAN), "Audit.lean"], "axioms.txt", src, environment)
@@ -99,6 +124,15 @@ def main():
             "Quot.sound",
         }:
             raise RuntimeError("Unexpected axiom " + group)
+    from formal.reference.profile_source.control_vectors import generate
+
+    vector_source, vector_originals = generate()
+    (src / "ControlVectors.lean").write_text(vector_source, encoding="utf8", newline="\n")
+    (OUT / "control-originals.json").write_text(
+        json.dumps(vector_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run([str(LEAN), "ControlVectors.lean"], "control-vectors.txt", src, environment)
+    sources["generated/ControlVectors.lean"] = digest(vector_source.encode())
     run(
         [
             sys.executable,
@@ -121,6 +155,10 @@ def main():
         ROOT / "formal/proposals/b-family-transfer/profile-v1.schema.json",
         ROOT / "formal/reference/profile_source/README.md",
         Path(__file__),
+        ROOT / "formal/scripts/native_source_artifacts.py",
+        ROOT / "delta-protocol/fixtures/004/cross-language/golden-v1.json",
+        ROOT / "delta-protocol/fixtures/local-round/parameter-schema-v1.json",
+        *sorted((ROOT / "delta-protocol/schemas/004").glob("*.json")),
     ]
     # Every imported project reference component is pinned, including synthetic
     # fixture inputs. No cached result substitutes for the current source hashes.
@@ -158,6 +196,10 @@ def main():
             "Bootstrap/initial-config authority, full RoundConfig with R/E and signed QC join",
             "Mixed slots and S-RANK retain original votes and unsigned durable intents",
             "General Lean original reference/position/multiplicity and rank injectivity lemmas",
+            "Kernel whole control-byte binding and closed root names; synthetic raw vectors",
+            "Source-derived storage context: whole config + original metadata + commitment root",
+            "O ledger facet retains every delivery/attempt; no physical-presence premise",
+            "Metadata/data-use Lean join reuses existing full ordered unsplit vector binding",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

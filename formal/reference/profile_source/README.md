@@ -46,6 +46,34 @@ multiplicity results and S-RANK annotation preservation/injectivity. It uses
 as a purported kind-3 proof. These lemmas contain no public-state/refinement
 premise. They are not yet the complete profile source-to-family theorem.
 
+`ProfileControl.lean` binds whole canonical control-document bytes and exact
+closed root fields. Kernel vectors retain complete synthetic original bytes,
+including negatives for duplicate members/trailing bytes and wrong profile.
+This is not yet the complete nested semantic/control decoder equivalence.
+
+`manifest_context.py` derives the full storage Context from the original complete
+manifest/schema/scale/plan/profile/fixed-point config and enclosing RoundConfig.
+The commitment is the ordered Merkle root specified in feature003 §3/US2 and
+feature004 FR008-014, never the separately hashed manifest identity. It needs
+no physical Q bytes at AC verification; `read_q` requires the actual exact
+original envelope at data use. Schema/units and ordered unsplit leaves are
+retained. Legacy schemas/fixtures are read only; the isolated future reference
+uses the independently selected symbolic semantics and never rewrites old IDs.
+
+`availability_ledger.py` replays the native InputLedger facet from empty, with
+the approved O authenticated guard and complete original delivery inventory.
+The source path derives Context from the retained commitment and byte inputs;
+late evidence cannot backdate acceptance, exact repeats retain the first AC,
+and rejected/alternate/lost-data observations remain in the event prefix.
+This facet still requires the outer producing history to establish original
+ticket issuance, commitment occurrence and ordinary-progress/close guards.
+
+`ProfileManifest.lean` separates metadata resolution from actual complete corpus
+use. Its general forward/converse lemmas connect that join to the existing
+`NativeManifestBinding.bind` premise used by R2.1/R2.2, retaining original bytes,
+ordered references, Merkle root and complete partition. It does not authenticate
+hashes, assert remote physical facts or derive a producer history from a hash.
+
 Run `formal/proposals/b-family-transfer/check_profile_components.py` with the
 pinned `ISC_SODIUM_DLL`; it rebuilds the involved Lean sources, audits axioms,
 checks the reference components and records exact source/log hashes. All

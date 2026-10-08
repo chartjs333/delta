@@ -1,6 +1,12 @@
 test_imported_registry_cannot_elect_itself (formal.reference.profile_source.test_authority.AuthorityTests.test_imported_registry_cannot_elect_itself) ... ok
 test_original_bootstrap_and_initial_configuration_select_keys (formal.reference.profile_source.test_authority.AuthorityTests.test_original_bootstrap_and_initial_configuration_select_keys) ... ok
 test_profile_shape_schema_matches_all_control_documents (formal.reference.profile_source.test_authority.AuthorityTests.test_profile_shape_schema_matches_all_control_documents) ... ok
+test_alternate_witness_conflict_and_exact_replay_preserve_original (formal.reference.profile_source.test_availability_ledger.LedgerTests.test_alternate_witness_conflict_and_exact_replay_preserve_original) ... ok
+test_full_inventory_including_invalid_and_duplicate_deliveries (formal.reference.profile_source.test_availability_ledger.LedgerTests.test_full_inventory_including_invalid_and_duplicate_deliveries) ... ok
+test_loss_preserves_ac_freeze_and_late_lineage (formal.reference.profile_source.test_availability_ledger.LedgerTests.test_loss_preserves_ac_freeze_and_late_lineage) ... ok
+test_no_backdating_valid_later_statement (formal.reference.profile_source.test_availability_ledger.LedgerTests.test_no_backdating_valid_later_statement) ... ok
+test_no_empty_freeze_or_context_substitution (formal.reference.profile_source.test_availability_ledger.LedgerTests.test_no_empty_freeze_or_context_substitution) ... ok
+test_source_occurrences_never_collapsed_or_reordered (formal.reference.profile_source.test_availability_ledger.LedgerTests.test_source_occurrences_never_collapsed_or_reordered) ... ok
 test_all_original_config_fields_are_signed_not_only_storage_binding (formal.reference.profile_source.test_configuration.ConfigurationTests.test_all_original_config_fields_are_signed_not_only_storage_binding) ... ok
 test_configuration_cannot_select_storage_trust_or_normalize_declaration (formal.reference.profile_source.test_configuration.ConfigurationTests.test_configuration_cannot_select_storage_trust_or_normalize_declaration) ... ok
 test_strict_wire_no_legacy_or_lossy_config (formal.reference.profile_source.test_configuration.ConfigurationTests.test_strict_wire_no_legacy_or_lossy_config) ... ok
@@ -31,6 +37,12 @@ test_interval_counts_slots_and_retry_does_not_allocate (formal.reference.profile
 test_missing_floor_or_invalid_cut_rejected (formal.reference.profile_source.test_journals.JournalTests.test_missing_floor_or_invalid_cut_rejected) ... ok
 test_never_collapse_original_votes_or_drop_finalization (formal.reference.profile_source.test_journals.JournalTests.test_never_collapse_original_votes_or_drop_finalization) ... ok
 test_torn_tail_is_not_a_smaller_source_domain (formal.reference.profile_source.test_journals.JournalTests.test_torn_tail_is_not_a_smaller_source_domain) ... ok
+test_changed_order_missing_leaf_or_context_rejects (formal.reference.profile_source.test_manifest_context.ManifestContextTests.test_changed_order_missing_leaf_or_context_rejects) ... ok
+test_complete_original_context_without_any_q_bytes (formal.reference.profile_source.test_manifest_context.ManifestContextTests.test_complete_original_context_without_any_q_bytes) ... ok
+test_context_to_ac_to_frozen_inputs_preserves_all_original_identities (formal.reference.profile_source.test_manifest_context.ManifestContextTests.test_context_to_ac_to_frozen_inputs_preserves_all_original_identities) ... ok
+test_exact_first_use_preserves_unsplit_originals_and_order (formal.reference.profile_source.test_manifest_context.ManifestContextTests.test_exact_first_use_preserves_unsplit_originals_and_order) ... ok
+test_no_implicit_legacy_semantics_or_duplicate_members (formal.reference.profile_source.test_manifest_context.ManifestContextTests.test_no_implicit_legacy_semantics_or_duplicate_members) ... ok
+test_wrong_manifest_identity_or_commitment_cannot_be_substituted (formal.reference.profile_source.test_manifest_context.ManifestContextTests.test_wrong_manifest_identity_or_commitment_cannot_be_substituted) ... ok
 test_anchor_prefix_need_not_be_latest_own_vote_tip (formal.reference.profile_source.test_metadata.MetadataTests.test_anchor_prefix_need_not_be_latest_own_vote_tip) ... ok
 test_cannot_collapse_original_source_occurrences (formal.reference.profile_source.test_metadata.MetadataTests.test_cannot_collapse_original_source_occurrences) ... ok
 test_canonical_wire_before_typed_construction (formal.reference.profile_source.test_metadata.MetadataTests.test_canonical_wire_before_typed_construction) ... ok
@@ -47,6 +59,6 @@ test_signature_without_own_intent_or_corrupt_signature_rejected (formal.referenc
 test_unsigned_durable_cut_is_retained_without_claiming_signature (formal.reference.profile_source.test_votes.VoteIntentTests.test_unsigned_durable_cut_is_retained_without_claiming_signature) ... ok
 
 ----------------------------------------------------------------------
-Ran 47 tests in 1.352s
+Ran 59 tests in 1.847s
 
 OK

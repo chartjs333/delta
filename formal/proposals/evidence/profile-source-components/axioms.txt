@@ -12,3 +12,21 @@
 'DeltaReduce.ProfileSource.Wal.mixed1232' depends on axioms: [propext]
 'DeltaReduce.ProfileSource.Wal.distinctPhysicalPositions' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ProfileSource.Wal.noEntryCollapse' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Control.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Control.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Control.originalBytesCannotBeSubstituted' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.Control.rootFieldsExact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Control.profileIndependentOfImportedVersion' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.originalBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.completeOrderedReferences' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.completeOrderedRoot' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.originalPlan' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.atUseExistingBinding' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.existingBindingReusable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.atUseOriginalLengths' depends on axioms: [propext, Classical.choice, Quot.sound]
