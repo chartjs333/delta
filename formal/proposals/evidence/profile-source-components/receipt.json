@@ -51,6 +51,7 @@
     "formal/proofs/DeltaReduce/NativeIscCertificate.lean": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
     "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
     "formal/proposals/isc-source-generation/SourceVote.lean": "fd7727fbab767898af14659215fc3512f4967321ea056b3fb90788704a37add5",
+    "formal/proposals/b-family-transfer/ProfileConfigurationQC.lean": "89d5aa5c0ce83944654d113e9d897abc1bbc3d2511cb7f9db54ef96dd51f1f12",
     "generated/ControlVectors0.lean": "907549be52d1375cfb903479a10989c482dcc0e3a66f4fe0d10b970233356d2b",
     "generated/ControlVectors1.lean": "718e8671c7a02c9bdbb0b2f131411b39e47ae50bb2ca7d34d44855d19a75d5f8",
     "generated/ControlVectors2.lean": "8200e34c241f5a259b16543a6f1eece1eb0947995492bbb304a75ecbd25c4db4",
@@ -62,6 +63,7 @@
     "generated/ConfigurationVectors.lean": "67311639f84eeb8d25c52e2ac734e4ae2b09f3617e206b81e768cdc02058b26f",
     "generated/NativeHeaderVectors.lean": "4816420e5e461391ee22cb178186a3659026b287fd09a866ce7f03496b363cad",
     "generated/SourceVoteVectors.lean": "6030cd9816354da3b076cc40bfbe74314f0eb9ce6cbd39f8f0649c52fe93fa02",
+    "generated/ConfigurationQCVectors.lean": "499ca526d5d18d4a4b4461b845432136d66081684c165cb7ba475fec86e9c513",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
@@ -70,6 +72,7 @@
     "formal/reference/profile_source/configuration.py": "b683b9155215ba28203492084141ae5a984d9e7da54d611353639e71b74ab180",
     "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
     "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
+    "formal/reference/profile_source/configuration_qc_vectors.py": "c348aee61562a09ea37282a5142607f142ba157ec4b4afd62f532f31d520cb57",
     "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
     "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
     "formal/reference/profile_source/input_history.py": "8a157a442c979a539c6810f4321aa1675e7111fee2918bfa3024f1773bf33180",
@@ -102,8 +105,8 @@
     "formal/reference/profile_source/vote_vectors.py": "77ccba72f393be28f2ff8745d8153ec0baecb4b9835f54c039ddcd9f5e55b687",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "fea142abaf817c0cce59ff3098b7bd87757f51046c4704d1fa745c901a9dc7dd",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "628667b9de887ce25d51b0e456f20845096251644e39b537e3cae06869be5b9f",
+    "formal/reference/profile_source/README.md": "324f2caacb319420cca9cb23edb99cfc522e6342eef393b2fa319255c70c73f7",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "99be3bc9429207bb525bf72296033438f51cc94d75faa913a19e3ce684b59bd1",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
@@ -422,9 +425,14 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "ProfileConfigurationQC.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "d30ebde1858c682d745cb41e40b4d57c18a1f19b8b2137ea265e232b2e5ec344"
+      "sha256": "99cd33e7143f0717b82edf365f52f307c76d0c349caf24e79e60925e030b06aa"
     },
     {
       "log": "control-vectors-0.txt",
@@ -482,19 +490,24 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "configuration-qc-vectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "8948c2fb936f46cb5e218cba21a8c7f485ad024141325d14d9a48a6e447fc153"
+      "sha256": "23707efd502c9b0a9ea1c406f16513f1ea72716e75e9c62a9719594f7f20af15"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "e46d69b9e749ff65ddc767fdc5b5af7140d2b78c808fc328bdf4b4e8bcaa1ce0"
+      "sha256": "68187784a6d3b4ff6263ed36b410af8d4daf1cf15122d1b82aa72d3663d9b7c6"
     },
     {
       "log": "w1-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "9592c819b4f1f94d5ea7742db8b26bbed17cd206081083dad2af83110ca7892a"
+      "sha256": "d66ea6162c60318a4530a8a2973c9c372159bc9ab8330f7b47c867b56193bc81"
     },
     {
       "log": "ruff.txt",
@@ -504,7 +517,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "eb27c90aa064a61ea9229c3acedb339696979cc4f1b6d1e8e8dd6eab0c1292a7"
+      "sha256": "d6618aac860f8215745a8e56a5cc32d7f88af148570217bf95dcb18d3ed520d1"
     }
   ],
   "established": [
@@ -537,7 +550,9 @@
     "Full policy descriptor is injective; later views/sequences are retained unchanged",
     "Successor twelve-field V codec, original signed preimages and own physical slots",
     "General S-RANK join retains distinct original V objects without signed renumbering",
-    "Four P0 input collections bind to the retained CONFIG/close source facet"
+    "Four P0 input collections bind to the retained CONFIG/close source facet",
+    "Whole CONFIG/QC/V/G relation retains original witness and signer/vote pairing",
+    "CONFIG QC context mismatch cannot be hidden by filtering; all originals retained"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

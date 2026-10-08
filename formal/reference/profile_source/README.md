@@ -249,6 +249,19 @@ original event and non-selected configuration occurrence remains in the source
 prefix. This still requires enclosing producer, initial-state and full-history
 qualification; the facet is not asserted complete for every policy/source cut.
 
+`ProfileConfigurationQC.lean` joins the complete original CONFIG and QC bytes
+to original delivered V/G records. Independent enrollment, the full CONFIG
+context, exact signer/vote pairing and all matching signers are checked; it
+does not select the first quorum or replace a witness on a later arrival cut.
+Original duplicate deliveries and multiple remote votes from one signer remain
+distinct occurrences. A same body/context group with inconsistent full context
+is rejected rather than filtered away. Kernel vectors retain two original QC
+witnesses over the same received inventory, with signatures independently
+checked by the pinned reference verifier on synthetic keys. The general Lean
+byte relation does not assume that structurally bound G has a valid signature:
+authentication, actual delivery, first-finalization permission and the complete
+producer prefix remain obligations of the enclosing source checker.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

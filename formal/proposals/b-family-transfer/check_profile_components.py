@@ -59,6 +59,7 @@ def main():
             "ProfileControl",
             "ProfileManifest",
             "ProfileConfiguration",
+            "ProfileConfigurationQC",
             "ProfileNativeHeader",
         }:
             path = Path(__file__).with_name(name + ".lean")
@@ -69,6 +70,7 @@ def main():
             "ProfileControl",
             "ProfileManifest",
             "ProfileConfiguration",
+            "ProfileConfigurationQC",
             "ProfileNativeHeader",
             "SourcePolicy",
             "SourceVote",
@@ -102,6 +104,7 @@ def main():
     visit("ProfileNativeHeader")
     visit("SourcePolicy")
     visit("SourceVote")
+    visit("ProfileConfigurationQC")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -155,7 +158,7 @@ def main():
     audit = (
         "import ProfileControl\nimport ProfileManifest\n"
         "import ProfileConfiguration\nimport ProfileNativeHeader\n"
-        "import SourcePolicy\nimport SourceVote\n"
+        "import SourcePolicy\nimport SourceVote\nimport ProfileConfigurationQC\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
     )
     audit += "".join(
@@ -176,6 +179,22 @@ def main():
             "physicalSlotRetained",
             "originalPosition",
             "differentOriginalVotes",
+        )
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ProfileSource.ConfigurationQC." + name + "\n"
+        for name in (
+            "readSource",
+            "decoded",
+            "complete",
+            "joined",
+            "originalQuorum",
+            "everyPairIsOriginal",
+            "joinComplete",
+            "checked",
+            "checkComplete",
+            "originalConfigurationAndQuorum",
+            "exactSignerCover",
         )
     )
     audit += "".join(
@@ -327,6 +346,17 @@ def main():
     )
     run([str(LEAN), "SourceVoteVectors.lean"], "source-vote-vectors.txt", src, environment)
     sources["generated/SourceVoteVectors.lean"] = digest(vote_source.encode())
+    from formal.reference.profile_source.configuration_qc_vectors import generate as qc_vectors
+
+    qc_source, qc_originals = qc_vectors()
+    (src / "ConfigurationQCVectors.lean").write_text(qc_source, encoding="utf8", newline="\n")
+    (OUT / "configuration-qc-originals.json").write_text(
+        json.dumps(qc_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run(
+        [str(LEAN), "ConfigurationQCVectors.lean"], "configuration-qc-vectors.txt", src, environment
+    )
+    sources["generated/ConfigurationQCVectors.lean"] = digest(qc_source.encode())
     run(
         [
             sys.executable,
@@ -456,6 +486,8 @@ def main():
             "Successor twelve-field V codec, original signed preimages and own physical slots",
             "General S-RANK join retains distinct original V objects without signed renumbering",
             "Four P0 input collections bind to the retained CONFIG/close source facet",
+            "Whole CONFIG/QC/V/G relation retains original witness and signer/vote pairing",
+            "CONFIG QC context mismatch cannot be hidden by filtering; all originals retained",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

@@ -51,6 +51,21 @@
 'DeltaReduce.ProfileSource.Vote.physicalSlotRetained' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Vote.originalPosition' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Vote.differentOriginalVotes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.readSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.decoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.joined' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.originalQuorum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.everyPairIsOriginal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.joinComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.checkComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.originalConfigurationAndQuorum' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.exactSignerCover' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Configuration.roundTrip' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Configuration.decoded' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Configuration.encoded' depends on axioms: [propext, Classical.choice, Quot.sound]
