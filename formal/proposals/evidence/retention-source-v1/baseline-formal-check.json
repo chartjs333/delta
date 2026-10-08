@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "checked_commit": "8fc019634689c86df43e0d74dcfc2fb2f3cd81ea",
+  "branch": "agent/isc-s16-formal-linkage",
+  "recorded_at_utc": "2026-10-08T06:57:27.993469+00:00",
+  "claim_scope": "Recheck of existing pre-O candidate baseline, not qualification of the O successor or R2.3.",
+  "component_evidence": "receipt.json",
+  "component_result": "EXACT_RETENTION_SOURCE_COMPONENT_CHECKED",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-f267929686d838d354616131f0f5a5ee",
+    "effective_revision": 13,
+    "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+    "node_id": "formal-linkage",
+    "phase": "node",
+    "agent_id": "isc-s16-formal-linkage-engineer",
+    "occurrence": 9,
+    "source_commit": "12326b892690705b7141fcd32bf3f32cf07d092e",
+    "source_path": "formal/proposals/retention-policy-source-binding-decision.json",
+    "source_sha256": "5a0cdfc82434dba8e7d25c58e69785849b01d7d7e5968cc874fb59d12b3af111",
+    "effective_scope_sha256": "0064382a8d1f1d98a5784ce95bb4c7df32a35449a7fda80ddd5187eb7af0bda2",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "scope_ack_id": "scope-ack-a30732f8d640518596da678cfa2e63c3",
+  "official_scope_recheck": {
+    "effective_core_sha256": "0064382a8d1f1d98a5784ce95bb4c7df32a35449a7fda80ddd5187eb7af0bda2",
+    "ack_exact": true,
+    "assignment": "13069d7e-a148-475a-bd49-9885bf2f283d",
+    "scope_revision": 13,
+    "read_only": true,
+    "response_sha256": "1b760d176d00b2f4e9d3bf7a86971db0cabb428acc5f93006348872a920f96ae"
+  },
+  "command_sequence": "Existing Makefile formal-check commands invoked individually because make is unavailable; same scripts and criteria. UTF-8 Python environment on Windows.",
+  "baseline_input_bundle_sha256": "340b2636677ccbf0f95a362711a6dc531b3b78dc9269148ea500d546512d508a",
+  "gates": {
+    "phase0": "PASS",
+    "contracts": "PASS_WITH_UTF8_AFTER_CAPTURED_CP1252_FAILURE",
+    "toolchain": "PASS",
+    "parse": "PASS",
+    "safety": "PASS",
+    "liveness": "PASS",
+    "proofs": "FAIL_MISSING_NATIVE_ARITHMETIC_RECOVERY_REFINEMENT",
+    "mutants": "NOT_RUN_AFTER_PROOF_GATE_FAILURE",
+    "refinement": "NOT_RUN_AFTER_PROOF_GATE_FAILURE",
+    "report": "NOT_RUN_AFTER_PROOF_GATE_FAILURE"
+  },
+  "cold_build_attempts": "Both unchanged1200s proof gates timed out. Explicit lake --no-cache build DeltaReduce source-cache setup completed, then the unchanged proof gate reached its actual completeness audit. Neither timeout was relabeled PASS; no gate limit or proof source changed.",
+  "kernel_audit_errors": [
+    "PO-AB1 conjunct admission-recovery-refinement theorem nativeArithmeticRecoveryRefines is missing",
+    "axiom dependency result missing for DeltaReduce.nativeArithmeticRecoveryRefines"
+  ],
+  "reported_kernel_axioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "stop_rule": "AGENTS.md: A failed model, proof, production-mutant, refinement or compatibility gate is an unconditional STOP.",
+  "disposition": "PROOF_GATE_STOP; no new architecture counterexample or semantic decision inferred from the known missing theorem.",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "r1_r2_1_r2_2": "CLOSED in original domains, not reopened by this evidence",
+  "residual": [
+    "Independently derived complete original source/configuration/aliases/units, including enclosing configuration authority and actual producing prefix.",
+    "Remaining certificate/candidate/current/environment collections and complete approved O public/source-state relation and affected qualification.",
+    "Initial/incomplete and sufficient ABORT correspondence retaining all original downstream lineage."
+  ],
+  "theorem_order": "Named recovery theorem remains after substantive reviewed R2.3 closure; this check does not authorize bypassing that order.",
+  "workflow": {
+    "assignment_preserved": true,
+    "result_submitted": false,
+    "review_submitted_this_turn": false,
+    "graph_transition_requested": false,
+    "new_scope_request": false,
+    "new_approval_needed_for_existing_R2_3_scope": false
+  },
+  "limits": [
+    "Retention component alone does not establish full original configuration/provenance authority.",
+    "Existing pre-O model results do not qualify O physical/observation claim changes.",
+    "No production changes, sigma assignment, old object migration, new trust, hidden cap, sorry, circular axiom or gate waiver.",
+    "Same executor verification is not independent Formal GO attestation."
+  ],
+  "attachments": {
+    "baseline-captures.json": {
+      "sha256": "e32cb7c874565a80e31ba62f96fea2ec6f5160fb6f5e0beea72ea5a3d1990005",
+      "byte_length": 257560
+    },
+    "baseline-lean-proof-report.json": {
+      "sha256": "b411f3f7524854d85f2c0a01d8321cbea7385a905f212d45fcebe8d3ea5aff6d",
+      "byte_length": 48645
+    }
+  }
+}
