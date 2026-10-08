@@ -1,0 +1,39 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "reason": "R2.3 source-binding остановлен на уже обязательном O §4.5: исходная retention policy должна быть разрешена, а не выведена из имени epoch. В закреплённых N/P/S/O и reference source найдены требование и signed retention_epoch_id, но нет конкретного policy object/resolution contract. Нужны exact existing references либо явное решение о недостающем binding. Физическая достоверность хранения не запрашивается; O и общая авторизация R2.3 не открываются заново.",
+  "dependencies": [
+    "Approved O: 90561a97de7f41f409bf22065ad6cdc9b3932458:docs/adr/0018-authenticated-availability-contract-v1.md section4 item5",
+    "Approved storage bytes: 1438fa3d78ec99291475cf4660fd8c190ac01bb3:docs/adr/0016-storage-availability-source-binding-v1.md section3",
+    "Independent provisioning: 26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/adr/0013-snapshot-provenance-profile-v1.md",
+    "Same-source report: formal/proposals/storage-retention-source-boundary.md",
+    "Same-source exact evidence: formal/proposals/evidence/storage-source-v1/retention-policy-boundary.json SHA256 034adf36aa2b8ae7521f8e90715dedbea04f97e71b3c1cf12f56c3540dd42ebe"
+  ],
+  "proposal": {
+    "instructions": "R2.3 remains authorized under the complete approved O contract at 90561a97de7f41f409bf22065ad6cdc9b3932458. This request does not reopen O/F/E or seek repeated R2.3 authority. It reports the missing original retention-policy resolution required by O section4 item5 and ADR0016 section3.\n\nA concrete decision is needed: provide the exact immutable existing retention-policy contract/evidence path and its binding from independent initial/RoundConfig policy plus retention_epoch_id; or explicitly specify/authorize the missing binding as a new contract decision using the same provisioning authority. The exact policy object, selection rule and canonical/source reference must be stated before implementing that part of the verifier. No new duration, expiry, observer, storage honesty premise, clock or trust root is selected by this request.\n\nApproving this unchanged unresolved request does NOT choose a policy, waive the original-policy obligation, or authorize an arbitrary encoding/duration. Keep STOP until exact applicable references or an exact semantic/binding decision are supplied. Equality of retention_epoch_id, an authentic signature, a supplied Context, or a successful public projection alone cannot close the obligation. Existing O permission, old byte-component evidence and R1/R2.1/R2.2 original-domain closure remain intact.\n\nAfter an actual exact decision, use fresh effective scope and exact ACK, then resume only the existing assigned work and ordinary result/two-review gates. No manual transition, result duplication, separate sprint, production integration, guard removal, concrete sigma or full R3. This request itself changes no graph/assignment/scope/ACK or existing object identity.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+      "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+      "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+      "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+      "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+      "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN",
+  "approval_state": "UNRESOLVED_EXACT_POLICY_BINDING_REQUIRED"
+}

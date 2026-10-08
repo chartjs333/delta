@@ -1,0 +1,539 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "source_base": "27e376a0c56807d2c1680180690eb7a6dd7e729e",
+  "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "scope_revision": 11,
+  "decision_id": "scope-decision-e5c12ebc8342d99630d5fcf28a9c6753",
+  "ack_id": "scope-ack-a07a96b9126f50c24a663f2b99658f95",
+  "result": "MISSING_RETENTION_POLICY_RESOLUTION_CONTRACT_IN_AVAILABLE_PINNED_CORPUS",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/003-bft-round-state-machine/spec.md",
+      "sha256": "ffe129366f152719b25925afed8b9bdebac8ddae9fcdd67b9fe255a6c0073821",
+      "byte_length": 19797,
+      "matching_lines": [
+        {
+          "line": 145,
+          "text": "- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`."
+        }
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8",
+      "byte_length": 27385,
+      "matching_lines": [
+        {
+          "line": 626,
+          "text": "Disposition InputLedger::record_availability("
+        }
+      ]
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "byte_length": 37676,
+      "matching_lines": [
+        {
+          "line": 88,
+          "text": "| `bootstrap.json` | `origin_id`, `genesis_ref`, `initial_config_ref`, `validator_epoch_id`, `validators` (ordered `{validator_id,key_ref,roles}`), `quorum_threshold`, `local_validator_id`, `runtime_build_id`, `formal_semantics_id`, `schema_set_id`, `signature_codec_id`, `producer_rules_id`, `initial_anchor` |"
+        }
+      ]
+    },
+    {
+      "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+      "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41",
+      "byte_length": 19599,
+      "matching_lines": [
+        {
+          "line": 41,
+          "text": "| N `specs/003-bft-round-state-machine/spec.md` FR-001/012–019 | RoundConfig availability policy; commitment binds immutable ticket/context; exact shard IDs, lengths, retention epoch, per-shard coverage, close/late/repair rules |"
+        },
+        {
+          "line": 42,
+          "text": "| N `delta-core-cpp/include/delta/core/consensus.hpp`, `AvailabilityProof`; `src/consensus.cpp`, `InputLedger::record_availability` | Six fields: ticket, commitment, certificate ID, covered leaf IDs, attester IDs, threshold. Checks membership/coverage/conflict; no key, signature, length or retention authentication |"
+        },
+        {
+          "line": 64,
+          "text": "  {retention_epoch_id, storage_epoch_id, storage_registry_id, threshold}"
+        },
+        {
+          "line": 103,
+          "text": "`retention_epoch_id` names the exact immutable storage retention obligation"
+        },
+        {
+          "line": 106,
+          "text": "mandatory. This codec does not define a new retention duration/extension rule:"
+        },
+        {
+          "line": 107,
+          "text": "the original retention policy and producing history must be available to the"
+        },
+        {
+          "line": 132,
+          "text": "origin_id, parent_checkpoint_id, retention_epoch_id, round_config_id, round_id,"
+        },
+        {
+          "line": 140,
+          "text": "71-byte `sha256:` IDs. Round/storage/epoch/retention labels retain the native"
+        },
+        {
+          "line": 173,
+          "text": "remain distinct history events. Another leaf or retention/context is not silently"
+        },
+        {
+          "line": 184,
+          "text": "parent_checkpoint_id, retention_epoch_id, round_config_id, round_id,"
+        },
+        {
+          "line": 200,
+          "text": "enrolled storage IDs must attest that exact leaf/length/retention/context."
+        },
+        {
+          "line": 253,
+          "text": "still apply. The codec makes no new liveness guarantee or everlasting-retention"
+        },
+        {
+          "line": 277,
+          "text": "role, epoch, context, length, retention and duplicate-key negatives; per-leaf"
+        }
+      ]
+    },
+    {
+      "commit": "90561a97de7f41f409bf22065ad6cdc9b3932458",
+      "path": "docs/adr/0018-authenticated-availability-contract-v1.md",
+      "sha256": "4b5c91196b63644dc472954447e9b1426cbf88055f78a5d49eb903821780b0d5",
+      "byte_length": 30643,
+      "matching_lines": [
+        {
+          "line": 65,
+          "text": "storage IDs, retention epoch, committed leaf IDs and full envelope lengths."
+        },
+        {
+          "line": 74,
+          "text": "key, per-leaf, duplicate, identity and retention-binding rules stay intact."
+        },
+        {
+          "line": 124,
+          "text": "   storage epoch, retention epoch and threshold equal that policy exactly."
+        },
+        {
+          "line": 139,
+          "text": "5. The original retention policy is resolved, not inferred from an epoch label"
+        },
+        {
+          "line": 224,
+          "text": "at its target. It certifies neither perpetual target retention nor the source's"
+        },
+        {
+          "line": 312,
+          "text": "honesty threshold, globally accurate clock, fault-free retention interval,"
+        },
+        {
+          "line": 327,
+          "text": "within the original attempt/deadline budgets. A signed retention obligation"
+        }
+      ]
+    },
+    {
+      "commit": "d1608a1226bbb931ad2c6b078e0d2bb202545122",
+      "path": "formal/reference/storage_source/codec.py",
+      "sha256": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
+      "byte_length": 12332,
+      "matching_lines": [
+        {
+          "line": 44,
+          "text": "    \"retention_epoch_id\","
+        },
+        {
+          "line": 108,
+          "text": "    for key in (\"round_id\", \"retention_epoch_id\", \"storage_epoch_id\"):"
+        }
+      ]
+    },
+    {
+      "commit": "d1608a1226bbb931ad2c6b078e0d2bb202545122",
+      "path": "formal/reference/storage_source/README.md",
+      "sha256": "988409ec3c57eabcd29d46ae2f51ba7d557560b867bbed987633aa8e399c0f6e",
+      "byte_length": 2901,
+      "matching_lines": [
+        {
+          "line": 16,
+          "text": "context, leaf and full envelope length. Authentication uses the existing pinned"
+        },
+        {
+          "line": 21,
+          "text": "bytes, wrong roles/keys/domains/context and witness reordering/inflation."
+        },
+        {
+          "line": 29,
+          "text": "`Context` is explicitly a **component input**, not an origin credential. The next"
+        },
+        {
+          "line": 32,
+          "text": "actual original prefix. Calling this function with a supplied Context or any"
+        }
+      ]
+    }
+  ],
+  "searches": [
+    {
+      "argv": [
+        "git",
+        "grep",
+        "-n",
+        "-i",
+        "retention",
+        "60c692f6e391f839829dfc64e93380db54cd507b",
+        "--",
+        "specs",
+        "docs",
+        "delta-protocol",
+        "delta-core-cpp",
+        "delta-runtime-cpp",
+        "delta-worker-python",
+        "formal/tla"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "fcfab1c95ed2fc3900f260d7530d79c0f88bf519c31b41ba72ee22f54c38c53d",
+      "matches": [
+        "60c692f6e391f839829dfc64e93380db54cd507b:docs/architecture/hybrid-runtime.md:60:| votes, certificates, state roots | C++ durable runtime | WAL/snapshot retention |",
+        "60c692f6e391f839829dfc64e93380db54cd507b:docs/architecture/hybrid-runtime.md:62:| certified global object pieces | Java distribution/CAS | object retention |",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "argv": [
+        "git",
+        "grep",
+        "-n",
+        "-i",
+        "retention",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+        "--",
+        "specs",
+        "docs",
+        "delta-protocol",
+        "delta-core-cpp",
+        "delta-runtime-cpp",
+        "delta-worker-python",
+        "formal/tla"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "e715306cb8787f425b22c92f9de73bae07da9b9eeba55a52b6c7a341ffc4cbf5",
+      "matches": [
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/architecture/hybrid-runtime.md:60:| votes, certificates, state roots | C++ durable runtime | WAL/snapshot retention |",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/architecture/hybrid-runtime.md:62:| certified global object pieces | Java distribution/CAS | object retention |",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:1566:ambiguity, exact receipt retention, old-parent retry, counterfeit scan rejection",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:1654:arithmetic journal, retry/conflict retention after current advance, stale first",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:1712:exact slot/key retention and computed before/after observation roots. Arithmetic",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:3273:- Eighteen general helpers prove structural encode/parse inversion with arbitrary suffix, encoding injectivity, complete accepted payload retention, bounds and computed policy-header/candidate extraction. Canonical shape checks preserve native validator ordering, role/abort vocabulary, candidate tuple order and global context uniqueness. Signed rational words retain all64 bits, with explicit signed64 interpretation. Native reserve/allocation/exception/preflight behavior is not proved.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:3661:source retention; negative-spelled nonnegative output is zero. Separate Canonical",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:4452:widths, count/coefficient/Q ranges, denominator retention and full rehashed Q",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:6068:This closes the complete native-cache retention and all-vote/mixed-position",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:6140:missing names/policy, duplicate public entries and complete source-key retention.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:6599:general retention proofs. They are not replaced by empty public sets. No full",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/000-formal-tla-spec/proof-obligations.md:66:derives a native arithmetic history, complete record retention, computed APPLY",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "argv": [
+        "git",
+        "log",
+        "--all",
+        "--format=%H %s",
+        "-S",
+        "retention_epoch_id",
+        "--",
+        "delta-protocol",
+        "delta-core-cpp",
+        "delta-runtime-cpp",
+        "delta-worker-python",
+        "formal/reference",
+        "docs/adr"
+      ],
+      "stdout_sha256": "c2f274c85214b2479c4d3343b81abd28f9505773f665207c9a0067041a6216d0",
+      "matches": [
+        "d1608a1226bbb931ad2c6b078e0d2bb202545122 feat(T047,T053): bind approved storage statements and original AC witness",
+        "1438fa3d78ec99291475cf4660fd8c190ac01bb3 docs(T047,T053): propose storage availability source binding"
+      ],
+      "ref_tip_inventory": [
+        "refs/heads/000-formal-tla-spec 7abd0f43f8f1b15ec9aa6c3d2c80b32bfb4a6eca",
+        "refs/heads/001-reproducible-training-baseline 4dac7f4b12403d2ff8a2362d43d70f42a7b162c2",
+        "refs/heads/003-bft-round-state-machine f4f2101969d14709834ab6b6d60e88755d710334",
+        "refs/heads/004-compressed-delta-protocol 29fb4138499a348f90d6bbc44e77fe6d1914e25f",
+        "refs/heads/005-content-addressed-p2p-distribution be5d72305bfd883a5bd99607df6c2788014bfd0a",
+        "refs/heads/006-regional-hierarchical-reduce b487ea81851cfd5b4769579392798841cb18afc0",
+        "refs/heads/007-domain-pure-ticket-scheduling 08a118c5d52a0a4f6658249cb65ea15e538904c2",
+        "refs/heads/008-certificates-and-consensus d86473a3f864b4e61d2312584afa080c8fd4fbab",
+        "refs/heads/009-qlora-8gb-mode a5e73b41feb2dad73aa11d810d0c700c548e11ba",
+        "refs/heads/010-wan-benchmark-and-quality 881301d8443c667a478617cc663d1450aee9777a",
+        "refs/heads/010a-primary-executor 686d8bf5083c4dd8b68454cf4749e2e3d9107107",
+        "refs/heads/010b-primary-exactness 92eac136bb945432e334092f915e7e59f1e7e6f5",
+        "refs/heads/010c-primary-scientific f370f3688175e9e854139c5192bf8d6400ee6579",
+        "refs/heads/010e-primary-campaign-remediation d4773c132c2f02f6d62fcaf3c7b04ce0f619da35",
+        "refs/heads/010f-primary-campaign-definition e0272852766c6747d89e4132dd07b4c8a1ca2bf1",
+        "refs/heads/010g-campaign02-execution-binding 48d3315a707b07eec4e5143ec3931d6b6f474b8e",
+        "refs/heads/010h-campaign02-immutable-definition 9a4d0d8062ac432d7104284c75dc4b24773dadb0",
+        "refs/heads/010i-campaign02-runner-remediation 95b287168ad02bbe585fbb05a7b27bbd951713f3",
+        "refs/heads/010j-campaign02-measured-stagec-bootstrap 9e03b2c21a48729fbdd394c8628ea960a77d1c2f",
+        "refs/heads/010k-campaign02-inert-stage-a-bootstrap a816d81337aa0c182683516ecac57fe46dc70141",
+        "refs/heads/010l-campaign02-bootstrap-registration 9aeea5b6000caa1eb3d7666f0f8d782eb7e7d687",
+        "refs/heads/010m-campaign02-tsan-exception-lifetime bd961b1cc308a5e2320cae7e6e4b4e0416c1c994",
+        "refs/heads/010n-campaign02-reactor-lifetime-qualification b309dcf62c91a88bd66fb1b2b8794c77c5aa247c",
+        "refs/heads/010o-campaign02-reactor-lifetime-bootstrap 410ea1dd9c3dfe97d2073335c4e418001fb5807e",
+        "refs/heads/010p-campaign02-bootstrap-registration 84b337892cb70d0ce9823ef2d64fab572752b145",
+        "refs/heads/agent/chatgpt-architecture-governance 7818766209b7c4c0b4e04d3e62b2e770bedd4f3d",
+        "refs/heads/agent/chatgpt-evidence-correction-merge-record 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/agent/chatgpt-pr39-merge-record 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/heads/agent/chatgpt-step5c-final-closure 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/heads/agent/chatgpt-step5c-final-closure-v2 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/agent/chatgpt-worker-security-merge-record 94721c271307e48aae1e1f09133660d169387ed0",
+        "refs/heads/agent/f010-unblock-baseline 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/heads/agent/feature010-baseline ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/heads/agent/feature010-foundation-merge 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/heads/agent/isc-s16-a01-handoff 85a2a526468293e90daf019c0e10781e3d753a8c",
+        "refs/heads/agent/isc-s16-continuous-sprint 47559b6bc7b39eda84ca631e70935a970b33e8ed",
+        "refs/heads/agent/isc-s16-contract-freeze a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+        "refs/heads/agent/isc-s16-ed25519-reference af13fd25bf11716736febdb1a0498e6856a83e4f",
+        "refs/heads/agent/isc-s16-formal-linkage 27e376a0c56807d2c1680180690eb7a6dd7e729e",
+        "refs/heads/agent/isc-s16-pipelined-sprint 4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+        "refs/heads/agent/isc-s16-w1-reference-engine 9744e701d27de413f32ee39ce86c25f89ec30663",
+        "refs/heads/agent/overnight-baseline 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/agent/pr47-baseline 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/heads/agent/pr47-closure ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/heads/agent/pr47-merge ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/heads/agent/prod-launch-baseline 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/agent/s15v2-baseline c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/heads/agent/s15v2-vote-refinement-audit c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/heads/audit/p0-4022-cpp-w1 2f991e251435e0a806a3596252a29cb42dc2a4f7",
+        "refs/heads/audit/p0-4022-w1-r2 125ed39f49b3240df122d054c10d62a71d0e9bb7",
+        "refs/heads/audit/p0-4024-java-w1 a26fc002a21f54b8b4163da154ca67e23829f7fe",
+        "refs/heads/audit/p0-4024-w1-r2 2b68e9d56dadd0c2f282781c422736633423a570",
+        "refs/heads/audit/p0-4025-python-w1 ed35bcf67a777a35dce9d455bdc56c216e5c77e7",
+        "refs/heads/audit/p0-4025-w1-r2 769d33796b2a7e7fe72984a458d82b4c369cde03",
+        "refs/heads/backup/002-pre-restack f75696c3e79190f744d397589c051697669f5b0f",
+        "refs/heads/backup/003-pre-restack 61c1227877139610676601cb83b16d30395a98c2",
+        "refs/heads/backup/004-pre-restack cc409c53ad88def87874cc4b2e8c9d5f960a2dd4",
+        "refs/heads/backup/005-pre-restack 4cebbbcedbe83d9d1f9f8de8b8419b6d5099ec60",
+        "refs/heads/backup/006-pre-restack 66ef5b14b769583af8079d51e1969df057f0d32c",
+        "refs/heads/backup/007-pre-restack f67e6fc728940e708fda4d14457d4b8eb3c8e924",
+        "refs/heads/backup/008-pre-restack 467b2a5c5ca922fbc10505497c111d6a78890ebe",
+        "refs/heads/backup/009-pre-restack 562789b4e6409510341ad27ad3d79f34f190f2bd",
+        "refs/heads/backup/010-pre-restack 9e32cfcf3c5b81e56a23c852756da1e264d16026",
+        "refs/heads/codex/campaign02-demo-controllers 670b58f4c400f5c8904ca40ba9cf3a2072e98d78",
+        "refs/heads/codex/demo-node-training-20260924 2f76e6993c50f3248487539d09597c233d634bf9",
+        "refs/heads/codex/demo-presentation-20260924 5d52b2d2eacd78d607a1f2e6b8812771dbc8e101",
+        "refs/heads/codex/demo-verification-lab-20260925 a974135e00150c1865b0cef80cbdbe89bdd2cac7",
+        "refs/heads/codex/feature000-binding-candidate ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+        "refs/heads/codex/feature010-simulated-local b259c67bc25e9274b586eb259cef043e11794e32",
+        "refs/heads/codex/quantum-reduction-experiment 670b58f4c400f5c8904ca40ba9cf3a2072e98d78",
+        "refs/heads/demo/freeze-20260911-delta efd8bed9cf5ad18ad4ce51f0a9c0d4825cb0bdb0",
+        "refs/heads/experiment/large-model-deltareduce 32b47f0e533394fb5630e83e28429a9e3f720881",
+        "refs/heads/feature/010-current-lineage-foundation 628aebbf96ac07904b7f13a22cca842c174e48f5",
+        "refs/heads/feature/010-exactness-safety f489ac7a384a8c9f74c36bb6f540b2889afa1607",
+        "refs/heads/feature/010-isolated-sidecar-v2 60c692f6e391f839829dfc64e93380db54cd507b",
+        "refs/heads/feature/10gene-worker-runtime-proof 4992d9eca319da21b5a2c7b94593f3668b92329c",
+        "refs/heads/feature/admin-ui-mvp 0c42598635939bd99be8105cb2dd0e4d8a5c17ab",
+        "refs/heads/feature/admin-ui-ux-mvp 3a58cb8cced96191d1cd9101e6137b47ecb3a837",
+        "refs/heads/feature/overnight-010-011-requalification 3c6572b68dd3b70e50b42853d698b06e92aa77a6",
+        "refs/heads/feature/overnight-formal-go-publication 83d73bc67ba26e2c1d1e44cba43a8640bbabf732",
+        "refs/heads/feature/overnight-formal-recovery b108ac35577fec4403e5f5820b939d85c551b47e",
+        "refs/heads/feature/presentation-demo-polish 11e3815aa24351f85d19146f5f0cba5074acf55f",
+        "refs/heads/feature/presentation-phi35-card 8c678a0ea5d90a3ac8f44b521b4d548f3ba0bfdd",
+        "refs/heads/feature/step5c-admin-ui-live 7168e64c13040a9f53f55f6f7ff85b677e81f213",
+        "refs/heads/feature/step5c-contracts 6bd7b01a28337d70be5c368cfd491e6f304165e1",
+        "refs/heads/feature/step5c-contracts-remediation 6898bc131f7c4b6d49fb40131ea0cced0f5d2f26",
+        "refs/heads/feature/step5c-controller 63600809a6d21ab81a88896dd5bbcd68aed60923",
+        "refs/heads/feature/step5c-controller-security-remediation 7503c418242eca056e79763319048404ae3b55a1",
+        "refs/heads/feature/step5c-e2e 614355b36aac8d00dca3043b732ae50f7023e3a5",
+        "refs/heads/feature/step5c-evidence-finalization 5e8e249556e8405eb6051e9662df33f59c3bb06b",
+        "refs/heads/feature/step5c-security 26ef8f2fe905549f8095c0b86d80c87179bc36f0",
+        "refs/heads/feature/step5c-worker-adapter f824328795f635eb1bb8c92d032f79a6c1ffd923",
+        "refs/heads/feature/step5c-worker-security-remediation 5c8bec8752cb509c6037b5cac4e55f37209988fb",
+        "refs/heads/integration/local-disk-20260910 d2867e2456bb6109cf35689a88109de871153130",
+        "refs/heads/integration/p0-ml-training-plugin-gap-audit 7537b76efaecb6d50dc927bb12c58ef76f30b9c3",
+        "refs/heads/integration/plugin-contract-stack-local 02fed5a8a33c22d7bcc310d850b35ce7c5bfc87b",
+        "refs/heads/main efd8bed9cf5ad18ad4ce51f0a9c0d4825cb0bdb0",
+        "refs/heads/recovery/s15r1c-20260923-baseline c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/heads/recovery/s15r1c-20260923-pr50-candidate e94fb08ad75d0693d566f1761cac8cc992bb4e42",
+        "refs/heads/review/f010-unblock-exact-head 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/heads/review/f010-unblock-governance 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/heads/review/feature010-pre-real-wan-exact-head ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/heads/review/feature010-pre-real-wan-governance ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/heads/review/isc-s16-continuous-architecture 9744e701d27de413f32ee39ce86c25f89ec30663",
+        "refs/heads/review/isc-s16-continuous-evidence 9744e701d27de413f32ee39ce86c25f89ec30663",
+        "refs/heads/review/isc-s16-sequential-architecture 9938fbc7db324f40f3e67687f875d788d4b5ce51",
+        "refs/heads/review/isc-s16-sequential-evidence 9938fbc7db324f40f3e67687f875d788d4b5ce51",
+        "refs/heads/review/overnight-exact-head 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/review/overnight-governance 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/review/pr47-exact-head-v2 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/heads/review/pr47-governance-v2 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/heads/review/prod-launch-exact-head 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/review/prod-launch-governance 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/heads/review/s15r1c-20260923-exact-head c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/heads/review/s15r1c-20260923-governance 85a87f82cd335b7aa5960e43cc3deaefae2ddc22",
+        "refs/heads/review/s15v2-exact-head c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/heads/review/s15v2-governance c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/heads/review/step5c-sprint7-exact-head 1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+        "refs/heads/review/step5c-sprint7-governance 1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+        "refs/heads/review/step5c-sprint8-evidence-exact-head 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/heads/review/step5c-sprint8-evidence-governance 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/heads/rfc/step5c-controlled-live-execution 4cf2aa836c235db571be7e79dc4ff6baa70ef180",
+        "refs/remotes/origin/000-formal-tla-spec 7abd0f43f8f1b15ec9aa6c3d2c80b32bfb4a6eca",
+        "refs/remotes/origin/001-reproducible-training-baseline 4dac7f4b12403d2ff8a2362d43d70f42a7b162c2",
+        "refs/remotes/origin/003-bft-round-state-machine f4f2101969d14709834ab6b6d60e88755d710334",
+        "refs/remotes/origin/003-central-round-coordinator 47469fc2fdacc7640fb0a7c05c71578629a2e5fa",
+        "refs/remotes/origin/004-compressed-delta-protocol 29fb4138499a348f90d6bbc44e77fe6d1914e25f",
+        "refs/remotes/origin/005-content-addressed-p2p-distribution be5d72305bfd883a5bd99607df6c2788014bfd0a",
+        "refs/remotes/origin/006-regional-hierarchical-reduce b487ea81851cfd5b4769579392798841cb18afc0",
+        "refs/remotes/origin/007-adaptive-heterogeneous-scheduling 47ec80380a10a9086f3d352546c04b37cdbf54e3",
+        "refs/remotes/origin/007-domain-pure-ticket-scheduling 08a118c5d52a0a4f6658249cb65ea15e538904c2",
+        "refs/remotes/origin/008-certificates-and-consensus d86473a3f864b4e61d2312584afa080c8fd4fbab",
+        "refs/remotes/origin/008-permissioned-trust-and-resilience 50beb1d8dad28fed48a47e38ebe3a5581c6f789c",
+        "refs/remotes/origin/009-qlora-8gb-mode a5e73b41feb2dad73aa11d810d0c700c548e11ba",
+        "refs/remotes/origin/010-wan-benchmark-and-quality 881301d8443c667a478617cc663d1450aee9777a",
+        "refs/remotes/origin/010a-primary-executor 686d8bf5083c4dd8b68454cf4749e2e3d9107107",
+        "refs/remotes/origin/010b-primary-exactness 92eac136bb945432e334092f915e7e59f1e7e6f5",
+        "refs/remotes/origin/010c-primary-scientific f370f3688175e9e854139c5192bf8d6400ee6579",
+        "refs/remotes/origin/010e-primary-campaign-remediation d4773c132c2f02f6d62fcaf3c7b04ce0f619da35",
+        "refs/remotes/origin/010f-primary-campaign-definition e0272852766c6747d89e4132dd07b4c8a1ca2bf1",
+        "refs/remotes/origin/010g-campaign02-execution-binding 48d3315a707b07eec4e5143ec3931d6b6f474b8e",
+        "refs/remotes/origin/010h-campaign02-immutable-definition 9a4d0d8062ac432d7104284c75dc4b24773dadb0",
+        "refs/remotes/origin/010i-campaign02-runner-remediation b2af7b926f3525494bb5634dbedcca3fe97051e1",
+        "refs/remotes/origin/010j-campaign02-measured-stagec-bootstrap 9e03b2c21a48729fbdd394c8628ea960a77d1c2f",
+        "refs/remotes/origin/010k-campaign02-inert-stage-a-bootstrap a816d81337aa0c182683516ecac57fe46dc70141",
+        "refs/remotes/origin/010l-campaign02-bootstrap-registration 9aeea5b6000caa1eb3d7666f0f8d782eb7e7d687",
+        "refs/remotes/origin/010m-campaign02-tsan-exception-lifetime bd961b1cc308a5e2320cae7e6e4b4e0416c1c994",
+        "refs/remotes/origin/010n-campaign02-reactor-lifetime-qualification b309dcf62c91a88bd66fb1b2b8794c77c5aa247c",
+        "refs/remotes/origin/010o-campaign02-reactor-lifetime-bootstrap 410ea1dd9c3dfe97d2073335c4e418001fb5807e",
+        "refs/remotes/origin/010p-campaign02-bootstrap-registration 84b337892cb70d0ce9823ef2d64fab572752b145",
+        "refs/remotes/origin/011-multiregion-pilot 72601567a278f221efcdc381432d5c8ae1735865",
+        "refs/remotes/origin/HEAD 5b75bc562f83fd99125ae79d76a6527ef7c716aa",
+        "refs/remotes/origin/agent/chatgpt-architecture-governance 7818766209b7c4c0b4e04d3e62b2e770bedd4f3d",
+        "refs/remotes/origin/agent/chatgpt-evidence-correction-merge-record 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/agent/chatgpt-pr39-merge-record 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/remotes/origin/agent/chatgpt-step5c-final-closure 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/remotes/origin/agent/chatgpt-step5c-final-closure-v2 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/agent/chatgpt-worker-security-merge-record 94721c271307e48aae1e1f09133660d169387ed0",
+        "refs/remotes/origin/agent/f010-unblock-baseline 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/remotes/origin/agent/feature010-baseline ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/remotes/origin/agent/feature010-foundation-merge 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/remotes/origin/agent/isc-s16-a01-handoff 85a2a526468293e90daf019c0e10781e3d753a8c",
+        "refs/remotes/origin/agent/isc-s16-continuous-sprint 47559b6bc7b39eda84ca631e70935a970b33e8ed",
+        "refs/remotes/origin/agent/isc-s16-contract-freeze a579a5c66586ba3f8f1d7cc26c454aba5addbd8f",
+        "refs/remotes/origin/agent/isc-s16-ed25519-reference af13fd25bf11716736febdb1a0498e6856a83e4f",
+        "refs/remotes/origin/agent/isc-s16-formal-linkage 27e376a0c56807d2c1680180690eb7a6dd7e729e",
+        "refs/remotes/origin/agent/isc-s16-pipelined-sprint 694bebf32e7951ea59fb6391ca35ca354ec1e38f",
+        "refs/remotes/origin/agent/isc-s16-sequential-sprint 9938fbc7db324f40f3e67687f875d788d4b5ce51",
+        "refs/remotes/origin/agent/isc-s16-w1-reference-engine 9744e701d27de413f32ee39ce86c25f89ec30663",
+        "refs/remotes/origin/agent/overnight-baseline 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/agent/overnight-formal-closure ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e",
+        "refs/remotes/origin/agent/overnight-working-version-merge 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/remotes/origin/agent/overnight-working-version-qualification 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/remotes/origin/agent/pr47-baseline 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/remotes/origin/agent/pr47-closure ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/remotes/origin/agent/pr47-merge ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/remotes/origin/agent/prod-launch-baseline 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/agent/s15v2-baseline c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/remotes/origin/agent/s15v2-vote-refinement-audit c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/remotes/origin/backup/004-pre-restack cc409c53ad88def87874cc4b2e8c9d5f960a2dd4",
+        "refs/remotes/origin/backup/005-pre-restack 4cebbbcedbe83d9d1f9f8de8b8419b6d5099ec60",
+        "refs/remotes/origin/backup/006-pre-restack 66ef5b14b769583af8079d51e1969df057f0d32c",
+        "refs/remotes/origin/backup/007-pre-restack f67e6fc728940e708fda4d14457d4b8eb3c8e924",
+        "refs/remotes/origin/backup/008-pre-restack 467b2a5c5ca922fbc10505497c111d6a78890ebe",
+        "refs/remotes/origin/backup/009-pre-restack 562789b4e6409510341ad27ad3d79f34f190f2bd",
+        "refs/remotes/origin/backup/010-pre-restack 9e32cfcf3c5b81e56a23c852756da1e264d16026",
+        "refs/remotes/origin/codex/campaign02-controller-custody-policy de3348fdcbd527046d5b66bc6d8c90df098d5aa8",
+        "refs/remotes/origin/codex/campaign02-demo-controllers 670b58f4c400f5c8904ca40ba9cf3a2072e98d78",
+        "refs/remotes/origin/codex/demo-node-training-20260924 2f76e6993c50f3248487539d09597c233d634bf9",
+        "refs/remotes/origin/codex/demo-presentation-20260924 5d52b2d2eacd78d607a1f2e6b8812771dbc8e101",
+        "refs/remotes/origin/codex/demo-verification-lab-20260925 a974135e00150c1865b0cef80cbdbe89bdd2cac7",
+        "refs/remotes/origin/codex/feature000-binding-candidate ea5a70d8c5fd3516de243632f2c5681b0e5a6292",
+        "refs/remotes/origin/codex/feature010-simulated-local b259c67bc25e9274b586eb259cef043e11794e32",
+        "refs/remotes/origin/feature/010-current-lineage-foundation 628aebbf96ac07904b7f13a22cca842c174e48f5",
+        "refs/remotes/origin/feature/010-exactness-safety f489ac7a384a8c9f74c36bb6f540b2889afa1607",
+        "refs/remotes/origin/feature/010-isolated-sidecar-v2 60c692f6e391f839829dfc64e93380db54cd507b",
+        "refs/remotes/origin/feature/10gene-worker-runtime-proof ff7579b6a8b43e58394ad7f78e7a2736e89cadce",
+        "refs/remotes/origin/feature/admin-ui-mvp ed47c7d600655513a3e7ebcda3cebf37c71d7aca",
+        "refs/remotes/origin/feature/admin-ui-spec 9a65c1225d32af351fef91e2a1ef7a9b675aaef0",
+        "refs/remotes/origin/feature/admin-ui-ux-mvp 3a58cb8cced96191d1cd9101e6137b47ecb3a837",
+        "refs/remotes/origin/feature/admin-ui-ux-spec c8842d7c2c907146e399ac80ad5bb320b3cd2064",
+        "refs/remotes/origin/feature/overnight-010-011-requalification 3c6572b68dd3b70e50b42853d698b06e92aa77a6",
+        "refs/remotes/origin/feature/overnight-formal-go-publication 83d73bc67ba26e2c1d1e44cba43a8640bbabf732",
+        "refs/remotes/origin/feature/overnight-formal-recovery b108ac35577fec4403e5f5820b939d85c551b47e",
+        "refs/remotes/origin/feature/overnight-working-version 968f77c11f9ea93fe5f5df39fca209a5b3831645",
+        "refs/remotes/origin/feature/presentation-demo-polish 11e3815aa24351f85d19146f5f0cba5074acf55f",
+        "refs/remotes/origin/feature/step5c-admin-ui-live 7168e64c13040a9f53f55f6f7ff85b677e81f213",
+        "refs/remotes/origin/feature/step5c-contracts 6bd7b01a28337d70be5c368cfd491e6f304165e1",
+        "refs/remotes/origin/feature/step5c-contracts-remediation 6898bc131f7c4b6d49fb40131ea0cced0f5d2f26",
+        "refs/remotes/origin/feature/step5c-controller 63600809a6d21ab81a88896dd5bbcd68aed60923",
+        "refs/remotes/origin/feature/step5c-controller-security-remediation 7503c418242eca056e79763319048404ae3b55a1",
+        "refs/remotes/origin/feature/step5c-e2e 614355b36aac8d00dca3043b732ae50f7023e3a5",
+        "refs/remotes/origin/feature/step5c-evidence-finalization 5e8e249556e8405eb6051e9662df33f59c3bb06b",
+        "refs/remotes/origin/feature/step5c-security 26ef8f2fe905549f8095c0b86d80c87179bc36f0",
+        "refs/remotes/origin/feature/step5c-worker-adapter f824328795f635eb1bb8c92d032f79a6c1ffd923",
+        "refs/remotes/origin/feature/step5c-worker-security-remediation 5c8bec8752cb509c6037b5cac4e55f37209988fb",
+        "refs/remotes/origin/main 5b75bc562f83fd99125ae79d76a6527ef7c716aa",
+        "refs/remotes/origin/recovery/s15r1c-20260923-baseline c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/remotes/origin/recovery/s15r1c-20260923-pr50-candidate e94fb08ad75d0693d566f1761cac8cc992bb4e42",
+        "refs/remotes/origin/review/f010-unblock-exact-head 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/remotes/origin/review/f010-unblock-governance 6f99ab1622aa4bb96dab29979ce11af8bd4c5f89",
+        "refs/remotes/origin/review/feature010-pre-real-wan-exact-head ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/remotes/origin/review/feature010-pre-real-wan-governance ac0e54ffbab4b9a5c20945b17ede2930b78ff080",
+        "refs/remotes/origin/review/isc-s16-continuous-architecture 9744e701d27de413f32ee39ce86c25f89ec30663",
+        "refs/remotes/origin/review/isc-s16-continuous-evidence 9744e701d27de413f32ee39ce86c25f89ec30663",
+        "refs/remotes/origin/review/isc-s16-sequential-architecture 9938fbc7db324f40f3e67687f875d788d4b5ce51",
+        "refs/remotes/origin/review/isc-s16-sequential-evidence 9938fbc7db324f40f3e67687f875d788d4b5ce51",
+        "refs/remotes/origin/review/overnight-exact-head 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/review/overnight-governance 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/review/pr47-exact-head-v2 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/remotes/origin/review/pr47-governance-v2 7a9faf852e0ccae4d25fdc363fbf39ecf1719341",
+        "refs/remotes/origin/review/prod-launch-exact-head 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/review/prod-launch-governance 337c88c2752fecbcc8d175d136c9e3dcd57dc855",
+        "refs/remotes/origin/review/s15r1c-20260923-exact-head c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/remotes/origin/review/s15r1c-20260923-governance c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/remotes/origin/review/s15v2-exact-head c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/remotes/origin/review/s15v2-governance c8aea64972f741060d1e527ebbb6f9a5a168a075",
+        "refs/remotes/origin/review/step5c-sprint7-exact-head 1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+        "refs/remotes/origin/review/step5c-sprint7-governance 1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85",
+        "refs/remotes/origin/review/step5c-sprint8-evidence-exact-head 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/remotes/origin/review/step5c-sprint8-evidence-governance 1a4d1a17c5e8f75941b1efb6e915b7405446d9b8",
+        "refs/remotes/origin/rfc/step5c-controlled-live-execution 4cf2aa836c235db571be7e79dc4ff6baa70ef180",
+        "refs/remotes/origin/sprint/isc-production-integration-v1 ea5a70d8c5fd3516de243632f2c5681b0e5a6292"
+      ]
+    }
+  ],
+  "finding": "Original retention obligation must be resolved by approved O section4 item5. Current fields and component bind an epoch label; no exact original policy object/resolution contract was found in the pinned corpus. No new duration/clock/physical truth check is requested.",
+  "not_claimed": [
+    "production-reachable safety attack",
+    "formal counterexample or failed new gate",
+    "inexistence of any unavailable external contract",
+    "R2 component invalidation",
+    "independent review"
+  ],
+  "implementation_changed": false,
+  "protocol_changed": false,
+  "worker_result_submitted": false
+}
