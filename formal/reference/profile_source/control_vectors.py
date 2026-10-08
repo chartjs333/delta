@@ -30,7 +30,7 @@ def fields(value):
     return result
 
 
-def generate():
+def generate(case_index=None):
     p = Package()
     activate = p.activate()
     anchor = {**activate, "kind": "ANCHOR"}
@@ -52,6 +52,8 @@ def generate():
     ]
     records = []
     for i, (kind, value) in enumerate(examples):
+        if case_index is not None and i != case_index:
+            continue
         raw = m.canonical(value)
         # Reparse the originals, not an independent alternate descriptor fixture.
         parsed = m.load(raw)
@@ -75,6 +77,9 @@ def generate():
         records.append({"kind": kind, "original_hex": raw.hex(), "raw_id": m.raw_id(raw)})
     # Canonicality rejects duplicate keys inside nested objects too, even when
     # the attacker supplies a matching typed descriptor and matching bytes.
+    if case_index not in (None, 0):
+        lines.append("end ProfileControlVectors")
+        return "\n".join(lines) + "\n", records
     lines += [
         'def duplicate : Fields := .cons (ascii "x") (.boolean true) '
         '(.cons (ascii "x") (.boolean false) .nil)',

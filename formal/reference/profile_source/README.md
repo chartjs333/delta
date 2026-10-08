@@ -110,6 +110,21 @@ Kernel examples use the approved FR004 roots and two original C witnesses for
 one B, with an explicit finite table of actual SHA256 preimages/digests. This
 table is cross-language byte evidence, never a proof or oracle for SHA256.
 
+`scheduling.py` reconstructs original007 policy/plan/ticket/initial-lease/timer
+bytes and the existing durable lease producer's DSJ1 records. The complete
+native five-record expire/same-worker-reassign capture matches exactly. Original
+worker/epoch/ticket identity and records remain; successful native commit leaves
+the native lease bytes ACTIVE, while the static public active-set projection
+excludes the committed ticket. General `ProfileSource.Ticket` lemmas preserve
+ticket bytes, original history and commitment owner/epoch over arbitrary finite
+action lists. They are static projection lemmas, not full deadline/command-byte
+decoder or forward-transition simulation proofs. In particular, same-worker
+reassignment is permitted natively but does not match the old TLA ReassignTicket
+guard. That forward diagnostic is not a demonstrated static R2 counterexample
+or a full authenticated Profile snapshot. No production code or action changed.
+Original capability/decision/configuration provenance and full source invocation
+binding still belong to the enclosing source checker; dataclasses are not trust.
+
 `capsule_binding.py` checks all W1 sections against an independently supplied
 predecessor: exact own WAL prefix and next physical slot, original source cut,
 whole S0/P0 and full retained deliveries, computed P1/C, one witness publication

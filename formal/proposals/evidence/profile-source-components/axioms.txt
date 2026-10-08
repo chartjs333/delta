@@ -12,6 +12,16 @@
 'DeltaReduce.ProfileSource.Wal.mixed1232' depends on axioms: [propext]
 'DeltaReduce.ProfileSource.Wal.distinctPhysicalPositions' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ProfileSource.Wal.noEntryCollapse' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.stepTicket' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.initialConsistent' does not depend on any axioms
+'DeltaReduce.ProfileSource.Ticket.stepHistory' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.afterCommitStable' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.stepConsistent' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.runConsistent' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.runTicket' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.runHistory' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.runStaticCommitSafety' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Ticket.sameWorkerRepresentable' depends on axioms: [propext]
 'DeltaReduce.ProfileSource.Control.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Control.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Control.originalBytesCannotBeSubstituted' depends on axioms: [propext,

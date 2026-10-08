@@ -23,6 +23,18 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     src, objects = BUILD / "source", BUILD / "objects"
     sources, order, checks = {}, [], []
+    probe = json.loads((OUT / "native-lease-probe.json").read_text(encoding="utf8"))
+    if probe["source_commit"] != "60c692f6e391f839829dfc64e93380db54cd507b":
+        raise RuntimeError("Unqualified native producer source pin")
+    for path, expected in probe["source_blobs"].items():
+        if not re.fullmatch(r"delta-core-cpp/[a-zA-Z0-9_./-]+", path) or ".." in path:
+            raise RuntimeError("Unexpected native source locator")
+        original = subprocess.check_output(
+            ["cmd.exe", "/d", "/c", "git", "cat-file", "blob", probe["source_commit"] + ":" + path],
+            cwd=ROOT,
+        )
+        if digest(original) != expected:
+            raise RuntimeError("Original native source mismatch " + path)
 
     def visit(name):
         if name in order or name in {"Init", "Std"}:
@@ -94,6 +106,16 @@ def main():
         "Wal.mixed1232",
         "Wal.distinctPhysicalPositions",
         "Wal.noEntryCollapse",
+        "Ticket.stepTicket",
+        "Ticket.initialConsistent",
+        "Ticket.stepHistory",
+        "Ticket.afterCommitStable",
+        "Ticket.stepConsistent",
+        "Ticket.runConsistent",
+        "Ticket.runTicket",
+        "Ticket.runHistory",
+        "Ticket.runStaticCommitSafety",
+        "Ticket.sameWorkerRepresentable",
         "Control.checked",
         "Control.complete",
         "Control.originalBytesCannotBeSubstituted",
@@ -164,7 +186,26 @@ def main():
     (OUT / "control-originals.json").write_text(
         json.dumps(vector_originals, indent=2) + "\n", encoding="utf8", newline="\n"
     )
-    run([str(LEAN), "ControlVectors.lean"], "control-vectors.txt", src, environment)
+    # Each original and all of its negative cases still use kernel `decide`.
+    # Fresh processes release elaboration memory between independent originals.
+    # The aggregate descriptor remains pinned; this changes no acceptance rule.
+    for i in range(len(vector_originals)):
+        case_source, case_originals = generate(i)
+        if case_originals != [vector_originals[i]]:
+            raise RuntimeError("Control vector partition changed original coverage")
+        name = f"ControlVectors{i}.lean"
+        (src / name).write_text(case_source, encoding="utf8", newline="\n")
+        run([str(LEAN), name], f"control-vectors-{i}.txt", src, environment)
+        sources["generated/" + name] = digest(case_source.encode())
+        print("checked " + name, flush=True)
+    partition_log = "".join(
+        f"ControlVectors{i}.lean: kernel checked; control-vectors-{i}.txt\n"
+        for i in range(len(vector_originals))
+    )
+    (OUT / "control-vectors.txt").write_text(partition_log, encoding="utf8", newline="\n")
+    checks.append(
+        {"log": "control-vectors.txt", "exit_code": 0, "sha256": digest(partition_log.encode())}
+    )
     sources["generated/ControlVectors.lean"] = digest(vector_source.encode())
     from formal.reference.profile_source.isc_vectors import generate as generate_isc
 
@@ -217,6 +258,8 @@ def main():
         Path(__file__),
         ROOT / "formal/scripts/native_source_artifacts.py",
         ROOT / "delta-protocol/fixtures/004/cross-language/golden-v1.json",
+        ROOT / "delta-protocol/fixtures/007/cross-language/golden-v1.json",
+        OUT / "native-lease-probe.json",
         ROOT / "delta-protocol/fixtures/local-round/parameter-schema-v1.json",
         ROOT / "docs/adr/evidence/0014-isc-commitment-profile-v1-vectors.json",
         *sorted((ROOT / "delta-protocol/schemas/004").glob("*.json")),
@@ -250,6 +293,11 @@ def main():
         "backend_sha256": backend,
         "source_hash_rule": "Git LF source text; protocol originals retained without normalization",
         "sources": sources,
+        "external_native_probe_sources": {
+            "commit": probe["source_commit"],
+            "files": probe["source_blobs"],
+            "kind": "PIN_VERIFICATION_OF_RETAINED_EXECUTION_NOT_A_NEW_NATIVE_RUN",
+        },
         "checks": checks,
         "established": [
             "Closed canonical profile fields, independent raw inventory, exact refs and floor",
@@ -267,6 +315,7 @@ def main():
             "Merkle fuel completeness for all existing 100000 tuples; no 4096 manifest cap",
             "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
             "O actual read ownership from complete prefix; general binding, release/crash refusal",
+            "Original007 plan/ticket/lease/timer bytes and DSJ1 producer; static commitment safety",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

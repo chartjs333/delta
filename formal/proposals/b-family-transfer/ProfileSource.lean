@@ -192,4 +192,135 @@ theorem noEntryCollapse (before : Nat) {left right : List Entry}
   simpa only [annotationRetainsOriginals] using h
 
 end Wal
+
+/- Static ticket projection of the existing native lease producer. This
+abstracts deadline/request-byte details, which the source decoder must still
+check. It does not assert forward simulation of ReassignTicket: native allows
+the same worker at the next epoch. That state remains representable here. -/
+namespace Ticket
+
+structure Commit where
+  worker : Bytes
+  epoch : Nat
+  content : Bytes
+  original : Bytes
+  deriving DecidableEq, Repr
+
+structure State where
+  ticket : Bytes
+  worker : Bytes
+  epoch : Nat
+  active : Bool
+  committed : Option Commit
+  history : List Bytes
+  deriving DecidableEq, Repr
+
+inductive Action where
+  | renew
+  | expire
+  | reassign (worker : Bytes)
+  | commit (content : Bytes)
+  | observe
+  deriving DecidableEq, Repr
+
+def step (s : State) (action : Action) (original : Bytes) : State :=
+  let base := {s with history := s.history ++ [original]}
+  match action with
+  | .observe => base
+  | .renew => base
+  | .expire => if s.committed.isNone then {base with active := false} else base
+  | .reassign worker =>
+      if s.committed.isNone && !s.active then
+        {base with worker := worker, epoch := s.epoch + 1, active := true}
+      else base
+  | .commit content =>
+      if s.committed.isNone && s.active then
+        {base with committed := some ⟨s.worker, s.epoch, content, original⟩}
+      else base
+
+def Consistent (s : State) : Prop :=
+  ∀ c, s.committed = some c → c.worker = s.worker ∧ c.epoch = s.epoch ∧
+    c.original ∈ s.history
+
+def publicActive (s : State) : Bool := s.active && s.committed.isNone
+
+def initial (ticket worker : Bytes) (original : List Bytes) : State :=
+  ⟨ticket,worker,0,true,none,original⟩
+
+theorem initialConsistent (ticket worker original) : Consistent (initial ticket worker original) := by
+  intro c h
+  contradiction
+
+theorem stepTicket (s action original) : (step s action original).ticket = s.ticket := by
+  cases action <;> simp only [step] <;> split <;> rfl
+
+theorem stepHistory (s action original) :
+    (step s action original).history = s.history ++ [original] := by
+  cases action <;> simp only [step] <;> split <;> rfl
+
+theorem afterCommitStable {s c} (committed : s.committed = some c) (action original) :
+    (step s action original).committed = some c ∧
+    (step s action original).worker = s.worker ∧
+    (step s action original).epoch = s.epoch := by
+  cases action <;> simp [step, committed]
+
+theorem stepConsistent {s} (valid : Consistent s) (action original) :
+    Consistent (step s action original) := by
+  intro c found
+  cases h : s.committed with
+  | some old =>
+      have stable := afterCommitStable h action original
+      have same : old = c := Option.some.inj (stable.1.symm.trans found)
+      subst c
+      obtain ⟨worker, epoch, present⟩ := valid old h
+      exact ⟨worker.trans stable.2.1.symm, epoch.trans stable.2.2.symm,
+        by rw [stepHistory]; exact List.mem_append_left _ present⟩
+  | none =>
+      cases action <;> simp [step, h] at found
+      case reassign worker =>
+        split at found <;> contradiction
+      case commit content =>
+        split at found
+        · cases Option.some.inj found
+          simp [step, *]
+        · contradiction
+
+def run (s : State) (events : List (Action × Bytes)) : State :=
+  events.foldl (fun state event => step state event.1 event.2) s
+
+theorem runConsistent {s} (valid : Consistent s) (events : List (Action × Bytes)) :
+    Consistent (run s events) := by
+  induction events generalizing s with
+  | nil => exact valid
+  | cons event rest ih => exact ih (stepConsistent valid event.1 event.2)
+
+theorem runTicket (s events) : (run s events).ticket = s.ticket := by
+  induction events generalizing s with
+  | nil => rfl
+  | cons event rest ih => exact (ih _).trans (stepTicket s event.1 event.2)
+
+theorem runHistory (s events) : (run s events).history = s.history ++ events.map Prod.snd := by
+  induction events generalizing s with
+  | nil => simp [run]
+  | cons event rest ih =>
+      change (run (step s event.1 event.2) rest).history = _
+      rw [ih, stepHistory]
+      simp [List.append_assoc]
+
+theorem runStaticCommitSafety {s} (valid : Consistent s) (events) {c}
+    (committed : (run s events).committed = some c) :
+    c.worker = (run s events).worker ∧ c.epoch = (run s events).epoch ∧
+    c.original ∈ (run s events).history ∧ publicActive (run s events) = false := by
+  obtain ⟨worker,epoch,original⟩ := runConsistent valid events c committed
+  exact ⟨worker,epoch,original,by simp [publicActive,committed]⟩
+
+theorem sameWorkerRepresentable {s} (empty : s.committed = none) (expired : s.active = false)
+    (original) :
+    (step s (.reassign s.worker) original).worker = s.worker ∧
+    (step s (.reassign s.worker) original).epoch = s.epoch + 1 ∧
+    publicActive (step s (.reassign s.worker) original) = true ∧
+    (step s (.reassign s.worker) original).ticket = s.ticket := by
+  simp [step,empty,expired,publicActive]
+
+end Ticket
 end DeltaReduce.ProfileSource

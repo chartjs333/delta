@@ -6,16 +6,16 @@
   ],
   "scope_revision": 13,
   "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
-  "result": "PROFILE_BYTE_AUTHORITY_AND_WAL_COMPONENTS_CHECKED",
+  "result": "INCOMPLETE_ENVIRONMENT_FAILURE",
   "formal_status": "NO_GO",
   "r2_3": "OPEN",
   "reviewed_r2_closure": false,
+  "previous_complete_component_commit": "1e0834e35291efa4bd6e8cbb4de432d22d82c40b",
   "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
-  "backend_sha256": "f656aeb789bfc3a2ac587fae1d7cfe278bbe8ce73f28da73b4d08282ea8f9fe3",
   "source_hash_rule": "Git LF source text; protocol originals retained without normalization",
   "sources": {
     "formal/proposals/b-family-transfer/ProfileControl.lean": "f6af4ec64f5a1d41cb7cdc61b9f77d55723c546c4a9d883ae13d113caa088aa7",
-    "formal/proposals/b-family-transfer/ProfileSource.lean": "907b61c93a6378db212302d139de29136d6303d27b96cbd50c464281a4b2a52a",
+    "formal/proposals/b-family-transfer/ProfileSource.lean": "04f4fcd0f19629b25655fa7eec0a74ee00e25970ab928ff8b7878d91476f675b",
     "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
     "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
     "formal/proofs/DeltaReduce/NativeReceiptBytes.lean": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580",
@@ -57,7 +57,7 @@
     "formal/reference/profile_source/configuration.py": "be6d3cc595cc64b6951a7d693c671f1dd7da53586ac799fe4af3cc53828f77e0",
     "formal/reference/profile_source/configuration_history.py": "a4db48c262408126e4fde7e7143d49caf9b23582b3c730ea0bb567561fb99a2b",
     "formal/reference/profile_source/configuration_qc.py": "9ae386ad19b2ba4151e83be36fbc5b54c0b1fbcec58c4fd8543bb9ec276a4a64",
-    "formal/reference/profile_source/control_vectors.py": "dc820ded6cc95711e9b8df7665f4f4900c9319803430a5e6afb2a4651a15e99f",
+    "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
     "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
     "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
@@ -78,8 +78,8 @@
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "3bab608b00c0a4983bba5716c0e612c03116e82abf5fd7d191a367418bd7d639",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "318c195f5d518556a6dc61b9c6a3d83967a681a3dc957ac055e4749a0cf065c3",
+    "formal/reference/profile_source/README.md": "38373df20498f34da3a5ef7fbfe637a9c076641fa5c293b81272151d620fad2f",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "ea16ecc22d5b471522efa9c55e431eecc24928de16bcda59a22f0399465976b8",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/local-round/parameter-schema-v1.json": "b2e41ffaf836d0fa80bf5afc6d21a66fd9b54237b569f45e919f35675b7df7d6",
@@ -129,7 +129,12 @@
     "formal/reference/storage_source/retention-vectors.json": "8f78b8e5ddb9eed5c5447cb5030706ce060b58bf03b03c93679c06be7049b0fb",
     "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",
     "formal/reference/storage_source/test_codec.py": "ecf98bf2dfe56ec73833b0222ebaa0222c1996626ffa7890a07f5bbb91d2f7df",
-    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b"
+    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b",
+    "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
+    "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
+    "formal/proposals/evidence/profile-source-components/native-lease-probe.json": "c6014d0b0699ed59948227b254de31408a9e4a36cd8706de0d9b94a39c473e9d",
+    "generated/ControlVectors0.lean": "907549be52d1375cfb903479a10989c482dcc0e3a66f4fe0d10b970233356d2b",
+    "generated/ControlVectors1.lean": "718e8671c7a02c9bdbb0b2f131411b39e47ae50bb2ca7d34d44855d19a75d5f8"
   },
   "checks": [
     {
@@ -305,61 +310,28 @@
     {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "fb8585731b8db0c0c3ad6426d407b25c3e394373a7bcb1f76139c590b85b1572"
+      "sha256": "e352167a138c98cbfc264b7fb061a8de5c265791352e4bea100f46a2d038e86c"
     },
     {
-      "log": "control-vectors.txt",
+      "log": "control-vectors-0.txt",
       "exit_code": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "log": "isc-vectors.txt",
-      "exit_code": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "log": "reference-tests.txt",
-      "exit_code": 0,
-      "sha256": "b95573085b14e9afdc4eb3f5926e55757fb29289847fa5d9cd707f43d5f80a20"
-    },
-    {
-      "log": "isc-reference-tests.txt",
-      "exit_code": 0,
-      "sha256": "dd3329b30e28628c44d1d13b4ed72139664cccd513ebc5c8190b5f8e1233baa6"
-    },
-    {
-      "log": "ruff.txt",
-      "exit_code": 0,
-      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
-    },
-    {
-      "log": "ruff-format.txt",
-      "exit_code": 0,
-      "sha256": "ec547b9784fec079a852c1a1af13bb56a8339603c43bdd8375f459e5927a5145"
+      "log": "control-vectors-1.txt",
+      "exit_code": 1,
+      "sha256": "cf6e327209e0b84b54d21e7f94dee3b0dbcb5dc178deaef11d95b6585d4c47e5"
     }
   ],
-  "established": [
-    "Closed canonical profile fields, independent raw inventory, exact refs and floor",
-    "Separate anchor/cut/target journals retain original bytes; anchor may precede tip",
-    "Bootstrap/initial-config authority, full RoundConfig with R/E and signed QC join",
-    "Mixed slots and S-RANK retain original votes and unsigned durable intents",
-    "General Lean original reference/position/multiplicity and rank injectivity lemmas",
-    "Kernel whole control-byte binding and closed root names; synthetic raw vectors",
-    "Source-derived storage context: whole config + original metadata + commitment root",
-    "O ledger facet retains every delivery/attempt; no physical-presence premise",
-    "Metadata/data-use Lean join reuses existing full ordered unsplit vector binding",
-    "Original CONFIG event cut and first witness, late/repeat inventory retained",
-    "Complete source event/input materialization with original cut/target positions",
-    "Future whole ISC C bytes and policy tree, exact b/c, explicit parent and tuple root",
-    "Merkle fuel completeness for all existing 100000 tuples; no 4096 manifest cap",
-    "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
-    "O actual read ownership from complete prefix; general binding, release/crash refusal"
-  ],
+  "failed_gate": "ControlVectors1.lean: INTERNAL PANIC: out of memory",
+  "isolated_recheck": "Even the first unchanged example alone failed with the same OOM; no later vector or full-suite PASS claimed.",
+  "host_failure": "CreateProcess OS1455 paging file too small subsequently rejected a test process before launch.",
+  "scope_recheck": "Two authenticated read-only effective-scope requests returned HTTP500; no ACK/result/review/graph mutation.",
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",
     "Full native origin from genesis; signatures do not prove finalization origin",
     "Complete O state relation, totality, initial/incomplete and ABORT composition",
     "Reviewed R2.3, named recovery theorem, full formal gates or production GO"
   ],
-  "evidence_kind": "REFERENCE_SYNTHETIC_COMPONENTS_NOT_PRODUCTION_CAPTURE"
+  "evidence_kind": "PARTIAL_REFERENCE_QUALIFICATION_NOT_PRODUCTION_OR_FORMAL_GO"
 }
