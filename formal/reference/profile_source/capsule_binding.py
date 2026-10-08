@@ -319,6 +319,7 @@ def bind_indexed(
 class InputBoundCapsule:
     capsule: IndexedCapsule
     input_source: object
+    configuration_header: object
 
 
 def bind_input_indexed(
@@ -344,7 +345,14 @@ def bind_input_indexed(
     does not remove the remaining genesis, complete P0, producer/control and
     full configuration origin obligations. There is no R2 success premise.
     """
-    from formal.reference.profile_source import authority, input_history, metadata, source_prefix
+    from formal.reference.profile_source import (
+        authority,
+        configuration,
+        configuration_history,
+        input_history,
+        metadata,
+        source_prefix,
+    )
 
     resolved = authority.resolve(
         prefix.metadata,
@@ -411,4 +419,11 @@ def bind_input_indexed(
         frozen_inputs=body.tuples,
         body=body,
     )
-    return InputBoundCapsule(bound, inputs)
+    finalized = configuration_history.finalized_config(inputs.configuration, body.round_config_id)
+    header = configuration.bind_native_header(
+        finalized.bound.config,
+        bound.bound.predecessor.native_state,
+        bound.bound.predecessor.policy,
+        actor,
+    )
+    return InputBoundCapsule(bound, inputs, header)

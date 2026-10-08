@@ -54,7 +54,13 @@ def main():
             return
         if name == "SourcePolicy":
             path = ROOT / "formal/proposals/isc-source-generation/SourcePolicy.lean"
-        elif name in {"ProfileSource", "ProfileControl", "ProfileManifest", "ProfileConfiguration"}:
+        elif name in {
+            "ProfileSource",
+            "ProfileControl",
+            "ProfileManifest",
+            "ProfileConfiguration",
+            "ProfileNativeHeader",
+        }:
             path = Path(__file__).with_name(name + ".lean")
         else:
             path = ROOT / "formal/proofs" / (name.replace(".", "/") + ".lean")
@@ -63,6 +69,7 @@ def main():
             "ProfileControl",
             "ProfileManifest",
             "ProfileConfiguration",
+            "ProfileNativeHeader",
             "SourcePolicy",
         } and not name.startswith("DeltaReduce."):
             raise RuntimeError("Unqualified import " + name)
@@ -91,6 +98,7 @@ def main():
     visit("ProfileControl")
     visit("ProfileManifest")
     visit("ProfileConfiguration")
+    visit("ProfileNativeHeader")
     visit("SourcePolicy")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
@@ -144,7 +152,7 @@ def main():
     ]
     audit = (
         "import ProfileControl\nimport ProfileManifest\n"
-        "import ProfileConfiguration\nimport SourcePolicy\n"
+        "import ProfileConfiguration\nimport ProfileNativeHeader\nimport SourcePolicy\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
     )
     audit += "".join(
@@ -164,6 +172,18 @@ def main():
             "complete",
             "wholeSource",
             "enrolledSource",
+        )
+    )
+    audit += "".join(
+        "#print axioms DeltaReduce.ProfileSource.NativeHeader." + name + "\n"
+        for name in (
+            "policyNoErasure",
+            "policyEveryField",
+            "coarseSource",
+            "matchFieldsCorrect",
+            "checked",
+            "complete",
+            "originalConfigurationAndPolicy",
         )
     )
     audit += "".join(
@@ -266,6 +286,15 @@ def main():
     )
     run([str(LEAN), "ConfigurationVectors.lean"], "configuration-vectors.txt", src, environment)
     sources["generated/ConfigurationVectors.lean"] = digest(config_source.encode())
+    from formal.reference.profile_source.native_header_vectors import generate as header_vectors
+
+    header_source, header_originals = header_vectors()
+    (src / "NativeHeaderVectors.lean").write_text(header_source, encoding="utf8", newline="\n")
+    (OUT / "native-header-originals.json").write_text(
+        json.dumps(header_originals, indent=2) + "\n", encoding="utf8", newline="\n"
+    )
+    run([str(LEAN), "NativeHeaderVectors.lean"], "native-header-vectors.txt", src, environment)
+    sources["generated/NativeHeaderVectors.lean"] = digest(header_source.encode())
     run(
         [
             sys.executable,
@@ -390,6 +419,8 @@ def main():
             "Joined input-to-W1 path re-resolves profile keys; no supplied frozen body/tuple list",
             "Full DRC1 configuration codec inverse/injectivity with original nested fields",
             "Existing two close policies derive from exact signed config, with no override",
+            "Original CONFIG/S0/P0 context, parent, deadlines and validators join without erasure",
+            "Full policy descriptor is injective; later views/sequences are retained unchanged",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

@@ -252,6 +252,56 @@ class BoundConfig:
     storage_binding: retention.StorageBinding
 
 
+@dataclass(frozen=True)
+class NativeHeader:
+    configuration: BoundConfig
+    original_state: bytes
+    original_policy: bytes
+    actor: str
+
+
+def bind_native_header(config, original_state, original_policy, actor):
+    """Join original immutable headers without erasing any policy collection.
+
+    This is one source conjunct, not a constructor of a legal initial state or
+    a proof of complete P0. Phase, current view, sequence, candidate inventory,
+    local clock and all downstream collections still come from the producer
+    prefix. In particular, current view is not reset to the CONFIG vote's view.
+    """
+    from formal.reference.isc_source.policy import decode as decode_policy
+    from formal.reference.profile_source.capsule_binding import read_state
+
+    _require(type(config) is BoundConfig, "original bound configuration required")
+    body = decode(config.original)
+    _require(config.body_id == content_id(DOMAIN, config.original), "original config identity")
+    native = read_state(original_state, body["formal_semantics_id"])
+    policy = decode_policy(original_policy)
+    _require(
+        policy["local_validator_id"] == actor
+        and actor in body["validator_ids"]
+        and policy["validator_ids"] == body["validator_ids"]
+        and policy["validator_epoch_id"] == body["validator_epoch_id"]
+        and policy["round_id"] == native["round_id"] == body["round_id"]
+        and policy["round_config_id"] == native["config_id"] == config.body_id,
+        "original configuration/native actor, epoch and round context",
+    )
+    _require(
+        int(native["height"]) == int(body["height"])
+        and native["parent_checkpoint_id"] == body["parent_checkpoint_id"]
+        and native["ticket_count"] == body["ticket_count"]
+        and policy["soft_deadline_tick"] == int(body["soft_deadline_tick"])
+        and policy["hard_deadline_tick"] == int(body["hard_deadline_tick"]),
+        "original configuration/native parent, height, count and deadlines",
+    )
+    snapshot = policy["snapshot"]
+    _require(
+        snapshot["parameter_schema_id"] == body["parameter_schema_id"]
+        and snapshot["state_id"] == content_id("deltareduce:003:round-state:v1", original_state),
+        "original configuration/native schema and complete coarse-state ID",
+    )
+    return NativeHeader(config, original_state, original_policy, actor)
+
+
 def bind(
     bootstrap: Bootstrap, storage_bootstrap: storage.Bootstrap, original: bytes, declaration: bytes
 ):

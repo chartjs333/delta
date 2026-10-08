@@ -50,6 +50,15 @@
 'DeltaReduce.ProfileSource.Configuration.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Configuration.wholeSource' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileSource.Configuration.enrolledSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.NativeHeader.policyNoErasure' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.NativeHeader.policyEveryField' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.NativeHeader.coarseSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.NativeHeader.matchFieldsCorrect' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.NativeHeader.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.NativeHeader.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.NativeHeader.originalConfigurationAndPolicy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
 'DeltaReduce.ProfileManifest.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileManifest.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileManifest.originalBytes' depends on axioms: [propext, Classical.choice, Quot.sound]

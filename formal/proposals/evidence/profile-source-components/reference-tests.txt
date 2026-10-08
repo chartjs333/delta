@@ -52,10 +52,13 @@ test_repeated_delivery_retained_and_never_quorum_inflation (formal.reference.pro
 test_indexed_original_command_and_full_deliveries_supply_w1_predecessor (formal.reference.profile_source.test_indexed_capsule.IndexedCapsuleTests.test_indexed_original_command_and_full_deliveries_supply_w1_predecessor) ... ok
 test_recomputed_w1_cannot_substitute_a_peer_or_delete_an_original_delivery (formal.reference.profile_source.test_indexed_capsule.IndexedCapsuleTests.test_recomputed_w1_cannot_substitute_a_peer_or_delete_an_original_delivery) ... ok
 test_supplied_coarse_state_cannot_replace_original_command_computation (formal.reference.profile_source.test_indexed_capsule.IndexedCapsuleTests.test_supplied_coarse_state_cannot_replace_original_command_computation) ... ok
+test_later_view_and_all_original_policy_collections_are_retained (formal.reference.profile_source.test_input_capsule.InputCapsuleTests.test_later_view_and_all_original_policy_collections_are_retained) ... ok
+test_original_config_cannot_be_replaced_by_an_internally_consistent_policy (formal.reference.profile_source.test_input_capsule.InputCapsuleTests.test_original_config_cannot_be_replaced_by_an_internally_consistent_policy) ... ok
 test_original_full_input_cut_drives_w1_body_and_frozen_tuples (formal.reference.profile_source.test_input_capsule.InputCapsuleTests.test_original_full_input_cut_drives_w1_body_and_frozen_tuples) ... ok
 test_w1_cannot_select_another_plan_or_missing_declaration (formal.reference.profile_source.test_input_capsule.InputCapsuleTests.test_w1_cannot_select_another_plan_or_missing_declaration) ... ok
 test_closed_body_is_derived_from_original_complete_source_facets (formal.reference.profile_source.test_input_history.InputHistoryTests.test_closed_body_is_derived_from_original_complete_source_facets) ... ok
 test_loss_and_repeated_close_preserve_first_frozen_inputs_and_source_multiplicity (formal.reference.profile_source.test_input_history.InputHistoryTests.test_loss_and_repeated_close_preserve_first_frozen_inputs_and_source_multiplicity) ... ok
+test_original_isc_view_is_not_replaced_by_configuration_voting_view (formal.reference.profile_source.test_input_history.InputHistoryTests.test_original_isc_view_is_not_replaced_by_configuration_voting_view) ... ok
 test_original_ticket_manifest_and_full_body_cannot_be_substituted (formal.reference.profile_source.test_input_history.InputHistoryTests.test_original_ticket_manifest_and_full_body_cannot_be_substituted) ... ok
 test_source_cut_does_not_borrow_later_attestations_or_other_receiver (formal.reference.profile_source.test_input_history.InputHistoryTests.test_source_cut_does_not_borrow_later_attestations_or_other_receiver) ... ok
 test_complete_mixed_projection_and_all_cuts (formal.reference.profile_source.test_journals.JournalTests.test_complete_mixed_projection_and_all_cuts) ... ok
@@ -122,6 +125,6 @@ test_signature_without_own_intent_or_corrupt_signature_rejected (formal.referenc
 test_unsigned_durable_cut_is_retained_without_claiming_signature (formal.reference.profile_source.test_votes.VoteIntentTests.test_unsigned_durable_cut_is_retained_without_claiming_signature) ... ok
 
 ----------------------------------------------------------------------
-Ran 122 tests in 6.991s
+Ran 125 tests in 8.646s
 
 OK

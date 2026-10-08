@@ -210,6 +210,17 @@ Kernel vectors check both policies against complete Python-generated original
 bytes. The partial two-ticket diagnostic retains all original events and AC
 lineage; it is component evidence, not a complete production snapshot or ABORT QC.
 
+`ProfileNativeHeader.lean` joins original CONFIG/S0/P0 bytes through the full
+typed codecs. It checks parent/height/count, epoch/validator membership, original
+soft/hard deadlines, round/configuration identity, schema and complete coarse
+state ID. The current view and physical sequence remain exactly as captured;
+neither is reset to the CONFIG voting view. Policy encoding injectivity covers
+every field, including unprojected downstream collections. This is not initial
+state authority or a proof that those collections arose legally. The input/W1
+reference path applies this join using its source-derived finalized CONFIG.
+Kernel vectors use finite SHA tables of explicit original preimages, with no
+hash axiom or native-evaluation proof axiom, and are synthetic partial inputs.
+
 Run `formal/proposals/b-family-transfer/check_profile_components.py` with the
 pinned `ISC_SODIUM_DLL`; it rebuilds the involved Lean sources, audits axioms,
 checks the reference components and records exact source/log hashes. All

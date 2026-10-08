@@ -228,6 +228,18 @@ class InputHistoryTests(unittest.TestCase):
         self.assertEqual(len(result.ledger.availabilities), 1)
         self.assertEqual(len(result.ledger.events), len(self.events))
 
+    def test_original_isc_view_is_not_replaced_by_configuration_voting_view(self):
+        later = replace(self.body, view=self.body.view + 1)
+        events = [*self.events[:-1], replace(self.events[-1], original=isc.body_preimage(later))]
+        result = self.reconstruct(events)
+        self.assertFalse(result.unresolved)
+        self.assertEqual(result.closed[0].body, later)
+        self.assertNotEqual(isc.body_id(later), isc.body_id(self.body))
+        self.assertEqual(result.closed[0].body.tuples, self.body.tuples)
+        self.assertIn(events[-1], result.producer_edges)
+        # A later-view original is not proof of lawful ADVANCE_VIEW. The full
+        # producing prefix must supply it; W1 still requires its current view.
+
 
 if __name__ == "__main__":
     unittest.main()

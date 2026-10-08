@@ -5,6 +5,7 @@ phase/durability remain deliberately unqualified. Never a valid import or GO.
 """
 
 import unittest
+from copy import deepcopy
 from dataclasses import replace
 from hashlib import sha256
 
@@ -17,6 +18,7 @@ from formal.reference.isc_source import test_finalization as candidate_fixture
 from formal.reference.isc_w1 import codec as w
 from formal.reference.profile_source import authority
 from formal.reference.profile_source import capsule_binding as c
+from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import metadata as m
 from formal.reference.profile_source import source_prefix as source
 from formal.reference.profile_source import test_authority as authority_fixture
@@ -99,6 +101,8 @@ class InputCapsuleTests(unittest.TestCase):
             local_validator_id=self.actor,
             round_id=body.round_id,
             round_config_id=body.round_config_id,
+            soft_deadline_tick=int(self.input.x.body["soft_deadline_tick"]),
+            hard_deadline_tick=int(self.input.x.body["hard_deadline_tick"]),
         )
         p["snapshot"].update(
             parameter_schema_id=body.parameter_schema_id,
@@ -285,6 +289,57 @@ class InputCapsuleTests(unittest.TestCase):
         self.assertEqual(result.capsule.bound.predecessor.cut.frozen_inputs, self.body.tuples)
         self.assertEqual(result.input_source.closed[0].body, self.body)
         self.assertTrue(result.input_source.producer_edges)  # not whole native origin
+        self.assertEqual(result.configuration_header.original_policy, self.policy)
+        self.assertEqual(result.configuration_header.original_state, self.initial)
+        self.assertEqual(result.configuration_header.configuration.original, self.input.config)
+
+    def test_original_config_cannot_be_replaced_by_an_internally_consistent_policy(self):
+        bound = cfg.bind(
+            self.boot, self.input.f.storage_boot, self.input.config, self.input.f.declaration
+        )
+        p = policy.decode(self.policy)
+        for field, changed in (
+            ("soft_deadline_tick", p["soft_deadline_tick"] + 1),
+            ("hard_deadline_tick", p["hard_deadline_tick"] + 1),
+            ("validator_epoch_id", m.raw_id(b"other-epoch")),
+            ("local_validator_id", self.boot.validators[1][0]),
+        ):
+            alternate = policy.encode({**p, field: changed})
+            with self.subTest(field=field), self.assertRaises(crypto.CodecError):
+                cfg.bind_native_header(bound, self.initial, alternate, self.actor)
+        for field, changed in (
+            ("parent_checkpoint_id", m.raw_id(b"other-parent")),
+            ("height", "2"),
+            ("ticket_count", 2),
+        ):
+            native = c.read_state(self.initial, self.boot.formal_semantics_id)
+            native[field] = changed
+            alternate = c.envelope(5, native)
+            associated = deepcopy(p)
+            associated["snapshot"]["state_id"] = crypto.content_id(
+                "deltareduce:003:round-state:v1", alternate
+            )
+            with self.subTest(field=field), self.assertRaises(crypto.CodecError):
+                cfg.bind_native_header(bound, alternate, policy.encode(associated), self.actor)
+
+    def test_later_view_and_all_original_policy_collections_are_retained(self):
+        bound = cfg.bind(
+            self.boot, self.input.f.storage_boot, self.input.config, self.input.f.declaration
+        )
+        native = c.read_state(self.initial, self.boot.formal_semantics_id)
+        native.update(view="2", durable_sequence="7")
+        alternate = c.envelope(5, native)
+        p = policy.decode(self.policy)
+        original_snapshot = deepcopy(p["snapshot"])
+        p["snapshot"]["state_id"] = crypto.content_id("deltareduce:003:round-state:v1", alternate)
+        raw = policy.encode(p)
+        result = cfg.bind_native_header(bound, alternate, raw, self.actor)
+        self.assertEqual(result.original_state, alternate)
+        self.assertEqual(result.original_policy, raw)
+        # Byte/header binding does not certify the template's opaque lineage.
+        for key, value in original_snapshot.items():
+            if key != "state_id":
+                self.assertEqual(policy.decode(result.original_policy)["snapshot"][key], value)
 
     def test_w1_cannot_select_another_plan_or_missing_declaration(self):
         altered = replace(self.input.plan, policies=())

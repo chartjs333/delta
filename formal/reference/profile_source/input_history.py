@@ -229,6 +229,11 @@ def reconstruct(events, validators, storage, backend, plan, original_config, dec
                 }
                 tuples = ledger.original_tuples(result.state, domains)
                 profile = scheduling.decode(plan.policies[0])["arithmetic_profile_id"]
+                # CONFIG's voting view is not the later ISC context view. Retain
+                # the exact original close object's view here; the outer source
+                # command fold/W1 join checks it against the actual coarse state.
+                # This facet does not authorize a view transition from this field.
+                original_body = isc.decode_body_preimage(event.original)
                 body = isc.Body(
                     validators.formal_semantics_id,
                     profile,
@@ -237,7 +242,7 @@ def reconstruct(events, validators, storage, backend, plan, original_config, dec
                     configuration.body_id,
                     configuration.round_id,
                     validators.validator_epoch_id,
-                    configuration.view,
+                    original_body.view,
                     configuration.parent,
                     isc.input_root(tuples),
                     tuples,

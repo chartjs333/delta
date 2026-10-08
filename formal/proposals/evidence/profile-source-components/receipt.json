@@ -46,6 +46,7 @@
     "formal/proofs/DeltaReduce/NativePolicySchema.lean": "4d19ebe15b067aab6442c8b67b4adfd1adfd9fe7718bd3cded8df4a9b8267612",
     "formal/proofs/DeltaReduce/NativeStateBytes.lean": "cb66d643495fbfb3a694240cf533e8f745a68afd58f28bcfb99891391463782e",
     "formal/proofs/DeltaReduce/NativeWalScan.lean": "0281eef29dfd973c3f63685ffffb926c012e399dea05444b647d36f989b14e58",
+    "formal/proposals/b-family-transfer/ProfileNativeHeader.lean": "fc7fc2987a2939a071a95f609d73f2a4eb05316b2e884743e05e0951c33bcddd",
     "formal/proposals/isc-source-generation/SourcePolicy.lean": "16ca5ad4bbbbf2f163f2f9ca3904d7e761a61d38589be95a1120d29e2f9b08c9",
     "formal/proofs/DeltaReduce/NativeIscCertificate.lean": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
     "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
@@ -58,21 +59,23 @@
     "generated/ControlVectors.lean": "8cba1d4f135de0bd81772e1eab66cb4d94784b30391b34ac655dcc8c5b084c43",
     "generated/ISCVectors.lean": "272b5a8c021814dc20031d427ef1dd5862cb891940e45618e68425a41da52868",
     "generated/ConfigurationVectors.lean": "67311639f84eeb8d25c52e2ac734e4ae2b09f3617e206b81e768cdc02058b26f",
+    "generated/NativeHeaderVectors.lean": "7babeefe088a96164cb2edac312b66717bdbc5e37327795c8e396ee7756e71de",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
     "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
-    "formal/reference/profile_source/capsule_binding.py": "de1ccb9b474f07f04283e5e8f30b51f5cb9eadae6ed77ba3d37a0c6d21af2e1c",
+    "formal/reference/profile_source/capsule_binding.py": "70283e241c431b9acb2d362c79bb49274c26f3d5f1b80164fcb4b4291a317570",
     "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
-    "formal/reference/profile_source/configuration.py": "eb537d44d64ef3b1dbc53edb04ee532e181f9cf5311a769d85cf5b3bbd693b6d",
+    "formal/reference/profile_source/configuration.py": "b683b9155215ba28203492084141ae5a984d9e7da54d611353639e71b74ab180",
     "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
     "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
     "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
     "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
-    "formal/reference/profile_source/input_history.py": "f6aeb697f7d393d5bb1d96ea2fa36474d0d1975a3c54dfd8ee16ef87011ad6d2",
+    "formal/reference/profile_source/input_history.py": "1b724edc2c5c6d0adad7f3236f5aff809273d9eebafdee0f569cf117e230d74a",
     "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
     "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
+    "formal/reference/profile_source/native_header_vectors.py": "4f05f687319ce563a164e7fdc77b76276bd1d570693cb912519c81abc27b908b",
     "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
     "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
     "formal/reference/profile_source/source_prefix.py": "64956d0f22a8bb56f161243a0659182c2b7f721afc4eaff6b8f00ea91362402a",
@@ -84,8 +87,8 @@
     "formal/reference/profile_source/test_configuration_history.py": "a669c68b3e162d8d6dd7a04a9eba1c22e3c1f5240b4336f1850108503eed3b66",
     "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
     "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
-    "formal/reference/profile_source/test_input_capsule.py": "8dd8b5507e6b54479aef6aa7ee008b7cd85da2059275f602b3278e0d207cde9a",
-    "formal/reference/profile_source/test_input_history.py": "2224dd1644ad27af44421190994116c05fe8827524eacf0c0435e852066fe2f5",
+    "formal/reference/profile_source/test_input_capsule.py": "a826075be3bcba0e8255366981d9165ade86a181b7a51e894c96ba2fb77cf20d",
+    "formal/reference/profile_source/test_input_history.py": "73ce9bcaf5ae6d1ec83443bf1a4b4d874c3b84d5fc1428c92fa486bc4d283cd1",
     "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
     "formal/reference/profile_source/test_manifest_context.py": "2d53806558e73b80bde4716bef6abd266c079e09c7f607d506dac5bb6f4ffb83",
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
@@ -96,8 +99,8 @@
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "8082ce0368fd18d59ad32f587559b3bac45bc61e4da794f044b2574f688e6435",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "ede662cc5ef7a73dec269e6aff2291de7488c6208beec4f57b493443f9831c0c",
+    "formal/reference/profile_source/README.md": "fe1d3cfe982d2915a366a48286adf01e265204c85f179a9833929c794d020f51",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "3ebad1d8c5dd3b213424cb880f66906b5b80548c176a2ed1a4a7a1c0e1032497",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e",
@@ -406,9 +409,14 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "ProfileNativeHeader.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "2242386c05db0acd1ca88f7729524570690a6df21b0d9931c7e3979f99aec501"
+      "sha256": "fa9aea57a9f0eeff0a5ccc74097433cc9aa1893fda6c794fa85f7f33f358fdca"
     },
     {
       "log": "control-vectors-0.txt",
@@ -456,19 +464,24 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
+      "log": "native-header-vectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "19697d9e9bfa804171fd23e884a78e55b8233e182e7b035d86b583ec899a9e95"
+      "sha256": "5d423e127d94c1a8d1d1144c205867b47b526f9d4927d45df7d884b5c7c29186"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "70001eb538be6042534400bf40e381a74cc96b881981ae4108c569c0d5a6bec8"
+      "sha256": "d674ce48b9e740b3509451a15a5bd9157df10800a537ca7d427898bb36016ab5"
     },
     {
       "log": "w1-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "dee993b0f9659fe0ca7e15cf8b226a48e702ee1bdbcadafa6c946b020f9bd5c9"
+      "sha256": "bdafa3873b4219dd89bd0be96e25d72021a0e6f7d43a30cf4a57e0532d3d1265"
     },
     {
       "log": "ruff.txt",
@@ -478,7 +491,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "aec51819fa2b338a1a7896d7f3fa3a16c30fdb3b01d724c485d984ae83b87a06"
+      "sha256": "d29644cebc037e2a733db225b8964bef215b4d0e037a4d4d2ce1aeb46f05a78c"
     }
   ],
   "established": [
@@ -506,7 +519,9 @@
     "Closed B/tuples derive from original CONFIG/ticket/manifest/AC/freeze source facets",
     "Joined input-to-W1 path re-resolves profile keys; no supplied frozen body/tuple list",
     "Full DRC1 configuration codec inverse/injectivity with original nested fields",
-    "Existing two close policies derive from exact signed config, with no override"
+    "Existing two close policies derive from exact signed config, with no override",
+    "Original CONFIG/S0/P0 context, parent, deadlines and validators join without erasure",
+    "Full policy descriptor is injective; later views/sequences are retained unchanged"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",
