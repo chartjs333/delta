@@ -41,10 +41,10 @@ def body_bytes(ctx, item):
     )
 
 
-def generate():
-    _, originals = lineage()
+def generate(body=None):
+    body = synthetic_body() if body is None else body
+    _, originals = lineage(body)
     p = policy.decode(bytes.fromhex(originals["whole_policy"]))
-    body = synthetic_body()
     ctx = p["snapshot"]["input_set_bodies"][0]["context"]
     entries = [
         {

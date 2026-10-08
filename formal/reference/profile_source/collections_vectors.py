@@ -13,11 +13,11 @@ from formal.reference.profile_source.parameter_vectors import texts
 from formal.reference.profile_source.policy_vectors import projected
 
 
-def generate():
-    _, originals = apply()
+def generate(body=None, *, bind_value_hashes=False):
+    body = synthetic_body() if body is None else body
+    _, originals = apply(body, bind_value_hashes=bind_value_hashes)
     p = policy.decode(bytes.fromhex(originals["whole_policy"]))
     ctx = p["snapshot"]["input_set_bodies"][0]["context"]
-    body = synthetic_body()
     p.update(
         local_validator_id="a",
         validator_epoch_id=ctx["validator_epoch_id"],

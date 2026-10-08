@@ -34,8 +34,9 @@ def parameter_bytes(ctx, item):
     )
 
 
-def generate():
-    _, originals = plan()
+def generate(source_body=None):
+    source_body = synthetic_body() if source_body is None else source_body
+    _, originals = plan(source_body)
     p = policy.decode(bytes.fromhex(originals["whole_policy"]))
     ctx = p["snapshot"]["input_set_bodies"][0]["context"]
     apc = p["snapshot"]["aggregation_plan_certificates"][0]
@@ -56,7 +57,7 @@ def generate():
         {
             **ctx,
             **{k: v for k, v in cert.items() if k != "context"},
-            "formal_semantics_id": synthetic_body().formal_semantics_id,
+            "formal_semantics_id": source_body.formal_semantics_id,
             "type_name": "PARAMETER_SHARD_QC",
             "schema_version": "2.0.0",
         }

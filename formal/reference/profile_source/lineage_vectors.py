@@ -17,9 +17,9 @@ def canonical(value):
     )
 
 
-def generate():
-    original_source, originals = inputs()
-    body = synthetic_body()
+def generate(body=None):
+    body = synthetic_body() if body is None else body
+    original_source, originals = inputs(body)
     common = {
         "arithmetic_profile_id": body.arithmetic_profile_id,
         "formal_semantics_id": body.formal_semantics_id,

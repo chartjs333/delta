@@ -10,8 +10,8 @@ from formal.reference.profile_source.native_header_vectors import policy_term
 from formal.reference.profile_source.policy_vectors import projected
 
 
-def generate():
-    body = synthetic_body()
+def generate(body=None):
+    body = synthetic_body() if body is None else body
     certificates = sorted(
         (
             identity.Certificate(body, signers)

@@ -31,8 +31,9 @@ def root_bytes(ctx, c):
     return raw
 
 
-def generate():
-    _, originals = parameter()
+def generate(body=None):
+    body = synthetic_body() if body is None else body
+    _, originals = parameter(body)
     p = policy.decode(bytes.fromhex(originals["whole_policy"]))
     ctx = p["snapshot"]["input_set_bodies"][0]["context"]
     shard = p["snapshot"]["parameter_qcs"][0]
@@ -68,7 +69,7 @@ def generate():
             {
                 **ctx,
                 **{k: v for k, v in c.items() if k != "context"},
-                "formal_semantics_id": synthetic_body().formal_semantics_id,
+                "formal_semantics_id": body.formal_semantics_id,
                 "schema_version": "2.0.0",
                 "type_name": "AGGREGATE_ROOT_QC",
             }

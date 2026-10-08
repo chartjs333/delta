@@ -11,11 +11,11 @@ from formal.reference.profile_source.lineage_vectors import canonical
 from formal.reference.profile_source.policy_vectors import projected
 
 
-def generate():
-    _, originals = aggregate()
+def generate(body=None, *, bind_value_hashes=False):
+    body = synthetic_body() if body is None else body
+    _, originals = aggregate(body)
     p = policy.decode(bytes.fromhex(originals["whole_policy"]))
     ctx = p["snapshot"]["input_set_bodies"][0]["context"]
-    body = synthetic_body()
     table = {}
 
     def identifier(domain, raw):
@@ -58,6 +58,15 @@ def generate():
         "parent_checkpoint_id": body.parent_checkpoint_id,
         "parent_optimizer_hash": "sha256:" + "5" * 64,
     }
+    if bind_value_hashes:
+        # A fresh fixture with actual native value preimages. Existing default
+        # fixtures and their deliberately opaque component hashes stay exact.
+        for kind in ("model", "optimizer"):
+            raw = ("deltareduce.008." + kind + ".v1").encode() + b"\0"
+            raw += b"".join(v.encode() + b";" for v in candidate["next_" + kind + "_values"])
+            digest = sha256(raw).digest()
+            table[raw] = digest
+            candidate["next_" + kind + "_hash"] = "sha256:" + digest.hex()
 
     def json_payload(value, kind):
         return canonical(

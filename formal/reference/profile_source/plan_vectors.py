@@ -30,8 +30,9 @@ def plan_bytes(ctx, item):
     return raw
 
 
-def generate():
-    _, originals = eligibility()
+def generate(body=None):
+    body = synthetic_body() if body is None else body
+    _, originals = eligibility(body)
     p = policy.decode(bytes.fromhex(originals["whole_policy"]))
     ctx = p["snapshot"]["input_set_bodies"][0]["context"]
     ec = p["snapshot"]["eligibility_certificates"][0]
@@ -57,7 +58,7 @@ def generate():
                     {**w, "alpha": {**w["alpha"], "numerator": str(w["alpha"]["numerator"])}}
                     for w in c["weights"]
                 ],
-                "formal_semantics_id": synthetic_body().formal_semantics_id,
+                "formal_semantics_id": body.formal_semantics_id,
                 "type_name": "AGGREGATION_PLAN_CERTIFICATE",
                 "schema_version": "2.0.0",
             }

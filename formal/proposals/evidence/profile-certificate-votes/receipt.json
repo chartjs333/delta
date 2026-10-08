@@ -1,0 +1,873 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "scope_revision": 13,
+  "result": "CERTIFICATE_ORIGINAL_CUT_COMPONENT_CHECKED",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "reviewed_r2_closure": false,
+  "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
+  "sources": {
+    "formal/proposals/b-family-transfer/ProfileCertificateVotes.lean": "95d6c3f653cb4d87c0a2745e3fc426ca8335e67d61a4c5e95a1ab29e70d2bf08",
+    "formal/proposals/b-family-transfer/ProfileCandidates.lean": "c1a763ad8f2181bb5f90476089342b4d331e5e66cddbbdcbb90db6be0aab10b0",
+    "formal/proposals/b-family-transfer/ProfileCollections.lean": "3b2981d9352ddea9fc6684fd994c2f398aad5952fa3e32a2379579966ef79965",
+    "formal/proposals/b-family-transfer/ProfileApply.lean": "54445af09df705f866941f7ac0aacc3b92d67409b159d6fe4cc6ff98e76c18b3",
+    "formal/proposals/b-family-transfer/ProfileAggregate.lean": "d5a8c5609192edfac3028fd4e9a0de2273467bdb013930dad87f49fc291be1b6",
+    "formal/proposals/b-family-transfer/ProfileParameter.lean": "54747422f16d1237bfd437942e26fc695ccd757f2ae0c105f49b7fe1201c82f4",
+    "formal/proposals/b-family-transfer/ProfilePlan.lean": "8d638cfd1598ffb699adde6af66f9cca80db8f4c9eef60aa7189b2374d53a82b",
+    "formal/proposals/b-family-transfer/ProfileEligibility.lean": "5ed1110357f306b9e8dc412e59e0a96713516ad10d373adb9967630eddf108b4",
+    "formal/proposals/b-family-transfer/ProfileLineage.lean": "a2cf28b65976168c2bbd555bf206eda202035c5f81e7424a4fc7b32c1adc6350",
+    "formal/proposals/b-family-transfer/ProfileInputSection.lean": "d3c690d3dec0d6fc8e43d5c20bddf9a2d8f9cfbb0d82b35a029073310581b8c5",
+    "formal/proposals/b-family-transfer/ProfilePolicy.lean": "72f3a0ecb74111e57242efe27b757171f3ecc8b0504895c779be9e91e584721b",
+    "formal/proposals/b-family-transfer/ProfileNativeHeader.lean": "fc7fc2987a2939a071a95f609d73f2a4eb05316b2e884743e05e0951c33bcddd",
+    "formal/proposals/b-family-transfer/ProfileConfiguration.lean": "5a0f35c47652ceef62b9863e5a7b2dfa1b7ee0dbcd11e04f3071c0a57d9a7536",
+    "formal/proofs/DeltaReduce/NativePolicyCodec.lean": "799f13148f1913c5a21eecdb1931dd6c72d7e147f96a6eb4b1817f9ecf4c7320",
+    "formal/proofs/DeltaReduce/NativeReceiptBytes.lean": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580",
+    "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
+    "formal/proofs/DeltaReduce/NativeConfigAdmission.lean": "73890c23bae73e474465b7e0b5412016be3982d888cfc88be9cf2219f03db534",
+    "formal/proofs/DeltaReduce/NativePolicyBytes.lean": "9a7570b9ecd340a869c2a154e7be41f9c77cd43cf5d04bb985dcc2539f271dd2",
+    "formal/proofs/DeltaReduce/NativePolicySchema.lean": "4d19ebe15b067aab6442c8b67b4adfd1adfd9fe7718bd3cded8df4a9b8267612",
+    "formal/proofs/DeltaReduce/NativeStateBytes.lean": "cb66d643495fbfb3a694240cf533e8f745a68afd58f28bcfb99891391463782e",
+    "formal/proofs/DeltaReduce/NativeWalScan.lean": "0281eef29dfd973c3f63685ffffb926c012e399dea05444b647d36f989b14e58",
+    "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
+    "formal/proposals/isc-source-generation/SourcePolicy.lean": "16ca5ad4bbbbf2f163f2f9ca3904d7e761a61d38589be95a1120d29e2f9b08c9",
+    "formal/proofs/DeltaReduce/NativeIscCertificate.lean": "3deab6d0ae4896fd61bc8d3ad808d3f05ffe3be6edf0dd37a2790602a5232053",
+    "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
+    "formal/proofs/DeltaReduce/NativeManifestMerkle.lean": "692b8540281368fddb40fd1026951a5e66f6fd9034fb5a66ef3cb9627d1fa60c",
+    "formal/proofs/DeltaReduce/NativeNormEvidence.lean": "f97cac92beff970cf82c03ec7dde87b3d2ec72b9db6debd488879227db3f19f9",
+    "formal/proofs/DeltaReduce/NativeCertificateDecimal.lean": "adf92652e154271a4ff7c3b35da4748b2d645bf3997a8c2ee20c78dfed5ead3f",
+    "formal/proofs/DeltaReduce/NativeSeedTranscript.lean": "df7f38bcced4929c1b57ba7c8c381ea9ad8661b64c05ae5c82bfdf9ab10bd818",
+    "formal/proofs/DeltaReduce/NativeEligibilityLineage.lean": "dbd439e1c4a5c2ed2d8ba02a197b433c36123db3d2362d38166d3193eb0a1b94",
+    "formal/proofs/DeltaReduce/NativeEligibility.lean": "44e193a483ab66a49fcc890821fc94e539bfb07d050368a05a88e7be7f134728",
+    "formal/proofs/DeltaReduce/NativeNormSection.lean": "44e31e793f29cf59ecbdb219820453171c786122147d26124675e11a08e000a4",
+    "formal/proofs/DeltaReduce/NativeFinalizedIscSection.lean": "618e53935d4deda22bf378bd6ae20db4f2686eae6cd524ac030af193c2782dab",
+    "formal/proofs/DeltaReduce/NativeIscAdmission.lean": "63ddf5cc963d51b7837afc1e4bb6ca6d0f1024f0ef60a23bd9e23b9348af213c",
+    "formal/proofs/DeltaReduce/NativePlanLineage.lean": "7d331d1c6daa6da0624eface08e587dc5278772b41d561c43d6f945041f1c5e1",
+    "formal/proofs/DeltaReduce/NativePlan.lean": "b23e94bec47a92187fbd9547c784210ca0f65c21acc31fa5bb7941e250c73655",
+    "formal/proofs/DeltaReduce/NativeEligibilitySection.lean": "2e2e9b6c2302d47f42aaa839a6c53dcc4192c7c137f66d67d3201c63a32ec455",
+    "formal/proofs/DeltaReduce/NativeParameterLineage.lean": "6e2477041743df436186e68662ef55a6ca1d96adbf93d2fec4060a9cc63dbde8",
+    "formal/proofs/DeltaReduce/NativeParameter.lean": "9861569b900e76473541052efd285f64474b5456f64e3adc6b49360730091427",
+    "formal/proofs/DeltaReduce/NativePlanSection.lean": "50a736a72de33c9047258a2310033ad6faee052b700af70078f9a62c22e638ed",
+    "formal/proofs/DeltaReduce/NativeContractSize.lean": "bee5fdd37858ffff79880b1c7e4a35ee654b8cc032e1191f212b6f7162598d16",
+    "formal/proofs/DeltaReduce/NativeAggregateLineage.lean": "31c3f123fdf032556f5128f8286eec54e5282a315ee2e2dbfad95675292ffd78",
+    "formal/proofs/DeltaReduce/NativeAggregateRoot.lean": "e93437d563f5440462693290ee294ca05a7593aa32eb3ad33573ea9c4941abdc",
+    "formal/proofs/DeltaReduce/NativeAggregateMerkle.lean": "af79d0cbb99fc5a2d96cbbb6d683909259590955c2872524b293e6382efd6108",
+    "formal/proofs/DeltaReduce/NativeSizedParameterSection.lean": "9f31e20f86eec8ede75c51695343b1e2d8d667393bbcf56c1e991f266ac2afac",
+    "formal/proofs/DeltaReduce/NativeParameterSection.lean": "9e78cdc9928ac7fcb0c162c7af7967c9a58b19d8f98245519b850b1505b6c430",
+    "formal/proofs/DeltaReduce/NativeApplyLineage.lean": "e23281709a7cfc72beede6576ac7882a8d1e71d7bdd4dc6acf47fec1480ebacb",
+    "formal/proofs/DeltaReduce/NativeApplyCertificate.lean": "154ed2e4b86f786448ddfecb2666f5bcaf51bbb083be962e6d4813e2187f8106",
+    "formal/proofs/DeltaReduce/NativeApplyProfile.lean": "032f0fd27c13e1c0bff98829c2cbf63530ef1b685b6af0c8ee1512c2bf17b6f3",
+    "formal/proofs/DeltaReduce/NativeAggregateSection.lean": "c48512385100639b520fc226d195dd30e3773e14dfff1698aa1bcc103c25fefe",
+    "formal/proofs/DeltaReduce/NativeFailureSection.lean": "cceb81ab8e56b3b94777699b3fab2fd61fbf96e60010a594085ca463a39b60ee",
+    "formal/proofs/DeltaReduce/NativeFailurePayload.lean": "3d91fec152920ad223521ab6a8134001f34d26b0681ad4b3ce62ffeb45c8894a",
+    "formal/proofs/DeltaReduce/NativeApplySection.lean": "a49102314e5621779747b79762ee71c91c285cfdc9b3ff0784fa27b1ea915f30",
+    "formal/proofs/DeltaReduce/NativeCandidateShape.lean": "6105d330b8ce7bddc576098558eb110fcb55f4daa0f223adb2789745b97e7294",
+    "formal/proofs/DeltaReduce/NativeSnapshotBase.lean": "61ff5ff6ce1b82b3018564ed28785471ad8d3cdd86044df16dea34c0c067eb88",
+    "formal/proofs/DeltaReduce/NativeProposedIsc.lean": "36661e2d0b56de8647a01e28948170a59b678b9a630cffb746675c803478cd3f",
+    "formal/proofs/DeltaReduce/NativeFailureAuthority.lean": "c2fa153c7f71da870f86b623f732053ae8960d0d3316edae5f82a5c526a6c91f",
+    "formal/proposals/b-family-transfer/ProfileConfigurationQC.lean": "89d5aa5c0ce83944654d113e9d897abc1bbc3d2511cb7f9db54ef96dd51f1f12",
+    "formal/proposals/isc-source-generation/SourceVote.lean": "fd7727fbab767898af14659215fc3512f4967321ea056b3fb90788704a37add5",
+    "formal/proposals/b-family-transfer/ProfileSource.lean": "823a4e632f161c5a3e60fc9f67e31a427f5bdb1ec77cdf30969a361312d0377c",
+    "formal/proposals/b-family-transfer/ProfileSourceIndex.lean": "d092d46248c6a5aa58d42ca97fd915e42308907222ec4c01a478884a5fd7eae8",
+    "formal/proposals/b-family-transfer/ProfileControl.lean": "f6af4ec64f5a1d41cb7cdc61b9f77d55723c546c4a9d883ae13d113caa088aa7",
+    "formal/proposals/b-family-transfer/ProfilePlanMembers.lean": "d1519a821b45a81f715def45864d8c6ef64edfe0b42cd22f7067eb029285ad51",
+    "formal/proofs/DeltaReduce/NativePlanMembers.lean": "5f54a7430b4d06db5a77cf84e1d374dd8eb213c3488b37a9b4c05821da914175",
+    "formal/proposals/b-family-transfer/ProfileSelectedVote.lean": "ed0d8542151b4feba8a33d78503042414d68e63c59591ca476f65a8ec90665da",
+    "formal/proposals/b-family-transfer/ProfileInstalledState.lean": "8adfd3a5736f1ee749cbdf2aac2dacaf7e5d6ba29974c3b04b8fd5b1ff68b6e2",
+    "formal/proofs/DeltaReduce/NativeSelectedVote.lean": "5818f50c782d4ac15faeb32932efae0f9f456968061f14bd091221039234b51a",
+    "formal/proofs/DeltaReduce/NativeCandidateAuthority.lean": "ee77014660b57d58cded7f1101bc55ff7cbdd651ef51331714cbb158f43b4011",
+    "formal/proofs/DeltaReduce/NativeFailureVote.lean": "02fa188e087a20a86e79ffa3ec9312433811780d0eb63b2057fdd9728498e081",
+    "formal/proposals/b-family-transfer/ProfileCurrent.lean": "cbd97cdbbdf8d0524103b8de39537b4d7c2fdfe867e8e85935e48e803081b5d2",
+    "formal/proofs/DeltaReduce/NativeCurrentValues.lean": "8787dc6854ac3b1fb745e7f3e01088aecfd55b42ebff21326d133c3c654ee192",
+    "formal/proofs/DeltaReduce/NativeApplyResult.lean": "6514074b924e6fdd851332b3c9f1924567a5fdda34baaed4c57b2fd23f77f627",
+    "formal/proofs/DeltaReduce/NativeCurrentPointer.lean": "85eb5e4cfdbb4fb73c52fce2980949457199734c27f766d6297d87326af8a1df",
+    "formal/proofs/DeltaReduce/ArithmeticBinding.lean": "7224e4b5710433ef9f3d1e3666a6e8cdced0b8178bb780f0569ad78cdca38693",
+    "formal/proofs/DeltaReduce/ParameterKernel.lean": "68ca0194a720dd525adbed22d3b7ccd725e2d2af95b3ff382502e92732dde5ec",
+    "formal/proofs/DeltaReduce/ArithmeticKernel.lean": "d8d43199a15914ba7f722d2dee7cc904b6b02e7cbdae37ec93f76dd1f8b45619",
+    "formal/proofs/DeltaReduce/ApplyKernel.lean": "780760d7647806ae8eaa48ba461676815947656404f11da946d4217e64baf7b8",
+    "formal/proofs/DeltaReduce/RecoveryKernel.lean": "af56e3c48ec83febd468e4702e3ed51b1493ea1c2ff67c0bb07bd3a9d227acfa",
+    "formal/proofs/DeltaReduce/NativePointerWal.lean": "3082ba369aad9922574f944fea2b78854c4fc34a49c34386712cdecfdcd25d21",
+    "generated/Audit.lean": "733dfc3498aba16658fa5a62696cafaf0d42f1a21acfed0da0f5f0df873a4cdb",
+    "generated/CertificateVoteVectors.lean": "ed833ee296938057895758a655578fd4b9362e89722a62061d500f5aabf0d2a3",
+    "generated/InputSectionVectors.lean": "f6da83e9c2ebe0b96c5d9a99ff62f4a89d1ccc193163633bb337e5c0e34cfc4c",
+    "generated/LineageVectors.lean": "c19380071ab946784d3c0605dd6684742469245cfffca8863dce909b07e463ac",
+    "generated/EligibilityVectors.lean": "953113e6046865c8fc3db09f939beb4539f81e694cee75d4e7eb4acf37d1eef8",
+    "generated/PlanVectors.lean": "ae51ba0c1f7cc0c4a84ba4c0f74af52175936fbdc728667f97d27bd8b8a8c9a6",
+    "generated/ParameterVectors.lean": "624235902189b4c0c349426deb70e775ead168cfeb1dc73f44d292ee9a9c0d22",
+    "generated/AggregateVectors.lean": "82ee0af8b348fa83fb44b9872cb81d74b4b663c495dc7ee89c427c129f9a1724",
+    "generated/ApplyVectors.lean": "9d3406f925346a5a0724e0c9162a16a5e94488004457e843c787b0e100f6417d",
+    "generated/CollectionsVectors.lean": "1d82842357aeb4f3b5f814d6e1c609e3cf86118c0d7faa539e21f5464a27762f",
+    "generated/TypedCertificateVectors.lean": "22af07f1448dc97eec3ad7249caae5014428affb6bc1bd2a08b921432db9ec58",
+    "generated/InstalledStateVectors.lean": "c9b337814c29224c3f1f8403ec4db466b88fe0c10b9eaff93fe24895994679ac",
+    "generated/CurrentInputSectionVectors.lean": "335432e988bbe6854ad9bb9b59e9b940ed6f81a1947f7b230b383b653c25d775",
+    "generated/CurrentLineageVectors.lean": "ed7bb2341ce590aa292aeb51e55e1577f54712dfba618c4ca39c3612aef8b188",
+    "generated/CurrentEligibilityVectors.lean": "507490bd0584fc1bd3464d3c42326be24ddb1698ac513541c1d415e1237e9239",
+    "generated/CurrentPlanVectors.lean": "f8d82dcde195c7937b3a80f12262d5e933c5420cb4e3cba8c988e68957cbe051",
+    "generated/CurrentParameterVectors.lean": "a216ca308452b477840e3f391413e118a7ea2f752a3b37aa553d3dbd389479fe",
+    "generated/CurrentAggregateVectors.lean": "f9113a8524c8b6faf7c78322477531c4ec46b889c9f2c4724ddcb471b3a3baff",
+    "generated/CurrentApplyVectors.lean": "ea00814947214fa266c3de1da185c51590aa7ed1272f6a64a76d53ab80e38739",
+    "generated/CurrentCollectionsVectors.lean": "cb208637ec105d5ce2aad02c5cd38450a98e17d5fd5e313f7d94ebed90cf94db",
+    "generated/CurrentVectors.lean": "df7cd78fd3f8eb227d5f4f80bfc90549a96e0075633b2f1016eee192687f7b45",
+    "generated/CurrentDefinitions.lean": "b103d84520c6b967cf4be53d993980cb59d2c5aacd1a83e63a529fea5754395e",
+    "generated/CurrentCase0.lean": "7305015fc8b01a80183700317d09fa937b721bf3a327020b1f52db7e9148e889",
+    "generated/CurrentCase1.lean": "88bfd4f1ae6660308cd9a458c0f45c28efbdf46588bb51b3759b2f4c43e6de1c",
+    "generated/CurrentCase2.lean": "1a61d6c7f77bd69b120d1d730c333916513f17182fa26fd1f00e8f950493cac6",
+    "generated/CurrentCase3.lean": "714da8feba4588a6cf0b696ea5c816674711d45626c524032bf5199ad6e937f8",
+    "generated/CurrentCase4.lean": "31036b3e8563496737ccb618fbe536bb92dbb50159be2cc95bd6c8f9377fe50f",
+    "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
+    "formal/reference/profile_source/aggregate_vectors.py": "fd956c8ec8a26415cb8f709848cc87f406196d497c03ef8bcdf7c84ac7988b25",
+    "formal/reference/profile_source/apply_vectors.py": "6e4b068514ab95b764c389812d1d4afc0589dcae1c9bd69231b13b9acc612ea3",
+    "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
+    "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
+    "formal/reference/profile_source/capsule_binding.py": "1c934e79a04ddaa7bff78fb7d0df84decc7afd432c74aeae2f4b2339932b36e3",
+    "formal/reference/profile_source/certificate_vote_vectors.py": "decedbfcbc1260897734f61a63bc8cc149b9c1332458185a5a98341929b1c996",
+    "formal/reference/profile_source/collections_vectors.py": "3270dc3ca8255e354bde4c5f90438a33b8a1f9f2b60c1d574e6fd5b1e62de1d1",
+    "formal/reference/profile_source/command_vectors.py": "c8277e65a100d7e3b2f3d43fea5b714d718c1c7d5bd1186660e3e5884c7d4428",
+    "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
+    "formal/reference/profile_source/configuration.py": "b683b9155215ba28203492084141ae5a984d9e7da54d611353639e71b74ab180",
+    "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
+    "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
+    "formal/reference/profile_source/configuration_qc_vectors.py": "c348aee61562a09ea37282a5142607f142ba157ec4b4afd62f532f31d520cb57",
+    "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
+    "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
+    "formal/reference/profile_source/current_vectors.py": "23b35bf46f138aa71d17b918e65b35bfb8fab123102a35b4a97be3a18750afc1",
+    "formal/reference/profile_source/eligibility_vectors.py": "6041f45c9678da617dcab41b1d37a9264b17934319eb5e84d09d05cb928361ee",
+    "formal/reference/profile_source/input_history.py": "8a157a442c979a539c6810f4321aa1675e7111fee2918bfa3024f1773bf33180",
+    "formal/reference/profile_source/input_section_vectors.py": "ae3166622c593a77cc94bf37f529818863ac335141d8049e022d8f3e76e73de6",
+    "formal/reference/profile_source/installed_state_vectors.py": "255c18fbf06cc0a3335514e3bfecd40d7f3a26ae7a52b06530b673deaf067436",
+    "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
+    "formal/reference/profile_source/journal_vectors.py": "cb201e15a611843fb316e6623ffceba967c11d1af29b5a7205711a4291cdf211",
+    "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
+    "formal/reference/profile_source/lineage_vectors.py": "815e0e74b0141179aab235b5b62a3052cc5bcd04bdf3e70ca1d3c3358cb3a920",
+    "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
+    "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
+    "formal/reference/profile_source/native_header_vectors.py": "4f05f687319ce563a164e7fdc77b76276bd1d570693cb912519c81abc27b908b",
+    "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
+    "formal/reference/profile_source/parameter_vectors.py": "e7ff4186071cd6eb0f078248eeac4623b0abff573f7abdb734ab6b81c7735021",
+    "formal/reference/profile_source/plan_vectors.py": "fcf092d6141cfe09dd431c14b061cf4133487f15a1e7cf5047d2f71adcbb5aa0",
+    "formal/reference/profile_source/policy_vectors.py": "bba0f264870d6f889f84c76784a6cd4a149c66611cdcbb27c89ca7c448f1e8d1",
+    "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
+    "formal/reference/profile_source/source_index_vectors.py": "a0dc88066f5e0aa7c8060ebab0800e4b3b2fe2a8ff35ee8b5f0d28a80e36b5fc",
+    "formal/reference/profile_source/source_prefix.py": "64956d0f22a8bb56f161243a0659182c2b7f721afc4eaff6b8f00ea91362402a",
+    "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
+    "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
+    "formal/reference/profile_source/test_capsule_binding.py": "ce9c86a39dcd39dc38a3b14b9e977e276bd68fb6fe1f611132e96b2653ff76ec",
+    "formal/reference/profile_source/test_commands.py": "abe076da3f78b9e00ef5fb3e7f31cee5d2d84e353b15474b9449f97c1a1cafbb",
+    "formal/reference/profile_source/test_configuration.py": "381602b8e8af51b78e8efa2aa8ab7387a9a2006ca40ec799d41ee29ad2fdccc1",
+    "formal/reference/profile_source/test_configuration_history.py": "a669c68b3e162d8d6dd7a04a9eba1c22e3c1f5240b4336f1850108503eed3b66",
+    "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
+    "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
+    "formal/reference/profile_source/test_input_capsule.py": "9096f4f67ddc44d1ab6e260e1718ee1219011284ab512f981aa7ec4215c2f644",
+    "formal/reference/profile_source/test_input_history.py": "73ce9bcaf5ae6d1ec83443bf1a4b4d874c3b84d5fc1428c92fa486bc4d283cd1",
+    "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
+    "formal/reference/profile_source/test_manifest_context.py": "2d53806558e73b80bde4716bef6abd266c079e09c7f607d506dac5bb6f4ffb83",
+    "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
+    "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
+    "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
+    "formal/reference/profile_source/test_source_deliveries.py": "8ee65881544cb5f204685c4541e0694990047a99a07ac12ef371ce964de6b96a",
+    "formal/reference/profile_source/test_source_prefix.py": "ffe689855a4e5bef8ca02bd3d3c662985b55656b0ad72729e419c963cab52b90",
+    "formal/reference/profile_source/test_typed_generation.py": "55c7e59d657dbdaf9ce124c33688ad9bc4f8947fcd7d4f0ffdd61c7c5c9fd931",
+    "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
+    "formal/reference/profile_source/typed_certificate_vectors.py": "72231856236c00fed295c74d1b23524fe800fcb6327a7d8278eeafad4a92d58c",
+    "formal/reference/profile_source/vote_record_vectors.py": "4efa40beb762d424f41ed7a8b3e4a04730388de79ff2eca0e5b68121c8a7b006",
+    "formal/reference/profile_source/vote_vectors.py": "77ccba72f393be28f2ff8745d8153ec0baecb4b9835f54c039ddcd9f5e55b687",
+    "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
+    "formal/reference/isc_source/__init__.py": "adc3fecf736563adc0922ce7bf83a2b4c1a6e8e650c047a59ce4de93a2a84449",
+    "formal/reference/isc_source/authentication.py": "c18d0a52f7ed019319d487200fa67d14def563be676b4d6a131f8f2237e67630",
+    "formal/reference/isc_source/budget.py": "b7075bfa0ea7795dff77cb3ec3181c7953f496fb583ec9003d4b0efb87a459d1",
+    "formal/reference/isc_source/finalization.py": "0b35dd3d09828d80e4771f48688ecfbf1527354e4d209a5d470e3986ba125191",
+    "formal/reference/isc_source/identity.py": "134959feece71ecdafb84bff5861161184c809e44c14feb81d03c0e34d4d610c",
+    "formal/reference/isc_source/policy-layout.json": "dbc992e9155b768b4f92fb25a05c883aae80763c473e402336b58c23b5d32799",
+    "formal/reference/isc_source/policy.py": "6dcd4d272a1426baa076bb53fc5c61b33ce6f4dceb3be2150ebe246dd0d12783",
+    "formal/reference/isc_source/test_authentication.py": "6fb83d78751b452b745e0fa214d9a827a89408070888239a6972aad32dbd598a",
+    "formal/reference/isc_source/test_budget.py": "069ef659cd6451c35b7b0d907b9d45f98a7eb50f876ce0e57cdd0fe0ebe25304",
+    "formal/reference/isc_source/test_finalization.py": "0b7cbb65c11168c4ccccddc03f65044fdd99105899a003636144900a0c0f24b8",
+    "formal/reference/isc_source/test_identity.py": "0cd5271e13aa5e16e2fe8b3189836ed222591785683991f7b0c8a1ee1d1c1740",
+    "formal/reference/isc_source/test_policy.py": "8ee6f396ba5b999650392f5d2f9716d8ed7ac0ac4e4f70586562cae8434e0350",
+    "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
+    "formal/reference/isc_crypto/conformance-evidence.json": "a351d5ad662859800519115f4ea19ea1b00b6bf472248d964f77e4865615ea19",
+    "formal/reference/isc_crypto/evidence.json": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
+    "formal/reference/isc_crypto/library-provenance.json": "88c6f9a355c2e97a6d65bdb6eaa8165b59c64dcf66ce31f3ad831b1c525adeaa",
+    "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
+    "formal/reference/isc_crypto/public-vector.json": "dfed5d72577b74fa084fb0a8a72859e1f9145ee124a90941f803aad253c0e591",
+    "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
+    "formal/reference/isc_crypto/test_codec.py": "fab2abb09f18f4998af6fc584a9e582610a7c8668f3eb7a01e5f58ac10bb7d0b",
+    "formal/reference/isc_crypto/test_public_vector.py": "3108c775f583a26f8188b2c12480658fece48c2d0b4461db6857d41a3b19aebe",
+    "formal/reference/isc_crypto/test_signatures.py": "2194b0a8291a7ad30c277bc0ab9db6a55cb6607d5343c339f764c1f4cc9fef32",
+    "formal/reference/isc_w1/codec.py": "45f20d9d77b6c89aede68f4ee61477d88dfd73d9275ce31871526d12dba52ce9",
+    "formal/reference/isc_w1/evidence.json": "9e63360f198c153e3c813df62f0533ec26aaaf4e2262aea97854269f23c361bd",
+    "formal/reference/isc_w1/harness.py": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c",
+    "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
+    "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
+    "formal/reference/storage_source/__init__.py": "39145ac3fae5559d5aba1cb28d88f4725f4d5e3472179932cba1caa930f4a47b",
+    "formal/reference/storage_source/codec.py": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
+    "formal/reference/storage_source/retention-source.schema.json": "c3ee0e7bb4fd3da5d7d79d986b089a9923ef6cf0d338b7e680b35d5d6cafe17c",
+    "formal/reference/storage_source/retention-vectors.json": "8f78b8e5ddb9eed5c5447cb5030706ce060b58bf03b03c93679c06be7049b0fb",
+    "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",
+    "formal/reference/storage_source/test_codec.py": "ecf98bf2dfe56ec73833b0222ebaa0222c1996626ffa7890a07f5bbb91d2f7df",
+    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b",
+    "formal/reference/non_isc/__init__.py": "3e4fc1d23dad738309542869791e2f0d5ccc557a183cbe6962fe3d95eec5dbf7",
+    "formal/reference/non_isc/authentication.py": "978c50b96ae9e106b02e39e2a22728c962744de53e145fdad192d7e7fbc78cf5",
+    "formal/reference/non_isc/codec.py": "6c428bfc55d24b04af2c861297143ceedeaab6d13885d50a376b66dca70ce86c",
+    "formal/reference/non_isc/test_authentication.py": "e83e6781379e1dd8a92ffae65e80445c23d6f8a3e718f0a4ed161e592c8e2a71",
+    "formal/proposals/b-family-transfer/check_certificate_votes.py": "9e5a990dbb64a50f2acfe9435e9ce30cf10f673426a5d1fe0ffaa331f8bf5408",
+    "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
+    "delta-protocol/fixtures/007/cross-language/golden-v1.json": "3ad83feeb4513d910002240f24d003ab040f20948547b3e5c26809cb00b6261e"
+  },
+  "checks": [
+    {
+      "log": "lean-version.txt",
+      "exit_code": 0,
+      "sha256": "2663f5dc5e5250d355b484788e6fc7db0c7420e21bc691f988c0d71c4288f52d"
+    },
+    {
+      "log": "module-DeltaReduce.NativeReceiptBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePolicyCodec.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeVoteBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePolicySchema.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePolicyBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeWalBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeWalScan.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeStateBytes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeConfigAdmission.txt",
+      "exit_code": 0,
+      "sha256": "1b2fa0912aedf33bca76312100c4b206f8a1e9dd73f882a9d66a0bcfc2eb0dda"
+    },
+    {
+      "log": "module-ProfileConfiguration.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeInputSetBody.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeIscCertificate.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeManifestMerkle.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-SourcePolicy.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileNativeHeader.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfilePolicy.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileInputSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeCertificateDecimal.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeNormEvidence.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeSeedTranscript.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileLineage.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeEligibility.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeIscAdmission.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeFinalizedIscSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeNormSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeEligibilityLineage.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileEligibility.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeEligibilitySection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePlan.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePlanLineage.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfilePlan.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePlanSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeParameter.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeParameterLineage.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeContractSize.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileParameter.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeAggregateMerkle.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeParameterSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeSizedParameterSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeAggregateRoot.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeAggregateLineage.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileAggregate.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeAggregateSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeApplyProfile.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeApplyCertificate.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeApplyLineage.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileApply.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeApplySection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeFailurePayload.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeFailureSection.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileCollections.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeProposedIsc.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeSnapshotBase.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeCandidateShape.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeFailureAuthority.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileCandidates.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileSource.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-SourceVote.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileConfigurationQC.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileControl.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileSourceIndex.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileCertificateVotes.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePlanMembers.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfilePlanMembers.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileInstalledState.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeCandidateAuthority.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeFailureVote.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeSelectedVote.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileSelectedVote.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeCurrentPointer.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.ArithmeticKernel.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.ParameterKernel.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.ApplyKernel.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.RecoveryKernel.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.ArithmeticBinding.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeApplyResult.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativePointerWal.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-DeltaReduce.NativeCurrentValues.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "module-ProfileCurrent.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "axioms.txt",
+      "exit_code": 0,
+      "sha256": "f384aa8f8116173cc1aab8fed78a54d3ddb30a20911d68e0b2a1facd6300a322"
+    },
+    {
+      "log": "kernel-vectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-InputSectionVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-LineageVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-EligibilityVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-PlanVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-ParameterVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-AggregateVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-ApplyVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CollectionsVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "typed-join.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "installed-state.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentInputSectionVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentLineageVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentEligibilityVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentPlanVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentParameterVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentAggregateVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentApplyVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "definitions-CurrentCollectionsVectors.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "current-definitions.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "current-case-0.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "current-case-1.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "current-case-2.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "current-case-3.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "current-case-4.txt",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "log": "ruff.txt",
+      "exit_code": 0,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "log": "ruff-format.txt",
+      "exit_code": 0,
+      "sha256": "04eb0d6e6734823dcd2b2b704729e976f683df7a8f334da7216520ef1cb319bf"
+    }
+  ],
+  "artifacts": {
+    "originals.json": "3a78b60308726659387bef1f9cf72e0f16fc6537388092b3503347b851d3ca5d",
+    "installed-state.json": "e6b862ec5d926187eb0425989bd7bbf3a26cd987c723ee329621644f8834e963",
+    "current.json": "9b9410cafe204e021e6befac152ba7186ecee1e48647cf7e7e76de01392c5f7a"
+  },
+  "audited_declarations": [
+    "ec",
+    "apc",
+    "parameter",
+    "root",
+    "applyTarget",
+    "fullMatch",
+    "matching",
+    "GroupCompatible",
+    "Quorum",
+    "bind",
+    "boundSource",
+    "boundComplete",
+    "matchingOriginal",
+    "eachSignerHasOriginal",
+    "preservesWitness",
+    "distinctWitnessesStayDistinct",
+    "derive",
+    "bindOriginal",
+    "originalSource",
+    "bindAll",
+    "wholeCount",
+    "everyOriginalAt",
+    "futureDeliveryDoesNotChangeCut",
+    "finalizationAction",
+    "bindEvent",
+    "eventBound",
+    "eventComplete",
+    "originalFinalizationCut"
+  ],
+  "audited_member_declarations": [
+    "Parents",
+    "tuple",
+    "derive",
+    "derived",
+    "complete",
+    "allOriginalMembers",
+    "originalWitness",
+    "witnessIndependentRows"
+  ],
+  "audited_state_declarations": {
+    "InstalledState": [
+      "bind",
+      "boundSource",
+      "complete",
+      "allOriginalBytes",
+      "originalSnapshotFields",
+      "allCandidateSource",
+      "abortPreservesDownstream"
+    ],
+    "SelectedVote": [
+      "entryView",
+      "matching",
+      "Identity",
+      "Checks",
+      "select",
+      "check",
+      "checked",
+      "complete",
+      "originalCandidate",
+      "currentParent",
+      "originalPhysicalSequence",
+      "arithmeticRefusal",
+      "recoveryOnlyReadiness",
+      "bind",
+      "boundSource",
+      "originalVoteBytes"
+    ],
+    "Current": [
+      "originalRecord",
+      "bind",
+      "boundSource",
+      "boundComplete",
+      "exactOriginalWitness",
+      "candidateSource",
+      "parentAndValues",
+      "computedCurrent",
+      "actualCurrentHashes",
+      "originalCandidateBytes",
+      "run",
+      "runSound",
+      "historyComplete",
+      "everyOriginal",
+      "noRecordErasure",
+      "monotonicHeight"
+    ]
+  },
+  "source_hash_rule": "Git LF source text; protocol originals retained without normalization",
+  "established": [
+    "Typed EC/APC/PARAMETER/ROOT/APPLY targets retain original C and native body/context",
+    "Exact signer set at each original finalization cut; no later witness replacement",
+    "Every original delivery and repeated/distinct vote occurrence is retained",
+    "Original event action/bytes/position determine receiver and quorum cut",
+    "Full decoded collection targets compose with original-cut quorums",
+    "Original member/weight arithmetic rows use b parents while retaining c witnesses",
+    "One complete installed-policy byte join preserves full snapshot and candidate list",
+    "Fresh vote guards enforce current parent/physical sequence and retain arithmetic refusal",
+    "Every pointer row retains original full finalized APPLY, vector preimages and parent"
+  ],
+  "not_established": [
+    "Initial origin, phase/delivery/finality/durability source composition",
+    "Complete O state relation, totality or reviewed R2.3 closure",
+    "Named recovery theorem, full formal gates or production GO"
+  ],
+  "evidence_kind": "SYNTHETIC_BYTE_QUORUM_COMPONENT_NOT_AUTHENTIC_HISTORY"
+}

@@ -1,0 +1,26 @@
+'DeltaReduce.ProfileSource.VoteRecord.receipt' does not depend on any axioms
+'DeltaReduce.ProfileSource.VoteRecord.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.originalReceipt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.cannotRelabelPolicy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.currentArithmeticGuard' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.fromBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.fromOriginal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.allOriginalBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.align' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.CurrentJournal.aligned' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.alignComplete' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.CurrentJournal.exactPointerScan' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.fullOriginalInventory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.bindComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.nativeScanAgrees' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.noRecordOrInputErasure' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.unknownRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.CurrentJournal.incompleteRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
