@@ -300,6 +300,19 @@ authority or durable seed-release permission. Those remain in the enclosing
 source fold. Kernel vectors contain two original witnesses and nonempty
 norm/seed lineage, with deliberately unqualified unrelated fields retained.
 
+`ProfileEligibility.lean` and `ProfilePlan.lean` extend that source chain to
+complete original EC/APC bodies, witnesses, finalized indices and parent bytes.
+They reuse the native shape/coverage checks with consensus b in the existing
+ISC reference position. Proposed-only checks stay proposed-only; no stronger
+cross-parent equality is silently imposed on a finalized certificate. All
+earlier witnesses stay retained, and the original accepted EC tickets determine
+the exact APC bucket/weight coverage. This is not proof of robust arithmetic,
+quorum authentication or first-finalization legality. The full producing
+history must still establish those claims independently of public acceptance.
+Generated downstream vectors import prior kernel-checked original definitions
+to avoid repeatedly elaborating the same examples, with all generated sources
+and individual kernel logs retained in the qualification receipt.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

@@ -65,6 +65,8 @@ def main():
             "ProfilePolicy",
             "ProfileInputSection",
             "ProfileLineage",
+            "ProfileEligibility",
+            "ProfilePlan",
             "ProfileNativeHeader",
         }:
             path = Path(__file__).with_name(name + ".lean")
@@ -81,6 +83,8 @@ def main():
             "ProfilePolicy",
             "ProfileInputSection",
             "ProfileLineage",
+            "ProfileEligibility",
+            "ProfilePlan",
             "ProfileNativeHeader",
             "SourcePolicy",
             "SourceVote",
@@ -120,6 +124,8 @@ def main():
     visit("ProfilePolicy")
     visit("ProfileInputSection")
     visit("ProfileLineage")
+    visit("ProfileEligibility")
+    visit("ProfilePlan")
     environment = dict(os.environ, LEAN_PATH=str(objects))
     version = subprocess.check_output([str(LEAN), "--version"], text=True).strip()
     if "version 4.32.1" not in version:
@@ -176,6 +182,7 @@ def main():
         "import SourcePolicy\nimport SourceVote\nimport ProfileConfigurationQC\n"
         "import ProfileSourceIndex\nimport ProfileVoteJournal\nimport ProfilePolicy\n"
         "import ProfileInputSection\nimport ProfileLineage\n"
+        "import ProfileEligibility\nimport ProfilePlan\n"
         + "".join("#print axioms DeltaReduce.ProfileSource." + name + "\n" for name in names)
     )
     for namespace, theorems in (
@@ -212,6 +219,39 @@ def main():
                 "everyNormParent",
                 "everySeedParent",
                 "noOriginalErasure",
+            ),
+        ),
+    ):
+        audit += "".join(
+            f"#print axioms DeltaReduce.ProfileSource.{namespace}.{name}\n" for name in theorems
+        )
+    for namespace, theorems in (
+        (
+            "Eligibility",
+            (
+                "boundSource",
+                "boundComplete",
+                "originalTree",
+                "originalParents",
+                "proposedNormParent",
+                "exactOriginalMembers",
+                "sectionSource",
+                "sectionComplete",
+                "finalizedWitness",
+                "noOriginalErasure",
+            ),
+        ),
+        (
+            "Plan",
+            (
+                "boundSource",
+                "boundComplete",
+                "originalTree",
+                "originalParents",
+                "coverageOriginal",
+                "collectionsSource",
+                "collectionsComplete",
+                "finalizedWitness",
             ),
         ),
     ):
@@ -498,19 +538,31 @@ def main():
     )
     run([str(LEAN), "PolicyVectors.lean"], "policy-vectors.txt", src, environment)
     sources["generated/PolicyVectors.lean"] = digest(policy_source.encode())
+    from formal.reference.profile_source.eligibility_vectors import generate as eligibility_vectors
     from formal.reference.profile_source.input_section_vectors import generate as input_vectors
     from formal.reference.profile_source.lineage_vectors import generate as lineage_vectors
+    from formal.reference.profile_source.plan_vectors import generate as plan_vectors
 
     for stem, log_stem, generator in (
         ("InputSectionVectors", "input-section", input_vectors),
         ("LineageVectors", "lineage", lineage_vectors),
+        ("EligibilityVectors", "eligibility", eligibility_vectors),
+        ("PlanVectors", "plan", plan_vectors),
     ):
         lean_source, originals = generator()
         (src / (stem + ".lean")).write_text(lean_source, encoding="utf8", newline="\n")
         (OUT / (log_stem + "-originals.json")).write_text(
             json.dumps(originals, indent=2) + "\n", encoding="utf8", newline="\n"
         )
-        run([str(LEAN), stem + ".lean"], log_stem + "-vectors.txt", src, environment)
+        # Later vectors import the already kernel-checked original definitions.
+        # Each generated source remains separately pinned; no cached external
+        # evidence or unverified evaluator replaces a kernel check.
+        run(
+            [str(LEAN), "-o", str(objects / (stem + ".olean")), stem + ".lean"],
+            log_stem + "-vectors.txt",
+            src,
+            environment,
+        )
         sources["generated/" + stem + ".lean"] = digest(lean_source.encode())
     run(
         [
@@ -650,6 +702,8 @@ def main():
             "CONFIG/S0/P0 source join retains all 33 snapshot fields and original candidate trees",
             "Whole original ISC collections retain two witnesses for one consensus body",
             "Norm/seed source bytes join finalized b without replacing or erasing original C",
+            "Complete EC/APC original payload collections retain native guards and b lineage",
+            "APC coverage preserves exact original EC membership and ordered ticket weights",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",
