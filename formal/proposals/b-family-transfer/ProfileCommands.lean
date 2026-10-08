@@ -257,4 +257,3 @@ theorem physicalSlotIndependent (sha sv cv sr entry slot) :
     checkStored sha sv cv sr {entry with sequence := slot} = checkStored sha sv cv sr entry := rfl
 
 end DeltaReduce.ProfileSource.Commands
-

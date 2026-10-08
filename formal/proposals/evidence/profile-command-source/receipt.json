@@ -12,7 +12,7 @@
   "reviewed_r2_closure": false,
   "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
   "sources": {
-    "formal/proposals/b-family-transfer/ProfileCommands.lean": "9e89b61590632422a4122ed0fe09134333094742897ca4e9bfb24ce8b8f43913",
+    "formal/proposals/b-family-transfer/ProfileCommands.lean": "f993812cbd7281224719cb4adf318fe24e7e7b0e342cc1d2a800150fff50c390",
     "formal/proposals/b-family-transfer/ProfileNativeHeader.lean": "fc7fc2987a2939a071a95f609d73f2a4eb05316b2e884743e05e0951c33bcddd",
     "formal/proposals/b-family-transfer/ProfileConfiguration.lean": "5a0f35c47652ceef62b9863e5a7b2dfa1b7ee0dbcd11e04f3071c0a57d9a7536",
     "formal/proofs/DeltaReduce/NativePolicyCodec.lean": "799f13148f1913c5a21eecdb1931dd6c72d7e147f96a6eb4b1817f9ecf4c7320",
@@ -233,7 +233,7 @@
     {
       "log": "native-capture-reference.txt",
       "exit_code": 0,
-      "sha256": "d2388355ac5d973e98aab6ca90cb412ec49ba3e9d9546b1989ed926abab65afb"
+      "sha256": "6238db82ecbb98351f1e4267fa02252a8a030ecf5763d8f97e6c977ede7e0864"
     },
     {
       "log": "ruff.txt",

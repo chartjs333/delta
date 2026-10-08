@@ -5,6 +5,6 @@ test_future_generation_is_selected_independently_no_legacy_fallback (formal.refe
 test_whole_effect_and_inner_record_substitution_rejects (formal.reference.profile_source.test_commands.CommandsTests.test_whole_effect_and_inner_record_substitution_rejects) ... ok
 
 ----------------------------------------------------------------------
-Ran 5 tests in 0.079s
+Ran 5 tests in 0.064s
 
 OK
