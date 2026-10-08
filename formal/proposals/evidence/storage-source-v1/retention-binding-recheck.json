@@ -1,0 +1,350 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "source_base": "411f383122f2a3c34e7183810b007c5864ef30ed",
+  "checked_at_utc": "2026-10-08T04:32:18.945372+00:00",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-42af092f5187f433b6910f1bc914dc90",
+    "effective_revision": 12,
+    "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+    "node_id": "formal-linkage",
+    "phase": "node",
+    "agent_id": "isc-s16-formal-linkage-engineer",
+    "occurrence": 9,
+    "source_commit": "411f383122f2a3c34e7183810b007c5864ef30ed",
+    "source_path": "formal/proposals/storage-retention-policy-decision.json",
+    "source_sha256": "96333a3e6be51988e95775c3be88eb2b41bd699cba4c474f0a8510182785f93e",
+    "effective_scope_sha256": "011ea76de6467e8dfb3750b97f2c76988a3d58af61f5bb9165f6f493b27e2236",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "ack_id": "scope-ack-cd92c2992ea62c8b263db8c726f9e201",
+  "decision_id": "scope-decision-b1b75af55b0e2518569446a9c997a59f",
+  "prior_audit": {
+    "commit": "411f383122f2a3c34e7183810b007c5864ef30ed",
+    "path": "formal/proposals/evidence/storage-source-v1/retention-policy-boundary.json",
+    "sha256": "034adf36aa2b8ae7521f8e90715dedbea04f97e71b3c1cf12f56c3540dd42ebe"
+  },
+  "recheck_queries": [
+    "git grep -n -i retention N/P -- specs docs delta-protocol delta-core-cpp delta-runtime-cpp delta-worker-python formal/tla",
+    "git log --all --format=oneline -S retention_epoch_id -- delta-protocol delta-core-cpp delta-runtime-cpp delta-worker-python formal/reference docs/adr",
+    "git ls-remote --heads origin",
+    "git grep -n -i retention <each changed/unrecorded remote tip> -- docs/adr specs delta-protocol delta-core-cpp delta-runtime-cpp formal/reference"
+  ],
+  "remote_comparison": [
+    {
+      "ref": "refs/heads/010i-campaign02-runner-remediation",
+      "prior": "95b287168ad02bbe585fbb05a7b27bbd951713f3",
+      "current": "b2af7b926f3525494bb5634dbedcca3fe97051e1"
+    },
+    {
+      "ref": "refs/heads/agent/isc-s16-formal-linkage",
+      "prior": "27e376a0c56807d2c1680180690eb7a6dd7e729e",
+      "current": "411f383122f2a3c34e7183810b007c5864ef30ed"
+    },
+    {
+      "ref": "refs/heads/agent/isc-s16-pipelined-sprint",
+      "prior": "4873b3559b390318c0fc8ff80dd00ecea4ea7b59",
+      "current": "694bebf32e7951ea59fb6391ca35ca354ec1e38f"
+    },
+    {
+      "ref": "refs/heads/feature/10gene-worker-runtime-proof",
+      "prior": "4992d9eca319da21b5a2c7b94593f3668b92329c",
+      "current": "ff7579b6a8b43e58394ad7f78e7a2736e89cadce"
+    },
+    {
+      "ref": "refs/heads/feature/admin-ui-mvp",
+      "prior": "0c42598635939bd99be8105cb2dd0e4d8a5c17ab",
+      "current": "ed47c7d600655513a3e7ebcda3cebf37c71d7aca"
+    },
+    {
+      "ref": "refs/heads/main",
+      "prior": "efd8bed9cf5ad18ad4ce51f0a9c0d4825cb0bdb0",
+      "current": "5b75bc562f83fd99125ae79d76a6527ef7c716aa"
+    },
+    {
+      "ref": "refs/heads/review/s15r1c-20260923-governance",
+      "prior": "85a87f82cd335b7aa5960e43cc3deaefae2ddc22",
+      "current": "c8aea64972f741060d1e527ebbb6f9a5a168a075"
+    }
+  ],
+  "observations": [
+    {
+      "file": "retention-recheck-411f3831.txt",
+      "sha256": "6507060147b6e755632bfce7c723593306938f30e08af2629ca92b648290230e",
+      "output_lines": [
+        "411f383122f2a3c34e7183810b007c5864ef30ed:formal/reference/isc_source/README.md:51:The additional field-update lemmas prove retention of every snapshot field",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:formal/reference/storage_source/codec.py:44:    \"retention_epoch_id\",",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:formal/reference/storage_source/codec.py:108:    for key in (\"round_id\", \"retention_epoch_id\", \"storage_epoch_id\"):",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:formal/reference/storage_source/test_codec.py:55:            \"retention_epoch_id\": \"retention-1\",",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:formal/reference/storage_source/test_codec.py:146:                    for k in (\"round_id\", \"storage_id\", \"storage_epoch_id\", \"retention_epoch_id\")",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:formal/reference/storage_source/test_codec.py:189:    def test_authentic_wrong_context_leaf_length_retention_key_and_source_reject(self):",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:formal/reference/storage_source/test_codec.py:207:                \"retention_epoch_id\": \"later\",",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:specs/000-formal-tla-spec/proof-obligations.md:66:derives a native arithmetic history, complete record retention, computed APPLY",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "411f383122f2a3c34e7183810b007c5864ef30ed:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "file": "retention-recheck-5b75bc56.txt",
+      "sha256": "f938a6ce2758698537320845d513e65039121a5f27c886f8ae2336baa70891e9",
+      "output_lines": [
+        "5b75bc562f83fd99125ae79d76a6527ef7c716aa:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "5b75bc562f83fd99125ae79d76a6527ef7c716aa:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "5b75bc562f83fd99125ae79d76a6527ef7c716aa:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "5b75bc562f83fd99125ae79d76a6527ef7c716aa:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "5b75bc562f83fd99125ae79d76a6527ef7c716aa:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "5b75bc562f83fd99125ae79d76a6527ef7c716aa:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "file": "retention-recheck-694bebf3.txt",
+      "sha256": "6dbe6854cd5c64a6ee6164f5b13fe2b8750795cc285a2d22182ac583f6d82699",
+      "output_lines": [
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f:specs/000-formal-tla-spec/proof-obligations.md:66:derives a native arithmetic history, complete record retention, computed APPLY",
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "file": "retention-recheck-b2af7b92.txt",
+      "sha256": "0af9490bfb19488c4b8e8f49b3faa858a191814a06a10e2fa6fd616edb399e7d",
+      "output_lines": [
+        "b2af7b926f3525494bb5634dbedcca3fe97051e1:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "b2af7b926f3525494bb5634dbedcca3fe97051e1:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "b2af7b926f3525494bb5634dbedcca3fe97051e1:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "b2af7b926f3525494bb5634dbedcca3fe97051e1:specs/010-wan-benchmark-and-quality/scripts/primary_contracts.py:405:        retention=\"MANIFESTS_AND_LICENSED_OR_AUTHORIZED_CONTENT_REFS\",",
+        "b2af7b926f3525494bb5634dbedcca3fe97051e1:specs/010-wan-benchmark-and-quality/spec.md:225:- **FR-001**: `BenchmarkDefinition` MUST bind source commit/tree, build/image/SBOM, protocol versions, model/mode, base/tokenizer/schema, dataset/domain manifest, fixed ticket plan, `B/H`, `pi_d`, optimizer/fixed-point/robust/apply profiles, topology, validator/storage/peer sets, network/fault profiles, seeds, metrics, thresholds, statistics, exclusions, retry policy, evidence retention and decision function."
+      ]
+    },
+    {
+      "file": "retention-recheck-c8aea649.txt",
+      "sha256": "2f15f50b61c4816929998fdf9c85d1f15ef6430db80f20fcec4df849ab7969c8",
+      "output_lines": [
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "file": "retention-recheck-ed47c7d6.txt",
+      "sha256": "f3dee1d0b6f884b3caef1846af1cd4c13987d17229d3373822019391d9917af5",
+      "output_lines": [
+        "ed47c7d600655513a3e7ebcda3cebf37c71d7aca:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "ed47c7d600655513a3e7ebcda3cebf37c71d7aca:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "ed47c7d600655513a3e7ebcda3cebf37c71d7aca:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden."
+      ]
+    },
+    {
+      "file": "retention-recheck-ff7579b6.txt",
+      "sha256": "d18633ab299e22b18deedf99256f10d6495da4646921a3dabe7f8bf500b99bb7",
+      "output_lines": [
+        "ff7579b6a8b43e58394ad7f78e7a2736e89cadce:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "ff7579b6a8b43e58394ad7f78e7a2736e89cadce:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "ff7579b6a8b43e58394ad7f78e7a2736e89cadce:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "ff7579b6a8b43e58394ad7f78e7a2736e89cadce:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "file": "retention-recheck-history.txt",
+      "sha256": "c2f274c85214b2479c4d3343b81abd28f9505773f665207c9a0067041a6216d0",
+      "output_lines": [
+        "d1608a1226bbb931ad2c6b078e0d2bb202545122 feat(T047,T053): bind approved storage statements and original AC witness",
+        "1438fa3d78ec99291475cf4660fd8c190ac01bb3 docs(T047,T053): propose storage availability source binding"
+      ]
+    },
+    {
+      "file": "retention-recheck-native.txt",
+      "sha256": "fcfab1c95ed2fc3900f260d7530d79c0f88bf519c31b41ba72ee22f54c38c53d",
+      "output_lines": [
+        "60c692f6e391f839829dfc64e93380db54cd507b:docs/architecture/hybrid-runtime.md:60:| votes, certificates, state roots | C++ durable runtime | WAL/snapshot retention |",
+        "60c692f6e391f839829dfc64e93380db54cd507b:docs/architecture/hybrid-runtime.md:62:| certified global object pieces | Java distribution/CAS | object retention |",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "60c692f6e391f839829dfc64e93380db54cd507b:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "file": "retention-recheck-profile.txt",
+      "sha256": "e715306cb8787f425b22c92f9de73bae07da9b9eeba55a52b6c7a341ffc4cbf5",
+      "output_lines": [
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/architecture/hybrid-runtime.md:60:| votes, certificates, state roots | C++ durable runtime | WAL/snapshot retention |",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/architecture/hybrid-runtime.md:62:| certified global object pieces | Java distribution/CAS | object retention |",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:1566:ambiguity, exact receipt retention, old-parent retry, counterfeit scan rejection",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:1654:arithmetic journal, retry/conflict retention after current advance, stale first",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:1712:exact slot/key retention and computed before/after observation roots. Arithmetic",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:3273:- Eighteen general helpers prove structural encode/parse inversion with arbitrary suffix, encoding injectivity, complete accepted payload retention, bounds and computed policy-header/candidate extraction. Canonical shape checks preserve native validator ordering, role/abort vocabulary, candidate tuple order and global context uniqueness. Signed rational words retain all64 bits, with explicit signed64 interpretation. Native reserve/allocation/exception/preflight behavior is not proved.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:3661:source retention; negative-spelled nonnegative output is zero. Separate Canonical",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:4452:widths, count/coefficient/Q ranges, denominator retention and full rehashed Q",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:6068:This closes the complete native-cache retention and all-vote/mixed-position",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:6140:missing names/policy, duplicate public entries and complete source-key retention.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:docs/feature010-progress.md:6599:general retention proofs. They are not replaced by empty public sets. No full",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/000-formal-tla-spec/proof-obligations.md:66:derives a native arithmetic history, complete record retention, computed APPLY",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/000-formal-tla-spec/tasks.md:18:- [x] T008 Add CI workflow `.github/workflows/formal.yml` with bounded mandatory jobs and artifact retention.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/003-bft-round-state-machine/spec.md:145:- **FR-014**: Storage peers MUST attest exact shard content IDs, lengths and retention epoch; an `AvailabilityCertificate AC_j` MUST satisfy the configured unique-attester quorum and cover all leaves in `C_j`.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/005-content-addressed-p2p-distribution/checklists/hybrid-runtime.md:5:- [x] Native pointer retention and Java-memory free are forbidden.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/011-multiregion-pilot/spec.md:61:  observability, evidence, retention, and secret policies;",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/011-multiregion-pilot/spec.md:329:  recovery/retention.",
+        "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/admin-ui/evidence/implementation-tasks.json:1144:      \"summary\": \"Proved stable unordered pair keys, dynamic cardinality for 0, 1, 2, 4, and 100 controllers, reorder identity preservation, explicit STALE acceptance, ORPHANED retention, and re-addition under a new draft key without evidence retargeting.\","
+      ]
+    },
+    {
+      "file": "retention-recheck-remote-heads.txt",
+      "sha256": "fc3f8a2545688e08708933e5c621b308b48abde78dad0f39083fd6eda289e659",
+      "output_lines": [
+        "7abd0f43f8f1b15ec9aa6c3d2c80b32bfb4a6eca\trefs/heads/000-formal-tla-spec",
+        "4dac7f4b12403d2ff8a2362d43d70f42a7b162c2\trefs/heads/001-reproducible-training-baseline",
+        "f4f2101969d14709834ab6b6d60e88755d710334\trefs/heads/003-bft-round-state-machine",
+        "47469fc2fdacc7640fb0a7c05c71578629a2e5fa\trefs/heads/003-central-round-coordinator",
+        "29fb4138499a348f90d6bbc44e77fe6d1914e25f\trefs/heads/004-compressed-delta-protocol",
+        "be5d72305bfd883a5bd99607df6c2788014bfd0a\trefs/heads/005-content-addressed-p2p-distribution",
+        "b487ea81851cfd5b4769579392798841cb18afc0\trefs/heads/006-regional-hierarchical-reduce",
+        "47ec80380a10a9086f3d352546c04b37cdbf54e3\trefs/heads/007-adaptive-heterogeneous-scheduling",
+        "08a118c5d52a0a4f6658249cb65ea15e538904c2\trefs/heads/007-domain-pure-ticket-scheduling",
+        "d86473a3f864b4e61d2312584afa080c8fd4fbab\trefs/heads/008-certificates-and-consensus",
+        "50beb1d8dad28fed48a47e38ebe3a5581c6f789c\trefs/heads/008-permissioned-trust-and-resilience",
+        "a5e73b41feb2dad73aa11d810d0c700c548e11ba\trefs/heads/009-qlora-8gb-mode",
+        "881301d8443c667a478617cc663d1450aee9777a\trefs/heads/010-wan-benchmark-and-quality",
+        "686d8bf5083c4dd8b68454cf4749e2e3d9107107\trefs/heads/010a-primary-executor",
+        "92eac136bb945432e334092f915e7e59f1e7e6f5\trefs/heads/010b-primary-exactness",
+        "f370f3688175e9e854139c5192bf8d6400ee6579\trefs/heads/010c-primary-scientific",
+        "d4773c132c2f02f6d62fcaf3c7b04ce0f619da35\trefs/heads/010e-primary-campaign-remediation",
+        "e0272852766c6747d89e4132dd07b4c8a1ca2bf1\trefs/heads/010f-primary-campaign-definition",
+        "48d3315a707b07eec4e5143ec3931d6b6f474b8e\trefs/heads/010g-campaign02-execution-binding",
+        "9a4d0d8062ac432d7104284c75dc4b24773dadb0\trefs/heads/010h-campaign02-immutable-definition",
+        "b2af7b926f3525494bb5634dbedcca3fe97051e1\trefs/heads/010i-campaign02-runner-remediation",
+        "9e03b2c21a48729fbdd394c8628ea960a77d1c2f\trefs/heads/010j-campaign02-measured-stagec-bootstrap",
+        "a816d81337aa0c182683516ecac57fe46dc70141\trefs/heads/010k-campaign02-inert-stage-a-bootstrap",
+        "9aeea5b6000caa1eb3d7666f0f8d782eb7e7d687\trefs/heads/010l-campaign02-bootstrap-registration",
+        "bd961b1cc308a5e2320cae7e6e4b4e0416c1c994\trefs/heads/010m-campaign02-tsan-exception-lifetime",
+        "b309dcf62c91a88bd66fb1b2b8794c77c5aa247c\trefs/heads/010n-campaign02-reactor-lifetime-qualification",
+        "410ea1dd9c3dfe97d2073335c4e418001fb5807e\trefs/heads/010o-campaign02-reactor-lifetime-bootstrap",
+        "84b337892cb70d0ce9823ef2d64fab572752b145\trefs/heads/010p-campaign02-bootstrap-registration",
+        "72601567a278f221efcdc381432d5c8ae1735865\trefs/heads/011-multiregion-pilot",
+        "7818766209b7c4c0b4e04d3e62b2e770bedd4f3d\trefs/heads/agent/chatgpt-architecture-governance",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/agent/chatgpt-evidence-correction-merge-record",
+        "1a4d1a17c5e8f75941b1efb6e915b7405446d9b8\trefs/heads/agent/chatgpt-pr39-merge-record",
+        "1a4d1a17c5e8f75941b1efb6e915b7405446d9b8\trefs/heads/agent/chatgpt-step5c-final-closure",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/agent/chatgpt-step5c-final-closure-v2",
+        "94721c271307e48aae1e1f09133660d169387ed0\trefs/heads/agent/chatgpt-worker-security-merge-record",
+        "6f99ab1622aa4bb96dab29979ce11af8bd4c5f89\trefs/heads/agent/f010-unblock-baseline",
+        "ac0e54ffbab4b9a5c20945b17ede2930b78ff080\trefs/heads/agent/feature010-baseline",
+        "6f99ab1622aa4bb96dab29979ce11af8bd4c5f89\trefs/heads/agent/feature010-foundation-merge",
+        "85a2a526468293e90daf019c0e10781e3d753a8c\trefs/heads/agent/isc-s16-a01-handoff",
+        "47559b6bc7b39eda84ca631e70935a970b33e8ed\trefs/heads/agent/isc-s16-continuous-sprint",
+        "a579a5c66586ba3f8f1d7cc26c454aba5addbd8f\trefs/heads/agent/isc-s16-contract-freeze",
+        "af13fd25bf11716736febdb1a0498e6856a83e4f\trefs/heads/agent/isc-s16-ed25519-reference",
+        "411f383122f2a3c34e7183810b007c5864ef30ed\trefs/heads/agent/isc-s16-formal-linkage",
+        "694bebf32e7951ea59fb6391ca35ca354ec1e38f\trefs/heads/agent/isc-s16-pipelined-sprint",
+        "9938fbc7db324f40f3e67687f875d788d4b5ce51\trefs/heads/agent/isc-s16-sequential-sprint",
+        "9744e701d27de413f32ee39ce86c25f89ec30663\trefs/heads/agent/isc-s16-w1-reference-engine",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/agent/overnight-baseline",
+        "ab1e522e07f3a2207ec37e3c2e2d4943b48a3a6e\trefs/heads/agent/overnight-formal-closure",
+        "7a9faf852e0ccae4d25fdc363fbf39ecf1719341\trefs/heads/agent/overnight-working-version-merge",
+        "7a9faf852e0ccae4d25fdc363fbf39ecf1719341\trefs/heads/agent/overnight-working-version-qualification",
+        "7a9faf852e0ccae4d25fdc363fbf39ecf1719341\trefs/heads/agent/pr47-baseline",
+        "ac0e54ffbab4b9a5c20945b17ede2930b78ff080\trefs/heads/agent/pr47-closure",
+        "ac0e54ffbab4b9a5c20945b17ede2930b78ff080\trefs/heads/agent/pr47-merge",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/agent/prod-launch-baseline",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075\trefs/heads/agent/s15v2-baseline",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075\trefs/heads/agent/s15v2-vote-refinement-audit",
+        "cc409c53ad88def87874cc4b2e8c9d5f960a2dd4\trefs/heads/backup/004-pre-restack",
+        "4cebbbcedbe83d9d1f9f8de8b8419b6d5099ec60\trefs/heads/backup/005-pre-restack",
+        "66ef5b14b769583af8079d51e1969df057f0d32c\trefs/heads/backup/006-pre-restack",
+        "f67e6fc728940e708fda4d14457d4b8eb3c8e924\trefs/heads/backup/007-pre-restack",
+        "467b2a5c5ca922fbc10505497c111d6a78890ebe\trefs/heads/backup/008-pre-restack",
+        "562789b4e6409510341ad27ad3d79f34f190f2bd\trefs/heads/backup/009-pre-restack",
+        "9e32cfcf3c5b81e56a23c852756da1e264d16026\trefs/heads/backup/010-pre-restack",
+        "de3348fdcbd527046d5b66bc6d8c90df098d5aa8\trefs/heads/codex/campaign02-controller-custody-policy",
+        "670b58f4c400f5c8904ca40ba9cf3a2072e98d78\trefs/heads/codex/campaign02-demo-controllers",
+        "2f76e6993c50f3248487539d09597c233d634bf9\trefs/heads/codex/demo-node-training-20260924",
+        "5d52b2d2eacd78d607a1f2e6b8812771dbc8e101\trefs/heads/codex/demo-presentation-20260924",
+        "a974135e00150c1865b0cef80cbdbe89bdd2cac7\trefs/heads/codex/demo-verification-lab-20260925",
+        "ea5a70d8c5fd3516de243632f2c5681b0e5a6292\trefs/heads/codex/feature000-binding-candidate",
+        "b259c67bc25e9274b586eb259cef043e11794e32\trefs/heads/codex/feature010-simulated-local",
+        "628aebbf96ac07904b7f13a22cca842c174e48f5\trefs/heads/feature/010-current-lineage-foundation",
+        "f489ac7a384a8c9f74c36bb6f540b2889afa1607\trefs/heads/feature/010-exactness-safety",
+        "60c692f6e391f839829dfc64e93380db54cd507b\trefs/heads/feature/010-isolated-sidecar-v2",
+        "ff7579b6a8b43e58394ad7f78e7a2736e89cadce\trefs/heads/feature/10gene-worker-runtime-proof",
+        "ed47c7d600655513a3e7ebcda3cebf37c71d7aca\trefs/heads/feature/admin-ui-mvp",
+        "9a65c1225d32af351fef91e2a1ef7a9b675aaef0\trefs/heads/feature/admin-ui-spec",
+        "3a58cb8cced96191d1cd9101e6137b47ecb3a837\trefs/heads/feature/admin-ui-ux-mvp",
+        "c8842d7c2c907146e399ac80ad5bb320b3cd2064\trefs/heads/feature/admin-ui-ux-spec",
+        "3c6572b68dd3b70e50b42853d698b06e92aa77a6\trefs/heads/feature/overnight-010-011-requalification",
+        "83d73bc67ba26e2c1d1e44cba43a8640bbabf732\trefs/heads/feature/overnight-formal-go-publication",
+        "b108ac35577fec4403e5f5820b939d85c551b47e\trefs/heads/feature/overnight-formal-recovery",
+        "968f77c11f9ea93fe5f5df39fca209a5b3831645\trefs/heads/feature/overnight-working-version",
+        "11e3815aa24351f85d19146f5f0cba5074acf55f\trefs/heads/feature/presentation-demo-polish",
+        "7168e64c13040a9f53f55f6f7ff85b677e81f213\trefs/heads/feature/step5c-admin-ui-live",
+        "6bd7b01a28337d70be5c368cfd491e6f304165e1\trefs/heads/feature/step5c-contracts",
+        "6898bc131f7c4b6d49fb40131ea0cced0f5d2f26\trefs/heads/feature/step5c-contracts-remediation",
+        "63600809a6d21ab81a88896dd5bbcd68aed60923\trefs/heads/feature/step5c-controller",
+        "7503c418242eca056e79763319048404ae3b55a1\trefs/heads/feature/step5c-controller-security-remediation",
+        "614355b36aac8d00dca3043b732ae50f7023e3a5\trefs/heads/feature/step5c-e2e",
+        "5e8e249556e8405eb6051e9662df33f59c3bb06b\trefs/heads/feature/step5c-evidence-finalization",
+        "26ef8f2fe905549f8095c0b86d80c87179bc36f0\trefs/heads/feature/step5c-security",
+        "f824328795f635eb1bb8c92d032f79a6c1ffd923\trefs/heads/feature/step5c-worker-adapter",
+        "5c8bec8752cb509c6037b5cac4e55f37209988fb\trefs/heads/feature/step5c-worker-security-remediation",
+        "5b75bc562f83fd99125ae79d76a6527ef7c716aa\trefs/heads/main",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075\trefs/heads/recovery/s15r1c-20260923-baseline",
+        "e94fb08ad75d0693d566f1761cac8cc992bb4e42\trefs/heads/recovery/s15r1c-20260923-pr50-candidate",
+        "6f99ab1622aa4bb96dab29979ce11af8bd4c5f89\trefs/heads/review/f010-unblock-exact-head",
+        "6f99ab1622aa4bb96dab29979ce11af8bd4c5f89\trefs/heads/review/f010-unblock-governance",
+        "ac0e54ffbab4b9a5c20945b17ede2930b78ff080\trefs/heads/review/feature010-pre-real-wan-exact-head",
+        "ac0e54ffbab4b9a5c20945b17ede2930b78ff080\trefs/heads/review/feature010-pre-real-wan-governance",
+        "9744e701d27de413f32ee39ce86c25f89ec30663\trefs/heads/review/isc-s16-continuous-architecture",
+        "9744e701d27de413f32ee39ce86c25f89ec30663\trefs/heads/review/isc-s16-continuous-evidence",
+        "9938fbc7db324f40f3e67687f875d788d4b5ce51\trefs/heads/review/isc-s16-sequential-architecture",
+        "9938fbc7db324f40f3e67687f875d788d4b5ce51\trefs/heads/review/isc-s16-sequential-evidence",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/review/overnight-exact-head",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/review/overnight-governance",
+        "7a9faf852e0ccae4d25fdc363fbf39ecf1719341\trefs/heads/review/pr47-exact-head-v2",
+        "7a9faf852e0ccae4d25fdc363fbf39ecf1719341\trefs/heads/review/pr47-governance-v2",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/review/prod-launch-exact-head",
+        "337c88c2752fecbcc8d175d136c9e3dcd57dc855\trefs/heads/review/prod-launch-governance",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075\trefs/heads/review/s15r1c-20260923-exact-head",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075\trefs/heads/review/s15r1c-20260923-governance",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075\trefs/heads/review/s15v2-exact-head",
+        "c8aea64972f741060d1e527ebbb6f9a5a168a075\trefs/heads/review/s15v2-governance",
+        "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85\trefs/heads/review/step5c-sprint7-exact-head",
+        "1e066fb48bb3152cbf3b4bc36fe7d8edc8939a85\trefs/heads/review/step5c-sprint7-governance",
+        "1a4d1a17c5e8f75941b1efb6e915b7405446d9b8\trefs/heads/review/step5c-sprint8-evidence-exact-head",
+        "1a4d1a17c5e8f75941b1efb6e915b7405446d9b8\trefs/heads/review/step5c-sprint8-evidence-governance",
+        "4cf2aa836c235db571be7e79dc4ff6baa70ef180\trefs/heads/rfc/step5c-controlled-live-execution",
+        "ea5a70d8c5fd3516de243632f2c5681b0e5a6292\trefs/heads/sprint/isc-production-integration-v1"
+      ]
+    }
+  ],
+  "finding": "No applicable approved original retention-policy resolver found in rechecked recorded corpus. Scope12 authorizes one proposed contract, not its implementation.",
+  "qualification": "DOCUMENTARY_RECHECK_ONLY",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "production_counterexample": false,
+  "implementation_or_proof_changes": false,
+  "reviewed_graph_result": false,
+  "draft_document_sha256": "143452dac55c556cff99286e3e01df2a5ee27164c8c9668bf5079518c068540c",
+  "validation": {
+    "document_hash_matches_staged_blob": true,
+    "scope12_core_and_source_hashes_verified": true,
+    "exact_ack_get_confirmed": true,
+    "proposal_matches_official_schema": true,
+    "implementation_or_formal_gates_executed": false
+  }
+}

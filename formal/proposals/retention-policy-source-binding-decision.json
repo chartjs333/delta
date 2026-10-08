@@ -1,0 +1,37 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "reason": "Scope12 authorized this one specification and required STOP plus a new decision before implementation/proofs using it. The exact proposed contract now supplies a concrete original policy source binding; approval must include its new future configuration field and signed-byte consequences.",
+  "dependencies": [
+    "scope-decision-b1b75af55b0e2518569446a9c997a59f; effective scope12; GET-confirmed exact role2753 ACK",
+    "Same-source formal/proposals/retention-policy-source-binding-v1.md SHA256 143452dac55c556cff99286e3e01df2a5ee27164c8c9668bf5079518c068540c",
+    "Same-source formal/proposals/evidence/storage-source-v1/retention-binding-recheck.json",
+    "Approved O 90561a97de7f41f409bf22065ad6cdc9b3932458 section4 item5; S1438fa3d78ec99291475cf4660fd8c190ac01bb3 section3; Profile P26eb02d0632435c9aa0d8ef44eb496b6fa73dd13"
+  ],
+  "proposal": {
+    "instructions": "Approve the exact proposed Retention Policy Source Binding v1 at formal/proposals/retention-policy-source-binding-v1.md in the same source commit, SHA256 143452dac55c556cff99286e3e01df2a5ee27164c8c9668bf5079518c068540c, sections 2-6. The selected mechanism adds one mandatory future RoundConfig.availability_policy.storage_binding.retention_policy_source object. It binds exact original declaration bytes by positive U64 byte length and raw SHA-256, with strict canonical R, contextual retention_epoch_id resolution and a derived provenance ID. Existing independently pinned initial/schema/producer rules and original valid RoundConfig authority select it. No new root, mutable policy registry, duration/expiry/clock/observer/storage-honesty assumption or global pre-enumeration of retention labels. The machine claim is original declaration byte-identity, not temporal interpretation or fulfillment. Future configuration signed bytes/QC IDs and dependent A/D/ac/ISC/downstream IDs require requalification; no legacy reinterpretation.\n\nApproval explicitly authorizes only necessary formal/reference schema/checker/Lean/TLA qualification and composition using this contract within the already authorized complete O/R2.3 scope, after fresh actual-role effective scope, exact ACK and GET persistence. It does not approve a production deployment policy value, close R2.3, waive any gate, assign sigma or permit production integration/recovery/guard removal/full R3. Stop at a genuinely new semantic boundary and use Pending decisions. Preserve the existing assignment and normal result/two-review graph workflow. Rejection or unresolved edit retains STOP; no self-approval or arbitrary interpretation of an ambiguous decision.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+      "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+      "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+      "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+      "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+      "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "qualification_status": "SPECIFICATION_ONLY_NOT_REVIEWED_OR_IMPLEMENTED",
+  "r2_3": "OPEN",
+  "approval_state": "PROPOSED"
+}
