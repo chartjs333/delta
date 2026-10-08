@@ -1,0 +1,34 @@
+'DeltaReduce.ProfileSource.IscFinalization.replace' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.IscFinalization.replacementField' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.otherFields' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.sameWitnessTree' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.IscFinalization.witnessTreeExact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.insertWitness' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.IscFinalization.insertBody' does not depend on any axioms
+'DeltaReduce.ProfileSource.IscFinalization.originalWitnessesRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.selectedWitnessRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.originalFinalizedRetained' does not depend on any axioms
+'DeltaReduce.ProfileSource.IscFinalization.selectedBodyRetained' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.IscFinalization.update' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.IscFinalization.updateSource' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.preservesOtherSnapshotFields' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.preservesOuterFields' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.allOldWitnessesAndBodies' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.differentWitnessCollision' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.target' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.signers' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.Inputs' does not depend on any axioms
+'DeltaReduce.ProfileSource.IscFinalization.Guards' does not depend on any axioms
+'DeltaReduce.ProfileSource.IscFinalization.computedCertificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.completeTarget' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.assemble' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.assembled' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.assembleComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.exactComputedSigners' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.unchangedLineage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.fromBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.IscFinalization.originalBefore' depends on axioms: [propext, Classical.choice, Quot.sound]

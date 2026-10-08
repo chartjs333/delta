@@ -349,6 +349,32 @@ WAL slot remains distinct from the coarse counter. Its separate qualifier is
 pinned original native capture without claiming a fresh native run, genesis
 origin, full admission, durability or public refinement.
 
+`ProfileCertificateVotes`, `ProfileInstalledState` and `ProfileSelectedVote`
+now join exact typed certificate witnesses and every original delivered vote
+at its original cut to the complete CONFIG/S0/P0 collections/candidates. The
+full matching signer inventory determines quorum; repeated deliveries remain
+original occurrences. `ProfileVoteRecord` also fixes the original kind-2 WAL
+slot, full policy hash, Vote and receipt, without creating a coordinate vote.
+`ProfileCurrent` and `ProfileCurrentJournal` join the complete original pointer
+journal to the same finalized ApplyQC, its parent and optimizer preimages and
+the existing pointer step. Unknown/torn required journals cannot be replaced
+by a shorter successful inventory. These are static joins; initial authority,
+actual producer order, authentication and durability remain explicit.
+
+`ProfileIscFinalization` constructs one first-finalization candidate from that
+complete installed source and original matching delivery cut. It computes C/c,
+updates finalized consensus b, preserves all old witnesses and every other
+snapshot/outer field, and compares complete P0/C/P1 bytes. Its general results
+include construction completeness for the explicit native conjuncts, original
+signer/row retention and collision rejection. It does not certify the prior
+state's origin, ordinary-active phase, original clock, barrier or exposure.
+The cross-language original-byte vectors are synthetic and use structurally
+bound G only; no signature or lawful history is inferred from zero signature
+bytes. Fresh kernel/axiom/source qualification is recorded separately in
+`evidence/profile-certificate-votes`, `evidence/profile-vote-record` and
+`evidence/profile-isc-finalization`. No graph review or full R2 closure is
+claimed by these component receipts.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all
