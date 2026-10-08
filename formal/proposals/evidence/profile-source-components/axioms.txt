@@ -30,6 +30,37 @@
 'DeltaReduce.ProfileManifest.atUseExistingBinding' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileManifest.existingBindingReusable' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ProfileManifest.atUseOriginalLengths' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.decodedOriginalBinding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.existingBindingComplete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.eventPrefixRetained' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.stepProvenance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.runProvenance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.selectedCoordinates' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.runRetainsAllEvents' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.selectedOriginalPosition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.selectedActualBinding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.processLostCannotReuse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.releaseCannotReuse' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.externalLossRetainsOwned' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileManifest.Observations.failedReadRetainsOwned' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
 'DeltaReduce.ISCSourceV2.boundCertificateSource' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ISCSourceV2.bindCertificateComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
 'DeltaReduce.ISCSourceV2.boundOrderedMerkle' depends on axioms: [propext, Classical.choice, Quot.sound]

@@ -19,7 +19,7 @@
     "formal/proofs/DeltaReduce/NativeWalBytes.lean": "6826a2f41ee315b2f80707d72a8b00f14e4804e2ab4b613f7a0a0fdf2bc1599e",
     "formal/proofs/DeltaReduce/NativeVoteBytes.lean": "aeb197839b6efb833b05d90c3421905d524a2321bb7a2b715fa08c9fb9e7ad35",
     "formal/proofs/DeltaReduce/NativeReceiptBytes.lean": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580",
-    "formal/proposals/b-family-transfer/ProfileManifest.lean": "de723681feab8ac97f0c2f579524743df3d866e1e30464f6c9829ccd4d21cbb7",
+    "formal/proposals/b-family-transfer/ProfileManifest.lean": "b7ad707f6789f35c287b0e10cc4bd498f8b3670fb5084981c62c15e8df4cff44",
     "formal/proofs/DeltaReduce/NativeManifestBinding.lean": "cd44f2344ca465381e0bd3604fde906a850bafcca3a47dba89dd239210d99ccf",
     "formal/proofs/DeltaReduce/NativeManifestBytes.lean": "13c5bfb3c84f86559ad82a00963001eb39be41d42820ded537f8561b9d42c093",
     "formal/proofs/DeltaReduce/NativeShardPlanBytes.lean": "01072d6f0e6bd2845a31095b0001fc8540bee85fc2dec72f30dffea0f88caa97",
@@ -62,6 +62,7 @@
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
     "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
+    "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
     "formal/reference/profile_source/source_prefix.py": "c937d91dcf086ea65a860b953c7c6d0031e37ad95c3020362e185128f126a674",
     "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
@@ -72,12 +73,13 @@
     "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
     "formal/reference/profile_source/test_manifest_context.py": "d6c079ec8818c8052422d83a775b40d0ee609813b3b00b2569697ef189d89551",
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
+    "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
     "formal/reference/profile_source/test_source_prefix.py": "ea0390c76b9ec28592a15929605f06f8d76f19e1fc66a8effef0e644c9acb691",
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/proposals/b-family-transfer/profile-v1.schema.json": "7ca2be5c7e6f62c7eb96c3017e196727058a624b7b8a172d4b244d8f6e60bb57",
-    "formal/reference/profile_source/README.md": "9cdde80944e274d3b405e104d96e1cba018f8beb0faee8a38237cc3204b9de6f",
-    "formal/proposals/b-family-transfer/check_profile_components.py": "9b83c898d48fbb3de0f2868bb687b2536076417fcfdda87be8bbfa3b445a042e",
+    "formal/reference/profile_source/README.md": "3bab608b00c0a4983bba5716c0e612c03116e82abf5fd7d191a367418bd7d639",
+    "formal/proposals/b-family-transfer/check_profile_components.py": "318c195f5d518556a6dc61b9c6a3d83967a681a3dc957ac055e4749a0cf065c3",
     "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f",
     "delta-protocol/fixtures/004/cross-language/golden-v1.json": "9236367b29a0e3cd69b2d491f4fae6faf7a8dabf035408f0b1fe9f9b981a7216",
     "delta-protocol/fixtures/local-round/parameter-schema-v1.json": "b2e41ffaf836d0fa80bf5afc6d21a66fd9b54237b569f45e919f35675b7df7d6",
@@ -303,7 +305,7 @@
     {
       "log": "axioms.txt",
       "exit_code": 0,
-      "sha256": "4c7128c67d249c55d184233ba9f49b1d88bd9cd8a16d620e34b7c99dc483144e"
+      "sha256": "fb8585731b8db0c0c3ad6426d407b25c3e394373a7bcb1f76139c590b85b1572"
     },
     {
       "log": "control-vectors.txt",
@@ -318,12 +320,12 @@
     {
       "log": "reference-tests.txt",
       "exit_code": 0,
-      "sha256": "c6d62bff06d61bd41bde96b7fe74940653dc52e7e3238b0ae6408b79a0ead381"
+      "sha256": "b95573085b14e9afdc4eb3f5926e55757fb29289847fa5d9cd707f43d5f80a20"
     },
     {
       "log": "isc-reference-tests.txt",
       "exit_code": 0,
-      "sha256": "513e54defe490c11097e3346b13d8d9afa94757733cb5e8580d61c82478591db"
+      "sha256": "dd3329b30e28628c44d1d13b4ed72139664cccd513ebc5c8190b5f8e1233baa6"
     },
     {
       "log": "ruff.txt",
@@ -333,7 +335,7 @@
     {
       "log": "ruff-format.txt",
       "exit_code": 0,
-      "sha256": "3cbc764509f46afb88053c5d0216718d29af883ed4a6216db2de94a84f3fa1bc"
+      "sha256": "ec547b9784fec079a852c1a1af13bb56a8339603c43bdd8375f459e5927a5145"
     }
   ],
   "established": [
@@ -350,7 +352,8 @@
     "Complete source event/input materialization with original cut/target positions",
     "Future whole ISC C bytes and policy tree, exact b/c, explicit parent and tuple root",
     "Merkle fuel completeness for all existing 100000 tuples; no 4096 manifest cap",
-    "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt"
+    "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
+    "O actual read ownership from complete prefix; general binding, release/crash refusal"
   ],
   "not_established": [
     "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

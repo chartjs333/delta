@@ -88,6 +88,16 @@ use. Its general forward/converse lemmas connect that join to the existing
 ordered references, Merkle root and complete partition. It does not authenticate
 hashes, assert remote physical facts or derive a producer history from a hash.
 
+`observed_inputs.py` and `ProfileManifest.Observations` fold actual input reads,
+failures, release, process loss and unrelated original source events from empty
+volatile memory. A complete successful read preserves all five original vector
+shards; bad/missing suffixes never insert a valid prefix. No AC or read receipt
+creates owned bytes. External loss does not mutate an already retained immutable
+buffer; release/crash prevents its reuse. General kernel lemmas derive original
+source position and existing full `NativeManifestBinding.bind` for every selected
+buffer, with a converse for the original accepted binding domain. This is the O
+byte-use conjunct; full operation/phase/certificate production is still needed.
+
 The existing `ISCSourceV2.SourcePolicy` component now binds the complete original
 successor C bytes to their original policy-tree value, explicit parent, every
 ordered unique tuple, all signer identities and separate computed b/c identities.

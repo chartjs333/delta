@@ -131,4 +131,187 @@ theorem atUseOriginalLengths
     m.plan.plan.entries.length = raws.length ∧ raws.length = blocks.length :=
   noMissingOrExtraBlocks (atUseExistingBinding metadata actual)
 
+/- Actual observations and volatile ownership are folded from empty. These
+source positions are not shard/vote/certificate identifiers. The full producer
+relation supplies the independently retained original event inputs and joins
+this fold to its operation guards; an AC never creates a Read event here. -/
+namespace Observations
+
+structure InputSource where
+  semantics : Bytes
+  schema : Bytes
+  scale : Bytes
+  plan : Bytes
+  manifest : Bytes
+  manifestId : Bytes
+  raws : List Bytes
+  deriving DecidableEq, Repr
+
+def decodeSource (hash : Bytes → Bytes) (s : InputSource) : Option Bound := do
+  let m ← load hash s.semantics s.schema s.scale s.plan s.manifest s.manifestId
+  let blocks ← consume hash s.scale m s.raws
+  some ⟨m.plan,m.manifest,blocks⟩
+
+theorem decodedOriginalBinding {hash s b} (ok : decodeSource hash s = some b) :
+    NativeManifestBinding.bind hash s.schema s.scale s.plan s.manifest s.manifestId s.raws = some b := by
+  simp only [decodeSource,Bind.bind,Option.bind_eq_some_iff] at ok
+  obtain ⟨m,hm,blocks,hblocks,last⟩ := ok
+  cases Option.some.inj last
+  exact atUseExistingBinding hm hblocks
+
+theorem existingBindingComplete {hash s b}
+    (ok : NativeManifestBinding.bind hash s.schema s.scale s.plan s.manifest s.manifestId s.raws = some b)
+    (semantics : b.manifest.wire.semantics = s.semantics) : decodeSource hash s = some b := by
+  obtain ⟨hm,hc⟩ := existingBindingReusable ok semantics
+  simp only [decodeSource,hm,hc,Bind.bind,Option.bind]
+
+inductive Event where
+  | read (actor : Bytes) (source : InputSource)
+  | failedRead (actor manifestId original : Bytes)
+  | release (actor : Bytes) (readPosition : Nat)
+  | processLost (actor : Bytes)
+  | externalLoss (actor manifestId original : Bytes)
+  | other (original : Bytes) (originalInputs : List Bytes)
+  deriving DecidableEq, Repr
+
+structure Buffer where
+  actor : Bytes
+  position : Nat
+  source : InputSource
+  deriving DecidableEq, Repr
+
+structure Memory where
+  events : List Event := []
+  owned : List Buffer := []
+  deriving DecidableEq, Repr
+
+def step (hash : Bytes → Bytes) (state : Memory) (event : Event) : Memory :=
+  let buffers := match event with
+    | .read actor source =>
+      if (decodeSource hash source).isSome then
+        state.owned ++ [⟨actor,state.events.length,source⟩]
+      else state.owned
+    | .release actor index => state.owned.filter (fun b => !(b.actor == actor && b.position == index))
+    | .processLost actor => state.owned.filter (fun b => b.actor != actor)
+    | _ => state.owned
+  ⟨state.events ++ [event],buffers⟩
+
+def run (hash : Bytes → Bytes) (events : List Event) : Memory := events.foldl (step hash) {}
+
+def OriginalRead (hash : Bytes → Bytes) (state : Memory) (buffer : Buffer) : Prop :=
+  state.events[buffer.position]? = some (.read buffer.actor buffer.source) ∧
+  (decodeSource hash buffer.source).isSome = true
+
+def Provenance (hash : Bytes → Bytes) (state : Memory) : Prop :=
+  ∀ buffer ∈ state.owned, OriginalRead hash state buffer
+
+theorem eventPrefixRetained (hash state event) :
+    (step hash state event).events = state.events ++ [event] := rfl
+
+theorem originalReadAppend {hash state buffer event} (h : OriginalRead hash state buffer) :
+    OriginalRead hash (step hash state event) buffer := by
+  refine ⟨?_,h.2⟩
+  change (state.events ++ [event])[buffer.position]? = _
+  have bound : buffer.position < state.events.length := List.getElem?_eq_some_iff.mp h.1 |>.1
+  rw [List.getElem?_append_left bound,h.1]
+
+theorem stepProvenance {hash state} (h : Provenance hash state) (event : Event) :
+    Provenance hash (step hash state event) := by
+  intro buffer inside
+  cases event with
+  | read actor source =>
+    simp only [step] at inside
+    split at inside
+    · rename_i success
+      rcases List.mem_append.mp inside with old | added
+      · exact originalReadAppend (h buffer old)
+      · have eq : buffer = ⟨actor,state.events.length,source⟩ := by simpa using added
+        subst buffer
+        refine ⟨?_,success⟩
+        change (state.events ++ [Event.read actor source])[state.events.length]? = _
+        simp
+    · exact originalReadAppend (h buffer inside)
+  | failedRead actor manifest original => exact originalReadAppend (h buffer inside)
+  | externalLoss actor manifest original => exact originalReadAppend (h buffer inside)
+  | other original inputs => exact originalReadAppend (h buffer inside)
+  | release actor index =>
+    exact originalReadAppend (h buffer (List.mem_filter.mp inside).1)
+  | processLost actor =>
+    exact originalReadAppend (h buffer (List.mem_filter.mp inside).1)
+
+theorem runProvenance (hash events) : Provenance hash (run hash events) := by
+  have fold : ∀ (events : List Event) (state : Memory), Provenance hash state →
+      Provenance hash (events.foldl (step hash) state) := by
+    intro events
+    induction events with
+    | nil => intro state good; exact good
+    | cons e rest ih => intro state good; exact ih _ (stepProvenance good e)
+  exact fold events {} (by intro b impossible; simp at impossible)
+
+def select (state : Memory) (actor : Bytes) (index : Nat) (manifestId : Bytes) : Option Buffer :=
+  state.owned.find? (fun b => b.actor == actor && b.position == index && b.source.manifestId == manifestId)
+
+theorem selectedOriginal {hash events actor index manifestId buffer}
+    (found : select (run hash events) actor index manifestId = some buffer) :
+    OriginalRead hash (run hash events) buffer :=
+  runProvenance hash events buffer (List.mem_of_find?_eq_some found)
+
+theorem selectedCoordinates {state actor index manifestId buffer}
+    (found : select state actor index manifestId = some buffer) :
+    buffer.actor = actor ∧ buffer.position = index ∧ buffer.source.manifestId = manifestId := by
+  have selected := List.find?_some found
+  simpa only [Bool.and_eq_true,beq_iff_eq,and_assoc] using selected
+
+theorem runRetainsAllEvents (hash events) : (run hash events).events = events := by
+  have fold : ∀ (events : List Event) (state : Memory),
+      (events.foldl (step hash) state).events = state.events ++ events := by
+    intro events
+    induction events with
+    | nil => intro state; simp
+    | cons e rest ih => intro state; simp [List.foldl,ih,step,List.append_assoc]
+  simpa only [run,List.nil_append] using fold events {}
+
+theorem selectedOriginalPosition {hash events actor index manifestId buffer}
+    (found : select (run hash events) actor index manifestId = some buffer) :
+    events[index]? = some (.read actor buffer.source) := by
+  have src := (selectedOriginal found).1
+  obtain ⟨actorEq,indexEq,_⟩ := selectedCoordinates found
+  simpa only [runRetainsAllEvents,actorEq,indexEq] using src
+
+theorem selectedActualBinding {hash events actor index manifestId buffer}
+    (found : select (run hash events) actor index manifestId = some buffer) :
+    ∃ b, NativeManifestBinding.bind hash buffer.source.schema buffer.source.scale
+      buffer.source.plan buffer.source.manifest buffer.source.manifestId buffer.source.raws = some b := by
+  have actual := (selectedOriginal found).2
+  cases hd : decodeSource hash buffer.source with
+  | none => simp [hd] at actual
+  | some b => exact ⟨b,decodedOriginalBinding hd⟩
+
+theorem processLostCannotReuse (hash state actor index manifestId) :
+    select (step hash state (.processLost actor)) actor index manifestId = none := by
+  apply List.find?_eq_none.mpr
+  intro buffer present
+  have different := (List.mem_filter.mp present).2
+  simp only [bne_iff_ne,ne_eq] at different
+  simp [different]
+
+theorem externalLossRetainsOwned (hash state actor manifestId original) :
+    (step hash state (.externalLoss actor manifestId original)).owned = state.owned := rfl
+
+theorem failedReadRetainsOwned (hash state actor manifestId original) :
+    (step hash state (.failedRead actor manifestId original)).owned = state.owned := rfl
+
+theorem releaseCannotReuse (hash state actor index manifestId) :
+    select (step hash state (.release actor index)) actor index manifestId = none := by
+  apply List.find?_eq_none.mpr
+  intro buffer present
+  have excluded := (List.mem_filter.mp present).2
+  change (!(buffer.actor == actor && buffer.position == index)) = true at excluded
+  simp only [Bool.not_eq_true', Bool.and_eq_false_iff] at excluded
+  rcases excluded with different | different
+  · simp [different]
+  · simp [different]
+
+end Observations
+
 end DeltaReduce.ProfileManifest

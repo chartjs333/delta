@@ -115,6 +115,19 @@ def main():
             "atUseExistingBinding",
             "existingBindingReusable",
             "atUseOriginalLengths",
+            "Observations.decodedOriginalBinding",
+            "Observations.existingBindingComplete",
+            "Observations.eventPrefixRetained",
+            "Observations.stepProvenance",
+            "Observations.runProvenance",
+            "Observations.selectedCoordinates",
+            "Observations.runRetainsAllEvents",
+            "Observations.selectedOriginalPosition",
+            "Observations.selectedActualBinding",
+            "Observations.processLostCannotReuse",
+            "Observations.releaseCannotReuse",
+            "Observations.externalLossRetainsOwned",
+            "Observations.failedReadRetainsOwned",
         )
     )
     audit += "".join(
@@ -253,6 +266,7 @@ def main():
             "Future whole ISC C bytes and policy tree, exact b/c, explicit parent and tuple root",
             "Merkle fuel completeness for all existing 100000 tuples; no 4096 manifest cap",
             "W1 whole byte output join: exact predecessor, all deliveries, P1/C/effects/receipt",
+            "O actual read ownership from complete prefix; general binding, release/crash refusal",
         ],
         "not_established": [
             "Profile JSON/CONFIG/QC codecs are not yet joined to a complete Lean source decoder",

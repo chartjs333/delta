@@ -25,6 +25,6 @@ test_only_two_approved_parent_insertions (formal.reference.isc_source.test_polic
 test_parent_bytes_preserved_in_both_policy_positions (formal.reference.isc_source.test_policy.PolicyTests.test_parent_bytes_preserved_in_both_policy_positions) ... ok
 
 ----------------------------------------------------------------------
-Ran 25 tests in 1.457s
+Ran 25 tests in 1.707s
 
 OK

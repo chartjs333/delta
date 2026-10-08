@@ -63,6 +63,12 @@ test_independent_own_journal_is_not_imported_or_remote (formal.reference.profile
 test_namespace_counters_are_not_interchanged (formal.reference.profile_source.test_metadata.MetadataTests.test_namespace_counters_are_not_interchanged) ... ok
 test_retains_originals_and_repeated_deliveries (formal.reference.profile_source.test_metadata.MetadataTests.test_retains_originals_and_repeated_deliveries) ... ok
 test_trusted_tail_never_truncated_or_reset (formal.reference.profile_source.test_metadata.MetadataTests.test_trusted_tail_never_truncated_or_reset) ... ok
+test_complete_data_is_owned_in_original_order (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_complete_data_is_owned_in_original_order) ... ok
+test_loss_or_later_failure_does_not_mutate_owned_immutable_bytes (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_loss_or_later_failure_does_not_mutate_owned_immutable_bytes) ... ok
+test_no_cross_actor_context_or_forged_imported_buffer (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_no_cross_actor_context_or_forged_imported_buffer) ... ok
+test_partial_or_corrupt_corpus_never_partially_populates_memory (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_partial_or_corrupt_corpus_never_partially_populates_memory) ... ok
+test_release_or_restart_prevents_old_receipt_reuse (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_release_or_restart_prevents_old_receipt_reuse) ... ok
+test_repeated_reads_remain_distinct_original_occurrences (formal.reference.profile_source.test_observed_inputs.ObservedInputsTests.test_repeated_reads_remain_distinct_original_occurrences) ... ok
 test_artifact_digest_is_not_an_original_event_occurrence (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_artifact_digest_is_not_an_original_event_occurrence) ... ok
 test_cut_and_target_derived_from_whole_original_index (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_cut_and_target_derived_from_whole_original_index) ... ok
 test_importer_cannot_rewrite_the_independent_source_index (formal.reference.profile_source.test_source_prefix.SourcePrefixTests.test_importer_cannot_rewrite_the_independent_source_index) ... ok
@@ -76,6 +82,6 @@ test_signature_without_own_intent_or_corrupt_signature_rejected (formal.referenc
 test_unsigned_durable_cut_is_retained_without_claiming_signature (formal.reference.profile_source.test_votes.VoteIntentTests.test_unsigned_durable_cut_is_retained_without_claiming_signature) ... ok
 
 ----------------------------------------------------------------------
-Ran 76 tests in 3.082s
+Ran 82 tests in 4.477s
 
 OK
