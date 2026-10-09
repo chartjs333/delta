@@ -1,0 +1,37 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "reason": "The existing frozen R2.3 unit-source obligation cannot be discharged by choosing an unspecified unit selector. The full original profile/model/optimizer types and applicable Profile-v1/storage/retention contracts do not identify the original authority field/rule selecting apply/model/optimizer quantum at UnitKey. Existing kernel results admit distinct quanta for the same numeric profile. This is a scoped missing source-selection contract, not a complete admissible-history counterexample or a new arithmetic obligation. A new field/default/authentication assumption must not be implemented under generic proof permission.",
+  "dependencies": [
+    "Same-source formal/proposals/unit-source-selection-boundary.md SHA256 ac1c5f7645f7e9ce054e51ec19cd0e65576f8c727dd0dae2a4cc5e005061916d",
+    "Same-source formal/proposals/evidence/unit-source-selection/audit.json (27 immutable exact-byte sources and recorded query)",
+    "Existing NativeStateArtifacts.sourceCannotDetermineQuantum; NativeStateProjectionVectors.numericProfile/sourceAllowsAnotherQuantum/missingUnits; full-source impossibility NOT claimed",
+    "Published origin/import source join 0246277a29fb8477112d4b6f5e900417d46fe167; R2.3 remains OPEN"
+  ],
+  "proposal": {
+    "instructions": "Authorize one specification-only pass for the exact missing arithmetic unit source-selection binding described in formal/proposals/unit-source-selection-boundary.md at this request source commit. This is not a renewed request for ordinary R2.3 implementation permission. First reuse any supplied applicable immutable original selector and its independent authority path. Otherwise prepare one minimal concrete future-generation source binding using the existing initial/configuration/validator authority and existing PROFILE/MODEL/OPTIMIZER representation; identify exact fields/bytes/context, configured profile selection, parent/current unit continuity, initial applicability, canonical bounds and consequences for signed hashes/QC claims. Do not pick a production numeric quantum or infer it from projected outputs. Any new field/rule remains PROPOSED, not approved or implemented. Stop after the specification for an exact semantic decision. This approval does not select the future byte contract, authorize new code/proofs/schemas/runtime, reopen R2.1/R2.2, weaken the source domain or close R2.3. Already authorized scope13 work and the existing sprint/assignment/history remain preserved; resume dependent implementation only under an applicable approved selector. Reject/unresolved edit retains STOP.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+      "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+      "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+      "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+      "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+      "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "qualification_status": "SOURCE_AUDIT_ONLY_NOT_FULL_HISTORY_COUNTEREXAMPLE_NOT_GRAPH_REVIEWED",
+  "r2_3": "OPEN",
+  "approval_state": "PROPOSED"
+}

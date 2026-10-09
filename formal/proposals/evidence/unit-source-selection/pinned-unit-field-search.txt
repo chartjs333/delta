@@ -1,0 +1,4 @@
+26eb02d0632435c9aa0d8ef44eb496b6fa73dd13:specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md:42:- domain mixture, apply quantum, checked intermediate/output widths, rounding,
+1438fa3d78ec99291475cf4660fd8c190ac01bb3:specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md:42:- domain mixture, apply quantum, checked intermediate/output widths, rounding,
+90561a97de7f41f409bf22065ad6cdc9b3932458:specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md:42:- domain mixture, apply quantum, checked intermediate/output widths, rounding,
+4555479c65161a901dd6582dea80ebd2521bb025:specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md:42:- domain mixture, apply quantum, checked intermediate/output widths, rounding,

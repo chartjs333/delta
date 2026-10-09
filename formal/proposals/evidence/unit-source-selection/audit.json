@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "status": "SOURCE_SELECTION_CONTRACT_NOT_IDENTIFIED_IN_APPLICABLE_PINS",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "source_commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae",
+      "bytes": 22074
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/004-compressed-delta-protocol/spec.md",
+      "sha256": "cb626b544709712c9d22a6ee6352225015ad3fa6e1d73b0c00250031c050b567",
+      "bytes": 13851
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/contracts.hpp",
+      "sha256": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1",
+      "bytes": 8711
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8",
+      "bytes": 36086
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/apply/engine.hpp",
+      "sha256": "f5e893cf84de8bed9cf14a7624803efc63ddd829f80d2686e5219b5eb7a57e05",
+      "bytes": 816
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/apply/engine.cpp",
+      "sha256": "a906f6b35ab5bcfbc3d422e1bfc73a885af800c4629123e302483c6ddf235986",
+      "bytes": 8233
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/protocol.hpp",
+      "sha256": "0d1f3f279816a0fec1ed75327f51ff27d775ccf2b426931427dfe92e35c48aa4",
+      "bytes": 5754
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/protocol.cpp",
+      "sha256": "431fe8e40afeaaf8479cb8fe86240e8db875629a0add316113b4ce748d4a86ab",
+      "bytes": 31638
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/runtime.cpp",
+      "sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91",
+      "bytes": 23554
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "bytes": 37676
+    },
+    {
+      "commit": "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "path": "docs/adr/0016-storage-availability-source-binding-v1.md",
+      "sha256": "cbcdaa56bc4aa39d112d77bab2e7f40b874d5bdafae5ebd035ee809a10824d41",
+      "bytes": 19599
+    },
+    {
+      "commit": "90561a97de7f41f409bf22065ad6cdc9b3932458",
+      "path": "docs/adr/0018-authenticated-availability-contract-v1.md",
+      "sha256": "4b5c91196b63644dc472954447e9b1426cbf88055f78a5d49eb903821780b0d5",
+      "bytes": 30643
+    },
+    {
+      "commit": "12326b892690705b7141fcd32bf3f32cf07d092e",
+      "path": "formal/proposals/retention-policy-source-binding-v1.md",
+      "sha256": "143452dac55c556cff99286e3e01df2a5ee27164c8c9668bf5079518c068540c",
+      "bytes": 16625
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "specs/000-formal-tla-spec/amendments/0001-arithmetic-input-binding.md",
+      "sha256": "45fef1b1d23604d8774d90086b46431fe7c73a16a481079d62a257dccf9f22e8",
+      "bytes": 12166
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proofs/DeltaReduce/ArithmeticBinding.lean",
+      "sha256": "7224e4b5710433ef9f3d1e3666a6e8cdced0b8178bb780f0569ad78cdca38693",
+      "bytes": 104972
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proofs/DeltaReduce/NativeStateArtifacts.lean",
+      "sha256": "a8b6fd8c18e843f8bb583f86c4a63afdd252aa84ccc858027cc685551efcc9d6",
+      "bytes": 4053
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proofs/DeltaReduce/NativeStateProjection.lean",
+      "sha256": "45174eef2b5e0685ca0cdceff0f063f8585f3e7506069dca52eaf52b354dfa81",
+      "bytes": 16620
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proofs/DeltaReduce/NativeStateProjectionVectors.lean",
+      "sha256": "9c1d9944b2415b7a5dcf24974d8a1c6e208bcb9d878f83b17f001e5638808294",
+      "bytes": 5000
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proofs/DeltaReduce/NativeAuthorityProjection.lean",
+      "sha256": "57259cf8a00fae43777c33a73c86be84758b110df103d6b2934a71543910d898",
+      "bytes": 6623
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proofs/DeltaReduce/NativeBindingConstruction.lean",
+      "sha256": "8f3de9564fb672a87c6199039deb30e354d6b9f19316086041d2d1d95f35c392",
+      "bytes": 7638
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proposals/native-state-projection-proof.md",
+      "sha256": "de67648a010ef48143346cad46afa7d5d3a1ba082851762766c22006d7cd6a94",
+      "bytes": 4612
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proposals/b-family-transfer/ProfileConfiguration.lean",
+      "sha256": "5a0f35c47652ceef62b9863e5a7b2dfa1b7ee0dbcd11e04f3071c0a57d9a7536",
+      "bytes": 19253
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proposals/b-family-transfer/ProfileOrigin.lean",
+      "sha256": "ccd24f1686ed2ba3f4da3523e8d3e5332c931f069f41604f1f9ab9ccc598f9aa",
+      "bytes": 18695
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proposals/b-family-transfer/ProfileImport.lean",
+      "sha256": "f84c647f5e2a1a664735b49b7e5a7a61d8f1d0a9b3e95307fe4dfc86c2a01f8d",
+      "bytes": 17457
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/reference/profile_source/authority.py",
+      "sha256": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
+      "bytes": 4617
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/reference/profile_source/test_authority.py",
+      "sha256": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
+      "bytes": 5418
+    },
+    {
+      "commit": "0246277a29fb8477112d4b6f5e900417d46fe167",
+      "path": "formal/proposals/arithmetic_binding.py",
+      "sha256": "1c4d42802d8abec7ef12640e54a9fcef3138b0af19f6c3c6ade4470bbd9b9573",
+      "bytes": 8194
+    }
+  ],
+  "search": {
+    "argv": [
+      "grep",
+      "-n",
+      "-I",
+      "-i",
+      "-e",
+      "apply_quantum",
+      "-e",
+      "model_quantum",
+      "-e",
+      "optimizer_quantum",
+      "-e",
+      "apply.quantum",
+      "60c692f6e391f839829dfc64e93380db54cd507b",
+      "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "1438fa3d78ec99291475cf4660fd8c190ac01bb3",
+      "90561a97de7f41f409bf22065ad6cdc9b3932458",
+      "4555479c65161a901dd6582dea80ebd2521bb025",
+      "--",
+      "specs",
+      "docs",
+      "delta-core-cpp",
+      "delta-runtime-cpp",
+      ":!**/evidence/**",
+      ":!docs/feature010-progress.md"
+    ],
+    "exit_code": 0,
+    "output": "pinned-unit-field-search.txt",
+    "sha256": "aa66acf91439acad2056da9440b3a9ec34a3c3aaf2504357c9799101fc07c591"
+  },
+  "existing_kernel_results": [
+    "DeltaReduce.NativeStateArtifacts.sourceCannotDetermineQuantum",
+    "DeltaReduce.NativeStateArtifacts.noUniqueQuantumProjection",
+    "DeltaReduce.NativeStateProjectionVectors.numericProfile",
+    "DeltaReduce.NativeStateProjectionVectors.sourceAllowsAnotherQuantum",
+    "DeltaReduce.NativeStateProjectionVectors.differentCompleteProfiles",
+    "DeltaReduce.NativeStateProjectionVectors.missingUnits"
+  ],
+  "conversion_illustration": {
+    "original_N": [
+      1
+    ],
+    "original_denominator": 1,
+    "original_q_quantum": [
+      1,
+      2
+    ],
+    "apply_quantum_a": [
+      1,
+      4
+    ],
+    "converted_a": [
+      2
+    ],
+    "apply_quantum_b": [
+      1,
+      2
+    ],
+    "converted_b": [
+      1
+    ],
+    "classification": "existing proposal oracle illustration only; NOT a complete admissible snapshot or production-reachable counterexample"
+  },
+  "not_claimed": [
+    "No impossibility proof for the full approved Profile-v1 source domain",
+    "No new native capture or TLC run",
+    "No proof that initial_config can never carry independently authenticated units",
+    "No absence claim about external artifacts not provided",
+    "No invalidation of accepted R2.1/R2.2 original-domain results",
+    "No new unit rule, field, default, trust root or unit-source decoder introduced"
+  ],
+  "missing_rule": "Exact original source field/object selected by independently authenticated initial/configuration authority for apply/model/optimizer quantum and configured ApplyArithmeticProfile, at the full original UnitKey. Generic content pinning and an unresolved primitive UnitSource do not define that selector."
+}
