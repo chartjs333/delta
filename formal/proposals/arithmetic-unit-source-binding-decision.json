@@ -1,0 +1,36 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "reason": "Scope14 authorized a specification only. The proposed exact future-generation unit source contract now exists: independently pinned initial arithmetic_units, native ApplyArithmeticProfile.apply_quantum, and RoundConfig.apply_arithmetic_profile_source with acyclic APC/proof-derived pid, with original-history unit continuity. These new fields/schema versions and signed-content consequences require an exact semantic decision before implementation. This is the existing R2.3 units obligation, not a new DoD or a request to reauthorize ordinary proof engineering.",
+  "dependencies": [
+    "Same-source formal/proposals/arithmetic-unit-source-binding-v1.md SHA256 7ec36faeb8eab0bdef137eda329daf409b4d07b56b2b8d517902c4e6ac339c49",
+    "Same-source formal/proposals/evidence/unit-source-binding/source-index.json: exact immutable sources and specification-only authority",
+    "Existing f9092d046c117b8d2fcf139eca1834281c0c0c28 unit-source boundary and 0246277a29fb8477112d4b6f5e900417d46fe167 origin/import component; neither establishes complete R2.3"
+  ],
+  "proposal": {
+    "instructions": "Approve the exact Arithmetic Unit Source Binding v1 at formal/proposals/arithmetic-unit-source-binding-v1.md in this request source commit. Select its mandatory initial arithmetic_units object, native ApplyArithmeticProfile.apply_quantum and schema version 2.0.0, RoundConfig.apply_arithmetic_profile_source and schema version 3.0.0, containing exact canonical numeric R rather than a cyclic full-profile ID, exact canonical encodings/ranges/hash rules, original configuration R plus original APC/proof selection of P and history-derived common-unit continuity, with the stated compatibility consequences. No production numeric quantum is selected. Authorize implementing, proving and qualifying this binding only in the already authorized isolated feature000 formal/reference R2.3 scope, composing it with all three frozen residual obligations until substantive reviewed closure. Ordinary helpers, source schemas/checkers and formal/reference tests within those boundaries need no further human request. Do not treat original legacy native objects as conforming to the new contract. Preserve all existing scope13 authority and restrictions. After substantive reviewed R2.3 closure, continue the already authorized named DeltaReduce.nativeArithmeticRecoveryRefines, its axiom audit and applicable formal/review/qualification gates; no full R3 or production integration. Approval is a source-contract selection, not proof of R2.3, valid genesis, universal bounds or Formal GO. Reject/unresolved edits retain the dependent STOP. A truly new semantic boundary uses Pending decisions; normal technical decomposition does not.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+      "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+      "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+      "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+      "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+      "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "qualification_status": "SPECIFICATION_ONLY_NOT_IMPLEMENTED_NOT_GRAPH_REVIEWED",
+  "r2_3": "OPEN",
+  "approval_state": "PROPOSED"
+}
