@@ -1,0 +1,34 @@
+{
+  "checked_at_utc": "2026-10-09T20:39:15.980911+00:00",
+  "request_id": "scope-request-527969688fc11f69a0254e1f9532dc8e",
+  "status": "PENDING_GET_CONFIRMED",
+  "source": {
+    "repository_key": "github.com/chartjs333/delta",
+    "commit": "9690a05296fb129012d6d03f3636abb2c365a09b",
+    "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-EC-DURABLE-COMMIT-SPECIFICATION-REQUEST.json",
+    "sha256": "cd20e5ad8cc5e59b0872e84717934678c7791c042760588d16560f275f60b8c8"
+  },
+  "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+  "execution_revision": 236,
+  "scope_revision": 17,
+  "attention": {
+    "state": "authorization_required",
+    "pending_request_ids": [
+      "scope-request-527969688fc11f69a0254e1f9532dc8e"
+    ],
+    "pending_application_ids": [],
+    "pending_ack_assignment_ids": [],
+    "other_gates": [],
+    "ack_does_not_resume_execution": true
+  },
+  "prior_requests_unchanged": 16,
+  "assignments_reviews_queue_unchanged": true,
+  "exact_ack_previously_get_confirmed": "scope-ack-41eed42d41d1b3ad5ab12f97def989aa",
+  "no_new_scope_ack_or_graph_transition": true,
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "request_claim": "Specification only. No concrete storage binding, implementation or proof work selected.",
+  "worker_commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+  "worker_transition_with_two_reviews": "d48d2116-79da-49e0-bafe-eaf7b3ec4274",
+  "independent_attestation": false
+}

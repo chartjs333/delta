@@ -105,3 +105,14 @@ branch `agent/isc-s16-continuous-sprint`. Exact scope-17 ACK
 RESUME/START outcome is submitted for STOP; scope requests do not advance the
 graph. This checkpoint adds only documentation/evidence/request material and
 does not merge the formal worker branch into production.
+
+## Pending receipt
+
+The official request `scope-request-527969688fc11f69a0254e1f9532dc8e` was
+GET-confirmed pending at 20:39 UTC. Its immutable source is
+`9690a05296fb129012d6d03f3636abb2c365a09b`. Execution revision 236, scope 17,
+the current assignment, all sixteen earlier requests, reviews and queue were
+unchanged by request creation. The UI now reports `authorization_required`;
+the graph execution state remains `active`. See
+`ec-durable-commit-boundary/pending-receipt.json` for the exact source digest
+and comparisons. No decision, new scope revision or dependent work is inferred.
