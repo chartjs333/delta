@@ -1,0 +1,170 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-CONTINUITY"
+  ],
+  "record_type": "scope17-first-EC-source-contract-activation-and-reviewed-routing",
+  "requested_outcome": "RESUME_FORMAL",
+  "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+  "decision": {
+    "decision_id": "scope-decision-1eec5f953a9929960b8403c0a8c563e9",
+    "request_id": "scope-request-a046e903247f973728511eefd3315673",
+    "idempotency_key": "5fb2ecf8-558f-4435-830e-4a571b801bbe",
+    "request_sha256": "1eec5f953a9929960b8403c0a8c563e9fc6b1363adcd26a9a23815a953bcf1b0",
+    "action": "approve",
+    "actor": "operator-91a52770d21b9451",
+    "timestamp": "2026-10-09T17:13:40.713754+00:00",
+    "reason": "",
+    "authorization": {
+      "request_id": "scope-request-a046e903247f973728511eefd3315673",
+      "decision_id": "scope-decision-1eec5f953a9929960b8403c0a8c563e9",
+      "validation_id": "scope-validation-05fb76670fd15f87dd286f0cacbadd47",
+      "proposal_sha256": "92b3d425985100acfda404b63deeff005f1ec02e819aaec7dc58c7a7a01ca9b8",
+      "actor": "operator-91a52770d21b9451",
+      "origin": "human_decision",
+      "provenance": null
+    },
+    "response": {
+      "request_id": "scope-request-a046e903247f973728511eefd3315673",
+      "decision_id": "scope-decision-1eec5f953a9929960b8403c0a8c563e9",
+      "action": "approve",
+      "status": "applied",
+      "receipt": {
+        "schema_version": 2,
+        "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+        "effective_revision": 17,
+        "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+          "effective_revision": 17,
+          "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+          "node_id": "continuity-coordinator",
+          "phase": "node",
+          "agent_id": "isc-s16-continuity-coordinator",
+          "occurrence": 9,
+          "source_commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1-DECISION.json",
+          "source_sha256": "701f2dd240e5d984c8297f4e0521fe6ebdd751bec88abea0b65c6caa4b35d541",
+          "effective_scope_sha256": "661475d858754be5a624dec12ef627c8ad107ab35c9e1a24e71686e22d63451f",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true
+        },
+        "effective_scope_sha256": "661475d858754be5a624dec12ef627c8ad107ab35c9e1a24e71686e22d63451f",
+        "assignment_preserved": true,
+        "graph_advanced": false,
+        "queue_changed": false,
+        "deduplicated": false,
+        "before_effective_sha256": "4be3e71dabef14fbe9f2c8c77d8c2ba4d07d4558307c34d9e4addadf25dd8185",
+        "after_effective_sha256": "37fb0bb041e48f1c2bd35d3683cfa487990a367f4dd241b0c2785c31cc244375"
+      },
+      "execution_revision": 215,
+      "scope_revision": 17,
+      "graph_advanced": false,
+      "deduplicated": false
+    }
+  },
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+    "effective_revision": 17,
+    "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 9,
+    "source_commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1-DECISION.json",
+    "source_sha256": "701f2dd240e5d984c8297f4e0521fe6ebdd751bec88abea0b65c6caa4b35d541",
+    "effective_scope_sha256": "661475d858754be5a624dec12ef627c8ad107ab35c9e1a24e71686e22d63451f",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "acknowledgement": {
+    "ack_id": "scope-ack-e2b6f8c6f51c48ef577547b6624c1622",
+    "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "agent_phone": "2750",
+    "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+    "effective_revision": 17,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+      "effective_revision": 17,
+      "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 9,
+      "source_commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1-DECISION.json",
+      "source_sha256": "701f2dd240e5d984c8297f4e0521fe6ebdd751bec88abea0b65c6caa4b35d541",
+      "effective_scope_sha256": "661475d858754be5a624dec12ef627c8ad107ab35c9e1a24e71686e22d63451f",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-09T17:28:19.809435+00:00"
+  },
+  "ack_get_confirmed": true,
+  "contract": {
+    "commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+    "path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md",
+    "sha256": "6cda0cf6f623a45c32e4f60ef80ed01dfc491251afa7d77628a41c55d7c2798a",
+    "selected_rule": "EC-SOURCE-STEP-v1",
+    "status": "APPROVED_FUTURE_FORMAL_REFERENCE_SOURCE_RULE_ONLY",
+    "normative_bytes_unchanged": true
+  },
+  "prior_worker": {
+    "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+    "path": "formal/proposals/configuration-units-ec-origin-checkpoint.md",
+    "scope": "Schema3 configuration source conjunct; R2.3 OPEN, not full producer or native recovery.",
+    "process_reviews": [
+      {
+        "assignment_id": "1afc0e00-261b-4ad7-8abf-630b04982ccb",
+        "reviewer_agent_id": "isc-s16-continuous-architecture-reviewer",
+        "decision": "APPROVE",
+        "reviewed_at": "2026-10-09T15:53:04.497284+02:00",
+        "scope_ack_id": "scope-ack-0a263d471f2782ad623a37288b51f668"
+      },
+      {
+        "assignment_id": "fb392083-8b05-47b4-a2d9-d075b9a220ac",
+        "reviewer_agent_id": "isc-s16-continuous-evidence-reviewer",
+        "decision": "APPROVE",
+        "reviewed_at": "2026-10-09T16:09:50.767733+02:00",
+        "scope_ack_id": "scope-ack-359f18fe8bc4652847cd1a072c929843"
+      }
+    ]
+  },
+  "next_work": [
+    "Preserve formal-linkage branch work at e389e186 and carry only the source-bound approved coordinator contract/routing changes into it. Do not replace the existing formal implementation with the coordinator branch.",
+    "Implement the exact selected six-reference ACT-EC-FINALIZE interpretation and independent first-finalization keyed by original ISC b. Derive the prior full native state, original body/prerequisites and admitted delivered inventory from their existing source rules; never assume public acceptance or whole-state refinement.",
+    "Construct original EC with all matching admitted original signers at the actual cut, retaining seed sidecar, signer-dependent witness e, all deliveries/journal positions and complete prior state. Compute only the two selected collection changes; reject conflict without partial state; exact retry retains its original producing event.",
+    "Prove the bounded source-rule conclusions and necessary composition in ProfileEcFinalization with ProfileCertificateVotes/Eligibility/SourceIndex/InstalledState; validate changed original bytes, altered cuts, missing prerequisite origin, duplicate delivery versus original votes, three/four signer cuts, incomplete/ABORT and nonempty lineage.",
+    "Run focused source regressions, Lean kernel/axiom audit and affected applicable formal/refinement/compatibility gates with source-bound evidence. Seek the two ordinary reviews for actual results. Do not call the source helper full R2.3 closure.",
+    "Continue the three existing R2.3 residuals only where independent producer/storage premises are actually established. Concrete EC durable storage is not selected by this contract; no W1 extension, new WAL kind, fake slot, durable=true or public-success assumption. Report a truly missing semantic prerequisite through the normal boundary flow, not a technical helper permission request.",
+    "Only after substantive reviewed R2.3 closure proceed to the already authorized DeltaReduce.nativeArithmeticRecoveryRefines, axiom audit and applicable qualification. Full R3 and production integration remain excluded."
+  ],
+  "compatibility": {
+    "production_Init_Next_change": false,
+    "certificate_or_QC_identity_change": false,
+    "WAL_identity_or_kind_change": false,
+    "concrete_sigma_assigned": false,
+    "old_object_migration_relabel": false,
+    "new_trust_authority": false
+  },
+  "limits": [
+    "The approved rule is a logical native-source EC step, not a concrete durable storage implementation or evidence that historical N runtime produced it.",
+    "Different original arrival cuts retain their distinct EC witness IDs; downstream convergence/liveness is not assumed or changed.",
+    "Approved unit and O/authentication contracts remain in force. R1/R2.1/R2.2 remain closed for original domains.",
+    "No production/runtime/ABI/Java/sidecar changes, guard removal, full R3, new profile domains, hidden source caps, erasure, sorry or circular assumptions.",
+    "Same sequential executor process reviews are not independent Formal GO attestations. Acknowledgement does not advance the graph."
+  ],
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "production_authorized": false,
+  "independent_attestation": false,
+  "identity_evidence": "Official actual-role effective-scope GET and read-only observability identify active coordinator2750/assignment/branch. Repository whoami timed out; no successful new delivery claimed. A fresh effective-scope GET after timeout confirmed the same context before the single ACK.",
+  "publication_base": "6c3167abbb9ad67ae01ce82b95651caf8201ec78",
+  "ack_persistence_sha256": "96698e19fcd8d6246b4ec515796fb9518e663a06a5c4e4c54a2e3ae7d46e33c0"
+}
