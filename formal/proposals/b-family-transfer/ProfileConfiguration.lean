@@ -466,4 +466,71 @@ theorem enrolledSource {independent raw body}
     cases Option.some.inj ok
     exact ⟨rfl,matchSource⟩
 
+
+/- Shared interpretation of original configuration fields under an independently
+selected closed grammar. It does not dispatch from an imported version string.
+The historical interpreter is definitionally unchanged; the unit generation
+adds its numeric checks in ProfileConfigurationUnits. -/
+def selectedClosePolicyUsing (fmt : Format) (value : Value) : Option Bytes := do
+  let policy ← lookup fmt value "availability_policy"
+  let selected ← text (lookup availability policy "close_policy")
+  if selected = ascii "OMIT_UNAVAILABLE" ∨ selected = ascii "ABORT_ON_INCOMPLETE"
+  then some selected else none
+
+def interpretUsing (fmt : Format) (schemaVersion : Bytes) (value : Value) : Option Body := do
+  let policy ← selectedClosePolicyUsing fmt value
+  let parent ← textField fmt value "parent_checkpoint_id"
+  let schema ← textField fmt value "parameter_schema_id"
+  let dataset ← textField fmt value "dataset_manifest_id"
+  let semantics ← textField fmt value "formal_semantics_id"
+  let epoch ← textField fmt value "validator_epoch_id"
+  let round ← textField fmt value "round_id"
+  let height ← decimalField fmt value "height"
+  let view ← decimalField fmt value "view"
+  let validators ← items (lookup fmt value "validator_ids") >>= texts
+  let domains ← items (lookup fmt value "domain_ticket_counts") >>= domainRows
+  let tickets ← numberField fmt value "ticket_count"
+  let batches ← numberField fmt value "batch_budget"
+  let steps ← numberField fmt value "step_budget"
+  let fault ← numberField fmt value "fault_tolerance"
+  let quorum ← numberField fmt value "quorum_threshold"
+  let soft ← decimalField fmt value "soft_deadline_tick"
+  let hard ← decimalField fmt value "hard_deadline_tick"
+  let threshold ← numberField fmt value "availability_threshold"
+  let ap ← lookup fmt value "availability_policy"
+  let binding ← lookup availability ap "storage_binding"
+  let storageEpoch ← textField storageFields binding "storage_epoch_id"
+  let storageRegistry ← textField storageFields binding "storage_registry_id"
+  let retentionEpoch ← textField storageFields binding "retention_epoch_id"
+  let sourceThreshold ← decimalField storageFields binding "threshold"
+  let source ← lookup storageFields binding "retention_policy_source"
+  let originalEpoch ← textField retentionSource source "retention_epoch_id"
+  let reference ← lookup retentionSource source "obligation_ref"
+  let refFormat := object [("byte_length",.text),("sha256",.text)]
+  let declarationLength ← decimalField refFormat reference "byte_length"
+  let declarationDigest ← textField refFormat reference "sha256"
+  let body := Body.mk value policy parent schema dataset semantics epoch round height view
+    validators domains tickets batches steps fault quorum soft hard threshold storageEpoch
+    storageRegistry retentionEpoch declarationLength declarationDigest
+  if Valid body ∧ sourceThreshold = threshold ∧ originalEpoch = retentionEpoch ∧
+      textField fmt value "schema_version" = some schemaVersion ∧
+      textField fmt value "type_name" = some (ascii "ROUND_CONFIG") ∧
+      textField retentionSource source "schema_version" = some (ascii "1.0.0") ∧
+      textField retentionSource source "type_name" = some (ascii "STORAGE_RETENTION_POLICY_SOURCE")
+  then some body else none
+
+theorem originalInterpreterUnchanged (value : Value) :
+    interpretUsing configuration (ascii "2.0.0") value = interpret value := rfl
+
+theorem interpretedUsing {fmt version value body}
+    (ok : interpretUsing fmt version value = some body) :
+    body.originalValue = value ∧ selectedClosePolicyUsing fmt value = some body.policy ∧ Valid body := by
+  unfold interpretUsing at ok
+  simp only [bind,Option.bind_eq_some_iff] at ok
+  repeat (obtain ⟨_,_,ok⟩ := ok)
+  split at ok <;> try contradiction
+  rename_i checks
+  cases Option.some.inj ok
+  exact ⟨rfl,by assumption,checks.1⟩
+
 end DeltaReduce.ProfileSource.Configuration

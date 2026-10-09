@@ -1,0 +1,74 @@
+'DeltaReduce.ProfileSource.Configuration.fieldCount' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.mapPrefix' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.consumeTag' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.encode' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.parse' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.roundTrip' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.decode' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.decoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.encoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.encodingInjective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.fields' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.object' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.retentionSource' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.availability' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.configuration' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.lookup' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.text' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.selectedClosePolicy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.header' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.encodeFrame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.decodeFrame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.frameEncoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.frameDecoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.frameInjective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.closePolicy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.policySource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.noPolicyOverride' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.number' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.items' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.textField' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.numberField' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.decimalField' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.texts' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.domainRows' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.Configuration.ordered' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.storageFields' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.Valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.interpret' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.interpreted' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.check' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.wholeSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.Matches' does not depend on any axioms
+'DeltaReduce.ProfileSource.Configuration.checkEnrolled' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.enrolledSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.selectedClosePolicyUsing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.interpretUsing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.originalInterpreterUnchanged' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.Configuration.interpretedUsing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.format' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.ConfigurationUnits.encodeFrame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.decodeFrame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.frameEncoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.frameDecoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.check' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.entireOriginalConfiguration' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.ParentMatches' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.admit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.admitted' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.admissionComplete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationUnits.noParentUnitOverride' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

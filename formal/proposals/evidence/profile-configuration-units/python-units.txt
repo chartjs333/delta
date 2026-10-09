@@ -1,0 +1,16 @@
+test_actual_profile_bytes_budget (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_actual_profile_bytes_budget) ... ok
+test_bad_rational_tokens_and_control_native_swap (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_bad_rational_tokens_and_control_native_swap) ... ok
+test_closed_fields_and_native_rules (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_closed_fields_and_native_rules) ... ok
+test_initial_full_surrounding_bytes_retained (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_initial_full_surrounding_bytes_retained) ... ok
+test_literal_three_representations (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_literal_three_representations) ... ok
+test_proof_numeric_and_semantics_substitution (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_proof_numeric_and_semantics_substitution) ... ok
+test_quantum_limits_are_not_coefficient_limits (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_quantum_limits_are_not_coefficient_limits) ... ok
+test_reject_aliases_duplicate_keys_and_nonintegers (formal.reference.profile_source.test_arithmetic_units.ArithmeticUnitsTests.test_reject_aliases_duplicate_keys_and_nonintegers) ... ok
+test_original_frame_full_fields_and_nocycle (formal.reference.profile_source.test_arithmetic_units.UnitConfigurationTests.test_original_frame_full_fields_and_nocycle) ... ok
+test_parent_continuity_needs_no_later_apc (formal.reference.profile_source.test_arithmetic_units.UnitConfigurationTests.test_parent_continuity_needs_no_later_apc) ... ok
+test_reject_changed_generation_fields_and_surrounding_config (formal.reference.profile_source.test_arithmetic_units.UnitConfigurationTests.test_reject_changed_generation_fields_and_surrounding_config) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.317s
+
+OK
