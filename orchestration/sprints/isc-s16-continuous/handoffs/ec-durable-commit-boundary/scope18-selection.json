@@ -1,0 +1,150 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01",
+    "ISC-S16-CONTINUITY"
+  ],
+  "selection": "ISOLATED_PROFILE_EC_COMMIT_V1",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-b45e7c9e11db84448ad3368973788add",
+    "effective_revision": 18,
+    "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 10,
+    "source_commit": "9690a05296fb129012d6d03f3636abb2c365a09b",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-EC-DURABLE-COMMIT-SPECIFICATION-REQUEST.json",
+    "source_sha256": "cd20e5ad8cc5e59b0872e84717934678c7791c042760588d16560f275f60b8c8",
+    "effective_scope_sha256": "ace6fda37a87c1ba00d0237717d9103c14bec5c27794059a38b7034f555a6cec",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "official_operator_decision": {
+    "decision_id": "scope-decision-351641e848148e36894d472a92df4424",
+    "request_id": "scope-request-527969688fc11f69a0254e1f9532dc8e",
+    "idempotency_key": "15b051b5-0055-453d-a53b-2ff57f740aa7",
+    "request_sha256": "351641e848148e36894d472a92df44240868131ae4bc2d97b0000e5455f7982b",
+    "action": "edit",
+    "actor": "operator-42d7853add4232a8",
+    "timestamp": "2026-10-09T23:07:30.404968+00:00",
+    "reason": "Extend the existing R2.3 standing delegation to cover bounded isolated formal/reference persistence and durability bindings, including EC_DURABLE_COMMIT_BINDING_NOT_SELECTED, while preserving all production, trust, safety and Formal GO boundaries.",
+    "authorization": {
+      "request_id": "scope-request-527969688fc11f69a0254e1f9532dc8e",
+      "decision_id": "scope-decision-351641e848148e36894d472a92df4424",
+      "validation_id": "scope-validation-d0d0634244643c9097c7bb982c392f57",
+      "proposal_sha256": "6a06dfcf4817838656c7f5ac4b396a6cfbae83eb562a655f162b49a6857bd999",
+      "actor": "operator-42d7853add4232a8",
+      "origin": "human_decision",
+      "provenance": null
+    },
+    "response": {
+      "request_id": "scope-request-527969688fc11f69a0254e1f9532dc8e",
+      "decision_id": "scope-decision-351641e848148e36894d472a92df4424",
+      "action": "edit",
+      "status": "applied",
+      "receipt": {
+        "schema_version": 2,
+        "amendment_id": "scope-human-b45e7c9e11db84448ad3368973788add",
+        "effective_revision": 18,
+        "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+        "scope_context": {
+          "schema_version": 1,
+          "amendment_id": "scope-human-b45e7c9e11db84448ad3368973788add",
+          "effective_revision": 18,
+          "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+          "node_id": "continuity-coordinator",
+          "phase": "node",
+          "agent_id": "isc-s16-continuity-coordinator",
+          "occurrence": 10,
+          "source_commit": "9690a05296fb129012d6d03f3636abb2c365a09b",
+          "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-EC-DURABLE-COMMIT-SPECIFICATION-REQUEST.json",
+          "source_sha256": "cd20e5ad8cc5e59b0872e84717934678c7791c042760588d16560f275f60b8c8",
+          "effective_scope_sha256": "ace6fda37a87c1ba00d0237717d9103c14bec5c27794059a38b7034f555a6cec",
+          "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+          "ack_required": true
+        },
+        "effective_scope_sha256": "ace6fda37a87c1ba00d0237717d9103c14bec5c27794059a38b7034f555a6cec",
+        "assignment_preserved": true,
+        "graph_advanced": false,
+        "queue_changed": false,
+        "deduplicated": false,
+        "before_effective_sha256": "37fb0bb041e48f1c2bd35d3683cfa487990a367f4dd241b0c2785c31cc244375",
+        "after_effective_sha256": "5a1e3fef20efb27aaf707985a4b417ef2810cf63128a7d6df6d1307e4183d426"
+      },
+      "execution_revision": 237,
+      "scope_revision": 18,
+      "graph_advanced": false,
+      "deduplicated": false
+    }
+  },
+  "acknowledgement": {
+    "ack_id": "scope-ack-06554ecad4461f32b59d761f8348bed9",
+    "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "agent_phone": "2750",
+    "amendment_id": "scope-human-b45e7c9e11db84448ad3368973788add",
+    "effective_revision": 18,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-b45e7c9e11db84448ad3368973788add",
+      "effective_revision": 18,
+      "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 10,
+      "source_commit": "9690a05296fb129012d6d03f3636abb2c365a09b",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-EC-DURABLE-COMMIT-SPECIFICATION-REQUEST.json",
+      "source_sha256": "cd20e5ad8cc5e59b0872e84717934678c7791c042760588d16560f275f60b8c8",
+      "effective_scope_sha256": "ace6fda37a87c1ba00d0237717d9103c14bec5c27794059a38b7034f555a6cec",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-09T23:19:12.015582+00:00"
+  },
+  "checks": {
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-b45e7c9e11db84448ad3368973788add",
+      "effective_revision": 18,
+      "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 10,
+      "source_commit": "9690a05296fb129012d6d03f3636abb2c365a09b",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-EC-DURABLE-COMMIT-SPECIFICATION-REQUEST.json",
+      "source_sha256": "cd20e5ad8cc5e59b0872e84717934678c7791c042760588d16560f275f60b8c8",
+      "effective_scope_sha256": "ace6fda37a87c1ba00d0237717d9103c14bec5c27794059a38b7034f555a6cec",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "core_hash_verified": true,
+    "original_proposal_blob_verified": true,
+    "repository_context_equal": true,
+    "effective_extension": "Delegates minimal deterministic isolated formal/reference persistence/source bindings; expressly supersedes specification-only STOP for this class. Legacy production/trust/identity/domain boundaries retained."
+  },
+  "scope_get_file_sha256": "56b818e8d1e4e11ad81288612241ae4fca0909d32b238a61e36b92a3e01203dc",
+  "source_inputs": {
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/proposals/b-family-transfer/ProfileEcFinalization.lean": "c87a54ff2b85802fd7b92aece3e78e8e561d57f94b9a221f8ed9c1df8288750d",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/reference/profile_source/ec_finalization.py": "73a08b076d53b06ff0a075d9f90e208e361a957004238c6b1e2c3786e7458e85",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/proposals/b-family-transfer/ProfileOrigin.lean": "ccd24f1686ed2ba3f4da3523e8d3e5332c931f069f41604f1f9ab9ccc598f9aa",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/proposals/b-family-transfer/ProfileImport.lean": "f84c647f5e2a1a664735b49b7e5a7a61d8f1d0a9b3e95307fe4dfc86c2a01f8d",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/proposals/b-family-transfer/ProfileSourceIndex.lean": "d092d46248c6a5aa58d42ca97fd915e42308907222ec4c01a478884a5fd7eae8",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/reference/profile_source/source_prefix.py": "64956d0f22a8bb56f161243a0659182c2b7f721afc4eaff6b8f00ea91362402a",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
+    "f1a9963eabb5cb61f936ad1ad41f45e870acd43e:orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md": "6cda0cf6f623a45c32e4f60ef80ed01dfc491251afa7d77628a41c55d7c2798a"
+  },
+  "limits": [
+    "No legacy storage compatibility claim",
+    "No production transition/WAL/identity changes",
+    "No new trust or physical-history authority",
+    "No R2.3 closure or named recovery proof from this document"
+  ]
+}

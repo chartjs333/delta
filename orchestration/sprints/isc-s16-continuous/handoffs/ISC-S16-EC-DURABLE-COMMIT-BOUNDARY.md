@@ -1,5 +1,14 @@
 # EC durable commit binding: reviewed boundary
 
+> Historical scope-17 checkpoint. On 10 October, official operator decision
+> `scope-decision-351641e848148e36894d472a92df4424` applied scope 18 and delegated
+> selection/implementation/proof of the minimal isolated binding. See
+> [EC durable binding v1](ISC-S16-EC-DURABLE-BINDING-v1.md) and
+> `ec-durable-commit-boundary/scope18-selection.json`. The specification-only
+> STOP below is superseded for that delegated class; R2.3 remains OPEN and
+> production/trust/identity restrictions remain in force. Historical results
+> and reviews below are preserved, not relabeled as closure.
+
 T047/T053 / ISC-S16-D01 / ISC-S16-CONTINUITY. 9 October 2026.
 **R2.3 OPEN; Formal NO_GO. No storage contract is selected here.**
 
