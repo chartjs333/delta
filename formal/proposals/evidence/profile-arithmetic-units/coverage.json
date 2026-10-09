@@ -1,0 +1,42 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "scope_revision": 15,
+  "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "contract": {
+    "commit": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1",
+    "path": "formal/proposals/arithmetic-unit-source-binding-v1.md",
+    "sha256": "7ec36faeb8eab0bdef137eda329daf409b4d07b56b2b8d517902c4e6ac339c49"
+  },
+  "component_receipt_sha256": "e2b464ce9a9146778afdc1b0174cebb5f2421f80798ff63bc50b4e58d2a0b32f",
+  "closed_local_conjuncts": [
+    "Strict U/R/P bytes and acyclic R/proof/P byte selection",
+    "Positive reduced I64 quantum while retaining original U64 coefficient denominators",
+    "Python schema3 full DRC1 codec and pre-APC parent-unit conjunct",
+    "Lean executable U/R parsers, checked predicates, retained bytes and uniqueness for successful decoding/selection",
+    "New P/configuration generation rejects the legacy formal_semantics_id; no future ID is selected"
+  ],
+  "open_components": [
+    "Universal valid-typed R lexer round-trip theorem (current converse explicitly names its lexer premise)",
+    "Lean full schema3 configuration-byte/authority composition",
+    "Independent complete initial/genesis origin with selected units",
+    "Original CONFIG producer/finality and complete original APC/proof/configuration join",
+    "Complete original current-prefix unit association, including pre-APC, loss, ABORT and historical retry cases",
+    "Complete full-state/source family totality across all three frozen R2.3 residuals",
+    "Affected future-generation TLA/model/mutant/refinement/compatibility qualification",
+    "Reviewed substantive R2.3 closure before named recovery theorem and axiom audit"
+  ],
+  "named_recovery_declaration_added": false,
+  "required_project_recovery_obligation_closed": false,
+  "r2_3": "OPEN",
+  "d01": "OPEN",
+  "q01_advanced": false,
+  "formal_go": false,
+  "graph_result_submitted": false,
+  "process_reviews_obtained_for_this_component": false,
+  "independent_attestation": false,
+  "external_primitives": "Only previously approved primitive hash/codec/signature, fixed-epoch bootstrap/floor and original-byte/durability assumptions; no new authority."
+}

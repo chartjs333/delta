@@ -1,0 +1,42 @@
+'DeltaReduce.ProfileSource.ArithmeticUnits.QuantumValid' does not depend on any axioms
+'DeltaReduce.ProfileSource.ArithmeticUnits.originalProfile' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.Valid' does not depend on any axioms
+'DeltaReduce.ProfileSource.ArithmeticUnits.numericFields' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.numericJSON' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.profileJSON' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.readFraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.readWeight' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.readNumeric' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.decodeNumeric' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.numericSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.numericComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.sourceNumbersUnique' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.sourceQuantumUnique' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.originalNumericConditions' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.initialJSON' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.readInitial' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.decodeInitial' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.initialSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.initialUnitsUnique' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.select' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.selectedSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.selectionComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.selectedQuantum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.selectedProof' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.selectedOriginalBound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.selectedNumbersUnique' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ArithmeticUnits.legacyGenerationRejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

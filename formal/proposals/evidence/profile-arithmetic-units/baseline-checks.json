@@ -1,0 +1,95 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "scope_revision": 15,
+  "base_commit": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1",
+  "status": "FAIL",
+  "formal_go": false,
+  "execution": "Unchanged Makefile formal-check commands; make unavailable. Gate reports written only in a physical source copy; no historical reports replaced.",
+  "source_manifest": {
+    "path": "baseline-source-hashes.json",
+    "sha256": "3f521713d0c6e10459d4e27a6aee16799d4d25a8b7ce60700ee6cd44aa3e9781",
+    "files": 440
+  },
+  "baseline_input_bundle_sha256": "340b2636677ccbf0f95a362711a6dc531b3b78dc9269148ea500d546512d508a",
+  "checks": [
+    {
+      "gate": "phase0",
+      "status": "PASS",
+      "log": "phase0.txt",
+      "sha256": "5b52431b27b3f7468824aea108144393f19839860c4cd990eed1ed67904920b6"
+    },
+    {
+      "gate": "contracts",
+      "status": "PASS",
+      "log": "formal-contracts.txt",
+      "sha256": "94a8b2e4658b5a7d3567fd3406b9d9714ec20aff006a7a7459d2de4e64110bfa"
+    },
+    {
+      "gate": "toolchain-locks",
+      "status": "PASS",
+      "log": "toolchain-locks.txt",
+      "sha256": "a83f8f9ef01625377fafbd38e94c9acf5beab2a5bea26964fa37593122db91c5"
+    },
+    {
+      "gate": "parse",
+      "status": "PASS",
+      "log": "baseline-parse.txt",
+      "sha256": "961359f404321ffa13f87b33e0b85a4eef5de5aaec5f891b5487598db6dd156f"
+    },
+    {
+      "gate": "safety",
+      "status": "PASS",
+      "log": "baseline-safety.txt",
+      "sha256": "57c666660a6b75fa7f51a3f4c1bbaddd0a3a3ccc8e4d787987f23f9ff510ea71"
+    },
+    {
+      "gate": "liveness",
+      "status": "PASS",
+      "log": "baseline-liveness.txt",
+      "sha256": "91a679e4d01c4198879be7afc48afe47878c33769bf1faeaacfddbfd762eda96"
+    },
+    {
+      "gate": "proofs-cache-attempt1",
+      "status": "FAIL_ENVIRONMENT",
+      "log": "baseline-proof-cache-attempt1.txt",
+      "sha256": "63260eaa27b1496dc35ab581b87e960f5674cb9700503e162f5df995cb7a1a8c"
+    },
+    {
+      "gate": "proofs",
+      "status": "FAIL",
+      "log": "baseline-proofs-final.txt",
+      "sha256": "25b3c962d5a5f320aea687e1a056df2a946823e87cb2a0dee9649bddbb96f989"
+    }
+  ],
+  "formal_contract_tests": 778,
+  "model_configurations": {
+    "safety": 28,
+    "liveness": 7
+  },
+  "proof_build": "PASS",
+  "proof_conjuncts": {
+    "expected": 45,
+    "status": "FAIL",
+    "verified": 44
+  },
+  "errors": [
+    "PO-AB1 conjunct admission-recovery-refinement theorem nativeArithmeticRecoveryRefines is missing",
+    "axiom dependency result missing for DeltaReduce.nativeArithmeticRecoveryRefines"
+  ],
+  "reports": {
+    "baseline-lean-proof-report.json": "295b4d74adc6e3054097719cf77b38bab54a1aec69e98b5bad97a5fb22853b45",
+    "baseline-tlc-evidence.json": "df352b443e4f8bf518afe94802a24ba0a6a4348a8eb63591ef5744b7a093d611"
+  },
+  "not_run_after_failure": [
+    "mutants",
+    "refinement",
+    "report"
+  ],
+  "qualification_limit": "Unchanged generation baseline only; no qualification of future-generation model guards, full R2.3, recovery or independent Formal GO.",
+  "cache_repair": "Replaced only workspace-owned junctions with physical copies of the same pinned packages/build; verifier unchanged."
+}

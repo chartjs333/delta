@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "transport": "existing DPAPI role wrapper; header-only credential not recorded",
+  "acknowledged": true,
+  "acknowledgement": {
+    "ack_id": "scope-ack-3af86533ad045e34125ea0b923d80680",
+    "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+    "agent_id": "isc-s16-formal-linkage-engineer",
+    "agent_phone": "2753",
+    "amendment_id": "scope-human-338fc0715cf3ea4c60e318331353f4a4",
+    "effective_revision": 15,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-338fc0715cf3ea4c60e318331353f4a4",
+      "effective_revision": 15,
+      "assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+      "node_id": "formal-linkage",
+      "phase": "node",
+      "agent_id": "isc-s16-formal-linkage-engineer",
+      "occurrence": 9,
+      "source_commit": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1",
+      "source_path": "formal/proposals/arithmetic-unit-source-binding-decision.json",
+      "source_sha256": "4f106f712efb8c0294b1b499aa9e800d4c7d576fe6f1d909d46eb4ec5419659b",
+      "effective_scope_sha256": "5a5a6b8f8f68e09eab45a46904e0c304b6812922cc965ca3bb0b99d53ecc02d6",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-09T11:53:25.325505+00:00"
+  },
+  "ack_context_exact": true,
+  "effective_core_sha256_verified": "5a5a6b8f8f68e09eab45a46904e0c304b6812922cc965ca3bb0b99d53ecc02d6",
+  "fresh_get_response_sha256": "a67ea9a184703ba82100616258e4532f340172487e38b3ca64638710bee93338",
+  "confirmation_response_sha256": "91f725703924c04d4096dda8497ef0e7d42e60c6630bf17e32439e32d1b5cb83",
+  "graph_transition": false
+}

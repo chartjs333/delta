@@ -1,8 +1,21 @@
 # R2.3 original profile source components
 
-T047/T053 / ISC-S16-D01; effective scope 13. This is formal/reference work in
+T047/T053 / ISC-S16-D01; effective scope 15, retaining scope 13's authority and
+restrictions. This is formal/reference work in
 the approved fixed-epoch Snapshot Provenance Profile v1 and successor O lane.
 No production implementation, concrete semantics ID, migration or READY claim.
+
+Scope 15 additionally selects Arithmetic Unit Source Binding v1 at
+`9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1`; role 2753's exact ACK
+`scope-ack-3af86533ad045e34125ea0b923d80680` is GET-confirmed. The separate
+`arithmetic_units.py` and `configuration_units.py` implement the selected U/R/P
+byte forms and schema-3 configuration fields. No legacy profile gets an
+implicit quantum. `ProfileArithmeticUnits.lean` parses original U/R bytes and
+checks exact acyclic R/proof/P selection. This component still needs original
+configuration/APC authority and the complete current-history unit relation;
+it is not a replacement for the enclosing R2.3 producer/family proof. See
+`formal/proposals/arithmetic-unit-source-checkpoint.md` and the new
+`evidence/profile-arithmetic-units` receipt for exact qualification and limits.
 
 The independent inputs are raw bootstrap/source-index custody, original own
 journals and latest trust log, plus separately provisioned approved verifier

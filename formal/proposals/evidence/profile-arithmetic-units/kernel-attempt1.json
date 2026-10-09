@@ -1,0 +1,8 @@
+{
+  "result": "TIMEOUT_NOT_PASS",
+  "timeout_seconds": 300,
+  "command": "lean Vectors.lean",
+  "vector_sha256": "75b2f8521a1e3fcae2233caeeea127120929250a96f21c341235baa54ac78eee",
+  "method": "combined default decide elaboration",
+  "next_attempt": "same assertions, direct kernel reduction and individually checked cases"
+}

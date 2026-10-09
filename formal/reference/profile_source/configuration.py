@@ -145,6 +145,19 @@ class Reader:
 
 def validate(value):
     closed(value, FIELDS)
+    _require(
+        value["type_name"] == "ROUND_CONFIG" and value["schema_version"] == "2.0.0",
+        "future closed configuration generation, no legacy fallback",
+    )
+    return validate_fields(value)
+
+
+def validate_fields(value):
+    """Shared original fields, after the caller's closed generation check.
+
+    This helper does not dispatch a schema or construct replacement bytes. Both
+    generation-specific decoders retain and hash their complete original frame.
+    """
     for key in U32_FIELDS:
         _uint(value[key], 4)
     for key in DECIMAL_FIELDS:
@@ -153,10 +166,6 @@ def validate(value):
         _id(value[key])
     for key in TEXT_FIELDS:
         ascii_text(value[key])
-    _require(
-        value["type_name"] == "ROUND_CONFIG" and value["schema_version"] == "2.0.0",
-        "future closed configuration generation, no legacy fallback",
-    )
     _label(value["round_id"])
     members = value["validator_ids"]
     _require(type(members) is list, "original validator collection")
