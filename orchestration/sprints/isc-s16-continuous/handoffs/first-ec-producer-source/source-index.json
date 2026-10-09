@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "status": "PROPOSED_SPECIFICATION_ONLY",
+  "r2_3": "OPEN",
+  "formal_go": false,
+  "scope_revision": 16,
+  "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+  "decision_id": "scope-decision-b27fceadfac527a03e40eea001457515",
+  "ack_id": "scope-ack-baaefdb170635084a400908b14bbd979",
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-edd16f0196b654049e0e5ca90086d4c1",
+    "effective_revision": 16,
+    "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 9,
+    "source_commit": "674d7cf2e8d307e777c01b5062828a211e0d40a5",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-FIRST-EC-SOURCE-CONTRACT-DECISION.json",
+    "source_sha256": "9cb7f6c03c358a43b222de402c7e19b042cf34f45fefe3cfa2b1a7dfc34c91bd",
+    "effective_scope_sha256": "e6865cc8a16bbf5aad2db197d35eb0fe407e680f9321c367f6a5ce8133cd653d",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "document": {
+    "path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md",
+    "sha256": "6cda0cf6f623a45c32e4f60ef80ed01dfc491251afa7d77628a41c55d7c2798a"
+  },
+  "immutable_sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/consensus.cpp",
+      "sha256": "1ef9e1add61d7ce2d4de6c0bb5a00c83d34696cf8e968ce192c088f14bb201e8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/core/consensus.hpp",
+      "sha256": "dbef0148e459cb227f844743fda236d1fb5c123709789ff738e89273fec3cdb9"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/contracts.hpp",
+      "sha256": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/vote_admission.cpp",
+      "sha256": "655b74601e163c62242a6ede4f93b2749ef32eb7828caaef9d32e7e63b8ce1ef"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/robust/plan.cpp",
+      "sha256": "cd90684b9f82912433f77c3bdd4bae03db6d21bf396b58b786d07ef9e4b28929"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/vote_codec.cpp",
+      "sha256": "154e105e2a12799c7f499312273330895a180cda2430b09b4662bbb67b00937b"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/runtime.cpp",
+      "sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "sha256": "b853596dcb6893467d215572d2701367643f142cbaaf510e225fb0d5bf92f3ee"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/tla/DeltaReduceTypes.tla",
+      "sha256": "2eb3008060f8bbe3ed1be12167211d602dc5bf2f5bc7d65caa9896f8586b0121"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/proposals/b-family-transfer/ProfileCertificateVotes.lean",
+      "sha256": "95d6c3f653cb4d87c0a2745e3fc426ca8335e67d61a4c5e95a1ab29e70d2bf08"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/proposals/b-family-transfer/ProfileSourceIndex.lean",
+      "sha256": "d092d46248c6a5aa58d42ca97fd915e42308907222ec4c01a478884a5fd7eae8"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/proposals/b-family-transfer/ProfileIscFinalization.lean",
+      "sha256": "1d64b1af9b373a628a0845892d0b9b1b0443ff7e4abf9351151f6785115687fb"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/proposals/b-family-transfer/ProfileEligibility.lean",
+      "sha256": "5ed1110357f306b9e8dc412e59e0a96713516ad10d373adb9967630eddf108b4"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/proposals/configuration-units-ec-origin-checkpoint.md",
+      "sha256": "284bcad1f1d365f80592569f71ce560b353340bb69df30a3ecc061c3fd5aaadf"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/proposals/evidence/ec-origin-boundary/source-audit.json",
+      "sha256": "ad86c73a84d6b5a030a0c325b5d2dba445d1b46648645954d384cd04de38b531"
+    },
+    {
+      "commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+      "path": "docs/adr/0015-non-isc-authority-binding-v1.md",
+      "sha256": "f2e988d26a28ff8cedf74cc2265c535057e7ae37dc152002a853c75a0614710d"
+    },
+    {
+      "commit": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1",
+      "path": "formal/proposals/arithmetic-unit-source-binding-v1.md",
+      "sha256": "7ec36faeb8eab0bdef137eda329daf409b4d07b56b2b8d517902c4e6ac339c49"
+    },
+    {
+      "commit": "674d7cf2e8d307e777c01b5062828a211e0d40a5",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-FIRST-EC-SOURCE-CONTRACT-DECISION.json",
+      "sha256": "9cb7f6c03c358a43b222de402c7e19b042cf34f45fefe3cfa2b1a7dfc34c91bd"
+    },
+    {
+      "commit": "674d7cf2e8d307e777c01b5062828a211e0d40a5",
+      "path": "orchestration/sprints/isc-s16-continuous/scope-requests/first-ec-source-contract/process-reviews.json",
+      "sha256": "6d6294b94715a4b24e5c81c904ab492ad419665d8120398f3e2c21695b140256"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/proofs/DeltaReduce/NativeEligibility.lean",
+      "sha256": "44e193a483ab66a49fcc890821fc94e539bfb07d050368a05a88e7be7f134728"
+    },
+    {
+      "commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+      "path": "formal/schemas/formal-trace.schema.json",
+      "sha256": "3d0356784ccfd398f5de30d4c21d3cbf8ec5061061d954219b8fce8e47d096fd"
+    }
+  ],
+  "prior_ec_audit_sources_reverified": 98,
+  "claim": "No applicable first-EC native P0/received-cut/P1 producer identified in these selected contracts. This is source inspection, not a universal absence proof. Source-only proposal does not establish physical EC persistence.",
+  "changes": "Documentary only; no code, schema, proof, fixture, source interpreter, WAL or certificate byte changes."
+}
