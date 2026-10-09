@@ -1,6 +1,6 @@
 # R2.3 original profile source components
 
-T047/T053 / ISC-S16-D01; effective scope 15, retaining scope 13's authority and
+T047/T053 / ISC-S16-D01; effective scope 17, retaining scope 15/13's authority and
 restrictions. This is formal/reference work in
 the approved fixed-epoch Snapshot Provenance Profile v1 and successor O lane.
 No production implementation, concrete semantics ID, migration or READY claim.
@@ -387,6 +387,27 @@ bytes. Fresh kernel/axiom/source qualification is recorded separately in
 `evidence/profile-certificate-votes`, `evidence/profile-vote-record` and
 `evidence/profile-isc-finalization`. No graph review or full R2 closure is
 claimed by these component receipts.
+
+Scope 17 selects EC-SOURCE-STEP-v1 at `f1a9963eabb5cb61f936ad1ad41f45e870acd43e`.
+`ec_finalization.py` and `ProfileEcFinalization.lean` compute its original EC
+witness using all admitted matching signers at the original cut, with first
+finalization keyed by ISC consensus b. The complete installed P0/P1 static joins
+retain all original collections, witnesses and candidates. Exact seed-sidecar
+collisions reject, duplicate deliveries stay distinct, and either retained
+original ISC C for the same b can occupy the event's C input without relabeling.
+The six-ref/event dependency check retains all matching delivery occurrences.
+Replay recomputes the original event and returns the entire current state
+unchanged, instead of selecting a witness from a later arrival cut.
+
+These are explicit native conjuncts, not a complete source fold: lawful origin
+of P0/body/seed/norm, admission/journal associations and prerequisite positions
+must still come from that fold. Python uses the pinned NSG1 Ed25519 verifier;
+synthetic signatures in vectors are not an authentic production history.
+The qualifier is `formal/proposals/b-family-transfer/check_ec_finalization.py`.
+In particular the selected EC source rule does not provide a concrete durable
+EC policy-commit encoding. W1 is ISC-only; a source-event/hash is not a barrier.
+See `formal/proposals/ec-source-step-checkpoint.md` for the exact remaining
+storage boundary, component receipt and mandatory gate outcome.
 
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment

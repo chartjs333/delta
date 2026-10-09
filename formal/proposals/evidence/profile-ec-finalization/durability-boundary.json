@@ -1,0 +1,231 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "scope_revision": 17,
+  "analysis_kind": "IMMUTABLE_CONTRACT_COVERAGE_NOT_RUNTIME_ATTACK_OR_NEW_PROOF_GATE",
+  "result": "EC_DURABLE_COMMIT_BINDING_NOT_SELECTED",
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/runtime.cpp",
+      "raw_sha256": "4cfa5fdedbe2b6663d4c7251bcc35dd9d329e3f9ad70d720d455321b3ba1ce91",
+      "byte_length": 23554,
+      "excerpts": [
+        {
+          "first_line": 127,
+          "text": "    if (config_.vote_policy.has_value()) {\n      core::consensus::validate_vote_admission_policy(*config_.vote_policy, initial_state);\n      vote_policy_identity_ = vote_policy_identity(*config_.vote_policy);\n      logical_tick_ = config_.vote_policy->initial_logical_tick;\n    }\n    std::error_code error;\n    std::filesystem::create_directories(config_.directory, error);\n    if (error) {"
+        },
+        {
+          "first_line": 240,
+          "text": "      if (entry.kind == detail::JournalKind::transition) {\n        const auto command = core::protocol::parse_command(entry.command_or_vote_bytes);\n        if (config_.vote_policy.has_value()) {\n          require(\n              command.logical_tick >= logical_tick_,\n              ErrorCode::recovery_mismatch,\n              \"durable command logical time moved backwards\");\n        }"
+        },
+        {
+          "first_line": 279,
+          "text": "      } else {\n        const auto vote = core::protocol::parse_vote(entry.command_or_vote_bytes);\n        require(\n            core::protocol::encode(vote) == entry.command_or_vote_bytes,\n            ErrorCode::recovery_mismatch,\n            \"durable vote frame is not the unique canonical encoding\");\n        require(\n            config_.vote_policy.has_value(),"
+        },
+        {
+          "first_line": 351,
+          "text": "  [[nodiscard]] SubmitReceipt process_submit(SubmitWork& work) {\n    verify_durable_binding();\n    const auto command = core::protocol::parse_command(work.command_bytes);\n    const auto command_id =\n        core::canonical::content_id(core::canonical::Type::command, work.command_bytes);\n    if (const auto found = requests_.find(command.request_id); found != requests_.end()) {\n      require(\n          found->second.command_id == command_id,"
+        },
+        {
+          "first_line": 438,
+          "text": "    }\n    verify_durable_binding();\n    return released;\n  }\n\n  [[nodiscard]] VoteReceipt process_vote(VoteWork& work) {\n    verify_durable_binding();\n    const auto vote = core::protocol::parse_vote(work.vote_bytes);"
+        },
+        {
+          "first_line": 496,
+          "text": "    const detail::JournalEntry entry{\n        next_sequence,\n        detail::JournalKind::vote,\n        work.vote_bytes,\n        {},\n        {},\n        vote_policy_identity_,\n    };"
+        },
+        {
+          "first_line": 614,
+          "text": "  std::atomic<std::size_t> recovered_vote_count_{0U};\n  mutable std::mutex state_mutex_;\n  core::canonical::Bytes state_bytes_;\n  core::consensus::VoteJournal vote_journal_;\n  std::uint64_t logical_tick_{0U};\n  bool recovery_ready_{false};\n  bool vote_authority_invalidated_{false};\n  std::map<std::string, std::uint64_t> vote_sequences_;"
+        }
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/include/delta/runtime/runtime.hpp",
+      "raw_sha256": "76e6698918915c7bfc8389f44a43c154bf2ddb4a95419b85613a25e6bea82db3",
+      "byte_length": 4004,
+      "excerpts": [
+        {
+          "first_line": 70,
+          "text": "  // supplies a fail-closed pathname-to-descriptor identity check; embedded\n  // runtimes may leave it empty.\n  std::function<void()> durable_binding_guard;\n  // A missing policy makes this a submit-only handle. record_vote() always\n  // fails closed unless the handle was opened with a validated immutable round\n  // contract and validator binding.\n  std::optional<core::consensus::VoteAdmissionPolicy> vote_policy;\n  std::optional<DurableFileIdentity> expected_wal_identity;"
+        }
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/certificate_runtime.cpp",
+      "raw_sha256": "d10db55f112976f79ff96aeabf0b60a3c2c632d4033d7d8acd587679be7ae6dd",
+      "byte_length": 8659,
+      "excerpts": [
+        {
+          "first_line": 85,
+          "text": "    : runtime_(std::make_unique<Runtime>(Config{\n          .directory = std::move(directory),\n          .initial_state_bytes = std::move(initial_state_bytes),\n          .submission_capacity = 64U,\n          .durable_binding_guard = {},\n          .vote_policy = std::move(vote_policy),\n          .expected_wal_identity = {},\n      })) {}"
+        },
+        {
+          "first_line": 97,
+          "text": "  auto frame = core::protocol::encode(vote);\n  const auto receipt = runtime_->record_vote(std::move(frame), crash_point);\n  return PersistedVoteFrame{\n      .frame = receipt.frame,\n      .vote_id = receipt.vote_id,\n      .journal_sequence = receipt.journal_sequence,\n      .replay = receipt.replay,\n  };"
+        },
+        {
+          "first_line": 113,
+          "text": "  require(\n      certificates::is_content_id(state_.checkpoint_id) &&\n          certificates::is_content_id(state_.optimizer_id) &&\n          (state_.apply_qc_id.empty() || certificates::is_content_id(state_.apply_qc_id)),\n      ErrorCode::invalid_config,\n      \"initial current-pointer state is invalid\");\n  std::filesystem::create_directories(directory_);\n  recover();"
+        },
+        {
+          "first_line": 174,
+          "text": "      command.apply_qc_id == apply_qc_id && command.context == apply_qc.context &&\n          command.expected_parent_checkpoint_id == apply_qc.parent_checkpoint_id &&\n          command.next_checkpoint_id == apply_qc.next_model_hash &&\n          command.next_optimizer_hash == apply_qc.next_optimizer_hash,\n      ErrorCode::request_conflict,\n      \"current-pointer command is not authorized by its ApplyQC\");\n#endif\n  if (state_.apply_qc_id == apply_qc_id) {"
+        }
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-runtime-cpp/src/wal.hpp",
+      "raw_sha256": "7ed2427f12db7668d686f508e29527818c96fa53a2a0a7c7db4fe9b47753b688",
+      "byte_length": 2393,
+      "excerpts": [
+        {
+          "first_line": 13,
+          "text": "enum class JournalKind : std::uint8_t {\n  transition = 1U,\n  vote = 2U,\n};\n\nstruct JournalEntry {\n  std::uint64_t sequence;\n  JournalKind kind;"
+        },
+        {
+          "first_line": 20,
+          "text": "  JournalKind kind;\n  core::canonical::Bytes command_or_vote_bytes;\n  core::canonical::Bytes next_state_bytes;\n  core::canonical::Bytes effect_batch_bytes;\n  core::canonical::Bytes wal_record_bytes;\n\n  bool operator==(const JournalEntry&) const = default;\n};"
+        }
+      ]
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/transition.cpp",
+      "raw_sha256": "74e5a6e62cc1b6c4cd1e30a33cc983e522f22cb5f839942fbec5c707b48eb569",
+      "byte_length": 7127,
+      "excerpts": [
+        {
+          "first_line": 35,
+          "text": "  if (command.command_kind == \"FINALIZE_ROUND_CONFIG\") {\n    require(\n        state.phase == protocol::RoundPhase::ticketing_open,\n        ErrorCode::illegal_phase,\n        \"round-config replay requires TICKETING_OPEN\");\n    return;\n  }\n  require(!terminal(state.phase), ErrorCode::terminal_state, \"terminal state rejects transitions\");"
+        },
+        {
+          "first_line": 43,
+          "text": "  if (command.command_kind == \"ADVANCE_VIEW\") {\n#if defined(DELTA_NATIVE_MUTANT_ALLOW_VIEW_JUMP)\n    require(\n        state.view != std::numeric_limits<std::uint64_t>::max(),\n        ErrorCode::view_mismatch,\n        \"mutant only retains the view overflow guard\");\n#else\n    require("
+        },
+        {
+          "first_line": 60,
+          "text": "  if (command.command_kind == \"ACCEPT_COMMITMENT\") {\n    require(\n        state.phase == protocol::RoundPhase::ticketing_open ||\n            state.phase == protocol::RoundPhase::committed,\n        ErrorCode::illegal_phase,\n        \"commitment is outside the commitment window\");\n    require(\n        state.committed_ticket_count < state.ticket_count,"
+        },
+        {
+          "first_line": 72,
+          "text": "  } else if (command.command_kind == \"ACCEPT_AVAILABILITY\") {\n    require(\n        state.phase == protocol::RoundPhase::committed ||\n            state.phase == protocol::RoundPhase::available,\n        ErrorCode::illegal_phase,\n        \"availability is outside the availability window\");\n    require(\n        state.available_ticket_count < state.committed_ticket_count,"
+        },
+        {
+          "first_line": 84,
+          "text": "  } else if (command.command_kind == \"FINALIZE_INPUT_FREEZE\") {\n    require(\n        state.phase == protocol::RoundPhase::available,\n        ErrorCode::illegal_phase,\n        \"input freeze requires AVAILABLE state\");\n    require(\n        state.available_ticket_count > 0U,\n        ErrorCode::input_set_empty,"
+        },
+        {
+          "first_line": 94,
+          "text": "  } else if (command.command_kind == \"FINALIZE_AGGREGATE\") {\n    require(\n        state.phase == protocol::RoundPhase::eligible,\n        ErrorCode::illegal_phase,\n        \"aggregate finalization requires ELIGIBLE state\");\n    state.phase = protocol::RoundPhase::aggregated;\n    state.state_root = command.body_hash;\n  } else if (command.command_kind == \"CERTIFY_ABORT\") {"
+        },
+        {
+          "first_line": 101,
+          "text": "  } else if (command.command_kind == \"CERTIFY_ABORT\") {\n    state.phase = protocol::RoundPhase::aborted;\n  } else {\n    reject(ErrorCode::unsupported_command, \"command kind is not registered for feature 003\");\n  }\n  state.durable_sequence = next_sequence(state.durable_sequence);\n}\n"
+        },
+        {
+          "first_line": 151,
+          "text": "  if (command.command_kind != \"ADVANCE_VIEW\") {\n    require(command.view == prior_state.view, ErrorCode::view_mismatch, \"view mismatch\");\n  }\n\n  auto next_state = prior_state;\n  apply_command(next_state, command);\n  auto next_state_encoded = protocol::encode(next_state, limits);\n  const auto prior_state_id ="
+        }
+      ]
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "raw_sha256": "b853596dcb6893467d215572d2701367643f142cbaaf510e225fb0d5bf92f3ee",
+      "byte_length": 49233,
+      "excerpts": [
+        {
+          "first_line": 80,
+          "text": "| W2 | Спрятать ISC в existing kind 1 / `FINALIZE_INPUT_FREEZE` | Отклонён: legacy replay вычисляет только coarse RoundState, не ISC membership/source. Existing `WalRecord.record_kind` допускает только `TRANSITION`. Reinterpretation разрушит старый replay contract |\n| W3 | Отдельный ISC log/side file с pointer из основного WAL | Отклонён для v1: создаёт дополнительную durability/atomicity границу и восстановление двух журналов. Не нужен для одного bounded ISC; файл сам не может стать authority |\n\nW1 — **утверждённое local storage encoding**, а не уже существующий codec.\nНе регистрируем его в коде/schema без отдельного разрешения на реализацию и formal-first допуска.\nОперация требует read capability kind 3 и согласованных codec/build/semantics pins\nдо открытия writer; импортированный frame не выбирает версию verifier.\n"
+        },
+        {
+          "first_line": 102,
+          "text": "  переопределение `FINALIZE_INPUT_FREEZE` и не новая public TLA action.\n\nТот же source cut независимо определяет parent и configuration. Наличие parent\nв RoundConfig, source witness или capsule **не делает parent подписанным полем ISC**\nи не закрывает explicit-parent obligation, оставленное commitment profile.\n\nBootstrap/signature codec/key registry/source bytes не берутся на веру из capsule.\n`signature_id`, SHA-256, transport authenticationTag или stored boolean `valid`"
+        }
+      ]
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "raw_sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "byte_length": 37676,
+      "excerpts": [
+        {
+          "first_line": 31,
+          "text": "- Bootstrap восстанавливает **exact independently known checkpoint F**, не\n  любой checkpoint с большим height. Snapshot current должен равняться F;\n  WAL continuation заканчивается в известном собственном durable tip L,\n  чей current также равен F. Newer checkpoint требует отдельно обновлённого\n  independent anchor; импортёр не выбирает freshness по пакету.\n- Нет chain of imported snapshots. Для full-state binding используется один\n  конечный source bundle от закреплённого genesis до cut/tip, с исходными\n  native events, body/config/artifact preimages и certificate lineage."
+        },
+        {
+          "first_line": 58,
+          "text": "| Trusted rollback floor | Старый валидный QC и snapshot после восстановления D | Последний durable independently retained anchor в T | Append-only `trust.log`, latest verified F и собственные исходные journals; начало связано с bootstrap digest | Проверить непрерывный trusted log, exact F tuple/QC, then candidate equality с F и authoritative local tips | Older/newer-unpinned/fork/unknown floor: отказ; нет fallback к bootstrap F0 при существующем более новом F |\n| Atomic activation | Crash между записью snapshot, floor и публикацией current; stale generation | Single native writer + T commit record после durability D | Immutable generation на D, затем один `ACTIVATE` record на T, связывающий F, generation/manifest hashes и journal cuts | Сначала durable generation, затем durable T commit; на restart выбрать только последний complete consistent T commit и заново проверить referenced bytes | Missing generation после T commit, повреждённый T tail или несовпадение cuts: RECOVERING/BLOCKED; не предыдущий current |\n| Canonical provenance encoding | Разные parser interpretations, числа с потерей точности, неоднозначный hash | Fixed profile/schema и existing hash/canonical primitives, pinned до пакета | Одна schema family: bootstrap, manifest, source-index, trusted-log record; original protocol objects хранятся byte-for-byte | Exact ASCII JSON subset, closed fields, ordered arrays, exact decimal strings, domain-separated IDs, decode/re-encode equality | Duplicate/unknown fields, noncanonical bytes, unsupported version, bounds overflow или trailing bytes: отказ |\n\nOffline provisioning здесь удостоверяет **ключи, primitive origin/config pins и\nfaithful observation конкретных исходных bytes**. Оно не удостоверяет public\nprojection или законность произвольного prepared snapshot. Последнее проверяет\nnative producing-history verifier. Operator не может заменить ApplyQC подписью"
+        },
+        {
+          "first_line": 60,
+          "text": "| Canonical provenance encoding | Разные parser interpretations, числа с потерей точности, неоднозначный hash | Fixed profile/schema и existing hash/canonical primitives, pinned до пакета | Одна schema family: bootstrap, manifest, source-index, trusted-log record; original protocol objects хранятся byte-for-byte | Exact ASCII JSON subset, closed fields, ordered arrays, exact decimal strings, domain-separated IDs, decode/re-encode equality | Duplicate/unknown fields, noncanonical bytes, unsupported version, bounds overflow или trailing bytes: отказ |\n\nOffline provisioning здесь удостоверяет **ключи, primitive origin/config pins и\nfaithful observation конкретных исходных bytes**. Оно не удостоверяет public\nprojection или законность произвольного prepared snapshot. Последнее проверяет\nnative producing-history verifier. Operator не может заменить ApplyQC подписью\nbootstrap file или выставить current без трёх действительных apply signatures.\n"
+        },
+        {
+          "first_line": 128,
+          "text": "- Unknown/duplicate/missing field — ошибка. Прочитанные bytes должны совпасть\n  с canonical re-encoding. Version/schema не выбираются imported content.\n- New document ID: `sha256:` плюс lowercase SHA-256 от\n  `ASCII(domain) || 0x00 || canonical_document_bytes`, как existing certificate\n  `id_for`. Domains: `deltareduce.snapshot-provenance.bootstrap.v1`,\n  `deltareduce.snapshot-provenance.manifest.v1`,\n  `deltareduce.snapshot-provenance.source-index.v1`,\n  `deltareduce.snapshot-provenance.trust-record.v1`."
+        },
+        {
+          "first_line": 199,
+          "text": " -> reconstruct/verify WAL -> atomic activation -> READY\n```\n\nПеред началом имеется закрытый local bundle; verification не запускает fetch,\npeer discovery, ожидание quorum или retry до «самого нового» checkpoint.\nДля этой deployment configuration выбраны admission limits: control document\nне более 4 MiB; до 65 536 artifact refs; суммарно до 64 GiB прочитанных bytes;\nдо 1 000 000 source events и до 1 000 000 WAL/pointer records суммарно."
+        },
+        {
+          "first_line": 213,
+          "text": "| **1. fresh node** | Пустой D. Подключить independently retained T по provisioned identity, получить exclusive owner lock и fenced signing-key custody. Закрыть voting/commands/effects. Один bounded scan inventory | T отсутствует/подменён, unknown custody, foreign local identity или другой writer: BLOCKED |\n| **2. bootstrap anchor** | Проверить trusted bootstrap digest, fixed epoch registry, pinned build/semantics/codecs. Просканировать конечный T `trust.log` от INIT record; выбрать последний durable F и собственный tip L. Cold handover требует, чтобы pointer tip уже был связан с этим F; pending anchor — отказ. Даже на пустом D не сбрасывать T до initial F0 | Bad log/tail, pending pointer/anchor mismatch, unknown key/epoch/version, отсутствующий approved input, reset старой identity: BLOCKED |\n| **3. verify checkpoint authority** | Один bounded traversal original ApplyQC/candidate/root/shard/APC/EC/ISC graph и votes. Проверить canonical IDs, contexts/roles/keys, threshold3/unique signers, signed payload association, model/optimizer artifacts. Output — authenticated exact F tuple и verified original graph | Signature/key/body/parent mismatch; cyclic/missing graph; self-authenticated epoch: BLOCKED |\n| **4. verify snapshot provenance** | Один indexed topological pass native source events от pinned genesis до target, с сохранённым computed cut. Проверить complete snapshot/config/source/aliases/units/collections и checkpoint transitions. Output — derived original cut и target, а не accepted public state | Нет independent producer rule/inputs, extra or omitted collection, bad origin либо mismatch: BLOCKED |\n| **5. check trusted floor** | Candidate snapshot current и derived target current должны **exactly equal F**; exact QC ID, height, model и optimizer, не просто model hash. Проверить original current lineage и snapshot cut ≤ authoritative own tip L. Floor reread под lock | Старый valid checkpoint, fork, новый self-selected checkpoint, changed F или unproven ancestry: BLOCKED |\n| **6. reconstruct/verify WAL** | Один ordered scan own original journals на T. Сопоставить prefix/cut и suffix до L с source-derived states, policy IDs, exact commands/votes/receipts/effects и pointer CAS. Rebuild volatile caches. Original files/bytes/sequences не переписывать. Output — exact recovered state и полный own durable vote cache | Gap, missing intact record, ambiguous/torn required scan, lost unpublished intent, altered policy или target mismatch: BLOCKED |\n| **7. atomic activation** | Выполнить конечный durability protocol §6: immutable D generation, then one T activation commit. F/L recheck перед commit. Output — durable association generation ↔ manifest ↔ F ↔ own cuts | Любая I/O/durability/identity ошибка: BLOCKED, ни replacement journal, ни fallback current |\n| **8. READY** | Последняя identity/hash/cut проверка непосредственно загруженных immutable bytes; state/current равны шагам 4/6, last T commit соответствует F/L. Только теперь открыть existing runtime command/effect boundary | Несовпадение или unavailable proof/compatibility authority: остаётся RECOVERING/BLOCKED |"
+        },
+        {
+          "first_line": 214,
+          "text": "| **2. bootstrap anchor** | Проверить trusted bootstrap digest, fixed epoch registry, pinned build/semantics/codecs. Просканировать конечный T `trust.log` от INIT record; выбрать последний durable F и собственный tip L. Cold handover требует, чтобы pointer tip уже был связан с этим F; pending anchor — отказ. Даже на пустом D не сбрасывать T до initial F0 | Bad log/tail, pending pointer/anchor mismatch, unknown key/epoch/version, отсутствующий approved input, reset старой identity: BLOCKED |\n| **3. verify checkpoint authority** | Один bounded traversal original ApplyQC/candidate/root/shard/APC/EC/ISC graph и votes. Проверить canonical IDs, contexts/roles/keys, threshold3/unique signers, signed payload association, model/optimizer artifacts. Output — authenticated exact F tuple и verified original graph | Signature/key/body/parent mismatch; cyclic/missing graph; self-authenticated epoch: BLOCKED |\n| **4. verify snapshot provenance** | Один indexed topological pass native source events от pinned genesis до target, с сохранённым computed cut. Проверить complete snapshot/config/source/aliases/units/collections и checkpoint transitions. Output — derived original cut и target, а не accepted public state | Нет independent producer rule/inputs, extra or omitted collection, bad origin либо mismatch: BLOCKED |\n| **5. check trusted floor** | Candidate snapshot current и derived target current должны **exactly equal F**; exact QC ID, height, model и optimizer, не просто model hash. Проверить original current lineage и snapshot cut ≤ authoritative own tip L. Floor reread под lock | Старый valid checkpoint, fork, новый self-selected checkpoint, changed F или unproven ancestry: BLOCKED |\n| **6. reconstruct/verify WAL** | Один ordered scan own original journals на T. Сопоставить prefix/cut и suffix до L с source-derived states, policy IDs, exact commands/votes/receipts/effects и pointer CAS. Rebuild volatile caches. Original files/bytes/sequences не переписывать. Output — exact recovered state и полный own durable vote cache | Gap, missing intact record, ambiguous/torn required scan, lost unpublished intent, altered policy или target mismatch: BLOCKED |\n| **7. atomic activation** | Выполнить конечный durability protocol §6: immutable D generation, then one T activation commit. F/L recheck перед commit. Output — durable association generation ↔ manifest ↔ F ↔ own cuts | Любая I/O/durability/identity ошибка: BLOCKED, ни replacement journal, ни fallback current |\n| **8. READY** | Последняя identity/hash/cut проверка непосредственно загруженных immutable bytes; state/current равны шагам 4/6, last T commit соответствует F/L. Только теперь открыть existing runtime command/effect boundary | Несовпадение или unavailable proof/compatibility authority: остаётся RECOVERING/BLOCKED |\n"
+        },
+        {
+          "first_line": 218,
+          "text": "| **6. reconstruct/verify WAL** | Один ordered scan own original journals на T. Сопоставить prefix/cut и suffix до L с source-derived states, policy IDs, exact commands/votes/receipts/effects и pointer CAS. Rebuild volatile caches. Original files/bytes/sequences не переписывать. Output — exact recovered state и полный own durable vote cache | Gap, missing intact record, ambiguous/torn required scan, lost unpublished intent, altered policy или target mismatch: BLOCKED |\n| **7. atomic activation** | Выполнить конечный durability protocol §6: immutable D generation, then one T activation commit. F/L recheck перед commit. Output — durable association generation ↔ manifest ↔ F ↔ own cuts | Любая I/O/durability/identity ошибка: BLOCKED, ни replacement journal, ни fallback current |\n| **8. READY** | Последняя identity/hash/cut проверка непосредственно загруженных immutable bytes; state/current равны шагам 4/6, last T commit соответствует F/L. Только теперь открыть existing runtime command/effect boundary | Несовпадение или unavailable proof/compatibility authority: остаётся RECOVERING/BLOCKED |\n\nREADY здесь имеет existing native смысл: разрешены commands/votes для той же\nenrolled identity с восстановленным собственным no-double-vote cache и\nсертифицированным current F. Это не observer-only READY и не утверждение,\nчто F является последним checkpoint глобальной сети. Bootstrap freshness"
+        }
+      ]
+    },
+    {
+      "commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+      "path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md",
+      "raw_sha256": "6cda0cf6f623a45c32e4f60ef80ed01dfc491251afa7d77628a41c55d7c2798a",
+      "byte_length": 22434,
+      "excerpts": [
+        {
+          "first_line": 18,
+          "text": "bytes. It creates neither a certificate protocol nor a storage capsule.\n\nApproval would select a new, future native-source producer rule for isolated\nfeature000 formal/reference work. It would NOT certify that an old runtime\nproduced these events, install recovery, close R2.3, assign a concrete semantics\nID, or approve a production WAL encoding. Other source producers still require\ntheir own existing, independently checked origin; they are not assumed correct\nbecause this EC step succeeds. The frozen three residuals are unchanged."
+        },
+        {
+          "first_line": 215,
+          "text": "a new native durable storage implementation. Actual append/barrier/commit/expose\nevidence, wherever claimed by a source, must still use an independently selected\nstorage contract and original records. W1 cannot establish EC durability; neither\ncan an EC/source hash. An absent concrete EC commit encoding cannot be replaced\nby a `durable=true` assumption. Selecting that production encoding is outside\nthis proposal; no claim that the historical N runtime supports it is made.\nSource-level construction can be proved independently, but alone is insufficient\nto close full snapshot/journal recovery or declare READY. This limitation must"
+        },
+        {
+          "first_line": 217,
+          "text": "storage contract and original records. W1 cannot establish EC durability; neither\ncan an EC/source hash. An absent concrete EC commit encoding cannot be replaced\nby a `durable=true` assumption. Selecting that production encoding is outside\nthis proposal; no claim that the historical N runtime supports it is made.\nSource-level construction can be proved independently, but alone is insufficient\nto close full snapshot/journal recovery or declare READY. This limitation must\nremain visible in the composed R2 evidence, not be moved into a hidden axiom.\n"
+        },
+        {
+          "first_line": 219,
+          "text": "by a `durable=true` assumption. Selecting that production encoding is outside\nthis proposal; no claim that the historical N runtime supports it is made.\nSource-level construction can be proved independently, but alone is insufficient\nto close full snapshot/journal recovery or declare READY. This limitation must\nremain visible in the composed R2 evidence, not be moved into a hidden axiom.\n\n## 6. Retry, conflict, incomplete sources and failure\n"
+        },
+        {
+          "first_line": 241,
+          "text": "by choosing a smaller cut. Unknown storage cuts remain unknown until verified.\nNo claim of faithful physical availability is added; the selected O semantics\nand rejection of factual-history trust F remain unchanged.\n\nDifferent admissible arrival cuts may yield different signer-dependent EC IDs.\nThey are distinct original histories/witnesses, not evidence of byte-identical\ncertificates. This proposal neither merges them nor applies ISC I-B to EC.\nLater APC/QC references continue to name the exact original e. It does not prove"
+        }
+      ]
+    }
+  ],
+  "reason": "Selected EC source rule computes policy P1 but explicitly excludes storage encoding. Native kind1 is a coarse state command; kind2 persists the original Vote intent and startup-policy hash; kind3 W1 is ISC-only. Current-pointer WAL covers APPLY current, not an EC commit. No existing inspected contract binds EC E/seed and full P0/P1 to append/barrier/commit/expose/recovery. This is a missing independent premise, not evidence that an authenticated full native history violates the model.",
+  "excluded_claims": [
+    "No new universal absence theorem",
+    "No executed production crash attack",
+    "No incomplete trace represented as fully admissible source counterexample",
+    "No alternative storage contract selected"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "result": "FORMAL_CHECK_STOPPED_AT_PROOFS",
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "command_equivalence": "Makefile formal-check recipes executed sequentially with existing pinned toolchain; make executable unavailable",
+  "gates": [
+    {
+      "gate": "phase0",
+      "log": "mandatory-phase0.txt",
+      "sha256": "5b52431b27b3f7468824aea108144393f19839860c4cd990eed1ed67904920b6",
+      "exit_code": 0,
+      "captured_raw_sha256": "242ca6da9d10d64608282fbfc538f7400b8afab6f268a5792f4998a8b6dcf26c"
+    },
+    {
+      "gate": "contracts",
+      "log": "mandatory-contracts.txt",
+      "sha256": "a3ac540070eb4cec6586bac760c305033387b10daf3f0050cd3c000c517e4e8b",
+      "exit_code": 0,
+      "captured_raw_sha256": "595686464288b85c5506e8ff78b40a1a30f18ae35f86fd582ecf9b680a915c58"
+    },
+    {
+      "gate": "toolchain",
+      "log": "mandatory-toolchain.txt",
+      "sha256": "a83f8f9ef01625377fafbd38e94c9acf5beab2a5bea26964fa37593122db91c5",
+      "exit_code": 0,
+      "captured_raw_sha256": "c9e96b09f16821ba608e6bfbec62d54cc1055dd66516598c4b466c05864a7e0e"
+    },
+    {
+      "gate": "parse",
+      "log": "mandatory-parse.txt",
+      "sha256": "0735fe4bdbe3a3c789cabe7f15e03969fb1cc4124f5f9047ad3ca3e0ec497143",
+      "exit_code": 0,
+      "captured_raw_sha256": "749eccf4c90be0a6dc3c8349210c89f88aef7dc6ba6e4945db56c4d54ea9c4c8"
+    },
+    {
+      "gate": "safety",
+      "log": "mandatory-safety.txt",
+      "sha256": "d61f593df4c8fa3862414f85cf4f93b374b93d6aeab0f1488f3df174f426b057",
+      "exit_code": 0,
+      "captured_raw_sha256": "005842afaa20ae47bc7f9b3f5c33c094db7b6916e4452e0c30fa83bc72ffe8a3"
+    },
+    {
+      "gate": "liveness",
+      "log": "mandatory-liveness.txt",
+      "sha256": "1341174fc226b9b508424937b0d4746bbb856d45801e2c6c7a8c27e3bdac74d3",
+      "exit_code": 0,
+      "captured_raw_sha256": "31d7e5f69c1ae7b5d69d3c0676280a297851ccb13d063e2269778e3418b4209b"
+    },
+    {
+      "gate": "proofs",
+      "log": "mandatory-proofs.txt",
+      "sha256": "0ac3e2ba5a69ae15c21f1feca11d4145b3c86f56a210d538537fb07d5f8da875",
+      "exit_code": 1,
+      "captured_raw_sha256": "997b7912c8f0f165749d1402d253ca60ab8dbdd4ba0c79ed7731596a1af65127"
+    }
+  ],
+  "errors": [
+    "PO-AB1 conjunct admission-recovery-refinement theorem nativeArithmeticRecoveryRefines is missing",
+    "axiom dependency result missing for DeltaReduce.nativeArithmeticRecoveryRefines"
+  ],
+  "not_run_after_failed_prerequisite": [
+    "mutants",
+    "refinement",
+    "report"
+  ],
+  "limitations": [
+    "Current EC component not full R2.3 or named recovery",
+    "First parse lacked TLA2TOOLS_JAR; corrected using already locked installed toolchain",
+    "Desktop restart interrupted an unfinished qualifier and safety pass; only unfinished gates repeated; no interrupted run promoted to PASS"
+  ],
+  "pinned_tools": {
+    "java": "D:/formal-tools-20260920/java/bin/java.exe",
+    "tla": "D:/formal-tools-20260920/tla/tla2tools.jar",
+    "lake": "D:/formal-tools-20260920/lean/bin/lake.exe"
+  },
+  "log_encoding": "UTF-8 text, LF newlines in Git; captured_raw_sha256 identifies untouched external capture"
+}

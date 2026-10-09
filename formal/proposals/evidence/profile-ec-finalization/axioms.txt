@@ -1,0 +1,56 @@
+'DeltaReduce.ProfileSource.EcFinalization.FirstFor' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcFinalization.existingFinalizedExcludesFirst' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcFinalization.sameWitnessTree' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.EcFinalization.witnessTreeExact' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.insertWitness' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.EcFinalization.originalWitnessesRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.selectedWitnessRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.differentWitnessCollision' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.update' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.EcFinalization.updateSource' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.preservesOtherSnapshotFields' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.preservesOuterFields' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.allOriginalLineageRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.Guards' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.bodyTarget' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.assemble' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.assembled' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.assembleComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.exactComputedWitness' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.firstAtOriginalKey' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.allDeliveredOriginalsRetained' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.unchangedLineage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.fromBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.originalBefore' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.successorOriginals' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.checkWhole' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.wholeNativeStateChecked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.insertPosition' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcFinalization.insertedPositionMembership' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.EcFinalization.insertedPositionSorted' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.orderedUnion' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcFinalization.orderedUnionSorted' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.orderedUnionMembership' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.EcFinalization.dependencyUnion' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.dependenciesAreExactlyOriginalPositions' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.EventChecks' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.bindEvent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.originalEventChecked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.Retained' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.replay' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.replayStutters' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.replayExactSeedAndWitness' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.checkReplay' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcFinalization.replayOriginalCut' depends on axioms: [propext, Classical.choice, Quot.sound]
