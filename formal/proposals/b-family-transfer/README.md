@@ -1,5 +1,32 @@
 # R2 / B — перенос family relation на исходные vector shards
 
+## Текущий source-profile компонент (scope revision 13)
+
+`ProfileOrigin.lean` связывает независимо provisioned bootstrap bytes/pins с
+исходным source inventory и всем сохранённым trusted-floor журналом. Проверяются
+точные domain-separated frame digests, ordinal/previous links, начальный anchor,
+монотонный floor и запрет смены anchor при прежней высоте. Журнал не усекается.
+
+`ProfileImport.lean` соединяет эти результаты с исходным manifest, snapshot/QC/
+candidate bytes, полным artifact inventory и всеми original own-journal prefixes,
+включая cuts каждого сохранённого trusted-floor record. `profileSource`,
+`originalArtifactInventory`, `eventInventoryAndCuts` и `allTrustedPrefixes` —
+общие Lean statements над принятым существующим metadata contract.
+
+Воспроизведение: `check_origin.py` и `check_import.py`; receipts и исходные
+проверяемые artifacts находятся в `../evidence/profile-origin/` и
+`../evidence/profile-import/`. SHA всех sources/logs/artifacts проверяются отдельно.
+Векторы содержат синтетические metadata: они не аттестуют genesis, QC signatures
+или production capture. Корректность ссылок не доказывает lawful producer history.
+
+**R2.3 OPEN / Formal NO_GO.** Остаются исходная producer/initial/configuration/
+unit authority, полная public family relation и initial/incomplete/ABORT с
+сохранением lineage. Graph result/review и named recovery theorem не заявлены.
+Ниже сохранён исторический checkpoint первоначального переноса; его старые
+разрешения, статусы подпунктов и оценка не заменяют актуальный effective scope.
+
+## Исторический checkpoint первоначального переноса
+
 Tasks T044/T047/T053–T057. Основание: прямой выбор пользователем B после
 `e157e84c0e4091ec7654212085f8a5e2076a40b1`. DoD R1–R7 не меняется.
 Бюджет этой задачи: максимум 12 активных часов; R3 не разрешён.
