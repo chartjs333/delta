@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "request_id": "scope-request-67dfa67f42c4af7b63be6d76997033f5",
+  "status": "pending",
+  "created_at": "2026-10-09T14:43:40.233594+00:00",
+  "idempotency_key": "isc-s16-r23-first-ec-source-contract-674d7cf2",
+  "request_sha256": "67dfa67f42c4af7b63be6d76997033f5a3921c8f38113f1827844cbad729e9b1",
+  "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+  "source": {
+    "repository_key": "github.com/chartjs333/delta",
+    "commit": "674d7cf2e8d307e777c01b5062828a211e0d40a5",
+    "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-R23-FIRST-EC-SOURCE-CONTRACT-DECISION.json",
+    "sha256": "9cb7f6c03c358a43b222de402c7e19b042cf34f45fefe3cfa2b1a7dfc34c91bd"
+  },
+  "base_scope_revision": 15,
+  "verification": {
+    "requests_get_endpoint": "/api/v1/projects/9000/sprints/sprint-0001-783ef52c/scope-requests",
+    "requests_get_sha256": "d0685a381424bb8ad40cb798b1618bc8f6cc272c09d49e40726d46946c78bd1a",
+    "execution_revision": 212,
+    "scope_revision": 15,
+    "workflow_revision": 57,
+    "matching_idempotency_records": 1,
+    "source_and_proposal_match_committed_json": true,
+    "effective_scope_get_sha256": "96ca65ab0a6bb1355cb120a321fcab65c0e66f705b788cee804c5911681e2804",
+    "effective_scope_context_unchanged": true,
+    "acknowledged": true,
+    "ack_id": "scope-ack-1f6c8b2ec002dc96d3e3f0584f31e390"
+  },
+  "boundary": "Request creation only; operator decision and application not performed",
+  "r2_3": "OPEN",
+  "formal_go": false,
+  "recovery_theorem_started": false,
+  "historical_results_rewritten": false,
+  "new_graph_or_sprint_created": false,
+  "checks": [
+    "Create transport body validated against static scope-change-request-v1 JSON Schema; scope/identity obtained only via HTTP",
+    "Exact published source SHA256 and source/proposal equality verified",
+    "Both prior process reviews accepted; not independent attestations",
+    "GET confirms one Pending request and unchanged scope15/current assignment/ACK",
+    "Installed DPAPI wrapper changes match explicitly approved hashes; credential handling unchanged"
+  ]
+}
