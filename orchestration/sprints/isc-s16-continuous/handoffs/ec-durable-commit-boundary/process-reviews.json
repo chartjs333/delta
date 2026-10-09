@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01",
+    "ISC-S16-CONTINUITY"
+  ],
+  "official_origin": "http://127.0.0.1:18025",
+  "project": "9000",
+  "sprint": "sprint-0001-783ef52c",
+  "source_commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+  "source_branch": "agent/isc-s16-formal-linkage",
+  "publication_base": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+  "transition": {
+    "transition_id": "d48d2116-79da-49e0-bafe-eaf7b3ec4274",
+    "source_node_id": "formal-linkage",
+    "source_agent_id": "isc-s16-formal-linkage-engineer",
+    "source_agent_name": "Delta ISC Formal Linkage Engineer",
+    "source_agent_phone": "2753",
+    "source_git_branch": "agent/isc-s16-formal-linkage",
+    "source_assignment_id": "0a98cefa-5b31-42a4-b709-fa0ec58bb932",
+    "outcome": "NEED_DECISION",
+    "target_node_id": "continuity-coordinator",
+    "status": "approved",
+    "proposed_at": "2026-10-09T19:45:22.423338+00:00",
+    "resolved_at": "2026-10-09T20:19:01.578016+00:00",
+    "applied_target_node_id": "continuity-coordinator",
+    "feedback": "",
+    "reviews": [
+      {
+        "reviewer_index": 1,
+        "reviewer_agent_id": "isc-s16-continuous-architecture-reviewer",
+        "reviewer_name": "Delta ISC Continuous Architecture Reviewer",
+        "assignment_id": "d02b709e-5110-4347-8b7c-9450f62e1ebc",
+        "decision": "APPROVE",
+        "feedback": "T047/T053 architecture process review: APPROVE the NEED_DECISION checkpoint and ordinary return to coordinator, not substantive R2.3 closure or Formal GO. Reviewed exact e389e1869ddac63c7d529a1e83d3b153d1669f36..47d75279d23441f5c10ed523bdea172b257e8bef. The selected source step computes all-cut EC signers, keys first finalization by original b, rejects missing finalized witnesses and same-e/different-seed collisions, changes only the two EC policy collections, retains all old witnesses/other fields, accepts either retained original C for b, and recomputes original event dependencies/replay without inventing protocol identities. Source/assembleComplete are explicit computation conjuncts, not a proof that the independent lawful producing prefix exists. Full static InstalledState joins are not public success or durable authority; Python also documents its prerequisite full joins/origin. The report correctly leaves source-fold and public totality open. Scope17 excludes concrete EC storage; pinned kind1/kind2 and ISC-only W1 do not select an EC policy commit/barrier/crash interpretation. No implementation of that missing semantic binding is hidden in this patch. The exact remaining need is an original persisted E/seed/event-cut/P0/P1 binding plus barrier and replay rule. No production/TLA Init-Next/schema/guard changes, new trust or source cap were found. Mandatory proof FAIL and missing named recovery remain NO_GO; no gate waiver. Fresh actual-role scope/core/source-parent hashes and exact ACK scope-ack-6376978e6575c96fd4cc7326d1ed8f14 GET-confirmed. Same sequential executor review is process evidence, NOT an independent attestation.",
+        "reviewed_at": "2026-10-09T20:06:22.477628+00:00"
+      },
+      {
+        "reviewer_index": 2,
+        "reviewer_agent_id": "isc-s16-continuous-evidence-reviewer",
+        "reviewer_name": "Delta ISC Continuous Evidence Reviewer",
+        "assignment_id": "2e9cd0c6-658d-4815-867e-1c50868c63d6",
+        "decision": "APPROVE",
+        "feedback": "T047/T053 evidence process review: APPROVE only the NEED_DECISION checkpoint/normal return to coordinator for exact e389e1869ddac63c7d529a1e83d3b153d1669f36..47d75279d23441f5c10ed523bdea172b257e8bef. Recomputed Git-blob hashes for the published source closure, every qualification log and original-byte artifact; validated receipt/checker inventory and standard Lean axiom audit. Kernel cases and reference regression support the scoped EC computation, original cut/signers/dependencies, retained witness/seed and replay. Synthetic NSG1 vectors are explicitly NOT an authentic producer history. The receipt does not establish original producing prefix, independent barriers, complete public totality or R2.3 closure. Immutable native/W1/selected-rule references support the narrow missing EC durable-binding finding, not an executed attack or a whole admitted snapshot counterexample. Mandatory phase0/contracts/locks/parse/safety/liveness passed; proof gate honestly fails on missing nativeArithmeticRecoveryRefines and its axiom result; mutants/refinement/report were not reached. Interrupted desktop run and corrected toolchain environment are not promoted to PASS. The successful fresh component receipt binds current sources, not stale failed kernel logs. No old evidence, semantics ID, QC/WAL object, production guard or trust model was relabeled. Architecture review1 APPROVE is GET-confirmed for this exact source result. Current role scope/core/source-context verified and ACK scope-ack-1bc2763e22f1ef128d81a4d9fa6b23f9 GET-confirmed. R2.3 OPEN / Formal NO_GO; no qualification waiver and no independent attestation from this same sequential executor.",
+        "reviewed_at": "2026-10-09T20:19:01.578016+00:00"
+      }
+    ],
+    "result_available": true,
+    "result_chars": 1270
+  },
+  "coordinator_assignment": "93868961-a78f-41db-93ec-06d4d6d3167d",
+  "execution_revision_after_reviews": 234,
+  "coordinator_scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+    "effective_revision": 17,
+    "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+    "node_id": "continuity-coordinator",
+    "phase": "node",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "occurrence": 10,
+    "source_commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+    "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1-DECISION.json",
+    "source_sha256": "701f2dd240e5d984c8297f4e0521fe6ebdd751bec88abea0b65c6caa4b35d541",
+    "effective_scope_sha256": "661475d858754be5a624dec12ef627c8ad107ab35c9e1a24e71686e22d63451f",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "coordinator_ack": {
+    "ack_id": "scope-ack-41eed42d41d1b3ad5ab12f97def989aa",
+    "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+    "agent_id": "isc-s16-continuity-coordinator",
+    "agent_phone": "2750",
+    "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+    "effective_revision": 17,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-82f5fa29c923344960bfa920cc9c07c9",
+      "effective_revision": 17,
+      "assignment_id": "93868961-a78f-41db-93ec-06d4d6d3167d",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 10,
+      "source_commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+      "source_path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1-DECISION.json",
+      "source_sha256": "701f2dd240e5d984c8297f4e0521fe6ebdd751bec88abea0b65c6caa4b35d541",
+      "effective_scope_sha256": "661475d858754be5a624dec12ef627c8ad107ab35c9e1a24e71686e22d63451f",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-09T20:30:00.378363+00:00"
+  },
+  "review_claim": "Both APPROVE only the NEED_DECISION checkpoint and normal coordinator route. Same sequential executor; not independent attestations or R2.3 closure.",
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "storage_binding": "NOT_SELECTED",
+  "request_at_capture": "NOT_YET_SUBMITTED",
+  "graph_transition_from_coordinator": false
+}

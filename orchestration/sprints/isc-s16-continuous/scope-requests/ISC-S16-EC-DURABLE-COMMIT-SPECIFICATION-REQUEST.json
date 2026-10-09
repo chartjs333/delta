@@ -1,0 +1,41 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01",
+    "ISC-S16-CONTINUITY"
+  ],
+  "reason": "EC durable commit binding — SPECIFICATION ONLY. The selected scope17 logical EC rule has a qualified component and two accepted process reviews, but expressly excludes the concrete storage binding required by the recovered-source claim. This requests one finite specification pass for that missing semantic boundary, not renewed permission for ordinary R2.3 helpers or implementation.",
+  "dependencies": [
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/proposals/ec-source-step-checkpoint.md; immutable component, limits and exact residual EC_DURABLE_COMMIT_BINDING_NOT_SELECTED.",
+    "47d75279d23441f5c10ed523bdea172b257e8bef:formal/proposals/evidence/profile-ec-finalization/durability-boundary.json; exact native N and ISC-only W1 source pins/excerpts.",
+    "f1a9963eabb5cb61f936ad1ad41f45e870acd43e:orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md sections5-7; scope17 does not supply a concrete EC durable commit encoding.",
+    "nginx-qa transition d48d2116-79da-49e0-bafe-eaf7b3ec4274; source assignment0a98cefa-5b31-42a4-b709-fa0ec58bb932; accepted architecture/evidence reviews d02b709e-5110-4347-8b7c-9450f62e1ebc and2e9cd0c6-658d-4815-867e-1c50868c63d6. Same sequential executor; no independent attestation or R2.3 closure."
+  ],
+  "proposal": {
+    "instructions": "Authorize ONE bounded specification-only pass for EC_DURABLE_COMMIT_BINDING_NOT_SELECTED. Using the already selected Snapshot Provenance Profile v1 and EC-SOURCE-STEP-v1, prepare a concrete minimal reviewable contract identifying (1) the persisted object binding exact original E/seed, original event/cut and complete computed P0/P1, (2) append/barrier/commit/expose ordering and (3) incomplete/crash/replay interpretation preserving original physical slots, public vote ordinals, identities and all lineage. Reuse existing selected authority and contracts wherever sufficient. Show exact byte/storage compatibility consequences and required future qualification; do not design a universal storage system or alternative provenance mechanism. This approval authorizes only drafting that contract, not selecting its eventual layout, a new WAL kind, W1 extension or implementation. If a purported already selected immutable binding is supplied, verify exact applicability and evidence instead of treating a hash or assertion as authority. After the specification, publish one exact proposal through Pending decisions and STOP before code/schema/proof/fixture/runtime changes or dependent R2.3 continuation. Preserve all scope17 permissions and restrictions: general R2.3 authority is not being requested again, but does not select the missing storage semantics. No production integration, guard removal, certificate/QC/WAL identity change, new trust, concrete sigma or full R3. R2.3 remains OPEN/Formal NO_GO until its ordinary substantive proof and review gates succeed; named recovery only after that closure. Reject or unresolved edits preserve the current dependent STOP.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+      "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+      "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+      "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+      "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+      "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate.",
+      "This selection concerns the exact EC-SOURCE-STEP-v1 source interpretation only. It is not approval of a concrete EC durability encoding, runtime producer, new WAL kind, W1 extension, new trust root or physical-history claim. If required composition lacks an independently selected storage/producer rule, expose that residual and STOP rather than assume it.",
+      "This request is specification-only. Approval does not select an EC persisted byte format, extend W1, introduce a WAL kind, authorize implementation/proofs/schemas/fixtures, or waive any gate. Submit the exact resulting proposal and STOP before dependent implementation. No durable=true/source-hash/public-success surrogate."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PROPOSED_SPECIFICATION_ONLY_NOT_SELECTED",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
