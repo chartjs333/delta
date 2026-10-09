@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "checked_at_utc": "2026-10-09T15:59:55.697528+00:00",
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "request_id": "scope-request-a046e903247f973728511eefd3315673",
+  "status": "PENDING_GET_CONFIRMED",
+  "source": {
+    "repository_key": "github.com/chartjs333/delta",
+    "commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+    "path": "orchestration/sprints/isc-s16-continuous/scope-requests/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1-DECISION.json",
+    "sha256": "701f2dd240e5d984c8297f4e0521fe6ebdd751bec88abea0b65c6caa4b35d541"
+  },
+  "current_assignment": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+  "current_scope_revision": 16,
+  "execution_revision": 214,
+  "workflow_revision": 61,
+  "ack_id": "scope-ack-baaefdb170635084a400908b14bbd979",
+  "exact_ack_preserved": true,
+  "prior_requests_preserved": 15,
+  "scope_core_sha256": "e6865cc8a16bbf5aad2db197d35eb0fe407e680f9321c367f6a5ce8133cd653d",
+  "graph_transition_submitted": false,
+  "result_or_review_submitted": false,
+  "code_schema_proof_fixture_runtime_changed": false,
+  "r2_3": "OPEN",
+  "formal_status": "NO_GO",
+  "decision_boundary": "Select exact EC-SOURCE-STEP-v1; not general R2.3 authorization. Concrete EC durability is not granted by source reconstruction.",
+  "evidence_hashes": {
+    "scope16-after-ack.json": "c7cd38ed969b3be1b24898e6fb1eac2cd9a38e901ede0009010fb52e920b003d",
+    "requests-after.json": "367590cd97aeecf945da5d5aa734c105cce1fb37ab1845af7a96599487c0de9e",
+    "scope16-after-pending.json": "c7cd38ed969b3be1b24898e6fb1eac2cd9a38e901ede0009010fb52e920b003d",
+    "request-response.json": "d5df224971889673cff9fb0331d142ecde096fe2bb13d405bc7f754331a90c81"
+  }
+}
