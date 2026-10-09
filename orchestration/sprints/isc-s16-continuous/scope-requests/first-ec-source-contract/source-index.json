@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "checkpoint": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+  "scope_revision": 15,
+  "r2_3": "OPEN",
+  "formal_go": false,
+  "sources": [
+    {
+      "git_blob": "e389e1869ddac63c7d529a1e83d3b153d1669f36:formal/proposals/configuration-units-ec-origin-checkpoint.md",
+      "sha256": "284bcad1f1d365f80592569f71ce560b353340bb69df30a3ecc061c3fd5aaadf"
+    },
+    {
+      "git_blob": "e389e1869ddac63c7d529a1e83d3b153d1669f36:formal/proposals/evidence/ec-origin-boundary/source-audit.json",
+      "sha256": "ad86c73a84d6b5a030a0c325b5d2dba445d1b46648645954d384cd04de38b531"
+    },
+    {
+      "git_blob": "e389e1869ddac63c7d529a1e83d3b153d1669f36:formal/proposals/evidence/profile-configuration-units/receipt.json",
+      "sha256": "0c556a1472de2ab4ee62bbfa5a4f8a958e2b89e55071a1879c70d85361e4de61"
+    },
+    {
+      "git_blob": "4dea988bae971c6b05f004319764a220cd9e4717:docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a"
+    },
+    {
+      "git_blob": "4dea988bae971c6b05f004319764a220cd9e4717:docs/adr/0014-isc-finalization-wal-capsule-v1.md",
+      "sha256": "b853596dcb6893467d215572d2701367643f142cbaaf510e225fb0d5bf92f3ee"
+    },
+    {
+      "git_blob": "4dea988bae971c6b05f004319764a220cd9e4717:formal/proposals/b-family-transfer/ProfileIscFinalization.lean",
+      "sha256": "1d64b1af9b373a628a0845892d0b9b1b0443ff7e4abf9351151f6785115687fb"
+    },
+    {
+      "git_blob": "bb9fce957dae329701a8cd473a7148e198e1ca12:docs/adr/0015-non-isc-authority-binding-v1.md",
+      "sha256": "f2e988d26a28ff8cedf74cc2265c535057e7ae37dc152002a853c75a0614710d"
+    },
+    {
+      "git_blob": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1:formal/proposals/arithmetic-unit-source-binding-decision.json",
+      "sha256": "4f106f712efb8c0294b1b499aa9e800d4c7d576fe6f1d909d46eb4ec5419659b"
+    },
+    {
+      "git_blob": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1:formal/proposals/arithmetic-unit-source-binding-v1.md",
+      "sha256": "7ec36faeb8eab0bdef137eda329daf409b4d07b56b2b8d517902c4e6ac339c49"
+    }
+  ],
+  "native_audit_scope": "92 native source/header files and 98 total immutable source hashes in the cited EC audit; verified again during process review",
+  "claims": [
+    "Bounded missing native first-EC producing edge; no universal impossibility or reachable counterexample claim",
+    "Source request only; no new producer rule or trust authority selected",
+    "All three R2.3 residuals remain open; recovery theorem remains stopped"
+  ],
+  "process_review_receipt": {
+    "path": "orchestration/sprints/isc-s16-continuous/scope-requests/first-ec-source-contract/process-reviews.json",
+    "sha256": "6d6294b94715a4b24e5c81c904ab492ad419665d8120398f3e2c21695b140256"
+  }
+}

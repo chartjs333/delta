@@ -1,0 +1,39 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "reason": "MISSING_FIRST_EC_NATIVE_PRODUCER_CONTRACT: e389e1869ddac63c7d529a1e83d3b153d1669f36 completes a schema-3 configuration source conjunct but cannot establish the first finalized EC producing event. The selected N/W1/SIG-NON-ISC/Profile-v1 contracts bind supplied bytes, votes and prior sources without selecting the native P0/received-cut/P1 first-finalization edge. A supplied valid EC, prefilled policy or public FinalizeEC is not independent native origin. This is the specific new semantic boundary identified by the user; no new permission for ordinary R2.3 helpers is requested.",
+  "dependencies": [
+    "e389e1869ddac63c7d529a1e83d3b153d1669f36:formal/proposals/configuration-units-ec-origin-checkpoint.md and formal/proposals/evidence/ec-origin-boundary/source-audit.json; exact blob hashes in accompanying source index.",
+    "N=60c692f6e391f839829dfc64e93380db54cd507b; SIG-NON-ISC=bb9fce957dae329701a8cd473a7148e198e1ca12:docs/adr/0015-non-isc-authority-binding-v1.md; selected W1 expressly excludes EC/seed and preserves non-ISC fields.",
+    "Scope15 source 9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1:formal/proposals/arithmetic-unit-source-binding-decision.json retains R2.3 OPEN until substantive reviewed closure.",
+    "Both process reviews APPROVE the boundary report, not R2.3 closure: assignments 1afc0e00-261b-4ad7-8abf-630b04982ccb and fb392083-8b05-47b4-a2d9-d075b9a220ac; authoritative GET execution revision210. Same-source scope-requests/first-ec-source-contract/process-reviews.json records exact feedback and ACKs. Same-executor process reviews are not independent attestations.",
+    "Same-source orchestration/sprints/isc-s16-continuous/scope-requests/first-ec-source-contract/source-index.json pins the selected immutable contracts and checkpoint; current coordinator assignment f14e1fce-76fe-4cc0-91b0-96e5d22961b0 remains active under scope15."
+  ],
+  "proposal": {
+    "instructions": "T047/T053 / ISC-S16-D01. Preserve existing scope15 Arithmetic Unit Source Binding v1 and all previously authorized isolated feature000 formal/reference R2.3 work. The new permission requested here is specification-only: prepare one bounded, reviewable native first-finalized-EC source-contract proposal. First resolve any already applicable contract only by exact immutable commit/path/raw SHA256 and show that it covers this edge; do not infer it from a valid supplied certificate or public FinalizeEC. If none exists, the proposed future-generation specification must explicitly define verified full native P0 and original ISC/seed/norm dependencies; original authenticated received EC votes at the actual cut; independently selected first-finalization eligibility and exact original witness/ID selection; computed P1 eligibility_certificates/finalized_eligibility_ids delta preserving all other fields; identical retry/conflict/incomplete/failure behavior; and original journal/source association retaining every source occurrence and lineage. State exact reused contracts, proposed new semantics, compatibility consequences, bounded proof files and gates separately. Do not silently introduce a WAL kind, extend ISC W1, choose a trust authority, change production Init/Next, alter certificate identity or discard nonempty/incomplete histories. Any such necessary design choice must be explicit in the proposal for human selection. STOP after the specification and its exact source-bound decision request: approval of this request authorizes designing the bounded proposal, not selecting or implementing its producer semantics, assuming producer validity, closing R2.3 or granting Formal GO. An existing immutable contract supplied by the authority may replace the design only after applicability is checked without extending it. Ordinary proof engineering under scope15 remains authorized; dependent full composition and nativeArithmeticRecoveryRefines remain stopped until this contract is selected, implemented/proved in its allowed boundary and R2.3 obtains substantive reviewed closure. Preserve the current sprint/assignment, all histories, branches and normal two-process-review flow; do not use a fake RESUME/START to escape the pending decision.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+      "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+      "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+      "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+      "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+      "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate.",
+      "The missing first-EC producer is not an allowed proof assumption. This request is specification-only for that new boundary; no EC producer implementation or proof based on an unselected rule."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PROPOSED_NEW_HUMAN_DECISION_NOT_EXISTING_AUTHORIZATION",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}

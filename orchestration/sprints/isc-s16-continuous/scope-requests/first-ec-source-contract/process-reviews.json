@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "source_commit": "e389e1869ddac63c7d529a1e83d3b153d1669f36",
+  "review_range": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1..e389e1869ddac63c7d529a1e83d3b153d1669f36",
+  "source_assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+  "source_outcome": "NEED_DECISION",
+  "authoritative_get": {
+    "endpoint": "/api/v1/projects/9000/sprints/sprint-0001-783ef52c/observability",
+    "execution_revision": 210,
+    "scope_revision": 15,
+    "response_sha256": "46cf961ee1d48d6b965ef2318a9c4e10cc6411ed6c2806bb58410df73a87dc33"
+  },
+  "reviews": [
+    {
+      "assignment_id": "1afc0e00-261b-4ad7-8abf-630b04982ccb",
+      "agent_id": "isc-s16-continuous-architecture-reviewer",
+      "agent_phone": "2791",
+      "review_index": 1,
+      "status": "approved",
+      "outcome": "APPROVE",
+      "completed_at": "2026-10-09T13:53:04.497284+00:00",
+      "feedback": "T047/T053 ISC-S16-D01 architecture process review: APPROVE the source-bound NEED_DECISION checkpoint, not R2.3 closure. Reviewed immutable 9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1..e389e1869ddac63c7d529a1e83d3b153d1669f36 (including 4dea988b); the transport metadata from_commit equal to target was not treated as an empty review. Read complete schema-3 DRC1 implementation/Lean statements and component limits: original interpreter is definitionally unchanged; supplied full parent/enrollment/common-unit checks do not derive original genesis/history; numeric lexer completeness remains open. Exact receipts/log and committed source hashes were checked. No protected production/protocol, mandatory proof/TLA, registry, orchestration or historical evidence rewrite in this range; diff whitespace check passes.\nThe missing first-finalized EC native producing edge is supported by pinned N=60c692f6, selected W1 exclusions, SIG-NON-ISC bb9fce957 and Profile-v1 section4. Carriers/codec/validators and a valid supplied EC do not provide P0 + original received cut -> computed original witness/P1/retry/journal-source contract. Public FinalizeEC cannot supply independent native origin. Scope15 arithmetic units does not select this rule. Approve normal routing to continuity coordinator to verify any existing applicable immutable contract, then register the exact bounded source-contract Pending decision if absent. No new producer, WAL kind, trust authority or source-domain restriction is selected by this review.\nR1/R2.1/R2.2 retain original domains; all three R2.3 residuals remain OPEN; baseline proof gate remains FAIL44/45 and Formal NO_GO. Recovery theorem waits for substantive reviewed R2.3 closure. No D01 GO, Q01 progression, full R3 or production authority. Sequential graph process review is not an independent formal attestation.",
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-338fc0715cf3ea4c60e318331353f4a4",
+        "effective_revision": 15,
+        "assignment_id": "1afc0e00-261b-4ad7-8abf-630b04982ccb",
+        "node_id": "formal-linkage",
+        "phase": "review",
+        "agent_id": "isc-s16-continuous-architecture-reviewer",
+        "occurrence": 9,
+        "source_commit": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1",
+        "source_path": "formal/proposals/arithmetic-unit-source-binding-decision.json",
+        "source_sha256": "4f106f712efb8c0294b1b499aa9e800d4c7d576fe6f1d909d46eb4ec5419659b",
+        "effective_scope_sha256": "c9598c5f69496593400cfb6be4510af84e6c2403ed5dedd2844fc1a4edc612ff",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true,
+        "source_assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+        "reviewed_source_scope_context_sha256": "d2516d4eb642a955fc60f6e39472d7ea061d15ab493592598a73f557364455f6"
+      },
+      "scope_ack_id": "scope-ack-0a263d471f2782ad623a37288b51f668"
+    },
+    {
+      "assignment_id": "fb392083-8b05-47b4-a2d9-d075b9a220ac",
+      "agent_id": "isc-s16-continuous-evidence-reviewer",
+      "agent_phone": "2792",
+      "review_index": 2,
+      "status": "approved",
+      "outcome": "APPROVE",
+      "completed_at": "2026-10-09T14:09:50.767733+00:00",
+      "feedback": "T047/T053 ISC-S16-D01 evidence process review: APPROVE accurate component checkpoint and bounded NEED_DECISION routing only. Sources reviewed: 9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1..e389e1869ddac63c7d529a1e83d3b153d1669f36, including 4dea988bae971c6b05f004319764a220cd9e4717. Verified immutable Git bytes against both receipts: 142 non-generated source files and 63 logs for the unit-byte component; 149 non-generated source files and 66 logs for schema-3 configuration. All recorded command exits are zero. The new receipt reports 13 kernel vectors, 11 focused, 22 configuration and 140 profile-source tests, pinned Lean4.32.1; declaration axiom output has only the declared standard propext/Classical.choice/Quot.sound basis. Inspected checker/declaration content, not name-only existence. This review validates the published receipts and source linkage, not a claim of rerunning all formal gates in a clean environment.\nRechecked all 98 immutable EC-audit source hashes, script hash and 14 exact excerpts; 92 native source/header files are covered. Inventory classification and selected W1/SIG-NON-ISC/Profile-v1 exclusions support the bounded missing producer contract, not a proof of global impossibility or a production-reachable counterexample. Complete configuration framing/admission is a source conjunct: full parent is supplied, parent history/genesis remains open, inherited numeric lexer completeness is explicit. No omitted applicability obligation is silently assumed.\nHistorical baseline FAIL44/45 is preserved: named recovery theorem and audit still missing, downstream gates not reported PASS. No production/protected-spine/mandatory-model change or historical evidence rewrite in the reviewed range. Coordinator may register the precise first-finalized-EC source-contract boundary after checking for an applicable immutable contract; this approval selects no new producer, WAL rule, authority or source restriction. All three R2.3 residuals remain OPEN; Formal NO_GO. R1/R2.1/R2.2 original domains preserved; no D01/Q01 GO or full R3. This is sequential graph process review, not independent formal attestation.",
+      "scope_context": {
+        "schema_version": 1,
+        "amendment_id": "scope-human-338fc0715cf3ea4c60e318331353f4a4",
+        "effective_revision": 15,
+        "assignment_id": "fb392083-8b05-47b4-a2d9-d075b9a220ac",
+        "node_id": "formal-linkage",
+        "phase": "review",
+        "agent_id": "isc-s16-continuous-evidence-reviewer",
+        "occurrence": 9,
+        "source_commit": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1",
+        "source_path": "formal/proposals/arithmetic-unit-source-binding-decision.json",
+        "source_sha256": "4f106f712efb8c0294b1b499aa9e800d4c7d576fe6f1d909d46eb4ec5419659b",
+        "effective_scope_sha256": "c9598c5f69496593400cfb6be4510af84e6c2403ed5dedd2844fc1a4edc612ff",
+        "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+        "ack_required": true,
+        "source_assignment_id": "13069d7e-a148-475a-bd49-9885bf2f283d",
+        "reviewed_source_scope_context_sha256": "d2516d4eb642a955fc60f6e39472d7ea061d15ab493592598a73f557364455f6"
+      },
+      "scope_ack_id": "scope-ack-359f18fe8bc4652847cd1a072c929843"
+    }
+  ],
+  "next_assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+  "r2_3": "OPEN",
+  "formal_go": false,
+  "review_kind": "Sequential graph process review by the same executor; not independent formal attestations",
+  "reviewed_claim": "Accuracy and source linkage of component checkpoint and missing native first-EC contract boundary; no R2.3 closure",
+  "duplicate_results_submitted": false,
+  "coordinator_scope_ack": {
+    "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+    "ack_id": "scope-ack-1f6c8b2ec002dc96d3e3f0584f31e390",
+    "effective_revision": 15,
+    "scope_context": {
+      "schema_version": 1,
+      "amendment_id": "scope-human-338fc0715cf3ea4c60e318331353f4a4",
+      "effective_revision": 15,
+      "assignment_id": "f14e1fce-76fe-4cc0-91b0-96e5d22961b0",
+      "node_id": "continuity-coordinator",
+      "phase": "node",
+      "agent_id": "isc-s16-continuity-coordinator",
+      "occurrence": 9,
+      "source_commit": "9f4d23b11fd1fa26586bce6fd8826c657fdfb0d1",
+      "source_path": "formal/proposals/arithmetic-unit-source-binding-decision.json",
+      "source_sha256": "4f106f712efb8c0294b1b499aa9e800d4c7d576fe6f1d909d46eb4ec5419659b",
+      "effective_scope_sha256": "6cf725a6be709e66a104136fe29b1aef89bd03f0398a32867286df68e5757b40",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "ack_required": true
+    },
+    "acknowledged_at": "2026-10-09T14:24:46.084289+00:00"
+  }
+}
