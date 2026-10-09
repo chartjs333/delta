@@ -1,0 +1,38 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "reason": "Scope16 specification-only pass is complete. The proposed EC-SOURCE-STEP-v1 selects the previously missing native first-finalization guard keyed by original ISC b, all original admitted delivered signers at that exact event, exact existing EC/seed bytes and a computed two-collection P0/P1 delta. This source interpretation is new semantics and requires selection; it is not another request to authorize ordinary R2.3 work. It does not provide a production EC durability encoding.",
+  "dependencies": [
+    "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md SHA256 6cda0cf6f623a45c32e4f60ef80ed01dfc491251afa7d77628a41c55d7c2798a",
+    "Same-source handoffs/first-ec-producer-source/source-index.json pins the native/selected-contract/reference/model evidence, with 98 earlier source hashes reverified.",
+    "Reviewed boundary e389e1869ddac63c7d529a1e83d3b153d1669f36 and immutable process reviews at 674d7cf2e8d307e777c01b5062828a211e0d40a5; scope15 arithmetic unit binding remains approved."
+  ],
+  "proposal": {
+    "instructions": "Select the exact EC-SOURCE-STEP-v1 proposal in orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md at this request source commit, including its existing six-reference source-index interpretation, independently derived full prior state and original admitted receive inventory, first-finalization exclusivity keyed by ISC consensus body b, all-cut original signer-set computation, unchanged EC ID and seed-sidecar association, complete two-collection P1 delta, original history/journal preservation and stated retry/conflict/incomplete boundaries. Authorize implementation and proof of that bounded source rule only in isolated feature000 formal/reference R2.3, with applicable gates and ordinary two-process reviews. Preserve all scope15 permissions and restrictions. This does not select a concrete EC storage/WAL encoding or establish that old native runtime histories conform; it does not permit treating source hashes, a supplied certificate, public Next success or a durable=true flag as native provenance/durability. Do not infer full R2.3 closure from this component. Compose all three existing residuals to substantive reviewed closure only where every independent producer/storage premise is actually established; expose any still-missing semantic contract rather than hide it in an assumption. After substantive reviewed R2.3 closure continue the already authorized named DeltaReduce.nativeArithmeticRecoveryRefines, axiom audit and applicable gates; full R3 remains forbidden. No concrete sigma, production integration, guard removal, certificate identity change, W1 extension, new WAL kind or new trust authority. Reject or unresolved edits retain the dependent STOP. Technical helpers within selected scope need no further human request.",
+    "retained_restrictions": [
+      "No production C++/ABI/Java/sidecar integration, production recovery deployment or arithmetic guard removal; exact compatible merged Formal GO remains required. Future feature000 semantic/model changes are those explicitly selected in this contract, never changes to the deployed legacy generation.",
+      "Preserve existing storage authentication bindings, original signer/object/QC/WAL identities and all retained delivery/source multiplicity. New generation pins/hashes must be qualified; no old-object reinterpretation, migration, relabeling or resigning. No concrete sigma_next.",
+      "F is forbidden. No factual-history observer, new trust/authority root, hidden source-domain restriction, invented source caps, loss/fault erasure, lineage truncation or replacement of missing bytes with successful callbacks. The revised physical-cut claim is explicit, not evidence that the old claim passed.",
+      "Preserve fixed-epoch enrolled Snapshot Provenance Profile v1 authority and deployment boundaries: no unenrolled node, epoch change, trusted-volume compromise/rollback, network bootstrap or universal backup format.",
+      "R1/R2.1/R2.2 stay CLOSED for their original domains. R2.3 stays OPEN until substantive reviewed proof. Named DeltaReduce.nativeArithmeticRecoveryRefines only after reviewed R2.3 closure; full R3 forbidden. No conditional refinement portrayed as production GO.",
+      "No sorry, hidden/circular/public-success axioms, vacuous theorem/domain weakening, opaque accept callbacks or relabeled FAIL/NO_GO. Requalify every affected source/model/refinement/mutant/compatibility/review gate; sequential self-review is not independent attestation.",
+      "No new sprint, reimport, reset, manual graph advancement, fake RESUME/START for STOP, duplicate result/review, nginx-qa patch/deploy/restart, subagents, foreign-file changes or frozen-ref rewrites. Preserve history and healthy demos. ACK removes only scope authorization and never advances graph or bypasses another gate.",
+      "This selection concerns the exact EC-SOURCE-STEP-v1 source interpretation only. It is not approval of a concrete EC durability encoding, runtime producer, new WAL kind, W1 extension, new trust root or physical-history claim. If required composition lacks an independently selected storage/producer rule, expose that residual and STOP rather than assume it."
+    ],
+    "node_ids": [
+      "continuity-coordinator",
+      "formal-linkage",
+      "formal-qualification"
+    ],
+    "reviewer_ids": [
+      "isc-s16-continuous-architecture-reviewer",
+      "isc-s16-continuous-evidence-reviewer"
+    ]
+  },
+  "approval_state": "PROPOSED_EXACT_SOURCE_RULE_NOT_YET_SELECTED",
+  "qualification_status": "NO_GO",
+  "r2_3": "OPEN"
+}
