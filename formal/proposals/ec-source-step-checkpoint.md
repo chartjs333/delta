@@ -1,5 +1,10 @@
 # EC source step: scope 17 checkpoint
 
+**Historical checkpoint.** Scope 18 subsequently selected and authorized an
+isolated formal/reference EC companion. See `ec-durable-binding-checkpoint.md`.
+The storage STOP below records the scope-17 result and is not a current
+permission blocker. Its original computation claims and limitations remain.
+
 T047/T053 / ISC-S16-D01. 9 October 2026. **R2.3 OPEN; Formal NO_GO.**
 Worker 2753, assignment `0a98cefa-5b31-42a4-b709-fa0ec58bb932`, branch
 `agent/isc-s16-formal-linkage`, publication base

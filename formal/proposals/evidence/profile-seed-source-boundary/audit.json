@@ -1,0 +1,138 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "result": "NO_CONCRETE_SEED_EVIDENCE_VERIFIER_IN_SELECTED_CORPUS",
+  "finding_method": "Manual applicability review of the immutable source inventory; keyword matches alone are not an absence proof",
+  "sources": [
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/include/delta/certificates/contracts.hpp",
+      "sha256": "69f4b7103f5f6ed4ac5602b95026a38acfcd3892e1d1135a76890f2ae4915fb1",
+      "copy": "source-00.hpp"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/contracts.cpp",
+      "sha256": "46c0983aa3a61cc3ab510ee351d25345e6a72baf90a83f76e46ca6f29bf3d8b8",
+      "copy": "source-01.cpp"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/certificates/verifier.cpp",
+      "sha256": "99b0ca04e90d947b73c1409cbc046baa27dd584b1cb969e4ec7416fbe34ad879",
+      "copy": "source-02.cpp"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/src/robust/plan.cpp",
+      "sha256": "cd90684b9f82912433f77c3bdd4bae03db6d21bf396b58b786d07ef9e4b28929",
+      "copy": "source-03.cpp"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "delta-core-cpp/tests/certificates_test.cpp",
+      "sha256": "5728d59750c9276ca3a5685429d99abd592e709432590266a7ac5c92bb1feb34",
+      "copy": "source-04.cpp"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/spec.md",
+      "sha256": "c0c00e448da6c9359d14d532242c3b95d27f8f431ba6077e31402fd63f9f22ae",
+      "copy": "source-05.md"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/plan.md",
+      "sha256": "374a6f9505fb0619b329ef272e010373dde21024f845f589926351b5f812a16b",
+      "copy": "source-06.md"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/runtime-profile.md",
+      "sha256": "a43a3fbab9f9c38ac6998598aee41dcd21246e78858bff2229d6de3140e0b802",
+      "copy": "source-07.md"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/task-map.md",
+      "sha256": "7624834188239c1b276fa1f725b94df7b295398b26f71d56d9ae9dd359a48e43",
+      "copy": "source-08.md"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/evidence/native-execution.json",
+      "sha256": "71ba9623bd521eb779f69fcb6db4f5d4a035c5819586b65251c0ee20f0ca5d88",
+      "copy": "source-09.json"
+    },
+    {
+      "commit": "60c692f6e391f839829dfc64e93380db54cd507b",
+      "path": "specs/008-certificates-and-consensus/evidence/certificate-refinement.json",
+      "sha256": "a2ed2efc6ffbe31120daf2eb608902d45a18b3af0126c458625780a6a9469fe4",
+      "copy": "source-10.json"
+    },
+    {
+      "commit": "26eb02d0632435c9aa0d8ef44eb496b6fa73dd13",
+      "path": "docs/adr/0013-snapshot-provenance-profile-v1.md",
+      "sha256": "7cd4170171d554e8f3b34f0a76e28643dfa9650dc49e06ff42526e6236063e4a",
+      "copy": "source-11.md"
+    },
+    {
+      "commit": "bb9fce957dae329701a8cd473a7148e198e1ca12",
+      "path": "docs/adr/0015-non-isc-authority-binding-v1.md",
+      "sha256": "f2e988d26a28ff8cedf74cc2265c535057e7ae37dc152002a853c75a0614710d",
+      "copy": "source-12.md"
+    },
+    {
+      "commit": "f1a9963eabb5cb61f936ad1ad41f45e870acd43e",
+      "path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-FIRST-EC-PRODUCER-SOURCE-v1.md",
+      "sha256": "6cda0cf6f623a45c32e4f60ef80ed01dfc491251afa7d77628a41c55d7c2798a",
+      "copy": "source-13.md"
+    },
+    {
+      "commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+      "path": "formal/proofs/DeltaReduce/NativeSeedTranscript.lean",
+      "sha256": "df7f38bcced4929c1b57ba7c8c381ea9ad8661b64c05ae5c82bfdf9ab10bd818",
+      "copy": "source-14.lean"
+    },
+    {
+      "commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+      "path": "formal/proofs/DeltaReduce/NativeSeedTranscriptVectors.lean",
+      "sha256": "1bc97e6efe60bac1aeb1fc3952ee60ddf4211b58ee46001d977cbc785c923a7a",
+      "copy": "source-15.lean"
+    },
+    {
+      "commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+      "path": "formal/proposals/native-seed-transcript-proof.md",
+      "sha256": "74a09640d3f71bf87385a7b9d257bd88581d76c56dfd8a7143f89fef8efe87ad",
+      "copy": "source-16.md"
+    },
+    {
+      "commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+      "path": "formal/proposals/b-family-transfer/ProfileLineage.lean",
+      "sha256": "a2cf28b65976168c2bbd555bf206eda202035c5f81e7424a4fc7b32c1adc6350",
+      "copy": "source-17.lean"
+    },
+    {
+      "commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+      "path": "formal/reference/profile_source/lineage_vectors.py",
+      "sha256": "815e0e74b0141179aab235b5b62a3052cc5bcd04bdf3e70ca1d3c3358cb3a920",
+      "copy": "source-18.py"
+    },
+    {
+      "commit": "47d75279d23441f5c10ed523bdea172b257e8bef",
+      "path": "formal/tla/DeltaReduceCertificates.tla",
+      "sha256": "5b086e6d4f444472631111e6d6745d6f712f11fb1aa773e987065bdbed2d4b00",
+      "copy": "source-19.tla"
+    }
+  ],
+  "corpus_sha256": "ce929212cdcf30d766f0f90802b9514b152ae4c79ed67bddf8ab73a384796a44",
+  "limits": [
+    "Contract coverage/source inspection, not execution of a forged production history",
+    "Not a proof that an unsupplied external selected seed contract cannot exist",
+    "Seed shape/parent checks and ordering evidence remain valid within their scope",
+    "No new seed algorithm, signing domain, trust root, predicate or implementation"
+  ]
+}

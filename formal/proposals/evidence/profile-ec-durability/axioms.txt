@@ -1,0 +1,62 @@
+'DeltaReduce.ProfileSource.EcDurability.recordDomain' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.sourceDomain' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.journalDomain' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.texts' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.nodeList' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcDurability.sourceFrames' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcDurability.sourcePreimage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.sourceId' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.journalId' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.fields' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.raw' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.Material.Valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.encode' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.bindOriginal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.wholeOriginalBinding' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.changedOriginalRejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.chain' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.chainSound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.chainComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.chainOriginalPosition' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.chainNoRecordErasure' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.bindJournal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.wholeJournalChecked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.companionCut' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.nonemptyCompanionHasOriginalCut' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.atEvent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.prefixPosition' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.material' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.checkStep' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.checkedStep' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.lastIdentity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.checkStorage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.storageAndNativeJoined' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.transaction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.target' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcDurability.initial' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcDurability.step' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.barrierSinceCrash' depends on axioms: [propext]
+'DeltaReduce.ProfileSource.EcDurability.Armed' does not depend on any axioms
+'DeltaReduce.ProfileSource.EcDurability.stepWal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.stepHistory' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.stepEffects' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.stepArmed' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.runInvariants' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.computedOriginalEffect' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.exposeRequiresNewBarrier' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.commitRequiresNewBarrier' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.crashKeepsLogicalHistory' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.recoveryDoesNotExposeOrCommit' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.unknownRecoveryPreservesBytes' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSource.EcDurability.repeatedExposureIdentity' depends on axioms: [propext, Quot.sound]

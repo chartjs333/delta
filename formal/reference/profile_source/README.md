@@ -1,6 +1,6 @@
 # R2.3 original profile source components
 
-T047/T053 / ISC-S16-D01; effective scope 17, retaining scope 15/13's authority and
+T047/T053 / ISC-S16-D01; effective scope 18, retaining scope 17/15/13's authority and
 restrictions. This is formal/reference work in
 the approved fixed-epoch Snapshot Provenance Profile v1 and successor O lane.
 No production implementation, concrete semantics ID, migration or READY claim.
@@ -408,6 +408,17 @@ In particular the selected EC source rule does not provide a concrete durable
 EC policy-commit encoding. W1 is ISC-only; a source-event/hash is not a barrier.
 See `formal/proposals/ec-source-step-checkpoint.md` for the exact remaining
 storage boundary, component receipt and mandatory gate outcome.
+
+Scope 18 selects a separate Profile T EC companion under the existing storage
+primitive. `ec_durability.py` and `ProfileEcDurability.lean` bind exact canonical
+frames, full original predecessor chains/cuts and computed EC transitions. The
+reference metadata join resolves the original bootstrap/pre-event index/own
+journal. Commit/exposure require a barrier after a crash; unknown/torn bytes
+are retained, and original native WAL slots, vote ranks and E/seed identities
+are unchanged. These are formal/reference contracts, not deployed storage.
+See `formal/proposals/ec-durable-binding-checkpoint.md` for exact residual and
+qualification limits. In particular, original P0 and admitted inventory legality
+still require the producing fold; record integrity cannot supply that origin.
 
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment

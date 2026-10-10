@@ -1,0 +1,40 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "command_equivalence": "Exact Makefile formal-check recipes sequentially; GNU make unavailable",
+  "gates": [
+    {
+      "gate": "phase0",
+      "log": "mandatory-phase0.txt",
+      "sha256": "5b52431b27b3f7468824aea108144393f19839860c4cd990eed1ed67904920b6",
+      "exit_code": 0,
+      "wall_seconds": 0.28
+    },
+    {
+      "gate": "contracts",
+      "log": "mandatory-contracts.txt",
+      "sha256": "15050475bd01cd2a4433740c559fd7c5e49d0d47c623cd1951d77c0bb11eb780",
+      "exit_code": 1,
+      "wall_seconds": 483.33
+    }
+  ],
+  "not_run_after_failed_prerequisite": [
+    "toolchain",
+    "parse",
+    "safety",
+    "liveness",
+    "proofs",
+    "mutants",
+    "refinement",
+    "report"
+  ],
+  "limits": [
+    "Component success is not complete R2.3 or the named recovery theorem",
+    "No failed or skipped mandatory gate promoted to PASS"
+  ]
+}

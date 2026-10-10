@@ -1,0 +1,4 @@
+# Audit copies and raw SHA manifests preserve the original byte encoding.
+* -text
+# Original Markdown hard line breaks are part of the pinned source bytes.
+source-*.md whitespace=-blank-at-eol

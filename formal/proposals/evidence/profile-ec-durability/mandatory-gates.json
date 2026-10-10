@@ -1,0 +1,70 @@
+{
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "formal_status": "NO_GO",
+  "r2_3": "OPEN",
+  "command_equivalence": "Exact Makefile formal-check recipes sequentially; GNU make unavailable",
+  "gates": [
+    {
+      "gate": "phase0",
+      "log": "mandatory-phase0.txt",
+      "sha256": "5b52431b27b3f7468824aea108144393f19839860c4cd990eed1ed67904920b6",
+      "exit_code": 0,
+      "wall_seconds": 0.24
+    },
+    {
+      "gate": "contracts",
+      "log": "mandatory-contracts.txt",
+      "sha256": "cda2b3a9376426e5da17e28bba9ccd707220eb96e289fc949153612449efac49",
+      "exit_code": 0,
+      "wall_seconds": 483.09
+    },
+    {
+      "gate": "toolchain",
+      "log": "mandatory-toolchain.txt",
+      "sha256": "a83f8f9ef01625377fafbd38e94c9acf5beab2a5bea26964fa37593122db91c5",
+      "exit_code": 0,
+      "wall_seconds": 0.21
+    },
+    {
+      "gate": "parse",
+      "log": "mandatory-parse.txt",
+      "sha256": "0735fe4bdbe3a3c789cabe7f15e03969fb1cc4124f5f9047ad3ca3e0ec497143",
+      "exit_code": 0,
+      "wall_seconds": 14.4
+    },
+    {
+      "gate": "safety",
+      "log": "mandatory-safety.txt",
+      "sha256": "d61f593df4c8fa3862414f85cf4f93b374b93d6aeab0f1488f3df174f426b057",
+      "exit_code": 0,
+      "wall_seconds": 456.96
+    },
+    {
+      "gate": "liveness",
+      "log": "mandatory-liveness.txt",
+      "sha256": "1341174fc226b9b508424937b0d4746bbb856d45801e2c6c7a8c27e3bdac74d3",
+      "exit_code": 0,
+      "wall_seconds": 85.61
+    },
+    {
+      "gate": "proofs",
+      "log": "mandatory-proofs.txt",
+      "sha256": "0edbe6b73e04a5a951aa430c29005679cb5ed87f80d23f94269f282e5b4881d0",
+      "exit_code": 1,
+      "wall_seconds": 34.41
+    }
+  ],
+  "not_run_after_failed_prerequisite": [
+    "mutants",
+    "refinement",
+    "report"
+  ],
+  "limits": [
+    "Component success is not complete R2.3 or the named recovery theorem",
+    "No failed or skipped mandatory gate promoted to PASS"
+  ]
+}

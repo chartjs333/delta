@@ -1,5 +1,10 @@
 # R2 / B — перенос family relation на исходные vector shards
 
+Актуальное продолжение scope 18: `../ec-durable-binding-checkpoint.md`.
+Конкретная formal/reference EC companion binding устраняет прежний
+storage-contract blocker; полный producing-source/public join остаётся OPEN.
+Исторические оценки и разрешения ниже не заменяют текущий effective scope.
+
 ## Текущий source-profile компонент (scope revision 13)
 
 `ProfileOrigin.lean` связывает независимо provisioned bootstrap bytes/pins с

@@ -1,0 +1,365 @@
+...............................................warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'formal/reports/formal-id-registry.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-trace.schema.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'formal/schemas/formal-verification-report.schema.json', LF will be replaced by CRLF the next time Git touches it
+..formal-gate: java
+.formal-gate: java
+.formal-gate: java
+.formal-gate: java
+..E....................................................EFE.....................................E....E.......................................................E.....E.....EFE.............................................................................................................................................................E......................................E............................E......E...................................E....................................................................E.E............E.......E..E.E..................................................................................................................................................................................
+======================================================================
+ERROR: test_generator_is_byte_exact (test_native_accumulator_lean.NativeAccumulatorLeanTests.test_generator_is_byte_exact)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_accumulator_lean.py", line 78, in test_generator_is_byte_exact
+    vectors.generate()
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\scripts\generate_native_accumulator_lean.py", line 118, in generate
+    binding = (ROOT / "formal/proofs/DeltaReduce/NativeAccumulatorBinding.lean").read_text()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 2526: character maps to <undefined>
+
+======================================================================
+ERROR: test_all_new_declarations_imported_and_audited (test_native_apply_result.NativeApplyResultTests.test_all_new_declarations_imported_and_audited)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_apply_result.py", line 116, in test_all_new_declarations_imported_and_audited
+    source = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 8048: character maps to <undefined>
+
+======================================================================
+ERROR: test_join_computes_source_and_arithmetic (test_native_apply_result.NativeApplyResultTests.test_join_computes_source_and_arithmetic)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_apply_result.py", line 121, in test_join_computes_source_and_arithmetic
+    source = (ROOT / "formal/proofs/DeltaReduce/NativeApplyResult.lean").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 8048: character maps to <undefined>
+
+======================================================================
+ERROR: test_all_named_declarations_audited (test_native_candidate_authority.NativeCandidateAuthorityTests.test_all_named_declarations_audited)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_candidate_authority.py", line 121, in test_all_named_declarations_audited
+    src = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 2985: character maps to <undefined>
+
+======================================================================
+ERROR: test_source_composition_and_scope (test_native_candidate_authority.NativeCandidateAuthorityTests.test_source_composition_and_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_candidate_authority.py", line 69, in test_source_composition_and_scope
+    src = (ROOT / "formal/proofs/DeltaReduce/NativeCandidateAuthority.lean").read_text()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 6402: character maps to <undefined>
+
+======================================================================
+ERROR: test_all_new_declarations_audited (test_native_contract_size.NativeContractSizeTests.test_all_new_declarations_audited)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_contract_size.py", line 103, in test_all_new_declarations_audited
+    src = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 1800: character maps to <undefined>
+
+======================================================================
+ERROR: test_source_constant_and_all_prior_certificate_families (test_native_contract_size.NativeContractSizeTests.test_source_constant_and_all_prior_certificate_families)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_contract_size.py", line 88, in test_source_constant_and_all_prior_certificate_families
+    lean = (ROOT / "formal/proofs/DeltaReduce/NativeSizedParameterSection.lean").read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 2809: character maps to <undefined>
+
+======================================================================
+ERROR: test_finalized_bridge_computes_original_section (test_native_current_pointer.NativeCurrentPointerTests.test_finalized_bridge_computes_original_section)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_current_pointer.py", line 137, in test_finalized_bridge_computes_original_section
+    src = (ROOT / "formal/proofs/DeltaReduce/NativeCurrentPointer.lean").read_text()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 3476: character maps to <undefined>
+
+======================================================================
+ERROR: test_named_declarations_audited (test_native_current_pointer.NativeCurrentPointerTests.test_named_declarations_audited)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_current_pointer.py", line 157, in test_named_declarations_audited
+    r"^(?:def|theorem) (\w+)", (proofs / (module + ".lean")).read_text(), re.M
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 3476: character maps to <undefined>
+
+======================================================================
+ERROR: test_mandatory_imports_and_all_named_audits (test_native_policy_codec.PolicyCodecTests.test_mandatory_imports_and_all_named_audits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_policy_codec.py", line 142, in test_mandatory_imports_and_all_named_audits
+    text = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 811: character maps to <undefined>
+
+======================================================================
+ERROR: test_every_decl_in_mandatory_import_and_axiom_audit (test_native_receipt_codec.NativeReceiptTests.test_every_decl_in_mandatory_import_and_axiom_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_receipt_codec.py", line 106, in test_every_decl_in_mandatory_import_and_axiom_audit
+    text = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 3001: character maps to <undefined>
+
+======================================================================
+ERROR: test_all_names_audited (test_native_selected_vote.NativeSelectedVoteTests.test_all_names_audited)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_selected_vote.py", line 149, in test_all_names_audited
+    src = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 7725: character maps to <undefined>
+
+======================================================================
+ERROR: test_whole_policy_selection_and_scope (test_native_selected_vote.NativeSelectedVoteTests.test_whole_policy_selection_and_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_selected_vote.py", line 109, in test_whole_policy_selection_and_scope
+    src = (ROOT / "formal/proofs/DeltaReduce/NativeSelectedVote.lean").read_text()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 7725: character maps to <undefined>
+
+======================================================================
+ERROR: test_mandatory_modules_and_native_field_inventory (test_native_state_codec.NativeStateCodecTests.test_mandatory_modules_and_native_field_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_state_codec.py", line 104, in test_mandatory_modules_and_native_field_inventory
+    source = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 971: character maps to <undefined>
+
+======================================================================
+ERROR: test_all_named_declarations_audited (test_native_vote_codec.NativeVoteCodecTests.test_all_named_declarations_audited)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_vote_codec.py", line 86, in test_all_named_declarations_audited
+    source = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 883: character maps to <undefined>
+
+======================================================================
+ERROR: test_native_fields_and_explicit_adapter_scope (test_native_vote_codec.NativeVoteCodecTests.test_native_fields_and_explicit_adapter_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_vote_codec.py", line 92, in test_native_fields_and_explicit_adapter_scope
+    source = (ROOT / "formal/proofs/DeltaReduce/NativeVoteBytes.lean").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 883: character maps to <undefined>
+
+======================================================================
+ERROR: test_mandatory_project_and_audit (test_native_wal_lean.NativeWalLeanTests.test_mandatory_project_and_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_wal_lean.py", line 91, in test_mandatory_project_and_audit
+    source = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 1780: character maps to <undefined>
+
+======================================================================
+ERROR: test_mandatory_modules_and_audit (test_native_wal_scan.NativeWalScanTests.test_mandatory_modules_and_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_wal_scan.py", line 42, in test_mandatory_modules_and_audit
+    source = (ROOT / f"formal/proofs/DeltaReduce/{module}.lean").read_text()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 947: character maps to <undefined>
+
+======================================================================
+ERROR: test_closed_mode_computes_original_policy (test_native_whole_replay.NativeWholeReplayTests.test_closed_mode_computes_original_policy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_whole_replay.py", line 97, in test_closed_mode_computes_original_policy
+    src = (self.proofs / "NativeReplayAdmission.lean").read_text()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 665: character maps to <undefined>
+
+======================================================================
+ERROR: test_named_declarations_in_axiom_audit (test_native_whole_replay.NativeWholeReplayTests.test_named_declarations_in_axiom_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_whole_replay.py", line 149, in test_named_declarations_in_axiom_audit
+    r"^(?:def|theorem) (\w+)", (self.proofs / (mod + ".lean")).read_text(), re.M
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python312\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "C:\Python312\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 665: character maps to <undefined>
+
+======================================================================
+FAIL: test_byte_exact_regeneration_and_real_hash_samples (test_native_apply_result.NativeApplyResultTests.test_byte_exact_regeneration_and_real_hash_samples)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_apply_result.py", line 29, in test_byte_exact_regeneration_and_real_hash_samples
+    self.assertEqual(
+AssertionError: 'impo[1585 chars]s := ⟨[19,-19],[2,-2],[20,-20],[2,-2]⟩\ndef ex[6937 chars]rs\n' != 'impo[1585 chars]s := âŸ¨[19,-19],[2,-2],[20,-20],[2,-2]âŸ©\nde[7024 chars]rs\n'
+Diff is 13369 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_generated_bytes_exact_and_finite_hashes_real (test_native_current_pointer.NativeCurrentPointerTests.test_generated_bytes_exact_and_finite_hashes_real)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\tests\test_native_current_pointer.py", line 119, in test_generated_bytes_exact_and_finite_hashes_real
+    self.assertEqual(
+AssertionError: 'impo[322 chars]d := ⟨⟨[115,104,97,50,53,54,58,100,100,100,100[21382 chars]rs\n' != 'impo[322 chars]d := âŸ¨âŸ¨[115,104,97,50,53,54,58,100,100,100[21477 chars]rs\n'
+Diff is 41491 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 778 tests in 481.242s
+
+FAILED (failures=2, errors=20)
