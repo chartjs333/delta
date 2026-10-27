@@ -93,12 +93,37 @@ erase inputs, create a seed fallback or fabricate AbortQC.
 
 ## Coins, output and remaining joins
 
-Honest contributions are generated once per semantic instance, with independent
-uniform private polynomial coefficients under the existing enrolled validator
-key/producer authority. Public verification does not itself attest unbiased
-private coins. A deterministic private derivation rule and its explicit
-cryptographic assumptions must be qualified before the complete producer is
-claimed. Test coins remain public synthetic data.
+Honest contributions are generated once per semantic instance from the original
+existing Ed25519 private seed k matching the independently enrolled public key.
+No new key or random service is introduced. For j=0,1,2, the coefficient is
+`LE(HMAC-SHA512(k, coefficient_domain || frame(J(instance)) || j_BE8)) mod L`,
+where coefficient_domain is `deltareduce.seed-pvss.coefficient.v1` plus NUL.
+The three pseudorandom function inputs are distinct. The original source cut,
+certificate witness, arrival order and opening/commit witness do not enter this
+coefficient derivation. Different original cuts of the same instance preserve
+the polynomial, while remaining different signed artifacts/occurrences.
+
+DEAL proof nonce at recipient i is
+`1 + LE(HMAC-SHA512(k, deal_nonce_domain || frame(J(DEAL_core)) || i_BE8)) mod (L-1)`;
+OPEN uses the identical formula on OPEN_core with a separate open_nonce_domain.
+The domains are `deltareduce.seed-pvss.nonce.deal.v1` and
+`deltareduce.seed-pvss.nonce.open.v1`, each plus NUL. No nonce is zero; no nonce
+is reused across different statements or purposes. Ed25519 signing keeps its
+existing algorithm and does not consume these proof nonces. Exact retries
+derive identical bytes. The scalar used to open shares is the standard clamped
+first half of SHA512(k), reduced modulo L, and must reproduce the enrolled key.
+
+Security explicitly additionally assumes HMAC-SHA512 pseudorandomness for the
+secret enrolled seed in the presence of its Ed25519 public key/signatures and
+domain-separated proof uses. This is a computational assumption about the SAME
+existing key authority, not a new independently trusted source. Modulo reduction
+has negligible statistical bias bounded by L/2^512 < 2^-259 per coefficient;
+we do not claim exact information-theoretic uniformity. Public verification does
+not prove honest private generation; the existing honest-validator/fault bound
+and specified producer algorithm are essential to the bias-resistance claim.
+Qualification must state this premise, not replace it by a `coins_valid` flag.
+Private seeds never enter a snapshot, public evidence or repository; executable
+generation tests use explicitly public synthetic seeds only.
 
 After a committed selection, any three valid OPENs for each selected dealer
 recover its unique point. Sum these points in canonical dealer order. `seed_id`
