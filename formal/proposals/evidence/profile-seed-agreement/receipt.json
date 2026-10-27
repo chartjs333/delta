@@ -111,6 +111,31 @@
       "propext",
       "Classical.choice",
       "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedSource.completeLength": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedSource.completeOriginals": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedSource.completePosition": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedSource.originalCommitStatusFloor": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedSource.originalPrepareBodyUnique": [
+      "propext",
+      "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedSource.prepareValueUnique": [
+      "propext",
+      "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedSource.unresolvedSuffixCannotRepair": [
+      "propext"
     ]
   },
   "checks": [
@@ -131,6 +156,16 @@
     },
     {
       "exit_code": 0,
+      "log": "ProfileSeedIntent-source-reuse.txt",
+      "sha256": "9e375907ee357ce93c95d5ff013b8b0aef23b649b0482037317b6b5fe693755f"
+    },
+    {
+      "exit_code": 0,
+      "log": "ProfileSeedKnowledge-source-reuse.txt",
+      "sha256": "ccbc6c09de1081c6dda33f18fac51f0690b8311b139f447d9b2e7e3345df63c7"
+    },
+    {
+      "exit_code": 0,
       "log": "quorum-reuse.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
@@ -146,14 +181,19 @@
     },
     {
       "exit_code": 0,
+      "log": "source-membership-proof-and-axioms.txt",
+      "sha256": "5e4b162ceb8e879afcd2fe66633f857f1f721f71d44007a44728849b99d0de7d"
+    },
+    {
+      "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "d6252811b96da296200bdb3e3c8cd1e9a47025f9fe5bd436edaaa5e8c932d69d"
+      "sha256": "d3bbe434cf0ecca1a34066de28bc8fd6d460ca51ea72bfc8b7f731dcdb1b1b19"
     },
     {
       "exit_code": 0,
       "log": "executed-imports.json",
       "missing_dependency_mutants": "both rejected",
-      "sha256": "ea5f322fb197980c5cbc97e9d1c54d22d73e8d35ee7e989f6833f9d3d556dfec"
+      "sha256": "9186b43c3f300bf960f33f8e4fae72a8aff667b9252730af26adbd8f4614a606"
     },
     {
       "exit_code": 0,
@@ -163,7 +203,7 @@
     {
       "exit_code": 0,
       "log": "format.txt",
-      "sha256": "d41ae50829b47e318b0787bc39d2a2ea2d52b518cfc7900d2efd569e6d26ab88"
+      "sha256": "ff581aaa8f1b2a77e28a682a7cae7b738f926730737e49664d06c810bcd5aa03"
     }
   ],
   "complete_seed_producer": false,
@@ -173,11 +213,14 @@
   "formal": "NO_GO",
   "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
   "lean_binary_sha256": "c3f02a2b739078d1237af9feefd27ec85b943b56870234b42bc0111d6699d54d",
+  "local_kernel_inputs_derived_from_original_commits": true,
   "local_status_floor_checked": true,
+  "original_local_occurrence_facet_checked": true,
   "original_source_join_closed": false,
   "production_compatible": false,
+  "public_sign_check_proves_private_kdf": false,
   "pvss_receipt_sha256": "540596454489eea037a4c5930edaf43e44d6d58c183e98f69e14a2ffde8219d7",
-  "residual": "complete honest source-index association of generating/durable/release prefix, cross-view safety and existing-policy progress, source-index/native-state join; all three full R2.3 obligations remain; no named recovery theorem or Formal GO",
+  "residual": "original local occurrence facet checked, but complete honest source-index/ISC/clock association and byte-to-kernel/global agreement composition remain; cross-view safety and existing-policy progress, source-index/native-state join; all three full R2.3 obligations remain; no named recovery theorem or Formal GO",
   "source_hash_encoding": "Git LF-normalized text only",
   "sources": {
     "formal/proofs/DeltaReduce/Quorum.lean": "f1e807c3938475d7255120f05e769b74abd66a13761c73231000acfdf806e525",
@@ -185,10 +228,12 @@
     "formal/proposals/b-family-transfer/ProfileSeedDurability.lean": "7c8832aa26168c9ccd70337285160eaa49dbc53bcea248c6754e5da4eb39461c",
     "formal/proposals/b-family-transfer/ProfileSeedIntent.lean": "479e575f88c5114484f372bb9dae14ce93479de30b6e4218672d80b5d5300ef7",
     "formal/proposals/b-family-transfer/ProfileSeedKnowledge.lean": "c83d862063959bdeb4bf36488f79d8b307529fcc03cb492f36952d0c5c2f7450",
-    "formal/proposals/b-family-transfer/check_seed_agreement.py": "9d6077a7b52990f69a6d3f23cf6e5479f22e79fb51690281f4edfb0120961db9",
+    "formal/proposals/b-family-transfer/ProfileSeedSource.lean": "9399bd7b6c20e43fc6d125b20b0c5c4407e939b8e48869ec3db55eaa3f7918d0",
+    "formal/proposals/b-family-transfer/check_seed_agreement.py": "0e83c9de0235544c7fa4ae52b53deadd8daff95476cc1d0a86ad758dbdf0a5f9",
     "formal/proposals/b-family-transfer/run_seed_reference_tests.py": "80ea2ff09b57136ab08c73cb06400ecacb46e999d2417e70bd322e9ea8f04ce4",
     "formal/proposals/seed-agreement-contract.md": "fe19244878e4d1b4c37debc7a1d261e3c1ac8e1c7d8dd462a27b14e23d696fca",
     "formal/proposals/seed-durable-producer-contract.md": "f443b021fc17a0b008749d7ba9c93af0c7a3f0f520605d6100773ecf53c4f549",
+    "formal/proposals/seed-source-association-contract.md": "6f86d19e0b2ff3dec74127beb55b91025b032c6e32cb069e1c220266f522fa29",
     "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
     "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
     "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
@@ -210,20 +255,101 @@
     "formal/reference/isc_w1/harness.py": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c",
     "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
     "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
+    "formal/reference/non_isc/__init__.py": "3e4fc1d23dad738309542869791e2f0d5ccc557a183cbe6962fe3d95eec5dbf7",
+    "formal/reference/non_isc/authentication.py": "978c50b96ae9e106b02e39e2a22728c962744de53e145fdad192d7e7fbc78cf5",
+    "formal/reference/non_isc/codec.py": "6c428bfc55d24b04af2c861297143ceedeaab6d13885d50a376b66dca70ce86c",
+    "formal/reference/non_isc/test_authentication.py": "e83e6781379e1dd8a92ffae65e80445c23d6f8a3e718f0a4ed161e592c8e2a71",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
+    "formal/reference/profile_source/aggregate_vectors.py": "fd956c8ec8a26415cb8f709848cc87f406196d497c03ef8bcdf7c84ac7988b25",
+    "formal/reference/profile_source/apply_vectors.py": "6e4b068514ab95b764c389812d1d4afc0589dcae1c9bd69231b13b9acc612ea3",
+    "formal/reference/profile_source/arithmetic_units.py": "8d43a7c9f6fdfafc1304bb61768902507a13f3f732aae65ada8665a159690d37",
+    "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
+    "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
+    "formal/reference/profile_source/capsule_binding.py": "1c934e79a04ddaa7bff78fb7d0df84decc7afd432c74aeae2f4b2339932b36e3",
+    "formal/reference/profile_source/certificate_vote_vectors.py": "decedbfcbc1260897734f61a63bc8cc149b9c1332458185a5a98341929b1c996",
+    "formal/reference/profile_source/collections_vectors.py": "3270dc3ca8255e354bde4c5f90438a33b8a1f9f2b60c1d574e6fd5b1e62de1d1",
+    "formal/reference/profile_source/command_vectors.py": "c8277e65a100d7e3b2f3d43fea5b714d718c1c7d5bd1186660e3e5884c7d4428",
+    "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
+    "formal/reference/profile_source/configuration.py": "bd82576c75f1d05d46f5f243bfa4ad837ebf87814d6c1cf01bba05f48a822bc2",
+    "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
+    "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
+    "formal/reference/profile_source/configuration_qc_vectors.py": "c348aee61562a09ea37282a5142607f142ba157ec4b4afd62f532f31d520cb57",
+    "formal/reference/profile_source/configuration_unit_vectors.py": "b1c9cdcb65fcbade343f455ecfc74e750e8225e72cf773483100e6a0e8772312",
+    "formal/reference/profile_source/configuration_units.py": "d39589f91b6fbd00638da10c807f899bd4518129280ca4deda4c2e9991a2bace",
+    "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
+    "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
+    "formal/reference/profile_source/current_vectors.py": "23b35bf46f138aa71d17b918e65b35bfb8fab123102a35b4a97be3a18750afc1",
+    "formal/reference/profile_source/ec_durability.py": "f29caa3494f664e8baf13328d59868549e867cc8c87546bbbb8ee38c2bd314e3",
+    "formal/reference/profile_source/ec_durability_vectors.py": "d0d5c3329ba2da9a1f0a5fe522cf3c3467514f7fca31ce9107bc24e918bc86fd",
+    "formal/reference/profile_source/ec_finalization.py": "73a08b076d53b06ff0a075d9f90e208e361a957004238c6b1e2c3786e7458e85",
+    "formal/reference/profile_source/ec_finalization_vectors.py": "0d0e827560fb9f8d905010c753d2de7a7cf1fa729ff97f7521307c6c9580c7d0",
+    "formal/reference/profile_source/eligibility_vectors.py": "6041f45c9678da617dcab41b1d37a9264b17934319eb5e84d09d05cb928361ee",
+    "formal/reference/profile_source/import_vectors.py": "6750fe26e6040e76a00a8daf9e11fb65434013fbf7dae495797cb12d0c301367",
+    "formal/reference/profile_source/input_history.py": "8a157a442c979a539c6810f4321aa1675e7111fee2918bfa3024f1773bf33180",
+    "formal/reference/profile_source/input_section_vectors.py": "ae3166622c593a77cc94bf37f529818863ac335141d8049e022d8f3e76e73de6",
+    "formal/reference/profile_source/installed_state_vectors.py": "255c18fbf06cc0a3335514e3bfecd40d7f3a26ae7a52b06530b673deaf067436",
+    "formal/reference/profile_source/isc_finalization_vectors.py": "6ecad11725dad22d5e6374b584682d8b176737d1b68e4f0b7b29de13c259a09f",
+    "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
+    "formal/reference/profile_source/journal_vectors.py": "cb201e15a611843fb316e6623ffceba967c11d1af29b5a7205711a4291cdf211",
+    "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
+    "formal/reference/profile_source/lineage_vectors.py": "815e0e74b0141179aab235b5b62a3052cc5bcd04bdf3e70ca1d3c3358cb3a920",
+    "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
+    "formal/reference/profile_source/native_header_vectors.py": "4f05f687319ce563a164e7fdc77b76276bd1d570693cb912519c81abc27b908b",
+    "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
+    "formal/reference/profile_source/origin_vectors.py": "9cb980a6d075ba4fb20963fc52b6740e337fb0e5b29a499bc2e795c164dc8448",
+    "formal/reference/profile_source/parameter_vectors.py": "e7ff4186071cd6eb0f078248eeac4623b0abff573f7abdb734ab6b81c7735021",
+    "formal/reference/profile_source/plan_vectors.py": "fcf092d6141cfe09dd431c14b061cf4133487f15a1e7cf5047d2f71adcbb5aa0",
+    "formal/reference/profile_source/policy_vectors.py": "bba0f264870d6f889f84c76784a6cd4a149c66611cdcbb27c89ca7c448f1e8d1",
+    "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
+    "formal/reference/profile_source/source_index_vectors.py": "a0dc88066f5e0aa7c8060ebab0800e4b3b2fe2a8ff35ee8b5f0d28a80e36b5fc",
+    "formal/reference/profile_source/source_prefix.py": "64956d0f22a8bb56f161243a0659182c2b7f721afc4eaff6b8f00ea91362402a",
+    "formal/reference/profile_source/test_arithmetic_units.py": "0532905f82efb8a7662382e745beaed98c08f27bde704406611a00e0eb05452f",
+    "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
+    "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
+    "formal/reference/profile_source/test_capsule_binding.py": "ce9c86a39dcd39dc38a3b14b9e977e276bd68fb6fe1f611132e96b2653ff76ec",
+    "formal/reference/profile_source/test_commands.py": "abe076da3f78b9e00ef5fb3e7f31cee5d2d84e353b15474b9449f97c1a1cafbb",
+    "formal/reference/profile_source/test_configuration.py": "381602b8e8af51b78e8efa2aa8ab7387a9a2006ca40ec799d41ee29ad2fdccc1",
+    "formal/reference/profile_source/test_configuration_history.py": "a669c68b3e162d8d6dd7a04a9eba1c22e3c1f5240b4336f1850108503eed3b66",
+    "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
+    "formal/reference/profile_source/test_ec_durability.py": "de8afef5f8e709f4cf07b51acbc673201034f8dcc4ba4b981eadc627b743c03b",
+    "formal/reference/profile_source/test_ec_finalization.py": "03f3883f99d2af277d37eff546e3be84feb596521f005b7bf8c5e0b682e67b4b",
+    "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
+    "formal/reference/profile_source/test_input_capsule.py": "9096f4f67ddc44d1ab6e260e1718ee1219011284ab512f981aa7ec4215c2f644",
+    "formal/reference/profile_source/test_input_history.py": "73ce9bcaf5ae6d1ec83443bf1a4b4d874c3b84d5fc1428c92fa486bc4d283cd1",
+    "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
+    "formal/reference/profile_source/test_manifest_context.py": "2d53806558e73b80bde4716bef6abd266c079e09c7f607d506dac5bb6f4ffb83",
+    "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
+    "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
+    "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
+    "formal/reference/profile_source/test_source_deliveries.py": "8ee65881544cb5f204685c4541e0694990047a99a07ac12ef371ce964de6b96a",
+    "formal/reference/profile_source/test_source_prefix.py": "ffe689855a4e5bef8ca02bd3d3c662985b55656b0ad72729e419c963cab52b90",
+    "formal/reference/profile_source/test_typed_generation.py": "55c7e59d657dbdaf9ce124c33688ad9bc4f8947fcd7d4f0ffdd61c7c5c9fd931",
+    "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
+    "formal/reference/profile_source/typed_certificate_vectors.py": "72231856236c00fed295c74d1b23524fe800fcb6327a7d8278eeafad4a92d58c",
+    "formal/reference/profile_source/vote_record_vectors.py": "4efa40beb762d424f41ed7a8b3e4a04730388de79ff2eca0e5b68121c8a7b006",
+    "formal/reference/profile_source/vote_vectors.py": "77ccba72f393be28f2ff8745d8153ec0baecb4b9835f54c039ddcd9f5e55b687",
+    "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/reference/seed_source/agreement.py": "b0f4a791b0433efb2f83310699021eb234d9d7b031094ed3f52c519654f361a0",
     "formal/reference/seed_source/durability.py": "f60871449ab9032221fc9aeb7ad0ba0a09f79a7cf6f4416b66c2893ef19e3a50",
     "formal/reference/seed_source/generation.py": "b4d4036eac75ba197083968197cc1366cdb121d1d13673e0fb2fb87e4cdfb666",
     "formal/reference/seed_source/native.py": "86c7d4783ea3b39dc8f66c7f6f5fdb0f703cd3cb37e6d249824b81ac3f614e00",
     "formal/reference/seed_source/producer_guards.py": "8f1ef9c67be120d0df884da82e1bf7c568e46ec0201fda02a995af998d23efd9",
     "formal/reference/seed_source/pvss.py": "384cf08745f8c9e5c8e432a8fb5b2b571d8b043846b171d8ba5bba77f39b054e",
+    "formal/reference/seed_source/source_history.py": "12270d5fd7d600ce9370de299b143bcec353c1e17d3acbfe8e83c3fc76081a3f",
     "formal/reference/seed_source/test_agreement.py": "8fe9fe16f13d6652006fe8f8b2c4d657512b2bd0a398cadf08cee48083f126be",
     "formal/reference/seed_source/test_durability.py": "bc64df9f8532ed14d05a7af11046145eccb2a660bfd4b4f3343044320aa3f254",
     "formal/reference/seed_source/test_generation.py": "f4b819097824cff800610ec73440101db4d6c1dc39a70c2a54e2842d0ba15281",
     "formal/reference/seed_source/test_native.py": "25c0023d9edeccb4959cc83037d653a8466ba7c002a6b71a3694d65452199fc3",
     "formal/reference/seed_source/test_producer_guards.py": "d9a19488ae3b9096d06882638f06941df815d3b1028f5ea8468cbbda5d81e692",
-    "formal/reference/seed_source/test_pvss.py": "4ea1ece1e9b21eec60bccec8430e3a3ea45b982efb9ec247603472bc19cb9277"
+    "formal/reference/seed_source/test_pvss.py": "4ea1ece1e9b21eec60bccec8430e3a3ea45b982efb9ec247603472bc19cb9277",
+    "formal/reference/seed_source/test_source_history.py": "85c7ecec0515ac4b6687c147b71811ea2b6fa9718ebc3e7c99624fefc7b2aca8",
+    "formal/reference/storage_source/__init__.py": "39145ac3fae5559d5aba1cb28d88f4725f4d5e3472179932cba1caa930f4a47b",
+    "formal/reference/storage_source/codec.py": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
+    "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",
+    "formal/reference/storage_source/test_codec.py": "ecf98bf2dfe56ec73833b0222ebaa0222c1996626ffa7890a07f5bbb91d2f7df",
+    "formal/reference/storage_source/test_retention.py": "c17b71c24402cf824a9198997eeda4e810f3d5f52e3cacb08cf73ac4a35f0f6b",
+    "formal/scripts/native_source_artifacts.py": "293a21a82ce59aa467dc1877cc84c983f40617517fa60027b5708087302af55f"
   },
   "status": "SEED_EVIDENCE_AND_INTENT_COMPONENTS_CHECKED"
 }

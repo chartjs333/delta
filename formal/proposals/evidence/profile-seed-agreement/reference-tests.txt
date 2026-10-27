@@ -42,8 +42,21 @@ test_randomized_witness_does_not_change_reconstructed_point (test_pvss.PvssTests
 test_signature_corruption_and_old_domain_fail_closed (test_pvss.PvssTests.test_signature_corruption_and_old_domain_fail_closed) ... ok
 test_wrong_registry_key_and_duplicate_key (test_pvss.PvssTests.test_wrong_registry_key_and_duplicate_key) ... ok
 test_zero_polynomial_and_zero_individual_evaluation (test_pvss.PvssTests.test_zero_polynomial_and_zero_individual_evaluation) ... ok
+test_complete_original_chain_and_every_prefix_cut (test_source_history.SourceHistoryTests.test_complete_original_chain_and_every_prefix_cut) ... ok
+test_contradictory_physical_output_not_a_rejected_command (test_source_history.SourceHistoryTests.test_contradictory_physical_output_not_a_rejected_command) ... ok
+test_crash_surviving_unknown_bytes_and_missing_journal_never_disappear (test_source_history.SourceHistoryTests.test_crash_surviving_unknown_bytes_and_missing_journal_never_disappear) ... ok
+test_faulty_remote_deal_not_required_to_match_honest_private_kdf (test_source_history.SourceHistoryTests.test_faulty_remote_deal_not_required_to_match_honest_private_kdf) ... ok
+test_foreign_context_rejected_and_original_bytes_retained (test_source_history.SourceHistoryTests.test_foreign_context_rejected_and_original_bytes_retained) ... ok
+test_forged_materialized_descriptor_input_or_future_dependency_rejected (test_source_history.SourceHistoryTests.test_forged_materialized_descriptor_input_or_future_dependency_rejected) ... ok
+test_initial_absence_not_manufactured_empty_or_lost_existing_journal (test_source_history.SourceHistoryTests.test_initial_absence_not_manufactured_empty_or_lost_existing_journal) ... ok
+test_missing_barrier_cannot_be_replaced_by_valid_signature (test_source_history.SourceHistoryTests.test_missing_barrier_cannot_be_replaced_by_valid_signature) ... ok
+test_original_commits_derive_knowledge_and_status_floor_across_crash (test_source_history.SourceHistoryTests.test_original_commits_derive_knowledge_and_status_floor_across_crash) ... ok
+test_receive_does_not_supply_own_signing_action (test_source_history.SourceHistoryTests.test_receive_does_not_supply_own_signing_action) ... ok
+test_retries_invalid_receive_and_unrelated_events_keep_original_positions (test_source_history.SourceHistoryTests.test_retries_invalid_receive_and_unrelated_events_keep_original_positions) ... ok
+test_uncommitted_receive_is_not_knowledge_even_with_complete_artifacts (test_source_history.SourceHistoryTests.test_uncommitted_receive_is_not_knowledge_even_with_complete_artifacts) ... ok
+test_unknown_invocation_is_unresolved_not_lawful_noop (test_source_history.SourceHistoryTests.test_unknown_invocation_is_unresolved_not_lawful_noop) ... ok
 
 ----------------------------------------------------------------------
-Ran 44 tests in 44.868s
+Ran 57 tests in 55.503s
 
 OK

@@ -1,5 +1,38 @@
 # R2.3 seed reference work checkpoint — 27 October 2026
 
+Current continuation: worker `dbaba853-6cc2-4f10-b707-ef79155613a8`, role 2753,
+scope 3 exact ACK GET-confirmed after the coordinator's two routing reviews.
+The earlier evidence-rework result at `4e0dcb51` was approved by both process
+reviews (`575fca3c`, `aef46c21`); it must not be resubmitted. The following older
+entries preserve the history and qualification limits of those checkpoints.
+
+The new original-source facet in `seed_source/source_history.py` interprets
+each retained producer invocation from empty, rechecks the complete original
+event descriptor/ordered inputs, and preserves every accepted/rejected/other/
+unresolved occurrence. SIGN requires its own original post-intent invocation;
+RECEIVE plus a valid signature cannot replace it. Contradictory SIGN output or
+crash image leaves unresolved coverage rather than becoming a harmless no-op.
+Original successful COMMIT cuts derive local intent/knowledge kernel inputs;
+uncommitted received bytes cannot supply a prepared certificate. Repeated
+crashes, original journal tips and pre-instance absence remain distinct.
+
+`ProfileSeedSource.lean` composes the existing local trace membership proofs for
+prepare-value uniqueness and the COMMIT/STATUS floor, and proves full occurrence
+position/length preservation plus persistence of unresolved coverage through a
+suffix. It does not prove decoder equivalence or the complete global source
+join. Public SIGN checking does not prove private KDF behavior; that explicit
+honest producer/cryptographic premise remains unchanged and is not hidden in a
+success flag. No real source run or production producer is claimed.
+
+Applicable qualification passed with receipt
+`31641ae4f1c5c8e279af080e1ded7b2aec4bf1f6cd305e0e0b531ca4f37df2e1`.
+The source-map gate first caught the newly executed transitive dependency
+`formal/scripts/native_source_artifacts.py`; it was explicitly pinned before
+the successful full rerun. This development checkpoint is not a worker result,
+review or R2.3 closure. Continue the original ISC/clock/bootstrap/native-state
+association and complete relation in this assignment. All three whole frozen
+R2.3 obligations remain OPEN; named recovery theorem has not begun.
+
 T047/T053 / ISC-S16-D01. **Active work, R2.3 OPEN, Formal NO_GO.** This is not
 a worker result, a new scope request, substantive R2.3 closure or an independent
 review. Current technical-rework assignment `e24da198-6836-4614-8005-8b120cc40d7c`, role 2753,

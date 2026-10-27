@@ -36,13 +36,24 @@ def main():
         Path(__file__).with_name("ProfileSeedDurability.lean"),
         Path(__file__).with_name("ProfileSeedKnowledge.lean"),
         Path(__file__).with_name("ProfileSeedAgreementSafety.lean"),
+        Path(__file__).with_name("ProfileSeedSource.lean"),
         ROOT / "formal/proofs/DeltaReduce/Quorum.lean",
         ROOT / "formal/proposals/seed-agreement-contract.md",
         ROOT / "formal/proposals/seed-durable-producer-contract.md",
+        ROOT / "formal/proposals/seed-source-association-contract.md",
         ROOT / "formal/reference/profile_source/__init__.py",
         ROOT / "formal/reference/profile_source/metadata.py",
+        ROOT / "formal/scripts/native_source_artifacts.py",
     ]
-    for folder in ("seed_source", "isc_crypto", "isc_source", "isc_w1"):
+    for folder in (
+        "seed_source",
+        "isc_crypto",
+        "isc_source",
+        "isc_w1",
+        "profile_source",
+        "non_isc",
+        "storage_source",
+    ):
         sources.extend(sorted((ROOT / "formal/reference" / folder).glob("*.py")))
     pins = {p.relative_to(ROOT).as_posix(): text_digest(p) for p in sources}
     pvss = ROOT / "formal/proposals/evidence/profile-seed-pvss/receipt.json"
@@ -104,6 +115,16 @@ def main():
     os.environ["LEAN_PATH"] = os.pathsep.join(
         [str(p / ".lake/build/lib/lean") for p in packages.iterdir() if p.is_dir()] + [str(cache)]
     )
+    for module in ("ProfileSeedIntent", "ProfileSeedKnowledge"):
+        run(
+            [
+                str(lean),
+                "-o",
+                str(cache / (module + ".olean")),
+                "formal/proposals/b-family-transfer/" + module + ".lean",
+            ],
+            module + "-source-reuse.txt",
+        )
     run(
         [
             str(lean),
@@ -129,6 +150,18 @@ def main():
         ):
             raise RuntimeError("Unexpected/incomplete " + name + " axiom audit")
         axioms += checked
+    source_log = run(
+        [str(lean), "formal/proposals/b-family-transfer/ProfileSeedSource.lean"],
+        "source-membership-proof-and-axioms.txt",
+    )
+    source_axioms = re.findall(r"'([^']+)' depends on axioms: \[([^]]*)\]", source_log)
+    if len(source_axioms) != 7 or any(
+        set(values.replace("\n", "").replace(" ", "").split(","))
+        - {"propext", "Quot.sound", "Classical.choice"}
+        for _, values in source_axioms
+    ):
+        raise RuntimeError("Unexpected/incomplete source membership axiom audit")
+    axioms += source_axioms
     run(
         [
             sys.executable,
@@ -196,6 +229,9 @@ def main():
         complete_seed_producer=False,
         durability_primitive_checked=True,
         local_status_floor_checked=True,
+        original_local_occurrence_facet_checked=True,
+        local_kernel_inputs_derived_from_original_commits=True,
+        public_sign_check_proves_private_kdf=False,
         cross_view_factor_checked=True,
         cross_view_safety_proved=False,
         original_source_join_closed=False,
@@ -209,7 +245,8 @@ def main():
         axioms={
             name: values.replace("\n", "").replace(" ", "").split(",") for name, values in axioms
         },
-        residual="complete honest source-index association of generating/durable/release prefix, "
+        residual="original local occurrence facet checked, but complete honest source-index/"
+        "ISC/clock association and byte-to-kernel/global agreement composition remain; "
         "cross-view safety and "
         "existing-policy progress, source-index/native-state join; all three full "
         "R2.3 obligations remain; no named recovery theorem or Formal GO",
