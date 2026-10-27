@@ -1,0 +1,17 @@
+'DeltaReduce.ProfileSource.Genesis.json' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.Checks' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.pointer' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.originalCoordinateSpellings' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.fullCoordinateCounts' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.nativeValueBounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.existingHashPreimages' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.noInventedCertificate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.originalConfigurationAndUnits' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.independentlyBoundOrigin' depends on axioms: [propext, Classical.choice, Quot.sound]
