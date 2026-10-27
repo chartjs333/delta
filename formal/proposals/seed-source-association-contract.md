@@ -69,6 +69,12 @@ must agree. Torn/BLOCKED/incomplete states remain representable, retain all
 bytes, and cannot expose a seed. Original native WAL bytes are retained without
 rewriting slots or public vote ordinals. Complete global native WAL association
 and ISC/clock legality are still the enclosing source fold, not this facet.
+Before any accepted invocation creates/uses an instance, an absent companion is
+represented as **absent**, not synthesized as an owned empty journal. The empty
+fold used to diagnose rejected attempts does not create an instance. After an
+accepted invocation, a missing own companion is unresolved even if its durable
+prefix happens to be empty. Initial/no-seed snapshots therefore need no invented
+per-instance protocol object or journal.
 
 ## Alternatives and compatibility
 
