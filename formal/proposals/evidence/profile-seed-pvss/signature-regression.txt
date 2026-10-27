@@ -11,6 +11,6 @@ test_short_and_long_public_keys_and_signatures_are_rejected (__main__.SignatureC
 test_wrong_binary_hash_fails_closed (__main__.SignatureConformanceTests.test_wrong_binary_hash_fails_closed) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 0.310s
+Ran 11 tests in 0.327s
 
 OK

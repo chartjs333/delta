@@ -39,12 +39,12 @@
     {
       "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "2019ed5fc405552e22bde3ba745b960a1e165825fe333a4a8041a807930e99ab"
+      "sha256": "59acc08160cdac9f9858a651a32d62bff4e9f597b4f209f87f36f2b0c6424ee6"
     },
     {
       "exit_code": 0,
       "log": "signature-regression.txt",
-      "sha256": "dfd188018387e3647091af004f34f26dc0b9ac6c01c94646410a50cd1472b1c2"
+      "sha256": "6d7aefff3ffe1fca4b5d6f1197928d635581b08d3ce4f6fd411b654d7a9e2d1e"
     }
   ],
   "contract": "formal/proposals/seed-pvss-component-contract.md",
@@ -55,9 +55,10 @@
   "mathlib_commit": "520045ab14e26149ee970e2e617ca04b09bde5d6",
   "r23": "OPEN",
   "remaining": "whole bias-resistant producer, prior agreement/release, coins, durability/source fold and complete R2.3 relation; no seed authority claimed",
+  "source_hash_encoding": "Git LF-normalized text; original artifact bytes unmodified",
   "sources": {
     "formal/proposals/b-family-transfer/ProfileSeedPvss.lean": "f5202a50919ba3fe2a702917cf98402f41cb693e858b3d00a532e03552887a35",
-    "formal/proposals/b-family-transfer/check_seed_pvss.py": "2dc203b9c7510db531b47e43eb6127b7116360bd8f8aacb396be199d0f6c663d",
+    "formal/proposals/b-family-transfer/check_seed_pvss.py": "661428e06a9dbfd3e9171ace804a75d9038d9fca7156480fa69fff630faae320",
     "formal/proposals/seed-pvss-component-contract.md": "7fdd45ca1d62779ae27f8acc0cd5a2250ca409109a9f5fe39ea33c5f2fd70159",
     "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
     "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
@@ -80,9 +81,9 @@
     "formal/reference/isc_w1/harness.py": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c",
     "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
     "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
-    "formal/reference/seed_source/pvss.py": "59100175b295da944d25a5b4f49b5f2ab659ab8cc00cbc44a13f4703bd8c39b1",
-    "formal/reference/seed_source/test_pvss.py": "00b71ed0cf34f9ea9bfa4b9f65e5b0deaeee521d9621a9b07737567a674c150d"
+    "formal/reference/seed_source/pvss.py": "1b5af39554ad88987896d59845fcc2028b334f71fcbb42943d5958e2bd07c720",
+    "formal/reference/seed_source/test_pvss.py": "4ea1ece1e9b21eec60bccec8430e3a3ea45b982efb9ec247603472bc19cb9277"
   },
   "status": "PVSS_COMPONENT_CHECKED",
-  "vector_sha256": "e0536f0edacb2c90a5a648d02e419ad7782f50efd90fda198de32523bbdc18ec"
+  "vector_sha256": "6ffd0955ec986380c31cc3a3c63b71644ed607067def7d6be3f3e5c81d13a07f"
 }

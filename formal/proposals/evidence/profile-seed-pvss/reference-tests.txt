@@ -11,6 +11,6 @@ test_wrong_registry_key_and_duplicate_key (formal.reference.seed_source.test_pvs
 test_zero_polynomial_and_zero_individual_evaluation (formal.reference.seed_source.test_pvss.PvssTests.test_zero_polynomial_and_zero_individual_evaluation) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 6.971s
+Ran 11 tests in 6.803s
 
 OK

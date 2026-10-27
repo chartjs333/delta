@@ -16,6 +16,12 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def source_hash(path):
+    # Match immutable Git text blobs on both Windows CRLF and LF checkouts.
+    # Signed statement/original artifact bytes are NEVER normalized.
+    return sha(path.read_bytes().replace(b"\r\n", b"\n"))
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     receipt = OUT / "receipt.json"
@@ -24,10 +30,12 @@ def main():
         ROOT / "formal/proposals/seed-pvss-component-contract.md",
         Path(__file__),
         Path(__file__).with_name("ProfileSeedPvss.lean"),
+        ROOT / "formal/reference/seed_source/pvss.py",
+        ROOT / "formal/reference/seed_source/test_pvss.py",
     ]
-    for folder in ("seed_source", "isc_crypto", "isc_source", "isc_w1"):
+    for folder in ("isc_crypto", "isc_source", "isc_w1"):
         paths += sorted((ROOT / "formal/reference" / folder).glob("*.py"))
-    sources = {p.relative_to(ROOT).as_posix(): sha(p.read_bytes()) for p in paths}
+    sources = {p.relative_to(ROOT).as_posix(): source_hash(p) for p in paths}
     lean = Path(os.environ["FAMILY_LEAN"])
     packages = Path(os.environ["PVSS_MATHLIB_PACKAGES"])
     actual = subprocess.check_output(
@@ -94,8 +102,10 @@ def main():
         original_openings_hex=[x.hex() for x in openings],
         reconstructed_point=p.reconstruct(group, boot, ctx, raw, openings).hex(),
     )
-    (OUT / "vector.json").write_text(json.dumps(vector, sort_keys=True, indent=2) + "\n", "utf8")
-    if sources != {p.relative_to(ROOT).as_posix(): sha(p.read_bytes()) for p in paths}:
+    (OUT / "vector.json").write_text(
+        json.dumps(vector, sort_keys=True, indent=2) + "\n", "utf8", newline="\n"
+    )
+    if sources != {p.relative_to(ROOT).as_posix(): source_hash(p) for p in paths}:
         raise RuntimeError("Sources changed during qualification")
     pin = json.loads(
         (ROOT / "formal/reference/isc_crypto/library-provenance.json").read_text("utf8")
@@ -106,6 +116,7 @@ def main():
         formal="NO_GO",
         contract="formal/proposals/seed-pvss-component-contract.md",
         sources=sources,
+        source_hash_encoding="Git LF-normalized text; original artifact bytes unmodified",
         lean=version,
         lean_binary_sha256=sha(lean.read_bytes()),
         mathlib_commit=actual,
@@ -116,7 +127,7 @@ def main():
         remaining="whole bias-resistant producer, prior agreement/release, coins, "
         "durability/source fold and complete R2.3 relation; no seed authority claimed",
     )
-    receipt.write_text(json.dumps(data, sort_keys=True, indent=2) + "\n", "utf8")
+    receipt.write_text(json.dumps(data, sort_keys=True, indent=2) + "\n", "utf8", newline="\n")
     print(
         json.dumps(
             {

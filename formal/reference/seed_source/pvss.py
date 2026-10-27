@@ -187,6 +187,7 @@ def authenticated(group: Group, boot: Bootstrap, expected: dict, raw: bytes):
     c._require(type(outer["body"]) is str, "original statement bytes")
     original = binary(outer["body"], len(outer["body"]) // 2)
     body = c._load(original)
+    c._label(body.get("actor"))
     c._require(
         COMMON <= set(body)
         and body["profile"] == PROFILE

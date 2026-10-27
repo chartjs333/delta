@@ -1,0 +1,107 @@
+{
+  "R23": "OPEN",
+  "axioms": {
+    "DeltaReduce.ProfileSeedIntent.acceptedStored": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedIntent.allAcceptedRetained": [
+      "propext",
+      "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedIntent.conflictingIntentRejected": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedIntent.exactRetry": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedIntent.newOldViewRejected": [
+      "propext",
+      "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedIntent.noConflictingAcceptedBodies": [
+      "propext",
+      "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedIntent.preservesStored": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedIntent.viewMonotone": [
+      "propext",
+      "Quot.sound"
+    ]
+  },
+  "checks": [
+    {
+      "exit_code": 0,
+      "log": "lean-version.txt",
+      "sha256": "2663f5dc5e5250d355b484788e6fc7db0c7420e21bc691f988c0d71c4288f52d"
+    },
+    {
+      "exit_code": 0,
+      "log": "intent-proof-and-axioms.txt",
+      "sha256": "9e375907ee357ce93c95d5ff013b8b0aef23b649b0482037317b6b5fe693755f"
+    },
+    {
+      "exit_code": 0,
+      "log": "reference-tests.txt",
+      "sha256": "737d9cbb8c67f9756728020f5b080dceb31f401e48a04e6d96181feac2a8caa6"
+    },
+    {
+      "exit_code": 0,
+      "log": "lint.txt",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "exit_code": 0,
+      "log": "format.txt",
+      "sha256": "cfe5c6461b42a90595a492aed11f2c8e6eb98b7c4caf2cc9f47e3333185e3f33"
+    }
+  ],
+  "complete_seed_producer": false,
+  "cross_view_safety_proved": false,
+  "formal": "NO_GO",
+  "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
+  "lean_binary_sha256": "c3f02a2b739078d1237af9feefd27ec85b943b56870234b42bc0111d6699d54d",
+  "original_source_join_closed": false,
+  "production_compatible": false,
+  "pvss_receipt_sha256": "a721fdf0392563c6e3de34d35498cf215318a848e2ed55ebc8bb1fabf6071d57",
+  "residual": "complete honest generating/durable/release prefix, cross-view safety and existing-policy progress, source-index/native-state join; all three full R2.3 obligations remain; no named recovery theorem or Formal GO",
+  "source_hash_encoding": "Git LF-normalized text only",
+  "sources": {
+    "formal/proposals/b-family-transfer/ProfileSeedIntent.lean": "479e575f88c5114484f372bb9dae14ce93479de30b6e4218672d80b5d5300ef7",
+    "formal/proposals/b-family-transfer/check_seed_agreement.py": "d51848d35da28f42802ad74ba5240d9f8da6e7475a8cc3226e548dedb4194566",
+    "formal/proposals/seed-agreement-contract.md": "fe19244878e4d1b4c37debc7a1d261e3c1ac8e1c7d8dd462a27b14e23d696fca",
+    "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
+    "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
+    "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
+    "formal/reference/isc_crypto/test_codec.py": "fab2abb09f18f4998af6fc584a9e582610a7c8668f3eb7a01e5f58ac10bb7d0b",
+    "formal/reference/isc_crypto/test_public_vector.py": "3108c775f583a26f8188b2c12480658fece48c2d0b4461db6857d41a3b19aebe",
+    "formal/reference/isc_crypto/test_signatures.py": "2194b0a8291a7ad30c277bc0ab9db6a55cb6607d5343c339f764c1f4cc9fef32",
+    "formal/reference/isc_source/__init__.py": "adc3fecf736563adc0922ce7bf83a2b4c1a6e8e650c047a59ce4de93a2a84449",
+    "formal/reference/isc_source/authentication.py": "c18d0a52f7ed019319d487200fa67d14def563be676b4d6a131f8f2237e67630",
+    "formal/reference/isc_source/budget.py": "b7075bfa0ea7795dff77cb3ec3181c7953f496fb583ec9003d4b0efb87a459d1",
+    "formal/reference/isc_source/finalization.py": "0b35dd3d09828d80e4771f48688ecfbf1527354e4d209a5d470e3986ba125191",
+    "formal/reference/isc_source/identity.py": "134959feece71ecdafb84bff5861161184c809e44c14feb81d03c0e34d4d610c",
+    "formal/reference/isc_source/policy.py": "6dcd4d272a1426baa076bb53fc5c61b33ce6f4dceb3be2150ebe246dd0d12783",
+    "formal/reference/isc_source/test_authentication.py": "6fb83d78751b452b745e0fa214d9a827a89408070888239a6972aad32dbd598a",
+    "formal/reference/isc_source/test_budget.py": "069ef659cd6451c35b7b0d907b9d45f98a7eb50f876ce0e57cdd0fe0ebe25304",
+    "formal/reference/isc_source/test_finalization.py": "0b7cbb65c11168c4ccccddc03f65044fdd99105899a003636144900a0c0f24b8",
+    "formal/reference/isc_source/test_identity.py": "0cd5271e13aa5e16e2fe8b3189836ed222591785683991f7b0c8a1ee1d1c1740",
+    "formal/reference/isc_source/test_policy.py": "8ee6f396ba5b999650392f5d2f9716d8ed7ac0ac4e4f70586562cae8434e0350",
+    "formal/reference/isc_w1/codec.py": "45f20d9d77b6c89aede68f4ee61477d88dfd73d9275ce31871526d12dba52ce9",
+    "formal/reference/isc_w1/harness.py": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c",
+    "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
+    "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
+    "formal/reference/seed_source/agreement.py": "b0f4a791b0433efb2f83310699021eb234d9d7b031094ed3f52c519654f361a0",
+    "formal/reference/seed_source/generation.py": "b4d4036eac75ba197083968197cc1366cdb121d1d13673e0fb2fb87e4cdfb666",
+    "formal/reference/seed_source/native.py": "86c7d4783ea3b39dc8f66c7f6f5fdb0f703cd3cb37e6d249824b81ac3f614e00",
+    "formal/reference/seed_source/producer_guards.py": "8f1ef9c67be120d0df884da82e1bf7c568e46ec0201fda02a995af998d23efd9",
+    "formal/reference/seed_source/pvss.py": "1b5af39554ad88987896d59845fcc2028b334f71fcbb42943d5958e2bd07c720",
+    "formal/reference/seed_source/test_agreement.py": "8fe9fe16f13d6652006fe8f8b2c4d657512b2bd0a398cadf08cee48083f126be",
+    "formal/reference/seed_source/test_generation.py": "f4b819097824cff800610ec73440101db4d6c1dc39a70c2a54e2842d0ba15281",
+    "formal/reference/seed_source/test_native.py": "25c0023d9edeccb4959cc83037d653a8466ba7c002a6b71a3694d65452199fc3",
+    "formal/reference/seed_source/test_producer_guards.py": "d9a19488ae3b9096d06882638f06941df815d3b1028f5ea8468cbbda5d81e692",
+    "formal/reference/seed_source/test_pvss.py": "4ea1ece1e9b21eec60bccec8430e3a3ea45b982efb9ec247603472bc19cb9277"
+  },
+  "status": "SEED_EVIDENCE_AND_INTENT_COMPONENTS_CHECKED"
+}

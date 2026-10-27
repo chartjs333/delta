@@ -51,7 +51,9 @@ def secret_scalar(seed):
     return int.from_bytes(raw, "little") % p.L
 
 
-def make_deal(group, seeds, boot, ctx, coefficients=(7, 11, 13), nonce_offset=0):
+def make_deal(
+    group, seeds, boot, ctx, coefficients=(7, 11, 13), nonce_offset=0, actor="validator-1"
+):
     members = p.context(boot, ctx)
     commitments = tuple(group.mul(a, group.h) for a in coefficients)
     values = [sum(a * i**j for j, a in enumerate(coefficients)) % p.L for i in range(1, 5)]
@@ -60,7 +62,7 @@ def make_deal(group, seeds, boot, ctx, coefficients=(7, 11, 13), nonce_offset=0)
         kind="DEAL",
         profile=p.PROFILE,
         context=ctx,
-        actor="validator-1",
+        actor=actor,
         commitments=[x.hex() for x in commitments],
         encrypted_shares=[x.hex() for x in encrypted],
     )
@@ -78,7 +80,7 @@ def make_deal(group, seeds, boot, ctx, coefficients=(7, 11, 13), nonce_offset=0)
         ).hex()
         for i, key in enumerate(members.values(), 1)
     ]
-    return p.sign(group, seeds["validator-1"], body)
+    return p.sign(group, seeds[actor], body)
 
 
 def make_open(group, seeds, boot, ctx, deal_raw, actor, nonce=43):
