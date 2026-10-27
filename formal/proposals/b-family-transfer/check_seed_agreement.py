@@ -155,7 +155,7 @@ def main():
         "source-membership-proof-and-axioms.txt",
     )
     source_axioms = re.findall(r"'([^']+)' depends on axioms: \[([^]]*)\]", source_log)
-    if len(source_axioms) != 7 or any(
+    if len(source_axioms) != 11 or any(
         set(values.replace("\n", "").replace(" ", "").split(","))
         - {"propext", "Quot.sound", "Classical.choice"}
         for _, values in source_axioms
@@ -230,6 +230,7 @@ def main():
         durability_primitive_checked=True,
         local_status_floor_checked=True,
         original_local_occurrence_facet_checked=True,
+        complete_instance_dispatch_checked=True,
         local_kernel_inputs_derived_from_original_commits=True,
         public_sign_check_proves_private_kdf=False,
         cross_view_factor_checked=True,

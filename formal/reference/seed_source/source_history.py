@@ -179,6 +179,18 @@ def fold(group, boot, expected, bootstrap_id, actor, native_wal, events, cuts=()
                 disposition, error = "unresolved_invocation", str(exc)
                 unresolved.append(position)
             else:
+                if row["bootstrap_id"] == bootstrap_id and row["instance_id"] != d.instance_id(
+                    expected
+                ):
+                    # The complete prefix contains other original instances.
+                    # Keep its position but leave its interpretation to its own
+                    # facet; fold_family checks that none is left unaccounted.
+                    outcomes.append(
+                        Outcome(position, "other_original_source", None, before.phase, state.phase)
+                    )
+                    if position + 1 in cuts:
+                        at_cut.append((position + 1, state))
+                    continue
                 try:
                     state = invoke(state, row, event.inputs)
                     disposition = "accepted"
@@ -242,6 +254,126 @@ def check_journal_tip(trace, actor, expected, original_own_journals):
         "computed complete surviving companion equals independently retained original",
     )
     return selected[0]
+
+
+@dataclass(frozen=True)
+class Family:
+    group: object
+    boot: object
+    bootstrap_id: str
+    actor: str
+    native_wal: bytes
+    events: tuple
+    cuts: tuple[int, ...]
+    traces: tuple[tuple[str, Trace], ...]
+    # Exactly one disposition for every original occurrence, including a
+    # missing instance/invalid invocation. No cache is itself authority.
+    outcomes: tuple[Outcome, ...]
+    unresolved: tuple[int, ...]
+
+
+def fold_family(group, boot, contexts, bootstrap_id, actor, native_wal, events, cuts=()):
+    """Compose all original instance facets; not ISC/context-origin authority.
+
+    The enclosing source join supplies each original own context exactly once.
+    Completeness is checked against the full event inventory, never a filtered
+    list. No new cap on the number of original instances is imposed.
+    """
+    c._require(type(contexts) is tuple and type(events) is tuple, "original instance catalog")
+    c._require(len(events) <= m.MAX_EVENTS, "existing complete source budget")
+    c._require(
+        type(cuts) is tuple
+        and all(type(i) is int and 0 <= i <= len(events) for i in cuts)
+        and cuts == tuple(sorted(set(cuts))),
+        "exact original family cuts",
+    )
+    traces = tuple(
+        (d.instance_id(ctx), fold(group, boot, ctx, bootstrap_id, actor, native_wal, events, cuts))
+        for ctx in contexts
+    )
+    by_id = dict(traces)
+    c._require(len(by_id) == len(traces), "one original context per semantic instance")
+    outcomes, unresolved = [], []
+    for position, event in enumerate(events):
+        original_event(event, position)
+        if event.actor != actor or event.action != ACTION:
+            outcome = Outcome(position, "other_original_source", None, "", "")
+        else:
+            try:
+                row = invocation(event.original)
+                if row["bootstrap_id"] != bootstrap_id:
+                    # Preserve the existing primitive's rejection before any
+                    # state change. SIGN/CRASH assert an original output, so a
+                    # contradictory assertion cannot become a harmless no-op.
+                    disposition = (
+                        "unresolved_original_output"
+                        if row["operation"] in ("SIGN", "CRASH")
+                        else "rejected"
+                    )
+                    outcome = Outcome(position, disposition, "original family bootstrap", "", "")
+                    outcomes.append(outcome)
+                    if disposition.startswith("unresolved"):
+                        unresolved.append(position)
+                    continue
+                selected = by_id.get(row["instance_id"])
+                c._require(selected is not None, "missing original instance context")
+                outcome = selected.outcomes[position]
+                c._require(
+                    outcome.disposition != "other_original_source", "selected instance coverage"
+                )
+            except c.CodecError as exc:
+                outcome = Outcome(position, "unresolved_invocation", str(exc), "", "")
+        outcomes.append(outcome)
+        if outcome.disposition.startswith("unresolved"):
+            unresolved.append(position)
+    return Family(
+        group,
+        boot,
+        bootstrap_id,
+        actor,
+        native_wal,
+        events,
+        cuts,
+        traces,
+        tuple(outcomes),
+        tuple(unresolved),
+    )
+
+
+def recheck_family(family):
+    c._require(type(family) is Family, "source family carrier")
+    actual = fold_family(
+        family.group,
+        family.boot,
+        tuple(t.state.expected for _, t in family.traces),
+        family.bootstrap_id,
+        family.actor,
+        family.native_wal,
+        family.events,
+        family.cuts,
+    )
+    c._require(actual == family, "entire recomputed original family, not supplied coverage")
+
+
+def check_family_journals(family, original_own_journals):
+    """Check every owned companion without dropping an unrepresented instance."""
+    recheck_family(family)
+    c._require(not family.unresolved, "complete local instance source coverage required")
+    c._require(type(original_own_journals) is tuple, "complete original own journals")
+    names = [
+        name
+        for actor, name, _ in original_own_journals
+        if actor == family.actor and name.startswith(d.JOURNAL + ":")
+    ]
+    known = {journal_id(trace.state.expected) for _, trace in family.traces}
+    c._require(
+        len(names) == len(set(names)) and set(names) <= known,
+        "every original own seed journal has its original instance",
+    )
+    return tuple(
+        (ident, check_journal_tip(trace, family.actor, trace.state.expected, original_own_journals))
+        for ident, trace in family.traces
+    )
 
 
 @dataclass(frozen=True)

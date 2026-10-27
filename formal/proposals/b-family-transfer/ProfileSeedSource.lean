@@ -104,6 +104,66 @@ theorem unresolvedSuffixCannotRepair {before after : List Outcome}
   rw [bad]
   rfl
 
+/- Finite source-family composition. The concrete decoder supplies the original
+instance key and full event (including inputs/cut); the local step includes its
+accepted/rejected/unresolved outcome. Projection never filters source positions.
+This algebra does not authenticate the catalog or discharge a missing key. -/
+namespace InstanceDispatch
+variable {State Payload : Type}
+
+structure Event (Payload : Type) where
+  instanceKey : Bytes
+  original : Payload
+
+def step (advance : State → Payload → State) (states : Bytes → Option State)
+    (event : Event Payload) : Bytes → Option State :=
+  match states event.instanceKey with
+  | none => states
+  | some before => fun key =>
+      if key = event.instanceKey then some (advance before event.original) else states key
+
+def facet (advance : State → Payload → State) (key : Bytes) (state : Option State)
+    (event : Event Payload) : Option State :=
+  if key = event.instanceKey then state.map (fun before => advance before event.original) else state
+
+theorem stepProjection (advance : State → Payload → State) (states : Bytes → Option State)
+    (event : Event Payload) (key : Bytes) :
+    step advance states event key = facet advance key (states key) event := by
+  by_cases same : key = event.instanceKey
+  · subst key
+    cases h : states event.instanceKey <;> simp [step,facet,h]
+  · cases h : states event.instanceKey <;> simp [step,facet,h,same]
+
+theorem otherInstanceUnchanged (advance : State → Payload → State)
+    (states : Bytes → Option State) (event : Event Payload) (key : Bytes)
+    (other : key ≠ event.instanceKey) : step advance states event key = states key := by
+  rw [stepProjection]
+  simp [facet,other]
+
+theorem completePrefixProjection (advance : State → Payload → State)
+    (states : Bytes → Option State) (events : List (Event Payload)) (key : Bytes) :
+    (events.foldl (step advance) states) key =
+      events.foldl (facet advance key) (states key) := by
+  induction events generalizing states with
+  | nil => rfl
+  | cons event rest ih =>
+    simp only [List.foldl_cons]
+    rw [ih,stepProjection]
+
+def covered (states : Bytes → Option State) (events : List (Event Payload)) : Bool :=
+  events.all (fun event => (states event.instanceKey).isSome)
+
+theorem coverageRequiresEveryOriginal (states : Bytes → Option State)
+    (events : List (Event Payload)) (ok : covered states events = true)
+    (event : Event Payload) (member : event ∈ events) :
+    ∃ state, states event.instanceKey = some state := by
+  have present := (List.all_eq_true.mp ok) event member
+  cases h : states event.instanceKey with
+  | none => simp [h] at present
+  | some state => exact ⟨state,rfl⟩
+
+end InstanceDispatch
+
 #print axioms originalPrepareBodyUnique
 #print axioms prepareValueUnique
 #print axioms originalCommitStatusFloor
@@ -111,4 +171,8 @@ theorem unresolvedSuffixCannotRepair {before after : List Outcome}
 #print axioms completeLength
 #print axioms completePosition
 #print axioms unresolvedSuffixCannotRepair
+#print axioms InstanceDispatch.stepProjection
+#print axioms InstanceDispatch.otherInstanceUnchanged
+#print axioms InstanceDispatch.completePrefixProjection
+#print axioms InstanceDispatch.coverageRequiresEveryOriginal
 end DeltaReduce.ProfileSeedSource

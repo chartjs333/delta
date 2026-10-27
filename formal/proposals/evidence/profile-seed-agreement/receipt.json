@@ -112,6 +112,19 @@
       "Classical.choice",
       "Quot.sound"
     ],
+    "DeltaReduce.ProfileSeedSource.InstanceDispatch.completePrefixProjection": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedSource.InstanceDispatch.coverageRequiresEveryOriginal": [
+      "propext",
+      "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedSource.InstanceDispatch.otherInstanceUnchanged": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedSource.InstanceDispatch.stepProjection": [
+      "propext"
+    ],
     "DeltaReduce.ProfileSeedSource.completeLength": [
       "propext"
     ],
@@ -182,12 +195,12 @@
     {
       "exit_code": 0,
       "log": "source-membership-proof-and-axioms.txt",
-      "sha256": "5e4b162ceb8e879afcd2fe66633f857f1f721f71d44007a44728849b99d0de7d"
+      "sha256": "c659cf7ca2e358043d7709ea2d96280e5a2a19dc03fc4d68069fa68ec2388757"
     },
     {
       "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "e04addd341a8031e157f336726643565d5aeb4d40426a94a943a9655be8bd082"
+      "sha256": "9cc4ebeb84b4f1e84f4c20edda8171014374f56934aaa85d7ab371cef687affa"
     },
     {
       "exit_code": 0,
@@ -206,6 +219,7 @@
       "sha256": "ff581aaa8f1b2a77e28a682a7cae7b738f926730737e49664d06c810bcd5aa03"
     }
   ],
+  "complete_instance_dispatch_checked": true,
   "complete_seed_producer": false,
   "cross_view_factor_checked": true,
   "cross_view_safety_proved": false,
@@ -228,12 +242,12 @@
     "formal/proposals/b-family-transfer/ProfileSeedDurability.lean": "7c8832aa26168c9ccd70337285160eaa49dbc53bcea248c6754e5da4eb39461c",
     "formal/proposals/b-family-transfer/ProfileSeedIntent.lean": "479e575f88c5114484f372bb9dae14ce93479de30b6e4218672d80b5d5300ef7",
     "formal/proposals/b-family-transfer/ProfileSeedKnowledge.lean": "c83d862063959bdeb4bf36488f79d8b307529fcc03cb492f36952d0c5c2f7450",
-    "formal/proposals/b-family-transfer/ProfileSeedSource.lean": "9399bd7b6c20e43fc6d125b20b0c5c4407e939b8e48869ec3db55eaa3f7918d0",
-    "formal/proposals/b-family-transfer/check_seed_agreement.py": "0e83c9de0235544c7fa4ae52b53deadd8daff95476cc1d0a86ad758dbdf0a5f9",
+    "formal/proposals/b-family-transfer/ProfileSeedSource.lean": "df8baff16ca79e143e7ebb75c0f9f618965d1c6207d77acc16a1d463dba684dc",
+    "formal/proposals/b-family-transfer/check_seed_agreement.py": "1999894a0a677b79fa96d043d5e51027e9735b948b323766c05c871c75c6345f",
     "formal/proposals/b-family-transfer/run_seed_reference_tests.py": "80ea2ff09b57136ab08c73cb06400ecacb46e999d2417e70bd322e9ea8f04ce4",
     "formal/proposals/seed-agreement-contract.md": "fe19244878e4d1b4c37debc7a1d261e3c1ac8e1c7d8dd462a27b14e23d696fca",
     "formal/proposals/seed-durable-producer-contract.md": "f443b021fc17a0b008749d7ba9c93af0c7a3f0f520605d6100773ecf53c4f549",
-    "formal/proposals/seed-source-association-contract.md": "6f86d19e0b2ff3dec74127beb55b91025b032c6e32cb069e1c220266f522fa29",
+    "formal/proposals/seed-source-association-contract.md": "4518133277c22007f69156c5c7537f7750ece7e681f6190caa498fbe829894bf",
     "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
     "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
     "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
@@ -336,14 +350,14 @@
     "formal/reference/seed_source/native.py": "86c7d4783ea3b39dc8f66c7f6f5fdb0f703cd3cb37e6d249824b81ac3f614e00",
     "formal/reference/seed_source/producer_guards.py": "8f1ef9c67be120d0df884da82e1bf7c568e46ec0201fda02a995af998d23efd9",
     "formal/reference/seed_source/pvss.py": "384cf08745f8c9e5c8e432a8fb5b2b571d8b043846b171d8ba5bba77f39b054e",
-    "formal/reference/seed_source/source_history.py": "3b9748a52cae0332a80afb00aaf86b18993cf4c0a173a567465485ea100a1e60",
+    "formal/reference/seed_source/source_history.py": "e460e949ea0ba5a1b53e3c092a82038bbfd083a75d1f5a4ef88525d946a461c2",
     "formal/reference/seed_source/test_agreement.py": "8fe9fe16f13d6652006fe8f8b2c4d657512b2bd0a398cadf08cee48083f126be",
     "formal/reference/seed_source/test_durability.py": "bc64df9f8532ed14d05a7af11046145eccb2a660bfd4b4f3343044320aa3f254",
     "formal/reference/seed_source/test_generation.py": "f4b819097824cff800610ec73440101db4d6c1dc39a70c2a54e2842d0ba15281",
     "formal/reference/seed_source/test_native.py": "25c0023d9edeccb4959cc83037d653a8466ba7c002a6b71a3694d65452199fc3",
     "formal/reference/seed_source/test_producer_guards.py": "d9a19488ae3b9096d06882638f06941df815d3b1028f5ea8468cbbda5d81e692",
     "formal/reference/seed_source/test_pvss.py": "4ea1ece1e9b21eec60bccec8430e3a3ea45b982efb9ec247603472bc19cb9277",
-    "formal/reference/seed_source/test_source_history.py": "88dccbe542638d9348c142f0b097129e9a73e9e63c3796ac98453b1eddc7d308",
+    "formal/reference/seed_source/test_source_history.py": "453bfab6ddf268e629057daed631452657683b3e9eeeaa6204c911eb7040ad51",
     "formal/reference/storage_source/__init__.py": "39145ac3fae5559d5aba1cb28d88f4725f4d5e3472179932cba1caa930f4a47b",
     "formal/reference/storage_source/codec.py": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
     "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",

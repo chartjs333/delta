@@ -99,6 +99,109 @@ class SourceHistoryTests(unittest.TestCase):
             cuts,
         )
 
+    def two_instances(self):
+        other = dict(self.ctx, round_id="second-original-round", height="2")
+        initial = d.initial(
+            self.group, self.boot, other, self.bootstrap_id, self.actor, self.native_wal
+        )
+        capture = Capture(initial).record(
+            "INTENT",
+            gen.deal_body(self.group, self.boot, other, self.actor, self.seeds[self.actor]),
+        )
+        capture, raw = capture.sign(1, self.seeds[self.actor])
+        capture.record("SIGNED", raw, 1).step("EXPOSE", ordinal=1)
+        rows = []
+        # Interleave two valid primitive histories, keeping each original body.
+        # This is a facet witness, not an authenticated two-round Profile import.
+        for left, right in zip(self.capture.events, capture.events, strict=True):
+            for old in (left, right):
+                rows.append(event(len(rows), old.actor, old.action, old.original, old.inputs))
+        journals = (
+            (self.actor, s.journal_id(self.ctx), self.capture.state.volatile),
+            (self.actor, s.journal_id(other), capture.state.volatile),
+        )
+        return other, capture, tuple(rows), journals
+
+    def family(self, contexts, rows, cuts=()):
+        return s.fold_family(
+            self.group,
+            self.boot,
+            contexts,
+            self.bootstrap_id,
+            self.actor,
+            self.native_wal,
+            rows,
+            cuts,
+        )
+
+    def test_complete_interleaved_instances_keep_one_original_event_inventory(self):
+        other, capture, rows, journals = self.two_instances()
+        family = self.family((self.ctx, other), rows, tuple(range(len(rows) + 1)))
+        self.assertEqual(family.events, rows)
+        self.assertFalse(family.unresolved)
+        self.assertTrue(all(o.disposition == "accepted" for o in family.outcomes))
+        left, right = [trace for _, trace in family.traces]
+        self.assertEqual(left.state, self.capture.state)
+        self.assertEqual(right.state, capture.state)
+        for trace in (left, right):
+            self.assertEqual(trace.events, rows)
+            self.assertEqual([o.index for o in trace.outcomes], list(range(len(rows))))
+            self.assertEqual(trace.state.native_wal, self.native_wal)
+        self.assertEqual(
+            [o.disposition for o in left.outcomes[1::2]], ["other_original_source"] * 8
+        )
+        self.assertEqual(
+            s.check_family_journals(family, journals),
+            (
+                (d.instance_id(self.ctx), self.capture.state.volatile),
+                (d.instance_id(other), capture.state.volatile),
+            ),
+        )
+
+    def test_missing_instance_and_empty_catalog_cannot_hide_original_sign(self):
+        other, _, rows, journals = self.two_instances()
+        incomplete = self.family((self.ctx,), rows)
+        self.assertEqual(incomplete.unresolved, tuple(range(1, len(rows), 2)))
+        empty = self.family((), rows)
+        self.assertEqual(empty.unresolved, tuple(range(len(rows))))
+        for bad in (incomplete, empty):
+            with self.assertRaisesRegex(c.CodecError, "coverage"):
+                s.check_family_journals(bad, journals)
+        with self.assertRaisesRegex(c.CodecError, "one original context"):
+            self.family((self.ctx, self.ctx, other), rows)
+
+    def test_family_journal_omission_substitution_extra_and_cache_tampering(self):
+        other, _, rows, journals = self.two_instances()
+        family = self.family((self.ctx, other), rows)
+        for bad in (
+            journals[:1],
+            ((journals[0][0], journals[0][1], journals[1][2]), journals[1]),
+            (*journals, (self.actor, d.JOURNAL + ":sha256:" + "9" * 64, b"")),
+        ):
+            with self.assertRaises(c.CodecError):
+                s.check_family_journals(family, bad)
+        for bad in (
+            replace(family, traces=family.traces[:1]),
+            replace(family, events=()),
+            replace(family, outcomes=family.outcomes[:-1]),
+        ):
+            with self.assertRaises(c.CodecError):
+                s.check_family_journals(bad, journals)
+        # Catalog order is representation only; original source order is not.
+        s.check_family_journals(replace(family, traces=tuple(reversed(family.traces))), journals)
+
+    def test_family_foreign_bootstrap_rejects_command_but_retains_output_conflict(self):
+        raw = m.load(command(self.empty, "INTENT"))
+        raw["bootstrap_id"] = m.raw_id(b"untrusted-other-bootstrap")
+        rows = (event(0, self.actor, s.ACTION, m.canonical(raw), (self.unsigned,)),)
+        family = self.family((), rows)
+        self.assertEqual(family.outcomes[0].disposition, "rejected")
+        self.assertEqual(s.check_family_journals(family, ()), ())
+        raw.update(operation="SIGN", intent_ordinal="1")
+        rows = (event(0, self.actor, s.ACTION, m.canonical(raw), (self.signed,)),)
+        family = self.family((), rows)
+        self.assertEqual(family.unresolved, (0,))
+
     def test_complete_original_chain_and_every_prefix_cut(self):
         events = tuple(self.capture.events)
         trace = self.fold(cuts=tuple(range(len(events) + 1)))

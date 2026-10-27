@@ -85,8 +85,10 @@ The complete original prefix may contain several seed instances of the same
 enrolled actor. A per-instance facet must preserve, but must not execute, an
 invocation naming another instance. Dispatch uses the already present exact
 `bootstrap_id` and `instance_id`; it creates no identity or new source field.
-Unknown/malformed invocation and foreign bootstrap remain unresolved. The same
-bootstrap with a different instance is `other_original_source` in that facet.
+Unknown/malformed invocation remains unresolved. A foreign bootstrap follows
+the existing primitive's fail-closed rejection before state change; contradictory
+SIGN/CRASH output assertions remain unresolved instead of becoming no-ops. The
+same bootstrap with a different instance is `other_original_source` in that facet.
 The whole family must account for every local seed occurrence through exactly
 one matching original instance, or retain its index as unresolved. An empty
 family therefore cannot certify a prefix containing local seed occurrences.

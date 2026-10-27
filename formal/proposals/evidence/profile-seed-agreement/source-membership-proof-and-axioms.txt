@@ -5,3 +5,7 @@
 'DeltaReduce.ProfileSeedSource.completeLength' depends on axioms: [propext]
 'DeltaReduce.ProfileSeedSource.completePosition' depends on axioms: [propext]
 'DeltaReduce.ProfileSeedSource.unresolvedSuffixCannotRepair' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedSource.InstanceDispatch.stepProjection' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedSource.InstanceDispatch.otherInstanceUnchanged' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedSource.InstanceDispatch.completePrefixProjection' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedSource.InstanceDispatch.coverageRequiresEveryOriginal' depends on axioms: [propext, Quot.sound]
