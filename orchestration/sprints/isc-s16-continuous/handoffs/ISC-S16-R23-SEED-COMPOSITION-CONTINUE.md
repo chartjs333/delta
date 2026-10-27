@@ -1,5 +1,42 @@
 # Reviewed seed components: continue the original R2.3 composition
 
+## Current route after original-source review
+
+27 October 2026, coordinator `80dd8cc7-b086-43fb-a8a4-1bd500c75aed`.
+Fresh actual-role scope3 and exact ACK persistence are verified. Official API
+returned this coordinator after both process reviews of worker
+`dbaba853-6cc2-4f10-b707-ef79155613a8`; no result was resent after a timeout.
+
+Worker head `d574a3093b958b1116d373ccd5e0e96b8ad7197a` adds the original seed
+invocation/journal association and derives local kernel inputs from original
+COMMIT cuts. It includes the pre-submission Trace cache-forgery correction and
+its preserved failing counterexample. Applicable receipt:
+`cf2061a5190a5bb3d0e013d9b88f71a199ba5c5c750e235372356370a5f8f1f4`.
+Architecture review `5dc35abf-3b6a-4609-97db-18e968b64322` APPROVE report
+`6955846047495e75f2195ae91cf3b581621c0a8f`; evidence review
+`bb6fb3b2-428a-4627-a16a-2063ac1a2242` APPROVE report
+`a6cfb25d3caa69a72f7d13e1fcceee15b3fe0264`. Both are process reviews by the same
+executor, not independent attestation. Continue from the latter commit so both
+reports remain available. The previous route below is retained as history.
+
+**RESUME_FORMAL through the normal graph; R2.3 OPEN / Formal NO_GO.**
+This accepted facet supplies original event/cut and local-history association;
+it does not yet supply the enclosing independent bootstrap/ISC/clock/native-state
+origin, global byte-to-kernel proof, progress or complete public relation.
+Continue those existing joins and the three frozen R2.3 obligations. Resolve
+minimal missing formal/reference associations inside standing delegation;
+record the selected rule before relying on it. Do not turn a supplied Trace,
+Metadata, successful public check or signature into origin authority. Preserve
+every source occurrence, including unresolved/incomplete states and lineage.
+
+Do not route another checkpoint merely for an unfinished helper. Work toward
+substantive source/state composition and its applicable qualification/reviews.
+No new semantic Pending is required inside the unchanged envelope. The named
+recovery theorem still waits for substantive reviewed full R2.3 closure.
+No runtime, production WAL/Init/Next, authority, domain cap or frozen DoD change.
+
+## Previous accepted route
+
 27 October 2026. T047/T053 / ISC-S16-CONTINUITY.
 Coordinator assignment `8c50b4df-c78c-4e71-b8f0-9ebecf08e966`, standing scope 3.
 **RESUME_FORMAL after the ordinary routing reviews. R2.3 OPEN / Formal NO_GO.**
