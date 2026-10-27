@@ -78,6 +78,41 @@ per-instance protocol object or journal.
 
 ## Alternatives and compatibility
 
+### Complete-source instance dispatch (28 October 2026)
+
+Standing scope 3, assignment `2fd81f70-bb27-4872-a09c-8a712c0e2311`.
+The complete original prefix may contain several seed instances of the same
+enrolled actor. A per-instance facet must preserve, but must not execute, an
+invocation naming another instance. Dispatch uses the already present exact
+`bootstrap_id` and `instance_id`; it creates no identity or new source field.
+Unknown/malformed invocation and foreign bootstrap remain unresolved. The same
+bootstrap with a different instance is `other_original_source` in that facet.
+The whole family must account for every local seed occurrence through exactly
+one matching original instance, or retain its index as unresolved. An empty
+family therefore cannot certify a prefix containing local seed occurrences.
+Every facet keeps the complete original list, original indices and requested
+cuts. No filtering/reindexing, concatenation of journals or journal reassignment
+is allowed. Unknown instance is not a rejected incoming message or legal no-op.
+Every original owned seed companion must have one corresponding instance;
+extra/missing/wrong-instance journals cannot be hidden in another facet.
+
+Instance contexts still require original finalized ISC/context/clock source
+binding in the enclosing relation. A supplied context catalog, successful
+dispatch or locally checked journal does not establish those origins or R2.3.
+The family is a finite composition over the existing event/journal inventory,
+without a new instance count cap. Duplicate catalog identities are ambiguous
+inputs, not authorization to merge or discard an original execution. Distinct
+original cuts of one semantic instance do not create new instances; the original
+own producer context must be derived once by the enclosing source join.
+
+The alternative of treating another instance's valid SIGN as a rejected or
+unresolved action is incorrect: the original source contains a lawful separate
+producer step. Conversely, skipping every unknown instance would permit an
+incomplete context catalog to erase an obligation. The selected two-level
+dispatch preserves both per-instance locality and complete-source coverage.
+This corrects reference composition only; no protocol bytes, signed payload,
+native WAL, source identities, production transition or trust root changes.
+
 Reject importing a prevalidated Machine, a `durable`/`legal` boolean or a signed
 artifact as a surrogate signing event: these assume the missing provenance.
 Reject copying private seeds into evidence or requiring every faulty dealer to

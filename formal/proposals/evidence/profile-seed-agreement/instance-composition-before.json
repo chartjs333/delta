@@ -1,0 +1,9 @@
+{
+  "source_commit": "a6cfb25d3caa69a72f7d13e1fcceee15b3fe0264",
+  "reproducer": "instance-composition-before.py",
+  "claim": "single-instance facet composition only; not a full lawful snapshot",
+  "original_event_count": 16,
+  "unresolved": [11],
+  "second_original_SIGN": 11,
+  "native_wal_preserved": true
+}
