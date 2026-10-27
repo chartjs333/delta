@@ -93,6 +93,12 @@ unsigned decimal strings. Content IDs use the existing sha256 grammar. Round
 labels use the existing label grammar. No certificate witness c may replace
 the consensus body b. Context equality is checked against the independently
 supplied expected context; its source legality remains the producing-fold join.
+Here `source_cut_id` denotes the shared original finalized-ISC anchor cut,
+not the sending actor's later delivery position. Each DEAL/OPEN occurrence
+retains its separate actor, original event bytes/index and local durable cut in
+the enclosing original source inventory. Recipients do not manufacture equal
+local journal prefixes. A replay keeps the signed anchor while retaining each
+distinct later delivery occurrence.
 
 DEAL core has `kind="DEAL"`, `profile="SEED-PVSS-ED25519-COMPONENT-v1"`,
 `context`, `actor`, three `commitments`, and four `encrypted_shares` in exact
