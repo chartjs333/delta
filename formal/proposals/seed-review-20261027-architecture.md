@@ -51,3 +51,23 @@ The worker's component receipt is insufficient for this discovered case. Preserv
 the failing reproduction and the previous receipt as history, fix under the next
 normal worker assignment, and run applicable checks/reviews again. The remaining
 original-index/global-source composition and full R2.3 obligations stay OPEN.
+
+## Rework architecture review at 299b2fed
+
+Current reviewer assignment `3c9d91a3-bdf4-4321-ad25-3fa2634af867`, fresh scope3
+ACK GET-confirmed. The worker correction keeps `recovery_active` until verified
+commit and does not recapture unknown bytes across further crashes. Repeated
+crashes in CRASHED/BLOCKED and after recovery verification/barrier were rerun;
+the original foreign frame remains BLOCKED, while a fully verified committed
+prefix can begin a new transaction. The Lean origin retention proofs compile
+with only standard kernel axioms. **APPROVE the architecture correction**, not
+whole source closure, independent attestation or Formal GO.
+
+The second evidence review must address a separately identified source-map gap:
+the new durability module imports `formal/reference/profile_source/metadata.py`,
+but the component qualifier's sources omit it and its package `__init__.py`.
+Complete transitive qualification binding must be repaired/re-run before an
+aggregate component acceptance; this architecture APPROVE does not waive that
+pending evidence gate. Both files exist at the reviewed Git head; the problem
+is incomplete reproducibility/change detection in the qualifier, not a new trust
+or source-domain choice. No Pending semantic decision is needed.
