@@ -1,0 +1,8 @@
+'DeltaReduce.ProfileSeedIntent.exactRetry' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedIntent.conflictingIntentRejected' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedIntent.acceptedStored' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedIntent.preservesStored' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedIntent.viewMonotone' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedIntent.newOldViewRejected' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedIntent.allAcceptedRetained' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedIntent.noConflictingAcceptedBodies' depends on axioms: [propext, Quot.sound]

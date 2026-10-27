@@ -1,0 +1,6 @@
+test_forged_trace_cache_cannot_replace_original_occurrences (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_forged_trace_cache_cannot_replace_original_occurrences) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.853s
+
+OK

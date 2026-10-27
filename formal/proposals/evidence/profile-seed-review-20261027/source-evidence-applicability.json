@@ -1,0 +1,14 @@
+{
+  "status": "PASS_APPLICABILITY",
+  "receipt": "cf2061a5190a5bb3d0e013d9b88f71a199ba5c5c750e235372356370a5f8f1f4",
+  "all_source_and_log_hashes_match": true,
+  "transitive_pvss_applicable": true,
+  "omission_mutants_rejected": [
+    "formal/reference/profile_source/metadata.py",
+    "formal/scripts/native_source_artifacts.py",
+    "formal/reference/seed_source/source_history.py"
+  ],
+  "axioms": "standard only",
+  "R23": "OPEN",
+  "formal": "NO_GO"
+}

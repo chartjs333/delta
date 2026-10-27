@@ -44,3 +44,27 @@ cross-view local rules, progress and the three complete R2.3 obligations remain
 OPEN. Continue these under standing delegation through the normal coordinator
 route; no new semantic decision is needed for this technical correction.
 Same sequential executor; neither review is an independent Formal GO attestation.
+
+## Original source facet at d574a309
+
+T047/T053. Reviewer 2792 assignment `bb6fb3b2-428a-4627-a16a-2063ac1a2242`,
+fresh scope3 with exact source-worker context hash and GET-confirmed ACK.
+**APPROVE the component evidence.** Recomputed the complete receipt source/log
+map and transitive PVSS receipt applicability. Receipt `cf2061a5` qualifies the
+corrected source; the superseded `31641ae4` is not used for that claim. The saved
+pre-fix cache regression remains a FAIL, accurately labeled as historical.
+
+Omitting metadata, native_source_artifacts or source_history from the executed
+dependency map was rejected by the same source-coverage function. The local
+Intent/Knowledge modules and new Source proof were rebuilt before rechecking
+the source theorem axiom output; only standard axioms occur. The cache-forgery
+regression was rerun and passed. Exact reviewer outputs are retained under
+`evidence/profile-seed-review-20261027/source-evidence-*`.
+
+The evidence remains component-specific: local membership/occurrence factors
+do not certify Python decoder equivalence, original ISC/bootstrap/clock/native
+legality, global honest-source composition or complete R2.3. Cryptographic and
+private-generation assumptions remain explicit. No production qualification,
+new source caps, migrated identities or recovery theorem is claimed. Both
+ordinary process reviews permit continued delegated composition through the
+normal coordinator; neither supplies independent Formal GO attestation.
