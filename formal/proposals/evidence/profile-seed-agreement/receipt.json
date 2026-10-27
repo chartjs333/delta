@@ -21,9 +21,18 @@
       "Classical.choice",
       "Quot.sound"
     ],
+    "DeltaReduce.ProfileSeedDurability.captureActive": [
+      "propext"
+    ],
+    "DeltaReduce.ProfileSeedDurability.captureFirst": [
+      "propext"
+    ],
     "DeltaReduce.ProfileSeedDurability.exposureRequiresArtifactBarrier": [
       "propext",
       "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedDurability.repeatedCrashOrigin": [
+      "propext"
     ],
     "DeltaReduce.ProfileSeedDurability.retryExposureKeepsJournal": [
       "propext",
@@ -52,6 +61,9 @@
     "DeltaReduce.ProfileSeedDurability.tornRecoveryBlocked": [
       "propext",
       "Quot.sound"
+    ],
+    "DeltaReduce.ProfileSeedDurability.unknownRemainsRejected": [
+      "propext"
     ],
     "DeltaReduce.ProfileSeedIntent.acceptedStored": [
       "propext"
@@ -115,7 +127,7 @@
     {
       "exit_code": 0,
       "log": "durability-proof-and-axioms.txt",
-      "sha256": "a387f2c880ec6c1d00ca957a44b0ebd72897c27570922b730d2b8f3a5d409816"
+      "sha256": "0f923683da4aa677e8079d8d45a0fb99f59c8385af2f1d6fb0165b78e3a94ade"
     },
     {
       "exit_code": 0,
@@ -135,7 +147,7 @@
     {
       "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "d2ec2d72a5ba24659799c1a771ee4d4f6b390eeeb352e673cce60d480c8fb996"
+      "sha256": "a2364e992101201dcee354fa41bacc0d4fdae8bda0c76e42278114422a9daa95"
     },
     {
       "exit_code": 0,
@@ -164,12 +176,12 @@
   "sources": {
     "formal/proofs/DeltaReduce/Quorum.lean": "f1e807c3938475d7255120f05e769b74abd66a13761c73231000acfdf806e525",
     "formal/proposals/b-family-transfer/ProfileSeedAgreementSafety.lean": "785ddd88e4f195087f0d281b67b3bccb56beb30e56ba4c8f8ae4fbe293ece144",
-    "formal/proposals/b-family-transfer/ProfileSeedDurability.lean": "6123670076cbfa6432224ba6d40cf8a06256a96864ab8d7ead50b597ef2830af",
+    "formal/proposals/b-family-transfer/ProfileSeedDurability.lean": "7c8832aa26168c9ccd70337285160eaa49dbc53bcea248c6754e5da4eb39461c",
     "formal/proposals/b-family-transfer/ProfileSeedIntent.lean": "479e575f88c5114484f372bb9dae14ce93479de30b6e4218672d80b5d5300ef7",
     "formal/proposals/b-family-transfer/ProfileSeedKnowledge.lean": "c83d862063959bdeb4bf36488f79d8b307529fcc03cb492f36952d0c5c2f7450",
-    "formal/proposals/b-family-transfer/check_seed_agreement.py": "da8862dd32ef79cf50ec6826c080944ae3be69be6dadb656d93df7058e06cab9",
+    "formal/proposals/b-family-transfer/check_seed_agreement.py": "fb077cacb1e636b9e1cb99c4e68b6bee0e768160c4214dd64973b6a89060e514",
     "formal/proposals/seed-agreement-contract.md": "fe19244878e4d1b4c37debc7a1d261e3c1ac8e1c7d8dd462a27b14e23d696fca",
-    "formal/proposals/seed-durable-producer-contract.md": "28b4b8f3088797876b256c8839bdf2aa441db01d27c744f21d3328d080839114",
+    "formal/proposals/seed-durable-producer-contract.md": "f443b021fc17a0b008749d7ba9c93af0c7a3f0f520605d6100773ecf53c4f549",
     "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
     "formal/reference/isc_crypto/probe_library.py": "fa582353178703c38823a35f31d93a11fba5d85e5d38535fe408d862c7dac251",
     "formal/reference/isc_crypto/sodium_reference.py": "ce7cf489b236224e7504ebbf8b361c91c51074271606768b8a0fdc1f7d09bf17",
@@ -192,13 +204,13 @@
     "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
     "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
     "formal/reference/seed_source/agreement.py": "b0f4a791b0433efb2f83310699021eb234d9d7b031094ed3f52c519654f361a0",
-    "formal/reference/seed_source/durability.py": "10a7fa3f17fa42a00c4206bf4df0640554e20669656edbe89cdf67e02a6f5a78",
+    "formal/reference/seed_source/durability.py": "f60871449ab9032221fc9aeb7ad0ba0a09f79a7cf6f4416b66c2893ef19e3a50",
     "formal/reference/seed_source/generation.py": "b4d4036eac75ba197083968197cc1366cdb121d1d13673e0fb2fb87e4cdfb666",
     "formal/reference/seed_source/native.py": "86c7d4783ea3b39dc8f66c7f6f5fdb0f703cd3cb37e6d249824b81ac3f614e00",
     "formal/reference/seed_source/producer_guards.py": "8f1ef9c67be120d0df884da82e1bf7c568e46ec0201fda02a995af998d23efd9",
     "formal/reference/seed_source/pvss.py": "384cf08745f8c9e5c8e432a8fb5b2b571d8b043846b171d8ba5bba77f39b054e",
     "formal/reference/seed_source/test_agreement.py": "8fe9fe16f13d6652006fe8f8b2c4d657512b2bd0a398cadf08cee48083f126be",
-    "formal/reference/seed_source/test_durability.py": "f1f082371e1446bdf0bcccd76b2f738775d3f07dade56eb559ec202b37777aa9",
+    "formal/reference/seed_source/test_durability.py": "bc64df9f8532ed14d05a7af11046145eccb2a660bfd4b4f3343044320aa3f254",
     "formal/reference/seed_source/test_generation.py": "f4b819097824cff800610ec73440101db4d6c1dc39a70c2a54e2842d0ba15281",
     "formal/reference/seed_source/test_native.py": "25c0023d9edeccb4959cc83037d653a8466ba7c002a6b71a3694d65452199fc3",
     "formal/reference/seed_source/test_producer_guards.py": "d9a19488ae3b9096d06882638f06941df815d3b1028f5ea8468cbbda5d81e692",

@@ -63,6 +63,13 @@ substitute. Complete valid surviving original records require a new barrier/comm
 use; torn, conflicting or unknown tails remain retained and BLOCKED. Recovery
 never deletes the tail or silently restarts from an empty/shorter history.
 
+Review correction (same selected semantics): the original unresolved base and
+attempted write remain fixed through repeated crashes, BLOCKED states, verified
+recovery and its barrier. They are released only by successful verified commit.
+Neither a second crash nor a parsing success promotes an unknown surviving tail
+to a new stable origin. `seed-review-20261027-architecture.md` preserves the
+concrete failing pre-correction reference trace; no production history is claimed.
+
 The concrete machine proves only this existing T-primitive binding. Its public
 constructor, hash or structurally valid journal is not a source capability.
 The enclosing complete producing fold must associate every append/barrier/

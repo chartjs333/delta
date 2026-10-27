@@ -200,6 +200,46 @@ class DurabilityTests(unittest.TestCase):
         with self.assertRaises(c.CodecError):
             d.append(state, "INTENT", body(self.deals[0]))
 
+    def test_repeated_crash_cannot_promote_unknown_parseable_tail(self):
+        base = finish(d.append(self.empty, "RECEIVE", b"bad"))
+        intent = gen.deal_body(self.g, self.boot, self.ctx, self.actor, self.seeds[self.actor])
+        pending = d.append(base, "INTENT", intent)
+        row = d.decode(d.scan(pending.volatile)[-1])
+        row.update(type_name="RECEIVE", payload_raw_id=m.raw_id(b"bad"), payload_bytes="3")
+        foreign = base.stable + d.frame(m.canonical(row))
+        self.assertLessEqual(len(foreign), len(pending.volatile))
+        self.assertNotEqual(foreign, pending.volatile)
+        # Parsing success cannot replace the original attempted append.
+        self.assertEqual(pending.inspect(foreign).knowledge, (b"bad", b"bad"))
+        for recover_between in (False, True):
+            crashed = d.crash(pending, foreign)
+            for _ in range(4):
+                if recover_between:
+                    crashed = d.recover(crashed)
+                    self.assertEqual(crashed.phase, "BLOCKED")
+                crashed = d.crash(crashed, foreign)
+                self.assertEqual(crashed.recovery_base, base.stable)
+                self.assertEqual(crashed.recovery_target, pending.volatile)
+                self.assertEqual(crashed.volatile, foreign)
+            rejected = d.recover(crashed)
+            self.assertEqual(rejected.phase, "BLOCKED")
+            with self.assertRaises(c.CodecError):
+                d.barrier(rejected)
+
+    def test_recovery_origin_survives_until_verified_commit_only(self):
+        pending = self.intent()
+        recovered = d.recover(d.crash(pending, pending.volatile))
+        for stage in (recovered, d.barrier(recovered)):
+            again = d.crash(stage, stage.volatile)
+            self.assertEqual(again.recovery_base, self.known.stable)
+            self.assertEqual(again.recovery_target, pending.volatile)
+            ready = finish(d.recover(again))
+            self.assertFalse(ready.recovery_active)
+            next_append = d.append(ready, "RECEIVE", b"next original occurrence")
+            next_crash = d.crash(next_append, ready.stable)
+            self.assertEqual(next_crash.recovery_base, ready.stable)
+            self.assertEqual(next_crash.recovery_target, next_append.volatile)
+
 
 if __name__ == "__main__":
     unittest.main()

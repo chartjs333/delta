@@ -150,6 +150,38 @@ theorem tornRecoveryBlocked {t s out} (crashed : s.phase = .crashed)
   cases ok
   exact ⟨rfl,rfl,rfl⟩
 
+/-- Exact origin state corresponding to durability.py's recovery_active/base/
+target. First capture is from original pre-crash state; subsequent crashes
+cannot replace it. Only successful replay/barrier/commit releases this origin. -/
+structure RecoveryOrigin where
+  active : Bool
+  base : Bytes
+  attempted : Bytes
+  deriving DecidableEq, Repr
+
+def capture (o : RecoveryOrigin) (stable volatile : Bytes) : RecoveryOrigin :=
+  if o.active then o else ⟨true,stable,volatile⟩
+def recognized (o : RecoveryOrigin) (surviving : Bytes) : Bool :=
+  o.active && (surviving == o.base || surviving == o.attempted)
+def captureMany (o : RecoveryOrigin) : List (Bytes × Bytes) → RecoveryOrigin
+  | [] => o
+  | (stable,volatile)::rest => captureMany (capture o stable volatile) rest
+
+theorem captureFirst (o : RecoveryOrigin) (inactive : o.active = false) (stable volatile) :
+    capture o stable volatile = ⟨true,stable,volatile⟩ := by simp [capture,inactive]
+theorem captureActive (o : RecoveryOrigin) (active : o.active = true) (stable volatile) :
+    capture o stable volatile = o := by simp [capture,active]
+theorem repeatedCrashOrigin (o : RecoveryOrigin) (active : o.active = true) (buffers) :
+    captureMany o buffers = o := by
+  induction buffers with
+  | nil => rfl
+  | cons head rest ih => simpa [captureMany,captureActive o active] using ih
+theorem unknownRemainsRejected (o : RecoveryOrigin) (active : o.active = true)
+    (surviving : Bytes) (unknown : surviving ≠ o.base ∧ surviving ≠ o.attempted) (buffers) :
+    recognized (captureMany o buffers) surviving = false := by
+  rw [repeatedCrashOrigin o active]
+  simp [recognized,unknown.1,unknown.2]
+
 #print axioms stepWal
 #print axioms stepHistory
 #print axioms stepArmed
@@ -158,4 +190,8 @@ theorem tornRecoveryBlocked {t s out} (crashed : s.phase = .crashed)
 #print axioms exposureRequiresArtifactBarrier
 #print axioms retryExposureKeepsJournal
 #print axioms tornRecoveryBlocked
+#print axioms captureFirst
+#print axioms captureActive
+#print axioms repeatedCrashOrigin
+#print axioms unknownRemainsRejected
 end DeltaReduce.ProfileSeedDurability

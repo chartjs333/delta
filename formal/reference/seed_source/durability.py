@@ -251,6 +251,7 @@ class Machine:
     produced: tuple[tuple[int, bytes], ...] = ()
     recovery_base: bytes = b""
     recovery_target: bytes = b""
+    recovery_active: bool = False
 
     def inspect(self, original=None):
         return replay(
@@ -344,7 +345,7 @@ def commit(state):
         "successful barrier before commit",
     )
     state.inspect(state.stable)
-    return replace(state, committed=state.stable, phase="READY")
+    return replace(state, committed=state.stable, phase="READY", recovery_active=False)
 
 
 def sign(state, intent_ordinal, private_seed):
@@ -415,13 +416,15 @@ def crash(state, surviving):
         committed=b"",
         produced=(),
         phase="CRASHED",
-        recovery_base=state.stable,
-        recovery_target=state.volatile,
+        recovery_base=state.recovery_base if state.recovery_active else state.stable,
+        recovery_target=state.recovery_target if state.recovery_active else state.volatile,
+        recovery_active=True,
     )
 
 
 def recover(state):
     c._require(state.phase == "CRASHED", "recovery follows modeled crash")
+    c._require(state.recovery_active, "original unresolved recovery origin")
     if state.volatile not in (state.recovery_base, state.recovery_target):
         # These originals belong to the retained producing trace, NOT a restart
         # cache. A parseable foreign/torn record cannot become another history.

@@ -79,7 +79,7 @@ def main():
         "durability-proof-and-axioms.txt",
     )
     storage_axioms = re.findall(r"'([^']+)' depends on axioms: \[([^]]*)\]", storage_log)
-    if len(storage_axioms) != 8 or any(
+    if len(storage_axioms) != 12 or any(
         set(values.split(", ")) - {"propext", "Quot.sound"} for _, values in storage_axioms
     ):
         raise RuntimeError("Unexpected/incomplete durability axiom audit")

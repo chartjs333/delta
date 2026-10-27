@@ -6,3 +6,7 @@
 'DeltaReduce.ProfileSeedDurability.exposureRequiresArtifactBarrier' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ProfileSeedDurability.retryExposureKeepsJournal' depends on axioms: [propext, Quot.sound]
 'DeltaReduce.ProfileSeedDurability.tornRecoveryBlocked' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.captureFirst' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedDurability.captureActive' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedDurability.repeatedCrashOrigin' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedDurability.unknownRemainsRejected' depends on axioms: [propext]

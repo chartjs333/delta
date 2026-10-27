@@ -2,9 +2,9 @@
 
 T047/T053 / ISC-S16-D01. **Active work, R2.3 OPEN, Formal NO_GO.** This is not
 a worker result, a new scope request, substantive R2.3 closure or an independent
-review. Assignment `20451db6-b10f-4613-96fa-f1fa2e3c4d37`, role 2753,
+review. Current technical-rework assignment `e24da198-6836-4614-8005-8b120cc40d7c`, role 2753,
 `agent/isc-s16-formal-linkage`. Exact scope revision 3 ACK
-`scope-ack-87cdb306ce7432a843d935ffeabbacd9` was GET-confirmed. Its additional
+`scope-ack-0515366a48c97c9b20e4ac9c5b013c50` was GET-confirmed. Its additional
 existing-validator seed purpose resolves the former permission boundary; the
 seed proof/source obligations themselves still require work.
 
@@ -63,8 +63,19 @@ runner import-path failure is retained; the corrected invocation passed.
 No full formal-check, fully composed PBFT safety/progress or complete recovery
 result is claimed by these component receipts. The first durability qualification
 stopped on a checker line-length error; the error was corrected and the whole
-applicable component qualification rerun successfully. No process reviews of this worker's
-new implementation have yet been submitted.
+applicable component qualification rerun successfully.
+
+The first component worker result was accepted as NO_GO; architecture reviewer
+2791 rejected head `3f51e324` with a concrete repeated-crash counterexample.
+nginx-qa returned the task to the worker through its normal rework path. The
+review report/log at `f2845349` is preserved. The correction keeps the unresolved
+original append base/target across all repeated crashes until verified commit,
+adds corresponding regression cases and a Lean origin-retention lemma. The
+applicable qualification passed again (receipt SHA256
+`9127a99bfbf51710ef537a5606b9dc68de03ec2a0c2e3792756d5f2fd44d7b26`).
+The corrected result still requires its normal reviews. This is an in-envelope
+technical correction, not a new semantic Pending decision or R2.3 closure.
+Same-executor process review is not independent attestation.
 
 ## Exact remaining boundary of this checkpoint
 
