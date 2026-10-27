@@ -1,0 +1,19 @@
+test_signatures (unittest.loader._FailedTest.test_signatures) ... ERROR
+
+======================================================================
+ERROR: test_signatures (unittest.loader._FailedTest.test_signatures)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_signatures
+Traceback (most recent call last):
+  File "C:\Python312\Lib\unittest\loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\reference\isc_crypto\test_signatures.py", line 14, in <module>
+    from codec import Vote, encode_vote, preimage
+ModuleNotFoundError: No module named 'codec'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

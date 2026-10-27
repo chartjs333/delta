@@ -1,0 +1,48 @@
+{
+  "acknowledged": true,
+  "acknowledgement": {
+    "ack_id": "scope-ack-87cdb306ce7432a843d935ffeabbacd9",
+    "acknowledged_at": "2026-10-27T15:38:21.421475+00:00",
+    "agent_id": "isc-s16-formal-linkage-engineer",
+    "agent_phone": "2753",
+    "amendment_id": "scope-human-9fcd5fffaa1d7fca733bb4684a444fce",
+    "assignment_id": "20451db6-b10f-4613-96fa-f1fa2e3c4d37",
+    "effective_revision": 3,
+    "scope_context": {
+      "ack_required": true,
+      "agent_id": "isc-s16-formal-linkage-engineer",
+      "amendment_id": "scope-human-9fcd5fffaa1d7fca733bb4684a444fce",
+      "assignment_id": "20451db6-b10f-4613-96fa-f1fa2e3c4d37",
+      "effective_revision": 3,
+      "effective_scope_sha256": "9b7dd90ad3ddaa6ab6ad79f26dea32ab4be401038ec4ea266ba5deb3bdfd47f7",
+      "node_id": "formal-linkage",
+      "occurrence": 2,
+      "phase": "node",
+      "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+      "schema_version": 1,
+      "source_commit": "54b82ed659ccfeb12e06c029f375ce6be06c9cb5",
+      "source_path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-SEED-AUTHORITY-ENVELOPE-ASSESSMENT.md",
+      "source_sha256": "82cc8340baa303fb259a3a91840ede050fb46e7718682bc00d58fd3ca979ef26"
+    }
+  },
+  "amendment_id": "scope-human-9fcd5fffaa1d7fca733bb4684a444fce",
+  "assignment_id": "20451db6-b10f-4613-96fa-f1fa2e3c4d37",
+  "classification": "WORKFLOW_AUTHORIZATION_NOT_PROTOCOL_AUTHORITY",
+  "effective_revision": 3,
+  "scope_context": {
+    "ack_required": true,
+    "agent_id": "isc-s16-formal-linkage-engineer",
+    "amendment_id": "scope-human-9fcd5fffaa1d7fca733bb4684a444fce",
+    "assignment_id": "20451db6-b10f-4613-96fa-f1fa2e3c4d37",
+    "effective_revision": 3,
+    "effective_scope_sha256": "9b7dd90ad3ddaa6ab6ad79f26dea32ab4be401038ec4ea266ba5deb3bdfd47f7",
+    "node_id": "formal-linkage",
+    "occurrence": 2,
+    "phase": "node",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "schema_version": 1,
+    "source_commit": "54b82ed659ccfeb12e06c029f375ce6be06c9cb5",
+    "source_path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-SEED-AUTHORITY-ENVELOPE-ASSESSMENT.md",
+    "source_sha256": "82cc8340baa303fb259a3a91840ede050fb46e7718682bc00d58fd3ca979ef26"
+  }
+}

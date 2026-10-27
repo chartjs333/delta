@@ -1,0 +1,8 @@
+'DeltaReduce.ProfileSeedPvss.responseCompleteness' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedPvss.reconstruct123' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedPvss.reconstruct124Scaled' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedPvss.reconstruct134' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedPvss.reconstruct234' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedPvss.reconstruct1234' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedPvss.reconstruct124' depends on axioms: [propext]
+'DeltaReduce.ProfileSeedPvss.allSubsetsSamePoint' depends on axioms: [propext]

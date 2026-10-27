@@ -88,8 +88,9 @@ objects are neither migrated nor relabelled.
 
 Context fields are `formal_semantics_id`, `origin_id`, `validator_epoch_id`,
 `registry_id`, `round_id`, `round_config_id`, `parent_checkpoint_id`,
-`isc_body_id`, `height`, `view`, `source_cut_id`. Heights/views are canonical
-unsigned decimal strings. Content IDs use the existing sha256 grammar. Round
+`isc_body_id`, `arithmetic_profile_id`, `parameter_schema_id`, `height`, `view`,
+`source_cut_id`. Heights/views are canonical uint64 decimal strings; height is
+positive, as in the existing native Context. Content IDs use the existing sha256 grammar. Round
 labels use the existing label grammar. No certificate witness c may replace
 the consensus body b. Context equality is checked against the independently
 supplied expected context; its source legality remains the producing-fold join.
