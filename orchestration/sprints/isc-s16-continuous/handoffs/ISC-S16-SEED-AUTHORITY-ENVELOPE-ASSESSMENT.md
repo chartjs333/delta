@@ -105,17 +105,34 @@ not a new global search for absent contracts. The distinction from the earlier
 blocker is precise: routine verifier/derivation selection is now delegated;
 the missing independently justified seed-contribution purpose is not.
 
-The new Pending request should concern **only a bounded specification of that
-outside-envelope seed-authority use**. In that pass, first examine reuse of
-the fixed enrolled validator/configuration authority without a new independently
-trusted key or external beacon. Specify exactly what existing authority would
-additionally attest, how original evidence is generated and checked, and what
-assumptions are needed for bias resistance and availability. Compare it with a
-threshold/beacon alternative only to expose any additional key/setup authority.
-If neither fits, report the exact remaining authority choice; do not silently
-choose it. Return a concrete, source-bound contract for a human decision before
-implementation. No cryptographic scheme, new key/root, signing purpose,
-entropy authority, source-domain restriction or weaker claim is selected here.
+The new Pending request concerns **one additional authority purpose**: permit
+the already enrolled, fixed-epoch validator set to act as the explicit seed
+contribution/signing authority in the isolated future-generation formal/reference
+model. This would add a seed purpose to those same independently authenticated
+identities; it would not assert that NSG1 already permits it. No new deployment
+operator, independently trusted public key, external beacon or factual-history
+observer is proposed.
+
+If approved, the standing delegation would cover selecting, recording,
+implementing and qualifying a minimal concrete protocol for that new purpose:
+exact evidence generation/verification and seed derivation, canonical domains,
+pre/post-ISC ordering, quorum/withholding/duplicate/incomplete behavior and
+history binding. A new seed signature purpose must be separately specified;
+it cannot relabel existing NSG1/ISC signatures. Any internal key/setup material
+must be derived and completely verified through the approved authority and
+original authenticated transcript, not independently trusted because a file
+contains it. An independently trusted setup/key remains outside this proposal.
+
+The original bias-resistance, witness-independence, failure/liveness and full
+source-domain obligations stay mandatory. If they cannot be met within that
+authority, the exact remaining boundary must be reported rather than a weaker
+claim substituted. The concrete algorithm and compatibility consequences must
+be recorded immutably and pass ordinary proofs, qualification and reviews before
+use in the enclosing relation. A separate specification-only STOP for ordinary
+choices within the newly approved purpose is **not** proposed.
+
+No seed signing purpose, cryptographic scheme, new key/root, entropy authority,
+source-domain restriction or weaker claim has been selected by this memo.
 
 All existing R2.3 permission remains valid. This does not ask to reauthorize
 R2.3, deterministic bindings or ordinary formal work. Existing schemas,
