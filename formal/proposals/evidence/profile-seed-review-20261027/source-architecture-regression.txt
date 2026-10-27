@@ -1,0 +1,19 @@
+test_complete_original_chain_and_every_prefix_cut (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_complete_original_chain_and_every_prefix_cut) ... ok
+test_contradictory_physical_output_not_a_rejected_command (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_contradictory_physical_output_not_a_rejected_command) ... ok
+test_crash_surviving_unknown_bytes_and_missing_journal_never_disappear (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_crash_surviving_unknown_bytes_and_missing_journal_never_disappear) ... ok
+test_faulty_remote_deal_not_required_to_match_honest_private_kdf (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_faulty_remote_deal_not_required_to_match_honest_private_kdf) ... ok
+test_foreign_context_rejected_and_original_bytes_retained (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_foreign_context_rejected_and_original_bytes_retained) ... ok
+test_forged_materialized_descriptor_input_or_future_dependency_rejected (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_forged_materialized_descriptor_input_or_future_dependency_rejected) ... ok
+test_forged_trace_cache_cannot_replace_original_occurrences (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_forged_trace_cache_cannot_replace_original_occurrences) ... ok
+test_initial_absence_not_manufactured_empty_or_lost_existing_journal (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_initial_absence_not_manufactured_empty_or_lost_existing_journal) ... ok
+test_missing_barrier_cannot_be_replaced_by_valid_signature (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_missing_barrier_cannot_be_replaced_by_valid_signature) ... ok
+test_original_commits_derive_knowledge_and_status_floor_across_crash (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_original_commits_derive_knowledge_and_status_floor_across_crash) ... ok
+test_receive_does_not_supply_own_signing_action (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_receive_does_not_supply_own_signing_action) ... ok
+test_retries_invalid_receive_and_unrelated_events_keep_original_positions (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_retries_invalid_receive_and_unrelated_events_keep_original_positions) ... ok
+test_uncommitted_receive_is_not_knowledge_even_with_complete_artifacts (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_uncommitted_receive_is_not_knowledge_even_with_complete_artifacts) ... ok
+test_unknown_invocation_is_unresolved_not_lawful_noop (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_unknown_invocation_is_unresolved_not_lawful_noop) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 24.110s
+
+OK

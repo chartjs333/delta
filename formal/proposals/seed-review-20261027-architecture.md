@@ -83,3 +83,36 @@ The runner accurately labels its evidence as executed import closure, without
 claiming coverage of unexecuted dynamic imports. The receipt still marks complete
 source/producer composition and full R2.3 OPEN/NO_GO. Second process review remains
 required. This is the same sequential executor, not independent attestation.
+
+## Original source facet at d574a309
+
+T047/T053. Reviewer 2791 assignment `5dc35abf-3b6a-4609-97db-18e968b64322`,
+scope3 ACK `scope-ack-aaa4a802c48b4e528dd0b6cf69db80bd` confirmed by GET;
+official observability revision69 confirms delivered/current review. The worker
+result was already accepted and was not resent after transport timeout.
+
+**APPROVE the isolated original-source facet and cache correction.** Reviewed
+the recorded contract, complete source fold, journal matching, local extraction
+and Lean membership factors. The source regression was rerun, including forged
+Trace caches, lost/foreign/repeated crash images, uncommitted knowledge and
+SIGN/RECEIVE substitution. Its exact output is retained in
+`evidence/profile-seed-review-20261027/source-architecture-regression.txt`.
+
+Every original descriptor/input/dependency is rechecked; rejected commands and
+other handlers remain explicit. Contradictory original SIGN output or CRASH
+image stays unresolved through a suffix. Downstream consumers recompute the
+entire Trace before using cached cuts. Initial absence is not replaced by an
+invented owned journal, and an existing missing journal cannot become empty.
+The local extractor consumes only newly committed records at actual source
+COMMITs; no signature alone is authority for an own signing step.
+
+The Lean factors require actual local kernel runs and deterministic decoding;
+they do not prove the Python extractor, crypto soundness, global source closure
+or arbitrary public-state acceptance. Those remaining obligations are explicitly
+reported, as are private KDF/honest-validator assumptions. No production state
+machine, historical identity, source cap or authority change is present.
+
+The enclosing independently authenticated metadata/ISC/clock/native-state join,
+global byte-to-kernel composition, progress and the three whole R2.3 obligations
+remain OPEN. Continue them after the evidence review under the existing scope.
+This same-executor process review is not independent Formal GO attestation.
