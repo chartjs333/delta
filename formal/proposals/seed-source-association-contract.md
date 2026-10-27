@@ -57,6 +57,8 @@ by this seed facet. A seed action for another actor is also retained unchanged.
 
 At requested prefix cuts compare the computed surviving companion bytes with
 the independently retained original journal for the exact actor/instance.
+Its Profile journal ID is `PROFILE-SEED-PRODUCER-V1:` followed by the existing
+domain-separated `instance_id` (including its `sha256:` prefix).
 Missing journal is not empty; original descriptor identity/count and byte tip
 must agree. Torn/BLOCKED/incomplete states remain representable, retain all
 bytes, and cannot expose a seed. Original native WAL bytes are retained without
