@@ -52,6 +52,11 @@ transition, and retain success or rejection with its exact position and before/
 after state. A rejected invocation is a no-op, not an omitted source occurrence.
 Unknown operation/dispatch or malformed descriptor is unresolved and prevents
 claiming coverage; invalid protocol payloads are retained rejected invocations.
+SIGN's signed-output assertion and CRASH's surviving-image assertion are facts
+of those original steps, not arbitrary network commands. If either contradicts
+its producer/T rule, mark the source unresolved; never reinterpret that claimed
+physical/output event as a harmless rejected command. No later event repairs its
+coverage, though the original suffix remains retained for diagnostics.
 An unrelated original action is retained for its own handler, not declared legal
 by this seed facet. A seed action for another actor is also retained unchanged.
 
