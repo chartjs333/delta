@@ -274,6 +274,19 @@ class SourceHistoryTests(unittest.TestCase):
         with self.assertRaises(c.CodecError):
             s.check_journal_tip(pending, self.actor, self.ctx, ())
 
+    def test_forged_trace_cache_cannot_replace_original_occurrences(self):
+        trace = self.fold()
+        altered = replace(trace, events=(), outcomes=(), commits=trace.commits)
+        with self.assertRaises(c.CodecError):
+            s.local_agreement(altered)
+        with self.assertRaises(c.CodecError):
+            s.check_journal_tip(
+                altered,
+                self.actor,
+                self.ctx,
+                ((self.actor, s.journal_id(self.ctx), trace.state.volatile),),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

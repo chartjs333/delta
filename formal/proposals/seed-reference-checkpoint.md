@@ -24,8 +24,17 @@ join. Public SIGN checking does not prove private KDF behavior; that explicit
 honest producer/cryptographic premise remains unchanged and is not hidden in a
 success flag. No real source run or production producer is claimed.
 
-Applicable qualification passed with receipt
-`31641ae4f1c5c8e279af080e1ded7b2aec4bf1f6cd305e0e0b531ca4f37df2e1`.
+Applicable qualification after the source-cache correction passed with receipt
+`cf2061a5190a5bb3d0e013d9b88f71a199ba5c5c750e235372356370a5f8f1f4`.
+Before submission, a constructed Trace at `792fa5c5` could keep cached COMMITs
+while deleting original events. The negative regression failed as expected;
+`evidence/profile-seed-agreement/source-cache-counterexample-before.txt` retains
+that failure. Downstream journal/local-kernel checks now recompute the entire
+fold and require exact equality of the carrier, including cuts and unresolved
+occurrences. The regression and complete component qualification pass after
+the correction. This is a reference-helper counterexample, not a production
+attack or full valid snapshot counterexample. The earlier receipt `31641ae4`
+does not qualify the corrected sources.
 The source-map gate first caught the newly executed transitive dependency
 `formal/scripts/native_source_artifacts.py`; it was explicitly pinned before
 the successful full rerun. This development checkpoint is not a worker result,

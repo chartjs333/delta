@@ -200,12 +200,30 @@ def fold(group, boot, expected, bootstrap_id, actor, native_wal, events, cuts=()
     return Trace(events, tuple(outcomes), tuple(at_cut), state, tuple(unresolved), tuple(commits))
 
 
+def recheck(trace):
+    """A constructed/replaced Trace is not source authority; recompute its fold."""
+    c._require(type(trace) is Trace and type(trace.state) is d.Machine, "source trace carrier")
+    state = trace.state
+    actual = fold(
+        state.group,
+        state.boot,
+        state.expected,
+        state.bootstrap_id,
+        state.actor,
+        state.native_wal,
+        trace.events,
+        tuple(index for index, _ in trace.cuts),
+    )
+    c._require(actual == trace, "entire recomputed original trace, not supplied caches")
+
+
 def check_journal_tip(trace, actor, expected, original_own_journals):
     """Exact surviving original bytes, including incomplete/BLOCKED tails.
 
     The enclosing metadata verifier supplies the independently retained inventory.
     No missing journal is filled with empty bytes; this is not an activation test.
     """
+    recheck(trace)
     c._require(type(original_own_journals) is tuple, "original own journal inventory")
     selected = [
         raw
@@ -254,6 +272,7 @@ def local_agreement(trace):
     remain in Trace; equal abstract values do not collapse those occurrences.
     This still requires the global authenticated/honest-source composition.
     """
+    recheck(trace)
     c._require(not trace.unresolved, "no source coverage through unresolved outputs")
     before = d.Replay()
     known, commits, reports, actions = [], [], [], []

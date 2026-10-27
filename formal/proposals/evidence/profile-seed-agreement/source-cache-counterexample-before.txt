@@ -1,0 +1,14 @@
+test_forged_trace_cache_cannot_replace_original_occurrences (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_forged_trace_cache_cannot_replace_original_occurrences) ... FAIL
+
+======================================================================
+FAIL: test_forged_trace_cache_cannot_replace_original_occurrences (formal.reference.seed_source.test_source_history.SourceHistoryTests.test_forged_trace_cache_cannot_replace_original_occurrences)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\madoev\.codex\worktrees\isc-s16-sequential\delta\formal\reference\seed_source\test_source_history.py", line 280, in test_forged_trace_cache_cannot_replace_original_occurrences
+    with self.assertRaises(c.CodecError):
+AssertionError: CodecError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 1.027s
+
+FAILED (failures=1)

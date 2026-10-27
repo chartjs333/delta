@@ -48,6 +48,7 @@ test_crash_surviving_unknown_bytes_and_missing_journal_never_disappear (test_sou
 test_faulty_remote_deal_not_required_to_match_honest_private_kdf (test_source_history.SourceHistoryTests.test_faulty_remote_deal_not_required_to_match_honest_private_kdf) ... ok
 test_foreign_context_rejected_and_original_bytes_retained (test_source_history.SourceHistoryTests.test_foreign_context_rejected_and_original_bytes_retained) ... ok
 test_forged_materialized_descriptor_input_or_future_dependency_rejected (test_source_history.SourceHistoryTests.test_forged_materialized_descriptor_input_or_future_dependency_rejected) ... ok
+test_forged_trace_cache_cannot_replace_original_occurrences (test_source_history.SourceHistoryTests.test_forged_trace_cache_cannot_replace_original_occurrences) ... ok
 test_initial_absence_not_manufactured_empty_or_lost_existing_journal (test_source_history.SourceHistoryTests.test_initial_absence_not_manufactured_empty_or_lost_existing_journal) ... ok
 test_missing_barrier_cannot_be_replaced_by_valid_signature (test_source_history.SourceHistoryTests.test_missing_barrier_cannot_be_replaced_by_valid_signature) ... ok
 test_original_commits_derive_knowledge_and_status_floor_across_crash (test_source_history.SourceHistoryTests.test_original_commits_derive_knowledge_and_status_floor_across_crash) ... ok
@@ -57,6 +58,6 @@ test_uncommitted_receive_is_not_knowledge_even_with_complete_artifacts (test_sou
 test_unknown_invocation_is_unresolved_not_lawful_noop (test_source_history.SourceHistoryTests.test_unknown_invocation_is_unresolved_not_lawful_noop) ... ok
 
 ----------------------------------------------------------------------
-Ran 57 tests in 55.503s
+Ran 58 tests in 55.889s
 
 OK

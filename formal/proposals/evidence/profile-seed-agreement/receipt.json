@@ -187,7 +187,7 @@
     {
       "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "d3bbe434cf0ecca1a34066de28bc8fd6d460ca51ea72bfc8b7f731dcdb1b1b19"
+      "sha256": "e04addd341a8031e157f336726643565d5aeb4d40426a94a943a9655be8bd082"
     },
     {
       "exit_code": 0,
@@ -336,14 +336,14 @@
     "formal/reference/seed_source/native.py": "86c7d4783ea3b39dc8f66c7f6f5fdb0f703cd3cb37e6d249824b81ac3f614e00",
     "formal/reference/seed_source/producer_guards.py": "8f1ef9c67be120d0df884da82e1bf7c568e46ec0201fda02a995af998d23efd9",
     "formal/reference/seed_source/pvss.py": "384cf08745f8c9e5c8e432a8fb5b2b571d8b043846b171d8ba5bba77f39b054e",
-    "formal/reference/seed_source/source_history.py": "12270d5fd7d600ce9370de299b143bcec353c1e17d3acbfe8e83c3fc76081a3f",
+    "formal/reference/seed_source/source_history.py": "3b9748a52cae0332a80afb00aaf86b18993cf4c0a173a567465485ea100a1e60",
     "formal/reference/seed_source/test_agreement.py": "8fe9fe16f13d6652006fe8f8b2c4d657512b2bd0a398cadf08cee48083f126be",
     "formal/reference/seed_source/test_durability.py": "bc64df9f8532ed14d05a7af11046145eccb2a660bfd4b4f3343044320aa3f254",
     "formal/reference/seed_source/test_generation.py": "f4b819097824cff800610ec73440101db4d6c1dc39a70c2a54e2842d0ba15281",
     "formal/reference/seed_source/test_native.py": "25c0023d9edeccb4959cc83037d653a8466ba7c002a6b71a3694d65452199fc3",
     "formal/reference/seed_source/test_producer_guards.py": "d9a19488ae3b9096d06882638f06941df815d3b1028f5ea8468cbbda5d81e692",
     "formal/reference/seed_source/test_pvss.py": "4ea1ece1e9b21eec60bccec8430e3a3ea45b982efb9ec247603472bc19cb9277",
-    "formal/reference/seed_source/test_source_history.py": "85c7ecec0515ac4b6687c147b71811ea2b6fa9718ebc3e7c99624fefc7b2aca8",
+    "formal/reference/seed_source/test_source_history.py": "88dccbe542638d9348c142f0b097129e9a73e9e63c3796ac98453b1eddc7d308",
     "formal/reference/storage_source/__init__.py": "39145ac3fae5559d5aba1cb28d88f4725f4d5e3472179932cba1caa930f4a47b",
     "formal/reference/storage_source/codec.py": "3a24411c49fdca65d2600291a169e6b1fcd150868950b6f6ee56bede88b8f0d4",
     "formal/reference/storage_source/retention.py": "88b0192ab51373d2c19ca99ac372fd16fd2661d95c37092b4452eebd48fb6cbe",
