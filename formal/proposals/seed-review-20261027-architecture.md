@@ -71,3 +71,15 @@ aggregate component acceptance; this architecture APPROVE does not waive that
 pending evidence gate. Both files exist at the reviewed Git head; the problem
 is incomplete reproducibility/change detection in the qualifier, not a new trust
 or source-domain choice. No Pending semantic decision is needed.
+
+## Qualification-source correction at 4e0dcb51
+
+Role 2791 assignment `40a036aa-9498-4f42-8446-e911f60fc1b6`, scope3 exact ACK
+GET-confirmed after a transient API failure. **APPROVE this correction**.
+Comparison to 299b2fed shows no producer, cryptographic, protocol or Lean change.
+The added dependency coverage rejects both omissions found in evidence review;
+all receipt source hashes and successful log hashes match the reviewed head.
+The runner accurately labels its evidence as executed import closure, without
+claiming coverage of unexecuted dynamic imports. The receipt still marks complete
+source/producer composition and full R2.3 OPEN/NO_GO. Second process review remains
+required. This is the same sequential executor, not independent attestation.
