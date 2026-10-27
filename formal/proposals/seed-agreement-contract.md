@@ -108,7 +108,9 @@ DEAL proof nonce at recipient i is
 OPEN uses the identical formula on OPEN_core with a separate open_nonce_domain.
 The domains are `deltareduce.seed-pvss.nonce.deal.v1` and
 `deltareduce.seed-pvss.nonce.open.v1`, each plus NUL. No nonce is zero; no nonce
-is reused across different statements or purposes. Ed25519 signing keeps its
+is deliberately reused across different statements or purposes: the KDF inputs
+are distinct, with residual output-collision probability covered by the stated
+computational assumptions. Ed25519 signing keeps its
 existing algorithm and does not consume these proof nonces. Exact retries
 derive identical bytes. The scalar used to open shares is the standard clamped
 first half of SHA512(k), reduced modulo L, and must reproduce the enrolled key.
@@ -133,6 +135,19 @@ witnesses, source cut, randomized proof bytes, signature bytes and arrival order
 The required transcript separately retains exact original evidence IDs and all
 occurrences. The existing native transcript/EC source join must establish which
 original transcript is persisted; equal seed values do not merge original objects.
+
+The native schema-2 `SEED_TRANSCRIPT` uses the existing field names. Its context
+is decoded from the original B preimage; `input_set_certificate_id` is computed
+as b, never copied from an untyped c reference. Its `share_ids` are the sorted
+exact DEAL artifact IDs in the committed selection, NOT the reconstruction or
+COMMIT witness subset. All OPEN/COMMIT occurrences remain in the source inventory.
+`seed_profile_id` is the domain-separated content ID of the closed reference
+algorithm descriptor implemented by `seed_source.native.profile_descriptor`.
+The installed producer/codec pins bind this descriptor as part of the selected
+future reference rules. An imported descriptor never elects its own authority.
+This algorithm-content ID is not a production sigma or permission to deploy.
+The constructor checks the original native body and independent epoch/registry;
+it cannot prove that the ISC was finalized or the seed was durably released.
 
 Required qualification inside the existing R2.3 residual: same/cross-view safety,
 release-after-commit, preservation of all events across invalid attempts/retries,
