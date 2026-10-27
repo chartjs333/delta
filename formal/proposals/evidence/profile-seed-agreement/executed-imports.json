@@ -1,0 +1,23 @@
+[
+  "formal/proposals/b-family-transfer/run_seed_reference_tests.py",
+  "formal/reference/isc_crypto/codec.py",
+  "formal/reference/isc_crypto/sodium_reference.py",
+  "formal/reference/isc_source/__init__.py",
+  "formal/reference/isc_source/authentication.py",
+  "formal/reference/isc_source/identity.py",
+  "formal/reference/isc_w1/codec.py",
+  "formal/reference/profile_source/__init__.py",
+  "formal/reference/profile_source/metadata.py",
+  "formal/reference/seed_source/agreement.py",
+  "formal/reference/seed_source/durability.py",
+  "formal/reference/seed_source/generation.py",
+  "formal/reference/seed_source/native.py",
+  "formal/reference/seed_source/producer_guards.py",
+  "formal/reference/seed_source/pvss.py",
+  "formal/reference/seed_source/test_agreement.py",
+  "formal/reference/seed_source/test_durability.py",
+  "formal/reference/seed_source/test_generation.py",
+  "formal/reference/seed_source/test_native.py",
+  "formal/reference/seed_source/test_producer_guards.py",
+  "formal/reference/seed_source/test_pvss.py"
+]

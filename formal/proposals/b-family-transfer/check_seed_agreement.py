@@ -20,11 +20,18 @@ def text_digest(path):
     return digest(path.read_bytes().replace(b"\r\n", b"\n"))
 
 
+def require_source_coverage(pins, imported):
+    missing = sorted(set(imported) - set(pins))
+    if missing:
+        raise RuntimeError("Unpinned executed repository dependencies: " + ", ".join(missing))
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "receipt.json").unlink(missing_ok=True)
     sources = [
         Path(__file__),
+        Path(__file__).with_name("run_seed_reference_tests.py"),
         Path(__file__).with_name("ProfileSeedIntent.lean"),
         Path(__file__).with_name("ProfileSeedDurability.lean"),
         Path(__file__).with_name("ProfileSeedKnowledge.lean"),
@@ -32,6 +39,8 @@ def main():
         ROOT / "formal/proofs/DeltaReduce/Quorum.lean",
         ROOT / "formal/proposals/seed-agreement-contract.md",
         ROOT / "formal/proposals/seed-durable-producer-contract.md",
+        ROOT / "formal/reference/profile_source/__init__.py",
+        ROOT / "formal/reference/profile_source/metadata.py",
     ]
     for folder in ("seed_source", "isc_crypto", "isc_source", "isc_w1"):
         sources.extend(sorted((ROOT / "formal/reference" / folder).glob("*.py")))
@@ -123,16 +132,33 @@ def main():
     run(
         [
             sys.executable,
-            "-m",
-            "unittest",
-            "discover",
-            "-s",
-            "formal/reference/seed_source",
-            "-p",
-            "test_*.py",
-            "-v",
+            str(Path(__file__).with_name("run_seed_reference_tests.py")),
         ],
         "reference-tests.txt",
+    )
+    imports = json.loads((OUT / "executed-imports.json").read_text("utf8"))
+    require_source_coverage(pins, imports)
+    # Regression of the actual review failure: removing either newly discovered
+    # dependency must make the SAME applicability gate reject, before receipt.
+    for path in (
+        "formal/reference/profile_source/__init__.py",
+        "formal/reference/profile_source/metadata.py",
+    ):
+        if path not in imports:
+            raise RuntimeError("Missing regression import: " + path)
+        try:
+            require_source_coverage({p: h for p, h in pins.items() if p != path}, imports)
+        except RuntimeError:
+            pass
+        else:
+            raise RuntimeError("Source omission mutant survived: " + path)
+    checks.append(
+        dict(
+            log="executed-imports.json",
+            sha256=text_digest(OUT / "executed-imports.json"),
+            exit_code=0,
+            missing_dependency_mutants="both rejected",
+        )
     )
     run(
         [
@@ -142,6 +168,7 @@ def main():
             "check",
             "formal/reference/seed_source",
             "formal/proposals/b-family-transfer/check_seed_pvss.py",
+            str(Path(__file__).with_name("run_seed_reference_tests.py")),
             str(Path(__file__)),
         ],
         "lint.txt",
@@ -155,6 +182,7 @@ def main():
             "--check",
             "formal/reference/seed_source",
             "formal/proposals/b-family-transfer/check_seed_pvss.py",
+            str(Path(__file__).with_name("run_seed_reference_tests.py")),
             str(Path(__file__)),
         ],
         "format.txt",

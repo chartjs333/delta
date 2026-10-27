@@ -77,6 +77,18 @@ The corrected result still requires its normal reviews. This is an in-envelope
 technical correction, not a new semantic Pending decision or R2.3 closure.
 Same-executor process review is not independent attestation.
 
+The subsequent evidence review rejected that corrected result because two
+transitive dependencies were absent from its qualification source map (report
+`5be6151a`). Worker rework `aca8206a-9824-465f-916b-5d5fff8005cc` under fresh
+scope 3 now pins both Profile metadata files and records the repository import
+closure actually executed by the regression suite. The qualifier rejects any
+unlisted loaded repository module; removing either reported dependency is also
+checked as an omission mutant. This checks executed imports plus explicit source
+pins, not arbitrary unexecuted dynamic imports. Requalification passed with
+receipt `c6b5db02c731101d64265ec99eff1e6bb6fe133b66538c164070dbe757971683`.
+The corrected evidence needs both normal reviews before dependent composition.
+No signed bytes, production behavior or trust changed; R2.3 remains OPEN.
+
 ## Exact remaining boundary of this checkpoint
 
 The candidate verifier is deliberately NOT an admitted-seed API. Before using

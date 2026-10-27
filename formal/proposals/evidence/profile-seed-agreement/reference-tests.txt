@@ -44,6 +44,6 @@ test_wrong_registry_key_and_duplicate_key (test_pvss.PvssTests.test_wrong_regist
 test_zero_polynomial_and_zero_individual_evaluation (test_pvss.PvssTests.test_zero_polynomial_and_zero_individual_evaluation) ... ok
 
 ----------------------------------------------------------------------
-Ran 44 tests in 43.981s
+Ran 44 tests in 44.868s
 
 OK
