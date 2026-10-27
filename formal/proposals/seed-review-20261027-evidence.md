@@ -23,3 +23,24 @@ domain, runtime or trust. The architecture correction at 299b2fed is accepted in
 its remit; aggregate component qualification awaits this evidence gate and both
 ordinary reviews of the corrected result. Whole source association and R2.3 are
 still open; a passed component does not close them.
+
+## Rework at 4e0dcb51
+
+Role 2792 assignment `e3325cad-70c3-4258-aa58-3ed3cebb3862`, scope3 ACK confirmed
+by fresh GET. **APPROVE the corrected component evidence**. All receipt source
+hashes and successful log hashes were recomputed. Both formerly missing files
+are included. The qualifier rejects an executed repository dependency omitted
+from its explicit map; deleting either reported file from that map was checked
+again and rejected. The seed regression suite was rerun at this head, including
+the repeated-crash foreign-frame case, and passed. The pinned Mathlib source
+checkout is at the recorded commit without tracked modifications.
+
+The executed import inventory describes the exercised regression imports, not
+all possible unexecuted dynamic imports. No cryptographic or protocol result is
+inferred from a source hash. Existing factor proofs and their residual premises
+remain accurately separated from complete source closure in the receipt.
+The full original-index/producer/ISC/history association, derivation of all
+cross-view local rules, progress and the three complete R2.3 obligations remain
+OPEN. Continue these under standing delegation through the normal coordinator
+route; no new semantic decision is needed for this technical correction.
+Same sequential executor; neither review is an independent Formal GO attestation.
