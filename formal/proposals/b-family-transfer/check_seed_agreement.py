@@ -26,7 +26,12 @@ def main():
     sources = [
         Path(__file__),
         Path(__file__).with_name("ProfileSeedIntent.lean"),
+        Path(__file__).with_name("ProfileSeedDurability.lean"),
+        Path(__file__).with_name("ProfileSeedKnowledge.lean"),
+        Path(__file__).with_name("ProfileSeedAgreementSafety.lean"),
+        ROOT / "formal/proofs/DeltaReduce/Quorum.lean",
         ROOT / "formal/proposals/seed-agreement-contract.md",
+        ROOT / "formal/proposals/seed-durable-producer-contract.md",
     ]
     for folder in ("seed_source", "isc_crypto", "isc_source", "isc_w1"):
         sources.extend(sorted((ROOT / "formal/reference" / folder).glob("*.py")))
@@ -69,6 +74,52 @@ def main():
         set(values.split(", ")) - {"propext", "Quot.sound"} for _, values in axioms
     ):
         raise RuntimeError("Unexpected/incomplete intent axiom audit")
+    storage_log = run(
+        [str(lean), "formal/proposals/b-family-transfer/ProfileSeedDurability.lean"],
+        "durability-proof-and-axioms.txt",
+    )
+    storage_axioms = re.findall(r"'([^']+)' depends on axioms: \[([^]]*)\]", storage_log)
+    if len(storage_axioms) != 8 or any(
+        set(values.split(", ")) - {"propext", "Quot.sound"} for _, values in storage_axioms
+    ):
+        raise RuntimeError("Unexpected/incomplete durability axiom audit")
+    axioms += storage_axioms
+    packages = Path(os.environ["PVSS_MATHLIB_PACKAGES"])
+    actual = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=packages / "mathlib", text=True
+    ).strip()
+    if actual != "520045ab14e26149ee970e2e617ca04b09bde5d6":
+        raise RuntimeError("Wrong pinned mathlib revision")
+    cache = ROOT / ".cache/seed-proof"
+    (cache / "DeltaReduce").mkdir(parents=True, exist_ok=True)
+    os.environ["LEAN_PATH"] = os.pathsep.join(
+        [str(p / ".lake/build/lib/lean") for p in packages.iterdir() if p.is_dir()] + [str(cache)]
+    )
+    run(
+        [
+            str(lean),
+            "-o",
+            str(cache / "DeltaReduce/Quorum.olean"),
+            "formal/proofs/DeltaReduce/Quorum.lean",
+        ],
+        "quorum-reuse.txt",
+    )
+    for module, name in (
+        ("ProfileSeedKnowledge", "knowledge"),
+        ("ProfileSeedAgreementSafety", "cross-view-factor"),
+    ):
+        log = run(
+            [str(lean), "formal/proposals/b-family-transfer/" + module + ".lean"],
+            name + "-proof-and-axioms.txt",
+        )
+        checked = re.findall(r"'([^']+)' depends on axioms: \[([^]]*)\]", log)
+        if len(checked) != 4 or any(
+            set(values.replace("\n", "").replace(" ", "").split(","))
+            - {"propext", "Quot.sound", "Classical.choice"}
+            for _, values in checked
+        ):
+            raise RuntimeError("Unexpected/incomplete " + name + " axiom audit")
+        axioms += checked
     run(
         [
             sys.executable,
@@ -115,6 +166,9 @@ def main():
         R23="OPEN",
         formal="NO_GO",
         complete_seed_producer=False,
+        durability_primitive_checked=True,
+        local_status_floor_checked=True,
+        cross_view_factor_checked=True,
         cross_view_safety_proved=False,
         original_source_join_closed=False,
         production_compatible=False,
@@ -124,8 +178,11 @@ def main():
         lean=version,
         lean_binary_sha256=digest(lean.read_bytes()),
         checks=checks,
-        axioms={name: values.split(", ") for name, values in axioms},
-        residual="complete honest generating/durable/release prefix, cross-view safety and "
+        axioms={
+            name: values.replace("\n", "").replace(" ", "").split(",") for name, values in axioms
+        },
+        residual="complete honest source-index association of generating/durable/release prefix, "
+        "cross-view safety and "
         "existing-policy progress, source-index/native-state join; all three full "
         "R2.3 obligations remain; no named recovery theorem or Formal GO",
     )

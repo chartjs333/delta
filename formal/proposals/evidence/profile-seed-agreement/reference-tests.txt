@@ -6,6 +6,14 @@ test_missing_and_duplicate_witnesses_cannot_commit (test_agreement.AgreementTest
 test_new_view_preserves_highest_prepared_candidate (test_agreement.AgreementTests.test_new_view_preserves_highest_prepared_candidate) ... ok
 test_original_positions_and_duplicate_occurrences_retained (test_agreement.AgreementTests.test_original_positions_and_duplicate_occurrences_retained) ... ok
 test_wrong_leader_and_relabelled_signature_rejected (test_agreement.AgreementTests.test_wrong_leader_and_relabelled_signature_rejected) ... ok
+test_all_crash_regions_preserve_originals_and_need_recovery_barrier (test_durability.DurabilityTests.test_all_crash_regions_preserve_originals_and_need_recovery_barrier) ... ok
+test_crash_after_sign_loses_only_unretained_effect_then_exact_replay (test_durability.DurabilityTests.test_crash_after_sign_loses_only_unretained_effect_then_exact_replay) ... ok
+test_deal_private_derivation_not_arbitrary_valid_algebra (test_durability.DurabilityTests.test_deal_private_derivation_not_arbitrary_valid_algebra) ... ok
+test_highest_prepared_and_old_view_guards_survive_recovery (test_durability.DurabilityTests.test_highest_prepared_and_old_view_guards_survive_recovery) ... ok
+test_intent_barrier_then_sign_then_artifact_barrier_before_expose (test_durability.DurabilityTests.test_intent_barrier_then_sign_then_artifact_barrier_before_expose) ... ok
+test_no_missing_payload_or_shorter_knowledge_recovery (test_durability.DurabilityTests.test_no_missing_payload_or_shorter_knowledge_recovery) ... ok
+test_open_requires_original_commit_quorum_before_intent_and_sign (test_durability.DurabilityTests.test_open_requires_original_commit_quorum_before_intent_and_sign) ... ok
+test_retry_keeps_original_ordinals_and_occurrences (test_durability.DurabilityTests.test_retry_keeps_original_ordinals_and_occurrences) ... ok
 test_all_subsets_from_generated_openings (test_generation.GenerationTests.test_all_subsets_from_generated_openings) ... ok
 test_cut_changes_preserve_polynomial_but_not_original_artifact (test_generation.GenerationTests.test_cut_changes_preserve_polynomial_but_not_original_artifact) ... ok
 test_distinct_instance_changes_coefficients (test_generation.GenerationTests.test_distinct_instance_changes_coefficients) ... ok
@@ -34,6 +42,6 @@ test_wrong_registry_key_and_duplicate_key (test_pvss.PvssTests.test_wrong_regist
 test_zero_polynomial_and_zero_individual_evaluation (test_pvss.PvssTests.test_zero_polynomial_and_zero_individual_evaluation) ... ok
 
 ----------------------------------------------------------------------
-Ran 34 tests in 19.326s
+Ran 42 tests in 39.353s
 
 OK

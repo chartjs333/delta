@@ -39,12 +39,12 @@
     {
       "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "59acc08160cdac9f9858a651a32d62bff4e9f597b4f209f87f36f2b0c6424ee6"
+      "sha256": "15c932bc1f1b2161403b0640fcb326ca01d3f0e9e6795c189e6339dcc7ba417d"
     },
     {
       "exit_code": 0,
       "log": "signature-regression.txt",
-      "sha256": "6d7aefff3ffe1fca4b5d6f1197928d635581b08d3ce4f6fd411b654d7a9e2d1e"
+      "sha256": "d8cf5bc28ca41ae3283f76da552a84055e21bb5ae95c7dd7042114bb8f551fa0"
     }
   ],
   "contract": "formal/proposals/seed-pvss-component-contract.md",
@@ -81,7 +81,7 @@
     "formal/reference/isc_w1/harness.py": "f81722fc017cbc3a5f65654aeb7b634bfd4378956a9ac40075dac035f243778c",
     "formal/reference/isc_w1/test_codec.py": "5a69b538dc1446e89c07b07eafa4d36e23cbd43b0433d9e162c4cd9693ced9df",
     "formal/reference/isc_w1/test_harness.py": "ce4a878d8b79f15612a376a77e64c31ededb567da08fccb1524866dd2b1def76",
-    "formal/reference/seed_source/pvss.py": "1b5af39554ad88987896d59845fcc2028b334f71fcbb42943d5958e2bd07c720",
+    "formal/reference/seed_source/pvss.py": "384cf08745f8c9e5c8e432a8fb5b2b571d8b043846b171d8ba5bba77f39b054e",
     "formal/reference/seed_source/test_pvss.py": "4ea1ece1e9b21eec60bccec8430e3a3ea45b982efb9ec247603472bc19cb9277"
   },
   "status": "PVSS_COMPONENT_CHECKED",

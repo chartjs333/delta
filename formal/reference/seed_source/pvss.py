@@ -180,13 +180,24 @@ def sign(group: Group, seed: bytes, body: dict) -> bytes:
 
 
 def authenticated(group: Group, boot: Bootstrap, expected: dict, raw: bytes):
-    members = context(boot, expected)
-    for key in members.values():
-        group.point(key, identity=False)
     outer = c._closed(c._load(raw), {"body", "signature"})
     c._require(type(outer["body"]) is str, "original statement bytes")
     original = binary(outer["body"], len(outer["body"]) // 2)
     body = c._load(original)
+    members = unsigned_context(group, boot, expected, body)
+    signature = binary(outer["signature"], 64)
+    c._require(
+        group.backend.verify(members[body["actor"]], message(original), signature),
+        "existing-key seed-purpose signature",
+    )
+    return body, members
+
+
+def unsigned_context(group: Group, boot: Bootstrap, expected: dict, body: dict):
+    """Shared structural checks only; never authenticates unsigned material."""
+    members = context(boot, expected)
+    for key in members.values():
+        group.point(key, identity=False)
     c._label(body.get("actor"))
     c._require(
         COMMON <= set(body)
@@ -195,12 +206,7 @@ def authenticated(group: Group, boot: Bootstrap, expected: dict, raw: bytes):
         and body["actor"] in members,
         "exact seed context/profile/actor",
     )
-    signature = binary(outer["signature"], 64)
-    c._require(
-        group.backend.verify(members[body["actor"]], message(original), signature),
-        "existing-key seed-purpose signature",
-    )
-    return body, members
+    return members
 
 
 def artifact_id(raw: bytes) -> str:
@@ -221,6 +227,11 @@ class Deal:
 
 def verify_deal(group: Group, boot: Bootstrap, expected: dict, raw: bytes) -> Deal:
     body, members = authenticated(group, boot, expected, raw)
+    commitments, encrypted = deal_algebra(group, body, members)
+    return Deal(raw, body["actor"], commitments, encrypted)
+
+
+def deal_algebra(group, body, members):
     c._closed(body, COMMON | {"commitments", "encrypted_shares", "proofs"})
     c._require(body["kind"] == "DEAL", "DEAL kind")
     for field, length in (("commitments", 3), ("encrypted_shares", 4), ("proofs", 4)):
@@ -238,7 +249,7 @@ def verify_deal(group: Group, boot: Bootstrap, expected: dict, raw: bytes) -> De
             encrypted[index - 1],
             binary(body["proofs"][index - 1], 64),
         )
-    return Deal(raw, body["actor"], commitments, encrypted)
+    return commitments, encrypted
 
 
 @dataclass(frozen=True)
@@ -254,6 +265,11 @@ def verify_open(
     # Never trust a caller-constructed Deal dataclass as a validated capability.
     deal = verify_deal(group, boot, expected, deal_raw)
     body, members = authenticated(group, boot, expected, raw)
+    index, share = open_algebra(group, body, members, deal_raw, deal)
+    return Opening(raw, index, share)
+
+
+def open_algebra(group, body, members, deal_raw, deal):
     c._closed(body, COMMON | {"deal_id", "share", "proof"})
     c._require(
         body["kind"] == "OPEN" and body["deal_id"] == artifact_id(deal_raw), "original DEAL binding"
@@ -270,7 +286,23 @@ def verify_open(
         deal.encrypted[index - 1],
         binary(body["proof"], 64),
     )
-    return Opening(raw, index, share)
+    return index, share
+
+
+def verify_unsigned(group, boot, expected, original_body, actor, deal_raw=None):
+    """Pre-sign algebra without a signature placeholder or authenticated object."""
+    body = c._load(original_body)
+    members = unsigned_context(group, boot, expected, body)
+    c._require(body["actor"] == actor, "own unsigned PVSS intent")
+    if body["kind"] == "DEAL":
+        c._require(deal_raw is None, "DEAL has no prior deal")
+        deal_algebra(group, body, members)
+    elif body["kind"] == "OPEN":
+        deal = verify_deal(group, boot, expected, deal_raw)
+        open_algebra(group, body, members, deal_raw, deal)
+    else:
+        raise c.CodecError("unknown unsigned PVSS kind")
+    return body
 
 
 def reconstruct(

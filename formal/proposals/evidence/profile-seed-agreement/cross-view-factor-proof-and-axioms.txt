@@ -1,0 +1,8 @@
+'DeltaReduce.ProfileSeedAgreementSafety.sameViewPrepared' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSeedAgreementSafety.laterPreparedPredecessor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSeedAgreementSafety.preparedAfterCommit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSeedAgreementSafety.noConflictingCommitValues' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -39,6 +39,20 @@ introduced. Historical seed shape fixtures are not reclassified as new evidence.
   preserve exact retries. The Lean intent kernel proves retention and absence
   of conflicting accepted bodies from its explicit empty start. The kernel is
   an overapproximation, not a complete byte/protocol/storage-source refinement.
+* The selected `PROFILE-SEED-PRODUCER-V1` companion now binds complete RECEIVE,
+  INTENT and SIGNED originals, including duplicate/invalid knowledge. The
+  primitive machine requires intent barrier/commit before its own signing action
+  and a second artifact barrier/commit before exposure. OPEN additionally needs
+  an original COMMIT quorum selecting its dealer. Exact retries use existing
+  ordinals. Crash/recovery retains complete original bytes and blocks torn or
+  foreign tails; original native WAL remains unchanged. The reference private
+  producer recomputes the selected existing-key KDF before DEAL/OPEN signing.
+* Lean proves the two-barrier transaction kernel and derives the local STATUS
+  floor from an empty-start, monotone knowledge/commit/view kernel. The global
+  cross-view certificate induction reuses PO-Q1 and explicit local rules; it
+  proves no conflicting committed values under those local rules. Deriving ALL
+  of these rules from the original authenticated byte/source fold is still open.
+  This factor theorem is not represented as full protocol qualification.
 
 Applicable component evidence is recorded in `evidence/profile-seed-pvss` and
 `evidence/profile-seed-agreement`. Both receipts explicitly keep R2.3 OPEN.
@@ -46,17 +60,20 @@ Their source hashes use Git LF-normalized TEXT; signed/original artifact bytes
 are never normalized. This corrects the first receipt's Windows/Git text-hash
 portability issue without changing any signed bytes. The initial regression
 runner import-path failure is retained; the corrected invocation passed.
-No full formal-check, global PBFT safety/progress or complete recovery result
-is claimed by these component receipts. No process reviews of this worker's
+No full formal-check, fully composed PBFT safety/progress or complete recovery
+result is claimed by these component receipts. The first durability qualification
+stopped on a checker line-length error; the error was corrected and the whole
+applicable component qualification rerun successfully. No process reviews of this worker's
 new implementation have yet been submitted.
 
 ## Exact remaining boundary of this checkpoint
 
 The candidate verifier is deliberately NOT an admitted-seed API. Before using
-its output in the full source relation, the producer fold must bind the honest
-local intent/knowledge sequence to original durable companion bytes, establish
-persist-before-sign/expose and release-after-commit through crash/recovery, and
-derive the cross-view agreement and existing-policy progress obligations. The
+its output in the full source relation, the producer fold must bind the checked
+local intent/knowledge/companion machine to original indexed source occurrences,
+derive the cross-view local-rule premises from that exact byte fold and preserve
+the existing-policy progress obligations. The primitive persist-before-sign/
+expose and release guard is checked but is not itself that complete source join. The
 complete original source-index/ISC-finalization/clock/context/native-state join
 must then establish the input premises for the existing EC/storage components.
 Neither signature validity nor a checked seed candidate supplies those facts.

@@ -1,0 +1,8 @@
+'DeltaReduce.ProfileSeedDurability.stepWal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.stepHistory' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.stepArmed' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.runArmed' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.signingRequiresIntentBarrier' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.exposureRequiresArtifactBarrier' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.retryExposureKeepsJournal' depends on axioms: [propext, Quot.sound]
+'DeltaReduce.ProfileSeedDurability.tornRecoveryBlocked' depends on axioms: [propext, Quot.sound]

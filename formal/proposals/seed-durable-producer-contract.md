@@ -57,7 +57,9 @@ commit derives caches by replay of complete records from empty. Signing and
 exposure only consult committed state. Crash preserves all stable bytes and
 may leave any bytes inside the attempted write extent, including a torn tail.
 Recovery independently replays the entire surviving journal and retained payload
-inventory. Complete valid surviving records require a new barrier/commit before
+inventory. The retained original producing trace must also bind the pre-crash
+stable prefix and attempted write; a different parseable record is not a lawful
+substitute. Complete valid surviving original records require a new barrier/commit before
 use; torn, conflicting or unknown tails remain retained and BLOCKED. Recovery
 never deletes the tail or silently restarts from an empty/shorter history.
 
