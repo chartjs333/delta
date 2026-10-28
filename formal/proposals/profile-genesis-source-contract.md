@@ -74,6 +74,18 @@ examples, not complete lawful snapshots or production provisioning evidence.
 
 ## Alternatives, compatibility and residual
 
+The base configuration join uses the independently selected schema-3 decoder
+and the existing ConfigurationUnits admission checks. It resolves validator and
+storage enrollment through the SAME raw bootstrap/initial configuration; checks
+the whole retained configuration and declaration; derives the full parent tuple
+from original genesis values; and requires original parent, increasing height,
+schema and both units. The legacy schema-2 decoder is unchanged and is never a
+fallback for this route. No configuration field, vote/QC ID or admission rule is
+added. The kernel composition retains its explicit independent Enrollment
+premise; Python resolves that premise from raw Profile inputs. This is the base
+case to be used by the enclosing producer, not permission to reset later current
+state to genesis, infer proposal/finalization from a valid body, or erase history.
+
 Do not accept an opaque genesis merely because its hash is pinned; that leaves
 the initial arithmetic source uninterpreted. Do not synthesize an ApplyCandidate
 or ApplyQC to reuse its value decoder; that invents protocol identities. Reuse

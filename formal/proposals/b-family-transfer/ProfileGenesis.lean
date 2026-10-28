@@ -1,5 +1,6 @@
 import ProfileOrigin
 import ProfileArithmeticUnits
+import ProfileConfigurationUnits
 import DeltaReduce.NativeCurrentValues
 
 /-! T047/T053. Initial source value/unit binding under the existing independent
@@ -153,5 +154,51 @@ theorem independentlyBoundOrigin {sha known bootstrap index bootstrapRaw indexRa
     out.initialConfiguration = origin.initialConfiguration :=
   ⟨(Origin.boundSource anchored).source,(Origin.boundSource anchored).retainedIndex,
     (boundSource ok).original,(boundSource ok).configuration⟩
+
+def parent (g : Bound) : ConfigurationUnits.Parent :=
+  ⟨g.current,g.units.schema,g.units.quantum,g.units.quantum⟩
+
+def bindConfiguration (sha : Bytes → Bytes) (origin : Origin.Bound) (g : Descriptor)
+    (configuration : Control.Fields) (enrolled : Configuration.Enrollment)
+    (configRaw : Bytes) : Option (Bound × ConfigurationUnits.Bound) := do
+  let base ← bind sha origin g configuration
+  let next ← ConfigurationUnits.admit enrolled (parent base) configRaw
+  some (base,next)
+
+theorem configurationSource {sha origin g configuration enrolled configRaw out}
+    (ok : bindConfiguration sha origin g configuration enrolled configRaw = some out) :
+    bind sha origin g configuration = some out.1 ∧
+    ConfigurationUnits.admit enrolled (parent out.1) configRaw = some out.2 := by
+  simp only [bindConfiguration,Bind.bind,Option.bind_eq_some_iff] at ok
+  obtain ⟨base,hb,next,hn,last⟩ := ok
+  cases Option.some.inj last
+  exact ⟨hb,hn⟩
+
+theorem configurationComplete {sha origin g configuration enrolled configRaw base next}
+    (hb : bind sha origin g configuration = some base)
+    (hn : ConfigurationUnits.admit enrolled (parent base) configRaw = some next) :
+    bindConfiguration sha origin g configuration enrolled configRaw = some (base,next) := by
+  simp only [bindConfiguration,hb,hn,Bind.bind,Option.bind]
+
+theorem configurationParentFromOriginal {sha origin g configuration enrolled configRaw out}
+    (ok : bindConfiguration sha origin g configuration enrolled configRaw = some out) :
+    out.1.original = origin.source.genesis ∧
+    out.1.initialConfiguration = origin.initialConfiguration ∧
+    out.2.body.parent = out.1.current.checkpoint ∧
+    out.1.current.height < out.2.body.height ∧
+    out.2.body.schema = out.1.units.schema ∧
+    out.2.numeric.quantum = out.1.units.quantum := by
+  have source := configurationSource ok
+  have initial := boundSource source.1
+  have admitted := (ConfigurationUnits.admitted source.2).2.2
+  exact ⟨initial.original,initial.configuration,admitted.2.1,admitted.2.2.1,
+    admitted.2.2.2.1,admitted.2.2.2.2.1⟩
+
+theorem configurationBytesAndEnrollment {sha origin g configuration enrolled configRaw out}
+    (ok : bindConfiguration sha origin g configuration enrolled configRaw = some out) :
+    ConfigurationUnits.encodeFrame out.2.body.originalValue = some configRaw ∧
+    Configuration.Matches enrolled out.2.body := by
+  have h := ConfigurationUnits.admitted (configurationSource ok).2
+  exact ⟨(ConfigurationUnits.entireOriginalConfiguration h.1).1,h.2.1⟩
 
 end DeltaReduce.ProfileSource.Genesis

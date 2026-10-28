@@ -68,3 +68,28 @@ def check_parent_units(original, parent_schema, model_quantum, optimizer_quantum
         "original parent schema and common-unit continuity",
     )
     return q
+
+
+def bind(bootstrap, storage_bootstrap, original, declaration):
+    """Explicit schema-3 route; never dispatch from an imported version string."""
+    value = decode(original)
+    return config._bind_fields(bootstrap, storage_bootstrap, original, declaration, value)
+
+
+def admit(bootstrap, storage_bootstrap, original, declaration, parent, schema, model_q, opt_q):
+    """Existing ConfigurationUnits.admit conjunct on a full original parent.
+
+    The caller must derive parent from original genesis/current history. This
+    does not finalize CONFIG or certify that a source occurrence was legal.
+    """
+    _require(type(parent) is tuple and len(parent) == 4, "full original current tuple")
+    checkpoint, optimizer, qc, height = parent
+    _id(checkpoint)
+    _id(optimizer)
+    if qc != "":
+        _id(qc)
+    _uint(height, 8)
+    bound = bind(bootstrap, storage_bootstrap, original, declaration)
+    _require(bound.parent == checkpoint and height < bound.height, "original current parent/height")
+    check_parent_units(original, schema, model_q, opt_q)
+    return bound

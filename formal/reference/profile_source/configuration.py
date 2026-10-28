@@ -321,6 +321,15 @@ def bind(
     replace the producer-prefix check. Its result is neither finality nor READY.
     """
     value = decode(original)
+    return _bind_fields(bootstrap, storage_bootstrap, original, declaration, value)
+
+
+def _bind_fields(bootstrap, storage_bootstrap, original, declaration, value):
+    """Shared authority checks after a closed generation-specific decoder.
+
+    Only the fixed schema-2/schema-3 entry points call this helper. A supplied
+    parsed body or success callback is not a public source entry point.
+    """
     registry(bootstrap)
     _require(
         storage_bootstrap.formal_semantics_id == bootstrap.formal_semantics_id

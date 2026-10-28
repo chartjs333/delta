@@ -5,8 +5,11 @@ import unittest
 from dataclasses import replace
 
 from formal.reference.isc_crypto.codec import CodecError
+from formal.reference.profile_source import configuration_units as cu
 from formal.reference.profile_source import genesis as g
 from formal.reference.profile_source import metadata as m
+from formal.reference.profile_source import test_authority as af
+from formal.reference.profile_source.test_arithmetic_units import numeric
 from formal.reference.profile_source.test_metadata import Package, frame, identifier, ref
 from formal.reference.storage_source.codec import canonical
 
@@ -61,7 +64,117 @@ def package():
     return p, initial
 
 
+def configuration_package(change=None):
+    """Explicit synthetic reprovisioning, never a claimed lawful import."""
+    af.AuthorityTests.setUpClass()
+    fixture = af.AuthorityTests()
+    fixture.setUp()
+    p = fixture.package
+    doc = document()
+    for name in ("formal_semantics_id", "origin_id", "validator_epoch_id"):
+        doc[name] = p.boot[name]
+    genesis = canonical(doc)
+    image = g.decode(
+        genesis, doc["formal_semantics_id"], doc["origin_id"], doc["validator_epoch_id"]
+    )
+    u = m.load(package()[1])["arithmetic_units"]
+    initial = canonical({**m.load(fixture.initial), "arithmetic_units": u})
+    body = fixture.fixture.body()
+    body.update(
+        schema_version="3.0.0",
+        parent_checkpoint_id=image.checkpoint_id,
+        parameter_schema_id=u["parameter_schema_id"],
+        apply_arithmetic_profile_source=cu.units.canonical(numeric("3", 7)).decode(),
+    )
+    if change:
+        change(body)
+    config = cu.encode(body)
+    declaration = fixture.fixture.declaration
+    originals = {*(raw for _, raw in p.artifacts), genesis, initial, config, declaration}
+    p.artifacts = tuple(sorted((m.raw_id(raw), raw) for raw in originals))
+    table = [ref(raw) for _, raw in p.artifacts]
+    p.boot.update(genesis_ref=ref(genesis), initial_config_ref=ref(initial))
+    p.boot_raw = m.canonical(p.boot)
+    bid = m.document_id(p.boot_raw, "BOOTSTRAP")
+    p.index.update(genesis_ref=ref(genesis), artifacts=table)
+    p.index_raw = m.canonical(p.index)
+    p.record["bootstrap_id"] = bid
+    p.trust = replace(
+        p.trust,
+        bootstrap=p.boot_raw,
+        bootstrap_raw_sha256=m.raw_id(p.boot_raw),
+        source_index_raw_sha256=m.raw_id(p.index_raw),
+        trusted_log=frame(p.record),
+    )
+    p.manifest.update(bootstrap_id=bid, artifacts=table, source_index_ref=ref(p.index_raw))
+    return fixture, p, config, declaration
+
+
+def bind_configuration_package(parts):
+    fixture, p, config, declaration = parts
+    return g.bind_configuration(
+        p.trust,
+        m.canonical(p.manifest),
+        p.index_raw,
+        p.artifacts,
+        fixture.keys,
+        fixture.registry,
+        fixture.storage_keys,
+        config,
+        declaration,
+    )
+
+
 class GenesisTests(unittest.TestCase):
+    def test_one_raw_origin_for_enrollment_values_units_and_whole_configuration(self):
+        parts = configuration_package()
+        result = bind_configuration_package(parts)
+        self.assertEqual(result.configuration.original, parts[2])
+        self.assertEqual(result.original_declaration, parts[3])
+        self.assertEqual(result.origin.initial_configuration, result.authorities.initial_config)
+        self.assertEqual(result.configuration.parent, result.origin.genesis.checkpoint_id)
+        self.assertEqual(result.origin.genesis.apply_qc_id, "")
+        self.assertEqual(
+            result.origin.source.events,
+            g.bind(
+                parts[1].trust,
+                m.canonical(parts[1].manifest),
+                parts[1].index_raw,
+                parts[1].artifacts,
+            ).source.events,
+        )
+
+    def test_rehashed_config_cannot_override_original_parent_schema_height_or_units(self):
+        for change in (
+            lambda b: b.update(parent_checkpoint_id=identifier("wrong original parent")),
+            lambda b: b.update(height="0"),
+            lambda b: b.update(parameter_schema_id=identifier("wrong original schema")),
+            lambda b: b.update(
+                apply_arithmetic_profile_source=cu.units.canonical(numeric("1", 7)).decode()
+            ),
+            lambda b: b.update(validator_epoch_id=identifier("wrong original epoch")),
+        ):
+            parts = configuration_package(change)
+            with self.subTest(change=change), self.assertRaises(CodecError):
+                bind_configuration_package(parts)
+
+    def test_original_keys_and_source_cannot_be_replaced_by_bound_caches(self):
+        fixture, p, raw, declaration = configuration_package()
+        args = (
+            m.canonical(p.manifest),
+            p.index_raw,
+            p.artifacts,
+            fixture.keys,
+            fixture.registry,
+            fixture.storage_keys,
+            raw,
+            declaration,
+        )
+        with self.assertRaisesRegex(CodecError, "independent primitive"):
+            g.bind_configuration(p.check(), *args)
+        with self.assertRaises(CodecError):
+            g.bind_configuration(p.trust, *args[:3], fixture.keys[:-1], *args[4:])
+
     def decode(self, doc):
         base = document()
         return g.decode(

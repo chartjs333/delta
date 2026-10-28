@@ -14,7 +14,13 @@
     "existingHashPreimages",
     "noInventedCertificate",
     "originalConfigurationAndUnits",
-    "independentlyBoundOrigin"
+    "independentlyBoundOrigin",
+    "parent",
+    "bindConfiguration",
+    "configurationSource",
+    "configurationComplete",
+    "configurationParentFromOriginal",
+    "configurationBytesAndEnrollment"
   ],
   "checks": [
     {
@@ -274,6 +280,11 @@
     },
     {
       "exit_code": 0,
+      "log": "module-ProfileConfigurationUnits.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
       "log": "module-DeltaReduce.ArithmeticKernel.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
@@ -320,7 +331,7 @@
     {
       "exit_code": 0,
       "log": "axioms.txt",
-      "sha256": "62025681cdadca20d6fe5bfdc512f6fb9f315ebe8bb07b7c3e1faf5c43466885"
+      "sha256": "cf44adbbc1adef4e778b19853bd95bbd831f5afb28f1ed33d988504cd4c3fc96"
     },
     {
       "exit_code": 0,
@@ -354,8 +365,18 @@
     },
     {
       "exit_code": 0,
+      "log": "kernel-case-5.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "kernel-case-6.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "1bda84dcaba7b7defcc00f5eb6041976f041a7e3a8b12fb0294eba40f66bf2e4"
+      "sha256": "a6682591df54148b5cde6993f8ece3e493cb766f7ce3f83feaaa4837678b64c5"
     },
     {
       "exit_code": 0,
@@ -365,16 +386,16 @@
     {
       "exit_code": 0,
       "log": "format.txt",
-      "sha256": "177f260a5645724013185e4b140c7045cc39e56c0c97b120f5cb23599f85f0de"
+      "sha256": "ef7d13d02214e98ca902b05257cdbe6a8e84f3b4714508efdc19766460b54209"
     }
   ],
   "evidence_kind": "SYNTHETIC_METADATA_VALUES_NOT_FULL_LAWFUL_SNAPSHOT",
   "formal": "NO_GO",
-  "generated_audit_sha256": "8c18bd8af09c42b595e795448a492552fb04494b61491326e66303cd4154b954",
-  "generated_vectors_sha256": "47b3b38e1379acad1f58a0f7c2930d911fedc378c2f18bc95eb689b2ac91a2b4",
+  "generated_audit_sha256": "bcb105b968465a9ca4bc61388fc9a2a7f1eea651d9a31b4998bdf6f657fdca6a",
+  "generated_vectors_sha256": "97e4fef64c9c50a8c7aeb5b6b96212b21ea83645c267e43d9018c025789669e0",
   "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
   "lean_binary_sha256": "c3f02a2b739078d1237af9feefd27ec85b943b56870234b42bc0111d6699d54d",
-  "originals_sha256": "602c1dc990a89a3d1a6eb565f88b922304c710fc910e3c544266851b2aff52b3",
+  "originals_sha256": "36559e2e522286c96b62d12e7a48dbc4eec04b24cb42f2b674ea9f78d03d2a3c",
   "residual": "Complete producing history, original ISC/clock/seed association, certified floor and full public-state/initial/incomplete/ABORT composition remain unclosed and unreviewed.",
   "result": "GENESIS_VALUE_SOURCE_CHECKED",
   "scope_revision": 3,
@@ -433,14 +454,15 @@
     "formal/proposals/b-family-transfer/ProfileArithmeticUnits.lean": "5ae9cc163eecf5eb1f00521ebc6ce50c117efb8fd1d800e8b98c33d4fb9df935",
     "formal/proposals/b-family-transfer/ProfileConfiguration.lean": "70295b55ff2e8915d6a34ad1159aa433254e9dda13d08b3548e438dacd05a272",
     "formal/proposals/b-family-transfer/ProfileConfigurationQC.lean": "89d5aa5c0ce83944654d113e9d897abc1bbc3d2511cb7f9db54ef96dd51f1f12",
+    "formal/proposals/b-family-transfer/ProfileConfigurationUnits.lean": "7f7fd31d8642810b4928cbb207b60d1aa8b5a4ba5528d214168ec9d923dee6ad",
     "formal/proposals/b-family-transfer/ProfileControl.lean": "f6af4ec64f5a1d41cb7cdc61b9f77d55723c546c4a9d883ae13d113caa088aa7",
-    "formal/proposals/b-family-transfer/ProfileGenesis.lean": "60da955b6b5171c43c708a967879b6e6470c25638a7b46fc780ebccfab6968f1",
+    "formal/proposals/b-family-transfer/ProfileGenesis.lean": "2a65157d2ffe2deb2f51e219649a7b67621a1c637612c6838f45dc5ae0ff8c69",
     "formal/proposals/b-family-transfer/ProfileOrigin.lean": "ccd24f1686ed2ba3f4da3523e8d3e5332c931f069f41604f1f9ab9ccc598f9aa",
     "formal/proposals/b-family-transfer/ProfileSource.lean": "823a4e632f161c5a3e60fc9f67e31a427f5bdb1ec77cdf30969a361312d0377c",
     "formal/proposals/b-family-transfer/ProfileSourceIndex.lean": "d092d46248c6a5aa58d42ca97fd915e42308907222ec4c01a478884a5fd7eae8",
-    "formal/proposals/b-family-transfer/check_genesis.py": "b4f02478f93fa1761adc7904a964ae69e0f72b3e7ce60dd422ac3a0adab199e7",
+    "formal/proposals/b-family-transfer/check_genesis.py": "4748a22d44f3829c3d96146d7c79db574c06c6e7b5519ad7da734d90e9bc8514",
     "formal/proposals/isc-source-generation/SourceVote.lean": "fd7727fbab767898af14659215fc3512f4967321ea056b3fb90788704a37add5",
-    "formal/proposals/profile-genesis-source-contract.md": "7e486297d04bc8e8cb4588f01a5a6d9bdf04924ba5473696a7c926bbabb71fdb",
+    "formal/proposals/profile-genesis-source-contract.md": "a2de916778542ec0642888a85963aa519f8dbc8304b92d60437b018d5e9d4cef",
     "formal/reference/isc_crypto/codec.py": "cb42fb0e12cae5f492ff0bea8ed0263fcd759a1d675ea111c69e8217fbfdaf03",
     "formal/reference/isc_crypto/conformance-evidence.json": "a351d5ad662859800519115f4ea19ea1b00b6bf472248d964f77e4865615ea19",
     "formal/reference/isc_crypto/evidence.json": "0fc2e5f16332ace6d406b23fa201ea47b8e002fc5740cc252db2c428db12a480",
@@ -483,12 +505,12 @@
     "formal/reference/profile_source/collections_vectors.py": "3270dc3ca8255e354bde4c5f90438a33b8a1f9f2b60c1d574e6fd5b1e62de1d1",
     "formal/reference/profile_source/command_vectors.py": "c8277e65a100d7e3b2f3d43fea5b714d718c1c7d5bd1186660e3e5884c7d4428",
     "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
-    "formal/reference/profile_source/configuration.py": "bd82576c75f1d05d46f5f243bfa4ad837ebf87814d6c1cf01bba05f48a822bc2",
+    "formal/reference/profile_source/configuration.py": "19fa37acc0ba6bba9b2635a2cafa6d3f3b77f71ca8e99f59375f01a653c69778",
     "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
     "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
     "formal/reference/profile_source/configuration_qc_vectors.py": "c348aee61562a09ea37282a5142607f142ba157ec4b4afd62f532f31d520cb57",
     "formal/reference/profile_source/configuration_unit_vectors.py": "b1c9cdcb65fcbade343f455ecfc74e750e8225e72cf773483100e6a0e8772312",
-    "formal/reference/profile_source/configuration_units.py": "d39589f91b6fbd00638da10c807f899bd4518129280ca4deda4c2e9991a2bace",
+    "formal/reference/profile_source/configuration_units.py": "cd80988350e2e1ed05d8cb34293c45a5ef1277577c9df0e76966db687c68b0ce",
     "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
     "formal/reference/profile_source/control_vectors.py": "3ee8266fee4279f66a0518094c31595e2dfc70a2de9737c8c90795fa48911fca",
     "formal/reference/profile_source/current_vectors.py": "23b35bf46f138aa71d17b918e65b35bfb8fab123102a35b4a97be3a18750afc1",
@@ -497,8 +519,8 @@
     "formal/reference/profile_source/ec_finalization.py": "73a08b076d53b06ff0a075d9f90e208e361a957004238c6b1e2c3786e7458e85",
     "formal/reference/profile_source/ec_finalization_vectors.py": "0d0e827560fb9f8d905010c753d2de7a7cf1fa729ff97f7521307c6c9580c7d0",
     "formal/reference/profile_source/eligibility_vectors.py": "6041f45c9678da617dcab41b1d37a9264b17934319eb5e84d09d05cb928361ee",
-    "formal/reference/profile_source/genesis.py": "44ec1f00afba9851f8ee47b5f7c37ab21aa21d4d7cd9e1d3491e283e7e3517c5",
-    "formal/reference/profile_source/genesis_vectors.py": "7c208e07ccb0a764dc67d4354c7fc296c9a91768651f19e42ac0d422a4c9ad73",
+    "formal/reference/profile_source/genesis.py": "779386833e98ebf5b3ebb98857dea1d395ec11b0121f0af5a15912b4b5d9607f",
+    "formal/reference/profile_source/genesis_vectors.py": "5a1fe8f6731ca401e677d10d3317d7f536b6a6608b5406063b513b6aeedd4350",
     "formal/reference/profile_source/import_vectors.py": "6750fe26e6040e76a00a8daf9e11fb65434013fbf7dae495797cb12d0c301367",
     "formal/reference/profile_source/input_history.py": "8a157a442c979a539c6810f4321aa1675e7111fee2918bfa3024f1773bf33180",
     "formal/reference/profile_source/input_section_vectors.py": "ae3166622c593a77cc94bf37f529818863ac335141d8049e022d8f3e76e73de6",
@@ -529,7 +551,7 @@
     "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
     "formal/reference/profile_source/test_ec_durability.py": "de8afef5f8e709f4cf07b51acbc673201034f8dcc4ba4b981eadc627b743c03b",
     "formal/reference/profile_source/test_ec_finalization.py": "03f3883f99d2af277d37eff546e3be84feb596521f005b7bf8c5e0b682e67b4b",
-    "formal/reference/profile_source/test_genesis.py": "bf4b774403fb05eb0f7b363981ab641a12830bcc71bf809775d8751b8aa78b57",
+    "formal/reference/profile_source/test_genesis.py": "c69d8eb958fc72e95327e225eb7bdd8c03d3a547ce5d8edb19b256f7f5bc238c",
     "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
     "formal/reference/profile_source/test_input_capsule.py": "9096f4f67ddc44d1ab6e260e1718ee1219011284ab512f981aa7ec4215c2f644",
     "formal/reference/profile_source/test_input_history.py": "73ce9bcaf5ae6d1ec83443bf1a4b4d874c3b84d5fc1428c92fa486bc4d283cd1",

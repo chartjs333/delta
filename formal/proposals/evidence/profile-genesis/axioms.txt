@@ -15,3 +15,13 @@
  Classical.choice,
  Quot.sound]
 'DeltaReduce.ProfileSource.Genesis.independentlyBoundOrigin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.parent' does not depend on any axioms
+'DeltaReduce.ProfileSource.Genesis.bindConfiguration' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.configurationSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.configurationComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.configurationParentFromOriginal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.Genesis.configurationBytesAndEnrollment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

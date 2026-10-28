@@ -109,6 +109,10 @@ def main():
         "noInventedCertificate",
         "originalConfigurationAndUnits",
         "independentlyBoundOrigin",
+        "configurationSource",
+        "configurationComplete",
+        "configurationParentFromOriginal",
+        "configurationBytesAndEnrollment",
     }
     if not required <= set(declarations):
         raise RuntimeError("Missing genesis source obligation")
@@ -135,7 +139,7 @@ def main():
     )
     pattern = r"^example\b[\s\S]*?(?=^(?:def |end |example |namespace |open |set_option )|\Z)"
     assertions = re.findall(pattern, vectors, flags=re.MULTILINE)
-    if len(assertions) != 5:
+    if len(assertions) != 7:
         raise RuntimeError("Incomplete kernel source vector inventory")
     definitions = re.sub(pattern, "", vectors, flags=re.MULTILINE)
     (source / "Definitions.lean").write_text(definitions, "utf8", newline="\n")
@@ -159,6 +163,8 @@ def main():
         "reference-tests.txt",
     )
     paths = [
+        "formal/reference/profile_source/configuration.py",
+        "formal/reference/profile_source/configuration_units.py",
         "formal/reference/profile_source/genesis.py",
         "formal/reference/profile_source/test_genesis.py",
         "formal/reference/profile_source/genesis_vectors.py",

@@ -10,8 +10,8 @@ from dataclasses import dataclass
 
 from formal.reference.isc_crypto.codec import _decimal, _id, _require
 from formal.reference.profile_source import arithmetic_units as units
+from formal.reference.profile_source import authority, configuration_units, source_prefix
 from formal.reference.profile_source import metadata as m
-from formal.reference.profile_source import source_prefix
 from formal.reference.storage_source import codec
 
 FIELDS = frozenset(
@@ -115,3 +115,54 @@ def bind(trust, manifest, index, artifacts):
         units.rational(u["quantum"], quantum=True, control=True),
         image,
     )
+
+
+@dataclass(frozen=True)
+class ConfigurationSource:
+    origin: Origin
+    authorities: authority.Authorities
+    configuration: object
+    original_declaration: bytes
+
+
+def bind_configuration(
+    trust,
+    manifest,
+    index,
+    artifacts,
+    validator_keys,
+    storage_registry,
+    storage_keys,
+    original_configuration,
+    declaration,
+):
+    """Independent initial bytes -> original schema-3 parent/config/unit conjunct.
+
+    This is the base case for the complete producing fold, not a reset operation
+    for later current states. Full proposal/finality/clock/durability still come
+    from original events; no supplied Origin/Authority/Parent cache is accepted.
+    """
+    origin = bind(trust, manifest, index, artifacts)
+    auth = authority.resolve(origin.source.metadata, validator_keys, storage_registry, storage_keys)
+    _require(
+        auth.initial_config == origin.initial_configuration, "one original initial configuration"
+    )
+    originals = dict(origin.source.metadata.original_artifacts)
+    for raw in (original_configuration, declaration):
+        _require(
+            type(raw) is bytes and originals.get(m.raw_id(raw)) == raw,
+            "complete original configuration/declaration source bytes",
+        )
+    g = origin.genesis
+    parent = (g.checkpoint_id, g.optimizer_id, g.apply_qc_id, g.height)
+    config = configuration_units.admit(
+        auth.validators,
+        auth.storage,
+        original_configuration,
+        declaration,
+        parent,
+        origin.parameter_schema_id,
+        origin.quantum,
+        origin.quantum,
+    )
+    return ConfigurationSource(origin, auth, config, declaration)
