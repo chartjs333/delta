@@ -65,3 +65,70 @@
 'DeltaReduce.ProfileSource.UnitCurrent.originalGenesisToCurrentUnits' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.entryView' does not depend on any axioms
+'DeltaReduce.ProfileSource.SelectedVote.matching' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.Identity' does not depend on any axioms
+'DeltaReduce.ProfileSource.SelectedVote.Checks' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.select' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.check' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.originalCandidate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.currentParent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.originalPhysicalSequence' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.arithmeticRefusal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.recoveryOnlyReadiness' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.originalVoteBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.UnitChecks' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.selectUnit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.checkUnit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitChecked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitOriginalCandidate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitOriginalIdentity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitOriginalPhysicalSequence' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitArithmeticRefusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitRecoveryOnlyReadiness' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.bindUnit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitBoundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.SelectedVote.unitOriginalVoteBytes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.receipt' does not depend on any axioms
+'DeltaReduce.ProfileSource.VoteRecord.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.originalReceipt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.cannotRelabelPolicy' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.currentArithmeticGuard' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.fromBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.fromOriginal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.allOriginalBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.receipt' does not depend on any axioms
+'DeltaReduce.ProfileSource.VoteRecord.Units.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.originalReceipt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.cannotRelabelPolicy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.currentArithmeticGuard' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.fromBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.fromOriginal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.VoteRecord.Units.allOriginalBytes' depends on axioms: [propext, Classical.choice, Quot.sound]

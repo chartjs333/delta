@@ -58,6 +58,7 @@ def main():
         order.append(name)
 
     visit("ProfileUnitCurrent")
+    visit("ProfileVoteRecord")
     for path in (ROOT / "formal/reference").rglob("*"):
         if path.is_file() and path.suffix in {".py", ".json"}:
             pins[path.relative_to(ROOT).as_posix()] = source_digest(path)
@@ -67,6 +68,7 @@ def main():
         ROOT / "formal/proposals/profile-genesis-source-contract.md",
         ROOT / "formal/proposals/arithmetic-unit-source-binding-v1.md",
         ROOT / "formal/scripts/native_source_artifacts.py",
+        ROOT / "formal/reference/profile_source/README.md",
     ):
         pins[path.relative_to(ROOT).as_posix()] = source_digest(path)
 
@@ -103,9 +105,13 @@ def main():
             env,
         )
     declarations = {}
-    for module in ("UnitState", "UnitCurrent"):
+    for module in ("UnitState", "UnitCurrent", "SelectedVote"):
         raw = Path(__file__).with_name("Profile" + module + ".lean").read_text("utf8")
         declarations[module] = re.findall(r"^(?:def|theorem) ([\w.]+)", raw, re.M)
+    vote_source = Path(__file__).with_name("ProfileVoteRecord.lean").read_text("utf8")
+    old_vote, unit_vote = vote_source.split("namespace Units\n", 1)
+    for namespace, raw in (("VoteRecord", old_vote), ("VoteRecord.Units", unit_vote)):
+        declarations[namespace] = re.findall(r"^(?:def|theorem) ([\w.]+)", raw, re.M)
     required = {
         "UnitState": {
             "headerSource",
@@ -145,6 +151,26 @@ def main():
             "originSource",
             "originalGenesisToCurrentUnits",
         },
+        "SelectedVote": {
+            "unitChecked",
+            "unitComplete",
+            "unitOriginalCandidate",
+            "unitOriginalIdentity",
+            "unitOriginalPhysicalSequence",
+            "unitArithmeticRefusal",
+            "unitRecoveryOnlyReadiness",
+            "unitBoundSource",
+            "unitOriginalVoteBytes",
+        },
+        "VoteRecord.Units": {
+            "boundSource",
+            "complete",
+            "originalReceipt",
+            "cannotRelabelPolicy",
+            "currentArithmeticGuard",
+            "fromOriginal",
+            "allOriginalBytes",
+        },
     }
     if any(not required[name] <= set(declarations[name]) for name in required):
         raise RuntimeError("Missing composition obligation")
@@ -153,7 +179,7 @@ def main():
         for namespace, names in declarations.items()
         for name in names
     ]
-    audit = "import ProfileUnitCurrent\n" + "".join(
+    audit = "import ProfileUnitCurrent\nimport ProfileVoteRecord\n" + "".join(
         "#print axioms " + name + "\n" for name in qualified
     )
     (source / "Audit.lean").write_text(audit, "utf8", newline="\n")
@@ -195,6 +221,23 @@ def main():
         name = f"Case{i}.lean"
         (source / name).write_text(case, "utf8", newline="\n")
         run([str(LEAN), name], f"kernel-case-{i}.txt", source, env)
+    from formal.reference.profile_source import configuration_route as route
+    from formal.reference.profile_source.installed_state_vectors import generate as installed
+    from formal.reference.profile_source.vote_record_vectors import generate as vote_records
+
+    vote_pins = {}
+    for generation in (route.LEGACY, route.UNITS):
+        for prefix, generator in (("Installed", installed), ("VoteRecords", vote_records)):
+            name = prefix + generation.name
+            generated, byte_evidence = generator(generation=generation)
+            raw_evidence = json.dumps(byte_evidence, indent=2) + "\n"
+            (source / (name + ".lean")).write_text(generated, "utf8", newline="\n")
+            (OUT / (name + "-originals.json")).write_text(raw_evidence, "utf8", newline="\n")
+            vote_pins[name] = dict(
+                lean_sha256=digest(generated.encode()),
+                originals_sha256=digest(raw_evidence.encode()),
+            )
+            run([str(LEAN), name + ".lean"], name + "-kernel.txt", source, env)
     run(
         [
             sys.executable,
@@ -209,7 +252,13 @@ def main():
     )
     paths = [
         "formal/reference/profile_source/" + name + ".py"
-        for name in ("unit_state", "unit_state_vectors", "test_unit_state")
+        for name in (
+            "unit_state",
+            "unit_state_vectors",
+            "test_unit_state",
+            "installed_state_vectors",
+            "vote_record_vectors",
+        )
     ]
     paths.append("formal/proposals/b-family-transfer/check_unit_state.py")
     run([sys.executable, "-m", "ruff", "check", *paths], "lint.txt")
@@ -228,6 +277,7 @@ def main():
         audited_declarations=declarations,
         generated_audit_sha256=digest(audit.encode()),
         generated_vectors_sha256=digest(vectors.encode()),
+        vote_vectors=vote_pins,
         originals_sha256=digest((OUT / "originals.json").read_bytes()),
         lean=version.strip(),
         lean_binary_sha256=digest(LEAN.read_bytes()),

@@ -438,6 +438,15 @@ retains both actors and every original occurrence; no production attack or full
 lawful-prefix counterexample is claimed. Replaying a cached result also rechecks
 the selected decoder against its original configuration bytes.
 
+`SelectedVote.bindUnit` and `VoteRecord.Units.fromBytes` compose the same native
+admission/anti-equivocation/receipt guards with the complete unit-bearing state.
+The original configuration, P0, candidate, Vote and kind-2 frame stay mandatory;
+the full original parent is carried separately from its checkpoint hash. A retry
+does not allocate another physical slot. The original sequence is not replaced
+by its public vote ordinal. PARAMETER/APPLY refusal remains, and recovery only
+bypasses readiness. These joins still require the source fold to derive runtime
+facts, the predecessor policy, barriers and parent at each original occurrence.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

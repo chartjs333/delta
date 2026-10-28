@@ -2,6 +2,37 @@
   "R23": "OPEN",
   "assignment_id": "2fd81f70-bb27-4872-a09c-8a712c0e2311",
   "audited_declarations": {
+    "SelectedVote": [
+      "entryView",
+      "matching",
+      "Identity",
+      "Checks",
+      "select",
+      "check",
+      "checked",
+      "complete",
+      "originalCandidate",
+      "currentParent",
+      "originalPhysicalSequence",
+      "arithmeticRefusal",
+      "recoveryOnlyReadiness",
+      "bind",
+      "boundSource",
+      "originalVoteBytes",
+      "UnitChecks",
+      "selectUnit",
+      "checkUnit",
+      "unitChecked",
+      "unitComplete",
+      "unitOriginalCandidate",
+      "unitOriginalIdentity",
+      "unitOriginalPhysicalSequence",
+      "unitArithmeticRefusal",
+      "unitRecoveryOnlyReadiness",
+      "bindUnit",
+      "unitBoundSource",
+      "unitOriginalVoteBytes"
+    ],
     "UnitCurrent": [
       "bind",
       "boundSource",
@@ -58,6 +89,30 @@
       "originalParentUnits",
       "abortPreservesDownstream",
       "everyOriginalProfile"
+    ],
+    "VoteRecord": [
+      "receipt",
+      "bind",
+      "boundSource",
+      "complete",
+      "originalReceipt",
+      "cannotRelabelPolicy",
+      "currentArithmeticGuard",
+      "fromBytes",
+      "fromOriginal",
+      "allOriginalBytes"
+    ],
+    "VoteRecord.Units": [
+      "receipt",
+      "bind",
+      "boundSource",
+      "complete",
+      "originalReceipt",
+      "cannotRelabelPolicy",
+      "currentArithmeticGuard",
+      "fromBytes",
+      "fromOriginal",
+      "allOriginalBytes"
     ]
   },
   "checks": [
@@ -363,31 +418,6 @@
     },
     {
       "exit_code": 0,
-      "log": "module-SourceVote.txt",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "exit_code": 0,
-      "log": "module-ProfileConfigurationQC.txt",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "exit_code": 0,
-      "log": "module-ProfileSourceIndex.txt",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "exit_code": 0,
-      "log": "module-DeltaReduce.NativeCurrentPointer.txt",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "exit_code": 0,
-      "log": "module-ProfileOrigin.txt",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "exit_code": 0,
       "log": "module-DeltaReduce.NativeQBytes.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
@@ -418,7 +448,32 @@
     },
     {
       "exit_code": 0,
+      "log": "module-DeltaReduce.NativeCurrentPointer.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
       "log": "module-ProfileConfigurationUnits.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-SourceVote.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-ProfileConfigurationQC.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-ProfileSourceIndex.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-ProfileOrigin.txt",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
@@ -488,8 +543,38 @@
     },
     {
       "exit_code": 0,
+      "log": "module-DeltaReduce.NativeCandidateAuthority.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-DeltaReduce.NativeFailureVote.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-DeltaReduce.NativeSelectedVote.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-ProfileSelectedVote.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-ProfileVoteJournal.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "module-ProfileVoteRecord.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
       "log": "axioms.txt",
-      "sha256": "946be17659996c7f6dc107a23858c21b1e3b970fc52c8891a3f8f54357e9f962"
+      "sha256": "05f1fdb81dd805862becfcd4233076d234fb5e16bb07ab9f04ddb6b74e1ece9b"
     },
     {
       "exit_code": 0,
@@ -548,8 +633,28 @@
     },
     {
       "exit_code": 0,
+      "log": "InstalledSCHEMA2-kernel.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "VoteRecordsSCHEMA2-kernel.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "InstalledUNITS-kernel.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
+      "log": "VoteRecordsUNITS-kernel.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit_code": 0,
       "log": "reference-tests.txt",
-      "sha256": "d033a392ce664c1d6235ec95d7b58ff64adabf9adda9f5bc06ba62fb46346eb0"
+      "sha256": "75b2e7d0ef75942ddadaeb76331f02f25d230c1c9beed4f5205b4a45d452a448"
     },
     {
       "exit_code": 0,
@@ -559,12 +664,12 @@
     {
       "exit_code": 0,
       "log": "format.txt",
-      "sha256": "177f260a5645724013185e4b140c7045cc39e56c0c97b120f5cb23599f85f0de"
+      "sha256": "ef7d13d02214e98ca902b05257cdbe6a8e84f3b4714508efdc19766460b54209"
     }
   ],
   "evidence_kind": "SYNTHETIC_STATIC_SOURCE_NOT_LAWFUL_PRODUCER_OR_RECOVERY",
   "formal": "NO_GO",
-  "generated_audit_sha256": "cfb469ed15514b0e893cfcc4dd14befccca356067f5aba328deeb3ab5c68e3da",
+  "generated_audit_sha256": "b02c8959e881a77a57b3d30cad1c363218726abdfe79a67d7ec6ea7f1302842b",
   "generated_vectors_sha256": "788a6027645e88ecb24e1d8249da4a882734f64a3888f8c7c5800912ebec52d7",
   "lean": "Lean (version 4.32.1, x86_64-w64-windows-gnu, commit f054605aea4b840552cca2e725580bffd1e1b704, Release)",
   "lean_binary_sha256": "c3f02a2b739078d1237af9feefd27ec85b943b56870234b42bc0111d6699d54d",
@@ -586,6 +691,7 @@
     "formal/proofs/DeltaReduce/NativeApplyProfile.lean": "032f0fd27c13e1c0bff98829c2cbf63530ef1b685b6af0c8ee1512c2bf17b6f3",
     "formal/proofs/DeltaReduce/NativeApplyResult.lean": "6514074b924e6fdd851332b3c9f1924567a5fdda34baaed4c57b2fd23f77f627",
     "formal/proofs/DeltaReduce/NativeApplySection.lean": "a49102314e5621779747b79762ee71c91c285cfdc9b3ff0784fa27b1ea915f30",
+    "formal/proofs/DeltaReduce/NativeCandidateAuthority.lean": "ee77014660b57d58cded7f1101bc55ff7cbdd651ef51331714cbb158f43b4011",
     "formal/proofs/DeltaReduce/NativeCandidateShape.lean": "6105d330b8ce7bddc576098558eb110fcb55f4daa0f223adb2789745b97e7294",
     "formal/proofs/DeltaReduce/NativeCertificateDecimal.lean": "adf92652e154271a4ff7c3b35da4748b2d645bf3997a8c2ee20c78dfed5ead3f",
     "formal/proofs/DeltaReduce/NativeConfigAdmission.lean": "73890c23bae73e474465b7e0b5412016be3982d888cfc88be9cf2219f03db534",
@@ -598,6 +704,7 @@
     "formal/proofs/DeltaReduce/NativeFailureAuthority.lean": "c2fa153c7f71da870f86b623f732053ae8960d0d3316edae5f82a5c526a6c91f",
     "formal/proofs/DeltaReduce/NativeFailurePayload.lean": "3d91fec152920ad223521ab6a8134001f34d26b0681ad4b3ce62ffeb45c8894a",
     "formal/proofs/DeltaReduce/NativeFailureSection.lean": "cceb81ab8e56b3b94777699b3fab2fd61fbf96e60010a594085ca463a39b60ee",
+    "formal/proofs/DeltaReduce/NativeFailureVote.lean": "02fa188e087a20a86e79ffa3ec9312433811780d0eb63b2057fdd9728498e081",
     "formal/proofs/DeltaReduce/NativeFinalizedIscSection.lean": "618e53935d4deda22bf378bd6ae20db4f2686eae6cd524ac030af193c2782dab",
     "formal/proofs/DeltaReduce/NativeInputSetBody.lean": "e194afd4757eade6b2042e93ef5628e2e84864314be1c9b5ae669fdc1194ca71",
     "formal/proofs/DeltaReduce/NativeIscAdmission.lean": "63ddf5cc963d51b7837afc1e4bb6ca6d0f1024f0ef60a23bd9e23b9348af213c",
@@ -623,6 +730,7 @@
     "formal/proofs/DeltaReduce/NativeReceiptBytes.lean": "a45c95694c48394997607b6e2777a9795dd0326ecd1e3f2e821b574a05aec580",
     "formal/proofs/DeltaReduce/NativeScaleBytes.lean": "666263cea765cfdef28065b0b7aab2d813b69dc39c28ddacf6208291109f83a2",
     "formal/proofs/DeltaReduce/NativeSeedTranscript.lean": "df7f38bcced4929c1b57ba7c8c381ea9ad8661b64c05ae5c82bfdf9ab10bd818",
+    "formal/proofs/DeltaReduce/NativeSelectedVote.lean": "5818f50c782d4ac15faeb32932efae0f9f456968061f14bd091221039234b51a",
     "formal/proofs/DeltaReduce/NativeSizedParameterSection.lean": "9f31e20f86eec8ede75c51695343b1e2d8d667393bbcf56c1e991f266ac2afac",
     "formal/proofs/DeltaReduce/NativeSnapshotBase.lean": "61ff5ff6ce1b82b3018564ed28785471ad8d3cdd86044df16dea34c0c067eb88",
     "formal/proofs/DeltaReduce/NativeStateBytes.lean": "cb66d643495fbfb3a694240cf533e8f745a68afd58f28bcfb99891391463782e",
@@ -638,7 +746,7 @@
     "formal/proposals/b-family-transfer/ProfileCandidates.lean": "c1a763ad8f2181bb5f90476089342b4d331e5e66cddbbdcbb90db6be0aab10b0",
     "formal/proposals/b-family-transfer/ProfileCollections.lean": "3b2981d9352ddea9fc6684fd994c2f398aad5952fa3e32a2379579966ef79965",
     "formal/proposals/b-family-transfer/ProfileConfiguration.lean": "70295b55ff2e8915d6a34ad1159aa433254e9dda13d08b3548e438dacd05a272",
-    "formal/proposals/b-family-transfer/ProfileConfigurationQC.lean": "89d5aa5c0ce83944654d113e9d897abc1bbc3d2511cb7f9db54ef96dd51f1f12",
+    "formal/proposals/b-family-transfer/ProfileConfigurationQC.lean": "41e9d78d65407ee58a08acdc106eb1d42d21611cf9b62514dd152421ab00d61d",
     "formal/proposals/b-family-transfer/ProfileConfigurationUnits.lean": "7f7fd31d8642810b4928cbb207b60d1aa8b5a4ba5528d214168ec9d923dee6ad",
     "formal/proposals/b-family-transfer/ProfileControl.lean": "f6af4ec64f5a1d41cb7cdc61b9f77d55723c546c4a9d883ae13d113caa088aa7",
     "formal/proposals/b-family-transfer/ProfileCurrent.lean": "cbd97cdbbdf8d0524103b8de39537b4d7c2fdfe867e8e85935e48e803081b5d2",
@@ -653,11 +761,14 @@
     "formal/proposals/b-family-transfer/ProfileParameter.lean": "54747422f16d1237bfd437942e26fc695ccd757f2ae0c105f49b7fe1201c82f4",
     "formal/proposals/b-family-transfer/ProfilePlan.lean": "8d638cfd1598ffb699adde6af66f9cca80db8f4c9eef60aa7189b2374d53a82b",
     "formal/proposals/b-family-transfer/ProfilePolicy.lean": "72f3a0ecb74111e57242efe27b757171f3ecc8b0504895c779be9e91e584721b",
+    "formal/proposals/b-family-transfer/ProfileSelectedVote.lean": "dbbbb677480d74e268bab5dbd0f7915ea184cc48f34955e934af81170605542e",
     "formal/proposals/b-family-transfer/ProfileSource.lean": "823a4e632f161c5a3e60fc9f67e31a427f5bdb1ec77cdf30969a361312d0377c",
     "formal/proposals/b-family-transfer/ProfileSourceIndex.lean": "d092d46248c6a5aa58d42ca97fd915e42308907222ec4c01a478884a5fd7eae8",
     "formal/proposals/b-family-transfer/ProfileUnitCurrent.lean": "7549ca8a4dd9a322d6baf11630b109f0823a457d742510bc68a1aac922559c04",
     "formal/proposals/b-family-transfer/ProfileUnitState.lean": "3944236244c8c05d19908712a9b08556c8345c15560e524d6aa487ef47adffce",
-    "formal/proposals/b-family-transfer/check_unit_state.py": "392ba1960c34c4c74ca2e6871878f259e430bce705d568f871004b544d9a1c98",
+    "formal/proposals/b-family-transfer/ProfileVoteJournal.lean": "6e06e07737f4a0e38bb0c860c3594a115f1d11f0af25b4c1f936cf13f421800e",
+    "formal/proposals/b-family-transfer/ProfileVoteRecord.lean": "f5c870fb1b48fa59789f66888133d36b880fe4e4ac940a03029dcd8eb499d131",
+    "formal/proposals/b-family-transfer/check_unit_state.py": "30b091545772dc6ade4f94791ea9f16cabf91a1b3ed0abc14b3afdbc0d96b88c",
     "formal/proposals/isc-source-generation/SourcePolicy.lean": "16ca5ad4bbbbf2f163f2f9ca3904d7e761a61d38589be95a1120d29e2f9b08c9",
     "formal/proposals/isc-source-generation/SourceVote.lean": "fd7727fbab767898af14659215fc3512f4967321ea056b3fb90788704a37add5",
     "formal/proposals/profile-genesis-source-contract.md": "a2de916778542ec0642888a85963aa519f8dbc8304b92d60437b018d5e9d4cef",
@@ -693,21 +804,23 @@
     "formal/reference/non_isc/authentication.py": "978c50b96ae9e106b02e39e2a22728c962744de53e145fdad192d7e7fbc78cf5",
     "formal/reference/non_isc/codec.py": "6c428bfc55d24b04af2c861297143ceedeaab6d13885d50a376b66dca70ce86c",
     "formal/reference/non_isc/test_authentication.py": "e83e6781379e1dd8a92ffae65e80445c23d6f8a3e718f0a4ed161e592c8e2a71",
+    "formal/reference/profile_source/README.md": "9570dc8103eabd037f3dd4b936fcb1f92526a599e0a29f8d013a3f59aec11254",
     "formal/reference/profile_source/__init__.py": "de618164b3bcbfb8d5f17b328ef63a92680b6f82bba02ee0b4c3b316eddf3bf1",
     "formal/reference/profile_source/aggregate_vectors.py": "fd956c8ec8a26415cb8f709848cc87f406196d497c03ef8bcdf7c84ac7988b25",
     "formal/reference/profile_source/apply_vectors.py": "6e4b068514ab95b764c389812d1d4afc0589dcae1c9bd69231b13b9acc612ea3",
     "formal/reference/profile_source/arithmetic_units.py": "8d43a7c9f6fdfafc1304bb61768902507a13f3f732aae65ada8665a159690d37",
     "formal/reference/profile_source/authority.py": "b17d47aaf58a2e50f4164d0d478056fcd4ca79053d1b25bdc618c54a1bbeb298",
-    "formal/reference/profile_source/availability_ledger.py": "b0078f31922e127a364923a6efaaae8743e8537f704f1921400b862cd3738607",
-    "formal/reference/profile_source/capsule_binding.py": "1c934e79a04ddaa7bff78fb7d0df84decc7afd432c74aeae2f4b2339932b36e3",
+    "formal/reference/profile_source/availability_ledger.py": "186ad61fafb4a122b8bda8cbfc544cb14205b8da16d43344fa874045b2952f01",
+    "formal/reference/profile_source/capsule_binding.py": "cbb0c3e0cf9632bf34bcd7dd5d2a5f807542b8be9448f6e78fd53b2977e5cbf1",
     "formal/reference/profile_source/certificate_vote_vectors.py": "decedbfcbc1260897734f61a63bc8cc149b9c1332458185a5a98341929b1c996",
     "formal/reference/profile_source/collections_vectors.py": "3270dc3ca8255e354bde4c5f90438a33b8a1f9f2b60c1d574e6fd5b1e62de1d1",
     "formal/reference/profile_source/command_vectors.py": "c8277e65a100d7e3b2f3d43fea5b714d718c1c7d5bd1186660e3e5884c7d4428",
     "formal/reference/profile_source/commands.py": "cbba6b56673713a49f4c0a37325da5ecc424f59906d9c4706aa6e387ea027591",
-    "formal/reference/profile_source/configuration.py": "19fa37acc0ba6bba9b2635a2cafa6d3f3b77f71ca8e99f59375f01a653c69778",
-    "formal/reference/profile_source/configuration_history.py": "65e473fd59c67298e68f878f42d77b798bd90dcaff3392e91c52c277cc3b029b",
-    "formal/reference/profile_source/configuration_qc.py": "5ad8df134ae0e483d985fa8575dc5b18ded5a86587829451744659ab5854b03f",
-    "formal/reference/profile_source/configuration_qc_vectors.py": "c348aee61562a09ea37282a5142607f142ba157ec4b4afd62f532f31d520cb57",
+    "formal/reference/profile_source/configuration.py": "4a283c481211d8c5f22335c36842651d8da0aeb3ce322107b2861a28f14c0e8a",
+    "formal/reference/profile_source/configuration_history.py": "d294c4b7d62d8b567d34ba820f0525dacef71b5f95b4ad7314a6679845d3aba7",
+    "formal/reference/profile_source/configuration_qc.py": "21771b0148d4614252a0674dcb6dadf849fde714b15e5abb4a7e5fd3de6c6f18",
+    "formal/reference/profile_source/configuration_qc_vectors.py": "bb0a6d3481487ff0fb1916147594bcb49190db4f74c6269e868070426f402029",
+    "formal/reference/profile_source/configuration_route.py": "fb1694ab9f32d151d96f779cc39a6273e3fa5174b8867af0da9bcc52500dc2be",
     "formal/reference/profile_source/configuration_unit_vectors.py": "b1c9cdcb65fcbade343f455ecfc74e750e8225e72cf773483100e6a0e8772312",
     "formal/reference/profile_source/configuration_units.py": "cd80988350e2e1ed05d8cb34293c45a5ef1277577c9df0e76966db687c68b0ce",
     "formal/reference/profile_source/configuration_vectors.py": "f66803aeedf738728c0832d68bff6b4d70e7c2d1d6a16ca6169a23dbd5b85b06",
@@ -721,15 +834,15 @@
     "formal/reference/profile_source/genesis.py": "779386833e98ebf5b3ebb98857dea1d395ec11b0121f0af5a15912b4b5d9607f",
     "formal/reference/profile_source/genesis_vectors.py": "5a1fe8f6731ca401e677d10d3317d7f536b6a6608b5406063b513b6aeedd4350",
     "formal/reference/profile_source/import_vectors.py": "6750fe26e6040e76a00a8daf9e11fb65434013fbf7dae495797cb12d0c301367",
-    "formal/reference/profile_source/input_history.py": "8a157a442c979a539c6810f4321aa1675e7111fee2918bfa3024f1773bf33180",
+    "formal/reference/profile_source/input_history.py": "083f373af09acc16eca7e24b036e2592de76fc0f4a4df89f3b0b9f08ff3aa21a",
     "formal/reference/profile_source/input_section_vectors.py": "ae3166622c593a77cc94bf37f529818863ac335141d8049e022d8f3e76e73de6",
-    "formal/reference/profile_source/installed_state_vectors.py": "255c18fbf06cc0a3335514e3bfecd40d7f3a26ae7a52b06530b673deaf067436",
+    "formal/reference/profile_source/installed_state_vectors.py": "8c2f1cb83e177b3291ad0298d17ba369fba9acfa3029983ecfa607a404330227",
     "formal/reference/profile_source/isc_finalization_vectors.py": "6ecad11725dad22d5e6374b584682d8b176737d1b68e4f0b7b29de13c259a09f",
     "formal/reference/profile_source/isc_vectors.py": "a8689943f48fd03e8d24dbb6533a526b3987b4ad2f057803c602ae69082f8c95",
     "formal/reference/profile_source/journal_vectors.py": "cb201e15a611843fb316e6623ffceba967c11d1af29b5a7205711a4291cdf211",
     "formal/reference/profile_source/journals.py": "af74d19fc66bd027e84665e88e4aa7510255e2cee204bb6fb578605618d5f184",
     "formal/reference/profile_source/lineage_vectors.py": "815e0e74b0141179aab235b5b62a3052cc5bcd04bdf3e70ca1d3c3358cb3a920",
-    "formal/reference/profile_source/manifest_context.py": "8ed1bba37721e3d58acd9f3d73deb4bf2ddfa774ea27aee29dbcd7eab83f7ff4",
+    "formal/reference/profile_source/manifest_context.py": "dd965588d3b969d3ee251cd4052bdd814e5040a8f6d00d80888409ce7764846e",
     "formal/reference/profile_source/metadata.py": "75943a24e62aac8807629d8d5d1f43754da107dab7e832cf5781d7a5ae190d59",
     "formal/reference/profile_source/native_header_vectors.py": "4f05f687319ce563a164e7fdc77b76276bd1d570693cb912519c81abc27b908b",
     "formal/reference/profile_source/observed_inputs.py": "5beb89985626a134b3dc46f4b0d01399fc9355eae0ebe2dfa2370cc8adab6019",
@@ -739,35 +852,36 @@
     "formal/reference/profile_source/policy_vectors.py": "bba0f264870d6f889f84c76784a6cd4a149c66611cdcbb27c89ca7c448f1e8d1",
     "formal/reference/profile_source/scheduling.py": "84bc80d92ea6df74a908908415af16f1c00feaa744647706ae0ec8a870533e04",
     "formal/reference/profile_source/source_index_vectors.py": "a0dc88066f5e0aa7c8060ebab0800e4b3b2fe2a8ff35ee8b5f0d28a80e36b5fc",
-    "formal/reference/profile_source/source_prefix.py": "64956d0f22a8bb56f161243a0659182c2b7f721afc4eaff6b8f00ea91362402a",
+    "formal/reference/profile_source/source_prefix.py": "5c56e93321bf25ced64cfc7f799275f47ce1ecf29a38aa5f69619b8830ad3011",
     "formal/reference/profile_source/test_arithmetic_units.py": "0532905f82efb8a7662382e745beaed98c08f27bde704406611a00e0eb05452f",
     "formal/reference/profile_source/test_authority.py": "b7603af8a88def9681d669b7f5d32f8a4332d4fb193342e384a374d24e008f25",
     "formal/reference/profile_source/test_availability_ledger.py": "dde9dbca0934ba1fc8674241b0cdb784610397115bdea377e35646c1a190b05f",
     "formal/reference/profile_source/test_capsule_binding.py": "ce9c86a39dcd39dc38a3b14b9e977e276bd68fb6fe1f611132e96b2653ff76ec",
     "formal/reference/profile_source/test_commands.py": "abe076da3f78b9e00ef5fb3e7f31cee5d2d84e353b15474b9449f97c1a1cafbb",
     "formal/reference/profile_source/test_configuration.py": "381602b8e8af51b78e8efa2aa8ab7387a9a2006ca40ec799d41ee29ad2fdccc1",
-    "formal/reference/profile_source/test_configuration_history.py": "a669c68b3e162d8d6dd7a04a9eba1c22e3c1f5240b4336f1850108503eed3b66",
-    "formal/reference/profile_source/test_configuration_qc.py": "8a40325e3f04df9c9da95eeaa41d52b71e82ed9483b06b601b7b66cc6791767e",
+    "formal/reference/profile_source/test_configuration_history.py": "c1332650ef4c7b1a5bebbe47f2b1f2b1dd50e2af1852d526a5b246f5271bb089",
+    "formal/reference/profile_source/test_configuration_qc.py": "77d7ea45f317f754aebb2178ed14bc16583bccb1ca12655643bfef4cecd1840e",
+    "formal/reference/profile_source/test_configuration_routes.py": "4000a0e93e5c1e60ee7fe578676f29f36c50769e90ad98e5c625458bf75bb1e3",
     "formal/reference/profile_source/test_ec_durability.py": "de8afef5f8e709f4cf07b51acbc673201034f8dcc4ba4b981eadc627b743c03b",
     "formal/reference/profile_source/test_ec_finalization.py": "03f3883f99d2af277d37eff546e3be84feb596521f005b7bf8c5e0b682e67b4b",
     "formal/reference/profile_source/test_genesis.py": "c69d8eb958fc72e95327e225eb7bdd8c03d3a547ce5d8edb19b256f7f5bc238c",
     "formal/reference/profile_source/test_indexed_capsule.py": "4ae6f500f76d9acbb1f2ad14e7691772ff0616a6a92a61bf79312ca486bd53e5",
-    "formal/reference/profile_source/test_input_capsule.py": "9096f4f67ddc44d1ab6e260e1718ee1219011284ab512f981aa7ec4215c2f644",
-    "formal/reference/profile_source/test_input_history.py": "73ce9bcaf5ae6d1ec83443bf1a4b4d874c3b84d5fc1428c92fa486bc4d283cd1",
+    "formal/reference/profile_source/test_input_capsule.py": "0069910f913f0c7c65834909d30f86cb2c384fbce080edb11fe30d857c0bbae6",
+    "formal/reference/profile_source/test_input_history.py": "ba91193e7ec3f47f2373af77ead913240be31c42b23cb13a1be0025fe84f48cb",
     "formal/reference/profile_source/test_journals.py": "c75fbb15f0a8c76ec275842328b80686c8a13583aecf8d08ffb354d7e44f32e3",
-    "formal/reference/profile_source/test_manifest_context.py": "2d53806558e73b80bde4716bef6abd266c079e09c7f607d506dac5bb6f4ffb83",
+    "formal/reference/profile_source/test_manifest_context.py": "f1c3e7393c7400586607a0ce3f26e19cf09ce7c0fde1e8045ac81c96a2f114bf",
     "formal/reference/profile_source/test_metadata.py": "27f33b0eb5a7798d5b193a50b4670a7f243f89a8c66c03657119ca0e36c0f4ae",
     "formal/reference/profile_source/test_observed_inputs.py": "01c02de61a6e9f8fc87c3f478102aa6b2dd395be129d82cfff9ae4106496ff65",
     "formal/reference/profile_source/test_scheduling.py": "e3e436f1b4b6a48a94dfedacd99aa59bb82e7a3b7f536db16723732263d633a4",
     "formal/reference/profile_source/test_source_deliveries.py": "8ee65881544cb5f204685c4541e0694990047a99a07ac12ef371ce964de6b96a",
-    "formal/reference/profile_source/test_source_prefix.py": "ffe689855a4e5bef8ca02bd3d3c662985b55656b0ad72729e419c963cab52b90",
+    "formal/reference/profile_source/test_source_prefix.py": "64fda526f6d52b2cde5096caa6f4a59e020d1ba4e1a1fdc9f442e9e7734f902e",
     "formal/reference/profile_source/test_typed_generation.py": "55c7e59d657dbdaf9ce124c33688ad9bc4f8947fcd7d4f0ffdd61c7c5c9fd931",
     "formal/reference/profile_source/test_unit_state.py": "b0a5dadf0f30232ff0989313082c864c4f065060bd4c749775d68eb9ab35867d",
     "formal/reference/profile_source/test_votes.py": "22af0b2d0142dc648b37404bd8638a7b7b788ea7f1cfef9b71bb51fae13ad14a",
     "formal/reference/profile_source/typed_certificate_vectors.py": "72231856236c00fed295c74d1b23524fe800fcb6327a7d8278eeafad4a92d58c",
     "formal/reference/profile_source/unit_state.py": "c9600b7cf384cdffb6ef7f0e91330332f0912c6663fe2c5432ccb05d01f37cd3",
     "formal/reference/profile_source/unit_state_vectors.py": "eb7989c61888416afe33ce5d4a03a1aab1ee190754dbcbac25303cc76518f1c9",
-    "formal/reference/profile_source/vote_record_vectors.py": "4efa40beb762d424f41ed7a8b3e4a04730388de79ff2eca0e5b68121c8a7b006",
+    "formal/reference/profile_source/vote_record_vectors.py": "946356cef60150fb014fd72f493defbd161499716bf0eccb24ac61df6985eaec",
     "formal/reference/profile_source/vote_vectors.py": "77ccba72f393be28f2ff8745d8153ec0baecb4b9835f54c039ddcd9f5e55b687",
     "formal/reference/profile_source/votes.py": "38e56868b6ee25b7186d3211df39ee800595c4d46f8ba90460047ad70a8ec7f5",
     "formal/reference/seed_source/agreement.py": "b0f4a791b0433efb2f83310699021eb234d9d7b031094ed3f52c519654f361a0",
@@ -796,5 +910,23 @@
   "task_ids": [
     "T047",
     "T053"
-  ]
+  ],
+  "vote_vectors": {
+    "InstalledSCHEMA2": {
+      "lean_sha256": "c9b337814c29224c3f1f8403ec4db466b88fe0c10b9eaff93fe24895994679ac",
+      "originals_sha256": "6336ba14bad6717e5ff1b6355ed150a50188460cc3372d1081e15b157ee4ae24"
+    },
+    "InstalledUNITS": {
+      "lean_sha256": "e94c638a1ae59dfee55c05f7e87d92c021fc31b65a10a7fdcd37dab831959a1a",
+      "originals_sha256": "d81627dc932efa6716888fa728999c5cd1b9837ed162b919152b0aa811f15c4d"
+    },
+    "VoteRecordsSCHEMA2": {
+      "lean_sha256": "2415421c1ac6863719e4b8f9cab74221a80994389c930c282b6f8ce2d9ef66a9",
+      "originals_sha256": "575c103678f7d6bc110908cd1a24d5053a74d252e5b1078c199f7f2ac3026d89"
+    },
+    "VoteRecordsUNITS": {
+      "lean_sha256": "237459f0fad883eef4ff1d14fe6f37b411b5f7f46f97bbba70d7de6c040acee1",
+      "originals_sha256": "e0b7952ca7b9cb004c64a97a573cb8b7407c1813315b2b0acdc1b76300dff7a9"
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import ProfileInstalledState
+import ProfileUnitState
 import SourceVote
 import DeltaReduce.NativeSelectedVote
 
@@ -111,5 +112,89 @@ theorem originalVoteBytes {sha enrolled actor configRaw stateRaw policyRaw state
   have h := boundSource ok
   exact ⟨(Vote.decodedVoteSound h.2.1).2,(checked h.2.2).2.2.2.2.1.1,
     originalPhysicalSequence h.2.2,arithmeticRefusal h.2.2⟩
+
+/-- Same native admission guard on the complete unit-bearing source state.
+This view never serializes the state through the old configuration/P codec. -/
+def UnitChecks (b : UnitState.Bound) (e : Candidates.Entry) (r : RuntimeFacts) (v : Vote.Vote) : Prop :=
+  Vote.VoteValid v ∧ NativeSelectedVote.GuardedAction e.original.action ∧
+  NativeVoteBytes.actionName e.original.action = v.wire.kind ∧
+  Identity b.header.policy b.header.state e r v ∧
+  NativeSelectedVote.Environment b.header.policy (Collections.stateView b.header.state)
+    b.collections.core.tail (entryView e) r
+instance (b e r v) : Decidable (UnitChecks b e r v) := by unfold UnitChecks; infer_instance
+
+def selectUnit (b : UnitState.Bound) (v : Vote.Vote) : Option Candidates.Entry :=
+  b.candidates.find? (fun e => matching b.header.state v e.original)
+
+def checkUnit (b : UnitState.Bound) (r : RuntimeFacts) (v : Vote.Vote) : Option Candidates.Entry := do
+  let e ← selectUnit b v
+  if UnitChecks b e r v then some e else none
+
+theorem unitChecked {b r v e} (ok : checkUnit b r v = some e) :
+    selectUnit b v = some e ∧ UnitChecks b e r v := by
+  simp only [checkUnit,Bind.bind,Option.bind_eq_some_iff] at ok
+  obtain ⟨entry,selected,last⟩ := ok
+  split at last <;> try contradiction
+  rename_i guards
+  cases Option.some.inj last
+  exact ⟨selected,guards⟩
+
+theorem unitComplete {b r v e} (selected : selectUnit b v = some e) (guards : UnitChecks b e r v) :
+    checkUnit b r v = some e := by simp only [checkUnit,selected,Bind.bind,Option.bind,if_pos guards]
+
+theorem unitOriginalCandidate {sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals b r v e}
+    (source : UnitState.bind sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals = some b)
+    (ok : checkUnit b r v = some e) :
+    e ∈ b.candidates ∧ Candidates.check sha b.header.policy b.header.state
+      b.collections.core e.original = some e := by
+  have member := List.mem_of_find?_eq_some (unitChecked ok).1
+  exact ⟨member,Candidates.everyEntry (UnitState.boundSource source).candidates e member⟩
+
+theorem unitOriginalIdentity {b r v e} (ok : checkUnit b r v = some e) :
+    Identity b.header.policy b.header.state e r v := (unitChecked ok).2.2.2.2.1
+
+theorem unitOriginalPhysicalSequence {b r v e} (ok : checkUnit b r v = some e) :
+    v.sequence = r.expectedSequence := (unitOriginalIdentity ok).2.2.2.2.2.2.2.2.2
+
+theorem unitArithmeticRefusal {b r v e} (ok : checkUnit b r v = some e) :
+    e.original.action ≠ 5 ∧ e.original.action ≠ 7 := (unitChecked ok).2.2.1.2.2
+
+theorem unitRecoveryOnlyReadiness {b r v e} (ok : checkUnit b r v = some e) :
+    checkUnit b {r with recovery := true, ready := false} v = some e := by
+  have h := unitChecked ok
+  apply unitComplete h.1
+  obtain ⟨valid,guard,kind,identity,_,invalid,phase,time,bounds⟩ := h.2
+  exact ⟨valid,guard,kind,identity,Or.inl rfl,invalid,phase,time,bounds⟩
+
+structure UnitBound where
+  state : UnitState.Bound
+  selected : Candidates.Entry
+  vote : Vote.Vote
+
+def bindUnit (sha : Bytes → Bytes) (enrolled : Configuration.Enrollment)
+    (parent : ConfigurationUnits.Parent) (actor configRaw stateRaw policyRaw : Bytes)
+    (stateValue : Value) (originals : Collections.Originals) (r : RuntimeFacts)
+    (voteRaw : Bytes) : Option UnitBound := do
+  let state ← UnitState.bind sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals
+  let vote ← Vote.decodeFrame voteRaw
+  let selected ← checkUnit state r vote
+  some ⟨state,selected,vote⟩
+
+theorem unitBoundSource {sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals r voteRaw out}
+    (ok : bindUnit sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals r voteRaw = some out) :
+    UnitState.bind sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals = some out.state ∧
+    Vote.decodeFrame voteRaw = some out.vote ∧ checkUnit out.state r out.vote = some out.selected := by
+  simp only [bindUnit,Bind.bind,Option.bind_eq_some_iff] at ok
+  obtain ⟨state,hs,vote,hv,selected,he,last⟩ := ok
+  cases Option.some.inj last
+  exact ⟨hs,hv,he⟩
+
+theorem unitOriginalVoteBytes {sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals r voteRaw out}
+    (ok : bindUnit sha enrolled parent actor configRaw stateRaw policyRaw stateValue originals r voteRaw = some out) :
+    Vote.encodeFrame out.vote.wire = voteRaw ∧
+    Identity out.state.header.policy out.state.header.state out.selected r out.vote ∧
+    out.selected.original.action ≠ 5 ∧ out.selected.original.action ≠ 7 := by
+  have h := unitBoundSource ok
+  exact ⟨(Vote.decodedVoteSound h.2.1).2,unitOriginalIdentity h.2.2,unitArithmeticRefusal h.2.2⟩
 
 end DeltaReduce.ProfileSource.SelectedVote

@@ -5,12 +5,13 @@ from hashlib import sha256
 
 from formal.reference.isc_w1.codec import Frame, decode_frame, encode_frame
 from formal.reference.non_isc.codec import decode_vote
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source.configuration_vectors import bytes_term as bs
 from formal.reference.profile_source.installed_state_vectors import generate as installed
 
 
-def generate():
-    source, originals = installed()
+def generate(*, generation=route.LEGACY):
+    source, originals = installed(generation=generation)
     source = source.replace("import ProfileSelectedVote", "import ProfileVoteRecord")
     source = source.replace("InstalledStateVectors", "VoteRecordVectors")
     # Reuse the complete source definitions; the earlier qualifier retains its
@@ -67,6 +68,15 @@ def generate():
         "end VoteRecordVectors",
     ]
     source = source.replace("end VoteRecordVectors\n", "\n".join(lines) + "\n")
+    if generation is route.UNITS:
+        source = source.replace(
+            "VoteRecord.bind hash enrolled actor",
+            "VoteRecord.Units.bind hash enrolled parent actor",
+        )
+        source = source.replace(
+            "VoteRecord.fromBytes hash enrolled actor",
+            "VoteRecord.Units.fromBytes hash enrolled parent actor",
+        )
     originals = {
         **originals,
         "evidence_kind": "SYNTHETIC_ORIGINAL_VOTE_ROW_NOT_PRODUCER_HISTORY",

@@ -12,16 +12,26 @@ from formal.reference.isc_source import policy
 from formal.reference.non_isc import codec
 from formal.reference.profile_source import capsule_binding as wire
 from formal.reference.profile_source import configuration as cfg
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source.configuration_vectors import bytes_term as bs
 from formal.reference.profile_source.configuration_vectors import value_term
 from formal.reference.profile_source.native_header_vectors import policy_term
 from formal.reference.profile_source.test_configuration import ConfigurationTests
 
 
-def generate():
+def generate(*, generation=route.LEGACY):
+    route.selected(generation)
     ConfigurationTests.setUpClass()
     config = ConfigurationTests().body()
-    raw_config = cfg.encode(config)
+    if generation is route.UNITS:
+        from formal.reference.profile_source import arithmetic_units
+        from formal.reference.profile_source.test_arithmetic_units import numeric
+
+        config["schema_version"] = "3.0.0"
+        config["apply_arithmetic_profile_source"] = arithmetic_units.canonical(numeric()).decode(
+            "ascii"
+        )
+    raw_config = route.selected(generation).encode(config)
     cid = cfg.content_id(cfg.DOMAIN, raw_config)
     actor = config["validator_ids"][0]
     state = {
@@ -171,7 +181,28 @@ def generate():
         ":= by decide +kernel",
         "end InstalledStateVectors",
     ]
-    return "\n".join(lines) + "\n", {
+    result = "\n".join(lines) + "\n"
+    if generation is route.UNITS:
+        parent = (
+            "def parent : ConfigurationUnits.Parent := ⟨⟨"
+            + bs(config["parent_checkpoint_id"].encode())
+            + ","
+            + bs(("sha256:" + "9" * 64).encode())
+            + ",[],0⟩,"
+            + bs(config["parameter_schema_id"].encode())
+            + ",⟨1,4⟩,⟨1,4⟩⟩\n"
+        )
+        result = result.replace("def run (raw : Bytes)", parent + "def run (raw : Bytes)")
+        result = result.replace(
+            "InstalledState.bind hash enrolled actor", "UnitState.bind hash enrolled parent actor"
+        )
+        result = result.replace(
+            "SelectedVote.bind hash enrolled actor",
+            "SelectedVote.bindUnit hash enrolled parent actor",
+        )
+        result = result.replace("out.collections.", "out.collections.core.")
+    return result, {
+        "selected_generation": generation.value,
         "evidence_kind": "SYNTHETIC_FULL_STATIC_JOIN_NOT_INITIAL_AUTHORITY",
         "original_config": raw_config.hex(),
         "original_state": raw_state.hex(),
