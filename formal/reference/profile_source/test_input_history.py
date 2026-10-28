@@ -12,6 +12,7 @@ from formal.reference.isc_source import identity as isc
 from formal.reference.non_isc import codec as non_isc
 from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_qc as qc
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import input_history as h
 from formal.reference.profile_source import manifest_context as manifests
 from formal.reference.profile_source import scheduling as scheduling
@@ -23,6 +24,8 @@ from formal.reference.storage_source import test_codec as storage_fixture
 
 
 class InputHistoryTests(unittest.TestCase):
+    generation = route.LEGACY
+
     @classmethod
     def setUpClass(cls):
         config_fixture.ConfigQcTests.setUpClass()
@@ -34,10 +37,12 @@ class InputHistoryTests(unittest.TestCase):
         self.actor = self.f.boot.validators[0][0]
         self.ticket_id = "ticket-domain-text-en-000"
         self.artifacts, self.mid, self.config, self.commit, self.raws = (
-            manifest_fixture.synthetic_fixture(self.f, ticket_id=self.ticket_id)
+            manifest_fixture.synthetic_fixture(
+                self.f, ticket_id=self.ticket_id, generation=self.generation
+            )
         )
         self.manifest = manifests.resolve(self.artifacts, self.f.boot.formal_semantics_id, self.mid)
-        value = cfg.decode(self.config)
+        value = route.decode(self.config, generation=self.generation)
         self.config_id = cfg.content_id(cfg.DOMAIN, self.config)
         context = {
             "arithmetic_profile_id": self.manifest.profile_id,
@@ -106,6 +111,7 @@ class InputHistoryTests(unittest.TestCase):
             self.artifacts,
             self.mid,
             self.commit,
+            generation=self.generation,
         )
         original_storage = storage_fixture.StorageSourceTests()
         original_storage.common = storage.load(context.common_bytes)
@@ -163,6 +169,7 @@ class InputHistoryTests(unittest.TestCase):
             self.config,
             self.f.declaration,
             actor=self.actor,
+            generation=self.generation,
         )
 
     def test_closed_body_is_derived_from_original_complete_source_facets(self):

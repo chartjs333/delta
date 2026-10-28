@@ -1,0 +1,13 @@
+{
+  "kind": "SYNTHETIC_CONFIG_FACET_DIAGNOSTIC_NOT_PRODUCTION_HISTORY",
+  "source_head": "9d7eba3df13a272bc58ea3a4b0cd22b52b277653",
+  "original_receiver_A": "synthetic-validator-1",
+  "original_receiver_B": "synthetic-validator-2",
+  "both_independently_enrolled": true,
+  "receiver_A_finalized": 1,
+  "receiver_B_proposals": 0,
+  "receiver_B_received": 0,
+  "receiver_B_disposition": "replay",
+  "all_original_events_retained": 7,
+  "expected": "rejected_configuration_quorum: receiver-B has no local proposal/delivery/finalized state"
+}

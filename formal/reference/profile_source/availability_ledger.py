@@ -10,7 +10,7 @@ from dataclasses import dataclass, replace
 
 from formal.reference.isc_crypto.codec import CodecError, _id, _require
 from formal.reference.isc_source.identity import InputTuple
-from formal.reference.profile_source import configuration as config
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source.metadata import text
 from formal.reference.storage_source import codec as s
 from formal.reference.storage_source import retention as r
@@ -115,7 +115,16 @@ def deliver(state, event):
 
 
 def record_availability(
-    state, event, validators, bootstrap, backend, original_configuration, context, declaration
+    state,
+    event,
+    validators,
+    bootstrap,
+    backend,
+    original_configuration,
+    context,
+    declaration,
+    *,
+    generation=route.LEGACY,
 ):
     """S + R + enclosing config + exact original pre-cut witness, then native ledger.
 
@@ -125,7 +134,9 @@ def record_availability(
     """
     next_state = observed(state, event)
     try:
-        configuration = config.bind(validators, bootstrap, original_configuration, declaration)
+        configuration = route.bind(
+            validators, bootstrap, original_configuration, declaration, generation=generation
+        )
         common = s.context(bootstrap, context)
         _require(
             common["round_config_id"] == configuration.body_id
@@ -214,6 +225,8 @@ def record_source_availability(
     declaration,
     original_artifacts,
     manifest_id,
+    *,
+    generation=route.LEGACY,
 ):
     """Join original metadata to the already retained native commitment.
 
@@ -238,11 +251,20 @@ def record_source_availability(
             original_artifacts,
             manifest_id,
             commitment,
+            generation=generation,
         )
     except (CodecError, SourceError):
         return Result(observed(state, event), "rejected_original_manifest")
     return record_availability(
-        state, event, validators, bootstrap, backend, original_configuration, context, declaration
+        state,
+        event,
+        validators,
+        bootstrap,
+        backend,
+        original_configuration,
+        context,
+        declaration,
+        generation=generation,
     )
 
 

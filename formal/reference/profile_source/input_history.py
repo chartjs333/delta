@@ -16,6 +16,7 @@ from formal.reference.isc_source import identity as isc
 from formal.reference.profile_source import availability_ledger as ledger
 from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_history as configs
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import manifest_context as manifests
 from formal.reference.profile_source import scheduling
 from formal.reference.profile_source import source_prefix as source
@@ -148,9 +149,9 @@ def metadata_inputs(events, event):
     return result
 
 
-def bound_plan(plan, original_config):
+def bound_plan(plan, original_config, *, generation=route.LEGACY):
     scheduling.verify_plan(plan)
-    body = cfg.decode(original_config)
+    body = route.decode(original_config, generation=generation)
     config_id = cfg.content_id(cfg.DOMAIN, original_config)
     _require(plan.semantics == body["formal_semantics_id"], "same original plan generation")
     p = plan.value
@@ -174,7 +175,18 @@ def bound_plan(plan, original_config):
     return body, {scheduling.decode(raw)["ticket_id"]: raw for raw in plan.tickets}
 
 
-def reconstruct(events, validators, storage, backend, plan, original_config, declaration, *, actor):
+def reconstruct(
+    events,
+    validators,
+    storage,
+    backend,
+    plan,
+    original_config,
+    declaration,
+    *,
+    actor,
+    generation=route.LEGACY,
+):
     """Read the existing original byte carriers and derive this ledger from empty.
 
     The initial planner/configuration arguments retain explicit provenance
@@ -182,8 +194,10 @@ def reconstruct(events, validators, storage, backend, plan, original_config, dec
     Close policy comes only from the exact original authenticated configuration;
     there is no caller-selected override or default.
     """
-    value, tickets = bound_plan(plan, original_config)
-    configuration = cfg.bind(validators, storage, original_config, declaration)
+    value, tickets = bound_plan(plan, original_config, generation=generation)
+    configuration = route.bind(
+        validators, storage, original_config, declaration, generation=generation
+    )
     _require(actor in [name for name, _ in validators.validators], "original enrolled receiver")
     state, config_state = ledger.empty(tuple(sorted(tickets))), configs.History()
     issued, closed, outcomes, unresolved, producers = {}, [], [], [], []
@@ -194,17 +208,17 @@ def reconstruct(events, validators, storage, backend, plan, original_config, dec
         # cannot supply this receiver's proposal/finality/delivery state.
         if event.actor == actor and event.action == "ACT-CONFIG-PROPOSE":
             try:
-                declared = source.declaration_for(event, event.original)
+                declared = source.declaration_for(event, event.original, generation=generation)
             except CodecError:
                 config_state = configs.observed(config_state, occurrence)
                 unresolved.append(event)
             else:
                 config_state = configs.propose(
-                    config_state, occurrence, validators, storage, declared
+                    config_state, occurrence, validators, storage, declared, generation=generation
                 ).state
         elif event.actor == actor and event.action == "ACT-CONFIG-FINALIZE":
             config_state = configs.finalize(
-                config_state, occurrence, validators, storage, backend
+                config_state, occurrence, validators, storage, backend, generation=generation
             ).state
         elif event.actor == actor and event.action == "ACT-MESSAGE-DELIVER":
             config_state = configs.deliver(config_state, occurrence, validators, backend).state
@@ -249,7 +263,14 @@ def reconstruct(events, validators, storage, backend, plan, original_config, dec
                 )
                 commitment = ledger.Commitment(manifest.ticket_id, manifest.commitment_id)
                 manifests.bind_context(
-                    validators, storage, original_config, declaration, originals, mid, commitment
+                    validators,
+                    storage,
+                    original_config,
+                    declaration,
+                    originals,
+                    mid,
+                    commitment,
+                    generation=generation,
                 )
                 result = ledger.record_commitment(state, occurrence, commitment)
                 state, disposition = result.state, result.disposition
@@ -280,6 +301,7 @@ def reconstruct(events, validators, storage, backend, plan, original_config, dec
                     declaration,
                     originals,
                     candidates[0],
+                    generation=generation,
                 )
                 state, disposition = result.state, result.disposition
                 producers.append(event)

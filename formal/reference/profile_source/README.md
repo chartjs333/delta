@@ -420,6 +420,24 @@ See `formal/proposals/ec-durable-binding-checkpoint.md` for exact residual and
 qualification limits. In particular, original P0 and admitted inventory legality
 still require the producing fold; record integrity cannot supply that origin.
 
+The explicit `configuration_route.Generation.UNITS` route now carries the
+already selected schema-3 bytes through CONFIG/QC, original proposal/delivery
+cuts, manifest/AC/InputLedger and input-derived W1 composition. The independent
+verifier chooses this closed route; an imported schema string never chooses a
+fallback. Existing schema-2 callers retain their original decoder. Full parent
+origin/units still come from the source fold, not from the route selector or QC.
+`ConfigurationQC.checkUnits` joins the complete enrolled configuration/parent
+to the unchanged original QC and exact signer/Vote pairs. It retains complete
+delivered inventories and original witness identity at the selected cut.
+
+CONFIG proposal/replay/finality lookup is local to the original receiver, as
+already required by the local input-history facet. A synthetic diagnostic at
+`9d7eba3d` found that the general CONFIG facet could label another receiver's
+finalization as replay despite no local proposal/deliveries. The corrected lookup
+retains both actors and every original occurrence; no production attack or full
+lawful-prefix counterexample is claimed. Replaying a cached result also rechecks
+the selected decoder against its original configuration bytes.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

@@ -17,8 +17,8 @@ from formal.reference.isc_source import finalization as isc_final
 from formal.reference.isc_source import identity as isc_identity
 from formal.reference.isc_w1 import codec as wal
 from formal.reference.non_isc import codec as non_isc
-from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_history as history
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import metadata as m
 from formal.reference.profile_source.availability_ledger import Occurrence
 from formal.reference.storage_source import codec as storage
@@ -339,9 +339,9 @@ def isc_inventory(cut: RetainedCut, bootstrap, backend, actor, round_id):
     )
 
 
-def declaration_for(event: Event, bound_config: bytes) -> bytes:
+def declaration_for(event: Event, bound_config: bytes, *, generation=route.LEGACY) -> bytes:
     """R selects E by exact raw bytes/length/epoch, never by source list position."""
-    body = cfg.decode(bound_config)
+    body = route.decode(bound_config, generation=generation)
     ref = body["availability_policy"]["storage_binding"]["retention_policy_source"][
         "obligation_ref"
     ]
@@ -367,22 +367,29 @@ class ConfigPrefix:
     other_actions: tuple[Event, ...]
 
 
-def configuration_prefix(prefix: Prefix, validators, storage, backend) -> ConfigPrefix:
+def configuration_prefix(
+    prefix: Prefix, validators, storage, backend, *, generation=route.LEGACY
+) -> ConfigPrefix:
+    route.selected(generation)
     state = history.History()
     cut, other = state if prefix.metadata.cut == 0 else None, []
     for event in prefix.before_target:
         occurrence = event.occurrence()
         if event.action == "ACT-CONFIG-PROPOSE":
             try:
-                declaration = declaration_for(event, event.original)
+                declaration = declaration_for(event, event.original, generation=generation)
             except CodecError:
                 # Malformed or incomplete attempts are original occurrences,
                 # not fabricated proposals and not permission to drop history.
                 state = history.observed(state, occurrence)
             else:
-                state = history.propose(state, occurrence, validators, storage, declaration).state
+                state = history.propose(
+                    state, occurrence, validators, storage, declaration, generation=generation
+                ).state
         elif event.action == "ACT-CONFIG-FINALIZE":
-            state = history.finalize(state, occurrence, validators, storage, backend).state
+            state = history.finalize(
+                state, occurrence, validators, storage, backend, generation=generation
+            ).state
         elif event.action == "ACT-MESSAGE-DELIVER":
             state = history.deliver(state, occurrence, validators, backend).state
         else:

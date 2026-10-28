@@ -13,12 +13,14 @@ from formal.reference.profile_source.test_metadata import Package, ref
 
 
 class SourcePrefixTests(unittest.TestCase):
+    configuration_case = config_fixture.ConfigQcTests
+
     @classmethod
     def setUpClass(cls):
         config_fixture.ConfigQcTests.setUpClass()
 
     def setUp(self):
-        self.config = config_fixture.ConfigQcTests()
+        self.config = self.configuration_case()
         self.config.setUp()
         self.p = Package()
         f = self.config
@@ -58,7 +60,9 @@ class SourcePrefixTests(unittest.TestCase):
     def check(self):
         prefix = s.materialize(self.p.check())
         f = self.config.f
-        return s.configuration_prefix(prefix, f.boot, f.storage_boot, f.backend)
+        return s.configuration_prefix(
+            prefix, f.boot, f.storage_boot, f.backend, generation=self.config.generation
+        )
 
     def test_cut_and_target_derived_from_whole_original_index(self):
         result = self.check()

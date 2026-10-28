@@ -16,7 +16,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from formal.reference.isc_crypto.codec import CodecError, _id, _pairs, _require
-from formal.reference.profile_source import configuration as cfg
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.storage_source import codec as storage
 from formal.scripts import native_source_artifacts as source
 
@@ -214,14 +214,18 @@ def bind_context(
     originals,
     manifest_id,
     original_commitment,
+    *,
+    generation=route.LEGACY,
 ):
     """Derive S context from config + original manifest/root, never caller fields.
 
     No claim of config finality, ticket issuance, or commitment event legality;
     those are prefix obligations, not assumptions that R2 succeeds.
     """
-    configuration = cfg.bind(validators, storage_bootstrap, original_config, declaration)
-    body = cfg.decode(original_config)
+    configuration = route.bind(
+        validators, storage_bootstrap, original_config, declaration, generation=generation
+    )
+    body = route.decode(original_config, generation=generation)
     m = resolve(originals, validators.formal_semantics_id, manifest_id)
     _require(
         m.base_config_id == configuration.body_id

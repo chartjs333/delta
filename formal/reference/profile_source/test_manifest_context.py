@@ -8,7 +8,7 @@ from pathlib import Path
 
 from formal.reference.isc_crypto.codec import CodecError
 from formal.reference.profile_source import availability_ledger as ledger
-from formal.reference.profile_source import configuration as cfg
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import manifest_context as m
 from formal.reference.profile_source import test_configuration as config_fixture
 from formal.reference.storage_source import test_codec as storage_fixture
@@ -17,7 +17,7 @@ from formal.scripts import native_source_artifacts as old
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def synthetic_fixture(f, *, ticket_id=None):
+def synthetic_fixture(f, *, ticket_id=None, generation=route.LEGACY):
     """Create new synthetic objects from the published arithmetic dimensions.
 
     Every changed preimage receives its new real hash. No original QC/signature,
@@ -44,8 +44,16 @@ def synthetic_fixture(f, *, ticket_id=None):
     body["domain_ticket_counts"] = [
         {"domain_id": golden["manifest"]["value"]["domain_id"], "ticket_count": 1}
     ]
-    config_raw = cfg.encode(body)
-    bound = cfg.bind(f.boot, f.storage_boot, config_raw, f.declaration)
+    if generation is route.UNITS:
+        from formal.reference.profile_source import arithmetic_units
+        from formal.reference.profile_source.test_arithmetic_units import numeric
+
+        number = numeric()
+        number["domain_weights"][0]["domain_id"] = body["domain_ticket_counts"][0]["domain_id"]
+        body["schema_version"] = "3.0.0"
+        body["apply_arithmetic_profile_source"] = arithmetic_units.canonical(number).decode("ascii")
+    config_raw = route.selected(generation).encode(body)
+    bound = route.bind(f.boot, f.storage_boot, config_raw, f.declaration, generation=generation)
 
     def context(kind):
         value = copy.deepcopy(golden[kind]["value"])

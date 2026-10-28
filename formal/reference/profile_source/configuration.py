@@ -277,11 +277,18 @@ def bind_native_header(config, original_state, original_policy, actor):
     local clock and all downstream collections still come from the producer
     prefix. In particular, current view is not reset to the CONFIG vote's view.
     """
+    _require(type(config) is BoundConfig, "original bound configuration required")
+    return _bind_native_header(
+        config, original_state, original_policy, actor, decode(config.original)
+    )
+
+
+def _bind_native_header(config, original_state, original_policy, actor, body):
+    """Shared fields only after the selected closed full-frame decoder."""
     from formal.reference.isc_source.policy import decode as decode_policy
     from formal.reference.profile_source.capsule_binding import read_state
 
     _require(type(config) is BoundConfig, "original bound configuration required")
-    body = decode(config.original)
     _require(config.body_id == content_id(DOMAIN, config.original), "original config identity")
     native = read_state(original_state, body["formal_semantics_id"])
     policy = decode_policy(original_policy)

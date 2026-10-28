@@ -7,14 +7,17 @@ from formal.reference.isc_crypto import codec as crypto
 from formal.reference.non_isc import codec as vote_codec
 from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_qc as qc
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source.configuration_vectors import bytes_term, value_term
 from formal.reference.profile_source.test_configuration_qc import ConfigQcTests
 from formal.reference.profile_source.vote_vectors import wire_term
 
 
-def generate():
+def generate(*, generation=route.LEGACY):
+    route.selected(generation)
     ConfigQcTests.setUpClass()
     f = ConfigQcTests()
+    f.generation = generation
     f.setUp()
     repeat = replace(f.delivered[0], event=replace(f.delivered[0].event, event_index=5))
     other = f.delivery(6, f.names[0], durable_sequence=2)
@@ -68,6 +71,19 @@ def generate():
             ]
         )
         + "⟩"
+    )
+    if generation is route.UNITS:
+        lines.append(
+            "def parent : ConfigurationUnits.Parent := ⟨⟨"
+            + bytes_term(f.body["parent_checkpoint_id"].encode())
+            + ","
+            + bytes_term(("sha256:" + "9" * 64).encode())
+            + ",[],0⟩,"
+            + bytes_term(f.body["parameter_schema_id"].encode())
+            + ",⟨1,4⟩,⟨1,4⟩⟩"
+        )
+    check_name = (
+        "checkUnits hash enrolled parent" if generation is route.UNITS else "check hash enrolled"
     )
     retained = []
     for i, source in enumerate((*originals, malformed_context)):
@@ -146,7 +162,7 @@ def generate():
         )
     lines.extend(
         [
-            "example : (check hash enrolled receiver 6 configRaw original0 value0 rows).isSome "
+            f"example : ({check_name} receiver 6 configRaw original0 value0 rows).isSome "
             "= true "
             ":= by decide +kernel",
             "example : (join hash receiver 2 original0 value0 rows).isNone = true "
@@ -160,11 +176,26 @@ def generate():
             "example : qc0.id ≠ qc1.id := by decide +kernel",
             "example : rows.length = 6 := rfl",
             "example : qc0.signers.length = 4 := rfl",
-            "end ConfigurationQCVectors",
         ]
     )
+    if generation is route.UNITS:
+        lines.extend(
+            [
+                "example : checkUnits hash enrolled {parent with modelQuantum := ⟨1,2⟩} "
+                "receiver 6 configRaw original0 value0 rows = none := by decide +kernel",
+                "example : checkUnits hash enrolled {parent with optimizerQuantum := ⟨1,2⟩} "
+                "receiver 6 configRaw original0 value0 rows = none := by decide +kernel",
+                "example : checkUnits hash enrolled "
+                "{parent with current := {parent.current with height := 1}} "
+                "receiver 6 configRaw original0 value0 rows = none := by decide +kernel",
+                "example : check hash enrolled receiver 6 configRaw original0 value0 rows = none "
+                ":= by decide +kernel",
+            ]
+        )
+    lines.append("end ConfigurationQCVectors")
     evidence = {
         "kind": "SYNTHETIC_BYTE_JOIN_NOT_PRODUCTION_HISTORY",
+        "selected_generation": generation.value,
         "signature_check": "PINNED_STRICT_VERIFIER_ON_PUBLIC_SYNTHETIC_KEYS",
         "config_hex": f.raw.hex(),
         "original_qc_hex": [qc.encode(value).hex() for value in (f.qc, alternate)],

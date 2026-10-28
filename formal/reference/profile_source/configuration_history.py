@@ -12,6 +12,7 @@ from formal.reference.isc_crypto.codec import CodecError, _require
 from formal.reference.non_isc.authentication import CONTRACT, AuthorityInputs, authenticate
 from formal.reference.profile_source import configuration as cfg
 from formal.reference.profile_source import configuration_qc as qc
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source.availability_ledger import Occurrence
 
 
@@ -61,13 +62,20 @@ def observed(state, event):
     return replace(state, events=(*state.events, event))
 
 
-def propose(state, event, validators, storage, declaration):
+def propose(state, event, validators, storage, declaration, *, generation=route.LEGACY):
     result = observed(state, event)
     try:
-        bound = cfg.bind(validators, storage, event.original, declaration)
+        bound = route.bind(validators, storage, event.original, declaration, generation=generation)
     except CodecError:
         return Result(result, "rejected_configuration_bytes")
-    prior = next((p for p in state.proposals if p.config.body_id == bound.body_id), None)
+    prior = next(
+        (
+            p
+            for p in state.proposals
+            if p.source.actor == event.actor and p.config.body_id == bound.body_id
+        ),
+        None,
+    )
     if prior is not None:
         _require(prior.config.original == bound.original, "original configuration ID collision")
         return Result(result, "replay")
@@ -96,15 +104,34 @@ def deliver(state, event, validators, backend):
     return Result(replace(result, received=(*state.received, received)), "recorded")
 
 
-def finalize(state, event, validators, storage, backend):
+def finalize(state, event, validators, storage, backend, *, generation=route.LEGACY):
     result = observed(state, event)
     try:
         certificate = qc.decode(event.original)
+        proposal = next(
+            (
+                p
+                for p in state.proposals
+                if p.source.actor == event.actor and p.config.body_id == certificate["body_hash"]
+            ),
+            None,
+        )
+        _require(proposal is not None, "original local configuration proposal missing")
+        # Recheck the fixed decoder route even on replay. A cached carrier does
+        # not select another generation or replace the exact original bytes.
+        route.bind(
+            validators,
+            storage,
+            proposal.config.original,
+            proposal.original_declaration,
+            generation=generation,
+        )
         prior = next(
             (
                 c
                 for c in state.finalized
-                if c.bound.config.context_id == certificate["context_id"]
+                if c.source.actor == event.actor
+                and c.bound.config.context_id == certificate["context_id"]
                 and c.bound.config.body_id == certificate["body_hash"]
             ),
             None,
@@ -117,10 +144,6 @@ def finalize(state, event, validators, storage, backend):
                 result,
                 "replay" if prior.source.original == event.original else "already_finalized",
             )
-        proposal = next(
-            (p for p in state.proposals if p.config.body_id == certificate["body_hash"]), None
-        )
-        _require(proposal is not None, "original configuration proposal missing")
         bound = qc.bind(
             validators,
             storage,
@@ -130,6 +153,7 @@ def finalize(state, event, validators, storage, backend):
             event.original,
             tuple(row.original for row in state.received if row.source.actor == event.actor),
             source_cut=event.index - 1,
+            generation=generation,
         )
     except CodecError:
         return Result(result, "rejected_configuration_quorum")

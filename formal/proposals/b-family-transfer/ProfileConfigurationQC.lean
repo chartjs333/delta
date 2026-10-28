@@ -1,4 +1,5 @@
 import ProfileConfiguration
+import ProfileConfigurationUnits
 import SourceVote
 
 /-! T047/T053: whole original CONFIG QC and original delivered-V byte relation.
@@ -268,5 +269,71 @@ theorem exactSignerCover {sha receiver cut raw descriptor rows out signer}
   · rintro ⟨row,member,same⟩
     rw [← same]
     exact pairs.2.2.1 row member
+
+/-- Explicit unit-bearing verifier route. The imported object does not choose a
+decoder. The full parent is independently derived by the enclosing source fold;
+it is never reconstructed from this QC or from a public refinement result. -/
+structure UnitBound where
+  config : ConfigurationUnits.Bound
+  quorum : Joined
+
+def checkUnits (sha : Bytes → Bytes) (enrolled : Configuration.Enrollment)
+    (parent : ConfigurationUnits.Parent) (receiver : Bytes) (cut : Nat)
+    (configRaw qcRaw : Bytes) (descriptor : Value) (rows : List Received) : Option UnitBound := do
+  let c ← ConfigurationUnits.admit enrolled parent configRaw
+  let q ← join sha receiver cut qcRaw descriptor rows
+  if receiver ∈ c.body.validators ∧ Association sha configRaw c.body q.certificate then
+    some ⟨c,q⟩ else none
+
+theorem unitChecked {sha enrolled parent receiver cut configRaw qcRaw descriptor rows out}
+    (ok : checkUnits sha enrolled parent receiver cut configRaw qcRaw descriptor rows = some out) :
+    ConfigurationUnits.admit enrolled parent configRaw = some out.config ∧
+    join sha receiver cut qcRaw descriptor rows = some out.quorum ∧
+    receiver ∈ out.config.body.validators ∧
+    Association sha configRaw out.config.body out.quorum.certificate := by
+  simp only [checkUnits,Bind.bind,Option.bind_eq_some_iff] at ok
+  obtain ⟨c,hc,q,hq,last⟩ := ok
+  split at last <;> try contradiction
+  rename_i checks
+  cases Option.some.inj last
+  exact ⟨hc,hq,checks⟩
+
+theorem unitComplete {sha enrolled parent receiver cut configRaw qcRaw descriptor rows c q}
+    (config : ConfigurationUnits.admit enrolled parent configRaw = some c)
+    (quorum : join sha receiver cut qcRaw descriptor rows = some q)
+    (receiverEnrolled : receiver ∈ c.body.validators)
+    (association : Association sha configRaw c.body q.certificate) :
+    checkUnits sha enrolled parent receiver cut configRaw qcRaw descriptor rows = some ⟨c,q⟩ := by
+  simp only [checkUnits,config,quorum,Bind.bind,Option.bind,
+    if_pos (And.intro receiverEnrolled association)]
+
+theorem unitOriginalConfigurationAndQuorum
+    {sha enrolled parent receiver cut configRaw qcRaw descriptor rows out}
+    (ok : checkUnits sha enrolled parent receiver cut configRaw qcRaw descriptor rows = some out) :
+    ConfigurationUnits.encodeFrame out.config.body.originalValue = some configRaw ∧
+    out.config.original = configRaw ∧
+    encode out.quorum.certificate.original = some qcRaw ∧
+    out.quorum.originalQC = qcRaw ∧ out.quorum.originalRows = rows ∧
+    3 ≤ out.quorum.certificate.signers.length ∧
+    ConfigurationUnits.ParentMatches parent out.config ∧
+    Configuration.Matches enrolled out.config.body ∧
+    Association sha configRaw out.config.body out.quorum.certificate := by
+  have h := unitChecked ok
+  have admitted := ConfigurationUnits.admitted h.1
+  have raw := ConfigurationUnits.entireOriginalConfiguration admitted.1
+  have q := originalQuorum h.2.1
+  have originals := joined h.2.1
+  exact ⟨raw.1,raw.2.1,q.1,originals.1,originals.2.1,q.2.1,
+    admitted.2.2,admitted.2.1,h.2.2.2⟩
+
+theorem unitEveryPairIsOriginal
+    {sha enrolled parent receiver cut configRaw qcRaw descriptor rows out signer id}
+    (ok : checkUnits sha enrolled parent receiver cut configRaw qcRaw descriptor rows = some out)
+    (member : (signer,id) ∈ out.quorum.certificate.signers.zip out.quorum.certificate.voteIds) :
+    ∃ row ∈ rows, row.receiver = receiver ∧ row.position ≤ cut ∧
+      voteMatches out.quorum.certificate row.vote = true ∧ row.vote.wire.validator = signer ∧
+      Vote.voteId sha row.artifact.vote = some id ∧
+      Vote.encodeFrame row.vote.wire = row.artifact.vote :=
+  everyPairIsOriginal (unitChecked ok).2.1 member
 
 end DeltaReduce.ProfileSource.ConfigurationQC

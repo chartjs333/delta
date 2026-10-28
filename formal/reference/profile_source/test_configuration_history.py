@@ -10,12 +10,14 @@ from formal.reference.profile_source.availability_ledger import Occurrence
 
 
 class ConfigurationHistoryTests(unittest.TestCase):
+    configuration_case = fixture.ConfigQcTests
+
     @classmethod
     def setUpClass(cls):
         fixture.ConfigQcTests.setUpClass()
 
     def setUp(self):
-        self.x = fixture.ConfigQcTests()
+        self.x = self.configuration_case()
         self.x.setUp()
         self.f = self.x.f
         self.state, self.index = h.History(), 0
@@ -27,7 +29,12 @@ class ConfigurationHistoryTests(unittest.TestCase):
 
     def propose(self):
         result = h.propose(
-            self.state, self.event(self.x.raw), self.f.boot, self.f.storage_boot, self.f.declaration
+            self.state,
+            self.event(self.x.raw),
+            self.f.boot,
+            self.f.storage_boot,
+            self.f.declaration,
+            generation=self.x.generation,
         )
         self.state = result.state
         return result.disposition
@@ -44,6 +51,7 @@ class ConfigurationHistoryTests(unittest.TestCase):
             self.f.boot,
             self.f.storage_boot,
             self.f.backend,
+            generation=self.x.generation,
         )
         self.state = result.state
         return result.disposition

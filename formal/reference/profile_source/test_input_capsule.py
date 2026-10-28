@@ -18,7 +18,7 @@ from formal.reference.isc_source import test_finalization as candidate_fixture
 from formal.reference.isc_w1 import codec as w
 from formal.reference.profile_source import authority
 from formal.reference.profile_source import capsule_binding as c
-from formal.reference.profile_source import configuration as cfg
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import metadata as m
 from formal.reference.profile_source import source_prefix as source
 from formal.reference.profile_source import test_authority as authority_fixture
@@ -27,6 +27,8 @@ from formal.reference.profile_source.test_metadata import frame, ref
 
 
 class InputCapsuleTests(unittest.TestCase):
+    input_case = input_fixture.InputHistoryTests
+
     @classmethod
     def setUpClass(cls):
         input_fixture.InputHistoryTests.setUpClass()
@@ -34,7 +36,7 @@ class InputCapsuleTests(unittest.TestCase):
         candidate_fixture.CandidateTests.setUpClass()
 
     def setUp(self):
-        self.input = input_fixture.InputHistoryTests()
+        self.input = self.input_case()
         self.input.setUp()
         self.a = authority_fixture.AuthorityTests()
         self.a.setUp()
@@ -298,6 +300,7 @@ class InputCapsuleTests(unittest.TestCase):
             plan=self.input.plan,
             original_config=self.input.config,
             declaration=self.input.f.declaration,
+            generation=self.input.generation,
         )
         args.update(changes)
         return c.bind_input_indexed(authorities, self.backend, source.materialize(meta), **args)
@@ -361,8 +364,12 @@ class InputCapsuleTests(unittest.TestCase):
                 self.check()
 
     def test_original_config_cannot_be_replaced_by_an_internally_consistent_policy(self):
-        bound = cfg.bind(
-            self.boot, self.input.f.storage_boot, self.input.config, self.input.f.declaration
+        bound = route.bind(
+            self.boot,
+            self.input.f.storage_boot,
+            self.input.config,
+            self.input.f.declaration,
+            generation=self.input.generation,
         )
         p = policy.decode(self.policy)
         for field, changed in (
@@ -373,7 +380,9 @@ class InputCapsuleTests(unittest.TestCase):
         ):
             alternate = policy.encode({**p, field: changed})
             with self.subTest(field=field), self.assertRaises(crypto.CodecError):
-                cfg.bind_native_header(bound, self.initial, alternate, self.actor)
+                route.bind_native_header(
+                    bound, self.initial, alternate, self.actor, generation=self.input.generation
+                )
         for field, changed in (
             ("parent_checkpoint_id", m.raw_id(b"other-parent")),
             ("height", "2"),
@@ -387,11 +396,21 @@ class InputCapsuleTests(unittest.TestCase):
                 "deltareduce:003:round-state:v1", alternate
             )
             with self.subTest(field=field), self.assertRaises(crypto.CodecError):
-                cfg.bind_native_header(bound, alternate, policy.encode(associated), self.actor)
+                route.bind_native_header(
+                    bound,
+                    alternate,
+                    policy.encode(associated),
+                    self.actor,
+                    generation=self.input.generation,
+                )
 
     def test_later_view_and_all_original_policy_collections_are_retained(self):
-        bound = cfg.bind(
-            self.boot, self.input.f.storage_boot, self.input.config, self.input.f.declaration
+        bound = route.bind(
+            self.boot,
+            self.input.f.storage_boot,
+            self.input.config,
+            self.input.f.declaration,
+            generation=self.input.generation,
         )
         native = c.read_state(self.initial, self.boot.formal_semantics_id)
         native.update(view="2", durable_sequence="7")
@@ -400,7 +419,9 @@ class InputCapsuleTests(unittest.TestCase):
         original_snapshot = deepcopy(p["snapshot"])
         p["snapshot"]["state_id"] = crypto.content_id("deltareduce:003:round-state:v1", alternate)
         raw = policy.encode(p)
-        result = cfg.bind_native_header(bound, alternate, raw, self.actor)
+        result = route.bind_native_header(
+            bound, alternate, raw, self.actor, generation=self.input.generation
+        )
         self.assertEqual(result.original_state, alternate)
         self.assertEqual(result.original_policy, raw)
         # Byte/header binding does not certify the template's opaque lineage.

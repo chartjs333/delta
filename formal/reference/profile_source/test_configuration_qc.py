@@ -8,10 +8,13 @@ from formal.reference.isc_w1.codec import Delivery
 from formal.reference.non_isc import codec as votes
 from formal.reference.profile_source import configuration as c
 from formal.reference.profile_source import configuration_qc as q
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import test_configuration as fixture
 
 
 class ConfigQcTests(unittest.TestCase):
+    generation = route.LEGACY
+
     @classmethod
     def setUpClass(cls):
         fixture.ConfigurationTests.setUpClass()
@@ -19,7 +22,15 @@ class ConfigQcTests(unittest.TestCase):
 
     def setUp(self):
         self.body = self.f.body()
-        self.raw = c.encode(self.body)
+        if self.generation is route.UNITS:
+            from formal.reference.profile_source import arithmetic_units
+            from formal.reference.profile_source.test_arithmetic_units import numeric
+
+            self.body["schema_version"] = "3.0.0"
+            self.body["apply_arithmetic_profile_source"] = arithmetic_units.canonical(
+                numeric()
+            ).decode("ascii")
+        self.raw = route.selected(self.generation).encode(self.body)
         self.names = [name for name, _ in self.f.boot.validators]
         self.delivered = tuple(self.delivery(i + 1, name) for i, name in enumerate(self.names))
         self.qc = {
@@ -73,6 +84,7 @@ class ConfigQcTests(unittest.TestCase):
             q.encode(self.qc if qc is None else qc),
             self.delivered if delivered is None else delivered,
             source_cut=cut,
+            generation=self.generation,
         )
 
     def test_complete_cut_and_original_witness_identity(self):

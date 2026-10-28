@@ -20,6 +20,7 @@ from formal.reference.isc_w1.codec import (
     decode_request_source,
 )
 from formal.reference.profile_source import configuration as wire
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import journals
 from formal.reference.profile_source.metadata import closed
 
@@ -344,6 +345,7 @@ def bind_input_indexed(
     plan,
     original_config,
     declaration,
+    generation=route.LEGACY,
 ):
     """Derive the full closed B/tuples from the same original retained W1 cut.
 
@@ -353,7 +355,6 @@ def bind_input_indexed(
     """
     from formal.reference.profile_source import (
         authority,
-        configuration,
         configuration_history,
         input_history,
         metadata,
@@ -399,6 +400,7 @@ def bind_input_indexed(
         original_config,
         declaration,
         actor=actor,
+        generation=generation,
     )
     _require(not inputs.unresolved, "complete original input source at retained cut")
     command = read_command(request.command_bytes, resolved.validators.formal_semantics_id)
@@ -426,11 +428,12 @@ def bind_input_indexed(
         body=body,
     )
     finalized = configuration_history.finalized_config(inputs.configuration, body.round_config_id)
-    header = configuration.bind_native_header(
+    header = route.bind_native_header(
         finalized.bound.config,
         bound.bound.predecessor.native_state,
         bound.bound.predecessor.policy,
         actor,
+        generation=generation,
     )
     collections = input_history.bind_input_collections(
         inputs, original_policy, body.round_config_id

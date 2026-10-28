@@ -11,6 +11,7 @@ from formal.reference.isc_crypto.codec import _decimal, _id, _label, _require, _
 from formal.reference.non_isc.authentication import CONTRACT, AuthorityInputs, authenticate
 from formal.reference.non_isc.codec import decode_artifact, preimage
 from formal.reference.profile_source import configuration as cfg
+from formal.reference.profile_source import configuration_route as route
 
 FIELDS = {
     "body_hash",
@@ -115,10 +116,13 @@ def bind(
     delivered,
     *,
     source_cut,
+    generation=route.LEGACY,
 ):
     from formal.reference.isc_w1.codec import Delivery
 
-    config = cfg.bind(bootstrap, storage_bootstrap, original_config, declaration)
+    config = route.bind(
+        bootstrap, storage_bootstrap, original_config, declaration, generation=generation
+    )
     qc = decode(original_qc)
     _require(
         qc["body_hash"] == config.body_id

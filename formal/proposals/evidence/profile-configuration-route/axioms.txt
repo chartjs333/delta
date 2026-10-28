@@ -1,0 +1,37 @@
+'DeltaReduce.ProfileSource.ConfigurationQC.format' does not depend on any axioms
+'DeltaReduce.ProfileSource.ConfigurationQC.encode' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.Valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.read' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.readSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.decode' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.decoded' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.voteMatches' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.selected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.GroupCompatible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.Pairing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.join' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.joined' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.originalQuorum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.everyPairIsOriginal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.joinComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.contextId' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.Association' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.check' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.checkComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.originalConfigurationAndQuorum' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.exactSignerCover' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.checkUnits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.unitChecked' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.unitComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.unitOriginalConfigurationAndQuorum' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.ConfigurationQC.unitEveryPairIsOriginal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
