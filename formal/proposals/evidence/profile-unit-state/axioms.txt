@@ -1,0 +1,67 @@
+'DeltaReduce.ProfileSource.UnitState.bindHeader' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.headerSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.headerComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.headerOriginals' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.numeric' does not depend on any axioms
+'DeltaReduce.ProfileSource.UnitState.quantumPrefix' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.readQuantum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.bindProfile' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.profileSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.profileComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.profileOriginals' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.coreRow' does not depend on any axioms
+'DeltaReduce.ProfileSource.UnitState.bindApplies' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.appliesSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.appliesComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.completeProfileInventory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.bindCollections' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.collectionsSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.collectionsComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.complete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.allOriginalHeaders' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.originalParentUnits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.abortPreservesDownstream' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitState.everyOriginalProfile' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.bind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.boundSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.boundComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.exactOriginalWitness' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.candidateSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.selectedFromOriginalConfiguration' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.unchangedOriginalUnits' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.parentAndValues' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.computedCurrent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.actualCurrentHashes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.run' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.runSound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.historyComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.everyOriginal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.unitsAlongCompleteHistory' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.exactPointerScan' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.bindJournal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.journalSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.fullOriginalInventory' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.journalComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.noRecordOrInputErasure' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.nativeScanAgrees' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.incompleteRejected' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.OriginContext' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.bindFromOrigin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.originSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitCurrent.originalGenesisToCurrentUnits' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
