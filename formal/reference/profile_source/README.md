@@ -447,6 +447,15 @@ by its public vote ordinal. PARAMETER/APPLY refusal remains, and recovery only
 bypasses readiness. These joins still require the source fold to derive runtime
 facts, the predecessor policy, barriers and parent at each original occurrence.
 
+`ProfileUnitFinalization` connects the same whole unit-bearing state to the
+existing ISC/EC candidate computations and rechecks the entire computed successor.
+The field view preserves every original collection/candidate but is never passed
+off as a schema-2 byte admission. Original configuration bytes, full parent units
+and complete P inventories remain obligatory on both sides. EC re-observation
+returns the whole current state, retaining units and later lineage. The existing
+finalization source/cut/authentication and durable-barrier obligations remain;
+these pure compositions do not derive them from a valid certificate.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

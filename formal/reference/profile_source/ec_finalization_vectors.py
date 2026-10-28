@@ -10,7 +10,7 @@ from formal.reference.isc_source import identity, policy
 from formal.reference.isc_source.test_identity import synthetic_body
 from formal.reference.non_isc import codec as non_isc
 from formal.reference.non_isc.authentication import CONTRACT, AuthorityInputs
-from formal.reference.profile_source import configuration as cfg
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import ec_finalization as ec
 from formal.reference.profile_source.configuration_vectors import bytes_term as bs
 from formal.reference.profile_source.configuration_vectors import value_term
@@ -20,15 +20,16 @@ from formal.reference.profile_source.test_configuration import ConfigurationTest
 from formal.reference.profile_source.vote_vectors import wire_term
 
 
-def fixture():
-    _, originals = installed()
+def fixture(*, generation=route.LEGACY):
+    route.selected(generation)
+    _, originals = installed(generation=generation)
     test = ConfigurationTests()
     boot, backend = test.boot, test.backend
     config_raw, state_raw = (
         bytes.fromhex(originals["original_config"]),
         bytes.fromhex(originals["original_state"]),
     )
-    config = cfg.decode(config_raw)
+    config = route.decode(config_raw, generation=generation)
     p = policy.decode(bytes.fromhex(originals["original_policy"]))
     names = p["validator_ids"]
     body = replace(
@@ -150,8 +151,8 @@ def fixture():
     )
 
 
-def generate():
-    f = fixture()
+def generate(*, generation=route.LEGACY):
+    f = fixture(generation=generation)
     p, boot = f["p"], f["boot"]
     actor = p["local_validator_id"]
     results = [
@@ -261,8 +262,36 @@ def generate():
         "  = some true := by decide +kernel",
         "end EcFinalizationVectors",
     ]
-    return "\n".join(lines) + "\n", {
+    generated = "\n".join(lines) + "\n"
+    if generation is route.UNITS:
+        config = f["config"]
+        parent = (
+            "def parent : ConfigurationUnits.Parent := ⟨⟨"
+            + bs(config["parent_checkpoint_id"].encode())
+            + ","
+            + bs(("sha256:" + "9" * 64).encode())
+            + ",[],0⟩,"
+            + bs(config["parameter_schema_id"].encode())
+            + ",⟨1,4⟩,⟨1,4⟩⟩\n"
+        )
+        generated = generated.replace(
+            "import ProfileEcFinalization", "import ProfileUnitFinalization"
+        )
+        start = generated.index("def run (cut tick")
+        end = generated.index("example :", start)
+        generated = (
+            generated[:start]
+            + parent
+            + "def runUnits (cut tick : Nat) (raw : Bytes) :=\n"
+            + "  UnitFinalization.ec hash enrolled parent actor config state raw sv originals\n"
+            + "    cut tick bodyId rows\n"
+            + "def run (cut tick : Nat) (raw : Bytes) :=\n"
+            + "  (runUnits cut tick raw).map UnitFinalization.ecFields\n"
+            + generated[end:]
+        )
+    return generated, {
         "evidence_kind": "SYNTHETIC_EC_SOURCE_CONJUNCTS_NOT_AUTHENTIC_PRODUCER_HISTORY",
+        "configuration_generation": generation.name,
         "prior_policy": f["prior"].hex(),
         "original_state": f["state"].hex(),
         "body": f["body"].hex(),

@@ -1,0 +1,29 @@
+'DeltaReduce.ProfileSource.UnitFinalization.fields' does not depend on any axioms
+'DeltaReduce.ProfileSource.UnitFinalization.fieldViewPreserves' does not depend on any axioms
+'DeltaReduce.ProfileSource.UnitFinalization.iscOriginals' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.iscUnrelatedOriginals' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.isc' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.iscSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.iscComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.iscExactSignersAndBodies' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.iscUnchangedLineage' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.iscParentUnits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.iscFields' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.ec' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.ecSource' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.ecComplete' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.ecParentUnits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.ecFields' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.replayEc' depends on axioms: [propext, Classical.choice, Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.replayEcKeepsWholeCurrent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'DeltaReduce.ProfileSource.UnitFinalization.replayEcNoUnitOrLineageErasure' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

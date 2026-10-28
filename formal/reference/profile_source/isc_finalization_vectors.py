@@ -8,6 +8,7 @@ from formal.reference.isc_crypto import codec as crypto
 from formal.reference.isc_source import finalization, identity, policy
 from formal.reference.isc_source.test_identity import synthetic_body
 from formal.reference.profile_source import capsule_binding as wire
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source.configuration_vectors import bytes_term as bs
 from formal.reference.profile_source.configuration_vectors import value_term
 from formal.reference.profile_source.installed_state_vectors import generate as installed
@@ -15,14 +16,13 @@ from formal.reference.profile_source.isc_vectors import lean_body
 from formal.reference.profile_source.vote_vectors import wire_term
 
 
-def generate():
-    _, original = installed()
+def generate(*, generation=route.LEGACY):
+    route.selected(generation)
+    _, original = installed(generation=generation)
     config_raw = bytes.fromhex(original["original_config"])
     state_raw = bytes.fromhex(original["original_state"])
     # The original framed body is decoded by the existing reference codec.
-    from formal.reference.profile_source.configuration import decode
-
-    config = decode(config_raw)
+    config = route.decode(config_raw, generation=generation)
     p = policy.decode(bytes.fromhex(original["original_policy"]))
     state = wire.read_envelope(
         state_raw, 5, wire.STATE_FIELDS, config["formal_semantics_id"], "ROUND_STATE"
@@ -163,8 +163,37 @@ def generate():
         "example : (run 4 0 b [row0,row0,row1]).isNone = true := by decide +kernel",
         "end IscFinalizationVectors",
     ]
-    return "\n".join(lines) + "\n", {
+    generated = "\n".join(lines) + "\n"
+    if generation is route.UNITS:
+        parent = (
+            "def parent : ConfigurationUnits.Parent := ⟨⟨"
+            + bs(config["parent_checkpoint_id"].encode())
+            + ","
+            + bs(("sha256:" + "9" * 64).encode())
+            + ",[],0⟩,"
+            + bs(config["parameter_schema_id"].encode())
+            + ",⟨1,4⟩,⟨1,4⟩⟩\n"
+        )
+        generated = generated.replace(
+            "import ProfileIscFinalization", "import ProfileUnitFinalization"
+        )
+        start = generated.index("def run (cut tick")
+        end = generated.index("example :", start)
+        generated = (
+            generated[:start]
+            + parent
+            + "def runUnits (cut tick : Nat) (id : Bytes) "
+            + "(inventory : List ConfigurationQC.Received) :=\n"
+            + "  UnitFinalization.isc hash enrolled parent actor config state prior sv originals\n"
+            + "    cut tick id body.tuples inventory\n"
+            + "def run (cut tick : Nat) (id : Bytes) "
+            + "(inventory : List ConfigurationQC.Received) :=\n"
+            + "  (runUnits cut tick id inventory).map UnitFinalization.iscFields\n"
+            + generated[end:]
+        )
+    return generated, {
         "evidence_kind": "SYNTHETIC_PURE_FINALIZATION_NOT_PRODUCER_OR_AUTHORITY",
+        "configuration_generation": generation.name,
         "original_config": config_raw.hex(),
         "original_state": state_raw.hex(),
         "original_policy": prior.hex(),
