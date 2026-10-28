@@ -5,6 +5,7 @@ from dataclasses import replace
 
 from formal.reference.isc_crypto.codec import CodecError
 from formal.reference.isc_source.authentication import registry
+from formal.reference.profile_source import configuration_route as route
 from formal.reference.profile_source import ec_durability as d
 from formal.reference.profile_source import metadata as m
 from formal.reference.profile_source import source_prefix as source
@@ -37,8 +38,8 @@ def descriptor(actor, action, original, inputs=(), dependencies=()):
     )
 
 
-def example():
-    f = fixture()
+def example(*, generation=route.LEGACY):
+    f = fixture(generation=generation)
     t = ec_cases.EcFinalizationTests()
     t.f = f
     candidate = t.run_candidate()

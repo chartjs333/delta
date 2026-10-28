@@ -456,6 +456,26 @@ returns the whole current state, retaining units and later lineage. The existing
 finalization source/cut/authentication and durable-barrier obligations remain;
 these pure compositions do not derive them from a valid certificate.
 
+`ProfileUnitStorage` joins that complete unit-bearing EC successor to the
+existing `PROFILE-EC-COMMIT-V1` original event, companion frame and preceding
+companion inventory. It derives the next ordinal and predecessor from the
+entire retained companion, compares the exact computed frame, and retains every
+descriptor before the original event. `ecFields` supplies only the internal
+field view; no legacy schema-2 parser admission of schema-3 bytes is inferred.
+The full unit-bearing before/after states remain in the result. Its transaction
+reuses the existing Profile T machine and preserves original native WAL bytes.
+
+The enclosing producing fold must still derive the independent index/bootstrap,
+prior P0/S0, parent, rows, clock, prerequisite origins and every earlier companion
+material; this component does not authenticate them from hashes or success flags.
+The existing barrier over all required artifacts and namespace, trusted import
+floor, complete public family and initial/incomplete/ABORT relation remain
+enclosing obligations. The qualifier `check_unit_storage.py` freshly builds the
+dependency closure, audits axioms and checks an exact schema-3 full-state/storage
+vector. Its synthetic prerequisite and directly constructed index are explicitly
+not a lawful producer history or recovery evidence. No new storage contract,
+format, physical slot, protocol identity or authority is introduced.
+
 **Residual remains the same R2.3:** complete independent producing prefix and
 source/configuration/aliases/units; complete O collections/current/environment
 relation and totality; initial/incomplete and sufficient ABORT with all

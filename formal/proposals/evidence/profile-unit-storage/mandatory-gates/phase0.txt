@@ -1,0 +1,1 @@
+{"counts":{"actions":49,"configs":35,"faults":42,"invariants":30,"proof_obligations":15,"temporal_properties":15},"errors":[],"formal_semantics_version":"1.1.0","input_bundle_sha256":"340b2636677ccbf0f95a362711a6dc531b3b78dc9269148ea500d546512d508a","phase":"T000-T003","schema_version":"1.0.0","status":"PASS"}

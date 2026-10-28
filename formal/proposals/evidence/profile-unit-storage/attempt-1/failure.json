@@ -1,0 +1,15 @@
+{
+  "R23": "OPEN",
+  "correction": "Separate exact preimage/digest literals; all 22 entries and original order preserved; no kernel check or limit weakened",
+  "failed_check": "whole-storage-kernel",
+  "failed_generated_source": "UnitStorageVector.lean",
+  "failed_generated_source_sha256": "0d8917221ccfd46c69834c0c98bd6276f59cccd64927ee133e023a2b041933d3",
+  "formal": "NO_GO",
+  "logs": {
+    "hash-table-equivalence.json": "b7ac0ea8ddd27ae93487ad718bf8c9a784d25b6e244b51d36e6333a01354c971",
+    "whole-storage-kernel.txt": "f3d233fe980202d1effa8a036069e5a62314403ea259f463695709fa8e788ab7"
+  },
+  "reason": "maximum recursion depth in one inline SHA table definition; dependent noncomputable diagnostics",
+  "result": "FAILED_NO_RECEIPT",
+  "superseding_receipt_sha256": "de9abe867fa8dcd4d7e8de5e35d9cbe7dc680cd0f88e3f7967e5365878d1b464"
+}

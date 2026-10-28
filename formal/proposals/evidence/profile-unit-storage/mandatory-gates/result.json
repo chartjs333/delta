@@ -1,0 +1,125 @@
+{
+  "task_ids": [
+    "T047",
+    "T053"
+  ],
+  "formal": "NO_GO",
+  "R23": "OPEN",
+  "command_equivalence": "Exact Makefile formal-check recipes, sequentially; GNU make unavailable",
+  "makefile_sha256": "1a52ff25a8ad0e600ab440eef709faff7ec05933e80145d341f2fbd9c4af4f48",
+  "gates": [
+    {
+      "gate": "phase0",
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "formal/scripts/verify_phase0.py"
+      ],
+      "exit_code": 0,
+      "log": "phase0.txt",
+      "sha256": "5b52431b27b3f7468824aea108144393f19839860c4cd990eed1ed67904920b6",
+      "wall_seconds": 0.47,
+      "original_capture_sha256": "242ca6da9d10d64608282fbfc538f7400b8afab6f268a5792f4998a8b6dcf26c"
+    },
+    {
+      "gate": "contracts",
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "formal/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "log": "contracts.txt",
+      "sha256": "f0c7773276f2bac59290691fd8dc895c33c5491578852e2408e0f9c37dc42e7c",
+      "wall_seconds": 481.84,
+      "original_capture_sha256": "b97dd7c09d2ca81c05d2a694fcd2a9b4515588932aec64e6a7bb9265eabf20a8"
+    },
+    {
+      "gate": "toolchain",
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "formal/toolchain/verify_locks.py"
+      ],
+      "exit_code": 0,
+      "log": "toolchain.txt",
+      "sha256": "a83f8f9ef01625377fafbd38e94c9acf5beab2a5bea26964fa37593122db91c5",
+      "wall_seconds": 0.27,
+      "original_capture_sha256": "c9e96b09f16821ba608e6bfbec62d54cc1055dd66516598c4b466c05864a7e0e"
+    },
+    {
+      "gate": "parse",
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "formal/scripts/run_formal_gate.py",
+        "parse"
+      ],
+      "exit_code": 0,
+      "log": "parse.txt",
+      "sha256": "0735fe4bdbe3a3c789cabe7f15e03969fb1cc4124f5f9047ad3ca3e0ec497143",
+      "wall_seconds": 15.3,
+      "original_capture_sha256": "749eccf4c90be0a6dc3c8349210c89f88aef7dc6ba6e4945db56c4d54ea9c4c8"
+    },
+    {
+      "gate": "safety",
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "formal/scripts/run_formal_gate.py",
+        "safety"
+      ],
+      "exit_code": 0,
+      "log": "safety.txt",
+      "sha256": "d61f593df4c8fa3862414f85cf4f93b374b93d6aeab0f1488f3df174f426b057",
+      "wall_seconds": 527.25,
+      "original_capture_sha256": "005842afaa20ae47bc7f9b3f5c33c094db7b6916e4452e0c30fa83bc72ffe8a3"
+    },
+    {
+      "gate": "liveness",
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "formal/scripts/run_formal_gate.py",
+        "liveness"
+      ],
+      "exit_code": 0,
+      "log": "liveness.txt",
+      "sha256": "1341174fc226b9b508424937b0d4746bbb856d45801e2c6c7a8c27e3bdac74d3",
+      "wall_seconds": 92.47,
+      "original_capture_sha256": "31d7e5f69c1ae7b5d69d3c0676280a297851ccb13d063e2269778e3418b4209b"
+    },
+    {
+      "gate": "proofs",
+      "command": [
+        "D:\\delta\\.venv\\Scripts\\python.exe",
+        "formal/scripts/run_formal_gate.py",
+        "proofs"
+      ],
+      "exit_code": 1,
+      "log": "proofs.txt",
+      "sha256": "54ea6ab449f5f51794c0ad86287bbda427d33671e53aacc79203b7b2f7111b45",
+      "wall_seconds": 91.5,
+      "original_capture_sha256": "70e04edb06cf03302ae3aad58c3fc7f3fe3a5227451e5cf21a237d0a4b5fd259"
+    }
+  ],
+  "not_run": [
+    "mutants",
+    "refinement",
+    "report"
+  ],
+  "status": "FAIL",
+  "failed_gate": "proofs",
+  "errors": [
+    "PO-AB1 conjunct admission-recovery-refinement theorem nativeArithmeticRecoveryRefines is missing",
+    "axiom dependency result missing for DeltaReduce.nativeArithmeticRecoveryRefines"
+  ],
+  "baseline_commit": "690c7b857a664809fda5fc6b44aa03384f0a0ea4",
+  "evaluated_index_tree": "8c1ccee85499f61ebd5a079f8bb8814f0705046d",
+  "component_receipt_sha256": "de9abe867fa8dcd4d7e8de5e35d9cbe7dc680cd0f88e3f7967e5365878d1b464",
+  "stored_log_encoding": "UTF-8 with LF; sha256 refers to stored log, original_capture_sha256 preserves original capture hash",
+  "runner_sha256": "9122194a7256025723c2fe152d948d77fdd7a260dbf751e6e7728312f7d63034",
+  "stop_rule": "AGENTS.md: A failed model, proof, production-mutant, refinement or compatibility gate is an unconditional STOP.",
+  "disposition": "Stopped new proof/code changes after proofs FAIL. No gate weakened; no named recovery theorem attempted; no worker result or graph mutation. Preserve qualified component and failure evidence only.",
+  "closure_claim": false
+}

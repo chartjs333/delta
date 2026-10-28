@@ -1,0 +1,58 @@
+{
+  "R23": "OPEN",
+  "acknowledged": true,
+  "authority_evidence_sha256": {
+    "current-scope.json": "e50f007d441aca1dcae6e5520ab911b891a4c064d5b694869b696647a29e7ffc",
+    "observability.json": "810436defb129862a51e4d1f86e85f22d03053ed0269c80895720f0577da6844"
+  },
+  "execution": {
+    "blocked_reason": null,
+    "current_assignment_ids": [
+      "2fd81f70-bb27-4872-a09c-8a712c0e2311"
+    ],
+    "current_node_id": "formal-linkage",
+    "phase": "node",
+    "qualification": null,
+    "revision": 85,
+    "status": "active",
+    "terminal_node": null
+  },
+  "formal": "NO_GO",
+  "graph_mutations": [],
+  "note": "Authorization only; not a protocol-source or closure premise.",
+  "precommit_scope_recheck": {
+    "acknowledged": true,
+    "computed_core_sha256": "9b7dd90ad3ddaa6ab6ad79f26dea32ab4be401038ec4ea266ba5deb3bdfd47f7",
+    "response_sha256": "e50f007d441aca1dcae6e5520ab911b891a4c064d5b694869b696647a29e7ffc",
+    "same_exact_scope_context": true
+  },
+  "project": "9000",
+  "runtime_type": "legacy_sequential",
+  "scope_context": {
+    "ack_required": true,
+    "agent_id": "isc-s16-formal-linkage-engineer",
+    "amendment_id": "scope-human-9fcd5fffaa1d7fca733bb4684a444fce",
+    "assignment_id": "2fd81f70-bb27-4872-a09c-8a712c0e2311",
+    "effective_revision": 3,
+    "effective_scope_sha256": "9b7dd90ad3ddaa6ab6ad79f26dea32ab4be401038ec4ea266ba5deb3bdfd47f7",
+    "node_id": "formal-linkage",
+    "occurrence": 6,
+    "phase": "node",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "schema_version": 1,
+    "source_commit": "54b82ed659ccfeb12e06c029f375ce6be06c9cb5",
+    "source_path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-SEED-AUTHORITY-ENVELOPE-ASSESSMENT.md",
+    "source_sha256": "82cc8340baa303fb259a3a91840ede050fb46e7718682bc00d58fd3ca979ef26"
+  },
+  "server": "http://127.0.0.1:18030",
+  "sprint": "sprint-0001-fada895e",
+  "verified": {
+    "acknowledged": true,
+    "assignment": "2fd81f70-bb27-4872-a09c-8a712c0e2311",
+    "core_sha256": "9b7dd90ad3ddaa6ab6ad79f26dea32ab4be401038ec4ea266ba5deb3bdfd47f7",
+    "graph_mutated": false,
+    "result": "VERIFIED",
+    "scope_revision": 3,
+    "source_sha256": "82cc8340baa303fb259a3a91840ede050fb46e7718682bc00d58fd3ca979ef26"
+  }
+}

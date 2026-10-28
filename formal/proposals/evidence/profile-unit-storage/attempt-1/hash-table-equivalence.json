@@ -1,0 +1,8 @@
+{
+  "result": "EXACT_TABLE_REPRESENTATION_ONLY",
+  "entries": 22,
+  "all_original_sha256_preimages_verified": true,
+  "same_order": true,
+  "max_rec_depth": 30000,
+  "kernel_check": "decide +kernel"
+}

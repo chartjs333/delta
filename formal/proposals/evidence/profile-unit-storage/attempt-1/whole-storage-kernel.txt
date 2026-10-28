@@ -1,0 +1,6 @@
+UnitStorageVector.lean:16:4: error: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+UnitStorageVector.lean:62:4: error(lean.dependsOnNoncomputable): failed to compile definition, consider marking it as 'noncomputable' because it depends on 'hash', which is 'noncomputable'
+UnitStorageVector.lean:65:4: error(lean.dependsOnNoncomputable): failed to compile definition, consider marking it as 'noncomputable' because it depends on 'runUnits', which is 'noncomputable'
+UnitStorageVector.lean:80:4: error(lean.dependsOnNoncomputable): failed to compile definition, consider marking it as 'noncomputable' because it depends on 'hash', which is 'noncomputable'
