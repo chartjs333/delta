@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "task_ids": [
+    "T047",
+    "T053",
+    "ISC-S16-D01"
+  ],
+  "kind": "DOCUMENTARY_STOP_APPLICABILITY_FOR_EXISTING_COORDINATOR_ROUTE",
+  "created_utc": "2026-10-28T11:18:23.514485+00:00",
+  "source_baseline": "e0d0e65b9e4bfe5b87b9f86dc7f0666619f3b564",
+  "project_id": "9000",
+  "sprint_id": "sprint-0001-fada895e",
+  "runtime_type": "legacy_sequential",
+  "execution": {
+    "status": "active",
+    "revision": 85,
+    "phase": "node",
+    "current_node_id": "formal-linkage",
+    "current_assignment_ids": [
+      "2fd81f70-bb27-4872-a09c-8a712c0e2311"
+    ],
+    "terminal_node": null,
+    "blocked_reason": null,
+    "qualification": null
+  },
+  "attention": {
+    "state": "scope_blocker_cleared",
+    "pending_request_ids": [],
+    "pending_application_ids": [],
+    "pending_ack_assignment_ids": [],
+    "other_gates": [],
+    "ack_does_not_resume_execution": true
+  },
+  "scope_context": {
+    "schema_version": 1,
+    "amendment_id": "scope-human-9fcd5fffaa1d7fca733bb4684a444fce",
+    "effective_revision": 3,
+    "assignment_id": "2fd81f70-bb27-4872-a09c-8a712c0e2311",
+    "node_id": "formal-linkage",
+    "phase": "node",
+    "agent_id": "isc-s16-formal-linkage-engineer",
+    "occurrence": 6,
+    "source_commit": "54b82ed659ccfeb12e06c029f375ce6be06c9cb5",
+    "source_path": "orchestration/sprints/isc-s16-continuous/handoffs/ISC-S16-SEED-AUTHORITY-ENVELOPE-ASSESSMENT.md",
+    "source_sha256": "82cc8340baa303fb259a3a91840ede050fb46e7718682bc00d58fd3ca979ef26",
+    "effective_scope_sha256": "9b7dd90ad3ddaa6ab6ad79f26dea32ab4be401038ec4ea266ba5deb3bdfd47f7",
+    "precedence": "effective_scope_supersedes_conflicting_issued_scope",
+    "ack_required": true
+  },
+  "acknowledged": true,
+  "scope_canonical_hash_verified": true,
+  "immutable_scope_source_hash_verified": true,
+  "api_response_sha256": {
+    "observability.json": "810436defb129862a51e4d1f86e85f22d03053ed0269c80895720f0577da6844",
+    "current-scope.json": "e50f007d441aca1dcae6e5520ab911b891a4c064d5b694869b696647a29e7ffc"
+  },
+  "api_evidence_location": "D:\\delta-data\\isc-s16-stop-order-20261028",
+  "input_hash_rule": "SHA256 of LF-normalized Git/worktree text; historical receipt and result raw hashes also recorded",
+  "source_inputs": {
+    "AGENTS.md": "6470de74a14d0d6cd745ef6b46858427b0f7b4222b6bad7e9a5b51316313ce56",
+    "docs/adr/0000-formal-verification-gate.md": "59523ef963cfceaa741499e3d375ceedcd451ac0fb8574ab70b8ad9e480a8bd0",
+    "specs/000-formal-tla-spec/candidate-contract.md": "2cd9be46dcda84c8f1cf17b176ee8ebe9ead0fe405a5407490b556161bc795b4",
+    "specs/000-formal-tla-spec/proof-obligations.md": "e93d31266eac996412cd48d25c8b5a1558a5742068444cdd64cc8d67637faf8f",
+    "specs/000-formal-tla-spec/refinement-contract.md": "130cd7a5b9e00b9f02808183a5f1d513d069e4bd42c42675f4359d49f0c3fc4c",
+    "Makefile": "1a52ff25a8ad0e600ab440eef709faff7ec05933e80145d341f2fbd9c4af4f48",
+    "formal/scripts/run_formal_gate.py": "70223da05a232e70550dd21f964ec09c0374d5d30d6f82a6d764096bebd29c90",
+    "formal/scripts/check_lean_evidence.py": "3b4325387b67d38a163a5827f05664b8d4a7ce61e75b8818e3423bc116359f42",
+    "formal/proposals/isc-s16-recovery-prerequisite-checkpoint.md": "bdeae68d29d6953bf20805dfb80a6253a4a071486977a3f3d87f67e35b88cf52",
+    "formal/proposals/profile-unit-state-composition.md": "182ebf140582d854d305745e24437f19534105926d1cfccaeb0729a7a9830f1c",
+    "formal/proposals/b-family-transfer/ProfileSource.lean": "823a4e632f161c5a3e60fc9f67e31a427f5bdb1ec77cdf30969a361312d0377c",
+    "formal/proposals/b-family-transfer/ProfileSourceIndex.lean": "d092d46248c6a5aa58d42ca97fd915e42308907222ec4c01a478884a5fd7eae8",
+    "formal/proposals/b-family-transfer/ProfileSelectedVote.lean": "dbbbb677480d74e268bab5dbd0f7915ea184cc48f34955e934af81170605542e",
+    "formal/proposals/b-family-transfer/ProfileUnitStorage.lean": "bc29b668f3d26b8b685d74e1048d8e83496eb5d0c3b7e97c51b0b9cdcc313d89",
+    "formal/proposals/b-family-transfer/FamilyRelation.lean": "afb51312b2e3c2556820f394db552f0e611e36e0e7c43672f791e62a3ec1b385",
+    "formal/proposals/b-family-transfer/StateFamily.lean": "288d4f90128606072bbcfaced2f81c0da5ad966c760603916b7bb40177480aeb",
+    "formal/reference/profile_source/README.md": "637c351b20cfe96fd51447779211931ed54d26a6c0a26f83073cca80f4a36448",
+    "formal/proposals/evidence/profile-unit-storage/receipt.json": "de9abe867fa8dcd4d7e8de5e35d9cbe7dc680cd0f88e3f7967e5365878d1b464",
+    "formal/proposals/evidence/profile-unit-storage/mandatory-gates/result.json": "c62617f2afb9ae692e6583783bb441843798f9bebb01c957d11ed0726f79020e",
+    "formal/proposals/evidence/profile-unit-storage/mandatory-gates/proofs.txt": "54ea6ab449f5f51794c0ad86287bbda427d33671e53aacc79203b7b2f7111b45"
+  },
+  "reports": {
+    "formal/proposals/isc-s16-r23-gate-applicability-20261028.md": "958fa5bc73940bdd2776c2552688827e12672287c89212d5449bffa3b8bb3385",
+    "orchestration/sprints/isc-s16-continuous/handoffs/NGINX-QA-R23-GATE-ORDER-20261028.md": "d7ab79d91c61bdb3ebe49fb1fbeab62b72c14a02eb8508c453f8331ca2b8a623"
+  },
+  "preserved_global_gate": {
+    "status": "FAIL",
+    "failed_gate": "proofs",
+    "errors": [
+      "PO-AB1 conjunct admission-recovery-refinement theorem nativeArithmeticRecoveryRefines is missing",
+      "axiom dependency result missing for DeltaReduce.nativeArithmeticRecoveryRefines"
+    ],
+    "not_run": [
+      "mutants",
+      "refinement",
+      "report"
+    ],
+    "result_sha256": "c62617f2afb9ae692e6583783bb441843798f9bebb01c957d11ed0726f79020e"
+  },
+  "declaration_scan": {
+    "root": "Git-tracked formal Lean files at source_baseline",
+    "files": 325,
+    "names": [
+      "nativeArithmeticRecoveryRefines",
+      "checkSourceSound",
+      "checkSourceComplete",
+      "profileFamilyTotal",
+      "profileR2_3Closed"
+    ],
+    "matches": [],
+    "caveat": "Names are planned content labels; absence alone is not a proof of the missing relation. Source statements define the residual."
+  },
+  "finding": "Executor ordering defect: aggregate downstream recovery FAIL was applied to stop its authorized R2.3 prerequisite. No nginx-qa backend gate rejection observed.",
+  "proposed_disposition": "Two ordinary reviews and coordinator analysis; continue only authorized R2.3 prerequisite under existing RESUME_FORMAL after accepted disposition, with global FAIL and NO_GO unchanged.",
+  "remaining_obligations": [
+    "complete independently produced source/configuration/aliases/units snapshot",
+    "complete public-state collections and coordinate family applicability",
+    "initial/incomplete and sufficient ABORT correspondence retaining downstream lineage"
+  ],
+  "R23": "OPEN",
+  "formal": "NO_GO",
+  "new_proof_or_code_changes": false,
+  "new_semantic_pending": false,
+  "recovery_theorem_started": false,
+  "gate_changes": false,
+  "closure_claim": false,
+  "nginx_runtime_changed": false,
+  "independent_attestation": false,
+  "validation": [
+    "fresh actual-role scope core/source/ACK and observability verified",
+    "20 source inputs unchanged from baseline",
+    "prior component receipt and global FAIL bytes unchanged",
+    "declaration absence checked without fabricating a theorem",
+    "document-only report; no new semantic qualification claimed"
+  ]
+}
